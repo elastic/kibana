@@ -38,8 +38,17 @@ import type { PublishesWritableDataViews } from '@kbn/presentation-publishing/in
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type {
   NonPersistedDisplayOptions,
-  SearchEmbeddableState,
+  SearchEmbeddablePanelApiState,
 } from '../../common/embeddable/types';
+
+export type { SearchEmbeddablePanelApiState };
+
+/**
+ * Input state accepted by the search embeddable factory.
+ */
+export type SearchEmbeddableInputState = SearchEmbeddablePanelApiState & {
+  nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
+};
 
 export type SearchEmbeddablePublicState = Pick<
   SerializableSavedSearch,
@@ -83,7 +92,7 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     tabs?: DiscoverSessionTab[];
   };
 
-export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableState> &
+export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddablePanelApiState> &
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
@@ -96,6 +105,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableState> &
   HasLibraryTransforms &
   HasTimeRange &
   HasInspectorAdapters &
+  PublishesSelectedTabId &
   Partial<HasEditCapabilities & PublishesSavedObjectId> &
   Partial<CanOverrideHoverActions> &
   HasDrilldowns &
@@ -115,6 +125,15 @@ export const apiPublishesSavedSearch = (
   const embeddable = api as PublishesSavedSearch;
   return Boolean(embeddable.savedSearch$);
 };
+
+/**
+ * Interface for publishing the selected tab ID
+ * @interface PublishesSelectedTabId
+ * @property {() => string | undefined} getSelectedTabId - Returns the ID of the selected tab
+ */
+export interface PublishesSelectedTabId {
+  getSelectedTabId: () => string | undefined;
+}
 
 export interface HasTimeRange {
   hasTimeRange(): boolean;

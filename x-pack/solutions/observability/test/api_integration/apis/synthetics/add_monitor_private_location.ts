@@ -22,7 +22,10 @@ import { getDevLocation } from '@kbn/synthetics-plugin/server/synthetics_service
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
-import { PrivateLocationTestService } from './services/private_location_test_service';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from './services/private_location_test_service';
 import { keyToOmitList, omitMonitorKeys } from './add_monitor';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
@@ -44,9 +47,18 @@ export default function ({ getService }: FtrProviderContext) {
     const testPrivateLocations = new PrivateLocationTestService(getService);
     const security = getService('security');
 
+    let username: string;
+    let password: string;
+    let SPACE_ID: string;
+    let roleName: string;
+
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await testPrivateLocations.installSyntheticsPackage();
+      await cleanSyntheticsTestData(kibanaServer);
+      const res = await monitorTestService.addsNewSpace();
+      username = res.username;
+      password = res.password;
+      SPACE_ID = res.SPACE_ID;
+      roleName = res.roleName;
 
       _httpMonitorJson = getFixtureJson('http_monitor');
       _browserMonitorJson = getFixtureJson('browser_monitor');
@@ -58,14 +70,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('add a test private location', async () => {
-      pvtLoc = await testPrivateLocations.createPrivateLocation();
+      pvtLoc = await testPrivateLocations.createPrivateLocation({ spaces: [SPACE_ID, 'default'] });
       testFleetPolicyID = pvtLoc.agentPolicyId;
 
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
 
       const testResponse: Array<PrivateLocation | ServiceLocation> = [
         ...getDevLocation('mockDevUrl'),
-        { ...pvtLoc, isInvalid: false },
+        { ...pvtLoc, spaces: ['default', SPACE_ID], isInvalid: false },
       ];
 
       expect(apiResponse.body.locations).eql(testResponse);
@@ -113,8 +125,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('handles spaces', async () => {
-      const { username, password, SPACE_ID, roleName } = await monitorTestService.addsNewSpace();
-
       let monitorId = '';
       const monitor = {
         ...httpMonitorJson,
@@ -161,7 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: monitorId,
             location: { id: pvtLoc.id },
             namespace: formatKibanaNamespace(SPACE_ID),
-            spaceId: SPACE_ID,
+            spaceIds: [SPACE_ID, 'default'],
             packageVersion: testPrivateLocations.installedVersion,
           })
         );

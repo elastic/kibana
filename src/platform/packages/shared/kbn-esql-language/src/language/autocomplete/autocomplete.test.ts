@@ -263,6 +263,16 @@ describe('autocomplete', () => {
         'doubleField'
       );
     });
+
+    it('suggests generated STATS columns after inline WHERE filters', async () => {
+      const { suggest: suggestTest } = await setup();
+      const suggestions = await suggestTest(
+        `FROM index | STATS COUNT() WHERE integerField > 0 | ${command} /`
+      );
+      const suggestionTexts = suggestions.map((value) => value.text);
+
+      expect(suggestionTexts).toContain('`COUNT() WHERE integerField > 0`');
+    });
   });
 
   // @TODO: get updated eval block from main
@@ -826,7 +836,7 @@ describe('autocomplete', () => {
         policies
           .map((p) => `${getSafeInsertText(p.name)} `)
           .map(attachTriggerCommand)
-          .map((s) => ({ ...s, rangeToReplace: { start: 17, end: 20 } }))
+          .map((s) => ({ ...s, rangeToReplace: { start: 16, end: 19 } }))
       );
       testSuggestions('FROM a | ENRICH policy /', ['ON ', 'WITH ', '| '].map(attachTriggerCommand));
 
@@ -850,14 +860,14 @@ describe('autocomplete', () => {
           'col0 = ',
           ...getPolicyFields('policy').map((name) => ({
             text: name,
-            rangeToReplace: { start: 43, end: 47 },
+            rangeToReplace: { start: 42, end: 46 },
           })),
         ]);
         testSuggestions(
           'FROM a | ENRICH policy ON @timestamp WITH col0 = othe/',
           getPolicyFields('policy').map((name) => ({
             text: name,
-            rangeToReplace: { start: 50, end: 54 },
+            rangeToReplace: { start: 49, end: 53 },
           }))
         );
       });

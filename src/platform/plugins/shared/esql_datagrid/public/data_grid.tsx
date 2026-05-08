@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useMemo, type ComponentProps } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { zipObject } from 'lodash';
 import type { UnifiedDataTableRenderCustomToolbarProps } from '@kbn/unified-data-table';
 import {
@@ -73,7 +73,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
-      expandedDocSetter: ComponentProps<typeof RowViewer>['setExpandedDoc'],
       customColumnsMeta?: DataTableColumnsMeta
     ) => (
       <RowViewer
@@ -91,8 +90,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         onAddColumn={(column) => {
           setActiveColumns([...activeColumns, column]);
         }}
-        onClose={() => expandedDocSetter(undefined)}
-        setExpandedDoc={expandedDocSetter}
+        onClose={() => setExpandedDoc(undefined)}
+        setExpandedDoc={setExpandedDoc}
       />
     ),
     [activeColumns, props.core.notifications, props.core.chrome, props.dataView, props.flyoutType]
@@ -177,6 +176,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
                 type="discoverApp"
                 size="s"
                 color="primary"
+                aria-hidden={true}
                 css={css`
                   margin-right: 4px;
                 `}

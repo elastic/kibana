@@ -31,7 +31,7 @@ describe('Import artifact list hook', () => {
     );
   });
 
-  it('import an artifact list', async () => {
+  it('should import an artifact list', async () => {
     const apiResponse: ImportExceptionsResponseSchema = {
       success: true,
       success_count: 1,
@@ -70,12 +70,13 @@ describe('Import artifact list hook', () => {
         body: expect.any(FormData),
         query: {
           overwrite: false,
+          as_new_list: false,
         },
       })
     );
   });
 
-  it('throw when importing an artifact list', async () => {
+  it('should throw when server responds with error', async () => {
     const expectedError = {
       response: {
         status: 500,

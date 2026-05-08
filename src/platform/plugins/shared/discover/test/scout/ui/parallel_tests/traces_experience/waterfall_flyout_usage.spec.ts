@@ -15,6 +15,7 @@ import {
   TRACES,
   RICH_TRACE,
   PRODUCER_TRACE,
+  DEEP_TRACE,
   setupTracesExperience,
   teardownTracesExperience,
 } from '../../fixtures/traces_experience';
@@ -37,6 +38,12 @@ const openTraceTimeline = async (pageObjects: {
   const { flyout } = pageObjects.tracesExperience;
   await flyout.traceSummary.fullScreenButton.click();
   await expect(flyout.waterfallFlyout.container).toBeVisible();
+  // Dismiss the "Trace insights in Discover" tour step if shown (it has a 500ms render delay
+  // and a z-index that overlaps the child flyout, blocking subsequent interactions).
+  await flyout.traceSummary.tourOkButton
+    .waitFor({ state: 'visible', timeout: 2000 })
+    .then(() => flyout.traceSummary.tourOkButton.click())
+    .catch(() => {});
 };
 
 spaceTest.describe(
@@ -184,6 +191,59 @@ spaceTest.describe(
             await expect(flyout.waterfallFlyout.childDocFlyout.traceSummarySection).toBeHidden();
           }
         );
+      }
+    );
+
+    spaceTest(
+      'Selected span is scrolled into view when opening the full-screen waterfall',
+      async ({ browserAuth, pageObjects }) => {
+        const { flyout } = pageObjects.tracesExperience;
+
+        await spaceTest.step('setup: login and open the scroll target span document', async () => {
+          await browserAuth.loginAsViewer();
+          await pageObjects.discover.goto();
+          await pageObjects.discover.writeAndSubmitEsqlQuery(
+            `${TRACES.ESQL_QUERY} | WHERE span.name == "${DEEP_TRACE.SCROLL_TARGET_SPAN_NAME}"`
+          );
+          await pageObjects.tracesExperience.openOverviewTab(pageObjects.discover);
+        });
+
+        await spaceTest.step('Open the full-screen waterfall', async () => {
+          await flyout.traceSummary.fullScreenButton.click();
+          await expect(flyout.waterfallFlyout.container).toBeVisible();
+        });
+
+        await spaceTest.step('Scroll target span is visible in the viewport', async () => {
+          await expect(
+            flyout.waterfallFlyout.getWaterfallItem(DEEP_TRACE.SCROLL_TARGET_SPAN_NAME).row
+          ).toBeInViewport();
+        });
+      }
+    );
+
+    spaceTest(
+      'Service badge in full-screen waterfall navigates to the APM service overview',
+      async ({ browserAuth, page, pageObjects }) => {
+        const { flyout } = pageObjects.tracesExperience;
+
+        await spaceTest.step('setup: login and open trace timeline', async () => {
+          await browserAuth.loginAsViewer();
+          await openTraceTimeline(pageObjects);
+        });
+
+        await spaceTest.step('Click the service badge on the transaction row', async () => {
+          const { serviceBadge } = flyout.waterfallFlyout.getWaterfallItem(
+            RICH_TRACE.TRANSACTION_NAME
+          );
+          await expect(serviceBadge).toBeVisible();
+          await serviceBadge.click();
+        });
+
+        await spaceTest.step('Verify navigation to the APM service overview', async () => {
+          await expect(page).toHaveURL(
+            new RegExp(`/app/apm/services/${RICH_TRACE.SERVICE_NAME}/overview`)
+          );
+        });
       }
     );
 

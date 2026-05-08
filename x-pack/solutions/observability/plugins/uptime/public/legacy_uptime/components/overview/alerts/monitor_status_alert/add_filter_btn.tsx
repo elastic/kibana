@@ -61,7 +61,7 @@ export const AddFilterButton: React.FC<Props> = ({ newFilters, onNewFilter, aler
     <EuiButtonEmpty
       data-test-subj="uptimeCreateAlertAddFilter"
       disabled={items.length === 0 || !dataView}
-      iconType="plusInCircleFilled"
+      iconType="plusCircle"
       onClick={onButtonClick}
       size="s"
       flush="left"

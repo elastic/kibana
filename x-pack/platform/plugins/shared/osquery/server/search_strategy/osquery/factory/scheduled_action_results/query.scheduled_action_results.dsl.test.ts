@@ -113,4 +113,18 @@ describe('buildScheduledActionResultsQuery', () => {
 
     expect(hasSpaceFilter).toBe(false);
   });
+
+  it('prefixes index with *: when ccsEnabled is true', () => {
+    const result = buildScheduledActionResultsQuery({ ...defaultOptions, ccsEnabled: true });
+
+    expect(result.index).toBe(
+      'logs-osquery_manager.action.responses*,*:logs-osquery_manager.action.responses*'
+    );
+  });
+
+  it('does not prefix index when ccsEnabled is false', () => {
+    const result = buildScheduledActionResultsQuery({ ...defaultOptions, ccsEnabled: false });
+
+    expect(result.index).toBe('logs-osquery_manager.action.responses*');
+  });
 });

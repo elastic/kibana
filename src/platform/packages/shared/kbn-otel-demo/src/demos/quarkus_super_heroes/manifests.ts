@@ -145,10 +145,11 @@ function createCommonManifests(options: ManifestOptions): object[] {
         },
         spec: {
           serviceAccountName: 'otel-collector',
+          ...(options.hostAliases ? { hostAliases: options.hostAliases } : {}),
           containers: [
             {
               name: 'otel-collector',
-              image: 'otel/opentelemetry-collector-contrib:0.115.1',
+              image: options.collectorImage || 'otel/opentelemetry-collector-contrib:0.115.1',
               args: ['--config=/etc/otel-collector-config.yaml'],
               ports: [
                 { containerPort: 4317, name: 'otlp-grpc' },
@@ -488,7 +489,8 @@ export const quarkusSuperHeroesManifests: DemoManifestGenerator = {
       } else {
         // Standard deployment with resource limits for Quarkus services
         const resources =
-          svc.name.startsWith('rest-') ||
+          svc.resources ??
+          (svc.name.startsWith('rest-') ||
           svc.name.startsWith('grpc-') ||
           svc.name === 'event-statistics' ||
           svc.name === 'ui-super-heroes'
@@ -496,7 +498,7 @@ export const quarkusSuperHeroesManifests: DemoManifestGenerator = {
                 limits: { memory: '1Gi', cpu: '1' },
                 requests: { memory: '256Mi', cpu: '0.5' },
               }
-            : svc.resources;
+            : undefined);
 
         manifests.push(
           createDeployment({

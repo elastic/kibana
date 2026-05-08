@@ -25,31 +25,25 @@ import { LicensePrompt } from '../../shared/license_prompt';
 import { EmptyPrompt } from './empty_prompt';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
-import { SearchBar } from '../../shared/search_bar/search_bar';
 import { useServiceName } from '../../../hooks/use_service_name';
 import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
+import { SloOverviewFlyout, useSloOverviewFlyout } from '../../shared/slo_overview_flyout';
 import { useServiceMap } from './use_service_map';
+import { useServiceMapBadges } from './use_service_map_badges';
 import { ServiceMapGraph } from './graph';
+import { ServiceMapSloFlyoutProvider } from './service_map_slo_flyout_context';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
-    <>
-      <SearchBar showTimeComparison />
-      <EuiFlexGroup
-        alignItems="center"
-        justifyContent="spaceAround"
-        // Set the height to give it some top margin
-        style={{ height: '60vh' }}
-      >
-        <EuiFlexItem grow={false} style={{ width: 600, textAlign: 'center' as const }}>
-          {children}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup alignItems="center" justifyContent="spaceAround" style={{ height: '60vh' }}>
+      <EuiFlexItem grow={false} style={{ width: 600, textAlign: 'center' as const }}>
+        {children}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
@@ -168,6 +162,9 @@ export function ServiceMap({
     });
   }, []);
 
+  const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
+    useSloOverviewFlyout();
+
   useLayoutEffect(() => {
     if (isFullscreen) {
       applyServiceMapFullScreenBodyClasses(true, bodyClassesToToggle);
@@ -177,6 +174,15 @@ export function ServiceMap({
       };
     }
   }, [isFullscreen, bodyClassesToToggle]);
+
+  const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({
+    environment,
+    start,
+    end,
+    kuery,
+    nodes: data.nodes,
+    nodesStatus: status,
+  });
 
   if (!license) {
     return null;
@@ -234,9 +240,10 @@ export function ServiceMap({
     });
   }
 
+  const isLoading = status === FETCH_STATUS.LOADING || badgesStatus === FETCH_STATUS.LOADING;
+
   return (
-    <>
-      <SearchBar showTimeComparison />
+    <ServiceMapSloFlyoutProvider onSloBadgeClick={openSloOverviewFlyout}>
       <div
         className={cx({
           [SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
@@ -254,12 +261,13 @@ export function ServiceMap({
             }}
             ref={ref}
           >
-            {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+            {isLoading && <LoadingSpinner />}
             <ServiceMapGraph
               height={mapHeight}
-              nodes={data.nodes}
-              edges={data.edges}
+              nodes={isLoading ? [] : nodesForGraph}
+              edges={isLoading ? [] : data.edges}
               serviceName={serviceName}
+              highlightedServiceName={serviceName}
               environment={environment}
               kuery={kuery}
               start={start}
@@ -270,7 +278,14 @@ export function ServiceMap({
             />
           </div>
         </EuiPanel>
+        {sloOverviewFlyout && (
+          <SloOverviewFlyout
+            serviceName={sloOverviewFlyout.serviceName}
+            agentName={sloOverviewFlyout.agentName}
+            onClose={closeSloOverviewFlyout}
+          />
+        )}
       </div>
-    </>
+    </ServiceMapSloFlyoutProvider>
   );
 }

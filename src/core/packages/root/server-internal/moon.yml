@@ -92,6 +92,8 @@ dependsOn:
   - '@kbn/core-data-streams-server-internal'
   - '@kbn/tracing-utils'
   - '@kbn/core-user-activity-server-internal'
+  - '@kbn/core-user-storage-server-internal'
+  - '@kbn/zod'
 tags:
   - shared-server
   - package
@@ -103,26 +105,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

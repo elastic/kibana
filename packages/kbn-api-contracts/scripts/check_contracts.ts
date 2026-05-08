@@ -11,8 +11,17 @@ import { execSync } from 'child_process';
 import { writeFileSync, mkdirSync, rmSync } from 'fs';
 import { resolve } from 'path';
 import { run } from '@kbn/dev-cli-runner';
-import { runOasdiff, parseOasdiff, applyAllowlist } from '../src/diff';
+import {
+  runOasdiff,
+  runOasdiffStructural,
+  parseOasdiff,
+  applyAllowlist,
+  buildRequestBodyIndex,
+  detectAdditionalPropertiesTightening,
+} from '../src/diff';
+import { loadOas } from '../src/input/load_oas';
 import { formatFailure } from '../src/report/format_failure';
+import { writeImpactReport } from '../src/report/write_impact_report';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
 import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
 import { loadTerraformApis } from '../src/terraform/load_terraform_apis';
@@ -29,6 +38,7 @@ interface CheckContractsOptions {
   mergeBase?: string;
   allowlistPath?: string;
   terraformApisPath?: string;
+  reportPath?: string;
 }
 
 const TMP_DIR = resolve(__dirname, '..', 'target', 'tmp');
@@ -154,6 +164,7 @@ run(
       mergeBase: (flags.mergeBase as string) || undefined,
       allowlistPath: (flags.allowlistPath as string) || undefined,
       terraformApisPath: (flags.terraformApisPath as string) || undefined,
+      reportPath: (flags.reportPath as string) || undefined,
     };
 
     log.info(`Checking ${opts.distribution} API contracts...`);
@@ -182,8 +193,10 @@ run(
         log.info(`Filtering oasdiff to ${terraformApis.length} Terraform provider API paths`);
       }
       let diffEntries;
+      let structuralDiff: unknown;
       try {
         diffEntries = runOasdiff(basePath, currentPath, { matchPath });
+        structuralDiff = runOasdiffStructural(basePath, currentPath, { matchPath });
       } catch (error: unknown) {
         // Some older branch specs (e.g. 9.3) have example objects incorrectly
         // placed under `#/components/schemas/` instead of `#/components/examples/`.
@@ -199,7 +212,17 @@ run(
         }
         throw error;
       }
-      const allBreakingChanges = parseOasdiff(diffEntries);
+
+      const currentOas = await loadOas(currentPath);
+      const requestBodyIndex = buildRequestBodyIndex(currentOas);
+      const { entries: syntheticEntries, warnings: detectorWarnings } =
+        detectAdditionalPropertiesTightening(structuralDiff, requestBodyIndex);
+
+      for (const warning of detectorWarnings) {
+        log.warning(warning);
+      }
+
+      const allBreakingChanges = parseOasdiff([...diffEntries, ...syntheticEntries]);
 
       if (allBreakingChanges.length === 0) {
         log.success('No breaking changes detected');
@@ -231,7 +254,19 @@ run(
         return;
       }
 
-      const report = formatFailure(breakingChanges, terraformImpact);
+      const filteredImpact = {
+        hasImpact: true,
+        impactedChanges: terraformImpact.impactedChanges.filter((i) =>
+          breakingChanges.includes(i.change)
+        ),
+      };
+
+      if (opts.reportPath) {
+        writeImpactReport(opts.reportPath, filteredImpact);
+        log.info(`Impact report written to ${opts.reportPath}`);
+      }
+
+      const report = formatFailure(breakingChanges, filteredImpact);
       log.error(report);
       throw new Error(
         `Found ${breakingChanges.length} breaking change(s) affecting Terraform provider APIs`
@@ -250,6 +285,7 @@ run(
         'mergeBase',
         'allowlistPath',
         'terraformApisPath',
+        'reportPath',
       ],
       help: `
         --distribution       Required. Either "stack" or "serverless"
@@ -258,6 +294,7 @@ run(
         --mergeBase          Merge base commit SHA (used in CI, skips remote resolution)
         --allowlistPath      Override allowlist path (default: packages/kbn-api-contracts/allowlist.json)
         --terraformApisPath  Override Terraform provider APIs config path
+        --reportPath         Write a JSON impact report to this path (used by CI for PR notifications)
 
         Examples:
           # CI: check using merge base SHA

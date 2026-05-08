@@ -22,7 +22,6 @@ interface QueryTemplate {
   label: string;
   description: string;
   queryString: string;
-  sortText?: string;
   category?: SuggestionCategory;
 }
 
@@ -37,6 +36,15 @@ export const getRecommendedQueriesTemplates = ({
   timeField?: string;
   categorizationField?: string;
 }): QueryTemplate[] => {
+  // Recommend TBUCKET for @timestamp fields as it is smarter and has easier to understand syntax
+  const bucketExpression =
+    timeField === '@timestamp' ? 'TBUCKET(50)' : `BUCKET(${timeField}, 50, ?_tstart, ?_tend)`;
+
+  const commentDescription =
+    timeField !== '@timestamp'
+      ? ' /* ?_tstart and ?_tend take the values of the time picker */'
+      : '';
+
   const queries: QueryTemplate[] = [
     {
       label: i18n.translate('kbn-esql-language.recommendedQueries.searchExample.label', {
@@ -49,7 +57,6 @@ export const getRecommendedQueriesTemplates = ({
         }
       ),
       queryString: `${fromCommand}\n  | WHERE KQL("term") /* Search all fields using KQL – e.g. WHERE KQL("debug") */`,
-      sortText: 'D',
       category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
     },
     {
@@ -113,7 +120,7 @@ export const getRecommendedQueriesTemplates = ({
                 defaultMessage: 'Count aggregation over time',
               }
             ),
-            queryString: `${fromCommand}| WHERE ${timeField} <=?_tend and ${timeField} >?_tstart| STATS count = COUNT(*) BY \`Over time\` = BUCKET(${timeField}, 50, ?_tstart, ?_tend) /* ?_tstart and ?_tend take the values of the time picker */`,
+            queryString: `${fromCommand}| WHERE ${timeField} <=?_tend and ${timeField} >?_tstart| STATS count = COUNT(*) BY \`Over time\` = ${bucketExpression}${commentDescription}`,
           },
           {
             label: i18n.translate('kbn-esql-language.recommendedQueries.eventRate.label', {
@@ -139,7 +146,7 @@ export const getRecommendedQueriesTemplates = ({
                 defaultMessage: 'Change point on count aggregation',
               }
             ),
-            queryString: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY buckets = BUCKET(${timeField}, 50, ?_tstart, ?_tend)  | CHANGE_POINT count ON buckets `,
+            queryString: `${fromCommand} | WHERE ${timeField} <=?_tend and ${timeField} >?_tstart | STATS count = COUNT(*) BY buckets = ${bucketExpression}  | CHANGE_POINT count ON buckets `,
           },
           {
             label: i18n.translate('kbn-esql-language.recommendedQueries.lastHour.label', {
@@ -175,6 +182,23 @@ export const getRecommendedQueriesTemplates = ({
           },
         ]
       : []),
+    ...(fromCommand
+      ? [
+          {
+            label: i18n.translate('kbn-esql-language.recommendedQueries.loadUnmappedFields.label', {
+              defaultMessage: 'Load unmapped fields',
+            }),
+            description: i18n.translate(
+              'kbn-esql-language.recommendedQueries.loadUnmappedFields.description',
+              {
+                defaultMessage:
+                  'Allows querying unmapped fields, loading their values from the _source if present.',
+              }
+            ),
+            queryString: `SET unmapped_fields = "LOAD"; ${fromCommand} `,
+          },
+        ]
+      : []),
   ];
 
   // prettify the query string
@@ -183,6 +207,7 @@ export const getRecommendedQueriesTemplates = ({
     const formattedQuery = fromCommand
       ? prettifyQuery(query.queryString)
       : prettifyQueryTemplate(`FROM index ${query.queryString}`);
+
     query.queryString = formattedQuery;
   });
   return queries;
@@ -237,7 +262,6 @@ export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
       text: query.queryString,
       kind: 'Issue',
       detail: query.description,
-      sortText: query?.sortText ?? 'E',
       category: query.category ?? SuggestionCategory.RECOMMENDED_QUERY,
       command: buildRecommendedQueryCommand(query.label),
     };
@@ -258,7 +282,6 @@ const buildExtensionSuggestion = (
     ? { documentation: { value: recommendedQuery.description } }
     : {}),
   kind: 'Issue',
-  sortText: 'D',
   category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
   ...(command ? { command } : {}),
 });

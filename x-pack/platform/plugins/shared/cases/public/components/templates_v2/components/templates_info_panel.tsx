@@ -20,7 +20,7 @@ import {
 import { css } from '@emotion/react';
 import { useKibana } from '../../../common/lib/kibana';
 import illustrationRelevance from '../../../assets/illustration-relevance-hand-touch-128.svg';
-import * as i18n from '../../templates/translations';
+import * as i18n from '../translations';
 
 const TemplatesInfoPanelComponent: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -58,7 +58,7 @@ const TemplatesInfoPanelComponent: React.FC = () => {
             <p>{i18n.TEMPLATES_INFO_DESCRIPTION}</p>
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiLink href={docLinks.links.cases.casesPermissions} target="_blank" external>
+          <EuiLink href={docLinks.links.cases.configureCaseSettings} target="_blank" external>
             {i18n.LEARN_MORE}
           </EuiLink>
         </EuiFlexItem>

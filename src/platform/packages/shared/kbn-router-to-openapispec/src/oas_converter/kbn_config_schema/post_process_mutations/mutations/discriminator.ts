@@ -16,6 +16,28 @@ import { isReferenceObject } from '../../../common';
 
 const { META_FIELD_X_OAS_DISCRIMINATOR, META_FIELD_X_OAS_DISCRIMINATOR_DEFAULT_CASE } = metaFields;
 
+const getDiscriminatorStringValue = (
+  sharedSchema: OpenAPIV3.SchemaObject,
+  propertyName: string
+): string | undefined => {
+  const rawProp = sharedSchema.properties?.[propertyName];
+  if (!rawProp || typeof rawProp !== 'object') {
+    return undefined;
+  }
+  if ('$ref' in rawProp) {
+    return undefined;
+  }
+  const propSchema = rawProp as OpenAPIV3.SchemaObject;
+  if (Array.isArray(propSchema.enum) && propSchema.enum.length === 1) {
+    const [only] = propSchema.enum;
+    return typeof only === 'string' ? only : undefined;
+  }
+  if ('const' in propSchema && typeof propSchema.const === 'string') {
+    return propSchema.const;
+  }
+  return undefined;
+};
+
 export const processDiscriminator = (ctx: IContext, schema: OpenAPIV3.SchemaObject): void => {
   const firstSchema = isReferenceObject(schema.anyOf?.[0])
     ? ctx.derefSharedSchema(schema.anyOf?.[0].$ref)
@@ -52,13 +74,13 @@ export const processDiscriminator = (ctx: IContext, schema: OpenAPIV3.SchemaObje
     META_FIELD_X_OAS_DISCRIMINATOR as keyof OpenAPIV3.SchemaObject
   ] as string;
 
-  schema.discriminator = { propertyName };
   deleteField(firstSchema, META_FIELD_X_OAS_DISCRIMINATOR);
 
   schema.oneOf = schema.anyOf;
   deleteField(schema, 'anyOf');
 
   let catchAllIdx = -1;
+  const mapping: Record<string, string> = {};
 
   ((schema.oneOf ?? []) as OpenAPIV3.ReferenceObject[]).forEach((entry, idx) => {
     const sharedSchema = ctx.derefSharedSchema(entry.$ref);
@@ -70,9 +92,33 @@ export const processDiscriminator = (ctx: IContext, schema: OpenAPIV3.SchemaObje
       catchAllIdx = idx;
       return;
     }
+
+    const discriminatorValue = getDiscriminatorStringValue(sharedSchema, propertyName);
+
+    if (discriminatorValue === undefined) {
+      throw new Error(
+        dedent`Could not derive OpenAPI discriminator.mapping for discriminated union branch ${
+          entry.$ref
+        }.
+
+        Each non-default branch must declare "${propertyName}" as a single-string enum (from schema.literal) so the OAS generator can build discriminator.mapping.
+
+        Debug details: ${JSON.stringify(sharedSchema.properties?.[propertyName])}.`
+      );
+    }
+
+    if (discriminatorValue in mapping) {
+      throw new Error(
+        `Duplicate discriminator value "${discriminatorValue}" when generating mapping for ${entry.$ref}.`
+      );
+    }
+    mapping[discriminatorValue] = entry.$ref;
   });
 
   if (catchAllIdx > -1) {
     schema.oneOf?.splice(catchAllIdx, 1);
   }
+
+  schema.discriminator =
+    Object.keys(mapping).length > 0 ? { propertyName, mapping } : { propertyName };
 };

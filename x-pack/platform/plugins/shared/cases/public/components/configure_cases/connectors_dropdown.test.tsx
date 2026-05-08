@@ -53,9 +53,10 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
+                aria-hidden={true}
                 css="unknown styles"
                 size="m"
-                type="minusInCircle"
+                type="minusCircle"
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -79,6 +80,7 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
+                aria-hidden={true}
                 css="unknown styles"
                 size="m"
                 type="logoSecurity"
@@ -105,6 +107,7 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
+                aria-hidden={true}
                 css="unknown styles"
                 size="m"
                 type="logoSecurity"
@@ -131,6 +134,7 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
+                aria-hidden={true}
                 css="unknown styles"
                 size="m"
                 type="logoSecurity"
@@ -157,6 +161,7 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
+                aria-hidden={true}
                 css="unknown styles"
                 size="m"
                 type="logoSecurity"
@@ -183,6 +188,7 @@ describe('ConnectorsDropdown', () => {
               grow={false}
             >
               <EuiIcon
+                aria-hidden={true}
                 css="unknown styles"
                 size="m"
                 type="logoSecurity"

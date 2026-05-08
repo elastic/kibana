@@ -390,7 +390,7 @@ export function Table<T extends UserContentCommonSchema>({
           columns={tableColumns}
           pagination={pagination}
           loading={isFetchingItems}
-          noItemsMessage={noItemsMessage}
+          noItemsMessage={isFetchingItems ? '' : noItemsMessage}
           selection={selection}
           search={search}
           executeQueryOptions={{ enabled: false }}
@@ -399,6 +399,9 @@ export function Table<T extends UserContentCommonSchema>({
           data-test-subj="itemsInMemTable"
           rowHeader="attributes.title"
           tableCaption={tableCaption}
+          scrollableInline
+          tableLayout="auto"
+          responsiveBreakpoint={false}
           css={cssFavoriteHoverWithinEuiTableRow(euiTheme.euiTheme)}
         />
       </TagFilterContextProvider>

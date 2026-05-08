@@ -8,19 +8,17 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
-import { WORKFLOWS_AI_AGENT_SETTING_ID } from '@kbn/workflows/common/constants';
 import { z } from '@kbn/zod/v4';
-import type { AgentBuilderPluginSetupContract } from '../../types';
-import type { WorkflowsManagementApi } from '../../workflows_management/workflows_management_api';
-
-export const GET_CONNECTORS_TOOL_ID = 'platform.workflows.get_connectors';
+import { workflowTools } from '../../../common/agent_builder/constants';
+import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
+import type { AgentBuilderPluginSetup } from '../../types';
 
 export function registerGetConnectorsTool(
-  agentBuilder: AgentBuilderPluginSetupContract,
+  agentBuilder: AgentBuilderPluginSetup,
   api: WorkflowsManagementApi
 ): void {
   agentBuilder.tools.register({
-    id: GET_CONNECTORS_TOOL_ID,
+    id: workflowTools.getConnectors,
     type: ToolType.builtin,
     description: `Get connector instances configured in the user's environment.
 
@@ -44,26 +42,18 @@ The connector \`id\` is what you put in the \`connector-id\` field of a workflow
       search: z.string().optional().describe('Search term to match against connector names'),
     }),
     tags: ['workflows', 'connectors'],
-    availability: {
-      handler: async ({ uiSettings }) => {
-        const isEnabled = await uiSettings.get<boolean>(WORKFLOWS_AI_AGENT_SETTING_ID);
-        return isEnabled
-          ? { status: 'available' }
-          : { status: 'unavailable', reason: 'AI workflow authoring is disabled' };
-      },
-      cacheMode: 'space',
-    },
+    experimental: true,
     handler: async ({ actionTypeId, stepType, search }, { spaceId, request }) => {
-      const { connectorsByType, totalConnectors } = await api.getAvailableConnectors(
+      const { connectorTypes, totalConnectors } = await api.getAvailableConnectors(
         spaceId,
         request
       );
 
       const entries = actionTypeId
-        ? connectorsByType[actionTypeId]
-          ? [[actionTypeId, connectorsByType[actionTypeId]] as const]
+        ? connectorTypes[actionTypeId]
+          ? [[actionTypeId, connectorTypes[actionTypeId]] as const]
           : []
-        : Object.entries(connectorsByType);
+        : Object.entries(connectorTypes);
 
       let connectors = entries.flatMap(([type, typeInfo]) => {
         const baseStepType = type.replace(/^\./, '');

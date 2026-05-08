@@ -14,34 +14,44 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-import { Model, EvaluatorStats } from '../common_attributes.gen';
+import { Model, BuildkiteMetadata, EvaluatorStats } from '../common_attributes.gen';
 
+export const GetEvaluationRunRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Filter stats by suite ID
+     */
+    suite_id: z.string().optional(),
+    /**
+     * Filter stats by task model ID
+     */
+    model_id: z.string().optional(),
+  })
+);
 export type GetEvaluationRunRequestQuery = z.infer<typeof GetEvaluationRunRequestQuery>;
-export const GetEvaluationRunRequestQuery = z.object({
-  /**
-   * Filter stats by suite ID
-   */
-  suite_id: z.string().optional(),
-  /**
-   * Filter stats by task model ID
-   */
-  model_id: z.string().optional(),
-});
 export type GetEvaluationRunRequestQueryInput = z.input<typeof GetEvaluationRunRequestQuery>;
 
+export const GetEvaluationRunRequestParams = lazySchema(() =>
+  z.object({
+    runId: z.string(),
+  })
+);
 export type GetEvaluationRunRequestParams = z.infer<typeof GetEvaluationRunRequestParams>;
-export const GetEvaluationRunRequestParams = z.object({
-  runId: z.string(),
-});
 export type GetEvaluationRunRequestParamsInput = z.input<typeof GetEvaluationRunRequestParams>;
 
+export const GetEvaluationRunResponse = lazySchema(() =>
+  z.object({
+    run_id: z.string(),
+    timestamp: z.string().optional(),
+    task_model: Model.optional(),
+    evaluator_model: Model.optional(),
+    git_branch: z.string().nullable().optional(),
+    git_commit_sha: z.string().nullable().optional(),
+    ci: BuildkiteMetadata.optional(),
+    total_repetitions: z.number().int().optional(),
+    stats: z.array(EvaluatorStats),
+  })
+);
 export type GetEvaluationRunResponse = z.infer<typeof GetEvaluationRunResponse>;
-export const GetEvaluationRunResponse = z.object({
-  run_id: z.string(),
-  task_model: Model.optional(),
-  evaluator_model: Model.optional(),
-  total_repetitions: z.number().int().optional(),
-  stats: z.array(EvaluatorStats),
-});

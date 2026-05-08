@@ -6,15 +6,22 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { AIChatExperience } from '@kbn/ai-assistant-common';
+import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
   'GenAI Settings - Selection Modal without AI Assistants Privileges',
-  { tag: ['@ess'] },
+  { tag: ['@local-stateful-classic'] },
   () => {
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects, scoutSpace }) => {
+      await scoutSpace.uiSettings.set({ [AI_CHAT_EXPERIENCE_TYPE]: AIChatExperience.Classic });
       await browserAuth.loginAsNonAssistantUser();
       await pageObjects.genAiSettings.navigateTo();
+    });
+
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.uiSettings.unset(AI_CHAT_EXPERIENCE_TYPE);
     });
 
     spaceTest(

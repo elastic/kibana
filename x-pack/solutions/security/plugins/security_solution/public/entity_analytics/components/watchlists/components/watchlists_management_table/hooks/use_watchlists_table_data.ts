@@ -7,19 +7,39 @@
 
 import { useQuery } from '@kbn/react-query';
 import { WATCHLISTS_URL } from '../../../../../../../common/entity_analytics/watchlists/constants';
+import type { MonitoringEntitySource } from '../../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import { useEntityAnalyticsRoutes } from '../../../../../api/api';
 import type { WatchlistTableItemType } from '../types';
+
+/**
+ * Derives a human-readable source label from an entity source.
+ *  - store  → "Entity Store"
+ *  - index  → "Index"
+ *  - entity_analytics_integration → the integration name (e.g. "AWS CloudTrail")
+ */
+const getSourceLabel = (source: MonitoringEntitySource): string => {
+  if (source.type === 'store') {
+    return 'Entity Store';
+  }
+  if (source.type === 'index') {
+    return 'Index';
+  }
+  if (source.type === 'entity_analytics_integration') {
+    return source.integrationName ?? 'Integration';
+  }
+  return source.name ?? '';
+};
 
 export const useWatchlistsTableData = (
   spaceId: string,
   pageIndex: number,
   toggleStatus: boolean
 ) => {
-  const { fetchWatchlists } = useEntityAnalyticsRoutes();
+  const { fetchWatchlists, listWatchlistEntitySources } = useEntityAnalyticsRoutes();
 
   const {
     data: watchlists,
-    isLoading,
+    isLoading: isWatchlistsLoading,
     isError,
     isRefetchError,
     refetch,
@@ -29,7 +49,48 @@ export const useWatchlistsTableData = (
     queryFn: ({ signal }) => fetchWatchlists({ signal }),
   });
 
-  const visibleRecords: WatchlistTableItemType[] = Array.isArray(watchlists) ? watchlists : [];
+  // Fetch entity sources for every watchlist that has entitySourceIds
+  const { data: enrichedRecords, isLoading: isEnriching } = useQuery({
+    queryKey: ['watchlists-management-table-sources', spaceId, watchlists],
+    enabled: Boolean(watchlists?.length),
+    queryFn: async ({ signal }) => {
+      const list = Array.isArray(watchlists) ? watchlists : [];
+
+      const results = await Promise.allSettled(
+        list.map(async (watchlist): Promise<WatchlistTableItemType> => {
+          if (!watchlist.id || !watchlist.entitySourceIds?.length) {
+            return watchlist;
+          }
+
+          try {
+            const { sources } = await listWatchlistEntitySources({
+              watchlistId: watchlist.id,
+              signal,
+            });
+
+            const labels = sources
+              ?.map(getSourceLabel)
+              .filter((label): label is string => Boolean(label));
+            return {
+              ...watchlist,
+              source: labels?.length ? labels.join(', ') : undefined,
+            };
+          } catch {
+            // If fetching sources fails for a single watchlist, just show it without the source
+            return watchlist;
+          }
+        })
+      );
+
+      return results.map((r) =>
+        r.status === 'fulfilled' ? r.value : ({} as WatchlistTableItemType)
+      );
+    },
+  });
+
+  const isLoading = isWatchlistsLoading || (Boolean(watchlists?.length) && isEnriching);
+  const visibleRecords: WatchlistTableItemType[] =
+    enrichedRecords ?? (Array.isArray(watchlists) ? watchlists : []);
 
   const inspect = {
     dsl: [

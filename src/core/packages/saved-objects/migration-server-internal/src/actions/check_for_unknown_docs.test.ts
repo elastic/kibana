@@ -153,6 +153,7 @@ describe('checkForUnknownDocs', () => {
     expect(client.search).toHaveBeenCalledTimes(1);
     expect(client.search).toHaveBeenCalledWith({
       index: '.kibana_8.0.0',
+      ignore_unavailable: false,
       size: 0,
       aggs: {
         typesAggregation: {

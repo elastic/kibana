@@ -14,11 +14,13 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import {
   API_VERSIONS,
   ACTIONS_INDEX,
+  ACTION_RESPONSES_DATA_STREAM_INDEX,
   MAX_TAGS_PER_ACTION,
   MAX_TAG_LENGTH,
 } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
+import { updateActionTagsResponseSchema } from './response_schemas';
 
 const updateActionTagsRequestParamsSchema = t.type({
   id: t.string,
@@ -60,6 +62,11 @@ export const updateActionTagsRoute = (
               typeof updateActionTagsRequestBodySchema,
               UpdateActionTagsRequestBodySchema
             >(updateActionTagsRequestBodySchema),
+          },
+          response: {
+            200: {
+              body: () => updateActionTagsResponseSchema,
+            },
           },
         },
       },
@@ -126,6 +133,29 @@ export const updateActionTagsRoute = (
           const hit = searchResult.hits.hits[0];
 
           if (!hit) {
+            const scheduledCheck = await esClient.search({
+              index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}-*`,
+              size: 0,
+              query: {
+                bool: {
+                  filter: [{ term: { schedule_id: request.params.id } }],
+                },
+              },
+            });
+
+            const totalHits = scheduledCheck.hits.total;
+            const scheduledCount =
+              typeof totalHits === 'number' ? totalHits : totalHits?.value ?? 0;
+
+            if (scheduledCount > 0) {
+              return response.badRequest({
+                body: {
+                  message:
+                    'Tags are not supported for scheduled query results. Tags can only be added to live queries and queries from rules.',
+                },
+              });
+            }
+
             return response.notFound({
               body: { message: `Action ${request.params.id} not found` },
             });

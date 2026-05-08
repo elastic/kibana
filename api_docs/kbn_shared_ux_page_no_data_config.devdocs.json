@@ -47,6 +47,7 @@
             "lineNumber": 28,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "NoDataConfigPageProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -194,9 +195,10 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false
           }
         ],

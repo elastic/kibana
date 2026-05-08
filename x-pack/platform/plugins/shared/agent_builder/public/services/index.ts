@@ -14,6 +14,8 @@ export { DocLinksService } from './doc_links';
 export { NavigationService } from './navigation';
 export { ToolsService } from './tools';
 export { SkillsService } from './skills/skills_service';
+export { SmlService } from './sml/sml_service';
 export { PluginsService } from './plugins/plugins_service';
+export { OAuthClientsService } from './oauth_clients';
 export { EventsService } from './events';
 export type { AgentBuilderInternalService } from './types';

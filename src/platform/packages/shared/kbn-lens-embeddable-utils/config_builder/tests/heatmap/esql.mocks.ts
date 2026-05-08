@@ -9,6 +9,7 @@
 
 import type { HeatmapVisualizationState } from '@kbn/lens-common';
 
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes } from '../../types';
 
 export const simple: LensAttributes = {
@@ -100,7 +101,7 @@ export const simple: LensAttributes = {
     },
     needsRefresh: false,
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsHeatmap',
   references: [],
 } satisfies LensAttributes;
@@ -205,7 +206,7 @@ export const withXAndYAxes = {
     },
     needsRefresh: false,
   },
-  version: 2,
+  version: LENS_ITEM_LATEST_VERSION,
   visualizationType: 'lnsHeatmap',
   references: [],
 } satisfies LensAttributes;

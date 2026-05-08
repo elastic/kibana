@@ -21,7 +21,11 @@ export const tlsRuleParamsSchema = schema.object(
     kqlQuery: schema.maybe(schema.string()),
   },
   {
-    meta: { description: 'The parameters for the rule.' },
+    meta: {
+      title: 'Synthetics TLS Rule Params',
+      description:
+        'The parameters for the synthetics tls rule. These parameters are appropriate when `rule_type_id` is `xpack.synthetics.alerts.tls`.',
+    },
   }
 );
 

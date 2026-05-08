@@ -182,6 +182,26 @@ describe('assignBucket', () => {
     expect(assignBucket({ score: 75 }, unlabeledConfig)).toBe('50-100');
     expect(assignBucket({ score: 150 }, unlabeledConfig)).toBe('100+');
   });
+
+  it('returns null when value matches no range', () => {
+    const noMatchConfig = {
+      field: 'age',
+      ranges: [
+        { from: 0, to: 10 },
+        { from: 10, to: 20 },
+      ],
+    };
+    expect(assignBucket({ age: 999 }, noMatchConfig)).toBeNull();
+  });
+
+  it('generates wildcard label when range has no from, to, or label', () => {
+    const wildcardConfig = {
+      field: 'val',
+      ranges: [{}],
+    };
+    // A range with no from and no to matches everything
+    expect(assignBucket({ val: 42 }, wildcardConfig)).toBe('*');
+  });
 });
 
 describe('parseGroupKeyValues', () => {
@@ -208,5 +228,9 @@ describe('parseGroupKeyValues', () => {
     expect(parseGroupKeyValues('"open::urgent"', ['status'])).toEqual({
       status: 'open::urgent',
     });
+  });
+
+  it('falls back to raw string when JSON.parse fails', () => {
+    expect(parseGroupKeyValues('not-valid-json', ['key'])).toEqual({ key: 'not-valid-json' });
   });
 });

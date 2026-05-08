@@ -35,6 +35,17 @@ describe('useCurrentUser', () => {
     mockUseQuery.mockReturnValue({ data: undefined, isLoading: false });
   });
 
+  it('defaults to enabled: true when called with no arguments', () => {
+    renderHook(() => useCurrentUser());
+
+    expect(mockUseQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: ['agentBuilder', 'currentUser'],
+        enabled: true,
+      })
+    );
+  });
+
   it('passes enabled: false to useQuery and does not call getCurrent', () => {
     renderHook(() => useCurrentUser({ enabled: false }));
 

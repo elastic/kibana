@@ -14,15 +14,17 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const DeleteWatchlistEntitySourceRequestParams = lazySchema(() =>
+  z.object({
+    watchlist_id: z.string(),
+    id: z.string(),
+  })
+);
 export type DeleteWatchlistEntitySourceRequestParams = z.infer<
   typeof DeleteWatchlistEntitySourceRequestParams
 >;
-export const DeleteWatchlistEntitySourceRequestParams = z.object({
-  watchlist_id: z.string(),
-  id: z.string(),
-});
 export type DeleteWatchlistEntitySourceRequestParamsInput = z.input<
   typeof DeleteWatchlistEntitySourceRequestParams
 >;

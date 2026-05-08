@@ -42,7 +42,7 @@ export const ValidationStepDetails: FC<{
               <EuiText size="s">{validationSummary.success}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="check" />
+              <EuiIcon type="check" aria-hidden={true} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
@@ -61,7 +61,7 @@ export const ValidationStepDetails: FC<{
               <EuiText size="s">{validationSummary.warning}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="warning" />
+              <EuiIcon type="warning" aria-hidden={true} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </>

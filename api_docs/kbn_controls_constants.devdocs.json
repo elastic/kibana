@@ -84,7 +84,7 @@
           "\"large\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
-        "lineNumber": 20,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -101,7 +101,7 @@
           "\"medium\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
-        "lineNumber": 19,
+        "lineNumber": 17,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -120,7 +120,7 @@
           "\"small\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
-        "lineNumber": 18,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -156,91 +156,6 @@
           "true"
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
-        "lineNumber": 14,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-constants",
-        "id": "def-common.DEFAULT_CONTROL_GROW",
-        "type": "boolean",
-        "tags": [],
-        "label": "DEFAULT_CONTROL_GROW",
-        "description": [],
-        "signature": [
-          "false"
-        ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
-        "lineNumber": 23,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-constants",
-        "id": "def-common.DEFAULT_CONTROL_WIDTH",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_CONTROL_WIDTH",
-        "description": [],
-        "signature": [
-          "\"medium\""
-        ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
-        "lineNumber": 22,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-constants",
-        "id": "def-common.DEFAULT_IGNORE_VALIDATIONS",
-        "type": "boolean",
-        "tags": [],
-        "label": "DEFAULT_IGNORE_VALIDATIONS",
-        "description": [],
-        "signature": [
-          "false"
-        ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
-        "lineNumber": 15,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-constants",
-        "id": "def-common.DEFAULT_SEARCH_TECHNIQUE",
-        "type": "string",
-        "tags": [],
-        "label": "DEFAULT_SEARCH_TECHNIQUE",
-        "description": [],
-        "signature": [
-          "\"wildcard\""
-        ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/options_list_constants.ts",
-        "lineNumber": 15,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/controls-constants",
-        "id": "def-common.DEFAULT_USE_GLOBAL_FILTERS",
-        "type": "boolean",
-        "tags": [],
-        "label": "DEFAULT_USE_GLOBAL_FILTERS",
-        "description": [],
-        "signature": [
-          "true"
-        ],
-        "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
         "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
@@ -258,7 +173,24 @@
           "\"esql_control\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
-        "lineNumber": 14,
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-constants",
+        "id": "def-common.MAX_OPTIONS_LIST_REQUEST_SIZE",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_OPTIONS_LIST_REQUEST_SIZE",
+        "description": [],
+        "signature": [
+          "1000"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-constants/src/options_list_constants.ts",
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -275,7 +207,7 @@
           "\"options_list_control\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
-        "lineNumber": 13,
+        "lineNumber": 12,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -292,7 +224,7 @@
           "\"range_slider_control\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
-        "lineNumber": 12,
+        "lineNumber": 13,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -309,7 +241,7 @@
           "\"time_slider_control\""
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
-        "lineNumber": 11,
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -319,15 +251,153 @@
     "objects": [
       {
         "parentPluginId": "@kbn/controls-constants",
-        "id": "def-common.OPTIONS_LIST_DEFAULT_SORT",
+        "id": "def-common.DEFAULT_DATA_CONTROL_STATE",
         "type": "Object",
         "tags": [],
-        "label": "OPTIONS_LIST_DEFAULT_SORT",
+        "label": "DEFAULT_DATA_CONTROL_STATE",
+        "description": [],
+        "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/controls-constants",
+            "id": "def-common.DEFAULT_DATA_CONTROL_STATE.use_global_filters",
+            "type": "boolean",
+            "tags": [],
+            "label": "use_global_filters",
+            "description": [],
+            "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-constants",
+            "id": "def-common.DEFAULT_DATA_CONTROL_STATE.ignore_validations",
+            "type": "boolean",
+            "tags": [],
+            "label": "ignore_validations",
+            "description": [],
+            "path": "src/platform/packages/shared/controls/controls-constants/src/control_constants.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-constants",
+        "id": "def-common.DEFAULT_DSL_OPTIONS_LIST_STATE",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_DSL_OPTIONS_LIST_STATE",
         "description": [],
         "signature": [
-          "{ readonly by: \"_count\"; readonly direction: \"desc\"; }"
+          "{ readonly sort: { readonly by: \"_count\"; readonly direction: \"desc\"; }; readonly search_technique: \"wildcard\"; readonly single_select: false; readonly exclude: false; readonly exists_selected: false; readonly run_past_timeout: false; readonly selected_options: (string | number)[]; readonly use_global_filters: boolean; readonly ignore_validations: boolean; }"
         ],
         "path": "src/platform/packages/shared/controls/controls-constants/src/options_list_constants.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-constants",
+        "id": "def-common.DEFAULT_ESQL_OPTIONS_LIST_STATE",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_ESQL_OPTIONS_LIST_STATE",
+        "description": [],
+        "signature": [
+          "{ readonly single_select: true; readonly selected_options: string[]; }"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-constants/src/options_list_constants.ts",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-constants",
+        "id": "def-common.DEFAULT_PINNED_CONTROL_STATE",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_PINNED_CONTROL_STATE",
+        "description": [],
+        "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/controls-constants",
+            "id": "def-common.DEFAULT_PINNED_CONTROL_STATE.width",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "width",
+            "description": [],
+            "signature": [
+              "\"small\" | \"medium\" | \"large\""
+            ],
+            "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-constants",
+            "id": "def-common.DEFAULT_PINNED_CONTROL_STATE.grow",
+            "type": "boolean",
+            "tags": [],
+            "label": "grow",
+            "description": [],
+            "path": "src/platform/packages/shared/controls/controls-constants/src/controls_group_constants.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-constants",
+        "id": "def-common.DEFAULT_RANGE_SLIDER_STATE",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_RANGE_SLIDER_STATE",
+        "description": [],
+        "signature": [
+          "{ readonly step: 1; readonly use_global_filters: boolean; readonly ignore_validations: boolean; }"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-constants/src/range_slider_constants.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/controls-constants",
+        "id": "def-common.DEFAULT_TIME_SLIDER_STATE",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_TIME_SLIDER_STATE",
+        "description": [],
+        "signature": [
+          "{ readonly start_percentage_of_time_range: 0; readonly end_percentage_of_time_range: 1; readonly is_anchored: false; }"
+        ],
+        "path": "src/platform/packages/shared/controls/controls-constants/src/time_slider_constants.ts",
         "lineNumber": 10,
         "columnNumber": 14,
         "deprecated": false,

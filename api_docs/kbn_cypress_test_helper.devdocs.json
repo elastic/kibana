@@ -90,6 +90,7 @@
                 "lineNumber": 15,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "MetaType",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -193,6 +194,7 @@
                 "lineNumber": 25,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "AxiosError",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -272,6 +274,7 @@
             "lineNumber": 68,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -311,6 +314,7 @@
             "lineNumber": 112,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateRuntimeServicesOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -358,6 +362,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Client",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -466,9 +471,9 @@
         "signature": [
           "((kbnClient: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/kbn-client",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnKbnClientPluginApi",
             "section": "def-common.KbnClient",
             "text": "KbnClient"
           },
@@ -490,9 +495,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/kbn-client",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnKbnClientPluginApi",
                 "section": "def-common.KbnClient",
                 "text": "KbnClient"
               }
@@ -501,6 +506,7 @@
             "lineNumber": 18,
             "columnNumber": 57,
             "deprecated": false,
+            "docsReferencedTypeName": "KbnClient",
             "trackAdoption": false
           }
         ],
@@ -516,9 +522,9 @@
         "signature": [
           "(kbnClient: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/kbn-client",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnKbnClientPluginApi",
             "section": "def-common.KbnClient",
             "text": "KbnClient"
           },
@@ -541,9 +547,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/kbn-client",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnKbnClientPluginApi",
                 "section": "def-common.KbnClient",
                 "text": "KbnClient"
               }
@@ -552,6 +558,7 @@
             "lineNumber": 15,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "KbnClient",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -637,6 +644,7 @@
             "lineNumber": 30,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "Error",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -695,9 +703,9 @@
           "default",
           " | ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/kbn-client",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
+            "docId": "kibKbnKbnClientPluginApi",
             "section": "def-common.KbnClient",
             "text": "KbnClient"
           },
@@ -720,9 +728,9 @@
               "default",
               " | ",
               {
-                "pluginId": "@kbn/test",
+                "pluginId": "@kbn/kbn-client",
                 "scope": "common",
-                "docId": "kibKbnTestPluginApi",
+                "docId": "kibKbnKbnClientPluginApi",
                 "section": "def-common.KbnClient",
                 "text": "KbnClient"
               }
@@ -792,6 +800,7 @@
             "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SecurityTestUser",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -829,6 +838,7 @@
             "lineNumber": 21,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }

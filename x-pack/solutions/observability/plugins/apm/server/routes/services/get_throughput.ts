@@ -12,6 +12,7 @@ import type { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { nullifyLeadingTrailingEmptyRedMetricPoints } from '../../../common/utils/red_metric_value_for_histogram_bucket';
 import type { Maybe } from '../../../typings/common';
 
 interface Options {
@@ -20,7 +21,7 @@ interface Options {
   filters?: BoolQuery;
   serviceName: string;
   apmEventClient: APMEventClient;
-  transactionType: string;
+  transactionType?: string;
   transactionName?: string;
   start: number;
   end: number;
@@ -63,7 +64,7 @@ export async function getThroughput({
       bool: {
         filter: [
           { term: { [SERVICE_NAME]: serviceName } },
-          { term: { [TRANSACTION_TYPE]: transactionType } },
+          ...termQuery(TRANSACTION_TYPE, transactionType),
           ...rangeQuery(startWithOffset, endWithOffset),
           ...environmentQuery(environment),
           ...kqlQuery(kuery),
@@ -92,12 +93,11 @@ export async function getThroughput({
 
   const response = await apmEventClient.search('get_throughput_for_service', params);
 
-  return (
-    response.aggregations?.timeseries.buckets.map((bucket) => {
-      return {
-        x: bucket.key,
-        y: bucket.throughput.value,
-      };
-    }) ?? []
+  return nullifyLeadingTrailingEmptyRedMetricPoints(
+    response.aggregations?.timeseries.buckets.map((bucket) => ({
+      x: bucket.key,
+      docCount: bucket.doc_count,
+      y: bucket.throughput.value,
+    })) ?? []
   );
 }

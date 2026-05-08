@@ -250,6 +250,7 @@
                 "lineNumber": 131,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "ArgumentParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -303,6 +304,7 @@
                 "lineNumber": 142,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "ArgumentParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -356,6 +358,7 @@
                 "lineNumber": 148,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "ArgumentParams",
                 "trackAdoption": false,
                 "isRequired": false
               }

@@ -162,7 +162,7 @@ export const GettingStartedOnPrem = () => {
             <EuiFlexItem>
               <EuiButton
                 fill
-                iconType="plusInCircleFilled"
+                iconType="plusCircle"
                 data-test-subj="gettingStartedAddLocationButton"
                 onClick={() => setIsFlyoutOpen(true)}
               >

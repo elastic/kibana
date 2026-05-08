@@ -20,6 +20,16 @@ export const CLOSED_CASES = ({
     defaultMessage: 'Closed {totalCases, plural, =1 {"{caseTitle}"} other {{totalCases} cases}}',
   });
 
+export const CLOSED_CASES_SUMMARY = (closedAlertsCount: number, totalAlertsCount: number) =>
+  i18n.translate('xpack.cases.actions.closedCasesSummary', {
+    values: { closedAlertsCount, totalAlertsCount },
+    defaultMessage: 'Closed {closedAlertsCount}/{totalAlertsCount} attached alerts.',
+  });
+
+export const SEE_ALERTS = i18n.translate('xpack.cases.actions.seeAlerts', {
+  defaultMessage: 'See alerts',
+});
+
 export const REOPENED_CASES = ({
   totalCases,
   caseTitle,

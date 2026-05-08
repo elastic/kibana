@@ -20,45 +20,63 @@ import {
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
   GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_TOOLTIP_ID,
 } from '../../test_ids';
-import { RELATED_ENTITY } from '../../../common/constants';
 
 /**
- * Helper function to extract ecsParentField from the entity object in the first document.
- * This determines which ECS namespace field (user/host/service/entity) to use for filtering.
+ * Extracts the entity type from a node ID (EUID).
+ * EUID format: "user:...", "host:...", "service:...", or no prefix for generic entities.
  */
-export const getSourceNamespaceFromNode = (node: NodeViewModel): string | undefined => {
+export const getEntityTypeFromNodeId = (nodeId: string): string => {
+  const colonIndex = nodeId.indexOf(':');
+  return colonIndex === -1 ? 'entity' : nodeId.substring(0, colonIndex);
+};
+
+/**
+ * Transforms a field name to the correct namespace for the given role.
+ * - 'actor' role: strips `.target.` if present (e.g., `user.target.id` → `user.id`)
+ * - 'target' role: adds `.target.` if not present (e.g., `user.id` → `user.target.id`)
+ */
+export const fieldForRole = (field: string, role: 'actor' | 'target'): string => {
+  // Normalize to actor namespace first
+  const actorField = field.replace('.target.', '.');
+  if (role === 'actor') return actorField;
+  // Transform to target namespace
+  const dotIndex = actorField.indexOf('.');
+  if (dotIndex === -1) return actorField;
+  return `${actorField.substring(0, dotIndex)}.target.${actorField.substring(dotIndex + 1)}`;
+};
+
+/**
+ * Extracts sourceFields from the first document's entity.
+ * After deduplication in parse_records, each entity ID has one document with merged
+ * sourceFields — multi-value fields are arrays (e.g., user.id: ["id1", "id2"]).
+ */
+export const getSourceFieldsFromNode = (
+  node: NodeViewModel
+): Record<string, string | string[]> | undefined => {
   if ('documentsData' in node) {
     const documentsData = node.documentsData;
     if (Array.isArray(documentsData) && documentsData.length > 0) {
-      return (documentsData[0] as { entity?: { ecsParentField?: string } }).entity?.ecsParentField;
+      return (
+        documentsData[0] as {
+          entity?: { sourceFields?: Record<string, string | string[]> };
+        }
+      ).entity?.sourceFields;
     }
   }
   return undefined;
 };
 
 /**
- * Helper function to derive the actor field name based on the source namespace.
- * Maps namespace to the appropriate ECS actor field (e.g., 'user' -> 'user.entity.id').
- * Falls back to default entity.id if no namespace is provided.
+ * Pre-bound callbacks for entity filter actions in the expand popover.
+ * The caller (use_entity_node_expand_popover) binds these with node-specific data
+ * so getEntityExpandItems doesn't need to know about sourceFields or entity types.
  */
-export const getActorFieldFromNamespace = (sourceNamespace: string | undefined): string => {
-  if (!sourceNamespace) {
-    return 'entity.id';
-  }
-  return sourceNamespace === 'entity' ? 'entity.id' : `${sourceNamespace}.entity.id`;
-};
-
-/**
- * Helper function to derive the target field name based on the source namespace.
- * Maps namespace to the appropriate ECS target field (e.g., 'user' -> 'user.target.entity.id').
- * Falls back to default entity.target.id if no namespace is provided.
- */
-export const getTargetFieldFromNamespace = (sourceNamespace: string | undefined): string => {
-  if (!sourceNamespace) {
-    return 'entity.target.id';
-  }
-  return sourceNamespace === 'entity' ? 'entity.target.id' : `${sourceNamespace}.target.entity.id`;
-};
+export interface EntityFilterActions {
+  toggleEntityFilter: (role: 'actor' | 'target', action: 'show' | 'hide') => void;
+  isEntityFilterActive: (role: 'actor' | 'target') => boolean;
+  toggleRelatedEvents: (action: 'show' | 'hide') => void;
+  isRelatedEventsActive: () => boolean;
+}
 
 /**
  * Opt-in configuration for which items to render in the entity expand popover.
@@ -83,33 +101,20 @@ export interface EntityExpandShouldRender {
 export interface GetEntityExpandItemsOptions {
   /** The node ID */
   nodeId: string;
-  /**
-   * The source namespace from node data (e.g., 'user', 'host', 'service', 'entity').
-   * Used to derive the correct ECS field names for actor and target filters.
-   * Can be obtained using getSourceNamespaceFromNode(nodeData).
-   */
-  sourceNamespace?: string;
+  /** Pre-bound callbacks for entity filter actions */
+  entityFilterActions?: EntityFilterActions;
   /** Callback to show entity details. Called when "Show entity details" is clicked. */
   onShowEntityDetails?: () => void;
   /** Callback to close the popover */
   onClose?: () => void;
-  /**
-   * Callback to check if a filter is currently active.
-   * Returns true if the filter for the given field and value is active.
-   * If undefined, filter items will not show active state.
-   */
-  isFilterActive?: (field: string, value: string) => boolean;
-  /**
-   * Callback to toggle a filter on/off.
-   * If undefined, filter items will not toggle when clicked.
-   */
-  toggleFilter?: (field: string, value: string, action: 'show' | 'hide') => void;
   /** Opt-in configuration for which items to render. All default to false. */
   shouldRender: EntityExpandShouldRender;
   /** Whether entity details should be disabled (shown but not clickable). Defaults to false. */
   showEntityDetailsDisabled?: boolean;
   /** Whether entity relationships is currently expanded (controls show/hide label) */
   isEntityRelationshipsExpanded?: boolean;
+  /** Whether the entity is part of the initial set of entities (e.g., from the original graph request) */
+  isInitialEntity?: boolean;
   /** Callback to toggle entity relationships on/off */
   toggleEntityRelationships?: (action: 'show' | 'hide') => void;
   /** Whether entity relationships should be disabled. Defaults to false. */
@@ -131,22 +136,16 @@ export const getEntityExpandItems = (
   options: GetEntityExpandItemsOptions
 ): Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> => {
   const {
-    nodeId,
-    sourceNamespace,
     onShowEntityDetails,
     onClose,
-    isFilterActive,
-    toggleFilter,
+    entityFilterActions,
     shouldRender,
     showEntityDetailsDisabled = false,
     isEntityRelationshipsExpanded = false,
+    isInitialEntity = false,
     toggleEntityRelationships,
     showEntityRelationshipsDisabled = false,
   } = options;
-
-  // Derive ECS field names from source namespace
-  const actorField = getActorFieldFromNamespace(sourceNamespace);
-  const targetField = getTargetFieldFromNamespace(sourceNamespace);
 
   const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> = [];
 
@@ -172,10 +171,15 @@ export const getEntityExpandItems = (
       },
       showToolTip: showEntityRelationshipsDisabled,
       toolTipText: showEntityRelationshipsDisabled
-        ? i18n.translate(
-            'securitySolutionPackages.csp.graph.graphNodeExpandPopover.entityRelationshipsNotAvailable',
-            { defaultMessage: 'Entity relationships not available' }
-          )
+        ? isInitialEntity
+          ? i18n.translate(
+              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.initialEntityRelationshipsNotAvailable',
+              { defaultMessage: 'Cannot hide entity relationships of investigation entity' }
+            )
+          : i18n.translate(
+              'securitySolutionPackages.csp.graph.graphNodeExpandPopover.entityRelationshipsNotAvailable',
+              { defaultMessage: 'Entity relationships not available' }
+            )
         : undefined,
       toolTipProps: showEntityRelationshipsDisabled
         ? {
@@ -188,7 +192,7 @@ export const getEntityExpandItems = (
 
   // Filter action items
   if (shouldRender.showActionsByEntity) {
-    const actionsByEntityActive = isFilterActive?.(actorField, nodeId) ?? false;
+    const actionsByEntityActive = entityFilterActions?.isEntityFilterActive('actor') ?? false;
     items.push({
       type: 'item',
       iconType: 'sortRight',
@@ -203,14 +207,14 @@ export const getEntityExpandItems = (
             { defaultMessage: "Show this entity's actions" }
           ),
       onClick: () => {
-        toggleFilter?.(actorField, nodeId, actionsByEntityActive ? 'hide' : 'show');
+        entityFilterActions?.toggleEntityFilter('actor', actionsByEntityActive ? 'hide' : 'show');
         onClose?.();
       },
     });
   }
 
   if (shouldRender.showActionsOnEntity) {
-    const actionsOnEntityActive = isFilterActive?.(targetField, nodeId) ?? false;
+    const actionsOnEntityActive = entityFilterActions?.isEntityFilterActive('target') ?? false;
     items.push({
       type: 'item',
       iconType: 'sortLeft',
@@ -225,14 +229,14 @@ export const getEntityExpandItems = (
             { defaultMessage: 'Show actions done to this entity' }
           ),
       onClick: () => {
-        toggleFilter?.(targetField, nodeId, actionsOnEntityActive ? 'hide' : 'show');
+        entityFilterActions?.toggleEntityFilter('target', actionsOnEntityActive ? 'hide' : 'show');
         onClose?.();
       },
     });
   }
 
   if (shouldRender.showRelatedEvents) {
-    const relatedEventsActive = isFilterActive?.(RELATED_ENTITY, nodeId) ?? false;
+    const relatedEventsActive = entityFilterActions?.isRelatedEventsActive() ?? false;
     items.push({
       type: 'item',
       iconType: 'analyzeEvent',
@@ -247,7 +251,7 @@ export const getEntityExpandItems = (
             { defaultMessage: 'Show related events' }
           ),
       onClick: () => {
-        toggleFilter?.(RELATED_ENTITY, nodeId, relatedEventsActive ? 'hide' : 'show');
+        entityFilterActions?.toggleRelatedEvents(relatedEventsActive ? 'hide' : 'show');
         onClose?.();
       },
     });
@@ -267,7 +271,7 @@ export const getEntityExpandItems = (
 
     items.push({
       type: 'item',
-      iconType: 'expand',
+      iconType: 'maximize',
       testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID,
       label: i18n.translate(
         'securitySolutionPackages.csp.graph.graphNodeExpandPopover.showEntityDetails',

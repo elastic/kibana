@@ -61,6 +61,7 @@ const getConnectorWithoutSecrets = (
   ...connector,
   isMissingSecrets: connector.isMissingSecrets ?? false,
   secrets: {},
+  authMode: connector.authMode ?? 'shared',
 });
 
 const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
@@ -136,6 +137,14 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   const actionTypeModel: ActionTypeModel | null = actionTypeRegistry.get(connector.actionTypeId);
   const showButtons = canSave && actionTypeModel && !connector.isPreconfigured;
   const disabled = !isFormModified || hasErrors || isSaving;
+
+  const connectorWithoutSecrets = useMemo(
+    () =>
+      getConnectorWithoutSecrets(
+        connector as UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
+      ),
+    [connector]
+  );
 
   const onExecutionAction = useCallback(async () => {
     try {
@@ -272,7 +281,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
               )}
               <ConnectorForm
                 actionTypeModel={actionTypeModel}
-                connector={getConnectorWithoutSecrets(connector)}
+                connector={connectorWithoutSecrets}
                 isEdit={isEdit}
                 onChange={setFormState}
                 onFormModifiedChange={onFormModifiedChange}
@@ -294,6 +303,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     );
   }, [
     connector,
+    connectorWithoutSecrets,
     docLinks.links.alerting.preconfiguredConnectors,
     actionTypeModel,
     isEdit,

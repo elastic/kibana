@@ -10,8 +10,14 @@ import { merge } from 'lodash';
 import { BaseDataGenerator } from './base_data_generator';
 import type { EndpointScript } from '../types';
 import { SUPPORTED_HOST_OS_TYPE } from '../constants';
-import type { SCRIPT_TAGS } from '../service/script_library/constants';
-import { SORTED_SCRIPT_TAGS_KEYS } from '../service/script_library/constants';
+import type {
+  SCRIPT_TAGS,
+  ScriptLibraryAllowedFileType,
+} from '../service/script_library/constants';
+import {
+  SCRIPT_LIBRARY_ALLOWED_FILE_TYPES,
+  SORTED_SCRIPT_TAGS_KEYS,
+} from '../service/script_library/constants';
 
 export class EndpointScriptsGenerator extends BaseDataGenerator {
   generate(overrides: DeepPartial<EndpointScript> = {}): EndpointScript {
@@ -105,8 +111,8 @@ export class EndpointScriptsGenerator extends BaseDataGenerator {
     return selectedPlatforms;
   }
 
-  protected randomFileType(): 'script' | 'archive' {
-    return this.randomChoice(['script', 'archive']);
+  protected randomFileType(): ScriptLibraryAllowedFileType {
+    return this.randomChoice(SCRIPT_LIBRARY_ALLOWED_FILE_TYPES);
   }
 
   protected randomSHA256(): string {

@@ -30,6 +30,9 @@ import type {
   EXPRESSION_HEATMAP_GRID_NAME,
   HEATMAP_FUNCTION_RENDERER_NAME,
 } from '../constants';
+import type { HeatmapScaleTypes } from '../constants';
+
+export type HeatmapScaleType = (typeof HeatmapScaleTypes)[keyof typeof HeatmapScaleTypes];
 
 export interface HeatmapLegendConfig {
   /**
@@ -80,6 +83,7 @@ export interface HeatmapGridConfig {
   isXAxisTitleVisible: boolean;
   xTitle?: string;
   xSortPredicate?: HeatmapSortPredicate;
+  xScaleType?: HeatmapScaleType;
 }
 
 export type HeatmapGridConfigResult = HeatmapGridConfig & {

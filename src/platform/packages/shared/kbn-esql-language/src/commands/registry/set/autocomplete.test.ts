@@ -116,11 +116,15 @@ describe('SET Autocomplete', () => {
 
     describe('Unmapped fields setting', () => {
       it('suggests unmapped fields values after assignment operator', async () => {
-        await setExpectSuggestions('SET unmapped_fields = ', ['"FAIL";', '"NULLIFY";']);
+        await setExpectSuggestions('SET unmapped_fields = ', [
+          '"DEFAULT";',
+          '"LOAD";',
+          '"NULLIFY";',
+        ]);
       });
 
       it('suggests unmapped fields values for partial input', async () => {
-        await setExpectSuggestions('SET unmapped_fields = "N', ['FAIL', 'NULLIFY']);
+        await setExpectSuggestions('SET unmapped_fields = "N', ['DEFAULT', 'LOAD', 'NULLIFY']);
       });
     });
 
@@ -139,13 +143,11 @@ describe('SET Autocomplete', () => {
       });
 
       it('suggests map parameter name after completing a parameter entry', async () => {
-        await setExpectSuggestions('SET approximation = { "num_rows": 100, ', [
-          '"confidence_level": ',
-        ]);
+        await setExpectSuggestions('SET approximation = { "rows": 100, ', ['"confidence_level": ']);
       });
 
-      it('suggests map parameter values after parameter name and colon: num_rows', async () => {
-        await setExpectSuggestions('SET approximation = { "num_rows": ', [
+      it('suggests map parameter values after parameter name and colon: rows', async () => {
+        await setExpectSuggestions('SET approximation = { "rows": ', [
           '100000',
           '1000000',
           '500000',

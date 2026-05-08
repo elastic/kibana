@@ -8,27 +8,32 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { registerWorkflowYamlAttachment } from './attachments/workflow_yaml_attachment';
+import { registerWorkflowYamlDiffAttachment } from './attachments/workflow_yaml_diff_attachment';
 import { workflowAuthoringSkill } from './skills/workflow_authoring_skill';
 import { registerGetConnectorsTool } from './tools/get_connectors_tool';
 import { registerGetExamplesTool } from './tools/get_examples_tool';
 import { registerGetStepDefinitionsTool } from './tools/get_step_definitions_tool';
 import { registerGetTriggerDefinitionsTool } from './tools/get_trigger_definitions_tool';
-import { registerGetWorkflowTool } from './tools/get_workflow_tool';
-import { registerListWorkflowsTool } from './tools/list_workflows_tool';
 import { registerValidateWorkflowTool } from './tools/validate_workflow_tool';
-import type { AgentBuilderPluginSetupContract } from '../types';
-import type { WorkflowsManagementApi } from '../workflows_management/workflows_management_api';
+import { registerWorkflowEditTools } from './tools/workflow_edit_tools';
+import { registerWorkflowExecuteStepTool } from './tools/workflow_execute_step_tool';
+import type { WorkflowsManagementApi } from '../api/workflows_management_api';
+import type { WorkflowsAiTelemetryClient } from '../telemetry/workflows_ai_telemetry_client';
+import type { AgentBuilderPluginSetup } from '../types';
 
 interface RegisterWorkflowAgentBuilderIntegrationParams {
-  agentBuilder: AgentBuilderPluginSetupContract;
+  agentBuilder: AgentBuilderPluginSetup;
   logger: Logger;
   api: WorkflowsManagementApi;
+  aiTelemetryClient: WorkflowsAiTelemetryClient;
 }
 
 export function registerWorkflowAgentBuilderIntegration({
   agentBuilder,
   logger,
   api,
+  aiTelemetryClient,
 }: RegisterWorkflowAgentBuilderIntegrationParams): void {
   logger.debug('Registering workflow Agent Builder integration components');
 
@@ -36,9 +41,13 @@ export function registerWorkflowAgentBuilderIntegration({
   registerGetStepDefinitionsTool(agentBuilder, api);
   registerGetTriggerDefinitionsTool(agentBuilder);
   registerGetConnectorsTool(agentBuilder, api);
-  registerListWorkflowsTool(agentBuilder, api);
-  registerGetWorkflowTool(agentBuilder, api);
   registerGetExamplesTool(agentBuilder);
+
+  registerWorkflowExecuteStepTool(agentBuilder, api);
+  registerWorkflowEditTools(agentBuilder, api, aiTelemetryClient);
+
+  registerWorkflowYamlAttachment(agentBuilder, api);
+  registerWorkflowYamlDiffAttachment(agentBuilder);
 
   agentBuilder.skills.register(workflowAuthoringSkill);
 

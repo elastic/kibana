@@ -7,7 +7,8 @@
 
 import React from 'react';
 
-import type { FindActionResult } from '@kbn/actions-plugin/server';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { InsightBaseProps } from './insight_base';
 import { InsightBase as Component } from './insight_base';
@@ -36,15 +37,32 @@ const defaultProps: InsightBaseProps = {
     <ActionsMenu
       connectors={{
         connectors: [
-          { id: 'gpt-4', name: 'GPT-4' },
-          { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo' },
-        ] as FindActionResult[],
+          {
+            connectorId: 'gpt-4',
+            name: 'GPT-4',
+            type: InferenceConnectorType.OpenAI,
+            config: {},
+            capabilities: {},
+            isInferenceEndpoint: false,
+            isPreconfigured: false,
+          },
+          {
+            connectorId: 'gpt-3.5-turbo',
+            name: 'GPT-3.5 Turbo',
+            type: InferenceConnectorType.OpenAI,
+            config: {},
+            capabilities: {},
+            isInferenceEndpoint: false,
+            isPreconfigured: false,
+          },
+        ] as InferenceConnector[],
         selectedConnector: 'gpt-4',
         loading: false,
         selectConnector: () => {},
         reloadConnectors: () => {},
         getConnector: () => undefined,
         isConnectorSelectionRestricted: false,
+        defaultConnector: undefined,
       }}
       onEditPrompt={() => {}}
     />

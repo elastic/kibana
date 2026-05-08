@@ -13,19 +13,17 @@ import pMap from 'p-map';
 import { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import cypress from 'cypress';
-import grep from '@cypress/grep/src/plugin';
+import { plugin as grep } from '@cypress/grep/plugin';
 import crypto from 'crypto';
 import fs from 'fs';
 import { exec } from 'child_process';
 import { createFailError } from '@kbn/dev-cli-errors';
-import axios, { AxiosError } from 'axios';
 import path from 'path';
 import os from 'os';
 import pRetry from 'p-retry';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
-import { catchAxiosErrorFormatAndThrow } from '../../common/endpoint/format_axios_error';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { renderSummaryTable } from './print_run';
 import {
@@ -58,9 +56,10 @@ let log: ToolingLog = new ToolingLog({
 });
 
 const API_HEADERS = Object.freeze({
+  'Content-Type': 'application/json',
   'kbn-xsrf': 'cypress-creds',
   'x-elastic-internal-origin': 'security-solution',
-  [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
+  [ELASTIC_HTTP_VERSION_HEADER]: INITIAL_REST_VERSION,
 });
 const PROVIDERS = Object.freeze({
   providerType: 'basic',
@@ -83,15 +82,17 @@ export function proxyHealthcheck(proxyUrl: string): Promise<boolean> {
   const fetchHealthcheck = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if Elasticsearch is green.`);
 
-    const response = await axios.get(`${proxyUrl}/healthcheck`);
+    const response = await fetch(`${proxyUrl}/healthcheck`);
+    if (!response.ok) {
+      throw new Error(`${response.status}:${await response.text()}`);
+    }
+
     log.info(`The proxy service is available.`);
     return response.status === 200;
   };
   const retryOptions = {
-    onFailedAttempt: (error: Error | AxiosError) => {
-      if (error instanceof AxiosError) {
-        log.info(`The proxy service is not available. A retry will be triggered soon...`);
-      }
+    onFailedAttempt: () => {
+      log.info(`The proxy service is not available. A retry will be triggered soon...`);
     },
     retries: 4,
     factor: 2,
@@ -110,19 +111,22 @@ export function waitForEsStatusGreen(
   const fetchHealthStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if Elasticsearch is green.`);
 
-    const response = await axios
-      .get(`${esUrl}/_cluster/health?wait_for_status=green&timeout=50s`, {
-        headers: {
-          Authorization: `Basic ${auth}`,
-        },
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
+    const response = await fetch(`${esUrl}/_cluster/health?wait_for_status=green&timeout=50s`, {
+      headers: {
+        Authorization: `Basic ${auth}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`${response.status}:${await response.text()}`);
+    }
 
-    log.info(`${projectId}: Elasticsearch is ready with status ${response.data.status}.`);
+    const data = (await response.json()) as { status: string };
+
+    log.info(`${projectId}: Elasticsearch is ready with status ${data.status}.`);
   };
   const retryOptions = {
-    onFailedAttempt: (error: Error | AxiosError) => {
-      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+    onFailedAttempt: (error: Error) => {
+      if ((error as { cause?: { code?: string } }).cause?.code === 'ENOTFOUND') {
         log.info(
           `${projectId}: The Elasticsearch URL is not yet reachable. A retry will be triggered soon...`
         );
@@ -144,22 +148,25 @@ export function waitForKibanaAvailable(
 ): Promise<void> {
   const fetchKibanaStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if kibana is available.`);
-    const response = await axios
-      .get(`${kbUrl}/api/status`, {
-        headers: {
-          Authorization: `Basic ${auth}`,
-        },
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-    if (response.data.status.overall.level !== 'available') {
+    const response = await fetch(`${kbUrl}/api/status`, {
+      headers: {
+        Authorization: `Basic ${auth}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`${response.status}:${await response.text()}`);
+    }
+
+    const data = (await response.json()) as { status: { overall: { level: string } } };
+    if (data.status.overall.level !== 'available') {
       throw new Error(`${projectId}: Kibana is not available. A retry will be triggered soon...`);
     } else {
-      log.info(`${projectId}: Kibana status overall is ${response.data.status.overall.level}.`);
+      log.info(`${projectId}: Kibana status overall is ${data.status.overall.level}.`);
     }
   };
   const retryOptions = {
-    onFailedAttempt: (error: Error | AxiosError) => {
-      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+    onFailedAttempt: (error: Error) => {
+      if ((error as { cause?: { code?: string } }).cause?.code === 'ENOTFOUND') {
         log.info(
           `${projectId}: The Kibana URL is not yet reachable. A retry will be triggered soon...`
         );
@@ -179,17 +186,18 @@ export function waitForEsAccess(esUrl: string, auth: string, projectId: string):
   const fetchEsAccessAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if can be accessed.`);
 
-    await axios
-      .get(`${esUrl}`, {
-        headers: {
-          Authorization: `Basic ${auth}`,
-        },
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
+    const response = await fetch(`${esUrl}`, {
+      headers: {
+        Authorization: `Basic ${auth}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`${response.status}:${await response.text()}`);
+    }
   };
   const retryOptions = {
-    onFailedAttempt: (error: Error | AxiosError) => {
-      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+    onFailedAttempt: (error: Error) => {
+      if ((error as { cause?: { code?: string } }).cause?.code === 'ENOTFOUND') {
         log.info(
           `${projectId}: The elasticsearch url is not yet reachable. A retry will be triggered soon...`
         );
@@ -213,15 +221,18 @@ function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<vo
 
   const fetchLoginStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if login can be performed.`);
-    axios
-      .post(`${kbUrl}/internal/security/login`, body, {
-        headers: API_HEADERS,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
+    const response = await fetch(`${kbUrl}/internal/security/login`, {
+      method: 'POST',
+      headers: API_HEADERS,
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      throw new Error(`${response.status}:${await response.text()}`);
+    }
   };
   const retryOptions = {
-    onFailedAttempt: (error: Error | AxiosError) => {
-      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+    onFailedAttempt: (error: Error) => {
+      if ((error as { cause?: { code?: string } }).cause?.code === 'ENOTFOUND') {
         log.info('Project is not reachable. A retry will be triggered soon...');
       } else {
         log.error(`${error.message}`);
@@ -362,7 +373,8 @@ ${JSON.stringify(argv, null, 2)}
 
       const isOpen = argv._.includes('open');
       const cypressConfigFilePath = require.resolve(`../../../../${argv.configFile}`) as string;
-      const cypressConfigFile = await import(cypressConfigFilePath);
+      const cypressConfigModule = await import(cypressConfigFilePath);
+      const cypressConfigFile = cypressConfigModule.default ?? cypressConfigModule;
 
       // if KIBANA_MKI_QUALITY_GATE exists and has a value, we are running the tests against the Kibana QA quality gate.
       if (process.env.KIBANA_MKI_QUALITY_GATE) {

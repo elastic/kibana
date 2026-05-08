@@ -8,15 +8,17 @@
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import type { EuiPageHeaderProps } from '@elastic/eui';
-import { EuiButton, EuiPageHeader, EuiPageSection, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { RouteComponentProps } from 'react-router-dom';
+import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 
 import { useIndexErrors } from '../../../../hooks/use_index_errors';
 import { resetIndexUrlParams } from './reset_index_url_params';
 import { renderBadges } from '../../../../lib/render_badges';
+import { useLoadIndexDocumentsSample } from '../../../../services/api';
 import type { Index } from '../../../../../../common';
 import type { IndexDetailsTab, IndexDetailsTabId } from '../../../../../../common/constants';
 import { INDEX_OPEN, IndexDetailsSection } from '../../../../../../common/constants';
@@ -24,22 +26,15 @@ import { getIndexDetailsLink } from '../../../../services/routing';
 import { useAppContext } from '../../../../app_context';
 import { DiscoverLink } from '../../../../lib/discover_link';
 import { ManageIndexButton } from './manage_index_button';
-import { DetailsPageOverview } from './details_page_overview';
 import { DetailsPageMappings } from './details_page_mappings';
 import { DetailsPageSettings } from './details_page_settings';
 import { DetailsPageStats } from './details_page_stats';
 import { DetailsPageTab } from './details_page_tab';
 import { IndexErrorCallout } from './index_error_callout';
+import { DetailsPageOverview } from './details_page_overview/details_page_overview';
 
 const defaultTabs: IndexDetailsTab[] = [
-  {
-    id: IndexDetailsSection.Overview,
-    name: i18n.translate('xpack.idxMgmt.indexDetails.overviewTitle', {
-      defaultMessage: 'Overview',
-    }),
-    renderTabContent: ({ index }) => <DetailsPageOverview indexDetails={index} />,
-    order: 10,
-  },
+  // Overview tab is injected in component to pass live docs sample data.
   {
     id: IndexDetailsSection.Mappings,
     name: i18n.translate('xpack.idxMgmt.indexDetails.mappingsTitle', {
@@ -91,14 +86,37 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     },
     config: { enableIndexStats },
     plugins: { console: consolePlugin, ml },
-    services: { extensionsService },
+    services: { extensionsService, notificationService },
   } = useAppContext();
   const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ? true : false;
 
   const indexErrors = useIndexErrors(index, ml, hasMLPermissions);
+  const {
+    data: documentsSampleData,
+    isLoading: isDocumentsSampleLoading,
+    error: documentsSampleError,
+    resendRequest: resendDocumentsSampleRequest,
+  } = useLoadIndexDocumentsSample(index.name);
 
   const tabs = useMemo(() => {
-    const sortedTabs = [...defaultTabs];
+    const sortedTabs: IndexDetailsTab[] = [
+      {
+        id: IndexDetailsSection.Overview,
+        name: i18n.translate('xpack.idxMgmt.indexDetails.overviewTitle', {
+          defaultMessage: 'Overview',
+        }),
+        renderTabContent: ({ index: selectedIndex }) => (
+          <DetailsPageOverview
+            indexDetails={selectedIndex}
+            sampleDocuments={documentsSampleData?.results ?? []}
+            isDocumentsLoading={isDocumentsSampleLoading}
+            documentsError={documentsSampleError}
+          />
+        ),
+        order: 10,
+      },
+      ...defaultTabs,
+    ];
     if (enableIndexStats) {
       sortedTabs.push(statsTab);
     }
@@ -112,7 +130,14 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
       return tabA.order - tabB.order;
     });
     return sortedTabs;
-  }, [enableIndexStats, extensionsService.indexDetailsTabs, index]);
+  }, [
+    documentsSampleData,
+    isDocumentsSampleLoading,
+    documentsSampleError,
+    enableIndexStats,
+    extensionsService.indexDetailsTabs,
+    index,
+  ]);
 
   const onSectionChange = useCallback(
     (newSection: IndexDetailsTabId) => {
@@ -120,6 +145,10 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     },
     [history, index.name, search]
   );
+
+  const onIndexRefresh = useCallback(() => {
+    return resendDocumentsSampleRequest();
+  }, [resendDocumentsSampleRequest]);
 
   const headerTabs = useMemo<EuiPageHeaderProps['tabs']>(() => {
     return tabs.map((tabConfig) => ({
@@ -140,37 +169,59 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
 
   return (
     <>
-      <EuiPageSection paddingSize="none">
-        <EuiButton
-          data-test-subj="indexDetailsBackToIndicesButton"
-          color="text"
-          iconType="chevronSingleLeft"
-          onClick={navigateToIndicesList}
-        >
-          <FormattedMessage
-            id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
-            defaultMessage="Back to indices"
-          />
-        </EuiButton>
-      </EuiPageSection>
-      <EuiSpacer size="l" />
       <EuiPageHeader
         data-test-subj="indexDetailsHeader"
         pageTitle={pageTitle}
+        breadcrumbs={[
+          {
+            ['data-test-subj']: 'indexDetailsBackToIndicesButton',
+            text: (
+              <>
+                <EuiIcon size="s" aria-hidden={true} type="chevronSingleLeft" />
+                <FormattedMessage
+                  id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
+                  defaultMessage="Back to indices"
+                />
+              </>
+            ),
+            color: 'primary',
+            'aria-current': false,
+            onClick: (e) => {
+              e.preventDefault();
+              navigateToIndicesList();
+            },
+          },
+        ]}
         bottomBorder
+        tabs={headerTabs}
         rightSideItems={[
-          <DiscoverLink indexName={index.name} asButton={true} />,
           <ManageIndexButton
             index={index}
             reloadIndexDetails={fetchIndexDetails}
             navigateToIndicesList={navigateToIndicesList}
+            onIndexRefresh={onIndexRefresh}
+            fill={true}
           />,
+          <DiscoverLink indexName={index.name} asButton={true} fill={false} />,
+          <EuiButtonEmpty
+            onClick={() =>
+              openWiredConnectionDetails({
+                props: { options: { defaultTabId: 'apiKeys' } },
+              }).catch((error) => {
+                notificationService.showDangerToast(
+                  error?.body?.message ?? error?.message ?? 'An unexpected error occurred'
+                );
+              })
+            }
+            iconType="plugs"
+            data-test-subj="openConnectionDetails"
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.indexDetails.connectionDetailsButtonLabel"
+              defaultMessage="Connection details"
+            />
+          </EuiButtonEmpty>,
         ]}
-        rightSideGroupProps={{
-          wrap: false,
-        }}
-        responsive="reverse"
-        tabs={headerTabs}
       >
         {indexErrors.length > 0 ? <IndexErrorCallout errors={indexErrors} /> : null}
       </EuiPageHeader>

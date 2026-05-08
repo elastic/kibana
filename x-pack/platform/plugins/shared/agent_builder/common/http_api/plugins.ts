@@ -18,3 +18,5 @@ export type InstallPluginResponse = PluginDefinition;
 export interface DeletePluginResponse {
   success: boolean;
 }
+
+export const PLUGIN_USED_BY_AGENTS_ERROR_CODE = 'PLUGIN_USED_BY_AGENTS';

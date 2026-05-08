@@ -17,7 +17,7 @@ import {
   dataViewMock,
   createDataViewWithBytesField,
   columnsMetaOverridingBytesType,
-  createFormatFieldValueSpy,
+  createFormatFieldValueReactSpy,
   expectFieldCallToMatch,
 } from '@kbn/discover-utils/src/__mocks__';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -56,7 +56,10 @@ const mockServices = {
     get: (key: string) => key === 'discover:maxDocFieldsDisplayed' && 200,
   },
   fieldFormats: {
-    getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
+    getDefaultInstance: jest.fn(() => ({
+      convert: (value: unknown) => (value ? value : '-'),
+      reactConvert: (value: unknown) => (value ? value : '-'),
+    })),
   },
 };
 
@@ -752,14 +755,9 @@ describe('Unified data table cell rendering', function () {
     expect(component).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": Array [
-              100,
-            ],
-          }
-        }
-      />
+      >
+        100
+      </span>
     `);
   });
 
@@ -852,14 +850,9 @@ describe('Unified data table cell rendering', function () {
     expect(component).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": Array [
-              ".gz",
-            ],
-          }
-        }
-      />
+      >
+        .gz
+      </span>
     `);
 
     const componentWithDetails = shallow(
@@ -882,15 +875,9 @@ describe('Unified data table cell rendering', function () {
       >
         <EuiFlexItem>
           <DataTablePopoverCellValue>
-            <span
-              dangerouslySetInnerHTML={
-                Object {
-                  "__html": Array [
-                    ".gz",
-                  ],
-                }
-              }
-            />
+            <span>
+              .gz
+            </span>
           </DataTablePopoverCellValue>
         </EuiFlexItem>
         <EuiFlexItem
@@ -955,12 +942,9 @@ describe('Unified data table cell rendering', function () {
     expect(componentWithDataViewField).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": "gif",
-          }
-        }
-      />
+      >
+        gif
+      </span>
     `);
     const componentWithCustomESQLField = shallow(
       <DataTableCellValue
@@ -976,12 +960,9 @@ describe('Unified data table cell rendering', function () {
     expect(componentWithCustomESQLField).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": 350,
-          }
-        }
-      />
+      >
+        350
+      </span>
     `);
 
     expect(dataViewMock.fields.create).toHaveBeenCalledTimes(1);
@@ -1009,12 +990,9 @@ describe('Unified data table cell rendering', function () {
     expect(componentWithCustomESQLFieldOverride).toMatchInlineSnapshot(`
       <span
         className="unifiedDataTable__cellValue"
-        dangerouslySetInnerHTML={
-          Object {
-            "__html": 100,
-          }
-        }
-      />
+      >
+        100
+      </span>
     `);
 
     expect(dataViewMock.fields.create).toHaveBeenCalledTimes(2);
@@ -1031,7 +1009,7 @@ describe('Unified data table cell rendering', function () {
 
   describe('columnsMeta handling for _source column', () => {
     it('should use data view field type when columnsMeta is undefined', () => {
-      const formatFieldValueSpy = createFormatFieldValueSpy();
+      const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
       const testDataView = createDataViewWithBytesField();
 
       const rows = [
@@ -1068,12 +1046,12 @@ describe('Unified data table cell rendering', function () {
         />
       );
 
-      expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'number');
-      formatFieldValueSpy.mockRestore();
+      expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'number');
+      formatFieldValueReactSpy.mockRestore();
     });
 
     it('should use columnsMeta type instead of data view field type when provided', () => {
-      const formatFieldValueSpy = createFormatFieldValueSpy();
+      const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
       const testDataView = createDataViewWithBytesField();
 
       const rows = [
@@ -1110,8 +1088,8 @@ describe('Unified data table cell rendering', function () {
         />
       );
 
-      expectFieldCallToMatch(formatFieldValueSpy, 'bytes', 'string', ['keyword']);
-      formatFieldValueSpy.mockRestore();
+      expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
+      formatFieldValueReactSpy.mockRestore();
     });
   });
 });

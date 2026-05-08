@@ -21,7 +21,10 @@ import {
   MOCK_IDP_UIAM_ORGANIZATION_ID,
 } from '@kbn/mock-idp-utils';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { defineDockerServersConfig, fleetPackageRegistryDockerImage } from '@kbn/test';
+import {
+  defineDockerServersConfig,
+  fleetPackageRegistryDockerImage,
+} from '@kbn/test-docker-servers';
 import type { ScoutServerConfig } from '../../../../../types';
 import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../../../constants';
 
@@ -35,9 +38,6 @@ const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/
  * if this is defined it takes precedence over the `packageRegistryOverride` variable
  */
 const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
-
-// if config is executed on CI or locally
-const isRunOnCI = process.env.CI;
 
 const servers = {
   elasticsearch: {
@@ -203,8 +203,6 @@ export const defaultConfig: ScoutServerConfig = {
         },
       ])}`,
       // Agent policies are now created via Fleet API using the helper function from @kbn-scout
-      // SAML configuration
-      ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=true']),
       // This ensures that we register the Security SAML API endpoints.
       // In the real world the SAML config is injected by control plane.
       `--plugin-path=${SAML_IDP_PLUGIN_PATH}`,

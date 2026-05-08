@@ -7,27 +7,59 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import type { Serializable, SerializableRecord } from '@kbn/utility-types';
 import type { FieldFormat } from './field_format';
 import type { FieldFormatsRegistry } from './field_formats_registry';
 
-/** @public **/
+/**
+ * Content type for string-based field format converters.
+ * @public
+ * @deprecated The 'html' content type is deprecated. Prefer using `FieldFormat.reactConvert()` directly
+ * for React-based rendering, which returns `ReactNode` and avoids `dangerouslySetInnerHTML`.
+ * The 'text' content type remains valid for plain text output.
+ */
 export type FieldFormatsContentType = 'html' | 'text';
 
 /**
- * Html converter options
+ * React converter options
  */
-export interface HtmlContextTypeOptions {
+export interface ReactContextTypeOptions {
   field?: { name: string };
   hit?: { highlight?: Record<string, string[]> };
   skipFormattingInStringifiedJSON?: boolean;
 }
 
 /**
+ * @deprecated Use {@link ReactContextTypeOptions} instead. This type alias exists only for
+ * backward compatibility with code using the deprecated `htmlConvert` method.
+ */
+export type HtmlContextTypeOptions = ReactContextTypeOptions;
+
+/**
  * To html converter function
  * @public
+ * @deprecated Use {@link ReactContextTypeConvert} instead. The HTML content type is being phased out
+ * in favor of React-based rendering via `FieldFormat.reactConvert()`.
  */
 export type HtmlContextTypeConvert = (value: any, options?: HtmlContextTypeOptions) => string;
+
+/**
+ * To React node converter function. Use this instead of HtmlContextTypeConvert for new formatters.
+ * @public
+ */
+export type ReactContextTypeConvert = (value: any, options?: ReactContextTypeOptions) => ReactNode;
+
+/**
+ * Single-value React node converter. Like {@link ReactContextTypeConvert} but explicitly
+ * excludes arrays — use this for `reactConvertSingle` overrides so that callers cannot
+ * accidentally pass an array where only scalar values are expected.
+ * @public
+ */
+export type ReactContextTypeSingleConvert = (
+  value: string | number | boolean | null | undefined | Record<string, unknown>,
+  options?: ReactContextTypeOptions
+) => ReactNode;
 
 /**
  * Plain text converter options

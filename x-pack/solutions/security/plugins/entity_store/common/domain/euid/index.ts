@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-export { getEuidFromObject } from './memory';
+export { getEuidFromObject, getEntityIdentifiersFromDocument } from './memory';
+export { getEuidFromTimelineNonEcsData, type NonEcsTimelineDataRow } from './non_ecs_timeline_data';
 export { getEuidPainlessEvaluation, getEuidPainlessRuntimeMapping } from './painless';
 export { getEuidDslFilterBasedOnDocument, getEuidDslDocumentsContainsIdFilter } from './dsl';
+export { getEuidKqlFilterBasedOnDocument } from './kql';
+
 export {
   getEuidEsqlDocumentsContainsIdFilter,
   getEuidEsqlEvaluation,
@@ -16,3 +19,4 @@ export {
 } from './esql';
 export { applyFieldEvaluations } from './field_evaluations';
 export { getEuidSourceFields, type IdentitySourceFields } from './identity_fields';
+export { hashEuid, HASH_ALG } from './hash_euid';

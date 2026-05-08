@@ -6,7 +6,8 @@
  */
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import { isEqual } from 'lodash';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { CPSPluginStart } from '@kbn/cps/public';
@@ -19,7 +20,7 @@ import { EditSpaceTabFooter } from './footer';
 import { useEditSpaceServices } from './provider';
 import type { Space } from '../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../common/constants';
-import { getSpaceInitials } from '../../space_avatar';
+import { getSpaceColor, getSpaceInitials } from '../../space_avatar';
 import { ConfirmDeleteModal } from '../components';
 import { ConfirmAlterActiveSpaceModal } from '../components/confirm_alter_active_space_modal';
 import { CustomizeAvatar } from '../components/customize_avatar';
@@ -67,6 +68,9 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
 
   const [solution, setSolution] = useState<typeof space.solution | undefined>(space.solution);
 
+  const initialFeatureVisibilityRef = useRef<string[]>(space.disabledFeatures ?? []);
+  const storedFeatureVisibilityRef = useRef<string[] | undefined>(undefined);
+
   useUnsavedChangesPrompt({
     hasUnsavedChanges: isDirty,
     http,
@@ -90,6 +94,33 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
     }),
   });
 
+  useEffect(() => {
+    let unmounted = false;
+    if (!space.solution || space.solution === SOLUTION_VIEW_CLASSIC) {
+      storedFeatureVisibilityRef.current = space.disabledFeatures ?? [];
+      return;
+    }
+    (async () => {
+      try {
+        const res = await spacesManager.getPersistedFeatureVisibility(space.id);
+        const disabledFeatures = res.featureVisibility.disabledFeatures ?? [];
+        if (!unmounted) {
+          storedFeatureVisibilityRef.current = disabledFeatures;
+        }
+      } catch (error) {
+        logger.debug(`Failed to load persisted feature visibility for space "${space.id}"`, error);
+      }
+    })();
+    return () => {
+      unmounted = true;
+    };
+  }, [spacesManager, logger, space.id, space.solution, space.disabledFeatures]);
+
+  const isFeatureVisibilityModified = useMemo(() => {
+    const initialFeatureVisibility = initialFeatureVisibilityRef.current;
+    return !isEqual(formValues.disabledFeatures ?? [], initialFeatureVisibility);
+  }, [formValues.disabledFeatures]);
+
   const onChangeSpaceSettings = useCallback(
     (newFormValues: CustomizeSpaceFormValues) => {
       setFormValues({ ...formValues, ...newFormValues });
@@ -110,9 +141,22 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   const onSolutionViewChange = useCallback(
     (updatedSpace: Partial<Space>) => {
       setSolution(updatedSpace.solution);
+
+      const storedFeatureVisibility = storedFeatureVisibilityRef.current;
+
+      // Restore feature visibility if user is switching back to classic solution view
+      if (
+        updatedSpace.solution === SOLUTION_VIEW_CLASSIC &&
+        storedFeatureVisibility &&
+        !isFeatureVisibilityModified
+      ) {
+        onChangeFeatures({ ...updatedSpace, disabledFeatures: storedFeatureVisibility });
+        return;
+      }
+
       onChangeFeatures(updatedSpace);
     },
-    [onChangeFeatures]
+    [onChangeFeatures, isFeatureVisibilityModified]
   );
 
   const onProjectRoutingChange = useCallback(
@@ -129,6 +173,7 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
   const onClickCancel = useCallback(() => {
     setShowAlteringActiveSpaceDialog(false);
     setShowUserImpactWarning(false);
+    setIsDirty(false);
     backToSpacesList();
   }, [backToSpacesList]);
 
@@ -163,6 +208,11 @@ export const EditSpaceSettingsTab: React.FC<Props> = ({ space, features, history
       } = formValues;
 
       const spaceClone = structuredClone(partialSpace as Partial<Space>);
+
+      // Auto-generate color if needed
+      if (!spaceClone.color && !spaceClone.imageUrl) {
+        spaceClone.color = getSpaceColor(spaceClone);
+      }
       const { id, name } = spaceClone;
 
       if (!id) {

@@ -37,7 +37,7 @@ export const AlertQueryBar = ({ query = '', onChange }: Props) => {
   return (
     <QueryStringInput
       indexPatterns={dataView ? [dataView] : []}
-      iconType="search"
+      iconType="magnify"
       isClearable={true}
       onChange={(queryN) => {
         setInputVal(queryN?.query as string);

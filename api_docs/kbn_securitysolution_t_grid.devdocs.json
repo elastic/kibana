@@ -52,6 +52,7 @@
             "lineNumber": 95,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "DropResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -92,6 +93,7 @@
             "lineNumber": 91,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "DropResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -132,6 +134,7 @@
             "lineNumber": 87,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "DropResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -363,6 +366,7 @@
             "lineNumber": 122,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "DropResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -538,6 +542,7 @@
             "lineNumber": 102,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "DropResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -578,6 +583,7 @@
             "lineNumber": 99,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "DropResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -922,6 +928,7 @@
             "lineNumber": 113,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "DropResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -962,6 +969,7 @@
             "lineNumber": 85,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "DropResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1002,6 +1010,7 @@
             "lineNumber": 66,
             "columnNumber": 62,
             "deprecated": false,
+            "docsReferencedTypeName": "DropResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1042,6 +1051,7 @@
             "lineNumber": 63,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "DropResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1119,6 +1129,7 @@
             "lineNumber": 119,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "DropResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1535,25 +1546,6 @@
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/constants/index.ts",
         "lineNumber": 19,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-t-grid",
-        "id": "def-common.IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME",
-        "description": [
-          "This class is added to the document body while timeline field dragging"
-        ],
-        "signature": [
-          "\"is-timeline-field-dragging\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-securitysolution-t-grid/src/utils/drag_and_drop/index.ts",
-        "lineNumber": 132,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

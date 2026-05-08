@@ -71,6 +71,7 @@
             "lineNumber": 54,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeRange",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -94,6 +95,7 @@
             "lineNumber": 54,
             "columnNumber": 55,
             "deprecated": false,
+            "docsReferencedTypeName": "DataPublicPluginStart",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -131,6 +133,7 @@
             "lineNumber": 10,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -180,34 +183,10 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          " | undefined; }) => { references: { name: string; id: string; type: string; }[]; visualizationType: string; state: { visualization: {}; datasourceStates: Record<string, unknown>; query: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.AggregateQuery",
-            "text": "AggregateQuery"
-          },
-          "; filters: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[]; }; title: string; version: 2; }"
+          " | undefined; }) => LensAttributesFromSuggestion"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
-        "lineNumber": 15,
+        "lineNumber": 32,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -220,7 +199,7 @@
             "label": "{\n  filters,\n  query,\n  suggestion,\n  dataView,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
-            "lineNumber": 20,
+            "lineNumber": 37,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -243,7 +222,7 @@
                   "[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
-                "lineNumber": 21,
+                "lineNumber": 38,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -273,7 +252,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
-                "lineNumber": 22,
+                "lineNumber": 39,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -290,7 +269,7 @@
                   "<unknown, unknown> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
-                "lineNumber": 23,
+                "lineNumber": 40,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -313,7 +292,7 @@
                   " | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-visualization-utils/src/get_lens_attributes.ts",
-                "lineNumber": 24,
+                "lineNumber": 41,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -358,6 +337,7 @@
             "lineNumber": 16,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "IUiSettingsClient",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -508,6 +488,7 @@
                     "lineNumber": 28,
                     "columnNumber": 16,
                     "deprecated": false,
+                    "docsReferencedTypeName": "T",
                     "trackAdoption": false,
                     "isRequired": true
                   }

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-export const AGENT_BUILDER_TOUR_STORAGE_KEY = 'agentBuilder.hasSeenTour';
-
 export const storageKeys = {
-  agentId: 'agentBuilder.agentId',
   lastUsedConnector: 'agentBuilder.lastUsedConnector',
   welcomeMessageDismissed: 'agentBuilder.welcomeMessageDismissed',
-  hasSeenAgentBuilderTour: AGENT_BUILDER_TOUR_STORAGE_KEY,
+  autoIncludeWarningDismissed: 'agentBuilder.autoIncludeWarningDismissed',
+
+  getAgentIdKey: (spaceId: string): string => `agentBuilder.agentId.${spaceId}`,
 
   getLastConversationKey: (sessionTag?: string, agentId?: string): string => {
     const tag = sessionTag || 'default';

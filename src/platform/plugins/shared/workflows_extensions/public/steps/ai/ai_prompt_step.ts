@@ -19,7 +19,7 @@ import { createPublicStepDefinition } from '../../step_registry/types';
 export const AiPromptStepDefinition = createPublicStepDefinition({
   ...AiPromptStepCommonDefinition,
   icon: React.lazy(() =>
-    import('@elastic/eui/es/components/icon/assets/sparkles').then(({ icon }) => ({
+    import('@elastic/eui/es/components/icon/assets/product_agent').then(({ icon }) => ({
       default: icon,
     }))
   ),

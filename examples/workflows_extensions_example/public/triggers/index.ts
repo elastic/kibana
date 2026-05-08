@@ -15,4 +15,7 @@ export const registerTriggerDefinitions = (
   workflowsExtensions.registerTriggerDefinition(() =>
     import('./custom_trigger').then((m) => m.customTriggerPublicDefinition)
   );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./loop_trigger').then((m) => m.loopTriggerPublicDefinition)
+  );
 };

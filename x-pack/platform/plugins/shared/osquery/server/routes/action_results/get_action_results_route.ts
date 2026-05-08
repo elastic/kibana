@@ -28,6 +28,7 @@ import type {
 } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { actionResultsResponseSchema } from './response_schemas';
 
 export const getActionResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -56,6 +57,11 @@ export const getActionResultsRoute = (
               typeof getActionResultsRequestParamsSchema,
               GetActionResultsRequestParamsSchema
             >(getActionResultsRequestParamsSchema),
+          },
+          response: {
+            200: {
+              body: () => actionResultsResponseSchema,
+            },
           },
         },
       },
@@ -136,7 +142,7 @@ export const getActionResultsRoute = (
           // Return only real responses - placeholders will be generated client-side
           const processedEdges = res.edges;
 
-          const totalPages = Math.ceil(totalAgentCount / pageSize);
+          const totalPages = pageSize > 0 ? Math.ceil(totalAgentCount / pageSize) : 0;
 
           return response.ok({
             body: {

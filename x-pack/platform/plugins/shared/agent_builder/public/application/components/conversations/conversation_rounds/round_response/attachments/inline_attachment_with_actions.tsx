@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type {
   UnknownAttachment,
   ScreenContextAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentPreviewState } from '@kbn/agent-builder-browser/attachments';
+import type { ActionButton, AttachmentPreviewState } from '@kbn/agent-builder-browser/attachments';
 import { EuiSplitPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
 import { usePersistedConversationId } from '../../../../../hooks/use_persisted_conversation_id';
@@ -76,8 +77,19 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
   const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, version);
+  const [dynamicButtonsState, setDynamicButtonsState] = useState<{
+    key: string;
+    buttons: ActionButton[];
+  }>({ key: attachmentPreviewKey, buttons: [] });
 
-  const inlineActionButtons = useMemo(
+  const registerActionButtons = useCallback(
+    (buttons: ActionButton[]) => {
+      setDynamicButtonsState({ key: attachmentPreviewKey, buttons });
+    },
+    [attachmentPreviewKey]
+  );
+
+  const staticActionButtons = useMemo(
     () =>
       uiDefinition?.getActionButtons?.({
         attachment,
@@ -91,7 +103,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
             nextPreviewState === 'previewing' ? attachmentPreviewKey : null
           );
         },
-      }),
+      }) ?? [],
     [
       uiDefinition,
       attachment,
@@ -102,6 +114,14 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
       attachmentPreviewKey,
       openSidebarConversation,
     ]
+  );
+
+  const inlineActionButtons = useMemo(
+    () => [
+      ...staticActionButtons,
+      ...(dynamicButtonsState.key === attachmentPreviewKey ? dynamicButtonsState.buttons : []),
+    ],
+    [staticActionButtons, attachmentPreviewKey, dynamicButtonsState]
   );
 
   const isPreviewingAttachment = previewedAttachmentKey === attachmentPreviewKey;
@@ -116,19 +136,31 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   const title = uiDefinition?.getLabel?.(attachment) ?? attachment.type.toUpperCase();
 
   return (
-    <EuiSplitPanel.Outer grow hasShadow={false} hasBorder={true}>
+    <EuiSplitPanel.Outer
+      grow
+      hasShadow={false}
+      hasBorder={true}
+      css={css`
+        overflow: visible; // allow vis actions to overflow
+      `}
+    >
       <AttachmentHeader
         title={title}
         actionButtons={inlineActionButtons}
         previewBadgeState={resolvedPreviewBadgeState}
       />
       <EuiSplitPanel.Inner grow={false} paddingSize="none">
-        {uiDefinition?.renderInlineContent?.({
-          attachment,
-          isSidebar,
-          screenContext,
-          openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
-        })}
+        {uiDefinition?.renderInlineContent?.(
+          {
+            attachment,
+            isSidebar,
+            screenContext,
+            openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+          },
+          {
+            registerActionButtons,
+          }
+        )}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
   );

@@ -78,7 +78,7 @@ export const HeaderButtons: React.FC<HeaderButtonsProps> = React.memo(
       return (
         <SecuritySolutionLinkButton
           data-test-subj="addAnotherMigrationButton"
-          iconType="plusInCircle"
+          iconType="plusCircle"
           deepLinkId={SecurityPageName.landing}
           path={`${OnboardingTopicId.siemMigrations}#${onboardingCardId}`}
         >

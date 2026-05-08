@@ -10,11 +10,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import type { EuiTableSortingType, EuiSelectableOption } from '@elastic/eui';
-import {
-  getRulesAppDetailsRoute,
-  rulesAppRoute,
-  triggersActionsRoute,
-} from '@kbn/rule-data-utils/src/routes/stack_rule_paths';
+import { getRulesAppDetailsRoute } from '@kbn/rule-data-utils/src/routes/stack_rule_paths';
 import {
   EuiBasicTable,
   EuiFlexGroup,
@@ -39,6 +35,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 
 import { getRouterLinkProps } from '@kbn/router-utils';
+import { useKibana } from '../../../../common/lib/kibana';
 
 import {
   SELECT_ALL_RULES,
@@ -253,8 +250,9 @@ export const RulesListTable = (props: RulesListTableProps) => {
 
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
   const { euiTheme } = useEuiTheme();
-
-  // Detect current app to determine the correct path format
+  const {
+    application: { getUrlForApp },
+  } = useKibana().services;
 
   const ruleRowCss = css`
     min-width: ${euiTheme.breakpoint.xl}px;
@@ -424,11 +422,9 @@ export const RulesListTable = (props: RulesListTableProps) => {
         render: (name: string, rule: RuleTableItem) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);
           const checkEnabledResult = checkRuleTypeEnabled(ruleType);
-          const pathToRuleDetails = `${
-            getIsExperimentalFeatureEnabled('unifiedRulesPage')
-              ? rulesAppRoute
-              : triggersActionsRoute
-          }${getRulesAppDetailsRoute(rule.id)}`;
+          const pathToRuleDetails = getUrlForApp('rules', {
+            path: getRulesAppDetailsRoute(rule.id),
+          });
 
           const linkProps = getRouterLinkProps({
             href: pathToRuleDetails,
@@ -911,6 +907,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     tagPopoverOpenIndex,
     ruleOutcomeColumnField,
     euiTheme,
+    getUrlForApp,
   ]);
 
   const allRuleColumns = useMemo(() => getRulesTableColumns(), [getRulesTableColumns]);

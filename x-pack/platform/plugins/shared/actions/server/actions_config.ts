@@ -75,6 +75,8 @@ export interface ActionsConfigurationUtilities {
   getAwsSesConfig: () => AwsSesConfig;
   getEnabledEmailServices: () => string[];
   getMaxEmailBodyLength: () => number;
+  getEarsUrl: () => string | undefined;
+  isEarsEnabled: () => boolean;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -283,5 +285,7 @@ export function getActionsConfigurationUtilities(
       const nonNegativeLength = Math.max(0, configuredLength);
       return Math.min(nonNegativeLength, MAX_EMAIL_BODY_LENGTH);
     },
+    getEarsUrl: () => config.auth.ears?.url || config.ears?.url,
+    isEarsEnabled: () => config.auth.ears?.enabled ?? config.ears?.enabled ?? false,
   };
 }

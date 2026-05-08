@@ -95,6 +95,29 @@ describe('WorkflowTemplatingEngine', () => {
     });
   });
 
+  describe('extractGlobalVariableSegments', () => {
+    it('should collect nested references inside Liquid control-flow tags', () => {
+      const extractedSegments = templatingEngine.extractGlobalVariableSegments(
+        '{% if inputs.enabled %}{{ steps.fetchData.output.case.title }}{% endif %}'
+      );
+
+      expect(extractedSegments).toEqual(
+        expect.arrayContaining([
+          ['inputs', 'enabled'],
+          ['steps', 'fetchData', 'output', 'case', 'title'],
+        ])
+      );
+    });
+
+    it('should return null for dynamic bracket paths', () => {
+      const extractedSegments = templatingEngine.extractGlobalVariableSegments(
+        '{{ steps.load_comment_sync_state.output._source[steps.note_sync_space_comment.output].id }}'
+      );
+
+      expect(extractedSegments).toBeNull();
+    });
+  });
+
   describe('built-in filters', () => {
     it('should use built-in json filter for stringification', () => {
       const template = '{{ data | json }}';
@@ -152,6 +175,118 @@ describe('WorkflowTemplatingEngine', () => {
       const context = { nullValue: null };
       const result = templatingEngine.render(template, context);
       expect(result).toBe('');
+    });
+  });
+
+  describe('base64_encode filter', () => {
+    it('should base64 encode a plain string', () => {
+      const template = '{{ text | base64_encode }}';
+      const context = { text: 'Hello World' };
+      const result = templatingEngine.render(template, context);
+      expect(result).toBe(Buffer.from('Hello World').toString('base64'));
+    });
+
+    it('should base64 encode a Buffer without data corruption', () => {
+      const binaryData = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0xff, 0xfe]);
+      const template = '${{ data | base64_encode }}';
+      const context = { data: binaryData };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toBe(binaryData.toString('base64'));
+    });
+
+    it('should produce valid base64 that round-trips back to original bytes', () => {
+      const original = Buffer.from([0x00, 0x01, 0x80, 0xff, 0xfe, 0xfd]);
+      const template = '${{ data | base64_encode }}';
+      const context = { data: original };
+      const result = templatingEngine.render({ out: template }, context);
+      const decoded = Buffer.from(result.out as string, 'base64');
+      expect(decoded).toEqual(original);
+    });
+
+    it('should handle empty Buffer', () => {
+      const template = '${{ data | base64_encode }}';
+      const context = { data: Buffer.alloc(0) };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toBe('');
+    });
+
+    it('should handle null/undefined gracefully', () => {
+      const template = '{{ missing | base64_encode }}';
+      const result = templatingEngine.render(template, {});
+      expect(result).toBe(Buffer.from('').toString('base64'));
+    });
+  });
+
+  describe('custom entries filter', () => {
+    it('should convert an object to an array of {key, value} pairs', () => {
+      const template = '${{ data | entries }}';
+      const context = { data: { a: 1, b: 2, c: 3 } };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual([
+        { key: 'a', value: 1 },
+        { key: 'b', value: 2 },
+        { key: 'c', value: 3 },
+      ]);
+    });
+
+    it('should handle nested object values', () => {
+      const template = '${{ data | entries }}';
+      const context = {
+        data: {
+          'index-001': { settings: { lifecycle: { name: 'old-policy' } } },
+          'index-002': { settings: { lifecycle: { name: 'new-policy' } } },
+        },
+      };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual([
+        { key: 'index-001', value: { settings: { lifecycle: { name: 'old-policy' } } } },
+        { key: 'index-002', value: { settings: { lifecycle: { name: 'new-policy' } } } },
+      ]);
+    });
+
+    it('should return arrays as-is', () => {
+      const template = '${{ data | entries }}';
+      const context = { data: [1, 2, 3] };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual([1, 2, 3]);
+    });
+
+    it('should return null as-is', () => {
+      const template = '{{ data | entries }}';
+      const context = { data: null };
+      const result = templatingEngine.render(template, context);
+      expect(result).toBe('');
+    });
+
+    it('should return non-object primitives as-is', () => {
+      const template = '{{ data | entries }}';
+      const context = { data: 'hello' };
+      const result = templatingEngine.render(template, context);
+      expect(result).toBe('hello');
+    });
+
+    it('should handle empty objects', () => {
+      const template = '${{ data | entries }}';
+      const context = { data: {} };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual([]);
+    });
+
+    it('should work with evaluateExpression for foreach usage', () => {
+      const template = '{{ data | entries }}';
+      const context = { data: { x: 10, y: 20 } };
+      const result = templatingEngine.evaluateExpression(template, context);
+      expect(result).toEqual([
+        { key: 'x', value: 10 },
+        { key: 'y', value: 20 },
+      ]);
+    });
+
+    it('should chain with other filters', () => {
+      const template = '${{ data | entries | first }}';
+      const context = { data: { a: 1, b: 2 } };
+      const result = templatingEngine.render({ out: template }, context);
+      expect(result.out).toEqual({ key: 'a', value: 1 });
     });
   });
 

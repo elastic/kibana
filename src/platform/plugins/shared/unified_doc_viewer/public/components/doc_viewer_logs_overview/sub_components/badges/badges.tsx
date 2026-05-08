@@ -28,6 +28,7 @@ interface BadgesProps {
   hit: DataTableRecord;
   formattedDoc: LogDocumentOverview;
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
+  renderCpsWarning?: boolean;
 }
 
 export const Badges = ({
@@ -36,6 +37,7 @@ export const Badges = ({
   hit,
   renderFlyoutStreamProcessingLink,
   hasMessageField,
+  renderCpsWarning,
 }: BadgesProps) => {
   const { field: logLevelField, value: logLevelValue } = getLogLevelFieldWithFallback(formattedDoc);
   const { field: eventTypeField, value: eventTypeValue } =
@@ -55,7 +57,7 @@ export const Badges = ({
     <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center" wrap={true}>
       {hasMessageField &&
         renderFlyoutStreamProcessingLink &&
-        renderFlyoutStreamProcessingLink({ dataView, doc: hit })}
+        renderFlyoutStreamProcessingLink({ dataView, doc: hit, renderCpsWarning })}
 
       {hasLogLevel && logLevelField && (
         <HoverActionPopover value={logLevelValue} field={logLevelField}>

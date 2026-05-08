@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
@@ -79,6 +80,45 @@ export class WorkflowExecutionRepository {
       id: workflowExecution.id,
       refresh: options.refresh ?? false,
       document: workflowExecution,
+    });
+  }
+
+  /**
+   * Bulk creates multiple workflow execution documents in a single Elasticsearch request.
+   * Per-doc errors are reported per item in input order instead of throwing.
+   *
+   * @param executions - Array of partial workflow execution objects. Each must include the `id` property.
+   * @param options.refresh - Same semantics as `createWorkflowExecution`.
+   * @throws {Error} If any execution ID is missing.
+   * @returns Per-item results in the same order as `executions`.
+   */
+  public async bulkCreateWorkflowExecutions(
+    executions: Array<Partial<EsWorkflowExecution>>,
+    options: { refresh?: boolean | 'wait_for' } = {}
+  ): Promise<Array<{ id: string } | { id: string; error: string }>> {
+    if (executions.length === 0) {
+      return [];
+    }
+
+    executions.forEach((execution) => {
+      if (!execution.id) {
+        throw new Error('Workflow execution ID is required for bulk create');
+      }
+    });
+
+    const bulkResponse = await this.esClient.bulk({
+      refresh: options.refresh ?? false,
+      index: this.indexName,
+      operations: executions.flatMap((execution) => [{ create: { _id: execution.id } }, execution]),
+    });
+
+    return bulkResponse.items.map((item, idx) => {
+      const op = item.create ?? item.index;
+      const id = executions[idx].id as string;
+      if (op?.error) {
+        return { id, error: op.error.reason ?? JSON.stringify(op.error) };
+      }
+      return { id };
     });
   }
 
@@ -327,5 +367,71 @@ export class WorkflowExecutionRepository {
     return response.hits.hits
       .map((hit) => hit._source?.id ?? hit._id)
       .filter((id): id is string => id !== undefined);
+  }
+
+  /**
+   * One page of non-terminal workflow execution IDs for a workflow in a space, using
+   * search_after on the executions index (no point-in-time). Callers page by passing
+   * nextSearchAfter from the previous response. Under concurrent index changes, pagination
+   * is not a strict snapshot (possible duplicates or gaps across pages).
+   */
+  public async findNonTerminalExecutionIdsByWorkflowIdPage({
+    spaceId,
+    workflowId,
+    size,
+    searchAfter,
+  }: {
+    spaceId: string;
+    workflowId: string;
+    size: number;
+    searchAfter?: estypes.SortResults;
+  }): Promise<{
+    results: string[];
+    total: number;
+    nextSearchAfter?: estypes.SortResults;
+  }> {
+    const filterClauses: Array<Record<string, unknown>> = [
+      { term: { workflowId } },
+      { term: { spaceId } },
+      {
+        terms: {
+          status: NonTerminalExecutionStatuses,
+        },
+      },
+    ];
+
+    const pageSize = Math.min(size, 10000); // Cap at ES default max_result_window
+
+    const response = await this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
+      index: this.indexName,
+      query: {
+        bool: {
+          filter: filterClauses,
+        },
+      },
+      _source: ['id'],
+      sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
+      size: pageSize,
+      track_total_hits: true,
+      ...(searchAfter?.length ? { search_after: searchAfter } : {}),
+    });
+
+    const hits = response.hits.hits;
+    const results = hits
+      .map((hit) => hit._source?.id ?? hit._id)
+      .filter((id): id is string => id !== undefined);
+
+    const rawTotal = response.hits.total;
+    const total = typeof rawTotal === 'number' ? rawTotal : rawTotal?.value ?? 0;
+
+    let nextSearchAfter: estypes.SortResults | undefined;
+    if (results.length === pageSize && hits.length > 0) {
+      const lastSort = hits[hits.length - 1]?.sort;
+      if (lastSort) {
+        nextSearchAfter = lastSort;
+      }
+    }
+
+    return { results, total, nextSearchAfter };
   }
 }

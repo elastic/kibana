@@ -103,7 +103,7 @@ export const Toolbar: FC<Props> = ({
                 <RoutingButtonIcon
                   color="text"
                   to={getUrl(selectedPageNumber - 1)}
-                  iconType="arrowLeft"
+                  iconType="chevronSingleLeft"
                   isDisabled={selectedPageNumber <= 1}
                   aria-label={strings.getPreviousPageAriaLabel()}
                   data-test-subj="previousPageButton"
@@ -122,7 +122,7 @@ export const Toolbar: FC<Props> = ({
                 <RoutingButtonIcon
                   color="text"
                   to={getUrl(selectedPageNumber + 1)}
-                  iconType="arrowRight"
+                  iconType="chevronSingleRight"
                   isDisabled={selectedPageNumber >= totalPages}
                   aria-label={strings.getNextPageAriaLabel()}
                   data-test-subj="nextPageButton"
@@ -133,7 +133,7 @@ export const Toolbar: FC<Props> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     color="text"
-                    iconType="editorCodeBlock"
+                    iconType="code"
                     onClick={() => toggleTray('expression')}
                     data-test-subj="canvasExpressionEditorButton"
                   >

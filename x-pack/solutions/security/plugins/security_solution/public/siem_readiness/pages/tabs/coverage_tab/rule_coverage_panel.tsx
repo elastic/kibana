@@ -21,7 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { useDetectionRulesByIntegration, useSiemReadinessApi } from '@kbn/siem-readiness';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSiemReadinessCases } from '../../../hooks/use_siem_readiness_cases';
-import { useBasePath } from '../../../../common/lib/kibana';
+import { useBasePath, useKibana } from '../../../../common/lib/kibana';
+import { SiemReadinessEventTypes } from '../../../../common/lib/telemetry/events/siem_readiness/types';
 import { AllRuleCoveragePanel } from './rule_coverage_panels/all_rules';
 import { MitreAttackRuleCoveragePanel } from './rule_coverage_panels/mitre_attack_rules';
 import { ViewCasesButton } from '../../components/view_cases_button';
@@ -54,6 +55,7 @@ const buildMissingOrDisabledIntegrationDescription = (
 
 export const RuleCoveragePanel: React.FC = () => {
   const basePath = useBasePath();
+  const { telemetry } = useKibana().services;
   const getIntegrationUrl = useCallback(
     (integration: string): string => {
       const baseUrl = `${basePath}/app/integrations/detail`;
@@ -104,6 +106,9 @@ export const RuleCoveragePanel: React.FC = () => {
 
   const onChange = (optionId: string) => {
     setToggleIdSelected(optionId);
+    telemetry.reportEvent(SiemReadinessEventTypes.RuleViewToggled, {
+      view: optionId === 'all-rules-id' ? 'all_rules' : 'mitre_attack',
+    });
   };
 
   const enabledIntegrationAssociatedRulesCount =
@@ -115,6 +120,8 @@ export const RuleCoveragePanel: React.FC = () => {
   const hasMissingOrDisabledIntegrations = Boolean(
     enabledIntegrationRules.ruleIntegrationCoverage?.missingIntegrations?.length
   );
+
+  const hasNoEnabledRules = (getDetectionRules.data?.data?.length || 0) === 0;
 
   return (
     <EuiPanel hasBorder>
@@ -151,7 +158,7 @@ export const RuleCoveragePanel: React.FC = () => {
                   <EuiButtonEmpty
                     iconSide="right"
                     size="s"
-                    iconType="plusInCircle"
+                    iconType="plusCircle"
                     onClick={handleCreateCase}
                     data-test-subj="createNewCaseButton"
                   >
@@ -192,6 +199,41 @@ export const RuleCoveragePanel: React.FC = () => {
                       <EuiLink href={ELASTIC_INTEGRATIONS_DOCS_URL} target="_blank" external>
                         {i18n.translate(
                           'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.docsLink',
+                          {
+                            defaultMessage: 'docs',
+                          }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiCallOut>
+          </EuiFlexItem>
+        )}
+        {hasNoEnabledRules && (
+          <EuiFlexItem>
+            <EuiCallOut
+              announceOnMount
+              title={i18n.translate(
+                'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.noEnabledRulesTitle',
+                {
+                  defaultMessage: 'No rules are currently enabled',
+                }
+              )}
+              color="primary"
+              iconType="info"
+              size="s"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.noEnabledRulesDescription"
+                  defaultMessage="Learn more about installing and enabling rules in our {docs}."
+                  values={{
+                    docs: (
+                      <EuiLink href={ELASTIC_INTEGRATIONS_DOCS_URL} target="_blank" external>
+                        {i18n.translate(
+                          'xpack.securitySolution.siemReadiness.coverage.dataRuleCoverage.noEnabledRulesDocsLink',
                           {
                             defaultMessage: 'docs',
                           }

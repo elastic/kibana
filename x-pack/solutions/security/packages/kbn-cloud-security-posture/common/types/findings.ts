@@ -66,7 +66,7 @@ export interface CspFindingResult {
   evidence: Record<string, unknown>;
 }
 
-interface CspFindingResource {
+export interface CspFindingResource {
   name: string;
   sub_type: string;
   raw: object;

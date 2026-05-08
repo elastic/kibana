@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useMemo, useRef, type MutableRefObject } from 'react';
+import { useCallback, useEffect, useMemo, useRef, type MutableRefObject } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { ESQLCallbacks, ESQLControlVariable, ESQLRegistrySolutionId } from '@kbn/esql-types';
 import { KQL_TYPE_TO_KIND_MAP } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ILicense } from '@kbn/licensing-types';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { MapCache } from 'lodash';
 import type { FavoritesClient } from '@kbn/content-management-favorites-public';
 import {
@@ -24,8 +23,10 @@ import {
   getInferenceEndpoints,
   getTimeseriesIndices,
   getViews,
+  getDatasets,
 } from '@kbn/esql-utils';
 import type { getEsqlColumns, getESQLSources } from '@kbn/esql-utils';
+import type { ESQLSourceResult } from '@kbn/esql-types';
 import { clearCacheWhenOld } from '../helpers';
 import { getHistoryItems } from '../history_local_storage';
 import type { ESQLEditorDeps } from '../types';
@@ -53,7 +54,11 @@ type MemoizedFieldsFromESQL = MemoizedFn<
 >;
 
 type MemoizedSources = MemoizedFn<
-  [CoreStart, (() => Promise<ILicense | undefined>) | undefined],
+  [
+    CoreStart,
+    (() => Promise<ILicense | undefined>) | undefined,
+    ((sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>) | undefined
+  ],
   ReturnType<typeof getESQLSources>
 >;
 
@@ -107,25 +112,40 @@ export const useEsqlCallbacks = ({
   const getSources = useCallback(async () => {
     clearCacheWhenOld(dataSourcesCache, minimalQueryRef.current);
     const getLicense = esqlService?.getLicense;
-    const sources = await memoizedSources(core, getLicense).result;
+    const enrichSources = esqlService?.enrichSources;
+    const sources = await memoizedSources(core, getLicense, enrichSources).result;
     return sources;
   }, [dataSourcesCache, minimalQueryRef, memoizedSources, core, esqlService]);
 
   const getColumnsFor = useCallback(
     async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
       if (queryToExecute) {
-        // Abort any previous in-flight autocomplete column fetch and
-        // remove its potentially stale cache entry
-        if (columnsAbortControllerRef.current) {
+        // Only abort if the query changed — re-requests for the same query
+        // (e.g. from concurrent validation passes) should share the same fetch
+        // rather than aborting each other, which causes "Unknown column" errors.
+        if (
+          columnsAbortControllerRef.current &&
+          previousColumnsQueryRef.current !== queryToExecute
+        ) {
           columnsAbortControllerRef.current.abort();
           if (previousColumnsQueryRef.current) {
             esqlFieldsCache.delete(previousColumnsQueryRef.current);
           }
         }
 
-        const controller = new AbortController();
-        columnsAbortControllerRef.current = controller;
-        previousColumnsQueryRef.current = queryToExecute;
+        if (
+          !columnsAbortControllerRef.current ||
+          previousColumnsQueryRef.current !== queryToExecute
+        ) {
+          const controller = new AbortController();
+          columnsAbortControllerRef.current = controller;
+          previousColumnsQueryRef.current = queryToExecute;
+        }
+
+        // Capture the controller before the await so the aborted check
+        // refers to this request's signal, not a newer one that may have
+        // replaced it on the ref during the async gap.
+        const currentController = columnsAbortControllerRef.current;
 
         clearCacheWhenOld(esqlFieldsCache, queryToExecute);
         const timeRange = data.query.timefilter.timefilter.getTime();
@@ -133,13 +153,15 @@ export const useEsqlCallbacks = ({
           esqlQuery: queryToExecute,
           search: data.search.search,
           timeRange,
-          signal: controller.signal,
+          signal: currentController.signal,
           variables: esqlService?.variablesService?.esqlVariables,
           dropNullColumns: true,
         }).result;
 
-        if (controller.signal.aborted) {
-          esqlFieldsCache.delete(queryToExecute);
+        // Bail out without touching the cache — cache cleanup for the aborted query
+        // already happened at abort time. Deleting here would race with a fresh re-request that may
+        // have repopulated the same key.
+        if (currentController.signal.aborted) {
           return [];
         }
 
@@ -157,6 +179,17 @@ export const useEsqlCallbacks = ({
       esqlService,
     ]
   );
+
+  // Abort any in-flight getColumnsFor request when the editor unmounts. Without this, navigating away
+  // from a long-running query leaves it polling in the browser and running on ES.
+  useEffect(() => {
+    return () => {
+      columnsAbortControllerRef.current?.abort();
+      if (previousColumnsQueryRef.current) {
+        esqlFieldsCache.delete(previousColumnsQueryRef.current);
+      }
+    };
+  }, [esqlFieldsCache]);
 
   const getPolicies = useCallback(async () => getEsqlPolicies(core.http), [core.http]);
 
@@ -187,6 +220,10 @@ export const useEsqlCallbacks = ({
     return await getViews(core.http);
   }, [core.http]);
 
+  const getDatasetsCallback = useCallback(async () => {
+    return await getDatasets(core.http);
+  }, [core.http]);
+
   const getEditorExtensionsCallback = useCallback(
     async (queryString: string) => {
       // Only fetch recommendations if there's an active solutionId and a non-empty query
@@ -203,7 +240,7 @@ export const useEsqlCallbacks = ({
   );
 
   const getInferenceEndpointsCallback = useCallback(
-    async (taskType: InferenceTaskType) => {
+    async (taskType: string) => {
       return (await getInferenceEndpoints(core.http, taskType)) || [];
     },
     [core.http]
@@ -278,6 +315,7 @@ export const useEsqlCallbacks = ({
       getJoinIndices: getJoinIndicesCallback,
       getTimeseriesIndices: getTimeseriesIndicesCallback,
       getViews: getViewsCallback,
+      getDatasets: getDatasetsCallback,
       getEditorExtensions: getEditorExtensionsCallback,
       getInferenceEndpoints: getInferenceEndpointsCallback,
       getLicense,
@@ -299,6 +337,7 @@ export const useEsqlCallbacks = ({
       getJoinIndicesCallback,
       getTimeseriesIndicesCallback,
       getViewsCallback,
+      getDatasetsCallback,
       getEditorExtensionsCallback,
       getInferenceEndpointsCallback,
       getLicense,
