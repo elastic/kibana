@@ -78,6 +78,7 @@ permissions:
 env:
   PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.inputs.pr_number }}
   PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.inputs.pr_number }}
+  REVIEWER_COMMENT_ID: ${{ github.event.inputs.comment_id }}
 tools:
   github:
     toolsets: [default]
