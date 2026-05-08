@@ -94,6 +94,12 @@ export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps)
         defaultMessage: 'No matching objects found.',
       })}
       getExtraItems={async () => {
+        console.log('before');
+        // const test = await core.http.get(`/api/kibana/management/saved_objects/_find`, {
+        //   query: { type: 'markdown' },
+        // } as Record<string, any>);
+        // console.log('after', test);
+        // return test.savedObjects;
         const getPromises = Object.values(libraryTypes)
           .filter(({ getSavedObjects }) => Boolean(getSavedObjects))
           .map(({ getSavedObjects }) => getSavedObjects!());

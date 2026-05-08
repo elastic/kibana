@@ -81,10 +81,16 @@ export class DashboardMarkdownPlugin
       getIconForSavedObject: () => APP_ICON,
       // customPath: MARKDOWN_API_PATH,
       getSavedObjects: async () => {
+        // console.log({ http: this.props.services.http });
+        // const test = await core.http.get(`/api/kibana/management/saved_objects/_find`, {
+        //   query: { type: types },
+        // } as Record<string, any>);
+        // console.log({ response, test });
+
         const result = (await core.http.get(MARKDOWN_API_PATH, {
           version: MARKDOWN_API_VERSION,
         })) as MarkdownSearchResponseBody;
-        return result.markdowns.map(({ id, data, meta }) => {
+        return result.map(({ id, data, meta }) => {
           return {
             type: MARKDOWN_SAVED_OBJECT_TYPE,
             id,

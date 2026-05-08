@@ -121,7 +121,7 @@ class SavedObjectFinderUiClass extends React.Component<
   private debouncedFetch = debounce(async (query: Query) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
     const { contentClient, uiSettings } = this.props.services;
-    console.log({ metaDataMap });
+
     const { queryText, visibleTypes, selectedTags } = parseQuery(
       query,
       Object.values(metaDataMap).map((metadata) => ({
@@ -140,9 +140,7 @@ class SavedObjectFinderUiClass extends React.Component<
 
     const response = await Promise.all([
       contentClient.mSearch<SavedObjectCommon<FinderAttributes>>({
-        contentTypes: types
-          // .filter((type) => !hasCustomPath.includes(type))
-          .map((type) => ({ contentTypeId: type })),
+        contentTypes: types.map((type) => ({ contentTypeId: type })),
         query: {
           text: queryText ? `${queryText}*` : undefined,
           ...(includeTags?.length ? { tags: { included: includeTags } } : {}),
