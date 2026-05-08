@@ -72,6 +72,20 @@ export interface EntitiesOverviewProps {
    * Same as `onShowUserAlertsDetails` but for host entities.
    */
   onShowHostAlertsDetails?: (params: { hostName: string; entityId?: string }) => void;
+  /**
+   * Callback invoked when the user clicks the misconfigurations insight chip on the user card.
+   * When omitted, the click falls back to `onShowUserDetails`.
+   */
+  onShowUserMisconfigurationsDetails?: (params: { userName: string; entityId?: string }) => void;
+  /**
+   * Same as `onShowUserMisconfigurationsDetails` but for host entities.
+   */
+  onShowHostMisconfigurationsDetails?: (params: { hostName: string; entityId?: string }) => void;
+  /**
+   * Callback invoked when the user clicks the vulnerabilities insight chip on the host card.
+   * When omitted, the click falls back to `onShowHostDetails`. Vulnerabilities are host-only.
+   */
+  onShowHostVulnerabilitiesDetails?: (params: { hostName: string; entityId?: string }) => void;
 }
 
 const HEADER_TITLE = (
@@ -100,12 +114,17 @@ const buildShowUserDetailsHandler = (
   userName: string,
   entityId: string | undefined,
   onShowDetails: ShowUserHandler | undefined,
-  onShowAlerts: ShowUserHandler | undefined
+  onShowAlerts: ShowUserHandler | undefined,
+  onShowMisconfigurations: ShowUserHandler | undefined
 ) => {
   if (!onShowDetails || !userName) return undefined;
   return (path?: EntityDetailsPath) => {
     if (path?.subTab === CspInsightLeftPanelSubTab.ALERTS && onShowAlerts) {
       onShowAlerts({ userName, entityId });
+      return;
+    }
+    if (path?.subTab === CspInsightLeftPanelSubTab.MISCONFIGURATIONS && onShowMisconfigurations) {
+      onShowMisconfigurations({ userName, entityId });
       return;
     }
     onShowDetails({ userName, entityId });
@@ -116,12 +135,22 @@ const buildShowHostDetailsHandler = (
   hostName: string,
   entityId: string | undefined,
   onShowDetails: ShowHostHandler | undefined,
-  onShowAlerts: ShowHostHandler | undefined
+  onShowAlerts: ShowHostHandler | undefined,
+  onShowMisconfigurations: ShowHostHandler | undefined,
+  onShowVulnerabilities: ShowHostHandler | undefined
 ) => {
   if (!onShowDetails || !hostName) return undefined;
   return (path?: EntityDetailsPath) => {
     if (path?.subTab === CspInsightLeftPanelSubTab.ALERTS && onShowAlerts) {
       onShowAlerts({ hostName, entityId });
+      return;
+    }
+    if (path?.subTab === CspInsightLeftPanelSubTab.MISCONFIGURATIONS && onShowMisconfigurations) {
+      onShowMisconfigurations({ hostName, entityId });
+      return;
+    }
+    if (path?.subTab === CspInsightLeftPanelSubTab.VULNERABILITIES && onShowVulnerabilities) {
+      onShowVulnerabilities({ hostName, entityId });
       return;
     }
     onShowDetails({ hostName, entityId });
@@ -143,6 +172,9 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
     onShowHostDetails,
     onShowUserAlertsDetails,
     onShowHostAlertsDetails,
+    onShowUserMisconfigurationsDetails,
+    onShowHostMisconfigurationsDetails,
+    onShowHostVulnerabilitiesDetails,
   }) => {
     const hostName = getFieldValue(hit, 'host.name') as string | null;
     const userName = getFieldValue(hit, 'user.name') as string | null;
@@ -175,14 +207,20 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
           undefined) as IdentityFields | undefined,
       [euidApi?.euid, dataAsNestedObject]
     );
+    const legacyUserIdentityForStore =
+      userName != null && userName !== ''
+        ? ({ 'user.name': userName } as IdentityFields)
+        : undefined;
     const hostEntityId = euidApi?.euid.getEuidFromObject('host', dataAsNestedObject);
     const userEntityId = euidApi?.euid.getEuidFromObject('user', dataAsNestedObject);
 
     const userEntityFromStore = useEntityFromStore({
       entityId: userEntityId,
-      identityFields: userEntityIdentifiers ?? undefined,
+      identityFields: userEntityIdentifiers ?? legacyUserIdentityForStore,
       entityType: 'user',
-      skip: !entityStoreV2Enabled,
+      skip:
+        !entityStoreV2Enabled ||
+        (userEntityIdentifiers == null && legacyUserIdentityForStore == null),
     });
     const hostEntityFromStore = useEntityFromStore({
       entityId: hostEntityId,
@@ -215,10 +253,9 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
       [onShowEntitiesDetails]
     );
 
-    // `AlertCountInsight` calls back with `{ tab: CSP_INSIGHTS, subTab: ALERTS }` when the alerts
-    // chip is clicked; route those clicks to the dedicated alerts flyout. Other tabs fall through
-    // to the entity details flyout — flyout_v2 entity flyouts are single-body views, so the rest
-    // of the path is intentionally not forwarded.
+    // The chip insights call back with a `{ tab: CSP_INSIGHTS, subTab }` path; route each subTab
+    // to its dedicated flyout. When the corresponding handler is omitted, the click falls back
+    // to the entity details flyout — keeping the v2 chrome single-body per surface.
     const userEntityRecordId = userEntityRecord?.entity?.id;
     const handleShowUserDetails = useMemo(
       () =>
@@ -226,9 +263,16 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
           resolvedUserName,
           userEntityRecordId,
           onShowUserDetails,
-          onShowUserAlertsDetails
+          onShowUserAlertsDetails,
+          onShowUserMisconfigurationsDetails
         ),
-      [onShowUserDetails, onShowUserAlertsDetails, resolvedUserName, userEntityRecordId]
+      [
+        onShowUserDetails,
+        onShowUserAlertsDetails,
+        onShowUserMisconfigurationsDetails,
+        resolvedUserName,
+        userEntityRecordId,
+      ]
     );
 
     const hostEntityRecordId = hostEntityRecord?.entity?.id;
@@ -238,9 +282,18 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
           resolvedHostName,
           hostEntityRecordId,
           onShowHostDetails,
-          onShowHostAlertsDetails
+          onShowHostAlertsDetails,
+          onShowHostMisconfigurationsDetails,
+          onShowHostVulnerabilitiesDetails
         ),
-      [onShowHostDetails, onShowHostAlertsDetails, resolvedHostName, hostEntityRecordId]
+      [
+        onShowHostDetails,
+        onShowHostAlertsDetails,
+        onShowHostMisconfigurationsDetails,
+        onShowHostVulnerabilitiesDetails,
+        resolvedHostName,
+        hostEntityRecordId,
+      ]
     );
 
     return (

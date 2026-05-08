@@ -129,10 +129,14 @@ export interface UserDetailsProps {
   /**
    * Override invoked when the alerts insight chip is clicked. When provided, the alerts subtab
    * navigation routes here instead of opening the legacy two-panel user details flyout. Used by
-   * flyout_v2 to surface alerts in a dedicated tools flyout. Other insight chips (misconfig,
-   * vulnerabilities) keep their default navigation.
+   * flyout_v2 to surface alerts in a dedicated tools flyout.
    */
   onShowAlertsDetails?: () => void;
+  /**
+   * Override invoked when the misconfigurations insight chip is clicked. Same purpose as
+   * `onShowAlertsDetails`, for the misconfigurations subtab.
+   */
+  onShowMisconfigurationsDetails?: () => void;
 }
 
 /**
@@ -146,6 +150,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   expandedOnFirstRender = true,
   isAttackDetails = false,
   onShowAlertsDetails,
+  onShowMisconfigurationsDetails,
 }) => {
   const EntityCellActions = isAttackDetails ? AttackDetailsCellActions : DocumentDetailsCellActions;
 
@@ -323,9 +328,16 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
         onShowAlertsDetails();
         return;
       }
+      if (
+        onShowMisconfigurationsDetails &&
+        path?.subTab === CspInsightLeftPanelSubTab.MISCONFIGURATIONS
+      ) {
+        onShowMisconfigurationsDetails();
+        return;
+      }
       navigateToUserDetails(path as EntityDetailsPath);
     },
-    [navigateToUserDetails, onShowAlertsDetails]
+    [navigateToUserDetails, onShowAlertsDetails, onShowMisconfigurationsDetails]
   );
 
   const {

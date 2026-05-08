@@ -18,9 +18,13 @@ import type { IdentityFields } from '../../../flyout/document_details/shared/uti
 import { getField } from '../../../flyout/document_details/shared/utils';
 import { useEventDetails } from '../../../flyout/document_details/shared/hooks/use_event_details';
 import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import { ENTITIES_DETAILS_VIEW_TEST_ID } from '../test_ids';
-import { HostDetailsView } from './host_details_view';
-import { UserDetailsView } from './user_details_view';
+import { HostDetails } from '../../../flyout/document_details/left/components/host_details';
+import { UserDetails } from '../../../flyout/document_details/left/components/user_details';
+import {
+  ENTITIES_DETAILS_VIEW_TEST_ID,
+  HOST_DETAILS_VIEW_TEST_ID,
+  USER_DETAILS_VIEW_TEST_ID,
+} from '../test_ids';
 
 const NO_DATA = (
   <FormattedMessage
@@ -140,12 +144,14 @@ export const EntitiesDetailsView: FC<EntitiesDetailsViewProps> = memo(
                   </h3>
                 </EuiTitle>
                 <EuiSpacer size="s" />
-                <UserDetailsView
-                  userName={userDisplayName}
-                  entityId={userEntityFromStore.entityRecord?.entity?.id}
-                  timestamp={timestamp ?? ''}
-                  scopeId={scopeId}
-                />
+                <div data-test-subj={USER_DETAILS_VIEW_TEST_ID}>
+                  <UserDetails
+                    userName={userDisplayName}
+                    entityId={userEntityFromStore.entityRecord?.entity?.id}
+                    timestamp={timestamp ?? ''}
+                    scopeId={scopeId}
+                  />
+                </div>
               </EuiFlexItem>
             )}
             {showHostDetails && (
@@ -159,13 +165,17 @@ export const EntitiesDetailsView: FC<EntitiesDetailsViewProps> = memo(
                   </h3>
                 </EuiTitle>
                 <EuiSpacer size="s" />
-                <HostDetailsView
-                  hostName={hostDisplayName}
-                  entityId={hostEntityFromStore.entityRecord?.entity?.id}
-                  timestamp={timestamp ?? ''}
-                  scopeId={scopeId}
-                  hostEntityFromStoreResult={entityStoreV2Enabled ? hostEntityFromStore : undefined}
-                />
+                <div data-test-subj={HOST_DETAILS_VIEW_TEST_ID}>
+                  <HostDetails
+                    hostName={hostDisplayName}
+                    entityId={hostEntityFromStore.entityRecord?.entity?.id}
+                    timestamp={timestamp ?? ''}
+                    scopeId={scopeId}
+                    hostEntityFromStoreResult={
+                      entityStoreV2Enabled ? hostEntityFromStore : undefined
+                    }
+                  />
+                </div>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>

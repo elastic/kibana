@@ -13,24 +13,20 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { EntityIdentifierFields } from '../../../common/entity_analytics/types';
 import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
 import { getField } from '../../flyout/document_details/shared/utils';
 import { useKibana } from '../../common/lib/kibana';
-import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
-import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
-import {
-  defaultToolsFlyoutProperties,
-  useDefaultDocumentFlyoutProperties,
-} from '../shared/hooks/use_default_flyout_properties';
+import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
+import { useOpenToolsFlyout } from '../shared/hooks/use_open_tools_flyout';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { DocumentFlyoutWrapper } from '../document/document_flyout_wrapper';
 import { noopCellActionRenderer, type CellActionRenderer } from '../shared/components/cell_actions';
+import { HostDetails } from '../../flyout/document_details/left/components/host_details';
+import { UserDetails } from '../../flyout/document_details/left/components/user_details';
 import { EntitiesDetailsView } from './components/entities_details_view';
-import { EntityAlertsDetailsView } from './components/entity_alerts_details_view';
-import { HostDetailsView } from './components/host_details_view';
-import { UserDetailsView } from './components/user_details_view';
+import { EntityFindingsDetailsView } from './components/entity_findings_details_view';
+import { HOST_DETAILS_VIEW_TEST_ID, USER_DETAILS_VIEW_TEST_ID } from './test_ids';
 
 const ENTITIES_TITLE = i18n.translate('xpack.securitySolution.flyout.entities.title', {
   defaultMessage: 'Entities',
@@ -47,6 +43,18 @@ const HOST_ALERTS_TITLE = i18n.translate('xpack.securitySolution.flyout.entities
 const USER_ALERTS_TITLE = i18n.translate('xpack.securitySolution.flyout.entities.userAlertsTitle', {
   defaultMessage: 'User alerts',
 });
+const HOST_MISCONFIGURATIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.entities.hostMisconfigurationsTitle',
+  { defaultMessage: 'Host misconfigurations' }
+);
+const USER_MISCONFIGURATIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.entities.userMisconfigurationsTitle',
+  { defaultMessage: 'User misconfigurations' }
+);
+const HOST_VULNERABILITIES_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.entities.hostVulnerabilitiesTitle',
+  { defaultMessage: 'Host vulnerabilities' }
+);
 
 export interface EntitiesDetailsProps {
   /**
@@ -147,6 +155,63 @@ export interface UserEntityAlertsDetailsProps {
   onAlertUpdated?: () => void;
 }
 
+export interface HostEntityMisconfigurationsDetailsProps {
+  /**
+   * Alert/event document used by the flyout header.
+   */
+  hit: DataTableRecord;
+  /**
+   * Resolved host name for the findings query.
+   */
+  hostName: string;
+  /**
+   * Canonical Entity Store v2 id, when already resolved.
+   */
+  entityId?: string;
+  /**
+   * Scope id forwarded to the findings table for cell actions.
+   */
+  scopeId: string;
+}
+
+export interface UserEntityMisconfigurationsDetailsProps {
+  /**
+   * Alert/event document used by the flyout header.
+   */
+  hit: DataTableRecord;
+  /**
+   * Resolved user name for the findings query.
+   */
+  userName: string;
+  /**
+   * Canonical Entity Store v2 id, when already resolved.
+   */
+  entityId?: string;
+  /**
+   * Scope id forwarded to the findings table for cell actions.
+   */
+  scopeId: string;
+}
+
+export interface HostEntityVulnerabilitiesDetailsProps {
+  /**
+   * Alert/event document used by the flyout header.
+   */
+  hit: DataTableRecord;
+  /**
+   * Resolved host name for the findings query.
+   */
+  hostName: string;
+  /**
+   * Canonical Entity Store v2 id, when already resolved.
+   */
+  entityId?: string;
+  /**
+   * Scope id forwarded to the findings table for cell actions.
+   */
+  scopeId: string;
+}
+
 const FlyoutShell = memo(
   ({ hit, title, children }: React.PropsWithChildren<{ hit: DataTableRecord; title: string }>) => {
     const { euiTheme } = useEuiTheme();
@@ -238,57 +303,61 @@ export const HostEntityDetails = memo(
     onAlertUpdated,
   }: HostEntityDetailsProps) => {
     const timestamp = getField(getFieldValue(hit, '@timestamp')) ?? '';
-    const { services } = useKibana();
-    const { overlays } = services;
-    const store = useStore();
-    const history = useHistory();
-    const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const openToolsFlyout = useOpenToolsFlyout();
 
-    const onShowAlertsDetails = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <HostEntityAlertsDetails
-              hit={hit}
-              hostName={hostName}
-              entityId={entityId}
-              renderCellActions={renderCellActions}
-              onAlertUpdated={onAlertUpdated}
-            />
-          ),
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'inherit',
-        }
-      );
-    }, [
-      history,
-      historyKey,
-      hit,
-      hostName,
-      entityId,
-      onAlertUpdated,
-      overlays,
-      renderCellActions,
-      services,
-      store,
-    ]);
+    const onShowAlertsDetails = useCallback(
+      () =>
+        openToolsFlyout(
+          <HostEntityAlertsDetails
+            hit={hit}
+            hostName={hostName}
+            entityId={entityId}
+            renderCellActions={renderCellActions}
+            onAlertUpdated={onAlertUpdated}
+          />
+        ),
+      [openToolsFlyout, hit, hostName, entityId, renderCellActions, onAlertUpdated]
+    );
+
+    const onShowMisconfigurationsDetails = useCallback(
+      () =>
+        openToolsFlyout(
+          <HostEntityMisconfigurationsDetails
+            hit={hit}
+            hostName={hostName}
+            entityId={entityId}
+            scopeId={scopeId}
+          />
+        ),
+      [openToolsFlyout, hit, hostName, entityId, scopeId]
+    );
+
+    const onShowVulnerabilitiesDetails = useCallback(
+      () =>
+        openToolsFlyout(
+          <HostEntityVulnerabilitiesDetails
+            hit={hit}
+            hostName={hostName}
+            entityId={entityId}
+            scopeId={scopeId}
+          />
+        ),
+      [openToolsFlyout, hit, hostName, entityId, scopeId]
+    );
 
     return (
       <FlyoutShell hit={hit} title={HOST_TITLE}>
-        <HostDetailsView
-          hostName={hostName}
-          entityId={entityId}
-          timestamp={timestamp}
-          scopeId={scopeId}
-          onShowAlertsDetails={onShowAlertsDetails}
-        />
+        <div data-test-subj={HOST_DETAILS_VIEW_TEST_ID}>
+          <HostDetails
+            hostName={hostName}
+            entityId={entityId}
+            timestamp={timestamp}
+            scopeId={scopeId}
+            onShowAlertsDetails={onShowAlertsDetails}
+            onShowMisconfigurationsDetails={onShowMisconfigurationsDetails}
+            onShowVulnerabilitiesDetails={onShowVulnerabilitiesDetails}
+          />
+        </div>
       </FlyoutShell>
     );
   }
@@ -309,57 +378,47 @@ export const UserEntityDetails = memo(
     onAlertUpdated,
   }: UserEntityDetailsProps) => {
     const timestamp = getField(getFieldValue(hit, '@timestamp')) ?? '';
-    const { services } = useKibana();
-    const { overlays } = services;
-    const store = useStore();
-    const history = useHistory();
-    const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const openToolsFlyout = useOpenToolsFlyout();
 
-    const onShowAlertsDetails = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <UserEntityAlertsDetails
-              hit={hit}
-              userName={userName}
-              entityId={entityId}
-              renderCellActions={renderCellActions}
-              onAlertUpdated={onAlertUpdated}
-            />
-          ),
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'inherit',
-        }
-      );
-    }, [
-      history,
-      historyKey,
-      hit,
-      userName,
-      entityId,
-      onAlertUpdated,
-      overlays,
-      renderCellActions,
-      services,
-      store,
-    ]);
+    const onShowAlertsDetails = useCallback(
+      () =>
+        openToolsFlyout(
+          <UserEntityAlertsDetails
+            hit={hit}
+            userName={userName}
+            entityId={entityId}
+            renderCellActions={renderCellActions}
+            onAlertUpdated={onAlertUpdated}
+          />
+        ),
+      [openToolsFlyout, hit, userName, entityId, renderCellActions, onAlertUpdated]
+    );
+
+    const onShowMisconfigurationsDetails = useCallback(
+      () =>
+        openToolsFlyout(
+          <UserEntityMisconfigurationsDetails
+            hit={hit}
+            userName={userName}
+            entityId={entityId}
+            scopeId={scopeId}
+          />
+        ),
+      [openToolsFlyout, hit, userName, entityId, scopeId]
+    );
 
     return (
       <FlyoutShell hit={hit} title={USER_TITLE}>
-        <UserDetailsView
-          userName={userName}
-          entityId={entityId}
-          timestamp={timestamp}
-          scopeId={scopeId}
-          onShowAlertsDetails={onShowAlertsDetails}
-        />
+        <div data-test-subj={USER_DETAILS_VIEW_TEST_ID}>
+          <UserDetails
+            userName={userName}
+            entityId={entityId}
+            timestamp={timestamp}
+            scopeId={scopeId}
+            onShowAlertsDetails={onShowAlertsDetails}
+            onShowMisconfigurationsDetails={onShowMisconfigurationsDetails}
+          />
+        </div>
       </FlyoutShell>
     );
   }
@@ -381,7 +440,8 @@ export const HostEntityAlertsDetails = memo(
     const onAlertOpened = useOpenAlertFlyout({ renderCellActions, onAlertUpdated });
     return (
       <FlyoutShell hit={hit} title={HOST_ALERTS_TITLE}>
-        <EntityAlertsDetailsView
+        <EntityFindingsDetailsView
+          kind="alerts"
           field={EntityIdentifierFields.hostName}
           value={hostName}
           entityId={entityId}
@@ -409,7 +469,8 @@ export const UserEntityAlertsDetails = memo(
     const onAlertOpened = useOpenAlertFlyout({ renderCellActions, onAlertUpdated });
     return (
       <FlyoutShell hit={hit} title={USER_ALERTS_TITLE}>
-        <EntityAlertsDetailsView
+        <EntityFindingsDetailsView
+          kind="alerts"
           field={EntityIdentifierFields.userName}
           value={userName}
           entityId={entityId}
@@ -422,3 +483,64 @@ export const UserEntityAlertsDetails = memo(
 );
 
 UserEntityAlertsDetails.displayName = 'UserEntityAlertsDetails';
+
+/**
+ * Host misconfigurations flyout opened from the misconfigurations insight on the host entity overview.
+ */
+export const HostEntityMisconfigurationsDetails = memo(
+  ({ hit, hostName, entityId, scopeId }: HostEntityMisconfigurationsDetailsProps) => (
+    <FlyoutShell hit={hit} title={HOST_MISCONFIGURATIONS_TITLE}>
+      <EntityFindingsDetailsView
+        kind="misconfigurations"
+        field={EntityIdentifierFields.hostName}
+        value={hostName}
+        entityId={entityId}
+        entityType="host"
+        scopeId={scopeId}
+      />
+    </FlyoutShell>
+  )
+);
+
+HostEntityMisconfigurationsDetails.displayName = 'HostEntityMisconfigurationsDetails';
+
+/**
+ * User misconfigurations flyout opened from the misconfigurations insight on the user entity overview.
+ */
+export const UserEntityMisconfigurationsDetails = memo(
+  ({ hit, userName, entityId, scopeId }: UserEntityMisconfigurationsDetailsProps) => (
+    <FlyoutShell hit={hit} title={USER_MISCONFIGURATIONS_TITLE}>
+      <EntityFindingsDetailsView
+        kind="misconfigurations"
+        field={EntityIdentifierFields.userName}
+        value={userName}
+        entityId={entityId}
+        entityType="user"
+        scopeId={scopeId}
+      />
+    </FlyoutShell>
+  )
+);
+
+UserEntityMisconfigurationsDetails.displayName = 'UserEntityMisconfigurationsDetails';
+
+/**
+ * Host vulnerabilities flyout opened from the vulnerabilities insight on the host entity overview.
+ * Vulnerabilities are host-only — the user entity overview does not surface a vulnerabilities chip.
+ */
+export const HostEntityVulnerabilitiesDetails = memo(
+  ({ hit, hostName, entityId, scopeId }: HostEntityVulnerabilitiesDetailsProps) => (
+    <FlyoutShell hit={hit} title={HOST_VULNERABILITIES_TITLE}>
+      <EntityFindingsDetailsView
+        kind="vulnerabilities"
+        field={EntityIdentifierFields.hostName}
+        value={hostName}
+        entityId={entityId}
+        entityType="host"
+        scopeId={scopeId}
+      />
+    </FlyoutShell>
+  )
+);
+
+HostEntityVulnerabilitiesDetails.displayName = 'HostEntityVulnerabilitiesDetails';

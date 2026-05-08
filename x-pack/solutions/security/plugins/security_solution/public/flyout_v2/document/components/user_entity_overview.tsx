@@ -114,7 +114,7 @@ export interface UserEntityOverviewProps {
 }
 
 export const USER_PREVIEW_BANNER = {
-  title: i18n.translate('xpack.securitySolution.flyout.right.user.userPreviewTitle', {
+  title: i18n.translate('xpack.securitySolution.flyout.document.user.userPreviewTitle', {
     defaultMessage: 'Preview user details',
   }),
   backgroundColor: 'warning',
@@ -386,7 +386,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
         {isLoading ? (
           <EuiSkeletonText
             contentAriaLabel={i18n.translate(
-              'xpack.securitySolution.flyout.right.insights.entities.userLoadingAriaLabel',
+              'xpack.securitySolution.flyout.document.insights.entities.userLoadingAriaLabel',
               { defaultMessage: 'user overview' }
             )}
             data-test-subj={ENTITIES_USER_OVERVIEW_LOADING_TEST_ID}

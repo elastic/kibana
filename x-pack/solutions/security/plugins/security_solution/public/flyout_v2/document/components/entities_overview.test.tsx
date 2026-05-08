@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   ENTITIES_HOST_OVERVIEW_TEST_ID,
+  ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
   ENTITIES_USER_OVERVIEW_TEST_ID,
   INSIGHTS_ENTITIES_TEST_ID,
 } from './test_ids';
@@ -97,6 +98,7 @@ const renderEntitiesOverview = (props: {
   hit: DataTableRecord;
   dataAsNestedObject?: Ecs | null;
   onShowEntitiesDetails?: () => void;
+  onShowUserDetails?: (params: { userName: string; entityId?: string }) => void;
   showIcon?: boolean;
 }) =>
   render(
@@ -248,5 +250,69 @@ describe('<EntitiesOverview />', () => {
     expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
     expect(getByTestId(ENTITIES_USER_OVERVIEW_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(ENTITIES_HOST_OVERVIEW_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should use user.name as entity-store fallback when EUID identifiers are unavailable', () => {
+    const onShowUserDetails = jest.fn();
+    const userEntityRecord = {
+      entity: { id: 'user:store-id', name: 'user1' },
+      user: { name: ['user1'] },
+    };
+    mockUseUiSetting.mockReturnValue(true);
+    mockUseEntityFromStore.mockImplementation(
+      (params: Parameters<typeof useEntityFromStore>[0]) => {
+        if (
+          params.entityType === 'user' &&
+          params.identityFields?.['user.name'] === 'user1' &&
+          params.skip === false
+        ) {
+          return {
+            entityRecord: userEntityRecord,
+            entity: null,
+            firstSeen: null,
+            lastSeen: null,
+            isLoading: false,
+            error: null,
+            refetch: jest.fn(),
+          };
+        }
+        return {
+          entityRecord: null,
+          entity: null,
+          firstSeen: null,
+          lastSeen: null,
+          isLoading: false,
+          error: null,
+          refetch: jest.fn(),
+        };
+      }
+    );
+
+    const dataAsNestedObject = {
+      ...baseEcs,
+      host: {},
+      user: { name: ['user1'] },
+    } as unknown as Ecs;
+    const hit = buildHit({ user: { name: 'user1' } });
+
+    const { getByTestId } = renderEntitiesOverview({
+      hit,
+      dataAsNestedObject,
+      onShowUserDetails,
+    });
+
+    expect(mockUseEntityFromStore).toHaveBeenCalledWith(
+      expect.objectContaining({
+        identityFields: { 'user.name': 'user1' },
+        skip: false,
+      })
+    );
+
+    fireEvent.click(getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID));
+
+    expect(onShowUserDetails).toHaveBeenCalledWith({
+      userName: 'user1',
+      entityId: 'user:store-id',
+    });
   });
 });

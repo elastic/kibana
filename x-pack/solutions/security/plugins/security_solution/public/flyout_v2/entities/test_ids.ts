@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-export const ENTITIES_DETAILS_VIEW_TEST_ID = 'entitiesDetailsView';
-export const HOST_DETAILS_VIEW_TEST_ID = 'hostDetailsView';
-export const USER_DETAILS_VIEW_TEST_ID = 'userDetailsView';
-export const ENTITY_ALERTS_DETAILS_VIEW_TEST_ID = 'entityAlertsDetailsView';
+import { PREFIX } from '../../flyout/shared/test_ids';
+
+export const ENTITIES_DETAILS_VIEW_TEST_ID = `${PREFIX}EntitiesDetailsView` as const;
+export const HOST_DETAILS_VIEW_TEST_ID = `${PREFIX}HostDetailsView` as const;
+export const USER_DETAILS_VIEW_TEST_ID = `${PREFIX}UserDetailsView` as const;
+export const ENTITY_ALERTS_DETAILS_VIEW_TEST_ID = `${PREFIX}EntityAlertsDetailsView` as const;
+export const ENTITY_MISCONFIGURATIONS_DETAILS_VIEW_TEST_ID =
+  `${PREFIX}EntityMisconfigurationsDetailsView` as const;
+export const ENTITY_VULNERABILITIES_DETAILS_VIEW_TEST_ID =
+  `${PREFIX}EntityVulnerabilitiesDetailsView` as const;

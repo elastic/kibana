@@ -124,7 +124,7 @@ export interface HostEntityOverviewProps {
 }
 
 export const HOST_PREVIEW_BANNER = {
-  title: i18n.translate('xpack.securitySolution.flyout.right.host.hostPreviewTitle', {
+  title: i18n.translate('xpack.securitySolution.flyout.document.host.hostPreviewTitle', {
     defaultMessage: 'Preview host details',
   }),
   backgroundColor: 'warning',
@@ -406,7 +406,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
         <EuiSkeletonText
           data-test-subj={ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID}
           contentAriaLabel={i18n.translate(
-            'xpack.securitySolution.flyout.right.insights.entities.hostLoadingAriaLabel',
+            'xpack.securitySolution.flyout.document.insights.entities.hostLoadingAriaLabel',
             { defaultMessage: 'host overview' }
           )}
         />
