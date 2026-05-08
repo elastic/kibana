@@ -94,7 +94,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "entity-engine-descriptor-v2": "0c0c3cf4adb536b15890a732f825a723296f86d39d187b8b0c44418639f29eac",
         "entity-engine-status": "005903620a00737932aa54ae57817b078810b2f71cc42e7715d1c22c5e5b715e",
         "entity-store-ccs-state": "991a340bb39ccd92e58fe001540769afee40c0e71bc40ebccfbb6bcacf7b7c78",
-        "entity-store-global-state": "8f6ddcc910588398a762120ac375a5dcdd41be06b923bea9889e565f58e3cb1e",
+        "entity-store-global-state": "8f403b8abf9128a23c96a0a313d4a777f5b9aabf9b5f5ee51b604e6b2f955df6",
         "epm-packages": "8b9bba4344e69a8012d31363e55c89898128fd3f8236b0333dd2d6b44fd94d0d",
         "epm-packages-assets": "1095b56fabdeb3994a60f4da02e87179dfaf57d5bb23b97458129bf14c66b46e",
         "event-annotation-group": "21141aa64bba4d05ee6ebe0b0d75475452bca50e73f902a38800457d0727014d",
@@ -658,12 +658,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "entity-store-global-state|global: f625b80f055d7a5a819b3b312d6cf51a5e10b61f",
         "entity-store-global-state|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
         "entity-store-global-state|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
-<<<<<<< HEAD
-        "entity-store-global-state|10.2.0: 9bfc2a601b0b8a0074a21e134e2bace755bee5342fa7e666843d9c6c100d0d4f",
-        "entity-store-global-state|10.1.0: e142dccd899fda050613a1fc6414807296969934f97cbebe4a2b1dd02d20a4a0",
-=======
+        "entity-store-global-state|10.2.0: 59af4b054bdf0f18bdd6bfa61596fc2988f0ad1c0f1c39d734b4edc9fa03fbf9",
         "entity-store-global-state|10.1.0: eb728491610633034b69989c68b158805d5d67e5acb4dcb075ecb785729f81e0",
->>>>>>> main
         "==================================================================================================",
         "epm-packages|global: 9d90d41b665a6b53aa6e984ad0e100ff733e05b9",
         "epm-packages|mappings: 1cbcdbf7f2f945430538f54a97fafaa76b428223",
