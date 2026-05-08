@@ -7,13 +7,25 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
+import {
+  definitionToESQLQuery,
+  ensureMetadata,
+  getParentId,
+  isDraftStream,
+  mergeSourceIntoDocuments,
+  Streams,
+  stripOtelAliases,
+  withUnmappedFieldsDirective,
+} from '@kbn/streams-schema';
+import { BasicPrettyPrinter, Builder, Parser } from '@elastic/esql';
 import type { ErrorActorEvent } from 'xstate';
 import { fromObservable } from 'xstate';
 import type { errors as esErrors } from '@elastic/elasticsearch';
 import type { EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { Observable, filter, from, map, of, tap } from 'rxjs';
+import { getESQLResults } from '@kbn/esql-utils';
+import { Observable, filter, from, map, of, switchMap, tap } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { IEsSearchResponse } from '@kbn/search-types';
 import { pick } from 'lodash';
@@ -21,6 +33,7 @@ import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { EnrichmentDataSource } from '../../../../../../../common/url_schema';
 import type { StreamsTelemetryClient } from '../../../../../../telemetry/client';
 import { getFormattedError } from '../../../../../../util/errors';
+import { esqlResultToPlainObjects } from '../../../../../../util/esql_result_to_plain_objects';
 import type { DataSourceMachineDeps } from './types';
 import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
@@ -28,6 +41,7 @@ export interface SamplesFetchInput {
   dataSource: EnrichmentDataSourceWithUIAttributes;
   streamName: string;
   streamType: 'wired' | 'classic' | 'unknown';
+  isDraft?: boolean;
 }
 
 interface SearchParamsOptions {
@@ -53,7 +67,7 @@ type CollectorParams = Pick<
 
 interface FailureStoreCollectorParams {
   streamsRepositoryClient: StreamsRepositoryClient;
-  index: string;
+  streamName: string;
   telemetryClient: StreamsTelemetryClient;
   streamType: 'wired' | 'classic' | 'unknown';
   timeRange?: { from: string; to: string };
@@ -74,10 +88,51 @@ export function createDataCollectorActor({
   'data' | 'telemetryClient' | 'streamsRepositoryClient' | 'uiSettings'
 >) {
   return fromObservable<SampleDocument[], SamplesFetchInput>(({ input }) => {
-    const { dataSource, streamName, streamType } = input;
+    const { dataSource, streamName, streamType, isDraft } = input;
+
+    const isSearchBased = dataSource.type === 'latest-samples' || dataSource.type === 'kql-samples';
+
+    if (isDraft && isSearchBased) {
+      return from(resolveDraftSampleSource(streamsRepositoryClient, streamName)).pipe(
+        switchMap(({ baseQuery }) => {
+          const { root } = Parser.parse(ensureMetadata(baseQuery));
+
+          root.commands.push(
+            Builder.command({
+              name: 'sort',
+              args: [
+                Builder.expression.order(Builder.expression.column('@timestamp'), {
+                  order: 'DESC',
+                  nulls: '',
+                }),
+              ],
+            }),
+            Builder.command({
+              name: 'limit',
+              args: [Builder.expression.literal.integer(100)],
+            })
+          );
+          const esqlQuery = withUnmappedFieldsDirective(
+            BasicPrettyPrinter.multiline(root, { pipeTab: '' })
+          );
+
+          return collectEsqlSamples({
+            data,
+            telemetryClient,
+            streamType,
+            streamName,
+            dataSourceType: dataSource.type,
+            esqlQuery,
+            mergeSource: true,
+          });
+        })
+      );
+    }
+
     return getDataCollectorForDataSource(dataSource)({
       data,
       index: streamName,
+      streamName,
       telemetryClient,
       streamType,
       streamsRepositoryClient,
@@ -86,9 +141,71 @@ export function createDataCollectorActor({
   });
 }
 
+interface DraftSampleSource {
+  baseQuery: string;
+}
+
+/**
+ * Builds an ES|QL query for fetching pre-processing samples for a draft
+ * stream. Uses `definitionToESQLQuery` with `includeProcessing: false` so
+ * the query includes the parent FROM source, routing condition casts, and
+ * WHERE clause — but omits processing steps and field-type casts. This
+ * keeps a single source of truth for the draft query shape.
+ *
+ * Falls back to a simple `FROM <root>` when the parent cannot be resolved.
+ */
+async function resolveDraftSampleSource(
+  streamsRepositoryClient: StreamsRepositoryClient,
+  streamName: string
+): Promise<DraftSampleSource> {
+  const parentId = getParentId(streamName);
+  if (!parentId) {
+    throw new Error(`Draft stream "${streamName}" must have a parent stream`);
+  }
+
+  const [draftDef, parentDef] = await Promise.all([
+    streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
+      signal: null,
+      params: { path: { name: streamName } },
+    }),
+    streamsRepositoryClient.fetch('GET /api/streams/{name} 2023-10-31', {
+      signal: null,
+      params: { path: { name: parentId } },
+    }),
+  ]);
+
+  if (
+    !Streams.WiredStream.GetResponse.is(draftDef) ||
+    !Streams.WiredStream.GetResponse.is(parentDef)
+  ) {
+    throw new Error(
+      `Draft stream "${streamName}" and parent "${parentId}" must both be wired streams`
+    );
+  }
+
+  const routingEntry = parentDef.stream.ingest.wired.routing.find(
+    (r) => r.destination === streamName
+  );
+  const routingCondition = routingEntry?.where ?? { always: {} };
+
+  const parentIsDraft = isDraftStream(parentDef.stream);
+
+  const baseQuery = await definitionToESQLQuery({
+    definition: draftDef.stream,
+    routingCondition,
+    inheritedFields: parentIsDraft
+      ? undefined
+      : { ...parentDef.inherited_fields, ...parentDef.stream.ingest.wired.fields },
+    includeProcessing: false,
+  });
+
+  return { baseQuery };
+}
+
 type AllCollectorParams = CollectorParams & {
   streamsRepositoryClient: StreamsRepositoryClient;
   uiSettings: DataSourceMachineDeps['uiSettings'];
+  streamName: string;
 };
 
 /**
@@ -99,7 +216,7 @@ function getDataCollectorForDataSource(dataSource: EnrichmentDataSourceWithUIAtt
     return (args: AllCollectorParams) =>
       collectFailureStoreData({
         streamsRepositoryClient: args.streamsRepositoryClient,
-        index: args.index,
+        streamName: args.streamName,
         telemetryClient: args.telemetryClient,
         streamType: args.streamType,
         timeRange: dataSource.timeRange,
@@ -130,7 +247,7 @@ function collectFailureStoreData({
   streamsRepositoryClient,
   telemetryClient,
   streamType,
-  index,
+  streamName,
   timeRange,
 }: FailureStoreCollectorParams): Observable<SampleDocument[]> {
   const abortController = new AbortController();
@@ -144,7 +261,7 @@ function collectFailureStoreData({
         {
           signal: abortController.signal,
           params: {
-            path: { name: index },
+            path: { name: streamName },
             query: {
               size: 100,
               ...(timeRange?.from && { start: timeRange.from }),
@@ -158,7 +275,7 @@ function collectFailureStoreData({
         tap({
           subscribe: () => {
             registerFetchLatency = telemetryClient.startTrackingSimulationSamplesFetchLatency({
-              stream_name: index,
+              stream_name: streamName,
               stream_type: streamType,
               data_source_type: 'failure-store',
             });
@@ -181,6 +298,78 @@ function collectFailureStoreData({
 /**
  * Core function to collect data using KQL
  */
+function collectEsqlSamples({
+  data,
+  telemetryClient,
+  streamType,
+  streamName,
+  dataSourceType,
+  esqlQuery,
+  filter: userFilter,
+  timeRange,
+  mergeSource = false,
+}: {
+  data: DataSourceMachineDeps['data'];
+  telemetryClient: StreamsTelemetryClient;
+  streamType: 'wired' | 'classic' | 'unknown';
+  streamName: string;
+  dataSourceType: EnrichmentDataSource['type'];
+  esqlQuery: string;
+  filter?: ReturnType<typeof buildEsQuery>;
+  timeRange?: TimeRange;
+  mergeSource?: boolean;
+}): Observable<SampleDocument[]> {
+  const abortController = new AbortController();
+
+  return new Observable((observer) => {
+    let registerFetchLatency: () => void = () => {};
+
+    const execute = async () => {
+      registerFetchLatency = telemetryClient.startTrackingSimulationSamplesFetchLatency({
+        stream_name: streamName,
+        stream_type: streamType,
+        data_source_type: dataSourceType,
+      });
+
+      const { response } = await getESQLResults({
+        esqlQuery,
+        search: data.search.search,
+        signal: abortController.signal,
+        filter: userFilter,
+        timeRange: timeRange
+          ? { from: timeRange.from, to: timeRange.to, mode: 'absolute' as const }
+          : undefined,
+      });
+
+      let docs = esqlResultToPlainObjects<SampleDocument>(response);
+
+      if (mergeSource) {
+        docs = mergeSourceIntoDocuments(docs);
+      }
+
+      return stripOtelAliases(docs);
+    };
+
+    execute()
+      .then((docs) => {
+        observer.next(docs);
+        observer.complete();
+      })
+      .catch((err) => {
+        if (!abortController.signal.aborted) {
+          observer.error(err);
+        }
+      })
+      .finally(() => {
+        registerFetchLatency();
+      });
+
+    return () => {
+      abortController.abort();
+    };
+  });
+}
+
 function collectKqlData({
   data,
   telemetryClient,

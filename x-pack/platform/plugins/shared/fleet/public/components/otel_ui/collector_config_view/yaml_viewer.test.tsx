@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { dump } from 'js-yaml';
 
 import type { OTelCollectorConfig } from '../../../../common/types';
@@ -42,13 +42,11 @@ const config: OTelCollectorConfig = {
 };
 
 describe('YamlViewer', () => {
-  it('renders collapsed by default', () => {
+  it('renders the code block with YAML content', () => {
     render(<YamlViewer config={config} />);
 
-    const accordion = screen.getByTestId('otelYamlViewer');
-    expect(accordion).toBeInTheDocument();
-    // The code block content should not be visible until expanded
-    expect(screen.queryByTestId('otelYamlViewerCodeBlock')).not.toBeVisible();
+    expect(screen.getByTestId('otelYamlViewer')).toBeInTheDocument();
+    expect(screen.getByTestId('otelYamlViewerCodeBlock')).toBeVisible();
   });
 
   it('shows the title "Effective configuration (YAML)"', () => {
@@ -66,27 +64,19 @@ describe('YamlViewer', () => {
     expect(screen.getByText(`${lineCount} lines`)).toBeInTheDocument();
   });
 
-  it('reveals YAML content when expanded', () => {
+  it('renders YAML content with all top-level sections', () => {
     render(<YamlViewer config={config} />);
-
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
-
-    expect(screen.getByTestId('otelYamlViewerCodeBlock')).toBeVisible();
-    expect(screen.getByText(/otlp:/)).toBeInTheDocument();
-    expect(screen.getByText(/0\.0\.0\.0:4317/)).toBeInTheDocument();
-  });
-
-  it('renders valid YAML including all top-level sections', () => {
-    render(<YamlViewer config={config} />);
-
-    const button = screen.getByRole('button');
-    fireEvent.click(button);
 
     expect(screen.getByText(/receivers:/)).toBeInTheDocument();
     expect(screen.getByText(/processors:/)).toBeInTheDocument();
     expect(screen.getByText(/exporters:/)).toBeInTheDocument();
     expect(screen.getByText(/service:/)).toBeInTheDocument();
+  });
+
+  it('renders a download button', () => {
+    render(<YamlViewer config={config} />);
+
+    expect(screen.getByTestId('otelYamlViewerDownload')).toBeInTheDocument();
   });
 
   it('handles an empty config without crashing', () => {
