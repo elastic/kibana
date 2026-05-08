@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiHorizontalRule,
   EuiTextArea,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,10 +31,12 @@ import type {
 import {
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
+  hasEscaping,
 } from '@kbn/securitysolution-list-utils';
 import {
   WildCardWithWrongOperatorCallout,
   PartialCodeSignatureCallout,
+  UnnecessaryEscapingCallout,
 } from '@kbn/securitysolution-exception-list-components';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
@@ -150,6 +153,9 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
     const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] = useState<boolean>(
       hasWrongOperatorWithWildcard([exception])
     );
+    const [hasUnnecessaryEscaping, setHasUnnecessaryEscaping] = useState<boolean>(
+      hasEscaping([exception])
+    );
     const [hasPartialCodeSignatureWarning, setHasPartialCodeSignatureWarning] = useState<boolean>(
       hasPartialCodeSignatureEntry([exception])
     );
@@ -204,19 +210,21 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
           item,
           additionalEntries: addEntries,
           isValid: isFormValid && areConditionsValid && hasFormChanged,
-          confirmModalLabels: hasWildcardWithWrongOperator
-            ? CONFIRM_WARNING_MODAL_LABELS(
-                i18n.translate(
-                  'xpack.securitySolution.endpointException.flyoutForm.confirmModal.name',
+          confirmModalLabels:
+            hasWildcardWithWrongOperator || hasUnnecessaryEscaping
+              ? CONFIRM_WARNING_MODAL_LABELS(
+                  i18n.translate(
+                    'xpack.securitySolution.endpointException.flyoutForm.confirmModal.name',
+                    {
+                      defaultMessage: 'endpoint exception',
+                    }
+                  ),
                   {
-                    defaultMessage: 'endpoint exception',
+                    hasWildcardWithWrongOperator,
+                    hasUnnecessaryEscaping,
                   }
-                ),
-                {
-                  hasWildcardWithWrongOperator,
-                }
-              )
-            : undefined,
+                )
+              : undefined,
         });
       },
       [
@@ -227,6 +235,7 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
         areConditionsValid,
         hasFormChanged,
         hasWildcardWithWrongOperator,
+        hasUnnecessaryEscaping,
       ]
     );
 
@@ -438,8 +447,8 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
           setHasDuplicateFields(false);
         }
 
-        // handle wildcard with wrong operator case
         setHasWildcardWithWrongOperator(hasWrongOperatorWithWildcard(arg.exceptionItems));
+        setHasUnnecessaryEscaping(hasEscaping(arg.exceptionItems));
         setHasPartialCodeSignatureWarning(hasPartialCodeSignatureEntry(arg.exceptionItems));
 
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =
@@ -586,9 +595,12 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
         {detailsSection}
         <EuiHorizontalRule />
         {criteriaSection}
-        {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
-        {hasWildcardWithWrongOperator && hasPartialCodeSignatureWarning && <EuiSpacer size="xs" />}
-        {hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+          {hasUnnecessaryEscaping && <UnnecessaryEscapingCallout />}
+          {hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+        </EuiFlexGroup>
+
         {hasDuplicateFields && (
           <>
             <EuiSpacer size="xs" />

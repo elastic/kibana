@@ -443,34 +443,114 @@ describe('Endpoint exceptions form', () => {
       });
     });
 
-    describe('wildcard with wrong operator', () => {
-      beforeEach(() => {
-        formProps.item.name = 'test name';
-        formProps.item.entries = [
-          {
-            field: 'process.code_signature.subject_name',
-            operator: 'included',
-            type: 'match',
-            value: 'C:\\*\\test.exe',
-          },
-        ];
+    describe('warnings', () => {
+      describe('wildcard with wrong operator', () => {
+        beforeEach(() => {
+          formProps.item.name = 'test name';
+          formProps.item.entries = [
+            {
+              field: 'process.code_signature.subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'C:\\abc*\\test.exe',
+            },
+          ];
+        });
+
+        it('should display warning when wildcard is used with IS operator', async () => {
+          await act(() => render());
+
+          expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeInTheDocument();
+          expect(renderResult.queryByTestId('unnecessaryEscapingCallout')).not.toBeInTheDocument();
+        });
+
+        it('should provide confirm modal labels when wildcard warning exists', async () => {
+          render();
+
+          await waitFor(() => {
+            expect(formProps.onChange).toHaveBeenCalledWith(
+              expect.objectContaining({
+                confirmModalLabels: expect.objectContaining({
+                  listOfWarnings: [expect.stringContaining('wildcards')],
+                }),
+              })
+            );
+          });
+        });
       });
 
-      it('should display warning when wildcard is used with IS operator', async () => {
-        await act(() => render());
+      describe('unnecessary escaping', () => {
+        beforeEach(() => {
+          formProps.item.name = 'test name';
+          formProps.item.entries = [
+            {
+              field: 'process.code_signature.subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'C:\\\\abc\\\\test.exe',
+            },
+          ];
+        });
 
-        expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeInTheDocument();
+        it('should display warning when escaping is used', async () => {
+          await act(() => render());
+
+          expect(
+            renderResult.queryByTestId('wildcardWithWrongOperatorCallout')
+          ).not.toBeInTheDocument();
+          expect(renderResult.getByTestId('unnecessaryEscapingCallout')).toBeInTheDocument();
+        });
+
+        it('should provide confirm modal labels when unnecessary escaping warning exists', async () => {
+          render();
+
+          await waitFor(() => {
+            expect(formProps.onChange).toHaveBeenCalledWith(
+              expect.objectContaining({
+                confirmModalLabels: expect.objectContaining({
+                  listOfWarnings: [expect.stringContaining('escaping')],
+                }),
+              })
+            );
+          });
+        });
       });
 
-      it('should provide confirm modal labels when wildcard warning exists', async () => {
-        render();
+      describe('multiple warnings', () => {
+        beforeEach(() => {
+          formProps.item.name = 'test name';
+          formProps.item.entries = [
+            {
+              field: 'process.code_signature.subject_name',
+              operator: 'included',
+              type: 'match',
+              value: 'C:\\\\*\\\\test.exe',
+            },
+          ];
+        });
 
-        await waitFor(() => {
-          expect(formProps.onChange).toHaveBeenCalledWith(
-            expect.objectContaining({
-              confirmModalLabels: expect.anything(),
-            })
-          );
+        it('should display both warnings when both warnings exist', async () => {
+          await act(() => render());
+
+          expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeInTheDocument();
+          expect(renderResult.getByTestId('unnecessaryEscapingCallout')).toBeInTheDocument();
+        });
+
+        it('should provide confirm modal labels when both warnings exist', async () => {
+          render();
+
+          await waitFor(() => {
+            expect(formProps.onChange).toHaveBeenCalledWith(
+              expect.objectContaining({
+                confirmModalLabels: expect.objectContaining({
+                  listOfWarnings: [
+                    expect.stringContaining('wildcards'),
+                    expect.stringContaining('escaping'),
+                  ],
+                }),
+              })
+            );
+          });
         });
       });
     });
