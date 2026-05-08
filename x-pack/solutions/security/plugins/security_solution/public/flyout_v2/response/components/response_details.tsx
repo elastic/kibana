@@ -38,7 +38,7 @@ export const ResponseDetailsContent: React.FC<ResponseDetailsContentProps> = ({
     <div data-test-subj={RESPONSE_DETAILS_TEST_ID}>
       {isRulePreview ? (
         <FormattedMessage
-          id="xpack.securitySolution.flyout.left.response.previewMessage"
+          id="xpack.securitySolution.flyout.response.previewMessage"
           defaultMessage="Response is not available in alert preview."
         />
       ) : (
@@ -46,7 +46,7 @@ export const ResponseDetailsContent: React.FC<ResponseDetailsContentProps> = ({
           <EuiTitle size="xxxs">
             <h5>
               <FormattedMessage
-                id="xpack.securitySolution.flyout.left.response.responseTitle"
+                id="xpack.securitySolution.flyout.response.responseTitle"
                 defaultMessage="Responses"
               />
             </h5>

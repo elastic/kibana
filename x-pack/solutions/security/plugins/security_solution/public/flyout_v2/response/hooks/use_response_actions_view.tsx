@@ -37,7 +37,7 @@ const EmptyResponseActions = () => {
   return (
     <div css={emptyResponseActionsCss} data-test-subj={RESPONSE_NO_DATA_TEST_ID}>
       <FormattedMessage
-        id="xpack.securitySolution.flyout.left.response.noDataDescription"
+        id="xpack.securitySolution.flyout.response.noDataDescription"
         defaultMessage="There are no response actions defined for this event. To add some, edit the rule's settings and set up {link}."
         values={{
           link: (
@@ -46,7 +46,7 @@ const EmptyResponseActions = () => {
               target="_blank"
             >
               <FormattedMessage
-                id="xpack.securitySolution.flyout.left.response.noDataLinkText"
+                id="xpack.securitySolution.flyout.response.noDataLinkText"
                 defaultMessage="response actions"
               />
             </EuiLink>

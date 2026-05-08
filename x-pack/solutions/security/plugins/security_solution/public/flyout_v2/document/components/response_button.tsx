@@ -26,7 +26,7 @@ export const ResponseButton: React.FC<ResponseButtonProps> = ({ onShowResponseDe
       size="s"
     >
       <FormattedMessage
-        id="xpack.securitySolution.flyout.right.response.responseButtonLabel"
+        id="xpack.securitySolution.flyout.response.responseButtonLabel"
         defaultMessage="Response"
       />
     </EuiButton>

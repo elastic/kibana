@@ -98,17 +98,17 @@ export const ResponseSection = memo<ResponseSectionProps>(
             size="s"
             title={
               <FormattedMessage
-                id="xpack.securitySolution.flyout.right.response.previewTitle"
+                id="xpack.securitySolution.flyout.response.previewTitle"
                 defaultMessage="Response actions"
               />
             }
             aria-label={i18n.translate(
-              'xpack.securitySolution.flyout.right.response.previewAriaLabel',
+              'xpack.securitySolution.flyout.response.previewAriaLabel',
               { defaultMessage: 'Response actions' }
             )}
           >
             <FormattedMessage
-              id="xpack.securitySolution.flyout.right.response.previewMessage"
+              id="xpack.securitySolution.flyout.response.previewMessage"
               defaultMessage="Response is not available in alert preview."
             />
           </EuiCallOut>
@@ -131,7 +131,7 @@ export const ResponseSection = memo<ResponseSectionProps>(
         expanded={expanded}
         title={
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.response.sectionTitle"
+            id="xpack.securitySolution.flyout.response.sectionTitle"
             defaultMessage="Response"
           />
         }
