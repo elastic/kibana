@@ -74,6 +74,7 @@ export {
 } from './utils/cascaded_documents_helpers/utils';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
 export { isComputedColumn, getQuerySummary } from './utils/get_query_summary';
+export { resolveRenamedSourceField } from './utils/resolve_renamed_source_field';
 export { getAllEsqlControls, getEsqlControls } from './utils/get_esql_controls';
 export { convertFiltersToESQLExpression } from './utils/convert_filters_to_esql';
 export { convertQueryToESQLExpression } from './utils/convert_query_to_esql';

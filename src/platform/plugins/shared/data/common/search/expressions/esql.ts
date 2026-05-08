@@ -28,6 +28,7 @@ import {
   mapVariableToColumn,
   isComputedColumn,
   getQuerySummary,
+  resolveRenamedSourceField,
 } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import type { Observable } from 'rxjs';
@@ -376,6 +377,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               const kibanaFieldType = hasConflict
                 ? KBN_FIELD_TYPES.CONFLICT
                 : esFieldTypeToKibanaFieldType(type);
+
               return {
                 id: name,
                 name,
@@ -392,7 +394,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                         }
                       : {
                           indexPattern,
-                          sourceField: name,
+                          sourceField: resolveRenamedSourceField(
+                            name,
+                            querySummary.renamedColumnsPairs
+                          ),
                         },
                   params: {
                     id: kibanaFieldType,
