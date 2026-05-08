@@ -190,7 +190,8 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
             ? CONFIRM_WARNING_MODAL_LABELS(
                 i18n.translate('xpack.securitySolution.eventFilter.flyoutForm.confirmModal.name', {
                   defaultMessage: 'event filter',
-                })
+                }),
+                { hasWildcardWithWrongOperator }
               )
             : undefined,
         });

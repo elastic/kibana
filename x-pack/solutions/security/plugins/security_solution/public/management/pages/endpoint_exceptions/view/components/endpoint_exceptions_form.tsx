@@ -211,7 +211,10 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
                   {
                     defaultMessage: 'endpoint exception',
                   }
-                )
+                ),
+                {
+                  hasWildcardWithWrongOperator,
+                }
               )
             : undefined,
         });

@@ -402,7 +402,8 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             ? CONFIRM_WARNING_MODAL_LABELS(
                 i18n.translate('xpack.securitySolution.trustedApps.flyoutForm.confirmModal.name', {
                   defaultMessage: 'trusted application',
-                })
+                }),
+                { hasWildcardWithWrongOperator: updatedValidationResult.extraWarning }
               )
             : undefined,
         });
@@ -891,7 +892,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             <EuiSpacer size="s" />
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type="warningFill" size="s" color="warning" />
+                <EuiIcon type="warningFill" size="s" color="warning" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText

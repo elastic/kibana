@@ -15,30 +15,28 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiText,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+import type { ArtifactConfirmModalLabelProps } from '../types';
 
-interface ConfirmArtifactModalProps {
-  title: string;
-  body: string;
-  confirmButton: string;
-  cancelButton: string;
+interface ArtifactConfirmModalProps {
+  labels: ArtifactConfirmModalLabelProps;
   onCancel: () => void;
   onSuccess: () => void;
   'data-test-subj'?: string;
 }
 
-export const ArtifactConfirmModal = memo<ConfirmArtifactModalProps>(
+export const ArtifactConfirmModal = memo<ArtifactConfirmModalProps>(
   ({
-    title,
-    body,
-    confirmButton,
-    cancelButton,
+    labels: { title, warningsHeader, listOfWarnings, warningsFooter, confirmButton, cancelButton },
     onCancel,
     onSuccess,
     'data-test-subj': dataTestSubj,
   }) => {
+    const { euiTheme } = useEuiTheme();
     const getTestId = useTestIdGenerator(dataTestSubj);
     const artifactConfirmModalTitleId = useGeneratedHtmlId();
 
@@ -54,7 +52,22 @@ export const ArtifactConfirmModal = memo<ConfirmArtifactModalProps>(
 
         <EuiModalBody data-test-subj={getTestId('body')}>
           <EuiText>
-            <p>{body}</p>
+            <p>{warningsHeader}</p>
+
+            <ul>
+              {listOfWarnings.map((warning, index) => (
+                <li
+                  key={index}
+                  css={css`
+                    margin-bottom: ${euiTheme.size.s};
+                  `}
+                >
+                  {warning}
+                </li>
+              ))}
+            </ul>
+
+            <p>{warningsFooter}</p>
           </EuiText>
         </EuiModalBody>
 

@@ -47,7 +47,9 @@ export interface ArtifactFormComponentOnChangeCallbackProps {
 
 export interface ArtifactConfirmModalLabelProps {
   title: string;
-  body: string;
+  warningsHeader: string;
+  listOfWarnings: string[];
+  warningsFooter: string;
   confirmButton: string;
   cancelButton: string;
 }
