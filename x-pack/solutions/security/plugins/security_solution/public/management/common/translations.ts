@@ -487,7 +487,7 @@ export const MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS = {
 
 export const CONFIRM_WARNING_MODAL_LABELS = (
   entryType: string,
-  warnings: Partial<{ hasWildcardWithWrongOperator: boolean }>
+  warnings: Partial<{ hasWildcardWithWrongOperator: boolean; hasUnnecessaryEscaping: boolean }>
 ): ArtifactConfirmModalLabelProps => {
   const listOfWarnings: string[] = [
     ...(warnings.hasWildcardWithWrongOperator
@@ -497,6 +497,18 @@ export const CONFIRM_WARNING_MODAL_LABELS = (
             {
               defaultMessage:
                 'Using a "*" or a "?" in the value with the "is" operator can make the entry ineffective. Change the operator to "matches" to ensure wildcards run properly.',
+            }
+          ),
+        ]
+      : []),
+
+    ...(warnings.hasUnnecessaryEscaping
+      ? [
+          i18n.translate(
+            'xpack.securitySolution.artifacts.confirmWarningModal.unnecessaryEscaping',
+            {
+              defaultMessage:
+                'Endpoint artifacts do not require escaping when using "\\", "*" or "?" characters.',
             }
           ),
         ]
