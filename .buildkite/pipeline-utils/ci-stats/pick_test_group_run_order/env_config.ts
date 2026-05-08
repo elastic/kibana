@@ -63,7 +63,7 @@ export function loadRunOrderConfig() {
     // default true on PRs
     useSelectiveTesting:
       Boolean(process.env.GITHUB_PR_NUMBER) &&
-      !process.env.GITHUB_PR_LABELS?.includes(PREVENT_SELECTIVE_TESTS_LABEL),
+      !(parseCsvEnv('GITHUB_PR_LABELS') ?? []).includes(PREVENT_SELECTIVE_TESTS_LABEL),
     prMergeBase: process.env.GITHUB_PR_MERGE_BASE || undefined,
     prNumber: process.env.GITHUB_PR_NUMBER || undefined,
   } as const;
