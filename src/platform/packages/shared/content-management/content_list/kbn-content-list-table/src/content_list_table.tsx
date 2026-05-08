@@ -31,6 +31,7 @@ import {
 import { Action as BaseAction, EditAction, DeleteAction, InspectAction } from './action';
 import { useColumns, useSorting, useSelection } from './hooks';
 import { TableSkeleton } from './skeleton/table_skeleton';
+import { WIDE_VIEWPORT_NAME_BREAKPOINT_PX } from './breakpoints';
 
 /**
  * Props for ContentListTable component.
@@ -185,17 +186,6 @@ const cssTrailingSpacer = (euiTheme: EuiThemeComputed) => css`
     }
   }
 `;
-
-/**
- * Viewport width (px) at which `Column.Name` is allowed to grow past its
- * default `64em` cap. `2560px` matches a common 4K external display width
- * — at that size the default footprint leaves enough trailing whitespace
- * that giving some of it back to the title column is a clear win.
- *
- * Not tied to a named EUI breakpoint because EUI tops out at `xl` (~1200px),
- * so the value would have to be a hard-coded magic number either way.
- */
-export const WIDE_VIEWPORT_NAME_BREAKPOINT_PX = 2560;
 
 /**
  * Preferred {@link DEFAULT_NAME_WIDTH} bump applied at viewports

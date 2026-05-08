@@ -12,7 +12,7 @@ import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
 
-import { WIDE_VIEWPORT_NAME_BREAKPOINT_PX } from '../../content_list_table';
+import { WIDE_VIEWPORT_NAME_BREAKPOINT_PX } from '../../breakpoints';
 
 import { StarButton } from '../starred/star_button';
 import { NameCellTitle as Title } from './cell_title';
