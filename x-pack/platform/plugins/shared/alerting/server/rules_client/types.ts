@@ -58,6 +58,7 @@ export type {
 } from './methods/get_execution_kpi';
 export type { GetGlobalExecutionSummaryParams } from './methods/get_execution_summary';
 export type { GetActionErrorLogByIdParams } from './methods/get_action_error_log';
+export type { GetRuleHistoryParams } from './methods/get_rule_history';
 
 export interface RulesClientContext {
   readonly logger: Logger;

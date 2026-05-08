@@ -39,7 +39,13 @@ export { RULE_SAVED_OBJECT_TYPE, API_KEY_PENDING_INVALIDATION_TYPE } from './sav
 export { RuleNotifyWhen } from '../common';
 export type { AlertingServerSetup, AlertingServerStart } from './plugin';
 export type { RulesClientCreateOptions } from './rules_client_factory';
-export type { FindResult, BulkEditOperation, BulkOperationError } from './rules_client';
+export type {
+  FindResult,
+  BulkEditOperation,
+  BulkOperationError,
+  GetRuleHistoryParams,
+  RuleChangeTrackingDisabledError,
+} from './rules_client';
 export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration, isRuleSnoozed } from './lib';

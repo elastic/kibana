@@ -1,0 +1,273 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ConstructorOptions } from '../rules_client';
+import { RulesClient } from '../rules_client';
+import { RuleChangeTrackingDisabledError } from '../methods/get_rule_history';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+  coreFeatureFlagsMock,
+} from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
+import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import type { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
+import type { SavedObject } from '@kbn/core/server';
+import type { RawRule } from '../../types';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
+import { ConnectorAdapterRegistry } from '../../connector_adapters/connector_adapter_registry';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { backfillClientMock } from '../../backfill_client/backfill_client.mock';
+import type { IScopedChangeTrackingService } from '../lib/change_tracking';
+
+describe('getHistory()', () => {
+  const taskManager = taskManagerMock.createStart();
+  const ruleTypeRegistry = ruleTypeRegistryMock.create();
+  const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+  const eventLogClient = eventLogClientMock.create();
+
+  const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
+  const authorization = alertingAuthorizationMock.create();
+  const actionsAuthorization = actionsAuthorizationMock.create();
+  const auditLogger = auditLoggerMock.create();
+  const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+
+  const changeTrackingService: jest.Mocked<IScopedChangeTrackingService> = {
+    log: jest.fn(),
+    logBulk: jest.fn(),
+    getHistory: jest.fn(),
+  };
+
+  const kibanaVersion = 'v9.5.0';
+  const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+    taskManager,
+    ruleTypeRegistry,
+    unsecuredSavedObjectsClient,
+    authorization: authorization as unknown as AlertingAuthorization,
+    actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
+    spaceId: 'default',
+    namespace: 'default',
+    maxScheduledPerMinute: 10000,
+    minimumScheduleInterval: { value: '1m', enforce: false },
+    getUserName: jest.fn(),
+    createAPIKey: jest.fn(),
+    cloneAPIKey: jest.fn(),
+    logger: loggingSystemMock.create().get(),
+    internalSavedObjectsRepository,
+    encryptedSavedObjectsClient: encryptedSavedObjects,
+    getActionsClient: jest.fn(),
+    getEventLogClient: jest.fn(),
+    kibanaVersion,
+    auditLogger,
+    isAuthenticationTypeAPIKey: jest.fn(),
+    getAuthenticationAPIKey: jest.fn(),
+    connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+    getAlertIndicesAlias: jest.fn(),
+    alertsService: null,
+    backfillClient: backfillClientMock.create(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
+    isSystemAction: jest.fn(),
+    featureFlags: coreFeatureFlagsMock.createStart(),
+    isServerless: false,
+    changeTrackingService,
+  };
+
+  beforeEach(() => {
+    getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry, eventLogClient);
+    (auditLogger.log as jest.Mock).mockClear();
+    changeTrackingService.log.mockReset();
+    changeTrackingService.logBulk.mockReset();
+    changeTrackingService.getHistory.mockReset();
+    changeTrackingService.getHistory.mockResolvedValue({ total: 0, items: [] });
+  });
+
+  setGlobalDate();
+
+  const RuleIntervalSeconds = 1;
+
+  const getRuleSavedObject = (): SavedObject<RawRule> => ({
+    id: '1',
+    type: RULE_SAVED_OBJECT_TYPE,
+    attributes: {
+      enabled: true,
+      name: 'rule-name',
+      tags: ['tag-1', 'tag-2'],
+      alertTypeId: '123',
+      consumer: 'rule-consumer',
+      legacyId: null,
+      schedule: { interval: `${RuleIntervalSeconds}s` },
+      actions: [],
+      params: {},
+      createdBy: null,
+      updatedBy: null,
+      createdAt: mockedDateString,
+      updatedAt: mockedDateString,
+      apiKey: null,
+      apiKeyOwner: null,
+      throttle: null,
+      notifyWhen: null,
+      muteAll: false,
+      mutedInstanceIds: [],
+      executionStatus: {
+        status: 'unknown',
+        lastExecutionDate: '2020-08-20T19:23:38Z',
+        error: null,
+        warning: null,
+      },
+      revision: 0,
+    },
+    references: [],
+  });
+
+  let rulesClient: RulesClient;
+
+  beforeEach(() => {
+    rulesClient = new RulesClient(rulesClientParams);
+  });
+
+  test('throws RuleChangeTrackingDisabledError when changeTrackingService is not configured', async () => {
+    const clientWithoutTracking = new RulesClient({
+      ...rulesClientParams,
+      changeTrackingService: undefined,
+    });
+
+    await expect(
+      clientWithoutTracking.getHistory({ module: 'security', ruleId: '1' })
+    ).rejects.toBeInstanceOf(RuleChangeTrackingDisabledError);
+
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(authorization.ensureAuthorized).not.toHaveBeenCalled();
+    expect(changeTrackingService.getHistory).not.toHaveBeenCalled();
+  });
+
+  test('returns result from the change tracking service', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
+    const items = [{ '@timestamp': '2026-01-01T00:00:00.000Z' }];
+    changeTrackingService.getHistory.mockResolvedValueOnce({ total: 1, items: items as never[] });
+
+    const result = await rulesClient.getHistory({ module: 'security', ruleId: '1' });
+
+    expect(result).toEqual({ total: 1, items });
+  });
+
+  test('forwards default pagination to the change tracking service', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
+
+    await rulesClient.getHistory({ module: 'security', ruleId: '1' });
+
+    expect(changeTrackingService.getHistory).toHaveBeenCalledTimes(1);
+    expect(changeTrackingService.getHistory).toHaveBeenCalledWith('security', 'default', '1', {
+      from: 0,
+      size: 20,
+    });
+  });
+
+  test('forwards custom pagination and sort to the change tracking service', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
+
+    await rulesClient.getHistory({
+      module: 'security',
+      ruleId: '1',
+      page: 3,
+      perPage: 50,
+      sort: [{ '@timestamp': { order: 'asc' } }],
+    });
+
+    expect(changeTrackingService.getHistory).toHaveBeenCalledWith('security', 'default', '1', {
+      from: 100,
+      size: 50,
+      sort: [{ '@timestamp': { order: 'asc' } }],
+    });
+  });
+
+  test('forwards module param to the change tracking service', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
+
+    await rulesClient.getHistory({ module: 'observability', ruleId: '1' });
+
+    expect(changeTrackingService.getHistory).toHaveBeenCalledWith(
+      'observability',
+      'default',
+      '1',
+      expect.any(Object)
+    );
+  });
+
+  describe('authorization', () => {
+    test('ensures the user is authorised to read the rule via the GetHistory operation', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
+
+      await rulesClient.getHistory({ module: 'security', ruleId: '1' });
+
+      // authorize is called twice: once by getRule (Get) and once by getHistory (GetHistory).
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        entity: 'rule',
+        consumer: 'rule-consumer',
+        operation: 'getHistory',
+        ruleTypeId: '123',
+      });
+    });
+
+    test('throws when the user is not authorised', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
+      authorization.ensureAuthorized.mockRejectedValueOnce(new Error('Unauthorized'));
+
+      await expect(rulesClient.getHistory({ module: 'security', ruleId: '1' })).rejects.toThrow(
+        'Unauthorized'
+      );
+
+      expect(changeTrackingService.getHistory).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('auditLogger', () => {
+    test('logs a success audit event', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
+
+      await rulesClient.getHistory({ module: 'security', ruleId: '1' });
+
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'rule_get_history',
+            outcome: 'success',
+          }),
+          kibana: { saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: 'rule-name' } },
+        })
+      );
+    });
+
+    test('logs a failure audit event when authorization is denied', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
+      authorization.ensureAuthorized.mockRejectedValueOnce(new Error('Unauthorized'));
+
+      await expect(rulesClient.getHistory({ module: 'security', ruleId: '1' })).rejects.toThrow(
+        'Unauthorized'
+      );
+
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'rule_get_history',
+            outcome: 'failure',
+          }),
+          kibana: {
+            saved_object: { id: '1', type: RULE_SAVED_OBJECT_TYPE, name: 'rule-name' },
+          },
+        })
+      );
+    });
+  });
+});
