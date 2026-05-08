@@ -20,6 +20,10 @@ import type { AlertInfo, EventInfo } from './types';
 const ALERT_CHUNK_SIZE = 500;
 const EVENT_CHUNK_SIZE = 500;
 
+// Generates `count` alert documents for `owner` and bulk-indexes them into
+// `alertIndex` in chunks. Returns the alertId/ruleId/ruleName tuples for each
+// successfully indexed doc, which are later used to build alert attachments.
+// Called by indexAlertsForOwners.
 export async function bulkIndexAlerts(
   esClient: Client,
   alertIndex: string,
@@ -69,6 +73,10 @@ export async function bulkIndexAlerts(
   return indexedAlerts;
 }
 
+// Generates `count` process-event documents and bulk-indexes them into
+// `eventIndex`. Returns eventId/index pairs for the docs that were created
+// successfully, used later to build event attachments. Called by run.ts when
+// --events > 0 and at least one non-observability case is being generated.
 export async function bulkIndexEvents(
   esClient: Client,
   eventIndex: string,
@@ -110,6 +118,10 @@ export async function bulkIndexEvents(
   return allEventInfos;
 }
 
+// Tallies how many alerts each owner needs across `cases`, indexes that many
+// docs into the right index per owner, and returns a map keyed by owner so
+// case_generation.ts can hand out alert attachments without re-indexing.
+// Called once per space by run.ts when --alerts > 0.
 export async function indexAlertsForOwners(
   esClient: Client,
   cases: CasePostRequest[],

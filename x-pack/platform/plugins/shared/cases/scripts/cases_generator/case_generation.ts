@@ -22,6 +22,9 @@ interface CreatedCaseRef {
   targetStatus: CaseStatus;
 }
 
+// Picks a target status for a generated case using a fixed mix
+// (~60% open, ~25% in-progress, ~15% closed). Used so the generated dataset
+// shows a realistic distribution rather than every case sitting in "open".
 function pickRandomStatus(): CaseStatus {
   const r = rng();
   if (r < 0.6) return 'open';
@@ -29,6 +32,10 @@ function pickRandomStatus(): CaseStatus {
   return 'closed';
 }
 
+// Re-fetches the current `version` for each case ref so the bulk PATCH won't
+// 409 on stale versions. Posting attachments bumps a case's version, so the
+// versions captured at create time are usually stale by the time we patch
+// statuses. Used by bulkPatchCaseStatuses.
 async function refreshCaseVersions(
   ctx: KbnContext,
   space: string,
@@ -59,6 +66,11 @@ async function refreshCaseVersions(
   return refreshed.filter((r): r is CreatedCaseRef => r !== null);
 }
 
+// Patches the status of every case whose target status is something other
+// than 'open' (which is the default at creation time). Refreshes versions
+// first so the bulk PATCH succeeds, then sends batched PATCHes. Called once
+// per space at the end of generateCases so the final dataset has a realistic
+// status mix.
 async function bulkPatchCaseStatuses({
   ctx,
   space,
@@ -116,6 +128,10 @@ interface PendingAttachment {
   record: CreatedAttachment;
 }
 
+// Posts the pending attachments for one case via the bulk_create attachments
+// endpoint, in batches of ATTACHMENT_BULK_LIMIT, and records the ones that
+// succeeded into `list` for the saved-object follow-up step. Called by
+// generateCases once per case after the case POST returns an id.
 async function postBulkAttachments({
   ctx,
   caseId,
@@ -157,6 +173,10 @@ async function postBulkAttachments({
   }
 }
 
+// Top-level per-space worker: POSTs every prebuilt case in `cases`,
+// attaches the requested number of comments/alerts/events to each, mirrors
+// those attachments into the saved-objects store, and then patches a random
+// mix of statuses on the result. Called once per target space by run.ts.
 export async function generateCases(
   {
     cases,

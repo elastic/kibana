@@ -31,11 +31,18 @@ const CASE_DELETE_BATCH_SIZE = 100;
 const TEMPLATE_DELETE_BATCH_SIZE = 1000;
 const FIND_PAGE_SIZE = 100;
 
+// True when an error message indicates the target object already exists
+// (HTTP 409 or "already exists" copy). Lets create-* helpers treat existing
+// spaces/templates/configs as success rather than crashing the run.
 function isAlreadyExistsError(err: unknown): boolean {
   const message = (err as Error).message ?? '';
   return message.includes('already exists') || message.includes('409');
 }
 
+// Builds the template-field definition object for the Nth field of a
+// generated template, mapping the user-facing control name (text, number,
+// date, …) to the {control, type, metadata} shape the cases template API
+// expects. Used by createTemplates.
 function buildTemplateField(
   index: number,
   userType: TemplateFieldUserType
@@ -111,6 +118,10 @@ function buildTemplateField(
   }
 }
 
+// Builds the saved object document for one case attachment so it can be sent
+// through the saved_objects/_bulk_create API. Used by bulkCreateAttachmentSOs
+// after the attachments themselves have been posted to the cases attachments
+// endpoint, so the saved-object index stays in sync.
 function buildAttachmentSO(attachment: CreatedAttachment) {
   const now = new Date().toISOString();
   const id = uuidv4();
@@ -146,6 +157,10 @@ function buildAttachmentSO(attachment: CreatedAttachment) {
   };
 }
 
+// Bulk-creates the cases-attachments saved objects for every attachment that
+// was successfully posted on a case. Called by case_generation.ts after the
+// per-case attachment loop, so the saved-object store mirrors what the cases
+// API recorded.
 export async function bulkCreateAttachmentSOs({
   ctx,
   attachments,
@@ -180,6 +195,11 @@ export async function bulkCreateAttachmentSOs({
   logger.info(`  [attachments SO] ${docs.length}/${docs.length}`);
 }
 
+// Creates each template in `templates` for the given owner+space via the
+// templates API, returning refs (id+version+fieldTypes) for the ones that
+// stuck. Called per template-owner by run.ts; the returned refs are later
+// attached to generated cases so cases can be linked to their template.
+// "Already exists" responses are logged and skipped.
 export async function createTemplates({
   ctx,
   space,
@@ -256,6 +276,8 @@ export async function createTemplates({
   return created;
 }
 
+// Creates a single Kibana space, no-op'ing on "already exists". Called via
+// pMap by createSpaces when --numSpaces > 0.
 export async function createSpace(ctx: KbnContext, spaceId: string): Promise<void> {
   try {
     await runWithRetry(
@@ -278,6 +300,9 @@ export async function createSpace(ctx: KbnContext, spaceId: string): Promise<voi
   }
 }
 
+// Materializes N spaces from a SpaceConfig (namePattern + count) and returns
+// the resolved space IDs in declaration order. Called by run.ts before
+// generating cases when multi-space mode is on.
 export async function createSpaces(ctx: KbnContext, config: SpaceConfig): Promise<string[]> {
   const spaceIds = Array.from({ length: config.count }, (_, i) =>
     config.namePattern.replace('{i}', String(i + 1))
@@ -288,6 +313,9 @@ export async function createSpaces(ctx: KbnContext, config: SpaceConfig): Promis
   return spaceIds;
 }
 
+// Turns on `analytics_enabled` in the cases configuration for one owner+space,
+// patching an existing config when present and creating a new one otherwise.
+// Called once per (owner, space) pair by enableAnalyticsForSpaces.
 export async function enableAnalyticsForOwner({
   ctx,
   space,
@@ -362,6 +390,9 @@ export async function enableAnalyticsForOwner({
   }
 }
 
+// Enables analytics for every (owner, space) cross-product, fanning out to
+// enableAnalyticsForOwner with bounded concurrency. Called once by run.ts
+// when --analyticsOwners is supplied.
 export async function enableAnalyticsForSpaces({
   ctx,
   spaces,
@@ -383,6 +414,9 @@ export async function enableAnalyticsForSpaces({
   });
 }
 
+// Pages through the cases _find API and returns every case ID that carries
+// the given tag in `space`. Used by cleanupCases to enumerate auto-generated
+// cases before deleting them.
 async function findCaseIdsByTag(ctx: KbnContext, space: string, tag: string): Promise<string[]> {
   const findPath = `${casesBasePath(space)}/api/cases/_find`;
   const ids: string[] = [];
@@ -407,6 +441,9 @@ async function findCaseIdsByTag(ctx: KbnContext, space: string, tag: string): Pr
   return ids;
 }
 
+// Finds every case in `space` carrying `tag` and bulk-deletes them in batches.
+// Returns the count of cases removed. Called by runCleanup once per cleanup
+// space when --cleanup is set.
 export async function cleanupCases({
   ctx,
   space,
@@ -443,6 +480,9 @@ export async function cleanupCases({
   return ids.length;
 }
 
+// Pages through the templates list API for each owner and returns the IDs of
+// templates carrying `tag`. Used by cleanupTemplates to enumerate
+// auto-generated templates across owners before bulk-deleting them.
 async function findTemplateIdsByTag(
   ctx: KbnContext,
   space: string,
@@ -477,6 +517,9 @@ async function findTemplateIdsByTag(
   return ids;
 }
 
+// Finds every template in `space` (across the given owners) carrying `tag`
+// and bulk-deletes them in batches. Returns the count removed. Called by
+// runCleanup alongside cleanupCases.
 export async function cleanupTemplates({
   ctx,
   space,

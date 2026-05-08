@@ -15,6 +15,10 @@ import { logger } from './logger';
 import type { KbnContext } from './types';
 import { updateURL } from './utils';
 
+// Builds the KbnClient + auth headers used for every Kibana HTTP request in
+// this script. Embeds basic-auth credentials in the URL, layers in TLS+CA when
+// --ssl is set, and adds an `Authorization: ApiKey ...` header when --apiKey
+// is provided. Called once at the start of runGenerator.
 export function createKbnClient({
   url,
   username,
@@ -47,6 +51,9 @@ export function createKbnClient({
   return { kbnClient, headers };
 }
 
+// Builds the Elasticsearch client used for bulk-indexing alerts and events.
+// Created lazily by runGenerator only when --alerts > 0 or --events > 0;
+// upgrades the node URL to https and adds the dev CA when --ssl is set.
 export function createEsClient({
   node,
   ssl,

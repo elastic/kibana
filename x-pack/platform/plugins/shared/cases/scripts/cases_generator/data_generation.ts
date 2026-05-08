@@ -18,6 +18,9 @@ const EXTENDED_FIELD_SAMPLE_TEXT = [
   'No customer impact observed',
 ];
 
+// Returns a random sample value appropriate for the given template field
+// control. Used by buildExtendedFields when populating extended_fields on
+// templated cases so each field gets a believable value.
 function randomExtendedFieldValue(userType: TemplateFieldUserType): string {
   switch (userType) {
     case 'text':
@@ -41,6 +44,9 @@ function randomExtendedFieldValue(userType: TemplateFieldUserType): string {
   }
 }
 
+// Builds the extended_fields object a case POST needs when it's based on a
+// template, with one entry per template field. Called by buildCaseRequest when
+// a template was assigned to the case.
 function buildExtendedFields(template: CreatedTemplateRef): Record<string, string> {
   const result: Record<string, string> = {};
   template.fieldTypes.forEach((userType, idx) => {
@@ -51,6 +57,10 @@ function buildExtendedFields(template: CreatedTemplateRef): Record<string, strin
 
 const ENDPOINT_EVENTS_NAMESPACE = 'default';
 
+// Returns the alerts index this script writes into for a given owner+space.
+// Observability cases land in the metrics alerts index; security/cases owners
+// land in the security alerts index. Called by indexAlertsForOwners and the
+// security/observability alert generators.
 export function getAlertsIndex(owner: string, space: string): string {
   const spaceId = space || 'default';
   if (owner === 'observability') {
@@ -59,6 +69,8 @@ export function getAlertsIndex(owner: string, space: string): string {
   return `.alerts-security.alerts-${spaceId}`;
 }
 
+// Returns the endpoint process events data stream this script writes into.
+// Used by run.ts and bulkIndexEvents when --events > 0.
 export function getEventsIndex(): string {
   return `logs-endpoint.events.process-${ENDPOINT_EVENTS_NAMESPACE}`;
 }
@@ -68,6 +80,10 @@ export interface DocGeneratorContext {
   kibanaVersion: string;
 }
 
+// Builds a single security-style alert document (with the fields the security
+// alerts UI needs) ready for ES bulk indexing. Called by bulkIndexAlerts when
+// the owner is `securitySolution` or `cases`. `alertNum` is used only to
+// number the synthetic rule name.
 export function generateSecurityAlert(alertNum: number, ctx: DocGeneratorContext) {
   const now = new Date();
   const alertId = uuidv4();
@@ -113,6 +129,10 @@ export function generateSecurityAlert(alertNum: number, ctx: DocGeneratorContext
   };
 }
 
+// Builds a metrics-style observability alert document ready for ES bulk
+// indexing. Called by bulkIndexAlerts when the owner is `observability`.
+// Only metrics rule types are emitted because every observability alert in
+// this script is written to the metrics alerts index.
 export function generateObservabilityAlert(alertNum: number, ctx: DocGeneratorContext) {
   const now = new Date();
   const alertId = uuidv4();
@@ -197,6 +217,9 @@ export function generateObservabilityAlert(alertNum: number, ctx: DocGeneratorCo
   };
 }
 
+// Builds a single ECS-style process event document ready for ES bulk
+// indexing into the endpoint events data stream. Called by bulkIndexEvents to
+// produce the pool of events that get attached to non-observability cases.
 export function generateProcessEvent(ctx: DocGeneratorContext) {
   const now = new Date();
   const eventId = uuidv4();
@@ -285,6 +308,10 @@ const CASE_SEVERITIES = [
   CaseSeverity.CRITICAL,
 ];
 
+// Builds the body of a single POST /api/cases request, with random tags,
+// severity, and category. Called by run.ts (one call per case) when assembling
+// the per-space batch. When `template` is provided the case is linked to that
+// template and gets matching extended_fields.
 export function buildCaseRequest(
   counter: number,
   owner: string,

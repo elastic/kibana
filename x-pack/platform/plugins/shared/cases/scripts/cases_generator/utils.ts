@@ -23,23 +23,38 @@ export const USER_TYPE_TO_SCHEMA_TYPE: Record<TemplateFieldUserType, string> = {
   user: 'keyword',
 };
 
+// The RNG that every randomness-using helper in this script reads from. Defaults
+// to Math.random; installSeededRandom swaps it for a deterministic generator.
 let scriptRandom: () => number = Math.random;
 
+// Returns a random number in [0, 1) using whichever RNG is currently installed.
+// All script randomness goes through this so installSeededRandom can make runs
+// reproducible.
 export function rng(): number {
   return scriptRandom();
 }
 
+// Returns a short alphanumeric token of (up to) `length` characters. Used to
+// build the per-run reqId that gets stamped into case titles/descriptions so
+// you can tell which run created which case.
 export const randomString = (length: number) =>
   rng()
     .toString(36)
     .substring(2, length + 2);
 
+// Returns one element of `arr`, selected uniformly at random. Used everywhere
+// we need a random label/severity/category from a small pool.
 export const pick = <T>(arr: T[]): T => arr[Math.floor(rng() * arr.length)];
 
+// Returns a copy of `values` with duplicates removed (first-seen order kept).
+// Used for deduping owner/space lists assembled from CLI flags + config.
 export function dedupe<T>(values: T[]): T[] {
   return Array.from(new Set(values));
 }
 
+// Splits `arr` into consecutive sub-arrays of at most `size` elements. Used to
+// keep bulk requests (attachments, alert/event indexing, deletes) under server
+// limits.
 export function chunk<T>(arr: T[], size: number): T[][] {
   if (size <= 0) throw new Error('chunk size must be positive');
   const result: T[][] = [];
@@ -49,6 +64,8 @@ export function chunk<T>(arr: T[], size: number): T[][] {
   return result;
 }
 
+// Returns `n` distinct random elements drawn from `arr`. Used to pick a random
+// subset of tags for each generated case.
 export function sampleN<T>(arr: T[], n: number): T[] {
   if (n <= 0 || arr.length === 0) return [];
   if (n >= arr.length) return [...arr];
@@ -61,6 +78,10 @@ export function sampleN<T>(arr: T[], n: number): T[] {
   return copy.slice(copy.length - n);
 }
 
+// Picks one owner from `owners`, optionally biased by a weight map. Used by
+// the run loop and buildExecutionPlan to assign each generated case to an
+// owner. Falls back to a uniform pick when no distribution (or zero total
+// weight) is supplied.
 export function weightedOwnerPick(
   owners: string[],
   distribution: Record<string, number> | null
@@ -82,6 +103,9 @@ export function weightedOwnerPick(
   return owners[owners.length - 1];
 }
 
+// Parses the --ownerDistribution CLI flag (e.g. "securitySolution:60,cases:40")
+// into a weight map. Returns null when the input is empty or has no usable
+// pairs. Consumed by weightedOwnerPick.
 export function parseOwnerDistribution(str: string): Record<string, number> | null {
   if (!str) return null;
   const result: Record<string, number> = {};
@@ -102,6 +126,9 @@ export function parseOwnerDistribution(str: string): Record<string, number> | nu
   return Object.keys(result).length > 0 ? result : null;
 }
 
+// Returns `url` with the username/password and/or protocol replaced. Used by
+// clients.ts when constructing the Kibana and Elasticsearch client URLs from
+// CLI flags (e.g. injecting basic-auth or upgrading http→https for SSL).
 export function updateURL({
   url,
   user,
@@ -122,6 +149,9 @@ export function updateURL({
   return urlObject.href;
 }
 
+// Turns an HTTP/Axios error into a human-readable single-line string with the
+// status and (when present) response body. Used by every catch block that logs
+// failed Kibana/ES requests, and by runWithRetry to decide whether to retry.
 export function formatRequestError(err: unknown): string {
   const error = err as Error & {
     axiosError?: { status?: number };
@@ -143,11 +173,18 @@ export function formatRequestError(err: unknown): string {
 
 const RETRYABLE_PATTERNS = ['429', '502', '503', '504', 'ECONNRESET', 'ETIMEDOUT'];
 
+// True when the error looks transient (rate-limit, gateway error, dropped
+// connection). Used by runWithRetry to decide whether another attempt is worth
+// making.
 function shouldRetry(err: unknown): boolean {
   const message = formatRequestError(err);
   return RETRYABLE_PATTERNS.some((pattern) => message.includes(pattern));
 }
 
+// Runs `operation`, retrying with exponential backoff on transient errors and
+// rethrowing immediately on anything else. Wraps every Kibana/ES write in this
+// script so a single 503 or ECONNRESET doesn't fail the run. `label` shows up
+// in the warning log so you can tell which call was retried.
 export async function runWithRetry<T>(
   operation: () => Promise<T>,
   {
@@ -176,14 +213,23 @@ export async function runWithRetry<T>(
   }
 }
 
+// Treats the literal string "default" the same as an empty space ID. Used by
+// config.ts when canonicalizing user-supplied space inputs so downstream code
+// can rely on `''` meaning "the default space".
 export function normalizeSpace(space: string): string {
   return space === 'default' ? '' : space;
 }
 
+// Returns the URL prefix for a target space ('' for the default space, or
+// '/s/<space>' otherwise). Used to build every Kibana request path so the
+// same code works in single-space and multi-space runs.
 export function casesBasePath(space: string): string {
   return space ? `/s/${space}` : '';
 }
 
+// Converts a 0-based index into an Excel-style column label (0→A, 25→Z,
+// 26→AA, …). Used by templateFieldName to give each generated template field
+// a stable, human-readable suffix.
 export function fieldLetter(index: number): string {
   // Excel-style: 0→A, 25→Z, 26→AA, 51→AZ, 52→BA, …, 701→ZZ, 702→AAA.
   let n = index;
@@ -195,16 +241,23 @@ export function fieldLetter(index: number): string {
   return result;
 }
 
+// Returns the canonical name for the Nth field of a generated template
+// (e.g. `fieldA`, `fieldB`, …). Used both when building template definitions
+// (kibana_ops.ts) and when populating extended_fields on cases (data_generation.ts)
+// so both sides agree on field names.
 export function templateFieldName(index: number): string {
   return `field${fieldLetter(index)}`;
 }
 
 // Mirrors the cases plugin's getFieldSnakeKey helper — extended_fields keys must
-// match `${name}_as_${schemaType}` to be accepted by the server.
+// match `${name}_as_${schemaType}` to be accepted by the server. Used when
+// building the extended_fields payload for templated cases.
 export function extendedFieldKey(index: number, userType: TemplateFieldUserType): string {
   return `${templateFieldName(index)}_as_${USER_TYPE_TO_SCHEMA_TYPE[userType]}`;
 }
 
+// Splits a comma-separated CLI value into a trimmed, non-empty string array.
+// Used to parse multi-value flags like --owners or --analyticsOwners.
 export function parseList(input: string): string[] {
   return input
     .split(',')
@@ -212,6 +265,9 @@ export function parseList(input: string): string[] {
     .filter(Boolean);
 }
 
+// Parses `value` as a non-negative integer, returning `fallback` for anything
+// invalid (negatives, NaN, garbage). Used by config parsing and by the
+// interactive wizard's number prompts.
 export function parseNonNegativeInteger(value: string, fallback: number): number {
   const parsed = Number.parseInt(value, 10);
   if (Number.isNaN(parsed) || parsed < 0) {
@@ -223,6 +279,8 @@ export function parseNonNegativeInteger(value: string, fallback: number): number
 // cyrb128 / sfc32: textbook seedable PRNG primitives. Bitwise ops and parameter
 // reassignment are inherent to the algorithm, hence the scoped lint disables.
 /* eslint-disable no-bitwise, no-param-reassign */
+// Hashes a seed string into a 4-tuple of 32-bit ints used to initialize sfc32.
+// Internal helper for installSeededRandom.
 function cyrb128(str: string): [number, number, number, number] {
   let h1 = 1_779_033_703;
   let h2 = 3_144_134_277;
@@ -242,6 +300,8 @@ function cyrb128(str: string): [number, number, number, number] {
   return [(h1 ^ h2 ^ h3 ^ h4) >>> 0, (h2 ^ h1) >>> 0, (h3 ^ h1) >>> 0, (h4 ^ h1) >>> 0];
 }
 
+// Builds a deterministic 32-bit RNG closure from the four state words produced
+// by cyrb128. Internal helper for installSeededRandom.
 function sfc32(a: number, b: number, c: number, d: number) {
   return () => {
     a >>>= 0;
@@ -260,6 +320,10 @@ function sfc32(a: number, b: number, c: number, d: number) {
 }
 /* eslint-enable no-bitwise, no-param-reassign */
 
+// Replaces the script-wide RNG with a deterministic stream derived from
+// `seed`. Returns a function that restores the previous RNG. Used when
+// --seed is supplied so a run produces the same plan, owner picks,
+// severities, and tag selections every time.
 export function installSeededRandom(seed: string): () => void {
   const previous = scriptRandom;
   const [a, b, c, d] = cyrb128(seed);

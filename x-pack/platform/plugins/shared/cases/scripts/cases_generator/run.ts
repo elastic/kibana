@@ -43,6 +43,10 @@ interface ExecutionPlan {
   };
 }
 
+// Prints the end-of-run summary line ("Created N cases × M spaces, each
+// with X comments…") plus follow-up lines for owner distribution, templates,
+// and analytics when those features were used. Called by runGenerator after
+// every space has finished generating.
 function logFinalSummary(config: GeneratorConfig) {
   logger.info('Done!');
   const numSpaces = config.spaces ? config.spaces.count : 1;
@@ -90,6 +94,10 @@ function logFinalSummary(config: GeneratorConfig) {
   }
 }
 
+// The script's main entry point. Loads config, optionally seeds the RNG,
+// then dispatches to the right path: dry-run preview, cleanup, or a real
+// generation run (spaces → templates → analytics → alerts/events → cases).
+// Called from cases_generator.ts (the bin entry).
 // eslint-disable-next-line complexity -- top-level orchestrator branches on many config flags by design
 export async function runGenerator(): Promise<void> {
   const config = await loadConfig();
@@ -238,6 +246,9 @@ export async function runGenerator(): Promise<void> {
   }
 }
 
+// Iterates the planned target spaces (plus the template space) and deletes
+// every case and template tagged with `--cleanupTag` in each. Called by
+// runGenerator when --cleanup is set; nothing else happens in cleanup mode.
 async function runCleanup(
   config: GeneratorConfig,
   ctx: { kbnClient: import('@kbn/test').KbnClient; headers: Record<string, string> },
@@ -265,6 +276,9 @@ async function runCleanup(
   logger.info(`Cleanup complete. Removed ${totalCases} case(s) and ${totalTemplates} template(s).`);
 }
 
+// Prints the totals + per-space breakdown of an execution plan without
+// touching Kibana or ES. Called by runGenerator when --dryRun is set, to let
+// the user sanity-check counts before running for real.
 function logDryRun(config: GeneratorConfig, executionPlan: ExecutionPlan) {
   logger.info('DRY RUN: no data will be written.');
   logger.info(`Request seed: ${config.seed ?? 'none'}`);
@@ -285,6 +299,11 @@ function logDryRun(config: GeneratorConfig, executionPlan: ExecutionPlan) {
   }
 }
 
+// Pure projection of the run that will happen: simulates owner picks for
+// every case in every space, and totals up cases, attachments, alert/event
+// docs to index, template creates, and analytics updates. Used by --dryRun
+// and exercised heavily by run.test.ts; doing this without seeding will give
+// a different result every call because owner picks are randomized.
 export function buildExecutionPlan(config: GeneratorConfig, targetSpaces: string[]): ExecutionPlan {
   const reqId = randomString(6);
   const spacePlans: SpaceExecutionPlan[] = [];

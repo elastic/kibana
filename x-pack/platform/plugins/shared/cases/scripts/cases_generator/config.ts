@@ -21,6 +21,9 @@ import {
 
 const DEFAULT_KIBANA_VERSION = '9.2.0';
 
+// Parses a comma-separated list of template field types (e.g. "text,number,date")
+// into the typed array createTemplates expects, warning on unknown values.
+// Used by both the CLI (--templateFieldTypes) and the interactive wizard.
 function parseTemplateFieldTypes(input: string): TemplateFieldUserType[] {
   if (!input) return [];
   const valid = new Set<string>(TEMPLATE_FIELD_USER_TYPES);
@@ -40,6 +43,9 @@ function parseTemplateFieldTypes(input: string): TemplateFieldUserType[] {
   return result;
 }
 
+// Asks `question` on the readline interface and resolves with the user's
+// trimmed answer (or `defaultVal` if they hit enter). Building block for
+// every step of the interactive wizard.
 function prompt(rl: readline.Interface, question: string, defaultVal?: string): Promise<string> {
   const suffix = defaultVal !== undefined ? ` [${defaultVal}]` : '';
   return new Promise((resolve) => {
@@ -47,10 +53,15 @@ function prompt(rl: readline.Interface, question: string, defaultVal?: string): 
   });
 }
 
+// Prints a `=== Title ===` divider so the interactive wizard's six sections
+// are visually distinct in the terminal.
 function printSection(title: string) {
   logger.info(`\n=== ${title} ===`);
 }
 
+// Wraps `value` in single quotes when it contains shell-significant characters
+// so the rerun-command preview stays copy-paste safe. Used by
+// buildShorthandCommand.
 function shellQuote(value: string): string {
   if (value === '' || /[\s"'$`\\!*?{}[\]<>|&;()#~]/.test(value)) {
     return `'${value.replace(/'/g, `'\\''`)}'`;
@@ -58,6 +69,10 @@ function shellQuote(value: string): string {
   return value;
 }
 
+// Renders a non-interactive `node generate_cases.js …` command equivalent to
+// the interactive choices the user just made, suppressing flags that match
+// defaults. Printed at the end of the wizard so the user can recreate the
+// run later without going through the prompts again.
 // eslint-disable-next-line complexity -- one branch per CLI flag; flat is clearer than abstracted here
 function buildShorthandCommand(config: GeneratorConfig, fieldTypesAllOf?: string[]): string {
   const parts: string[] = ['node x-pack/platform/plugins/shared/cases/scripts/generate_cases.js'];
@@ -114,6 +129,8 @@ function buildShorthandCommand(config: GeneratorConfig, fieldTypesAllOf?: string
   return parts.join(' \\\n');
 }
 
+// Asks a yes/no question on the readline interface and re-prompts on bad
+// input. Used throughout the interactive wizard for every toggle.
 async function promptBoolean(
   rl: readline.Interface,
   question: string,
@@ -128,6 +145,8 @@ async function promptBoolean(
   }
 }
 
+// Asks for a non-negative integer and re-prompts on bad input. Used by the
+// interactive wizard for counts (cases, comments, alerts, events, weights).
 async function promptNonNegativeInteger(
   rl: readline.Interface,
   question: string,
@@ -141,6 +160,9 @@ async function promptNonNegativeInteger(
   }
 }
 
+// Throws when the owner list is empty or contains anything outside
+// VALID_OWNERS. Called by validateConfig for both the case owners and the
+// template owners (when templates are requested).
 function validateOwners(owners: string[]) {
   if (owners.length === 0) {
     throw new Error(`At least one owner is required. Valid owners: ${VALID_OWNERS.join(', ')}`);
@@ -153,6 +175,9 @@ function validateOwners(owners: string[]) {
   }
 }
 
+// Throws when the owner distribution has a negative weight or a total weight
+// of zero. Called by validateConfig so weightedOwnerPick always has at least
+// one positive weight to work with.
 function validateOwnerDistribution(config: GeneratorConfig) {
   if (!config.ownerDistribution) return;
 
@@ -170,6 +195,8 @@ function validateOwnerDistribution(config: GeneratorConfig) {
   }
 }
 
+// Throws when the multi-space config is malformed (zero count, or a name
+// pattern missing the {i} placeholder). Called by validateConfig.
 function validateSpaces(config: GeneratorConfig) {
   if (!config.spaces) return;
   if (config.spaces.count <= 0) {
@@ -180,6 +207,10 @@ function validateSpaces(config: GeneratorConfig) {
   }
 }
 
+// Final gate before returning a GeneratorConfig: dedupes owner/templateOwner
+// lists and runs every individual validator. Throws on the first problem so
+// the user sees a clear error before the run starts. Called by both
+// interactiveMode and parseCliConfig.
 function validateConfig(config: GeneratorConfig): GeneratorConfig {
   config.owners = dedupe(config.owners);
   config.templateOwners = dedupe(config.templateOwners);
@@ -231,6 +262,10 @@ function validateConfig(config: GeneratorConfig): GeneratorConfig {
   return config;
 }
 
+// Walks the user through defining up to 10 templates (name, description,
+// tags, field types) in the interactive wizard, plus the template owners and
+// space. Returns empty arrays if the user opts out of templates. Called by
+// interactiveMode in step 5/6.
 async function collectTemplateInputs(
   rl: readline.Interface,
   owners: string[],
@@ -285,6 +320,10 @@ async function collectTemplateInputs(
   return { templates, templateOwners, templateSpace };
 }
 
+// Drives the six-step interactive wizard (connection, spaces, ownership,
+// volume, templates, review) and returns a validated GeneratorConfig. Also
+// prints an equivalent non-interactive command at the end. Called by
+// loadConfig when --interactive (-i) is supplied.
 async function interactiveMode(): Promise<GeneratorConfig> {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
@@ -470,6 +509,10 @@ async function interactiveMode(): Promise<GeneratorConfig> {
   }
 }
 
+// Parses argv via yargs, normalizes/validates the values, and returns a
+// GeneratorConfig. Called by loadConfig for non-interactive runs. Adding a
+// new CLI flag means adding both a yargs option here and a field on
+// GeneratorConfig in types.ts.
 function parseCliConfig(): GeneratorConfig {
   const argv = yargs.help().options({
     interactive: {
@@ -669,6 +712,8 @@ function parseCliConfig(): GeneratorConfig {
   });
 }
 
+// Decides between interactive wizard mode and CLI argv mode based on
+// whether `-i` / `--interactive` is present. Sole entry point used by run.ts.
 export async function loadConfig(): Promise<GeneratorConfig> {
   const isInteractive = process.argv.includes('--interactive') || process.argv.includes('-i');
   if (isInteractive) {
