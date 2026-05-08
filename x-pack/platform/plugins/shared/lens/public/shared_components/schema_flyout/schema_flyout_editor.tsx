@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useRef, useState } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { FieldDescriptor } from './types';
+import { useSchemaDescriptions } from './use_schema_descriptions';
 import { SchemaFormField } from './fields';
 import { getStateAdapter } from './state_adapters';
 
@@ -17,10 +17,6 @@ interface SchemaFlyoutEditorProps {
   visualizationId: string;
   state: unknown;
   setState: (newState: unknown) => void;
-}
-
-interface VizSchemaResponse {
-  fields: FieldDescriptor[];
 }
 
 /** Get a nested value by dot-delimited path */
@@ -165,24 +161,7 @@ export const SchemaFlyoutEditor: React.FC<SchemaFlyoutEditorProps> = ({
   state,
   setState,
 }) => {
-  const { services } = useKibana();
-  const [fieldDescriptors, setFieldDescriptors] = useState<FieldDescriptor[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-    services.http
-      ?.get<Record<string, VizSchemaResponse>>('/internal/lens/schema_descriptions')
-      .then((data) => {
-        if (!cancelled) {
-          const vizData = data[visualizationId];
-          setFieldDescriptors(vizData?.fields ?? []);
-        }
-      })
-      .catch(() => {}); // silently fail — falls back to no flyout
-    return () => {
-      cancelled = true;
-    };
-  }, [services.http, visualizationId]);
+  const { data: fieldDescriptors } = useSchemaDescriptions(visualizationId);
 
   if (fieldDescriptors.length === 0) {
     return null;

@@ -8,6 +8,8 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import type { FramePublicAPI } from '@kbn/lens-common';
 import type { VisualizationToolbarProps } from '@kbn/lens-common';
+import { QueryClientProvider } from '@kbn/react-query';
+import { lensQueryClient } from '../../query_client';
 import {
   useLensDispatch,
   updateVisualizationState,
@@ -72,13 +74,15 @@ export const VisualizationToolbarWrapper = memo(function VisualizationToolbar({
 
   if (schemaFlyoutEditorEnabled && hasSchemaForVisualization(activeVisualization.id)) {
     return (
-      <FlyoutToolbar<unknown>
-        frame={framePublicAPI}
-        state={visualizationState.state}
-        setState={setVisualizationState}
-        isInlineEditing={isInlineEditing}
-        contentMap={{ style: SchemaStyleContent }}
-      />
+      <QueryClientProvider client={lensQueryClient}>
+        <FlyoutToolbar<unknown>
+          frame={framePublicAPI}
+          state={visualizationState.state}
+          setState={setVisualizationState}
+          isInlineEditing={isInlineEditing}
+          contentMap={{ style: SchemaStyleContent }}
+        />
+      </QueryClientProvider>
     );
   }
 

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   SchemaFlyoutEditor,
   getByPath,
@@ -37,6 +38,21 @@ jest.mock('./fields', () => ({
     <div data-test-subj={`schemaField-${descriptor.path}`}>{descriptor.label}</div>
   ),
 }));
+
+const createTestQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        cacheTime: 0,
+      },
+    },
+  });
+
+const renderWithQueryClient = (ui: React.ReactElement) => {
+  const queryClient = createTestQueryClient();
+  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>);
+};
 
 describe('getByPath', () => {
   it('returns nested value', () => {
@@ -124,7 +140,7 @@ describe('SchemaFlyoutEditor', () => {
   it('renders nothing when fetch returns no data for visualization', async () => {
     mockHttpGet.mockResolvedValue({});
 
-    const { container } = render(
+    const { container } = renderWithQueryClient(
       <SchemaFlyoutEditor visualizationId="unknownViz" state={{}} setState={setState} />
     );
 
@@ -140,7 +156,7 @@ describe('SchemaFlyoutEditor', () => {
       lnsDatatable: { fields: [] },
     });
 
-    const { container } = render(
+    const { container } = renderWithQueryClient(
       <SchemaFlyoutEditor visualizationId="lnsDatatable" state={{}} setState={setState} />
     );
 
@@ -161,7 +177,9 @@ describe('SchemaFlyoutEditor', () => {
       lnsDatatable: { fields: mockFields },
     });
 
-    render(<SchemaFlyoutEditor visualizationId="lnsDatatable" state={{}} setState={setState} />);
+    renderWithQueryClient(
+      <SchemaFlyoutEditor visualizationId="lnsDatatable" state={{}} setState={setState} />
+    );
 
     await waitFor(() => {
       expect(screen.getByTestId('schemaField-styling.density.mode')).toBeInTheDocument();
@@ -172,7 +190,7 @@ describe('SchemaFlyoutEditor', () => {
   it('renders nothing when fetch fails', async () => {
     mockHttpGet.mockRejectedValue(new Error('Network error'));
 
-    const { container } = render(
+    const { container } = renderWithQueryClient(
       <SchemaFlyoutEditor visualizationId="lnsDatatable" state={{}} setState={setState} />
     );
 
