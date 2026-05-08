@@ -1,9 +1,10 @@
 ---
 name: bug-fix
 description: >
-  Implements a TDD fix for a reproduced Kibana Security Solution bug and opens a draft PR.
-  Dispatched by the bug-fixer orchestrator after reproduction is confirmed — not triggered
-  directly by users.
+  Step 2 of 2 for fixing a Kibana Security Solution bug. Implements a TDD fix for a
+  reproduced bug and opens a draft PR. Trigger after /bug-reproduce has confirmed
+  reproduction and the user has reviewed the report. Requires analysis.json and
+  reproduction-report.md to exist at the Kibana repo root.
 ---
 
 # Bug Fix
@@ -16,8 +17,10 @@ Read these files before doing anything else:
 - `analysis.json` — classification, affected paths, server args, similar issues, related PRs
 - `reproduction-report.md` — browser diagnostics, data path trace, root cause hypothesis
 
-If either file is missing, do not proceed. Tell the user the orchestrator must complete
-Phase A (bug-reproduce) first.
+If either file is missing, or if `reproduction-report.md` has `status: not_reproduced`
+or `user_acknowledged: pending`, stop immediately and tell the user:
+_"Run `/bug-reproduce #NUMBER` first. This skill requires a confirmed browser
+reproduction before fix work can begin."_
 
 ## Phase 4: Fix (TDD)
 
