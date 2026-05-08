@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type SpaceId, asSpaceId, DEFAULT_SPACE_ID } from './space_id';
+import { type SpaceId, asSpaceId, DEFAULT_SPACE_ID, getSpaceUrlPrefix } from './space_id';
 
 const spaceContextRegex = /^\/s\/([a-z0-9_\-]+)/;
 
@@ -51,11 +51,8 @@ export function addSpaceIdToPath(
   }
 
   const normalizedBasePath = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
-
-  if (spaceId && spaceId !== DEFAULT_SPACE_ID) {
-    return `${normalizedBasePath}/s/${spaceId}${requestedPath}`;
-  }
-  return `${normalizedBasePath}${requestedPath}` || '/';
+  const spacePrefix = spaceId ? getSpaceUrlPrefix(asSpaceId(spaceId)) : '';
+  return `${normalizedBasePath}${spacePrefix}${requestedPath}` || '/';
 }
 
 function stripServerBasePath(requestBasePath: string, serverBasePath: string): string {
