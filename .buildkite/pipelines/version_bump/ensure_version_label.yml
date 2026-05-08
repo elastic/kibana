@@ -1,0 +1,4 @@
+steps:
+  - name: 'Ensure version label exists'
+    key: ensure-version-label
+    command: .buildkite/scripts/steps/version_bump/ensure_version_label.sh
