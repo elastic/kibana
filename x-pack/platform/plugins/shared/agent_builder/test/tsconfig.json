@@ -1,0 +1,29 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["node"]
+  },
+  "include": [
+    "./scout_agent_builder/**/*",
+    "./scout_agent_builder_smoke/**/*",
+    "./scout_agent_builder_shared/**/*"
+  ],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/scout",
+    "@kbn/scout-synthtrace",
+    "@kbn/synthtrace-client",
+    "@kbn/ftr-llm-proxy",
+    "@kbn/kbn-client",
+    "@kbn/test-subj-selector",
+    "@kbn/agent-builder-common",
+    "@kbn/gen-ai-functional-testing",
+    "@kbn/agent-builder-server",
+    "@kbn/repo-info",
+    "@kbn/test",
+    "@kbn/test-es-server",
+    "@kbn/test-suites-xpack-platform",
+    "@kbn/agent-context-layer-plugin"
+  ]
+}

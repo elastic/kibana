@@ -61,7 +61,6 @@ describe('getColumns', () => {
       scopeId,
       dataTestSubj,
       onShowAlert: mockOnShowAlert,
-      hidePreviewLink: false,
     });
     expect(columns).toHaveLength(5);
   });
@@ -74,7 +73,6 @@ describe('getColumns', () => {
         scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
-        hidePreviewLink: false,
       });
       const { render: renderCell } = previewColumn as {
         render: (row: Record<string, unknown>) => React.ReactElement;
@@ -90,7 +88,6 @@ describe('getColumns', () => {
         scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
-        hidePreviewLink: false,
       });
       const { render: renderCell } = previewColumn as {
         render: (row: Record<string, unknown>) => React.ReactElement;
@@ -110,7 +107,6 @@ describe('getColumns', () => {
         scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
-        hidePreviewLink: false,
       });
       const { render: renderCell } = timestampColumn as unknown as {
         render: (value: string) => React.ReactElement;
@@ -128,7 +124,6 @@ describe('getColumns', () => {
         scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
-        hidePreviewLink: false,
       });
       expect((timestampColumn as { field: string }).field).toBe('@timestamp');
     });
@@ -140,29 +135,12 @@ describe('getColumns', () => {
       'kibana.alert.rule.uuid': 'rule-uuid-123',
     };
 
-    it('renders rule name as plain text when hidePreviewLink is true', () => {
+    it('renders rule name as a PreviewLink when useLegacyExpandableFlyout is true', () => {
       const [, , ruleColumn] = getColumns({
         scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
-        hidePreviewLink: true,
-      });
-      const { render: renderCell } = ruleColumn as {
-        render: (row: Record<string, unknown>) => React.ReactElement;
-      };
-
-      renderColumn(renderCell(row));
-
-      expect(screen.getByText('My Detection Rule')).toBeInTheDocument();
-      expect(screen.queryByTestId(`${dataTestSubj}RulePreview`)).not.toBeInTheDocument();
-    });
-
-    it('renders rule name as a PreviewLink when hidePreviewLink is false', () => {
-      const [, , ruleColumn] = getColumns({
-        scopeId,
-        dataTestSubj,
-        onShowAlert: mockOnShowAlert,
-        hidePreviewLink: false,
+        useLegacyExpandableFlyout: true,
       });
       const { render: renderCell } = ruleColumn as {
         render: (row: Record<string, unknown>) => React.ReactElement;
@@ -172,6 +150,23 @@ describe('getColumns', () => {
 
       expect(screen.getByText('My Detection Rule')).toBeInTheDocument();
       expect(screen.getByTestId(`${dataTestSubj}RulePreview`)).toBeInTheDocument();
+    });
+
+    it('renders rule name as a ChildLink when useLegacyExpandableFlyout is false', () => {
+      const [, , ruleColumn] = getColumns({
+        scopeId,
+        dataTestSubj,
+        onShowAlert: mockOnShowAlert,
+        useLegacyExpandableFlyout: false,
+      });
+      const { render: renderCell } = ruleColumn as {
+        render: (row: Record<string, unknown>) => React.ReactElement;
+      };
+
+      renderColumn(renderCell(row));
+
+      expect(screen.getByText('My Detection Rule')).toBeInTheDocument();
+      expect(screen.getByTestId(`${dataTestSubj}RuleLink`)).toBeInTheDocument();
     });
 
     it('renders rule name as plain text when user cannot read rules', () => {
@@ -190,7 +185,6 @@ describe('getColumns', () => {
         scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
-        hidePreviewLink: false,
       });
       const { render: renderCell } = ruleColumn as {
         render: (row: Record<string, unknown>) => React.ReactElement;
@@ -209,7 +203,6 @@ describe('getColumns', () => {
         scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
-        hidePreviewLink: false,
       });
       const { render: renderCell } = reasonColumn as unknown as {
         render: (value: string) => React.ReactElement;
@@ -225,7 +218,6 @@ describe('getColumns', () => {
         scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
-        hidePreviewLink: false,
       });
       expect((reasonColumn as { field: string }).field).toBe(ALERT_REASON);
     });
@@ -237,7 +229,6 @@ describe('getColumns', () => {
         scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
-        hidePreviewLink: false,
       });
       const { render: renderCell } = severityColumn as unknown as {
         render: (value: string) => React.ReactElement;
@@ -254,7 +245,6 @@ describe('getColumns', () => {
         scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
-        hidePreviewLink: false,
       });
       const { render: renderCell } = severityColumn as unknown as {
         render: (value: string) => React.ReactElement;
@@ -270,7 +260,6 @@ describe('getColumns', () => {
         scopeId,
         dataTestSubj,
         onShowAlert: mockOnShowAlert,
-        hidePreviewLink: false,
       });
       expect((severityColumn as { field: string }).field).toBe('kibana.alert.severity');
     });
@@ -282,7 +271,6 @@ describe('getColumns', () => {
       const [previewColumn] = getColumns({
         scopeId,
         onShowAlert: mockOnShowAlert,
-        hidePreviewLink: false,
       });
       const { render: renderCell } = previewColumn as {
         render: (row: Record<string, unknown>) => React.ReactElement;

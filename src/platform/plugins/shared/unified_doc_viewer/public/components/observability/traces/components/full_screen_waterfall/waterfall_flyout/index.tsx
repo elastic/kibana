@@ -84,6 +84,7 @@ export interface Props {
   flyoutContentId: FlyoutContentId;
   children: React.ReactNode;
   skipNextEventReport?: boolean;
+  size?: EuiFlyoutProps['size'];
 }
 
 export function WaterfallFlyout({
@@ -97,6 +98,7 @@ export function WaterfallFlyout({
   hasAnimation,
   flyoutContentId,
   skipNextEventReport,
+  size = 's',
 }: Props) {
   const { analytics } = getUnifiedDocViewerServices();
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
@@ -114,7 +116,7 @@ export function WaterfallFlyout({
   return (
     <EuiFlyout
       data-test-subj={dataTestSubj}
-      size="s"
+      size={size}
       includeFixedHeadersInFocusTrap={false}
       onClose={onCloseFlyout}
       aria-labelledby={flyoutTitleId}
