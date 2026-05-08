@@ -1024,7 +1024,7 @@
             "tags": [],
             "label": "content",
             "description": [
-              "Searchable content text"
+              "Searchable content (indexed as `semantic_text`)"
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
             "lineNumber": 23,
@@ -1049,6 +1049,60 @@
           },
           {
             "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlChunk.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [
+              "Longer summary for semantic search (indexed as `semantic_text`); omit or empty if none"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlChunk.user_id",
+            "type": "string",
+            "tags": [],
+            "label": "user_id",
+            "description": [
+              "Owner or last-modifier user id when known"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
+            "id": "def-server.SmlChunk.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [
+              "Other SML chunk ids this item references"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "agentBuilder",
             "id": "def-server.SmlChunk.permissions",
             "type": "Array",
             "tags": [],
@@ -1060,7 +1114,7 @@
               "string[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-            "lineNumber": 27,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1078,7 +1132,7 @@
           "\nContext passed to SML type hooks (`list` and `getSmlData`)."
         ],
         "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-        "lineNumber": 38,
+        "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2082,7 +2136,7 @@
               "; }"
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-            "lineNumber": 42,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2098,7 +2152,7 @@
               "SavedObjectsClientContract"
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-            "lineNumber": 43,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2120,7 +2174,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-            "lineNumber": 44,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2138,7 +2192,7 @@
           "\nReturn value from getSmlData — normalized data to index."
         ],
         "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-        "lineNumber": 31,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2161,7 +2215,7 @@
               "[]"
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-            "lineNumber": 35,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2286,7 +2340,7 @@
           "\nAn item returned by the `list` hook of an SML type."
         ],
         "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-        "lineNumber": 56,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2301,7 +2355,7 @@
               "Unique ID of the attachment (e.g., saved object ID)"
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-            "lineNumber": 60,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2316,7 +2370,7 @@
               "Last updated timestamp — used by crawler for change detection"
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-            "lineNumber": 62,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2334,7 +2388,7 @@
               "string[]"
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-            "lineNumber": 64,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2352,7 +2406,7 @@
           "\nContext passed to the toAttachment hook."
         ],
         "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-        "lineNumber": 47,
+        "lineNumber": 53,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2369,7 +2423,7 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-            "lineNumber": 51,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2385,7 +2439,7 @@
               "SavedObjectsClientContract"
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-            "lineNumber": 52,
+            "lineNumber": 58,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2398,7 +2452,7 @@
             "label": "spaceId",
             "description": [],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-            "lineNumber": 53,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2416,7 +2470,7 @@
           "\nServer-side type definition for SML (Semantic Metadata Layer).\n\nRegistered via `agentContextLayer.registerType()` during plugin setup.\n\nSolutions register these to make their content discoverable via the SML."
         ],
         "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-        "lineNumber": 68,
+        "lineNumber": 74,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2431,7 +2485,7 @@
               "Unique identifier for this SML type (e.g., 'dashboard', 'lens', 'esql')"
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-            "lineNumber": 76,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2465,7 +2519,7 @@
               "[]>"
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-            "lineNumber": 79,
+            "lineNumber": 85,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2487,7 +2541,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-                "lineNumber": 85,
+                "lineNumber": 91,
                 "columnNumber": 10,
                 "deprecated": false,
                 "docsReferencedTypeName": "SmlContext",
@@ -2526,7 +2580,7 @@
               " | undefined>"
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-            "lineNumber": 87,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2542,7 +2596,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-                "lineNumber": 90,
+                "lineNumber": 96,
                 "columnNumber": 16,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2565,7 +2619,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-                "lineNumber": 90,
+                "lineNumber": 96,
                 "columnNumber": 34,
                 "deprecated": false,
                 "docsReferencedTypeName": "SmlContext",
@@ -2606,7 +2660,7 @@
               "<string, unknown> | undefined>"
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-            "lineNumber": 92,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2628,7 +2682,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-                "lineNumber": 96,
+                "lineNumber": 102,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "SmlDocument",
@@ -2652,7 +2706,7 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-                "lineNumber": 97,
+                "lineNumber": 103,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "SmlToAttachmentContext",
@@ -2675,7 +2729,7 @@
               "(() => string) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-            "lineNumber": 100,
+            "lineNumber": 106,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2966,7 +3020,7 @@
             "section": "def-server.SmlDocument",
             "text": "SmlDocument"
           },
-          " plus relevance score.\n`content` is optional when the query excluded it from `_source` (e.g. `skipContent`)."
+          " plus relevance score.\n`content` and `description` are optional when excluded from `_source` (e.g. `skipContent`)."
         ],
         "signature": [
           "Omit<",
@@ -2980,7 +3034,7 @@
           ", \"content\"> & { content?: string | undefined; score: number; }"
         ],
         "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/types.ts",
-        "lineNumber": 131,
+        "lineNumber": 143,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2998,7 +3052,7 @@
           "\nElasticsearch `mappings` block for the SML data index (e.g. integration tests, tooling).\nField definitions match `smlStorageSchemaProperties` / `storageSettings`."
         ],
         "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/sml_storage.ts",
-        "lineNumber": 46,
+        "lineNumber": 49,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3016,7 +3070,7 @@
               "\"strict\""
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/sml_storage.ts",
-            "lineNumber": 47,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3046,10 +3100,18 @@
               ">; origin_id: ",
               "MappingKeywordProperty",
               " & { ignore_above: 1024; }; content: ",
-              "MappingTextProperty",
+              "MappingSemanticTextProperty",
               " & Partial<",
-              "MappingTextProperty",
-              ">; created_at: ",
+              "MappingSemanticTextProperty",
+              ">; description: ",
+              "MappingSemanticTextProperty",
+              " & Partial<",
+              "MappingSemanticTextProperty",
+              ">; user_id: ",
+              "MappingKeywordProperty",
+              " & { ignore_above: 1024; }; references: ",
+              "MappingKeywordProperty",
+              " & { ignore_above: 1024; }; created_at: ",
               "MappingDateProperty",
               " & { format: \"strict_date_optional_time\"; }; updated_at: ",
               "MappingDateProperty",
@@ -3060,7 +3122,7 @@
               " & { ignore_above: 1024; }; }"
             ],
             "path": "x-pack/platform/plugins/shared/agent_context_layer/server/services/sml/sml_storage.ts",
-            "lineNumber": 48,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
