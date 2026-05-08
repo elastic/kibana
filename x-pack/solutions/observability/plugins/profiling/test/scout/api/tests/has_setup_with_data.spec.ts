@@ -12,9 +12,18 @@ import { apiTest } from '../../common/fixtures';
 import { esArchiversPath, esResourcesEndpoint } from '../../common/fixtures/constants';
 
 apiTest.describe('Profiling is setup and data is loaded', { tag: tags.stateful.classic }, () => {
+  // ES profiling resource creation can race with prior cleanup (background ProfilingIndexManager); allow extra hook budget so a fresh setup + data load completes reliably.
+  // eslint-disable-next-line @kbn/eslint/scout_no_describe_configure -- extended timeout applies to hooks (beforeAll); see https://playwright.dev/docs/test-timeouts
+  apiTest.describe.configure({ timeout: 180_000 });
+
   let viewerApiCreditials: RoleApiCredentials;
   let adminApiCreditials: RoleApiCredentials;
+
   apiTest.beforeAll(async ({ requestAuth, profilingSetup }) => {
+    // Ensure the ES profiling data streams + aliases (`profiling-stackframes`, `profiling-stacktraces`, `profiling-executables`, `profiling-hosts`, `profiling-events-*`) exist before we bulk-write into them. Bulk `create` ops to non-existing aliases would otherwise create regular indices that later collide with the ES profiling plugin's alias creation (`InvalidAliasNameException`).
+    if (!(await profilingSetup.checkStatus()).has_setup) {
+      await profilingSetup.setupResources();
+    }
     await profilingSetup.loadData(esArchiversPath);
     viewerApiCreditials = await requestAuth.getApiKey('viewer');
     adminApiCreditials = await requestAuth.getApiKey('admin');

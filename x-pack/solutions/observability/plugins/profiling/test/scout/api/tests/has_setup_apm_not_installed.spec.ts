@@ -17,6 +17,7 @@ apiTest.describe(
   () => {
     let viewerApiCreditials: RoleApiCredentials;
     let adminApiCreditials: RoleApiCredentials;
+
     apiTest.beforeAll(async ({ profilingSetup, requestAuth }) => {
       if (!(await profilingSetup.checkStatus()).has_setup) {
         await profilingSetup.setupResources();
