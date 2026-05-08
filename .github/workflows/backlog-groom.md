@@ -64,10 +64,14 @@ jobs:
       duplicate_pr_url: ${{ steps.check_duplicate_pr.outputs.duplicate_pr_url }}
 engine:
   id: claude
-  model: "llm-gateway/claude-sonnet-4-6"
+  version: "2.1.111"
+  model: opus[1m]
+  max-turns: 120
   env:
-    ANTHROPIC_BASE_URL: "https://elastic.litellm-prod.ai/"
-    ANTHROPIC_API_KEY: ${{ secrets.CLAUDE_LITELLM_PROXY_API_KEY }}
+    ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}
+    ANTHROPIC_BASE_URL: https://elastic.litellm-prod.ai
+    ENABLE_PROMPT_CACHING_1H: "1"
+    ANTHROPIC_DEFAULT_OPUS_MODEL: llm-gateway/claude-opus-4-7[1m]
 tools:
   github:
     toolsets: [issues, pull_requests, repos]
