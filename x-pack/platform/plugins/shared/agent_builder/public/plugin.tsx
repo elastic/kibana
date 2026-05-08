@@ -59,7 +59,6 @@ import type {
   ConversationSidebarRef,
 } from './types';
 import type { EmbeddableConversationProps } from './embeddable/types';
-import { createEmbeddableConversation } from './embeddable/create_embeddable_conversation';
 import type { PublicEmbeddableConversationProps } from './types';
 import type { OpenConversationSidebarOptions } from './sidebar/types';
 import {
@@ -236,21 +235,32 @@ export class AgentBuilderPlugin
 
     setSidebarServices(core, internalServices);
 
-    const ConfiguredEmbeddableConversation = createEmbeddableConversation({
-      services: internalServices,
-      coreStart: core,
+    const LazyConfiguredEmbeddableConversation = React.lazy(async () => {
+      const { createEmbeddableConversation } = await import(
+        './embeddable/create_embeddable_conversation'
+      );
+
+      return {
+        default: createEmbeddableConversation({
+          services: internalServices,
+          coreStart: core,
+        }),
+      };
     });
+
     const noop = () => {};
     const PublicEmbeddableConversation: React.FC<PublicEmbeddableConversationProps> = ({
       onClose,
       ariaLabelledBy,
       ...rest
     }) => (
-      <ConfiguredEmbeddableConversation
-        {...rest}
-        onClose={onClose ?? noop}
-        ariaLabelledBy={ariaLabelledBy ?? 'agent-builder-embeddable-conversation'}
-      />
+      <React.Suspense fallback={null}>
+        <LazyConfiguredEmbeddableConversation
+          {...rest}
+          onClose={onClose ?? noop}
+          ariaLabelledBy={ariaLabelledBy ?? 'agent-builder-embeddable-conversation'}
+        />
+      </React.Suspense>
     );
 
     this.experimentalDeepLinksSubscription = core.uiSettings
