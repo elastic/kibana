@@ -621,10 +621,13 @@ describe('constructSearchQuery with fieldLabelFilters', () => {
     );
     expect(existsClause).toBeDefined();
 
-    const multiMatchClause = shouldClauses!.find(
-      (c: estypes.QueryDslQueryContainer) => c?.multi_match != null
+    const freeTextSearchClause = shouldClauses!.find(
+      (c: estypes.QueryDslQueryContainer) => c?.simple_query_string != null
     );
-    expect(multiMatchClause).toBeDefined();
+    expect(freeTextSearchClause?.simple_query_string).toEqual({
+      query: 'test',
+      fields: [`${CASE_SAVED_OBJECT}.title`],
+    });
   });
 
   it('combines fieldLabelFilters (should) with extendedFieldFilters (filter) correctly', () => {
