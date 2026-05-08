@@ -171,7 +171,10 @@ export default function ({ getService }: FtrProviderContext) {
         const indices = ['.kibana-event-log-7.9.0-000001', '.kibana-event-log-8.0.0-000001'];
         await es.indices.delete({ index: indices, ignore_unavailable: true });
         for (const index of indices) {
-          await es.indices.create({ index, mappings: EVENT_LOG_INDEX_MAPPINGS as MappingTypeMapping });
+          await es.indices.create({
+            index,
+            mappings: EVENT_LOG_INDEX_MAPPINGS as MappingTypeMapping,
+          });
         }
         await es.bulk({
           operations: MULTI_INDEX_DOCS.flatMap(({ index, id, doc }) => [
@@ -207,8 +210,14 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe(`Legacy Ids`, () => {
       before(async () => {
-        await es.indices.delete({ index: '.kibana-event-log-8.0.0-000001', ignore_unavailable: true });
-        await es.indices.create({ index: '.kibana-event-log-8.0.0-000001', mappings: EVENT_LOG_INDEX_MAPPINGS as MappingTypeMapping });
+        await es.indices.delete({
+          index: '.kibana-event-log-8.0.0-000001',
+          ignore_unavailable: true,
+        });
+        await es.indices.create({
+          index: '.kibana-event-log-8.0.0-000001',
+          mappings: EVENT_LOG_INDEX_MAPPINGS as MappingTypeMapping,
+        });
         await es.bulk({
           operations: LEGACY_IDS_DOCS.flatMap(({ id, doc }) => [
             { index: { _index: '.kibana-event-log-8.0.0-000001', _id: id } },
@@ -218,7 +227,10 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
       after(async () => {
-        await es.indices.delete({ index: '.kibana-event-log-8.0.0-000001', ignore_unavailable: true });
+        await es.indices.delete({
+          index: '.kibana-event-log-8.0.0-000001',
+          ignore_unavailable: true,
+        });
       });
       it('should support search event by ids and legacyIds', async () => {
         const legacyId = `521f2511-5cd1-44fd-95df-e0df83e354d5`;
