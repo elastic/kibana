@@ -126,6 +126,7 @@ dependsOn:
   - '@kbn/response-ops-oauth-hooks'
   - '@kbn/connector-specs'
   - '@kbn/core-user-profile-browser'
+  - '@kbn/security-plugin-types-public'
 tags:
   - plugin
   - prod

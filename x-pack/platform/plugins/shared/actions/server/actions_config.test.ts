@@ -49,8 +49,9 @@ const defaultActionsConfig: ActionsConfig = {
         callback: { lookbackWindow: '1h', limit: 100 },
       },
     },
+    ears: { enabled: false },
   },
-  ears: { enabled: false },
+  ears: { enabled: false }, // legacy config
 };
 
 describe('ensureUriAllowed', () => {
@@ -780,9 +781,74 @@ describe('getEarsUrl()', () => {
   test('returns the configured URL when ears.url is set in config', () => {
     const acu = getActionsConfigurationUtilities({
       ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: false, url: 'https://ears.example.com' },
+      },
+      ears: { enabled: false, url: 'https://ears-legacy.example.com' }, // legacy config
+    });
+    expect(acu.getEarsUrl()).toBe('https://ears.example.com');
+  });
+
+  test('returns URL from auth.ears.url when only the new config key is set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: false, url: 'https://ears.example.com' },
+      },
+    });
+    expect(acu.getEarsUrl()).toBe('https://ears.example.com');
+  });
+
+  test('falls back to legacy ears.url when auth.ears.url is not set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
       ears: { enabled: false, url: 'https://ears.example.com' },
     });
     expect(acu.getEarsUrl()).toBe('https://ears.example.com');
+  });
+});
+
+describe('isEarsEnabled()', () => {
+  test('returns false when neither config key is set', () => {
+    const acu = getActionsConfigurationUtilities(defaultActionsConfig);
+    expect(acu.isEarsEnabled()).toBe(false);
+  });
+
+  test('returns true when auth.ears.enabled is true', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: true },
+      },
+    });
+    expect(acu.isEarsEnabled()).toBe(true);
+  });
+
+  test('falls back to legacy ears.enabled when auth.ears.enabled is not set', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: undefined,
+      },
+      ears: { enabled: true },
+    });
+    expect(acu.isEarsEnabled()).toBe(true);
+  });
+
+  test('auth.ears.enabled takes precedence over legacy ears.enabled', () => {
+    const acu = getActionsConfigurationUtilities({
+      ...defaultActionsConfig,
+      auth: {
+        ...defaultActionsConfig.auth,
+        ears: { enabled: false },
+      },
+      ears: { enabled: true },
+    });
+    expect(acu.isEarsEnabled()).toBe(false);
   });
 });
 

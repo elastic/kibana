@@ -425,7 +425,15 @@
         "tags": [],
         "label": "useSelection",
         "description": [
-          "\nHook to integrate content list selection with `EuiBasicTable`.\n\nBridges the provider's selection state with `EuiBasicTable`'s `selection` prop\nusing **controlled mode** (`selected`). This ensures programmatic selection\nchanges (e.g., clearing after delete) are reflected in the table checkboxes.\n"
+          "\nHook to integrate content list selection with `EuiBasicTable`.\n\nBridges the provider's selection state with `EuiBasicTable`'s `selection` prop\nusing **controlled mode** (`selected`). This ensures programmatic selection\nchanges (e.g., clearing after delete) are reflected in the table checkboxes.\n\nWhen `features.selection` is a ",
+          {
+            "pluginId": "@kbn/content-list-table",
+            "scope": "public",
+            "docId": "kibKbnContentListTablePluginApi",
+            "section": "def-public.SelectionConfig",
+            "text": "SelectionConfig"
+          },
+          ", its `selectable` and\n`selectableMessage` callbacks are forwarded to EUI so consumers can gate row\ncheckboxes (e.g. permission checks) and surface a tooltip describing the\ndisablement reason.\n"
         ],
         "signature": [
           "() => ",
@@ -438,7 +446,7 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/hooks/use_selection.ts",
-        "lineNumber": 38,
+        "lineNumber": 44,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3065,7 +3073,7 @@
           " hook."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/hooks/use_selection.ts",
-        "lineNumber": 18,
+        "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3092,7 +3100,7 @@
               "<Record<string, unknown>>> | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/hooks/use_selection.ts",
-            "lineNumber": 22,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
