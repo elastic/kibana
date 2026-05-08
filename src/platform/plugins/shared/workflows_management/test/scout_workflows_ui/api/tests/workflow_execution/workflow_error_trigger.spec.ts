@@ -326,7 +326,10 @@ spaceTest.describe(
             `Error handler should run for async child failure, got ${r.length} (was ${initialHandlerCount})`,
         });
         const newestHandlerExecution = handlerExecutions[0];
-        const verifiedHandlerExecution = await waitForExecution(workflowsApi, newestHandlerExecution.id);
+        const verifiedHandlerExecution = await waitForExecution(
+          workflowsApi,
+          newestHandlerExecution.id
+        );
         expect(verifiedHandlerExecution?.triggeredBy).toBe('workflows.failed');
         expect(verifiedHandlerExecution?.status).toBe(ExecutionStatus.COMPLETED);
       }
