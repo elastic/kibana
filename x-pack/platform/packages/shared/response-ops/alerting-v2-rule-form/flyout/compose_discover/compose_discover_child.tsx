@@ -17,11 +17,12 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiLoadingSpinner,
+  EuiTab,
+  EuiTabs,
   EuiText,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiToolTip,
-  EuiBadge,
   EuiSuperDatePicker,
   EuiSelect,
   EuiPanel,
@@ -33,7 +34,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { ESQL_LANG_ID } from '@kbn/monaco';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
-import type { ComposeDiscoverState, ComposeDiscoverAction } from './types';
+import type { ComposeDiscoverState, ComposeDiscoverAction, SandboxTabConfig } from './types';
 import { ComposeDiscoverTabs } from './compose_discover_tabs';
 import { useQueryExecution } from './use_query_execution';
 import { useEsqlAutocomplete } from './use_esql_providers';
@@ -43,6 +44,9 @@ interface ComposeDiscoverChildProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
+  /** Determines which tabs to show in the editor. Computed by getSandboxTabConfig() in the parent. */
+  tabConfig: SandboxTabConfig;
+
   onClose: () => void;
 }
 
@@ -56,8 +60,22 @@ const isMac =
   typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 const RUN_SHORTCUT_LABEL = isMac ? '⌘⏎' : 'Ctrl+Enter';
 
-function getActiveQuery(state: ComposeDiscoverState, localQuery: string): string {
-  if (!state.tracking) return localQuery;
+/** Mirrors getVisibleTabIds from compose_discover_tabs for inline header tab bar. */
+function getVisibleTabIdsForHeader(tabConfig: SandboxTabConfig): Array<'base' | 'alert' | 'recovery'> {
+  switch (tabConfig.type) {
+    case 'base-alert': return ['base', 'alert'];
+    case 'base-recovery': return ['recovery'];
+    case 'all-three': return ['base', 'alert', 'recovery'];
+    default: return [];
+  }
+}
+
+function getActiveQuery(
+  state: ComposeDiscoverState,
+  localQuery: string,
+  tabConfig: SandboxTabConfig
+): string {
+  if (tabConfig.type === 'single') return localQuery;
   switch (state.activeTab) {
     case 'base':
       return state.baseQuery;
@@ -74,6 +92,8 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   state,
   dispatch,
   services,
+  tabConfig,
+
   onClose,
 }) => {
   useEsqlAutocomplete(services);
@@ -84,10 +104,14 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
 
   const timeRange = useMemo(() => ({ from: dateStart, to: dateEnd }), [dateStart, dateEnd]);
 
-  const activeQuery = getActiveQuery(state, localQuery);
+  const activeQuery = getActiveQuery(state, localQuery, tabConfig);
 
+  // Only fetch fields when the query has a real index pattern after FROM.
+  // Guard must check for a valid index name character — NOT just any non-whitespace,
+  // because "FROM \n| STATS..." has a pipe after the newline which is not a source.
+  const queryForFields = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(activeQuery) ? activeQuery : '';
   const { data: fieldMap } = useDataFields({
-    query: activeQuery,
+    query: queryForFields,
     http: services.http,
     dataViews: services.dataViews,
   });
@@ -105,7 +129,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
     return dateFields.map((name) => ({ value: name, text: name }));
   }, [fieldMap]);
 
-  const { columns, rows, totalRowCount, isLoading, isError, error, run, hasRun } =
+  const { columns, rows, totalRowCount, isLoading, isError, error, run, hasRun, lastExecutedQuery } =
     useQueryExecution({
       query: activeQuery,
       timeField: state.timeField,
@@ -117,15 +141,17 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
         e.preventDefault();
+        e.stopPropagation(); // stops the event reaching Monaco's own handlers
         run();
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    // Capture phase so we intercept before Monaco handles ⌘↵ for its own commands
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [run]);
 
   const handleDone = useCallback(() => {
-    if (state.tracking) {
+    if (tabConfig.type !== 'single') {
       dispatch({
         type: 'COMMIT_CHILD_SPLIT',
         baseQuery: state.baseQuery,
@@ -136,7 +162,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
       dispatch({ type: 'COMMIT_CHILD_QUERY', fullQuery: localQuery });
     }
     onClose();
-  }, [state, localQuery, dispatch, onClose]);
+  }, [tabConfig, state, localQuery, dispatch, onClose]);
 
   const gridColumns: EuiDataGridColumn[] = useMemo(
     () =>
@@ -191,8 +217,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   return (
     <EuiFlyout
       type="overlay"
-      size="l"
-      maxWidth="100%"
+      size="fill"
       onClose={onClose}
       aria-labelledby={CHILD_FLYOUT_TITLE_ID}
     >
@@ -201,9 +226,11 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
           <h3>
             {!state.queryCommitted
               ? 'Define alert query'
-              : state.tracking
-                ? 'Edit rule queries'
-                : 'Edit alert query'}
+              : tabConfig.type === 'base-recovery'
+                ? 'Edit recovery query'
+                : tabConfig.type !== 'single'
+                  ? 'Edit rule queries'
+                  : 'Edit alert query'}
           </h3>
         </EuiTitle>
         {!state.queryCommitted && (
@@ -212,56 +239,80 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
             the rest of the rule settings next.
           </EuiText>
         )}
-
-        <EuiSpacer size="s" />
-
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-          <EuiFlexItem grow={false}>
-            <EuiSelect
-              options={timeFieldOptions}
-              value={state.timeField}
-              onChange={(e) =>
-                dispatch({ type: 'SET_TIME_FIELD', timeField: e.target.value })
-              }
-              compressed
-              prepend="Time field"
-              data-test-subj="composeDiscoverTimeField"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSuperDatePicker
-              start={dateStart}
-              end={dateEnd}
-              onTimeChange={({ start, end }) => {
-                setDateStart(start);
-                setDateEnd(end);
-              }}
-              compressed
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={`Run query (${RUN_SHORTCUT_LABEL})`}>
-              <EuiButton
-                size="s"
-                iconType="playFilled"
-                onClick={run}
-                isLoading={isLoading}
-                data-test-subj="composeDiscoverRunQuery"
-              >
-                Run
-              </EuiButton>
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{RUN_SHORTCUT_LABEL}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
-        <EuiPanel hasBorder paddingSize="none" style={editorPanelStyles}>
-          {state.tracking ? (
-            <ComposeDiscoverTabs state={state} dispatch={dispatch} />
+      <EuiFlyoutBody paddingSize="none">
+        {/* ── 1. Tab bar ──────────────────────────────────────────────── */}
+        <div style={{ padding: '0 16px' }}>
+          {tabConfig.type !== 'single' ? (
+            <EuiTabs>
+              {(['base', 'alert', 'recovery'] as const)
+                .filter((id) => getVisibleTabIdsForHeader(tabConfig).includes(id))
+                .map((id) => (
+                  <EuiTab
+                    key={id}
+                    isSelected={state.activeTab === id}
+                    onClick={() => dispatch({ type: 'SET_TAB', tab: id })}
+                    data-test-subj={`composeDiscoverTab-${id}`}
+                  >
+                    {id === 'base' ? 'Base query' : id === 'alert' ? 'Alert query' : 'Recovery query'}
+                  </EuiTab>
+                ))}
+            </EuiTabs>
+          ) : (
+            <EuiTabs>
+              <EuiTab isSelected>Query</EuiTab>
+            </EuiTabs>
+          )}
+        </div>
+
+        {/* ── 2. Search / date picker / time field row — one line ──────── */}
+        <div style={{ padding: '8px 16px' }}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={`Search (${RUN_SHORTCUT_LABEL})`}>
+                <EuiButton
+                  size="s"
+                  onClick={run}
+                  isLoading={isLoading}
+                  data-test-subj="composeDiscoverRunQuery"
+                >
+                  Search
+                </EuiButton>
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow>
+              <EuiSuperDatePicker
+                start={dateStart}
+                end={dateEnd}
+                onTimeChange={({ start, end }) => {
+                  setDateStart(start);
+                  setDateEnd(end);
+                }}
+                showUpdateButton={false}
+                compressed
+                width="full"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
+              <EuiSelect
+                options={timeFieldOptions}
+                value={state.timeField}
+                onChange={(e) =>
+                  dispatch({ type: 'SET_TIME_FIELD', timeField: e.target.value })
+                }
+                compressed
+                prepend="Time field"
+                data-test-subj="composeDiscoverTimeField"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+
+        {/* ── 3. Editor — bordered panel ──────────────────────────────── */}
+        <EuiPanel hasBorder paddingSize="none" style={{ margin: '0 16px', ...editorPanelStyles }}>
+          {tabConfig.type !== 'single' ? (
+            <ComposeDiscoverTabs state={state} dispatch={dispatch} tabConfig={tabConfig} hideTabBar services={services} />
           ) : (
             <CodeEditor
               languageId={ESQL_LANG_ID}
@@ -278,6 +329,17 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
           )}
         </EuiPanel>
 
+        {/* ── 4. Footer stats ─────────────────────────────────────────── */}
+        {hasRun && !isLoading && !isError && (
+          <div style={{ padding: '4px 16px' }}>
+            <EuiText size="xs" color="subdued">
+              {totalRowCount.toLocaleString()} document{totalRowCount !== 1 ? 's' : ''} queried
+            </EuiText>
+          </div>
+        )}
+
+        {/* ── 5. Results ──────────────────────────────────────────────── */}
+        <div style={{ padding: '0 16px' }}>
         <EuiSpacer size="m" />
 
         {!hasRun && (
@@ -286,8 +348,8 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
             title={<h4>Run your query to see results</h4>}
             body={
               <p>
-                Click <strong>Run</strong> or press <strong>{RUN_SHORTCUT_LABEL}</strong> to execute
-                the query.
+                Click <strong>Search</strong> or press <strong>{RUN_SHORTCUT_LABEL}</strong> to
+                execute the query.
               </p>
             }
           />
@@ -318,7 +380,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
         {hasRun && !isLoading && !isError && rows.length > 0 && (
           <>
             <ComposeDiscoverChart
-              query={activeQuery}
+              query={lastExecutedQuery ?? activeQuery}
               timeField={state.timeField}
               timeRange={timeRange}
               columns={columns}
@@ -358,13 +420,14 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
             />
           </>
         )}
+        </div>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButton fill onClick={handleDone} data-test-subj="composeDiscoverChildDone">
-              {state.queryCommitted ? 'Done' : 'Next'}
+              Apply changes
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

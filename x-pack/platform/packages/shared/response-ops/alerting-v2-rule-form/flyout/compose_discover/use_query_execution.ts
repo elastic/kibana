@@ -26,6 +26,8 @@ export interface QueryExecutionResult {
   error: string | null;
   run: () => void;
   hasRun: boolean;
+  /** The query that was last explicitly executed — use this for the chart to avoid auto-refresh on keystrokes. */
+  lastExecutedQuery: string | null;
 }
 
 interface TimeRange {
@@ -166,5 +168,6 @@ export const useQueryExecution = ({
     error: errorMessage,
     run,
     hasRun: executionQuery !== null,
+    lastExecutedQuery: executionQuery,
   };
 };
