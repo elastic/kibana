@@ -655,6 +655,8 @@ describe('EditConnectorFlyout', () => {
         />
       );
 
+      expect(await screen.findByTestId('nameInput')).toBeInTheDocument();
+
       await userEvent.clear(screen.getByTestId('nameInput'));
       await userEvent.type(screen.getByTestId('nameInput'), 'My new name');
       await userEvent.type(screen.getByTestId('test-connector-secret-text-field'), 'password');

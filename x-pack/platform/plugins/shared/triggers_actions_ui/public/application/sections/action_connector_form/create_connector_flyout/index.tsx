@@ -135,7 +135,8 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const isSaving = isSavingConnector || isSubmitting;
   const isUsingInitialConnector = Boolean(initialConnector);
   const hasConnectorTypeSelected = actionType != null;
-  const disabled = hasErrors || !canSave || isLoadingActionTypeModel || !!actionTypeModelError;
+  const disabled =
+    hasErrors || !canSave || isLoadingActionTypeModel || !!actionTypeModelError || !actionTypeModel;
   // Only stack connectors (not spec-based) support the test tab
   const isTestable =
     !actionTypeModel?.source || actionTypeModel?.source === ACTION_TYPE_SOURCES.stack;
@@ -443,18 +444,21 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               </>
             )}
 
-            {!isLoadingActionTypeModel && !showLoadingSpinner && !actionTypeModelError && (
-              <>
-                <ConnectorForm
-                  actionTypeModel={actionTypeModel}
-                  connector={defaultConnector}
-                  isEdit={false}
-                  onChange={setFormState}
-                  setResetForm={setResetForm}
-                />
-                {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
-              </>
-            )}
+            {!isLoadingActionTypeModel &&
+              !showLoadingSpinner &&
+              !actionTypeModelError &&
+              actionTypeModel && (
+                <>
+                  <ConnectorForm
+                    actionTypeModel={actionTypeModel}
+                    connector={defaultConnector}
+                    isEdit={false}
+                    onChange={setFormState}
+                    setResetForm={setResetForm}
+                  />
+                  {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
+                </>
+              )}
           </>
         ) : (
           <ActionTypeMenu

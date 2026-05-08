@@ -199,6 +199,8 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     isLoadingActionTypeModel,
   ]);
 
+  const isResolvingConnectorType = resolvedActionType === null && !actionTypesLoadError;
+
   const showButtons =
     canSave &&
     actionTypeModel &&
@@ -206,7 +208,12 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     !isLoadingActionTypeModel &&
     !actionTypeModelError;
   const disabled =
-    !isFormModified || hasErrors || isSaving || isLoadingActionTypeModel || !!actionTypeModelError;
+    !isFormModified ||
+    hasErrors ||
+    isSaving ||
+    isLoadingActionTypeModel ||
+    !!actionTypeModelError ||
+    !actionTypeModel;
 
   const connectorWithoutSecrets = useMemo(
     () =>
@@ -376,7 +383,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                 </>
               )}
 
-              {showLoadingSpinner && (
+              {(showLoadingSpinner || isResolvingConnectorType) && (
                 <EuiFlexGroup
                   direction="column"
                   justifyContent="center"
@@ -438,18 +445,21 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                 </>
               )}
 
-              {!isLoadingActionTypeModel && !actionTypeModelError && !actionTypesLoadError && (
-                <>
-                  <ConnectorForm
-                    actionTypeModel={actionTypeModel}
-                    connector={connectorWithoutSecrets}
-                    isEdit={isEdit}
-                    onChange={setFormState}
-                    onFormModifiedChange={onFormModifiedChange}
-                  />
-                  {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
-                </>
-              )}
+              {actionTypeModel &&
+                !isLoadingActionTypeModel &&
+                !actionTypeModelError &&
+                !actionTypesLoadError && (
+                  <>
+                    <ConnectorForm
+                      actionTypeModel={actionTypeModel}
+                      connector={connectorWithoutSecrets}
+                      isEdit={isEdit}
+                      onChange={setFormState}
+                      onFormModifiedChange={onFormModifiedChange}
+                    />
+                    {!!preSubmitValidationErrorMessage && <p>{preSubmitValidationErrorMessage}</p>}
+                  </>
+                )}
             </>
           )}
         </>
@@ -471,6 +481,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     actionTypeModel,
     actionTypeModelError,
     actionTypesLoadError,
+    isResolvingConnectorType,
     isEdit,
     isLoadingActionTypeModel,
     showLoadingSpinner,
