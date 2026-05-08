@@ -12,6 +12,7 @@ import type { FieldDescriptor } from './types';
 import { useSchemaDescriptions } from './use_schema_descriptions';
 import { SchemaFormField } from './fields';
 import { getStateAdapter } from './state_adapters';
+import { filterFieldsByCondition } from './evaluate_condition';
 
 interface SchemaFlyoutEditorProps {
   visualizationId: string;
@@ -163,6 +164,11 @@ export const SchemaFlyoutEditor: React.FC<SchemaFlyoutEditorProps> = ({
 }) => {
   const { data: fieldDescriptors, isLoading } = useSchemaDescriptions(visualizationId);
 
+  const visibleFields = useMemo(
+    () => filterFieldsByCondition(fieldDescriptors, state),
+    [fieldDescriptors, state]
+  );
+
   if (isLoading) {
     return (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -179,13 +185,13 @@ export const SchemaFlyoutEditor: React.FC<SchemaFlyoutEditorProps> = ({
     );
   }
 
-  if (fieldDescriptors.length === 0) {
+  if (visibleFields.length === 0) {
     return null;
   }
 
   return (
     <SchemaForm
-      fieldDescriptors={fieldDescriptors}
+      fieldDescriptors={visibleFields}
       state={state}
       setState={setState}
       visualizationId={visualizationId}

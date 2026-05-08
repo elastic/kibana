@@ -44,12 +44,14 @@ export const xyUISchema: UISchemaEntry[] = [
     label: i18n.translate('xpack.lens.xy.showPartialBucketsLabel', {
       defaultMessage: 'Show partial buckets',
     }),
+    condition: { requiresTimeAxis: true },
   },
   {
     path: 'styling.overlays.current_time_marker.visible',
     label: i18n.translate('xpack.lens.xy.showCurrentTimeMarkerLabel', {
       defaultMessage: 'Show current time marker',
     }),
+    condition: { requiresTimeAxis: true },
   },
   // Styling — line/area interpolation
   {
@@ -58,6 +60,9 @@ export const xyUISchema: UISchemaEntry[] = [
       defaultMessage: 'Line interpolation',
     }),
     widget: 'buttonGroup',
+    condition: {
+      seriesTypes: ['line', 'area', 'area_stacked', 'area_percentage_stacked'],
+    },
     options: [
       {
         value: 'linear',
@@ -82,6 +87,9 @@ export const xyUISchema: UISchemaEntry[] = [
       defaultMessage: 'Points visibility',
     }),
     widget: 'buttonGroup',
+    condition: {
+      seriesTypes: ['line', 'area', 'area_stacked', 'area_percentage_stacked'],
+    },
     options: [
       {
         value: 'auto',
@@ -105,6 +113,9 @@ export const xyUISchema: UISchemaEntry[] = [
     }),
     widget: 'range',
     props: { min: 0.1, max: 1, step: 0.1 },
+    condition: {
+      seriesTypes: ['area', 'area_stacked', 'area_percentage_stacked'],
+    },
   },
   // Styling — bars
   {
@@ -112,6 +123,16 @@ export const xyUISchema: UISchemaEntry[] = [
     label: i18n.translate('xpack.lens.xy.barDataLabelsLabel', {
       defaultMessage: 'Show bar data labels',
     }),
+    condition: {
+      seriesTypes: [
+        'bar',
+        'bar_stacked',
+        'bar_percentage',
+        'bar_horizontal',
+        'bar_horizontal_stacked',
+        'bar_horizontal_percentage',
+      ],
+    },
   },
   // Styling — fitting
   {
@@ -120,6 +141,10 @@ export const xyUISchema: UISchemaEntry[] = [
       defaultMessage: 'Missing values',
     }),
     widget: 'buttonGroup',
+    condition: {
+      seriesTypes: ['line', 'area', 'area_stacked'],
+      excludeTextBased: true,
+    },
     options: [
       {
         value: 'none',

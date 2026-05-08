@@ -23,4 +23,19 @@ export interface FieldDescriptor {
   props?: Record<string, unknown>;
   tooltip?: string;
   children?: FieldDescriptor[];
+  /** Condition that must be met for this field to be visible */
+  condition?: FieldVisibilityCondition;
+}
+
+/**
+ * Conditions controlling when a field is visible.
+ * All specified conditions must be met (AND logic).
+ */
+export interface FieldVisibilityCondition {
+  /** Show this field only when at least one layer matches one of these series types */
+  seriesTypes?: string[];
+  /** Show only when the X axis is time-based */
+  requiresTimeAxis?: boolean;
+  /** Show only when NO text-based (ES|QL) datasource is present */
+  excludeTextBased?: boolean;
 }
