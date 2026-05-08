@@ -36,6 +36,7 @@
             "lineNumber": 66,
             "columnNumber": 80,
             "deprecated": false,
+            "docsReferencedTypeName": "GenerateFormFieldsParams",
             "trackAdoption": false,
             "isRequired": true
           }

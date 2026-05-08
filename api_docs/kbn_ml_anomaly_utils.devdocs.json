@@ -118,6 +118,7 @@
             "lineNumber": 207,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "MlAnomalyRecordDoc",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -173,6 +174,7 @@
             "lineNumber": 166,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "MlAnomalyRecordDoc",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -228,6 +230,7 @@
             "lineNumber": 188,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "MlAnomalyRecordDoc",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -321,6 +324,7 @@
             "lineNumber": 23,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "EuiThemeComputed",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -639,6 +643,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EuiThemeComputed",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -698,6 +703,7 @@
             "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "EuiThemeComputed",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -753,6 +759,7 @@
             "lineNumber": 83,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "MlAnomaliesTableRecord",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -851,6 +858,7 @@
             "lineNumber": 114,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "MlAnomalyRecordDoc",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -906,6 +914,7 @@
             "lineNumber": 263,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "MlAnomalyRecordDoc",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1101,6 +1110,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "MlAnomalyResultType",
             "trackAdoption": false,
             "isRequired": true
           }

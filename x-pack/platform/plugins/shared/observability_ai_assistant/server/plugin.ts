@@ -96,25 +96,23 @@ export class ObservabilityAIAssistantPlugin
       },
     });
 
-    if (plugins.searchInferenceEndpoints) {
-      plugins.searchInferenceEndpoints.features.register(observabilityParentFeature);
+    plugins.searchInferenceEndpoints.features.register(observabilityParentFeature);
 
-      const failures: string[] = [];
-      for (const feature of observabilityAIAssistantInferenceFeatures) {
-        const result = plugins.searchInferenceEndpoints.features.register(feature);
-        if (!result.ok) {
-          failures.push(`${feature.featureId}: ${result.error}`);
-        }
+    const failures: string[] = [];
+    for (const feature of observabilityAIAssistantInferenceFeatures) {
+      const result = plugins.searchInferenceEndpoints.features.register(feature);
+      if (!result.ok) {
+        failures.push(`${feature.featureId}: ${result.error}`);
       }
-      if (failures.length) {
-        this.logger.warn(
-          `Failed to register inference feature for Observability AI Assistant: ${failures.join(
-            '; '
-          )}`
-        );
-      } else {
-        this.logger.debug('Registered Observability AI Assistant inference features');
-      }
+    }
+    if (failures.length) {
+      this.logger.warn(
+        `Failed to register inference feature for Observability AI Assistant: ${failures.join(
+          '; '
+        )}`
+      );
+    } else {
+      this.logger.debug('Registered Observability AI Assistant inference features');
     }
 
     const routeHandlerPlugins = mapValues(plugins, (value, key) => {

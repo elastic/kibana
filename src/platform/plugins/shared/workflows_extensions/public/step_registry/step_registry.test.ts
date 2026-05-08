@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { loggerMock } from '@kbn/logging-mocks';
 import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { PublicStepRegistry } from './step_registry';
@@ -25,9 +26,11 @@ const defaultDefinition: PublicStepDefinition = {
 
 describe('PublicStepRegistry', () => {
   let registry: PublicStepRegistry;
+  let logger: ReturnType<typeof loggerMock.create>;
 
   beforeEach(() => {
-    registry = new PublicStepRegistry();
+    logger = loggerMock.create();
+    registry = new PublicStepRegistry(logger);
   });
 
   describe('register', () => {
@@ -121,15 +124,25 @@ describe('PublicStepRegistry', () => {
       expect(registry.get(stepId)).toEqual(defaultDefinition);
     });
 
-    it('should throw when resolved definition duplicates an existing step type ID', async () => {
+    it('should log an error and skip registration when resolved definition duplicates an existing step type ID', async () => {
       registry.register(defaultDefinition);
       const loader = () => Promise.resolve({ ...defaultDefinition, label: 'Other' });
 
       registry.register(loader);
 
-      await expect(registry.whenReady()).rejects.toThrow(
-        'Step definition for type "custom.myStep" is already registered'
+      await expect(registry.whenReady()).resolves.toBeUndefined();
+
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to register step definition',
+        expect.objectContaining({
+          error: expect.objectContaining({
+            message: expect.stringContaining(
+              'Step definition for type "custom.myStep" is already registered'
+            ),
+          }),
+        })
       );
+      expect(registry.get(stepId)).toEqual(defaultDefinition);
     });
 
     it('whenReady() should resolve after all loaders have settled', async () => {
@@ -176,23 +189,33 @@ describe('PublicStepRegistry', () => {
       expect(registry.getAll()).toHaveLength(2);
     });
 
-    it('should throw when loader resolves with undefined', async () => {
-      registry.register(() => Promise.resolve(undefined as unknown as PublicStepDefinition));
+    it('should skip registration when loader resolves with undefined', async () => {
+      registry.register(() => Promise.resolve(undefined));
 
-      await expect(registry.whenReady()).rejects.toThrow('Step definition is not loaded correctly');
+      await registry.whenReady();
+
+      expect(registry.has(stepId)).toBe(false);
+      expect(registry.getAll()).toHaveLength(0);
     });
 
-    it('should throw when loader resolves with null', async () => {
+    it('should skip registration when loader resolves with null', async () => {
       registry.register(() => Promise.resolve(null as unknown as PublicStepDefinition));
 
-      await expect(registry.whenReady()).rejects.toThrow('Step definition is not loaded correctly');
+      await registry.whenReady();
+
+      expect(registry.has(stepId)).toBe(false);
+      expect(registry.getAll()).toHaveLength(0);
     });
 
-    it('should reject whenReady() when loader rejects', async () => {
+    it('should log an error and resolve whenReady() when loader rejects', async () => {
       const loadError = new Error('Failed to load step module');
       registry.register(() => Promise.reject(loadError));
 
-      await expect(registry.whenReady()).rejects.toThrow('Failed to load step module');
+      await expect(registry.whenReady()).resolves.toBeUndefined();
+
+      expect(logger.error).toHaveBeenCalledWith('Failed to register step definition', {
+        error: loadError,
+      });
     });
   });
 

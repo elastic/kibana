@@ -232,6 +232,7 @@
                 "lineNumber": 78,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "AddFavoriteRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -388,6 +389,7 @@
             "lineNumber": 81,
             "columnNumber": 51,
             "deprecated": false,
+            "docsReferencedTypeName": "EuiThemeComputed",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -439,6 +441,7 @@
             "lineNumber": 25,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "FavoriteButtonProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -596,6 +599,7 @@
             "lineNumber": 106,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "PropsWithChildren",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -786,6 +790,7 @@
                 "lineNumber": 36,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "AddFavoriteRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }

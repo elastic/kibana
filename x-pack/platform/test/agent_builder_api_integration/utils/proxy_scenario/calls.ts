@@ -122,30 +122,6 @@ export const mockFinalAnswer = (llmProxy: LlmProxy, answer: string) => {
     .completeAfterIntercept();
 };
 
-export const mockInternalIndexExplorerCall = ({
-  resource,
-  llmProxy,
-}: {
-  resource: { name: string; type: 'index' | 'data_stream' } | null;
-  llmProxy: LlmProxy;
-}) => {
-  // search tool - index explorer call
-  void llmProxy.interceptors.toolChoice({
-    name: 'select_resources',
-    response: createToolCallMessage('select_resources', {
-      targets: resource
-        ? [
-            {
-              reason: 'Because',
-              type: resource.type,
-              name: resource.name,
-            },
-          ]
-        : [],
-    }),
-  });
-};
-
 export const mockSearchToolCallWithNaturalLanguageGen = ({
   resource,
   esqlQuery = "FROM my_index WHERE name = 'John'",
@@ -155,12 +131,8 @@ export const mockSearchToolCallWithNaturalLanguageGen = ({
   esqlQuery?: string;
   llmProxy: LlmProxy;
 }) => {
-  // search tool - index explorer call
-  mockInternalIndexExplorerCall({ llmProxy, resource });
-
-  // search tool - search strategy selection
   void llmProxy.interceptors.userMessage({
-    name: 'search_tool:tool_selection',
+    name: 'search_tool:dispatcher',
     when: ({ messages }) => {
       const lastMessage = last(messages)?.content as string;
       return lastMessage.startsWith('Execute the following user query:');

@@ -16,7 +16,7 @@ import type { LinksLayoutType } from '../../../common/content_management';
 import { EXTERNAL_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { coreServices, trackUiMetric } from '../../services/kibana_services';
 import type { ResolvedLink } from '../../types';
-import { DEFAULT_EXTERNAL_LINK_OPTIONS } from './constants';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../common/constants';
 
 export const ExternalLinkComponent = ({
   link,

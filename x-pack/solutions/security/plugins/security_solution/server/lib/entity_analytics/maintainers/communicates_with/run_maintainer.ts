@@ -144,7 +144,7 @@ export async function runMaintainer({
       };
 
       const esqlQuery = integration.buildEsqlQuery(namespace);
-      logger.info(
+      logger.debug(
         `[${integration.id}] Running ES|QL query for ${buckets.length} user buckets (${esqlQuery.length} chars)`
       );
       logger.debug(`[${integration.id}] ES|QL query:\n${esqlQuery}`);
@@ -173,7 +173,9 @@ export async function runMaintainer({
 
         for (const record of records) {
           const targets =
-            record.communicates_with.length > 0 ? record.communicates_with.join(', ') : 'none';
+            record.communicates_with.ids.length > 0
+              ? record.communicates_with.ids.join(', ')
+              : 'none';
           logger.debug(`[${integration.id}] Entity ${record.entityId}: targets=[${targets}]`);
         }
       }

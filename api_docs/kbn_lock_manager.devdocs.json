@@ -116,6 +116,7 @@
                 "lineNumber": 15,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -139,6 +140,7 @@
                 "lineNumber": 15,
                 "columnNumber": 59,
                 "deprecated": false,
+                "docsReferencedTypeName": "Logger",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -177,6 +179,7 @@
                 "lineNumber": 29,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LockId",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -263,6 +266,7 @@
                 "lineNumber": 44,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "LockId",
                 "trackAdoption": false,
                 "isRequired": true
               }

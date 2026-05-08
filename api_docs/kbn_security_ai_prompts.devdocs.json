@@ -57,6 +57,7 @@
             "lineNumber": 90,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "GetPromptArgs",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -118,6 +119,7 @@
             "lineNumber": 31,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "GetPromptsByGroupIdArgs",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -56,11 +56,8 @@ const createTestCases = (spaceId: string) => {
   return { normal, withObjectNamespaces };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-
-  const { addTests, createTestDefinitions } = bulkUpdateTestSuiteFactory(esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions } = bulkUpdateTestSuiteFactory(context);
   const createTests = (spaceId: string) => {
     const { normal, withObjectNamespaces } = createTestCases(spaceId);
     return [

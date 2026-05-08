@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, Suspense, useCallback } from 'react';
 import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
 import {
@@ -74,15 +74,17 @@ const FlyoutHeaderComponent: React.FC<{
     <EuiFlyoutHeader hasBorder data-test-subj="edit-connector-flyout-header">
       <EuiFlexGroup gutterSize="s" alignItems="center">
         {icon ? (
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={icon} size="m" data-test-subj="edit-connector-flyout-header-icon" />
-          </EuiFlexItem>
+          <Suspense fallback={null}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={icon} size="m" data-test-subj="edit-connector-flyout-header-icon" />
+            </EuiFlexItem>
+          </Suspense>
         ) : null}
         <EuiFlexItem grow={false}>
           {isPreconfigured ? (
             <>
-              <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
-                <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" wrap={true}>
+                <EuiFlexItem autoFocus={true} grow={false} style={{ minWidth: '200px' }}>
                   <EuiTitle size="s">
                     <h3 id="flyoutTitle">
                       <FormattedMessage
@@ -123,8 +125,8 @@ const FlyoutHeaderComponent: React.FC<{
               </EuiText>
             </>
           ) : (
-            <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
-              <EuiFlexItem>
+            <EuiFlexGroup gutterSize="s" alignItems="center" wrap={true}>
+              <EuiFlexItem style={{ minWidth: '200px' }}>
                 <EuiTitle size="s">
                   <h3 id="flyoutTitle">
                     <FormattedMessage

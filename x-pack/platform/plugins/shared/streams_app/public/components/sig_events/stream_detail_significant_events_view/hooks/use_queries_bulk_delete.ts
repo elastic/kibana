@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { DISCOVERY_QUERIES_QUERY_KEY } from '../../../../hooks/sig_events/use_fetch_discovery_queries';
@@ -13,11 +12,10 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useQueriesApi } from '../../../../hooks/sig_events/use_queries_api';
 
 interface UseRulesDemoteParams {
-  definition: Streams.all.Definition;
   onSuccess?: () => void;
 }
 
-export function useRulesDemote({ definition, onSuccess }: UseRulesDemoteParams) {
+export function useRulesDemote({ onSuccess }: UseRulesDemoteParams) {
   const {
     core: {
       notifications: { toasts },

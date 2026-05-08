@@ -33,7 +33,6 @@ export const ruleSavedObjectAttributesSchema = schema.object({
   evaluation: schema.object({
     query: schema.object({
       base: schema.string(),
-      condition: schema.maybe(schema.string()),
     }),
   }),
   recovery_policy: schema.maybe(
@@ -42,7 +41,6 @@ export const ruleSavedObjectAttributesSchema = schema.object({
       query: schema.maybe(
         schema.object({
           base: schema.maybe(schema.string()),
-          condition: schema.maybe(schema.string()),
         })
       ),
     })

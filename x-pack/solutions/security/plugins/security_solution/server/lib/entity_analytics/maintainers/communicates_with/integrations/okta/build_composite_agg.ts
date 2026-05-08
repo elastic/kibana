@@ -7,13 +7,13 @@
 
 import { buildCompositeAggQueryBase } from '../shared_query_utils';
 import type { CompositeAfterKey } from '../../types';
-import { OKTA_AUTH_EVENT_ACTIONS } from './constants';
+import { OKTA_USER_ADMIN_EVENT_ACTIONS } from './constants';
 
 export const buildCompositeAggQuery = (afterKey?: CompositeAfterKey) =>
   buildCompositeAggQueryBase(
     [
-      { terms: { 'event.action': OKTA_AUTH_EVENT_ACTIONS } },
-      { exists: { field: 'okta.target.display_name' } },
+      { terms: { 'event.action': OKTA_USER_ADMIN_EVENT_ACTIONS } },
+      { exists: { field: 'user.target.email' } },
     ],
     afterKey
   );

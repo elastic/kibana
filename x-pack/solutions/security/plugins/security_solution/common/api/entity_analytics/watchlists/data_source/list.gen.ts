@@ -14,41 +14,47 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { MonitoringEntitySource } from './common.gen';
 
+export const ListWatchlistEntitySourcesRequestQuery = lazySchema(() =>
+  z.object({
+    type: z.string().optional(),
+    managed: BooleanFromString.optional(),
+    name: z.string().optional(),
+    page: z.coerce.number().int().min(1).optional(),
+    per_page: z.coerce.number().int().min(1).max(10000).optional(),
+    sort_field: z.string().optional(),
+    sort_order: z.enum(['asc', 'desc']).optional(),
+  })
+);
 export type ListWatchlistEntitySourcesRequestQuery = z.infer<
   typeof ListWatchlistEntitySourcesRequestQuery
 >;
-export const ListWatchlistEntitySourcesRequestQuery = z.object({
-  type: z.string().optional(),
-  managed: BooleanFromString.optional(),
-  name: z.string().optional(),
-  page: z.coerce.number().int().min(1).optional(),
-  per_page: z.coerce.number().int().min(1).max(10000).optional(),
-  sort_field: z.string().optional(),
-  sort_order: z.enum(['asc', 'desc']).optional(),
-});
 export type ListWatchlistEntitySourcesRequestQueryInput = z.input<
   typeof ListWatchlistEntitySourcesRequestQuery
 >;
 
+export const ListWatchlistEntitySourcesRequestParams = lazySchema(() =>
+  z.object({
+    watchlist_id: z.string(),
+  })
+);
 export type ListWatchlistEntitySourcesRequestParams = z.infer<
   typeof ListWatchlistEntitySourcesRequestParams
 >;
-export const ListWatchlistEntitySourcesRequestParams = z.object({
-  watchlist_id: z.string(),
-});
 export type ListWatchlistEntitySourcesRequestParamsInput = z.input<
   typeof ListWatchlistEntitySourcesRequestParams
 >;
 
+export const ListWatchlistEntitySourcesResponse = lazySchema(() =>
+  z.object({
+    sources: z.array(MonitoringEntitySource),
+    page: z.number().int().min(1),
+    per_page: z.number().int().min(1).max(10000),
+    total: z.number().int().min(0),
+  })
+);
 export type ListWatchlistEntitySourcesResponse = z.infer<typeof ListWatchlistEntitySourcesResponse>;
-export const ListWatchlistEntitySourcesResponse = z.object({
-  sources: z.array(MonitoringEntitySource),
-  page: z.number().int().min(1),
-  per_page: z.number().int().min(1).max(10000),
-  total: z.number().int().min(0),
-});

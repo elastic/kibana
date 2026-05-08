@@ -26,8 +26,8 @@ import { EditPolicyModal } from '../downsampling/edit_policy_modal/edit_policy_m
 import { CreatePolicyModal } from '../downsampling/create_new_policy_modal/create_new_policy_modal';
 import { EditIlmPhasesFlyout } from '../downsampling/edit_ilm_phases_flyout';
 import {
-  createIlmPhasesFlyoutDeserializer,
-  createIlmPhasesFlyoutSerializer,
+  createMapFormValuesToIlmPolicyPhases,
+  mapIlmPolicyPhasesToFormValues,
 } from '../downsampling/edit_ilm_phases_flyout/form';
 import type { LifecyclePhase } from '../common/data_lifecycle/lifecycle_types';
 import { useSnapshotRepositories } from './use_snapshot_repositories';
@@ -110,9 +110,8 @@ export const useIlmLifecycleSummary = ({
   const currentPolicy = useRef<IlmPolicyWithUsage | null>(null);
 
   const getCanonicalFlyoutInitialPhases = (initialPhases: IlmPolicyPhases): IlmPolicyPhases => {
-    const deserializer = createIlmPhasesFlyoutDeserializer();
-    const serializer = createIlmPhasesFlyoutSerializer(initialPhases);
-    return serializer(deserializer(initialPhases));
+    const mapFormValuesToIlmPolicyPhases = createMapFormValuesToIlmPolicyPhases(initialPhases);
+    return mapFormValuesToIlmPolicyPhases(mapIlmPolicyPhasesToFormValues(initialPhases));
   };
 
   const affectedResources = currentPolicy.current
@@ -543,7 +542,7 @@ export const useIlmLifecycleSummary = ({
 
       {uiState.isEditLifecycleFlyoutOpen && uiState.editFlyoutInitialPhases && (
         <EditIlmPhasesFlyout
-          initialPhases={uiState.previewPhases ?? uiState.editFlyoutInitialPhases}
+          initialPhases={uiState.editFlyoutInitialPhases}
           selectedPhase={uiState.editingPhase}
           setSelectedPhase={(phase) => dispatchUi({ type: 'setEditingPhase', payload: phase })}
           onChange={(next, meta) => {

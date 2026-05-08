@@ -6,12 +6,14 @@
  */
 
 import type { Node, Edge, EdgeMarker as ReactFlowEdgeMarker } from '@xyflow/react';
+import type { AlertStatus } from '@kbn/rule-data-utils';
 import type { AgentName } from '@kbn/apm-types/src/es_schemas/ui/fields';
 import type { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '@kbn/apm-types';
 import type { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_SUBTYPE, SPAN_TYPE } from '@kbn/apm-types';
 import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
 import type { Coordinate } from '../../typings/timeseries';
 import type { ServiceAnomalyStats } from '../anomaly_detection';
+import type { SloStatus } from '../service_inventory';
 
 export interface ServiceMapTelemetry {
   tracesCount: number;
@@ -170,6 +172,7 @@ export interface ServiceMapExitSpan extends ServiceMapService {
 export type ServiceMapSpan = ServiceMapExitSpan & {
   destinationService?: ServiceMapService;
 };
+/** Satisfies React Flow's `Record<string, unknown>` node data constraint. */
 interface BaseNodeData extends Record<string, unknown> {
   id: string;
   label: string;
@@ -177,8 +180,19 @@ interface BaseNodeData extends Record<string, unknown> {
 
 export interface ServiceNodeData extends BaseNodeData {
   isService: true;
+  /**
+   * Embeddable / focused service map: accent the filtered/focus service (frame, fill,
+   * primary ring on the node). Edge highlighting still follows React Flow selection only.
+   */
+  contextHighlight?: boolean;
   agentName?: AgentName;
   serviceAnomalyStats?: ServiceAnomalyStats;
+  /** Active alerts count for service map badges (merged client-side). */
+  alertsCount?: number;
+  /** Per-status counts when badge merge supplies a breakdown. */
+  alertsByStatus?: Partial<Record<AlertStatus, number>>;
+  sloStatus?: SloStatus | 'noSLOs';
+  sloCount?: number;
 }
 
 export interface DependencyNodeData extends BaseNodeData {

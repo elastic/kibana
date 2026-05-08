@@ -9,10 +9,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { LensSeriesLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensSeriesLayer, LensYBoundsConfig } from '@kbn/lens-embeddable-utils';
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useRef } from 'react';
-import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { useLensProps } from './hooks/use_lens_props';
 import type { LensWrapperProps } from './lens_wrapper';
@@ -36,6 +35,8 @@ export type ChartProps = Pick<UnifiedMetricsGridProps, 'fetchParams'> &
     isLoading?: boolean;
     error?: Error;
     userMessages?: EmbeddableComponentProps['userMessages'];
+    profileId: string;
+    id: string;
   };
 
 const LensWrapperMemo = React.memo(LensWrapper);
@@ -59,6 +60,8 @@ export const Chart = ({
   isLoading = false,
   error,
   userMessages,
+  profileId,
+  id,
 }: ChartProps) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -67,6 +70,7 @@ export const Chart = ({
   const { SaveModalComponent } = services.lens;
 
   const lensProps = useLensProps({
+    chartId: id,
     title,
     query: esqlQuery,
     services,
@@ -77,6 +81,7 @@ export const Chart = ({
     yBounds,
     error,
     userMessages,
+    profileId,
   });
 
   return (

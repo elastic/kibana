@@ -14,39 +14,45 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { isNonEmptyString } from '@kbn/zod-helpers/v4';
 
 /**
  * A list of alerts `id`s.
  */
+export const AlertIds = lazySchema(() =>
+  z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1)
+);
 export type AlertIds = z.infer<typeof AlertIds>;
-export const AlertIds = z.array(z.string().min(1).superRefine(isNonEmptyString)).min(1);
 
 /**
  * Use alert tags to organize related alerts into categories that you can filter and group.
  */
+export const AlertTag = lazySchema(() => z.string().min(1).superRefine(isNonEmptyString));
 export type AlertTag = z.infer<typeof AlertTag>;
-export const AlertTag = z.string().min(1).superRefine(isNonEmptyString);
 
 /**
  * List of keywords to organize related alerts into categories that you can filter and group.
  */
+export const AlertTags = lazySchema(() => z.array(AlertTag));
 export type AlertTags = z.infer<typeof AlertTags>;
-export const AlertTags = z.array(AlertTag);
 
 /**
  * The status of an alert, which can be `open`, `acknowledged`, `in-progress`, or `closed`.
  */
+export const AlertStatus = lazySchema(() =>
+  z.enum(['open', 'closed', 'acknowledged', 'in-progress'])
+);
 export type AlertStatus = z.infer<typeof AlertStatus>;
-export const AlertStatus = z.enum(['open', 'closed', 'acknowledged', 'in-progress']);
 export type AlertStatusEnum = typeof AlertStatus.enum;
 export const AlertStatusEnum = AlertStatus.enum;
 
 /**
  * The status of an alert, which can be `open`, `acknowledged`, `in-progress`, or `closed`.
  */
+export const AlertStatusExceptClosed = lazySchema(() =>
+  z.enum(['open', 'acknowledged', 'in-progress'])
+);
 export type AlertStatusExceptClosed = z.infer<typeof AlertStatusExceptClosed>;
-export const AlertStatusExceptClosed = z.enum(['open', 'acknowledged', 'in-progress']);
 export type AlertStatusExceptClosedEnum = typeof AlertStatusExceptClosed.enum;
 export const AlertStatusExceptClosedEnum = AlertStatusExceptClosed.enum;

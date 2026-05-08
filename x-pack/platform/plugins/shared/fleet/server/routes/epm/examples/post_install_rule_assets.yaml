@@ -1,0 +1,30 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postInstallRuleAssetsRequestExample:
+          description: 'Install alert rule assets for a specific package version'
+          value: {}
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postInstallRuleAssetsExample:
+            description: 'Rule assets successfully installed'
+            value:
+              items:
+                - id: 'rule-asset-id-1'
+                  type: 'security_rule'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

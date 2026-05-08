@@ -71,6 +71,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
           : buildRecoveryAlertEvents({
               ruleId: rule.id,
               ruleVersion: 1,
+              spaceId: input.spaceId,
               activeGroupHashes,
               breachedGroupHashes: new Set(alertEventsBatch.map((e) => e.group_hash)),
               scheduledTimestamp: input.scheduledAt,

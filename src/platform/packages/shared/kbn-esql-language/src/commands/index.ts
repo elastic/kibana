@@ -18,6 +18,7 @@ export * from './definitions/all_operators';
 export * from './definitions/utils/promql';
 
 // Utilities from definitions
+export { ESQL_APPLY_TEXT_REPLACEMENT_COMMAND } from './registry/constants';
 export { METADATA_FIELDS } from './registry/options/metadata';
 export { TIME_SYSTEM_PARAMS } from './definitions/utils/literals';
 export { withAutoSuggest } from './definitions/utils/autocomplete/helpers';

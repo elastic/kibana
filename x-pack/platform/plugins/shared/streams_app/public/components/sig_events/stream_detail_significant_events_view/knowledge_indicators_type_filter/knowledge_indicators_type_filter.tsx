@@ -10,6 +10,7 @@ import {
   EuiBadge,
   EuiFilterButton,
   EuiFilterGroup,
+  EuiPanel,
   EuiPopover,
   EuiSelectable,
   useGeneratedHtmlId,
@@ -19,6 +20,12 @@ import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { upperFirst } from 'lodash';
 import React, { useMemo, useState } from 'react';
+import { matchesKnowledgeIndicatorFilters } from '../utils/matches_knowledge_indicator_filters';
+import {
+  getKnowledgeIndicatorType,
+  MATCH_QUERY_TYPE,
+  STATS_QUERY_TYPE,
+} from '../utils/get_knowledge_indicator_type';
 
 interface KnowledgeIndicatorTypeFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
@@ -26,6 +33,8 @@ interface KnowledgeIndicatorTypeFilterProps {
   statusFilter: 'active' | 'excluded';
   selectedTypes: string[];
   onSelectedTypesChange: (selectedTypes: string[]) => void;
+  hideComputedTypes?: boolean;
+  selectedStreams?: string[];
 }
 
 export function KnowledgeIndicatorsTypeFilter({
@@ -34,6 +43,8 @@ export function KnowledgeIndicatorsTypeFilter({
   statusFilter,
   selectedTypes,
   onSelectedTypesChange,
+  hideComputedTypes = false,
+  selectedStreams = [],
 }: KnowledgeIndicatorTypeFilterProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const popoverId = useGeneratedHtmlId({
@@ -45,47 +56,43 @@ export function KnowledgeIndicatorsTypeFilter({
   const availableTypes = useMemo(() => {
     const types = new Set<string>();
 
-    knowledgeIndicators.forEach((knowledgeIndicator) => {
-      if (knowledgeIndicator.kind === 'feature') {
-        types.add(knowledgeIndicator.feature.type);
-      } else {
-        types.add('query');
+    knowledgeIndicators.forEach((ki) => {
+      if (
+        !matchesKnowledgeIndicatorFilters(ki, {
+          statusFilter,
+          selectedStreams,
+          hideComputedTypes,
+        })
+      ) {
+        return;
       }
+      types.add(getKnowledgeIndicatorType(ki));
     });
 
     return Array.from(types).sort((left, right) => left.localeCompare(right));
-  }, [knowledgeIndicators]);
+  }, [knowledgeIndicators, statusFilter, hideComputedTypes, selectedStreams]);
 
   const typeCounts = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
     const counts: Record<string, number> = {};
 
-    knowledgeIndicators.forEach((knowledgeIndicator) => {
-      const matchesStatusFilter =
-        statusFilter === 'active'
-          ? knowledgeIndicator.kind === 'query' || !knowledgeIndicator.feature.excluded_at
-          : knowledgeIndicator.kind === 'feature' &&
-            Boolean(knowledgeIndicator.feature.excluded_at);
-
-      if (!matchesStatusFilter) {
+    knowledgeIndicators.forEach((ki) => {
+      if (
+        !matchesKnowledgeIndicatorFilters(ki, {
+          statusFilter,
+          selectedStreams,
+          hideComputedTypes,
+          searchTerm,
+        })
+      ) {
         return;
       }
 
-      const type =
-        knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.type : 'query';
-
-      const title =
-        knowledgeIndicator.kind === 'feature'
-          ? (knowledgeIndicator.feature.title ?? '').toLowerCase()
-          : (knowledgeIndicator.query.title ?? '').toLowerCase();
-
-      if (!normalizedSearchTerm || title.includes(normalizedSearchTerm)) {
-        counts[type] = (counts[type] ?? 0) + 1;
-      }
+      const type = getKnowledgeIndicatorType(ki);
+      counts[type] = (counts[type] ?? 0) + 1;
     });
 
     return counts;
-  }, [knowledgeIndicators, searchTerm, statusFilter]);
+  }, [knowledgeIndicators, searchTerm, statusFilter, hideComputedTypes, selectedStreams]);
 
   const options = useMemo<EuiSelectableOption[]>(
     () => [
@@ -96,7 +103,12 @@ export function KnowledgeIndicatorsTypeFilter({
       ...availableTypes.map((type) => ({
         key: type,
         checked: selectedTypes.includes(type) ? ('on' as const) : undefined,
-        label: type === 'query' ? KNOWLEDGE_INDICATOR_QUERY_TYPE_LABEL : upperFirst(type),
+        label:
+          type === MATCH_QUERY_TYPE
+            ? MATCH_QUERY_TYPE_LABEL
+            : type === STATS_QUERY_TYPE
+            ? STATS_QUERY_TYPE_LABEL
+            : upperFirst(type),
         append: <EuiBadge>{typeCounts[type] ?? 0}</EuiBadge>,
       })),
     ],
@@ -137,13 +149,16 @@ export function KnowledgeIndicatorsTypeFilter({
           }}
         >
           {(list) => (
-            <div
+            <EuiPanel
+              hasShadow={false}
+              hasBorder={false}
+              paddingSize="none"
               css={css`
                 min-width: 260px;
               `}
             >
               {list}
-            </div>
+            </EuiPanel>
           )}
         </EuiSelectable>
       </EuiPopover>
@@ -158,10 +173,17 @@ const KNOWLEDGE_INDICATOR_TYPE_FILTER_GROUP_LABEL = i18n.translate(
   }
 );
 
-const KNOWLEDGE_INDICATOR_QUERY_TYPE_LABEL = i18n.translate(
-  'xpack.streams.significantEventsTable.knowledgeIndicatorType.query',
+const MATCH_QUERY_TYPE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.knowledgeIndicatorType.matchQuery',
   {
-    defaultMessage: 'Query',
+    defaultMessage: 'Match query',
+  }
+);
+
+const STATS_QUERY_TYPE_LABEL = i18n.translate(
+  'xpack.streams.significantEventsTable.knowledgeIndicatorType.statsQuery',
+  {
+    defaultMessage: 'Stats query',
   }
 );
 

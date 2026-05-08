@@ -11,10 +11,10 @@ import type { z } from '@kbn/zod/v4';
 import { JsonModelRootShapeSchema } from './json_model_shape_schema';
 import { isValidJsonSchema } from '../../lib/validate_json_schema';
 
-// Root-level JSON Schema model for workflow inputs.
+// Root-level JSON Schema model for workflow inputs/outputs and wait-for-input step schema.
 // Uses the narrower JsonModelRootShapeSchema so that only object-level keywords
-// (properties, required, definitions, etc.) are suggested at the inputs level,
-// while individual property definitions still allow the full set of JSON Schema keywords.
+// (properties, required, definitions, etc.) are suggested at the root.
+// Each property definition must match JsonModelShapeSchema (see isValidJsonSchema).
 export const JsonModelSchema = JsonModelRootShapeSchema.refine(
   (data) => {
     // Validate that properties is a valid JSON Schema object

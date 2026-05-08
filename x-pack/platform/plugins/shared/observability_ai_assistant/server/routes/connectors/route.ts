@@ -19,21 +19,14 @@ const listConnectorsRoute = createObservabilityAIAssistantServerRoute({
   handler: async (resources): Promise<InferenceConnector[]> => {
     const { request, plugins, logger } = resources;
 
-    const searchInferenceEndpoints = await plugins.searchInferenceEndpoints?.start();
-    if (searchInferenceEndpoints) {
-      const resolved = await searchInferenceEndpoints.endpoints.getForFeature(
-        OBSERVABILITY_AI_ASSISTANT_SUBFEATURE_ID,
-        request
-      );
-      resolved.warnings.forEach((w) => logger.warn(w));
+    const searchInferenceEndpoints = await plugins.searchInferenceEndpoints.start();
+    const resolved = await searchInferenceEndpoints.endpoints.getForFeature(
+      OBSERVABILITY_AI_ASSISTANT_SUBFEATURE_ID,
+      request
+    );
+    resolved.warnings.forEach((w) => logger.warn(w));
 
-      if (resolved.endpoints.length > 0) {
-        return resolved.endpoints;
-      }
-    }
-
-    const inferenceStart = await plugins.inference.start();
-    return inferenceStart.getConnectorList(request);
+    return resolved.endpoints;
   },
 });
 

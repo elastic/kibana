@@ -7,32 +7,24 @@
 
 import React, { useCallback, useState } from 'react';
 import { EuiPopover, EuiFilterButton } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { InlineFilterPopover } from './inline_filter_popover';
+import * as i18n from './translations';
 
 const EPISODE_STATUS_OPTIONS: Array<{ label: string; value: string }> = [
   {
-    label: i18n.translate('xpack.alertingV2EpisodesUi.statusFilter.activeLabel', {
-      defaultMessage: 'Active',
-    }),
+    label: i18n.STATUS_FILTER_ACTIVE_LABEL,
     value: 'active',
   },
   {
-    label: i18n.translate('xpack.alertingV2EpisodesUi.statusFilter.recoveringLabel', {
-      defaultMessage: 'Recovering',
-    }),
+    label: i18n.STATUS_FILTER_RECOVERING_LABEL,
     value: 'recovering',
   },
   {
-    label: i18n.translate('xpack.alertingV2EpisodesUi.statusFilter.pendingLabel', {
-      defaultMessage: 'Pending',
-    }),
+    label: i18n.STATUS_FILTER_PENDING_LABEL,
     value: 'pending',
   },
   {
-    label: i18n.translate('xpack.alertingV2EpisodesUi.statusFilter.inactiveLabel', {
-      defaultMessage: 'Inactive',
-    }),
+    label: i18n.STATUS_FILTER_INACTIVE_LABEL,
     value: 'inactive',
   },
 ];
@@ -59,9 +51,7 @@ export function AlertEpisodesStatusFilter({
 
   return (
     <EuiPopover
-      aria-label={i18n.translate('xpack.alertingV2EpisodesUi.statusFilter.ariaLabel', {
-        defaultMessage: 'Status filter',
-      })}
+      aria-label={i18n.STATUS_FILTER_ARIA_LABEL}
       button={
         <EuiFilterButton
           iconType="arrowDown"
@@ -73,9 +63,7 @@ export function AlertEpisodesStatusFilter({
           numActiveFilters={selectedStatus ? 1 : undefined}
           data-test-subj={`${dataTestSubj}-button`}
         >
-          {i18n.translate('xpack.alertingV2EpisodesUi.statusFilter.label', {
-            defaultMessage: 'Status',
-          })}
+          {i18n.STATUS_FILTER_LABEL}
         </EuiFilterButton>
       }
       isOpen={isOpen}
@@ -88,9 +76,7 @@ export function AlertEpisodesStatusFilter({
         selectedValues={selectedStatus ? [selectedStatus] : []}
         singleSelect
         onSelectionChange={handleSelectionChange}
-        emptyMessage={i18n.translate('xpack.alertingV2EpisodesUi.statusFilter.noMatch', {
-          defaultMessage: 'No matching statuses',
-        })}
+        emptyMessage={i18n.STATUS_FILTER_NO_MATCH}
         data-test-subj={`${dataTestSubj}-popover`}
       />
     </EuiPopover>

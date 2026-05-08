@@ -44,5 +44,17 @@ describe('aggregateQueryToAst', () => {
         descriptionForInspector: ['Custom desc'],
       })
     );
+
+    expect(
+      aggregateQueryToAst({
+        query: { esql: 'from foo' },
+        ignoreGlobalFilters: true,
+      })
+    ).toHaveProperty(
+      'arguments',
+      expect.objectContaining({
+        ignoreGlobalFilters: [true],
+      })
+    );
   });
 });

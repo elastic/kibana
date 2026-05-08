@@ -174,6 +174,7 @@ export function DateRangePickerProvider({
   onSettingsChange,
   timeZone,
   onRefresh,
+  refreshEpoch,
   prependBasePath: prependBasePathProp,
   canAccessAdvancedSettings = false,
 }: PropsWithChildren<DateRangePickerProps>) {
@@ -260,6 +261,7 @@ export function DateRangePickerProvider({
     isPaused: refreshTimerPaused,
     intervalMs: settings.autoRefresh?.isEnabled ? settings.autoRefresh.intervalMs : 0,
     onRefresh,
+    refreshEpoch,
   });
 
   const toggleAutoRefresh = useCallback(() => {

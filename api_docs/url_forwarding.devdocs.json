@@ -64,6 +64,7 @@
                 "lineNumber": 23,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -110,6 +111,7 @@
                 "lineNumber": 70,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreStart",
                 "trackAdoption": false,
                 "isRequired": true
               }

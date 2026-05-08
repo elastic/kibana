@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { IndexAutocompleteItem, EsqlView } from '@kbn/esql-types';
-import type { ESQLMessage, EditorError } from '@elastic/esql/types';
+import type { EditorError } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../../commands/registry/types';
 import type { ESQLPolicy } from '../../commands/registry/types';
+import type { ESQLMessage } from '../../commands';
 
 export interface ReferenceMaps {
   sources: Set<string>;

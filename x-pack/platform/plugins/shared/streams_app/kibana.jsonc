@@ -29,7 +29,7 @@
       "unifiedDocViewer",
       "dashboard",
     ],
-    "optionalPlugins": ["cloud", "cps", "spaces", "indexLifecycleManagement"],
+    "optionalPlugins": ["cloud", "cps", "spaces", "indexLifecycleManagement", "evals"],
     "requiredBundles": [
       "discover",
       "esql",

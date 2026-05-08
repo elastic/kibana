@@ -48,5 +48,9 @@ export const updateMaintenanceWindowRequestBodySchema = schema.object({
 });
 
 export const updateMaintenanceWindowRequestParamsSchema = schema.object({
-  id: schema.string(),
+  id: schema.string({
+    meta: {
+      description: 'The identifier for the maintenance window.',
+    },
+  }),
 });

@@ -38,7 +38,7 @@ jest.mock('./run', () => ({
   runJest: jest.fn(),
 }));
 
-import { parseJestRunOutput, planJestContractRuns } from './run_contract';
+import { planJestContractRuns } from './run_contract';
 
 describe('planJestContractRuns', () => {
   it('forces a full config run for config-only changes', () => {
@@ -140,34 +140,5 @@ describe('planJestContractRuns', () => {
         mode: 'full',
       },
     ]);
-  });
-});
-
-describe('parseJestRunOutput', () => {
-  it('extracts failed test files and summary lines from jest stdout', () => {
-    expect(
-      parseJestRunOutput(`
-        PASS packages/foo/src/a.test.ts
-        FAIL packages/foo/src/b.test.ts
-        FAIL packages/foo/src/c.test.ts
-
-        Test Suites: 2 failed, 1 passed, 3 total
-        Tests:       4 failed, 10 passed, 14 total
-        Snapshots:   3 failed, 1 passed, 4 total
-      `)
-    ).toEqual({
-      excerpt: [
-        'PASS packages/foo/src/a.test.ts',
-        'FAIL packages/foo/src/b.test.ts',
-        'FAIL packages/foo/src/c.test.ts',
-        'Test Suites: 2 failed, 1 passed, 3 total',
-        'Tests:       4 failed, 10 passed, 14 total',
-        'Snapshots:   3 failed, 1 passed, 4 total',
-      ],
-      failedTestFiles: ['packages/foo/src/b.test.ts', 'packages/foo/src/c.test.ts'],
-      snapshots: 'Snapshots:   3 failed, 1 passed, 4 total',
-      suites: 'Test Suites: 2 failed, 1 passed, 3 total',
-      tests: 'Tests:       4 failed, 10 passed, 14 total',
-    });
   });
 });

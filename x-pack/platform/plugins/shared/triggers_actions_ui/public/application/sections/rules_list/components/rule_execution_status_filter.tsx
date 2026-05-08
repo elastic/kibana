@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiPopover,
@@ -57,6 +58,10 @@ export const RuleExecutionStatusFilter: React.FunctionComponent<RuleExecutionSta
     <EuiPopover
       isOpen={isPopoverOpen}
       closePopover={onClosePopover}
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.sections.rulesList.ruleExecutionStatusFilterPopoverAriaLabel',
+        { defaultMessage: 'Filter by last response' }
+      )}
       button={
         <EuiFilterButton
           iconType="chevronSingleDown"

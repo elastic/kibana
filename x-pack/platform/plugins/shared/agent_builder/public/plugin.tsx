@@ -14,13 +14,21 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, type Subscription } from 'rxjs';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { registerLocators } from './locator/register_locators';
-import { registerAnalytics, registerApp } from './register';
+import { buildAgentBuilderDeepLinks, registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
+
+const LazyAgentBuilderAnnouncementChromeInner = dynamic(() =>
+  import('./components/announcement/agent_builder_announcement_chrome_inner').then((m) => ({
+    default: m.AgentBuilderAnnouncementChromeInner,
+  }))
+);
 import {
   AgentBuilderAccessChecker,
   AgentService,
@@ -32,6 +40,7 @@ import {
   ToolsService,
   SkillsService,
   SmlService,
+  OAuthClientsService,
   PluginsService,
   EventsService,
   type AgentBuilderInternalService,
@@ -81,6 +90,8 @@ export class AgentBuilderPlugin
     addAttachment: (attachment: AttachmentInput) => void;
   } | null = null;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private isEarsEnabled = false;
+  private experimentalDeepLinksSubscription?: Subscription;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -95,6 +106,7 @@ export class AgentBuilderPlugin
     });
 
     this.setupServices = { navigationService, usageCollection: deps.usageCollection };
+    this.isEarsEnabled = deps.actions.isEarsEnabled;
 
     registerApp({
       core,
@@ -110,7 +122,7 @@ export class AgentBuilderPlugin
     registerAnalytics({ analytics: core.analytics });
     registerLocators(deps.share);
 
-    registerWorkflowSteps(deps.workflowsExtensions);
+    registerWorkflowSteps(deps.workflowsExtensions, core);
 
     core.chrome.sidebar.registerApp({
       appId: 'agentBuilder',
@@ -147,6 +159,7 @@ export class AgentBuilderPlugin
     const skillsService = new SkillsService({ http });
     const smlService = new SmlService({ http });
     const pluginsService = new PluginsService({ http });
+    const oauthClientsService = new OAuthClientsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     if (!this.setupServices) {
@@ -206,10 +219,12 @@ export class AgentBuilderPlugin
       skillsService,
       smlService,
       pluginsService,
+      oauthClientsService,
       startDependencies,
       usageCollection,
       accessChecker,
       eventsService,
+      isEarsEnabled: this.isEarsEnabled,
       openSidebarConversation: (options?: OpenConversationSidebarOptions) => {
         return openSidebarInternal(options);
       },
@@ -218,6 +233,15 @@ export class AgentBuilderPlugin
     this.internalServices = internalServices;
 
     setSidebarServices(core, internalServices);
+
+    this.experimentalDeepLinksSubscription = core.uiSettings
+      .get$<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+      .pipe(distinctUntilChanged())
+      .subscribe((experimentalFeaturesEnabled) => {
+        this.appUpdater$.next(() => ({
+          deepLinks: buildAgentBuilderDeepLinks(experimentalFeaturesEnabled),
+        }));
+      });
 
     const agentBuilderService: AgentBuilderPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
@@ -270,6 +294,24 @@ export class AgentBuilderPlugin
       core.chrome.navControls.registerRight({
         mount: (element) => {
           ReactDOM.render(
+            <LazyAgentBuilderAnnouncementChromeInner
+              coreStart={core}
+              pluginsStart={startDependencies}
+            />,
+            element,
+            () => {}
+          );
+
+          return () => {
+            ReactDOM.unmountComponentAtNode(element);
+          };
+        },
+        order: 1000,
+      });
+
+      core.chrome.navControls.registerRight({
+        mount: (element) => {
+          ReactDOM.render(
             <AgentBuilderNavControlInitiator
               coreStart={core}
               pluginsStart={startDependencies}
@@ -289,5 +331,9 @@ export class AgentBuilderPlugin
     }
 
     return agentBuilderService;
+  }
+
+  stop() {
+    this.experimentalDeepLinksSubscription?.unsubscribe();
   }
 }

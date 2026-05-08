@@ -35,14 +35,12 @@ interface SelectModelAndInstallKnowledgeBaseProps {
   onInstall: (inferenceId: string) => Promise<void>;
   isInstalling: boolean;
   eisCalloutZIndex?: number;
-  isInKnowledgeBaseTab?: boolean;
 }
 
 export function SelectModelAndInstallKnowledgeBase({
   onInstall,
   isInstalling,
   eisCalloutZIndex,
-  isInKnowledgeBaseTab = false,
 }: SelectModelAndInstallKnowledgeBaseProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -105,7 +103,7 @@ export function SelectModelAndInstallKnowledgeBase({
       >
         <EuiFlexGroup direction="row" alignItems="center" justifyContent="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="warning" color="danger" />
+            <EuiIcon type="warning" color="danger" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText color="danger">

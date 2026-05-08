@@ -1,0 +1,243 @@
+{
+  "sha1": "7fb379f736a0c45f3ff7120b9cb520d2262459ea",
+  "tests": [
+    {
+      "id": "98effaf1263dcb1-f461af45e6d8b43",
+      "title": "search session - completion (stateful only) should complete session when searches complete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_completion.spec.ts",
+        "line": 32,
+        "column": 12
+      }
+    },
+    {
+      "id": "8cfd76a3ae98c29-619fb451f81c424",
+      "title": "search session - management (stateful only) should fail to create a session with no name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
+        "line": 32,
+        "column": 12
+      }
+    },
+    {
+      "id": "8cfd76a3ae98c29-7174158333dd81e",
+      "title": "search session - management (stateful only) should create and get a session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
+        "line": 47,
+        "column": 12
+      }
+    },
+    {
+      "id": "8cfd76a3ae98c29-c3f1a6e5dcf9358",
+      "title": "search session - management (stateful only) should fail to delete an unknown session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
+        "line": 67,
+        "column": 12
+      }
+    },
+    {
+      "id": "8cfd76a3ae98c29-28e1217c78bc94e",
+      "title": "search session - management (stateful only) should create and delete a session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
+      "id": "8cfd76a3ae98c29-a80e431f895291d",
+      "title": "search session - management (stateful only) should create and cancel a session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
+        "line": 98,
+        "column": 12
+      }
+    },
+    {
+      "id": "8cfd76a3ae98c29-c135b49c8921a76",
+      "title": "search session - management (stateful only) should rename a session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
+        "line": 123,
+        "column": 12
+      }
+    },
+    {
+      "id": "8cfd76a3ae98c29-b7e8c06b50eaed1",
+      "title": "search session - management (stateful only) should sync search ids into saved session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
+        "line": 146,
+        "column": 12
+      }
+    },
+    {
+      "id": "8cfd76a3ae98c29-9b7e9a1993ed96c",
+      "title": "search session - management (stateful only) should create and extend a session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
+        "line": 206,
+        "column": 12
+      }
+    },
+    {
+      "id": "8cfd76a3ae98c29-9f9ccdf4ef36a51",
+      "title": "search session - management (stateful only) should fail to extend a nonexistent session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_management.spec.ts",
+        "line": 226,
+        "column": 12
+      }
+    },
+    {
+      "id": "efcaa768b97a97c-afd1e2921421158",
+      "title": "search session - permissions (stateful only) should 403 if no app gives permissions to store search sessions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_permissions.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
+    {
+      "id": "98fb1108b97c2b0-6d8c8479244d0cd",
+      "title": "search session - cross-user security (stateful only) should prevent users from accessing other users sessions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_security.spec.ts",
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "98fb1108b97c2b0-6012f6d7704722c",
+      "title": "search session - cross-user security (stateful only) should prevent users from deleting other users sessions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_security.spec.ts",
+        "line": 54,
+        "column": 12
+      }
+    },
+    {
+      "id": "98fb1108b97c2b0-5c84de9ec92c488",
+      "title": "search session - cross-user security (stateful only) should prevent users from cancelling other users sessions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_security.spec.ts",
+        "line": 73,
+        "column": 12
+      }
+    },
+    {
+      "id": "98fb1108b97c2b0-467a7aaf6ebb742",
+      "title": "search session - cross-user security (stateful only) should prevent users from extending other users sessions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_security.spec.ts",
+        "line": 92,
+        "column": 12
+      }
+    },
+    {
+      "id": "98fb1108b97c2b0-cfbea5ff9425bdd",
+      "title": "search session - cross-user security (stateful only) should prevent unauthorized users from creating sessions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_security.spec.ts",
+        "line": 112,
+        "column": 12
+      }
+    },
+    {
+      "id": "b43a450fb0940f1-4566a69f1585b56",
+      "title": "search session - non-default space (stateful only) should complete persisted session in non-default space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/api/tests/session_spaces.spec.ts",
+        "line": 38,
+        "column": 12
+      }
+    }
+  ]
+}

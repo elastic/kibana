@@ -38,7 +38,7 @@ import type { WorkplaceAIApp, DeepLinkId as WorkplaceAILink } from '@kbn/deeplin
 import type { DeepLinkId as AgentBuilderLink } from '@kbn/deeplinks-agent-builder';
 import type { AppId as WorkflowsApp, DeepLinkId as WorkflowsLink } from '@kbn/deeplinks-workflows';
 import type { KibanaProject } from '@kbn/projects-solutions-groups';
-import type { BadgeType } from '@kbn/core-chrome-navigation';
+import type { BadgeType } from '@kbn/ui-side-navigation';
 
 import type { ChromeNavLink } from './nav_links';
 

@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import type { ReactNode } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonRectangle } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ContentListItem } from '@kbn/content-list-provider';
-import type { ParsedPart } from '@kbn/content-list-assembly';
+import type { ParsedPart, SkeletonOutput } from '@kbn/content-list-assembly';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
+import { getColumnLayoutProps, type ColumnLayoutProps } from '../layout';
 import { action, type ActionOutput, type ActionBuilderContext } from '../../action';
 
 /** Default i18n-translated column title for the actions column. */
@@ -23,16 +26,47 @@ const DEFAULT_ACTIONS_COLUMN_TITLE = i18n.translate(
 );
 
 /**
+ * EUI renders row actions as `EuiButtonIcon` `size="s"`, which `euiButtonSizeMap`
+ * sets to `euiTheme.size.xl` (32px) with an `euiTheme.size.xs` (4px) gap between
+ * icons. The cell content adds `euiTheme.size.s` (8px) of padding on each side.
+ * The cell also has `flex-wrap: wrap` applied (see EUI's `_table_cell_content.styles`),
+ * so any width shortfall causes icons to stack vertically. The formula below
+ * sizes the column to fit `N` icons inline plus padding:
+ * `xl * N + xs * (N - 1) + s * 2`, which works out to `36N + 12` at the default
+ * theme scale.
+ *
+ * Falls back to the static formula when the theme is not threaded through
+ * context (e.g. unit tests that construct contexts inline).
+ */
+const getActionsColumnDefaultWidth = (
+  count: number,
+  euiTheme: ColumnBuilderContext['euiTheme']
+): string => {
+  if (!euiTheme) {
+    return `${count * 36 + 12}px`;
+  }
+  const iconWidth = parseInt(euiTheme.size.xl, 10);
+  const iconGap = parseInt(euiTheme.size.xs, 10);
+  const cellPadding = parseInt(euiTheme.size.s, 10);
+  return `${count * iconWidth + (count - 1) * iconGap + cellPadding * 2}px`;
+};
+
+/**
  * Props for the `Column.Actions` preset component.
  *
  * These are the declarative attributes consumers pass in JSX. The actions builder
  * reads them directly from the parsed attributes.
  */
-export interface ActionsColumnProps {
-  /** Column width (CSS value like `'100px'`). */
-  width?: string;
+export interface ActionsColumnProps
+  extends Pick<ColumnLayoutProps, 'width' | 'minWidth' | 'maxWidth'> {
   /** Custom column title. Defaults to `'Actions'`. */
   columnTitle?: string;
+  /**
+   * Whether to stick the actions column to the right side during horizontal scroll.
+   *
+   * @default true
+   */
+  sticky?: boolean;
   /**
    * Action children.
    *
@@ -56,29 +90,41 @@ const getDefaultActionParts = (context: ColumnBuilderContext): ParsedPart[] => {
   const parts: ParsedPart[] = [];
   const { itemConfig, isReadOnly } = context;
 
-  if (isReadOnly) {
-    return parts;
+  // Edit and delete actions are suppressed in read-only mode, but inspect
+  // (view details) is always available when the content editor is enabled —
+  // matching the existing TableListView behavior where "View details" is
+  // shown regardless of read-only state.
+  if (!isReadOnly) {
+    const hasEdit = itemConfig?.getEditUrl || itemConfig?.onEdit;
+    const hasDelete = itemConfig?.onDelete;
+
+    if (hasEdit) {
+      parts.push({
+        type: 'part',
+        part: 'action',
+        preset: 'edit',
+        instanceId: 'edit',
+        attributes: {},
+      });
+    }
+
+    if (hasDelete) {
+      parts.push({
+        type: 'part',
+        part: 'action',
+        preset: 'delete',
+        instanceId: 'delete',
+        attributes: {},
+      });
+    }
   }
 
-  const hasEdit = itemConfig?.getEditUrl || itemConfig?.onEdit;
-  const hasDelete = itemConfig?.onDelete;
-
-  if (hasEdit) {
+  if (itemConfig?.onInspect) {
     parts.push({
       type: 'part',
       part: 'action',
-      preset: 'edit',
-      instanceId: 'edit',
-      attributes: {},
-    });
-  }
-
-  if (hasDelete) {
-    parts.push({
-      type: 'part',
-      part: 'action',
-      preset: 'delete',
-      instanceId: 'delete',
+      preset: 'inspect',
+      instanceId: 'inspect',
       attributes: {},
     });
   }
@@ -101,7 +147,7 @@ export const buildActionsColumn = (
   attributes: ActionsColumnProps,
   context: ColumnBuilderContext
 ): EuiBasicTableColumn<ContentListItem> | undefined => {
-  const { children, width, columnTitle } = attributes;
+  const { children, width, minWidth, maxWidth, columnTitle, sticky = true } = attributes;
 
   // Parse action children from the Column.Actions element.
   const actionParts = children !== undefined ? action.parseChildren(children) : [];
@@ -124,10 +170,17 @@ export const buildActionsColumn = (
     return undefined;
   }
 
+  const defaultWidth = getActionsColumnDefaultWidth(actions.length, context.euiTheme);
+
   return {
     name: columnTitle ?? DEFAULT_ACTIONS_COLUMN_TITLE,
     actions,
-    ...(width && { width }),
+    ...getColumnLayoutProps({
+      width: width ?? defaultWidth,
+      minWidth: minWidth ?? width ?? defaultWidth,
+      maxWidth,
+    }),
+    sticky,
     'data-test-subj': 'content-list-table-column-actions',
   };
 };
@@ -162,7 +215,51 @@ export const buildActionsColumn = (
  * </ContentListTable>
  * ```
  */
+/**
+ * Build the skeleton for `Column.Actions` — a right-aligned row of small
+ * rectangles, one per configured action.
+ *
+ * Mirrors the real actions column's visual layout so there's no jump when
+ * the real row icons fade in. The action count is determined the same way
+ * the resolver would determine it (explicit `Action.*` children → their
+ * count; otherwise the provider-derived defaults from `itemConfig`).
+ *
+ * Returned as a `{ node }` escape-hatch because a "row of N shapes" isn't a
+ * single `SkeletonDescriptor` variant.
+ */
+const buildActionsColumnSkeleton = (
+  attributes: ActionsColumnProps,
+  context: ColumnBuilderContext
+): SkeletonOutput => {
+  const { children } = attributes;
+  const actionParts = children !== undefined ? action.parseChildren(children) : [];
+
+  // Hard-coded fallback when no explicit children were provided. The real
+  // resolver may ultimately produce 0 (none configured), 2 (edit + delete),
+  // or 3 (edit, delete, inspect) depending on provider configuration — 2 is
+  // the most common shape and close enough that the swap is not jarring.
+  const count = actionParts.length > 0 ? actionParts.length : 2;
+
+  // Match the rendered footprint of an `EuiButtonIcon size="s"` icon glyph
+  // (~`euiTheme.size.l`, 24px). Falls back to a static value when no theme
+  // is threaded through context (e.g. unit tests).
+  const iconSize = context.euiTheme?.size.l ?? 20;
+
+  return {
+    node: (
+      <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" alignItems="center" responsive={false}>
+        {Array.from({ length: count }, (_unused, idx) => (
+          <EuiFlexItem key={idx} grow={false}>
+            <EuiSkeletonRectangle isLoading width={iconSize} height={iconSize} borderRadius="s" />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    ),
+  };
+};
+
 export const ActionsColumn = column.createPreset({
   name: 'actions',
   resolve: buildActionsColumn,
+  skeleton: buildActionsColumnSkeleton,
 });

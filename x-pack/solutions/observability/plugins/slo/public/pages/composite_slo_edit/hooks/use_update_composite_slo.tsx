@@ -39,8 +39,12 @@ export function useUpdateCompositeSlo() {
       );
     },
     {
-      onSuccess: (_data, { compositeSlo }) => {
-        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
+      onSuccess: (_data, { compositeSloId, compositeSlo }) => {
+        queryClient.invalidateQueries({ queryKey: sloKeys.compositeLists(), exact: false });
+        queryClient.invalidateQueries({
+          queryKey: sloKeys.compositeDetail(compositeSloId),
+          exact: false,
+        });
         toasts.addSuccess({
           title: toMountPoint(
             <span>

@@ -182,13 +182,13 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
       setLoading(false);
       addError(error, {
         toastMessage: i18n.translate('xpack.securitySolution.ruleFromTimeline.error.toastMessage', {
-          defaultMessage: 'Failed to create rule from timeline with id: {id}',
+          defaultMessage: 'Failed to create rule from Timeline with id: {id}',
           values: {
             id: selectedTimeline.id,
           },
         }),
         title: i18n.translate('xpack.securitySolution.ruleFromTimeline.error.title', {
-          defaultMessage: 'Failed to import rule from timeline',
+          defaultMessage: 'Failed to import rule from Timeline',
         }),
       });
     }

@@ -74,12 +74,12 @@ export function WelcomeTourCallout({
                 <EuiText size="s" color="subdued">
                   {i18n.translate('xpack.streams.welcomeCallout.description', {
                     defaultMessage:
-                      'Your existing Elasticsearch data streams appear here as classic streams, simplifying field extraction and retention management.',
+                      'Existing Elasticsearch data streams appear in this list as classic streams, so you can manage field extraction and retention in one place.',
                   })}
                   <br />
                   {i18n.translate('xpack.streams.welcomeCallout.descriptionSecondLine', {
                     defaultMessage:
-                      'To try the full managed hierarchy experience, enable /logs streams when onboarding new data.',
+                      'To try the full managed hierarchy experience, pick "Wired Streams" in the Ingestion selector when onboarding new data.',
                   })}
                 </EuiText>
               </EuiFlexItem>

@@ -8,6 +8,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { getWaterfallItem } from './waterfall';
 
 export interface TracesFlyout {
   readonly overviewTab: Locator;
@@ -32,6 +33,7 @@ export interface TracesFlyout {
     readonly openInDiscoverButton: Locator;
     readonly tourOkButton: Locator;
     getServiceBadge(name: string): Locator;
+    clickWaterfallPreview(): Promise<void>;
   };
 
   readonly errors: {
@@ -122,6 +124,13 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
           .filter({ hasText: name })
           .locator('[data-test-subj="apmBarDetailsServiceNameBadge"]');
       },
+      async clickWaterfallPreview() {
+        const waterfallClickArea = page.testSubj.locator(
+          'unifiedDocViewerTraceSummaryTraceWaterfallClickArea'
+        );
+        await waterfallClickArea.waitFor({ state: 'visible' });
+        await waterfallClickArea.dispatchEvent('click');
+      },
     },
 
     errors: {
@@ -150,15 +159,7 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
         container: timelineFlyout,
         backButton: timelineFlyout.locator('[data-test-subj="euiFlyoutMenuBackButton"]'),
         getWaterfallItem(name: string) {
-          const row = timelineFlyout
-            .locator('[data-test-subj="traceItemRowWrapper"]')
-            .filter({ hasText: name });
-          return {
-            row,
-            content: row.locator('[data-test-subj="apmBarDetailsName"]'),
-            errorBadge: row.locator('[data-test-subj="apmBarDetailsErrorBadge"]'),
-            serviceBadge: row.locator('[data-test-subj="apmBarDetailsServiceNameBadge"]'),
-          };
+          return getWaterfallItem(timelineFlyout, name);
         },
         childDocFlyout: {
           aboutSection: childDocContainer.locator('[data-test-subj="UnifiedDocViewerTableGrid"]'),

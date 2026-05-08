@@ -16,11 +16,20 @@ import { getPrintableSessionId } from '../../session_management';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 /** User profile data keys that are allowed to be updated by Cloud users */
-const ALLOWED_KEYS_UPDATE_CLOUD = ['userSettings.darkMode', 'userSettings.contrastMode'];
+const ALLOWED_KEYS_UPDATE_CLOUD = [
+  'userSettings.darkMode',
+  'userSettings.contrastMode',
+  'userSettings.agentBuilderAnnouncementModalSeen',
+  'userSettings.agentBuilderAnnouncementModalSeenBySpaceJson',
+  'userSettings.locale',
+];
 
 const MAX_STRING_FIELD_LENGTH = 1024;
 
 const MAX_USER_PROFILE_DATA_SIZE_BYTES = 1000 * 1024;
+
+/** Stringified JSON map (space id → seen); cap is defensive and stays well under {@link MAX_USER_PROFILE_DATA_SIZE_BYTES}. */
+const MAX_AGENT_BUILDER_ANNOUNCEMENT_SPACE_JSON_CHARS = 64 * 1024;
 
 const userProfileUpdateSchema = schema.object({
   avatar: schema.maybe(
@@ -43,6 +52,11 @@ const userProfileUpdateSchema = schema.object({
       contrastMode: schema.maybe(
         schema.oneOf([schema.literal('system'), schema.literal('standard'), schema.literal('high')])
       ),
+      agentBuilderAnnouncementModalSeen: schema.maybe(schema.boolean()),
+      agentBuilderAnnouncementModalSeenBySpaceJson: schema.maybe(
+        schema.string({ maxLength: MAX_AGENT_BUILDER_ANNOUNCEMENT_SPACE_JSON_CHARS })
+      ),
+      locale: schema.maybe(schema.string({ maxLength: MAX_STRING_FIELD_LENGTH })),
     })
   ),
 });
@@ -53,6 +67,7 @@ export function defineUpdateUserProfileDataRoute({
   getUserProfileService,
   logger,
   getAuthenticationService,
+  i18n: i18nService,
 }: RouteDefinitionParams) {
   router.post(
     {
@@ -118,6 +133,17 @@ export function defineUpdateUserProfileDataRoute({
         if (!isValidColor) {
           return response.customError({
             body: 'Invalid hex color',
+            statusCode: 400,
+          });
+        }
+      }
+
+      const requestedLocale = userProfileData.userSettings?.locale;
+      if (requestedLocale) {
+        const allowedLocales = i18nService.getLocales();
+        if (!allowedLocales.includes(requestedLocale)) {
+          return response.customError({
+            body: `Locale "${requestedLocale}" is not enabled for this deployment`,
             statusCode: 400,
           });
         }

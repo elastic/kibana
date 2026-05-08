@@ -40,6 +40,10 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
         POSTGRES_PASSWORD: 'superman',
         POSTGRES_DB: 'heroes_database',
       },
+      resources: {
+        requests: { memory: '256Mi', cpu: '100m' },
+        limits: { memory: '512Mi', cpu: '500m' },
+      },
     },
 
     // PostgreSQL for Villains
@@ -52,6 +56,10 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
         POSTGRES_PASSWORD: 'superbad',
         POSTGRES_DB: 'villains_database',
       },
+      resources: {
+        requests: { memory: '256Mi', cpu: '100m' },
+        limits: { memory: '512Mi', cpu: '500m' },
+      },
     },
 
     // MongoDB for Fights
@@ -63,6 +71,10 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
         MONGO_INITDB_DATABASE: 'fights',
         MONGO_INITDB_ROOT_USERNAME: 'superfight',
         MONGO_INITDB_ROOT_PASSWORD: 'superfight',
+      },
+      resources: {
+        requests: { memory: '256Mi', cpu: '100m' },
+        limits: { memory: '512Mi', cpu: '500m' },
       },
     },
 
@@ -78,6 +90,10 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
         MARIADB_ROOT_PASSWORD: 'locations',
         MARIADB_SKIP_TEST_DB: 'yes',
       },
+      resources: {
+        requests: { memory: '256Mi', cpu: '100m' },
+        limits: { memory: '512Mi', cpu: '500m' },
+      },
     },
 
     // Kafka for events
@@ -89,6 +105,10 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
         LOG_DIR: '/tmp/logs',
         KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://fights-kafka:9092',
       },
+      resources: {
+        requests: { memory: '512Mi', cpu: '100m' },
+        limits: { memory: '1Gi', cpu: '1' },
+      },
     },
 
     // Apicurio Schema Registry
@@ -99,6 +119,10 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
       env: {
         REGISTRY_AUTH_ANONYMOUS_READ_ACCESS_ENABLED: 'true',
         QUARKUS_HTTP_PORT: '8086',
+      },
+      resources: {
+        requests: { memory: '128Mi', cpu: '50m' },
+        limits: { memory: '512Mi', cpu: '500m' },
       },
     },
 
@@ -116,6 +140,21 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
         QUARKUS_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: 'http://otel-collector:4317',
         OTEL_SERVICE_NAME: 'rest-heroes',
       },
+      resources: {
+        requests: { memory: '256Mi', cpu: '250m' },
+        limits: { memory: '1Gi', cpu: '1' },
+      },
+      initContainers: [
+        {
+          name: 'wait-for-heroes-db',
+          image: 'busybox:1.36',
+          command: [
+            'sh',
+            '-c',
+            'until nc -z heroes-db 5432; do echo waiting for heroes-db; sleep 2; done',
+          ],
+        },
+      ],
     },
 
     // REST Villains Service
@@ -132,6 +171,21 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
         QUARKUS_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: 'http://otel-collector:4317',
         OTEL_SERVICE_NAME: 'rest-villains',
       },
+      resources: {
+        requests: { memory: '256Mi', cpu: '250m' },
+        limits: { memory: '1Gi', cpu: '1' },
+      },
+      initContainers: [
+        {
+          name: 'wait-for-villains-db',
+          image: 'busybox:1.36',
+          command: [
+            'sh',
+            '-c',
+            'until nc -z villains-db 5432; do echo waiting for villains-db; sleep 2; done',
+          ],
+        },
+      ],
     },
 
     // REST Narration Service (AI narration)
@@ -142,6 +196,10 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
       env: {
         QUARKUS_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: 'http://otel-collector:4317',
         OTEL_SERVICE_NAME: 'rest-narration',
+      },
+      resources: {
+        requests: { memory: '256Mi', cpu: '250m' },
+        limits: { memory: '1Gi', cpu: '1' },
       },
     },
 
@@ -159,6 +217,21 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
         QUARKUS_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: 'http://otel-collector:4317',
         OTEL_SERVICE_NAME: 'grpc-locations',
       },
+      resources: {
+        requests: { memory: '256Mi', cpu: '250m' },
+        limits: { memory: '1Gi', cpu: '1' },
+      },
+      initContainers: [
+        {
+          name: 'wait-for-locations-db',
+          image: 'busybox:1.36',
+          command: [
+            'sh',
+            '-c',
+            'until nc -z locations-db 3306; do echo waiting for locations-db; sleep 2; done',
+          ],
+        },
+      ],
     },
 
     // REST Fights Service (main orchestrator)
@@ -183,6 +256,21 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
         QUARKUS_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: 'http://otel-collector:4317',
         OTEL_SERVICE_NAME: 'rest-fights',
       },
+      resources: {
+        requests: { memory: '256Mi', cpu: '250m' },
+        limits: { memory: '1Gi', cpu: '1' },
+      },
+      initContainers: [
+        {
+          name: 'wait-for-fights-db',
+          image: 'busybox:1.36',
+          command: [
+            'sh',
+            '-c',
+            'until nc -z fights-db 27017; do echo waiting for fights-db; sleep 2; done',
+          ],
+        },
+      ],
     },
 
     // Event Statistics Service
@@ -197,6 +285,10 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
         QUARKUS_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: 'http://otel-collector:4317',
         OTEL_SERVICE_NAME: 'event-statistics',
       },
+      resources: {
+        requests: { memory: '256Mi', cpu: '250m' },
+        limits: { memory: '1Gi', cpu: '1' },
+      },
     },
 
     // UI Super Heroes (frontend)
@@ -208,6 +300,10 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
         API_BASE_URL: 'http://rest-fights:8082',
         QUARKUS_OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: 'http://otel-collector:4317',
         OTEL_SERVICE_NAME: 'ui-super-heroes',
+      },
+      resources: {
+        requests: { memory: '256Mi', cpu: '250m' },
+        limits: { memory: '1Gi', cpu: '1' },
       },
     },
 
@@ -229,6 +325,10 @@ export const quarkusSuperHeroesConfig: DemoConfig = {
       ],
       env: {
         OTEL_SERVICE_NAME: 'load-generator',
+      },
+      resources: {
+        requests: { memory: '32Mi', cpu: '25m' },
+        limits: { memory: '64Mi', cpu: '100m' },
       },
     },
   ],

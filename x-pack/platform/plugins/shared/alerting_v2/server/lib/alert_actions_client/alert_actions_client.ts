@@ -119,8 +119,8 @@ export class AlertActionsClient {
         last_event_timestamp = MAX(@timestamp),
         last_episode_id = LAST(episode.id, @timestamp),
         rule_id = VALUES(rule.id)
-        BY group_hash
-      | KEEP last_event_timestamp, rule_id, group_hash, last_episode_id
+        BY group_hash, space_id
+      | KEEP last_event_timestamp, rule_id, group_hash, last_episode_id, space_id
       | RENAME last_event_timestamp AS @timestamp, last_episode_id AS episode_id
     `.toRequest();
 
@@ -149,6 +149,7 @@ export class AlertActionsClient {
       rule_id: alertEvent.rule_id,
       group_hash: alertEvent.group_hash,
       episode_id: alertEvent.episode_id,
+      space_id: alertEvent.space_id,
       ...actionData,
     };
   }
@@ -165,7 +166,7 @@ export class AlertActionsClient {
     }
       | SORT @timestamp DESC
       | RENAME rule.id AS rule_id, episode.id AS episode_id
-      | KEEP @timestamp, group_hash, episode_id, rule_id
+      | KEEP @timestamp, group_hash, episode_id, rule_id, space_id
       | LIMIT 1`.toRequest();
 
     const result = queryResponseToRecords<AlertEventRecord>(
@@ -187,4 +188,5 @@ interface AlertEventRecord {
   group_hash: string;
   episode_id: string;
   rule_id: string;
+  space_id: string;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { type SyntheticEvent } from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { SecurityCellActions, CellActionsMode } from '../../../common/components/cell_actions';
@@ -25,8 +25,10 @@ import { formatRiskScore } from '../../common';
 
 export const getUserRiskScoreColumns = ({
   dispatchSeverityUpdate,
+  openUserFlyout,
 }: {
   dispatchSeverityUpdate: (s: RiskSeverity) => void;
+  openUserFlyout: (userName: string) => void;
 }): UserRiskScoreColumns => [
   {
     field: 'user.name',
@@ -53,7 +55,14 @@ export const getUserRiskScoreColumns = ({
               telemetry: CELL_ACTIONS_TELEMETRY,
             }}
           >
-            <UserDetailsLink userName={userName} userTab={UsersTableType.risk} />
+            <UserDetailsLink
+              userName={userName}
+              userTab={UsersTableType.risk}
+              onClick={(e: SyntheticEvent) => {
+                e.preventDefault();
+                openUserFlyout(userName);
+              }}
+            />
           </SecurityCellActions>
         );
       }

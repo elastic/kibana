@@ -117,14 +117,6 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
     throw new Error('No euid ranking branches found, invalid euid logic definition');
   }
 
-  const filterChecks: string[] = [];
-  for (const filterCond of [identityField.documentsFilter, entityDefinition.postAggFilter].filter(
-    (c): c is Condition => Boolean(c)
-  )) {
-    filterChecks.push(`if (!(${streamlangConditionToPainlessDoc(filterCond)})) { return null; }`);
-  }
-  const filterPreamble = filterChecks.length > 0 ? filterChecks.join(' ') + ' ' : '';
-
   const evaluatedVars = new Map<string, string>();
   let preamble = '';
   const fieldEvaluations = identityField.fieldEvaluations ?? [];
@@ -141,6 +133,18 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
     entityDefinition.whenConditionTrueSetFieldsAfterStats,
     evaluatedVars
   );
+
+  /** Same order as getEuidFromObject: field evals (and pre/post stats overrides) run before the pipeline gate. */
+  const filterOpts: StreamlangToPainlessDocOptions = { evaluatedVars };
+  const filterChecks: string[] = [];
+  for (const filterCond of [identityField.documentsFilter, entityDefinition.postAggFilter].filter(
+    (c): c is Condition => Boolean(c)
+  )) {
+    filterChecks.push(
+      `if (!(${streamlangConditionToPainlessDoc(filterCond, filterOpts)})) { return null; }`
+    );
+  }
+  const filterPreamble = filterChecks.length > 0 ? filterChecks.join(' ') + ' ' : '';
 
   const fieldCondition = (field: string): string => {
     const varName = evaluatedVars.get(field);
@@ -169,8 +173,8 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
   const hasConditionalBranch = euidRanking.branches.some((b) => b.when != null);
   if (!hasConditionalBranch && euidRanking.branches.length === 1) {
     return (
-      filterPreamble +
       preamble +
+      filterPreamble +
       buildBranchClauses(euidRanking.branches[0].ranking) +
       ' return null;'
     );
@@ -194,7 +198,7 @@ export function getEuidPainlessEvaluation(entityType: EntityType): string {
   const lastBranchPart = branchParts[branchParts.length - 1] ?? '';
   const endsWithExhaustiveElse = lastBranchPart.startsWith('else {');
   const trailingReturn = endsWithExhaustiveElse ? '' : ' return null;';
-  return filterPreamble + preamble + branchLogic + trailingReturn;
+  return preamble + filterPreamble + branchLogic + trailingReturn;
 }
 
 function painlessFieldNonEmpty(field: string): string {

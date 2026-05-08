@@ -38,25 +38,6 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
           `,
         },
       },
-      rule_has_recovery_query_condition: {
-        type: 'boolean',
-        script: {
-          source: `
-            def rule = params._source['${RULE_SAVED_OBJECT_TYPE}'];
-            if (rule != null) {
-              def rp = rule['recovery_policy'];
-              if (rp != null) {
-                def q = rp['query'];
-                if (q != null && q['condition'] != null) {
-                  emit(true);
-                  return;
-                }
-              }
-            }
-            emit(false);
-          `,
-        },
-      },
       rule_pending_count: {
         type: 'long',
         script: {
@@ -176,19 +157,11 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
       count_by_lookback: {
         terms: { field: `${RULE_SAVED_OBJECT_TYPE}.schedule.lookback`, size: TERMS_SIZE },
       },
-      count_with_query_condition: {
-        filter: {
-          exists: { field: `${RULE_SAVED_OBJECT_TYPE}.evaluation.query.condition` },
-        },
-      },
       count_with_recovery_policy: {
         filter: { exists: { field: 'rule_recovery_policy_type' } },
       },
       count_by_recovery_policy_type: {
         terms: { field: 'rule_recovery_policy_type', size: TERMS_SIZE },
-      },
-      count_with_recovery_query_condition: {
-        filter: { term: { rule_has_recovery_query_condition: true } },
       },
       avg_pending_count: {
         avg: { field: 'rule_pending_count' },
@@ -234,12 +207,10 @@ export async function getRuleStats(esClient: ElasticsearchClient): Promise<RuleS
     count_by_kind: bucketsToRecord<'alert' | 'signal'>(aggs?.count_by_kind.buckets),
     count_by_schedule: bucketsToArray(aggs?.count_by_schedule.buckets),
     count_by_lookback: bucketsToArray(aggs?.count_by_lookback.buckets),
-    count_with_query_condition: aggs?.count_with_query_condition.doc_count ?? 0,
     count_with_recovery_policy: aggs?.count_with_recovery_policy.doc_count ?? 0,
     count_by_recovery_policy_type: bucketsToRecord<'query' | 'no_breach'>(
       aggs?.count_by_recovery_policy_type.buckets
     ),
-    count_with_recovery_query_condition: aggs?.count_with_recovery_query_condition.doc_count ?? 0,
     avg_pending_count: aggs?.avg_pending_count.value ?? null,
     avg_recovering_count: aggs?.avg_recovering_count.value ?? null,
     count_by_pending_timeframe: bucketsToArray(aggs?.count_by_pending_timeframe.buckets),

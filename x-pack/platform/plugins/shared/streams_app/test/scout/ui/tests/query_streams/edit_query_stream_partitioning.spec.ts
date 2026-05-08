@@ -7,7 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { getEsqlViewName } from '@kbn/streams-schema';
+import { getEsqlViewName } from '@kbn/streams-schema/src/models/query/view_name';
 import { test } from '../../fixtures';
 import {
   createQueryStream,
@@ -43,9 +43,8 @@ test.describe(
       await pageObjects.streams.gotoStreamMainPage();
     });
 
-    test.afterAll(async ({ kbnClient, apiServices, esClient }) => {
-      // Cleanup may fail if the delete test already removed the stream - helpers handle this gracefully
-      await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME);
+    test.afterAll(async ({ kbnClient, apiServices, esClient, log }) => {
+      await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME, log);
       await deleteRootStreamViews(esClient);
       await disableQueryStreams(kbnClient);
     });
@@ -73,8 +72,7 @@ test.describe(
 
       await test.step('update the query and save', async () => {
         await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue(UPDATED_ESQL_QUERY);
-        await pageObjects.streams.clickQueryStreamFormSaveButton();
-        await expect(pageObjects.streams.queryStreamUpdatedSuccessToast).toBeVisible();
+        await pageObjects.streams.saveInlineQueryStreamEdit();
       });
 
       await test.step('verify the ES|QL view was updated', async () => {

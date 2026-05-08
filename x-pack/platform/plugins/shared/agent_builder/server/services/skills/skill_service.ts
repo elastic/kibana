@@ -19,7 +19,7 @@ import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import type { ToolRegistry } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
-import { getSkillEntryPath } from '../runner/store/volumes/skills/utils';
+import { getSkillEntryPath } from '../execution/runner/store/volumes/skills/utils';
 import { createSkillRegistry } from './skill_registry';
 import type { SkillRegistry } from './skill_registry';
 import { createBuiltinSkillProvider } from './builtin';

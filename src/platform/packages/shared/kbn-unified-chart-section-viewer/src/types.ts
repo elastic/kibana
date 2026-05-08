@@ -11,6 +11,7 @@ import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { ExternalServices } from './context/external_services';
 interface ChartSectionActions {
   openInNewTab?: (params: {
     query?: Query | AggregateQuery;
@@ -23,6 +24,11 @@ interface ChartSectionActions {
 export interface UnifiedMetricsGridProps extends ChartSectionProps {
   actions: ChartSectionActions;
   /**
+   * The profile ID of the data source profile that renders this grid.
+   * Used for execution context labels in APM monitoring.
+   */
+  profileId: string;
+  /**
    * Breakdown field from Discover's app state, synced from sidebar "Add Breakdown" action
    */
   breakdownField?: string;
@@ -30,6 +36,11 @@ export interface UnifiedMetricsGridProps extends ChartSectionProps {
    * Optional callback used to push toolbar breakdown selections back to Discover app state.
    */
   onBreakdownFieldChange?: (fieldName?: string) => void;
+  /**
+   * Optional external services injected by the host (e.g. Discover) to enable
+   * cross-plugin features such as the Streams flyout field section.
+   */
+  externalServices?: ExternalServices;
 }
 
 export interface Dimension {
@@ -91,6 +102,7 @@ export interface ParsedMetrics {
 export interface MetricsInfo extends ParsedMetrics {
   loading: boolean;
   error: Error | null;
+  activeDimensions: Dimension[];
 }
 
 export interface ParsedMetricsWithTelemetry extends ParsedMetrics {

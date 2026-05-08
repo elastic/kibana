@@ -13,13 +13,23 @@ import type { FunctionRegistrationParameters } from '.';
 jest.mock('axios');
 const mockedAxios = jest.mocked(axios);
 
+function createEnotfoundError(hostname: string): Error {
+  const cause = new Error(`getaddrinfo ENOTFOUND ${hostname}`) as NodeJS.ErrnoException;
+  cause.code = 'ENOTFOUND';
+  const error = new Error(`getaddrinfo ENOTFOUND ${hostname}`) as NodeJS.ErrnoException;
+  error.code = 'ERR_NETWORK';
+  error.cause = cause;
+  return error;
+}
+
 function registerFunction(overrides: {
   publicBaseUrl?: string;
   requestUrl?: URL;
   rewrittenUrl?: URL;
   headers?: Record<string, string>;
+  serverInfo?: { hostname: string; port: number; protocol: 'http' | 'https' | 'socket' };
 }) {
-  const logger = { info: jest.fn(), error: jest.fn() };
+  const logger = { info: jest.fn(), debug: jest.fn(), warn: jest.fn(), error: jest.fn() };
   const coreStart = {
     http: {
       basePath: {
@@ -27,6 +37,14 @@ function registerFunction(overrides: {
         serverBasePath: '',
         get: jest.fn(),
       },
+      getServerInfo: jest.fn().mockReturnValue(
+        overrides.serverInfo ?? {
+          name: 'kibana',
+          hostname: '0.0.0.0',
+          port: 5601,
+          protocol: 'http',
+        }
+      ),
     },
   };
 
@@ -149,5 +167,132 @@ describe('kibana tool', () => {
     ).rejects.toThrow(
       'Cannot invoke Kibana tool: "server.publicBaseUrl" must be configured in kibana.yml'
     );
+  });
+
+  describe('local server fallback', () => {
+    const vpcPublicBaseUrl = 'https://kibana-vpc.internal:5601';
+    const defaultServerInfo = { hostname: '0.0.0.0', port: 5601, protocol: 'http' as const };
+    const getStatusArgs = { arguments: { method: 'GET' as const, pathname: '/api/status' } };
+
+    function registerVpcFunction(
+      serverInfo: {
+        hostname: string;
+        port: number;
+        protocol: 'http' | 'https' | 'socket';
+      } = defaultServerInfo
+    ) {
+      return registerFunction({ publicBaseUrl: vpcPublicBaseUrl, serverInfo });
+    }
+
+    it('retries with local server address when publicBaseUrl hostname is not resolvable', async () => {
+      const { handler, resources } = registerVpcFunction();
+
+      mockedAxios
+        .mockRejectedValueOnce(createEnotfoundError('kibana-vpc.internal'))
+        .mockResolvedValueOnce({ data: { status: 'ok' } });
+
+      const result = await handler(getStatusArgs);
+
+      expect(mockedAxios).toHaveBeenCalledTimes(2);
+
+      const firstCall = mockedAxios.mock.calls[0][0] as AxiosRequestConfig;
+      expect(firstCall.url).toBe('https://kibana-vpc.internal:5601/api/status');
+
+      const retryCall = mockedAxios.mock.calls[1][0] as AxiosRequestConfig;
+      expect(retryCall.url).toBe('http://localhost:5601/api/status');
+
+      expect(result).toEqual({ content: { status: 'ok' } });
+      expect(resources.logger.warn).toHaveBeenCalledWith(expect.stringContaining('(ENOTFOUND)'));
+    });
+
+    it('does not fall back when the request fails with a non-ENOTFOUND error', async () => {
+      const cause = new Error('connect ECONNREFUSED 127.0.0.1:5601') as NodeJS.ErrnoException;
+      cause.code = 'ECONNREFUSED';
+      const error = new Error('connect ECONNREFUSED') as NodeJS.ErrnoException;
+      error.code = 'ERR_NETWORK';
+      error.cause = cause;
+
+      const { handler, resources } = registerFunction({});
+      mockedAxios.mockRejectedValueOnce(error);
+
+      await expect(handler(getStatusArgs)).rejects.toThrow();
+
+      expect(mockedAxios).toHaveBeenCalledTimes(1);
+      expect(resources.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error calling Kibana API')
+      );
+    });
+
+    it('does not fall back when the request fails with a non-network error', async () => {
+      const { handler } = registerFunction({});
+      mockedAxios.mockRejectedValueOnce(new Error('Request failed with status code 500'));
+
+      await expect(handler(getStatusArgs)).rejects.toThrow('Request failed with status code 500');
+
+      expect(mockedAxios).toHaveBeenCalledTimes(1);
+    });
+
+    it('logs and rethrows when the local fallback request also fails', async () => {
+      const { handler, resources } = registerVpcFunction();
+
+      mockedAxios
+        .mockRejectedValueOnce(createEnotfoundError('kibana-vpc.internal'))
+        .mockRejectedValueOnce(new Error('ECONNREFUSED on fallback'));
+
+      await expect(handler(getStatusArgs)).rejects.toThrow('ECONNREFUSED on fallback');
+
+      expect(mockedAxios).toHaveBeenCalledTimes(2);
+      expect(resources.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error calling Kibana API via local fallback')
+      );
+    });
+
+    it('does not fall back when server protocol is "socket"', async () => {
+      const { handler, resources } = registerVpcFunction({
+        hostname: 'localhost',
+        port: 5601,
+        protocol: 'socket',
+      });
+
+      mockedAxios.mockRejectedValueOnce(createEnotfoundError('kibana-vpc.internal'));
+
+      await expect(handler(getStatusArgs)).rejects.toThrow();
+
+      expect(mockedAxios).toHaveBeenCalledTimes(1);
+      expect(resources.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error calling Kibana API')
+      );
+    });
+
+    it('maps hostname "::" to "localhost" when building the fallback URL', async () => {
+      const { handler } = registerVpcFunction({ hostname: '::', port: 5601, protocol: 'http' });
+
+      mockedAxios
+        .mockRejectedValueOnce(createEnotfoundError('kibana-vpc.internal'))
+        .mockResolvedValueOnce({ data: { ok: true } });
+
+      await handler(getStatusArgs);
+
+      const retryCall = mockedAxios.mock.calls[1][0] as AxiosRequestConfig;
+      expect(retryCall.url).toBe('http://localhost:5601/api/status');
+    });
+
+    it('detects ENOTFOUND nested multiple levels deep in the error cause chain', async () => {
+      const root = new Error('getaddrinfo ENOTFOUND host') as NodeJS.ErrnoException;
+      root.code = 'ENOTFOUND';
+      const mid = new Error('inner wrapper');
+      mid.cause = root;
+      const outer = new Error('outer wrapper');
+      outer.cause = mid;
+
+      const { handler } = registerVpcFunction();
+
+      mockedAxios.mockRejectedValueOnce(outer).mockResolvedValueOnce({ data: { ok: true } });
+
+      const result = await handler(getStatusArgs);
+
+      expect(mockedAxios).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({ content: { ok: true } });
+    });
   });
 });

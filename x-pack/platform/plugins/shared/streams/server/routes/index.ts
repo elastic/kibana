@@ -28,6 +28,7 @@ import { attachmentRoutes } from './attachments/route';
 import { internalAttachmentRoutes } from './internal/attachments/route';
 import { internalDescriptionGenerationRoutes } from './internal/sig_events/description_generation/route';
 import { featureRoutes as internalFeatureRoutes } from './internal/sig_events/features/route';
+import { identifyFeaturesRoutes as internalIdentifyFeaturesRoutes } from './internal/sig_events/features/identify_route';
 import { internalInsightsRoutes } from './internal/sig_events/insights/route';
 import { internalTasksRoutes } from './internal/streams/tasks/route';
 import { internalOnboardingRoutes } from './internal/streams/onboarding/route';
@@ -35,6 +36,7 @@ import { internalQueriesRoutes } from './internal/sig_events/queries/route';
 import { internalEligibleStreamsRoutes } from './internal/sig_events/extraction/eligible_streams_route';
 import { internalSignificantEventsSettingsRoutes } from './internal/sig_events/significant_events_settings/route';
 import { timeSeriesRoutes } from './internal/streams/time_series/route';
+import { internalMemoryRoutes } from './internal/memory/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -52,12 +54,14 @@ export const streamsRouteRepository = {
   ...internalAttachmentRoutes,
   ...internalDescriptionGenerationRoutes,
   ...internalFeatureRoutes,
+  ...internalIdentifyFeaturesRoutes,
   ...internalInsightsRoutes,
   ...internalTasksRoutes,
   ...internalOnboardingRoutes,
   ...internalQueriesRoutes,
   ...internalEligibleStreamsRoutes,
   ...internalSignificantEventsSettingsRoutes,
+  ...internalMemoryRoutes,
   // public APIs
   ...docCountsRoutes,
   ...crudRoutes,

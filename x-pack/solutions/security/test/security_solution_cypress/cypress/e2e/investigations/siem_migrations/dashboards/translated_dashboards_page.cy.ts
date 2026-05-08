@@ -14,7 +14,7 @@ import {
   DASHBOARD_MIGRATION_PROGRESS_BAR_TEXT,
   TRANSLATED_DASHBOARDS_RESULT_TABLE,
 } from '../../../../screens/siem_migrations';
-import { deleteConnectors } from '../../../../tasks/api_calls/common';
+import { deleteConnectors, suppressGlobalAnnouncements } from '../../../../tasks/api_calls/common';
 import { createBedrockConnector } from '../../../../tasks/api_calls/connectors';
 import { visit } from '../../../../tasks/navigation';
 import {
@@ -61,6 +61,7 @@ describe.skip(
       );
 
       role.login();
+      suppressGlobalAnnouncements();
       visit(`${GET_STARTED_URL}/siem_migrations`);
       selectMigrationConnector();
       goToTranslatedDashboardsPageFromOnboarding();

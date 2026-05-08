@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { ModelFamily, ModelProvider } from '@kbn/inference-common';
-import type { EvaluationScoreDocument } from './score_repository';
+import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import { computePairedTTestResults, pairScores } from './statistical_analysis';
 
 const baseTaskModel = {
   id: 'gpt-4',
-  family: ModelFamily.GPT,
-  provider: ModelProvider.OpenAI,
+  family: 'gpt',
+  provider: 'openai',
 };
 
 const baseEvaluatorModel = {
   id: 'claude-3',
-  family: ModelFamily.Claude,
-  provider: ModelProvider.Anthropic,
+  family: 'claude',
+  provider: 'anthropic',
 };
 
 const createMockScore = ({
@@ -115,6 +114,20 @@ describe('pairScores', () => {
     const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(scoresA, scoresB);
 
     expect(pairs).toHaveLength(0);
+    expect(skippedMissingPairs).toBe(2);
+    expect(skippedNullScores).toBe(0);
+  });
+
+  it('counts B-only examples as missing pairs', () => {
+    const scoresA = [createMockScore({ exampleId: 'example-1', score: 0.8 })];
+    const scoresB = [
+      createMockScore({ exampleId: 'example-1', score: 0.9 }),
+      createMockScore({ exampleId: 'example-2', score: 0.7 }),
+    ];
+
+    const { pairs, skippedMissingPairs, skippedNullScores } = pairScores(scoresA, scoresB);
+
+    expect(pairs).toHaveLength(1);
     expect(skippedMissingPairs).toBe(1);
     expect(skippedNullScores).toBe(0);
   });
@@ -183,5 +196,28 @@ describe('computePairedTTestResults', () => {
 
     expect(result.pValue).not.toBeNull();
     expect(result.pValue as number).toBeCloseTo(0.013, 2);
+  });
+
+  it('accepts pre-computed pairs and produces the same results', () => {
+    const scoresA = [
+      createMockScore({ exampleId: 'ex1', score: 1 }),
+      createMockScore({ exampleId: 'ex2', score: 2 }),
+      createMockScore({ exampleId: 'ex3', score: 3 }),
+      createMockScore({ exampleId: 'ex4', score: 4 }),
+      createMockScore({ exampleId: 'ex5', score: 5 }),
+    ];
+    const scoresB = [
+      createMockScore({ exampleId: 'ex1', score: 0 }),
+      createMockScore({ exampleId: 'ex2', score: 0 }),
+      createMockScore({ exampleId: 'ex3', score: 0 }),
+      createMockScore({ exampleId: 'ex4', score: 0 }),
+      createMockScore({ exampleId: 'ex5', score: 0 }),
+    ];
+
+    const { pairs } = pairScores(scoresA, scoresB);
+    const fromDocs = computePairedTTestResults(scoresA, scoresB);
+    const fromPairs = computePairedTTestResults(pairs);
+
+    expect(fromPairs).toEqual(fromDocs);
   });
 });

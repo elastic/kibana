@@ -381,7 +381,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       cloudHost: decodedId?.host,
       cloudDefaultPort: decodedId?.defaultPort,
       isCloudEnabled,
-      isEce: this.config.is_ece,
+      isEce: this.config.isSaasContainer != null ? !this.config.isSaasContainer : undefined,
       trialEndDate: this.trialEndDate,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
       apm: {

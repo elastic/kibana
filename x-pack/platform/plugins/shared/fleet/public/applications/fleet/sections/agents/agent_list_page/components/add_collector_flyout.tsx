@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useQuery } from '@kbn/react-query';
-
+import { dump } from 'js-yaml';
+import { v4 as uuidv4 } from 'uuid';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -16,11 +17,19 @@ import {
   EuiButton,
   EuiText,
   EuiSteps,
+  EuiCode,
   EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiLoadingSpinner,
   EuiFlyoutFooter,
   EuiCallOut,
+  EuiForm,
+  EuiFormRow,
+  EuiFieldText,
+  EuiTextArea,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -33,8 +42,11 @@ import {
   sendGetEnrollmentAPIKeys,
   useGetFleetServerHosts,
   useFleetStatus,
+  useDefaultOutput,
+  useStartServices,
 } from '../../../../hooks';
 import { AgentEnrollmentConfirmationStep, usePollingAgentCount } from '../../../../components';
+import { useGetCreateApiKey } from '../../../../../../components/agent_enrollment_flyout/hooks';
 
 interface AddCollectorFlyoutProps {
   onClose: () => void;
@@ -48,6 +60,14 @@ function getOpAMPPolicyId(spaceId?: string) {
   return !spaceId || spaceId === '' || spaceId === DEFAULT_SPACE_ID
     ? OPAMP_POLICY_ID
     : `${spaceId}-${OPAMP_POLICY_ID}`;
+}
+
+// Converts a human-readable label to a lowercase, hyphen-separated machine key, e.g. "My Group 1" → "my-group-1".
+function slugify(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 async function fetchOpampPolicy(spaceId?: string): Promise<any | null> {
@@ -93,14 +113,41 @@ async function ensurePolicyAndFetchToken(spaceId?: string): Promise<string | und
   return tokens[0]?.api_key;
 }
 
+const REQUIRED_ERROR = i18n.translate('xpack.fleet.addCollectorFlyout.fieldRequired', {
+  defaultMessage: 'This field is required.',
+});
+
+const SLUG_FORMAT_ERROR = i18n.translate('xpack.fleet.addCollectorFlyout.slugFormatError', {
+  defaultMessage:
+    'Must contain only lowercase letters, numbers, and hyphens, with no leading or trailing hyphens.',
+});
+
+// Validates that a value matches the slug format produced by slugify().
+function isValidSlug(value: string): boolean {
+  return /^[a-z0-9]+([a-z0-9-]*[a-z0-9])?$/.test(value);
+}
+
+const DEFAULT_ES_HOST = 'http://localhost:9200';
+
 export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps> = ({
   onClose,
   onClickViewAgents,
 }) => {
+  const instanceUid = useRef(uuidv4());
+  const { cloud } = useStartServices();
+
+  const {
+    apiKeyEncoded: esApiKeyEncoded,
+    isLoading: isCreatingApiKey,
+    onCreateApiKey,
+  } = useGetCreateApiKey();
+
   const fleetServerHosts = useGetFleetServerHosts();
   const defaultFleetServerHost =
     fleetServerHosts.data?.items?.find((item) => item.is_default)?.host_urls?.[0] || '';
   const { spaceId } = useFleetStatus();
+  const { output: defaultOutput } = useDefaultOutput();
+  const defaultEsHost = defaultOutput?.hosts?.[0] ?? DEFAULT_ES_HOST;
   const { enrolledAgentIds } = usePollingAgentCount(getOpAMPPolicyId(spaceId), {
     noLowerTimeLimit: true,
     pollImmediately: true,
@@ -111,46 +158,393 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
     isLoading: loading,
     error: queryError,
   } = useQuery<string | undefined, Error>({
-    queryKey: ['opampPolicyAndToken'],
+    queryKey: ['opampPolicyAndToken', spaceId],
     queryFn: () => ensurePolicyAndFetchToken(spaceId),
   });
 
   const error = queryError?.message ?? null;
 
-  const opampConfig = `extensions:
-  opamp:
-    server:
-      http:
-        endpoint: ${defaultFleetServerHost}/v1/opamp
-        headers:
-          Authorization: ApiKey ${token}
-    instance_uid: <instance-uid>
+  // Form state
+  const [groupDisplayName, setGroupDisplayName] = useState('OTel Collector Group');
+  const [collectorGroup, setCollectorGroup] = useState('otel-collector-group');
+  const [collectorGroupOverridden, setCollectorGroupOverridden] = useState(false);
+  const [serviceName, setServiceName] = useState('otel-collector-group');
+  const [serviceNameOverridden, setServiceNameOverridden] = useState(false);
+  const [collectorDisplayName, setCollectorDisplayName] = useState('${env:HOSTNAME}');
+  const [configDescription, setConfigDescription] = useState('');
+  const [tags, setTags] = useState('');
+  const [environment, setEnvironment] = useState('');
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-service:
-  extensions: [opamp]`;
+  const touch = (field: string) => setTouched((prev) => ({ ...prev, [field]: true }));
+
+  type RequiredField =
+    | 'groupDisplayName'
+    | 'collectorGroup'
+    | 'serviceName'
+    | 'collectorDisplayName';
+  const fieldErrors: Partial<Record<RequiredField, string>> = {};
+  if (groupDisplayName.trim() === '') fieldErrors.groupDisplayName = REQUIRED_ERROR;
+  if (collectorGroup.trim() === '') fieldErrors.collectorGroup = REQUIRED_ERROR;
+  else if (!isValidSlug(collectorGroup)) fieldErrors.collectorGroup = SLUG_FORMAT_ERROR;
+  if (serviceName.trim() === '') fieldErrors.serviceName = REQUIRED_ERROR;
+  else if (!isValidSlug(serviceName)) fieldErrors.serviceName = SLUG_FORMAT_ERROR;
+  if (collectorDisplayName.trim() === '') fieldErrors.collectorDisplayName = REQUIRED_ERROR;
+
+  const isFormValid = Object.keys(fieldErrors).length === 0;
+  const isInvalid = (field: RequiredField) => !!(touched[field] && fieldErrors[field]);
+  const errorFor = (field: RequiredField) => (touched[field] ? fieldErrors[field] : undefined);
+
+  const handleGroupDisplayNameChange = (value: string) => {
+    setGroupDisplayName(value);
+    const slug = slugify(value);
+    if (!collectorGroupOverridden) setCollectorGroup(slug);
+    if (!serviceNameOverridden) setServiceName(slug);
+  };
+
+  const opampConfig = useMemo(() => {
+    const nonIdentifyingAttrs: Record<string, any> = {
+      'elastic.collector.group_name': groupDisplayName,
+      'elastic.collector.group': collectorGroup,
+      'elastic.display.name': collectorDisplayName,
+      ...(configDescription ? { 'config.description': configDescription } : {}),
+      ...(tags.trim() ? { tags } : {}),
+      ...(environment ? { 'deployment.environment.name': environment } : {}),
+    };
+
+    const telemetryResource: Record<string, any> = {
+      'elastic.collector.group_name': groupDisplayName,
+      'elastic.collector.group': collectorGroup,
+      'service.namespace': collectorGroup,
+      'service.name': serviceName,
+      'service.instance.id': collectorDisplayName,
+      ...(tags.trim() ? { tags } : {}),
+      ...(environment ? { 'deployment.environment.name': environment } : {}),
+    };
+
+    const selfTelemetryOtlpExporter: Record<string, any> = {
+      exporter: {
+        otlp: {
+          protocol: 'grpc',
+          endpoint: 'http://localhost:4317',
+        },
+      },
+    };
+
+    const config = {
+      extensions: {
+        opamp: {
+          server: {
+            http: {
+              endpoint: `${defaultFleetServerHost}/v1/opamp`,
+              headers: { Authorization: `ApiKey ${token}` },
+              ...(!cloud?.isCloudEnabled && {
+                tls: { insecure_skip_verify: true },
+              }),
+            },
+          },
+          instance_uid: instanceUid.current,
+          agent_description: { non_identifying_attributes: nonIdentifyingAttrs },
+        },
+      },
+      receivers: {
+        otlp: {
+          protocols: {
+            grpc: {
+              endpoint: '0.0.0.0:4317',
+            },
+          },
+        },
+      },
+      exporters: {
+        'elasticsearch/otel': {
+          endpoints: [defaultEsHost],
+          api_key: esApiKeyEncoded ? esApiKeyEncoded : '${API_KEY}',
+          mapping: { mode: 'otel' },
+        },
+        otlp: {
+          endpoint: 'http://localhost:4317',
+          tls: { insecure: true },
+        },
+      },
+      service: {
+        extensions: ['opamp'],
+        pipelines: {
+          logs: { receivers: ['otlp'], exporters: ['elasticsearch/otel'] },
+          metrics: { receivers: ['otlp'], exporters: ['elasticsearch/otel'] },
+          traces: { receivers: ['otlp'], exporters: ['elasticsearch/otel'] },
+        },
+        telemetry: {
+          resource: telemetryResource,
+          metrics: {
+            readers: [{ periodic: selfTelemetryOtlpExporter }],
+          },
+          logs: {
+            processors: [{ batch: selfTelemetryOtlpExporter }],
+          },
+          traces: {
+            processors: [{ batch: selfTelemetryOtlpExporter }],
+          },
+        },
+      },
+    };
+    return dump(config, { lineWidth: -1, quotingType: '"', forceQuotes: true, noRefs: true });
+  }, [
+    groupDisplayName,
+    collectorGroup,
+    serviceName,
+    collectorDisplayName,
+    configDescription,
+    tags,
+    environment,
+    defaultFleetServerHost,
+    defaultEsHost,
+    token,
+    esApiKeyEncoded,
+    cloud?.isCloudEnabled,
+  ]);
 
   const steps = [
     {
       title: i18n.translate('xpack.fleet.addCollectorFlyout.getOpampConfigStepTitle', {
-        defaultMessage: 'Copy OpAMP Configuration',
+        defaultMessage: 'Collector configuration',
       }),
       children: (
         <EuiText>
           <p>
             <FormattedMessage
               id="xpack.fleet.addCollectorFlyout.opampConfigInstruction"
-              defaultMessage="Use this OpAMP configuration to monitor your collector:"
+              defaultMessage="Fill in the form with metadata and copy or download the generated collector config below:"
             />
           </p>
-          {token && defaultFleetServerHost ? (
-            <EuiCodeBlock
-              isCopyable
-              language="yaml"
-              paddingSize="m"
-              data-test-subj="opampConfigYaml"
+          <EuiForm component="div" fullWidth>
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate('xpack.fleet.addCollectorFlyout.form.groupDisplayNameLabel', {
+                defaultMessage: 'Collector group display name',
+              })}
+              helpText={i18n.translate(
+                'xpack.fleet.addCollectorFlyout.form.groupDisplayNameHelpText',
+                {
+                  defaultMessage:
+                    'Human-readable label for this group of collectors, e.g. "Production West".',
+                }
+              )}
+              isInvalid={isInvalid('groupDisplayName')}
+              error={errorFor('groupDisplayName')}
             >
-              {opampConfig}
-            </EuiCodeBlock>
+              <EuiFieldText
+                fullWidth
+                isInvalid={isInvalid('groupDisplayName')}
+                value={groupDisplayName}
+                onChange={(e) => handleGroupDisplayNameChange(e.target.value)}
+                onBlur={() => touch('groupDisplayName')}
+                data-test-subj="collectorGroupDisplayNameInput"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate('xpack.fleet.addCollectorFlyout.form.collectorGroupLabel', {
+                defaultMessage: 'Collector group',
+              })}
+              helpText={i18n.translate(
+                'xpack.fleet.addCollectorFlyout.form.collectorGroupHelpText',
+                {
+                  defaultMessage:
+                    'Machine-friendly key used for filtering in Fleet UI. Auto-derived from the display name above. If overriding, use only lowercase letters, numbers, and hyphens.',
+                }
+              )}
+              isInvalid={isInvalid('collectorGroup')}
+              error={errorFor('collectorGroup')}
+            >
+              <EuiFieldText
+                fullWidth
+                isInvalid={isInvalid('collectorGroup')}
+                prepend="elastic.collector.group:"
+                value={collectorGroup}
+                onChange={(e) => {
+                  setCollectorGroupOverridden(true);
+                  setCollectorGroup(e.target.value);
+                }}
+                onBlur={() => touch('collectorGroup')}
+                data-test-subj="collectorGroupInput"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate('xpack.fleet.addCollectorFlyout.form.serviceNameLabel', {
+                defaultMessage: 'Service name',
+              })}
+              helpText={i18n.translate('xpack.fleet.addCollectorFlyout.form.serviceNameHelpText', {
+                defaultMessage:
+                  'Identifies this collector in Elasticsearch as service.name. Auto-derived from the display name above. If overriding, use only lowercase letters, numbers, and hyphens.',
+              })}
+              isInvalid={isInvalid('serviceName')}
+              error={errorFor('serviceName')}
+            >
+              <EuiFieldText
+                fullWidth
+                isInvalid={isInvalid('serviceName')}
+                value={serviceName}
+                onChange={(e) => {
+                  setServiceNameOverridden(true);
+                  setServiceName(e.target.value);
+                }}
+                onBlur={() => touch('serviceName')}
+                data-test-subj="serviceNameInput"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate(
+                'xpack.fleet.addCollectorFlyout.form.collectorDisplayNameLabel',
+                { defaultMessage: 'Collector display name' }
+              )}
+              helpText={i18n.translate(
+                'xpack.fleet.addCollectorFlyout.form.collectorDisplayNameHelpText',
+                {
+                  defaultMessage:
+                    'Per-instance identity that distinguishes this collector within the group, e.g. "prod-collector-01". Defaults to HOSTNAME environment variable.',
+                }
+              )}
+              isInvalid={isInvalid('collectorDisplayName')}
+              error={errorFor('collectorDisplayName')}
+            >
+              <EuiFieldText
+                fullWidth
+                isInvalid={isInvalid('collectorDisplayName')}
+                value={collectorDisplayName}
+                onChange={(e) => setCollectorDisplayName(e.target.value)}
+                onBlur={() => touch('collectorDisplayName')}
+                data-test-subj="collectorDisplayNameInput"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate('xpack.fleet.addCollectorFlyout.form.configDescriptionLabel', {
+                defaultMessage: 'Config description',
+              })}
+              helpText={i18n.translate(
+                'xpack.fleet.addCollectorFlyout.form.configDescriptionHelpText',
+                {
+                  defaultMessage:
+                    'Optional. A human-readable summary of what this collector does. Appears as a comment header in the effective config view.',
+                }
+              )}
+            >
+              <EuiTextArea
+                fullWidth
+                value={configDescription}
+                onChange={(e) => setConfigDescription(e.target.value)}
+                data-test-subj="configDescriptionInput"
+                resize="vertical"
+                rows={3}
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate('xpack.fleet.addCollectorFlyout.form.tagsLabel', {
+                defaultMessage: 'Tags',
+              })}
+              helpText={i18n.translate('xpack.fleet.addCollectorFlyout.form.tagsHelpText', {
+                defaultMessage:
+                  'Optional. Comma-separated labels, e.g. prod,west-region,k8s. Tags appear in the Fleet view filter and as resource attributes on all self-emitted metrics and logs in Elasticsearch, making them queryable via ES|QL.',
+              })}
+            >
+              <EuiFieldText
+                fullWidth
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+                data-test-subj="tagsInput"
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate('xpack.fleet.addCollectorFlyout.form.environmentLabel', {
+                defaultMessage: 'Environment',
+              })}
+              helpText={i18n.translate('xpack.fleet.addCollectorFlyout.form.environmentHelpText', {
+                defaultMessage:
+                  'Optional. Deployment tier following OTel semconv (deployment.environment.name). Appears alongside tags in the Fleet view and on self-emitted telemetry.',
+              })}
+            >
+              <EuiFieldText
+                fullWidth
+                value={environment}
+                onChange={(e) => setEnvironment(e.target.value)}
+                data-test-subj="environmentInput"
+              />
+            </EuiFormRow>
+          </EuiForm>
+          <EuiHorizontalRule />
+          {!isFormValid && (
+            <EuiText color="danger">
+              <p>
+                <FormattedMessage
+                  id="xpack.fleet.addCollectorFlyout.fixValidationErrors"
+                  defaultMessage="The form is invalid. Fill in all required fields above to generate the collector config."
+                />
+              </p>
+            </EuiText>
+          )}
+          {token && defaultFleetServerHost && isFormValid ? (
+            <>
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="xpack.fleet.addCollectorFlyout.apiKeyDescription"
+                    defaultMessage="Either use an existing API key and replace {apiKeyPlaceholder} in the {apiKeyField} field of the config below, or click the button to generate a new one."
+                    values={{
+                      apiKeyPlaceholder: <EuiCode>{'${API_KEY}'}</EuiCode>,
+                      apiKeyField: <EuiCode>api_key</EuiCode>,
+                    }}
+                  />
+                </p>
+              </EuiText>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={onCreateApiKey}
+                    isLoading={isCreatingApiKey}
+                    isDisabled={!!esApiKeyEncoded}
+                    iconType={esApiKeyEncoded ? 'check' : undefined}
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.addCollectorFlyout.createApiKeyButton"
+                      defaultMessage="Create API key"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    iconType="download"
+                    onClick={() => {
+                      const link = document.createElement('a');
+                      link.href = `data:text/x-yaml;charset=utf-8,${encodeURIComponent(
+                        opampConfig
+                      )}`;
+                      link.download = 'otel-opamp.yaml';
+                      link.click();
+                    }}
+                  >
+                    <FormattedMessage
+                      id="xpack.fleet.addCollectorFlyout.downloadConfigButton"
+                      defaultMessage="Download config"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+              <EuiCodeBlock
+                isCopyable
+                language="yaml"
+                paddingSize="m"
+                data-test-subj="opampConfigYaml"
+              >
+                {opampConfig}
+              </EuiCodeBlock>
+            </>
           ) : loading ? (
             <EuiCallOut
               announceOnMount

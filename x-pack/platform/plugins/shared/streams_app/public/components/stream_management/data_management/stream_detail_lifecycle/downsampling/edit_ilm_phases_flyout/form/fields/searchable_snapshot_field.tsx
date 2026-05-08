@@ -7,17 +7,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { IlmPolicyPhases } from '@kbn/streams-schema';
-import {
-  type FormHook,
-  getFieldValidityAndErrorMessage,
-  useFormData,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { type FieldPath, useController, useFormContext, useWatch } from 'react-hook-form';
 import { EuiButtonIcon, EuiFormRow, EuiLink, EuiSelect, EuiText } from '@elastic/eui';
 import type { IlmPhasesFlyoutFormInternal } from '../types';
 
 export interface SearchableSnapshotRepositoryFieldProps {
-  form: FormHook<IlmPolicyPhases, IlmPhasesFlyoutFormInternal>;
   repositoryOptions: Array<{ value: string; text: string }>;
   isLoadingSearchableSnapshotRepositories?: boolean;
   onRefreshSearchableSnapshotRepositories?: () => void;
@@ -27,7 +21,6 @@ export interface SearchableSnapshotRepositoryFieldProps {
 }
 
 export const SearchableSnapshotRepositoryField = ({
-  form,
   repositoryOptions,
   isLoadingSearchableSnapshotRepositories,
   onRefreshSearchableSnapshotRepositories,
@@ -35,14 +28,19 @@ export const SearchableSnapshotRepositoryField = ({
   showCreateRepositoryLink = true,
   dataTestSubj,
 }: SearchableSnapshotRepositoryFieldProps) => {
-  const path = `_meta.searchableSnapshot.repository`;
-  useFormData({ form, watch: path });
-  const field = form.getFields()[path];
-  const value = String(field?.value ?? '');
+  const path =
+    '_meta.searchableSnapshot.repository' satisfies FieldPath<IlmPhasesFlyoutFormInternal>;
+  const { control, trigger } = useFormContext<IlmPhasesFlyoutFormInternal>();
+  useWatch({ control, name: path });
 
-  if (!field) return null;
+  const { field, fieldState } = useController({
+    control,
+    name: path,
+  });
+  const value = String(field.value ?? '');
 
-  const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+  const isInvalid = Boolean(fieldState.error);
+  const errorMessage = fieldState.error?.message;
 
   const canShowCreateRepositoryLink =
     showCreateRepositoryLink && typeof onCreateSnapshotRepository === 'function';
@@ -85,7 +83,10 @@ export const SearchableSnapshotRepositoryField = ({
         data-test-subj={`${dataTestSubj}SnapshotRepositorySelect`}
         options={repositoryOptions}
         value={value}
-        onChange={(e) => field.setValue(e.target.value)}
+        onChange={(e) => {
+          field.onChange(e.target.value);
+          void trigger(path);
+        }}
         append={
           <EuiButtonIcon
             display="empty"

@@ -1,0 +1,40 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        postCopyAgentPolicyRequestExample:
+          description: 'Copy an agent policy with a new name'
+          value:
+            name: 'Copy of my agent policy'
+            description: 'A copy of the original agent policy'
+responses:
+  200:
+    description: 'Successful response'
+    content:
+      application/json:
+        examples:
+          postCopyAgentPolicyExample:
+            description: 'The copied agent policy'
+            value:
+              item:
+                id: 'agent-policy-id-copy-1'
+                name: 'Copy of my agent policy'
+                namespace: 'default'
+                description: 'A copy of the original agent policy'
+                is_managed: false
+                is_protected: false
+                status: 'active'
+                revision: 1
+                updated_at: '2024-01-15T11:00:00.000Z'
+                updated_by: 'user1'
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

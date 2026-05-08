@@ -17,25 +17,31 @@ jest.mock('./status_popover_button', () => ({
     eventId,
     contextId,
     onStatusUpdated,
+    disabled,
   }: {
     eventId: string;
     contextId: string;
     onStatusUpdated?: () => void;
+    disabled?: boolean;
   }) => (
     <button
       data-test-subj="mockStatusPopoverButton"
       data-event-id={eventId}
       data-context-id={contextId}
+      data-disabled={String(disabled ?? false)}
       onClick={onStatusUpdated}
       type="button"
     />
   ),
 }));
 
-const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
+const createMockHit = (
+  flattened: DataTableRecord['flattened'],
+  raw: DataTableRecord['raw'] = { _id: 'es-alert-1' }
+): DataTableRecord =>
   ({
     id: 'alert-1',
-    raw: { _id: 'es-alert-1' },
+    raw,
     flattened,
     isAnchor: false,
   } as DataTableRecord);
@@ -43,6 +49,11 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
 const alertHit = createMockHit({
   'kibana.alert.workflow_status': 'open',
 });
+
+const remoteAlertHit = createMockHit(
+  { 'kibana.alert.workflow_status': 'open' },
+  { _id: 'es-alert-1', _index: 'remote-cluster:.alerts-security.alerts-default' }
+);
 
 const renderComponent = (props: Partial<Parameters<typeof Status>[0]> = {}) =>
   render(
@@ -99,5 +110,17 @@ describe('<Status />', () => {
 
     expect(queryByTestId('mockStatusPopoverButton')).not.toBeInTheDocument();
     expect(container).toHaveTextContent('Status—');
+  });
+
+  it('passes disabled=false to the status button for a local alert', () => {
+    const { getByTestId } = renderComponent({ hit: alertHit });
+
+    expect(getByTestId('mockStatusPopoverButton')).toHaveAttribute('data-disabled', 'false');
+  });
+
+  it('passes disabled=true to the status button for a remote alert', () => {
+    const { getByTestId } = renderComponent({ hit: remoteAlertHit });
+
+    expect(getByTestId('mockStatusPopoverButton')).toHaveAttribute('data-disabled', 'true');
   });
 });

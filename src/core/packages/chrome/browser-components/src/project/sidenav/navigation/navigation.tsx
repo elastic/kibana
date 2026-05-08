@@ -9,7 +9,7 @@
 
 import React, { useMemo } from 'react';
 import { map } from 'rxjs';
-import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
+import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
 import classnames from 'classnames';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 import { useObservable } from '@kbn/use-observable';

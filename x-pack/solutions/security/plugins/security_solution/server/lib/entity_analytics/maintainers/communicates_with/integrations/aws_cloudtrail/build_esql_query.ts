@@ -18,15 +18,22 @@ export function buildEsqlQuery(namespace: string): string {
 
   const iamTypesLiteral = HUMAN_IAM_IDENTITY_TYPES.map((t) => `"${t}"`).join(', ');
 
+  // `host.target.entity.id` is populated by the AWS CloudTrail ingest pipeline
+  // (elastic/integrations#17827, introduced in aws package v6.4.0). The pipeline
+  // classifies CloudTrail target resource ARNs by ID prefix (e.g. "i-" → EC2
+  // instances, "eni-" → network interfaces) and writes the raw resource IDs — NOT
+  // prefixed with "host:" — to this multi-value field. CONCAT("host:", ...) below
+  // constructs the full host EUID expected by the entity store.
   return `SET unmapped_fields="nullify";
 FROM ${getIndexPattern(namespace)}
 | WHERE aws.cloudtrail.user_identity.type IN (${iamTypesLiteral})
-    AND event.provider IS NOT NULL
+    AND host.target.entity.id IS NOT NULL
     AND (${userIdFilter})
 ${userFieldEvalsLine}| EVAL actorUserId = ${userEuidEval}
 | WHERE actorUserId IS NOT NULL AND actorUserId != ""
-| EVAL targetEntityId = CONCAT("service:", event.provider)
-| WHERE targetEntityId IS NOT NULL AND targetEntityId != "service:"
+| EVAL targetEntityId = CONCAT("host:", host.target.entity.id)
+| MV_EXPAND targetEntityId
+| WHERE targetEntityId IS NOT NULL AND targetEntityId != "host:"
 | STATS communicates_with = VALUES(targetEntityId) BY actorUserId
 | LIMIT ${COMPOSITE_PAGE_SIZE}`;
 }

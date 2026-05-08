@@ -18,6 +18,9 @@ import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/e
 import type { TimeRange } from '@kbn/es-query';
 import { AlertEpisodesStatusFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/status_filter';
 import { AlertEpisodesRuleFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/rule_filter';
+import { AlertEpisodesTagFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/tag_filter';
+import { AlertEpisodesAssigneeFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/assignee_filter';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import useDebounce from 'react-use/lib/useDebounce';
 
@@ -27,9 +30,10 @@ export interface EpisodesFilterBarProps {
   timeRange: TimeRange;
   onTimeChange: (range: TimeRange) => void;
   ruleOptions: Array<{ label: string; value: string }>;
+  assigneeUids: string[];
   onRefresh?: () => void;
   isLoading?: boolean;
-  services: { http: HttpStart };
+  services: { http: HttpStart; expressions: ExpressionsStart };
 }
 
 export const EpisodesFilterBar = ({
@@ -38,6 +42,7 @@ export const EpisodesFilterBar = ({
   timeRange,
   onTimeChange,
   ruleOptions,
+  assigneeUids,
   onRefresh,
   isLoading = false,
   services,
@@ -65,6 +70,20 @@ export const EpisodesFilterBar = ({
   const onRuleChange = useCallback(
     (ruleId: string | undefined) => {
       onFilterChange((prev) => ({ ...prev, ruleId }));
+    },
+    [onFilterChange]
+  );
+
+  const onTagsChange = useCallback(
+    (tags: string[] | undefined) => {
+      onFilterChange((prev) => ({ ...prev, tags }));
+    },
+    [onFilterChange]
+  );
+
+  const onAssigneeChange = useCallback(
+    (assigneeUid: string | undefined) => {
+      onFilterChange((prev) => ({ ...prev, assigneeUid }));
     },
     [onFilterChange]
   );
@@ -102,6 +121,21 @@ export const EpisodesFilterBar = ({
             ruleOptions={ruleOptions}
             data-test-subj="episodesFilterBar-rule"
             services={services}
+          />
+
+          <AlertEpisodesTagFilter
+            selectedTags={filterState.tags}
+            onTagsChange={onTagsChange}
+            services={services}
+            timeRange={timeRange}
+            data-test-subj="episodesFilterBar-tags"
+          />
+
+          <AlertEpisodesAssigneeFilter
+            selectedAssigneeUid={filterState.assigneeUid}
+            onAssigneeChange={onAssigneeChange}
+            assigneeUids={assigneeUids}
+            data-test-subj="episodesFilterBar-assignee"
           />
         </EuiFilterGroup>
       </EuiFlexItem>

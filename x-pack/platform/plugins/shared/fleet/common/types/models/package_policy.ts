@@ -7,6 +7,7 @@
 
 import type { RegistryRelease, ExperimentalDataStreamFeature, DeprecationInfo } from './epm';
 import type { SecretReference } from './secret';
+import type { GlobalDataTag } from './agent_policy';
 
 export interface PackagePolicyPackage {
   name: string;
@@ -60,7 +61,10 @@ export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
 }
 
 export interface NewPackagePolicyInput {
+  /** Auto-generated instance identifier for this input within a saved package policy (e.g. `otelcol-nginx-abc123`). Distinct from `name`, which comes from the registry manifest and is used to disambiguate inputs of the same type. */
   id?: string;
+  /** The registry input's `name` field, when set. Used to disambiguate multiple inputs of the same `type` within a policy template. Falls back to `type` when absent. */
+  name?: string;
   type: string;
   policy_template?: string;
   enabled: boolean;
@@ -106,6 +110,7 @@ export interface NewPackagePolicy {
   supports_agentless?: boolean | null;
   supports_cloud_connector?: boolean | null;
   additional_datastreams_permissions?: string[];
+  global_data_tags?: GlobalDataTag[];
 }
 
 export interface UpdatePackagePolicy extends NewPackagePolicy {

@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
-import { parseDuration } from '../../helpers/helpers';
+import { parseDuration } from '../../../../../../util/parse_duration';
 
 interface Props {
   initialValue: IngestStreamLifecycleAll;

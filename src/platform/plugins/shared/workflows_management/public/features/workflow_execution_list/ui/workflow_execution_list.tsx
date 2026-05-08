@@ -153,7 +153,7 @@ export const WorkflowExecutionList = ({
                 <WorkflowExecutionListItem
                   status={execution.status}
                   isTestRun={execution.isTestRun}
-                  startedAt={new Date(execution.startedAt)}
+                  startedAt={toValidDate(execution.startedAt)}
                   duration={execution.duration}
                   executedBy={execution.executedBy}
                   triggeredBy={execution.triggeredBy}
@@ -246,4 +246,9 @@ const componentStyles = {
     height: '100%',
     overflowY: 'auto',
   }),
+};
+
+const toValidDate = (value: string): Date | null => {
+  const date = new Date(value);
+  return isNaN(date.getTime()) ? null : date;
 };

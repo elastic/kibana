@@ -8,6 +8,15 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { stackMonitoringCommonSchema } from '../common';
 
-export const cpuUsageParamsSchema = stackMonitoringCommonSchema.extends({});
+export const cpuUsageParamsSchema = stackMonitoringCommonSchema.extends(
+  {},
+  {
+    meta: {
+      title: 'CPU Usage Rule Params',
+      description:
+        'The parameters for the CPU usage rule. These parameters are appropriate when `rule_type_id` is `monitoring_alert_cpu_usage`.',
+    },
+  }
+);
 
 export type CpuUsageParams = TypeOf<typeof cpuUsageParamsSchema>;

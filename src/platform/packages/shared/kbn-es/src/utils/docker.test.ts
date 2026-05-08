@@ -980,7 +980,7 @@ describe('runServerlessCluster()', () => {
     // docker inspect (1)
     // docker run (3)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(17);
+    expect(execa.mock.calls).toHaveLength(18);
 
     // UIAM containers should not be started when `--uiam` is not passed
     expect(runUiamContainerMock).not.toHaveBeenCalled();
@@ -1004,7 +1004,7 @@ describe('runServerlessCluster()', () => {
     // docker inspect (2 = image info call for ES nodes is memoized in the previous test, 2 for UIAM containers)
     // docker run (3)
     // docker logs (1)
-    expect(execa.mock.calls).toHaveLength(20);
+    expect(execa.mock.calls).toHaveLength(21);
 
     expect(runUiamContainerMock).toHaveBeenCalledTimes(2);
     expect(runUiamContainerMock).toHaveBeenCalledWith(
@@ -1171,7 +1171,7 @@ describe('runDockerContainer()', () => {
     // docker pull (1)
     // docker inspect (1)
     // docker run (1)
-    expect(execa.mock.calls).toHaveLength(14);
+    expect(execa.mock.calls).toHaveLength(15);
   });
 });
 

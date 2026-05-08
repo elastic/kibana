@@ -5,59 +5,25 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import type { InferenceConnector } from '@kbn/inference-common';
+import { useQuery } from '@kbn/react-query';
 import type { InferenceConnectorsResponse } from '../../common/types';
+import { INFERENCE_CONNECTORS_QUERY_KEY } from '../../common/constants';
 import { useKibana } from './use_kibana';
 
 const INFERENCE_CONNECTORS_API = '/internal/inference/connectors';
 
-export interface UseConnectorsResult {
-  connectors?: InferenceConnector[];
-  loading: boolean;
-  error?: Error;
-  reload: () => void;
-}
-
-export const useConnectors = (): UseConnectorsResult => {
+export const useConnectors = () => {
   const { services } = useKibana();
-  const { http } = services;
 
-  const [connectors, setConnectors] = useState<InferenceConnector[] | undefined>(undefined);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Error | undefined>(undefined);
+  return useQuery({
+    queryKey: [INFERENCE_CONNECTORS_QUERY_KEY],
+    queryFn: async () => {
+      const response = await services.http.get<InferenceConnectorsResponse>(
+        INFERENCE_CONNECTORS_API,
+        {}
+      );
 
-  const fetchConnectors = useCallback(
-    async (signal?: AbortSignal) => {
-      setLoading(true);
-      setError(undefined);
-      try {
-        const res = await http.get<InferenceConnectorsResponse>(INFERENCE_CONNECTORS_API, {
-          signal,
-        });
-        setConnectors(res.connectors);
-      } catch (e) {
-        if ((e as any)?.name !== 'AbortError') {
-          setError(e as Error);
-          setConnectors(undefined);
-        }
-      } finally {
-        setLoading(false);
-      }
+      return response.connectors;
     },
-    [http]
-  );
-
-  useEffect(() => {
-    const controller = new AbortController();
-    fetchConnectors(controller.signal);
-    return () => controller.abort();
-  }, [fetchConnectors]);
-
-  return {
-    connectors,
-    loading,
-    error,
-    reload: () => fetchConnectors(),
-  };
+  });
 };

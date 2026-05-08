@@ -190,6 +190,19 @@ describe('RERANK Autocomplete', () => {
       );
     });
 
+    test('suggests text and keyword fields after an incomplete assignment in ON clause', async () => {
+      const query = `${buildRerankQuery({ query: '"search query"', onClause: 'col0 =' })} `;
+
+      await expectRerankSuggestions(
+        query,
+        {
+          contains: ['textField', 'keywordField'],
+          notContains: ['integerField'],
+        },
+        mockCallbacks
+      );
+    });
+
     test('suggests field columns after a list of keyword fields and comma', async () => {
       const query =
         buildRerankQuery({

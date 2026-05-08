@@ -55,8 +55,8 @@ jest.mock('../../../flyout_v2/shared/components/notes', () => ({
   ),
 }));
 
-jest.mock('../../../flyout_v2/shared/components/alert_header_block', () => ({
-  AlertHeaderBlock: ({
+jest.mock('../../../flyout_v2/shared/components/flyout_header_block', () => ({
+  FlyoutHeaderBlock: ({
     children,
     'data-test-subj': dataTestSubj,
   }: {
@@ -76,7 +76,10 @@ describe('HeaderTitle', () => {
       timestamp: '2024-10-10T10:00:00.000Z',
       alertsCount: 3,
     });
-    mockedUseAttackDetailsContext.mockReturnValue({ attackId: 'attack-1' });
+    mockedUseAttackDetailsContext.mockReturnValue({
+      attackId: 'attack-1',
+      searchHit: { _index: '.alerts-security.alerts-default', _id: 'attack-1' },
+    });
     mockedUseNavigateToAttackDetailsLeftPanel.mockReturnValue(jest.fn());
   });
 

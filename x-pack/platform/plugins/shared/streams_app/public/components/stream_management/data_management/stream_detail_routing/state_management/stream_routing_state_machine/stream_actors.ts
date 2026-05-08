@@ -56,13 +56,14 @@ export interface ForkStreamInput {
   where: Condition;
   status: RoutingStatus;
   destination: string;
+  draft?: boolean;
 }
 export function createForkStreamActor({
   streamsRepositoryClient,
-  forkSuccessNofitier,
+  forkSuccessNotifier,
   telemetryClient,
 }: Pick<StreamRoutingServiceDependencies, 'streamsRepositoryClient'> & {
-  forkSuccessNofitier: (streamName: string) => void;
+  forkSuccessNotifier?: (streamName: string) => void;
   telemetryClient: StreamsTelemetryClient;
 }) {
   return fromPromise<ForkStreamResponse, ForkStreamInput>(async ({ input, signal }) => {
@@ -70,6 +71,7 @@ export function createForkStreamActor({
       where: input.where,
       status: input.status,
       destination: input.destination,
+      ...(input.draft ? { draft: true } : {}),
     });
 
     const response = await streamsRepositoryClient.fetch(
@@ -85,7 +87,7 @@ export function createForkStreamActor({
       }
     );
 
-    forkSuccessNofitier(input.destination);
+    forkSuccessNotifier?.(input.destination);
     telemetryClient.trackChildStreamCreated({
       name: input.destination,
     });
@@ -152,7 +154,7 @@ export function createQueryStreamActor({
  * Notifier factories
  */
 
-export const createStreamSuccessNofitier =
+export const createStreamSuccessNotifier =
   ({ toasts }: { toasts: IToasts }) =>
   () => {
     toasts.addSuccess({
@@ -185,7 +187,7 @@ export const updateQueryStreamSuccessNotifier =
     });
   };
 
-export const createStreamFailureNofitier =
+export const createStreamFailureNotifier =
   ({ toasts }: { toasts: IToasts }) =>
   (params: { event: unknown }) => {
     const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;

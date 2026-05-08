@@ -15,9 +15,11 @@ import {
   isElserOnMlNodeSemanticField,
 } from '../../../../../components/mappings_editor/lib/utils';
 import * as apiService from '../../../../../services/api';
-import { notificationService } from '../../../../../services/notification';
 import type { NormalizedFields, State } from '../../../../../components/mappings_editor/types';
 import { UpdateElserMappingsModal } from './update_elser_mappings_modal';
+import { AppContextProvider } from '../../../../../app_context';
+import type { AppDependencies } from '../../../../../app_context';
+import { NotificationService } from '../../../../../services/notification';
 import {
   createMappingViewFieldsFixture,
   defaultDenormalizedMappings,
@@ -51,36 +53,47 @@ jest.mock('../../../../../services', () => ({
   },
 }));
 
-jest.mock('../../../../../services/notification', () => ({
-  notificationService: { showSuccessToast: jest.fn(), showDangerToast: jest.fn() },
-}));
-
 const deNormalizeMock = jest.mocked(deNormalize);
 const prepareFieldsForEisUpdateMock = jest.mocked(prepareFieldsForEisUpdate);
 const isElserOnMlNodeSemanticFieldMock = jest.mocked(isElserOnMlNodeSemanticField);
 const mappingsContextMock = jest.mocked(mappingsContext);
-const notificationServiceMock = jest.mocked(notificationService);
 const updateIndexMappingsMock = jest.mocked(apiService.updateIndexMappings);
+
+let notificationService: NotificationService;
+let showSuccessToastSpy: jest.SpyInstance;
+let showDangerToastSpy: jest.SpyInstance;
 
 const renderEisUpdateCallout = ({
   hasUpdatePrivileges = true,
 }: {
   hasUpdatePrivileges?: boolean;
 } = {}) => {
+  const ctx = {
+    services: {
+      notificationService,
+    },
+  } as unknown as AppDependencies;
+
   return render(
-    <UpdateElserMappingsModal
-      indexName="test-index"
-      refetchMapping={refetchMapping}
-      setIsModalOpen={setIsModalOpen}
-      hasUpdatePrivileges={hasUpdatePrivileges}
-      modalId="test-modal-id"
-    />
+    <AppContextProvider value={ctx}>
+      <UpdateElserMappingsModal
+        indexName="test-index"
+        refetchMapping={refetchMapping}
+        setIsModalOpen={setIsModalOpen}
+        hasUpdatePrivileges={hasUpdatePrivileges}
+        modalId="test-modal-id"
+      />
+    </AppContextProvider>
   );
 };
 
 describe('UpdateElserMappingsModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    const toasts = { add: jest.fn() } as any;
+    notificationService = new NotificationService(toasts);
+    showSuccessToastSpy = jest.spyOn(notificationService, 'showSuccessToast');
+    showDangerToastSpy = jest.spyOn(notificationService, 'showDangerToast');
     const fieldsById: NormalizedFields = createMappingViewFieldsFixture();
 
     mappingsContextMock.useMappingsState.mockReturnValue({
@@ -144,7 +157,7 @@ describe('UpdateElserMappingsModal', () => {
     await userEvent.click(applyBtn);
 
     expect(updateIndexMappingsMock).toHaveBeenCalledTimes(1);
-    expect(notificationServiceMock.showSuccessToast).toHaveBeenCalledTimes(1);
+    expect(showSuccessToastSpy).toHaveBeenCalledTimes(1);
     expect(setIsModalOpen).toHaveBeenCalledWith(false);
     expect(refetchMapping).toHaveBeenCalled();
   });
@@ -166,7 +179,7 @@ describe('UpdateElserMappingsModal', () => {
     await userEvent.click(applyBtn);
 
     expect(updateIndexMappingsMock).toHaveBeenCalledTimes(1);
-    expect(notificationServiceMock.showDangerToast).toHaveBeenCalledTimes(1);
+    expect(showDangerToastSpy).toHaveBeenCalledTimes(1);
     expect(setIsModalOpen).toHaveBeenCalledWith(false);
   });
 

@@ -38,19 +38,12 @@ const {
   scanButtonShouldBe,
   clickTrustedAppFormSubmissionButton,
   validateErrorToastContent,
-  surveySectionExists,
-  surveySectionDoesNotExist,
 } = workflowInsightsSelectors;
 
 describe(
   'Workflow Insights',
   {
-    tags: [
-      '@ess',
-      '@serverless',
-      // skipped on MKI since feature flags are not supported there
-      '@skipInServerlessMKI',
-    ],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     const connectorName = 'TEST-CONNECTOR';
@@ -107,8 +100,6 @@ describe(
         selectConnector(connectorId);
         chooseConnectorButtonExistsWithLabel(connectorName);
 
-        surveySectionDoesNotExist();
-
         scanButtonShouldBe('enabled');
       });
 
@@ -140,7 +131,6 @@ describe(
       it('should properly initialize workflow insights with a connector already defined', () => {
         loadEndpointDetailsFlyout(endpointId);
         chooseConnectorButtonExistsWithLabel(connectorName);
-        surveySectionDoesNotExist();
         scanButtonShouldBe('enabled');
       });
 
@@ -240,7 +230,6 @@ describe(
         loadEndpointDetailsFlyout(endpointId);
 
         insightsResultExists();
-        surveySectionExists();
 
         insightsEmptyResultsCalloutDoesNotExist();
         clickInsightsResultRemediationButton();

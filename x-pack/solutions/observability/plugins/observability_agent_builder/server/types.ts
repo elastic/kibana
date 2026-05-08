@@ -6,10 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import type {
-  AgentBuilderPluginSetup,
-  AgentBuilderPluginStart,
-} from '@kbn/agent-builder-plugin/server/types';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
@@ -49,7 +46,7 @@ export interface ObservabilityAgentBuilderPluginSetupDependencies {
   security: SecurityPluginSetup;
   ml?: MlPluginSetup;
   inference: InferenceServerSetup;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginSetup;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
 }
 
 export interface ObservabilityAgentBuilderPluginStartDependencies {
@@ -64,7 +61,7 @@ export interface ObservabilityAgentBuilderPluginStartDependencies {
   inference: InferenceServerStart;
   ml?: MlPluginStart;
   spaces?: SpacesPluginStart;
-  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 
 export type ObservabilityAgentBuilderCoreSetup = CoreSetup<

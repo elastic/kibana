@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type {
   AlertDetailsContextualInsight,
   AlertDetailsContextualInsightsHandler,
@@ -28,15 +28,17 @@ import { getServiceNameFromSignals } from './get_service_name_from_signals';
 import { getContainerIdFromSignals } from './get_container_id_from_signals';
 import { getExitSpanChangePoints, getServiceChangePoints } from '../get_changepoints';
 import type { APMRouteHandlerResources } from '../../apm_routes/register_apm_server_routes';
+import type { APMCore } from '../../typings';
 import { getApmErrors } from './get_apm_errors';
 
 export const getAlertDetailsContextHandler = (
-  coreStartPromise: Promise<CoreStart>,
+  apmCore: APMCore,
   resourcePlugins: APMRouteHandlerResources['plugins'],
   logger: Logger
 ): AlertDetailsContextualInsightsHandler => {
   return async (requestContext, query) => {
     const resources = {
+      core: apmCore,
       getApmIndices: async () => {
         const coreContext = await requestContext.core;
         return resourcePlugins.apmDataAccess.setup.getApmIndices(coreContext.savedObjects.client);
@@ -64,7 +66,7 @@ export const getAlertDetailsContextHandler = (
       },
     };
 
-    const coreStart = await coreStartPromise;
+    const coreStart = await apmCore.start();
     const [
       apmEventClient,
       annotationsClient,

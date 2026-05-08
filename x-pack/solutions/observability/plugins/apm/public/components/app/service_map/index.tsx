@@ -31,8 +31,11 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
+import { SloOverviewFlyout, useSloOverviewFlyout } from '../../shared/slo_overview_flyout';
 import { useServiceMap } from './use_service_map';
+import { useServiceMapBadges } from './use_service_map_badges';
 import { ServiceMapGraph } from './graph';
+import { ServiceMapSloFlyoutProvider } from './service_map_slo_flyout_context';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -159,6 +162,9 @@ export function ServiceMap({
     });
   }, []);
 
+  const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
+    useSloOverviewFlyout();
+
   useLayoutEffect(() => {
     if (isFullscreen) {
       applyServiceMapFullScreenBodyClasses(true, bodyClassesToToggle);
@@ -168,6 +174,15 @@ export function ServiceMap({
       };
     }
   }, [isFullscreen, bodyClassesToToggle]);
+
+  const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({
+    environment,
+    start,
+    end,
+    kuery,
+    nodes: data.nodes,
+    nodesStatus: status,
+  });
 
   if (!license) {
     return null;
@@ -225,40 +240,52 @@ export function ServiceMap({
     });
   }
 
+  const isLoading = status === FETCH_STATUS.LOADING || badgesStatus === FETCH_STATUS.LOADING;
+
   return (
-    <div
-      className={cx({
-        [SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
-        [SERVICE_MAP_FULL_SCREEN_CLASS]: isFullscreen,
-      })}
-      css={isFullscreen ? fullScreenContainerStyles : undefined}
-    >
-      <EuiPanel hasBorder={true} paddingSize="none">
-        <div
-          data-test-subj="serviceMap"
-          style={{
-            height: isFullscreen ? '100%' : mapHeight,
-            zIndex: Number(euiTheme.levels.content) + 1,
-            ...(isFullscreen ? { minHeight: 0, flex: 1 } : {}),
-          }}
-          ref={ref}
-        >
-          {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-          <ServiceMapGraph
-            height={mapHeight}
-            nodes={data.nodes}
-            edges={data.edges}
-            serviceName={serviceName}
-            environment={environment}
-            kuery={kuery}
-            start={start}
-            end={end}
-            isFullscreen={isFullscreen}
-            onToggleFullscreen={onToggleFullscreen}
-            fullMapHref={fullMapHref}
+    <ServiceMapSloFlyoutProvider onSloBadgeClick={openSloOverviewFlyout}>
+      <div
+        className={cx({
+          [SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS]: isFullscreen,
+          [SERVICE_MAP_FULL_SCREEN_CLASS]: isFullscreen,
+        })}
+        css={isFullscreen ? fullScreenContainerStyles : undefined}
+      >
+        <EuiPanel hasBorder={true} paddingSize="none">
+          <div
+            data-test-subj="serviceMap"
+            style={{
+              height: isFullscreen ? '100%' : mapHeight,
+              zIndex: Number(euiTheme.levels.content) + 1,
+              ...(isFullscreen ? { minHeight: 0, flex: 1 } : {}),
+            }}
+            ref={ref}
+          >
+            {isLoading && <LoadingSpinner />}
+            <ServiceMapGraph
+              height={mapHeight}
+              nodes={isLoading ? [] : nodesForGraph}
+              edges={isLoading ? [] : data.edges}
+              serviceName={serviceName}
+              highlightedServiceName={serviceName}
+              environment={environment}
+              kuery={kuery}
+              start={start}
+              end={end}
+              isFullscreen={isFullscreen}
+              onToggleFullscreen={onToggleFullscreen}
+              fullMapHref={fullMapHref}
+            />
+          </div>
+        </EuiPanel>
+        {sloOverviewFlyout && (
+          <SloOverviewFlyout
+            serviceName={sloOverviewFlyout.serviceName}
+            agentName={sloOverviewFlyout.agentName}
+            onClose={closeSloOverviewFlyout}
           />
-        </div>
-      </EuiPanel>
-    </div>
+        )}
+      </div>
+    </ServiceMapSloFlyoutProvider>
   );
 }

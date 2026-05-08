@@ -25,7 +25,7 @@ describe('convert', () => {
       schema: {
         additionalProperties: false,
         properties: {
-          any: {},
+          any: { description: 'any type', nullable: true },
           array: {
             items: {
               additionalProperties: false,
@@ -217,7 +217,7 @@ describe('convertPathParameters', () => {
         {
           in: 'path',
           name: 'a',
-          required: false,
+          required: true,
           schema: {
             type: 'string',
           },

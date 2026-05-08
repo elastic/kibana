@@ -36,6 +36,8 @@ export type {
   EvaluationResult,
   RanExperiment,
   EvalsExecutorClient,
+  EvaluationCompleteEvent,
+  OnEvaluationComplete,
 } from './src/types';
 export { KibanaEvalsClient } from './src/kibana_evals_executor/client';
 export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
@@ -71,11 +73,17 @@ export type {
 export { createTable } from './src/utils/reporting/report_table';
 export {
   EvaluationScoreRepository,
+  computeScoreDocumentId,
   type EvaluationScoreDocument,
   type EvaluatorStats,
   type RunStats,
 } from './src/utils/score_repository';
-export { mapToEvaluationScoreDocuments, exportEvaluations } from './src/utils/report_model_score';
+export {
+  mapToEvaluationScoreDocuments,
+  exportEvaluations,
+  buildSingleScoreDocument,
+  type BuildSingleScoreDocumentParams,
+} from './src/utils/report_model_score';
 
 export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';
 /**
@@ -121,6 +129,8 @@ export {
   createScopeViolationEvaluator,
 } from './src/evaluators/security';
 export { createSimilarityEvaluator } from './src/evaluators/similarity';
+
+export { deleteConnectorById, getConnectorIdAsUuid } from './src/utils/create_connector_fixture';
 
 // Re-export Scout tags here to avoid requiring a direct dependency on @kbn/scout for modules using @kbn/evals
 export { tags } from '@kbn/scout';

@@ -107,8 +107,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
-      await expandedFlyoutGraph.assertCalloutVisible();
-      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
       await expandedFlyoutGraph.toggleSearchBar();
 
@@ -229,8 +227,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
-      await expandedFlyoutGraph.assertCalloutVisible();
-      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
@@ -268,8 +264,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
-      await expandedFlyoutGraph.assertCalloutVisible();
-      await expandedFlyoutGraph.dismissCallout();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showActionsOnEntity('projects/your-project-id/roles/customRole');
@@ -323,9 +317,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
           await expandedFlyoutGraph.expandGraph();
           await expandedFlyoutGraph.waitGraphIsLoaded();
-          if (await expandedFlyoutGraph.isCalloutVisible()) {
-            await expandedFlyoutGraph.dismissCallout();
-          }
           await expandedFlyoutGraph.assertGraphNodesNumber(5);
           await expandedFlyoutGraph.toggleSearchBar();
 
@@ -335,11 +326,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
           await expandedFlyoutGraph.expectFilterTextEquals(
             0,
-            'user.email: serviceaccount@example.com OR user.id: serviceaccount@example.com OR user.name: Service Account'
+            'user.name: Service Account OR user.email: serviceaccount@example.com OR user.id: serviceaccount@example.com'
           );
           await expandedFlyoutGraph.expectFilterPreviewEquals(
             0,
-            'user.email: serviceaccount@example.com OR user.id: serviceaccount@example.com OR user.name: Service Account'
+            'user.name: Service Account OR user.email: serviceaccount@example.com OR user.id: serviceaccount@example.com'
           );
 
           await expandedFlyoutGraph.showEntityDetails('d45b28b33930cc202a6c9d8d8eab3ae6');

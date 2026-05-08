@@ -174,6 +174,7 @@
               "lineNumber": 1109,
               "columnNumber": 10,
               "deprecated": false,
+              "docsReferencedTypeName": "P",
               "trackAdoption": false
             },
             {
@@ -247,25 +248,6 @@
     "misc": [
       {
         "parentPluginId": "searchHomepage",
-        "id": "def-common.HOMEPAGE_FEATURE_FLAG_ID",
-        "type": "string",
-        "tags": [],
-        "label": "HOMEPAGE_FEATURE_FLAG_ID",
-        "description": [
-          "\nUI Setting id for the Search Homepage feature flag"
-        ],
-        "signature": [
-          "\"searchHomepage:homepageEnabled\""
-        ],
-        "path": "x-pack/solutions/search/plugins/search_homepage/common/index.ts",
-        "lineNumber": 14,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "searchHomepage",
         "id": "def-common.PLUGIN_ID",
         "type": "string",
         "tags": [],
@@ -300,23 +282,6 @@
       },
       {
         "parentPluginId": "searchHomepage",
-        "id": "def-common.SEARCH_HOMEPAGE_V2_UI_FLAG",
-        "type": "string",
-        "tags": [],
-        "label": "SEARCH_HOMEPAGE_V2_UI_FLAG",
-        "description": [],
-        "signature": [
-          "\"searchHomepage:searchHomepageV2Enabled\""
-        ],
-        "path": "x-pack/solutions/search/plugins/search_homepage/common/index.ts",
-        "lineNumber": 15,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "searchHomepage",
         "id": "def-common.WORKFLOWS_UI_SETTING_ENABLED_ID",
         "type": "string",
         "tags": [],
@@ -328,7 +293,7 @@
           "\"workflows:ui:enabled\""
         ],
         "path": "x-pack/solutions/search/plugins/search_homepage/common/index.ts",
-        "lineNumber": 21,
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

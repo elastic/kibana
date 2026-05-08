@@ -13,7 +13,7 @@ export const buildCompositeAggQuery = (afterKey?: CompositeAfterKey) =>
   buildCompositeAggQueryBase(
     [
       { terms: { 'aws.cloudtrail.user_identity.type': HUMAN_IAM_IDENTITY_TYPES } },
-      { exists: { field: 'event.provider' } },
+      { exists: { field: 'host.target.entity.id' } },
     ],
     afterKey
   );

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { EntityType } from '@kbn/entity-store/common';
 
 export interface WatchlistBulkEntity {
@@ -12,7 +13,11 @@ export interface WatchlistBulkEntity {
   type: EntityType;
   name?: string;
   sourceId: string;
-  existingEntityId?: string;
   /** Current watchlist names from the entity store, used for store sync */
   currentWatchlists?: string[];
+}
+
+export interface BulkItemOutcome<T> {
+  succeeded: readonly T[];
+  failed: readonly { entity: T; item: BulkResponse['items'][number]; error: string }[];
 }

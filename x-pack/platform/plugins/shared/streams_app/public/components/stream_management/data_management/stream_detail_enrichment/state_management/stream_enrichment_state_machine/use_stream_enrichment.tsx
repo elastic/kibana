@@ -13,6 +13,7 @@ import type {
   StreamlangStepWithUIAttributes,
   StreamlangDSL,
   StreamlangConditionBlock,
+  StreamlangUIBranch,
 } from '@kbn/streamlang';
 import { GrokCollection, GrokCollectionProvider } from '@kbn/grok-ui';
 import type { Streams } from '@kbn/streams-schema';
@@ -55,7 +56,10 @@ export const useStreamEnrichmentEvents = () => {
       },
       addProcessor: (
         step?: StreamlangProcessorDefinition,
-        options?: { parentId: StreamlangStepWithUIAttributes['parentId'] }
+        options?: {
+          parentId: StreamlangStepWithUIAttributes['parentId'];
+          branch?: StreamlangUIBranch;
+        }
       ) => {
         service.send({ type: 'step.addProcessor', step, options });
       },
@@ -64,7 +68,10 @@ export const useStreamEnrichmentEvents = () => {
       },
       addCondition: (
         step?: StreamlangConditionBlock,
-        options?: { parentId: StreamlangStepWithUIAttributes['parentId'] }
+        options?: {
+          parentId: StreamlangStepWithUIAttributes['parentId'];
+          branch?: StreamlangUIBranch;
+        }
       ) => {
         service.send({ type: 'step.addCondition', step, options });
       },
@@ -86,7 +93,7 @@ export const useStreamEnrichmentEvents = () => {
       reorderStepByDragDrop: (
         sourceStepId: string,
         targetStepId: string,
-        operation: 'before' | 'after' | 'inside'
+        operation: 'before' | 'after' | 'inside' | 'inside-else'
       ) => {
         service.send({ type: 'step.reorderByDragDrop', sourceStepId, targetStepId, operation });
       },

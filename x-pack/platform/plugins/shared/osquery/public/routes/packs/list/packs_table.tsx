@@ -387,6 +387,7 @@ const PacksTableComponent = ({ hasAssetsToInstall }: { hasAssetsToInstall?: bool
             {...newPackLinkProps}
             iconType="plusInCircle"
             isDisabled={!permissions.writePacks}
+            data-test-subj="add-pack-button"
           >
             <FormattedMessage
               id="xpack.osquery.packList.createPackButtonLabel"

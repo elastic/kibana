@@ -31,16 +31,21 @@ export const useListDetailPageStyles = () => {
         overflow: hidden;
       `,
       searchInputWrapper: css`
-        padding: 0 ${euiTheme.size.m} ${euiTheme.size.s} 0;
+        padding: 0;
+        padding-right: ${euiTheme.size.l};
+        padding-bottom: ${euiTheme.size.l};
         flex-shrink: 0;
       `,
       scrollableList: css`
         flex: 1;
         overflow-y: auto;
-        padding: 0 ${euiTheme.size.m} ${euiTheme.size.s} 0;
+        padding: 0;
+        padding-right: ${euiTheme.size.l};
+        padding-bottom: ${euiTheme.size.l};
       `,
       detailPanelWrapper: css`
         overflow: hidden;
+        margin-bottom: ${euiTheme.size.m};
       `,
       noSelectionPlaceholder: css`
         height: 100%;

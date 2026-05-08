@@ -32,7 +32,7 @@ import { FlyoutMetadataCard } from '../../../flyout_components/flyout_metadata_c
 import { FlyoutToolbarHeader } from '../../../flyout_components/flyout_toolbar_header';
 import { KnowledgeIndicatorFeatureDetailsContent } from '../../stream_detail_significant_events_view/knowledge_indicator_details_flyout';
 import { DeleteFeatureModal } from './delete_feature_modal';
-import { getConfidenceColor } from './use_stream_features_table';
+import { getConfidenceColor } from '../../stream_detail_significant_events_view/utils/get_confidence_color';
 
 interface FeatureDetailsFlyoutProps {
   feature: Feature;

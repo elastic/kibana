@@ -74,6 +74,21 @@ interface StreamsFeaturesIdentifiedProps {
   state: 'success' | 'failure' | 'canceled';
 }
 
+interface StreamsAgentBuilderKnowledgeIndicatorCreatedProps {
+  ki_kind: 'feature' | 'query';
+  tool_id: 'ki_feature_create' | 'ki_query_create';
+  success: boolean;
+  stream_name: string;
+  stream_type: StreamType | 'unknown';
+  error_message?: string;
+}
+
+interface StreamsAgentToolKiIdentificationStartedProps {
+  success: boolean;
+  stream_name: string;
+  error_message?: string;
+}
+
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
@@ -82,4 +97,6 @@ export {
   type StreamsInsightsGeneratedProps,
   type StreamsProcessingPipelineSuggestedProps,
   type StreamsFeaturesIdentifiedProps,
+  type StreamsAgentBuilderKnowledgeIndicatorCreatedProps,
+  type StreamsAgentToolKiIdentificationStartedProps,
 };

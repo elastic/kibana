@@ -20,6 +20,7 @@ jest.mock('../entities/utils', () => ({
 describe('WatchlistConfigClient', () => {
   let soClientMock: ReturnType<typeof savedObjectsClientMock.create>;
   let esClientMock: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
+  let internalEsClientMock: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let loggerMock: ReturnType<typeof loggingSystemMock.createLogger>;
   let client: WatchlistConfigClient;
 
@@ -27,12 +28,14 @@ describe('WatchlistConfigClient', () => {
     soClientMock = savedObjectsClientMock.create();
 
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
+    internalEsClientMock = elasticsearchServiceMock.createElasticsearchClient();
 
     loggerMock = loggingSystemMock.createLogger();
 
     client = new WatchlistConfigClient({
       soClient: soClientMock,
       esClient: esClientMock,
+      internalEsClient: internalEsClientMock,
       namespace: 'default',
       logger: loggerMock,
     });

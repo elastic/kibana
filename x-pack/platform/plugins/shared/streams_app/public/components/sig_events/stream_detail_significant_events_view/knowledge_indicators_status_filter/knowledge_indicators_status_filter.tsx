@@ -9,11 +9,14 @@ import { EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React, { useMemo } from 'react';
+import { matchesKnowledgeIndicatorFilters } from '../utils/matches_knowledge_indicator_filters';
 
 interface KnowledgeIndicatorStatusFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];
   searchTerm: string;
   selectedTypes: string[];
+  selectedStreams?: string[];
+  hideComputedTypes?: boolean;
   statusFilter: 'active' | 'excluded';
   onStatusFilterChange: (filter: 'active' | 'excluded') => void;
 }
@@ -22,32 +25,26 @@ export function KnowledgeIndicatorsStatusFilter({
   knowledgeIndicators,
   searchTerm,
   selectedTypes,
+  selectedStreams = [],
+  hideComputedTypes = false,
   statusFilter,
   onStatusFilterChange,
 }: KnowledgeIndicatorStatusFilterProps) {
   const statusFilterCounts = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
-
     return knowledgeIndicators.reduce(
-      (accumulator, knowledgeIndicator) => {
-        const type =
-          knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.type : 'query';
-        const matchesType = selectedTypes.length === 0 || selectedTypes.includes(type);
+      (accumulator, ki) => {
+        const matchesOtherFilters = matchesKnowledgeIndicatorFilters(ki, {
+          selectedTypes,
+          selectedStreams,
+          hideComputedTypes,
+          searchTerm,
+        });
 
-        if (!matchesType) {
+        if (!matchesOtherFilters) {
           return accumulator;
         }
 
-        const title =
-          knowledgeIndicator.kind === 'feature'
-            ? (knowledgeIndicator.feature.title ?? '').toLowerCase()
-            : (knowledgeIndicator.query.title ?? '').toLowerCase();
-
-        if (normalizedSearchTerm && !title.includes(normalizedSearchTerm)) {
-          return accumulator;
-        }
-
-        if (knowledgeIndicator.kind === 'feature' && knowledgeIndicator.feature.excluded_at) {
+        if (ki.kind === 'feature' && ki.feature.excluded_at) {
           accumulator.excluded += 1;
         } else {
           accumulator.active += 1;
@@ -57,7 +54,7 @@ export function KnowledgeIndicatorsStatusFilter({
       },
       { active: 0, excluded: 0 }
     );
-  }, [knowledgeIndicators, searchTerm, selectedTypes]);
+  }, [knowledgeIndicators, searchTerm, selectedTypes, selectedStreams, hideComputedTypes]);
 
   return (
     <EuiFilterGroup>

@@ -17,7 +17,7 @@ import {
 import { internalApiPath } from '../../../common/constants';
 import { AGENT_BUILDER_READ_SECURITY, SKILLS_WRITE_SECURITY } from '../route_security';
 import { internalToPublicSummary } from '../../services/skills/utils';
-import { resolveAgentSkills } from '../../services/agents/modes/utils/select_skills';
+import { resolveAgentSkills } from '../../services/execution/run_agent/utils/select_skills';
 
 const SKILL_ID_STRING = schema.string({ minLength: 1, maxLength: 512 });
 

@@ -68,6 +68,32 @@ export function clearDissectSuggestion() {
 }
 
 /**
+ * Collects the current suggestion data from simulation and interactive mode state.
+ * Pure data-gathering function with no side effects.
+ */
+export function collectStreamsSuggestionData(
+  getSimulationSnapshot: () => SimulationActorSnapshot,
+  getInteractiveModeSnapshot: () => InteractiveModeSnapshot | null
+): StreamsSuggestionData {
+  const simulationSnapshot = getSimulationSnapshot();
+  const interactiveModeSnapshot = getInteractiveModeSnapshot();
+
+  const rawSamples = selectOriginalPreviewRecords(simulationSnapshot.context).map(
+    (sample) => sample.document
+  );
+  const processedSamples = selectPreviewRecords(simulationSnapshot.context);
+
+  const suggestionData = extractSuggestionData(interactiveModeSnapshot);
+
+  return {
+    raw_samples: rawSamples,
+    processed_samples: processedSamples,
+    suggestion: suggestionData?.suggestion ?? null,
+    suggestionType: suggestionData?.type ?? 'pipeline',
+  };
+}
+
+/**
  * Creates a function that can be called from dev console to copy current suggestion state
  */
 export function createCopyStreamsSuggestionHelper(
@@ -76,24 +102,7 @@ export function createCopyStreamsSuggestionHelper(
 ) {
   return function copyStreamsSuggestion() {
     try {
-      const simulationSnapshot = getSimulationSnapshot();
-      const interactiveModeSnapshot = getInteractiveModeSnapshot();
-
-      // Get both raw and processed samples from simulation state
-      const rawSamples = selectOriginalPreviewRecords(simulationSnapshot.context).map(
-        (sample) => sample.document
-      );
-      const processedSamples = selectPreviewRecords(simulationSnapshot.context);
-
-      // Try to determine suggestion type and get suggestion data
-      const suggestionData = extractSuggestionData(interactiveModeSnapshot);
-
-      const data: StreamsSuggestionData = {
-        raw_samples: rawSamples,
-        processed_samples: processedSamples,
-        suggestion: suggestionData?.suggestion ?? null,
-        suggestionType: suggestionData?.type ?? 'pipeline',
-      };
+      const data = collectStreamsSuggestionData(getSimulationSnapshot, getInteractiveModeSnapshot);
 
       // Copy to clipboard as JSON
       const jsonString = JSON.stringify(data, null, 2);
@@ -104,8 +113,8 @@ export function createCopyStreamsSuggestionHelper(
         console.log('✅ Copied suggestion data to clipboard:', {
           suggestionType: data.suggestionType,
           hasSuggestion: data.suggestion !== null,
-          rawSamplesCount: rawSamples.length,
-          processedSamplesCount: processedSamples.length,
+          rawSamplesCount: data.raw_samples.length,
+          processedSamplesCount: data.processed_samples.length,
         });
         // eslint-disable-next-line no-console
         console.log('Preview (first 500 chars):', jsonString.substring(0, 500) + '...');

@@ -176,32 +176,38 @@ function calculateMetricAverages(
   rows: MetricsExplorerRow[],
   isOtel: boolean
 ): Omit<PodNodeMetricsRow, 'id' | 'name'> {
+  const unpackRow = isOtel ? unpackMetricsOtel : unpackMetrics;
   const averageCpuUsagePercentValues: number[] = [];
   const averageMemoryUsagePercentValues: number[] = [];
   let memoryUnit: PodNodeMetricsRow['memoryUnit'] = '%';
 
-  rows.forEach((row) => {
-    const unpacked = isOtel ? unpackMetricsOtel(row) : unpackMetrics(row);
+  for (const row of rows) {
+    const {
+      averageCpuUsagePercent,
+      averageMemoryUsagePercent,
+      memoryUnit: rowMemoryUnit,
+    } = unpackRow(row);
 
-    if (unpacked.averageCpuUsagePercent !== null) {
-      averageCpuUsagePercentValues.push(unpacked.averageCpuUsagePercent);
+    if (averageCpuUsagePercent !== null) {
+      averageCpuUsagePercentValues.push(averageCpuUsagePercent);
     }
-    if (unpacked.averageMemoryUsagePercent !== null) {
-      averageMemoryUsagePercentValues.push(unpacked.averageMemoryUsagePercent);
+    if (averageMemoryUsagePercent !== null) {
+      averageMemoryUsagePercentValues.push(averageMemoryUsagePercent);
     }
-    memoryUnit = unpacked.memoryUnit;
-  });
-
-  let averageCpuUsagePercent = null;
-  if (averageCpuUsagePercentValues.length !== 0) {
-    averageCpuUsagePercent = scaleUpPercentage(averageOfValues(averageCpuUsagePercentValues));
+    memoryUnit = rowMemoryUnit;
   }
 
-  let averageMemoryUsagePercent = null;
-  if (averageMemoryUsagePercentValues.length !== 0) {
-    const avg = averageOfValues(averageMemoryUsagePercentValues);
-    averageMemoryUsagePercent = memoryUnit === '%' ? scaleUpPercentage(avg) : Math.floor(avg);
-  }
+  const averageCpuUsagePercent =
+    averageCpuUsagePercentValues.length === 0
+      ? null
+      : scaleUpPercentage(averageOfValues(averageCpuUsagePercentValues));
+
+  const averageMemoryUsagePercent =
+    averageMemoryUsagePercentValues.length === 0
+      ? null
+      : memoryUnit === '%'
+      ? scaleUpPercentage(averageOfValues(averageMemoryUsagePercentValues))
+      : Math.floor(averageOfValues(averageMemoryUsagePercentValues));
 
   return { averageCpuUsagePercent, averageMemoryUsagePercent, memoryUnit };
 }
@@ -227,9 +233,14 @@ function unpackMetricsOtel(row: MetricsExplorerRow): Omit<PodNodeMetricsRow, 'id
   }
 
   const memoryBytes = unpackMetricOtel(row, SEMCONV_K8S_POD_MEMORY_WORKING_SET);
+  const memoryMegabytes =
+    typeof memoryBytes === 'number' && Number.isFinite(memoryBytes)
+      ? memoryBytes / 1_000_000
+      : null;
+
   return {
     averageCpuUsagePercent: cpuUtilization,
-    averageMemoryUsagePercent: memoryBytes != null ? memoryBytes / 1_000_000 : null,
+    averageMemoryUsagePercent: memoryMegabytes,
     memoryUnit: ' MB',
   };
 }

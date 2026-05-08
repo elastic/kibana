@@ -11,9 +11,9 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { getRouteConfig } from '../get_route_config';
 import { deleteDashboard } from './delete';
-import { telemetryHandler } from '../telemetry_handler';
 
 export function registerDeleteRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -24,6 +24,7 @@ export function registerDeleteRoute(
     path: `${basePath}/{id}`,
     summary: `Delete a dashboard`,
     ...routeConfig,
+    description: 'Permanently deletes a dashboard by ID.',
   });
 
   deleteRoute.addVersion(
@@ -34,7 +35,7 @@ export function registerDeleteRoute(
           params: schema.object({
             id: schema.string({
               meta: {
-                description: 'A unique identifier for the dashboard.',
+                description: 'The dashboard ID, as returned by the create or search endpoints.',
               },
             }),
           }),

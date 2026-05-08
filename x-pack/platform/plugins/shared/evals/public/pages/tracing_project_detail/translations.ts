@@ -28,10 +28,6 @@ export const COLUMN_OUTPUT = i18n.translate('xpack.evals.tracing.projectDetail.c
   defaultMessage: 'Output',
 });
 
-export const COLUMN_ERROR = i18n.translate('xpack.evals.tracing.projectDetail.columns.error', {
-  defaultMessage: 'Error',
-});
-
 export const COLUMN_START_TIME = i18n.translate(
   'xpack.evals.tracing.projectDetail.columns.startTime',
   { defaultMessage: 'Start Time' }
@@ -99,13 +95,16 @@ export const AUTO_REFRESH_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Configure auto-refresh interval' }
 );
 
-export const formatLatency = (ms: number): string => {
-  if (ms >= 1000) return `${(ms / 1000).toFixed(2)}s`;
-  return `${ms.toFixed(1)}ms`;
-};
+export const LOAD_ERROR_TITLE = i18n.translate('xpack.evals.tracing.projectDetail.loadErrorTitle', {
+  defaultMessage: 'Unable to load traces',
+});
 
-export const formatTokens = (tokens: number): string => {
-  if (tokens >= 1_000_000) return `${(tokens / 1_000_000).toFixed(1)}M`;
-  if (tokens >= 1_000) return `${(tokens / 1_000).toFixed(1)}K`;
-  return String(tokens);
-};
+export const getLoadErrorBody = (errorMessage: string) =>
+  i18n.translate('xpack.evals.tracing.projectDetail.loadErrorBody', {
+    defaultMessage: 'An error occurred while loading traces: {errorMessage}',
+    values: { errorMessage },
+  });
+
+export const RETRY_BUTTON = i18n.translate('xpack.evals.tracing.projectDetail.retryButton', {
+  defaultMessage: 'Retry',
+});

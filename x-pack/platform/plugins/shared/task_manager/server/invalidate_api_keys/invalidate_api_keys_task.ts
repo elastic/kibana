@@ -13,6 +13,7 @@ import type {
   InvalidateUiamAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { TaskScheduling } from '../task_scheduling';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { INVALIDATE_API_KEY_SO_NAME, TASK_SO_NAME } from '../saved_objects';
@@ -53,7 +54,9 @@ export async function scheduleInvalidateApiKeyTask(
 interface RegisterInvalidateApiKeyTaskOpts {
   configInterval: string;
   coreStartServices: () => Promise<[CoreStart, TaskManagerPluginsStart, TaskManagerStartContract]>;
+  getEncryptedSavedObjectsClient: () => EncryptedSavedObjectsClient | undefined;
   invalidateApiKeyFn?: ApiKeyInvalidationFn;
+  invalidateUiamApiKeyFn?: () => UiamApiKeyInvalidationFn | undefined;
   logger: Logger;
   removalDelay: string;
   taskTypeDictionary: TaskTypeDictionary;
@@ -64,7 +67,9 @@ export function registerInvalidateApiKeyTask(opts: RegisterInvalidateApiKeyTaskO
     logger,
     configInterval,
     coreStartServices,
+    getEncryptedSavedObjectsClient,
     invalidateApiKeyFn,
+    invalidateUiamApiKeyFn,
     removalDelay,
     taskTypeDictionary,
   } = opts;
@@ -75,7 +80,9 @@ export function registerInvalidateApiKeyTask(opts: RegisterInvalidateApiKeyTaskO
         logger,
         configInterval,
         coreStartServices,
+        getEncryptedSavedObjectsClient,
         invalidateApiKeyFn,
+        invalidateUiamApiKeyFn,
         removalDelay,
       }),
     },
@@ -84,7 +91,13 @@ export function registerInvalidateApiKeyTask(opts: RegisterInvalidateApiKeyTaskO
 
 type InvalidateApiKeysTaskRunnerOpts = Pick<
   RegisterInvalidateApiKeyTaskOpts,
-  'logger' | 'configInterval' | 'coreStartServices' | 'invalidateApiKeyFn' | 'removalDelay'
+  | 'logger'
+  | 'configInterval'
+  | 'coreStartServices'
+  | 'getEncryptedSavedObjectsClient'
+  | 'invalidateApiKeyFn'
+  | 'invalidateUiamApiKeyFn'
+  | 'removalDelay'
 >;
 
 interface InvalidateApiKeysTaskState {
@@ -92,8 +105,15 @@ interface InvalidateApiKeysTaskState {
 }
 
 export function taskRunner(opts: InvalidateApiKeysTaskRunnerOpts) {
-  const { logger, configInterval, coreStartServices, invalidateApiKeyFn, removalDelay } = opts;
-
+  const {
+    logger,
+    configInterval,
+    coreStartServices,
+    getEncryptedSavedObjectsClient,
+    invalidateApiKeyFn,
+    invalidateUiamApiKeyFn,
+    removalDelay,
+  } = opts;
   return ({ taskInstance }: { taskInstance: { state: InvalidateApiKeysTaskState } }) => {
     return {
       async run() {
@@ -105,7 +125,9 @@ export function taskRunner(opts: InvalidateApiKeysTaskRunnerOpts) {
           ]);
 
           const result = await runInvalidate({
+            encryptedSavedObjectsClient: getEncryptedSavedObjectsClient(),
             invalidateApiKeyFn,
+            invalidateUiamApiKeyFn: invalidateUiamApiKeyFn?.(),
             logger,
             missingApiKeyRetries,
             removalDelay,

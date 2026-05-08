@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { paths, SLOS_WELCOME_PATH } from '@kbn/slo-shared-plugin/common/locators/paths';
+import {
+  paths,
+  SLOS_COMPOSITE_PATH,
+  SLOS_PATH,
+  SLOS_WELCOME_PATH,
+} from '@kbn/slo-shared-plugin/common/locators/paths';
 import React, { useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
@@ -19,6 +24,7 @@ import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { LoadingPage } from '../loading_page';
+import { CompositeSloList } from './components/composite_slo_list';
 import { CreateSloBtn } from './components/common/create_slo_btn';
 import { SloList } from './components/slo_list';
 import { SloListSearchBar } from './components/slo_list_search_bar';
@@ -26,15 +32,43 @@ import { SLOsOverview } from './components/slos_overview/slos_overview';
 
 export const SLO_PAGE_ID = 'slo-page-container';
 
+type TabId = 'slos' | 'compositeSlos';
+
+const tabs: Array<{ id: TabId; label: string; path: string }> = [
+  {
+    id: 'slos',
+    label: i18n.translate('xpack.slo.slosPage.tabs.slos', { defaultMessage: 'SLOs' }),
+    path: SLOS_PATH,
+  },
+  {
+    id: 'compositeSlos',
+    label: i18n.translate('xpack.slo.slosPage.tabs.compositeSlos', {
+      defaultMessage: 'Composite SLOs',
+    }),
+    path: SLOS_COMPOSITE_PATH,
+  },
+];
+
 export function SlosPage() {
   const {
     http: { basePath },
     serverless,
   } = useKibana().services;
-  const { ObservabilityPageTemplate } = usePluginContext();
+  const { ObservabilityPageTemplate, experimentalFeatures } = usePluginContext();
   const { hasAtLeast } = useLicense();
   const { data: permissions } = usePermissions();
   const history = useHistory();
+  const location = useLocation();
+  const isCompositeSloEnabled = experimentalFeatures?.compositeSlo?.enabled ?? false;
+  const isCompositePath = location.pathname === SLOS_COMPOSITE_PATH;
+  const selectedTabId: TabId = isCompositePath && isCompositeSloEnabled ? 'compositeSlos' : 'slos';
+
+  useEffect(() => {
+    if (isCompositePath && !isCompositeSloEnabled) {
+      history.replace(SLOS_PATH);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCompositePath, isCompositeSloEnabled]);
 
   const {
     data: { total } = { total: 0 },
@@ -79,11 +113,33 @@ export function SlosPage() {
     >
       <HeaderMenu />
       <SloOutdatedCallout />
-      <SloListSearchBar />
-      <EuiSpacer size="m" />
-      <SLOsOverview />
-      <EuiSpacer size="m" />
-      <SloList />
+      {isCompositeSloEnabled && (
+        <>
+          <EuiTabs>
+            {tabs.map(({ id, label, path }) => (
+              <EuiTab
+                key={id}
+                isSelected={id === selectedTabId}
+                onClick={() => history.push(path)}
+                data-test-subj={`sloTab-${id}`}
+              >
+                {label}
+              </EuiTab>
+            ))}
+          </EuiTabs>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {selectedTabId === 'slos' && (
+        <>
+          <SloListSearchBar />
+          <EuiSpacer size="m" />
+          <SLOsOverview />
+          <EuiSpacer size="m" />
+          <SloList />
+        </>
+      )}
+      {isCompositeSloEnabled && selectedTabId === 'compositeSlos' && <CompositeSloList />}
     </ObservabilityPageTemplate>
   );
 }

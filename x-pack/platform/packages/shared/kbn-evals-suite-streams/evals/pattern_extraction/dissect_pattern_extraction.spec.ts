@@ -70,14 +70,6 @@ evaluate.describe(
   'Dissect pattern extraction quality evaluation',
   { tag: tags.stateful.classic },
   () => {
-    evaluate.beforeAll(async ({ apiServices }) => {
-      await apiServices.streams.enable();
-    });
-
-    evaluate.afterAll(async ({ apiServices }) => {
-      await apiServices.streams.disable();
-    });
-
     Object.entries(DISSECT_PATTERN_DATASETS).forEach(([_, dataset]) => {
       evaluate.describe(`Dissect: ${dataset.name}`, { tag: tags.stateful.classic }, () => {
         dataset.examples.forEach((example, idx) => {

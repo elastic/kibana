@@ -47,6 +47,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/ai-assistant-common'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/shared-ux-ai-components'
   - '@kbn/shared-ux-utility'
   - '@kbn/discover-shared-plugin'
   - '@kbn/i18n'
@@ -63,6 +64,8 @@ dependsOn:
   - '@kbn/observability-utils-server'
   - '@kbn/calculate-auto'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/inference-connectors'
+  - '@kbn/react-query'
 tags:
   - plugin
   - prod

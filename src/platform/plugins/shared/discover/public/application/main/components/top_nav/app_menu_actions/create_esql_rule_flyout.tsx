@@ -10,6 +10,7 @@
 import React, { useCallback, useEffect, useRef, useSyncExternalStore } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DiscoverInternalState } from '../../../state_management/redux';
 import { selectTab } from '../../../state_management/redux/selectors';
 import type { DiscoverServices } from '../../../../../build_services';
@@ -21,6 +22,11 @@ const getEsqlQuery = (getState: () => DiscoverInternalState, tabId: string): str
   }
   return query.esql;
 };
+
+const getEsqlVariables = (
+  getState: () => DiscoverInternalState,
+  tabId: string
+): ESQLControlVariable[] | undefined => selectTab(getState(), tabId).esqlVariables;
 
 export function CreateESQLRuleFlyout({
   services,
@@ -36,8 +42,10 @@ export function CreateESQLRuleFlyout({
   onClose: () => void;
 }) {
   const getQuery = useCallback(() => getEsqlQuery(getState, tabId), [getState, tabId]);
+  const getVariables = useCallback(() => getEsqlVariables(getState, tabId), [getState, tabId]);
 
   const query = useSyncExternalStore(subscribe, getQuery);
+  const esqlVariables = useSyncExternalStore(subscribe, getVariables);
 
   const { history, core, alertingVTwo } = services;
   const RuleFormFlyout = alertingVTwo!.DynamicRuleFormFlyout;
@@ -81,5 +89,5 @@ export function CreateESQLRuleFlyout({
     return null;
   }
 
-  return <RuleFormFlyout query={query} onClose={onClose} />;
+  return <RuleFormFlyout query={query} onClose={onClose} esqlVariables={esqlVariables} />;
 }

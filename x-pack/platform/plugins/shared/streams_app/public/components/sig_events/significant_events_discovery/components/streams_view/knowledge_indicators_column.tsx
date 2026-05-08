@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiText } from '@elastic/eui';
+import { EuiI18nNumber, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { OnboardingResult, Streams, TaskResult } from '@kbn/streams-schema';
 import React from 'react';
@@ -30,7 +30,7 @@ export function KnowledgeIndicatorsColumn({
         font-family: 'Roboto Mono', monospace;
       `}
     >
-      {features.length || '—'}
+      {features.length ? <EuiI18nNumber value={features.length} /> : '—'}
     </EuiText>
   );
 }

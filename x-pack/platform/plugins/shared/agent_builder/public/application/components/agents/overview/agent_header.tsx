@@ -19,10 +19,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
+import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
 import { css } from '@emotion/react';
 import { labels } from '../../../utils/i18n';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { AgentVisibilityBadge } from '../list/agent_visibility_badge';
+import { AgentDescription } from './agent_description';
 
 const { agentOverview: overviewLabels } = labels;
 
@@ -45,12 +47,18 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
     color: ${euiTheme.colors.textSubdued};
   `;
 
+  let createdByUsername = agent.created_by?.username;
+  if (createdByUsername === SYSTEM_USER_ID) {
+    createdByUsername = overviewLabels.createdByElastic;
+  }
+  const byAuthorLabel = createdByUsername && overviewLabels.byAuthor(createdByUsername);
+
   return (
     <>
       <EuiFlexGroup gutterSize="m" responsive={false}>
         <EuiFlexGroup responsive={false} alignItems="center">
           <EuiFlexItem grow={false}>
-            <AgentAvatar agent={agent} size="xl" />
+            <AgentAvatar agent={agent} size="xl" iconSize="xl" iconPaddingSize="m" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup direction="column" gutterSize="xs">
@@ -58,10 +66,10 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
                 <h1>{agent.name}</h1>
               </EuiTitle>
               <EuiFlexGroup alignItems="center" gutterSize="l" responsive={false} wrap>
-                {agent.created_by?.username && (
+                {byAuthorLabel && (
                   <EuiFlexItem grow={false}>
                     <EuiText size="s" color="subdued">
-                      {overviewLabels.byAuthor(agent.created_by.username)}
+                      {byAuthorLabel}
                     </EuiText>
                   </EuiFlexItem>
                 )}
@@ -101,7 +109,7 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
               <EuiButtonEmpty
                 href={docsUrl}
                 target="_blank"
-                iconType="documents"
+                iconType="question"
                 size="s"
                 data-test-subj="agentOverviewDocsLink"
               >
@@ -122,10 +130,8 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        {agent.description}
-      </EuiText>
+      <EuiSpacer size="m" />
+      <AgentDescription description={agent.description} />
 
       {agent.labels && agent.labels.length > 0 && (
         <>
@@ -139,6 +145,7 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
           </EuiFlexGroup>
         </>
       )}
+      <EuiSpacer size="m" />
     </>
   );
 };

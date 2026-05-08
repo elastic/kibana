@@ -1,0 +1,54 @@
+responses:
+  200:
+    description: "Indicates a successful response."
+    content:
+      application/json:
+        examples:
+          runningStatusExample:
+            summary: "Entity Store running"
+            description: "The Entity Store is running with two started engines using default settings."
+            value:
+              status: running
+              engines:
+                - type: host
+                  status: started
+                  filter: ""
+                  delay: "1m"
+                  timeout: "25s"
+                  frequency: "30s"
+                  lookbackPeriod: "3h"
+                  fieldHistoryLength: 10
+                  docsPerSecond: -1
+                  indexPattern: ""
+                  enrichPolicyExecutionInterval: null
+                  timestampField: "@timestamp"
+                  maxPageSearchSize: 10000
+                  lastExecutionTimestamp: "2026-04-10T08:30:00.000Z"
+                - type: user
+                  status: started
+                  filter: ""
+                  delay: "1m"
+                  timeout: "25s"
+                  frequency: "30s"
+                  lookbackPeriod: "3h"
+                  fieldHistoryLength: 10
+                  docsPerSecond: -1
+                  indexPattern: ""
+                  enrichPolicyExecutionInterval: null
+                  timestampField: "@timestamp"
+                  maxPageSearchSize: 10000
+                  lastExecutionTimestamp: "2026-04-10T08:30:00.000Z"
+          notInstalledExample:
+            summary: "Entity Store not installed"
+            description: "The Entity Store has not been installed."
+            value:
+              status: not_installed
+              engines: []
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X GET -H "Authorization: ApiKey ${API_KEY}" \
+        "${KIBANA_URL}/api/security/entity_store/status?include_components=false"
+  - lang: Console
+    source: |
+      GET kbn://api/security/entity_store/status?include_components=false

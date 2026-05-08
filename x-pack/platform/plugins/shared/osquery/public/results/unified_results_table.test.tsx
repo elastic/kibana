@@ -77,18 +77,6 @@ jest.mock('@kbn/cell-actions', () => ({
 let capturedOnInitialStateChange: ((state: Partial<{ isCompareActive: boolean }>) => void) | null =
   null;
 
-jest.mock('@kbn/unified-data-table', () => ({
-  UnifiedDataTable: (props: {
-    onInitialStateChange?: (state: Partial<{ isCompareActive: boolean }>) => void;
-  }) => {
-    capturedOnInitialStateChange = props.onInitialStateChange ?? null;
-
-    return <div data-test-subj="mockUnifiedDataTable" />;
-  },
-  DataLoadingState: { loading: 'loading', loaded: 'loaded' },
-  DataGridDensity: { EXPANDED: 'expanded', COMPACT: 'compact' },
-}));
-
 jest.mock('./results_flyout', () => ({
   OsqueryResultsFlyout: () => null,
 }));
@@ -168,10 +156,30 @@ const defaultProps = {
   agentIds: ['agent-1'],
 };
 
+let capturedUnifiedDataTableProps: Record<string, unknown> = {};
+
+// Mock that also captures props for assertions
+jest.mock('@kbn/unified-data-table', () => ({
+  UnifiedDataTable: (props: Record<string, unknown>) => {
+    capturedUnifiedDataTableProps = props;
+    capturedOnInitialStateChange =
+      (
+        props as {
+          onInitialStateChange?: (state: Partial<{ isCompareActive: boolean }>) => void;
+        }
+      ).onInitialStateChange ?? null;
+
+    return <div data-test-subj="mockUnifiedDataTable" />;
+  },
+  DataLoadingState: { loading: 'loading', loaded: 'loaded' },
+  DataGridDensity: { EXPANDED: 'expanded', COMPACT: 'compact' },
+}));
+
 describe('UnifiedResultsTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedOnInitialStateChange = null;
+    capturedUnifiedDataTableProps = {};
     transformEdgesToRecordsMock.mockReturnValue([]);
   });
 
@@ -230,6 +238,58 @@ describe('UnifiedResultsTable', () => {
       });
 
       expect(screen.getByTestId('pagination-button-0')).toBeInTheDocument();
+    });
+  });
+
+  describe('ECS-mapped column visibility', () => {
+    it('should pass visible columns derived from result data to UnifiedDataTable', () => {
+      const mockRows = [{ id: 'row-1', raw: {}, flattened: {} }] as never;
+      transformEdgesToRecordsMock.mockReturnValue(mockRows);
+      setupMocks({ rows: [{}], total: 1 });
+      useAllResultsMock.mockReturnValue({
+        data: {
+          edges: [{}],
+          total: 1,
+          columns: ['osquery.days.number', 'osquery.hostname', 'agent.id'],
+        },
+        isLoading: false,
+      } as never);
+
+      render(<UnifiedResultsTable {...defaultProps} />);
+
+      // UnifiedDataTable should receive columns prop
+      expect(capturedUnifiedDataTableProps).toHaveProperty('columns');
+      const columns = capturedUnifiedDataTableProps.columns as string[];
+      expect(columns).toContain('osquery.days.number');
+      expect(columns).toContain('osquery.hostname');
+    });
+
+    it('should render the UnifiedDataTable component', () => {
+      const mockRows = [{ id: 'row-1', raw: {}, flattened: {} }] as never;
+      transformEdgesToRecordsMock.mockReturnValue(mockRows);
+      setupMocks({ rows: [{}], total: 1 });
+      useAllResultsMock.mockReturnValue({
+        data: { edges: [{}], total: 1, columns: ['osquery.uptime'] },
+        isLoading: false,
+      } as never);
+
+      render(<UnifiedResultsTable {...defaultProps} />);
+
+      expect(screen.getByTestId('mockUnifiedDataTable')).toBeInTheDocument();
+    });
+  });
+
+  describe('empty state', () => {
+    it('should render results panel when no results', () => {
+      setupMocks({ rows: [], total: 0 });
+      useAllResultsMock.mockReturnValue({
+        data: { edges: [], total: 0, columns: [] },
+        isLoading: false,
+      } as never);
+
+      render(<UnifiedResultsTable {...defaultProps} />);
+
+      expect(screen.getAllByTestId('osqueryResultsPanel').length).toBeGreaterThan(0);
     });
   });
 });

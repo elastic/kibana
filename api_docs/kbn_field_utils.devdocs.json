@@ -77,7 +77,7 @@
         "label": "FieldDescription",
         "description": [],
         "signature": [
-          "({ fieldsMetadataService, ...props }: ",
+          "({ fieldsMetadataService, streamNames, ...props }: ",
           {
             "pluginId": "@kbn/field-utils",
             "scope": "public",
@@ -88,7 +88,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_description/field_description.tsx",
-        "lineNumber": 50,
+        "lineNumber": 53,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -98,7 +98,7 @@
             "id": "def-public.FieldDescription.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  fieldsMetadataService,\n  ...props\n}",
+            "label": "{\n  fieldsMetadataService,\n  streamNames,\n  ...props\n}",
             "description": [],
             "signature": [
               {
@@ -110,7 +110,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_description/field_description.tsx",
-            "lineNumber": 50,
+            "lineNumber": 53,
             "columnNumber": 67,
             "deprecated": false,
             "trackAdoption": false,
@@ -181,6 +181,7 @@
             "lineNumber": 19,
             "columnNumber": 64,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldIconProps",
             "trackAdoption": false
           }
         ],
@@ -315,6 +316,7 @@
             "lineNumber": 46,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldSelectProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -366,6 +368,7 @@
             "lineNumber": 25,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "DataViewField",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -410,6 +413,7 @@
             "lineNumber": 15,
             "columnNumber": 72,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -451,6 +455,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -469,6 +474,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "GetCustomFieldType",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -564,6 +570,7 @@
             "lineNumber": 17,
             "columnNumber": 67,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -934,7 +941,7 @@
           "FieldDescriptionContentProps"
         ],
         "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_description/field_description.tsx",
-        "lineNumber": 46,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -957,7 +964,23 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_description/field_description.tsx",
-            "lineNumber": 47,
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/field-utils",
+            "id": "def-public.FieldDescriptionProps.streamNames",
+            "type": "Array",
+            "tags": [],
+            "label": "streamNames",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-field-utils/src/components/field_description/field_description.tsx",
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

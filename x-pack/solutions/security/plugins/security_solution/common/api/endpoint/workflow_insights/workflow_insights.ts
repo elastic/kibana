@@ -14,6 +14,7 @@ import {
   WORKFLOW_INSIGHT_TARGET_TYPE_VALUES,
   WORKFLOW_INSIGHT_ACTION_TYPE_VALUES,
 } from '../../../endpoint/types/workflow_insights';
+import type { WorkflowInsightType } from '../../../endpoint/types/workflow_insights';
 
 const arrayWithNonEmptyString = (field: string, options: { maxSize: number }) =>
   schema.arrayOf(
@@ -121,13 +122,38 @@ export const GetWorkflowInsightsRequestSchema = {
 
 export const CreateWorkflowInsightRequestSchema = {
   body: schema.object({
-    insightType: insightTypeOneOf,
+    insightTypes: schema.arrayOf(insightTypeOneOf, { maxSize: 10 }),
+    endpointIds: schema.arrayOf(
+      schema.string({
+        minLength: 1,
+        validate: (v) => {
+          if (v.trim() === '') {
+            return 'endpointId cannot be an empty string';
+          }
+        },
+      }),
+      { maxSize: 50 }
+    ),
+    connectorId: schema.maybe(schema.string({ minLength: 1 })),
   }),
 };
 
 export const GetPendingInsightsRequestSchema = {
   query: schema.object({
-    insightType: schema.maybe(insightTypeOneOf),
+    insightTypes: schema.maybe(schema.arrayOf(insightTypeOneOf, { maxSize: 10 })),
+    endpointIds: schema.maybe(
+      schema.arrayOf(
+        schema.string({
+          minLength: 1,
+          validate: (v) => {
+            if (v.trim() === '') {
+              return 'endpointId cannot be an empty string';
+            }
+          },
+        }),
+        { maxSize: 50 }
+      )
+    ),
   }),
 };
 
@@ -142,6 +168,39 @@ export type UpdateWorkflowInsightsRequestBody = TypeOf<
   typeof UpdateWorkflowInsightRequestSchema.body
 >;
 
+export interface CreateWorkflowInsightRequestBody {
+  insightTypes: WorkflowInsightType[];
+  endpointIds: string[];
+  connectorId?: string;
+}
+
 export type GetPendingInsightsRequestQueryParams = TypeOf<
   typeof GetPendingInsightsRequestSchema.query
 >;
+
+export interface GetPendingWorkflowInsightsResponse {
+  pending: Array<{
+    executionId: string;
+    status: string;
+    conversationId?: string;
+    insightType?: string;
+    endpointId?: string;
+    '@timestamp': string;
+    failureReason?: string;
+  }>;
+}
+
+export interface CreateWorkflowInsightResponse {
+  executions: Array<{
+    executionId: string;
+    conversationId?: string;
+    insightType: string;
+    endpointId?: string;
+    '@timestamp'?: string;
+  }>;
+  failures?: Array<{
+    insightType: string;
+    endpointId: string;
+    error: string;
+  }>;
+}
