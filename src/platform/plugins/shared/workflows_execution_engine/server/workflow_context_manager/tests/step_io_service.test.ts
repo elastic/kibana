@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { JsonValue } from '@kbn/utility-types';
 import { ExecutionStatus } from '@kbn/workflows';
 import type {
   ConnectorStep,
@@ -76,6 +77,30 @@ function createCompletedStep(
   } as Partial<EsWorkflowStepExecution>);
 }
 
+/**
+ * Test helper that mirrors the production flow: state holds lifecycle
+ * (status/stepId/stepType), the service holds IO (output + size). Use this
+ * instead of `createCompletedStep + service.recordOutputSize(...)` so the
+ * test seeds size through the supported `setStepOutput` API.
+ */
+function seedCompletedStepWithSize(
+  state: WorkflowExecutionState,
+  service: StepIoService,
+  id: string,
+  stepId: string,
+  output: JsonValue | null,
+  sizeBytes: number,
+  stepType?: string
+): void {
+  state.upsertStep({
+    id,
+    stepId,
+    stepType,
+    status: ExecutionStatus.COMPLETED,
+  } as Partial<EsWorkflowStepExecution>);
+  service.setStepOutput(id, output, sizeBytes);
+}
+
 describe('StepIoService', () => {
   const EVICTION_THRESHOLD = 100; // bytes
 
@@ -107,17 +132,18 @@ describe('StepIoService', () => {
       expect(state.getStepExecution('step-1')?.input).toEqual({ foo: 'bar' });
     });
 
-    it('returns step error via service', () => {
-      const { service } = buildHarness();
-      service.failStep({
+    it('returns step error via service when state holds the error', () => {
+      const { state, service } = buildHarness();
+      // The service no longer owns lifecycle metadata (status / error /
+      // scopeStack) — that's the runtime's job now. The service still surfaces
+      // the error through `getStepError` by reading current state.
+      state.upsertStep({
         id: 'step-1',
         stepId: 'myStep',
         stepType: 'connector',
+        status: ExecutionStatus.FAILED,
         error: { type: 'BadThing', message: 'boom' },
-        finishedAt: '2025-08-06T00:00:01.000Z',
-        executionTimeMs: 50,
-        scopeStack: [],
-      });
+      } as Partial<EsWorkflowStepExecution>);
       expect(service.getStepError('step-1')).toEqual({ type: 'BadThing', message: 'boom' });
     });
 
@@ -178,74 +204,84 @@ describe('StepIoService', () => {
       expect(service.getDataSetVariables()).toEqual({ foo: 1 });
     });
 
-    it('completeStep writes output, status, finishedAt, executionTimeMs atomically', () => {
+    it('setStepOutput writes the output through state and records the size', () => {
       const { state, service } = buildHarness();
-      service.completeStep({
-        id: 'step-1',
-        output: { result: 'ok' },
-        finishedAt: '2025-08-06T00:00:01.000Z',
-        executionTimeMs: 1000,
-      });
-      const step = state.getStepExecution('step-1');
-      expect(step).toEqual(
-        expect.objectContaining({
-          status: ExecutionStatus.COMPLETED,
-          output: { result: 'ok' },
-          finishedAt: '2025-08-06T00:00:01.000Z',
-          executionTimeMs: 1000,
-        })
-      );
-    });
-
-    it('failStep writes status FAILED, output null, error, scopeStack', () => {
-      const { state, service } = buildHarness();
-      service.failStep({
+      // The runtime would write the lifecycle fields first; tests exercise
+      // the IO half in isolation.
+      state.upsertStep({
         id: 'step-1',
         stepId: 'myStep',
         stepType: 'connector',
-        error: { type: 'BadThing', message: 'boom' },
-        finishedAt: '2025-08-06T00:00:01.000Z',
-        executionTimeMs: 500,
-        scopeStack: [],
-      });
-      const step = state.getStepExecution('step-1');
-      expect(step).toEqual(
-        expect.objectContaining({
-          status: ExecutionStatus.FAILED,
-          output: null,
-          error: { type: 'BadThing', message: 'boom' },
-          finishedAt: '2025-08-06T00:00:01.000Z',
-          executionTimeMs: 500,
-        })
-      );
+        status: ExecutionStatus.COMPLETED,
+      } as Partial<EsWorkflowStepExecution>);
+      service.setStepOutput('step-1', { result: 'ok' }, 12);
+
+      expect(state.getStepExecution('step-1')?.output).toEqual({ result: 'ok' });
+      expect(service.getOutputSizeStats()).toEqual({ totalBytes: 12, stepCount: 1 });
+    });
+
+    it('setStepOutput accepts the FAILED-step null sentinel', () => {
+      const { state, service } = buildHarness();
+      state.upsertStep({
+        id: 'step-1',
+        stepId: 'myStep',
+        stepType: 'connector',
+        status: ExecutionStatus.FAILED,
+      } as Partial<EsWorkflowStepExecution>);
+      service.setStepOutput('step-1', null);
+
+      expect(state.getStepExecution('step-1')?.output).toBeNull();
+      // No size recorded for FAILED steps (the caller passed no sizeBytes).
+      expect(service.getOutputSizeStats()).toEqual({ totalBytes: 0, stepCount: 0 });
+    });
+
+    it('setStepOutput ignores negative or non-finite sizeBytes', () => {
+      const { state, service } = buildHarness();
+      state.upsertStep({
+        id: 'step-1',
+        stepId: 'myStep',
+        stepType: 'connector',
+        status: ExecutionStatus.COMPLETED,
+      } as Partial<EsWorkflowStepExecution>);
+      service.setStepOutput('step-1', { ok: true }, -1);
+      service.setStepOutput('step-1', { ok: true }, NaN);
+      service.setStepOutput('step-1', { ok: true }, Infinity);
+
+      expect(service.getOutputSizeStats()).toEqual({ totalBytes: 0, stepCount: 0 });
     });
   });
 
-  describe('recordOutputSize', () => {
+  describe('size threshold (driven through setStepOutput)', () => {
     it('stores size for later threshold check', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
-      createCompletedStep(state, 'step-1', 'myStep', { data: 'something' }, 'connector');
-      service.recordOutputSize('step-1', 50);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        { data: 'something' },
+        50,
+        'connector'
+      );
 
       await service.flushStepChanges();
       await service.flushStepChanges();
       expect(service.hasEvictedOutputs()).toBe(false);
 
-      createCompletedStep(state, 'step-2', 'myStep2', { data: 'large' }, 'connector');
-      service.recordOutputSize('step-2', 200);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-2',
+        'myStep2',
+        { data: 'large' },
+        200,
+        'connector'
+      );
 
       await service.flushStepChanges();
       await service.flushStepChanges();
       expect(service.hasEvictedOutputs()).toBe(true);
       expect(state.getStepExecution('step-2')?.output).toBeUndefined();
-    });
-
-    it('ignores negative or non-finite sizes (defensive against legacy callers)', () => {
-      const { service } = buildHarness();
-      service.recordOutputSize('step-1', -1);
-      service.recordOutputSize('step-2', NaN);
-      service.recordOutputSize('step-3', Infinity);
-      expect(service.getOutputSizeStats()).toEqual({ totalBytes: 0, stepCount: 0 });
     });
   });
 
@@ -257,20 +293,16 @@ describe('StepIoService', () => {
 
     it('sums sizes from non-evicted steps', () => {
       const { state, service } = buildHarness();
-      createCompletedStep(state, 'step-1', 's1', { data: 'a' }, 'connector');
-      createCompletedStep(state, 'step-2', 's2', { data: 'b' }, 'connector');
-      service.recordOutputSize('step-1', 100);
-      service.recordOutputSize('step-2', 200);
+      seedCompletedStepWithSize(state, service, 'step-1', 's1', { data: 'a' }, 100, 'connector');
+      seedCompletedStepWithSize(state, service, 'step-2', 's2', { data: 'b' }, 200, 'connector');
 
       expect(service.getOutputSizeStats()).toEqual({ totalBytes: 300, stepCount: 2 });
     });
 
     it('combines sizes from active and evicted steps', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
-      createCompletedStep(state, 'step-1', 's1', { data: 'a' }, 'connector');
-      createCompletedStep(state, 'step-2', 's2', { data: 'b' }, 'connector');
-      service.recordOutputSize('step-1', 150);
-      service.recordOutputSize('step-2', 250);
+      seedCompletedStepWithSize(state, service, 'step-1', 's1', { data: 'a' }, 150, 'connector');
+      seedCompletedStepWithSize(state, service, 'step-2', 's2', { data: 'b' }, 250, 'connector');
 
       // Drive step-2 through the deferral cycle so it ends up evicted.
       await service.flushStepChanges();
@@ -290,8 +322,15 @@ describe('StepIoService', () => {
 
     it('returns true after eviction', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
-      createCompletedStep(state, 'step-1', 'myStep', { data: 'large' }, 'connector');
-      service.recordOutputSize('step-1', 250);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        { data: 'large' },
+        250,
+        'connector'
+      );
 
       await service.flushStepChanges();
       await service.flushStepChanges();
@@ -303,8 +342,15 @@ describe('StepIoService', () => {
   describe('eviction policy', () => {
     it('evicts output above threshold from completed step', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
-      createCompletedStep(state, 'step-1', 'myStep', { largeData: 'x'.repeat(200) }, 'connector');
-      service.recordOutputSize('step-1', 250);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        { largeData: 'x'.repeat(200) },
+        250,
+        'connector'
+      );
 
       await service.flushStepChanges();
       await service.flushStepChanges();
@@ -315,8 +361,15 @@ describe('StepIoService', () => {
 
     it('evicts output exactly at threshold (minPayloadSize is inclusive)', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
-      createCompletedStep(state, 'step-1', 'myStep', { data: 'at-boundary' }, 'connector');
-      service.recordOutputSize('step-1', EVICTION_THRESHOLD);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        { data: 'at-boundary' },
+        EVICTION_THRESHOLD,
+        'connector'
+      );
 
       await service.flushStepChanges();
       await service.flushStepChanges();
@@ -328,8 +381,7 @@ describe('StepIoService', () => {
     it('retains output below threshold', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
       const smallOutput = { key: 'val' };
-      createCompletedStep(state, 'step-1', 'myStep', smallOutput, 'connector');
-      service.recordOutputSize('step-1', 10);
+      seedCompletedStepWithSize(state, service, 'step-1', 'myStep', smallOutput, 10, 'connector');
 
       await service.flushStepChanges();
       await service.flushStepChanges();
@@ -345,9 +397,10 @@ describe('StepIoService', () => {
         stepId: 'myStep',
         stepType: 'connector',
         status: ExecutionStatus.RUNNING,
-        output: { data: 'x'.repeat(200) },
       } as Partial<EsWorkflowStepExecution>);
-      service.recordOutputSize('step-1', 250);
+      // Record an above-threshold size to prove the eviction predicate still
+      // gates on COMPLETED status, not on size alone.
+      service.setStepOutput('step-1', { data: 'x'.repeat(200) }, 250);
 
       await service.flushStepChanges();
       await service.flushStepChanges();
@@ -358,8 +411,15 @@ describe('StepIoService', () => {
 
     it('retains output from data.set steps regardless of size (pinned)', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
-      createCompletedStep(state, 'step-1', 'myDataSet', { largeData: 'x'.repeat(200) }, 'data.set');
-      service.recordOutputSize('step-1', 250);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myDataSet',
+        { largeData: 'x'.repeat(200) },
+        250,
+        'data.set'
+      );
 
       await service.flushStepChanges();
       await service.flushStepChanges();
@@ -370,8 +430,15 @@ describe('StepIoService', () => {
 
     it('retains output from waitForInput steps regardless of size (pinned)', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
-      createCompletedStep(state, 'step-1', 'wait', { answer: 'x'.repeat(200) }, 'waitForInput');
-      service.recordOutputSize('step-1', 250);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'wait',
+        { answer: 'x'.repeat(200) },
+        250,
+        'waitForInput'
+      );
 
       await service.flushStepChanges();
       await service.flushStepChanges();
@@ -398,9 +465,10 @@ describe('StepIoService', () => {
         stepId: 'myStep',
         stepType: 'connector',
         status: ExecutionStatus.FAILED,
-        output: null,
       } as Partial<EsWorkflowStepExecution>);
-      service.recordOutputSize('step-1', 250);
+      // Even with a recorded size, the eviction predicate must keep null:
+      // null is the FAILED-step sentinel, distinct from `undefined` (evicted).
+      service.setStepOutput('step-1', null, 250);
 
       await service.flushStepChanges();
       await service.flushStepChanges();
@@ -413,8 +481,15 @@ describe('StepIoService', () => {
       const { state, service, stepExecutionRepository } = buildHarness({
         evictionMinBytes: EVICTION_THRESHOLD,
       });
-      createCompletedStep(state, 'step-1', 'myStep', { data: 'x'.repeat(200) }, 'connector');
-      service.recordOutputSize('step-1', 250);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        { data: 'x'.repeat(200) },
+        250,
+        'connector'
+      );
 
       // Cycle 1: persists + queues for eviction.
       await service.flushStepChanges();
@@ -432,8 +507,15 @@ describe('StepIoService', () => {
         evictionMinBytes: EVICTION_THRESHOLD,
       });
       const originalOutput = { restored: true, data: 'x'.repeat(200) };
-      createCompletedStep(state, 'step-1', 'myStep', originalOutput, 'connector');
-      service.recordOutputSize('step-1', 250);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        originalOutput,
+        250,
+        'connector'
+      );
 
       await service.flushStepChanges();
       await service.flushStepChanges();
@@ -470,8 +552,15 @@ describe('StepIoService', () => {
       const { state, service, stepExecutionRepository } = buildHarness({
         evictionMinBytes: EVICTION_THRESHOLD,
       });
-      createCompletedStep(state, 'step-1', 'myStep', { data: 'large' }, 'connector');
-      service.recordOutputSize('step-1', 250);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        { data: 'large' },
+        250,
+        'connector'
+      );
       await service.flushStepChanges();
       await service.flushStepChanges();
 
@@ -490,8 +579,15 @@ describe('StepIoService', () => {
         evictionMinBytes: EVICTION_THRESHOLD,
       });
       const originalOutput = { restored: true, data: 'x'.repeat(200) };
-      createCompletedStep(state, 'step-1', 'myStep', originalOutput, 'connector');
-      service.recordOutputSize('step-1', 250);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        originalOutput,
+        250,
+        'connector'
+      );
 
       // Get to evicted state.
       await service.flushStepChanges();
@@ -529,8 +625,7 @@ describe('StepIoService', () => {
       // Pinned types are never evicted, so rehydrateOutputs would be a no-op
       // for them — but if a future code path mistakenly added them to the
       // transient set, release must guard against re-evicting them.
-      createCompletedStep(state, 'step-1', 'pinnedStep', { v: 1 }, 'data.set');
-      service.recordOutputSize('step-1', 250);
+      seedCompletedStepWithSize(state, service, 'step-1', 'pinnedStep', { v: 1 }, 250, 'data.set');
 
       await service.flushStepChanges();
       await service.flushStepChanges();
@@ -549,8 +644,15 @@ describe('StepIoService', () => {
       const { state, service, stepExecutionRepository } = buildHarness({
         evictionMinBytes: EVICTION_THRESHOLD,
       });
-      createCompletedStep(state, 'step-1', 'myStep', { data: 'x'.repeat(200) }, 'connector');
-      service.recordOutputSize('step-1', 250);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        { data: 'x'.repeat(200) },
+        250,
+        'connector'
+      );
       await service.flushStepChanges();
       await service.flushStepChanges();
 
@@ -576,8 +678,15 @@ describe('StepIoService', () => {
   describe('deferred output eviction via flushStepChanges', () => {
     it('does NOT evict output on the flush that persists it', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
-      createCompletedStep(state, 'step-1', 'myStep', { data: 'x'.repeat(200) }, 'connector');
-      service.recordOutputSize('step-1', 250);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        { data: 'x'.repeat(200) },
+        250,
+        'connector'
+      );
 
       await service.flushStepChanges();
 
@@ -587,8 +696,15 @@ describe('StepIoService', () => {
 
     it('evicts output on the second flush', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
-      createCompletedStep(state, 'step-1', 'myStep', { data: 'x'.repeat(200) }, 'connector');
-      service.recordOutputSize('step-1', 250);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        { data: 'x'.repeat(200) },
+        250,
+        'connector'
+      );
 
       await service.flushStepChanges();
       await service.flushStepChanges();
@@ -600,8 +716,7 @@ describe('StepIoService', () => {
     it('does not evict small outputs even after two flushes', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
       const smallOutput = { key: 'val' };
-      createCompletedStep(state, 'step-1', 'myStep', smallOutput, 'connector');
-      service.recordOutputSize('step-1', 10);
+      seedCompletedStepWithSize(state, service, 'step-1', 'myStep', smallOutput, 10, 'connector');
 
       await service.flushStepChanges();
       await service.flushStepChanges();
@@ -612,12 +727,26 @@ describe('StepIoService', () => {
 
     it('evicts previous batch and queues new batch on successive flushes', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
-      createCompletedStep(state, 'step-a', 'sA', { data: 'a'.repeat(200) }, 'connector');
-      service.recordOutputSize('step-a', 250);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-a',
+        'sA',
+        { data: 'a'.repeat(200) },
+        250,
+        'connector'
+      );
       await service.flushStepChanges();
 
-      createCompletedStep(state, 'step-b', 'sB', { data: 'b'.repeat(200) }, 'connector');
-      service.recordOutputSize('step-b', 300);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-b',
+        'sB',
+        { data: 'b'.repeat(200) },
+        300,
+        'connector'
+      );
       await service.flushStepChanges();
 
       expect(state.getStepExecution('step-a')?.output).toBeUndefined();
@@ -629,8 +758,15 @@ describe('StepIoService', () => {
 
     it('processes pending eviction on empty flush (no new changes)', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
-      createCompletedStep(state, 'step-1', 'myStep', { data: 'x'.repeat(200) }, 'connector');
-      service.recordOutputSize('step-1', 250);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        { data: 'x'.repeat(200) },
+        250,
+        'connector'
+      );
 
       await service.flushStepChanges();
       expect(state.getStepExecution('step-1')?.output).toBeDefined();
@@ -642,8 +778,15 @@ describe('StepIoService', () => {
 
     it('does not evict data.set outputs even after deferral', async () => {
       const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
-      createCompletedStep(state, 'step-1', 'myDataSet', { largeData: 'x'.repeat(200) }, 'data.set');
-      service.recordOutputSize('step-1', 250);
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myDataSet',
+        { largeData: 'x'.repeat(200) },
+        250,
+        'data.set'
+      );
 
       await service.flushStepChanges();
       await service.flushStepChanges();
@@ -743,9 +886,8 @@ describe('StepIoService', () => {
         stepType: 'connector',
         status: ExecutionStatus.COMPLETED,
         input: { message: 'hello' },
-        output: { data: 'x'.repeat(200) },
       } as Partial<EsWorkflowStepExecution>);
-      service.recordOutputSize('step-1', 250);
+      service.setStepOutput('step-1', { data: 'x'.repeat(200) }, 250);
 
       await service.flushStepChanges();
       expect(state.getStepExecution('step-1')?.input).toBeUndefined();
@@ -767,18 +909,16 @@ describe('StepIoService', () => {
         stepId: 'loopStep',
         stepType: 'connector',
         status: ExecutionStatus.COMPLETED,
-        output: { data: 'x'.repeat(200) },
       } as Partial<EsWorkflowStepExecution>);
-      service.recordOutputSize('iter-1', 250);
+      service.setStepOutput('iter-1', { data: 'x'.repeat(200) }, 250);
 
       state.upsertStep({
         id: 'iter-2',
         stepId: 'loopStep',
         stepType: 'connector',
         status: ExecutionStatus.COMPLETED,
-        output: { data: 'y'.repeat(200) },
       } as Partial<EsWorkflowStepExecution>);
-      service.recordOutputSize('iter-2', 250);
+      service.setStepOutput('iter-2', { data: 'y'.repeat(200) }, 250);
 
       // Stale-loop eviction nullifies iter-1 (non-latest).
       service.evictStaleLoopOutputs(['loopStep']);
@@ -1035,10 +1175,8 @@ describe('StepIoService', () => {
 
       // Seed two completed predecessors and drive them through the deferred
       // eviction cycle so they end up in the evicted-outputs map.
-      createCompletedStep(state, 'exec-a', 'step_a', { v: 'a' }, 'connector');
-      createCompletedStep(state, 'exec-b', 'step_b', { v: 'b' }, 'connector');
-      service.recordOutputSize('exec-a', 1);
-      service.recordOutputSize('exec-b', 1);
+      seedCompletedStepWithSize(state, service, 'exec-a', 'step_a', { v: 'a' }, 1, 'connector');
+      seedCompletedStepWithSize(state, service, 'exec-b', 'step_b', { v: 'b' }, 1, 'connector');
       await service.flushStepChanges();
       await service.flushStepChanges();
       expect(service.hasEvictedOutputs()).toBe(true);
@@ -1082,8 +1220,7 @@ describe('StepIoService', () => {
         .find((n) => n.stepId === 'step_b')!;
 
       const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
-      createCompletedStep(state, 'exec-a', 'step_a', { v: 'a' }, 'connector');
-      service.recordOutputSize('exec-a', 1);
+      seedCompletedStepWithSize(state, service, 'exec-a', 'step_a', { v: 'a' }, 1, 'connector');
       await service.flushStepChanges();
       await service.flushStepChanges();
       expect(service.hasEvictedOutputs()).toBe(true);

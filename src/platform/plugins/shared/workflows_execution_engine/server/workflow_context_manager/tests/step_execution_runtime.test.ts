@@ -15,48 +15,28 @@ import { ExecutionError } from '@kbn/workflows/server';
 import { createMockWorkflowEventLogger } from '../../workflow_event_logger/mocks';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/types';
 import { StepExecutionRuntime } from '../step_execution_runtime';
-import type { CompleteStepArgs, FailStepArgs, StepIoService } from '../step_io_service';
+import type { StepIoService } from '../step_io_service';
 import type { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
 
 /**
  * Builds a `StepIoService` test double that delegates IO writes back to the
- * provided state mock. Lets existing assertions on `state.upsertStep`
- * continue to verify the runtime's behaviour without rewriting them, while
- * still routing writes through the service as production does.
+ * provided state mock. Production split: lifecycle (status / finishedAt /
+ * executionTimeMs / error / scopeStack) is the runtime's responsibility and
+ * goes through `state.upsertStep` directly; only IO data
+ * (input/output) flows through this service. The test double mirrors that
+ * contract — `setStepOutput` writes only `output`, never lifecycle fields.
  */
 function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoService {
+  const sizes = new Map<string, number>();
   return {
     setStepInput: (id: string, input: JsonValue) => state.upsertStep({ id, input }),
-    completeStep: ({ id, output, finishedAt, executionTimeMs }: CompleteStepArgs) =>
-      state.upsertStep({
-        id,
-        status: ExecutionStatus.COMPLETED,
-        finishedAt,
-        output,
-        ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
-      } as Partial<EsWorkflowStepExecution>),
-    failStep: ({
-      id,
-      stepId,
-      stepType,
-      error,
-      finishedAt,
-      executionTimeMs,
-      scopeStack,
-    }: FailStepArgs) =>
-      state.upsertStep({
-        id,
-        stepId,
-        stepType,
-        status: ExecutionStatus.FAILED,
-        scopeStack,
-        finishedAt,
-        output: null,
-        error,
-        ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
-      } as Partial<EsWorkflowStepExecution>),
-    recordOutputSize: jest.fn(),
+    setStepOutput: (id: string, output: JsonValue | null, sizeBytes?: number) => {
+      state.upsertStep({ id, output });
+      if (sizeBytes !== undefined && Number.isFinite(sizeBytes) && sizeBytes >= 0) {
+        sizes.set(id, sizeBytes);
+      }
+    },
     getStepInput: jest.fn((id: string) => state.getStepExecution(id)?.input),
     getStepOutput: jest.fn((id: string) => state.getStepExecution(id)?.output),
     getStepError: jest.fn((id: string) => state.getStepExecution(id)?.error),
@@ -66,14 +46,15 @@ function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoSe
       return { input: latest.input, output: latest.output, error: latest.error };
     }),
     getDataSetVariables: jest.fn(() => ({} as Record<string, unknown>)),
-    getOutputSizeStats: jest.fn().mockReturnValue({ totalBytes: 0, stepCount: 0 }),
+    getOutputSizeStats: jest.fn(() => {
+      let totalBytes = 0;
+      for (const bytes of sizes.values()) totalBytes += bytes;
+      return { totalBytes, stepCount: sizes.size };
+    }),
     hasEvictedOutputs: jest.fn().mockReturnValue(false),
     rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
     prepareForRead: jest.fn().mockResolvedValue(undefined),
     releaseTransientlyRehydratedOutputs: jest.fn(),
-    onLoad: jest.fn().mockReturnValue({ pinnedIdsToFetch: [] }),
-    onStepsFlushed: jest.fn(),
-    clearStepIo: jest.fn(),
   } as unknown as StepIoService;
 }
 

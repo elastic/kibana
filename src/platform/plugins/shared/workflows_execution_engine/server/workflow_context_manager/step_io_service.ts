@@ -9,7 +9,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
-import type { EsWorkflowStepExecution, SerializedError, StackFrame } from '@kbn/workflows';
+import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { extractReferencedStepIds } from './extract_referenced_step_ids';
@@ -39,23 +39,6 @@ export interface StepIoServiceInit {
   logger?: Logger;
 }
 
-export interface CompleteStepArgs {
-  id: string;
-  output: unknown;
-  finishedAt: string;
-  executionTimeMs?: number;
-}
-
-export interface FailStepArgs {
-  id: string;
-  stepId: string;
-  stepType?: string;
-  error: SerializedError;
-  finishedAt: string;
-  executionTimeMs?: number;
-  scopeStack: StackFrame[];
-}
-
 export interface PrepareForReadArgs {
   node: GraphNodeUnion;
   predecessorsResolver: PredecessorsResolver;
@@ -79,17 +62,25 @@ export interface StepIoReader {
       }
     | undefined;
   getDataSetVariables(): Record<string, unknown>;
-  recordOutputSize(stepExecutionId: string, bytes: number): void;
 }
 
 /**
- * Reader + write surface used by the per-step runtime. Adds the atomic
- * write transitions (`completeStep`, `failStep`, `setStepInput`).
+ * Reader + write surface used by the per-step runtime. Owns step IO data
+ * (input/output) only — lifecycle metadata (status, finishedAt, error,
+ * executionTimeMs, scopeStack) is the runtime's responsibility and goes
+ * through `WorkflowExecutionState.upsertStep` directly. Splitting the
+ * concerns keeps each writer focused: lifecycle is the runtime's job, IO
+ * is the service's.
  */
 export interface StepIoWriter extends StepIoReader {
   setStepInput(stepExecutionId: string, input: JsonValue): void;
-  completeStep(args: CompleteStepArgs): void;
-  failStep(args: FailStepArgs): void;
+  /**
+   * Writes a step's output to in-memory state and queues it for the next
+   * flush. Optionally records the byte size for eviction/telemetry — pass
+   * `sizeBytes` when the caller already measured the payload (Layer 2
+   * enforcement) so we don't pay for a second `JSON.stringify`.
+   */
+  setStepOutput(stepExecutionId: string, output: JsonValue | null, sizeBytes?: number): void;
 }
 
 /**
@@ -266,64 +257,36 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   }
 
   /**
-   * Atomic transition: status -> COMPLETED, output, finishedAt, executionTimeMs.
-   * Single `upsertStep` call so no flush observer can interleave between status
-   * and output writes.
+   * Writes a step's output through the change tracker so it lands in ES on
+   * the next flush. Lifecycle fields (status, finishedAt, error, etc.) are
+   * the caller's responsibility: the runtime emits a separate
+   * `state.upsertStep` for those.
+   *
+   * Atomicity with the lifecycle write is preserved because both writes
+   * happen synchronously on the same tick — the persistence loop runs in a
+   * separate microtask chain and cannot interleave between them. State's
+   * `updateStep` merges the partials so the flush queue ends up with one
+   * combined entry per step id, identical to the previous single-call
+   * shape.
+   *
+   * `output: null` is the FAILED-step sentinel; the eviction layer
+   * distinguishes it from `undefined` (evicted) so do not coerce. `sizeBytes`
+   * is optional — pass it when Layer 2 has already measured the payload so
+   * the eviction predicate can decide without re-serialising.
    */
-  public completeStep({ id, output, finishedAt, executionTimeMs }: CompleteStepArgs): void {
-    this.invalidateDataSetCacheIfNeeded(id);
-    this.state.upsertStep({
-      id,
-      status: ExecutionStatus.COMPLETED,
-      finishedAt,
-      output: output as JsonValue,
-      ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
-    });
-  }
-
-  /**
-   * Atomic transition: status -> FAILED, output: null, error, finishedAt, executionTimeMs.
-   * `output: null` is semantically distinct from `undefined` (evicted) and is
-   * preserved by `isEvictionCandidate`.
-   */
-  public failStep({
-    id,
-    stepId,
-    stepType,
-    error,
-    finishedAt,
-    executionTimeMs,
-    scopeStack,
-  }: FailStepArgs): void {
-    this.invalidateDataSetCacheIfNeeded(id, stepType);
-    this.state.upsertStep({
-      id,
-      stepId,
-      stepType,
-      status: ExecutionStatus.FAILED,
-      scopeStack,
-      finishedAt,
-      output: null,
-      error,
-      ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
-    });
+  public setStepOutput(
+    stepExecutionId: string,
+    output: JsonValue | null,
+    sizeBytes?: number
+  ): void {
+    this.invalidateDataSetCacheIfNeeded(stepExecutionId);
+    if (sizeBytes !== undefined && Number.isFinite(sizeBytes) && sizeBytes >= 0) {
+      this.outputSizes.set(stepExecutionId, sizeBytes);
+    }
+    this.state.upsertStep({ id: stepExecutionId, output });
   }
 
   // ----- Size tracking & telemetry ------------------------------------------
-
-  /**
-   * Records the output byte size for a step execution. Called by Layer 2
-   * enforcement after `safeOutputSize()` has already serialised the output —
-   * zero additional serialisation cost.
-   *
-   * Layer 2 fails closed on non-serialisable outputs, so the size handed in
-   * here is always a non-negative byte count. We still guard against negative
-   * inputs (legacy callers / tests) by treating them as "do not record".
-   */
-  public recordOutputSize(stepExecutionId: string, bytes: number): void {
-    if (!Number.isFinite(bytes) || bytes < 0) return;
-    this.outputSizes.set(stepExecutionId, bytes);
-  }
 
   /**
    * Aggregate output size statistics across active and evicted steps. Uses

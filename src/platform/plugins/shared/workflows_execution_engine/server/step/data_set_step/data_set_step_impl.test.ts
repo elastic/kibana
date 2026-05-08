@@ -48,7 +48,6 @@ describe('DataSetStepImpl', () => {
       finishStep: jest.fn().mockResolvedValue(undefined),
       failStep: jest.fn().mockResolvedValue(undefined),
       setInput: jest.fn().mockResolvedValue(undefined),
-      recordOutputSize: jest.fn(),
       getCurrentStepState: jest.fn(),
       setCurrentStepState: jest.fn().mockResolvedValue(undefined),
       stepExecutionId: 'test-step-exec-id',
@@ -130,12 +129,17 @@ describe('DataSetStepImpl', () => {
     it('should set variables and return them as output', async () => {
       await dataSetStep.run();
 
-      // Variables are now stored as step output, not via setVariables
-      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
-        user_id: '12345',
-        email: 'user@example.com',
-        is_active: true,
-      });
+      // Variables are now stored as step output, not via setVariables.
+      // The base atomic node forwards a measured size as the second arg of
+      // finishStep (Layer 2), so we tolerate any positive number here.
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(
+        {
+          user_id: '12345',
+          email: 'user@example.com',
+          is_active: true,
+        },
+        expect.any(Number)
+      );
       expect(mockWorkflowLogger.logDebug).toHaveBeenCalledWith('Set 3 variable(s)');
     });
 
@@ -153,10 +157,13 @@ describe('DataSetStepImpl', () => {
 
       await dataSetStep.run();
 
-      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
-        name: 'John Doe',
-        message: 'Hello World',
-      });
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(
+        {
+          name: 'John Doe',
+          message: 'Hello World',
+        },
+        expect.any(Number)
+      );
     });
 
     it('should preserve number values', async () => {
@@ -174,11 +181,14 @@ describe('DataSetStepImpl', () => {
 
       await dataSetStep.run();
 
-      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
-        age: 25,
-        count: 100,
-        price: 99.99,
-      });
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(
+        {
+          age: 25,
+          count: 100,
+          price: 99.99,
+        },
+        expect.any(Number)
+      );
     });
 
     it('should preserve boolean values', async () => {
@@ -195,10 +205,13 @@ describe('DataSetStepImpl', () => {
 
       await dataSetStep.run();
 
-      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
-        is_active: true,
-        is_verified: false,
-      });
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(
+        {
+          is_active: true,
+          is_verified: false,
+        },
+        expect.any(Number)
+      );
     });
 
     it('should preserve nested objects', async () => {
@@ -221,16 +234,19 @@ describe('DataSetStepImpl', () => {
 
       await dataSetStep.run();
 
-      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
-        profile: {
-          name: 'John Doe',
-          age: 30,
-          address: {
-            city: 'San Francisco',
-            country: 'USA',
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(
+        {
+          profile: {
+            name: 'John Doe',
+            age: 30,
+            address: {
+              city: 'San Francisco',
+              country: 'USA',
+            },
           },
         },
-      });
+        expect.any(Number)
+      );
     });
 
     it('should preserve arrays', async () => {
@@ -248,11 +264,14 @@ describe('DataSetStepImpl', () => {
 
       await dataSetStep.run();
 
-      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
-        tags: ['workflow', 'automation', 'data'],
-        numbers: [1, 2, 3, 4, 5],
-        mixed: ['string', 42, true, { key: 'value' }],
-      });
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(
+        {
+          tags: ['workflow', 'automation', 'data'],
+          numbers: [1, 2, 3, 4, 5],
+          mixed: ['string', 42, true, { key: 'value' }],
+        },
+        expect.any(Number)
+      );
     });
 
     it('should handle empty object', async () => {
@@ -266,7 +285,9 @@ describe('DataSetStepImpl', () => {
 
       await dataSetStep.run();
 
-      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({});
+      // Empty object: output is `{}`, which serialises to a 2-byte string —
+      // still a positive size, hence `expect.any(Number)`.
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({}, expect.any(Number));
       expect(mockWorkflowLogger.logDebug).toHaveBeenCalledWith('Set 0 variable(s)');
     });
 
@@ -284,10 +305,13 @@ describe('DataSetStepImpl', () => {
 
       await dataSetStep.run();
 
-      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith({
-        nullable: null,
-        optional: undefined,
-      });
+      expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledWith(
+        {
+          nullable: null,
+          optional: undefined,
+        },
+        expect.any(Number)
+      );
     });
 
     it('should error when input is not an object', async () => {
@@ -322,39 +346,18 @@ describe('DataSetStepImpl', () => {
       expect(mockStepExecutionRuntime.failStep).toHaveBeenCalled();
     });
 
-    describe('output size recording for eviction', () => {
-      it('should call recordOutputSize with correct byte count after successful step', async () => {
+    describe('output size forwarding for eviction', () => {
+      // The base atomic node now folds size measurement into finishStep —
+      // there is no longer a standalone `recordOutputSize` call to assert on.
+      // We verify the same intent by checking the second arg of finishStep,
+      // which the IO service uses for the eviction decision.
+      it('forwards a positive byte count to finishStep on success', async () => {
         await dataSetStep.run();
 
-        expect(mockStepExecutionRuntime.recordOutputSize).toHaveBeenCalledTimes(1);
-        expect(mockStepExecutionRuntime.recordOutputSize).toHaveBeenCalledWith(expect.any(Number));
-        // The recorded size should be positive (non-empty output)
-        const recordedSize = mockStepExecutionRuntime.recordOutputSize.mock.calls[0][0];
-        expect(recordedSize).toBeGreaterThan(0);
-      });
-
-      it('should not call recordOutputSize when step fails', async () => {
-        mockContextManager.renderValueAccordingToContext.mockReturnValue(null as any);
-
-        await dataSetStep.run();
-
-        expect(mockStepExecutionRuntime.recordOutputSize).not.toHaveBeenCalled();
-      });
-
-      it('should not call recordOutputSize when maxResponseSize is 0', async () => {
-        (mockContextManager as any).getDependencies = jest.fn().mockReturnValue({
-          config: { maxResponseSize: new ByteSizeValue(0) },
-        });
-        dataSetStep = new DataSetStepImpl(
-          mockNode,
-          mockStepExecutionRuntime,
-          mockWorkflowRuntime,
-          mockWorkflowLogger
-        );
-
-        await dataSetStep.run();
-
-        expect(mockStepExecutionRuntime.recordOutputSize).not.toHaveBeenCalled();
+        expect(mockStepExecutionRuntime.finishStep).toHaveBeenCalledTimes(1);
+        const [, sizeBytes] = mockStepExecutionRuntime.finishStep.mock.calls[0];
+        expect(typeof sizeBytes).toBe('number');
+        expect(sizeBytes).toBeGreaterThan(0);
       });
     });
   });

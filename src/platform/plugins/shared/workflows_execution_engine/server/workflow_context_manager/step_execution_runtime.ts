@@ -159,19 +159,39 @@ export class StepExecutionRuntime {
     this.stepIoService.setStepInput(this.stepExecutionId, input as JsonValue);
   }
 
-  public finishStep(stepOutput?: unknown): void {
+  /**
+   * Marks the step as COMPLETED.
+   *
+   * Lifecycle vs IO split: the lifecycle write (status, finishedAt,
+   * executionTimeMs) goes through `WorkflowExecutionState.upsertStep` here
+   * directly; the IO write (output, optional size) goes through the IO
+   * service. Both calls happen synchronously on the same tick, so the
+   * persistence loop cannot interleave between them — the flush queue
+   * receives one merged entry per step id, identical to the previous
+   * single-call shape.
+   *
+   * @param sizeBytes Optional pre-measured output size (Layer 2 enforcement)
+   *   forwarded to the IO service for eviction/telemetry. Omit when the
+   *   step has no output to size.
+   */
+  public finishStep(stepOutput?: unknown, sizeBytes?: number): void {
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const finishedAt = new Date().toISOString();
     const executionTimeMs = startedStepExecution?.startedAt
       ? new Date(finishedAt).getTime() - new Date(startedStepExecution.startedAt).getTime()
       : undefined;
 
-    this.stepIoService.completeStep({
+    this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
-      output: stepOutput,
+      status: ExecutionStatus.COMPLETED,
       finishedAt,
-      executionTimeMs,
+      ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
+    this.stepIoService.setStepOutput(
+      this.stepExecutionId,
+      (stepOutput ?? null) as JsonValue | null,
+      sizeBytes
+    );
     this.logStepComplete({
       id: this.stepExecutionId,
       status: ExecutionStatus.COMPLETED,
@@ -180,9 +200,15 @@ export class StepExecutionRuntime {
     });
   }
 
+  /**
+   * Marks the step as FAILED.
+   *
+   * Same lifecycle/IO split as {@link finishStep}: status / error /
+   * scopeStack / timing go through state, the FAILED-step `output: null`
+   * sentinel goes through the IO service. Atomicity is preserved because
+   * the two writes share a synchronous tick.
+   */
   public failStep(error: Error): void {
-    // If there is a last step execution, fail it. If not, create a new step
-    // execution with FAILED status.
     const executionError = ExecutionError.fromError(error);
     const serializedError = executionError.toSerializableObject();
 
@@ -201,15 +227,19 @@ export class StepExecutionRuntime {
     this.workflowExecutionState.updateWorkflowExecution({
       error: serializedError,
     });
-    this.stepIoService.failStep({
+    this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
       stepId: this.node.stepId,
       stepType: this.node.stepType,
-      error: serializedError,
-      finishedAt,
-      executionTimeMs,
+      status: ExecutionStatus.FAILED,
       scopeStack: this.stackFrames,
+      finishedAt,
+      error: serializedError,
+      ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
+    // `null` is the FAILED-step sentinel — distinct from `undefined`
+    // (evicted) so the eviction predicate can keep them apart.
+    this.stepIoService.setStepOutput(this.stepExecutionId, null);
     this.logStepFail(executionError);
   }
 
@@ -289,17 +319,6 @@ export class StepExecutionRuntime {
     }
     const { resumeAt: _stripped, ...rest } = existing;
     return Object.keys(rest).length ? rest : undefined;
-  }
-
-  /**
-   * Records the output byte size for this step execution.
-   * Used by the eviction system to decide whether a completed step's output
-   * is large enough to evict from memory after it has been flushed to ES.
-   * The size is computed by Layer 2 enforcement (safeOutputSize) and passed
-   * here at zero additional serialization cost.
-   */
-  public recordOutputSize(bytes: number): void {
-    this.stepIoService.recordOutputSize(this.stepExecutionId, bytes);
   }
 
   /** Modifies workflow-level execution state. Use sparingly — prefer step output for step-scoped data. */

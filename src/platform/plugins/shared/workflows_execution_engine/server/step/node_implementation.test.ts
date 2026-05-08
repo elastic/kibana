@@ -28,7 +28,6 @@ const createStepExecutionRuntime = (overrides: Record<string, unknown> = {}) => 
   finishStep: jest.fn(),
   failStep: jest.fn(),
   setInput: jest.fn(),
-  recordOutputSize: jest.fn(),
   stepExecutionId: 'step-exec-1',
   node: { configuration: {} },
   workflowExecution: { workflowDefinition: {} },
@@ -72,7 +71,7 @@ describe('BaseAtomicNodeImplementation', () => {
     await impl.run();
 
     expect(runtime.startStep).toHaveBeenCalled();
-    expect(runtime.finishStep).toHaveBeenCalledWith({ data: 'ok' });
+    expect(runtime.finishStep).toHaveBeenCalledWith({ data: 'ok' }, expect.any(Number));
     expect(workflowRuntime.navigateToNextNode).toHaveBeenCalled();
   });
 
@@ -212,10 +211,9 @@ describe('BaseAtomicNodeImplementation', () => {
 
       expect(runtime.failStep).toHaveBeenCalled();
       expect(runtime.finishStep).not.toHaveBeenCalled();
-      expect(runtime.recordOutputSize).not.toHaveBeenCalled();
     });
 
-    it('records the measured size on success', async () => {
+    it('forwards the measured size to finishStep on success', async () => {
       const step: BaseStep = { name: 'sized-step', stepId: 'sized-step', type: 'atomic' };
       const runtime = createStepExecutionRuntime();
       const workflowRuntime = createWorkflowRuntime();
@@ -225,9 +223,10 @@ describe('BaseAtomicNodeImplementation', () => {
 
       await impl.run();
 
-      expect(runtime.recordOutputSize).toHaveBeenCalledTimes(1);
-      const recorded = (runtime.recordOutputSize as jest.Mock).mock.calls[0][0];
-      expect(recorded).toBeGreaterThan(0);
+      expect(runtime.finishStep).toHaveBeenCalledTimes(1);
+      const [, sizeBytes] = (runtime.finishStep as jest.Mock).mock.calls[0];
+      expect(typeof sizeBytes).toBe('number');
+      expect(sizeBytes).toBeGreaterThan(0);
     });
   });
 
