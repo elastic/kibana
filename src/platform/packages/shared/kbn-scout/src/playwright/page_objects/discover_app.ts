@@ -13,6 +13,8 @@ import type { ScoutPage } from '..';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 
+const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
+
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
 
@@ -612,5 +614,14 @@ export class DiscoverApp {
     }
 
     await expect(docTable).toContainText(text);
+  }
+
+  public setQueryMode(mode: 'esql' | 'classic') {
+    return this.page.addInitScript(
+      ([_mode, _discoverQueryModeKey]) => {
+        window.localStorage.setItem(_discoverQueryModeKey, JSON.stringify(_mode));
+      },
+      [mode, DISCOVER_QUERY_MODE_KEY]
+    );
   }
 }

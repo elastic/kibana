@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/agent-builder-workflows-plugin",
+  "owner": ["@elastic/workchat-eng", "@elastic/workflows-eng"],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "agentBuilderWorkflows",
+    "server": true,
+    "browser": true,
+    "configPath": ["xpack", "agentBuilderWorkflows"],
+    "requiredPlugins": ["agentBuilder", "workflowsManagement", "agentContextLayer"],
+    "requiredBundles": ["kibanaReact"],
+    "optionalPlugins": [],
+    "extraPublicDirs": []
+  }
+}
