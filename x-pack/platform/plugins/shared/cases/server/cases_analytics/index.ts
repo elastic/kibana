@@ -12,3 +12,4 @@ export {
 } from './service';
 export { CasesAnalyticsWriter, NOOP_WRITER, type CasesAnalyticsWriterContract } from './writer';
 export { casesAnalyticsStateSavedObjectType } from './reconciliation';
+export { registerCasesAnalyticsRoutes } from './routes';

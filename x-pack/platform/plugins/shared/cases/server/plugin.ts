@@ -20,6 +20,7 @@ import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { APP_ID } from '../common/constants';
 
 import type { CasesClient } from './client';
@@ -55,7 +56,7 @@ import type { ServerlessProjectType } from '../common/constants/types';
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { registerCaseWorkflowSteps } from './workflows';
 import { initUiSettings } from './ui_settings';
-import { CasesAnalyticsService } from './cases_analytics';
+import { CasesAnalyticsService, registerCasesAnalyticsRoutes } from './cases_analytics';
 
 export class CasePlugin
   implements
@@ -81,6 +82,9 @@ export class CasePlugin
   private readonly isServerless: boolean;
   private readonly closeReasonValidators: Map<string, CloseReasonValidator> = new Map();
   private readonly casesAnalyticsService: CasesAnalyticsService;
+  /** Captured during start so the analytics support routes registered at setup
+   *  can call `runSoon` once the start contract is available. */
+  private taskManagerStart: TaskManagerStartContract | null = null;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -124,6 +128,18 @@ export class CasePlugin
       logger: this.logger,
       config: this.caseConfig.analytics,
     });
+
+    if (this.caseConfig.analytics.enabled) {
+      // Register the support routes only when the feature is enabled. Same
+      // gating as the SO type registration — operators don't need a /state
+      // endpoint that would always return `{ enabled: false }`.
+      registerCasesAnalyticsRoutes({
+        core,
+        logger: this.logger,
+        getTaskManager: () => this.taskManagerStart,
+        casesAnalyticsService: this.casesAnalyticsService,
+      });
+    }
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
@@ -249,6 +265,11 @@ export class CasePlugin
       if (this.caseConfig.incrementalId.enabled) {
         void this.incrementalIdTaskManager?.setupIncrementIdTask(plugins.taskManager, core);
       }
+
+      // Make the start contract available to the support routes. Captured
+      // here rather than at setup() because TaskManagerStartContract isn't
+      // resolvable at setup time.
+      this.taskManagerStart = plugins.taskManager;
 
       // Bootstrap cases-as-data writer + reconciliation. Best-effort: failures here
       // log but do not block plugin start.

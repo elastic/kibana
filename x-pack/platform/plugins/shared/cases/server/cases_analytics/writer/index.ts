@@ -83,30 +83,38 @@ export class CasesAnalyticsWriter {
   }
 
   /**
-   * Hard-delete a case document. Called by `CasesService.deleteCase` /
+   * Hard-delete the case + lifecycle docs. Called by `CasesService.deleteCase` /
    * `bulkDeleteCaseEntities` post-success.
    *
-   * Note: activity rows for the deleted case are NOT cascaded — by design. Activity
-   * is append-only for forensic purposes. If a tenant requires hard erasure for
-   * compliance, that's a separate operator workflow.
+   * Cascades to `case_lifecycle` because that surface is a per-case denormalization
+   * keyed on the same id — leaving it behind would skew MTTR/MTTD dashboards
+   * with phantom closed cases.
+   *
+   * Activity rows are intentionally NOT cascaded — activity is append-only for
+   * forensic purposes. If a tenant requires hard erasure for compliance, that's a
+   * separate operator workflow (currently: manual delete-by-query).
    */
   deleteCase(caseId: string): void {
-    void this.fireAndForget('case', caseId, async () => {
-      try {
-        await this.esClient.delete({
-          index: CASES_DATA_CASE_ALIAS,
-          id: caseId,
-        });
-      } catch (err) {
-        // 404 is the happy path for a delete: the case may have never been indexed,
-        // or reconciliation hasn't picked it up yet. Swallow at debug.
-        if (err?.statusCode === 404 || err?.meta?.statusCode === 404) {
-          this.logger.debug(`cases.analytics: ${caseId} not present in case index; skipping`);
-          return;
-        }
-        throw err;
+    void this.fireAndForget('case', caseId, () =>
+      this.deleteByIdSwallow404(CASES_DATA_CASE_ALIAS, caseId)
+    );
+    void this.fireAndForget('case_lifecycle', caseId, () =>
+      this.deleteByIdSwallow404(CASES_DATA_CASE_LIFECYCLE_ALIAS, caseId)
+    );
+  }
+
+  private async deleteByIdSwallow404(index: string, id: string): Promise<void> {
+    try {
+      await this.esClient.delete({ index, id });
+    } catch (err) {
+      // 404 is the happy path for a delete: the doc may have never been indexed,
+      // or reconciliation hasn't picked it up yet. Swallow at debug.
+      if (err?.statusCode === 404 || err?.meta?.statusCode === 404) {
+        this.logger.debug(`cases.analytics: ${id} not present in ${index}; skipping`);
+        return;
       }
-    });
+      throw err;
+    }
   }
 
   /**

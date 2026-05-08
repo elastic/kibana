@@ -18,7 +18,11 @@ import {
 } from '../../../common/constants';
 import { DEFAULT_RECONCILIATION_INTERVAL } from '../constants';
 import type { CasesAnalyticsWriterContract } from '../writer';
-import { runReconciliation } from './runner';
+import {
+  runReconciliation,
+  type ReconciliationDataViewService,
+  type ReconciliationSavedObjectsFinder,
+} from './runner';
 
 export { casesAnalyticsStateSavedObjectType } from './state_so';
 
@@ -30,6 +34,7 @@ interface RegisterArgs {
   resolveDeps: () => Promise<{
     core: CoreStart;
     writer: CasesAnalyticsWriterContract;
+    dataViewService?: ReconciliationDataViewService;
   }>;
 }
 
@@ -42,29 +47,28 @@ export const registerReconciliationTask = ({
     [CASES_ANALYTICS_RECONCILIATION_TASK_TYPE]: {
       title: 'Cases Analytics — Reconciliation',
       description:
-        'Periodic backstop that re-emits any case / activity / lifecycle docs missed by the synchronous writer.',
+        'Periodic backstop that re-emits any case / activity / lifecycle docs missed by the synchronous writer, and refreshes managed data views for any template changes the in-process hook missed.',
       timeout: '10m',
       maxAttempts: 1,
       createTaskRunner: () => ({
         run: async () => {
-          const { core, writer } = await resolveDeps();
+          const { core, writer, dataViewService } = await resolveDeps();
           const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
             CASE_SAVED_OBJECT,
             CASE_USER_ACTION_SAVED_OBJECT,
             CASES_ANALYTICS_STATE_SO_TYPE,
           ]);
-          // Use the same internal repo as a "client" — find() exists on both
-          // contracts. We don't need request-scoped auth here since the writer is
-          // an internal subsystem.
+          // The runner only needs `find()` on the SO client — see
+          // `ReconciliationSavedObjectsFinder` in runner.ts. Internal repo
+          // exposes a compatible `find` so the cast is structural-safe.
           const unsecuredSavedObjectsClient =
-            internalSavedObjectsRepository as unknown as Parameters<
-              typeof runReconciliation
-            >[0]['unsecuredSavedObjectsClient'];
+            internalSavedObjectsRepository as unknown as ReconciliationSavedObjectsFinder;
           await runReconciliation({
             logger,
             internalSavedObjectsRepository,
             unsecuredSavedObjectsClient,
             writer,
+            dataViewService,
           });
         },
         cancel: async () => {},
@@ -95,5 +99,26 @@ export const scheduleReconciliationTask = async ({
     logger.debug(`cases.analytics: reconciliation scheduled (interval=${interval})`);
   } catch (err) {
     logger.warn(`cases.analytics: failed to schedule reconciliation: ${err.message}`);
+  }
+};
+
+/**
+ * Cleans up a leftover scheduled reconciliation task. Called when the analytics
+ * feature is disabled — without this, a flag flip from enabled→disabled leaves a
+ * task that fires on every interval, fails its `resolveDeps` (because `start()`
+ * never ran), and floods operator logs.
+ */
+export const removeReconciliationTaskIfExists = async ({
+  taskManager,
+  logger,
+}: {
+  taskManager: TaskManagerStartContract;
+  logger: Logger;
+}): Promise<void> => {
+  try {
+    await taskManager.removeIfExists(CASES_ANALYTICS_RECONCILIATION_TASK_TYPE);
+    logger.debug('cases.analytics: removed any leftover reconciliation task');
+  } catch (err) {
+    logger.warn(`cases.analytics: failed to remove reconciliation task: ${err.message}`);
   }
 };

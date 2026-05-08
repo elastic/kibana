@@ -28,7 +28,11 @@ import type { UserActionPersistedAttributes } from '../common/types/user_actions
 import { CasesAnalyticsDataViewService } from './data_view/service';
 import { ensureCasesDataIndices } from './ensure_indices';
 import { ensureCasesDataIlmPolicy } from './ilm/ensure_policy';
-import { registerReconciliationTask, scheduleReconciliationTask } from './reconciliation';
+import {
+  registerReconciliationTask,
+  removeReconciliationTaskIfExists,
+  scheduleReconciliationTask,
+} from './reconciliation';
 import { CasesAnalyticsWriter, NOOP_WRITER, type CasesAnalyticsWriterContract } from './writer';
 
 export interface CasesAnalyticsConfig {
@@ -113,7 +117,14 @@ export class CasesAnalyticsService {
   private startResolvers?: {
     coreStart: CoreStart;
     realWriter: CasesAnalyticsWriter;
+    /** Live data view service so the reconciliation task can backstop the in‑process
+     * `onTemplateChanged` hook. */
+    dataViewService: CasesAnalyticsDataViewService;
   };
+  /** Set once `start()` has wired everything up; surfaced via `getStatus()`. */
+  private startedAt?: string;
+  private dataViewBootstrapState: 'pending' | 'ready' | 'error' = 'pending';
+  private dataViewBootstrapError?: string;
 
   constructor({ logger, config }: { logger: Logger; config: CasesAnalyticsConfig }) {
     this.logger = logger.get('cases.analytics');
@@ -149,6 +160,7 @@ export class CasesAnalyticsService {
         return {
           core: this.startResolvers.coreStart,
           writer: this.startResolvers.realWriter,
+          dataViewService: this.startResolvers.dataViewService,
         };
       },
     });
@@ -159,6 +171,11 @@ export class CasesAnalyticsService {
       this.logger.info(
         'cases-as-data: disabled (xpack.cases.analytics.enabled=false); skipping start'
       );
+      // Clean up any leftover scheduled task from a prior `enabled: true` run.
+      // Without this, the scheduled task keeps firing on its interval and its
+      // `resolveDeps` throws `"reconciliation task fired before start() — …"`
+      // until the task finally gets dropped by Task Manager. Best-effort.
+      await removeReconciliationTaskIfExists({ taskManager, logger: this.logger });
       return;
     }
 
@@ -209,26 +226,41 @@ export class CasesAnalyticsService {
       },
     });
 
+    // Construct the data view service synchronously so the reconciliation task
+    // and template hook proxy can delegate to it as soon as `start()` begins.
+    const dataViewService = new CasesAnalyticsDataViewService({
+      logger: this.logger,
+      dataViewsService: dataViews,
+      internalSavedObjectsClient,
+      esClient,
+    });
+    this.dataViewService = dataViewService;
+
     this.writer = realWriter;
-    this.startResolvers = { coreStart: core, realWriter };
+    this.startResolvers = { coreStart: core, realWriter, dataViewService };
     this.logger.info('cases-as-data: writer wired up (proxy now delegating to real writer)');
 
     // Bootstrap (best-effort). Failures here log but do not abort start — the
     // reconciliation task is the durability backstop. These run AFTER the writer is
     // wired so any case writes during bootstrap still go through the real writer
     // (and may fail if the index doesn't exist yet, which reconciliation backfills).
-    await ensureCasesDataIlmPolicy({ esClient, logger: this.logger });
+    await ensureCasesDataIlmPolicy({ esClient, logger: this.logger, isServerless });
     await ensureCasesDataIndices({ esClient, logger: this.logger, isServerless });
 
-    this.dataViewService = new CasesAnalyticsDataViewService({
-      logger: this.logger,
-      dataViewsService: dataViews,
-      internalSavedObjectsClient,
-      esClient,
-    });
     // Bootstrap views + run an initial reconcile from existing templates.
+    // We track the resolution state for the `getStatus()` accessor — operators
+    // hitting the status endpoint can see whether the data views are ready.
     // Fire-and-forget; failures are logged inside the service.
-    void this.dataViewService.start();
+    this.dataViewBootstrapState = 'pending';
+    void dataViewService
+      .start()
+      .then(() => {
+        this.dataViewBootstrapState = 'ready';
+      })
+      .catch((err) => {
+        this.dataViewBootstrapState = 'error';
+        this.dataViewBootstrapError = err?.message ?? String(err);
+      });
 
     await scheduleReconciliationTask({
       taskManager,
@@ -236,6 +268,7 @@ export class CasesAnalyticsService {
       intervalOverride: this.config.reconciliation.interval,
     });
 
+    this.startedAt = new Date().toISOString();
     this.logger.info('cases-as-data: indices bootstrapped, reconciliation scheduled');
   }
 
@@ -260,5 +293,33 @@ export class CasesAnalyticsService {
    */
   getTemplateHook(): CasesAnalyticsTemplateHookContract {
     return this.templateHookProxy;
+  }
+
+  /**
+   * Operator-facing status snapshot. Surfaced via the
+   * `GET /internal/cases/_analytics/state` route.
+   */
+  getStatus(): {
+    enabled: boolean;
+    writer_ready: boolean;
+    data_view_state: 'pending' | 'ready' | 'error';
+    data_view_error?: string;
+    started_at?: string;
+  } {
+    return {
+      enabled: this.config.enabled,
+      writer_ready: this.startResolvers != null,
+      data_view_state: this.dataViewBootstrapState,
+      data_view_error: this.dataViewBootstrapError,
+      started_at: this.startedAt,
+    };
+  }
+
+  /**
+   * Internal: support-tool entry point for the data view service. Returns the
+   * live instance when started and enabled, otherwise `null`.
+   */
+  getDataViewService(): CasesAnalyticsDataViewService | null {
+    return this.dataViewService ?? null;
   }
 }

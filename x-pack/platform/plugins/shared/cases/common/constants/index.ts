@@ -219,6 +219,18 @@ export const CASES_ANALYTICS_STATE_SO_TYPE = 'cases-analytics-state';
 export const CASES_ANALYTICS_STATE_SO_ID = 'cases-analytics-state';
 
 /**
+ * Internal support routes for cases-as-data operators. These are NOT
+ * customer-facing — they exist so on-call / dev can poke at the subsystem
+ * without dropping into ES directly.
+ */
+export const CASES_ANALYTICS_INTERNAL_URL = '/internal/cases/_analytics' as const;
+export const CASES_ANALYTICS_STATE_URL = `${CASES_ANALYTICS_INTERNAL_URL}/state` as const;
+export const CASES_ANALYTICS_RECONCILE_RUN_SOON_URL =
+  `${CASES_ANALYTICS_INTERNAL_URL}/reconcile/run_soon` as const;
+export const CASES_ANALYTICS_BACKFILL_RUN_SOON_URL =
+  `${CASES_ANALYTICS_INTERNAL_URL}/backfill/run_soon` as const;
+
+/**
  * Telemetry
  */
 export const CASE_TELEMETRY_SAVED_OBJECT = 'cases-telemetry';

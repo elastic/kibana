@@ -9,7 +9,8 @@ import type {
   ISavedObjectsRepository,
   Logger,
   SavedObject,
-  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+  SavedObjectsFindResponse,
 } from '@kbn/core/server';
 import {
   CASE_SAVED_OBJECT,
@@ -22,11 +23,40 @@ import type { UserActionPersistedAttributes } from '../../common/types/user_acti
 import type { CasesAnalyticsWriterContract } from '../writer';
 import type { CasesAnalyticsStateAttributes } from './state_so';
 
+/**
+ * Minimal SO-finder shape the runner needs. Narrower than
+ * `SavedObjectsClientContract` so the unavoidable `as unknown as` cast in
+ * `reconciliation/index.ts` (where we hand an `ISavedObjectsRepository` here)
+ * is checked against just the surface we actually use, not the whole SO API.
+ * If a future change calls a method outside this interface, TypeScript catches
+ * the mistake instead of failing at runtime in production.
+ */
+export interface ReconciliationSavedObjectsFinder {
+  find: <T>(options: SavedObjectsFindOptions) => Promise<SavedObjectsFindResponse<T, unknown>>;
+}
+
+/**
+ * Optional sub-system the runner can drive on each tick. Today only the data
+ * view sync uses this — its `reconcile()` walks templates and refreshes
+ * extended-field runtime mappings. Defined here as a minimal shape so the
+ * runner doesn't depend on the data view module's public types.
+ */
+export interface ReconciliationDataViewService {
+  reconcile: () => Promise<void>;
+}
+
 interface RunnerDeps {
   logger: Logger;
   internalSavedObjectsRepository: ISavedObjectsRepository;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: ReconciliationSavedObjectsFinder;
   writer: CasesAnalyticsWriterContract;
+  /**
+   * Optional. When provided (in production wiring), the runner also refreshes
+   * the data view runtime fields each tick — backstops `onTemplateChanged`
+   * events that may have been missed (transient ES error, node down at
+   * write-time, etc.).
+   */
+  dataViewService?: ReconciliationDataViewService;
 }
 
 const PAGE_SIZE = 100;
@@ -53,6 +83,7 @@ export const runReconciliation = async ({
   internalSavedObjectsRepository,
   unsecuredSavedObjectsClient,
   writer,
+  dataViewService,
 }: RunnerDeps): Promise<void> => {
   const log = logger.get('cases.analytics.reconciliation');
   const startedAt = Date.now();
@@ -86,6 +117,19 @@ export const runReconciliation = async ({
       writer,
       since,
     });
+
+    // Backstop the data view runtime field sync. Runs after the SO sweep so a
+    // newly-discovered template (added between ticks) gets its runtime fields
+    // applied even if the in-process `onTemplateChanged` hook was missed.
+    // Errors are logged inside the data view service; we don't want a runtime
+    // field hiccup to block the watermark from advancing.
+    if (dataViewService != null) {
+      try {
+        await dataViewService.reconcile();
+      } catch (err) {
+        log.warn(`data view reconcile failed during tick: ${err.message}`);
+      }
+    }
 
     await writeState(internalSavedObjectsRepository, log, {
       last_run_at: new Date(startedAt).toISOString(),
@@ -149,7 +193,7 @@ const reconcileCases = async ({
   since,
 }: {
   log: Logger;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: ReconciliationSavedObjectsFinder;
   writer: CasesAnalyticsWriterContract;
   since: string | null;
 }): Promise<number> => {
@@ -177,7 +221,7 @@ const reconcileLifecycle = async ({
   since,
 }: {
   log: Logger;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: ReconciliationSavedObjectsFinder;
   writer: CasesAnalyticsWriterContract;
   since: string | null;
 }): Promise<number> => {
@@ -207,7 +251,7 @@ const reconcileActivity = async ({
   since,
 }: {
   log: Logger;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: ReconciliationSavedObjectsFinder;
   writer: CasesAnalyticsWriterContract;
   since: string | null;
 }): Promise<number> => {
@@ -235,7 +279,7 @@ async function* pagedFind<T>({
   type,
   filter,
 }: {
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  unsecuredSavedObjectsClient: ReconciliationSavedObjectsFinder;
   type: string;
   filter?: string;
 }): AsyncGenerator<Array<SavedObject<T>>> {
