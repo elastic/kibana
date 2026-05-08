@@ -23,7 +23,6 @@ import {
   StepCategory,
 } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
-import { workflowTools } from '../../common/constants';
 import {
   addDynamicConnectorsToCache,
   getAllConnectors,
@@ -31,8 +30,10 @@ import {
   getDeprecatedStepMetadata,
 } from '@kbn/workflows-management-plugin/common/schema';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import { workflowTools } from '../../common/constants';
+
+type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
 interface StepDefinitionForAgent {
   id: string;

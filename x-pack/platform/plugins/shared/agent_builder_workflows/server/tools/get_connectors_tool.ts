@@ -7,10 +7,11 @@
 
 import { ToolType } from '@kbn/agent-builder-common';
 import { z } from '@kbn/zod/v4';
-import { workflowTools } from '../../common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import { workflowTools } from '../../common/constants';
+
+type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
 export function registerGetConnectorsTool(
   agentBuilder: AgentBuilderPluginSetup,
