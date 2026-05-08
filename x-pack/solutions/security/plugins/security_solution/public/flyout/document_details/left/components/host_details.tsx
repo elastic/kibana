@@ -79,7 +79,7 @@ import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_
 import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { PreviewLink } from '../../../shared/components/preview_link';
 import { HostPreviewPanelKey } from '../../../entity_details/host_right';
-import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
+import { HOST_PREVIEW_BANNER } from '../../../../flyout_v2/document/components/host_entity_overview';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
 import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';

@@ -26,6 +26,7 @@ import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { CorrelationsOverview } from './correlations_overview';
 import { PrevalenceOverview } from './prevalence_overview';
+import { EntitiesOverview } from './entities_overview';
 import { PrevalenceDetails } from '../../prevalence';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
@@ -47,6 +48,8 @@ export const INSIGHTS_SECTION_TITLE = i18n.translate(
 );
 
 const LOCAL_STORAGE_SECTION_KEY = 'insights';
+
+const noop = () => {};
 
 export interface InsightsSectionProps {
   /**
@@ -213,6 +216,19 @@ export const InsightsSection = memo(
         sectionId={LOCAL_STORAGE_SECTION_KEY}
         title={INSIGHTS_SECTION_TITLE}
       >
+        <EntitiesOverview
+          hit={hit}
+          renderCellActions={renderCellActions}
+          showIcon={false}
+          onShowEntitiesDetails={noop}
+          onShowUserDetails={noop}
+          onShowHostDetails={noop}
+          onShowUserAlertsDetails={noop}
+          onShowHostAlertsDetails={noop}
+          onShowUserMisconfigurationsDetails={noop}
+          onShowHostMisconfigurationsDetails={noop}
+          onShowHostVulnerabilitiesDetails={noop}
+        />
         {isAlert && (
           <ThreatIntelligenceOverview
             hit={hit}

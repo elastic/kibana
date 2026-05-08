@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { CellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/local_storage';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { CorrelationsOverview } from '../../../../flyout_v2/document/components/correlations_overview';
 import { PrevalenceOverview } from '../../../../flyout_v2/document/components/prevalence_overview';
 import { ThreatIntelligenceOverview } from '../../../../flyout_v2/document/components/threat_intelligence_overview';
+import { EntitiesOverview } from '../../../../flyout_v2/document/components/entities_overview';
 import { INSIGHTS_TEST_ID } from './test_ids';
-import { EntitiesOverview } from './entities_overview';
 import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { getField } from '../../shared/utils';
@@ -25,6 +26,8 @@ import { LeftPanelInsightsTab } from '../../left';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../../../flyout_v2/threat_intelligence';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
+import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
+import { CellActions } from '../../shared/components/cell_actions';
 
 const KEY = 'insights';
 
@@ -32,11 +35,31 @@ const KEY = 'insights';
  * Insights section under overview tab. It contains entities, threat intelligence, prevalence and correlations.
  */
 export const InsightsSection = memo(() => {
-  const { getFieldsData, investigationFields, isPreviewMode, searchHit, scopeId, isRulePreview } =
-    useDocumentDetailsContext();
+  const {
+    dataAsNestedObject,
+    getFieldsData,
+    investigationFields,
+    isPreviewMode,
+    searchHit,
+    scopeId,
+    isRulePreview,
+  } = useDocumentDetailsContext();
   const eventKind = getField(getFieldsData('event.kind'));
 
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+  const renderCellActions = useCallback<CellActionRenderer>(
+    ({ children, field, value }) => (
+      <CellActions field={field} value={value as string | string[] | null | undefined}>
+        {children}
+      </CellActions>
+    ),
+    []
+  );
+
+  const goToEntitiesTab = useNavigateToLeftPanel({
+    tab: LeftPanelInsightsTab,
+    subTab: ENTITIES_TAB_ID,
+  });
 
   const goToThreatIntelligenceTab = useNavigateToLeftPanel({
     tab: LeftPanelInsightsTab,
@@ -72,7 +95,14 @@ export const InsightsSection = memo(() => {
       sectionId={KEY}
       data-test-subj={INSIGHTS_TEST_ID}
     >
-      <EntitiesOverview />
+      <EntitiesOverview
+        hit={hit}
+        dataAsNestedObject={dataAsNestedObject}
+        scopeId={scopeId}
+        showIcon={!isPreviewMode}
+        renderCellActions={renderCellActions}
+        onShowEntitiesDetails={goToEntitiesTab}
+      />
       {eventKind === EventKind.signal && (
         <>
           <EuiSpacer size="s" />

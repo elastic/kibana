@@ -9,13 +9,10 @@ import React from 'react';
 import { act, render } from '@testing-library/react';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { DocumentDetailsContext } from '../../shared/context';
-import {
-  INSIGHTS_CONTENT_TEST_ID,
-  INSIGHTS_ENTITIES_TEST_ID,
-  INSIGHTS_HEADER_TEST_ID,
-} from './test_ids';
+import { INSIGHTS_CONTENT_TEST_ID, INSIGHTS_HEADER_TEST_ID } from './test_ids';
 import {
   CORRELATIONS_TEST_ID,
+  INSIGHTS_ENTITIES_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
   PREVALENCE_TEST_ID,
 } from '../../../../flyout_v2/document/components/test_ids';
@@ -41,6 +38,9 @@ import { useShowRelatedCases } from '../../../../flyout_v2/correlations/hooks/us
 import { useShowSuppressedAlerts } from '../../../../flyout_v2/correlations/hooks/use_show_suppressed_alerts';
 
 jest.mock('../../../../flyout_v2/document/hooks/use_alert_prevalence');
+jest.mock('../../shared/hooks/use_event_details', () => ({
+  useEventDetails: jest.fn(() => ({ dataAsNestedObject: null, loading: false })),
+}));
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
