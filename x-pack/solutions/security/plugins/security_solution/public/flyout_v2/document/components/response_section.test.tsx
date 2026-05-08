@@ -30,11 +30,13 @@ jest.mock('../../shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 jest.mock('./response_section_content', () => ({
-  ResponseSectionContent: jest.fn(({ onShowResponseDetails }: { onShowResponseDetails: () => void }) => (
-    <button data-test-subj="responseSectionContentMock" onClick={onShowResponseDetails}>
-      show
-    </button>
-  )),
+  ResponseSectionContent: jest.fn(
+    ({ onShowResponseDetails }: { onShowResponseDetails: () => void }) => (
+      <button data-test-subj="responseSectionContentMock" onClick={onShowResponseDetails}>
+        show
+      </button>
+    )
+  ),
 }));
 
 const mockOpenSystemFlyout = jest.fn();
@@ -51,9 +53,7 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
 
 const alertMockHit = createMockHit({ 'event.kind': 'signal' });
 
-const renderResponseSection = ({
-  isRulePreview = false,
-}: { isRulePreview?: boolean } = {}) =>
+const renderResponseSection = ({ isRulePreview = false }: { isRulePreview?: boolean } = {}) =>
   render(
     <Provider store={store}>
       <Router history={history}>

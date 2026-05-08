@@ -34,7 +34,9 @@ const hitWithoutAlertId = {
 jest.mock('../../../common/components/user_privileges');
 jest.mock('../../../management/hooks/response_actions/use_get_automated_action_list');
 jest.mock('../../../common/components/response_actions/response_actions_empty_prompt', () => ({
-  ResponseActionsEmptyPrompt: jest.fn(() => <div data-test-subj="responseActionsEmptyPromptMock" />),
+  ResponseActionsEmptyPrompt: jest.fn(() => (
+    <div data-test-subj="responseActionsEmptyPromptMock" />
+  )),
 }));
 
 const useGetAutomatedActionListMock = useGetAutomatedActionList as jest.Mock;
