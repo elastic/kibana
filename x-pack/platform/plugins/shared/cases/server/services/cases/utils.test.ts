@@ -432,7 +432,7 @@ describe('constructSearchQuery with extendedFieldFilters', () => {
           {
             bool: {
               filter: [
-                { term: { ef_priority_as_keyword: { value: 'high' } } },
+                { term: { 'cases.extended_fields.priority_as_keyword': 'high' } },
                 {
                   bool: {
                     minimum_should_match: 1,
@@ -512,7 +512,7 @@ describe('constructSearchQuery with extendedFieldFilters', () => {
           {
             bool: {
               filter: [
-                { term: { ef_priority_as_keyword: { value: 'high' } } },
+                { term: { 'cases.extended_fields.priority_as_keyword': 'high' } },
                 {
                   bool: {
                     minimum_should_match: 1,
@@ -534,7 +534,7 @@ describe('constructSearchQuery with extendedFieldFilters', () => {
           {
             bool: {
               filter: [
-                { term: { ef_region_as_keyword: { value: 'emea' } } },
+                { term: { 'cases.extended_fields.region_as_keyword': 'emea' } },
                 {
                   bool: {
                     minimum_should_match: 1,
@@ -579,7 +579,7 @@ describe('constructSearchQuery with fieldLabelFilters', () => {
           {
             bool: {
               filter: [
-                { exists: { field: 'ef_priority_as_keyword' } },
+                { exists: { field: 'cases.extended_fields.priority_as_keyword' } },
                 {
                   bool: {
                     should: [
@@ -619,7 +619,7 @@ describe('constructSearchQuery with fieldLabelFilters', () => {
     const existsClause = shouldClauses!.find(
       (c: estypes.QueryDslQueryContainer) =>
         (c?.bool?.filter as estypes.QueryDslQueryContainer[])?.[0]?.exists?.field ===
-        'ef_priority_as_keyword'
+        'cases.extended_fields.priority_as_keyword'
     );
     expect(existsClause).toBeDefined();
 
@@ -657,11 +657,11 @@ describe('constructSearchQuery with fieldLabelFilters', () => {
     expect(shouldWrapper?.bool?.should).toBeDefined();
     const shouldClauses = shouldWrapper!.bool!.should as estypes.QueryDslQueryContainer[];
     const innerFilter = shouldClauses[0]?.bool?.filter as estypes.QueryDslQueryContainer[];
-    expect(innerFilter?.[0]?.exists?.field).toBe('ef_priority_as_keyword');
+    expect(innerFilter?.[0]?.exists?.field).toBe('cases.extended_fields.priority_as_keyword');
 
     const extendedFilter = filter[1];
     const extFilterClauses = extendedFilter?.bool?.filter as estypes.QueryDslQueryContainer[];
-    expect(extFilterClauses?.[0]?.term?.ef_region_as_keyword).toBeDefined();
+    expect(extFilterClauses?.[0]?.term?.['cases.extended_fields.region_as_keyword']).toBeDefined();
   });
 
   it('returns undefined when no search, caseIds, extendedFieldFilters, or fieldLabelFilters', () => {
@@ -758,5 +758,69 @@ describe('constructSearchQuery with runtime fields (EF_ALL_VALUES_FIELD)', () =>
     });
 
     expect(result).toBeUndefined();
+  });
+
+  it('splits multi-word search into bool.must of individual term queries', () => {
+    const result = constructSearchQuery({
+      search: 'test text',
+      searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
+      caseIds: [],
+    });
+
+    const shouldClauses = result?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
+    expect(shouldClauses).toBeDefined();
+
+    const runtimeClause = shouldClauses!.find(
+      (c: estypes.QueryDslQueryContainer) => c?.bool?.must != null
+    );
+    expect(runtimeClause).toEqual({
+      bool: {
+        must: [
+          { term: { [EF_ALL_VALUES_FIELD]: { value: 'test', case_insensitive: true } } },
+          { term: { [EF_ALL_VALUES_FIELD]: { value: 'text', case_insensitive: true } } },
+        ],
+      },
+    });
+  });
+
+  it('handles multi-word search with extra whitespace', () => {
+    const result = constructSearchQuery({
+      search: '  test   text  ',
+      searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
+      caseIds: [],
+    });
+
+    const shouldClauses = result?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
+    expect(shouldClauses).toBeDefined();
+
+    const runtimeClause = shouldClauses!.find(
+      (c: estypes.QueryDslQueryContainer) => c?.bool?.must != null
+    );
+    expect(runtimeClause).toEqual({
+      bool: {
+        must: [
+          { term: { [EF_ALL_VALUES_FIELD]: { value: 'test', case_insensitive: true } } },
+          { term: { [EF_ALL_VALUES_FIELD]: { value: 'text', case_insensitive: true } } },
+        ],
+      },
+    });
+  });
+
+  it('uses a simple term query for single-word search', () => {
+    const result = constructSearchQuery({
+      search: 'spy',
+      searchFields: DEFAULT_CASE_RUNTIME_FIELDS,
+      caseIds: [],
+    });
+
+    const shouldClauses = result?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
+    expect(shouldClauses).toBeDefined();
+
+    const runtimeClause = shouldClauses!.find(
+      (c: estypes.QueryDslQueryContainer) => c?.term?.[EF_ALL_VALUES_FIELD] != null
+    );
+    expect(runtimeClause).toEqual({
+      term: { [EF_ALL_VALUES_FIELD]: { value: 'spy', case_insensitive: true } },
+    });
   });
 });
