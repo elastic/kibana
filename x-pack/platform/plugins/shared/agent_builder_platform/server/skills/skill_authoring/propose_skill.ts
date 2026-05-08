@@ -112,7 +112,7 @@ export const createProposeSkillTool = (): BuiltinSkillBoundedTool<typeof propose
       };
     }
 
-    const data: SkillDraftAttachmentData = { ...parsed.data, is_latest: true };
+    const data: SkillDraftAttachmentData = parsed.data;
 
     try {
       const attachment = await attachments.add(

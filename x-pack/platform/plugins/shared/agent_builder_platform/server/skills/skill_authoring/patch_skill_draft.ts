@@ -264,7 +264,6 @@ export const createPatchSkillDraftTool = (): BuiltinSkillBoundedTool<
       content: nextContent,
       tool_ids: toolIds ?? current.tool_ids,
       ...(nextReferenced.length > 0 ? { referenced_content: nextReferenced } : {}),
-      is_latest: true,
     };
 
     const validated = skillCreateRequestSchema.safeParse(merged);

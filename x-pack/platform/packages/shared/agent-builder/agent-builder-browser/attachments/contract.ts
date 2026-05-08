@@ -115,8 +115,14 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
   getLabel: (attachment: TAttachment) => string;
   /**
    * Returns the icon type to display for the attachment.
+   * When provided, the icon is rendered in the inline attachment header alongside the title.
    */
   getIcon?: () => IconType;
+  /**
+   * Optional badge or content rendered below the title in the inline attachment header.
+   * Use for status indicators such as Draft/Created state.
+   */
+  getHeaderBadge?: (attachment: TAttachment) => ReactNode;
   /**
    * Optional custom click handler for attachment pills.
    * When provided, pills will invoke this instead of the default behavior.

@@ -6,15 +6,18 @@
  */
 
 import React from 'react';
+import type { ReactNode } from 'react';
 import {
   EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiSplitPanel,
-  EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import { i18n } from '@kbn/i18n';
@@ -39,6 +42,10 @@ export const HEADER_HEIGHT = 72;
 
 interface AttachmentHeaderProps {
   title: string;
+  /** Optional icon rendered to the left of the title, sized to span title + badge height. */
+  icon?: IconType;
+  /** Optional badge or content rendered below the title, inside the header. */
+  headerBadge?: ReactNode;
   actionButtons?: ActionButton[];
   onClose?: () => void;
   /**
@@ -52,18 +59,13 @@ interface AttachmentHeaderProps {
 
 export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
   title,
+  icon,
+  headerBadge,
   actionButtons,
   onClose,
   previewBadgeState = 'none',
 }) => {
   const { euiTheme } = useEuiTheme();
-
-  const textStyles = css`
-    font-weight: ${euiTheme.font.weight.semiBold};
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  `;
 
   const headerStyles = css`
     position: relative;
@@ -82,7 +84,17 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     z-index: ${euiTheme.levels.content};
   `;
 
-  if (!actionButtons || actionButtons.length === 0) {
+  const iconContainerStyles = css`
+    border-right: ${euiTheme.border.thin};
+    padding: ${euiTheme.size.m};
+    padding-left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  `;
+
+  if (!actionButtons?.length && !icon && !headerBadge) {
     return null;
   }
 
@@ -98,17 +110,36 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
         justifyContent="spaceBetween"
         alignItems="center"
         style={{ width: '100%' }}
+        gutterSize="s"
       >
+        {icon && (
+          <EuiFlexItem grow={false}>
+            <div css={iconContainerStyles}>
+              <EuiIcon type={icon} size="l" color="subdued" aria-hidden={true} />
+            </div>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-          <EuiText css={textStyles} size="s">
-            {title}
-          </EuiText>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="xs"
+            alignItems="flexStart"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                {/* h3 would be semantically preferred, but browser UA styles override EuiTitle's size prop here; h5 native size is close enough to xs that it doesn't. */}
+                <h5>{title}</h5>
+              </EuiTitle>
+            </EuiFlexItem>
+            {headerBadge && <EuiFlexItem grow={false}>{headerBadge}</EuiFlexItem>}
+          </EuiFlexGroup>
         </EuiFlexItem>
-        {previewBadgeState !== 'previewing' && (
+        {previewBadgeState !== 'previewing' && actionButtons?.length ? (
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
             <AttachmentActions buttons={actionButtons} />
           </EuiFlexItem>
-        )}
+        ) : null}
         {previewBadgeState === 'previewing' && (
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
             <EuiBadge iconType="eye" color="success">
