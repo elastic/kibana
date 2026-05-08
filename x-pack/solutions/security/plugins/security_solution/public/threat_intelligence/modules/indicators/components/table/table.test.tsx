@@ -13,7 +13,7 @@ import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { generateMockIndicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { BUTTON_TEST_ID, TABLE_UPDATE_PROGRESS_TEST_ID } from './test_ids';
-import { INDICATORS_FLYOUT_TITLE_TEST_ID } from '../../../../../flyout/ioc_details/header';
+import { IOC_DETAILS_TITLE_TEST_ID } from '../../../../../flyout_v2/ioc/test_ids';
 
 jest.mock('../../../../hooks/use_investigate_in_timeline', () => ({
   useInvestigateInTimeline: jest.fn(() => ({ investigateInTimelineFn: jest.fn() })),
@@ -114,7 +114,7 @@ describe('<IndicatorsTable />', () => {
       screen.getAllByTestId(BUTTON_TEST_ID)[0].click();
     });
 
-    expect(screen.queryByTestId(INDICATORS_FLYOUT_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(IOC_DETAILS_TITLE_TEST_ID)).toBeInTheDocument();
 
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
     expect(screen.queryByTestId(TABLE_UPDATE_PROGRESS_TEST_ID)).not.toBeInTheDocument();
