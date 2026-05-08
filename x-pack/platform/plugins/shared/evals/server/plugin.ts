@@ -13,7 +13,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME, EVALS_API_PRIVILEGES, EVALS_UI_PRIVILEGES } from '../common';
 import type { EvalsConfig } from './config';
 import {
   EVALS_REMOTE_KIBANA_CONFIG_SAVED_OBJECT_TYPE,
@@ -86,23 +86,23 @@ export class EvalsPlugin
       privileges: {
         all: {
           app: ['kibana', PLUGIN_ID],
-          api: [PLUGIN_ID],
+          api: [EVALS_API_PRIVILEGES.read, EVALS_API_PRIVILEGES.manage],
           management: { ai: [PLUGIN_ID] },
           savedObject: {
             all: [],
             read: [],
           },
-          ui: ['show'],
+          ui: [EVALS_UI_PRIVILEGES.show, EVALS_UI_PRIVILEGES.manage],
         },
         read: {
           app: ['kibana', PLUGIN_ID],
-          api: [PLUGIN_ID],
+          api: [EVALS_API_PRIVILEGES.read],
           management: { ai: [PLUGIN_ID] },
           savedObject: {
             all: [],
             read: [],
           },
-          ui: ['show'],
+          ui: [EVALS_UI_PRIVILEGES.show],
         },
       },
     });

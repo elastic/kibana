@@ -68,6 +68,11 @@ export class EvalsPublicPlugin
     };
 
     const openAddToDatasetFlyout = (options: AddToDatasetFlyoutOpenOptions) => {
+      const canManage = !!core.application.capabilities[PLUGIN_ID]?.manage;
+      if (!canManage) {
+        return;
+      }
+
       void (async () => {
         const { AddToDatasetFlyout } = await import('./components/add_to_dataset_flyout');
         const overlayRef = core.overlays.openFlyout(
