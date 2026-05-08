@@ -16,6 +16,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import {
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
@@ -27,7 +28,6 @@ import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../common/advanced
 import { ActionPoliciesApi } from './services/action_policies_api';
 import { RulesApi } from './services/rules_api';
 import { WorkflowsApi } from './services/workflows_api';
-import { WorkflowExtensionsService } from './services/workflow_extensions_service';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { setKibanaServices } from './kibana_services';
 import { DynamicRuleFormFlyout } from './create_rule_form_flyout';
@@ -40,18 +40,16 @@ export const module = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
   bind(ActionPoliciesApi).toSelf().inSingletonScope();
   bind(WorkflowsApi).toSelf().inSingletonScope();
-  bind(WorkflowExtensionsService)
-    .toDynamicValue(
-      ({ get }) => new WorkflowExtensionsService(get(PluginSetup('workflowsExtensions')))
-    )
-    .inSingletonScope();
   bind(Start).toConstantValue({
     DynamicRuleFormFlyout,
   } satisfies AlertingV2PublicStart);
   bind(OnSetup).toConstantValue((container) => {
     const getStartServices = container.get(CoreSetup('getStartServices'));
+    const workflowsExtensionsSetup = container.get(
+      PluginSetup('workflowsExtensions')
+    ) as WorkflowsExtensionsPublicPluginSetup;
 
-    registerTriggerDefinitions(container.get(WorkflowExtensionsService));
+    registerTriggerDefinitions(workflowsExtensionsSetup);
 
     getStartServices().then(([coreStart]) => {
       const diContainer = coreStart.injection.getContainer();
