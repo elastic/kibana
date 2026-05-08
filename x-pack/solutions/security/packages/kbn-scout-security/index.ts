@@ -42,6 +42,7 @@ export type {
   SecurityParallelTestFixtures,
   SecurityParallelApiServicesFixture,
   SecurityParallelWorkerFixtures,
+  ThreatMatchRuleCreatePage,
 } from './src/playwright';
 
 // Re-exported Scout core types
