@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useShouldShowGraph } from '../../../flyout/shared/hooks/use_should_show_graph';
-import { useGraphPreviewData } from './use_graph_preview_data';
+import { useGraphPreview } from './use_graph_preview';
 
 jest.mock('@kbn/entity-store/public');
 jest.mock('../../../flyout/shared/hooks/use_should_show_graph');
@@ -39,7 +39,7 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
     isAnchor: false,
   } as DataTableRecord);
 
-describe('useGraphPreviewData', () => {
+describe('useGraphPreview', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useEntityStoreEuidApi).mockReturnValue(mockEuidApi as never);
@@ -47,7 +47,7 @@ describe('useGraphPreviewData', () => {
   });
 
   it('returns hasGraphData=false for an empty hit', () => {
-    const { result } = renderHook(() => useGraphPreviewData(createMockHit({})));
+    const { result } = renderHook(() => useGraphPreview(createMockHit({})));
 
     expect(result.current.hasGraphData).toBe(false);
     expect(result.current.shouldShowGraph).toBe(false);
@@ -70,7 +70,7 @@ describe('useGraphPreviewData', () => {
       'host.target.name': 'host-2',
     });
 
-    const { result } = renderHook(() => useGraphPreviewData(hit));
+    const { result } = renderHook(() => useGraphPreview(hit));
 
     expect(result.current.timestamp).toBe('2025-01-01T00:00:00.000Z');
     expect(result.current.eventIds).toEqual(['original-event-id']);
@@ -92,7 +92,7 @@ describe('useGraphPreviewData', () => {
       'user.target.name': 'bob',
     });
 
-    const { result } = renderHook(() => useGraphPreviewData(hit));
+    const { result } = renderHook(() => useGraphPreview(hit));
 
     expect(result.current.eventIds).toEqual(['event-id']);
     expect(result.current.isAlert).toBe(false);
@@ -109,7 +109,7 @@ describe('useGraphPreviewData', () => {
       'user.target.name': 'bob',
     });
 
-    const { result } = renderHook(() => useGraphPreviewData(hit));
+    const { result } = renderHook(() => useGraphPreview(hit));
 
     expect(result.current.hasGraphData).toBe(true);
     expect(result.current.shouldShowGraph).toBe(false);
@@ -126,7 +126,7 @@ describe('useGraphPreviewData', () => {
       'user.name': 'alice',
     });
 
-    const { result } = renderHook(() => useGraphPreviewData(hit));
+    const { result } = renderHook(() => useGraphPreview(hit));
 
     expect(result.current.actorIds).toEqual([]);
     expect(result.current.targetIds).toEqual([]);

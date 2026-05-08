@@ -19,7 +19,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
 import { GraphPreview } from '../../../flyout/shared/components/graph_preview';
-import { useGraphPreviewData } from '../../graph/hooks/use_graph_preview_data';
+import { useGraphPreview } from '../hooks/use_graph_preview';
 import { GRAPH_PREVIEW_TECHNICAL_PREVIEW_TEST_ID, GRAPH_PREVIEW_TEST_ID } from './test_ids';
 
 export interface GraphPreviewContainerProps {
@@ -48,7 +48,7 @@ export interface GraphPreviewContainerProps {
 export const GraphPreviewContainer = memo(
   ({ hit, onShowGraph, showIcon, disableNavigation }: GraphPreviewContainerProps) => {
     const renderingId = useGeneratedHtmlId();
-    const { eventIds, timestamp, isAlert, shouldShowGraph } = useGraphPreviewData(hit);
+    const { eventIds, timestamp, isAlert, shouldShowGraph } = useGraphPreview(hit);
 
     const iconType = useMemo(() => (showIcon ? 'arrowStart' : undefined), [showIcon]);
     const isNavigationEnabled = !disableNavigation;

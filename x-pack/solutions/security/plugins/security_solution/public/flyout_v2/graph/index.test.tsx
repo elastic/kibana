@@ -10,9 +10,9 @@ import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { Graph, GRAPH_TEST_ID } from '.';
-import { useGraphPreviewData } from './hooks/use_graph_preview_data';
+import { useGraphPreview } from '../document/hooks/use_graph_preview';
 
-jest.mock('./hooks/use_graph_preview_data');
+jest.mock('../document/hooks/use_graph_preview');
 jest.mock('../../flyout/shared/components/graph_visualization', () => ({
   GraphVisualization: jest.fn(() => <div data-test-subj="sharedGraphVisualizationMock" />),
 }));
@@ -22,7 +22,7 @@ jest.mock('../shared/components/tools_flyout_header', () => ({
   ),
 }));
 
-const mockUseGraphPreviewData = jest.mocked(useGraphPreviewData);
+const mockUseGraphPreview = jest.mocked(useGraphPreview);
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -48,7 +48,7 @@ describe('Graph (tools flyout)', () => {
   });
 
   it('returns null when there are no event ids', () => {
-    mockUseGraphPreviewData.mockReturnValue({
+    mockUseGraphPreview.mockReturnValue({
       eventIds: [],
       timestamp: '2025-01-01T00:00:00.000Z',
       actorIds: [],
@@ -65,7 +65,7 @@ describe('Graph (tools flyout)', () => {
   });
 
   it('returns null when timestamp is missing', () => {
-    mockUseGraphPreviewData.mockReturnValue({
+    mockUseGraphPreview.mockReturnValue({
       eventIds: ['event-id'],
       timestamp: null,
       actorIds: [],
@@ -82,7 +82,7 @@ describe('Graph (tools flyout)', () => {
   });
 
   it('renders the header and the shared graph visualization when data is present', () => {
-    mockUseGraphPreviewData.mockReturnValue({
+    mockUseGraphPreview.mockReturnValue({
       eventIds: ['event-id'],
       timestamp: '2025-01-01T00:00:00.000Z',
       actorIds: ['alice'],

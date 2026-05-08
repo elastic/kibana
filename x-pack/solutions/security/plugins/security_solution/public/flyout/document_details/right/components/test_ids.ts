@@ -114,9 +114,6 @@ export const VISUALIZATIONS_TEST_ID = `${PREFIX}Visualizations` as const;
 export const VISUALIZATIONS_SECTION_HEADER_TEST_ID = VISUALIZATIONS_TEST_ID + HEADER_TEST_ID;
 export const VISUALIZATIONS_SECTION_CONTENT_TEST_ID = VISUALIZATIONS_TEST_ID + CONTENT_TEST_ID;
 
-export const GRAPH_PREVIEW_TEST_ID = `${PREFIX}GraphPreview` as const;
-export const GRAPH_PREVIEW_LOADING_TEST_ID = `${GRAPH_PREVIEW_TEST_ID}Loading` as const;
-
 /* Response section */
 
 const RESPONSE_TEST_ID = `${PREFIX}Response` as const;

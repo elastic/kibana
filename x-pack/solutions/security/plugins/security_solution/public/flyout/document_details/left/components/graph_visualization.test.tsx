@@ -109,9 +109,7 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
 
 jest.mock('../../shared/context', () => ({
   useDocumentDetailsContext: () => ({
-    getFieldsData: jest.fn(),
-    dataAsNestedObject: {},
-    dataFormattedForFieldBrowser: {},
+    searchHit: { _id: 'doc-1', _index: 'idx', _source: {} },
     scopeId: 'test-scope',
   }),
 }));
@@ -119,7 +117,7 @@ jest.mock('../../shared/context', () => ({
 const MOCK_EVENT_IDS = ['event-1', 'event-2'];
 const MOCK_TIMESTAMP = new Date().toISOString();
 
-jest.mock('../../shared/hooks/use_graph_preview', () => ({
+jest.mock('../../../../flyout_v2/document/hooks/use_graph_preview', () => ({
   useGraphPreview: () => ({
     eventIds: MOCK_EVENT_IDS,
     timestamp: MOCK_TIMESTAMP,

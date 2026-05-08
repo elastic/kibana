@@ -14,7 +14,7 @@ import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { PREFIX } from '../../flyout/shared/test_ids';
 import { GraphVisualization as SharedGraphVisualization } from '../../flyout/shared/components/graph_visualization';
-import { useGraphPreviewData } from './hooks/use_graph_preview_data';
+import { useGraphPreview } from '../document/hooks/use_graph_preview';
 
 export const GRAPH_TEST_ID = `${PREFIX}Graph` as const;
 
@@ -45,7 +45,7 @@ export interface GraphProps {
  */
 export const Graph = memo(({ hit, renderCellActions, onAlertUpdated }: GraphProps) => {
   const { euiTheme } = useEuiTheme();
-  const { eventIds, timestamp, isAlert } = useGraphPreviewData(hit);
+  const { eventIds, timestamp, isAlert } = useGraphPreview(hit);
 
   if (eventIds.length === 0 || !timestamp) {
     return null;

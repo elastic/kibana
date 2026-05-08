@@ -16,9 +16,9 @@ import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { getField, getFieldArray } from '../../../flyout/document_details/shared/utils';
 import { useShouldShowGraph } from '../../../flyout/shared/hooks/use_should_show_graph';
-import { EventKind } from '../../document/constants/event_kinds';
+import { EventKind } from '../constants/event_kinds';
 
-export interface UseGraphPreviewDataResult {
+export interface UseGraphPreviewResult {
   /**
    * The timestamp of the event
    */
@@ -70,11 +70,11 @@ const EMPTY_EUID_SOURCE_FIELDS: EuidSourceFields = {
 };
 
 /**
- * Hit-based equivalent of the legacy `useGraphPreview` that derives all graph parameters
- * from a `DataTableRecord` instead of `useDocumentDetailsContext`. Used by the Flyout v2
- * Graph tools flyout and the v2 Graph preview.
+ * Derives all graph parameters from a `DataTableRecord`. Used by the Flyout v2 Graph
+ * tools flyout and the v2 Graph preview, and by the legacy expandable-flyout graph
+ * surfaces (which build a `hit` from their document context).
  */
-export const useGraphPreviewData = (hit: DataTableRecord): UseGraphPreviewDataResult => {
+export const useGraphPreview = (hit: DataTableRecord): UseGraphPreviewResult => {
   const euidApi = useEntityStoreEuidApi();
   const euid = euidApi?.euid;
 
