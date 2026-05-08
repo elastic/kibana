@@ -34,7 +34,7 @@ import { initializeLogRateAnalysisControls } from './initialize_log_rate_analysi
 import type { LogRateAnalysisEmbeddableApi } from './types';
 import { EmbeddableLogRateAnalysisUserInput } from './log_rate_analysis_config_input';
 import type { LogRateAnalysisEmbeddableState } from '../../../common/embeddables/log_rate_analysis/types';
-import { ensureCapabilities } from '../ensure_capabilities';
+import { canUseAiops } from '../../capabilities';
 
 export type EmbeddableLogRateAnalysisType = typeof EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE;
 
@@ -45,7 +45,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
     type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
-      ensureCapabilities(coreStart);
+      canUseAiops(coreStart, true);
       const runtimeState = initialState;
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const titleManager = initializeTitleManager(initialState);
