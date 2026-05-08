@@ -180,7 +180,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
                 css={css`
                   margin-right: 4px;
                 `}
-                aria-hidden={true}
               />
               <EuiText size="xs">
                 {i18n.translate('esqlDataGrid.openInDiscoverLabel', {
