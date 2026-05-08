@@ -114,6 +114,10 @@ describe('WorkflowExecutionState', () => {
       workflowRunId: 'test-workflow-execution-id',
       workflowId: 'test-workflow-id',
       stepId: 'test-step-execution-id',
+      // `scopeStack` is required on the schema; createStep now defaults to []
+      // when the caller did not supply one (previously it left undefined,
+      // which would write `null` into ES on bulk upsert).
+      scopeStack: [],
       status: ExecutionStatus.RUNNING,
       startedAt: '2025-08-05T20:00:00.000Z',
       stepExecutionIndex: 0,

@@ -240,9 +240,11 @@ describe('StepIoService', () => {
       expect(state.getStepExecution('step-2')?.output).toBeUndefined();
     });
 
-    it('ignores negative sizes (safeOutputSize -1 sentinel)', () => {
+    it('ignores negative or non-finite sizes (defensive against legacy callers)', () => {
       const { service } = buildHarness();
       service.recordOutputSize('step-1', -1);
+      service.recordOutputSize('step-2', NaN);
+      service.recordOutputSize('step-3', Infinity);
       expect(service.getOutputSizeStats()).toEqual({ totalBytes: 0, stepCount: 0 });
     });
   });
@@ -451,7 +453,7 @@ describe('StepIoService', () => {
       expect(service.hasEvictedOutputs()).toBe(false);
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['step-1'],
-        ['id', 'output']
+        ['id', 'output', 'workflowRunId']
       );
     });
 
@@ -799,6 +801,108 @@ describe('StepIoService', () => {
     });
   });
 
+  describe('evictCompletedLoopsOnResume', () => {
+    // Logic moved here from WorkflowExecutionRuntimeManager — see B.6 in the
+    // review. The runtime manager test now only verifies delegation; the
+    // behavioural assertions live next to the implementation.
+
+    function makeGraph(innerStepIdsByLoop: Record<string, Set<string>>) {
+      return {
+        getInnerStepIds: jest.fn(
+          (loopStepId: string) => innerStepIdsByLoop[loopStepId] ?? new Set()
+        ),
+      };
+    }
+
+    it('evicts inner step outputs for completed foreach loops', () => {
+      const { state, service } = buildHarness();
+      state.upsertStep({
+        id: 'foreach-1',
+        stepId: 'myForeach',
+        stepType: 'foreach',
+        status: ExecutionStatus.COMPLETED,
+      } as Partial<EsWorkflowStepExecution>);
+      const graph = makeGraph({ myForeach: new Set(['inner']) });
+
+      service.evictCompletedLoopsOnResume(graph);
+
+      expect(graph.getInnerStepIds).toHaveBeenCalledWith('myForeach');
+    });
+
+    it('evicts inner step outputs for completed while loops', () => {
+      const { state, service } = buildHarness();
+      state.upsertStep({
+        id: 'while-1',
+        stepId: 'myWhile',
+        stepType: 'while',
+        status: ExecutionStatus.COMPLETED,
+      } as Partial<EsWorkflowStepExecution>);
+      const graph = makeGraph({ myWhile: new Set(['body']) });
+
+      service.evictCompletedLoopsOnResume(graph);
+
+      expect(graph.getInnerStepIds).toHaveBeenCalledWith('myWhile');
+    });
+
+    it('skips loops still running at resume time', () => {
+      const { state, service } = buildHarness();
+      state.upsertStep({
+        id: 'foreach-1',
+        stepId: 'midForeach',
+        stepType: 'foreach',
+        status: ExecutionStatus.RUNNING,
+      } as Partial<EsWorkflowStepExecution>);
+      const graph = makeGraph({});
+
+      service.evictCompletedLoopsOnResume(graph);
+
+      expect(graph.getInnerStepIds).not.toHaveBeenCalled();
+    });
+
+    it('de-duplicates by stepId when a nested loop has multiple COMPLETED executions', () => {
+      const { state, service } = buildHarness();
+      // 3 executions of the same inner loop, all COMPLETED.
+      state.upsertStep({
+        id: 'inner-1',
+        stepId: 'innerForeach',
+        stepType: 'foreach',
+        status: ExecutionStatus.COMPLETED,
+      } as Partial<EsWorkflowStepExecution>);
+      state.upsertStep({
+        id: 'inner-2',
+        stepId: 'innerForeach',
+        stepType: 'foreach',
+        status: ExecutionStatus.COMPLETED,
+      } as Partial<EsWorkflowStepExecution>);
+      state.upsertStep({
+        id: 'inner-3',
+        stepId: 'innerForeach',
+        stepType: 'foreach',
+        status: ExecutionStatus.COMPLETED,
+      } as Partial<EsWorkflowStepExecution>);
+      const graph = makeGraph({ innerForeach: new Set(['deepAction']) });
+
+      service.evictCompletedLoopsOnResume(graph);
+
+      expect(graph.getInnerStepIds).toHaveBeenCalledTimes(1);
+    });
+
+    it('is a no-op when there are no loop steps', () => {
+      const { state, service } = buildHarness();
+      state.upsertStep({
+        id: 'a',
+        stepId: 'action1',
+        stepType: 'slack',
+        status: ExecutionStatus.COMPLETED,
+      } as Partial<EsWorkflowStepExecution>);
+      const graph = makeGraph({});
+
+      service.evictCompletedLoopsOnResume(graph);
+
+      expect(graph.getInnerStepIds).not.toHaveBeenCalled();
+    });
+  });
+
   describe('load (resume-time deferred outputs)', () => {
     /**
      * Drives the public `service.load()` path with mocked repository
@@ -952,7 +1056,7 @@ describe('StepIoService', () => {
       // Only step_b is referenced by step_c — exec-a should not be rehydrated.
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['exec-b'],
-        ['id', 'output']
+        ['id', 'output', 'workflowRunId']
       );
     });
 
@@ -995,7 +1099,7 @@ describe('StepIoService', () => {
 
       expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledWith(
         ['exec-a'],
-        ['id', 'output']
+        ['id', 'output', 'workflowRunId']
       );
     });
   });

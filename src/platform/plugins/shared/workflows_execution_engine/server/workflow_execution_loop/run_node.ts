@@ -143,7 +143,19 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     // rehydrated for this step's read. Without this, resume tasks would
     // progressively grow in-memory state by accumulating outputs they only
     // briefly needed.
-    params.stepIoService.releaseTransientlyRehydratedOutputs();
+    //
+    // Skip the release when the step failed and the workflow is still
+    // running — that combination signals an in-flight retry / on-failure
+    // handler that will need the same predecessor outputs on the next
+    // attempt. Releasing now would cost a redundant ES round-trip per retry
+    // attempt for a large predecessor.
+    const stepFinished = stepExecutionRuntime?.stepExecution;
+    const willRetry =
+      stepFinished?.status === ExecutionStatus.FAILED &&
+      params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING;
+    if (!willRetry) {
+      params.stepIoService.releaseTransientlyRehydratedOutputs();
+    }
 
     nodeSpan?.end();
   }

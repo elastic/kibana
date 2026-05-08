@@ -11,9 +11,9 @@ import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowStepExecution, SerializedError, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { GraphNodeUnion } from '@kbn/workflows/graph';
+import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { extractReferencedStepIds } from './extract_referenced_step_ids';
-import { EVICTION_EXEMPT_STEP_TYPES } from './step_io_pinned_types';
+import { EVICTION_EXEMPT_STEP_TYPES, LOOP_STEP_TYPES } from './step_io_pinned_types';
 import type { StepIoStateAccessor } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { OutputSizeStats } from '../lib/telemetry/events/workflows_execution/types';
@@ -62,6 +62,57 @@ export interface PrepareForReadArgs {
 }
 
 /**
+ * Read-only IO surface used by node implementations and the context manager.
+ * Constructor-inject this (instead of the full service) into consumers that
+ * have no business mutating step state — the compiler then prevents an
+ * accidental `flush()` or eviction call from a node implementation.
+ */
+export interface StepIoReader {
+  getStepOutput(stepExecutionId: string): JsonValue | null | undefined;
+  getStepInput(stepExecutionId: string): JsonValue | undefined;
+  getStepError(stepExecutionId: string): SerializedError | undefined;
+  getLatestStepIO(stepId: string):
+    | {
+        input: JsonValue | undefined;
+        output: JsonValue | null | undefined;
+        error: SerializedError | undefined;
+      }
+    | undefined;
+  getDataSetVariables(): Record<string, unknown>;
+  recordOutputSize(stepExecutionId: string, bytes: number): void;
+}
+
+/**
+ * Reader + write surface used by the per-step runtime. Adds the atomic
+ * write transitions (`completeStep`, `failStep`, `setStepInput`).
+ */
+export interface StepIoWriter extends StepIoReader {
+  setStepInput(stepExecutionId: string, input: JsonValue): void;
+  completeStep(args: CompleteStepArgs): void;
+  failStep(args: FailStepArgs): void;
+}
+
+/**
+ * Lifecycle surface used by the workflow execution loop and runtime manager.
+ * Includes flush/load/eviction/rehydration entry points that node code must
+ * never call. Kept disjoint from {@link StepIoReader} on purpose — a loop
+ * step impl should not be able to drive a flush or evict outputs.
+ */
+export interface StepIoLifecycle {
+  flush(): Promise<void>;
+  flushStepChanges(): Promise<void>;
+  load(): Promise<void>;
+  prepareForRead(args: PrepareForReadArgs): Promise<void>;
+  releaseTransientlyRehydratedOutputs(): void;
+  evictStaleLoopOutputs(innerStepIds: Iterable<string>): void;
+  evictCompletedLoopsOnResume(graph: {
+    getInnerStepIds(loopStepId: string): Iterable<string>;
+  }): void;
+  hasEvictedOutputs(): boolean;
+  getOutputSizeStats(): OutputSizeStats;
+}
+
+/**
  * Owns the in-memory IO lifecycle of a workflow run:
  *
  * - **Reads/writes** of step `input`/`output` (delegated through narrow
@@ -83,7 +134,7 @@ export interface PrepareForReadArgs {
  * store and ES persistence primitives. The dependency graph is one-way:
  * service → state → repositories.
  */
-export class StepIoService {
+export class StepIoService implements StepIoWriter, StepIoLifecycle {
   private readonly stepRepository: StepExecutionRepository;
   private readonly state: StepIoStateAccessor;
   private readonly pinnedStepTypes: ReadonlySet<string>;
@@ -104,6 +155,15 @@ export class StepIoService {
    * outputs they only briefly needed.
    */
   private transientlyRehydratedIds: string[] = [];
+
+  /**
+   * Memoised `data.set` aggregation. `getVariables()` is called from every
+   * `getContext()` (5–10× per step), and the underlying walk filters and
+   * sorts every step execution. Cache invalidation: any write that touches a
+   * `data.set` step (creation, completion, failure) clears this — see
+   * `invalidateDataSetCacheIfNeeded`.
+   */
+  private dataSetVariablesCache: Record<string, unknown> | undefined;
 
   constructor(init: StepIoServiceInit) {
     this.stepRepository = init.stepRepository;
@@ -153,10 +213,15 @@ export class StepIoService {
   /**
    * Aggregates outputs from all completed `data.set` step executions in
    * execution order. `data.set` is pinned (never evicted) so this read does
-   * not need rehydration. The shape mirrors the previous inline reducer in
-   * `WorkflowContextManager.getVariables`.
+   * not need rehydration. Memoised — `getContext()` (and therefore this) is
+   * called 5–10× per step, but the result only changes when a `data.set`
+   * step writes; the cache is invalidated by `invalidateDataSetCacheIfNeeded`
+   * on every write path.
    */
   public getDataSetVariables(): Record<string, unknown> {
+    if (this.dataSetVariablesCache !== undefined) {
+      return this.dataSetVariablesCache;
+    }
     const result: Record<string, unknown> = {};
     const sorted = this.state
       .getAllStepExecutions()
@@ -171,7 +236,27 @@ export class StepIoService {
     for (const exec of sorted) {
       Object.assign(result, exec.output);
     }
+    this.dataSetVariablesCache = result;
     return result;
+  }
+
+  /**
+   * Drops the memoised `data.set` aggregation when a write may have changed
+   * its contents. Cheap — invoked on every step write but only does work
+   * when the write touches a `data.set` step.
+   */
+  private invalidateDataSetCacheIfNeeded(stepExecutionId: string, stepType?: string): void {
+    if (stepType === 'data.set') {
+      this.dataSetVariablesCache = undefined;
+      return;
+    }
+    if (stepType === undefined) {
+      // Caller didn't tell us — peek at state to find out.
+      const existing = this.state.getStepExecution(stepExecutionId);
+      if (existing?.stepType === 'data.set') {
+        this.dataSetVariablesCache = undefined;
+      }
+    }
   }
 
   // ----- IO writes ----------------------------------------------------------
@@ -186,6 +271,7 @@ export class StepIoService {
    * and output writes.
    */
   public completeStep({ id, output, finishedAt, executionTimeMs }: CompleteStepArgs): void {
+    this.invalidateDataSetCacheIfNeeded(id);
     this.state.upsertStep({
       id,
       status: ExecutionStatus.COMPLETED,
@@ -209,6 +295,7 @@ export class StepIoService {
     executionTimeMs,
     scopeStack,
   }: FailStepArgs): void {
+    this.invalidateDataSetCacheIfNeeded(id, stepType);
     this.state.upsertStep({
       id,
       stepId,
@@ -227,12 +314,14 @@ export class StepIoService {
   /**
    * Records the output byte size for a step execution. Called by Layer 2
    * enforcement after `safeOutputSize()` has already serialised the output —
-   * zero additional serialisation cost. Negative values (the `safeOutputSize`
-   * sentinel for non-serialisable outputs) are ignored so callers cannot poison
-   * `getOutputSizeStats()`.
+   * zero additional serialisation cost.
+   *
+   * Layer 2 fails closed on non-serialisable outputs, so the size handed in
+   * here is always a non-negative byte count. We still guard against negative
+   * inputs (legacy callers / tests) by treating them as "do not record".
    */
   public recordOutputSize(stepExecutionId: string, bytes: number): void {
-    if (bytes < 0) return;
+    if (!Number.isFinite(bytes) || bytes < 0) return;
     this.outputSizes.set(stepExecutionId, bytes);
   }
 
@@ -285,8 +374,12 @@ export class StepIoService {
    * Resume-time entry point. Asks state to fetch step metadata without the
    * `output` field, marks non-pinned outputs as deferred, then asks state
    * to eagerly fetch outputs for pinned step types (data.set, waitForInput).
+   * Drops the `data.set` cache because the eager output fetch repopulates
+   * pinned outputs that the cache may have computed against (none, on a
+   * fresh load) — invalidate to be safe.
    */
   public async load(): Promise<void> {
+    this.dataSetVariablesCache = undefined;
     const foundSteps = await this.state.loadStepDocsWithoutOutput();
     const pinnedIdsToFetch = this.markDeferredAfterLoad(foundSteps);
     await this.state.loadStepOutputs(pinnedIdsToFetch);
@@ -310,6 +403,32 @@ export class StepIoService {
     }
   }
 
+  /**
+   * Re-applies stale-iteration eviction for loops that completed before the
+   * workflow suspended. Called from `WorkflowExecutionRuntimeManager.resume()`
+   * after `load()` so resume tasks don't carry the full output of every past
+   * loop iteration in memory — matching the in-memory state the initial task
+   * had at the point of suspension.
+   *
+   * De-duplicates by stepId because nested loops produce one execution per
+   * outer iteration, all COMPLETED — `getInnerStepIds` is per stepId.
+   */
+  public evictCompletedLoopsOnResume(graph: Pick<WorkflowGraph, 'getInnerStepIds'>): void {
+    const completedLoopStepIds = new Set<string>();
+    for (const exec of this.state.getAllStepExecutions()) {
+      if (
+        exec.stepType != null &&
+        LOOP_STEP_TYPES.has(exec.stepType) &&
+        exec.status === ExecutionStatus.COMPLETED
+      ) {
+        completedLoopStepIds.add(exec.stepId);
+      }
+    }
+    for (const loopStepId of completedLoopStepIds) {
+      this.evictStaleLoopOutputs(graph.getInnerStepIds(loopStepId));
+    }
+  }
+
   // ----- Rehydration --------------------------------------------------------
 
   /**
@@ -320,29 +439,76 @@ export class StepIoService {
    * scope-stack entries used by `enrichStepContextAccordingToStepScope`.
    *
    * No-op (zero ES calls) when nothing is evicted.
+   *
+   * Reset of `transientlyRehydratedIds` happens here, not in
+   * `releaseTransientlyRehydratedOutputs`, so an error that bypasses the
+   * release in run_node's `finally` cannot leak previous-step IDs into the
+   * next step's transient set.
    */
   public async prepareForRead({ node, predecessorsResolver }: PrepareForReadArgs): Promise<void> {
+    this.transientlyRehydratedIds = [];
+
     if (!this.hasEvictedOutputs()) {
       return;
     }
 
+    const neededIds = this.computeRehydrationTargets(node, predecessorsResolver);
+
+    // data.set / waitForInput outputs are pinned (never evicted), so they
+    // never appear in evictedOutputIdsAndBytes — rehydrateOutputs filters
+    // out non-evicted IDs cheaply.
+
+    await this.rehydrateOutputs(Array.from(neededIds));
+  }
+
+  /**
+   * Resolves the set of step execution IDs whose outputs need to be rehydrated
+   * before the upcoming context build. Combines:
+   *
+   * 1. Template-referenced steps. Static analysis returns either:
+   *    - a `Set<string>` of step IDs that the node's templates reference,
+   *    - or `null` when bracket access defeats static analysis.
+   *
+   * 2. Active scope-stack frames consumed by `enrichStepContextAccordingToStepScope`.
+   *
+   * **Conservative fallback.** When the static analysis returns an empty set
+   * but evicted outputs exist among the predecessors, we fall back to
+   * rehydrating all predecessors. This guards against the analysis missing
+   * a template reference (new node shape, unknown configuration key) — a
+   * miss would otherwise produce `undefined` at template render time and
+   * silently corrupt downstream step IO.
+   */
+  private computeRehydrationTargets(
+    node: GraphNodeUnion,
+    predecessorsResolver: PredecessorsResolver
+  ): Set<string> {
     const neededIds = new Set<string>();
     const referencedStepIds = extractReferencedStepIds(node);
 
-    if (referencedStepIds === null) {
-      // Static analysis ambiguous — fall back to all predecessors.
+    const fallbackToPredecessors = (): void => {
       for (const pred of predecessorsResolver(node)) {
         const latestExec = this.state.getLatestStepExecution(pred.stepId);
         if (latestExec) {
           neededIds.add(latestExec.id);
         }
       }
+    };
+
+    if (referencedStepIds === null) {
+      // Static analysis ambiguous (dynamic bracket access).
+      fallbackToPredecessors();
     } else {
       for (const stepId of referencedStepIds) {
         const latestExec = this.state.getLatestStepExecution(stepId);
         if (latestExec) {
           neededIds.add(latestExec.id);
         }
+      }
+      // If the analysis found nothing but a predecessor is actually evicted,
+      // the analysis missed a reference. Fall back conservatively rather
+      // than trust an empty set.
+      if (referencedStepIds.size === 0 && this.hasEvictedPredecessor(node, predecessorsResolver)) {
+        fallbackToPredecessors();
       }
     }
 
@@ -357,11 +523,20 @@ export class StepIoService {
       neededIds.add(buildStepExecutionId(executionId, frame.stepId, currentScope.stackFrames));
     }
 
-    // data.set / waitForInput outputs are pinned (never evicted), so they
-    // never appear in evictedOutputIdsAndBytes — rehydrateOutputs filters
-    // out non-evicted IDs cheaply.
+    return neededIds;
+  }
 
-    await this.rehydrateOutputs(Array.from(neededIds));
+  private hasEvictedPredecessor(
+    node: GraphNodeUnion,
+    predecessorsResolver: PredecessorsResolver
+  ): boolean {
+    for (const pred of predecessorsResolver(node)) {
+      const latestExec = this.state.getLatestStepExecution(pred.stepId);
+      if (latestExec && this.evictedOutputIdsAndBytes.has(latestExec.id)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -423,18 +598,36 @@ export class StepIoService {
     );
 
     const startMs = performance.now();
-    const docs = await this.stepRepository.getStepExecutionsByIds(idsToRehydrate, ['id', 'output']);
+    const expectedRunId = this.state.getWorkflowExecutionId();
+    const fetched = await this.stepRepository.getStepExecutionsByIds(idsToRehydrate, [
+      'id',
+      'output',
+      'workflowRunId',
+    ]);
+    // Defensive cross-execution filter: mget targets documents by `_id` only,
+    // and step execution IDs are constructed from the workflow execution ID,
+    // so a collision is improbable but not impossible (e.g. someone running
+    // a custom resume path with mis-typed IDs). Drop any doc whose
+    // workflowRunId disagrees with the current execution rather than
+    // restoring foreign output into memory.
+    const docs = fetched.filter((doc) => {
+      if (doc.workflowRunId && doc.workflowRunId !== expectedRunId) {
+        this.logger?.error(
+          `Cross-execution doc skipped during rehydration: id=${doc.id} expected runId=${expectedRunId} got=${doc.workflowRunId}`
+        );
+        return false;
+      }
+      return true;
+    });
 
     let restoredCount = 0;
     for (const doc of docs) {
       const previousBytes = this.evictedOutputIdsAndBytes.get(doc.id) ?? 0;
       this.evictedOutputIdsAndBytes.delete(doc.id);
-      // doc.output is JsonValue | undefined off the typed shape; ES treats
-      // `null` and `undefined` interchangeably at the source level, but the
-      // engine relies on the `null` (FAILED) vs `undefined` distinction.
-      // FAILED steps are not eviction candidates, so any rehydrated value
-      // here was a COMPLETED output — coercing a missing value back to null
-      // would lose the original signal, so we restore as-is.
+      // The repository normalises absent `output` to `null` at the boundary,
+      // so `doc.output` here is already `JsonValue | null`. FAILED steps are
+      // not eviction candidates, so any rehydrated value was a COMPLETED
+      // output, and `null` only occurs when ES legitimately stored null.
       this.state.restoreStepOutputInMemory(doc.id, doc.output ?? null);
       // Track for transient release: predecessors brought back into memory
       // for one step's read should not stay there forever.
@@ -446,13 +639,15 @@ export class StepIoService {
       //  2. The step is eligible for re-eviction next cycle
       // For live-execution evictions the original size is preserved; for
       // resume-path deferred outputs it's unknown (stored as 0), so we
-      // measure via safeOutputSize. Non-measurable outputs (-1 sentinel)
-      // are deliberately not tracked rather than recorded as 0.
+      // measure via safeOutputSize. Non-measurable outputs (`null`) are
+      // deliberately not tracked rather than recorded as 0 — these come
+      // from ES so they were serialisable when written; getting null here
+      // means a JSON.stringify quirk, not a poison payload.
       if (previousBytes > 0) {
         this.outputSizes.set(doc.id, previousBytes);
       } else {
         const sz = safeOutputSize(doc.output);
-        if (sz >= 0) {
+        if (sz !== null) {
           this.outputSizes.set(doc.id, sz);
         }
       }

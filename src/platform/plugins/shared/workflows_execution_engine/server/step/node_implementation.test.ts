@@ -197,6 +197,40 @@ describe('BaseAtomicNodeImplementation', () => {
     });
   });
 
+  describe('output size enforcement', () => {
+    it('fails the step closed when output is non-serializable', async () => {
+      const step: BaseStep = { name: 'circular-step', stepId: 'circular-step', type: 'atomic' };
+      const runtime = createStepExecutionRuntime();
+      const workflowRuntime = createWorkflowRuntime();
+
+      const circular: Record<string, unknown> = { a: 1 };
+      circular.self = circular;
+      const impl = new TestStepImpl(step, runtime as any, undefined, workflowRuntime as any);
+      impl.mockResult = { input: {}, output: circular, error: undefined };
+
+      await impl.run();
+
+      expect(runtime.failStep).toHaveBeenCalled();
+      expect(runtime.finishStep).not.toHaveBeenCalled();
+      expect(runtime.recordOutputSize).not.toHaveBeenCalled();
+    });
+
+    it('records the measured size on success', async () => {
+      const step: BaseStep = { name: 'sized-step', stepId: 'sized-step', type: 'atomic' };
+      const runtime = createStepExecutionRuntime();
+      const workflowRuntime = createWorkflowRuntime();
+
+      const impl = new TestStepImpl(step, runtime as any, undefined, workflowRuntime as any);
+      impl.mockResult = { input: {}, output: { hello: 'world' }, error: undefined };
+
+      await impl.run();
+
+      expect(runtime.recordOutputSize).toHaveBeenCalledTimes(1);
+      const recorded = (runtime.recordOutputSize as jest.Mock).mock.calls[0][0];
+      expect(recorded).toBeGreaterThan(0);
+    });
+  });
+
   describe('handleFailure', () => {
     it('wraps errors into ExecutionError format', () => {
       const step = { name: 'test', stepId: 'test', type: 'atomic' } as BaseStep;

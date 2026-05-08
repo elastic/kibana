@@ -13,6 +13,14 @@ import type { EnterIfNode, GraphNodeUnion } from '@kbn/workflows/graph';
 const STEPS_PREFIX = 'steps.';
 
 /**
+ * Per-node cache. Graph nodes are immutable for the lifetime of an execution,
+ * and a single node can be analysed many times across loop iterations and
+ * retries — memoising keyed by node reference removes the redundant scans
+ * without retaining anything once the graph is GC'd.
+ */
+const referencedStepIdsCache = new WeakMap<GraphNodeUnion, Set<string> | null>();
+
+/**
  * Extracts the set of step IDs referenced by a node's template expressions.
  *
  * Returns:
@@ -21,13 +29,27 @@ const STEPS_PREFIX = 'steps.';
  *    `steps[variables.x].output`) — caller should fall back to all predecessors
  *
  * For `enter-if` nodes, KQL condition strings are also analyzed via `extractPropertyPathsFromKql`.
+ *
+ * Result is memoised per-node — see {@link referencedStepIdsCache}.
  */
 export function extractReferencedStepIds(node: GraphNodeUnion): Set<string> | null {
+  if (referencedStepIdsCache.has(node)) {
+    return referencedStepIdsCache.get(node) as Set<string> | null;
+  }
+  const result = computeReferencedStepIds(node);
+  referencedStepIdsCache.set(node, result);
+  return result;
+}
+
+function computeReferencedStepIds(node: GraphNodeUnion): Set<string> | null {
   try {
     const variables: string[] = [];
 
     // For enter-if nodes, the condition can be a KQL string that contains
-    // both KQL field references and template expressions
+    // both KQL field references and template expressions. The graph union's
+    // `configuration` is broadened (atomic uses `any`), so TypeScript does
+    // not narrow `node.configuration` from the `type` discriminator alone —
+    // we keep the explicit cast to the if-specific node shape.
     if (node.type === 'enter-if') {
       const { condition } = (node as EnterIfNode).configuration;
       if (typeof condition === 'string') {

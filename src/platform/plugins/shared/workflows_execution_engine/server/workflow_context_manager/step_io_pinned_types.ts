@@ -22,3 +22,11 @@ export const EVICTION_EXEMPT_STEP_TYPES: ReadonlySet<string> = new Set([
   'data.set',
   'waitForInput',
 ]);
+
+/**
+ * Step types that act as loop containers. Used by resume-time stale-iteration
+ * cleanup to identify which completed steps' inner outputs are now safe to
+ * drop. Kept next to the eviction-exempt set so all "step-type-aware
+ * eviction policy" knobs live in one file.
+ */
+export const LOOP_STEP_TYPES: ReadonlySet<string> = new Set(['foreach', 'while']);

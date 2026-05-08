@@ -126,6 +126,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
       flushStepChanges: jest.fn().mockResolvedValue(undefined),
       load: jest.fn().mockResolvedValue(undefined),
       evictStaleLoopOutputs: jest.fn(),
+      // Drives the eviction work that used to live in this class — tests that
+      // observe stale-loop eviction now spy on this method directly.
+      evictCompletedLoopsOnResume: jest.fn(),
     } as unknown as StepIoService;
 
     underTest = new WorkflowExecutionRuntimeManager({
@@ -328,86 +331,31 @@ describe('WorkflowExecutionRuntimeManager', () => {
       });
     });
 
-    describe('evictCompletedLoopOutputs', () => {
-      it('should evict inner step outputs for completed foreach loops on resume', async () => {
-        const innerStepIds = new Set(['iter_step']);
-        (workflowExecutionState.getAllStepExecutions as jest.Mock).mockReturnValue([
-          {
-            stepId: 'myForeach',
-            stepType: 'foreach',
-            status: ExecutionStatus.COMPLETED,
-          } as EsWorkflowStepExecution,
-        ]);
-        (workflowExecutionGraph.getInnerStepIds as jest.Mock).mockReturnValue(innerStepIds);
-
+    describe('evictCompletedLoopOutputs (delegation)', () => {
+      // The actual eviction logic lives in StepIoService.evictCompletedLoopsOnResume
+      // and is exercised by step_io_service.test.ts. Here we only verify the
+      // runtime manager delegates correctly: load() must complete first, then
+      // the eviction call is made with the workflow graph.
+      it('delegates loop eviction to StepIoService.evictCompletedLoopsOnResume', async () => {
         await underTest.resume();
 
-        expect(workflowExecutionGraph.getInnerStepIds).toHaveBeenCalledWith('myForeach');
-        expect(stepIoService.evictStaleLoopOutputs).toHaveBeenCalledWith(innerStepIds);
-      });
-
-      it('should evict inner step outputs for completed while loops on resume', async () => {
-        const innerStepIds = new Set(['body_step']);
-        (workflowExecutionState.getAllStepExecutions as jest.Mock).mockReturnValue([
-          {
-            stepId: 'myWhile',
-            stepType: 'while',
-            status: ExecutionStatus.COMPLETED,
-          } as EsWorkflowStepExecution,
-        ]);
-        (workflowExecutionGraph.getInnerStepIds as jest.Mock).mockReturnValue(innerStepIds);
-
-        await underTest.resume();
-
-        expect(workflowExecutionGraph.getInnerStepIds).toHaveBeenCalledWith('myWhile');
-        expect(stepIoService.evictStaleLoopOutputs).toHaveBeenCalledWith(innerStepIds);
-      });
-
-      it('should not evict outputs for a loop that is still running at resume time', async () => {
-        (workflowExecutionState.getAllStepExecutions as jest.Mock).mockReturnValue([
-          {
-            stepId: 'midForeach',
-            stepType: 'foreach',
-            status: ExecutionStatus.RUNNING,
-          } as EsWorkflowStepExecution,
-        ]);
-
-        await underTest.resume();
-
-        expect(stepIoService.evictStaleLoopOutputs).not.toHaveBeenCalled();
-      });
-
-      it('should de-duplicate by stepId when a nested loop has multiple COMPLETED executions', async () => {
-        // inner foreach ran once per outer iteration → 3 executions, all COMPLETED
-        (workflowExecutionState.getAllStepExecutions as jest.Mock).mockReturnValue([
-          { stepId: 'innerForeach', stepType: 'foreach', status: ExecutionStatus.COMPLETED },
-          { stepId: 'innerForeach', stepType: 'foreach', status: ExecutionStatus.COMPLETED },
-          { stepId: 'innerForeach', stepType: 'foreach', status: ExecutionStatus.COMPLETED },
-        ] as EsWorkflowStepExecution[]);
-        (workflowExecutionGraph.getInnerStepIds as jest.Mock).mockReturnValue(
-          new Set(['deepAction'])
+        expect(stepIoService.evictCompletedLoopsOnResume).toHaveBeenCalledWith(
+          workflowExecutionGraph
         );
-
-        await underTest.resume();
-
-        // getInnerStepIds and evictStaleLoopOutputs called exactly once despite 3 executions
-        expect(workflowExecutionGraph.getInnerStepIds).toHaveBeenCalledTimes(1);
-        expect(stepIoService.evictStaleLoopOutputs).toHaveBeenCalledTimes(1);
       });
 
-      it('should not call eviction when there are no loop steps', async () => {
-        (workflowExecutionState.getAllStepExecutions as jest.Mock).mockReturnValue([
-          { stepId: 'action1', stepType: 'slack', status: ExecutionStatus.COMPLETED },
-          {
-            stepId: 'action2',
-            stepType: 'elasticsearch.search',
-            status: ExecutionStatus.COMPLETED,
-          },
-        ] as EsWorkflowStepExecution[]);
+      it('delegates after load() so the service sees fully-loaded state', async () => {
+        const callOrder: string[] = [];
+        (stepIoService.load as jest.Mock).mockImplementation(async () => {
+          callOrder.push('load');
+        });
+        (stepIoService.evictCompletedLoopsOnResume as jest.Mock).mockImplementation(() => {
+          callOrder.push('evict');
+        });
 
         await underTest.resume();
 
-        expect(stepIoService.evictStaleLoopOutputs).not.toHaveBeenCalled();
+        expect(callOrder).toEqual(['load', 'evict']);
       });
     });
   });

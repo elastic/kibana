@@ -177,13 +177,19 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
         const maxBytes = this.getMaxResponseBytes();
         if (maxBytes > 0) {
           const outputSize = safeOutputSize(result.output);
-          if (outputSize > 0 && outputSize > maxBytes) {
+          // Fail closed on non-serializable outputs (null sentinel) — the value
+          // cannot be persisted to ES, so silently allowing it through would
+          // leak a payload of unknown size into in-memory state and bypass
+          // both the size limit and eviction.
+          if (outputSize === null) {
             throw new ResponseSizeLimitError(maxBytes, this.step.name);
           }
-          // Record the already-computed size for eviction decisions (zero extra serialization)
-          if (outputSize > 0) {
-            this.stepExecutionRuntime.recordOutputSize(outputSize);
+          if (outputSize > maxBytes) {
+            throw new ResponseSizeLimitError(maxBytes, this.step.name);
           }
+          // Record the already-computed size for eviction decisions (zero extra serialization).
+          // Zero-byte outputs are recorded so the step still counts toward stats.
+          this.stepExecutionRuntime.recordOutputSize(outputSize);
         }
       }
 

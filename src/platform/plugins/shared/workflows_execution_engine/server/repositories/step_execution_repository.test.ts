@@ -401,5 +401,43 @@ describe('StepExecutionRepository', () => {
         ids: ['step-1'],
       });
     });
+
+    it('normalises missing output to null when output is in the projection', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          { _id: 'step-1', found: true, _source: { id: 'step-1', stepId: 't' /* no output */ } },
+        ],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1'], ['id', 'output']);
+
+      expect(result[0].output).toBeNull();
+    });
+
+    it('does not invent an output field when output is not in the projection', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [{ _id: 'step-1', found: true, _source: { id: 'step-1', stepId: 't' } }],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1'], ['id', 'stepId']);
+
+      expect('output' in result[0]).toBe(false);
+    });
+
+    it('preserves a legitimate null output (FAILED step)', async () => {
+      esClient.mget.mockResolvedValue({
+        docs: [
+          {
+            _id: 'step-1',
+            found: true,
+            _source: { id: 'step-1', stepId: 't', output: null },
+          },
+        ],
+      });
+
+      const result = await underTest.getStepExecutionsByIds(['step-1'], ['id', 'output']);
+
+      expect(result[0].output).toBeNull();
+    });
   });
 });

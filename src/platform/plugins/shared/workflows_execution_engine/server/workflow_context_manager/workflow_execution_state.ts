@@ -20,6 +20,14 @@ export interface FailedStepContext {
 }
 
 /**
+ * Narrow shape required by `createStep`: `id` is mandatory at creation time;
+ * `stepId` is *expected* but historically allowed to be undefined (status-only
+ * seed writes that fill it in on a later upsert). Defined here so the call
+ * site can drop `as string` casts on `id` while preserving the loose contract.
+ */
+type CreateStepInput = Partial<EsWorkflowStepExecution> & Pick<EsWorkflowStepExecution, 'id'>;
+
+/**
  * Narrow view of `WorkflowExecutionState` used by `StepIoService`. State has
  * no compile-time knowledge of the service: this interface lives in the file
  * that defines the producer (state) so the dependency graph is one-way —
@@ -145,15 +153,23 @@ export class WorkflowExecutionState {
   /**
    * Retrieves all executions for a workflow step in chronological order.
    * Returns `[]` when the step has not executed yet.
+   *
+   * Skips IDs missing from the canonical map (rather than asserting them
+   * with a cast). The index and the canonical map are kept in sync by
+   * `createStep` / `buildStepIdExecutionIdIndex`, but a defensive skip
+   * keeps a future bug from surfacing as a downstream `undefined`.
    */
   public getStepExecutionsByStepId(stepId: string): EsWorkflowStepExecution[] {
     const executionIds = this.stepIdExecutionIdIndex.get(stepId);
     if (!executionIds?.length) {
       return [];
     }
-    return executionIds.map(
-      (executionId) => this.stepExecutions.get(executionId) as EsWorkflowStepExecution
-    );
+    const result: EsWorkflowStepExecution[] = [];
+    for (const executionId of executionIds) {
+      const exec = this.stepExecutions.get(executionId);
+      if (exec) result.push(exec);
+    }
+    return result;
   }
 
   public getLatestStepExecution(stepId: string): EsWorkflowStepExecution | undefined {
@@ -166,11 +182,12 @@ export class WorkflowExecutionState {
       throw new Error('WorkflowExecutionState: Step execution must have an ID to be upserted');
     }
 
-    if (!this.stepExecutions.has(step.id)) {
-      this.createStep(step);
-    } else {
+    if (this.stepExecutions.has(step.id)) {
       this.updateStep(step.id, step);
+      return;
     }
+
+    this.createStep({ ...step, id: step.id });
   }
 
   // ----- ES persistence primitives -----------------------------------------
@@ -251,38 +268,63 @@ export class WorkflowExecutionState {
     }
   }
 
-  private createStep(step: Partial<EsWorkflowStepExecution>) {
-    const stepExecutions = this.getStepExecutionsByStepId(step.stepId as string);
-    if (!stepExecutions.length) {
-      this.stepIdExecutionIdIndex.set(step.stepId as string, []);
+  private createStep(step: CreateStepInput) {
+    const { id, stepId } = step;
+    // Index entry is keyed by stepId — only register when we actually have
+    // one (a partial seed write may not). The index is rebuilt on resume.
+    let previousExecutionCount = 0;
+    if (stepId) {
+      let executionIds = this.stepIdExecutionIdIndex.get(stepId);
+      previousExecutionCount = executionIds?.length ?? 0;
+      if (!executionIds) {
+        executionIds = [];
+        this.stepIdExecutionIdIndex.set(stepId, executionIds);
+      }
+      executionIds.push(id);
     }
-    this.stepIdExecutionIdIndex.get(step.stepId as string)?.push(step.id as string);
-    const newStep: EsWorkflowStepExecution = {
+
+    // `scopeStack` is required on the doc; default to an empty array so we
+    // never write `undefined` into ES (callers in the engine always supply
+    // it, but this guards against a future Partial caller).
+    //
+    // The cast at the end is intentional: `EsWorkflowStepExecution` requires
+    // `status` / `startedAt` / `topologicalIndex`, but a minimal "create
+    // shell" call (e.g. just to seed `state` or `output`) may not have them.
+    // Those fields are populated on the next `updateStep`, and ES partial-
+    // update semantics tolerate missing fields on doc_as_upsert. Tightening
+    // the type here would force every caller to pre-fill placeholders.
+    const newStep = {
       ...step,
-      id: step.id,
+      id,
+      scopeStack: step.scopeStack ?? [],
       globalExecutionIndex: this.stepExecutions.size,
-      stepExecutionIndex: stepExecutions.length,
+      stepExecutionIndex: previousExecutionCount,
       workflowRunId: this.workflowExecution.id,
       workflowId: this.workflowExecution.workflowId,
       spaceId: this.workflowExecution.spaceId,
       isTestRun: Boolean(this.workflowExecution.isTestRun),
     } as EsWorkflowStepExecution;
-    this.stepExecutions.set(step.id as string, newStep);
-    this.stepDocumentsChanges.set(step.id as string, newStep);
+    this.stepExecutions.set(id, newStep);
+    this.stepDocumentsChanges.set(id, newStep);
     // Execution and flushes are synchronous, so an incremental update here
     // preserves the global execution order without depending on what was
     // loaded by the resume task.
     this.updateWorkflowExecution({
-      stepExecutionIds: [...(this.workflowExecution.stepExecutionIds || []), step.id as string],
+      stepExecutionIds: [...(this.workflowExecution.stepExecutionIds || []), id],
     });
   }
 
   private updateStep(stepId: string, step: Partial<EsWorkflowStepExecution>) {
     const existingStep = this.stepExecutions.get(stepId);
-    const updatedStep = {
+    if (!existingStep) {
+      // upsertStep already routed us through createStep when the step was
+      // missing — reaching this branch with no existing step is a logic bug.
+      throw new Error(`WorkflowExecutionState: updateStep called for ${stepId} but no step exists`);
+    }
+    const updatedStep: EsWorkflowStepExecution = {
       ...existingStep,
       ...step,
-    } as EsWorkflowStepExecution;
+    };
     this.stepExecutions.set(stepId, updatedStep);
     // Accumulate changes for the next flush — merge with any pending changes.
     // ES partial update (doc_as_upsert) preserves fields not included.
