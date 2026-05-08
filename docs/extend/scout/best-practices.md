@@ -229,7 +229,7 @@ globalSetupHook('Load shared test data (if needed)', async ({ esArchiver, log })
 :::::
 
 ::::::{note}
-Global setup hooks have **no corresponding teardown**. Keep operations that require cleanup (such as `kbnClient.importExport.load()`) in `beforeAll`/`afterAll` hooks so saved objects are properly removed after tests run. See [Global setup hook: When to use](./global-setup-hook.md#when-to-use) for guidance.
+Per-test or per-suite cleanup (e.g. saved objects created with `kbnClient.importExport.load()`) belongs in `beforeAll`/`afterAll` hooks where it's scoped to a single spec. For **suite-wide** state shared across spec files — feature-flag overrides, global UI settings, or hand-indexed data that affects other configs sharing the cluster — use the optional [global teardown hook](./global-setup-hook.md#global-teardown-hook). It runs once after all workers finish (even on failure) and exposes `esClient` / `kbnClient` / `apiServices`. `esArchiver` is intentionally not available there: Scout never exposes archive-unloading because it's slow and unnecessary — leftover indexes in the cluster don't break tests when setup uses idempotent `esArchiver.loadIfNeeded`.
 ::::::
 
 ## Only load archives your tests actually use [only-load-archives-your-tests-actually-use]
