@@ -10,8 +10,10 @@ import { visit } from '../../../tasks/navigation';
 import {
   setGrouping,
   waitForGroupingTable,
+  waitForEntityAnalyticsPageReady,
   interceptEntityStoreSearch,
   selectGroupingOption,
+  interceptEntityStoreStatus,
 } from '../../../tasks/entity_analytics/entity_analytics_home';
 import { ENTITY_ANALYTICS_HOME_PAGE_URL } from '../../../urls/navigation';
 import {
@@ -40,6 +42,7 @@ describe(
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'entityAnalyticsNewHomePageEnabled',
           ])}`,
+          '--uiSettings.overrides.securitySolution:entityStoreEnableV2=true',
         ],
       },
     },
@@ -56,12 +59,12 @@ describe(
     describe('Group by Resolution', () => {
       beforeEach(() => {
         login();
+        interceptEntityStoreStatus('running');
         interceptEntityStoreSearch();
         visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
         cy.get(PAGE_TITLE).should('exist');
         // Resolution is the default grouping
-        cy.wait('@entityStoreSearch');
-        waitForGroupingTable();
+        waitForEntityAnalyticsPageReady();
       });
 
       it('displays resolution groups', () => {
@@ -108,11 +111,11 @@ describe(
       beforeEach(() => {
         login();
         setGrouping(['entity.EngineMetadata.Type']);
+        interceptEntityStoreStatus('running');
         interceptEntityStoreSearch();
         visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
         cy.get(PAGE_TITLE).should('exist');
-        cy.wait('@entityStoreSearch');
-        waitForGroupingTable();
+        waitForEntityAnalyticsPageReady();
       });
 
       it('shows group selector with Entity type selected', () => {
@@ -142,11 +145,11 @@ describe(
       beforeEach(() => {
         login();
         setGrouping(['entity.relationships.resolution.resolved_to']);
+        interceptEntityStoreStatus('running');
         interceptEntityStoreSearch();
         visit(ENTITY_ANALYTICS_HOME_PAGE_URL);
         cy.get(PAGE_TITLE).should('exist');
-        cy.wait('@entityStoreSearch');
-        waitForGroupingTable();
+        waitForEntityAnalyticsPageReady();
       });
 
       it('selecting "None" shows flat data table', () => {

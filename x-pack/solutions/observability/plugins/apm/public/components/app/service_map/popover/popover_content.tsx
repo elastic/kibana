@@ -44,6 +44,7 @@ export interface ContentsProps {
   onFocusClick: (event: React.MouseEvent<HTMLAnchorElement>) => void;
   showDiagnoseButton?: boolean;
   onDiagnoseClick?: () => void;
+  isEmbedded?: boolean;
 }
 
 export const ServiceContentsWithDiagnose = withDiagnoseButton(ServiceContents);
@@ -90,6 +91,8 @@ interface PopoverContentProps {
   onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
   /** Called when user clicks "Open diagnostic tool" – parent should open the flyout and close the popover. */
   onOpenDiagnostic?: () => void;
+  /** When true, hides navigation actions like "Focus map" that don't apply in dashboard embeds. */
+  isEmbedded?: boolean;
 }
 
 /**
@@ -104,6 +107,7 @@ export function PopoverContent({
   end,
   onFocusClick,
   onOpenDiagnostic,
+  isEmbedded,
 }: PopoverContentProps) {
   const { core } = useApmPluginContext();
   const isDiagnosticModeEnabled = core?.uiSettings?.get(enableDiagnosticMode);
@@ -160,6 +164,7 @@ export function PopoverContent({
         end={end}
         showDiagnoseButton={isDiagnosticModeEnabled}
         onDiagnoseClick={onOpenDiagnostic}
+        isEmbedded={isEmbedded}
       />
     </EuiFlexGroup>
   );

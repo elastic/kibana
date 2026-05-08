@@ -9,10 +9,7 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import {
   selectTabSavedSearchByValueAttributes,
@@ -22,8 +19,6 @@ import {
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { TransferAction } from '../../../../plugin_imports/embeddable_editor_service';
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard, <></>);
 
 const OBJECT_TYPE = i18n.translate('discover.saveDiscoverTable.modalTitle', {
   defaultMessage: 'Discover table',
@@ -36,6 +31,7 @@ const BUTTON_LABEL = i18n.translate('discover.saveDiscoverTable.buttonLabel', {
 export function SaveDiscoverTableButton() {
   const [showSaveModal, setShowSaveModal] = useState(false);
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
+  const controlGroupState = useCurrentTabSelector((tab) => tab.attributes.controlGroupState);
   const getState = useInternalStateGetState();
   const services = useDiscoverServices();
   const runtimeStateManager = useRuntimeStateManager();
@@ -54,12 +50,15 @@ export function SaveDiscoverTableButton() {
       });
 
       services.embeddableEditor.transferBackToEditor(TransferAction.SaveByValue, {
-        state: { ...byValueState, title: newTitle, description: newDescription },
+        state: {
+          byValueState: { ...byValueState, title: newTitle, description: newDescription },
+          controlGroupState,
+        },
         app: 'dashboards',
         path: dashboardId && dashboardId !== 'new' ? `#/view/${dashboardId}` : '#/create',
       });
     },
-    [getState, currentTabId, services, runtimeStateManager]
+    [currentTabId, getState, runtimeStateManager, services, controlGroupState]
   );
 
   return (

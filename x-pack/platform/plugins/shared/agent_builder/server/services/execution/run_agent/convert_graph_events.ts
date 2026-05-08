@@ -143,6 +143,7 @@ export const convertGraphEvents = ({
                       toolCallId,
                       params: toolCallArgs,
                       toolCallGroupId,
+                      toolOrigin: toolManager.getToolOrigin(toolId),
                     })
                   );
                 }

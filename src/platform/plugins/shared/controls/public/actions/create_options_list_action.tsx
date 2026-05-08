@@ -43,12 +43,11 @@ export const createOptionsListControlAction = (): CreateControlTypeAction<
       const field = dataView.getFieldByName(fieldName);
       return Boolean(field && isFieldCompatible(field));
     },
-    execute: async ({ embeddable, state, controlId, isPinned }) => {
+    execute: async ({ embeddable, state, controlId }) => {
       createDataControlOfType(OPTIONS_LIST_CONTROL, {
         embeddable,
         state: { ...DEFAULT_DSL_OPTIONS_LIST_STATE, ...state },
         controlId,
-        isPinned,
       });
     },
     extension: {

@@ -7,11 +7,12 @@
 
 import { HookLifecycle, HookExecutionMode } from '@kbn/agent-builder-server';
 import type { InternalSetupServices } from '../../services';
-import type { AnalyticsService } from '../../telemetry';
+import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { createLoadSkillToolsAfterRead } from './load_skill_tools_after_read';
 
 export interface RegisterSkillToolsLoaderHookDeps {
   analyticsService?: AnalyticsService;
+  trackingService?: TrackingService;
 }
 
 /**
@@ -28,7 +29,10 @@ export const registerSkillToolsLoaderHook = (
     hooks: {
       [HookLifecycle.afterToolCall]: {
         mode: HookExecutionMode.blocking,
-        handler: createLoadSkillToolsAfterRead({ analyticsService: deps.analyticsService }),
+        handler: createLoadSkillToolsAfterRead({
+          analyticsService: deps.analyticsService,
+          trackingService: deps.trackingService,
+        }),
       },
     },
   });

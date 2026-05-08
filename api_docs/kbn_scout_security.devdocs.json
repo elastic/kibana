@@ -162,6 +162,7 @@
                 "lineNumber": 148,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "ClientOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -205,6 +206,7 @@
                 "lineNumber": 153,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "ClientOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -285,6 +287,7 @@
                 "lineNumber": 26,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutPage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -302,6 +305,7 @@
                 "lineNumber": 26,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectorInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -434,6 +438,7 @@
                 "lineNumber": 26,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutPage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -451,6 +456,7 @@
                 "lineNumber": 26,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectorInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -545,7 +551,7 @@
         "label": "EuiComboBoxWrapper",
         "description": [],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-        "lineNumber": 17,
+        "lineNumber": 22,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -563,7 +569,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-            "lineNumber": 25,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -585,9 +591,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-                "lineNumber": 31,
+                "lineNumber": 36,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutPage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -602,9 +609,10 @@
                   "SelectorInput"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-                "lineNumber": 31,
+                "lineNumber": 36,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectorInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -622,7 +630,7 @@
               "() => Promise<string[]>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-            "lineNumber": 41,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -637,10 +645,18 @@
             "label": "selectMultiOption",
             "description": [],
             "signature": [
-              "(value: string) => Promise<void>"
+              "(value: string, options?: ",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ComboBoxInputOptions",
+                "text": "ComboBoxInputOptions"
+              },
+              " | undefined) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-            "lineNumber": 72,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -656,11 +672,36 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-                "lineNumber": 72,
+                "lineNumber": 81,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-security",
+                "id": "def-common.EuiComboBoxWrapper.selectMultiOption.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.ComboBoxInputOptions",
+                    "text": "ComboBoxInputOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
+                "lineNumber": 81,
+                "columnNumber": 42,
+                "deprecated": false,
+                "docsReferencedTypeName": "ComboBoxInputOptions",
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -673,10 +714,18 @@
             "label": "selectMultiOptions",
             "description": [],
             "signature": [
-              "(values: string[]) => Promise<void>"
+              "(values: string[], options?: ",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ComboBoxInputOptions",
+                "text": "ComboBoxInputOptions"
+              },
+              " | undefined) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-            "lineNumber": 88,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -692,11 +741,36 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-                "lineNumber": 88,
+                "lineNumber": 97,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-security",
+                "id": "def-common.EuiComboBoxWrapper.selectMultiOptions.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.ComboBoxInputOptions",
+                    "text": "ComboBoxInputOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
+                "lineNumber": 97,
+                "columnNumber": 46,
+                "deprecated": false,
+                "docsReferencedTypeName": "ComboBoxInputOptions",
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -709,10 +783,18 @@
             "label": "setCustomMultiOption",
             "description": [],
             "signature": [
-              "(value: string) => Promise<void>"
+              "(value: string, options?: ",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ComboBoxInputOptions",
+                "text": "ComboBoxInputOptions"
+              },
+              " | undefined) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-            "lineNumber": 111,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -728,11 +810,36 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-                "lineNumber": 111,
+                "lineNumber": 120,
                 "columnNumber": 30,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-security",
+                "id": "def-common.EuiComboBoxWrapper.setCustomMultiOption.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.ComboBoxInputOptions",
+                    "text": "ComboBoxInputOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
+                "lineNumber": 120,
+                "columnNumber": 45,
+                "deprecated": false,
+                "docsReferencedTypeName": "ComboBoxInputOptions",
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -748,7 +855,7 @@
               "() => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-            "lineNumber": 124,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -766,7 +873,7 @@
               "(value: string) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-            "lineNumber": 138,
+            "lineNumber": 147,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -782,7 +889,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-                "lineNumber": 138,
+                "lineNumber": 147,
                 "columnNumber": 22,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -799,10 +906,18 @@
             "label": "selectSingleOption",
             "description": [],
             "signature": [
-              "(value: string, options?: { optionTestSubj?: string | undefined; optionRoleName?: string | undefined; }) => Promise<void>"
+              "(value: string, options?: { optionTestSubj?: string | undefined; optionRoleName?: string | undefined; optionVisibilityTimeoutMs?: number | undefined; } & ",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ComboBoxInputOptions",
+                "text": "ComboBoxInputOptions"
+              },
+              ") => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-            "lineNumber": 150,
+            "lineNumber": 158,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -818,7 +933,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-                "lineNumber": 151,
+                "lineNumber": 159,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -827,49 +942,26 @@
               {
                 "parentPluginId": "@kbn/scout-security",
                 "id": "def-common.EuiComboBoxWrapper.selectSingleOption.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [],
+                "signature": [
+                  "{ optionTestSubj?: string | undefined; optionRoleName?: string | undefined; optionVisibilityTimeoutMs?: number | undefined; } & ",
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.ComboBoxInputOptions",
+                    "text": "ComboBoxInputOptions"
+                  }
+                ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-                "lineNumber": 152,
-                "columnNumber": 14,
+                "lineNumber": 160,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "@kbn/scout-security",
-                    "id": "def-common.EuiComboBoxWrapper.selectSingleOption.$2.optionTestSubj",
-                    "type": "string",
-                    "tags": [],
-                    "label": "optionTestSubj",
-                    "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
-                    "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-                    "lineNumber": 152,
-                    "columnNumber": 16,
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "@kbn/scout-security",
-                    "id": "def-common.EuiComboBoxWrapper.selectSingleOption.$2.optionRoleName",
-                    "type": "string",
-                    "tags": [],
-                    "label": "optionRoleName",
-                    "description": [],
-                    "signature": [
-                      "string | undefined"
-                    ],
-                    "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-                    "lineNumber": 152,
-                    "columnNumber": 41,
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -882,10 +974,18 @@
             "label": "setCustomSingleOption",
             "description": [],
             "signature": [
-              "(value: string) => Promise<void>"
+              "(value: string, options?: { settleTimeoutMs?: number | undefined; } & ",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ComboBoxInputOptions",
+                "text": "ComboBoxInputOptions"
+              },
+              ") => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-            "lineNumber": 165,
+            "lineNumber": 188,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -901,8 +1001,32 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-                "lineNumber": 165,
-                "columnNumber": 31,
+                "lineNumber": 189,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout-security",
+                "id": "def-common.EuiComboBoxWrapper.setCustomSingleOption.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "{ settleTimeoutMs?: number | undefined; } & ",
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.ComboBoxInputOptions",
+                    "text": "ComboBoxInputOptions"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
+                "lineNumber": 190,
+                "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -921,7 +1045,7 @@
               "() => Promise<string>"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
-            "lineNumber": 173,
+            "lineNumber": 206,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -982,6 +1106,7 @@
                 "lineNumber": 34,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutPage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -999,6 +1124,7 @@
                 "lineNumber": 34,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectorInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1382,6 +1508,7 @@
                 "lineNumber": 25,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutPage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1399,6 +1526,7 @@
                 "lineNumber": 25,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectorInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1513,6 +1641,7 @@
                 "lineNumber": 30,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutPage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1530,6 +1659,7 @@
                 "lineNumber": 30,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectorInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1732,6 +1862,7 @@
                 "lineNumber": 28,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutPage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1749,6 +1880,7 @@
                 "lineNumber": 28,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectorInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1907,6 +2039,7 @@
                 "lineNumber": 28,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ScoutPage",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1924,6 +2057,7 @@
                 "lineNumber": 28,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "SelectorInput",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2211,6 +2345,7 @@
                 "lineNumber": 48,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "KbnClientOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2265,6 +2400,7 @@
                 "lineNumber": 80,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ReqOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2369,6 +2505,7 @@
                 "lineNumber": 27,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "URL",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2431,6 +2568,7 @@
                 "lineNumber": 36,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "PathOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2651,6 +2789,7 @@
                 "lineNumber": 29,
                 "columnNumber": 38,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogLevel",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2754,6 +2893,199 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-security",
+        "id": "def-common.ThreatMatchRuleCreatePage",
+        "type": "Class",
+        "tags": [],
+        "label": "ThreatMatchRuleCreatePage",
+        "description": [
+          "\nRule creation flow for Indicator match (threat match) rules — threat index\nand threat-field mapping controls."
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/threat_match_rule_create_page.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.ThreatMatchRuleCreatePage.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/threat_match_rule_create_page.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-security",
+                "id": "def-common.ThreatMatchRuleCreatePage.Unnamed.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "page",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.ScoutPage",
+                    "text": "ScoutPage"
+                  }
+                ],
+                "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/threat_match_rule_create_page.ts",
+                "lineNumber": 15,
+                "columnNumber": 15,
+                "deprecated": false,
+                "docsReferencedTypeName": "ScoutPage",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.ThreatMatchRuleCreatePage.navigateToThreatMatchForm",
+            "type": "Function",
+            "tags": [],
+            "label": "navigateToThreatMatchForm",
+            "description": [
+              "\nOpens rule creation in the given space, selects Indicator match, enters the\nthreat index, and waits for the threat-field autocomplete combobox."
+            ],
+            "signature": [
+              "(params: { kbnUrl: ",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.KibanaUrl",
+                "text": "KibanaUrl"
+              },
+              "; spaceId: string; testIndex: string; }) => Promise<void>"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/threat_match_rule_create_page.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-security",
+                "id": "def-common.ThreatMatchRuleCreatePage.navigateToThreatMatchForm.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/threat_match_rule_create_page.ts",
+                "lineNumber": 27,
+                "columnNumber": 43,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/scout-security",
+                    "id": "def-common.ThreatMatchRuleCreatePage.navigateToThreatMatchForm.$1.kbnUrl",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "kbnUrl",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/scout",
+                        "scope": "common",
+                        "docId": "kibKbnScoutPluginApi",
+                        "section": "def-common.KibanaUrl",
+                        "text": "KibanaUrl"
+                      }
+                    ],
+                    "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/threat_match_rule_create_page.ts",
+                    "lineNumber": 28,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/scout-security",
+                    "id": "def-common.ThreatMatchRuleCreatePage.navigateToThreatMatchForm.$1.spaceId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "spaceId",
+                    "description": [],
+                    "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/threat_match_rule_create_page.ts",
+                    "lineNumber": 29,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/scout-security",
+                    "id": "def-common.ThreatMatchRuleCreatePage.navigateToThreatMatchForm.$1.testIndex",
+                    "type": "string",
+                    "tags": [],
+                    "label": "testIndex",
+                    "description": [],
+                    "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/threat_match_rule_create_page.ts",
+                    "lineNumber": 30,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.ThreatMatchRuleCreatePage.openThreatFieldDropdownOption",
+            "type": "Function",
+            "tags": [],
+            "label": "openThreatFieldDropdownOption",
+            "description": [
+              "\nTypes a field name into the threat-field combobox and returns the matching\noption locator for presence/absence assertions (without selecting it)."
+            ],
+            "signature": [
+              "(fieldName: string) => Promise<",
+              "Locator",
+              ">"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/threat_match_rule_create_page.ts",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-security",
+                "id": "def-common.ThreatMatchRuleCreatePage.openThreatFieldDropdownOption.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/threat_match_rule_create_page.ts",
+                "lineNumber": 58,
+                "columnNumber": 39,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "functions": [
@@ -2824,6 +3156,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -2841,6 +3174,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -2857,6 +3191,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
@@ -2915,6 +3250,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -2932,6 +3268,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -2948,6 +3285,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
@@ -3022,6 +3360,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -3039,6 +3378,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -3055,6 +3395,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
@@ -3145,6 +3486,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ScoutPage",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3164,6 +3506,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Args",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3219,6 +3562,7 @@
             "lineNumber": 22,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "ScoutPlaywrightOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3293,6 +3637,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -3310,6 +3655,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -3326,6 +3672,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
@@ -3414,15 +3761,7 @@
             "section": "def-common.KibanaUrl",
             "text": "KibanaUrl"
           },
-          "; } & { config: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutTestConfig",
-            "text": "ScoutTestConfig"
-          },
-          "; } & { debuggingPort: number; } & { debuggingPort: number; }>"
+          "; } & { config: any; } & { debuggingPort: number; } & { debuggingPort: number; }>"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/index.ts",
         "lineNumber": 16,
@@ -3460,6 +3799,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -3477,6 +3817,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -3493,6 +3834,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
@@ -3546,6 +3888,7 @@
             "lineNumber": 37,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3633,6 +3976,7 @@
             "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -3706,6 +4050,7 @@
             "lineNumber": 8559,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "List",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3800,15 +4145,7 @@
           "ScoutSpaceParallelFixture",
           "; } & { scoutSpace: ",
           "ScoutSpaceParallelFixture",
-          "; config: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutTestConfig",
-            "text": "ScoutTestConfig"
-          },
-          "; } & { roleDescriptors: ",
+          "; config: any; } & { roleDescriptors: ",
           "RoleDescriptorsFixture",
           "; log: ",
           {
@@ -3864,6 +4201,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -3881,6 +4219,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -3897,6 +4236,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
@@ -3991,15 +4331,7 @@
             "section": "def-common.KibanaUrl",
             "text": "KibanaUrl"
           },
-          "; } & { config: ",
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutTestConfig",
-            "text": "ScoutTestConfig"
-          },
-          "; } & { roleDescriptors: ",
+          "; } & { config: any; } & { roleDescriptors: ",
           "RoleDescriptorsFixture",
           "; log: ",
           {
@@ -4055,6 +4387,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -4072,6 +4405,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -4088,6 +4422,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
@@ -4152,6 +4487,7 @@
             "lineNumber": 2767,
             "columnNumber": 19,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBody",
             "trackAdoption": false,
             "returnComment": [],
             "children": [
@@ -4169,6 +4505,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestArgs",
                 "trackAdoption": false
               },
               {
@@ -4185,6 +4522,7 @@
                 "lineNumber": 2673,
                 "columnNumber": 44,
                 "deprecated": false,
+                "docsReferencedTypeName": "TestInfo",
                 "trackAdoption": false
               }
             ]
@@ -4555,6 +4893,7 @@
                 "lineNumber": 43,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRole",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4622,6 +4961,7 @@
                 "lineNumber": 15873,
                 "columnNumber": 48,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4687,6 +5027,7 @@
                 "lineNumber": 15874,
                 "columnNumber": 57,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4752,6 +5093,7 @@
                 "lineNumber": 15875,
                 "columnNumber": 49,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4817,6 +5159,7 @@
                 "lineNumber": 15876,
                 "columnNumber": 60,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4882,6 +5225,7 @@
                 "lineNumber": 15877,
                 "columnNumber": 50,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4947,6 +5291,7 @@
                 "lineNumber": 15883,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5754,6 +6099,40 @@
       },
       {
         "parentPluginId": "@kbn/scout-security",
+        "id": "def-common.ComboBoxInputOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ComboBoxInputOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
+        "lineNumber": 16,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.ComboBoxInputOptions.useFill",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "useFill",
+            "description": [
+              "When true, uses fill() instead of pressSequentially() for faster input without keystroke simulation."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/eui_components/combo_box.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-security",
         "id": "def-common.ElasticsearchRoleDescriptor",
         "type": "Interface",
         "tags": [],
@@ -5937,6 +6316,7 @@
                 "lineNumber": 12525,
                 "columnNumber": 83,
                 "deprecated": false,
+                "docsReferencedTypeName": "PageFunctionOn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5956,6 +6336,7 @@
                 "lineNumber": 12525,
                 "columnNumber": 124,
                 "deprecated": false,
+                "docsReferencedTypeName": "Arg",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6032,6 +6413,7 @@
                 "lineNumber": 12561,
                 "columnNumber": 78,
                 "deprecated": false,
+                "docsReferencedTypeName": "PageFunctionOn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6112,6 +6494,7 @@
                 "lineNumber": 12596,
                 "columnNumber": 89,
                 "deprecated": false,
+                "docsReferencedTypeName": "PageFunctionOn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6131,6 +6514,7 @@
                 "lineNumber": 12596,
                 "columnNumber": 130,
                 "deprecated": false,
+                "docsReferencedTypeName": "Arg",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6180,6 +6564,7 @@
                 "lineNumber": 12629,
                 "columnNumber": 84,
                 "deprecated": false,
+                "docsReferencedTypeName": "PageFunctionOn",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6225,6 +6610,7 @@
                 "lineNumber": 12657,
                 "columnNumber": 86,
                 "deprecated": false,
+                "docsReferencedTypeName": "PageFunctionOn",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6244,6 +6630,7 @@
                 "lineNumber": 12657,
                 "columnNumber": 129,
                 "deprecated": false,
+                "docsReferencedTypeName": "Arg",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6289,6 +6676,7 @@
                 "lineNumber": 12685,
                 "columnNumber": 81,
                 "deprecated": false,
+                "docsReferencedTypeName": "PageFunctionOn",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -6468,6 +6856,7 @@
                 "lineNumber": 12774,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "Locator",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -7472,6 +7861,7 @@
                 "lineNumber": 13335,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "EvaluationArgument",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -7547,6 +7937,7 @@
                 "lineNumber": 13370,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "Locator",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -9714,6 +10105,7 @@
                 "lineNumber": 14305,
                 "columnNumber": 6,
                 "deprecated": false,
+                "docsReferencedTypeName": "Locator",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10000,6 +10392,7 @@
                 "lineNumber": 14451,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "LocatorScreenshotOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -11632,18 +12025,12 @@
           {
             "parentPluginId": "@kbn/scout-security",
             "id": "def-common.ScoutParallelWorkerFixtures.config",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "config",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/scout",
-                "scope": "common",
-                "docId": "kibKbnScoutPluginApi",
-                "section": "def-common.ScoutTestConfig",
-                "text": "ScoutTestConfig"
-              }
+              "any"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/parallel_run_fixtures.ts",
             "lineNumber": 56,
@@ -11978,212 +12365,6 @@
       },
       {
         "parentPluginId": "@kbn/scout-security",
-        "id": "def-common.ScoutTestConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "ScoutTestConfig",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-        "lineNumber": 12,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.serverless",
-            "type": "boolean",
-            "tags": [],
-            "label": "serverless",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 13,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.http2",
-            "type": "boolean",
-            "tags": [],
-            "label": "http2",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 14,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.uiam",
-            "type": "boolean",
-            "tags": [],
-            "label": "uiam",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 15,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.projectType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "projectType",
-            "description": [],
-            "signature": [
-              "\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 16,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.organizationId",
-            "type": "string",
-            "tags": [],
-            "label": "organizationId",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 17,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.isCloud",
-            "type": "boolean",
-            "tags": [],
-            "label": "isCloud",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 18,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.cloudHostName",
-            "type": "string",
-            "tags": [],
-            "label": "cloudHostName",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 19,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.cloudUsersFilePath",
-            "type": "string",
-            "tags": [],
-            "label": "cloudUsersFilePath",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 20,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.license",
-            "type": "string",
-            "tags": [],
-            "label": "license",
-            "description": [],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 21,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.hosts",
-            "type": "Object",
-            "tags": [],
-            "label": "hosts",
-            "description": [],
-            "signature": [
-              "{ kibana: string; elasticsearch: string; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 22,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.auth",
-            "type": "Object",
-            "tags": [],
-            "label": "auth",
-            "description": [],
-            "signature": [
-              "{ username: string; password: string; }"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 26,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.linkedProject",
-            "type": "Object",
-            "tags": [],
-            "label": "linkedProject",
-            "description": [],
-            "signature": [
-              "{ hosts: { elasticsearch: string; }; auth: { username: string; password: string; }; } | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 30,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout-security",
-            "id": "def-common.ScoutTestConfig.metadata",
-            "type": "Any",
-            "tags": [],
-            "label": "metadata",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
-            "lineNumber": 39,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/scout-security",
         "id": "def-common.ScoutTestFixtures",
         "type": "Interface",
         "tags": [],
@@ -12429,18 +12610,12 @@
           {
             "parentPluginId": "@kbn/scout-security",
             "id": "def-common.ScoutWorkerFixtures.config",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "config",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/scout",
-                "scope": "common",
-                "docId": "kibKbnScoutPluginApi",
-                "section": "def-common.ScoutTestConfig",
-                "text": "ScoutTestConfig"
-              }
+              "any"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/test/ui/single_thread_fixtures.ts",
             "lineNumber": 75,
@@ -12748,7 +12923,7 @@
           }
         ],
         "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
-        "lineNumber": 19,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12764,7 +12939,7 @@
               "AlertsTablePage"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
-            "lineNumber": 20,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12780,7 +12955,7 @@
               "AlertDetailsRightPanelPage"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
-            "lineNumber": 21,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12796,7 +12971,7 @@
               "EntityAnalyticsDashboardsPage"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
-            "lineNumber": 22,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12812,7 +12987,7 @@
               "EntityAnalyticsManagementPage"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
-            "lineNumber": 23,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12828,7 +13003,7 @@
               "CspmIntegrationPage"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
-            "lineNumber": 24,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12844,7 +13019,7 @@
               "TimelinePage"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
-            "lineNumber": 25,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12860,7 +13035,31 @@
               "DetectionsAttackDiscoveryPage"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
-            "lineNumber": 26,
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.SecurityPageObjects.threatMatchRuleCreatePage",
+            "type": "Object",
+            "tags": [],
+            "label": "threatMatchRuleCreatePage",
+            "description": [
+              "Indicator match (threat match) rule creation page — threat index and field mapping controls."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout-security",
+                "scope": "common",
+                "docId": "kibKbnScoutSecurityPluginApi",
+                "section": "def-common.ThreatMatchRuleCreatePage",
+                "text": "ThreatMatchRuleCreatePage"
+              }
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -12876,7 +13075,23 @@
               "AttackDetailsRightPanelPage"
             ],
             "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
-            "lineNumber": 27,
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-security",
+            "id": "def-common.SecurityPageObjects.serverlessProjectChromePage",
+            "type": "Object",
+            "tags": [],
+            "label": "serverlessProjectChromePage",
+            "description": [],
+            "signature": [
+              "ServerlessProjectChromePage"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-scout-security/src/playwright/fixtures/test/page_objects/index.ts",
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13237,6 +13452,25 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-security",
+        "id": "def-common.ScoutTestConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ScoutTestConfig",
+        "description": [
+          "\nShape of the JSON files Scout reads to point tests at a deployment\n(`local.json`, `cloud_ech.json`, `cloud_mki.json`). The canonical schema\nwith required/optional/conditional rules lives in `./test_config.schema.ts`."
+        ],
+        "signature": [
+          "any"
+        ],
+        "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.ts",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -13543,6 +13777,22 @@
               },
               {
                 "parentPluginId": "@kbn/scout-security",
+                "id": "def-common.tags.serverless.vectordb",
+                "type": "Array",
+                "tags": [],
+                "label": "vectordb",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/tags.ts",
+                "lineNumber": 72,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/scout-security",
                 "id": "def-common.tags.serverless.all",
                 "type": "Array",
                 "tags": [],
@@ -13554,7 +13804,7 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/tags.ts",
-                "lineNumber": 73,
+                "lineNumber": 74,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -13574,7 +13824,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/tags.ts",
-            "lineNumber": 81,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13590,7 +13840,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/tags.ts",
-            "lineNumber": 96,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

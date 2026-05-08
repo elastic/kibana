@@ -153,6 +153,7 @@ export const createToolManagerMock = (): ToolManagerMock => {
     list: jest.fn(),
     recordToolUse: jest.fn(),
     getToolIdMapping: jest.fn(),
+    getToolOrigin: jest.fn(),
     getDynamicToolIds: jest.fn(),
     getSummarizer: jest.fn(),
   };
@@ -336,6 +337,11 @@ export interface ToolHandlerContextMock extends ToolHandlerContext {
 
 export const createToolHandlerContextMock = (): ToolHandlerContextMock => {
   return {
+    callContext: {
+      toolId: 'toolId',
+      toolCallId: 'toolCallId',
+      callSource: 'agent',
+    },
     request: httpServerMock.createKibanaRequest(),
     spaceId: 'default',
     esClient: elasticsearchServiceMock.createScopedClusterClient(),

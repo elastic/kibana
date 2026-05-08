@@ -30,7 +30,7 @@
           "<(Readonly<{ id?: string | undefined; } & { type: \"esql_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"options_list_control\"; config: Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"range_slider_control\"; config: Readonly<{ value?: string[] | undefined; title?: string | undefined; } & { field_name: string; step: number; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }> | Readonly<{ id?: string | undefined; } & { type: \"time_slider_control\"; config: Readonly<{} & { start_percentage_of_time_range: number; end_percentage_of_time_range: number; is_anchored: boolean; }>; grow: boolean; width: \"small\" | \"medium\" | \"large\"; }>)[]>"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/controls_group_schema.ts",
-        "lineNumber": 46,
+        "lineNumber": 51,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -84,6 +84,7 @@
                 "lineNumber": 1109,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "P",
                 "trackAdoption": false
               },
               {
@@ -115,7 +116,7 @@
         "label": "LegacyIgnoreParentSettings",
         "description": [],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-        "lineNumber": 85,
+        "lineNumber": 86,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -131,7 +132,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 86,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -147,7 +148,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 87,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -163,7 +164,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 88,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -179,7 +180,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 89,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -358,13 +359,29 @@
           },
           {
             "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredESQLControlExplicitInput.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
             "id": "def-server.LegacyStoredESQLControlExplicitInput.esqlQuery",
             "type": "string",
             "tags": [],
             "label": "esqlQuery",
             "description": [],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 72,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -380,7 +397,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 73,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -396,7 +413,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -409,7 +426,7 @@
             "label": "variableName",
             "description": [],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 75,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -422,7 +439,7 @@
             "label": "variableType",
             "description": [],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 76,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -496,7 +513,7 @@
         "label": "LegacyStoredTimeSliderExplicitInput",
         "description": [],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-        "lineNumber": 79,
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -512,7 +529,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 80,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -528,7 +545,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 81,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -544,7 +561,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 82,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1032,7 +1049,7 @@
           "<Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined>; }>"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/options_list_schema.ts",
-        "lineNumber": 47,
+        "lineNumber": 103,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1056,7 +1073,7 @@
           "<Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> | Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>>"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/options_list_schema.ts",
-        "lineNumber": 81,
+        "lineNumber": 184,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1136,7 +1153,7 @@
           "<string | undefined>; }>"
         ],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/range_slider_schema.ts",
-        "lineNumber": 16,
+        "lineNumber": 23,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

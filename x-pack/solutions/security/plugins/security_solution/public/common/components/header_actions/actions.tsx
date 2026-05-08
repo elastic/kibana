@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import {
   makeSelectDocumentNotesBySavedObjectId,
   makeSelectNotesByDocumentId,
@@ -176,7 +176,7 @@ const ActionsComponent: React.FC<ActionsComponentProps> = ({
   );
 
   const isRemoteDocument = useMemo(
-    () => isCCSRemoteIndexName(ecsData._index ?? ''),
+    () => isNonLocalIndexName(ecsData._index ?? ''),
     [ecsData._index]
   );
 

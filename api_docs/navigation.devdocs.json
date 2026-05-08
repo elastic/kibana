@@ -78,6 +78,7 @@
                 "lineNumber": 50,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "PluginInitializerContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -126,6 +127,7 @@
                 "lineNumber": 52,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -143,6 +145,7 @@
                 "lineNumber": 52,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "NavigationPublicSetupDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -190,6 +193,7 @@
                 "lineNumber": 61,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -207,6 +211,7 @@
                 "lineNumber": 62,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "NavigationPublicStartDependencies",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -297,6 +302,7 @@
             "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TopNavMenuProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -406,6 +412,7 @@
             "lineNumber": 28,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "TopNavMenuItemsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -552,6 +559,7 @@
                 "lineNumber": 17,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false
               }
             ]
@@ -1228,6 +1236,7 @@
               "lineNumber": 25,
               "columnNumber": 19,
               "deprecated": false,
+              "docsReferencedTypeName": "RegisteredTopNavMenuData",
               "trackAdoption": false
             }
           ]
@@ -1373,6 +1382,7 @@
               "lineNumber": 52,
               "columnNumber": 27,
               "deprecated": false,
+              "docsReferencedTypeName": "AddSolutionNavigationArg",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1408,7 +1418,31 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "navigation",
+        "id": "def-server.featureFlags",
+        "type": "Array",
+        "tags": [],
+        "label": "featureFlags",
+        "description": [],
+        "signature": [
+          "(",
+          "FeatureFlagDefinition",
+          "<\"boolean\"> | ",
+          "FeatureFlagDefinition",
+          "<\"string\"> | ",
+          "FeatureFlagDefinition",
+          "<\"number\">)[]"
+        ],
+        "path": "src/platform/plugins/shared/navigation/server/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "common": {
@@ -1444,7 +1478,7 @@
         "label": "DEFAULT_ROUTES",
         "description": [],
         "path": "src/platform/plugins/shared/navigation/common/constants.ts",
-        "lineNumber": 12,
+        "lineNumber": 14,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1457,7 +1491,7 @@
             "label": "classic",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
-            "lineNumber": 13,
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1470,7 +1504,7 @@
             "label": "es",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
-            "lineNumber": 14,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1483,7 +1517,7 @@
             "label": "search",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
-            "lineNumber": 15,
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1498,7 +1532,7 @@
               "// O11y aliases"
             ],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
-            "lineNumber": 17,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1511,7 +1545,7 @@
             "label": "observability",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
-            "lineNumber": 18,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1524,7 +1558,7 @@
             "label": "security",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
-            "lineNumber": 19,
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1537,7 +1571,20 @@
             "label": "workplaceai",
             "description": [],
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
-            "lineNumber": 20,
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-common.DEFAULT_ROUTES.vectordb",
+            "type": "string",
+            "tags": [],
+            "label": "vectordb",
+            "description": [],
+            "path": "src/platform/plugins/shared/navigation/common/constants.ts",
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

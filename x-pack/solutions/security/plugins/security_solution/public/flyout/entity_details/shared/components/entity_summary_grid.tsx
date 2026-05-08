@@ -7,7 +7,6 @@
 
 import React, { memo, useMemo, useState } from 'react';
 import {
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCopy,
   EuiFlexGrid,
@@ -19,7 +18,6 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { Entity } from '../../../../../common/api/entity_analytics';
@@ -29,6 +27,12 @@ import type { CriticalityLevelWithUnassigned } from '../../../../../common/entit
 import { useGetWatchlists } from '../../../../entity_analytics/api/hooks/use_get_watchlists';
 import { getWatchlistName } from '../../../../../common/entity_analytics/watchlists/constants';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { EntitySourceValue, TruncatedBadgeList, toEntitySourceArray } from './entity_source_value';
+
+const WATCHLISTS_OVERFLOW_TOOLTIP_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.grid.watchlistsOverflowTitle',
+  { defaultMessage: 'Additional watchlists' }
+);
 
 interface EntitySummaryGridProps {
   entityRecord: Entity;
@@ -100,7 +104,7 @@ export const EntitySummaryGrid = memo(
               { defaultMessage: 'Data source' }
             )}
           >
-            <EuiText size="s">{entityRecord.entity?.source ?? getEmptyTagValue()}</EuiText>
+            <EntitySourceValue values={toEntitySourceArray(entityRecord.entity?.source)} />
           </SummaryPanel>
           <SummaryPanel
             label={i18n.translate(
@@ -202,7 +206,7 @@ const WatchlistsCell = memo(({ watchlistIds }: { watchlistIds: string[] }) => {
     return map;
   }, [watchlistsData]);
 
-  const resolvedNames = useMemo(() => {
+  const resolvedNames = useMemo<string[]>(() => {
     if (watchlistIds.length === 0) return [];
     return watchlistIds
       .map((id) => {
@@ -210,35 +214,15 @@ const WatchlistsCell = memo(({ watchlistIds }: { watchlistIds: string[] }) => {
         // If all we have is the ID, the watchlist has likely been deleted
         return watchlistName !== id ? watchlistName : undefined;
       })
-      .filter((name) => name !== undefined);
+      .filter((name): name is string => name !== undefined);
   }, [watchlistIds, watchlistNamesById]);
 
-  if (resolvedNames.length === 0) {
-    return <EuiText size="s">{getEmptyTagValue()}</EuiText>;
-  }
-
-  const firstName = resolvedNames[0];
-  const moreCount = resolvedNames.length - 1;
-
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">{firstName}</EuiText>
-      </EuiFlexItem>
-      {moreCount > 0 && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={resolvedNames.slice(1).join(', ')}>
-            <EuiButtonEmpty size="xs" flush="left">
-              {`+${moreCount} `}
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.entityDetails.grid.watchlistsMore"
-                defaultMessage="More"
-              />
-            </EuiButtonEmpty>
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+    <TruncatedBadgeList
+      values={resolvedNames}
+      overflowTooltipTitle={WATCHLISTS_OVERFLOW_TOOLTIP_TITLE}
+      data-test-subj="entityWatchlistsCell"
+    />
   );
 });
 WatchlistsCell.displayName = 'WatchlistsCell';

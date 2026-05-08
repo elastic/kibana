@@ -6,15 +6,29 @@
  */
 
 import React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { DataViewSelectPopoverProps } from './data_view_select_popover';
 import { DataViewSelectPopover } from './data_view_select_popover';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
-import { DataViewSelector } from '@kbn/unified-search-plugin/public';
-import { act } from 'react-dom/test-utils';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
+
+// Mock DataViewSelector to avoid expensive EuiTextTruncate rendering in jsdom
+const MockedDataViewSelector = jest.fn(({ dataViewsList }) => (
+  <div data-test-subj="dataViewSelector-mock">
+    {dataViewsList?.map((dv: { id: string; title: string }) => (
+      <div key={dv.id} data-test-subj={`dataViewOption-${dv.id}`}>
+        {dv.title}
+      </div>
+    ))}
+  </div>
+));
+jest.mock('@kbn/unified-search-plugin/public', () => ({
+  DataViewSelector: (props: Record<string, unknown>) => MockedDataViewSelector(props),
+}));
 
 const selectedDataView = {
   id: 'mock-data-logs-id',
@@ -99,75 +113,47 @@ const mount = () => {
   };
 
   return {
-    wrapper: mountWithIntl(<DataViewSelectPopover {...props} />),
+    result: renderWithI18n(<DataViewSelectPopover {...props} />),
     dataViewsMock,
   };
 };
 
 describe('DataViewSelectPopover', () => {
   test('renders properly', async () => {
-    const { wrapper, dataViewsMock } = mount();
+    const { dataViewsMock } = mount();
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    await waitFor(() => {
+      expect(dataViewsMock.getIds).toHaveBeenCalled();
     });
 
-    expect(dataViewsMock.getIds).toHaveBeenCalled();
-    expect(wrapper.find('[data-test-subj="selectDataViewExpression"]').exists()).toBeTruthy();
+    expect(screen.getByTestId('selectDataViewExpression')).toBeInTheDocument();
 
     const getIdsResult = await dataViewsMock.getIds.mock.results[0].value;
     expect(getIdsResult).toBe(dataViewIds);
   });
 
-  test('should open a popover on click', async () => {
-    const { wrapper } = mount();
+  test('should open a popover on click and display loaded data views', async () => {
+    const { dataViewsMock } = mount();
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    await waitFor(() => {
+      expect(dataViewsMock.getIds).toHaveBeenCalled();
     });
 
-    await wrapper.find('[data-test-subj="selectDataViewExpression"]').first().simulate('click');
+    await userEvent.click(screen.getByTestId('selectDataViewExpression'));
 
-    expect(wrapper.find(DataViewSelector).prop('dataViewsList')).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "id": "mock-data-logs-id",
-          "isAdhoc": false,
-          "name": undefined,
-          "title": "kibana_sample_data_logs",
-          "type": undefined,
-        },
-        Object {
-          "id": "mock-ecommerce-id",
-          "isAdhoc": false,
-          "name": undefined,
-          "title": "kibana_sample_data_ecommerce",
-          "type": undefined,
-        },
-        Object {
-          "id": "mock-test-id",
-          "isAdhoc": false,
-          "name": undefined,
-          "title": "test",
-          "type": undefined,
-        },
-        Object {
-          "id": "mock-ad-hoc-id",
-          "isAdhoc": true,
-          "name": undefined,
-          "title": "ad-hoc data view",
-          "type": undefined,
-        },
-        Object {
-          "id": "mock-ad-hoc-esql-id",
-          "isAdhoc": true,
-          "name": undefined,
-          "title": "ad-hoc data view esql",
-          "type": "esql",
-        },
-      ]
-    `);
+    await screen.findByTestId('chooseDataViewPopoverContent');
+
+    // Verify the DataViewSelector received the correct filtered data views
+    // (excludes flights which isn't in dataViewIds)
+    const lastCall = MockedDataViewSelector.mock.calls.at(-1)![0];
+    const dataViewTitles = lastCall.dataViewsList.map((dv: { title: string }) => dv.title);
+    expect(dataViewTitles).toEqual([
+      'kibana_sample_data_logs',
+      'kibana_sample_data_ecommerce',
+      'test',
+      'ad-hoc data view',
+      'ad-hoc data view esql',
+    ]);
+    expect(dataViewTitles).not.toContain('kibana_sample_data_flights');
   });
 });

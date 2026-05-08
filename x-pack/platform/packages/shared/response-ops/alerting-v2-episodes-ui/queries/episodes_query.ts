@@ -24,6 +24,21 @@ export interface AlertEpisode {
   first_timestamp: string;
   last_timestamp: string;
   duration: number;
+  last_ack_action?: 'ack' | 'unack';
+  last_assignee_uid?: string | null;
+  last_snooze_action?: 'snooze' | 'unsnooze';
+  snooze_expiry?: string;
+  last_deactivate_action?: 'activate' | 'deactivate';
+  last_tags?: string[];
+  /** JSON string from the latest **non-empty** alert `data` (see `addEpisodeAggregation`) */
+  episode_data?: string | null;
+}
+
+/**
+ * Raw ES|QL response shape before client-side normalization.
+ */
+export interface AlertEpisodeEsqlRow extends Omit<AlertEpisode, 'last_tags'> {
+  last_tags?: string | string[] | null;
 }
 
 export const ALERT_EPISODE_FIELDS = [
@@ -35,6 +50,13 @@ export const ALERT_EPISODE_FIELDS = [
   'first_timestamp',
   'last_timestamp',
   'duration',
+  'last_ack_action',
+  'last_assignee_uid',
+  'last_snooze_action',
+  'snooze_expiry',
+  'last_deactivate_action',
+  'last_tags',
+  'episode_data',
 ] as const;
 
 export interface EpisodesFilterState {
@@ -46,6 +68,8 @@ export interface EpisodesFilterState {
   queryString?: string | null;
   /** Tag values — episodes matching any selected tag (OR) */
   tags?: string[] | null;
+  /** Assignee UID — episodes whose last assignee matches this user profile UID */
+  assigneeUid?: string;
 }
 
 export interface EpisodesSortState {
@@ -66,10 +90,14 @@ const sanitizeSortField = (field: string) => {
 };
 
 export const addEpisodeAggregation = (query: ComposerQuery) => {
-  // This will be simplified when the `$.alerting-episodes` ES|QL view works.
+  /* This will be simplified when the `$.alerting-episodes` ES|QL view works.
+   * Matches `buildEpisodeEventDataQuery` and `buildRelatedEpisodesQuery`.
+   */
+
   // prettier-ignore
   query
-    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp) BY episode.id`
+    .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
+    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}" BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
     .pipe`WHERE @timestamp == last_timestamp`;
 };
@@ -78,7 +106,22 @@ const addGroupHashActionStats = (query: ComposerQuery) => {
   // prettier-ignore
   query
     .pipe`INLINE STATS last_deactivate_action = LAST(action_type, @timestamp) WHERE action_type IN ("deactivate", "activate"),
-                       last_tags = LAST(tags, @timestamp) WHERE action_type IN ("tag") BY group_hash`;
+                       last_snooze_action     = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
+                       snooze_expiry          = LAST(expiry, @timestamp)      WHERE action_type == "snooze",
+                       last_tags              = LAST(tags, @timestamp)        WHERE action_type == "tag"
+          BY group_hash`;
+};
+
+const addEpisodeIdActionStats = (query: ComposerQuery) => {
+  // `.rule-events` documents carry the nested `episode.id`, while `.alert-actions`
+  // documents carry a flat `episode_id` — unify them so INLINE STATS groups both
+  // sides under the same key.
+  // prettier-ignore
+  query
+    .pipe`EVAL episode_id = COALESCE(\`episode.id\`, episode_id)`
+    .pipe`INLINE STATS last_ack_action      = LAST(action_type,  @timestamp) WHERE action_type IN ("ack", "unack"),
+                       last_assignee_uid    = LAST(assignee_uid, @timestamp) WHERE action_type == "assign"
+          BY episode_id`;
 };
 
 const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
@@ -96,23 +139,25 @@ const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
 
 /**
  * Builds an ES|QL query that aggregates episode data from `.rule-events` and
- * `.alert-actions` (last tags / deactivate state per group_hash), then episode rows.
+ * `.alert-actions` (last tags / deactivate state per group_hash, last assignee per episode),
+ * then narrows to episode rows and derives `effective_status`.
  */
 export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
-  const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM]);
+  const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM], ['_source']);
 
   const trimmedSearch = search?.trim();
   if (trimmedSearch) {
     query.pipe(
       `WHERE ((type == "alert" AND QSTR(${escapeStringValue(
         trimmedSearch
-      )})) OR (action_type IN ("deactivate", "activate", "tag")))`
+      )})) OR (action_type IN ("deactivate", "activate", "snooze", "unsnooze", "tag", "ack", "unack", "assign")))`
     );
   } else {
-    query.where`type == "alert" OR action_type IN ("deactivate", "activate", "tag")`;
+    query.where`type == "alert" OR action_type IN ("deactivate", "activate", "snooze", "unsnooze", "tag", "ack", "unack", "assign")`;
   }
 
   addGroupHashActionStats(query);
+  addEpisodeIdActionStats(query);
   query.where`type == "alert"`;
   addEpisodeAggregation(query);
   // Derive effective status: overridden to "inactive" when the latest action is "deactivate"
@@ -125,7 +170,8 @@ export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
  * Builds an ES|QL query for episodes request with sorting and filtering.
  *
  * Joins `.rule-events` and `.alert-actions` so that user-driven deactivation
- * is reflected in an `effective_status` column used for status filtering.
+ * is reflected in an `effective_status` column, and per-episode assignee info
+ * is available for `assigneeUid` filtering.
  */
 export const buildEpisodesQuery = (
   sortState: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' },
@@ -147,6 +193,10 @@ export const buildEpisodesQuery = (
 
   if (filterState?.tags?.length) {
     addTagsFilter(query, filterState.tags);
+  }
+
+  if (filterState?.assigneeUid) {
+    query.where`last_assignee_uid == ${filterState.assigneeUid}`;
   }
 
   return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(

@@ -139,6 +139,7 @@
                 "lineNumber": 64,
                 "columnNumber": 50,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectsFindOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -326,6 +327,7 @@
                 "lineNumber": 112,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedObjectMigration",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -483,6 +485,7 @@
             "lineNumber": 39,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Map",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -502,6 +505,7 @@
             "lineNumber": 39,
             "columnNumber": 69,
             "deprecated": false,
+            "docsReferencedTypeName": "Map",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -550,6 +554,7 @@
             "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectMigrationMap",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -569,12 +574,20 @@
             "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectMigrationMap",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "The merged map {@link SavedObjectMigrationMap }"
+          "The merged map ",
+          {
+            "pluginId": "@kbn/core-saved-objects-utils-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsUtilsServerPluginApi",
+            "section": "def-server.SavedObjectMigrationMap",
+            "text": "SavedObjectMigrationMap"
+          }
         ],
         "initialIsOpen": false
       },
@@ -621,6 +634,7 @@
             "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectMigration",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -641,6 +655,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectMigration",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -766,6 +781,7 @@
             "lineNumber": 19,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "Set",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -785,6 +801,7 @@
             "lineNumber": 19,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "Set",
             "trackAdoption": false,
             "isRequired": true
           }

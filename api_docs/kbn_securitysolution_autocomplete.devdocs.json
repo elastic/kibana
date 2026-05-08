@@ -182,6 +182,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -338,6 +339,7 @@
             "lineNumber": 27,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "EsFieldSelectorProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -408,6 +410,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AutocompleteListsData",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -510,6 +513,7 @@
                     "lineNumber": 28,
                     "columnNumber": 14,
                     "deprecated": false,
+                    "docsReferencedTypeName": "T",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -876,6 +880,7 @@
             "lineNumber": 41,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "UseFieldValueAutocompleteProps",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -42,6 +42,23 @@
     "misc": [
       {
         "parentPluginId": "mockIdpPlugin",
+        "id": "def-common.MOCK_IDP_KIBANA_BASE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_KIBANA_BASE_PATH",
+        "description": [],
+        "signature": [
+          "\"/kbn\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "mockIdpPlugin",
         "id": "def-common.MOCK_IDP_REALM_NAME",
         "type": "string",
         "tags": [],
@@ -51,7 +68,7 @@
           "\"cloud-saml-kibana\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 62,
+        "lineNumber": 67,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -68,7 +85,7 @@
           "\"org1234567890\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 40,
+        "lineNumber": 45,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -85,7 +102,7 @@
           "\"abcdef12345678901234567890123456\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 41,
+        "lineNumber": 46,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -99,7 +116,7 @@
         "label": "MOCK_IDP_UIAM_SERVICE_INTERNAL_URL",
         "description": [],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 55,
+        "lineNumber": 60,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -113,7 +130,7 @@
         "label": "MOCK_IDP_UIAM_SERVICE_URL",
         "description": [],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 57,
+        "lineNumber": 62,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -130,7 +147,7 @@
           "\"Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=\""
         ],
         "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
-        "lineNumber": 15,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

@@ -220,6 +220,7 @@
                 "lineNumber": 106,
                 "columnNumber": 39,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false
               }
             ]
@@ -265,7 +266,7 @@
                 "id": "def-public.scopedHistoryMock.create.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  pathname = '/',\n  search = '',\n  hash = '',\n  key,\n  state,\n}",
                 "description": [],
                 "signature": [
                   "{ pathname?: string | undefined; search?: string | undefined; state?: unknown; hash?: string | undefined; key?: string | undefined; }"
@@ -274,6 +275,7 @@
                 "lineNumber": 16,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false
               }
             ]

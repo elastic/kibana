@@ -17,7 +17,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
@@ -31,7 +31,7 @@ import { useBulkGetUserProfiles } from '../../../common/components/user_profiles
 import { UsersAvatarsPanel } from '../../../common/components/user_profiles/users_avatars_panel';
 import { useSetAlertAssignees } from '../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { AlertHeaderBlock } from '../../shared/components/alert_header_block';
+import { FlyoutHeaderBlock } from '../../shared/components/flyout_header_block';
 import {
   ASSIGNEES_ADD_BUTTON_TEST_ID,
   ASSIGNEES_EMPTY_TEST_ID,
@@ -78,7 +78,7 @@ export interface AssigneesProps {
 export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: AssigneesProps) => {
   const eventId = useMemo(() => hit.raw._id ?? '', [hit]);
   const isRemoteDocument = useMemo(
-    () => isCCSRemoteIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
+    () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
     [hit]
   );
   const initialAssignedUserIds = useMemo(() => {
@@ -193,7 +193,7 @@ export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: As
   );
 
   return (
-    <AlertHeaderBlock
+    <FlyoutHeaderBlock
       hasBorder
       title={
         <FormattedMessage
@@ -215,7 +215,7 @@ export const Assignees = memo(({ hit, onAlertUpdated, showAssignees = true }: As
           <EuiFlexItem grow={false}>{updateAssigneesPopover}</EuiFlexItem>
         </EuiFlexGroup>
       )}
-    </AlertHeaderBlock>
+    </FlyoutHeaderBlock>
   );
 });
 
