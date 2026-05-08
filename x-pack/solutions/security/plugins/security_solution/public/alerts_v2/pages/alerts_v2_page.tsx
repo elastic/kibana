@@ -238,6 +238,18 @@ export const AlertsV2Page = () => {
     [openFlyout]
   );
 
+  const handleOpenFlyoutNotes = useCallback(
+    (episodeId: string) => {
+      openFlyout({
+        right: {
+          id: AlertsV2DetailsPanelKey,
+          params: { episodeId, initialTab: 'notes' },
+        },
+      });
+    },
+    [openFlyout]
+  );
+
   const episodeActions: EpisodeAction[] = useMemo(
     () =>
       createEpisodeActions({
@@ -294,6 +306,7 @@ export const AlertsV2Page = () => {
               securityActions={securityActions}
               episode={episode as any}
               onActionSuccess={refetch}
+              onShowNotes={() => handleOpenFlyoutNotes(record.id)}
               renderCustomButton={(onClick: () => void) => (
                 <Control
                   iconType="boxesHorizontal"
@@ -307,7 +320,7 @@ export const AlertsV2Page = () => {
         },
       } as RowControlColumn,
     ],
-    [securityActions, episodeActions, refetch, handleOpenFlyout]
+    [securityActions, episodeActions, refetch, handleOpenFlyout, handleOpenFlyoutNotes]
   );
 
   const customBulkActions: CustomBulkActions = useMemo(

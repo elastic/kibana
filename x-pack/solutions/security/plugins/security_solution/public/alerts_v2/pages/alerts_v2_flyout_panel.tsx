@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   EuiAccordion,
   EuiBadge,
@@ -34,6 +35,7 @@ import {
 import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { useFetchEpisodeEventsQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_events_query';
 import { useFetchEpisodeEventDataQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_event_data_query';
 import { useAlertingEpisodeSourceDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episode_source_data_view';
@@ -41,10 +43,6 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
-import {
-  useFetchEpisodeChangelog,
-  type EpisodeChangelogEntry,
-} from '../hooks/use_fetch_episode_changelog';
 import { useBulkGetProfiles } from '@kbn/alerting-v2-episodes-ui/hooks/use_bulk_get_profiles';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
@@ -60,17 +58,35 @@ import {
   getEpisodeDurationMs,
 } from '@kbn/alerting-v2-episodes-ui/utils/episode_series_derived';
 import type { EpisodeEventRow } from '@kbn/alerting-v2-episodes-ui/queries/episode_events_query';
-import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import {
+  useFetchEpisodeChangelog,
+  type EpisodeChangelogEntry,
+} from '../hooks/use_fetch_episode_changelog';
 import { FlyoutHeader } from '../../flyout/shared/components/flyout_header';
 import { FlyoutBody } from '../../flyout/shared/components/flyout_body';
 import { useKibana } from '../../common/lib/kibana';
 import { TakeActionDropdown } from '../components/take_action_dropdown';
 import { EpisodeAssigneeCell } from '../components/episode_assignee_cell';
 import { createWorkflowActions } from '../actions/workflow_actions';
+import { AddNote } from '../../notes/components/add_note';
+import { NotesList } from '../../notes/components/notes_list';
+import { DeleteConfirmModal } from '../../notes/components/delete_confirm_modal';
+import type { Note } from '../../../common/api/timeline';
+import type { State } from '../../common/store';
+import {
+  fetchNotesByDocumentIds,
+  makeSelectNotesByDocumentId,
+  ReqStatus,
+  selectFetchNotesByDocumentIdsError,
+  selectFetchNotesByDocumentIdsStatus,
+  selectNotesTablePendingDeleteIds,
+} from '../../notes/store/notes.slice';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import * as i18n from '../translations';
 
 export interface AlertsV2DetailsPanelParams {
   episodeId: string;
+  initialTab?: FlyoutTab;
 }
 
 export interface AlertsV2DetailsPanelProps {
@@ -158,7 +174,7 @@ const CopyableId: React.FC<{ value: string }> = ({ value }) => (
   </EuiCopy>
 );
 
-type FlyoutTab = 'overview' | 'metadata' | 'json' | 'events_log';
+type FlyoutTab = 'overview' | 'metadata' | 'json' | 'events_log' | 'notes';
 
 const ACTION_TYPE_LABELS: Record<string, string> = {
   ack: 'Acknowledged',
@@ -242,13 +258,44 @@ const getEventsLogDescription = (
 };
 
 export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ params }) => {
-  const { episodeId } = params;
+  const { episodeId, initialTab } = params;
   const services = useKibana().services;
   const queryClient = useQueryClient();
-  const [selectedTab, setSelectedTab] = useState<FlyoutTab>('overview');
+  const [selectedTab, setSelectedTab] = useState<FlyoutTab>(initialTab ?? 'overview');
   const [expandedEventIds, setExpandedEventIds] = useState<Set<string>>(new Set());
 
+  const dispatch = useDispatch();
+  const { notesPrivileges } = useUserPrivileges();
+  const canCreateNotes = notesPrivileges.crud;
+
+  const selectNotesByDocumentId = useMemo(() => makeSelectNotesByDocumentId(), []);
+  const notes: Note[] = useSelector((state: State) => selectNotesByDocumentId(state, episodeId));
+  const pendingDeleteIds = useSelector((state: State) => selectNotesTablePendingDeleteIds(state));
+  const notesFetchStatus = useSelector((state: State) =>
+    selectFetchNotesByDocumentIdsStatus(state)
+  );
+  const notesFetchError = useSelector((state: State) => selectFetchNotesByDocumentIdsError(state));
+
+  const fetchNotes = useCallback(
+    () => dispatch(fetchNotesByDocumentIds({ documentIds: [episodeId] })),
+    [dispatch, episodeId]
+  );
+
+  useEffect(() => {
+    fetchNotes();
+  }, [fetchNotes]);
+
+  useEffect(() => {
+    if (notesFetchStatus === ReqStatus.Failed && notesFetchError) {
+      services.notifications.toasts.addError(notesFetchError as Error, {
+        title: 'Error fetching notes',
+      });
+    }
+  }, [notesFetchStatus, notesFetchError, services.notifications.toasts]);
+
   const onTabClick = useCallback((tab: FlyoutTab) => setSelectedTab(tab), []);
+
+  const handleShowNotes = useCallback(() => setSelectedTab('notes'), []);
 
   const toggleEventExpand = useCallback((id: string) => {
     setExpandedEventIds((prev) => {
@@ -760,6 +807,37 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
     );
   };
 
+  const renderNotesTab = () => (
+    <EuiPanel hasBorder={false} hasShadow={false}>
+      {notesFetchStatus === ReqStatus.Loading && (
+        <EuiFlexGroup justifyContent="center" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      {notesFetchStatus === ReqStatus.Succeeded && notes.length === 0 && (
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              {i18n.FLYOUT_NO_NOTES}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      {notes.length > 0 && (
+        <NotesList notes={notes} options={{ hideFlyoutIcon: true, hideTimelineIcon: true }} />
+      )}
+      {canCreateNotes && (
+        <>
+          <EuiSpacer />
+          <AddNote eventId={episodeId} timelineId="" />
+        </>
+      )}
+      {pendingDeleteIds.length > 0 && <DeleteConfirmModal />}
+    </EuiPanel>
+  );
+
   return (
     <>
       <FlyoutHeader>
@@ -795,6 +873,18 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
               </>
             )}
           </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === 'notes'}
+            onClick={() => onTabClick('notes')}
+          >
+            {i18n.FLYOUT_TAB_NOTES}
+            {notes.length > 0 && (
+              <>
+                {' '}
+                <EuiBadge color="hollow">{notes.length}</EuiBadge>
+              </>
+            )}
+          </EuiTab>
         </EuiTabs>
       </FlyoutHeader>
 
@@ -803,6 +893,7 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
         {selectedTab === 'json' && renderJsonTab()}
         {selectedTab === 'metadata' && renderMetadataTab()}
         {selectedTab === 'events_log' && renderEventsLogTab()}
+        {selectedTab === 'notes' && renderNotesTab()}
       </FlyoutBody>
 
       {syntheticEpisode && (
@@ -815,6 +906,7 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
                   securityActions={securityActions}
                   episode={syntheticEpisode as any}
                   onActionSuccess={handleActionSuccess}
+                  onShowNotes={handleShowNotes}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

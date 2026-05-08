@@ -288,3 +288,18 @@ export const FLYOUT_RAW_EVENT = i18n.translate(
   'xpack.securitySolution.alertsV2.flyout.rawEvent',
   { defaultMessage: 'Show full event' }
 );
+
+export const FLYOUT_TAB_NOTES = i18n.translate(
+  'xpack.securitySolution.alertsV2.flyout.tabNotes',
+  { defaultMessage: 'Notes' }
+);
+
+export const FLYOUT_NO_NOTES = i18n.translate(
+  'xpack.securitySolution.alertsV2.flyout.noNotes',
+  { defaultMessage: 'No notes have been created for this episode.' }
+);
+
+export const ACTION_ADD_NOTE = i18n.translate(
+  'xpack.securitySolution.alertsV2.flyout.action.addNote',
+  { defaultMessage: 'Add note' }
+);

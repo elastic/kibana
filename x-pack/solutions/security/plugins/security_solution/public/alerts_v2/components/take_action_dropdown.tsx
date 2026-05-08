@@ -79,6 +79,7 @@ interface TakeActionDropdownProps {
   episode: SecurityAlertEpisode;
   onActionSuccess: () => void;
   renderCustomButton?: (onClick: () => void) => React.ReactNode;
+  onShowNotes?: () => void;
 }
 
 export const TakeActionDropdown: React.FC<TakeActionDropdownProps> = ({
@@ -87,6 +88,7 @@ export const TakeActionDropdown: React.FC<TakeActionDropdownProps> = ({
   episode,
   onActionSuccess,
   renderCustomButton,
+  onShowNotes,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
@@ -148,6 +150,23 @@ export const TakeActionDropdown: React.FC<TakeActionDropdownProps> = ({
     [episodeActions, episode, closePopover, onActionSuccess]
   );
 
+  const noteItems: EuiContextMenuPanelItemDescriptor[] = useMemo(
+    () =>
+      onShowNotes
+        ? [
+            {
+              name: i18n.ACTION_ADD_NOTE,
+              icon: 'editorComment',
+              onClick: () => {
+                closePopover();
+                onShowNotes();
+              },
+            },
+          ]
+        : [],
+    [onShowNotes, closePopover]
+  );
+
   const notImplementedItems: EuiContextMenuPanelItemDescriptor[] = useMemo(
     () =>
       NOT_IMPLEMENTED_ACTIONS.map((action) => ({
@@ -168,7 +187,7 @@ export const TakeActionDropdown: React.FC<TakeActionDropdownProps> = ({
     () => [
       {
         id: 0,
-        items: [...securityItems, ...v2Items, ...notImplementedItems],
+        items: [...securityItems, ...noteItems, ...v2Items, ...notImplementedItems],
       },
       {
         id: 'CLOSE_REASON_PANEL',
