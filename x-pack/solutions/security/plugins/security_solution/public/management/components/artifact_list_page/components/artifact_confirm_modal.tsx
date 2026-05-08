@@ -28,7 +28,11 @@ import type { ArtifactConfirmModalLabelProps } from '../types';
 
 export const CONFIRM_WARNING_MODAL_LABELS = (
   entryType: string,
-  warnings: Partial<{ hasWildcardWithWrongOperator: boolean; hasUnnecessaryEscaping: boolean }>,
+  warnings: Partial<{
+    hasWildcardWithWrongOperator: boolean;
+    hasUnnecessaryEscaping: boolean;
+    hasMalformedMatchesValue: boolean;
+  }>,
   links: DocLinks
 ): ArtifactConfirmModalLabelProps => {
   const listOfWarnings: ArtifactConfirmModalLabelProps['listOfWarnings'] = [
@@ -39,6 +43,18 @@ export const CONFIRM_WARNING_MODAL_LABELS = (
             {
               defaultMessage:
                 'Using a "*" or a "?" in the value with the "is" operator can make the entry ineffective. Change the operator to "matches" to ensure wildcards run properly.',
+            }
+          ),
+        ]
+      : []),
+
+    ...(warnings.hasMalformedMatchesValue
+      ? [
+          i18n.translate(
+            'xpack.securitySolution.artifacts.confirmWarningModal.malformedMatchesValue',
+            {
+              defaultMessage:
+                'Using escape sequences (e.g. "\\*", "\\?") with the "matches" operator makes them match literal characters instead of wildcard patterns. If you intended an exact match, change the operator to "is".',
             }
           ),
         ]

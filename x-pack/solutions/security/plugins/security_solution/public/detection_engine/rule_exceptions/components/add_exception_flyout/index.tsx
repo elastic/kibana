@@ -518,7 +518,10 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const confirmModal = useMemo(() => {
     const labels = CONFIRM_WARNING_MODAL_LABELS(
       listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION,
-      { hasWildcardWithWrongOperator: wildcardWarningExists },
+      {
+        hasWildcardWithWrongOperator: wildcardWarningExists,
+        hasMalformedMatchesValue: malformedMatchesValueExists,
+      },
       links
     );
 
@@ -530,7 +533,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         data-test-subj="artifactConfirmModal"
       />
     );
-  }, [links, listType, submitException, wildcardWarningExists]);
+  }, [links, listType, submitException, wildcardWarningExists, malformedMatchesValueExists]);
 
   return (
     <EuiFlyout

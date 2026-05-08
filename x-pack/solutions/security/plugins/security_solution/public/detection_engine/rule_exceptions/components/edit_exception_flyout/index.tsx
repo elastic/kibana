@@ -405,7 +405,10 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   const confirmModal = useMemo(() => {
     const labels = CONFIRM_WARNING_MODAL_LABELS(
       listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION,
-      { hasWildcardWithWrongOperator: wildcardWarningExists },
+      {
+        hasWildcardWithWrongOperator: wildcardWarningExists,
+        hasMalformedMatchesValue: malformedMatchesValueExists,
+      },
       links
     );
 
@@ -417,7 +420,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         data-test-subj="artifactConfirmModal"
       />
     );
-  }, [listType, wildcardWarningExists, links, handleSubmitException]);
+  }, [listType, wildcardWarningExists, links, handleSubmitException, malformedMatchesValueExists]);
 
   return (
     <EuiFlyout
