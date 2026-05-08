@@ -9,14 +9,12 @@ import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { WORKFLOW_SML_TYPE, WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import {
-  workflowIndexName,
-  type WorkflowProperties,
-} from '@kbn/workflows-management-plugin/server/storage/workflow_storage';
+import { WORKFLOW_INDEX_NAME } from '@kbn/workflows';
+import type { WorkflowProperties } from '@kbn/workflows-management-plugin/server/storage/workflow_storage';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
-const indexPattern = `${workflowIndexName}-*`;
+const indexPattern = `${WORKFLOW_INDEX_NAME}-*`;
 
 const buildSearchContent = (source: WorkflowProperties): string => {
   const parts: Array<string | undefined> = [
