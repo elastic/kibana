@@ -115,6 +115,7 @@ export const ATTACKS_PATH = '/attacks' as const;
 export const ALERT_DETECTIONS = '/alert_detections' as const;
 
 export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
+export const ATTACK_DETAILS_REDIRECT_PATH = `${ATTACKS_PATH}/redirect` as const;
 export const ALERT_SUMMARY_PATH = `/alert_summary` as const;
 export const RULES_PATH = '/rules' as const;
 export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
@@ -541,8 +542,12 @@ export const MAX_NOTES_PER_DOCUMENT = 100;
 
 /**
  * Cases attachment IDs
+ *
+ * The endpoint attachment type id now lives in the cases plugin as
+ * `SECURITY_ENDPOINT_ATTACHMENT_TYPE` (see `@kbn/cases-plugin/common`).
+ * Import it from there directly so all unified attachment type ids stay in a
+ * single source of truth.
  */
-export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;
 export const CASE_ATTACHMENT_INDICATOR_TYPE_ID = 'indicator' as const;
 
 /**

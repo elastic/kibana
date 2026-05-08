@@ -35,7 +35,7 @@ const SELECT_PICKER_HEIGHT = '250px';
 const NoFilterItems = () => {
   return (
     <EuiSelectableMessage>
-      <EuiIcon type="minusCircle" />
+      <EuiIcon aria-hidden={true} type="minusCircle" />
       <EuiSpacer size="xs" />
       <p>
         <FormattedMessage

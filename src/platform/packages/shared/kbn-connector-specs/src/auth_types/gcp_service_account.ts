@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
@@ -15,25 +15,27 @@ import { getGcpAccessToken, parseServiceAccountKey } from './gcp_jwt_helpers';
 
 const DEFAULT_SCOPE = 'https://www.googleapis.com/auth/cloud-platform';
 
-const authSchema = z
-  .object({
-    serviceAccountJson: z
-      .string()
-      .min(1, { message: i18n.GCP_SERVICE_ACCOUNT_JSON_REQUIRED_MESSAGE })
-      .meta({
-        sensitive: true,
-        widget: 'fileUpload',
-        widgetOptions: { accept: '.json' },
-        label: i18n.GCP_SERVICE_ACCOUNT_JSON_LABEL,
-        helpText: i18n.GCP_SERVICE_ACCOUNT_JSON_HELP_TEXT,
+const authSchema = lazySchema(() =>
+  z
+    .object({
+      serviceAccountJson: z
+        .string()
+        .min(1, { message: i18n.GCP_SERVICE_ACCOUNT_JSON_REQUIRED_MESSAGE })
+        .meta({
+          sensitive: true,
+          widget: 'fileUpload',
+          widgetOptions: { accept: '.json' },
+          label: i18n.GCP_SERVICE_ACCOUNT_JSON_LABEL,
+          helpText: i18n.GCP_SERVICE_ACCOUNT_JSON_HELP_TEXT,
+        }),
+      scope: z.string().optional().meta({
+        label: i18n.GCP_SERVICE_ACCOUNT_SCOPE_LABEL,
+        helpText: i18n.GCP_SERVICE_ACCOUNT_SCOPE_HELP_TEXT,
+        hidden: true,
       }),
-    scope: z.string().optional().meta({
-      label: i18n.GCP_SERVICE_ACCOUNT_SCOPE_LABEL,
-      helpText: i18n.GCP_SERVICE_ACCOUNT_SCOPE_HELP_TEXT,
-      hidden: true,
-    }),
-  })
-  .meta({ label: i18n.GCP_SERVICE_ACCOUNT_LABEL });
+    })
+    .meta({ label: i18n.GCP_SERVICE_ACCOUNT_LABEL })
+);
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 
