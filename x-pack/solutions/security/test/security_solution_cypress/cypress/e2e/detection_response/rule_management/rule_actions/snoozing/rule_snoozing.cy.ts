@@ -224,10 +224,12 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'
       createRule(getNewRule({ name: 'Test rule', enabled: false })).then(({ body: rule }) => {
         cy.intercept('POST', `${INTERNAL_ALERTING_API_FIND_RULES_PATH}*`, {
           statusCode: 500,
-        });
+        }).as('findRulesError');
 
         visitRuleDetailsPage(rule.id);
       });
+
+      cy.wait('@findRulesError');
 
       cy.get(DISABLED_SNOOZE_BADGE)
         .find('[data-test-subj="rulesListNotifyBadge-unsnoozed"]')
