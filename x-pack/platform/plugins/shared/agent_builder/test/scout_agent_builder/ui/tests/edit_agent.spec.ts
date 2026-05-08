@@ -80,7 +80,11 @@ test.describe(
         await page.testSubj
           .locator('agentBuilderAgentsListPageTitle')
           .waitFor({ state: 'visible' });
-        expect(await pageObjects.agentBuilder.getAgentRowDisplayName(agent.id)).toBe(editedName);
+        // The list page renders before React-Query's background refetch lands, so
+        // the row can briefly show the previous name. Poll until the refresh hits.
+        await expect(async () => {
+          expect(await pageObjects.agentBuilder.getAgentRowDisplayName(agent.id)).toBe(editedName);
+        }).toPass({ timeout: 30_000 });
       });
 
       await test.step('clones agent', async () => {
