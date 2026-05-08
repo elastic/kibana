@@ -39,7 +39,7 @@
           ", \"type\">) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/public/components/package_icon.tsx",
-        "lineNumber": 47,
+        "lineNumber": 56,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -58,7 +58,7 @@
               ", \"type\">"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/components/package_icon.tsx",
-            "lineNumber": 48,
+            "lineNumber": 57,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

@@ -40,6 +40,7 @@
     "@kbn/core-ui-settings-server",
     "@kbn/utility-types",
     "@kbn/inference-tracing",
+    "@kbn/tracing",
     "@kbn/std",
     "@kbn/esql-language",
     "@kbn/esql-utils",

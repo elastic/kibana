@@ -1,0 +1,19 @@
+{
+  "sha1": "",
+  "tests": [
+    {
+      "id": "69056a2d02da36d-f607091c4746337",
+      "title": "Agent Builder — LLM smoke (converse API) EIS — models discovery gate",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
+        "line": 235,
+        "column": 12
+      }
+    }
+  ]
+}

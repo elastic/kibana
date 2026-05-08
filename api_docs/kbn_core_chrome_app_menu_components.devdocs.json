@@ -14,7 +14,7 @@
           "(props: AppMenuActionButtonProps) => React.JSX.Element"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/components/app_menu_action_button.tsx",
-        "lineNumber": 31,
+        "lineNumber": 28,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -30,7 +30,7 @@
               "AppMenuActionButtonProps"
             ],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/components/app_menu_action_button.tsx",
-            "lineNumber": 31,
+            "lineNumber": 28,
             "columnNumber": 37,
             "deprecated": false,
             "docsReferencedTypeName": "AppMenuActionButtonProps",
@@ -1363,7 +1363,7 @@
           "\nConfiguration object for the AppMenu component.\nThe maximum number of items that can be visible at once before overflowing into the \"More\"\npopover is determined by the APP_MENU_ITEM_LIMIT constant - currently 5 but it will\nbe reduced to 3 in a future release."
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-        "lineNumber": 268,
+        "lineNumber": 264,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1382,7 +1382,7 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-            "lineNumber": 275,
+            "lineNumber": 271,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1401,7 +1401,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-            "lineNumber": 280,
+            "lineNumber": 276,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1507,40 +1507,6 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-app-menu-components",
-        "id": "def-public.APP_MENU_NOTIFICATION_INDICATOR_LEFT",
-        "type": "number",
-        "tags": [],
-        "label": "APP_MENU_NOTIFICATION_INDICATOR_LEFT",
-        "description": [],
-        "signature": [
-          "25"
-        ],
-        "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/constants.ts",
-        "lineNumber": 19,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-app-menu-components",
-        "id": "def-public.APP_MENU_NOTIFICATION_INDICATOR_TOP",
-        "type": "number",
-        "tags": [],
-        "label": "APP_MENU_NOTIFICATION_INDICATOR_TOP",
-        "description": [],
-        "signature": [
-          "2"
-        ],
-        "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/constants.ts",
-        "lineNumber": 18,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-app-menu-components",
         "id": "def-public.AppMenuItemType",
         "type": "Type",
         "tags": [],
@@ -1553,7 +1519,7 @@
           " & { order: number; overflow?: boolean | undefined; separator?: \"above\" | \"below\" | undefined; }"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-        "lineNumber": 217,
+        "lineNumber": 213,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1576,7 +1542,7 @@
           " | undefined; labelBadgeText?: string | undefined; }"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-        "lineNumber": 236,
+        "lineNumber": 232,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1599,7 +1565,7 @@
           " | undefined; }"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-        "lineNumber": 254,
+        "lineNumber": 250,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1662,7 +1628,7 @@
           "AppMenuSecondarySplitButton | AppMenuSecondarySplitButtonWithPopover"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-        "lineNumber": 79,
+        "lineNumber": 75,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

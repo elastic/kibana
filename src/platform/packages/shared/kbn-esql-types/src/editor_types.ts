@@ -68,6 +68,7 @@ export const esqlFieldTypes: readonly string[] = [
   'histogram',
   'exponential_histogram',
   'tdigest',
+  'flattened',
 ] as const;
 
 export type EsqlFieldType = (typeof esqlFieldTypes)[number];

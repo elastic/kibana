@@ -291,18 +291,16 @@ describe('OTelComponentDetail', () => {
     expect(result.getByText(/exporters:/)).toBeInTheDocument();
   });
 
-  it('switches to Metrics tab and shows placeholder', () => {
+  it('does not render Metrics tab for pipeline', () => {
     const result = testRenderer.render(
       <OTelComponentDetail
-        componentId="otlp"
-        componentType="receiver"
+        componentId="logs/default"
+        componentType="pipeline"
         config={config}
         onClose={jest.fn()}
       />
     );
 
-    fireEvent.click(result.getByTestId('otelComponentDetailTab-metrics'));
-    expect(result.getByTestId('otelComponentDetailMetricsPlaceholder')).toBeInTheDocument();
-    expect(result.queryByText(/protocols:/)).not.toBeInTheDocument();
+    expect(result.queryByTestId('otelComponentDetailTab-metrics')).not.toBeInTheDocument();
   });
 });

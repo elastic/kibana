@@ -1,0 +1,318 @@
+{
+  "id": "@kbn/core-user-storage-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-user-storage-common",
+        "id": "def-common.IUserStorageClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "IUserStorageClient",
+        "description": [
+          "Server-side scoped client returned by `asScopedToClient()`."
+        ],
+        "path": "src/core/packages/user-storage/common/src/types.ts",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-storage-common",
+            "id": "def-common.IUserStorageClient.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "Resolve a single key: returns the user override or the registered default."
+            ],
+            "signature": [
+              "<T = unknown>(key: string) => Promise<T>"
+            ],
+            "path": "src/core/packages/user-storage/common/src/types.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-storage-common",
+                "id": "def-common.IUserStorageClient.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/user-storage/common/src/types.ts",
+                "lineNumber": 31,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-storage-common",
+            "id": "def-common.IUserStorageClient.getAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getAll",
+            "description": [
+              "Resolve all registered keys (user overrides merged with defaults)."
+            ],
+            "signature": [
+              "() => Promise<Record<string, unknown>>"
+            ],
+            "path": "src/core/packages/user-storage/common/src/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-storage-common",
+            "id": "def-common.IUserStorageClient.set",
+            "type": "Function",
+            "tags": [],
+            "label": "set",
+            "description": [
+              "Validate and persist a value for the current user."
+            ],
+            "signature": [
+              "<T = unknown>(key: string, value: T) => Promise<void>"
+            ],
+            "path": "src/core/packages/user-storage/common/src/types.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-storage-common",
+                "id": "def-common.IUserStorageClient.set.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/user-storage/common/src/types.ts",
+                "lineNumber": 35,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-user-storage-common",
+                "id": "def-common.IUserStorageClient.set.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "src/core/packages/user-storage/common/src/types.ts",
+                "lineNumber": 35,
+                "columnNumber": 33,
+                "deprecated": false,
+                "docsReferencedTypeName": "T",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-storage-common",
+            "id": "def-common.IUserStorageClient.remove",
+            "type": "Function",
+            "tags": [],
+            "label": "remove",
+            "description": [
+              "Remove the user override so the key falls back to its default."
+            ],
+            "signature": [
+              "(key: string) => Promise<void>"
+            ],
+            "path": "src/core/packages/user-storage/common/src/types.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-user-storage-common",
+                "id": "def-common.IUserStorageClient.remove.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/user-storage/common/src/types.ts",
+                "lineNumber": 37,
+                "columnNumber": 10,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-storage-common",
+        "id": "def-common.UserStorageDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserStorageDefinition",
+        "description": [
+          "Definition for a single user storage key, provided at registration time."
+        ],
+        "signature": [
+          "UserStorageDefinition",
+          "<T>"
+        ],
+        "path": "src/core/packages/user-storage/common/src/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-storage-common",
+            "id": "def-common.UserStorageDefinition.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [
+              "zod/v4 schema used to validate values on write."
+            ],
+            "signature": [
+              "ZodType",
+              "<T, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<T, unknown>>"
+            ],
+            "path": "src/core/packages/user-storage/common/src/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-storage-common",
+            "id": "def-common.UserStorageDefinition.defaultValue",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "defaultValue",
+            "description": [
+              "Value returned when the user has not set this key."
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "src/core/packages/user-storage/common/src/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-user-storage-common",
+            "id": "def-common.UserStorageDefinition.scope",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scope",
+            "description": [
+              "Whether this key is per-space or global."
+            ],
+            "signature": [
+              "\"global\" | \"space\""
+            ],
+            "path": "src/core/packages/user-storage/common/src/types.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-user-storage-common",
+        "id": "def-common.UserStorageRegistrations",
+        "type": "Type",
+        "tags": [],
+        "label": "UserStorageRegistrations",
+        "description": [
+          "A record of key → definition, passed to `register()`."
+        ],
+        "signature": [
+          "{ [x: string]: ",
+          "UserStorageDefinition",
+          "<unknown>; }"
+        ],
+        "path": "src/core/packages/user-storage/common/src/types.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-user-storage-common",
+        "id": "def-common.UserStorageScope",
+        "type": "Type",
+        "tags": [],
+        "label": "UserStorageScope",
+        "description": [
+          "Whether a key is scoped to a single space or is global across all spaces."
+        ],
+        "signature": [
+          "\"global\" | \"space\""
+        ],
+        "path": "src/core/packages/user-storage/common/src/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -15,7 +15,6 @@ import {
   EuiSpacer,
   EuiTab,
   EuiTabs,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -33,6 +32,7 @@ import { getComponentHealthStatus, getHealthStatusLabel, HEALTH_STATUS_COLORS } 
 
 import { ComponentConfigTab } from './component_config_tab';
 import { ComponentHealthTab } from './component_health_tab';
+import { ComponentMetricsTab, SUPPORTED_METRIC_TYPES } from './component_metrics_tab';
 
 const getComponentSection = (
   config: OTelCollectorConfig,
@@ -91,6 +91,13 @@ export const OTelComponentDetail: React.FunctionComponent<OTelComponentDetailPro
   onClose,
 }) => {
   const [selectedTabId, setSelectedTabId] = useState<ComponentDetailTabId>('config');
+  const visibleTabs = useMemo(
+    () =>
+      COMPONENT_DETAIL_TABS.filter(
+        (tab) => tab.id !== 'metrics' || SUPPORTED_METRIC_TYPES.includes(componentType)
+      ),
+    [componentType]
+  );
   const section = getComponentSection(config, componentType);
   const componentConfig = section?.[componentId];
   const componentHealth = useMemo(
@@ -146,7 +153,7 @@ export const OTelComponentDetail: React.FunctionComponent<OTelComponentDetailPro
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiTabs size="s" data-test-subj="otelComponentDetailTabs">
-        {COMPONENT_DETAIL_TABS.map((tab) => (
+        {visibleTabs.map((tab) => (
           <EuiTab
             key={tab.id}
             isSelected={tab.id === selectedTabId}
@@ -164,11 +171,7 @@ export const OTelComponentDetail: React.FunctionComponent<OTelComponentDetailPro
       {selectedTabId === 'health' && <ComponentHealthTab componentHealth={componentHealth} />}
 
       {selectedTabId === 'metrics' && (
-        <EuiText size="s" color="subdued" data-test-subj="otelComponentDetailMetricsPlaceholder">
-          {i18n.translate('xpack.fleet.otelUi.componentDetail.metricsPlaceholder', {
-            defaultMessage: 'Metrics will be available here.',
-          })}
-        </EuiText>
+        <ComponentMetricsTab componentId={componentId} componentType={componentType} />
       )}
     </EuiPanel>
   );

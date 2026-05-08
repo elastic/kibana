@@ -60,7 +60,7 @@
         "label": "CreateRuleFormFlyoutProps",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting_v2/public/create_rule_form_flyout.tsx",
-        "lineNumber": 13,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -73,7 +73,7 @@
             "label": "query",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting_v2/public/create_rule_form_flyout.tsx",
-            "lineNumber": 14,
+            "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -89,7 +89,7 @@
               "(() => void) | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting_v2/public/create_rule_form_flyout.tsx",
-            "lineNumber": 15,
+            "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -107,7 +107,46 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting_v2/public/create_rule_form_flyout.tsx",
-            "lineNumber": 16,
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alertingVTwo",
+            "id": "def-public.CreateRuleFormFlyoutProps.esqlVariables",
+            "type": "Array",
+            "tags": [],
+            "label": "esqlVariables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/create_rule_form_flyout.tsx",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alertingVTwo",
+            "id": "def-public.CreateRuleFormFlyoutProps.validationErrors",
+            "type": "Array",
+            "tags": [],
+            "label": "validationErrors",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting_v2/public/create_rule_form_flyout.tsx",
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -125,7 +164,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting_v2/public/create_rule_form_flyout.tsx",
-            "lineNumber": 17,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

@@ -13,7 +13,7 @@
 @babel/types@7.24.7
 @babel/types@7.26.8
 @base2/pretty-print-object@1.0.1
-@elastic/apm-rum-core@5.25.1
+@elastic/apm-rum-core@5.25.2
 @elastic/charts@71.5.0
 @elastic/esql@3.0.0
 @elastic/eui-theme-borealis@7.0.0
@@ -303,7 +303,7 @@ lines-and-columns@1.2.4
 loader-runner@4.3.0
 locate-path@6.0.0
 lodash.toarray@4.4.0
-lodash@4.17.23
+lodash@4.18.1
 loose-envify@1.4.0
 luxon@1.28.1
 markdown-escapes@1.0.1
