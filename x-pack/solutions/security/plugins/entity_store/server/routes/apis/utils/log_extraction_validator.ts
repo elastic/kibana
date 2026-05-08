@@ -75,11 +75,11 @@ function isValidFrequency(frequency: string): boolean {
   }
 }
 
-function validateAdditionalIndexPatterns(
-  data: LogExtractionBodyParams,
+function validateIndexPatternList(
+  patterns: string[] | undefined,
+  fieldName: 'additionalIndexPatterns' | 'excludedIndexPatterns',
   ctx: z.RefinementCtx
 ): void {
-  const patterns = data.additionalIndexPatterns;
   if (patterns === undefined) {
     return;
   }
@@ -93,7 +93,7 @@ function validateAdditionalIndexPatterns(
     if (isEmpty || !validIndexPattern) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ['additionalIndexPatterns', i],
+        path: [fieldName, i],
         message: 'must be a non-empty, valid index pattern (no spaces or illegal characters)',
       });
     }
@@ -136,7 +136,8 @@ export function validateLogExtractionParams(
 
   validateFilter(data, ctx);
   validateFrequencyParam(data, ctx);
-  validateAdditionalIndexPatterns(data, ctx);
+  validateIndexPatternList(data.additionalIndexPatterns, 'additionalIndexPatterns', ctx);
+  validateIndexPatternList(data.excludedIndexPatterns, 'excludedIndexPatterns', ctx);
   validateDelayVsLookbackPeriod(data, ctx);
 }
 
