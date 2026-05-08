@@ -33,6 +33,10 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common';
+import {
+  CspInsightLeftPanelSubTab,
+  type EntityDetailsPath,
+} from '../../../entity_details/shared/components/left_panel/left_panel_header';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -139,6 +143,22 @@ export interface HostDetailsProps {
    * Set for attack flyout entity panels; omit in document details flyout.
    */
   isAttackDetails?: boolean;
+  /**
+   * Override invoked when the alerts insight chip is clicked. When provided, the alerts subtab
+   * navigation routes here instead of opening the legacy two-panel host details flyout. Used by
+   * flyout_v2 to surface alerts in a dedicated tools flyout.
+   */
+  onShowAlertsDetails?: () => void;
+  /**
+   * Override invoked when the misconfigurations insight chip is clicked. Same purpose as
+   * `onShowAlertsDetails`, for the misconfigurations subtab.
+   */
+  onShowMisconfigurationsDetails?: () => void;
+  /**
+   * Override invoked when the vulnerabilities insight chip is clicked. Same purpose as
+   * `onShowAlertsDetails`, for the vulnerabilities subtab.
+   */
+  onShowVulnerabilitiesDetails?: () => void;
 }
 
 /**
@@ -152,6 +172,9 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   expandedOnFirstRender = true,
   hostEntityFromStoreResult,
   isAttackDetails = false,
+  onShowAlertsDetails,
+  onShowMisconfigurationsDetails,
+  onShowVulnerabilitiesDetails,
 }) => {
   const EntityCellActions = isAttackDetails ? AttackDetailsCellActions : DocumentDetailsCellActions;
 
@@ -328,7 +351,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     })
   );
 
-  const openDetailsPanel = useNavigateToHostDetails({
+  const navigateToHostDetails = useNavigateToHostDetails({
     hostName,
     entityId,
     scopeId,
@@ -339,6 +362,36 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
     isPreviewMode: true, // setting to true to always open a new host flyout
     contextID: HOST_DETAILS_INSIGHTS_ID,
   });
+
+  const openDetailsPanel = useCallback(
+    (path?: EntityDetailsPath) => {
+      if (onShowAlertsDetails && path?.subTab === CspInsightLeftPanelSubTab.ALERTS) {
+        onShowAlertsDetails();
+        return;
+      }
+      if (
+        onShowMisconfigurationsDetails &&
+        path?.subTab === CspInsightLeftPanelSubTab.MISCONFIGURATIONS
+      ) {
+        onShowMisconfigurationsDetails();
+        return;
+      }
+      if (
+        onShowVulnerabilitiesDetails &&
+        path?.subTab === CspInsightLeftPanelSubTab.VULNERABILITIES
+      ) {
+        onShowVulnerabilitiesDetails();
+        return;
+      }
+      navigateToHostDetails(path as EntityDetailsPath);
+    },
+    [
+      navigateToHostDetails,
+      onShowAlertsDetails,
+      onShowMisconfigurationsDetails,
+      onShowVulnerabilitiesDetails,
+    ]
+  );
 
   const {
     loading: isRelatedUsersLoading,

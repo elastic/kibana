@@ -11,8 +11,6 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
-import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
 import { DocumentFlyoutWrapper } from '../document_flyout_wrapper';
 import { type CellActionRenderer } from '../../shared/components/cell_actions';
 import { EventKind } from '../constants/event_kinds';
@@ -33,10 +31,18 @@ import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { CorrelationsDetails } from '../../correlations';
 import { ThreatIntelligenceDetails } from '../../threat_intelligence';
 import { ChildLink } from '../../shared/components/child_link';
+import { useDefaultDocumentFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
+import { useOpenToolsFlyout } from '../../shared/hooks/use_open_tools_flyout';
 import {
-  defaultToolsFlyoutProperties,
-  useDefaultDocumentFlyoutProperties,
-} from '../../shared/hooks/use_default_flyout_properties';
+  EntitiesDetails,
+  HostEntityAlertsDetails,
+  HostEntityDetails,
+  HostEntityMisconfigurationsDetails,
+  HostEntityVulnerabilitiesDetails,
+  UserEntityAlertsDetails,
+  UserEntityDetails,
+  UserEntityMisconfigurationsDetails,
+} from '../../entities';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -76,7 +82,7 @@ export const InsightsSection = memo(
     const history = useHistory();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const openToolsFlyout = useOpenToolsFlyout();
 
     const expanded = useExpandSection({
       storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
@@ -101,21 +107,10 @@ export const InsightsSection = memo(
       [rule?.investigation_fields?.field_names]
     );
 
-    const onShowThreatIntelligenceDetails = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: <ThreatIntelligenceDetails hit={hit} />,
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'start',
-        }
-      );
-    }, [history, historyKey, hit, overlays, services, store]);
+    const onShowThreatIntelligenceDetails = useCallback(
+      () => openToolsFlyout(<ThreatIntelligenceDetails hit={hit} />),
+      [openToolsFlyout, hit]
+    );
 
     const onShowAlert = useCallback(
       (id: string, indexName: string) =>
@@ -149,61 +144,133 @@ export const InsightsSection = memo(
       ]
     );
 
-    const onShowCorrelationsDetails = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <CorrelationsDetails
-              hit={hit}
-              scopeId=""
-              isRulePreview={false}
-              onShowAlert={onShowAlert}
-            />
-          ),
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'start',
-        }
-      );
-    }, [history, historyKey, hit, onShowAlert, overlays, services, store]);
+    const onShowCorrelationsDetails = useCallback(
+      () =>
+        openToolsFlyout(
+          <CorrelationsDetails
+            hit={hit}
+            scopeId=""
+            isRulePreview={false}
+            onShowAlert={onShowAlert}
+          />
+        ),
+      [openToolsFlyout, hit, onShowAlert]
+    );
 
-    const onShowPrevalenceDetails = useCallback(() => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <PrevalenceDetails
-              hit={hit}
-              investigationFields={investigationFields}
-              scopeId={''}
-              columns={getColumns(renderCellActions, isInSecurityApp, '', ChildLink)}
-            />
-          ),
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          historyKey,
-          session: 'start',
-        }
-      );
-    }, [
-      renderCellActions,
-      history,
-      historyKey,
-      hit,
-      investigationFields,
-      isInSecurityApp,
-      overlays,
-      services,
-      store,
-    ]);
+    const onShowUserDetails = useCallback(
+      ({ userName, entityId }: { userName: string; entityId?: string }) =>
+        openToolsFlyout(
+          <UserEntityDetails
+            hit={hit}
+            scopeId=""
+            userName={userName}
+            entityId={entityId}
+            renderCellActions={renderCellActions}
+            onAlertUpdated={onAlertUpdated}
+          />
+        ),
+      [openToolsFlyout, hit, onAlertUpdated, renderCellActions]
+    );
+
+    const onShowHostDetails = useCallback(
+      ({ hostName, entityId }: { hostName: string; entityId?: string }) =>
+        openToolsFlyout(
+          <HostEntityDetails
+            hit={hit}
+            scopeId=""
+            hostName={hostName}
+            entityId={entityId}
+            renderCellActions={renderCellActions}
+            onAlertUpdated={onAlertUpdated}
+          />
+        ),
+      [openToolsFlyout, hit, onAlertUpdated, renderCellActions]
+    );
+
+    const onShowUserAlertsDetails = useCallback(
+      ({ userName, entityId }: { userName: string; entityId?: string }) =>
+        openToolsFlyout(
+          <UserEntityAlertsDetails
+            hit={hit}
+            userName={userName}
+            entityId={entityId}
+            renderCellActions={renderCellActions}
+            onAlertUpdated={onAlertUpdated}
+          />
+        ),
+      [openToolsFlyout, hit, onAlertUpdated, renderCellActions]
+    );
+
+    const onShowHostAlertsDetails = useCallback(
+      ({ hostName, entityId }: { hostName: string; entityId?: string }) =>
+        openToolsFlyout(
+          <HostEntityAlertsDetails
+            hit={hit}
+            hostName={hostName}
+            entityId={entityId}
+            renderCellActions={renderCellActions}
+            onAlertUpdated={onAlertUpdated}
+          />
+        ),
+      [openToolsFlyout, hit, onAlertUpdated, renderCellActions]
+    );
+
+    const onShowUserMisconfigurationsDetails = useCallback(
+      ({ userName, entityId }: { userName: string; entityId?: string }) =>
+        openToolsFlyout(
+          <UserEntityMisconfigurationsDetails
+            hit={hit}
+            userName={userName}
+            entityId={entityId}
+            scopeId=""
+          />
+        ),
+      [openToolsFlyout, hit]
+    );
+
+    const onShowHostMisconfigurationsDetails = useCallback(
+      ({ hostName, entityId }: { hostName: string; entityId?: string }) =>
+        openToolsFlyout(
+          <HostEntityMisconfigurationsDetails
+            hit={hit}
+            hostName={hostName}
+            entityId={entityId}
+            scopeId=""
+          />
+        ),
+      [openToolsFlyout, hit]
+    );
+
+    const onShowHostVulnerabilitiesDetails = useCallback(
+      ({ hostName, entityId }: { hostName: string; entityId?: string }) =>
+        openToolsFlyout(
+          <HostEntityVulnerabilitiesDetails
+            hit={hit}
+            hostName={hostName}
+            entityId={entityId}
+            scopeId=""
+          />
+        ),
+      [openToolsFlyout, hit]
+    );
+
+    const onShowEntitiesDetails = useCallback(
+      () => openToolsFlyout(<EntitiesDetails hit={hit} scopeId="" />),
+      [openToolsFlyout, hit]
+    );
+
+    const onShowPrevalenceDetails = useCallback(
+      () =>
+        openToolsFlyout(
+          <PrevalenceDetails
+            hit={hit}
+            investigationFields={investigationFields}
+            scopeId={''}
+            columns={getColumns(renderCellActions, isInSecurityApp, '', ChildLink)}
+          />
+        ),
+      [openToolsFlyout, hit, investigationFields, isInSecurityApp, renderCellActions]
+    );
 
     return (
       <ExpandableSection
@@ -214,7 +281,19 @@ export const InsightsSection = memo(
         sectionId={LOCAL_STORAGE_SECTION_KEY}
         title={INSIGHTS_SECTION_TITLE}
       >
-        <EntitiesOverview hit={hit} renderCellActions={renderCellActions} showIcon={false} />
+        <EntitiesOverview
+          hit={hit}
+          renderCellActions={renderCellActions}
+          showIcon={false}
+          onShowEntitiesDetails={onShowEntitiesDetails}
+          onShowUserDetails={onShowUserDetails}
+          onShowHostDetails={onShowHostDetails}
+          onShowUserAlertsDetails={onShowUserAlertsDetails}
+          onShowHostAlertsDetails={onShowHostAlertsDetails}
+          onShowUserMisconfigurationsDetails={onShowUserMisconfigurationsDetails}
+          onShowHostMisconfigurationsDetails={onShowHostMisconfigurationsDetails}
+          onShowHostVulnerabilitiesDetails={onShowHostVulnerabilitiesDetails}
+        />
         {isAlert && (
           <ThreatIntelligenceOverview
             hit={hit}

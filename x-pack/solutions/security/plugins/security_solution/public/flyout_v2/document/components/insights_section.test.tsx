@@ -108,6 +108,12 @@ jest.mock('./entities_overview', () => ({
     </div>
   ),
 }));
+jest.mock('../../entities', () => ({
+  EntitiesDetails: () => <div data-test-subj="entitiesDetailsMock" />,
+  UserEntityDetails: () => <div data-test-subj="userEntityDetailsMock" />,
+  HostEntityDetails: () => <div data-test-subj="hostEntityDetailsMock" />,
+}));
+
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
     id: '1',
@@ -254,14 +260,49 @@ describe('InsightsSection', () => {
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
   });
 
-  it('does not open a flyout when clicking the entities overview links', () => {
+  it('opens a system flyout when clicking the user entity link', () => {
+    const { getByTestId } = renderInsightsSection();
+
+    fireEvent.click(getByTestId('entitiesOverviewMockUserButton'));
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: documentFlyoutHistoryKey,
+        session: 'start',
+      })
+    );
+  });
+
+  it('opens a system flyout when clicking the entities overview header link', () => {
     const { getByTestId } = renderInsightsSection();
 
     fireEvent.click(getByTestId('entitiesOverviewMockDetailsButton'));
-    fireEvent.click(getByTestId('entitiesOverviewMockUserButton'));
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: documentFlyoutHistoryKey,
+        session: 'start',
+      })
+    );
+  });
+
+  it('opens a system flyout when clicking the host entity link', () => {
+    const { getByTestId } = renderInsightsSection();
+
     fireEvent.click(getByTestId('entitiesOverviewMockHostButton'));
 
-    expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
+    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: documentFlyoutHistoryKey,
+        session: 'start',
+      })
+    );
   });
 
   it('disables timeline interactions when not in Security Solution', () => {
