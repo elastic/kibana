@@ -66,6 +66,9 @@ export const buildLifecycleDoc = (
 
   const stats = computeStats(caseSO, sortedActivity);
 
+  const finalStatusLabel = STATUS_LABEL_BY_NUMBER[attributes.status] ?? String(attributes.status);
+  const isClosed = finalStatusLabel === 'closed';
+
   return {
     '@timestamp': now(),
     kibana: {
@@ -79,11 +82,16 @@ export const buildLifecycleDoc = (
         : {}),
     },
     case_lifecycle: {
-      final_status: STATUS_LABEL_BY_NUMBER[attributes.status] ?? String(attributes.status),
+      final_status: finalStatusLabel,
       final_severity: SEVERITY_LABEL_BY_NUMBER[attributes.severity] ?? String(attributes.severity),
       ...stats,
       created_at: attributes.created_at,
-      ...(attributes.closed_at != null ? { closed_at: attributes.closed_at } : {}),
+      // Only emit `closed_at` for cases that are actually closed. For reopened
+      // cases the SO may still hold a stale `closed_at` from a prior close
+      // cycle; emitting that would produce dashboards showing "closed at X" for
+      // a case that's currently open. Reconciliation re-runs lifecycle on every
+      // patch, so this stays in sync across reopen → close cycles.
+      ...(isClosed && attributes.closed_at != null ? { closed_at: attributes.closed_at } : {}),
     },
   };
 };
@@ -103,17 +111,13 @@ const computeStats = (
   const createdAt = new Date(attributes.created_at).getTime();
 
   let firstResponseAt: number | undefined;
-  let total_comments = 0;
   let total_assignee_changes = 0;
   let total_status_changes = 0;
 
   for (const ua of sortedActivity) {
     const { type, action } = ua.attributes;
-    if (type === 'comment' && action === 'create') {
-      total_comments += 1;
-      if (firstResponseAt == null) {
-        firstResponseAt = new Date(ua.attributes.created_at).getTime();
-      }
+    if (type === 'comment' && action === 'create' && firstResponseAt == null) {
+      firstResponseAt = new Date(ua.attributes.created_at).getTime();
     } else if (type === 'assignees') {
       total_assignee_changes += 1;
     } else if (type === 'status') {
@@ -121,14 +125,25 @@ const computeStats = (
     }
   }
 
-  const closedAt = attributes.closed_at ? new Date(attributes.closed_at).getTime() : undefined;
-  const nowTs = Date.now();
+  // For open cases we DON'T emit `time_open_ms` — the value would change every
+  // recompute (driven by `Date.now()`), making aggregations a moving target.
+  // Consumers can compute `now - created_at` from a runtime field if they want
+  // a live "open for X" metric. For closed cases, `time_open_ms` and
+  // `time_to_close_ms` collapse to the same value (closed_at - created_at).
+  const isClosed =
+    (STATUS_LABEL_BY_NUMBER[attributes.status] ?? String(attributes.status)) === 'closed';
+  const closedAtMs =
+    isClosed && attributes.closed_at != null ? new Date(attributes.closed_at).getTime() : undefined;
+  const closedDelta = closedAtMs != null ? closedAtMs - createdAt : undefined;
 
   return {
     ...(firstResponseAt != null ? { time_to_first_response_ms: firstResponseAt - createdAt } : {}),
-    ...(closedAt != null ? { time_to_close_ms: closedAt - createdAt } : {}),
-    time_open_ms: (closedAt ?? nowTs) - createdAt,
-    total_comments: total_comments || (attributes.total_comments ?? 0),
+    ...(closedDelta != null ? { time_to_close_ms: closedDelta } : {}),
+    ...(closedDelta != null ? { time_open_ms: closedDelta } : {}),
+    // `attributes.total_comments` is the canonical count maintained on the case
+    // SO. The activity scan would only count `comment+create` user actions,
+    // which can drift from the SO when comments are deleted.
+    total_comments: attributes.total_comments ?? 0,
     total_assignee_changes,
     total_status_changes,
   };
