@@ -87,7 +87,7 @@ export const createDashboardSavedObjectType = ({
   mappings: {
     dynamic: false,
     properties: {
-      description: { type: 'keyword' },
+      description: { type: 'text' },
       hits: { type: 'integer', index: false, doc_values: false },
       kibanaSavedObjectMeta: {
         properties: { searchSourceJSON: { type: 'text', index: false } },
