@@ -322,7 +322,7 @@
           "; label: string; icon?: string | React.ComponentType | undefined; shouldRotate?: boolean | undefined; }[]"
         ],
         "path": "src/platform/packages/shared/kbn-event-annotation-components/components/annotation_editor_controls/icon_set.ts",
-        "lineNumber": 15,
+        "lineNumber": 16,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
