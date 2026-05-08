@@ -43,6 +43,16 @@ const SUFFIX_TO_RUNTIME_TYPE: Record<string, RuntimeType> = {
 const NO_RUNTIME_FIELD_SUFFIXES = new Set(['keyword']);
 
 /**
+ * Every suffix the cases template system can emit, exported for the schema
+ * collision guard test. Keep in sync with the union of the keys above and
+ * `NO_RUNTIME_FIELD_SUFFIXES`.
+ */
+export const ALL_TEMPLATE_TYPE_SUFFIXES: readonly string[] = [
+  ...Object.keys(SUFFIX_TO_RUNTIME_TYPE),
+  ...NO_RUNTIME_FIELD_SUFFIXES,
+];
+
+/**
  * Suffix → runtime type. `null` means no runtime field is needed (already
  * keyword in the index). `undefined` means the suffix is unknown — caller
  * should ignore the field.
@@ -103,12 +113,26 @@ export const buildPainlessSource = (snakeKey: string, runtimeType: RuntimeType):
 /**
  * Convenience: from a snake-key, decide whether to emit a runtime field and,
  * if so, return the spec ready to merge into the data view's
- * `runtimeFieldMap`. Field name in the data view = the indexed path
- * `cases.extended_fields.<snakeKey>`, so the runtime field shadows the
- * indexed keyword field — KQL / Lens see the typed view only.
+ * `runtimeFieldMap`.
+ *
+ * The runtime field is published at the **top-level** path
+ * `cases.<snakeKey>` (e.g. `cases.score_as_integer`) — sitting alongside
+ * `cases.title`, `cases.severity`, etc. The painless reads from the indexed
+ * keyword path `cases.extended_fields.<snakeKey>` and emits the typed value.
+ *
+ * Why not shadow the indexed path directly (`cases.extended_fields.<snakeKey>`)?
+ * Because Kibana data views resolve field names by merging
+ * `{ ...runtime, ...mapped }` — mapped fields with the same name overwrite
+ * runtime ones. A runtime field at the indexed name still appears as the
+ * underlying keyword type in Lens, hiding the numeric/date filter operators.
+ *
+ * The collision risk for `cases.<snakeKey>` is bounded: no top-level field
+ * on the case mapping ends in `_as_<type>` for any of our supported types,
+ * and that invariant is enforced by `mappings/schema_drift.test.ts`. New
+ * top-level case fields must avoid the `_as_<type>` suffix.
  */
 export interface RuntimeFieldEntry {
-  /** Field name in the data view; same as the indexed path it shadows. */
+  /** Field name in the data view, at the top-level under `cases.*`. */
   fieldName: string;
   spec: RuntimeFieldSpec;
 }
@@ -121,7 +145,7 @@ export const buildRuntimeFieldEntry = (snakeKey: string): RuntimeFieldEntry | nu
   if (runtimeType == null) return null;
 
   return {
-    fieldName: `cases.extended_fields.${snakeKey}`,
+    fieldName: `cases.${snakeKey}`,
     spec: {
       type: runtimeType,
       script: { source: buildPainlessSource(snakeKey, runtimeType) },

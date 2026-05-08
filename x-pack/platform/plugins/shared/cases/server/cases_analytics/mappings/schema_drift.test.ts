@@ -17,6 +17,7 @@ import { CASE_LIFECYCLE_INDEX_MAPPING } from './case_lifecycle';
 import { buildActivityDoc } from '../writer/activity_doc_builder';
 import { buildCaseDoc } from '../writer/case_doc_builder';
 import { buildLifecycleDoc } from '../writer/lifecycle_doc_builder';
+import { ALL_TEMPLATE_TYPE_SUFFIXES } from '../data_view/runtime_fields';
 
 /**
  * Schema drift guard.
@@ -156,6 +157,59 @@ const isCovered = (path: string, mappedPaths: Set<string>): boolean => {
 
 /** Skip extended_fields contents — those land via dynamic_templates. */
 const isExtendedFieldsLeaf = (path: string): boolean => path.startsWith('cases.extended_fields.');
+
+/**
+ * Snake-key collision guard.
+ *
+ * Typed runtime fields are published at the **top-level** path
+ * `cases.<snakeKey>` (e.g. `cases.score_as_long`) — sitting alongside
+ * `cases.title`, `cases.severity`, etc. The painless reads from the indexed
+ * keyword path `cases.extended_fields.<snakeKey>` and emits the typed value.
+ *
+ * For this scheme to be collision-safe, **no top-level mapped field on a case
+ * surface may end in `_as_<type>` for any type the template system can emit.**
+ * If one ever did, Kibana data views would resolve that path to the indexed
+ * keyword (because mapped fields override runtime ones during merge), and the
+ * typed runtime field would silently disappear from Lens / Discover.
+ *
+ * The set of suffixes we have to defend against is exported as
+ * `ALL_TEMPLATE_TYPE_SUFFIXES` from the runtime-fields module — that's the
+ * authoritative list keyed off `BaseFieldSchema.type`. Adding a new template
+ * field type updates that list and these tests automatically widen with it.
+ */
+const expectNoSnakeKeyCollisions = (mapping: MappingTypeMapping): void => {
+  const collisions: string[] = [];
+  // Walk every dotted path in the mapping and assert that the **leaf segment**
+  // doesn't end with `_as_<type>`. We check leaf segment rather than full path
+  // because a runtime field at `cases.foo_as_long` collides with a mapped
+  // `cases.foo_as_long` regardless of nesting depth — only the last segment
+  // matters for the data-view merge.
+  const walk = (node: Record<string, MappingProperty>, prefix: string): void => {
+    for (const [k, prop] of Object.entries(node)) {
+      const path = prefix ? `${prefix}.${k}` : k;
+      for (const suffix of ALL_TEMPLATE_TYPE_SUFFIXES) {
+        if (k.endsWith(`_as_${suffix}`)) {
+          collisions.push(path);
+          break;
+        }
+      }
+      const props = (prop as { properties?: Record<string, MappingProperty> }).properties;
+      if (props) walk(props, path);
+    }
+  };
+  if (mapping.properties) walk(mapping.properties, '');
+  expect(collisions).toEqual([]);
+};
+
+describe('snake-key collision guard (runtime field naming invariant)', () => {
+  it('case mapping has no top-level field ending in _as_<type>', () => {
+    expectNoSnakeKeyCollisions(CASE_INDEX_MAPPING);
+  });
+
+  it('case_lifecycle mapping has no top-level field ending in _as_<type>', () => {
+    expectNoSnakeKeyCollisions(CASE_LIFECYCLE_INDEX_MAPPING);
+  });
+});
 
 describe('analytic index mappings cover every doc-builder field', () => {
   it('case surface', () => {

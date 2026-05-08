@@ -48,8 +48,10 @@ const TEMPLATES_PAGE_SIZE = 100;
 /**
  * Manages the three cases-data data views (one per surface), and keeps their
  * `runtimeFieldMap` in sync with extended-field declarations across all
- * templates. The data view at `cases.extended_fields.<snakeKey>` shadows the
- * indexed keyword field with a typed runtime field per `_as_<type>` suffix.
+ * templates. Each `_as_<type>` suffix in the templates produces a typed
+ * runtime field at the top-level path `cases.<snakeKey>` that reads from the
+ * indexed keyword `cases.extended_fields.<snakeKey>` under the hood — see
+ * `runtime_fields.ts` for why we don't shadow the indexed path directly.
  *
  * Designed for two trigger sources:
  *   - On template create / update / delete, callers invoke

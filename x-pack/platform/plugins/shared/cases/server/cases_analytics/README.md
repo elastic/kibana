@@ -132,6 +132,35 @@ dev script or test; a future operator route is on the roadmap.
 | Sustained write failures on one surface      | Mapping conflict (extended fields) | Inspect index template; coordinate with template-fields sync |
 | Reconciliation log shows `cases=0` forever   | State SO watermark stuck in future | Manually delete the state SO to reset  |
 
+## Extended fields and the `_as_<type>` naming invariant
+
+Templates declare typed extended fields via snake-keys of the form
+`<name>_as_<type>` (e.g. `riskScore_as_long`, `incidentDate_as_date`). The
+case writer indexes those values as **keywords** under
+`cases.extended_fields.<snake>`, then the data view publishes a typed
+**runtime field** at the **top-level** path `cases.<snake>` (e.g.
+`cases.riskScore_as_long`) so Lens / Discover surface numeric, date, and
+boolean filter operators instead of string contains.
+
+The runtime field deliberately **does not shadow** the indexed keyword path.
+Kibana data views resolve a field name by merging `{ ...runtime, ...mapped }`,
+which means a runtime field at the indexed name (`cases.extended_fields.foo`)
+is silently overwritten by the mapped keyword and Lens loses the typed
+operators. Publishing at `cases.<snake>` sidesteps that.
+
+**Schema invariant: no top-level field on `cases.*` (or any `cases-data` index
+mapping) may end with `_as_<type>` for any type the template system can emit.**
+If one ever did, the runtime field would collide and disappear silently from
+Lens. The set of suffixes is exported from
+`data_view/runtime_fields.ts#ALL_TEMPLATE_TYPE_SUFFIXES` and enforced at CI
+time by `mappings/schema_drift.test.ts`. New top-level case fields must avoid
+the `_as_<type>` suffix shape.
+
+`unsigned_long` is mapped to the `long` runtime type; values exceeding
+`Long.MAX_VALUE` lose precision when surfaced through the data view but
+remain accurate at the indexed level. A future improvement could use a typed
+sub-field at the index level for unsigned_long specifically.
+
 ## Authorization
 
 PR B does NOT wire any user-facing privileges. The writer runs as the internal

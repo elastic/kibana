@@ -43,6 +43,13 @@ const INDEX_PATTERNS: Record<CasesDataSurface, string> = {
  * is bootstrapped, and `timeFieldName: '@timestamp'` to play well with
  * Discover's time picker.
  *
+ * `namespaces: ['*']` makes the data view visible in every space rather than
+ * only the space whose context bootstrapped it. The underlying indices are
+ * cluster-level, the data view SO is per-space — without this flag, users in
+ * other spaces would see "no data view" until someone re-bootstrapped under
+ * their context. The bootstrap path uses `overwrite: true` keyed on the
+ * deterministic id, so concurrent bootstraps from different spaces converge.
+ *
  * Runtime fields are added incrementally by the data view sync service as
  * templates declare new extended fields. The base spec carries an empty
  * `runtimeFieldMap` so subsequent merges have something to extend.
@@ -54,5 +61,6 @@ export const buildBaseDataViewSpec = (surface: CasesDataSurface): DataViewSpec =
   timeFieldName: '@timestamp',
   allowNoIndex: true,
   managed: true,
+  namespaces: ['*'],
   runtimeFieldMap: {},
 });

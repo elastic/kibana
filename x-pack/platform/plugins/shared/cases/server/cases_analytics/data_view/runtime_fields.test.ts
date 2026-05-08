@@ -107,12 +107,20 @@ describe('buildPainlessSource', () => {
 });
 
 describe('buildRuntimeFieldEntry', () => {
-  it('produces a typed runtime field shadowing the indexed keyword path', () => {
+  it('publishes the runtime field at the top-level cases.<snake> path', () => {
+    // Why not shadow the indexed `cases.extended_fields.<snake>` keyword?
+    // Kibana data views resolve a field name by merging
+    // `{ ...runtime, ...mapped }` — so a runtime field at the indexed name
+    // gets overwritten by the mapped keyword and Lens loses the typed
+    // operators. We publish at `cases.<snake>` instead and the painless
+    // reads from the indexed keyword path under the hood.
     const entry = buildRuntimeFieldEntry('riskScore_as_long');
     expect(entry).not.toBeNull();
-    expect(entry!.fieldName).toBe('cases.extended_fields.riskScore_as_long');
+    expect(entry!.fieldName).toBe('cases.riskScore_as_long');
     expect(entry!.spec.type).toBe('long');
     expect(entry!.spec.script?.source).toContain('Long.parseLong');
+    // Painless still reads from the indexed keyword path.
+    expect(entry!.spec.script?.source).toContain("doc['cases.extended_fields.riskScore_as_long']");
   });
 
   it('returns null for keyword (no runtime field needed)', () => {
