@@ -21,9 +21,24 @@ export const metricStateAdapter: VizStateAdapter<MetricVisualizationState> = {
   },
 
   formValuesToState(currentState, formValues) {
-    const apiConfig = unflattenFromDotPaths(formValues) as MetricConfig;
+    // Strip empty/undefined/null values so optional fields are removed from state
+    const cleanedValues = Object.fromEntries(
+      Object.entries(formValues).filter(([, v]) => v !== '' && v !== undefined && v !== null)
+    );
+    const apiConfig = unflattenFromDotPaths(cleanedValues) as MetricConfig;
     const hasSecondary = !!currentState.secondaryMetricAccessor;
     const stylingState = buildMetricStylingState(apiConfig, hasSecondary);
-    return { ...currentState, ...stylingState };
+
+    // buildMetricStylingState uses stripUndefined(), so optional keys absent
+    // from stylingState must be explicitly deleted from currentState to avoid
+    // stale values surviving the spread (e.g. icon removal).
+    const optionalKeys = ['icon', 'iconAlign'] as const;
+    const merged = { ...currentState, ...stylingState };
+    for (const key of optionalKeys) {
+      if (!(key in stylingState)) {
+        delete (merged as Record<string, unknown>)[key];
+      }
+    }
+    return merged;
   },
 };

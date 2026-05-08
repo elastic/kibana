@@ -234,6 +234,7 @@ export function buildFieldDescriptors(
     if (entry.tooltip) field.tooltip = entry.tooltip;
     if (entry.description) field.description = entry.description;
     if (entry.options) field.options = entry.options;
+    if (entry.defaultValue !== undefined) field.defaultValue = entry.defaultValue;
     if (entry.condition) field.condition = entry.condition;
 
     // Suppress description when it's redundant with the label

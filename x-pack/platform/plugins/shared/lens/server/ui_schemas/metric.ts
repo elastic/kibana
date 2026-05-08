@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { LENS_METRIC_STATE_DEFAULTS } from '@kbn/lens-common';
 import type { UISchemaEntry } from './types';
 
 export const metricUISchema: UISchemaEntry[] = [
@@ -15,6 +16,7 @@ export const metricUISchema: UISchemaEntry[] = [
       defaultMessage: 'Position',
     }),
     widget: 'buttonGroup',
+    defaultValue: LENS_METRIC_STATE_DEFAULTS.primaryPosition,
     options: [
       {
         value: 'top',
@@ -36,6 +38,7 @@ export const metricUISchema: UISchemaEntry[] = [
       defaultMessage: 'Value alignment',
     }),
     widget: 'buttonGroup',
+    defaultValue: LENS_METRIC_STATE_DEFAULTS.primaryAlign,
     options: [
       {
         value: 'left',
@@ -57,6 +60,7 @@ export const metricUISchema: UISchemaEntry[] = [
       defaultMessage: 'Font size',
     }),
     widget: 'buttonGroup',
+    defaultValue: 'auto', // maps to LENS_METRIC_STATE_DEFAULTS.valueFontMode ('default' → 'auto')
     options: [
       {
         value: 'auto',
@@ -74,6 +78,7 @@ export const metricUISchema: UISchemaEntry[] = [
       defaultMessage: 'Labels alignment',
     }),
     widget: 'buttonGroup',
+    defaultValue: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
     options: [
       {
         value: 'left',
@@ -99,6 +104,7 @@ export const metricUISchema: UISchemaEntry[] = [
       defaultMessage: 'Secondary value alignment',
     }),
     widget: 'buttonGroup',
+    defaultValue: LENS_METRIC_STATE_DEFAULTS.secondaryAlign,
     options: [
       {
         value: 'left',
@@ -132,6 +138,7 @@ export const metricUISchema: UISchemaEntry[] = [
       defaultMessage: 'Icon position',
     }),
     widget: 'buttonGroup',
+    defaultValue: LENS_METRIC_STATE_DEFAULTS.iconAlign,
     options: [
       {
         value: 'left',

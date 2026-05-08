@@ -24,6 +24,8 @@ export interface UISchemaEntry {
   description?: string;
   /** Override option labels for enum/select fields. Keys are raw schema values, values are i18n'd labels. */
   options?: Array<{ value: string; label: string }>;
+  /** Default value when the field is not present in the visualization state */
+  defaultValue?: unknown;
   /** Condition that must be met for this field to be visible */
   condition?: FieldVisibilityCondition;
 }
