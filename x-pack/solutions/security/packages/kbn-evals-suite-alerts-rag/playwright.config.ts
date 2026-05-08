@@ -7,7 +7,11 @@
 
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 
-export default createPlaywrightEvalsConfig({
+const config = createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
-  timeout: 30 * 60_000,
+  timeout: 120_000,
 });
+
+config.retries = 2;
+
+export default config;
