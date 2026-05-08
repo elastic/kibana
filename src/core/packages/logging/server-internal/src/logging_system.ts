@@ -158,11 +158,11 @@ export class LoggingSystem implements ILoggingSystem {
       return new BaseLogger(context, LogLevel.All, [this.bufferAppender], this.asLoggerFactory());
     }
 
-    const { level, appenders } = this.getLoggerConfigByContext(config, context);
+    const { level, appenders, filters } = this.getLoggerConfigByContext(config, context);
     const loggerLevel = LogLevel.fromId(level);
     const loggerAppenders = appenders.map((appenderKey) => this.appenders.get(appenderKey)!);
 
-    return new BaseLogger(context, loggerLevel, loggerAppenders, this.asLoggerFactory());
+    return new BaseLogger(context, loggerLevel, loggerAppenders, this.asLoggerFactory(), filters);
   }
 
   private getLoggerConfigByContext(config: LoggingConfig, context: string): LoggerConfigType {

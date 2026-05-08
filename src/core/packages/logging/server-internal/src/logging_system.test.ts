@@ -262,7 +262,9 @@ test('setContextConfig() updates config with relative contexts', async () => {
         { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: [
+      { name: 'grandchild', appenders: ['default', 'custom'], level: 'debug', filters: [] },
+    ],
   });
 
   testsLogger.warn('tests log to default!');
@@ -317,7 +319,7 @@ test('setContextConfig() updates config for a root context', async () => {
         { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ name: '', appenders: ['custom'], level: 'debug' }],
+    loggers: [{ name: '', appenders: ['custom'], level: 'debug', filters: [] }],
   });
 
   testsLogger.warn('tests log to default!');
@@ -351,7 +353,9 @@ test('custom context name configs are applied on subsequent calls to update()', 
         { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: [
+      { name: 'grandchild', appenders: ['default', 'custom'], level: 'debug', filters: [] },
+    ],
   });
 
   // Calling upgrade after setContextConfig should not throw away the context-specific config
@@ -395,7 +399,9 @@ test('subsequent calls to setContextConfig() for the same context name override 
         { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: [
+      { name: 'grandchild', appenders: ['default', 'custom'], level: 'debug', filters: [] },
+    ],
   });
 
   // Call again, this time with level: 'warn' and a different pattern
@@ -409,7 +415,7 @@ test('subsequent calls to setContextConfig() for the same context name override 
         },
       ],
     ]),
-    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'warn' }],
+    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'warn', filters: [] }],
   });
 
   const logger = system.get('tests', 'child', 'grandchild');
@@ -445,7 +451,9 @@ test('subsequent calls to setContextConfig() for the same context name can disab
         { type: 'console', layout: { type: 'pattern', pattern: '[%level][%logger] %message' } },
       ],
     ]),
-    loggers: [{ name: 'grandchild', appenders: ['default', 'custom'], level: 'debug' }],
+    loggers: [
+      { name: 'grandchild', appenders: ['default', 'custom'], level: 'debug', filters: [] },
+    ],
   });
 
   // Call again, this time no customizations (effectively disabling)

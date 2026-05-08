@@ -112,6 +112,7 @@ test('correctly fills in default `loggers` config.', () => {
     appenders: ['default'],
     name: 'root',
     level: 'info',
+    filters: [],
   });
 });
 
@@ -149,21 +150,25 @@ test('correctly fills in custom `loggers` config.', () => {
     appenders: ['default'],
     name: 'root',
     level: 'info',
+    filters: [],
   });
   expect(configValue.loggers.get('plugins')).toEqual({
     appenders: ['file'],
     name: 'plugins',
     level: 'warn',
+    filters: [],
   });
   expect(configValue.loggers.get('plugins.pid')).toEqual({
     appenders: ['file'],
     name: 'plugins.pid',
     level: 'trace',
+    filters: [],
   });
   expect(configValue.loggers.get('http')).toEqual({
     appenders: ['default'],
     name: 'http',
     level: 'error',
+    filters: [],
   });
 });
 
@@ -332,6 +337,86 @@ describe('extend', () => {
       appenders: ['console'],
       name: 'plugins',
       level: 'trace',
+      filters: [],
     });
+  });
+});
+
+describe('meta filters', () => {
+  it('accepts a valid meta filter in logger config', () => {
+    const configValue = new LoggingConfig(
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins.alerting',
+            level: 'warn',
+            filters: [{ type: 'meta', match: { 'labels.ruleType': 'esql' }, level: 'debug' }],
+          },
+        ],
+      })
+    );
+
+    expect(configValue.loggers.get('plugins.alerting')).toEqual({
+      appenders: ['default'],
+      name: 'plugins.alerting',
+      level: 'warn',
+      filters: [{ type: 'meta', match: { 'labels.ruleType': 'esql' }, level: 'debug' }],
+    });
+  });
+
+  it('accepts filters with numeric and boolean match values', () => {
+    expect(() =>
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins',
+            level: 'warn',
+            filters: [{ type: 'meta', match: { retryCount: 3, enabled: true }, level: 'trace' }],
+          },
+        ],
+      })
+    ).not.toThrow();
+  });
+
+  it('defaults to an empty filters array when none are specified', () => {
+    const configValue = new LoggingConfig(
+      config.schema.validate({
+        loggers: [{ name: 'plugins', level: 'warn' }],
+      })
+    );
+
+    expect(configValue.loggers.get('plugins')?.filters).toEqual([]);
+  });
+
+  it('rejects a filter with an invalid level', () => {
+    expect(() =>
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins',
+            level: 'warn',
+            filters: [{ type: 'meta', match: { 'labels.ruleType': 'esql' }, level: 'verbose' }],
+          },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects more than 10 filters per logger', () => {
+    expect(() =>
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins',
+            level: 'warn',
+            filters: Array.from({ length: 11 }, (_, i) => ({
+              type: 'meta' as const,
+              match: { key: `val${i}` },
+              level: 'debug' as const,
+            })),
+          },
+        ],
+      })
+    ).toThrow();
   });
 });

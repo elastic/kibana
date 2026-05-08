@@ -54,6 +54,15 @@ const browserConfig = schema.object({
   }),
 });
 
+const metaFilterSchema = schema.object({
+  type: schema.literal('meta'),
+  match: schema.recordOf(
+    schema.string(),
+    schema.oneOf([schema.string(), schema.number(), schema.boolean()])
+  ),
+  level: levelSchema,
+});
+
 /**
  * Config schema for validating the `loggers` key in {@link LoggerContextConfigType} or {@link LoggingConfigType}.
  *
@@ -63,6 +72,7 @@ export const loggerSchema = schema.object({
   appenders: schema.arrayOf(schema.string(), { defaultValue: [], maxSize: 25 }),
   name: schema.string(),
   level: levelSchema,
+  filters: schema.arrayOf(metaFilterSchema, { defaultValue: [], maxSize: 10 }),
 });
 
 export const config = {
@@ -200,7 +210,14 @@ export class LoggingConfig {
   private fillLoggersConfig(loggingConfig: LoggingConfigType) {
     // Include `root` logger into common logger list so that it can easily be a part
     // of the logger hierarchy and put all the loggers in map for easier retrieval.
-    const loggers = [{ name: ROOT_CONTEXT_NAME, ...loggingConfig.root }, ...loggingConfig.loggers];
+    const loggers = [
+      {
+        name: ROOT_CONTEXT_NAME,
+        filters: [] as LoggerConfigType['filters'],
+        ...loggingConfig.root,
+      },
+      ...loggingConfig.loggers,
+    ];
 
     const loggerConfigByContext = new Map(
       loggers.map((loggerConfig) => toTuple(loggerConfig.name, loggerConfig))

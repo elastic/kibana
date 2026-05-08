@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Appender, LogMeta, LogRecord } from '@kbn/logging';
+import type { Appender, LogMeta, LogRecord, MetaFilterConfig } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { getLoggerContext } from '..';
 import type { CreateLogRecordFn } from './logger';
@@ -37,7 +37,7 @@ describe('AbstractLogger', () => {
 
   beforeEach(() => {
     appenderMocks = [{ append: jest.fn() }, { append: jest.fn() }];
-    logger = new TestLogger(context, LogLevel.All, appenderMocks, factory);
+    logger = new TestLogger(context, LogLevel.All, appenderMocks, factory, []);
 
     createLogRecordSpy.mockImplementation((level, message, meta) => {
       return {
@@ -288,5 +288,144 @@ describe('AbstractLogger', () => {
         expect(logFn).not.toHaveBeenCalled();
       });
     }
+  });
+
+  describe('meta filters', () => {
+    // Uses ECS `labels` for custom key-value metadata (dot-notation path).
+    const matchingMeta: LogMeta = { labels: { ruleType: 'esql' } };
+    const nonMatchingMeta: LogMeta = { labels: { ruleType: 'kql' } };
+
+    const filter: MetaFilterConfig = {
+      type: 'meta',
+      match: { 'labels.ruleType': 'esql' },
+      level: 'debug',
+    };
+
+    beforeEach(() => {
+      createLogRecordSpy.mockImplementation((level, message, meta) => {
+        return { level, message, meta } as LogRecord;
+      });
+    });
+
+    it('allows records at the filter level when meta matches', () => {
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+      logger.debug('debug message', matchingMeta);
+
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).toHaveBeenCalledTimes(1);
+        expect(appenderMock.append).toHaveBeenCalledWith(
+          expect.objectContaining({ level: LogLevel.Debug })
+        );
+      }
+    });
+
+    it('drops records at the filter level when meta does not match', () => {
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+      logger.debug('debug message', nonMatchingMeta);
+
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).not.toHaveBeenCalled();
+      }
+    });
+
+    it('drops records at the filter level when meta is absent', () => {
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+      logger.debug('debug message');
+
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).not.toHaveBeenCalled();
+      }
+    });
+
+    it('still passes records at the nominal level regardless of meta', () => {
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+      logger.warn('warn message', nonMatchingMeta);
+      logger.error('error message');
+
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).toHaveBeenCalledTimes(2);
+      }
+    });
+
+    it('takes the most permissive matching filter when multiple filters are configured', () => {
+      const traceFilter: MetaFilterConfig = {
+        type: 'meta',
+        match: { 'labels.ruleType': 'esql' },
+        level: 'trace',
+      };
+      const debugFilter: MetaFilterConfig = {
+        type: 'meta',
+        match: { 'labels.ruleType': 'esql' },
+        level: 'debug',
+      };
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [
+        debugFilter,
+        traceFilter,
+      ]);
+
+      logger.trace('trace message', matchingMeta);
+
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).toHaveBeenCalledTimes(1);
+        expect(appenderMock.append).toHaveBeenCalledWith(
+          expect.objectContaining({ level: LogLevel.Trace })
+        );
+      }
+    });
+
+    it('requires ALL match predicates to be satisfied', () => {
+      const strictFilter: MetaFilterConfig = {
+        type: 'meta',
+        match: { 'labels.ruleType': 'esql', 'labels.scope': 'background' },
+        level: 'debug',
+      };
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [strictFilter]);
+
+      logger.debug('debug message', { labels: { ruleType: 'esql' } });
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).not.toHaveBeenCalled();
+      }
+
+      jest.clearAllMocks();
+
+      logger.debug('debug message', { labels: { ruleType: 'esql', scope: 'background' } });
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).toHaveBeenCalledTimes(1);
+      }
+    });
+
+    describe('isLevelEnabled', () => {
+      it('reflects the most permissive filter level, not the nominal level', () => {
+        logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+
+        expect(logger.isLevelEnabled('debug')).toBe(true);
+        expect(logger.isLevelEnabled('trace')).toBe(false);
+        expect(logger.isLevelEnabled('warn')).toBe(true);
+      });
+
+      it('falls back to nominal level when no filters are configured', () => {
+        logger = new TestLogger(context, LogLevel.Info, appenderMocks, factory);
+
+        expect(logger.isLevelEnabled('debug')).toBe(false);
+        expect(logger.isLevelEnabled('info')).toBe(true);
+      });
+    });
+
+    it('forwards records passed via log() through filter evaluation', () => {
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+
+      const baseRecord = { context, timestamp: new Date(), pid: 1, message: 'direct log' };
+      logger.log({ ...baseRecord, level: LogLevel.Debug, meta: matchingMeta });
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).toHaveBeenCalledTimes(1);
+      }
+
+      jest.clearAllMocks();
+
+      logger.log({ ...baseRecord, level: LogLevel.Debug, meta: nonMatchingMeta });
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).not.toHaveBeenCalled();
+      }
+    });
   });
 });
