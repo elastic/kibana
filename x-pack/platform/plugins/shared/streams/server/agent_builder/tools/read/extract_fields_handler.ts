@@ -464,7 +464,7 @@ export const runExtractFieldsFlow = async (
  * extraction by content (e.g. "if log.level == error then grok…"), and
  * surfacing a false positive there would be more confusing than helpful.
  */
-const isExtractionStepOnField = (step: unknown, fieldName: string): boolean => {
+export const isExtractionStepOnField = (step: unknown, fieldName: string): boolean => {
   if (typeof step !== 'object' || step === null) return false;
   const obj = step as { action?: unknown; from?: unknown };
   return (obj.action === 'grok' || obj.action === 'dissect') && obj.from === fieldName;
@@ -482,7 +482,7 @@ const isExtractionStepOnField = (step: unknown, fieldName: string): boolean => {
  * new extraction in front unnecessarily, which is never a correctness
  * problem (it just reverts to the pre-fix layout).
  */
-const stepWritesOrRemovesField = (step: unknown, fieldName: string): boolean => {
+export const stepWritesOrRemovesField = (step: unknown, fieldName: string): boolean => {
   if (typeof step !== 'object' || step === null) return false;
   const obj = step as { action?: unknown; from?: unknown; to?: unknown };
   if (obj.to === fieldName) return true;
@@ -511,7 +511,7 @@ const KV_FIELD_BLOCKLIST = new Set(['@timestamp', 'stream.name', 'body.text', 'm
  * the prefix is appropriate. No automatic rewriting happens; this keeps
  * destructive value changes under human control.
  */
-const buildKeyValueHints = (parsedDocuments: FlattenRecord[]): string[] => {
+export const buildKeyValueHints = (parsedDocuments: FlattenRecord[]): string[] => {
   const fieldValues = new Map<string, string[]>();
 
   for (const doc of parsedDocuments) {

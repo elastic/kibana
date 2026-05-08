@@ -748,4 +748,183 @@ describe('partitionStream', () => {
       );
     });
   });
+
+  describe('processing pipeline summary', () => {
+    // Captures the `input` field on the prompt that was rendered for the LLM
+    // so each test can assert that `summarizeProcessingPipeline` rendered (or
+    // omitted) the summary correctly.
+    const captureInput = () => {
+      const captured: { input?: Record<string, unknown> } = {};
+      mockExecuteAsReasoningAgent.mockImplementation(async (options) => {
+        const opts = options as Parameters<typeof executeAsReasoningAgent>[0];
+        captured.input = opts.input as Record<string, unknown>;
+        return {
+          content: '',
+          toolCalls: [
+            {
+              toolCallId: 'call-1',
+              function: {
+                name: 'partition_logs',
+                arguments: { index: 'logs.test', partitions: [] },
+              },
+            },
+          ],
+        } as unknown as Awaited<ReturnType<typeof executeAsReasoningAgent>>;
+      });
+      return captured;
+    };
+
+    const arrangeClusters = () => {
+      mockClusterLogs.mockResolvedValueOnce([
+        {
+          name: 'Uncategorized logs',
+          condition: { always: {} },
+          clustering: {
+            sampled: 50,
+            noise: [],
+            clusters: [{ count: 50, analysis: createMockAnalysis() }],
+          },
+        },
+      ]);
+    };
+
+    const definitionWithProcessing = (
+      steps: Streams.WiredStream.Definition['ingest']['processing']['steps']
+    ): Streams.WiredStream.Definition => {
+      const definition = createMockDefinition();
+      definition.ingest.processing = { ...definition.ingest.processing, steps };
+      return definition;
+    };
+
+    it('omits processing_summary when the pipeline has no steps', async () => {
+      const captured = captureInput();
+      arrangeClusters();
+
+      await partitionStream({ ...defaultParams, definition: createMockDefinition() });
+
+      expect(captured.input).toBeDefined();
+      expect(captured.input).not.toHaveProperty('processing_summary');
+    });
+
+    it('renders structured-action targets (set, rename, convert, date) into the summary', async () => {
+      const captured = captureInput();
+      arrangeClusters();
+
+      const definition = definitionWithProcessing([
+        // The pipeline produces these fields. Cluster samples in the future
+        // may omit them when the pipeline was added recently — surfacing the
+        // list closes that gap.
+        { action: 'set', to: 'attributes.environment', value: 'prod', ignore_failure: true },
+        {
+          action: 'rename',
+          from: 'attributes.user_id',
+          to: 'attributes.user.id',
+          ignore_failure: true,
+        },
+        {
+          action: 'convert',
+          from: 'attributes.custom.response_time_ms',
+          to: 'attributes.http.response.duration_ms',
+          type: 'long',
+          ignore_failure: true,
+        },
+        {
+          action: 'date',
+          from: 'attributes.custom.timestamp',
+          to: '@timestamp',
+          formats: ['ISO8601'],
+          ignore_failure: true,
+        },
+      ]);
+
+      await partitionStream({ ...defaultParams, definition });
+
+      const summary = captured.input?.processing_summary as string | undefined;
+      expect(summary).toBeDefined();
+      expect(summary).toContain('Existing processing pipeline (4 steps)');
+      expect(summary).toContain('- @timestamp');
+      expect(summary).toContain('- attributes.environment');
+      expect(summary).toContain('- attributes.http.response.duration_ms');
+      expect(summary).toContain('- attributes.user.id');
+      // Older docs may not yet carry the new fields — the section explicitly
+      // tells the LLM that's expected.
+      expect(summary).toMatch(/older documents/i);
+    });
+
+    it('renders grok captures so extracted attribute names are visible to the LLM', async () => {
+      const captured = captureInput();
+      arrangeClusters();
+
+      const definition = definitionWithProcessing([
+        {
+          action: 'grok',
+          from: 'body.text',
+          patterns: ['%{IP:attributes.source.ip} %{NUMBER:attributes.http.response.status_code}'],
+          ignore_failure: true,
+        },
+      ]);
+
+      await partitionStream({ ...defaultParams, definition });
+
+      const summary = captured.input?.processing_summary as string | undefined;
+      expect(summary).toBeDefined();
+      expect(summary).toContain('- attributes.source.ip');
+      expect(summary).toContain('- attributes.http.response.status_code');
+    });
+
+    it('recurses into condition blocks (if/then/else) when collecting fields', async () => {
+      const captured = captureInput();
+      arrangeClusters();
+
+      // Conditional steps only run when the predicate matches, but their
+      // outputs are still candidate fields for partition conditions.
+      const definition = definitionWithProcessing([
+        {
+          condition: {
+            field: 'severity_text',
+            eq: 'ERROR',
+            steps: [
+              {
+                action: 'set',
+                to: 'attributes.error.flag',
+                value: 'true',
+                ignore_failure: true,
+              },
+            ],
+            else: [
+              {
+                action: 'set',
+                to: 'attributes.normal.flag',
+                value: 'true',
+                ignore_failure: true,
+              },
+            ],
+          },
+        },
+      ]);
+
+      await partitionStream({ ...defaultParams, definition });
+
+      const summary = captured.input?.processing_summary as string | undefined;
+      expect(summary).toBeDefined();
+      expect(summary).toContain('- attributes.error.flag');
+      expect(summary).toContain('- attributes.normal.flag');
+    });
+
+    it('omits processing_summary when steps exist but produce no field references', async () => {
+      const captured = captureInput();
+      arrangeClusters();
+
+      // `remove` doesn't produce fields — it removes them. With a pipeline
+      // that's pure removals the summary would be empty/misleading, so we
+      // skip the section entirely.
+      const definition = definitionWithProcessing([
+        { action: 'remove', from: 'attributes.unused', ignore_failure: true },
+      ]);
+
+      await partitionStream({ ...defaultParams, definition });
+
+      expect(captured.input).not.toHaveProperty('processing_summary');
+    });
+  });
 });
