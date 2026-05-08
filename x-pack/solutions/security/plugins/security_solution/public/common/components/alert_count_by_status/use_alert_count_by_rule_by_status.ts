@@ -9,13 +9,16 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { buildEntityIdentifierTermFilters } from '../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import { firstNonNullValue } from '../../../../common/endpoint/models/ecs_safety_helpers';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { Status } from '../../../../common/api/detection_engine';
 import type { GenericBuckets } from '../../../../common/search_strategy';
-import type { ESBoolQuery, ESQuery, ESTermQuery } from '../../../../common/typed_json';
+import type { ESBoolQuery, ESQuery } from '../../../../common/typed_json';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
+import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { useGlobalTime } from '../../containers/use_global_time';
 import { useUiSetting } from '../../lib/kibana';
@@ -49,9 +52,8 @@ export interface UseAlertCountByRuleByStatusProps {
    * When empty or omitted, {@link field} / {@link value} are used as a single legacy term filter.
    */
   identityFields?: Record<string, string> | null;
-  field: string;
-  value: string;
   entityType?: string;
+  entityRecord?: EntityStoreRecord | null;
   queryId: string;
   statuses: Status[];
   skip?: boolean;
@@ -68,13 +70,12 @@ const ALERTS_BY_RULE_AGG = 'alertsByRuleAggregation';
 export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
   additionalFilters,
   identityFields,
-  field,
-  value,
   entityType,
   queryId,
   statuses,
   skip = false,
   signalIndexName,
+  entityRecord: entityRecordInput,
 }) => {
   const [updatedAt, setUpdatedAt] = useState(Date.now());
   const [items, setItems] = useState<AlertCountByRuleByStatusItem[]>([]);
@@ -88,8 +89,12 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
       : EMPTY_IDENTITY_FIELDS;
   const entityIdValue = identityFieldsStable[ENTITY_ID_FIELD];
   const storeEntityType = toStoreEntityType(entityType);
+
   const shouldResolveEntityIdFromStore =
-    Boolean(entityIdValue) && entityStoreV2Enabled && storeEntityType != null;
+    Boolean(entityIdValue) && // entity ID is defined
+    entityStoreV2Enabled && // entity store v2 is enabled
+    storeEntityType != null && // entity type is mappable to store-supported types
+    !entityRecordInput; // entity record not already provided as input
 
   const entityFromStore = useEntityFromStore({
     entityId: entityIdValue,
@@ -100,20 +105,30 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
   const { entityRecord, isLoading: entityFromStoreLoading } = entityFromStore;
 
   const euidApi = useEntityStoreEuidApi();
-  const identityFieldsForQuery = useMemo(
-    () =>
-      entityStoreV2Enabled
-        ? euidApi?.euid?.getEntityIdentifiersFromDocument(
-            storeEntityType ?? 'generic',
-            entityRecord
-          )
-        : identityFieldsStable,
-    [entityStoreV2Enabled, euidApi?.euid, storeEntityType, entityRecord, identityFieldsStable]
-  );
+  const entityFilters = useMemo(() => {
+    if (entityStoreV2Enabled && euidApi?.euid && (entityRecord || entityRecordInput)) {
+      // Use the entity record to generate a DSL query fragment
+      const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(
+        storeEntityType ?? 'generic',
+        entityRecord ?? entityRecordInput
+      );
+      return filter != null ? [filter] : [];
+    }
+
+    return identityFieldsStable != null && Object.keys(identityFieldsStable).length > 0
+      ? [buildEntityIdentifierTermFilters(identityFieldsStable)]
+      : [];
+  }, [
+    entityStoreV2Enabled,
+    euidApi?.euid,
+    entityRecord,
+    entityRecordInput,
+    identityFieldsStable,
+    storeEntityType,
+  ]);
 
   const skipAlertsQuery =
-    skip ||
-    (shouldResolveEntityIdFromStore && (entityFromStoreLoading || identityFieldsForQuery == null));
+    skip || (shouldResolveEntityIdFromStore && (entityFromStoreLoading || !entityFilters.length));
 
   const isResolvingEntityId = shouldResolveEntityIdFromStore && entityFromStoreLoading;
 
@@ -129,10 +144,8 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
       additionalFilters,
       from,
       to,
-      field,
-      value,
       statuses,
-      identityFields: identityFieldsForQuery ?? identityFieldsStable,
+      entityFilters: entityFilters ?? [],
     }),
     skip: skipAlertsQuery,
     queryName: ALERTS_QUERY_NAMES.ALERTS_COUNT_BY_STATUS,
@@ -145,23 +158,11 @@ export const useAlertCountByRuleByStatus: UseAlertCountByRuleByStatus = ({
         additionalFilters,
         from,
         to,
-        field,
-        value,
         statuses,
-        identityFields: identityFieldsForQuery ?? identityFieldsStable,
+        entityFilters: entityFilters ?? [],
       })
     );
-  }, [
-    setAlertsQuery,
-    from,
-    to,
-    field,
-    value,
-    statuses,
-    additionalFilters,
-    identityFieldsForQuery,
-    identityFieldsStable,
-  ]);
+  }, [setAlertsQuery, from, to, statuses, additionalFilters, identityFieldsStable, entityFilters]);
 
   useEffect(() => {
     if (!data) {
@@ -199,35 +200,16 @@ export const buildRuleAlertsByEntityQuery = ({
   additionalFilters = [],
   from,
   to,
-  field,
-  value,
   statuses,
-  identityFields,
+  entityFilters = [],
 }: {
   additionalFilters?: ESBoolQuery[];
   from: string;
   to: string;
   statuses: string[];
-  field: string;
-  value: string;
-  identityFields?: Record<string, string>;
+  entityFilters?: QueryDslQueryContainer[];
 }) => {
-  const entityTermFilters: ESTermQuery[] =
-    identityFields != null && Object.keys(identityFields).length > 0
-      ? Object.entries(identityFields).map(([entityField, entityValue]) => ({
-          term: {
-            [entityField]: entityValue,
-          },
-        }))
-      : [
-          {
-            term: {
-              [field]: value,
-            },
-          },
-        ];
-
-  const filterClauses: Array<ESBoolQuery | ESQuery> = [
+  const filterClauses: Array<ESBoolQuery | ESQuery | QueryDslQueryContainer> = [
     ...additionalFilters,
     {
       range: {
@@ -246,7 +228,7 @@ export const buildRuleAlertsByEntityQuery = ({
           },
         ]
       : []),
-    ...entityTermFilters,
+    ...entityFilters,
   ];
 
   return {
