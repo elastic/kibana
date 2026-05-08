@@ -159,20 +159,22 @@ describe('Trusted devices form', () => {
     await waitForEuiPopoverOpen();
   };
 
-  const getConditionsFieldSelect = (dataTestSub: string = formPrefix): HTMLButtonElement => {
-    return renderResult.getByTestId(`${dataTestSub}-fieldSelect`) as HTMLButtonElement;
+  const getEntryFieldSelect = (index = 0): HTMLButtonElement =>
+    renderResult.getByTestId(`${formPrefix}-entry${index}fieldSelect`) as HTMLButtonElement;
+
+  const getEntryOperatorSelect = (index = 0): HTMLButtonElement =>
+    renderResult.getByTestId(`${formPrefix}-entry${index}operatorSelect`) as HTMLButtonElement;
+
+  const getEntryValueField = (index = 0): HTMLInputElement => {
+    const comboBox = renderResult.getByTestId(`${formPrefix}-entry${index}valueField`);
+    return comboBox.querySelector('input[role="combobox"]') as HTMLInputElement;
   };
 
-  const getConditionsOperatorSelect = (dataTestSub: string = formPrefix): HTMLButtonElement => {
-    return renderResult.getByTestId(`${dataTestSub}-operatorSelect`) as HTMLButtonElement;
-  };
+  const getEntryRemoveButton = (index: number): HTMLButtonElement =>
+    renderResult.getByTestId(`${formPrefix}-entry${index}removeButton`) as HTMLButtonElement;
 
-  const getConditionsValueField = (dataTestSub: string = formPrefix): HTMLInputElement => {
-    const comboBox = renderResult.getByTestId(`${dataTestSub}-valueField`);
-    // EuiComboBox has a searchable input inside it
-    const searchInput = comboBox.querySelector('input[role="combobox"]');
-    return searchInput as HTMLInputElement;
-  };
+  const getAndButton = (): HTMLButtonElement =>
+    renderResult.getByTestId(`${formPrefix}-AndButton`) as HTMLButtonElement;
 
   beforeEach(() => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
@@ -313,7 +315,7 @@ describe('Trusted devices form', () => {
 
     it('should display field options based on OS selection', async () => {
       // Form defaults to Windows+Mac OS, so USERNAME field should NOT be available
-      const fieldSelect = getConditionsFieldSelect();
+      const fieldSelect = getEntryFieldSelect();
       await userEvent.click(fieldSelect);
 
       const options = Array.from(
@@ -345,7 +347,7 @@ describe('Trusted devices form', () => {
       );
 
       // Check field options - USERNAME should now be available
-      const fieldSelect = getConditionsFieldSelect();
+      const fieldSelect = getEntryFieldSelect();
       await userEvent.click(fieldSelect);
 
       const options = Array.from(
@@ -380,7 +382,7 @@ describe('Trusted devices form', () => {
       rerenderWithLatestProps();
 
       // Check field options - USERNAME should be hidden
-      const fieldSelect = getConditionsFieldSelect();
+      const fieldSelect = getEntryFieldSelect();
       await userEvent.click(fieldSelect);
 
       const options = Array.from(
@@ -404,7 +406,7 @@ describe('Trusted devices form', () => {
     });
 
     it('should toggle operator from "is" to "matches" and update entry type to wildcard', async () => {
-      const operatorSelect = getConditionsOperatorSelect();
+      const operatorSelect = getEntryOperatorSelect();
       await userEvent.click(operatorSelect);
 
       const operatorOptions = Array.from(
@@ -422,10 +424,10 @@ describe('Trusted devices form', () => {
     });
 
     it('should clear value field when field selection changes', async () => {
-      const valueField = getConditionsValueField();
+      const valueField = getEntryValueField();
       await setTextFieldValue(valueField, 'device-123');
 
-      const fieldSelect = getConditionsFieldSelect();
+      const fieldSelect = getEntryFieldSelect();
       await userEvent.click(fieldSelect);
       await userEvent.click(
         screen.getByRole('option', {
@@ -444,20 +446,20 @@ describe('Trusted devices form', () => {
       await setTextFieldValue(getNameField(), 'some name');
 
       act(() => {
-        fireEvent.blur(getConditionsValueField());
+        fireEvent.blur(getEntryValueField());
       });
 
       expect(renderResult.getByText(INPUT_ERRORS.entryValueEmpty)).toBeTruthy();
     });
 
     it('should show performance warning when operator is matches and value contains "**"', async () => {
-      await userEvent.click(getConditionsOperatorSelect());
+      await userEvent.click(getEntryOperatorSelect());
       await userEvent.click(screen.getByRole('option', { name: OPERATOR_TITLES.matches }));
 
       // ensure the component receives the updated item with type: 'wildcard'
       rerenderWithLatestProps();
 
-      const valueField = getConditionsValueField();
+      const valueField = getEntryValueField();
       await setTextFieldValue(valueField, 'prefix**suffix');
 
       act(() => {
@@ -531,6 +533,155 @@ describe('Trusted devices form', () => {
       const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
       expect(lastCall?.item.entries?.[0]?.field).toBe(TrustedDeviceConditionEntryField.HOST);
       expect(lastCall?.item.entries?.[0]?.value).toBe('myhost');
+    });
+
+    describe('Multiple condition entries', () => {
+      it('should render an AND button', () => {
+        expect(getAndButton()).toBeTruthy();
+      });
+
+      it('should add a second entry when the AND button is clicked', async () => {
+        await userEvent.click(getAndButton());
+
+        const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+        expect(lastCall?.item.entries).toHaveLength(2);
+        expect(lastCall?.item.entries[1]).toMatchObject({
+          field: TrustedDeviceConditionEntryField.DEVICE_ID,
+          type: 'match',
+          operator: 'included',
+          value: '',
+        });
+      });
+
+      it('should not show the AND connector badge with a single entry', () => {
+        expect(renderResult.queryByTestId(`${formPrefix}-andConnector`)).toBeNull();
+      });
+
+      it('should show the AND connector badge after adding a second entry', async () => {
+        await userEvent.click(getAndButton());
+        rerenderWithLatestProps();
+
+        expect(renderResult.getByTestId(`${formPrefix}-andConnector`)).toBeTruthy();
+      });
+
+      it('should render field, operator, value controls for the second entry', async () => {
+        await userEvent.click(getAndButton());
+        rerenderWithLatestProps();
+
+        expect(getEntryFieldSelect(1)).toBeTruthy();
+        expect(getEntryOperatorSelect(1)).toBeTruthy();
+        expect(getEntryValueField(1)).toBeTruthy();
+      });
+
+      it('should call onChange with updated entries[1].value when the second entry value changes', async () => {
+        await userEvent.click(getAndButton());
+        rerenderWithLatestProps();
+
+        const secondValueField = getEntryValueField(1);
+        await setTextFieldValue(secondValueField, 'my-second-device');
+
+        const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+        expect(lastCall?.item.entries).toHaveLength(2);
+        expect(lastCall?.item.entries[1].value).toBe('my-second-device');
+      });
+    });
+
+    describe('Entry removal', () => {
+      it('should disable the remove button when only one entry exists', () => {
+        expect(getEntryRemoveButton(0)).toBeDisabled();
+      });
+
+      it('should enable both remove buttons after a second entry is added', async () => {
+        await userEvent.click(getAndButton());
+        rerenderWithLatestProps();
+
+        expect(getEntryRemoveButton(0)).not.toBeDisabled();
+        expect(getEntryRemoveButton(1)).not.toBeDisabled();
+      });
+
+      it('should remove entry at index 0 and keep entry at index 1', async () => {
+        formProps.item = createItem({
+          entries: [
+            createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'first-device'),
+            createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'my-host'),
+          ],
+        });
+        latestUpdatedItem = formProps.item;
+        rerenderWithLatestProps();
+
+        await userEvent.click(getEntryRemoveButton(0));
+
+        const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+        expect(lastCall?.item.entries).toHaveLength(1);
+        expect(lastCall?.item.entries[0].field).toBe(TrustedDeviceConditionEntryField.HOST);
+        expect(lastCall?.item.entries[0].value).toBe('my-host');
+      });
+
+      it('should remove entry at index 1 and keep entry at index 0', async () => {
+        formProps.item = createItem({
+          entries: [
+            createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'first-device'),
+            createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'my-host'),
+          ],
+        });
+        latestUpdatedItem = formProps.item;
+        rerenderWithLatestProps();
+
+        await userEvent.click(getEntryRemoveButton(1));
+
+        const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+        expect(lastCall?.item.entries).toHaveLength(1);
+        expect(lastCall?.item.entries[0].field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
+        expect(lastCall?.item.entries[0].value).toBe('first-device');
+      });
+    });
+  });
+
+  describe('Duplicate field validation', () => {
+    it('should show a duplicate field error when two entries share the same field', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-1'),
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-2'),
+        ],
+      });
+      await render();
+
+      // Trigger validateForm so validationResult.errors.entries is populated
+      await setTextFieldValue(getNameField(), 'My TD');
+
+      // Blur a value field to make visitedFields.entries true, surfacing the error
+      act(() => {
+        fireEvent.blur(getEntryValueField(0));
+      });
+
+      expect(
+        renderResult.getByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeTruthy();
+    });
+
+    it('should not show a duplicate field error when entries use different fields', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-1'),
+          createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'my-host'),
+        ],
+      });
+      await render();
+
+      await setTextFieldValue(getNameField(), 'My TD');
+
+      act(() => {
+        fireEvent.blur(getEntryValueField(0));
+      });
+
+      expect(
+        renderResult.queryByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeNull();
     });
   });
 

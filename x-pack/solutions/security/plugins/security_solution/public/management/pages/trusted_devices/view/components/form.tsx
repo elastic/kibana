@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiHideFor,
   EuiHorizontalRule,
   EuiSpacer,
   EuiSuperSelect,
@@ -23,6 +24,7 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
+import styled from 'styled-components';
 import {
   OperatingSystem,
   TrustedDeviceConditionEntryField,
@@ -304,7 +306,7 @@ const ConditionEntryRow = memo<ConditionEntryRowProps>(
     const handleRemove = useCallback(() => onRemove(index), [index, onRemove]);
 
     return (
-      <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
+      <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem>
           <EuiFormRow label={showLabels ? 'Field' : undefined}>
             <EuiSuperSelect
@@ -371,6 +373,34 @@ const ConditionEntryRow = memo<ConditionEntryRowProps>(
 ConditionEntryRow.displayName = 'ConditionEntryRow';
 
 // ConditionsSection ------------------------------------------------------------
+
+const ConditionGroupFlexGroup = styled(EuiFlexGroup)`
+  // The positioning of the 'and-badge' is done by using the EuiButton's height and adding on to it
+  // the amount of padding used to space out each of the entries (times 2 because a spacer is also
+  // used above the Button), and then we adjust it with 3px
+  .and-badge {
+    padding-top: 20px;
+    padding-bottom: ${({ theme }) => {
+      return `calc(${theme.eui.euiButtonHeightSmall} + (${theme.eui.euiSizeS} * 2) + 3px);`;
+    }};
+  }
+
+  .group-entries {
+    margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
+
+    & > * {
+      margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .and-button {
+    min-width: 95px;
+  }
+`;
 
 const ConditionsSection = memo<{
   getTestId: (suffix?: string) => string | undefined;
@@ -451,14 +481,20 @@ const ConditionsSection = memo<{
               : undefined
           }
         >
-          <EuiFlexGroup gutterSize="xs" alignItems="flexStart">
+          <ConditionGroupFlexGroup gutterSize="xs">
             {entries.length > 1 && (
-              <EuiFlexItem grow={false} data-test-subj={getTestId('andConnector')}>
-                <AndOrBadge type="and" includeAntennas />
-              </EuiFlexItem>
+              <EuiHideFor sizes={['xs', 's']}>
+                <EuiFlexItem
+                  grow={false}
+                  data-test-subj={getTestId('andConnector')}
+                  className="and-badge"
+                >
+                  <AndOrBadge type="and" includeAntennas />
+                </EuiFlexItem>
+              </EuiHideFor>
             )}
             <EuiFlexItem grow={1}>
-              <div data-test-subj={getTestId('conditionEntries')}>
+              <div data-test-subj={getTestId('conditionEntries')} className="group-entries">
                 {entries.map((entry, index) => (
                   <ConditionEntryRow
                     key={index}
@@ -478,20 +514,21 @@ const ConditionsSection = memo<{
                   />
                 ))}
               </div>
-              <EuiSpacer size="s" />
               <div>
+                <EuiSpacer size="s" />
                 <EuiButton
                   size="s"
                   iconType="plusCircle"
                   onClick={onAddEntry}
                   isDisabled={disabled}
+                  className="and-button"
                   data-test-subj={getTestId('AndButton')}
                 >
                   {AND_BUTTON_LABEL}
                 </EuiButton>
               </div>
             </EuiFlexItem>
-          </EuiFlexGroup>
+          </ConditionGroupFlexGroup>
         </EuiFormRow>
       </>
     );
@@ -581,8 +618,11 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
           } else {
             const entryErrors: string[] = [];
             const entryWarnings: string[] = [];
+            const fieldCounts = new Map<string, number>();
 
             for (const entry of formData.entries) {
+              fieldCounts.set(entry.field, (fieldCounts.get(entry.field) ?? 0) + 1);
+
               if ('value' in entry) {
                 if (typeof entry.value === 'string') {
                   if (!entry.value.trim()) {
@@ -596,6 +636,14 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
                   entryErrors.push(INPUT_ERRORS.entryValueEmpty);
                   break;
                 }
+              }
+            }
+
+            for (const [field, count] of fieldCounts) {
+              if (count > 1) {
+                entryErrors.push(
+                  INPUT_ERRORS.noDuplicateField(field as TrustedDeviceConditionEntryField)
+                );
               }
             }
 

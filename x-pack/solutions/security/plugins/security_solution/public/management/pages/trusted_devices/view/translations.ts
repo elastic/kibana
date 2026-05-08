@@ -171,6 +171,14 @@ export const INPUT_ERRORS = {
       defaultMessage: 'At least one condition must be specified',
     }
   ),
+  noDuplicateField: (field: TrustedDeviceConditionEntryField) =>
+    i18n.translate(
+      'xpack.securitySolution.trustedDevices.form.errors.conditionFieldDuplicated',
+      {
+        defaultMessage: '{field} cannot be added more than once',
+        values: { field: CONDITION_FIELD_TITLE[field] },
+      }
+    ),
 };
 
 export const VALIDATION_WARNINGS = {
