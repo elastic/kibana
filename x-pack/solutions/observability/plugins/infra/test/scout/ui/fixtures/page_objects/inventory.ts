@@ -147,6 +147,7 @@ export class InventoryPage {
     await this.page.goto(`${this.kbnUrl.app('metrics')}/inventory`);
     if (!opts.skipLoadWait) {
       await this.waitForPageToLoad();
+      await this.waitForNodesToLoad();
     }
   }
 
@@ -234,6 +235,7 @@ export class InventoryPage {
     await this.datePickerInput.press('Enter', { delay: 50 });
     await this.datePickerInput.press('Escape', { delay: 50 });
     await this.waitForNodesToLoad();
+    await this.waitForPageToLoad();
   }
 
   public async getWaffleNode(nodeName: string) {
