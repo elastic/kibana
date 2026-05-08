@@ -23,6 +23,7 @@ import { servicesRouteDefinitions } from './services';
 import { serviceMapRouteDefinitions } from './service_map';
 import { errorsRouteDefinitions } from './errors';
 import { infrastructureRouteDefinitions } from './infrastructure';
+import { environmentsRouteDefinitions } from './environments';
 import type { BuildGroupedRepository } from './types';
 
 export const routeDefinitions = {
@@ -43,6 +44,7 @@ export const routeDefinitions = {
   serviceMap: serviceMapRouteDefinitions,
   errors: errorsRouteDefinitions,
   infrastructure: infrastructureRouteDefinitions,
+  environments: environmentsRouteDefinitions,
 };
 
 export type SharedAPMRouteRepository = BuildGroupedRepository<typeof routeDefinitions>;
