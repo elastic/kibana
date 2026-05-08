@@ -91,7 +91,7 @@ dependsOn:
   - '@kbn/utility-types-jest'
   - '@kbn/zod'
   - '@kbn/connector-schemas'
-  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-browser'
   - '@kbn/object-utils'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/react-query'

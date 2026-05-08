@@ -1,5 +1,5 @@
 {
-  "sha1": "2d01ddb30271bba791ae6b9bf03d28e8a4805684",
+  "sha1": "3c0f756ccf7951b3b17b57f4f1e429242d576ed7",
   "tests": [
     {
       "id": "7a50a1b508e10f4-3be34281d1d9c2c",
@@ -606,8 +606,8 @@
       }
     },
     {
-      "id": "7e7734002ff1828-bba14a33864c832",
-      "title": "Cross-compatibility - Else Branch documents with missing condition field: ingest else-branch fires, esql excludes from both branches",
+      "id": "7e7734002ff1828-afd28cec807695b",
+      "title": "Cross-compatibility - Else Branch documents with missing condition field: both transpilers fire the else-branch",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -633,7 +633,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/else_branch.spec.ts",
-        "line": 211,
+        "line": 208,
         "column": 12
       }
     },
@@ -649,7 +649,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/else_branch.spec.ts",
-        "line": 287,
+        "line": 284,
         "column": 12
       }
     },
@@ -665,7 +665,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/else_branch.spec.ts",
-        "line": 381,
+        "line": 378,
         "column": 12
       }
     },
@@ -782,6 +782,22 @@
       }
     },
     {
+      "id": "edf87fd95fcb890-3b0805161eca3f4",
+      "title": "Cross-compatibility - Filter Conditions neq fires on documents where the condition field is missing (parity with not(eq))",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
+        "line": 124,
+        "column": 12
+      }
+    },
+    {
       "id": "edf87fd95fcb890-258bd4de3cc0009",
       "title": "Cross-compatibility - Filter Conditions should handle gt (greater than) filter condition",
       "expectedStatus": "passed",
@@ -793,7 +809,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 124,
+        "line": 177,
         "column": 12
       }
     },
@@ -809,7 +825,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 179,
+        "line": 232,
         "column": 12
       }
     },
@@ -825,7 +841,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 232,
+        "line": 285,
         "column": 12
       }
     },
@@ -841,7 +857,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 287,
+        "line": 340,
         "column": 12
       }
     },
@@ -857,7 +873,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 340,
+        "line": 393,
         "column": 12
       }
     },
@@ -873,7 +889,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 398,
+        "line": 451,
         "column": 12
       }
     },
@@ -889,7 +905,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 461,
+        "line": 514,
         "column": 12
       }
     },
@@ -905,7 +921,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 567,
+        "line": 620,
         "column": 12
       }
     },
@@ -921,7 +937,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 634,
+        "line": 687,
         "column": 12
       }
     },
@@ -937,7 +953,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 701,
+        "line": 754,
         "column": 12
       }
     },
@@ -953,7 +969,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 781,
+        "line": 834,
         "column": 12
       }
     },
@@ -969,7 +985,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 847,
+        "line": 900,
         "column": 12
       }
     },
@@ -985,7 +1001,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 919,
+        "line": 972,
         "column": 12
       }
     },
@@ -1001,7 +1017,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 979,
+        "line": 1032,
         "column": 12
       }
     },
@@ -1017,7 +1033,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 1033,
+        "line": 1086,
         "column": 12
       }
     },
@@ -1033,7 +1049,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/shared/kbn-streamlang-tests/test/scout/api/tests/cross_compatibility/filter_conditions.spec.ts",
-        "line": 1100,
+        "line": 1153,
         "column": 12
       }
     },

@@ -15,7 +15,7 @@
       "label": "WorkflowsPublicPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
-      "lineNumber": 40,
+      "lineNumber": 35,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -31,7 +31,7 @@
       "label": "WorkflowsPublicPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
-      "lineNumber": 78,
+      "lineNumber": 41,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -51,7 +51,7 @@
             "; }) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
-          "lineNumber": 79,
+          "lineNumber": 42,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -64,7 +64,7 @@
               "label": "options",
               "description": [],
               "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
-              "lineNumber": 85,
+              "lineNumber": 48,
               "columnNumber": 45,
               "deprecated": false,
               "trackAdoption": false,
@@ -80,7 +80,7 @@
                     "string[]"
                   ],
                   "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
-                  "lineNumber": 86,
+                  "lineNumber": 49,
                   "columnNumber": 5,
                   "deprecated": false,
                   "trackAdoption": false
@@ -107,7 +107,7 @@
         "label": "BulkScheduleWorkflowItem",
         "description": [],
         "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
-        "lineNumber": 145,
+        "lineNumber": 139,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -129,7 +129,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
-            "lineNumber": 146,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -142,7 +142,7 @@
             "label": "spaceId",
             "description": [],
             "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
-            "lineNumber": 147,
+            "lineNumber": 141,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -158,7 +158,7 @@
               "{ [x: string]: unknown; }"
             ],
             "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
-            "lineNumber": 148,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -171,7 +171,7 @@
             "label": "triggeredBy",
             "description": [],
             "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
-            "lineNumber": 149,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -194,7 +194,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/workflows_management/server/api/workflows_management_api.ts",
-            "lineNumber": 150,
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -214,7 +214,7 @@
       "label": "WorkflowsServerPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 47,
+      "lineNumber": 44,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -230,7 +230,7 @@
             "WorkflowsManagementApi"
           ],
           "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-          "lineNumber": 48,
+          "lineNumber": 45,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -247,7 +247,7 @@
       "label": "WorkflowsServerPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 52,
+      "lineNumber": 49,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

@@ -10,7 +10,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlToolsOptions } from './types';
 
 const smlSearchSchema = z.object({
@@ -35,7 +35,7 @@ const smlSearchSchema = z.object({
  * Searches the Semantic Metadata Layer for items matching a query.
  */
 export const createSmlSearchTool = ({
-  getSmlService,
+  getAgentContextLayer,
 }: SmlToolsOptions): BuiltinToolDefinition<typeof smlSearchSchema> => ({
   id: platformCoreTools.smlSearch,
   type: ToolType.builtin,
@@ -50,7 +50,9 @@ export const createSmlSearchTool = ({
   availability: {
     cacheMode: 'global',
     handler: async ({ uiSettings }) => {
-      const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
+      const enabled = await uiSettings.get<boolean>(
+        AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
+      );
       return enabled
         ? { status: 'available' }
         : {
@@ -60,12 +62,12 @@ export const createSmlSearchTool = ({
     },
   },
   handler: async ({ query, size }, context) => {
-    const smlService = getSmlService();
+    const agentContextLayer = getAgentContextLayer();
     const { spaceId, esClient, request } = context;
 
     let searchResult;
     try {
-      searchResult = await smlService.search({
+      searchResult = await agentContextLayer.search({
         query,
         size,
         spaceId,

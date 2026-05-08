@@ -260,7 +260,7 @@
         "label": "LazyRuleFormFlyout",
         "description": [],
         "signature": [
-          "React.LazyExoticComponent<({ push, onClose, isLoading, children, }: ",
+          "React.LazyExoticComponent<({ push, onClose, isLoading, isSaveDisabled, children, }: ",
           {
             "pluginId": "@kbn/alerting-v2-rule-form",
             "scope": "public",
@@ -822,7 +822,7 @@
         "label": "DynamicRuleFormFlyoutProps",
         "description": [],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
-        "lineNumber": 16,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -840,7 +840,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
-            "lineNumber": 17,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -858,7 +858,7 @@
               "(() => void) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
-            "lineNumber": 19,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -875,7 +875,7 @@
               "The query that drives form values - changes will sync to form state"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
-            "lineNumber": 21,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -899,7 +899,68 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
-            "lineNumber": 23,
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormFlyoutProps.includeYaml",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeYaml",
+            "description": [
+              "Whether to include the Form/YAML edit mode toggle (default: false)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormFlyoutProps.esqlVariables",
+            "type": "Array",
+            "tags": [],
+            "label": "esqlVariables",
+            "description": [
+              "\nES|QL control variables from Discover. When provided (including `[]`),\nthe flyout inlines resolvable `?param` / `??param` tokens via Composer\nand blocks save for any that remain unresolved.\n\nWhen `undefined`, the flyout treats the query as-is — no placeholder\nscanning, no save gating — so non-ES|QL-control callers are unaffected."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormFlyoutProps.validationErrors",
+            "type": "Array",
+            "tags": [],
+            "label": "validationErrors",
+            "description": [
+              "\nCaller-supplied validation errors (merged with any unresolved-variable\nerrors computed internally)."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1440,6 +1501,22 @@
           },
           {
             "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleFormFlyoutProps.isSaveDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSaveDisabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/rule_form_flyout.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
             "id": "def-public.RuleFormFlyoutProps.children",
             "type": "CompoundType",
             "tags": [],
@@ -1449,7 +1526,7 @@
               "React.ReactNode"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/rule_form_flyout.tsx",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

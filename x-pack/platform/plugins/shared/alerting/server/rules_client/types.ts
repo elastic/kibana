@@ -39,7 +39,7 @@ import type { ConnectorAdapterRegistry } from '../connector_adapters/connector_a
 import type { GetAlertIndicesAlias } from '../lib';
 import type { AlertsService } from '../alerts_service';
 import type { BackfillClient } from '../backfill_client/backfill_client';
-import type { IChangeTrackingService } from './lib/change_tracking';
+import type { IScopedChangeTrackingService } from './lib/change_tracking';
 
 export type {
   BulkEditOperation,
@@ -80,10 +80,12 @@ export interface RulesClientContext {
   readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   readonly auditLogger?: AuditLogger;
   readonly eventLogger?: IEventLogger;
-  readonly changeTrackingService?: IChangeTrackingService;
+  readonly changeTrackingService?: IScopedChangeTrackingService;
   readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule>;
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
+  readonly cloneAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
+  readonly cloneApiKeysOnCreate?: boolean;
   readonly connectorAdapterRegistry: ConnectorAdapterRegistry;
   readonly getAlertIndicesAlias: GetAlertIndicesAlias;
   readonly alertsService: AlertsService | null;

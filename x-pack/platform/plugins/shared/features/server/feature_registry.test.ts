@@ -56,7 +56,7 @@ describe('FeatureRegistry', () => {
             },
             app: ['app1'],
             savedObject: {
-              all: ['space', 'etc', 'telemetry'],
+              all: ['space', 'etc', 'telemetry', 'user-storage', 'user-storage-global'],
               read: ['canvas', 'config', 'config-global', 'url', 'tag', 'cloud'],
             },
             api: ['someApiEndpointTag', 'anotherEndpointTag'],
@@ -65,7 +65,16 @@ describe('FeatureRegistry', () => {
           read: {
             savedObject: {
               all: [],
-              read: ['config', 'config-global', 'url', 'telemetry', 'tag', 'cloud'],
+              read: [
+                'config',
+                'config-global',
+                'url',
+                'telemetry',
+                'tag',
+                'cloud',
+                'user-storage',
+                'user-storage-global',
+              ],
             },
             ui: [],
           },
@@ -129,7 +138,7 @@ describe('FeatureRegistry', () => {
                 },
                 app: ['app1'],
                 savedObject: {
-                  all: ['space', 'etc', 'telemetry'],
+                  all: ['space', 'etc', 'telemetry', 'user-storage', 'user-storage-global'],
                   read: ['canvas', 'config', 'config-global', 'url', 'tag', 'cloud'],
                 },
                 api: ['someApiEndpointTag', 'anotherEndpointTag'],
@@ -292,7 +301,11 @@ describe('FeatureRegistry', () => {
       expect(result[0].privileges).toHaveProperty('read');
 
       const allPrivilege = result[0].privileges?.all;
-      expect(allPrivilege?.savedObject.all).toEqual(['telemetry']);
+      expect(allPrivilege?.savedObject.all).toEqual([
+        'telemetry',
+        'user-storage',
+        'user-storage-global',
+      ]);
     });
 
     it(`automatically grants access to config, config-global, url, telemetry and tag saved objects`, () => {
@@ -343,6 +356,8 @@ describe('FeatureRegistry', () => {
         'url',
         'tag',
         'cloud',
+        'user-storage',
+        'user-storage-global',
       ]);
     });
 
@@ -376,7 +391,11 @@ describe('FeatureRegistry', () => {
       const result = featureRegistry.getAllKibanaFeatures();
 
       const reservedPrivilege = result[0]!.reserved!.privileges[0].privilege;
-      expect(reservedPrivilege.savedObject.all).toEqual(['telemetry']);
+      expect(reservedPrivilege.savedObject.all).toEqual([
+        'telemetry',
+        'user-storage',
+        'user-storage-global',
+      ]);
       expect(reservedPrivilege.savedObject.read).toEqual([
         'config',
         'config-global',
@@ -420,7 +439,11 @@ describe('FeatureRegistry', () => {
 
       const allPrivilege = result[0].privileges!.all;
       const readPrivilege = result[0].privileges!.read;
-      expect(allPrivilege?.savedObject.all).toEqual(['telemetry']);
+      expect(allPrivilege?.savedObject.all).toEqual([
+        'telemetry',
+        'user-storage',
+        'user-storage-global',
+      ]);
       expect(allPrivilege?.savedObject.read).toEqual([
         'config',
         'config-global',
@@ -435,6 +458,8 @@ describe('FeatureRegistry', () => {
         'tag',
         'cloud',
         'telemetry',
+        'user-storage',
+        'user-storage-global',
       ]);
     });
 
@@ -2566,7 +2591,7 @@ describe('FeatureRegistry', () => {
           all: {
             ui: [],
             savedObject: {
-              all: ['telemetry'],
+              all: ['telemetry', 'user-storage', 'user-storage-global'],
               read: ['config', 'config-global', 'url', 'tag', 'cloud'],
             },
             composedOf: [
@@ -2578,7 +2603,16 @@ describe('FeatureRegistry', () => {
             ui: [],
             savedObject: {
               all: [],
-              read: ['config', 'config-global', 'telemetry', 'url', 'tag', 'cloud'],
+              read: [
+                'config',
+                'config-global',
+                'telemetry',
+                'url',
+                'tag',
+                'cloud',
+                'user-storage',
+                'user-storage-global',
+              ],
             },
             composedOf: [{ feature: 'featureD', privileges: ['read'] }],
           },
@@ -2600,7 +2634,7 @@ describe('FeatureRegistry', () => {
           all: {
             ui: [],
             savedObject: {
-              all: ['telemetry'],
+              all: ['telemetry', 'user-storage', 'user-storage-global'],
               read: ['config', 'config-global', 'url', 'tag', 'cloud'],
             },
             composedOf: [{ feature: 'featureE', privileges: ['all'] }],
@@ -2609,7 +2643,16 @@ describe('FeatureRegistry', () => {
             ui: [],
             savedObject: {
               all: [],
-              read: ['config', 'config-global', 'telemetry', 'url', 'tag', 'cloud'],
+              read: [
+                'config',
+                'config-global',
+                'telemetry',
+                'url',
+                'tag',
+                'cloud',
+                'user-storage',
+                'user-storage-global',
+              ],
             },
           },
         });

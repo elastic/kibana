@@ -57,8 +57,14 @@ import {
 import type { AttachmentService } from '../attachments';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 import { createCaseError, isSOError } from '../../common/error';
-import type { ResolvedExtendedFieldFilter } from './extended_field_search_utils';
-import { buildExtendedFieldRuntimeMappings } from './extended_field_search_utils';
+import type {
+  ResolvedExtendedFieldFilter,
+  ResolvedFieldLabelFilter,
+} from './extended_field_search_utils';
+import {
+  buildExtendedFieldRuntimeMappings,
+  buildFieldLabelRuntimeMappings,
+} from './extended_field_search_utils';
 import type {
   CasePersistedAttributes,
   CaseSavedObjectTransformed,
@@ -274,10 +280,12 @@ export class CasesService {
     caseOptions,
     namespaces,
     extendedFieldFilters,
+    fieldLabelFilters,
   }: {
     caseOptions: SavedObjectFindOptionsKueryNode;
     namespaces: string[];
     extendedFieldFilters?: ResolvedExtendedFieldFilter[][];
+    fieldLabelFilters?: ResolvedFieldLabelFilter[];
   }): Promise<CasesMapWithPageInfo> {
     const caseIdsByAttachmentSearch = await this.getCaseIdsByAttachmentSearch(
       namespaces,
@@ -289,21 +297,34 @@ export class CasesService {
       searchFields: caseOptions.searchFields,
       caseIds: caseIdsByAttachmentSearch,
       extendedFieldFilters,
+      fieldLabelFilters,
     });
 
     const filterQuery = caseOptions.filter ? toElasticsearchQuery(caseOptions.filter) : undefined;
     const query = mergeSearchQuery(searchQuery, filterQuery);
 
-    const runtimeMappings =
+    const extendedFieldRuntimeMappings =
       extendedFieldFilters && extendedFieldFilters.length > 0
         ? buildExtendedFieldRuntimeMappings(extendedFieldFilters)
-        : undefined;
+        : {};
+
+    const fieldLabelRuntimeMappings =
+      fieldLabelFilters && fieldLabelFilters.length > 0
+        ? buildFieldLabelRuntimeMappings(fieldLabelFilters)
+        : {};
+
+    const runtimeMappings = {
+      ...extendedFieldRuntimeMappings,
+      ...fieldLabelRuntimeMappings,
+    };
+
+    const hasRuntimeMappings = Object.keys(runtimeMappings).length > 0;
 
     const cases = await this.searchCases({
       type: [CASE_SAVED_OBJECT],
       namespaces,
       query,
-      ...(runtimeMappings ? { runtime_mappings: runtimeMappings } : {}),
+      ...(hasRuntimeMappings ? { runtime_mappings: runtimeMappings } : {}),
       ...convertFindQueryParams(caseOptions),
     });
 

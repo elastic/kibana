@@ -226,7 +226,7 @@ describe('DynamicConnectorsPoller', () => {
       await wait();
 
       expect(mockClient.inference.get).toHaveBeenCalledTimes(2);
-      expect(mockActions.registerDynamicConnector).toHaveBeenCalledTimes(13);
+      expect(mockActions.registerDynamicConnector).toHaveBeenCalledTimes(11);
       expect(mockLogger.error).toHaveBeenCalledTimes(2);
     })
   );

@@ -8,6 +8,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { cloneDeep, isEqual, pick } from 'lodash';
+import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
@@ -70,6 +71,7 @@ export class EditJobFlyoutUI extends Component {
       jobGroupsValidationError: '',
       isValidJobDetails: true,
       isValidJobCustomUrls: true,
+      modelMemoryEstimation: undefined,
     };
 
     this.refreshJobs = this.props.refreshJobs;
@@ -185,6 +187,17 @@ export class EditJobFlyoutUI extends Component {
     this.extractInitialJobFormState(job, hasDatafeed);
     const datafeedRunning = hasDatafeed && job.datafeed_config.state !== DATAFEED_STATE.STOPPED;
     const jobClosed = job.state === JOB_STATE.CLOSED;
+
+    if (jobClosed && job.datafeed_config && job.data_counts) {
+      this.estimateModelMemoryLimit({
+        earliestMs: job.data_counts.earliest_record_timestamp,
+        latestMs: job.data_counts.latest_record_timestamp,
+        indexPattern: job.datafeed_config.indices.join(','),
+        query: job.datafeed_config.query,
+        timeFieldName: job.data_description.time_field,
+        analysisConfig: job.analysis_config,
+      });
+    }
 
     this.setState({
       job,
@@ -307,6 +320,30 @@ export class EditJobFlyoutUI extends Component {
       });
   };
 
+  async estimateModelMemoryLimit(payload) {
+    this.setState({ modelMemoryEstimation: undefined });
+
+    if (
+      payload === undefined ||
+      payload.earliestMs === undefined ||
+      payload.latestMs === undefined
+    ) {
+      this.setState({ modelMemoryEstimation: null });
+      return;
+    }
+
+    const mlApi = this.props.kibana.services.mlServices.mlApi;
+
+    try {
+      const { modelMemoryLimit } = await firstValueFrom(mlApi.calculateModelMemoryLimit$(payload));
+      this.setState({ modelMemoryEstimation: modelMemoryLimit ?? null });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Model memory limit could not be calculated', error);
+      this.setState({ modelMemoryEstimation: undefined });
+    }
+  }
+
   render() {
     const confirmModalTitleId = htmlIdGenerator()('confirmModalTitle');
 
@@ -335,6 +372,8 @@ export class EditJobFlyoutUI extends Component {
         isValidJobCustomUrls,
         datafeedRunning,
         jobClosed,
+        modelMemoryEstimation,
+        hasDatafeed,
       } = this.state;
 
       const tabs = [
@@ -357,6 +396,8 @@ export class EditJobFlyoutUI extends Component {
               setJobDetails={this.setJobDetails}
               jobGroupsValidationError={jobGroupsValidationError}
               jobModelMemoryLimitValidationError={jobModelMemoryLimitValidationError}
+              modelMemoryEstimation={modelMemoryEstimation}
+              hasDatafeed={hasDatafeed}
             />
           ),
         },

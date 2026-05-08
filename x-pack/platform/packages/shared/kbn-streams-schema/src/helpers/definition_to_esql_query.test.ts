@@ -49,7 +49,9 @@ describe('definitionToESQLQuery', () => {
         definition: createDraftDefinition(),
         routingCondition: eqCondition,
       });
-      expect(result).toBe(['FROM $.logs.otel', '| WHERE `service.name` == "nginx"'].join('\n'));
+      expect(result).toBe(
+        ['FROM $.logs.otel', '| WHERE COALESCE(`service.name` == "nginx", FALSE)'].join('\n')
+      );
     });
 
     it('omits WHERE clause for always conditions', async () => {
@@ -66,9 +68,10 @@ describe('definitionToESQLQuery', () => {
         routingCondition: andCondition,
       });
       expect(result).toBe(
-        ['FROM $.logs.otel', '| WHERE `service.name` == "nginx" AND `log.level` == "error"'].join(
-          '\n'
-        )
+        [
+          'FROM $.logs.otel',
+          '| WHERE COALESCE(`service.name` == "nginx", FALSE) AND COALESCE(`log.level` == "error", FALSE)',
+        ].join('\n')
       );
     });
 
@@ -88,7 +91,7 @@ describe('definitionToESQLQuery', () => {
         routingCondition: eqCondition,
       });
       expect(result).toBe(
-        ['FROM $.logs.otel.nginx', '| WHERE `service.name` == "nginx"'].join('\n')
+        ['FROM $.logs.otel.nginx', '| WHERE COALESCE(`service.name` == "nginx", FALSE)'].join('\n')
       );
     });
 
@@ -113,7 +116,7 @@ describe('definitionToESQLQuery', () => {
       expect(result).toBe(
         [
           'FROM $.logs.otel',
-          '| WHERE `service.name` == "nginx"',
+          '| WHERE COALESCE(`service.name` == "nginx", FALSE)',
           '| WHERE NOT(old_field IS NULL)',
           '  | WHERE new_field IS NULL',
           '  | EVAL new_field = old_field',
@@ -127,7 +130,9 @@ describe('definitionToESQLQuery', () => {
         definition: createDraftDefinition({ steps: [] }),
         routingCondition: eqCondition,
       });
-      expect(result).toBe(['FROM $.logs.otel', '| WHERE `service.name` == "nginx"'].join('\n'));
+      expect(result).toBe(
+        ['FROM $.logs.otel', '| WHERE COALESCE(`service.name` == "nginx", FALSE)'].join('\n')
+      );
     });
   });
 });

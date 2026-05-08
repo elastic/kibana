@@ -1,22 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`transpile - Streamlang DSL to ES|QL) should handle not conditions 1`] = `
-"  | EVAL \`attributes.not_flag\` = CASE(NOT \`attributes.status\` == \\"active\\", \\"not-active\\", \`attributes.not_flag\`)
-  | EVAL \`attributes.not_nested\` = CASE(NOT (\`attributes.a\` == 1 OR \`attributes.b\` == 2), \\"not-a-or-b\\", \`attributes.not_nested\`)"
+"  | EVAL \`attributes.not_flag\` = CASE(NOT COALESCE(\`attributes.status\` == \\"active\\", FALSE), \\"not-active\\", \`attributes.not_flag\`)
+  | EVAL \`attributes.not_nested\` = CASE(NOT (COALESCE(\`attributes.a\` == 1, FALSE) OR COALESCE(\`attributes.b\` == 2, FALSE)), \\"not-a-or-b\\", \`attributes.not_nested\`)"
 `;
 
 exports[`transpile - Streamlang DSL to ES|QL) should handle type coercions 1`] = `
 Object {
   "commands": Array [
-    "EVAL \`attributes.boolean_true_test\` = CASE(\`attributes.is_active\` == TRUE AND \`attributes.is_active_str\` == \\"true\\" AND \`attributes.is_inactive\` != TRUE AND \`attributes.is_inactive_str\` != \\"true\\", \\"matched_true_test\\", \`attributes.boolean_true_test\`)
-  | EVAL \`attributes.boolean_false_test\` = CASE(\`attributes.is_disabled\` == FALSE AND \`attributes.is_disabled_str\` == \\"false\\" AND \`attributes.is_enabled\` != FALSE AND \`attributes.is_enabled_str\` != \\"false\\", \\"matched_false_test\\", \`attributes.boolean_false_test\`)
-  | EVAL \`attributes.numeric_450_test\` = CASE(\`attributes.status_code\` == 450 AND \`attributes.status_code_str\` == \\"450\\" AND \`attributes.other_code\` != 450 AND \`attributes.other_code_str\` != \\"450\\", \\"matched_450_test\\", \`attributes.numeric_450_test\`)
-  | EVAL \`attributes.mixed_coercion_test\` = CASE(\`attributes.response_time\` > 100 AND \`attributes.response_time_str\` > \\"100\\" AND \`attributes.port\` >= \\"8000\\" AND \`attributes.port\` <= \\"9000\\" AND \`attributes.is_enabled\` == TRUE AND \`attributes.count_str\` == \\"42\\", \\"matched_mixed_coercion\\", \`attributes.mixed_coercion_test\`)",
+    "EVAL \`attributes.boolean_true_test\` = CASE(COALESCE(\`attributes.is_active\` == TRUE, FALSE) AND COALESCE(\`attributes.is_active_str\` == \\"true\\", FALSE) AND COALESCE(\`attributes.is_inactive\` != TRUE, TRUE) AND COALESCE(\`attributes.is_inactive_str\` != \\"true\\", TRUE), \\"matched_true_test\\", \`attributes.boolean_true_test\`)
+  | EVAL \`attributes.boolean_false_test\` = CASE(COALESCE(\`attributes.is_disabled\` == FALSE, FALSE) AND COALESCE(\`attributes.is_disabled_str\` == \\"false\\", FALSE) AND COALESCE(\`attributes.is_enabled\` != FALSE, TRUE) AND COALESCE(\`attributes.is_enabled_str\` != \\"false\\", TRUE), \\"matched_false_test\\", \`attributes.boolean_false_test\`)
+  | EVAL \`attributes.numeric_450_test\` = CASE(COALESCE(\`attributes.status_code\` == 450, FALSE) AND COALESCE(\`attributes.status_code_str\` == \\"450\\", FALSE) AND COALESCE(\`attributes.other_code\` != 450, TRUE) AND COALESCE(\`attributes.other_code_str\` != \\"450\\", TRUE), \\"matched_450_test\\", \`attributes.numeric_450_test\`)
+  | EVAL \`attributes.mixed_coercion_test\` = CASE(COALESCE(\`attributes.response_time\` > 100, FALSE) AND COALESCE(\`attributes.response_time_str\` > \\"100\\", FALSE) AND COALESCE(\`attributes.port\` >= \\"8000\\" AND \`attributes.port\` <= \\"9000\\", FALSE) AND COALESCE(\`attributes.is_enabled\` == TRUE, FALSE) AND COALESCE(\`attributes.count_str\` == \\"42\\", FALSE), \\"matched_mixed_coercion\\", \`attributes.mixed_coercion_test\`)",
   ],
-  "query": "  | EVAL \`attributes.boolean_true_test\` = CASE(\`attributes.is_active\` == TRUE AND \`attributes.is_active_str\` == \\"true\\" AND \`attributes.is_inactive\` != TRUE AND \`attributes.is_inactive_str\` != \\"true\\", \\"matched_true_test\\", \`attributes.boolean_true_test\`)
-  | EVAL \`attributes.boolean_false_test\` = CASE(\`attributes.is_disabled\` == FALSE AND \`attributes.is_disabled_str\` == \\"false\\" AND \`attributes.is_enabled\` != FALSE AND \`attributes.is_enabled_str\` != \\"false\\", \\"matched_false_test\\", \`attributes.boolean_false_test\`)
-  | EVAL \`attributes.numeric_450_test\` = CASE(\`attributes.status_code\` == 450 AND \`attributes.status_code_str\` == \\"450\\" AND \`attributes.other_code\` != 450 AND \`attributes.other_code_str\` != \\"450\\", \\"matched_450_test\\", \`attributes.numeric_450_test\`)
-  | EVAL \`attributes.mixed_coercion_test\` = CASE(\`attributes.response_time\` > 100 AND \`attributes.response_time_str\` > \\"100\\" AND \`attributes.port\` >= \\"8000\\" AND \`attributes.port\` <= \\"9000\\" AND \`attributes.is_enabled\` == TRUE AND \`attributes.count_str\` == \\"42\\", \\"matched_mixed_coercion\\", \`attributes.mixed_coercion_test\`)",
+  "query": "  | EVAL \`attributes.boolean_true_test\` = CASE(COALESCE(\`attributes.is_active\` == TRUE, FALSE) AND COALESCE(\`attributes.is_active_str\` == \\"true\\", FALSE) AND COALESCE(\`attributes.is_inactive\` != TRUE, TRUE) AND COALESCE(\`attributes.is_inactive_str\` != \\"true\\", TRUE), \\"matched_true_test\\", \`attributes.boolean_true_test\`)
+  | EVAL \`attributes.boolean_false_test\` = CASE(COALESCE(\`attributes.is_disabled\` == FALSE, FALSE) AND COALESCE(\`attributes.is_disabled_str\` == \\"false\\", FALSE) AND COALESCE(\`attributes.is_enabled\` != FALSE, TRUE) AND COALESCE(\`attributes.is_enabled_str\` != \\"false\\", TRUE), \\"matched_false_test\\", \`attributes.boolean_false_test\`)
+  | EVAL \`attributes.numeric_450_test\` = CASE(COALESCE(\`attributes.status_code\` == 450, FALSE) AND COALESCE(\`attributes.status_code_str\` == \\"450\\", FALSE) AND COALESCE(\`attributes.other_code\` != 450, TRUE) AND COALESCE(\`attributes.other_code_str\` != \\"450\\", TRUE), \\"matched_450_test\\", \`attributes.numeric_450_test\`)
+  | EVAL \`attributes.mixed_coercion_test\` = CASE(COALESCE(\`attributes.response_time\` > 100, FALSE) AND COALESCE(\`attributes.response_time_str\` > \\"100\\", FALSE) AND COALESCE(\`attributes.port\` >= \\"8000\\" AND \`attributes.port\` <= \\"9000\\", FALSE) AND COALESCE(\`attributes.is_enabled\` == TRUE, FALSE) AND COALESCE(\`attributes.count_str\` == \\"42\\", FALSE), \\"matched_mixed_coercion\\", \`attributes.mixed_coercion_test\`)",
 }
 `;
 
@@ -31,11 +31,11 @@ exports[`transpile - Streamlang DSL to ES|QL) should transpile a variety of proc
   | EVAL message_lowercase = TO_LOWER(message)
   | WHERE NOT(message IS NULL)
   | EVAL message_trimmed = TRIM(message)
-  | WHERE NOT \`https.status_code\` == 200
+  | WHERE NOT COALESCE(\`https.status_code\` == 200, FALSE)
   | WHERE NOT(\`http.status_code\` IS NULL)
-  | EVAL \`http.status_code_str\` = CASE(\`http.error\` == 404, TO_STRING(\`http.status_code\`), NULL)
+  | EVAL \`http.status_code_str\` = CASE(COALESCE(\`http.error\` == 404, FALSE), TO_STRING(\`http.status_code\`), NULL)
   | WHERE NOT(message IS NULL)
-  | EVAL clean_message = CASE(log_level == \\"ERROR\\", REPLACE(message, \\"error\\", \\"warning\\"), clean_message)
+  | EVAL clean_message = CASE(COALESCE(log_level == \\"ERROR\\", FALSE), REPLACE(message, \\"error\\", \\"warning\\"), clean_message)
   | WHERE NOT(\`attributes.old_name\` IS NULL)
   | WHERE \`attributes.new_name\` IS NULL
   | EVAL \`attributes.new_name\` = \`attributes.old_name\`
@@ -49,11 +49,11 @@ exports[`transpile - Streamlang DSL to ES|QL) should transpile a variety of proc
   | WHERE NOT(\`body.log\` IS NULL)
   | DISSECT \`body.log\` \\"%{attributes.client} %{attributes.method} %{attributes.path}\\"
   | EVAL \`attributes.tags\` = CASE(\`attributes.tags\` IS NULL, [\\"new_tag\\"], MV_APPEND(\`attributes.tags\`, [\\"new_tag\\"]))
-  | EVAL \`attributes.flag\` = CASE(\`attributes.status\` == \\"active\\", \\"yes\\", \`attributes.flag\`)
-  | EVAL \`attributes.prod_flag\` = CASE(\`attributes.env\` == \\"prod\\", \\"prod-env\\", \`attributes.prod_flag\`)
-  | EVAL \`attributes.prod_flag\` = CASE(\`attributes.a\` == 1 OR \`attributes.b\` == 2, \\"prod-env\\", \`attributes.prod_flag\`)
-  | EVAL \`attributes.department_flag\` = CASE((\`attributes.a\` == 1 OR \`attributes.b\` == 2) AND \`attributes.department\` == \\"legal\\", \\"legal-department\\", \`attributes.department_flag\`)
-  | EVAL \`attributes.test\` = CASE(\`attributes.status\` == \\"active\\" OR \`attributes.status\` == \\"inactive\\" AND \`attributes.read_only\` == FALSE, \\"yes\\", \`attributes.test\`)
+  | EVAL \`attributes.flag\` = CASE(COALESCE(\`attributes.status\` == \\"active\\", FALSE), \\"yes\\", \`attributes.flag\`)
+  | EVAL \`attributes.prod_flag\` = CASE(COALESCE(\`attributes.env\` == \\"prod\\", FALSE), \\"prod-env\\", \`attributes.prod_flag\`)
+  | EVAL \`attributes.prod_flag\` = CASE(COALESCE(\`attributes.a\` == 1, FALSE) OR COALESCE(\`attributes.b\` == 2, FALSE), \\"prod-env\\", \`attributes.prod_flag\`)
+  | EVAL \`attributes.department_flag\` = CASE((COALESCE(\`attributes.a\` == 1, FALSE) OR COALESCE(\`attributes.b\` == 2, FALSE)) AND COALESCE(\`attributes.department\` == \\"legal\\", FALSE), \\"legal-department\\", \`attributes.department_flag\`)
+  | EVAL \`attributes.test\` = CASE(COALESCE(\`attributes.status\` == \\"active\\", FALSE) OR COALESCE(\`attributes.status\` == \\"inactive\\", FALSE) AND COALESCE(\`attributes.read_only\` == FALSE, FALSE), \\"yes\\", \`attributes.test\`)
   | EVAL \\"WARNING: Manual ingest pipeline not supported in ES|QL\\""
 `;
 
