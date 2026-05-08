@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useMemo } from 'react';
-import { EuiBetaBadge, useGeneratedHtmlId } from '@elastic/eui';
+import React, { memo, useEffect } from 'react';
+import { EuiBetaBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -47,10 +47,9 @@ export interface GraphPreviewContainerProps {
  */
 export const GraphPreviewContainer = memo(
   ({ hit, onShowGraph, showIcon, disableNavigation }: GraphPreviewContainerProps) => {
-    const renderingId = useGeneratedHtmlId();
     const { eventIds, timestamp, isAlert, shouldShowGraph } = useGraphPreview(hit);
 
-    const iconType = useMemo(() => (showIcon ? 'arrowStart' : undefined), [showIcon]);
+    const iconType = showIcon ? 'arrowStart' : undefined;
     const isNavigationEnabled = !disableNavigation;
 
     const { isLoading, isError, data } = useFetchGraphData({
@@ -71,7 +70,7 @@ export const GraphPreviewContainer = memo(
       if (shouldShowGraph) {
         uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, GRAPH_PREVIEW);
       }
-    }, [shouldShowGraph, renderingId]);
+    }, [shouldShowGraph]);
 
     const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');
 

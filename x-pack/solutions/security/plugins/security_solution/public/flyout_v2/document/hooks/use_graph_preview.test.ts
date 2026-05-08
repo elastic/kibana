@@ -17,16 +17,13 @@ jest.mock('../../../flyout/shared/hooks/use_should_show_graph');
 const mockEuidApi = {
   euid: {
     getEuidSourceFields: (entityType: string) => {
-      if (entityType === 'user') {
-        return { identitySourceFields: ['user.name'] };
-      }
-      if (entityType === 'host') {
-        return { identitySourceFields: ['host.name'] };
-      }
-      if (entityType === 'service') {
-        return { identitySourceFields: ['service.name'] };
-      }
-      return { identitySourceFields: [] };
+      const fieldsMap: Record<string, string[]> = {
+        user: ['user.name'],
+        host: ['host.name'],
+        service: ['service.name'],
+        generic: ['entity.id'],
+      };
+      return { identitySourceFields: fieldsMap[entityType] ?? [] };
     },
   },
 };
@@ -38,6 +35,15 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
     flattened,
     isAnchor: false,
   } as DataTableRecord);
+
+const baseAlertFlattened = {
+  '@timestamp': '2025-01-01T00:00:00.000Z',
+  'kibana.alert.original_event.id': 'original-event-id',
+  'event.action': ['action'],
+  'event.kind': 'signal',
+  'user.name': 'alice',
+  'user.target.name': 'bob',
+};
 
 describe('useGraphPreview', () => {
   beforeEach(() => {
@@ -59,14 +65,9 @@ describe('useGraphPreview', () => {
 
   it('derives all graph parameters from a populated alert document', () => {
     const hit = createMockHit({
-      '@timestamp': '2025-01-01T00:00:00.000Z',
-      'kibana.alert.original_event.id': 'original-event-id',
+      ...baseAlertFlattened,
       'event.id': 'event-id',
-      'event.action': ['process-started'],
-      'event.kind': 'signal',
-      'user.name': 'alice',
       'host.name': 'host-1',
-      'user.target.name': 'bob',
       'host.target.name': 'host-2',
     });
 
@@ -76,7 +77,7 @@ describe('useGraphPreview', () => {
     expect(result.current.eventIds).toEqual(['original-event-id']);
     expect(result.current.actorIds).toEqual(expect.arrayContaining(['alice', 'host-1']));
     expect(result.current.targetIds).toEqual(expect.arrayContaining(['bob', 'host-2']));
-    expect(result.current.action).toEqual(['process-started']);
+    expect(result.current.action).toEqual(['action']);
     expect(result.current.isAlert).toBe(true);
     expect(result.current.hasGraphData).toBe(true);
     expect(result.current.shouldShowGraph).toBe(true);
@@ -98,15 +99,97 @@ describe('useGraphPreview', () => {
     expect(result.current.isAlert).toBe(false);
   });
 
+  it('returns eventIds=[] when neither original_event.id nor event.id exist', () => {
+    const { 'kibana.alert.original_event.id': _omit, ...rest } = baseAlertFlattened;
+    const { result } = renderHook(() => useGraphPreview(createMockHit(rest)));
+
+    expect(result.current.eventIds).toEqual([]);
+    expect(result.current.hasGraphData).toBe(false);
+  });
+
+  it('returns hasGraphData=false when timestamp is missing', () => {
+    const { '@timestamp': _omit, ...rest } = baseAlertFlattened;
+    const { result } = renderHook(() => useGraphPreview(createMockHit(rest)));
+
+    expect(result.current.timestamp).toBeNull();
+    expect(result.current.hasGraphData).toBe(false);
+  });
+
+  it('returns action=undefined and hasGraphData=false when event.action is missing', () => {
+    const { 'event.action': _omit, ...rest } = baseAlertFlattened;
+    const { result } = renderHook(() => useGraphPreview(createMockHit(rest)));
+
+    expect(result.current.action).toBeUndefined();
+    expect(result.current.hasGraphData).toBe(false);
+  });
+
+  it('returns hasGraphData=false when actor is missing (target exists)', () => {
+    const { 'user.name': _omit, ...rest } = baseAlertFlattened;
+    const { result } = renderHook(() => useGraphPreview(createMockHit(rest)));
+
+    expect(result.current.actorIds).toEqual([]);
+    expect(result.current.targetIds).toEqual(['bob']);
+    expect(result.current.hasGraphData).toBe(false);
+  });
+
+  it('returns hasGraphData=false when target is missing (actor exists)', () => {
+    const { 'user.target.name': _omit, ...rest } = baseAlertFlattened;
+    const { result } = renderHook(() => useGraphPreview(createMockHit(rest)));
+
+    expect(result.current.actorIds).toEqual(['alice']);
+    expect(result.current.targetIds).toEqual([]);
+    expect(result.current.hasGraphData).toBe(false);
+  });
+
+  it('aggregates actor/target across multiple EUID source fields', () => {
+    const hit = createMockHit({
+      '@timestamp': '2025-01-01T00:00:00.000Z',
+      'kibana.alert.original_event.id': 'original-event-id',
+      'event.action': ['action'],
+      'event.kind': 'signal',
+      'user.name': 'alice',
+      'host.name': 'host-1',
+      'user.target.name': 'bob',
+      'host.target.name': 'host-2',
+    });
+
+    const { result } = renderHook(() => useGraphPreview(hit));
+
+    expect(result.current.actorIds).toEqual(expect.arrayContaining(['alice', 'host-1']));
+    expect(result.current.actorIds).toHaveLength(2);
+    expect(result.current.targetIds).toEqual(expect.arrayContaining(['bob', 'host-2']));
+    expect(result.current.targetIds).toHaveLength(2);
+    expect(result.current.hasGraphData).toBe(true);
+  });
+
+  it.each([
+    ['user', 'user.name', 'user.target.name'],
+    ['host', 'host.name', 'host.target.name'],
+    ['service', 'service.name', 'service.target.name'],
+    ['generic', 'entity.id', 'entity.target.id'],
+  ])('resolves %s EUID source fields for actor and target', (_label, actorField, targetField) => {
+    const hit = createMockHit({
+      '@timestamp': '2025-01-01T00:00:00.000Z',
+      'kibana.alert.original_event.id': 'original-event-id',
+      'event.action': ['action'],
+      'event.kind': 'signal',
+      [actorField]: 'actor-id',
+      [targetField]: 'target-id',
+    });
+
+    const { result } = renderHook(() => useGraphPreview(hit));
+
+    expect(result.current.actorIds).toEqual(['actor-id']);
+    expect(result.current.targetIds).toEqual(['target-id']);
+    expect(result.current.hasGraphData).toBe(true);
+  });
+
   it('returns shouldShowGraph=false when license/entity store gate fails', () => {
     jest.mocked(useShouldShowGraph).mockReturnValue(false);
 
     const hit = createMockHit({
-      '@timestamp': '2025-01-01T00:00:00.000Z',
+      ...baseAlertFlattened,
       'event.id': 'event-id',
-      'event.action': ['action'],
-      'user.name': 'alice',
-      'user.target.name': 'bob',
     });
 
     const { result } = renderHook(() => useGraphPreview(hit));

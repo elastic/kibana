@@ -132,7 +132,7 @@ export const useGraphPreview = (hit: DataTableRecord): UseGraphPreviewResult => 
 
   const shouldShowGraph = useShouldShowGraph() && hasGraphData;
 
-  const isAlert = (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal;
+  const isAlert = getFieldValue(hit, EVENT_KIND) === EventKind.signal;
 
   return {
     timestamp,
