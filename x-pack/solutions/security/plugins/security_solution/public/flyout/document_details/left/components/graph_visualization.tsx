@@ -11,7 +11,7 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { useGraphPreview } from '../../../../flyout_v2/document/hooks/use_graph_preview';
 import { GraphVisualization as SharedGraphVisualization } from '../../../../flyout_v2/graph/components/graph_visualization';
 
-export { GRAPH_ID } from '../../../../flyout_v2/graph/components/graph_visualization';
+export { GRAPH_ID } from '../../../../flyout_v2/graph/test_ids';
 
 /**
  * Graph visualization view displayed in the document details expandable flyout left section under the Visualize tab.

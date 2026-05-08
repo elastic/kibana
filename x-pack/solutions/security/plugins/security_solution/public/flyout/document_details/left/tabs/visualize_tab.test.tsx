@@ -11,7 +11,7 @@ import { useGraphPreview } from '../../../../flyout_v2/document/hooks/use_graph_
 import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { GRAPH_ID } from '../components/graph_visualization';
+import { GRAPH_ID } from '../../../../flyout_v2/graph/test_ids';
 import { VisualizeTab } from './visualize_tab';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { VISUALIZE_TAB_GRAPH_VISUALIZATION_BUTTON_TEST_ID } from './test_ids';
@@ -25,8 +25,10 @@ jest.mock('../../../../flyout_v2/document/hooks/use_graph_preview');
 jest.mock('../../../../common/hooks/use_upselling');
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../shared/context');
-jest.mock('../components/graph_visualization', () => ({
+jest.mock('../../../../flyout_v2/graph/test_ids', () => ({
   GRAPH_ID: 'graph-id',
+}));
+jest.mock('../components/graph_visualization', () => ({
   GraphVisualization: () => (
     <div data-test-subj={mockGraphVisualizationTestId}>{'Graph Visualization'}</div>
   ),

@@ -72,6 +72,8 @@ export const Graph = memo(({ hit, renderCellActions, onAlertUpdated }: GraphProp
             eventIds={eventIds}
             timestamp={timestamp}
             isAlert={isAlert}
+            renderCellActions={renderCellActions}
+            onAlertUpdated={onAlertUpdated}
           />
         </div>
       </EuiFlyoutBody>

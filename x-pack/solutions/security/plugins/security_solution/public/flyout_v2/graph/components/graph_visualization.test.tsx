@@ -8,6 +8,10 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, waitFor } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { GraphInvestigation } from '@kbn/cloud-security-posture-graph';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { GraphVisualization } from './graph_visualization';
@@ -62,12 +66,17 @@ const mockCapabilities = {
   },
 };
 
+const mockOpenSystemFlyout = jest.fn();
+
 jest.mock('../../../common/lib/kibana', () => ({
   useToasts: () => mockToasts,
   useKibana: () => ({
     services: {
       application: {
         capabilities: mockCapabilities,
+      },
+      overlays: {
+        openSystemFlyout: mockOpenSystemFlyout,
       },
     },
   }),
@@ -78,6 +87,22 @@ jest.mock('../../../common/lib/kibana', () => ({
       },
     }),
   },
+}));
+
+jest.mock('../../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: () => true,
+}));
+
+jest.mock('../../shared/components/flyout_provider', () => ({
+  flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+jest.mock('../../document/document_flyout_wrapper', () => ({
+  DocumentFlyoutWrapper: () => <div data-test-subj="documentFlyoutWrapperMock" />,
+}));
+
+jest.mock('../../network_details', () => ({
+  Network: () => <div data-test-subj="networkMock" />,
 }));
 
 jest.mock('../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
@@ -120,6 +145,18 @@ const ENTITY_PROPS = {
   entityId: 'entity-1',
 };
 
+const store = createStore(() => ({}));
+const history = createMemoryHistory();
+
+const renderGraphVisualization = (props: React.ComponentProps<typeof GraphVisualization>) =>
+  render(
+    <Provider store={store}>
+      <Router history={history}>
+        <GraphVisualization {...props} />
+      </Router>
+    </Provider>
+  );
+
 describe('GraphVisualization', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -135,7 +172,7 @@ describe('GraphVisualization', () => {
 
   describe('event mode', () => {
     it('renders the wrapper and lazy-loads GraphInvestigation', async () => {
-      const { getByTestId } = render(<GraphVisualization {...EVENT_PROPS} />);
+      const { getByTestId } = renderGraphVisualization(EVENT_PROPS);
       expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
 
       await waitFor(() => {
@@ -144,7 +181,7 @@ describe('GraphVisualization', () => {
     });
 
     it('passes originEventIds derived from eventIds and isAlert', async () => {
-      render(<GraphVisualization {...EVENT_PROPS} />);
+      renderGraphVisualization(EVENT_PROPS);
 
       await waitFor(() => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
@@ -160,7 +197,7 @@ describe('GraphVisualization', () => {
 
     it('passes a timestamp-anchored timeRange', async () => {
       const timestamp = '2024-01-15T10:00:00.000Z';
-      render(<GraphVisualization {...EVENT_PROPS} timestamp={timestamp} />);
+      renderGraphVisualization({ ...EVENT_PROPS, timestamp });
 
       await waitFor(() => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
@@ -174,7 +211,7 @@ describe('GraphVisualization', () => {
     });
 
     it('passes onOpenEventPreview callback', async () => {
-      render(<GraphVisualization {...EVENT_PROPS} />);
+      renderGraphVisualization(EVENT_PROPS);
 
       await waitFor(() => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
@@ -188,7 +225,7 @@ describe('GraphVisualization', () => {
 
   describe('entity mode', () => {
     it('renders the wrapper and lazy-loads GraphInvestigation', async () => {
-      const { getByTestId } = render(<GraphVisualization {...ENTITY_PROPS} />);
+      const { getByTestId } = renderGraphVisualization(ENTITY_PROPS);
       expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
 
       await waitFor(() => {
@@ -197,7 +234,7 @@ describe('GraphVisualization', () => {
     });
 
     it('passes entityIds with isOrigin: true', async () => {
-      render(<GraphVisualization {...ENTITY_PROPS} />);
+      renderGraphVisualization(ENTITY_PROPS);
 
       await waitFor(() => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
@@ -209,7 +246,7 @@ describe('GraphVisualization', () => {
     });
 
     it('passes a rolling 30-day timeRange', async () => {
-      render(<GraphVisualization {...ENTITY_PROPS} />);
+      renderGraphVisualization(ENTITY_PROPS);
 
       await waitFor(() => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
@@ -223,7 +260,7 @@ describe('GraphVisualization', () => {
   describe('showInvestigateInTimeline', () => {
     it('passes showInvestigateInTimeline as true when user has timeline read access', async () => {
       mockCapabilities.securitySolutionTimeline.read = true;
-      render(<GraphVisualization {...EVENT_PROPS} />);
+      renderGraphVisualization(EVENT_PROPS);
 
       await waitFor(() => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
@@ -234,7 +271,7 @@ describe('GraphVisualization', () => {
 
     it('passes showInvestigateInTimeline as false when user has no timeline read access', async () => {
       mockCapabilities.securitySolutionTimeline.read = false;
-      render(<GraphVisualization {...EVENT_PROPS} />);
+      renderGraphVisualization(EVENT_PROPS);
 
       await waitFor(() => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
@@ -248,7 +285,7 @@ describe('GraphVisualization', () => {
 
   describe('onInvestigateInTimeline', () => {
     it('shows a danger toast when time range cannot be parsed', async () => {
-      render(<GraphVisualization {...EVENT_PROPS} />);
+      renderGraphVisualization(EVENT_PROPS);
 
       await waitFor(() => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
@@ -262,7 +299,7 @@ describe('GraphVisualization', () => {
     });
 
     it('calls investigateInTimeline with a valid time range', async () => {
-      render(<GraphVisualization {...EVENT_PROPS} />);
+      renderGraphVisualization(EVENT_PROPS);
 
       await waitFor(() => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);

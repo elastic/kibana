@@ -8,6 +8,10 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, waitFor } from '@testing-library/react';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { GraphInvestigation } from '@kbn/cloud-security-posture-graph';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { GraphVisualization } from './graph_visualization';
@@ -70,6 +74,9 @@ jest.mock('../../../../common/lib/kibana', () => ({
           securitySolutionTimeline: { read: true, crud: true },
         },
       },
+      overlays: {
+        openSystemFlyout: jest.fn(),
+      },
     },
   }),
   KibanaServices: {
@@ -79,6 +86,22 @@ jest.mock('../../../../common/lib/kibana', () => ({
       },
     }),
   },
+}));
+
+jest.mock('../../../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: () => true,
+}));
+
+jest.mock('../../../../flyout_v2/shared/components/flyout_provider', () => ({
+  flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+jest.mock('../../../../flyout_v2/document/document_flyout_wrapper', () => ({
+  DocumentFlyoutWrapper: () => <div />,
+}));
+
+jest.mock('../../../../flyout_v2/network_details', () => ({
+  Network: () => <div />,
 }));
 
 jest.mock('../../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
@@ -125,6 +148,18 @@ jest.mock('../../../../flyout_v2/document/hooks/use_graph_preview', () => ({
   }),
 }));
 
+const store = createStore(() => ({}));
+const history = createMemoryHistory();
+
+const renderGraphVisualization = () =>
+  render(
+    <Provider store={store}>
+      <Router history={history}>
+        <GraphVisualization />
+      </Router>
+    </Provider>
+  );
+
 describe('GraphVisualization (document_details wrapper)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -139,7 +174,7 @@ describe('GraphVisualization (document_details wrapper)', () => {
   });
 
   it('renders the graph visualization wrapper', async () => {
-    const { getByTestId } = render(<GraphVisualization />);
+    const { getByTestId } = renderGraphVisualization();
     expect(getByTestId(GRAPH_VISUALIZATION_TEST_ID)).toBeInTheDocument();
 
     await waitFor(() => {
@@ -148,7 +183,7 @@ describe('GraphVisualization (document_details wrapper)', () => {
   });
 
   it('passes event context from useDocumentDetailsContext and useGraphPreview as originEventIds', async () => {
-    render(<GraphVisualization />);
+    renderGraphVisualization();
 
     await waitFor(() => {
       expect(GraphInvestigation).toHaveBeenCalledTimes(1);

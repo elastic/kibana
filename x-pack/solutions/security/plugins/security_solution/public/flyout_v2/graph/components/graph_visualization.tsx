@@ -7,17 +7,20 @@
 
 import React, { memo, useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
+import { noop } from 'lodash';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
+import { useHistory } from 'react-router-dom';
+import { useStore } from 'react-redux';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import {
   getNodeDocumentMode,
   getSingleDocumentData,
   GraphGroupedNodePreviewPanelKey,
   GROUP_PREVIEW_BANNER,
-  NETWORK_PREVIEW_BANNER,
   type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
@@ -31,12 +34,8 @@ import { GRAPH_VISUALIZATION_TEST_ID } from '../test_ids';
 import { useInvestigateInTimeline } from '../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { DocumentDetailsPreviewPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
-import {
-  ALERT_PREVIEW_BANNER,
-  EVENT_PREVIEW_BANNER,
-  GENERIC_ENTITY_PREVIEW_BANNER,
-} from '../../../flyout/document_details/preview/constants';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
+import { GENERIC_ENTITY_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
 import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { extractTimelineCapabilities } from '../../../common/utils/timeline_capabilities';
 import {
@@ -44,14 +43,24 @@ import {
   EntityPanelKeyByType,
 } from '../../../flyout/entity_details/shared/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy';
+import { flyoutProviders } from '../../shared/components/flyout_provider';
+import { DocumentFlyoutWrapper } from '../../document/document_flyout_wrapper';
+import { Network } from '../../network_details';
+import {
+  defaultToolsFlyoutProperties,
+  useDefaultDocumentFlyoutProperties,
+} from '../../shared/hooks/use_default_flyout_properties';
+import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
+import {
+  noopCellActionRenderer,
+  type CellActionRenderer,
+} from '../../shared/components/cell_actions';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
     default: module.GraphInvestigation,
   }))
 );
-
-export const GRAPH_ID = 'graph-visualization' as const;
 
 const MAX_DOCUMENTS_TO_LOAD = 50;
 
@@ -77,7 +86,21 @@ interface EntityGraphVisualizationProps {
   entityId: string;
 }
 
-export type GraphVisualizationProps = EventGraphVisualizationProps | EntityGraphVisualizationProps;
+export type GraphVisualizationProps = (
+  | EventGraphVisualizationProps
+  | EntityGraphVisualizationProps
+) & {
+  height?: number | string;
+  /**
+   * Cell actions renderer threaded through to the document preview opened from a graph node.
+   * Defaults to a no-op renderer when the component is hosted outside Flyout v2 (e.g. legacy left panel).
+   */
+  renderCellActions?: CellActionRenderer;
+  /**
+   * Callback invoked after alert mutations inside the document preview opened from a graph node.
+   */
+  onAlertUpdated?: () => void;
+};
 
 /**
  * Full-screen graph investigation view for use in left-panel flyout tabs.
@@ -86,17 +109,27 @@ export type GraphVisualizationProps = EventGraphVisualizationProps | EntityGraph
  * - 'entity': driven by an Entity Store entity ID (used in entity detail panels).
  */
 export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props) => {
-  const { scopeId } = props;
+  const { scopeId, renderCellActions = noopCellActionRenderer, onAlertUpdated = noop } = props;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const height = useFlyoutBodyAvailableHeight(wrapperRef);
+  const availableHeight = useFlyoutBodyAvailableHeight(wrapperRef);
+  const height = props.height ?? availableHeight;
+  const cssHeight = typeof height === 'number' ? `${height}px` : height;
 
+  const { services } = useKibana();
   const {
     application: { capabilities },
-  } = useKibana().services;
+    overlays,
+  } = services;
   const { read: hasTimelineAccess } = extractTimelineCapabilities(capabilities);
 
   const toasts = useToasts();
+  const store = useStore();
+  const history = useHistory();
+  const isInSecurityApp = useIsInSecurityApp();
+  const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+
   const oldDataView = useGetScopedSourcererDataView({
     sourcererScope: PageScope.default,
   });
@@ -107,22 +140,28 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
   const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
 
+  // TODO: entity and grouped-node previews are still routed through the legacy expandable
+  // flyout. They render in the V1 left-panel host but no-op in Flyout v2 tools flyouts until
+  // their panels are migrated to flyout_v2.
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
   const onOpenNetworkPreview = useCallback(
-    (ip: string, previewScopeId: string) => {
-      openPreviewPanel({
-        id: 'network-preview',
-        params: {
-          ip,
-          scopeId: previewScopeId,
-          flowTarget: FlowTargetSourceDest.source,
-          banner: NETWORK_PREVIEW_BANNER,
-          isPreviewMode: true,
-        },
-      });
+    (ip: string) => {
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: <Network ip={ip} flowTarget={FlowTargetSourceDest.source} />,
+        }),
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: 'inherit',
+        }
+      );
     },
-    [openPreviewPanel]
+    [overlays, services, store, history, historyKey]
   );
 
   const onOpenEventPreview = useCallback(
@@ -176,33 +215,31 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
         });
       };
 
-      const showEventOrAlertPreview = (
-        item: { id: string },
-        banner: {
-          title: string;
-          backgroundColor: string;
-          textColor: string;
-        },
-        index?: string
-      ) => {
-        openPreviewPanel({
-          id: DocumentDetailsPreviewPanelKey,
-          params: {
-            id: item.id,
-            indexName: index,
-            scopeId,
-            banner,
-            isPreviewMode: true,
-          },
-        });
+      const showEventOrAlertPreview = (item: { id: string }, index?: string) => {
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: (
+              <DocumentFlyoutWrapper
+                documentId={item.id}
+                indexName={index}
+                renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
+              />
+            ),
+          }),
+          {
+            ...defaultDocumentFlyoutProperties,
+            historyKey,
+            session: 'inherit',
+          }
+        );
       };
 
       if ((docMode === 'single-event' || docMode === 'single-alert') && singleDocumentData) {
-        showEventOrAlertPreview(
-          singleDocumentData,
-          docMode === 'single-alert' ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
-          singleDocumentData.index
-        );
+        showEventOrAlertPreview(singleDocumentData, singleDocumentData.index);
       } else if (docMode === 'single-entity' && singleDocumentData && isEntityNodeEnriched(node)) {
         showEntityPreview(singleDocumentData);
       } else if (docMode === 'grouped-entities' && documentsData.length > 0) {
@@ -250,7 +287,20 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
         });
       }
     },
-    [toasts, openPreviewPanel, scopeId, dataViewIndexPattern]
+    [
+      toasts,
+      openPreviewPanel,
+      overlays,
+      services,
+      store,
+      history,
+      historyKey,
+      defaultDocumentFlyoutProperties,
+      renderCellActions,
+      onAlertUpdated,
+      scopeId,
+      dataViewIndexPattern,
+    ]
   );
 
   const { investigateInTimeline } = useInvestigateInTimeline();
@@ -302,7 +352,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
       ref={wrapperRef}
       data-test-subj={GRAPH_VISUALIZATION_TEST_ID}
       css={css`
-        height: ${height}px;
+        height: ${cssHeight};
         width: 100%;
       `}
     >
