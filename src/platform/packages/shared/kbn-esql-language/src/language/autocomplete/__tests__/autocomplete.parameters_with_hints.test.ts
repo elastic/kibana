@@ -20,7 +20,7 @@ const allUniqueParameterHints = uniqBy(
   getAllFunctions()
     .flatMap((fn) => fn.signatures)
     .flatMap((signature) => signature.params)
-    .flatMap((param) => (param.hint ? [param.hint] : [])),
+    .flatMap((param) => (param.hint?.entityType ? [param.hint] : [])),
   'entityType'
 );
 
