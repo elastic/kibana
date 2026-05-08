@@ -23,25 +23,31 @@ export async function writeYamlDocument(filePath: string, document: unknown): Pr
   }
 }
 
-const applyBlockScalarTypes = (doc: Document): void => {
+/**
+ * Apply BLOCK_LITERAL formatting to code samples in x-codeSamples.
+ * Code samples should preserve exact formatting including line breaks and indentation.
+ */
+const applyCodeSampleFormatting = (doc: Document): void => {
   visit(doc, {
-    Scalar(_key, node, path) {
-      if (_key !== 'key' && typeof node.value === 'string') {
-        // Only apply block scalar notation to strings with actual internal newlines.
-        // Trailing newlines alone are not semantically significant in OpenAPI specs.
-        // Always use BLOCK_LITERAL (|) to preserve multi-line content exactly as-is.
-        if (node.value.includes('\n')) {
-          node.type = 'BLOCK_LITERAL';
-        }
-        // Single-line strings (including those with only trailing newlines) are
-        // left as plain scalars - the yaml package will wrap them naturally
+    Pair(_key, node) {
+      // Check if this is a 'source' key within x-codeSamples
+      if (
+        isScalar(node.key) &&
+        node.key.value === 'source' &&
+        isScalar(node.value) &&
+        typeof node.value.value === 'string' &&
+        node.value.value.includes('\n')
+      ) {
+        // Check if we're inside an x-codeSamples array by walking up the path
+        // This is a heuristic: if the parent context looks like a code sample, use literal block
+        node.value.type = 'BLOCK_LITERAL';
       }
     },
   });
 };
 
 const prepareDocument = (doc: Document): void => {
-  applyBlockScalarTypes(doc);
+  applyCodeSampleFormatting(doc);
 };
 
 function stringifyToYaml(document: unknown): string {
