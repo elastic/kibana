@@ -12,7 +12,7 @@ import { concatMap, filter, map, type Subscription } from 'rxjs';
 import { apiPublishesBlockingError } from '@kbn/presentation-publishing';
 
 import type { DashboardApi } from '../dashboard_api/types';
-import { coreServices } from './kibana_services';
+import { coreServices, dataService } from './kibana_services';
 
 const sessions = new Map<string, DashboardUserActivitySession>();
 export const getDashboardUserActivityService = (api: DashboardApi) => {
@@ -27,13 +27,10 @@ class DashboardUserActivitySession {
   private bindedVisibilityHandler;
 
   private activitySubscription: Subscription;
-  private eventQueues: {
-    view: Array<{ start: number }>;
-    refresh: Array<{ type: 'manual' | 'auto'; start: number }>;
-  } = {
-    view: [],
-    refresh: [],
-  };
+  private currentEvent: {
+    view?: { start: number };
+    refresh?: { start: number };
+  } = { view: undefined, refresh: undefined };
 
   constructor(api: DashboardApi) {
     this.api = api;
@@ -41,14 +38,11 @@ class DashboardUserActivitySession {
       .pipe(
         map((activity) => {
           if (activity.start) {
-            /** Push into the appropriate event queue */
-            if (activity.type === 'view') {
-              this.eventQueues.view.push({ start: activity.start });
-            } else {
-              this.eventQueues.refresh.push({
-                type: activity.refreshType,
-                start: activity.start,
-              });
+            /** Only one event of each type is allowed to be in progress at a time */
+            if (activity.type === 'view' && !this.currentEvent.view) {
+              this.currentEvent.view = { start: activity.start };
+            } else if (!this.currentEvent.refresh) {
+              this.currentEvent.refresh = { start: activity.start };
             }
             return;
           }
@@ -57,20 +51,16 @@ class DashboardUserActivitySession {
         }),
         filter((activity) => activity !== undefined), // filter out activities that haven't ended
         concatMap(async (activity) => {
-          const event = this.eventQueues[activity.type].shift();
+          const event = this.currentEvent[activity.type];
           if (!event) {
             return;
           }
           try {
+            await this.logUserActivity(activity.type, event.start, activity.end!);
             if (activity.type === 'view') {
-              await this.logUserActivity(activity.type, event.start, activity.end!);
+              delete this.currentEvent.view;
             } else {
-              const refreshStart = event as (typeof this.eventQueues)['refresh'][number];
-              await this.logUserActivity(
-                `${activity.type}_${refreshStart.type}`,
-                refreshStart.start,
-                activity.end!
-              );
+              delete this.currentEvent.refresh;
             }
           } catch (e) {
             // if an error is thrown when logging, do nothing; no need to surface this
@@ -90,14 +80,12 @@ class DashboardUserActivitySession {
     document.removeEventListener('visibilitychange', this.bindedVisibilityHandler);
   }
 
-  private async logUserActivity(
-    type: 'view' | 'refresh_manual' | 'refresh_auto',
-    start: number,
-    end: number
-  ) {
+  private async logUserActivity(type: 'view' | 'refresh', start: number, end: number) {
     const state = this.api.getSerializedState();
+    const refreshInterval = dataService.query.timefilter.timefilter.getRefreshInterval();
     const meta = {
       time_range: state.attributes.time_range,
+      ...(!refreshInterval.pause && { refresh_interval: refreshInterval.value }),
       query: state.attributes.query,
       filters: state.attributes.filters,
       panel_count: state.attributes.panels.length,

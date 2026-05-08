@@ -408,11 +408,6 @@ export function InternalDashboardTopNav({
           onQuerySubmit={(_payload, isUpdate) => {
             if (isUpdate === false) {
               dashboardApi.forceRefresh();
-              dashboardApi.userActivity$.next({
-                type: 'refresh',
-                start: Date.now(),
-                refreshType: 'manual',
-              });
             }
             if (hasUnpublishedFilters) dashboardApi.publishFilters();
             if (hasUnpublishedTimeslice) dashboardApi.publishTimeslice();

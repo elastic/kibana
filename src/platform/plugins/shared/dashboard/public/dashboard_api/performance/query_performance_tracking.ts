@@ -101,6 +101,9 @@ export function startQueryPerformanceTracking(
 
       if (queryHasStarted) {
         performanceState.lastLoadStartTime = now;
+        if (loadType === 'dashboardSubsequentLoad') {
+          dashboard.userActivity$.next({ type: 'refresh', start: Date.now() });
+        }
         return;
       }
 

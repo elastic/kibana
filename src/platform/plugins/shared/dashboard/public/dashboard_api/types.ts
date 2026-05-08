@@ -235,15 +235,10 @@ export type DashboardApi = CanExpandPanels &
     addIncomingEmbeddables: (embeddables?: EmbeddablePackageState[]) => void;
   };
 
-type ActivityTypes = 'view' | 'refresh';
-export type UserActivity<ActivityType extends ActivityTypes = ActivityTypes> =
-  ActivityType extends 'view'
-    ?
-        | { type: ActivityType; start: number; end?: undefined }
-        | { type: ActivityType; start?: undefined; end: number }
-    :
-        | { type: ActivityType; start: number; end?: undefined; refreshType: 'manual' | 'auto' }
-        | { type: ActivityType; start?: undefined; end: number };
+type ActivityType = 'view' | 'refresh';
+export type UserActivity =
+  | { type: ActivityType; start: number; end?: undefined }
+  | { type: ActivityType; start?: undefined; end: number };
 
 export interface DashboardInternalApi {
   gridLayout$: BehaviorSubject<GridLayoutData>;

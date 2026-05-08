@@ -230,11 +230,6 @@ export function initializeUnifiedSearchManager(
         .getAutoRefreshFetch$()
         .pipe(
           tap(() => {
-            userActivity$.next({
-              type: 'refresh',
-              start: Date.now(),
-              refreshType: 'auto',
-            });
             reload$.next();
           }),
           switchMap((done) => waitForPanelsToLoad$.pipe(finalize(done)))

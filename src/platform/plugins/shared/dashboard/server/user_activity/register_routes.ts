@@ -22,11 +22,7 @@ export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerCon
       path: '/internal/dashboard/user_activity/{type}/{id}',
       validate: {
         params: schema.object({
-          type: schema.oneOf([
-            schema.literal('view'),
-            schema.literal('refresh_manual'),
-            schema.literal('refresh_auto'),
-          ]),
+          type: schema.oneOf([schema.literal('view'), schema.literal('refresh')]),
           id: schema.string(),
         }),
         body: schema.object({
@@ -37,6 +33,7 @@ export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerCon
           meta: schema.maybe(
             schema.object({
               time_range: schema.maybe(timeRangeSchema),
+              refresh_interval: schema.maybe(schema.number()),
               query: schema.maybe(asCodeQuerySchema),
               filters: schema.maybe(
                 schema.arrayOf(asCodeFilterSchema, {
@@ -62,16 +59,10 @@ export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerCon
     },
     async (ctx, req, res) => {
       const user = (await ctx.core).security.authc.getCurrentUser();
-      let message;
-      if (req.params.type === 'refresh_auto') {
-        message = `Dashboard "${req.body.title}" (id: ${req.params.id}) was refreshed automatically.`;
-      } else {
-        message = `User ${user ? `"${user.username}"` : ''} ${
-          req.params.type === 'view' ? 'viewed' : 'manually refreshed'
-        } dashboard "${req.body.title}" (id: ${req.params.id}).`;
-      }
       coreServices.userActivity.trackUserAction({
-        message,
+        message: `User ${user ? `"${user.username}"` : ''} ${
+          req.params.type === 'view' ? 'viewed' : 'refreshed'
+        } dashboard "${req.body.title}" (id: ${req.params.id}).`,
         event: {
           action: req.params.type === 'view' ? 'dashboard_view' : 'dashboard_refresh',
           type: 'access',
