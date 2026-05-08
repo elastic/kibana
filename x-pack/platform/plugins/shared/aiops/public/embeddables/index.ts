@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
 import type { Reference } from '@kbn/content-management-utils';
-import type { AiopsPluginStart, AiopsPluginStartDeps } from '../types';
+import type { AiopsCoreSetup } from '../types';
 
 export const registerEmbeddables = (
   embeddable: EmbeddableSetup,
-  core: CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>
+  getStartServices: AiopsCoreSetup['getStartServices']
 ) => {
   embeddable.registerEmbeddablePublicDefinition(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, async () => {
     const { getChangePointChartEmbeddableFactory } = await import('./change_point_chart');
-    return getChangePointChartEmbeddableFactory(core.getStartServices);
+    return getChangePointChartEmbeddableFactory(getStartServices);
   });
   embeddable.registerLegacyURLTransform(EMBEDDABLE_CHANGE_POINT_CHART_TYPE, async () => {
     const { transformOut } = await import('./change_point_chart');
@@ -27,7 +26,7 @@ export const registerEmbeddables = (
   });
   embeddable.registerEmbeddablePublicDefinition(EMBEDDABLE_PATTERN_ANALYSIS_TYPE, async () => {
     const { getPatternAnalysisEmbeddableFactory } = await import('./pattern_analysis');
-    return getPatternAnalysisEmbeddableFactory(core.getStartServices);
+    return getPatternAnalysisEmbeddableFactory(getStartServices);
   });
   embeddable.registerLegacyURLTransform(EMBEDDABLE_PATTERN_ANALYSIS_TYPE, async () => {
     const { transformOut } = await import('./pattern_analysis');
@@ -35,7 +34,7 @@ export const registerEmbeddables = (
   });
   embeddable.registerEmbeddablePublicDefinition(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, async () => {
     const { getLogRateAnalysisEmbeddableFactory } = await import('./log_rate_analysis');
-    return getLogRateAnalysisEmbeddableFactory(core.getStartServices);
+    return getLogRateAnalysisEmbeddableFactory(getStartServices);
   });
   embeddable.registerLegacyURLTransform(EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE, async () => {
     const { transformOut } = await import('./log_rate_analysis');

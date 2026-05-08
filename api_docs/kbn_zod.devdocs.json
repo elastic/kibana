@@ -16501,6 +16501,142 @@
                 "path": "x-pack/platform/plugins/shared/osquery/common/api/unified_history/get_unified_history.gen.ts"
               },
               {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/attachment/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/attachment/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/attachment/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/attachment/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/attachment/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/attachment/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/attachment/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/connector/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/configure/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/user_action/create_case/v1.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/common/types/domain_zod/user_action/create_case/v1.ts"
+              },
+              {
                 "plugin": "@kbn/securitysolution-exceptions-common",
                 "path": "x-pack/solutions/security/packages/kbn-securitysolution-exceptions-common/api/create_exception_list_item/create_exception_list_item.gen.ts"
               },
@@ -19959,6 +20095,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/rule_monitoring/model/execution_event.gen.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/pci_compliance_schemas.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/pci_compliance_schemas.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -32041,6 +32185,46 @@
           {
             "plugin": "@kbn/connector-schemas",
             "path": "src/platform/packages/shared/kbn-connector-schemas/jira-service-management/schemas/v1.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/common/schema_zod/index.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/common/schema_zod/index.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/common/schema_zod/index.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/common/schema_zod/index.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/common/schema_zod/index.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/common/schema_zod/index.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/common/schema_zod/index.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/common/schema_zod/index.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/common/schema_zod/index.ts"
+          },
+          {
+            "plugin": "cases",
+            "path": "x-pack/platform/plugins/shared/cases/common/schema_zod/index.ts"
           },
           {
             "plugin": "@kbn/zod-helpers",

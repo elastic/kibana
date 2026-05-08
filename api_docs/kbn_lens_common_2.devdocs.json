@@ -322,7 +322,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          "[] | undefined>; setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; setDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; saveToLibrary: (title: string) => Promise<string>; getSerializedStateByReference: (newId: string) => ",
+          "[] | undefined>; setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; setDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; hasLibraryItemWithTitle: (title: string) => Promise<boolean>; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; saveToLibrary: (title: string) => Promise<string>; getSerializedStateByReference: (newId: string) => ",
           {
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",
@@ -1191,7 +1191,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          "[] | undefined>; setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; setDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; saveToLibrary: (title: string) => Promise<string>; getSerializedStateByReference: (newId: string) => ",
+          "[] | undefined>; setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; setDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; hasLibraryItemWithTitle: (title: string) => Promise<boolean>; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; saveToLibrary: (title: string) => Promise<string>; getSerializedStateByReference: (newId: string) => ",
           {
             "pluginId": "@kbn/lens-common-2",
             "scope": "common",

@@ -45,6 +45,31 @@ describe('GoogleDriveConnector', () => {
         },
       });
     });
+
+    it('supports ears auth type with correct Google defaults and overrides', () => {
+      const types = GoogleDriveConnector.auth?.types as Array<
+        | string
+        | {
+            type: string;
+            defaults?: Record<string, unknown>;
+            overrides?: Record<string, unknown>;
+          }
+      >;
+      expect(types.map((t) => (typeof t === 'string' ? t : t.type))).toContain('ears');
+
+      const earsType = types.find((t) => typeof t === 'object' && t.type === 'ears');
+      expect(earsType).toMatchObject({
+        type: 'ears',
+        defaults: {
+          provider: 'google',
+          scope:
+            'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.metadata.readonly',
+        },
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+      });
+    });
   });
 
   describe('searchFiles action', () => {
