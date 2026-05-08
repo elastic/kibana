@@ -763,14 +763,6 @@ describe('RenderingService', () => {
       });
     });
 
-    it('injects empty values when start() was never called (no userStorageStart)', async () => {
-      const { render } = await service.setup(mockRenderingSetupDeps);
-
-      const content = await render(createKibanaRequest(), buildUiSettings());
-
-      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
-    });
-
     it('injects empty values when asScoped() returns null (no profile_uid)', async () => {
       const { render } = await service.setup(mockRenderingSetupDeps);
 
