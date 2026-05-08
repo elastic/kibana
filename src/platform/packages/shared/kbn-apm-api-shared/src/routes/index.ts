@@ -29,6 +29,7 @@ import { fallbackToTransactionsRouteDefinitions } from './fallback_to_transactio
 import { latencyDistributionRouteDefinitions } from './latency_distribution';
 import { metricsRouteDefinitions } from './metrics';
 import { profilingRouteDefinitions } from './profiling';
+import { serviceGroupsRouteDefinitions } from './service_groups';
 import type { BuildGroupedRepository } from './types';
 
 export const routeDefinitions = {
@@ -55,6 +56,7 @@ export const routeDefinitions = {
   latencyDistribution: latencyDistributionRouteDefinitions,
   metrics: metricsRouteDefinitions,
   profiling: profilingRouteDefinitions,
+  serviceGroups: serviceGroupsRouteDefinitions,
 };
 
 export type SharedAPMRouteRepository = BuildGroupedRepository<typeof routeDefinitions>;
