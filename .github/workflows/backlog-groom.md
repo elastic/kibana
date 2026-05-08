@@ -13,19 +13,6 @@ on:
     issues: write
     pull-requests: read
   steps:
-
-    - name: Capture issue context
-      id: capture_issue_context
-      uses: actions/github-script@v9
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const issue = context.payload.issue;
-          core.setOutput('issue_number', String(issue?.number ?? ''));
-          core.setOutput('issue_title', issue?.title ?? '');
-          core.setOutput('issue_body', issue?.body ?? '');
-          core.setOutput('issue_author', issue?.user?.login ?? '');
-
     - name: Check actor trust
       id: check_actor_trust
       uses: actions/github-script@v9
@@ -56,8 +43,7 @@ on:
             return;
           }
 
-          const issueAuthor = context.payload.issue?.user?.login
-            ?? '${{ steps.capture_issue_context.outputs.issue_author }}';
+          const issueAuthor = context.payload.issue?.user?.login ?? '';
           if (!issueAuthor) {
             core.setOutput('actor_trusted', 'false');
             core.setOutput('actor_trusted_reason', 'Issue author login missing from payload.');
@@ -85,8 +71,7 @@ on:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const { owner, repo } = context.repo;
-          const issueNumber = context.payload.issue?.number
-            ?? parseInt('${{ steps.capture_issue_context.outputs.issue_number }}', 10);
+          const issueNumber = context.payload.issue.number;
           const expectedBranch = `backlog-groom/issue-${issueNumber}`;
 
           const pulls = await github.paginate(github.rest.pulls.list, {
@@ -127,10 +112,6 @@ permissions:
 jobs:
   pre-activation:
     outputs:
-      issue_number: ${{ steps.capture_issue_context.outputs.issue_number }}
-      issue_title: ${{ steps.capture_issue_context.outputs.issue_title }}
-      issue_body: ${{ steps.capture_issue_context.outputs.issue_body }}
-      issue_author: ${{ steps.capture_issue_context.outputs.issue_author }}
       actor_trusted: ${{ steps.check_actor_trust.outputs.actor_trusted }}
       actor_trusted_reason: ${{ steps.check_actor_trust.outputs.actor_trusted_reason }}
       duplicate_pr_found: ${{ steps.check_duplicate_pr.outputs.duplicate_pr_found }}
@@ -170,10 +151,9 @@ Deterministic pre-activation has confirmed this issue is eligible, the actor is 
 - **Issue body**:
 
   ```markdown
-  ${{ needs.pre_activation.outputs.issue_body }}
+  ${{ github.event.issue.body }}
   ```
 
-- **Repository**: `${{ github.repository }}`
 - **Triggered by**: `@${{ github.actor }}`
 - **Required branch**: `backlog-groom/issue-${{ github.event.issue.number }}`
 
