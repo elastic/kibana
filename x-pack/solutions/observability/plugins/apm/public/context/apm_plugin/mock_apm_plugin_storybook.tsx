@@ -87,6 +87,7 @@ const mockCore = {
     capabilities: {
       apm: {},
       ml: {},
+      slo: { read: true },
       savedObjectsManagement: {},
     },
     currentAppId$: new Observable(),
