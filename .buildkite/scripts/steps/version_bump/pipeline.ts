@@ -45,7 +45,7 @@ if (!BUMP_TYPE) {
 
       // Step 5: Reconcile labels
       pipeline.push('  - wait # before reconcile labels');
-      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/reconcile_labels.yml'));
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/reconcile_pr_labels.yml'));
     }
 
     if (BUMP_TYPE === 'minor') {
