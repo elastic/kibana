@@ -7,7 +7,7 @@
 
 import { filter, type Subscription } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { IdGenerator } from '..';
 
 interface NewAttachmentIdRegenerationSubscriptionParams {

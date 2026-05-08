@@ -19,7 +19,7 @@ import type { setupConsoleErrorsProvider as setupErrorsProviderFn } from './cons
 import type { ConsoleParsedRequestsProvider as ParsedProviderCtor } from './console_parsed_requests_provider';
 
 import { monaco } from '../../monaco_imports';
-import { ESQL_AUTOCOMPLETE_TRIGGER_CHARS } from '../esql';
+import { ESQL_AUTOCOMPLETE_TRIGGER_CHARS, ESQLLang } from '../esql';
 
 const mockWorkerSetup = jest.fn<void, []>();
 
@@ -400,8 +400,8 @@ describe('console language', () => {
     dispose();
   });
 
-  it('wires onLanguage + parsed request provider', () => {
-    ConsoleLang.onLanguage?.();
+  it('wires onLanguage + parsed request provider', async () => {
+    await ConsoleLang.onLanguage?.();
     expect(mockWorkerSetup).toHaveBeenCalledTimes(1);
     expect(mockSetupConsoleErrorsProvider).toHaveBeenCalledTimes(1);
 
@@ -410,5 +410,14 @@ describe('console language', () => {
     getParsedRequestsProvider(model);
 
     expect(mockConsoleParsedRequestsProvider).toHaveBeenCalledWith(expect.anything(), model);
+  });
+
+  it('initializes even when ES|QL language fails to load', async () => {
+    jest.spyOn(ESQLLang, 'onLanguage').mockRejectedValueOnce(new Error('ES|QL load failed'));
+
+    await expect(ConsoleLang.onLanguage?.()).resolves.toBeUndefined();
+
+    expect(mockWorkerSetup).toHaveBeenCalledTimes(1);
+    expect(mockSetupConsoleErrorsProvider).toHaveBeenCalledTimes(1);
   });
 });
