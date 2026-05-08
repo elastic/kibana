@@ -301,7 +301,7 @@ describe('FlyoutRiskSummary', () => {
           },
         },
         aliases: [],
-        group_size: 1,
+        group_size: 2,
       },
       isLoading: false,
       isFetching: false,
@@ -349,5 +349,43 @@ describe('FlyoutRiskSummary', () => {
         }),
       })
     );
+  });
+
+  it('does not render resolution risk score block for standalone entities', () => {
+    mockUseResolutionGroup.mockReturnValue({
+      data: {
+        target: {
+          entity: {
+            id: 'host:target-entity',
+          },
+        },
+        aliases: [],
+        group_size: 1,
+      },
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+    });
+    mockUseRiskScore.mockReturnValue({
+      ...(mockHostRiskScoreState as RiskScoreState<EntityType.host>),
+      data: mockHostRiskScoreState.data,
+      loading: false,
+    });
+
+    const { queryByTestId } = render(
+      <TestProviders>
+        <FlyoutRiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+          recalculatingScore={false}
+          isPreviewMode={false}
+          entityType={EntityType.host}
+          entityId="host:alias-entity"
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
   });
 });

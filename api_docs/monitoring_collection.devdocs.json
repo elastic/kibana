@@ -211,6 +211,7 @@
               "lineNumber": 23,
               "columnNumber": 23,
               "deprecated": false,
+              "docsReferencedTypeName": "Metric",
               "trackAdoption": false,
               "isRequired": true
             }

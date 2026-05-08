@@ -187,6 +187,7 @@
                 "lineNumber": 102,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Provider",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -229,6 +230,7 @@
                 "lineNumber": 109,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "EvaluationContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -289,6 +291,7 @@
                 "lineNumber": 131,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "EvaluationContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -407,6 +410,7 @@
                 "lineNumber": 147,
                 "columnNumber": 58,
                 "deprecated": false,
+                "docsReferencedTypeName": "Value",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -466,6 +470,7 @@
                 "lineNumber": 155,
                 "columnNumber": 58,
                 "deprecated": false,
+                "docsReferencedTypeName": "Value",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -588,6 +593,7 @@
                 "lineNumber": 171,
                 "columnNumber": 59,
                 "deprecated": false,
+                "docsReferencedTypeName": "Value",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -649,6 +655,7 @@
                 "lineNumber": 179,
                 "columnNumber": 59,
                 "deprecated": false,
+                "docsReferencedTypeName": "Value",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -689,7 +696,14 @@
         "tags": [],
         "label": "FeatureFlagDefinitions",
         "description": [
-          "\nList of {@link FeatureFlagDefinition}"
+          "\nList of ",
+          {
+            "pluginId": "@kbn/core-feature-flags-server",
+            "scope": "server",
+            "docId": "kibKbnCoreFeatureFlagsServerPluginApi",
+            "section": "def-server.FeatureFlagDefinition",
+            "text": "FeatureFlagDefinition"
+          }
         ],
         "signature": [
           "(",

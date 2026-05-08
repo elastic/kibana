@@ -16,7 +16,7 @@ const ELASTIC_OSQUERY_HOSTFS_TABLES = ['users', 'groups', 'processes'];
 
 run(
   async ({ flags }) => {
-    const schemaPath = path.resolve(`../../public/common/schemas/osquery/`);
+    const schemaPath = path.resolve(`../../common/schemas/osquery/`);
     const schemaFile = path.join(schemaPath, flags.schema_version as string);
     const schemaData = await require(schemaFile);
 
@@ -39,7 +39,7 @@ run(
     flags: {
       string: ['schema_version'],
       help: `
-        --schema_version The semver string for the schema file located in public/common/schemas/osquery/
+        --schema_version The semver string for the schema file located in common/schemas/osquery/
       `,
     },
   }

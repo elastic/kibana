@@ -22,9 +22,16 @@ import {
   NO_NOTES,
   NotesDetailsContent,
 } from './components/notes_details_content';
+import { NotesRemoteCallout } from './components/notes_remote_callout';
 import { NOTES_DETAILS_TEST_ID } from './test_ids';
 
 export { FETCH_NOTES_ERROR, NO_NOTES };
+export {
+  LINKED_PROJECT_EVENT_NOTES_MESSAGE,
+  LINKED_PROJECT_NOTES_MESSAGE,
+  REMOTE_CLUSTER_EVENT_NOTES_MESSAGE,
+  REMOTE_CLUSTER_NOTES_MESSAGE,
+} from './components/notes_remote_callout';
 
 const TITLE = i18n.translate('xpack.securitySolution.flyout.notes.title', {
   defaultMessage: 'Notes',
@@ -54,6 +61,7 @@ export const NotesDetails = memo(({ hit }: NotesDetailsProps) => {
 
   return (
     <>
+      <NotesRemoteCallout hit={hit} />
       <EuiFlyoutHeader
         hasBorder
         css={css`

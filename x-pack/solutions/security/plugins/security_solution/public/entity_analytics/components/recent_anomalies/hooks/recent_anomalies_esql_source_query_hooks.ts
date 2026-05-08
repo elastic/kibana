@@ -140,9 +140,10 @@ export const useRecentAnomaliesDataEsqlSource = ({
   viewBy,
   watchlistId,
   spaceId,
-}: EsqlSourceParams & { rowLabels?: string[] }) => {
+  timeRange,
+}: EsqlSourceParams & { rowLabels?: string[]; timeRange?: { from: string; to: string } }) => {
   const euidApi = useEntityStoreEuidApi();
-  const interval = useIntervalForHeatmap();
+  const interval = useIntervalForHeatmap(timeRange);
 
   if (!euidApi || !spaceId || !rowLabels) return undefined;
   const formattedLabels = rowLabels.map((each) => `"${each}"`).join(', ');

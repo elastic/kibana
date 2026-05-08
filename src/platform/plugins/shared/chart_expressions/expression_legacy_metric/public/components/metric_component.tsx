@@ -20,7 +20,7 @@ import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common'
 import { getFormatService, getPaletteService } from '../services';
 import type { VisParams, MetricOptions } from '../../common/types';
 import { MetricVisValue } from './metric_value';
-import { formatValue, shouldApplyColor } from '../utils';
+import { formatValueAsText, formatValueAsReactNode, shouldApplyColor } from '../utils';
 import { needsLightText } from '../utils/palette';
 import { withAutoScale } from './with_auto_scale';
 
@@ -76,9 +76,9 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
             value = (value - min) / (max - min);
           }
 
-          const formattedValue = formatValue(value, formatter, 'html');
+          const formattedValue = formatValueAsReactNode(value, formatter);
           if (bucketColumnId) {
-            const bucketValue = formatValue(row[bucketColumnId], bucketFormatter);
+            const bucketValue = formatValueAsText(row[bucketColumnId], bucketFormatter);
             title = `${bucketValue} - ${title}`;
           }
 

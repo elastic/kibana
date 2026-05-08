@@ -79,7 +79,8 @@ export class DataStreamClient<
   };
 
   public async create(args: ClientCreateRequest<FullDocumentType>) {
-    const { space, documents, ...restArgs } = args;
+    const { space: rawSpace, documents, ...restArgs } = args;
+    const space = rawSpace === '' ? DEFAULT_SPACE : rawSpace;
 
     // Convert documents to ES bulk format: [metadata, document] pairs
     const operations: Array<api.BulkOperationContainer | FullDocumentType> = [];
@@ -97,8 +98,8 @@ export class DataStreamClient<
       let processedId: string | undefined = _id;
       let processedDocument: FullDocumentType;
 
-      if (this.isNonDefaultSpace(space)) {
-        // Space-aware mode: prefix ID and decorate document
+      if (space !== undefined) {
+        // Space-aware mode: prefix ID and decorate document (including 'default' space)
         processedId = generateSpacePrefixedId(space, _id);
         processedDocument = decorateDocumentWithSpace(documentWithoutId as FullDocumentType, space);
       } else {
@@ -132,7 +133,8 @@ export class DataStreamClient<
     args: ClientSearchRequest<SRM>,
     transportOpts?: TransportRequestOptionsWithOutMeta
   ) {
-    const { space, query, ...restArgs } = args;
+    const { space: rawSpace, query, ...restArgs } = args;
+    const space = rawSpace === '' ? DEFAULT_SPACE : rawSpace;
 
     // Build the space-aware query
     const spaceQuery = this.buildSpaceAwareQuery(query, space);
@@ -147,8 +149,8 @@ export class DataStreamClient<
       transportOpts
     );
 
-    // Strip kibana.space_ids from all hits if space was provided
-    if (this.isNonDefaultSpace(space) && response.hits?.hits) {
+    // Strip the system-managed kibana.space_ids property from all hits
+    if (space !== undefined && response.hits?.hits) {
       return {
         ...response,
         hits: {
@@ -164,52 +166,30 @@ export class DataStreamClient<
     return response;
   }
 
-  private isNonDefaultSpace(space?: string): space is string {
-    return typeof space !== 'undefined' && space !== DEFAULT_SPACE;
+  /**
+   * Remove the system-managed `kibana` property from a document before returning to the caller.
+   */
+  private stripSpaceProperty(doc?: FullDocumentType): FullDocumentType | undefined {
+    if (typeof doc !== 'object' || doc === null) {
+      return doc;
+    }
+    const { kibana: _, ...rest } = doc as Record<string, unknown>;
+    return rest as FullDocumentType;
   }
 
   /**
    * Build a space-aware query by wrapping the original query with space filtering.
+   * All named spaces (including 'default') filter strictly by kibana.space_ids.
+   * When space is undefined, only space-agnostic documents (no kibana.space_ids) are returned.
    */
   private buildSpaceAwareQuery(
     originalQuery?: api.QueryDslQueryContainer,
     space?: string
   ): api.QueryDslQueryContainer {
-    if (this.isNonDefaultSpace(space)) {
-      // Space-aware mode: filter to only documents in this space
-      const spaceFilter = buildSpaceFilter(space);
-      if (originalQuery) {
-        return {
-          bool: {
-            must: [originalQuery],
-            filter: [spaceFilter],
-          },
-        };
-      }
-      return spaceFilter;
-    } else {
-      // Space-agnostic mode: exclude documents that have kibana.space_ids
-      const agnosticFilter = buildSpaceAgnosticFilter();
-      if (originalQuery) {
-        return {
-          bool: {
-            must: [originalQuery],
-            filter: [agnosticFilter],
-          },
-        };
-      }
-      return agnosticFilter;
+    const filter = space !== undefined ? buildSpaceFilter(space) : buildSpaceAgnosticFilter();
+    if (originalQuery) {
+      return { bool: { must: [originalQuery], filter: [filter] } };
     }
-  }
-
-  /**
-   * Remove kibana.space_ids from document before returning to caller.
-   */
-  private stripSpaceProperty(doc?: FullDocumentType): FullDocumentType | undefined {
-    if (typeof doc !== 'object') {
-      return doc;
-    }
-    const { kibana, ...rest } = doc as Record<string, unknown>;
-    return rest as FullDocumentType;
+    return filter;
   }
 }

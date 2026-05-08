@@ -1,0 +1,130 @@
+---
+# This file is used to generate "CSV settings settings" page in the product docs
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: CSV settings in Kibana
+id: reporting-csv-settings
+
+groups:
+  - group: CSV settings
+    id: reporting-csv-settings
+    note: |
+      We recommend using CSV reports to export moderate amounts of data only. The feature enables analysis of data in external tools, but it is not intended for bulk export or to backup Elasticsearch data. Report timeout and incomplete data issues are likely if you are exporting data where:
+
+      * More than 250 MB of data is being exported
+      * Data is stored on slow storage tiers
+      * Any shard needed for the search is unavailable
+      * Network latency between nodes is high
+      * Cross-cluster search is used
+      * ES|QL is used and result row count exceeds the limits of ES|QL queries
+
+      To work around the limitations, use filters to create multiple smaller reports, or extract the data you need directly with the Elasticsearch APIs.
+
+      For more information on using Elasticsearch APIs directly, see [Scroll API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-scroll), [Point in time API](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-open-point-in-time), [ES|QL](docs-content://explore-analyze/query-filter/languages/esql-rest.md) or [SQL](docs-content://explore-analyze/query-filter/languages/sql-rest-format.md#_csv) with CSV response data format. We recommend that you use an official Elastic language client: details for each programming language library that Elastic provides are in the [{{es}} Client documentation](https://www.elastic.co/guide/en/elasticsearch/client/index.html).
+
+      Reporting parameters can be adjusted to overcome some of these limiting scenarios. Results are dependent on data size, availability, and latency factors and are not guaranteed.
+
+    settings:
+
+      - setting: xpack.reporting.csv.maxConcurrentShardRequests
+        description: |
+          Sets the maximum number of concurrent shard requests that each sub-search request executes per node during Kibana CSV export. Defaults to `5`. This setting is available in 8.12.0 and later versions in {{ecloud}}.
+        datatype: int
+        default: 5
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.reporting.csv.maxSizeBytes
+        id: xpack-reporting-csv
+        description: |
+          The maximum [byte size](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#byte-units) of a CSV file before being truncated. This setting exists to prevent large exports from causing performance and storage issues. Can be specified as a number of bytes. Defaults to `250mb`.
+        datatype: string
+        default: 250mb
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.reporting.csv.scroll.size
+        description: |
+          Number of documents retrieved from {{es}} for each scroll iteration during a CSV export. The maximum value is `10000`. Defaults to `500`.
+        note: "You may need to lower this setting if the default number of documents creates a strain on network resources."
+        datatype: int
+        default: 500
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.reporting.csv.scroll.duration
+        description: |
+          Amount of [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) allowed before {{kib}} cleans the scroll context during a CSV export. Valid option is either `auto` or [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units), Defaults to `30s`.
+        note: "If search latency in {{es}} is sufficiently high, such as if you are using {{ccs}}, you may either need to increase the time setting or set this config value to `auto`. When the config value is set to `auto` the scroll context will be preserved for as long as possible, before the report task is terminated due to the limits of `xpack.reporting.queue.timeout`."
+        datatype: string
+        default: 30s
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.reporting.csv.scroll.strategy
+        description: |
+          Choose the API method used to page through data during CSV export. Valid options are `scroll` and `pit`. Defaults to `pit`.
+        note: |
+          Each method has its own unique limitations which are important to understand.
+
+          * Scroll API: Search is limited to 500 shards at the very most. In cases where data shards are unavailable or time out, the export may return partial data.
+          * PIT API: Permissions to read data aliases alone will not work: the permissions are needed on the underlying indices or datastreams. In cases where data shards are unavailable or time out, the export will be empty rather than returning partial data.
+        datatype: enum
+        default: pit
+        options:
+          - option: scroll
+          - option: pit
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.reporting.csv.checkForFormulas
+        description: |
+          Enables a check that warns you when there's a potential formula included in the output (=, -, +, and @ chars). See OWASP: [https://www.owasp.org/index.php/CSV_Injection](https://www.owasp.org/index.php/CSV_Injection). Defaults to `true`.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.reporting.csv.escapeFormulaValues
+        description: |
+          Escape formula values in cells with a `'`. See OWASP: [https://www.owasp.org/index.php/CSV_Injection](https://www.owasp.org/index.php/CSV_Injection). Defaults to `true`.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.reporting.csv.useByteOrderMarkEncoding
+        description: |
+          Adds a byte order mark (`\ufeff`) at the beginning of the CSV file. Defaults to `false`.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.reporting.csv.maxRows
+        description: |
+          The maximum number of rows in a CSV report. Reports longer than the maximum limit will be truncated. The default is 10,000. The minimum is 1.
+        datatype: int
+        default: 10000
+        applies_to:
+          stack: ga 9.3
+          ech: ga
+          self: ga

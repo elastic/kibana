@@ -20,7 +20,15 @@ import {
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { SuggestIngestPipelinePrompt } from './prompt';
-import { getPipelineDefinitionJsonSchema, type SuggestPipelineAgentSchema } from './schema';
+import {
+  getPipelineDefinitionJsonSchema,
+  type SuggestPipelineAgentSchema,
+  FULL_PIPELINE_ACTIONS,
+  POST_PARSE_PIPELINE_ACTIONS,
+  postParsePipelineDefinitionSchema,
+} from './schema';
+import { formatZodPipelineErrors } from './format_zod_pipeline_errors';
+import { buildSimulationFeedback } from './build_simulation_feedback';
 
 export interface SuggestProcessingPipelineResult {
   pipeline: StreamlangDSL | null;
@@ -85,6 +93,10 @@ export async function suggestProcessingPipeline({
   }
 
   const isOtel = isOtelStream(definition);
+  const allowedActions =
+    agentPipelineSchema === postParsePipelineDefinitionSchema
+      ? POST_PARSE_PIPELINE_ACTIONS
+      : FULL_PIPELINE_ACTIONS;
 
   // Conditionally include field examples based on stream type to reduce LLM decision space
   const fieldExamples = isOtel
@@ -112,7 +124,6 @@ export async function suggestProcessingPipeline({
       prompt: SuggestIngestPipelinePrompt,
       input,
       maxSteps: effectiveMaxSteps,
-      maxDurationMs,
       // `low` skips injecting `reason` / `complete` planning tools (only `simulate_pipeline` +
       // `commit_pipeline` from the prompt). `ReasoningPower` is `'low' | 'medium' | 'high'` only.
       power: 'low',
@@ -121,11 +132,23 @@ export async function suggestProcessingPipeline({
           // 1. Validate the pipeline schema
           const pipeline = agentPipelineSchema.safeParse(toolCall.function.arguments.pipeline);
           if (!pipeline.success) {
+            const formattedErrors = formatZodPipelineErrors(
+              pipeline.error,
+              toolCall.function.arguments.pipeline,
+              allowedActions
+            );
             return {
               response: {
                 valid: false,
-                errors: pipeline.error.issues,
+                errors: formattedErrors.map(
+                  (e) =>
+                    `Step ${e.stepIndex >= 0 ? e.stepIndex : 'pipeline'} (${e.action}): ${
+                      e.message
+                    }`
+                ),
                 metrics: undefined,
+                processors: {},
+                temporary_fields: [],
               },
             };
           }
@@ -135,62 +158,43 @@ export async function suggestProcessingPipeline({
             pipeline.data as StreamlangDSL
           );
 
-          // 3. Simulate the pipeline and collect metrics
+          // 3. Simulate the pipeline and build structured feedback
           const simulateResult = await simulatePipeline(pipelineWithIdentifiers);
-          const metrics = await getSimulationMetrics(
-            simulateResult,
+          const feedback = await buildSimulationFeedback({
+            simulationResult: simulateResult,
             fieldsMetadataClient,
             isOtel,
-            mappedFields
-          );
-
-          // Collect unique errors from simulation
-          const uniqueErrors = getUniqueDocumentErrors(simulateResult);
-
-          // 3. Validate parse rate - if below 80%, mark as invalid
-          const parseRate = metrics.parse_rate;
-          if (parseRate < 80) {
-            return {
-              response: {
-                valid: false,
-                errors: [
-                  `Parse rate is too low: ${parseRate.toFixed(
-                    2
-                  )}% (minimum required: 80%). The pipeline is not extracting fields from enough documents. Review the processors and ensure they handle the document structure correctly.`,
-                  ...uniqueErrors,
-                ],
-                metrics,
-              },
-            };
-          }
-
-          // 4. Validate processor failure rates - each processor should have < 20% failure rate
-          const processorFailures = validateProcessorFailureRates(simulateResult);
-          if (processorFailures.length > 0) {
-            return {
-              response: {
-                valid: false,
-                errors: [...processorFailures, ...uniqueErrors],
-                metrics,
-              },
-            };
-          }
+            mappedFields,
+            getFieldSummary: buildFieldSummaryLinesFromDocumentValues,
+          });
 
           return {
             response: {
-              valid: true,
-              errors: uniqueErrors.length > 0 ? uniqueErrors : undefined,
-              metrics,
+              valid: feedback.valid,
+              errors: feedback.errors,
+              metrics: feedback.metrics,
+              processors: feedback.processors,
+              temporary_fields: feedback.temporary_fields,
             },
           };
         },
         commit_pipeline: async (toolCall) => {
           const pipeline = agentPipelineSchema.safeParse(toolCall.function.arguments.pipeline);
           if (!pipeline.success) {
+            const formattedErrors = formatZodPipelineErrors(
+              pipeline.error,
+              toolCall.function.arguments.pipeline,
+              allowedActions
+            );
             return {
               response: {
                 committed: false,
-                errors: pipeline.error.issues,
+                errors: formattedErrors.map(
+                  (e) =>
+                    `Step ${e.stepIndex >= 0 ? e.stepIndex : 'pipeline'} (${e.action}): ${
+                      e.message
+                    }`
+                ),
               },
             };
           }
@@ -203,6 +207,7 @@ export async function suggestProcessingPipeline({
           };
         },
       },
+      maxDurationMs,
       finalToolChoice: {
         type: 'function',
         function: 'commit_pipeline',
@@ -267,6 +272,12 @@ export {
 } from './schema';
 export { mergeSeedParsingProcessorIntoSuggestedPipeline } from './merge_seed_parsing_into_suggested_pipeline';
 export { formatUpstreamSeedParsingContextForPromptMarkdown } from './upstream_seed_parsing_prompt';
+export { formatZodPipelineErrors } from './format_zod_pipeline_errors';
+export {
+  buildSimulationFeedback,
+  detectTemporaryFields,
+  type SimulationFeedback,
+} from './build_simulation_feedback';
 
 /**
  * Builds a JSON-serializable overview of sample document structure (fields, example values, schema hints)
@@ -298,91 +309,7 @@ export async function fetchMappedFieldsForStreamProcessingSuggestions(
   return getMappedFields(esClient, streamIndexName);
 }
 
-/**
- * Validates that each processor has a failure rate below 20%.
- * Returns an array of error messages for processors that exceed the threshold.
- */
-function validateProcessorFailureRates(simulationResult: ProcessingSimulationResponse): string[] {
-  const errors: string[] = [];
-  const maxFailureRate = 0.2; // 20%
-
-  if (!simulationResult.processors_metrics) {
-    return errors;
-  }
-
-  for (const [processorId, metrics] of Object.entries(simulationResult.processors_metrics)) {
-    if (!metrics) continue;
-    if (metrics.failed_rate > maxFailureRate) {
-      const failurePercentage = (metrics.failed_rate * 100).toFixed(2);
-      errors.push(
-        `Processor "${processorId}" has a failure rate of ${failurePercentage}% (maximum allowed: 20%). This processor is failing on too many documents. Review the processor configuration and ensure it handles the document structure correctly.`
-      );
-    }
-  }
-
-  return errors;
-}
-
-export function getUniqueDocumentErrors(simulationResult: ProcessingSimulationResponse): string[] {
-  if (!simulationResult.documents || simulationResult.documents.length === 0) {
-    return [];
-  }
-
-  // Collect all unique error messages
-  const errorMap = new Map<string, { count: number; type: string; exampleDoc?: FlattenRecord }>();
-
-  for (const doc of simulationResult.documents) {
-    if (doc.errors && doc.errors.length > 0) {
-      for (const error of doc.errors) {
-        const key = `${error.type}: ${error.message}`;
-        if (!errorMap.has(key)) {
-          errorMap.set(key, {
-            count: 1,
-            type: error.type,
-            exampleDoc: doc.value,
-          });
-        } else {
-          errorMap.get(key)!.count++;
-        }
-      }
-    }
-  }
-
-  // Format errors with counts and example context
-  const uniqueErrors: string[] = [];
-  const maxErrors = 5;
-  const maxErrorLength = 250;
-  let errorIndex = 0;
-
-  for (const [errorKey, errorInfo] of errorMap.entries()) {
-    if (errorIndex >= maxErrors) {
-      break;
-    }
-
-    const countStr = errorInfo.count > 1 ? ` (occurred in ${errorInfo.count} documents)` : '';
-    const fullError = `${errorKey}${countStr}`;
-
-    // Truncate error message if it exceeds max length
-    const truncatedError =
-      fullError.length > maxErrorLength
-        ? `${fullError.substring(0, maxErrorLength)}...`
-        : fullError;
-
-    uniqueErrors.push(truncatedError);
-    errorIndex++;
-  }
-
-  // Add message if there are more errors
-  const remainingErrors = errorMap.size - maxErrors;
-  if (remainingErrors > 0) {
-    uniqueErrors.push(`... and ${remainingErrors} more error(s)`);
-  }
-
-  return uniqueErrors;
-}
-
 async function getMappedFields(esClient: ElasticsearchClient, index: string) {
-  // get mapped fields for specified index
   const fieldCaps = await esClient.fieldCaps({
     index,
     fields: '*',
@@ -398,7 +325,6 @@ async function getMappedFields(esClient: ElasticsearchClient, index: string) {
     }
   }
 
-  // Sort alphabetically by field name
   return Object.keys(mappedFields)
     .sort()
     .reduce<Record<string, string>>((sorted, key) => {
@@ -407,7 +333,7 @@ async function getMappedFields(esClient: ElasticsearchClient, index: string) {
     }, {});
 }
 
-async function buildFieldSummaryLinesFromDocumentValues(
+export async function buildFieldSummaryLinesFromDocumentValues(
   documents: FlattenRecord[],
   fieldsMetadataClient: IFieldsMetadataClient,
   isOtel: boolean,
@@ -468,40 +394,4 @@ async function buildFieldSummaryLinesFromDocumentValues(
 
     return `${fieldName} (${typeIndicator}) - ${valuesDescription}`;
   });
-}
-
-async function getSimulationMetrics(
-  simulationResult: ProcessingSimulationResponse,
-  fieldsMetadataClient: IFieldsMetadataClient,
-  isOtel: boolean,
-  mappedFields: Record<string, string>
-) {
-  if (simulationResult.definition_error || simulationResult.documents.length === 0) {
-    return {
-      sampled: 0,
-      fields: [],
-      parse_rate: 0,
-    };
-  }
-
-  const documents = simulationResult.documents;
-  const sampled = documents.length;
-  const parseRate = simulationResult.documents_metrics.parsed_rate * 100;
-
-  const flattenedDocs = documents
-    .map((d) => d.value)
-    .filter((v): v is FlattenRecord => v != null && typeof v === 'object');
-
-  const fields = await buildFieldSummaryLinesFromDocumentValues(
-    flattenedDocs,
-    fieldsMetadataClient,
-    isOtel,
-    mappedFields
-  );
-
-  return {
-    sampled,
-    fields,
-    parse_rate: parseFloat(parseRate.toFixed(2)),
-  };
 }

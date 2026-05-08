@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
-import { JsonModelShapeSchema } from '@kbn/workflows/spec/schema/common/json_model_shape_schema';
+import { JsonModelSchema } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { i18n } from '@kbn/i18n';
 import {
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
@@ -27,8 +27,7 @@ export const InputSchema = z.object({
   /**
    * output schema for the run agent step, if provided agent will return structured output
    */
-  // TODO: replace with proper JsonSchema7 zod schema when https://github.com/elastic/kibana/pull/244223 is merged and released
-  schema: JsonModelShapeSchema.optional().describe('The schema for the output of the agent.'),
+  schema: JsonModelSchema.optional().describe('The schema for the output of the agent.'),
   /**
    * The user input message to send to the agent.
    */

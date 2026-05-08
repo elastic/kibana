@@ -54,6 +54,7 @@
                 "lineNumber": 22,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "MountPoint",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -78,7 +79,22 @@
               }
             ],
             "returnComment": [
-              "a unique identifier for the given banner to be used with {@link OverlayBannersStart.remove } and\n{@link OverlayBannersStart.replace }"
+              "a unique identifier for the given banner to be used with ",
+              {
+                "pluginId": "@kbn/core-overlays-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                "section": "def-public.OverlayBannersStart.remove",
+                "text": "OverlayBannersStart.remove"
+              },
+              " and\n",
+              {
+                "pluginId": "@kbn/core-overlays-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                "section": "def-public.OverlayBannersStart.replace",
+                "text": "OverlayBannersStart.replace"
+              }
             ]
           },
           {
@@ -179,6 +195,7 @@
                 "lineNumber": 41,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "MountPoint",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -203,7 +220,22 @@
               }
             ],
             "returnComment": [
-              "a new identifier for the given banner to be used with {@link OverlayBannersStart.remove } and\n{@link OverlayBannersStart.replace }"
+              "a new identifier for the given banner to be used with ",
+              {
+                "pluginId": "@kbn/core-overlays-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                "section": "def-public.OverlayBannersStart.remove",
+                "text": "OverlayBannersStart.remove"
+              },
+              " and\n",
+              {
+                "pluginId": "@kbn/core-overlays-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                "section": "def-public.OverlayBannersStart.replace",
+                "text": "OverlayBannersStart.replace"
+              }
             ]
           },
           {
@@ -284,6 +316,7 @@
                 "lineNumber": 27,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "MountPoint",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -304,6 +337,7 @@
                 "lineNumber": 27,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverlayFlyoutOpenOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -644,6 +678,7 @@
                 "lineNumber": 50,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "MountPoint",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -664,6 +699,7 @@
                 "lineNumber": 50,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverlayModalOpenOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -730,6 +766,7 @@
                 "lineNumber": 59,
                 "columnNumber": 45,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverlayModalConfirmOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -759,7 +796,13 @@
             "tags": [],
             "label": "banners",
             "description": [
-              "{@link OverlayBannersStart}"
+              {
+                "pluginId": "@kbn/core-overlays-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
+                "section": "def-public.OverlayBannersStart",
+                "text": "OverlayBannersStart"
+              }
             ],
             "signature": [
               "OverlayBannersStart"
@@ -777,7 +820,7 @@
             "tags": [],
             "label": "openFlyout",
             "description": [
-              "{@link OverlayFlyoutStart#open}"
+              "OverlayFlyoutStart#open"
             ],
             "signature": [
               "(mount: ",
@@ -809,6 +852,7 @@
                 "lineNumber": 27,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "MountPoint",
                 "trackAdoption": false,
                 "returnComment": [],
                 "children": [
@@ -826,6 +870,7 @@
                     "lineNumber": 22,
                     "columnNumber": 64,
                     "deprecated": false,
+                    "docsReferencedTypeName": "T",
                     "trackAdoption": false
                   }
                 ]
@@ -845,6 +890,7 @@
                 "lineNumber": 27,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverlayFlyoutOpenOptions",
                 "trackAdoption": false
               }
             ]
@@ -902,6 +948,7 @@
                 "lineNumber": 48,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverlaySystemFlyoutOpenOptions",
                 "trackAdoption": false
               }
             ]
@@ -913,7 +960,7 @@
             "tags": [],
             "label": "openModal",
             "description": [
-              "{@link OverlayModalStart#open}"
+              "OverlayModalStart#open"
             ],
             "signature": [
               "(mount: ",
@@ -945,6 +992,7 @@
                 "lineNumber": 50,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "MountPoint",
                 "trackAdoption": false,
                 "returnComment": [],
                 "children": [
@@ -962,6 +1010,7 @@
                     "lineNumber": 22,
                     "columnNumber": 64,
                     "deprecated": false,
+                    "docsReferencedTypeName": "T",
                     "trackAdoption": false
                   }
                 ]
@@ -981,6 +1030,7 @@
                 "lineNumber": 50,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverlayModalOpenOptions",
                 "trackAdoption": false
               }
             ]
@@ -992,7 +1042,7 @@
             "tags": [],
             "label": "openConfirm",
             "description": [
-              "{@link OverlayModalStart#openConfirm}"
+              "OverlayModalStart#openConfirm"
             ],
             "signature": [
               "(message: string | ",
@@ -1041,6 +1091,7 @@
                 "lineNumber": 59,
                 "columnNumber": 45,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverlayModalConfirmOptions",
                 "trackAdoption": false
               }
             ]
@@ -1122,6 +1173,7 @@
                 "lineNumber": 48,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverlaySystemFlyoutOpenOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }

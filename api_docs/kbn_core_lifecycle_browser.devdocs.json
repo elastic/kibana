@@ -30,7 +30,13 @@
             "tags": [],
             "label": "analytics",
             "description": [
-              "{@link AnalyticsServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.AnalyticsServiceSetup",
+                "text": "AnalyticsServiceSetup"
+              }
             ],
             "signature": [
               "{ optIn: (optInConfig: ",
@@ -64,7 +70,13 @@
             "tags": [],
             "label": "application",
             "description": [
-              "{@link ApplicationSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.ApplicationSetup",
+                "text": "ApplicationSetup"
+              }
             ],
             "signature": [
               "ApplicationSetup"
@@ -82,7 +94,13 @@
             "tags": [],
             "label": "chrome",
             "description": [
-              "{@link ChromeSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.ChromeSetup",
+                "text": "ChromeSetup"
+              }
             ],
             "signature": [
               "ChromeSetup"
@@ -100,7 +118,13 @@
             "tags": [],
             "label": "customBranding",
             "description": [
-              "{@link CustomBrandingSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.CustomBrandingSetup",
+                "text": "CustomBrandingSetup"
+              }
             ],
             "signature": [
               "CustomBrandingSetup"
@@ -118,7 +142,13 @@
             "tags": [],
             "label": "fatalErrors",
             "description": [
-              "{@link FatalErrorsSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.FatalErrorsSetup",
+                "text": "FatalErrorsSetup"
+              }
             ],
             "signature": [
               "FatalErrorsSetup"
@@ -136,7 +166,13 @@
             "tags": [],
             "label": "featureFlags",
             "description": [
-              "{@link FeatureFlagsSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.FeatureFlagsSetup",
+                "text": "FeatureFlagsSetup"
+              }
             ],
             "signature": [
               "FeatureFlagsSetup"
@@ -154,7 +190,13 @@
             "tags": [],
             "label": "http",
             "description": [
-              "{@link HttpSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.HttpSetup",
+                "text": "HttpSetup"
+              }
             ],
             "signature": [
               "HttpSetup"
@@ -172,7 +214,13 @@
             "tags": [],
             "label": "injection",
             "description": [
-              "{@link CoreDiServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.CoreDiServiceSetup",
+                "text": "CoreDiServiceSetup"
+              }
             ],
             "signature": [
               "CoreDiServiceSetup"
@@ -190,7 +238,13 @@
             "tags": [],
             "label": "notifications",
             "description": [
-              "{@link NotificationsSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.NotificationsSetup",
+                "text": "NotificationsSetup"
+              }
             ],
             "signature": [
               "NotificationsSetup"
@@ -210,7 +264,14 @@
             ],
             "label": "uiSettings",
             "description": [
-              "{@link IUiSettingsClient}\n"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              "\n"
             ],
             "signature": [
               "IUiSettingsClient"
@@ -228,7 +289,13 @@
             "tags": [],
             "label": "settings",
             "description": [
-              "{@link SettingsStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.SettingsStart",
+                "text": "SettingsStart"
+              }
             ],
             "signature": [
               "SettingsStart"
@@ -246,7 +313,13 @@
             "tags": [],
             "label": "executionContext",
             "description": [
-              "{@link ExecutionContextSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.ExecutionContextSetup",
+                "text": "ExecutionContextSetup"
+              }
             ],
             "signature": [
               "ExecutionContextSetup"
@@ -264,7 +337,13 @@
             "tags": [],
             "label": "theme",
             "description": [
-              "{@link ThemeServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.ThemeServiceSetup",
+                "text": "ThemeServiceSetup"
+              }
             ],
             "signature": [
               "ThemeServiceSetup"
@@ -282,7 +361,13 @@
             "tags": [],
             "label": "plugins",
             "description": [
-              "{@link PluginsServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.PluginsServiceSetup",
+                "text": "PluginsServiceSetup"
+              }
             ],
             "signature": [
               "PluginsServiceSetup"
@@ -300,7 +385,13 @@
             "tags": [],
             "label": "security",
             "description": [
-              "{@link SecurityServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.SecurityServiceSetup",
+                "text": "SecurityServiceSetup"
+              }
             ],
             "signature": [
               "SecurityServiceSetup"
@@ -318,7 +409,13 @@
             "tags": [],
             "label": "userProfile",
             "description": [
-              "{@link UserProfileServiceSetup}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.UserProfileServiceSetup",
+                "text": "UserProfileServiceSetup"
+              }
             ],
             "signature": [
               "UserProfileServiceSetup"
@@ -336,7 +433,13 @@
             "tags": [],
             "label": "getStartServices",
             "description": [
-              "{@link StartServicesAccessor}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.StartServicesAccessor",
+                "text": "StartServicesAccessor"
+              }
             ],
             "signature": [
               "() => Promise<[",
@@ -376,7 +479,13 @@
             "tags": [],
             "label": "analytics",
             "description": [
-              "{@link AnalyticsServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.AnalyticsServiceStart",
+                "text": "AnalyticsServiceStart"
+              }
             ],
             "signature": [
               "{ optIn: (optInConfig: ",
@@ -400,7 +509,13 @@
             "tags": [],
             "label": "application",
             "description": [
-              "{@link ApplicationStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.ApplicationStart",
+                "text": "ApplicationStart"
+              }
             ],
             "signature": [
               "ApplicationStart"
@@ -418,7 +533,13 @@
             "tags": [],
             "label": "chrome",
             "description": [
-              "{@link ChromeStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.ChromeStart",
+                "text": "ChromeStart"
+              }
             ],
             "signature": [
               "ChromeStart"
@@ -436,7 +557,13 @@
             "tags": [],
             "label": "customBranding",
             "description": [
-              "{@link CustomBrandingStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.CustomBrandingStart",
+                "text": "CustomBrandingStart"
+              }
             ],
             "signature": [
               "CustomBrandingStart"
@@ -454,7 +581,13 @@
             "tags": [],
             "label": "docLinks",
             "description": [
-              "{@link DocLinksStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.DocLinksStart",
+                "text": "DocLinksStart"
+              }
             ],
             "signature": [
               "DocLinksStart"
@@ -472,7 +605,13 @@
             "tags": [],
             "label": "executionContext",
             "description": [
-              "{@link ExecutionContextStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.ExecutionContextStart",
+                "text": "ExecutionContextStart"
+              }
             ],
             "signature": [
               "ExecutionContextSetup"
@@ -490,7 +629,13 @@
             "tags": [],
             "label": "featureFlags",
             "description": [
-              "{@link FeatureFlagsStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.FeatureFlagsStart",
+                "text": "FeatureFlagsStart"
+              }
             ],
             "signature": [
               "FeatureFlagsStart"
@@ -508,7 +653,13 @@
             "tags": [],
             "label": "http",
             "description": [
-              "{@link HttpStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.HttpStart",
+                "text": "HttpStart"
+              }
             ],
             "signature": [
               "HttpSetup"
@@ -526,7 +677,13 @@
             "tags": [],
             "label": "injection",
             "description": [
-              "{@link CoreDiServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.CoreDiServiceStart",
+                "text": "CoreDiServiceStart"
+              }
             ],
             "signature": [
               "CoreDiServiceStart"
@@ -544,7 +701,13 @@
             "tags": [],
             "label": "i18n",
             "description": [
-              "{@link I18nStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.I18nStart",
+                "text": "I18nStart"
+              }
             ],
             "signature": [
               "I18nStart"
@@ -562,7 +725,13 @@
             "tags": [],
             "label": "notifications",
             "description": [
-              "{@link NotificationsStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.NotificationsStart",
+                "text": "NotificationsStart"
+              }
             ],
             "signature": [
               "NotificationsStart"
@@ -580,7 +749,13 @@
             "tags": [],
             "label": "overlays",
             "description": [
-              "{@link OverlayStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.OverlayStart",
+                "text": "OverlayStart"
+              }
             ],
             "signature": [
               "OverlayStart"
@@ -600,7 +775,14 @@
             ],
             "label": "uiSettings",
             "description": [
-              "{@link IUiSettingsClient}\n"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.IUiSettingsClient",
+                "text": "IUiSettingsClient"
+              },
+              "\n"
             ],
             "signature": [
               "IUiSettingsClient"
@@ -618,7 +800,13 @@
             "tags": [],
             "label": "settings",
             "description": [
-              "{@link SettingsStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.SettingsStart",
+                "text": "SettingsStart"
+              }
             ],
             "signature": [
               "SettingsStart"
@@ -636,7 +824,13 @@
             "tags": [],
             "label": "fatalErrors",
             "description": [
-              "{@link FatalErrorsStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.FatalErrorsStart",
+                "text": "FatalErrorsStart"
+              }
             ],
             "signature": [
               "FatalErrorsSetup"
@@ -654,7 +848,13 @@
             "tags": [],
             "label": "deprecations",
             "description": [
-              "{@link DeprecationsServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.DeprecationsServiceStart",
+                "text": "DeprecationsServiceStart"
+              }
             ],
             "signature": [
               "DeprecationsServiceStart"
@@ -672,7 +872,13 @@
             "tags": [],
             "label": "theme",
             "description": [
-              "{@link ThemeServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.ThemeServiceStart",
+                "text": "ThemeServiceStart"
+              }
             ],
             "signature": [
               "ThemeServiceSetup"
@@ -690,7 +896,13 @@
             "tags": [],
             "label": "plugins",
             "description": [
-              "{@link PluginsServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.PluginsServiceStart",
+                "text": "PluginsServiceStart"
+              }
             ],
             "signature": [
               "PluginsServiceStart"
@@ -708,7 +920,13 @@
             "tags": [],
             "label": "pricing",
             "description": [
-              "{@link PricingServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.PricingServiceStart",
+                "text": "PricingServiceStart"
+              }
             ],
             "signature": [
               "PricingServiceStart"
@@ -726,7 +944,13 @@
             "tags": [],
             "label": "security",
             "description": [
-              "{@link SecurityServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.SecurityServiceStart",
+                "text": "SecurityServiceStart"
+              }
             ],
             "signature": [
               "SecurityServiceStart"
@@ -744,7 +968,13 @@
             "tags": [],
             "label": "userProfile",
             "description": [
-              "{@link UserProfileServiceStart}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.UserProfileServiceStart",
+                "text": "UserProfileServiceStart"
+              }
             ],
             "signature": [
               "UserProfileService"
@@ -762,7 +992,13 @@
             "tags": [],
             "label": "rendering",
             "description": [
-              "{@link RenderingService}"
+              {
+                "pluginId": "@kbn/core-lifecycle-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+                "section": "def-public.RenderingService",
+                "text": "RenderingService"
+              }
             ],
             "signature": [
               "RenderingService"
@@ -786,7 +1022,15 @@
         "tags": [],
         "label": "StartServicesAccessor",
         "description": [
-          "\nAllows plugins to get access to APIs available in start inside async\nhandlers, such as {@link App.mount}. Promise will not resolve until Core\nand plugin dependencies have completed `start`.\n"
+          "\nAllows plugins to get access to APIs available in start inside async\nhandlers, such as ",
+          {
+            "pluginId": "@kbn/core-lifecycle-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
+            "section": "def-public.App.mount",
+            "text": "App.mount"
+          },
+          ". Promise will not resolve until Core\nand plugin dependencies have completed `start`.\n"
         ],
         "signature": [
           "() => Promise<[",

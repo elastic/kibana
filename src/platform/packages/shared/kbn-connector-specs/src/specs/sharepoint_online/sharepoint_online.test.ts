@@ -118,6 +118,30 @@ describe('SharepointOnline', () => {
       expect(types).toContain('oauth_client_credentials');
     });
 
+    it('supports ears auth with microsoft provider and SharePoint scopes', () => {
+      const earsType = (
+        SharepointOnline.auth?.types as Array<
+          | string
+          | {
+              type: string;
+              defaults?: Record<string, unknown>;
+              overrides?: { meta?: { scope?: Record<string, unknown> } };
+            }
+        >
+      ).find((t) => typeof t === 'object' && t.type === 'ears');
+      expect(earsType).toBeDefined();
+      expect(earsType).toMatchObject({
+        type: 'ears',
+        defaults: {
+          provider: 'microsoft',
+          scope: 'Sites.Selected Files.Read.All offline_access',
+        },
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+      });
+    });
+
     it('supports oauth_authorization_code with correct Microsoft defaults', () => {
       const oauthType = (
         SharepointOnline.auth?.types as Array<
@@ -128,7 +152,7 @@ describe('SharepointOnline', () => {
       expect(oauthType).toMatchObject({
         type: 'oauth_authorization_code',
         defaults: {
-          scope: 'Sites.Read.All Files.Read.All offline_access',
+          scope: 'Sites.Selected Files.Read.All offline_access',
         },
       });
     });

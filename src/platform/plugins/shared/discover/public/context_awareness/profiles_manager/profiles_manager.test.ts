@@ -58,6 +58,7 @@ describe('ProfilesManager', () => {
 
     expect(result).toEqual({
       didProfileChange: true,
+      isFirstResolution: true,
     });
 
     const profiles = scopedProfilesManager.getProfiles();
@@ -78,6 +79,7 @@ describe('ProfilesManager', () => {
 
     expect(result).toEqual({
       didProfileChange: true,
+      isFirstResolution: true,
     });
   });
 
@@ -176,7 +178,7 @@ describe('ProfilesManager', () => {
 
     const result = await scopedProfilesManager.resolveDataSourceProfile(esqlProfileParams);
 
-    expect(result).toEqual({ didProfileChange: false });
+    expect(result).toEqual({ didProfileChange: false, isFirstResolution: false });
     expect(mocks.dataSourceProfileProviderMock.resolve).toHaveBeenCalledTimes(1);
   });
 
@@ -191,7 +193,7 @@ describe('ProfilesManager', () => {
       query: { esql: 'from logs-*' },
     });
 
-    expect(result).toEqual({ didProfileChange: false });
+    expect(result).toEqual({ didProfileChange: false, isFirstResolution: false });
     expect(mocks.dataSourceProfileProviderMock.resolve).toHaveBeenCalledTimes(2);
   });
 

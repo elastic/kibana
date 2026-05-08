@@ -8,10 +8,10 @@
  */
 
 import type { DynamicStepContextSchema } from '@kbn/workflows';
+import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
+import { inferZodType, VARIABLE_REGEX } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
-import { VARIABLE_REGEX } from '../../../../common/lib/regex';
-import { getSchemaAtPath, inferZodType } from '../../../../common/lib/zod';
 
 interface DataMapContextSchemaEntries {
   item: z.ZodType;

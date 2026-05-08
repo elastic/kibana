@@ -6,8 +6,14 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { IndexAutocompleteItem, ESQLSourceResult, EsqlView } from '@kbn/esql-types';
+import type {
+  ESQLCallbacks,
+  IndexAutocompleteItem,
+  ESQLSourceResult,
+  EsqlView,
+} from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
+import { EsqlQuery } from '@elastic/esql';
 import { i18n } from '@kbn/i18n';
 import type { ESQLAstAllCommands, ESQLAstJoinCommand, ESQLSource } from '@elastic/esql/types';
 import { isAsExpression, Walker, LeafPrinter, Parser } from '@elastic/esql';
@@ -197,6 +203,37 @@ export function getSourcesFromCommands(
   return args.filter(
     (arg) => arg.sourceType === sourceType && arg.name !== '' && arg.name !== EDITOR_MARKER
   );
+}
+
+/**
+ * Returns true when a wired stream has been used as a source in the query.
+ */
+export async function hasWiredStreamsInQuery(
+  query: string,
+  callbacks: Pick<ESQLCallbacks, 'getSources'> = {}
+): Promise<boolean> {
+  const { getSources } = callbacks;
+  if (!getSources) {
+    return false;
+  }
+
+  // Parse the query to get the sources used in the query.
+  const esqlQuery = EsqlQuery.fromSrc(query);
+  const sourcesInQuery = getSourcesFromCommands(esqlQuery.ast.commands, 'index');
+  if (sourcesInQuery.length === 0) {
+    return false;
+  }
+
+  // Get the available sources, this operations should not be expensive as it is cached.
+  const availableSources = await getSources();
+  const availableWiredStreams = new Set(
+    availableSources
+      .filter((source) => source.type === SOURCES_TYPES.WIRED_STREAM)
+      .map((source) => source.name)
+  );
+
+  // Check if any of the sources used in the query are streams.
+  return sourcesInQuery.some((source) => sourceExists(source.name, availableWiredStreams));
 }
 
 export function getSourceSuggestions(

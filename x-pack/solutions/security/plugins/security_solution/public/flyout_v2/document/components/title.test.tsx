@@ -83,6 +83,17 @@ const externalAlertHit = createMockHit({
   'event.kind': 'alert',
 });
 
+const remoteAlertHit: DataTableRecord = {
+  id: '1',
+  raw: { _index: 'remote-cluster:.alerts-security.alerts-default' },
+  flattened: {
+    'event.kind': 'signal',
+    'kibana.alert.rule.name': 'Test Rule Name',
+    'kibana.alert.rule.uuid': 'rule-uuid-123',
+  },
+  isAnchor: false,
+} as DataTableRecord;
+
 const renderTitle = (props: Parameters<typeof Title>[0]) =>
   render(
     <IntlProvider locale="en">
@@ -141,6 +152,13 @@ describe('<Title />', () => {
 
   it('should render as plain text when the alert has no rule id', () => {
     const { queryByTestId, getByTestId } = renderTitle({ hit: alertHitWithoutRuleId });
+
+    expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(TITLE_TEST_ID)).toHaveAttribute('data-is-link', 'false');
+  });
+
+  it('should render as plain text for a remote alert even when a rule id is present', () => {
+    const { queryByTestId, getByTestId } = renderTitle({ hit: remoteAlertHit });
 
     expect(queryByTestId(TITLE_LINK_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(TITLE_TEST_ID)).toHaveAttribute('data-is-link', 'false');

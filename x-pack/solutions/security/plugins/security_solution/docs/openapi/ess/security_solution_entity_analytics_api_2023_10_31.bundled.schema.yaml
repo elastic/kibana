@@ -308,6 +308,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/delete:
     delete:
+      description: >-
+        Deletes the Privilege Monitoring Engine and optionally removes all
+        associated privileged user data.
       operationId: DeleteMonitoringEngine
       parameters:
         - description: Whether to delete all the privileged user data
@@ -321,6 +324,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                DeleteMonitoringEngineResponse:
+                  summary: Engine deleted successfully
+                  value:
+                    deleted: true
               schema:
                 type: object
                 properties:
@@ -334,11 +342,19 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/disable:
     post:
+      description: >-
+        Disables the Privilege Monitoring Engine, stopping all monitoring
+        activity without removing data.
       operationId: DisableMonitoringEngine
       responses:
         '200':
           content:
             application/json:
+              examples:
+                DisableMonitoringEngineResponse:
+                  summary: Engine disabled successfully
+                  value:
+                    status: disabled
               schema:
                 $ref: '#/components/schemas/MonitoringEngineDescriptor'
           description: Successful response
@@ -347,17 +363,32 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/init:
     post:
+      description: >-
+        Initializes the Privilege Monitoring Engine, setting up the required
+        resources and starting the engine.
       operationId: InitMonitoringEngine
       responses:
         '200':
           content:
             application/json:
+              examples:
+                InitMonitoringEngineResponse:
+                  summary: Engine initialized successfully
+                  value:
+                    status: started
               schema:
                 $ref: '#/components/schemas/MonitoringEngineDescriptor'
           description: Successful response
         '500':
           content:
             application/json:
+              examples:
+                InitMonitoringEngineError:
+                  summary: Internal server error during engine initialization
+                  value:
+                    error:
+                      message: Failed to initialize monitoring engine
+                    status: error
               schema:
                 $ref: '#/components/schemas/MonitoringEngineDescriptor'
           description: Internal Server Error
@@ -366,11 +397,19 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/engine/schedule_now:
     post:
+      description: >-
+        Schedules the Privilege Monitoring Engine to run as soon as possible,
+        triggering an immediate monitoring cycle.
       operationId: ScheduleMonitoringEngine
       responses:
         '200':
           content:
             application/json:
+              examples:
+                ScheduleMonitoringEngineResponse:
+                  summary: Engine scheduled successfully
+                  value:
+                    success: true
               schema:
                 type: object
                 properties:
@@ -381,6 +420,11 @@ paths:
         '409':
           content:
             application/json:
+              examples:
+                ScheduleMonitoringEngineConflict:
+                  summary: Engine is already running
+                  value:
+                    message: Monitoring engine is already running
               schema:
                 type: object
                 properties:
@@ -393,11 +437,22 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/privileges/health:
     get:
+      description: >-
+        Returns the current health status of the Privilege Monitoring Engine,
+        including engine status, error details, and user count statistics.
       operationId: PrivMonHealth
       responses:
         '200':
           content:
             application/json:
+              examples:
+                PrivMonHealthResponse:
+                  summary: Healthy privilege monitoring engine
+                  value:
+                    status: started
+                    users:
+                      current_count: 42
+                      max_allowed: 1000
               schema:
                 type: object
                 properties:
@@ -441,13 +496,16 @@ paths:
         '200':
           content:
             application/json:
-              example:
-                has_all_required: true
-                privileges:
-                  elasticsearch:
-                    index:
-                      .entity_analytics.monitoring.user-default:
-                        read: true
+              examples:
+                PrivMonPrivilegesResponse:
+                  summary: Privileges check response
+                  value:
+                    has_all_required: true
+                    privileges:
+                      elasticsearch:
+                        index:
+                          .entity_analytics.monitoring.user-default:
+                            read: true
               schema:
                 $ref: '#/components/schemas/EntityAnalyticsPrivileges'
           description: Successful response
@@ -456,10 +514,24 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users:
     post:
+      description: >-
+        Creates a new privileged user to be monitored by the Privilege
+        Monitoring Engine.
       operationId: CreatePrivMonUser
       requestBody:
         content:
           application/json:
+            examples:
+              CreatePrivMonUserRequest:
+                summary: Create a monitored user
+                value:
+                  entity_analytics_monitoring:
+                    labels:
+                      - field: department
+                        source: api
+                        value: IT
+                  user:
+                    name: john.doe
             schema:
               $ref: '#/components/schemas/UserName'
         required: true
@@ -467,6 +539,22 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                CreatePrivMonUserResponse:
+                  summary: Created monitored user
+                  value:
+                    '@timestamp': '2026-01-28T12:00:00.000Z'
+                    entity_analytics_monitoring:
+                      labels:
+                        - field: department
+                          source: api
+                          value: IT
+                    event:
+                      ingested: '2026-01-28T12:00:00.000Z'
+                    id: user-abc-123
+                    user:
+                      is_privileged: true
+                      name: john.doe
               schema:
                 $ref: '#/components/schemas/MonitoredUserDoc'
           description: User created successfully
@@ -475,10 +563,21 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/_csv:
     post:
+      description: >-
+        Bulk upserts privileged users by uploading a CSV file. Returns per-row
+        errors and aggregate upload statistics.
       operationId: PrivmonBulkUploadUsersCSV
       requestBody:
         content:
           multipart/form-data:
+            examples:
+              PrivmonBulkUploadUsersCSVRequest:
+                summary: CSV file with privileged users
+                value:
+                  file: |
+                    username,is_privileged
+                    john.doe,true
+                    jane.smith,true
             schema:
               type: object
               properties:
@@ -492,17 +591,20 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                PrivmonBulkUploadUsersCSVResponse:
+                  summary: Bulk upload response with mixed results
+                  value:
+                    errors:
+                      - index: 1
+                        message: Invalid monitored field
+                        username: john.doe
+                    stats:
+                      failedOperations: 1
+                      successfulOperations: 1
+                      totalOperations: 2
+                      uploaded: 2
               schema:
-                example:
-                  errors:
-                    - index: 1
-                      message: Invalid monitored field
-                      username: john.doe
-                  stats:
-                    failedOperations: 1
-                    successfulOperations: 1
-                    totalOperations: 2
-                    uploaded: 1
                 type: object
                 properties:
                   errors:
@@ -522,9 +624,11 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/{id}:
     delete:
+      description: Removes a privileged user from monitoring by their document ID.
       operationId: DeletePrivMonUser
       parameters:
-        - in: path
+        - description: The document ID of the monitored user to delete
+          in: path
           name: id
           required: true
           schema:
@@ -533,6 +637,12 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                DeletePrivMonUserResponse:
+                  summary: User deleted successfully
+                  value:
+                    acknowledged: true
+                    message: User deleted successfully
               schema:
                 type: object
                 properties:
@@ -551,9 +661,13 @@ paths:
       tags:
         - Security Entity Analytics API
     put:
+      description: >-
+        Updates the details of an existing monitored privileged user by their
+        document ID.
       operationId: UpdatePrivMonUser
       parameters:
-        - in: path
+        - description: The document ID of the monitored user to update
+          in: path
           name: id
           required: true
           schema:
@@ -561,6 +675,18 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              UpdatePrivMonUserRequest:
+                summary: Update a monitored user
+                value:
+                  entity_analytics_monitoring:
+                    labels:
+                      - field: department
+                        source: api
+                        value: Security
+                  user:
+                    is_privileged: true
+                    name: john.doe
             schema:
               $ref: '#/components/schemas/MonitoredUserUpdateDoc'
         required: true
@@ -568,6 +694,22 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                UpdatePrivMonUserResponse:
+                  summary: Updated monitored user
+                  value:
+                    '@timestamp': '2026-01-28T12:00:00.000Z'
+                    entity_analytics_monitoring:
+                      labels:
+                        - field: department
+                          source: api
+                          value: Security
+                    event:
+                      ingested: '2026-01-28T12:00:00.000Z'
+                    id: user-abc-123
+                    user:
+                      is_privileged: true
+                      name: john.doe
               schema:
                 $ref: '#/components/schemas/MonitoredUserDoc'
           description: User updated successfully
@@ -576,6 +718,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/users/list:
     get:
+      description: >-
+        Returns a list of all privileged users currently being monitored.
+        Supports optional KQL filtering.
       operationId: ListPrivMonUsers
       parameters:
         - description: KQL query to filter the list of monitored users
@@ -588,6 +733,34 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                ListPrivMonUsersResponse:
+                  summary: List of monitored users
+                  value:
+                    - '@timestamp': '2026-01-28T12:00:00.000Z'
+                      entity_analytics_monitoring:
+                        labels:
+                          - field: department
+                            source: api
+                            value: IT
+                      event:
+                        ingested: '2026-01-28T12:00:00.000Z'
+                      id: user-abc-123
+                      user:
+                        is_privileged: true
+                        name: john.doe
+                    - '@timestamp': '2026-01-15T09:00:00.000Z'
+                      entity_analytics_monitoring:
+                        labels:
+                          - field: department
+                            source: csv
+                            value: Security
+                      event:
+                        ingested: '2026-01-15T09:00:00.000Z'
+                      id: user-def-456
+                      user:
+                        is_privileged: true
+                        name: jane.smith
               schema:
                 items:
                   $ref: '#/components/schemas/MonitoredUserDoc'
@@ -598,11 +771,20 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/privileged_user_monitoring/pad/install:
     post:
+      description: >-
+        Installs the privileged access detection integration package and sets up
+        the associated ML modules required for the Entity Analytics privileged
+        user monitoring experience.
       operationId: InstallPrivilegedAccessDetectionPackage
       responses:
         '200':
           content:
             application/json:
+              examples:
+                InstallPrivilegedAccessDetectionPackageResponse:
+                  summary: Package installed successfully
+                  value:
+                    message: Privileged access detection package installed successfully
               schema:
                 type: object
                 properties:
@@ -618,11 +800,28 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/privileged_user_monitoring/pad/status:
     get:
+      description: >-
+        Returns the installation and ML module setup status of the privileged
+        access detection package, along with the state of each associated ML
+        job.
       operationId: GetPrivilegedAccessDetectionPackageStatus
       responses:
         '200':
           content:
             application/json:
+              examples:
+                GetPrivilegedAccessDetectionPackageStatusResponse:
+                  summary: Package fully installed and running
+                  value:
+                    jobs:
+                      - description: Detects high-risk login patterns
+                        job_id: pad-high-risk-login
+                        state: opened
+                      - description: Detects privilege escalation events
+                        job_id: pad-privilege-escalation
+                        state: opened
+                    ml_module_setup_status: complete
+                    package_installation_status: complete
               schema:
                 type: object
                 properties:
@@ -668,6 +867,9 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/watchlists:
     post:
+      description: >-
+        Creates a new entity analytics watchlist with an optional set of entity
+        sources. Watchlists apply a risk score modifier to matched entities.
       operationId: CreateWatchlist
       requestBody:
         content:
@@ -786,6 +988,9 @@ paths:
       x-state: Technical Preview
   /api/entity_analytics/watchlists/{id}:
     get:
+      description: >-
+        Retrieves the details of an entity analytics watchlist by its unique
+        identifier.
       operationId: GetWatchlist
       parameters:
         - description: Unique ID of the watchlist
@@ -817,6 +1022,9 @@ paths:
         - Security Entity Analytics API
       x-state: Technical Preview
     put:
+      description: >-
+        Updates the name, description, risk modifier, or managed status of an
+        existing entity analytics watchlist.
       operationId: UpdateWatchlist
       parameters:
         - description: The ID of the watchlist to update
@@ -1177,6 +1385,7 @@ paths:
       x-state: Technical Preview; added in 9.4.0
   /api/entity_analytics/watchlists/list:
     get:
+      description: Returns a list of all entity analytics watchlists.
       operationId: ListWatchlists
       responses:
         '200':
@@ -2112,6 +2321,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                CleanUpRiskEngineResponse:
+                  summary: Successful cleanup response
+                  value:
+                    cleanup_successful: true
               schema:
                 type: object
                 properties:
@@ -2121,12 +2335,29 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                taskManagerUnavailable:
+                  summary: Task manager is unavailable
+                  value:
+                    message: >-
+                      Task Manager is unavailable, but is required by the risk
+                      engine. Please enable the taskManager plugin and try
+                      again.
+                    status_code: 400
               schema:
                 $ref: '#/components/schemas/TaskManagerUnavailableResponse'
           description: Task manager is unavailable
         default:
           content:
             application/json:
+              examples:
+                cleanupFailed:
+                  summary: Cleanup failed
+                  value:
+                    cleanup_successful: false
+                    errors:
+                      - error: Risk engine is disabled or deleted already.
+                        seq: 1
               schema:
                 $ref: '#/components/schemas/CleanUpRiskEngineErrorResponse'
           description: Unexpected error
@@ -2140,6 +2371,23 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              ConfigureRiskEngineSavedObjectRequest:
+                summary: Configure the risk engine saved object
+                value:
+                  enable_reset_to_zero: false
+                  exclude_alert_statuses:
+                    - closed
+                  exclude_alert_tags:
+                    - low-priority
+                  filters:
+                    - entity_types:
+                        - host
+                        - user
+                      filter: 'host.name: *'
+                  range:
+                    end: now
+                    start: now-30d
             schema:
               type: object
               properties:
@@ -2172,6 +2420,15 @@ paths:
                       - entity_types
                       - filter
                   type: array
+                page_size:
+                  description: >
+                    Number of entities to score per page. Higher values reduce
+                    total scoring time by reducing the number of alert-index
+                    scans, but cannot exceed the ES|QL result limit (10,000 by
+                    default).
+                  maximum: 10000
+                  minimum: 100
+                  type: integer
                 range:
                   type: object
                   properties:
@@ -2184,6 +2441,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                ConfigureRiskEngineSavedObjectResponse:
+                  summary: Successful configuration response
+                  value:
+                    risk_engine_saved_object_configured: true
               schema:
                 type: object
                 properties:
@@ -2193,12 +2455,29 @@ paths:
         '400':
           content:
             application/json:
+              examples:
+                taskManagerUnavailable:
+                  summary: Task manager is unavailable
+                  value:
+                    message: >-
+                      Task Manager is unavailable, but is required by the risk
+                      engine. Please enable the taskManager plugin and try
+                      again.
+                    status_code: 400
               schema:
                 $ref: '#/components/schemas/TaskManagerUnavailableResponse'
           description: Task manager is unavailable
         default:
           content:
             application/json:
+              examples:
+                configureError:
+                  summary: Configure saved object failed
+                  value:
+                    errors:
+                      - error: Internal server error
+                        seq: 1
+                    risk_engine_saved_object_configured: false
               schema:
                 $ref: >-
                   #/components/schemas/ConfigureRiskEngineSavedObjectErrorResponse
@@ -2215,23 +2494,49 @@ paths:
       operationId: ScheduleRiskEngineNow
       requestBody:
         content:
-          application/json: {}
+          application/json:
+            examples:
+              emptyRequest:
+                summary: No request body
+                value: {}
+            schema:
+              type: object
       responses:
         '200':
           content:
             application/json:
+              examples:
+                ScheduleRiskEngineNowResponse:
+                  summary: Successful schedule response
+                  value:
+                    success: true
               schema:
                 $ref: '#/components/schemas/RiskEngineScheduleNowResponse'
           description: Successful response
         '400':
           content:
             application/json:
+              examples:
+                taskManagerUnavailable:
+                  summary: Task manager is unavailable
+                  value:
+                    message: >-
+                      Task Manager is unavailable, but is required by the risk
+                      engine. Please enable the taskManager plugin and try
+                      again.
+                    status_code: 400
               schema:
                 $ref: '#/components/schemas/TaskManagerUnavailableResponse'
           description: Task manager is unavailable
         default:
           content:
             application/json:
+              examples:
+                scheduleNowError:
+                  summary: Schedule now failed
+                  value:
+                    full_error: '{}'
+                    message: Internal server error
               schema:
                 $ref: '#/components/schemas/RiskEngineScheduleNowErrorResponse'
           description: Unexpected error

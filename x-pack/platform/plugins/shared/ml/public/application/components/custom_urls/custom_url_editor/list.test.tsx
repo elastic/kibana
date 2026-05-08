@@ -17,7 +17,7 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { MlKibanaUrlConfig } from '@kbn/ml-anomaly-utils';
 import { parseUrlState } from '@kbn/ml-url-state';
-import type { Job } from '../../../../../common';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 
 jest.mock('@kbn/ml-url-state', () => ({
   parseUrlState: jest.fn(),

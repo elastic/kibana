@@ -10,7 +10,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
+import { INPUT_STRING_PLACEHOLDER } from '../../../../common/consts/placeholders';
 
 // Mock CodeEditor
 jest.mock('@kbn/code-editor', () => ({
@@ -47,16 +49,6 @@ jest.mock('@kbn/workflows/spec/lib/build_fields_zod_validator', () => ({
   buildFieldsZodValidator: jest.fn(() => ({
     safeParse: jest.fn(() => ({ success: true })),
   })),
-}));
-
-// Mock applyInputDefaults
-jest.mock('@kbn/workflows/spec/lib/field_conversion', () => ({
-  applyInputDefaults: jest.fn(() => ({})),
-}));
-
-// Mock generateSampleFromJsonSchema
-jest.mock('../../../../common/lib/generate_sample_from_json_schema', () => ({
-  generateSampleFromJsonSchema: jest.fn(() => 'sample-value'),
 }));
 
 // Mock theme constant
@@ -130,5 +122,117 @@ describe('WorkflowExecuteManualForm', () => {
 
     // The useEffect should call setValue with the default workflow input
     expect(mockSetValue).toHaveBeenCalledWith(expect.any(String));
+  });
+
+  describe('initial input pre-fill', () => {
+    const getInitialJson = (inputs?: JsonModelSchemaType): Record<string, unknown> => {
+      const setValue = jest.fn();
+      renderWithProviders(
+        <WorkflowExecuteManualForm
+          value=""
+          inputs={inputs}
+          setValue={setValue}
+          errors={null}
+          setErrors={jest.fn()}
+        />
+      );
+      expect(setValue).toHaveBeenCalled();
+      const raw = setValue.mock.calls[0][0] as string;
+      return JSON.parse(raw);
+    };
+
+    it('emits an empty object when no inputs schema is provided', () => {
+      expect(getInitialJson()).toEqual({});
+    });
+
+    it('emits an empty object when the schema has no properties', () => {
+      expect(getInitialJson({ properties: {} })).toEqual({});
+    });
+
+    it('includes required properties without a default as placeholders', () => {
+      expect(
+        getInitialJson({
+          properties: { streamName: { type: 'string' } },
+          required: ['streamName'],
+        })
+      ).toEqual({ streamName: INPUT_STRING_PLACEHOLDER });
+    });
+
+    it('uses schema defaults for required properties', () => {
+      expect(
+        getInitialJson({
+          properties: { maxIterations: { type: 'number', default: 5 } },
+          required: ['maxIterations'],
+        })
+      ).toEqual({ maxIterations: 5 });
+    });
+
+    it('uses schema defaults for optional properties', () => {
+      expect(
+        getInitialJson({
+          properties: { color: { type: 'string', default: 'blue' } },
+        })
+      ).toEqual({ color: 'blue' });
+    });
+
+    it('omits optional properties that have no default', () => {
+      expect(
+        getInitialJson({
+          properties: {
+            startsAt: { type: 'string', description: 'Defaults to 24h ago at runtime' },
+            enabled: { type: 'boolean' },
+            tags: { type: 'array', items: { type: 'string' } },
+          },
+        })
+      ).toEqual({});
+    });
+
+    it('emits only required placeholders and defaults in a mixed schema', () => {
+      // Mirrors the example from issue elastic/security-team#16857: only `streamName` is
+      // required and only `maxIterations` has a default; optional `startsAt` should not appear.
+      expect(
+        getInitialJson({
+          properties: {
+            streamName: { type: 'string' },
+            maxIterations: { type: 'number', default: 5 },
+            startsAt: { type: 'string', description: 'Defaults to 24h ago at runtime' },
+          },
+          required: ['streamName'],
+        })
+      ).toEqual({
+        streamName: INPUT_STRING_PLACEHOLDER,
+        maxIterations: 5,
+      });
+    });
+
+    it('resolves $ref nested defaults and omits optional array/boolean/integer without defaults', () => {
+      // Catches regressions in applyInputDefaults $ref resolution; optional top-level fields
+      // with no default must not appear (see PR #264633 / security-team#16857).
+      expect(
+        getInitialJson({
+          properties: {
+            streamName: { type: 'string' },
+            tags: { type: 'array', items: { type: 'string' } },
+            dryRun: { type: 'boolean' },
+            priority: { type: 'integer' },
+            owner: { $ref: '#/definitions/UserSchema' },
+          },
+          required: ['streamName'],
+          definitions: {
+            UserSchema: {
+              type: 'object',
+              properties: {
+                name: { type: 'string', default: 'Jane Doe' },
+                team: { type: 'string' },
+              },
+              required: ['name'],
+            },
+          },
+        } as JsonModelSchemaType)
+      ).toEqual({
+        streamName: INPUT_STRING_PLACEHOLDER,
+        owner: { name: 'Jane Doe' },
+      });
+    });
   });
 });

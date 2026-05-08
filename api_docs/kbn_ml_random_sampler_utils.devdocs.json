@@ -74,6 +74,7 @@
                 "lineNumber": 73,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RandomSamplerOption",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -127,6 +128,7 @@
                 "lineNumber": 75,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RandomSamplerProbability",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -268,6 +270,7 @@
                 "lineNumber": 105,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "RandomSamplerOption",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -379,6 +382,7 @@
                 "lineNumber": 130,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "RandomSamplerProbability",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -513,6 +517,7 @@
             "lineNumber": 56,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "RandomSamplerOptions",
             "trackAdoption": false,
             "isRequired": true
           }

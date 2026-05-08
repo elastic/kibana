@@ -67,7 +67,7 @@ export function WiredStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
 
   const {
-    features: { attachments, overviewPage },
+    features: { overviewPage },
   } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
@@ -232,16 +232,12 @@ export function WiredStreamDetailManagement({
         </EuiToolTip>
       ),
     },
-    ...(attachments.enabled
-      ? {
-          attachments: {
-            content: <StreamDetailAttachments definition={definition} />,
-            label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
-              defaultMessage: 'Attachments',
-            }),
-          },
-        }
-      : {}),
+    attachments: {
+      content: <StreamDetailAttachments definition={definition} />,
+      label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
+        defaultMessage: 'Attachments',
+      }),
+    },
     ...otherTabs,
     ...(definition.privileges.manage
       ? {

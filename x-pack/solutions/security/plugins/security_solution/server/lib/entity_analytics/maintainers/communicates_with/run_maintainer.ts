@@ -144,7 +144,7 @@ export async function runMaintainer({
       };
 
       const esqlQuery = integration.buildEsqlQuery(namespace);
-      logger.info(
+      logger.debug(
         `[${integration.id}] Running ES|QL query for ${buckets.length} user buckets (${esqlQuery.length} chars)`
       );
       logger.debug(`[${integration.id}] ES|QL query:\n${esqlQuery}`);

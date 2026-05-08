@@ -12,6 +12,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
+import type { AgentExecutionMode } from '@kbn/agent-builder-common';
 import type {
   ToolEventEmitter,
   ModelProvider,
@@ -24,8 +25,9 @@ import type {
   RunContext,
 } from '../runner';
 import type { IToolFileStore } from '../runner/filestore';
-import type { AttachmentStateManager } from '../attachments';
 import type { SkillsService } from '../runner/skills_service';
+import type { ToolCallSource } from '../runner/runner';
+import type { AttachmentStateManager } from '../attachments';
 
 /**
  * Tool result as returned by the tool handler.
@@ -73,11 +75,21 @@ export type ToolHandlerFn<
   TResult extends ToolResult = ToolResult
 > = (args: TParams, context: ToolHandlerContext) => MaybePromise<ToolHandlerReturn<TResult>>;
 
+export interface ToolHandlerCallContext {
+  toolId: string;
+  toolCallId: string;
+  callSource: ToolCallSource;
+}
+
 /**
  * Scoped context which can be used during tool execution to access
  * a panel of built-in services, such as a pre-scoped elasticsearch client.
  */
 export interface ToolHandlerContext {
+  /**
+   * Information about the tool call
+   */
+  callContext: ToolHandlerCallContext;
   /**
    * The request that was provided when initiating that tool execution.
    * Can be used to create scoped services not directly exposed by this context.
@@ -150,4 +162,9 @@ export interface ToolHandlerContext {
    * The current execution context, including the agent/tool call stack.
    */
   runContext: RunContext;
+  /**
+   * The execution mode for the current agent run.
+   * When 'standalone', the execution is non-interactive (HITL disabled).
+   */
+  executionMode?: AgentExecutionMode;
 }

@@ -13,7 +13,7 @@ import { MAX_WORKFLOW_YAML_LENGTH } from '@kbn/workflows';
 import type { RouteDependencies } from '../types';
 import { AVAILABILITY, INTERNAL_API_VERSION, OAS_TAG } from '../utils/route_constants';
 import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerValidateWorkflowRoute({ router, api, spaces, logger }: RouteDependencies) {
   router.versioned
@@ -46,7 +46,7 @@ export function registerValidateWorkflowRoute({ router, api, spaces, logger }: R
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const spaceId = spaces.getSpaceId(request);
           const result = await api.validateWorkflow(request.body.yaml, spaceId, request);

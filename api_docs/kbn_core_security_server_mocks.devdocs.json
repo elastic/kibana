@@ -304,6 +304,7 @@
                 "lineNumber": 125,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "MockAuthenticatedUserProps",
                 "trackAdoption": false,
                 "isRequired": true
               }

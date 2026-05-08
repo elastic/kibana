@@ -14,23 +14,27 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { EntityType } from '../common.gen';
 
+export const StopEntityEngineRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The entity type of the engine to stop.
+     */
+    entityType: EntityType,
+  })
+);
 export type StopEntityEngineRequestParams = z.infer<typeof StopEntityEngineRequestParams>;
-export const StopEntityEngineRequestParams = z.object({
-  /**
-   * The entity type of the engine to stop.
-   */
-  entityType: EntityType,
-});
 export type StopEntityEngineRequestParamsInput = z.input<typeof StopEntityEngineRequestParams>;
 
+export const StopEntityEngineResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Whether the engine was successfully stopped.
+     */
+    stopped: z.boolean().optional(),
+  })
+);
 export type StopEntityEngineResponse = z.infer<typeof StopEntityEngineResponse>;
-export const StopEntityEngineResponse = z.object({
-  /**
-   * Whether the engine was successfully stopped.
-   */
-  stopped: z.boolean().optional(),
-});

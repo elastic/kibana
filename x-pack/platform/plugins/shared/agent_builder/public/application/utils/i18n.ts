@@ -93,7 +93,18 @@ export const labels = {
     // Table columns and labels
     toolIdLabel: i18n.translate('xpack.agentBuilder.tools.idLabel', { defaultMessage: 'ID' }),
     tagsLabel: i18n.translate('xpack.agentBuilder.tools.tagsLabel', { defaultMessage: 'Labels' }),
+    experimentalLabel: i18n.translate('xpack.agentBuilder.tools.experimentalLabel', {
+      defaultMessage: 'Experimental',
+    }),
     toolsLabel: i18n.translate('xpack.agentBuilder.tools.toolsLabel', { defaultMessage: 'Tools' }),
+    selectToolColumnHeader: i18n.translate('xpack.agentBuilder.tools.selectToolColumnHeader', {
+      defaultMessage: 'Select tool',
+    }),
+    selectToolCheckboxAriaLabel: (toolId: string) =>
+      i18n.translate('xpack.agentBuilder.tools.selectToolCheckboxAriaLabel', {
+        defaultMessage: 'Select tool {toolId}',
+        values: { toolId },
+      }),
 
     // Tool types
     esqlLabel: i18n.translate('xpack.agentBuilder.tools.esqlLabel', { defaultMessage: 'ES|QL' }),
@@ -508,6 +519,76 @@ export const labels = {
           defaultMessage: 'Please select at least one tool to import.',
         }
       ),
+    },
+    mcpClients: {
+      title: i18n.translate('xpack.agentBuilder.mcpClients.title', {
+        defaultMessage: 'MCP clients (OAuth)',
+      }),
+      description: i18n.translate('xpack.agentBuilder.mcpClients.description', {
+        defaultMessage:
+          'An MCP client enables agentic AI to securely interact with Elastic Cloud on your behalf. Agents can request access dynamically and act as delegated users.',
+      }),
+      breadcrumb: i18n.translate('xpack.agentBuilder.mcpClients.breadcrumb', {
+        defaultMessage: 'MCP clients',
+      }),
+      addMcpClientButtonLabel: i18n.translate(
+        'xpack.agentBuilder.mcpClients.addMcpClientButtonLabel',
+        {
+          defaultMessage: 'Add MCP client',
+        }
+      ),
+      searchMcpClientsPlaceholder: i18n.translate(
+        'xpack.agentBuilder.mcpClients.searchMcpClientsPlaceholder',
+        {
+          defaultMessage: 'Search',
+        }
+      ),
+      listMcpClientsErrorMessage: i18n.translate(
+        'xpack.agentBuilder.mcpClients.listMcpClientsErrorMessage',
+        {
+          defaultMessage: 'Failed to fetch MCP clients',
+        }
+      ),
+      noMcpClientsFoundMessage: i18n.translate(
+        'xpack.agentBuilder.mcpClients.noMcpClientsFoundMessage',
+        {
+          defaultMessage: 'No MCP clients found.',
+        }
+      ),
+      noMcpClientsPromptTitle: i18n.translate(
+        'xpack.agentBuilder.mcpClients.noMcpClientsPromptTitle',
+        {
+          defaultMessage: 'No MCP clients (OAuth)',
+        }
+      ),
+      noMcpClientsPromptBody: i18n.translate(
+        'xpack.agentBuilder.mcpClients.noMcpClientsPromptBody',
+        {
+          defaultMessage: 'Get started with MCP clients (OAuth).',
+        }
+      ),
+      noItemsPromptLearnMoreLinkLabel: i18n.translate(
+        'xpack.agentBuilder.mcpClients.noItemsPromptLearnMoreLinkLabel',
+        {
+          defaultMessage: 'Learn more',
+        }
+      ),
+      name: i18n.translate('xpack.agentBuilder.mcpClients.name', { defaultMessage: 'Name' }),
+      connections: i18n.translate('xpack.agentBuilder.mcpClients.connections', {
+        defaultMessage: 'Connections',
+      }),
+      status: i18n.translate('xpack.agentBuilder.mcpClients.status', {
+        defaultMessage: 'Status',
+      }),
+      actions: i18n.translate('xpack.agentBuilder.mcpClients.actions', {
+        defaultMessage: 'Actions',
+      }),
+      statusFilter: i18n.translate('xpack.agentBuilder.mcpClients.statusFilter', {
+        defaultMessage: 'Status',
+      }),
+      mcpClientsLabel: i18n.translate('xpack.agentBuilder.mcpClients.mcpClientsLabel', {
+        defaultMessage: 'MCP clients',
+      }),
     },
   },
   byAuthor: (author: string) =>
@@ -1668,6 +1749,16 @@ export const labels = {
       'xpack.agentBuilder.connectors.status.notAuthorizedTooltip',
       {
         defaultMessage: 'Click to authorize via OAuth',
+      }
+    ),
+    statusEarsDisabled: i18n.translate('xpack.agentBuilder.connectors.status.earsDisabled', {
+      defaultMessage: 'Disabled',
+    }),
+    statusEarsDisabledTooltip: i18n.translate(
+      'xpack.agentBuilder.connectors.status.earsDisabledTooltip',
+      {
+        defaultMessage:
+          'EARS authentication is disabled. Enable it via xpack.actions.auth.ears.enabled in kibana.yml.',
       }
     ),
     statusFilter: i18n.translate('xpack.agentBuilder.connectors.statusFilter', {

@@ -147,6 +147,14 @@ Output sections:
   snapshot was captured with allocation tracking. Walks each live
   node's allocation-time call stack to the first plugin frame, so
   schema libraries roll up to the plugin that triggered them.
+- **Allocated by Module (allocation site)** — same walk, reports
+  third-party `node_modules` libraries (zod, joi, require-in-the-middle,
+  etc.). Tells you *where the allocator code lives*.
+- **Allocated by Package (allocation site)** — same walk, reports
+  `@kbn/*` Kibana packages, skipping library frames so wrapper packages
+  get credit for the library bytes they trigger (e.g. `@kbn/connector-schemas`
+  shows up with the zod bytes its callers allocated). Tells you *which
+  Kibana code triggered the allocations*.
 
 All tables include both percentage and absolute MB columns, so you
 can diff snapshots across interventions.
@@ -157,6 +165,11 @@ Flags:
 - `--counterfactual=N` — top-N packages/plugins included in the
   counterfactual analysis (default 30).
 - `--no-counterfactual` — skip counterfactual analysis (faster).
+- `--filter=<regex>` — restrict allocation-site tables to nodes whose
+  deepest allocation frame `script_name` matches `<regex>`, and skip
+  matching frames when walking the stack so attribution lands on the
+  *caller* of the filtered code. Example: `--filter=zod` to attribute
+  Zod-allocated state back to the package that defined the schema.
 
 ---
 

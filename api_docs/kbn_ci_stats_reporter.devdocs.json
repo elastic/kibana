@@ -86,6 +86,7 @@
                 "lineNumber": 124,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "SomeDevLog",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -152,6 +153,7 @@
                 "lineNumber": 128,
                 "columnNumber": 60,
                 "deprecated": false,
+                "docsReferencedTypeName": "SomeDevLog",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -244,6 +246,7 @@
                 "lineNumber": 157,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "TimingsOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -329,6 +332,7 @@
                 "lineNumber": 238,
                 "columnNumber": 43,
                 "deprecated": false,
+                "docsReferencedTypeName": "MetricsOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -381,6 +385,7 @@
                 "lineNumber": 266,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "CiStatsReportTestsOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -419,6 +424,7 @@
                 "lineNumber": 321,
                 "columnNumber": 34,
                 "deprecated": false,
+                "docsReferencedTypeName": "PerformanceMetrics",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -474,6 +480,7 @@
             "lineNumber": 14,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },

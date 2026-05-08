@@ -7,10 +7,9 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/i18n",
-    "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
-    "@kbn/agent-builder-genai-utils",
+    "@kbn/agent-builder-tools-base",
     "@kbn/agent-builder-server",
     "@kbn/dashboard-plugin",
     "@kbn/dashboard-agent-common",
@@ -27,10 +26,11 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/es-query",
     "@kbn/data-plugin",
+    "@kbn/agent-context-layer-plugin",
     "@kbn/as-code-filters-transforms",
     "@kbn/as-code-shared-transforms",
     "@kbn/data-views-plugin",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
   ],
   "exclude": ["target/**/*"]
 }

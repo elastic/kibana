@@ -13,7 +13,7 @@ import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import { Parser, isSubQuery } from '@elastic/esql';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
-import { EsqlService } from '../services/esql_service';
+import { EsqlService } from '@kbn/esql-server-utils';
 
 const ES_TIMESTAMP_FIELD_NAME = '@timestamp';
 

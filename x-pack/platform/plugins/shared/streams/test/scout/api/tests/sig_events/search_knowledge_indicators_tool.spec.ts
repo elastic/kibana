@@ -38,11 +38,11 @@ import {
 } from '../../../../../server/lib/streams/assets/fields';
 import { getQueryLinkUuid } from '../../../../../server/lib/streams/assets/query/query_client';
 
-const TOOL_ID = 'platform.streams.sig_events.search_kis';
+const TOOL_ID = 'platform.streams.sig_events.ki_search';
 
 // Failing, see https://github.com/elastic/kibana/issues/262787
 apiTest.describe.skip(
-  'search_kis tool',
+  'ki_search tool',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     const rootStream = 'logs.otel';

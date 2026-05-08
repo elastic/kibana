@@ -31,6 +31,7 @@ import type {
 } from './types';
 import type { StreamsAppServices } from './services/types';
 import {
+  createDiscoverFlyoutStreamFieldByStreamNameLink,
   createDiscoverFlyoutStreamFieldLink,
   createDiscoverFlyoutStreamProcessingLink,
 } from './discover_features';
@@ -165,6 +166,10 @@ export class StreamsAppPlugin
       pluginsStart.discoverShared.features.registry.register({
         id: 'streams',
         renderFlyoutStreamField: createDiscoverFlyoutStreamFieldLink({
+          streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
+          locator,
+        }),
+        renderFlyoutStreamFieldByStreamName: createDiscoverFlyoutStreamFieldByStreamNameLink({
           streamsRepositoryClient: pluginsStart.streams.streamsRepositoryClient,
           locator,
         }),

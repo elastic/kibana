@@ -49,7 +49,7 @@
           "() => void"
         ],
         "path": "packages/kbn-heap-snapshot-analyzer-cli/src/run_cli.ts",
-        "lineNumber": 128,
+        "lineNumber": 139,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

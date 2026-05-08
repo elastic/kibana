@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import {
   ListJoinedTeamsInputSchema,
@@ -33,10 +33,12 @@ import type {
  */
 const userPath = (userId?: string): string => (userId ? `/users/${userId}` : '/me');
 
-const GraphCollectionOutputSchema = z.object({
-  value: z.array(z.any()).describe('Array of items returned from the API'),
-  '@odata.nextLink': z.string().optional().describe('URL to fetch next page of results'),
-});
+const GraphCollectionOutputSchema = lazySchema(() =>
+  z.object({
+    value: z.array(z.any()).describe('Array of items returned from the API'),
+    '@odata.nextLink': z.string().optional().describe('URL to fetch next page of results'),
+  })
+);
 
 export const MicrosoftTeams: ConnectorSpec = {
   metadata: {
@@ -74,6 +76,48 @@ export const MicrosoftTeams: ConnectorSpec = {
         },
       },
       {
+        type: 'oauth_authorization_code',
+        defaults: {
+          scope:
+            'Team.ReadBasic.All Channel.ReadBasic.All Chat.Read ChannelMessage.Read.All offline_access',
+        },
+        overrides: {
+          meta: {
+            scope: { hidden: true },
+            authorizationUrl: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.authorizationUrl.label',
+                { defaultMessage: 'Authorization URL' }
+              ),
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.authorizationUrl.helpText',
+                {
+                  defaultMessage:
+                    "Replace ''{tenantId}'' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/authorize",
+                  values: { tenantId: '{tenant-id}' },
+                }
+              ),
+            },
+            tokenUrl: {
+              label: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.tokenUrl.label',
+                { defaultMessage: 'Token URL' }
+              ),
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+              helpText: i18n.translate(
+                'core.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.tokenUrl.helpText',
+                {
+                  defaultMessage:
+                    "Replace ''{tenantId}'' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+                  values: { tenantId: '{tenant-id}' },
+                }
+              ),
+            },
+          },
+        },
+      },
+      {
         type: 'oauth_client_credentials',
         defaults: {
           scope: 'https://graph.microsoft.com/.default',
@@ -99,6 +143,17 @@ export const MicrosoftTeams: ConnectorSpec = {
           },
         },
       },
+      {
+        type: 'ears',
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'microsoft',
+          scope:
+            'Team.ReadBasic.All Channel.ReadBasic.All Chat.Read ChannelMessage.Read.All offline_access',
+        },
+      },
     ],
   },
 
@@ -107,7 +162,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     listJoinedTeams: {
       isTool: true,
       description:
-        "List the Microsoft Teams that the authenticated user (or a specified user) has joined. Use this to discover available teams before drilling into channels or messages. With delegated auth (bearer token), omit userId to list the signed-in user's teams. With app-only auth (client credentials), userId is required.",
+        "List the Microsoft Teams that the authenticated user (or a specified user) has joined. Use this to discover available teams before drilling into channels or messages. With delegated auth (bearer token or OAuth authorization code), omit userId to list the signed-in user's teams. With app-only auth (client credentials), userId is required.",
       input: ListJoinedTeamsInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListJoinedTeamsInput) => {
@@ -179,7 +234,7 @@ export const MicrosoftTeams: ConnectorSpec = {
     listChats: {
       isTool: true,
       description:
-        'List Microsoft Teams chats (direct messages and group chats) for the authenticated user or a specified user. Use this to discover chat IDs before fetching messages with listChatMessages. With delegated auth (bearer token), omit userId. With app-only auth (client credentials), userId is required.',
+        'List Microsoft Teams chats (direct messages and group chats) for the authenticated user or a specified user. Use this to discover chat IDs before fetching messages with listChatMessages. With delegated auth (bearer token or OAuth authorization code), omit userId. With app-only auth (client credentials), userId is required.',
       input: ListChatsInputSchema,
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input: ListChatsInput) => {
@@ -226,25 +281,27 @@ export const MicrosoftTeams: ConnectorSpec = {
     searchMessages: {
       isTool: true,
       description:
-        'Search Teams messages using the Microsoft Graph Search API. Requires delegated authentication (bearer token). Not supported with app-only (client credentials) auth — Microsoft does not allow application permissions for chatMessage search.',
+        'Search Teams messages using the Microsoft Graph Search API. Requires delegated authentication (bearer token or OAuth authorization code). Not supported with app-only (client credentials) auth — Microsoft does not allow application permissions for chatMessage search.',
       input: SearchMessagesInputSchema,
-      output: z
-        .object({
-          value: z
-            .array(
-              z.object({
-                hitsContainers: z
-                  .array(z.any())
-                  .describe('Containers with search hits and associated metadata'),
-              })
-            )
-            .describe('Search response containers'),
-        })
-        .describe('Microsoft Graph Search API response'),
+      output: lazySchema(() =>
+        z
+          .object({
+            value: z
+              .array(
+                z.object({
+                  hitsContainers: z
+                    .array(z.any())
+                    .describe('Containers with search hits and associated metadata'),
+                })
+              )
+              .describe('Search response containers'),
+          })
+          .describe('Microsoft Graph Search API response')
+      ),
       handler: async (ctx, input: SearchMessagesInput) => {
         if (ctx.secrets?.authType === 'oauth_client_credentials') {
           throw new Error(
-            'searchMessages requires delegated authentication (bearer token). ' +
+            'searchMessages requires delegated authentication (bearer token or OAuth authorization code). ' +
               'Microsoft Graph does not support app-only (client credentials) access ' +
               'to the /search/query API for chatMessage entities.'
           );
@@ -284,8 +341,9 @@ export const MicrosoftTeams: ConnectorSpec = {
     '- Direct/group chats: listChats → listChatMessages (with chatId)',
     '',
     'AUTH DIFFERENCES (delegated vs app-only):',
-    '- Delegated auth (bearer token): userId is optional — omit it to operate as the signed-in user.',
+    '- Delegated auth (bearer token or oauth_authorization_code or ears): userId is optional — omit it to operate as the signed-in user.',
     '- App-only auth (client credentials): userId is REQUIRED for listJoinedTeams and listChats.',
+    '- searchMessages only works with delegated auth (bearer or oauth_authorization_code or ears); app-only (client credentials) is not supported.',
   ].join('\n'),
 
   test: {
@@ -299,7 +357,7 @@ export const MicrosoftTeams: ConnectorSpec = {
         const isAppOnly = ctx.secrets?.authType === 'oauth_client_credentials';
         const url = isAppOnly
           ? 'https://graph.microsoft.com/v1.0/teams'
-          : 'https://graph.microsoft.com/v1.0/me/joinedTeams';
+          : 'https://graph.microsoft.com/v1.0/me/joinedTeams'; // bearer and oauth_authorization_code use delegated /me path
 
         const response = await ctx.client.get(url, {
           params: { $select: 'id,displayName' },

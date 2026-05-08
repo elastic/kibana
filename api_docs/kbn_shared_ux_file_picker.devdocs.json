@@ -48,6 +48,7 @@
             "lineNumber": 18,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -145,6 +146,7 @@
                 "lineNumber": 47,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "FileJSON",
                 "trackAdoption": false,
                 "isRequired": true
               }

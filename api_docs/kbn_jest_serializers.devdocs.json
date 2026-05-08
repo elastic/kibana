@@ -103,6 +103,7 @@
             "lineNumber": 11,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Function",
             "trackAdoption": false,
             "isRequired": true
           },

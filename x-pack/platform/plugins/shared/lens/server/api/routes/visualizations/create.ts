@@ -7,6 +7,7 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { LENS_CONTENT_TYPE } from '@kbn/lens-common/content_management/constants';
 
 import {
@@ -27,7 +28,7 @@ import {
 
 export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement, builder }
+  { contentManagement, builder, usageCounter }
 ) => {
   const createRoute = router.post({
     path: LENS_VIS_API_PATH,
@@ -81,27 +82,28 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
         },
       },
     },
-    async (ctx, req, res) => {
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<LensSavedObject>(LENS_CONTENT_TYPE);
+    async (ctx, req, res) =>
+      telemetryHandler(req, usageCounter, async () => {
+        const client = contentManagement.contentClient
+          .getForRequest({ request: req, requestHandlerContext: ctx })
+          .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
-      try {
-        const { references, ...data } = getLensRequestConfig(builder, req.body);
-        const options: LensCreateIn['options'] = { ...req.query, references };
-        const { result } = await client.create(data, options);
-        const responseItem = getLensResponseItem(builder, result.item);
+        try {
+          const { references, ...data } = getLensRequestConfig(builder, req.body);
+          const options: LensCreateIn['options'] = { ...req.query, references };
+          const { result } = await client.create(data, options);
+          const responseItem = getLensResponseItem(builder, result.item);
 
-        return res.created<LensCreateResponseBody>({
-          body: responseItem,
-        });
-      } catch (error) {
-        if (isBoom(error) && error.output.statusCode === 403) {
-          return res.forbidden();
+          return res.created<LensCreateResponseBody>({
+            body: responseItem,
+          });
+        } catch (error) {
+          if (isBoom(error) && error.output.statusCode === 403) {
+            return res.forbidden();
+          }
+
+          return boomify(error); // forward unknown error
         }
-
-        return boomify(error); // forward unknown error
-      }
-    }
+      })
   );
 };

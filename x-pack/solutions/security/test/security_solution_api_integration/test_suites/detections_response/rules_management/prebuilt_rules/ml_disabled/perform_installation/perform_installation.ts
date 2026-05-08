@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext): void => {
           failed: 0,
         },
         results: {
-          created: [{ type: 'query' }],
+          created: [{ rule_id: nonMlRuleAsset['security-rule'].rule_id }],
         },
       });
     });

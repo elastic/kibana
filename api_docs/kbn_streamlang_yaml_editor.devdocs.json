@@ -68,6 +68,7 @@
             "lineNumber": 20,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamType",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -137,6 +138,7 @@
             "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "StepSummary",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -160,6 +162,7 @@
             "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "YamlLineMap",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -216,6 +219,7 @@
             "lineNumber": 38,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamType",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -313,6 +317,7 @@
             "lineNumber": 42,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangYamlEditorProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -373,6 +378,7 @@
             "lineNumber": 21,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "StreamlangDSL",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -610,6 +616,7 @@
                 "lineNumber": 17,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "StreamlangDSL",
                 "trackAdoption": false,
                 "isRequired": true
               },

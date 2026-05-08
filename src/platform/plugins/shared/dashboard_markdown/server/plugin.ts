@@ -20,7 +20,7 @@ import { getTransforms } from './embeddable';
 
 export class MarkdownPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
   setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
-    plugins.embeddable.registerTransforms(MARKDOWN_EMBEDDABLE_TYPE, {
+    plugins.embeddable.registerEmbeddableServerDefinition(MARKDOWN_EMBEDDABLE_TYPE, {
       title: 'Markdown',
       getSchema: () => markdownEmbeddableSchema,
       getTransforms,

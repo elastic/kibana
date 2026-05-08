@@ -8,14 +8,13 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getWorkflowExamples, WORKFLOW_EXAMPLE_IDS } from '@kbn/workflows';
 import { loadWorkflowExampleContent } from '@kbn/workflows/server';
 import { z } from '@kbn/zod/v4';
 import { workflowTools } from '../../../common/agent_builder/constants';
-import type { AgentBuilderPluginSetupContract } from '../../types';
+import type { AgentBuilderPluginSetup } from '../../types';
 
-export function registerGetExamplesTool(agentBuilder: AgentBuilderPluginSetupContract): void {
+export function registerGetExamplesTool(agentBuilder: AgentBuilderPluginSetup): void {
   agentBuilder.tools.register({
     id: workflowTools.getExamples,
     type: ToolType.builtin,
@@ -43,17 +42,7 @@ Supports keyword search across names, descriptions, and tags.`,
         .describe('Maximum number of examples to return (default: 3, max: 5)'),
     }),
     tags: ['workflows', 'yaml', 'examples'],
-    availability: {
-      handler: async ({ uiSettings }) => {
-        const isEnabled = await uiSettings.get<boolean>(
-          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-        return isEnabled
-          ? { status: 'available' }
-          : { status: 'unavailable', reason: 'AI workflow authoring is disabled' };
-      },
-      cacheMode: 'space',
-    },
+    experimental: true,
     handler: async ({ category, search, limit }) => {
       const effectiveLimit = Math.min(limit ?? 3, 5);
       const entries = getWorkflowExamples({ category, search });

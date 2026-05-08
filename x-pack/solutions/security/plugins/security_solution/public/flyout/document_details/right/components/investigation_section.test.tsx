@@ -19,7 +19,7 @@ import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { useHighlightedFields } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
-import { useRuleDetails } from '../../../rule_details/hooks/use_rule_details';
+import { useRuleDetails } from '../../../../flyout_v2/rule/hooks/use_rule_details';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { useHighlightedFieldsPrivilege } from '../../../../flyout_v2/document/hooks/use_highlighted_fields_privilege';
 import type { UseBasicDataFromDetailsDataResult } from '../../shared/hooks/use_basic_data_from_details_data';
@@ -52,7 +52,7 @@ jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
 }));
 jest.mock('../../../../flyout_v2/document/hooks/use_highlighted_fields');
 jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../rule_details/hooks/use_rule_details');
+jest.mock('../../../../flyout_v2/rule/hooks/use_rule_details');
 jest.mock('../../../../flyout_v2/document/hooks/use_highlighted_fields_privilege');
 jest.mock('../../shared/hooks/use_basic_data_from_details_data');
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
@@ -175,6 +175,18 @@ describe('<InvestigationSection />', () => {
 
     await act(async () => {
       expect(getByTestId(INVESTIGATION_GUIDE_TEST_ID)).toBeInTheDocument();
+    });
+  });
+
+  it('should not render investigation guide when document is a remote alert', async () => {
+    const { queryByTestId } = renderInvestigationSection({
+      ...panelContextValue,
+      indexName: 'remote-cluster:index-name',
+      searchHit: { ...panelContextValue.searchHit, _index: 'remote-cluster:index-name' },
+    });
+
+    await act(async () => {
+      expect(queryByTestId(INVESTIGATION_GUIDE_TEST_ID)).not.toBeInTheDocument();
     });
   });
 

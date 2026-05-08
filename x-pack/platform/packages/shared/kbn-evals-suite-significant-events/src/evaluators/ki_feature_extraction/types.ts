@@ -21,8 +21,8 @@ export type ValidKIFeatureType = (typeof VALID_KI_FEATURE_TYPES)[number];
 
 export interface KIFeatureExtractionEvaluationExample {
   input: {
-    sample_documents: Array<SearchHit<Record<string, unknown>>>;
-  };
+    sample_documents?: Array<SearchHit<Record<string, unknown>>>;
+  } & Record<string, unknown>;
   output: {
     criteria: EvaluationCriterion[];
     weight?: number;
@@ -46,6 +46,7 @@ export interface KIFeatureExtractionEvaluationDataset {
 interface KIFeatureExtractionTaskOutput {
   features: BaseFeature[];
   traceId?: string | null;
+  sample_documents?: Array<SearchHit<Record<string, unknown>>>;
 }
 
 export type KIFeatureExtractionOutput = BaseFeature[] | KIFeatureExtractionTaskOutput;

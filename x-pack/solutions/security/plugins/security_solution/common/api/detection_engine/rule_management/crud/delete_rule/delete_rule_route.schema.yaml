@@ -46,3 +46,32 @@ paths:
             application/json:
               schema:
                 $ref: '../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+              examples:
+                deletedRule:
+                  summary: Response shape after a rule is deleted
+                  value:
+                    id: c41d170b-8ba6-4de6-b8ec-76440a35ace3
+                    updated_at: '2020-02-03T11:19:04.462Z'
+                    updated_by: elastic
+                    name: 'MS Office child process'
+                    rule_id: process_started_by_ms_office_user_folder
+                    description: 'Process started by MS Office program in user folder'
+                    enabled: false
+                    immutable: false
+                    version: 3
+                    tags: [tag]
+                    type: query
+                    language: kuery
+                    query: 'event.action:Process*'
+                    risk_score: 50
+                    severity: low
+                    from: 'now-4200s'
+                    to: 'now'
+                    max_signals: 100
+                    references: []
+                    false_positives: []
+                    interval: 1h
+                    actions: []
+                    throttle: null
+                    created_at: '2020-02-03T11:19:04.259Z'
+                    created_by: elastic

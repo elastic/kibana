@@ -36,6 +36,8 @@ export const buildLookupSyncOperationsForPage = ({
   resolutionTargetIds?: string[];
 }): { upserts: LookupDocument[]; deletes: string[] } => {
   const upsertMap = new Map<string, LookupDocument>();
+  const resolutionTargetIdSet = new Set(resolutionTargetIds);
+  const deleteSet = new Set(notInStoreEntityIds);
 
   for (const [entityId, entity] of page.entities.entries()) {
     const targetId = entity.entity?.relationships?.resolution?.resolved_to;
@@ -57,6 +59,12 @@ export const buildLookupSyncOperationsForPage = ({
           '@timestamp': now,
         });
       }
+    } else {
+      // Lookup rows are derived state owned by risk scoring. Remove stale rows
+      // when an entity is no longer resolved and is not a confirmed target.
+      if (!resolutionTargetIdSet.has(entityId) && !upsertMap.has(entityId)) {
+        deleteSet.add(entityId);
+      }
     }
   }
 
@@ -75,7 +83,11 @@ export const buildLookupSyncOperationsForPage = ({
   }
 
   const upserts = [...upsertMap.values()];
-  return { upserts, deletes: notInStoreEntityIds };
+  for (const entityId of upsertMap.keys()) {
+    // If an entity is upserted in this page, never delete it in the same batch.
+    deleteSet.delete(entityId);
+  }
+  return { upserts, deletes: [...deleteSet] };
 };
 
 export const syncLookupIndex = async ({
