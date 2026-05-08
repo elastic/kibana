@@ -5233,6 +5233,7 @@ const embeddingDefinition: FunctionDefinition = {
             'Identifier of an existing inference endpoint that will generate the embeddings. The inference endpoint must have the `embedding` task type and should use the same model that was used to embed your indexed data.',
           hint: {
             entityType: 'inference_endpoint',
+            kind: 'entity',
             constraints: {
               task_type: 'embedding',
             },
@@ -19712,6 +19713,7 @@ const textEmbeddingDefinition: FunctionDefinition = {
             'Identifier of an existing inference endpoint that will generate the embeddings. The inference endpoint must have the `text_embedding` task type and should use the same model that was used to embed your indexed data.',
           hint: {
             entityType: 'inference_endpoint',
+            kind: 'entity',
             constraints: {
               task_type: 'text_embedding',
             },
