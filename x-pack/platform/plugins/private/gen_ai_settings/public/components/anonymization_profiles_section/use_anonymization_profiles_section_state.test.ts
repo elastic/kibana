@@ -69,7 +69,7 @@ describe('useAnonymizationProfilesSectionState', () => {
     expect(result.current.canManage).toBe(true);
   });
 
-  it('uses basePath.spaceId and hidden capabilities when capability shape is invalid', () => {
+  it('uses http.spaceId and hidden capabilities when capability shape is invalid', () => {
     const { services } = setupServices();
     (services.http.basePath as Record<string, unknown>).spaceId = 'default';
     services.application.capabilities.anonymization = {} as never;

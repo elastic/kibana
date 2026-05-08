@@ -8,8 +8,6 @@
  */
 
 import type { IBasePath } from '@kbn/core-http-browser';
-import type { SpaceId } from '@kbn/core-spaces-common';
-import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { modifyUrl } from '@kbn/std';
 
 export class BasePath implements IBasePath {
@@ -17,26 +15,22 @@ export class BasePath implements IBasePath {
   public readonly serverBasePath: string;
   public readonly assetsHrefBase: string;
   public readonly publicBaseUrl?: string;
-  public readonly spaceId: SpaceId;
 
   constructor({
     basePath,
     serverBasePath,
     assetsHrefBase,
     publicBaseUrl,
-    spaceId,
   }: {
     basePath: string;
     serverBasePath?: string;
     assetsHrefBase?: string;
     publicBaseUrl?: string;
-    spaceId?: string;
   }) {
     this.basePath = basePath;
     this.serverBasePath = serverBasePath ?? this.basePath;
     this.assetsHrefBase = assetsHrefBase ?? this.serverBasePath;
     this.publicBaseUrl = publicBaseUrl;
-    this.spaceId = spaceId ? asSpaceId(spaceId) : DEFAULT_SPACE_ID;
   }
 
   public get = () => {

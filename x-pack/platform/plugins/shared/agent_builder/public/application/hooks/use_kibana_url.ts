@@ -21,7 +21,7 @@ export const useKibanaUrl = () => {
   const kibanaUrl = useMemo(() => {
     const configuredUrl = http.basePath.publicBaseUrl ?? cloud?.kibanaUrl;
     if (configuredUrl) {
-      return addSpaceIdToPath(configuredUrl, http.basePath.spaceId);
+      return addSpaceIdToPath(configuredUrl, http.spaceId);
     }
     return `${window.location.origin}${http.basePath.get()}`;
   }, [cloud, http]);

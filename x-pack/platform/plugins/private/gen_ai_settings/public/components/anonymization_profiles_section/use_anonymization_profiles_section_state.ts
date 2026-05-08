@@ -38,7 +38,7 @@ export const useAnonymizationProfilesSectionState = ({
 }) => {
   const { application, http, notifications } = services;
 
-  const activeSpaceId = http.basePath.spaceId;
+  const activeSpaceId = http.spaceId;
 
   const anonymizationCapabilities = useMemo<AnonymizationCapabilities>(() => {
     const capabilityValue = application.capabilities[ANONYMIZATION_FEATURE_ID];

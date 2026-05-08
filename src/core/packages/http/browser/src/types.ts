@@ -16,6 +16,12 @@ import type { ApiVersion } from '@kbn/core-http-common';
 /** @public */
 export interface HttpSetup {
   /**
+   * The active space ID for this page. Always populated — defaults to `'default'`.
+   * Static for the page lifetime; space changes trigger a full page navigation.
+   */
+  readonly spaceId: SpaceId;
+
+  /**
    * APIs for manipulating the basePath on URL segments.
    * See {@link IBasePath}
    */
@@ -109,13 +115,6 @@ export interface IBasePath {
    * other hrefs to static assets.
    */
   readonly assetsHrefBase: string;
-
-  /**
-   * The active space ID derived from the current basePath.
-   * Always populated — defaults to `'default'` when no `/s/{spaceId}` prefix is present.
-   * This is a static string; space changes trigger a full page navigation.
-   */
-  readonly spaceId: SpaceId;
 
   /**
    * The server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the

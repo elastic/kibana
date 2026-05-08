@@ -76,22 +76,6 @@ describe('BasePath', () => {
     });
   });
 
-  describe('spaceId', () => {
-    it('uses the injected spaceId', () => {
-      expect(new BasePath({ basePath: '/s/myspace', spaceId: 'myspace' }).spaceId).toEqual(
-        'myspace'
-      );
-    });
-
-    it('defaults to "default" when spaceId is not provided', () => {
-      expect(new BasePath({ basePath: '/foo' }).spaceId).toEqual('default');
-    });
-
-    it('validates the spaceId via asSpaceId', () => {
-      expect(() => new BasePath({ basePath: '/', spaceId: 'INVALID SPACE' })).toThrow();
-    });
-  });
-
   describe('serverBasePath', () => {
     it('defaults to basePath', () => {
       expect(new BasePath({ basePath: '/foo/bar' }).serverBasePath).toEqual('/foo/bar');

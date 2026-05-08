@@ -98,15 +98,13 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
   }, [setBreadcrumbs, showAiBreadcrumb]);
 
   const handleNavigateToSpaces = useCallback(() => {
-    const spacesPath = `/kibana/spaces/edit/${http.basePath.spaceId}${
-      isPermissionsBased ? '/roles' : ''
-    }`;
+    const spacesPath = `/kibana/spaces/edit/${http.spaceId}${isPermissionsBased ? '/roles' : ''}`;
 
     application.navigateToApp('management', {
       path: spacesPath,
       openInNewTab: true,
     });
-  }, [application, http.basePath.spaceId, isPermissionsBased]);
+  }, [application, http.spaceId, isPermissionsBased]);
 
   async function handleSave() {
     const tokenUsageTrackingTurnedOn =

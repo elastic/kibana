@@ -18,7 +18,7 @@ export { createProjectFetcher } from './project_fetcher';
  * Returns {@link PROJECT_ROUTING.ALL} when the expression doesn't exist (404).
  */
 export const fetchDefaultProjectRouting = async (http: HttpSetup): Promise<string> => {
-  const projectRoutingName = getSpaceDefaultNpreName(http.basePath.spaceId);
+  const projectRoutingName = getSpaceDefaultNpreName(http.spaceId);
 
   try {
     return await http.get<string>(`/internal/cps/project_routing/${projectRoutingName}`);
