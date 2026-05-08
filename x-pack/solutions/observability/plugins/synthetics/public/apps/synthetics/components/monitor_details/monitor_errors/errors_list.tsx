@@ -30,16 +30,40 @@ import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 
-function getNextUpStateForResolvedError(
+export function getNextUpStateForResolvedError(
   errorState: PingState,
   upStates: PingState[],
   scopeByMonitor: boolean
 ) {
   for (const upState of upStates) {
     if (scopeByMonitor && upState.config_id !== errorState.config_id) continue;
+    if (upState.observer?.name !== errorState.observer?.name) continue;
     if (moment(upState.state.started_at).valueOf() > moment(errorState['@timestamp']).valueOf())
       return upState;
   }
+}
+
+export function computeGlobalActiveErrorIds(
+  errorStates: PingState[],
+  upStates: PingState[]
+): Set<string> {
+  const latestErrorByMonitorAndLocation = new Map<string, PingState>();
+  for (const err of errorStates) {
+    const key = `${err.config_id}:${err.observer?.name ?? ''}`;
+    const existing = latestErrorByMonitorAndLocation.get(key);
+    if (!existing || moment(err['@timestamp']).isAfter(existing['@timestamp'])) {
+      latestErrorByMonitorAndLocation.set(key, err);
+    }
+  }
+
+  const ids = new Set<string>();
+  for (const latestErr of latestErrorByMonitorAndLocation.values()) {
+    const resolved = getNextUpStateForResolvedError(latestErr, upStates, true);
+    if (!resolved) {
+      ids.add(`${latestErr.config_id}:${latestErr['@timestamp']}`);
+    }
+  }
+  return ids;
 }
 
 export const ErrorsList = ({
@@ -81,19 +105,8 @@ export const ErrorsList = ({
     const ids = new Set<string>();
 
     if (isGlobalView) {
-      const latestErrorByMonitor = new Map<string, PingState>();
-      for (const err of errorStates) {
-        const existing = latestErrorByMonitor.get(err.config_id);
-        if (!existing || moment(err['@timestamp']).isAfter(existing['@timestamp'])) {
-          latestErrorByMonitor.set(err.config_id, err);
-        }
-      }
-
-      for (const [monitorConfigId, latestErr] of latestErrorByMonitor) {
-        const resolved = getNextUpStateForResolvedError(latestErr, upStates, true);
-        if (!resolved) {
-          ids.add(`${monitorConfigId}:${latestErr['@timestamp']}`);
-        }
+      for (const id of computeGlobalActiveErrorIds(errorStates, upStates)) {
+        ids.add(id);
       }
     } else if (latestPing?.monitor.status === 'down') {
       const sorted = [...errorStates].sort(
