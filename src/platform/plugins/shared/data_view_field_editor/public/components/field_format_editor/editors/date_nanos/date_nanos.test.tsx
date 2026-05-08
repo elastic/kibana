@@ -17,10 +17,10 @@ import { screen } from '@testing-library/react';
 const fieldType = 'date_nanos';
 
 const format = createFieldFormatMock({
-  reactConvert: jest.fn().mockImplementation((input: string) => `converted date for ${input}`),
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { pattern: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS' };
   }),
+  reactConvert: jest.fn().mockImplementation((input: string) => `converted date for ${input}`),
 });
 
 const formatParams = {
