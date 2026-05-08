@@ -78,7 +78,6 @@ steps:
         with:
           method: POST
           path: "/internal/streams/{{ inputs.streamName }}/features/_identify/inferred"
-          use_server_info: true
           headers:
             x-elastic-internal-origin: "kibana"
           body:
@@ -144,7 +143,6 @@ steps:
     with:
       method: POST
       path: "/internal/streams/{{ inputs.streamName }}/features/_identify/computed"
-      use_server_info: true
       headers:
         x-elastic-internal-origin: "kibana"
       body:

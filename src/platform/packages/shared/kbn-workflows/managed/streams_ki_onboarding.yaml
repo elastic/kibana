@@ -93,7 +93,6 @@ steps:
         with:
           method: GET
           path: "/internal/streams/{{ inputs.streamName }}/features/_should_identify?thresholdHours={{ inputs.featuresRecencyThresholdHours }}"
-          use_server_info: true
           headers:
             x-elastic-internal-origin: "kibana"
       - name: skip_if_recent
@@ -161,7 +160,6 @@ steps:
         with:
           method: POST
           path: "/internal/streams/{{ inputs.streamName }}/memory/_generate"
-          use_server_info: true
           headers:
             x-elastic-internal-origin: "kibana"
           body:

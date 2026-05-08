@@ -32,7 +32,6 @@ steps:
     with:
       method: POST
       path: "/internal/streams/{{ inputs.streamName }}/queries/_generate"
-      use_server_info: true
       headers:
         x-elastic-internal-origin: "kibana"
       body:
@@ -53,7 +52,6 @@ steps:
     with:
       method: POST
       path: "/internal/streams/{{ inputs.streamName }}/queries/_persist"
-      use_server_info: true
       headers:
         x-elastic-internal-origin: "kibana"
       body:
