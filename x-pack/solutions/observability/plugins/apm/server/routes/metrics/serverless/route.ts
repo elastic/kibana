@@ -11,6 +11,7 @@ import {
   apmAWSLambdaRequestCostPerMillion,
 } from '@kbn/observability-plugin/common';
 import { toNumberRt } from '@kbn/io-ts-utils';
+import type { FetchAndTransformMetrics } from '@kbn/apm-api-shared';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt, transactionDataSourceRt } from '../../default_api_types';
 import { getServerlessAgentMetricsCharts } from './get_serverless_agent_metrics_chart';
@@ -22,7 +23,6 @@ import type { AWSLambdaPriceFactor, ServerlessSummaryResponse } from './get_serv
 import { getServerlessSummary } from './get_serverless_summary';
 import { getActiveInstancesTimeseries } from './get_active_instances_timeseries';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
-import type { FetchAndTransformMetrics } from '../fetch_and_transform_metrics';
 import type { Coordinate } from '../../../../typings/timeseries';
 
 const serverlessMetricsChartsRoute = createApmServerRoute({

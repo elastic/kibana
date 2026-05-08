@@ -27,6 +27,7 @@ import { environmentsRouteDefinitions } from './environments';
 import { eventMetadataRouteDefinitions } from './event_metadata';
 import { fallbackToTransactionsRouteDefinitions } from './fallback_to_transactions';
 import { latencyDistributionRouteDefinitions } from './latency_distribution';
+import { metricsRouteDefinitions } from './metrics';
 import type { BuildGroupedRepository } from './types';
 
 export const routeDefinitions = {
@@ -51,6 +52,7 @@ export const routeDefinitions = {
   eventMetadata: eventMetadataRouteDefinitions,
   fallbackToTransactions: fallbackToTransactionsRouteDefinitions,
   latencyDistribution: latencyDistributionRouteDefinitions,
+  metrics: metricsRouteDefinitions,
 };
 
 export type SharedAPMRouteRepository = BuildGroupedRepository<typeof routeDefinitions>;
