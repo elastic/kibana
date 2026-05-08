@@ -35,7 +35,7 @@ interface ToolsFlatViewProps {
   onPageChange: (pageIndex: number) => void;
   pageSize: number;
   onPageSizeChange: (pageSize: number) => void;
-  enableElasticCapabilities?: boolean;
+  areElasticCapabilitiesEnabled?: boolean;
   defaultToolIdSet?: Set<string>;
 }
 
@@ -66,7 +66,7 @@ const createCheckboxColumn = (
   selectedTools: ToolSelection[],
   onToggleTool: (toolId: string) => void,
   disabled: boolean,
-  enableElasticCapabilities: boolean,
+  areElasticCapabilitiesEnabled: boolean,
   defaultToolIdSet: Set<string>
 ) => ({
   width: '40px',
@@ -79,7 +79,7 @@ const createCheckboxColumn = (
     const toolFields: ToolSelectionRelevantFields = {
       id: tool.id,
     };
-    const isAutoIncluded = enableElasticCapabilities && defaultToolIdSet.has(tool.id);
+    const isAutoIncluded = areElasticCapabilitiesEnabled && defaultToolIdSet.has(tool.id);
     const checkbox = (
       <EuiCheckbox
         id={`tool-${tool.id}`}
@@ -119,7 +119,7 @@ export const ToolsFlatView: React.FC<ToolsFlatViewProps> = ({
   onPageChange,
   pageSize,
   onPageSizeChange,
-  enableElasticCapabilities = false,
+  areElasticCapabilitiesEnabled = false,
   defaultToolIdSet,
 }) => {
   const emptyDefaultToolIdSet = React.useMemo(() => new Set<string>(), []);
@@ -130,13 +130,13 @@ export const ToolsFlatView: React.FC<ToolsFlatViewProps> = ({
         selectedTools,
         onToggleTool,
         disabled,
-        enableElasticCapabilities,
+        areElasticCapabilitiesEnabled,
         resolvedDefaultToolIdSet
       ),
       createToolDetailsColumn(),
       createTagsColumn(),
     ],
-    [selectedTools, onToggleTool, disabled, enableElasticCapabilities, resolvedDefaultToolIdSet]
+    [selectedTools, onToggleTool, disabled, areElasticCapabilitiesEnabled, resolvedDefaultToolIdSet]
   );
 
   const handleTableChange = React.useCallback(

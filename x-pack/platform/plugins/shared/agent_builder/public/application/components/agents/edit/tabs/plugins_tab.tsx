@@ -41,7 +41,7 @@ interface PluginsTabProps {
   plugins: PluginDefinition[];
   isLoading: boolean;
   isFormDisabled: boolean;
-  enableElasticCapabilities: boolean;
+  areElasticCapabilitiesEnabled: boolean;
 }
 
 export const PluginsTab: React.FC<PluginsTabProps> = ({
@@ -49,7 +49,7 @@ export const PluginsTab: React.FC<PluginsTabProps> = ({
   plugins,
   isLoading,
   isFormDisabled,
-  enableElasticCapabilities,
+  areElasticCapabilitiesEnabled,
 }) => {
   const [showActiveOnly, setShowActiveOnly] = useState(false);
   const showActiveOnlyChangeHandler = !isFormDisabled ? setShowActiveOnly : undefined;
@@ -69,7 +69,7 @@ export const PluginsTab: React.FC<PluginsTabProps> = ({
             disabled={isFormDisabled}
             showActiveOnly={showActiveOnly || isFormDisabled}
             onShowActiveOnlyChange={showActiveOnlyChangeHandler}
-            enableElasticCapabilities={enableElasticCapabilities}
+            areElasticCapabilitiesEnabled={areElasticCapabilitiesEnabled}
           />
         )}
       />
@@ -85,7 +85,7 @@ interface PluginsSelectionProps {
   disabled?: boolean;
   showActiveOnly: boolean;
   onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
-  enableElasticCapabilities: boolean;
+  areElasticCapabilitiesEnabled: boolean;
 }
 
 const PluginsSelection: React.FC<PluginsSelectionProps> = ({
@@ -96,7 +96,7 @@ const PluginsSelection: React.FC<PluginsSelectionProps> = ({
   disabled = false,
   showActiveOnly,
   onShowActiveOnlyChange,
-  enableElasticCapabilities,
+  areElasticCapabilitiesEnabled,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
@@ -105,8 +105,8 @@ const PluginsSelection: React.FC<PluginsSelectionProps> = ({
   const selectedIdSet = useMemo(() => new Set(selectedPlugins ?? []), [selectedPlugins]);
 
   const isPluginAutoIncluded = useCallback(
-    (plugin: PluginDefinition) => enableElasticCapabilities && plugin.readonly,
-    [enableElasticCapabilities]
+    (plugin: PluginDefinition) => areElasticCapabilitiesEnabled && plugin.readonly,
+    [areElasticCapabilitiesEnabled]
   );
 
   const isPluginActive = useCallback(

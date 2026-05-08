@@ -41,7 +41,7 @@ interface SkillsTabProps {
   skills: PublicSkillSummary[];
   isLoading: boolean;
   isFormDisabled: boolean;
-  enableElasticCapabilities: boolean;
+  areElasticCapabilitiesEnabled: boolean;
 }
 
 export const SkillsTab: React.FC<SkillsTabProps> = ({
@@ -49,7 +49,7 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
   skills,
   isLoading,
   isFormDisabled,
-  enableElasticCapabilities,
+  areElasticCapabilitiesEnabled,
 }) => {
   const [showActiveOnly, setShowActiveOnly] = useState(false);
   const showActiveOnlyChangeHandler = !isFormDisabled ? setShowActiveOnly : undefined;
@@ -69,7 +69,7 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
             disabled={isFormDisabled}
             showActiveOnly={showActiveOnly || isFormDisabled}
             onShowActiveOnlyChange={showActiveOnlyChangeHandler}
-            enableElasticCapabilities={enableElasticCapabilities}
+            areElasticCapabilitiesEnabled={areElasticCapabilitiesEnabled}
           />
         )}
       />
@@ -85,7 +85,7 @@ interface SkillsSelectionProps {
   disabled?: boolean;
   showActiveOnly: boolean;
   onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
-  enableElasticCapabilities: boolean;
+  areElasticCapabilitiesEnabled: boolean;
 }
 
 const SkillsSelection: React.FC<SkillsSelectionProps> = ({
@@ -96,7 +96,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   disabled = false,
   showActiveOnly,
   onShowActiveOnlyChange,
-  enableElasticCapabilities,
+  areElasticCapabilitiesEnabled,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
@@ -105,8 +105,8 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   const selectedIdSet = useMemo(() => new Set(selectedSkills ?? []), [selectedSkills]);
 
   const isSkillAutoIncluded = useCallback(
-    (skill: PublicSkillSummary) => enableElasticCapabilities && skill.readonly,
-    [enableElasticCapabilities]
+    (skill: PublicSkillSummary) => areElasticCapabilitiesEnabled && skill.readonly,
+    [areElasticCapabilitiesEnabled]
   );
 
   const isSkillActive = useCallback(

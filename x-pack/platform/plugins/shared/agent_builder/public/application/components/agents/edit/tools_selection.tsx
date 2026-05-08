@@ -22,7 +22,7 @@ interface ToolsSelectionProps {
   disabled?: boolean;
   showActiveOnly?: boolean;
   onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
-  enableElasticCapabilities?: boolean;
+  areElasticCapabilitiesEnabled?: boolean;
 }
 
 export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
@@ -33,7 +33,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   disabled = false,
   showActiveOnly = false,
   onShowActiveOnlyChange,
-  enableElasticCapabilities = false,
+  areElasticCapabilitiesEnabled = false,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
@@ -42,8 +42,8 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   const defaultToolIdSet = useMemo(() => new Set<string>(defaultAgentToolIds), []);
 
   const activeTools = useMemo(
-    () => getActiveTools(tools, selectedTools, enableElasticCapabilities, defaultToolIdSet),
-    [tools, selectedTools, enableElasticCapabilities, defaultToolIdSet]
+    () => getActiveTools(tools, selectedTools, areElasticCapabilitiesEnabled, defaultToolIdSet),
+    [tools, selectedTools, areElasticCapabilitiesEnabled, defaultToolIdSet]
   );
 
   const activeToolIdSet = useMemo(() => new Set(activeTools.map((t) => t.id)), [activeTools]);
@@ -69,11 +69,11 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 
   const handleToggleTool = useCallback(
     (toolId: string) => {
-      if (enableElasticCapabilities && defaultToolIdSet.has(toolId)) return;
+      if (areElasticCapabilitiesEnabled && defaultToolIdSet.has(toolId)) return;
       const newSelection = toggleToolSelection(toolId, tools, selectedTools);
       onToolsChange(newSelection);
     },
-    [selectedTools, onToolsChange, tools, enableElasticCapabilities, defaultToolIdSet]
+    [selectedTools, onToolsChange, tools, areElasticCapabilitiesEnabled, defaultToolIdSet]
   );
 
   const handleSearchChange = useCallback((query: string) => {
@@ -123,7 +123,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
         onPageChange={handlePageChange}
         pageSize={pageSize}
         onPageSizeChange={handlePageSizeChange}
-        enableElasticCapabilities={enableElasticCapabilities}
+        areElasticCapabilitiesEnabled={areElasticCapabilitiesEnabled}
         defaultToolIdSet={defaultToolIdSet}
       />
     </div>
