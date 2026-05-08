@@ -49,8 +49,6 @@ export const INSIGHTS_SECTION_TITLE = i18n.translate(
 
 const LOCAL_STORAGE_SECTION_KEY = 'insights';
 
-const noop = () => {};
-
 export interface InsightsSectionProps {
   /**
    * Document to display in the overview tab
@@ -216,19 +214,7 @@ export const InsightsSection = memo(
         sectionId={LOCAL_STORAGE_SECTION_KEY}
         title={INSIGHTS_SECTION_TITLE}
       >
-        <EntitiesOverview
-          hit={hit}
-          renderCellActions={renderCellActions}
-          showIcon={false}
-          onShowEntitiesDetails={noop}
-          onShowUserDetails={noop}
-          onShowHostDetails={noop}
-          onShowUserAlertsDetails={noop}
-          onShowHostAlertsDetails={noop}
-          onShowUserMisconfigurationsDetails={noop}
-          onShowHostMisconfigurationsDetails={noop}
-          onShowHostVulnerabilitiesDetails={noop}
-        />
+        <EntitiesOverview hit={hit} renderCellActions={renderCellActions} showIcon={false} />
         {isAlert && (
           <ThreatIntelligenceOverview
             hit={hit}

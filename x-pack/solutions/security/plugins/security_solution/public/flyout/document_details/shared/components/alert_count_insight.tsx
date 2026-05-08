@@ -64,9 +64,10 @@ interface AlertCountInsightProps {
    */
   ['data-test-subj']?: string;
   /**
-   * The function to open the details panel.
+   * The function to open the details panel. When omitted, the count is rendered as plain
+   * text instead of a link (used by Flyout v2 surfaces that don't navigate to a sub-flyout).
    */
-  openDetailsPanel: (path: EntityDetailsPath) => void;
+  openDetailsPanel?: (path: EntityDetailsPath) => void;
 }
 
 /**
@@ -139,6 +140,10 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
 
   const alertCount = useMemo(() => {
     const formattedAlertCount = <FormattedCount count={totalAlertCount} />;
+
+    if (!openDetailsPanel) {
+      return formattedAlertCount;
+    }
 
     return (
       <EuiToolTip

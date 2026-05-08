@@ -55,9 +55,10 @@ interface MisconfigurationsInsightProps {
    */
   telemetryKey?: CloudSecurityUiCounters;
   /**
-   * The function to open the details panel.
+   * The function to open the details panel. When omitted, the count is rendered as plain
+   * text instead of a link (used by Flyout v2 surfaces that don't navigate to a sub-flyout).
    */
-  openDetailsPanel: (path: EntityDetailsPath) => void;
+  openDetailsPanel?: (path: EntityDetailsPath) => void;
 }
 
 /*
@@ -109,27 +110,33 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
           margin-bottom: ${euiTheme.size.xs};
         `}
       >
-        <EuiToolTip
-          content={
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.insights.misconfiguration.misconfigurationCountTooltip"
-              defaultMessage="Opens {count, plural, one {this misconfiguration} other {these misconfigurations}} in a new flyout"
-              values={{ count: totalFindings }}
-            />
-          }
-        >
-          <EuiLink
-            data-test-subj={`${dataTestSubj}-count`}
-            onClick={() =>
-              openDetailsPanel({
-                tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-                subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
-              })
+        {openDetailsPanel ? (
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.insights.misconfiguration.misconfigurationCountTooltip"
+                defaultMessage="Opens {count, plural, one {this misconfiguration} other {these misconfigurations}} in a new flyout"
+                values={{ count: totalFindings }}
+              />
             }
           >
+            <EuiLink
+              data-test-subj={`${dataTestSubj}-count`}
+              onClick={() =>
+                openDetailsPanel({
+                  tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+                  subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
+                })
+              }
+            >
+              <FormattedCount count={totalFindings} />
+            </EuiLink>
+          </EuiToolTip>
+        ) : (
+          <span data-test-subj={`${dataTestSubj}-count`}>
             <FormattedCount count={totalFindings} />
-          </EuiLink>
-        </EuiToolTip>
+          </span>
+        )}
       </div>
     ),
     [totalFindings, dataTestSubj, euiTheme.size, openDetailsPanel]

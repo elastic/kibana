@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { USER_PREVIEW_BANNER, UserEntityOverview } from './user_entity_overview';
+import { UserEntityOverview } from './user_entity_overview';
 import { useFirstLastSeen } from '../../../common/containers/use_first_last_seen';
 import {
   ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID,
@@ -26,7 +26,6 @@ import { mockDataFormattedForFieldBrowser } from '../../../flyout/document_detai
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { mockFlyoutApi } from '../../../flyout/document_details/shared/mocks/mock_flyout_context';
-import { UserPreviewPanelKey } from '../../../flyout/entity_details/user_right';
 import { useAlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
 const userName = 'user';
@@ -195,11 +194,11 @@ describe('<UserEntityOverview />', () => {
       expect(queryByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).not.toBeInTheDocument();
     });
 
-    it('should open user preview', () => {
+    it('renders the user name as plain text when no onShowDetails is provided', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
-      const { getByTestId } = render(
+      const { getByTestId, queryByRole } = render(
         <TestProviders>
           <UserEntityOverview
             userName={userName}
@@ -209,17 +208,35 @@ describe('<UserEntityOverview />', () => {
         </TestProviders>
       );
 
-      getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID).click();
-      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
-        id: UserPreviewPanelKey,
-        params: {
-          userName,
-          scopeId: mockContextValue.scopeId,
-          banner: USER_PREVIEW_BANNER,
-          contextID: mockContextValue.scopeId,
-          entityId: undefined,
-        },
-      });
+      const container = getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID);
+      expect(container).toHaveTextContent(userName);
+      expect(container.querySelector('a, button')).toBeNull();
+      expect(queryByRole('link', { name: userName })).toBeNull();
+      container.click();
+      expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
+    });
+
+    it('renders the user name as a link when onShowDetails is provided', () => {
+      mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
+      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
+      const onShowDetails = jest.fn();
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <UserEntityOverview
+            userName={userName}
+            identityFields={identityFields}
+            scopeId={panelContextValue.scopeId}
+            onShowDetails={onShowDetails}
+          />
+        </TestProviders>
+      );
+
+      const container = getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID);
+      const link = container.querySelector('a, button');
+      expect(link).not.toBeNull();
+      link?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      expect(onShowDetails).toHaveBeenCalledTimes(1);
     });
   });
 

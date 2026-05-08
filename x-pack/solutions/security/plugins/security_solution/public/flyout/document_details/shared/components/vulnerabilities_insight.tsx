@@ -57,9 +57,10 @@ interface VulnerabilitiesInsightProps {
    */
   telemetryKey?: CloudSecurityUiCounters;
   /**
-   * The function to open the details panel.
+   * The function to open the details panel. When omitted, the count is rendered as plain
+   * text instead of a link (used by Flyout v2 surfaces that don't navigate to a sub-flyout).
    */
-  openDetailsPanel: (path: EntityDetailsPath) => void;
+  openDetailsPanel?: (path: EntityDetailsPath) => void;
 }
 
 /*
@@ -136,27 +137,33 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
           margin-bottom: ${euiTheme.size.xs};
         `}
       >
-        <EuiToolTip
-          content={
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.insights.vulnerabilities.vulnerabilitiesCountTooltip"
-              defaultMessage="Opens {count, plural, one {this vulnerability} other {these vulnerabilities}} in a new flyout"
-              values={{ count: totalVulnerabilities }}
-            />
-          }
-        >
-          <EuiLink
-            data-test-subj={`${dataTestSubj}-count`}
-            onClick={() =>
-              openDetailsPanel({
-                tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-                subTab: CspInsightLeftPanelSubTab.VULNERABILITIES,
-              })
+        {openDetailsPanel ? (
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.insights.vulnerabilities.vulnerabilitiesCountTooltip"
+                defaultMessage="Opens {count, plural, one {this vulnerability} other {these vulnerabilities}} in a new flyout"
+                values={{ count: totalVulnerabilities }}
+              />
             }
           >
+            <EuiLink
+              data-test-subj={`${dataTestSubj}-count`}
+              onClick={() =>
+                openDetailsPanel({
+                  tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+                  subTab: CspInsightLeftPanelSubTab.VULNERABILITIES,
+                })
+              }
+            >
+              <FormattedCount count={totalVulnerabilities} />
+            </EuiLink>
+          </EuiToolTip>
+        ) : (
+          <span data-test-subj={`${dataTestSubj}-count`}>
             <FormattedCount count={totalVulnerabilities} />
-          </EuiLink>
-        </EuiToolTip>
+          </span>
+        )}
       </div>
     ),
     [totalVulnerabilities, dataTestSubj, euiTheme.size, openDetailsPanel]

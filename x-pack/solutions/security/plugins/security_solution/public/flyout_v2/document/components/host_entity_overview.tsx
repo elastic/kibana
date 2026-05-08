@@ -25,13 +25,9 @@ import {
   MISCONFIGURATION_INSIGHT_HOST_ENTITY_OVERVIEW,
   VULNERABILITIES_INSIGHT_HOST_ENTITY_OVERVIEW,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
-import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { HOST_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
@@ -81,11 +77,9 @@ import {
   ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID,
 } from './test_ids';
 import { RiskScoreDocTooltip } from '../../../overview/components/common';
-import { PreviewLink } from '../../../flyout/shared/components/preview_link';
 import { MisconfigurationsInsight } from '../../../flyout/document_details/shared/components/misconfiguration_insight';
 import { VulnerabilitiesInsight } from '../../../flyout/document_details/shared/components/vulnerabilities_insight';
 import { AlertCountInsight } from '../../../flyout/document_details/shared/components/alert_count_insight';
-import { useNavigateToHostDetails } from '../../../flyout/entity_details/host_right/hooks/use_navigate_to_host_details';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
@@ -145,7 +139,6 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
-  const euidApi = useEntityStoreEuidApi();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns();
@@ -230,7 +223,6 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     return hostRiskFromSearch;
   }, [entityStoreV2Enabled, entityRecord, hostName, hostRiskFromSearch]);
 
-  const isRiskScoreExist = !!hostRiskData?.host?.risk;
   const isAuthorized = entityStoreV2Enabled ? true : isRiskScoreAuthorized;
 
   const hostOSFamilyValue = useMemo(() => {
@@ -320,39 +312,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     ];
   }, [hostRiskData]);
 
-  const { hasNonClosedAlerts } = useNonClosedAlerts({
-    identityFields: hostIdentityFields,
-    entityType: EntityType.host,
-    to,
-    from,
-    queryId: HOST_ENTITY_OVERVIEW_ID,
-  });
-  const hostCspIdentityDoc = entityRecord ?? hostIdentityFields;
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions('host', hostCspIdentityDoc, euidApi, {
-      entityStoreV2Enabled,
-      legacyIdentityFields: hostIdentityFields,
-    })
-  );
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEuidCspPreviewOptions('host', hostCspIdentityDoc, euidApi, {
-      entityStoreV2Enabled,
-      legacyIdentityFields: hostIdentityFields,
-    })
-  );
-
-  const navigateToHostDetails = useNavigateToHostDetails({
-    hostName,
-    entityId: entityRecord?.entity?.id,
-    scopeId,
-    isRiskScoreExist,
-    hasMisconfigurationFindings,
-    hasVulnerabilitiesFindings,
-    hasNonClosedAlerts,
-    isPreviewMode: true, // setting to true to always open a new host flyout
-    contextID: 'HostEntityOverview',
-  });
-  const openDetailsPanel = onShowDetails ?? navigateToHostDetails;
+  const openDetailsPanel = onShowDetails;
 
   const handleNameClick = useCallback(() => onShowDetails?.(), [onShowDetails]);
   const nameTextStyles = css`
@@ -373,7 +333,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
           <EuiFlexItem grow={false}>
             <EuiIcon type={HOST_ICON} aria-hidden={true} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}>
             {onShowDetails ? (
               <EuiToolTip
                 content={i18n.translate(
@@ -381,23 +341,10 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
                   { defaultMessage: 'Show host details' }
                 )}
               >
-                <EuiLink
-                  onClick={handleNameClick}
-                  data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
-                >
-                  {nameText}
-                </EuiLink>
+                <EuiLink onClick={handleNameClick}>{nameText}</EuiLink>
               </EuiToolTip>
             ) : (
-              <PreviewLink
-                field="host.name"
-                value={hostName}
-                entityId={entityRecord?.entity?.id}
-                scopeId={scopeId}
-                data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
-              >
-                {nameText}
-              </PreviewLink>
+              nameText
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

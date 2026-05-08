@@ -21,15 +21,12 @@ import { css } from '@emotion/react';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
-import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import type { ESQuery } from '../../../../common/typed_json';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { getRiskFromEntityRecord } from '../../../flyout/entity_details/shared/entity_store_risk_utils';
 import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
@@ -74,10 +71,8 @@ import {
 } from './test_ids';
 import { useObservedUserDetails } from '../../../explore/users/containers/users/observed_details';
 import { RiskScoreDocTooltip } from '../../../overview/components/common';
-import { PreviewLink } from '../../../flyout/shared/components/preview_link';
 import { MisconfigurationsInsight } from '../../../flyout/document_details/shared/components/misconfiguration_insight';
 import { AlertCountInsight } from '../../../flyout/document_details/shared/components/alert_count_insight';
-import { useNavigateToUserDetails } from '../../../flyout/entity_details/user_right/hooks/use_navigate_to_user_details';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
@@ -135,7 +130,6 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
-  const euidApi = useEntityStoreEuidApi();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns();
@@ -211,37 +205,9 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     return userRiskFromSearch;
   }, [entityStoreV2Enabled, entityRecord, userName, userRiskFromSearch]);
 
-  const isRiskScoreExist = !!userRiskData?.user?.risk;
   const isAuthorized = entityStoreV2Enabled ? true : isRiskScoreAuthorized;
 
-  const userCspIdentityDoc = entityRecord ?? userIdentityFields;
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi, {
-      entityStoreV2Enabled,
-      legacyIdentityFields: userIdentityFields,
-    })
-  );
-  const { hasNonClosedAlerts } = useNonClosedAlerts({
-    entityRecord,
-    identityFields: userIdentityFields,
-    entityType: EntityType.user,
-    to,
-    from,
-    queryId: USER_ENTITY_OVERVIEW_ID,
-  });
-
-  const navigateToUserDetails = useNavigateToUserDetails({
-    userName,
-    identityFields: userIdentityFields,
-    entityId: entityRecord?.entity?.id,
-    scopeId,
-    isRiskScoreExist,
-    hasMisconfigurationFindings,
-    hasNonClosedAlerts,
-    isPreviewMode: true, // setting to true to always open a new user flyout
-    contextID: 'UserEntityOverview',
-  });
-  const openDetailsPanel = onShowDetails ?? navigateToUserDetails;
+  const openDetailsPanel = onShowDetails;
 
   const userDetailsForDomain = entityStoreV2Enabled ? entityRecord : userDetails;
   const userDomainValue = useMemo(
@@ -353,7 +319,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
           <EuiFlexItem grow={false}>
             <EuiIcon type={USER_ICON} aria-hidden={true} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}>
             {onShowDetails ? (
               <EuiToolTip
                 content={i18n.translate(
@@ -361,23 +327,10 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
                   { defaultMessage: 'Show user details' }
                 )}
               >
-                <EuiLink
-                  onClick={handleNameClick}
-                  data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
-                >
-                  {nameText}
-                </EuiLink>
+                <EuiLink onClick={handleNameClick}>{nameText}</EuiLink>
               </EuiToolTip>
             ) : (
-              <PreviewLink
-                field="user.name"
-                value={userName}
-                entityId={entityRecord?.entity?.id}
-                scopeId={scopeId}
-                data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
-              >
-                {nameText}
-              </PreviewLink>
+              nameText
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
