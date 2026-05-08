@@ -7,45 +7,56 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import React from 'react';
+import { createFieldFormatMock } from '../test_utils';
 import { DurationFormatEditor } from './duration';
+import { formatId } from './constants';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 
 const fieldType = 'number';
 
-const format = {
-  getParamDefaults: jest.fn().mockImplementation(() => {
-    return {
-      includeSpaceWithSuffix: true,
-      inputFormat: 'seconds',
-      outputFormat: 'humanize',
-      outputPrecision: 10,
-    };
-  }),
-  isHuman: () => true,
-  isHumanPrecise: () => false,
-  reactConvert: jest.fn().mockImplementation((input: string) => `converted duration for ${input}`),
-  type: {
-    inputFormats: [
-      {
-        kind: 'seconds',
-        text: 'Seconds',
-      },
-    ],
-    outputFormats: [
-      {
-        method: 'humanize',
-        text: 'Human Readable',
-      },
-      {
-        method: 'asMinutes',
-        text: 'Minutes',
-      },
-    ],
-  },
-};
+const createDurationFormat = ({
+  outputFormat = 'humanize',
+  outputPrecision = 10,
+  isHuman = true,
+  isHumanPrecise = false,
+} = {}) =>
+  createFieldFormatMock({
+    getParamDefaults: jest.fn().mockImplementation(() => {
+      return {
+        includeSpaceWithSuffix: true,
+        inputFormat: 'seconds',
+        outputFormat,
+        outputPrecision,
+      };
+    }),
+    isHuman: () => isHuman,
+    isHumanPrecise: () => isHumanPrecise,
+    reactConvert: jest
+      .fn()
+      .mockImplementation((input: string) => `converted duration for ${input}`),
+    type: {
+      inputFormats: [
+        {
+          kind: 'seconds',
+          text: 'Seconds',
+        },
+      ],
+      outputFormats: [
+        {
+          method: 'humanize',
+          text: 'Human Readable',
+        },
+        {
+          method: 'asMinutes',
+          text: 'Minutes',
+        },
+      ],
+    },
+  });
+
+const format = createDurationFormat();
 
 const formatParams = {
   inputFormat: '',
@@ -66,7 +77,7 @@ const renderDurationFormatEditor = ({
   renderWithI18n(
     <DurationFormatEditor
       fieldType={fieldType}
-      format={newFormat as unknown as FieldFormat}
+      format={newFormat}
       formatParams={newFormatParams}
       onChange={onChange}
       onError={onError}
@@ -75,7 +86,7 @@ const renderDurationFormatEditor = ({
 
 describe('DurationFormatEditor', () => {
   it('should have a formatId', () => {
-    expect(DurationFormatEditor.formatId).toEqual('duration');
+    expect(DurationFormatEditor.formatId).toEqual(formatId);
   });
 
   it('should render human readable output normally', () => {
@@ -89,18 +100,10 @@ describe('DurationFormatEditor', () => {
   });
 
   it('should render non-human readable output normally', () => {
-    const newFormat = {
-      ...format,
-      getParamDefaults: jest.fn().mockImplementation(() => {
-        return {
-          includeSpaceWithSuffix: true,
-          inputFormat: 'seconds',
-          outputFormat: 'asMinutes',
-          outputPrecision: 10,
-        };
-      }),
-      isHuman: () => false,
-    };
+    const newFormat = createDurationFormat({
+      outputFormat: 'asMinutes',
+      isHuman: false,
+    });
 
     renderDurationFormatEditor({ newFormat });
 
@@ -114,19 +117,12 @@ describe('DurationFormatEditor', () => {
   });
 
   it('should not render show suffix on dynamic output', () => {
-    const newFormat = {
-      ...format,
-      getParamDefaults: jest.fn().mockImplementation(() => {
-        return {
-          includeSpaceWithSuffix: true,
-          inputFormat: 'seconds',
-          outputFormat: 'dynamic',
-          outputPrecision: 2,
-        };
-      }),
-      isHuman: () => false,
-      isHumanPrecise: () => true,
-    };
+    const newFormat = createDurationFormat({
+      outputFormat: 'dynamic',
+      outputPrecision: 2,
+      isHuman: false,
+      isHumanPrecise: true,
+    });
 
     renderDurationFormatEditor({
       newFormat,

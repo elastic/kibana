@@ -6,15 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import React from 'react';
+import { createFieldFormatMock } from '../test_utils';
+import { formatId } from './constants';
 import { HistogramFormatEditor } from './histogram';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 
 const fieldType = 'histogram';
 
-const format: Pick<FieldFormat, 'getParamDefaults' | 'reactConvert'> = {
+const format = createFieldFormatMock({
   getParamDefaults: jest.fn().mockImplementation(() => {
     return { id: 'number', params: {} };
   }),
@@ -23,7 +24,7 @@ const format: Pick<FieldFormat, 'getParamDefaults' | 'reactConvert'> = {
     .mockImplementation((input: number | Record<string, number[]>) =>
       typeof input === 'number' ? input.toFixed(2) : JSON.stringify(input)
     ),
-};
+});
 
 const formatParams = {
   id: 'number' as const,
@@ -38,7 +39,7 @@ const renderHistogramFormatEditor = () =>
   renderWithI18n(
     <HistogramFormatEditor
       fieldType={fieldType}
-      format={format as FieldFormat}
+      format={format}
       formatParams={formatParams}
       onChange={onChange}
       onError={onError}
@@ -47,7 +48,7 @@ const renderHistogramFormatEditor = () =>
 
 describe('HistogramFormatEditor', () => {
   it('should have a formatId', () => {
-    expect(HistogramFormatEditor.formatId).toEqual('histogram');
+    expect(HistogramFormatEditor.formatId).toEqual(formatId);
   });
 
   it('should render normally', () => {
