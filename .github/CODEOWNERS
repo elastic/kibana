@@ -548,7 +548,7 @@ src/platform/packages/shared/kbn-discover-contextual-components @elastic/obs-exp
 src/platform/packages/shared/kbn-discover-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/packages/shared/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
-src/platform/packages/shared/kbn-ebt-click @elastic/obs-exploration
+src/platform/packages/shared/kbn-ebt-click @elastic/obs-exploration-team
 src/platform/packages/shared/kbn-ebt-tools @elastic/kibana-core
 src/platform/packages/shared/kbn-edot-collector @elastic/obs-ai-team
 src/platform/packages/shared/kbn-elastic-agent-utils @elastic/obs-exploration-team

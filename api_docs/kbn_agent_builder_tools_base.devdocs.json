@@ -641,7 +641,7 @@
           "any"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/visualization/chart_type_registry.ts",
-        "lineNumber": 152,
+        "lineNumber": 239,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

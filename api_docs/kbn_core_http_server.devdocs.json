@@ -6581,6 +6581,10 @@
               },
               {
                 "plugin": "@kbn/core",
+                "path": "src/core/packages/i18n/server-internal/src/routes/translations.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
                 "path": "src/core/packages/rendering/server-internal/src/bootstrap/register_bootstrap_route.test.ts"
               },
               {
@@ -8613,6 +8617,10 @@
               {
                 "plugin": "cps",
                 "path": "src/platform/plugins/shared/cps/server/routes/lookup_index.ts"
+              },
+              {
+                "plugin": "cps",
+                "path": "src/platform/plugins/shared/cps/server/routes/lookup_index.test.ts"
               },
               {
                 "plugin": "@kbn/test-suites-src",
