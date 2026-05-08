@@ -19,13 +19,45 @@ export interface EntityTag {
   readonly color: 'hollow' | 'success' | 'warning' | 'danger' | 'accent' | 'primary';
 }
 
+export type GoldenSignalLevel = 'warning' | 'danger' | 'success';
+
 export interface GoldenSignal {
   readonly id: 'latency' | 'errorRate' | 'throughput';
   readonly label: string;
-  readonly value: string;
+  /** Numeric value powering the metric tile. Formatted via {@link formatGoldenSignalValue}. */
+  readonly value: number;
+  /** Unit suffix appended to the formatted value (e.g. `s`, `%`, `req/s`). */
+  readonly unit: string;
+  /** Subtitle copy under the metric value (e.g. `+12% in last 5 min`). */
   readonly delta: string;
-  readonly color: 'warning' | 'danger' | 'success';
+  /** Severity level — drives the tile background tint. */
+  readonly color: GoldenSignalLevel;
+  /**
+   * Mocked timeseries powering the trend area background of the metric tile.
+   * 24 evenly-spaced samples is enough for the prototype.
+   */
+  readonly trend: readonly number[];
+  /**
+   * Long-form description shown on hover (replaces the legacy `(?)` icon —
+   * surfaced through `EuiToolTip` rather than a click target).
+   */
+  readonly description: string;
 }
+
+/**
+ * Format a {@link GoldenSignal} numeric value back into its display string.
+ * Kept colocated with the data so the tile component stays presentational.
+ */
+export const formatGoldenSignalValue = (signal: GoldenSignal): string => {
+  switch (signal.id) {
+    case 'latency':
+      return `${signal.value.toFixed(1)}${signal.unit}`;
+    case 'errorRate':
+      return `${signal.value.toFixed(1)}${signal.unit}`;
+    case 'throughput':
+      return `${Math.round(signal.value)}${signal.unit}`;
+  }
+};
 
 export interface EntityDetailRow {
   readonly id: string;
@@ -78,23 +110,44 @@ export const buildFakeEntityOverview = (serviceName: string): EntityOverview => 
     {
       id: 'latency',
       label: 'Latency',
-      value: '0.9s',
-      delta: '+X% in last XX min',
+      value: 0.9,
+      unit: 's',
+      delta: '+12% in last 5 min',
       color: 'warning',
+      trend: [
+        0.42, 0.45, 0.43, 0.48, 0.47, 0.5, 0.52, 0.55, 0.6, 0.62, 0.66, 0.7, 0.72, 0.74, 0.78, 0.81,
+        0.83, 0.84, 0.85, 0.87, 0.88, 0.89, 0.9, 0.9,
+      ],
+      description:
+        'Average end-to-end request latency across all instances of this service over the selected time window.',
     },
     {
       id: 'errorRate',
       label: 'Error rate',
-      value: '4.5%',
-      delta: '+X% in last XX min',
+      value: 4.5,
+      unit: '%',
+      delta: '+3.1% in last 5 min',
       color: 'danger',
+      trend: [
+        0.4, 0.5, 0.6, 0.7, 0.9, 1.1, 1.2, 1.4, 1.6, 1.9, 2.2, 2.5, 2.8, 3.1, 3.4, 3.6, 3.9, 4.1,
+        4.2, 4.3, 4.35, 4.4, 4.45, 4.5,
+      ],
+      description:
+        'Percentage of failed requests (status >= 500 or trace error tag) over the selected time window.',
     },
     {
       id: 'throughput',
       label: 'Throughput',
-      value: '312req/s',
-      delta: 'Stable in last XX min',
+      value: 312,
+      unit: 'req/s',
+      delta: 'Stable in last 5 min',
       color: 'success',
+      trend: [
+        298, 305, 310, 308, 312, 315, 311, 313, 316, 314, 312, 310, 311, 313, 312, 314, 313, 312,
+        311, 312, 313, 312, 312, 312,
+      ],
+      description:
+        'Requests per second served by this service across all instances over the selected time window.',
     },
   ],
   details: [

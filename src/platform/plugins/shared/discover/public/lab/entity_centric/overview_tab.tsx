@@ -20,12 +20,18 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
+  type EuiThemeComputed,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { EntityOverview, GoldenSignal } from './fake_entity_overview';
+import type { MetricDatum } from '@elastic/charts';
+import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import type { EntityOverview, GoldenSignal, GoldenSignalLevel } from './fake_entity_overview';
+import { formatGoldenSignalValue } from './fake_entity_overview';
 
 interface OverviewTabProps {
   readonly overview: EntityOverview;
@@ -199,45 +205,76 @@ const EntitySummaryCard = ({ overview }: { overview: EntityOverview }) => {
   );
 };
 
+const GOLDEN_SIGNAL_TILE_HEIGHT = 132;
+
+const goldenSignalTileBackground = (
+  level: GoldenSignalLevel,
+  euiTheme: EuiThemeComputed
+): string => {
+  switch (level) {
+    case 'warning':
+      return euiTheme.colors.backgroundBaseWarning;
+    case 'danger':
+      return euiTheme.colors.backgroundBaseDanger;
+    case 'success':
+      return euiTheme.colors.backgroundBaseSuccess;
+  }
+};
+
 const GoldenSignalsRow = ({ signals }: { signals: readonly GoldenSignal[] }) => (
   <EuiFlexGroup gutterSize="m" responsive={false} wrap>
     {signals.map((signal) => (
-      <EuiFlexItem key={signal.id} style={{ minWidth: 160 }}>
+      <EuiFlexItem key={signal.id} style={{ minWidth: 180 }}>
         <GoldenSignalCard signal={signal} />
       </EuiFlexItem>
     ))}
   </EuiFlexGroup>
 );
 
-const GoldenSignalCard = ({ signal }: { signal: GoldenSignal }) => (
-  <EuiPanel
-    hasBorder
-    hasShadow={false}
-    color={signal.color}
-    paddingSize="m"
-    data-test-subj={`entityCentricLabGoldenSignalCard-${signal.id}`}
-  >
-    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-      <EuiFlexItem>
-        <EuiTitle size="xxs">
-          <h4>{signal.label}</h4>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="questionInCircle" color="subdued" aria-hidden={true} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer size="m" />
-    <EuiText size="xs" color="subdued" textAlign="right">
-      {signal.delta}
-    </EuiText>
-    <EuiText textAlign="right">
-      <EuiTitle size="l">
-        <span>{signal.value}</span>
-      </EuiTitle>
-    </EuiText>
-  </EuiPanel>
-);
+const GoldenSignalCard = ({ signal }: { signal: GoldenSignal }) => {
+  const { euiTheme } = useEuiTheme();
+  const { charts } = useDiscoverServices();
+  // Discover plugin entry already depends on `charts`, so the start contract
+  // is guaranteed at this point — pulling the base theme through it keeps us
+  // off the (currently un-referenced) `@kbn/charts-theme` package.
+  const chartBaseTheme = charts.theme.useChartsBaseTheme();
+
+  const datum: MetricDatum = {
+    title: signal.label,
+    value: signal.value,
+    valueFormatter: () => formatGoldenSignalValue(signal),
+    extra: <span>{signal.delta}</span>,
+    color: goldenSignalTileBackground(signal.color, euiTheme),
+    trend: signal.trend.map((y, x) => ({ x, y })),
+    trendShape: MetricTrendShape.Area,
+    trendA11yTitle: signal.label,
+    trendA11yDescription: signal.description,
+  };
+
+  return (
+    <EuiToolTip content={signal.description} position="top" delay="long">
+      {/* `tabIndex={0}` so keyboard users can also surface the tooltip — the
+          metric tile itself is non-interactive. */}
+      <div
+        tabIndex={0}
+        role="group"
+        aria-label={signal.label}
+        css={css`
+          height: ${GOLDEN_SIGNAL_TILE_HEIGHT}px;
+          border: ${euiTheme.border.thin};
+          border-radius: ${euiTheme.border.radius.medium};
+          overflow: hidden;
+        `}
+        data-test-subj={`entityCentricLabGoldenSignalCard-${signal.id}`}
+      >
+        <Chart>
+          <Settings baseTheme={chartBaseTheme} locale={i18n.getLocale()} />
+          <Metric id={`entityCentricLab-goldenSignal-${signal.id}`} data={[[datum]]} />
+        </Chart>
+      </div>
+    </EuiToolTip>
+  );
+};
 
 const KeyValueGrid = ({
   rows,
