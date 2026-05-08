@@ -82,6 +82,17 @@ describe('getIntegrations / fetchDatasets error handling', () => {
     expect(logger.debug).not.toHaveBeenCalled();
   });
 
+  it('logs RegistryResponseError without a status at error level (no silent silencing)', async () => {
+    const err = new RegistryResponseError('Bad Gateway');
+    (err as unknown as { status: number | undefined }).status = undefined;
+    const packageClient = buildPackageClient(jest.fn().mockRejectedValue(err));
+
+    await getIntegrations({ packageClient, logger });
+
+    expect(logger.error).toHaveBeenCalledTimes(1);
+    expect(logger.debug).not.toHaveBeenCalled();
+  });
+
   it('keeps unknown errors at error level', async () => {
     const packageClient = buildPackageClient(
       jest.fn().mockRejectedValue(new Error('something else broke'))

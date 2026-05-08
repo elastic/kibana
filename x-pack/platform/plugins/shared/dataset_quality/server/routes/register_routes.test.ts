@@ -37,8 +37,6 @@ const buildRouteHandler = (handler: jest.Mock) => {
 
   registerRoutes({
     core: coreSetup,
-    // Cast: registerRoutes accepts the broader ServerRouteRepository shape; this
-    // minimal repository is structurally compatible for the parts it touches.
     repository: repository as unknown as Parameters<typeof registerRoutes>[0]['repository'],
     logger,
     plugins: {} as Parameters<typeof registerRoutes>[0]['plugins'],
@@ -46,8 +44,6 @@ const buildRouteHandler = (handler: jest.Mock) => {
     getIsSecurityEnabled: jest.fn(),
   });
 
-  // The router instance used by registerRoutes is the value returned from
-  // core.http.createRouter(); pull it out of the mock's results.
   const createRouterMock = coreSetup.http.createRouter as jest.Mock;
   expect(createRouterMock).toHaveBeenCalledTimes(1);
   const router = createRouterMock.mock.results[0].value as { get: jest.Mock };
@@ -83,7 +79,7 @@ describe('registerRoutes error handling', () => {
 
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 431,
-      body: { message: 'Upstream Elasticsearch responded with status 431' },
+      body: { message: 'Elasticsearch responded with status 431' },
     });
     expect(logger.debug).toHaveBeenCalledTimes(1);
     expect(logger.error).not.toHaveBeenCalled();
@@ -116,16 +112,15 @@ describe('registerRoutes error handling', () => {
     expect(logger.error).not.toHaveBeenCalled();
   });
 
-  it('logs at error for an ES ResponseError 5xx', async () => {
-    const handler = jest.fn().mockRejectedValue(
-      new errors.ResponseError({
-        statusCode: 503,
-        body: { error: { type: 'no_shard_available_action_exception', reason: 'no shards' } },
-        headers: {},
-        warnings: [],
-        meta: {} as never,
-      })
-    );
+  it('logs at error for an ES ResponseError 5xx and forwards the original Error so stack/type survive', async () => {
+    const cause = new errors.ResponseError({
+      statusCode: 503,
+      body: { error: { type: 'no_shard_available_action_exception', reason: 'no shards' } },
+      headers: {},
+      warnings: [],
+      meta: {} as never,
+    });
+    const handler = jest.fn().mockRejectedValue(cause);
 
     const { wrappedHandler, logger } = buildRouteHandler(handler);
     const response = await invoke(wrappedHandler);
@@ -136,6 +131,91 @@ describe('registerRoutes error handling', () => {
     });
     expect(logger.error).toHaveBeenCalledTimes(1);
     expect(logger.debug).not.toHaveBeenCalled();
+    // Error instance survives so BaseLogger emits ECS error.stack_trace / error.type.
+    const [firstArg] = (logger.error as jest.Mock).mock.calls[0];
+    expect(firstArg).toBe(cause);
+  });
+
+  it('logs HTTP 429 (rate limit) at warn so capacity signals stay visible', async () => {
+    const handler = jest.fn().mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 429,
+        body: {
+          error: { type: 'circuit_breaking_exception', reason: 'data too large' },
+        },
+        headers: {},
+        warnings: [],
+        meta: {} as never,
+      })
+    );
+
+    const { wrappedHandler, logger } = buildRouteHandler(handler);
+    const response = await invoke(wrappedHandler);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 429,
+      body: { message: 'data too large' },
+    });
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(logger.debug).not.toHaveBeenCalled();
+  });
+
+  it('falls back to caused_by.reason when the top-level reason is missing', async () => {
+    const handler = jest.fn().mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 400,
+        body: {
+          error: {
+            type: 'mapper_parsing_exception',
+            caused_by: {
+              type: 'illegal_argument_exception',
+              reason: 'mapper [foo] cannot be changed from type [keyword] to [text]',
+            },
+          },
+        },
+        headers: {},
+        warnings: [],
+        meta: {} as never,
+      })
+    );
+
+    const { wrappedHandler } = buildRouteHandler(handler);
+    const response = await invoke(wrappedHandler);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 400,
+      body: {
+        message: 'mapper [foo] cannot be changed from type [keyword] to [text]',
+      },
+    });
+  });
+
+  it('falls back to root_cause[0].reason when both top-level reason and caused_by are missing', async () => {
+    const handler = jest.fn().mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 400,
+        body: {
+          error: {
+            type: 'search_phase_execution_exception',
+            root_cause: [
+              { type: 'illegal_argument_exception', reason: 'field [bar] is not aggregatable' },
+            ],
+          },
+        },
+        headers: {},
+        warnings: [],
+        meta: {} as never,
+      })
+    );
+
+    const { wrappedHandler } = buildRouteHandler(handler);
+    const response = await invoke(wrappedHandler);
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 400,
+      body: { message: 'field [bar] is not aggregatable' },
+    });
   });
 
   it('returns 499 with a generic message for RequestAbortedError', async () => {

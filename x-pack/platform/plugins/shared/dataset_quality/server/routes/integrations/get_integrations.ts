@@ -95,13 +95,15 @@ const fetchDatasets = async (options: {
     const { name, version, logger } = options;
     const message = `There was an error when trying to fetch information about package ${name} version ${version}: ${error}`;
 
-    // Registry 4xx and Fleet permission failures are user-facing, not Kibana
-    // faults — log at debug to keep them out of the ERROR stream.
-    const isRecoverable =
-      (error instanceof RegistryResponseError && (error.status ?? 0) < 500) ||
+    // Registry 4xx / Fleet permission denials are user-facing, not Kibana faults.
+    // A registry error without a status stays at error so transient failures stay visible.
+    const shouldLogAsDebug =
+      (error instanceof RegistryResponseError &&
+        error.status !== undefined &&
+        error.status < 500) ||
       error instanceof FleetUnauthorizedError;
 
-    if (isRecoverable) {
+    if (shouldLogAsDebug) {
       logger.debug(message);
     } else {
       logger.error(message);
