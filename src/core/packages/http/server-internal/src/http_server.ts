@@ -156,22 +156,6 @@ function stripConfiguredBasePath(
 }
 
 /**
- * Extracts the space id from a clean URL (one that has already been stripped
- * of `config.basePath`). When the path carries an explicit `/s/<spaceId>`
- * prefix the URL is rewritten to drop it.
- */
-function extractSpaceFromUrl(request: Request) {
-  const { spaceId, pathHasExplicitSpaceIdentifier } = getSpaceIdFromPath(request.url.pathname);
-  if (!pathHasExplicitSpaceIdentifier) {
-    return spaceId;
-  }
-  const spacePrefix = getSpaceUrlPrefix(spaceId);
-  const newPathname = request.url.pathname.slice(spacePrefix.length) || '/';
-  setRewrittenUrl(request, `${newPathname}${request.url.search}`);
-  return spaceId;
-}
-
-/**
  * Records the original URL on the first rewrite of a request so handlers can
  * recover it later, and applies the new URL via Hapi's setUrl.
  */
@@ -659,7 +643,12 @@ export class HttpServer {
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
 
-      const spaceId = extractSpaceFromUrl(request);
+      const { spaceId, pathHasExplicitSpaceIdentifier } = getSpaceIdFromPath(request.url.pathname);
+      if (pathHasExplicitSpaceIdentifier) {
+        const spacePrefix = getSpaceUrlPrefix(spaceId);
+        const newPathname = request.url.pathname.slice(spacePrefix.length) || '/';
+        setRewrittenUrl(request, `${newPathname}${request.url.search}`);
+      }
 
       const app: KibanaRequestState = request.app as KibanaRequestState;
 
