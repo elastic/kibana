@@ -14,7 +14,6 @@ import type { ConnectorSpec, ActionContext } from '../../connector_spec';
 import type { SlackAssistantSearchContextResponse, SlackErrorFields } from './types';
 
 const SLACK_API_BASE = 'https://slack.com/api';
-const ENABLE_TEMPORARY_MANUAL_TOKEN_AUTH = true; // Temporary: remove once OAuth support is unblocked.
 const SLACK_CONVERSATION_TYPES = ['public_channel', 'private_channel', 'im', 'mpim'] as const;
 
 // Slack API/connector constants (avoid magic numbers)
