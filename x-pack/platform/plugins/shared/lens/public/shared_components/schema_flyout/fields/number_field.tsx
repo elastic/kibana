@@ -27,12 +27,7 @@ export const NumberField = ({ descriptor, control }: NumberFieldProps) => {
   const { field } = useController({ name: descriptor.path, control });
 
   return (
-    <EuiFormRow
-      label={descriptor.label}
-      helpText={descriptor.description}
-      display="columnCompressed"
-      fullWidth
-    >
+    <EuiFormRow label={descriptor.label} display="columnCompressed" fullWidth>
       <EuiFieldNumber
         value={field.value as number | undefined}
         onChange={(e) => field.onChange(e.target.valueAsNumber)}

@@ -30,12 +30,7 @@ export const SelectField = ({ descriptor, control }: SelectFieldProps) => {
 
   if (rawOptions.length <= 4) {
     return (
-      <EuiFormRow
-        label={descriptor.label}
-        helpText={descriptor.description}
-        display="columnCompressed"
-        fullWidth
-      >
+      <EuiFormRow label={descriptor.label} display="columnCompressed" fullWidth>
         <EuiButtonGroup
           legend={descriptor.label}
           options={rawOptions.map((opt) => ({ id: opt.value, label: opt.label }))}
@@ -55,12 +50,7 @@ export const SelectField = ({ descriptor, control }: SelectFieldProps) => {
   }));
 
   return (
-    <EuiFormRow
-      label={descriptor.label}
-      helpText={descriptor.description}
-      display="columnCompressed"
-      fullWidth
-    >
+    <EuiFormRow label={descriptor.label} display="columnCompressed" fullWidth>
       <EuiSelect
         options={options}
         value={String(field.value ?? '')}

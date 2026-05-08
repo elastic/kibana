@@ -27,12 +27,7 @@ export const ToggleField = ({ descriptor, control }: ToggleFieldProps) => {
   const { field } = useController({ name: descriptor.path, control });
 
   return (
-    <EuiFormRow
-      label={descriptor.label}
-      helpText={descriptor.description}
-      display="columnCompressed"
-      fullWidth
-    >
+    <EuiFormRow label={descriptor.label} display="columnCompressed" fullWidth>
       <EuiSwitch
         label=""
         compressed
