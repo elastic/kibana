@@ -45,6 +45,13 @@ const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
 };
 
+const combineConditions = (conditions: Array<string | undefined>): string | undefined => {
+  const filtered = conditions.map((c) => c?.trim()).filter((c): c is string => Boolean(c));
+  if (filtered.length === 0) return undefined;
+  if (filtered.length === 1) return filtered[0];
+  return filtered.map((c) => `(${c})`).join(' AND ');
+};
+
 export function getInputId(
   input: NewPackagePolicyInput,
   packagePolicyId?: string,
@@ -74,9 +81,29 @@ export const storedPackagePolicyToAgentInputs = (
     return fullInputs;
   }
 
+  const { enableIntegrationConditions } = appContextService.getExperimentalFeatures();
+  const isAgentless = packagePolicy.supports_agentless === true;
+
   packagePolicy.inputs.forEach((input) => {
     if (!input.enabled) {
       return;
+    }
+
+    const inputStreams = getFullInputStreams(input);
+
+    // Integration-level condition fans out to each non-otelcol input on non-agentless
+    // policies, AND-combined with the input-level condition already produced by
+    // getFullInputStreams. Flag-gated so behavior is unchanged when off.
+    const integrationLevelCondition =
+      enableIntegrationConditions && !isAgentless && input.type !== OTEL_COLLECTOR_INPUT_TYPE
+        ? packagePolicy.condition
+        : undefined;
+    const combinedInputCondition = combineConditions([
+      integrationLevelCondition,
+      inputStreams.condition,
+    ]);
+    if (combinedInputCondition !== undefined) {
+      inputStreams.condition = combinedInputCondition;
     }
 
     const fullInput: FullAgentPolicyInput = {
@@ -91,7 +118,7 @@ export const storedPackagePolicyToAgentInputs = (
       },
       use_output: packagePolicy.output_id || agentPolicyOutputId,
       package_policy_id: packagePolicy.id,
-      ...getFullInputStreams(input),
+      ...inputStreams,
     };
 
     // Guard: undefined data_stream.type is only valid for inputs that allow dynamic signal types.
@@ -167,16 +194,29 @@ export const getFullInputStreams = (
   allStreamEnabled: boolean = false,
   streamsOriginalIdsMap?: Map<string, string> // Map of stream ids <destinationId, originalId>
 ): FullAgentPolicyInputStream => {
+  // Extract template-defined `condition` (from compiled_input) before spreading so a
+  // later AND-combine with the user input.condition.
+  const { condition: compiledInputCondition, ...compiledInputRest } = input.compiled_input || {};
+  const inputCondition = combineConditions([compiledInputCondition, input.condition]);
+
   return {
-    ...(input.compiled_input || {}),
+    ...compiledInputRest,
+    ...(inputCondition !== undefined ? { condition: inputCondition } : {}),
     ...(input.streams.length
       ? {
           streams: input.streams
             .filter((stream) => stream.enabled || allStreamEnabled)
             .map((stream) => {
               const streamId = stream.id;
-              const { data_stream: compiledDataStream, ...compiledStream } =
-                stream.compiled_stream ?? {};
+              const {
+                data_stream: compiledDataStream,
+                condition: compiledStreamCondition,
+                ...compiledStream
+              } = stream.compiled_stream ?? {};
+              const streamCondition = combineConditions([
+                compiledStreamCondition,
+                stream.condition,
+              ]);
               const fullStream: FullAgentPolicyInputStream = {
                 id: streamId,
                 data_stream: {
@@ -184,6 +224,7 @@ export const getFullInputStreams = (
                   ...compiledDataStream,
                 },
                 ...compiledStream,
+                ...(streamCondition !== undefined ? { condition: streamCondition } : {}),
                 ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
                   acc[key] = value;
                   return acc;
