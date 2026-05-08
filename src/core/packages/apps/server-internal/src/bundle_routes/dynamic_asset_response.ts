@@ -9,6 +9,7 @@
 
 import { createReadStream } from 'fs';
 import { resolve, extname } from 'path';
+import { createBrotliCompress, createGzip, constants as zlibConstants } from 'zlib';
 import mime from 'mime-types';
 import agent from 'elastic-apm-node';
 
@@ -21,6 +22,40 @@ import { selectCompressedFile } from './select_compressed_file';
 const MINUTE = 60;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
+
+function getAcceptedEncodings(acceptEncodingHeader: string): Array<'br' | 'gzip'> {
+  if (!acceptEncodingHeader) {
+    return [];
+  }
+
+  const entries = acceptEncodingHeader
+    .split(',')
+    .map((part, idx) => {
+      const [coding, ...params] = part.trim().toLowerCase().split(';');
+      if (coding !== 'br' && coding !== 'gzip' && coding !== 'x-gzip') {
+        return undefined;
+      }
+      let q = 1;
+      for (const p of params) {
+        const [key, value] = p.split('=').map((s) => s.trim());
+        if (key === 'q') {
+          const parsed = Number(value);
+          if (!Number.isNaN(parsed)) q = parsed;
+        }
+      }
+      if (q <= 0) {
+        return undefined;
+      }
+      return { coding: coding === 'x-gzip' ? 'gzip' : (coding as 'br' | 'gzip'), q, idx };
+    })
+    .filter((x): x is { coding: 'br' | 'gzip'; q: number; idx: number } => x != null)
+    .sort((a, b) => {
+      if (b.q !== a.q) return b.q - a.q;
+      return b.idx - a.idx;
+    });
+
+  return entries.map((e) => e.coding);
+}
 
 /**
  *  Serve asset for the requested path. This is designed
@@ -75,6 +110,7 @@ export const createDynamicAssetHandler = ({
       ));
 
       let headers: Record<string, string>;
+      let dynamicEncoding: 'gzip' | 'br' | undefined;
       if (isDist) {
         headers = {
           'cache-control': `public, max-age=${365 * DAY}, immutable`,
@@ -89,9 +125,16 @@ export const createDynamicAssetHandler = ({
       }
 
       // If we manually selected a compressed file, specify the encoding header.
-      // Otherwise, let Hapi automatically gzip the response.
+      // Otherwise, apply dynamic compression (Fastify does not auto-compress these streams).
       if (fileEncoding) {
         headers['content-encoding'] = fileEncoding;
+      } else {
+        const accepted = getAcceptedEncodings((req.headers['accept-encoding'] as string) || '');
+        dynamicEncoding = accepted.find((enc) => enc === 'br' || enc === 'gzip');
+        if (dynamicEncoding) {
+          headers['content-encoding'] = dynamicEncoding;
+          headers.vary = 'accept-encoding';
+        }
       }
 
       const fileExt = extname(path);
@@ -104,9 +147,21 @@ export const createDynamicAssetHandler = ({
         start: 0,
         autoClose: true,
       });
+      const body =
+        dynamicEncoding === 'gzip'
+          ? content.pipe(createGzip())
+          : dynamicEncoding === 'br'
+          ? content.pipe(
+              createBrotliCompress({
+                params: {
+                  [zlibConstants.BROTLI_PARAM_QUALITY]: 3,
+                },
+              })
+            )
+          : content;
 
       return res.ok({
-        body: content,
+        body,
         headers,
       });
     } catch (error) {

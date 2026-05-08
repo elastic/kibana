@@ -59,7 +59,7 @@ describe('headers', () => {
     });
     const result = await handler(
       {} as any,
-      { params: { path: filePath }, headers: { 'accept-encoding': 'br' } } as any,
+      { params: { path: filePath }, headers: { 'accept-encoding': '*' } } as any,
       kibanaResponseFactory
     );
     expect(result.options.headers).toEqual({
