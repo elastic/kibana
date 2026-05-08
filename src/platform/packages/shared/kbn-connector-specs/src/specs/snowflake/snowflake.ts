@@ -35,7 +35,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import type {
   ExecuteStatementInput,
@@ -261,83 +261,91 @@ export const Snowflake: ConnectorSpec = {
     },
   },
 
-  schema: z.object({
-    accountUrl: z
-      .url()
-      .transform((val) => val.replace(/\/+$/, ''))
-      .describe('Snowflake account URL')
-      .meta({
-        widget: 'text',
-        placeholder: 'https://<account>.snowflakecomputing.com',
-        label: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.accountUrl.label', {
-          defaultMessage: 'Snowflake Account URL',
+  schema: lazySchema(() =>
+    z.object({
+      accountUrl: z
+        .url()
+        .transform((val) => val.replace(/\/+$/, ''))
+        .describe('Snowflake account URL')
+        .meta({
+          widget: 'text',
+          placeholder: 'https://<account>.snowflakecomputing.com',
+          label: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.accountUrl.label', {
+            defaultMessage: 'Snowflake Account URL',
+          }),
+          helpText: i18n.translate(
+            'core.kibanaConnectorSpecs.snowflake.config.accountUrl.helpText',
+            {
+              defaultMessage:
+                'The base URL for your Snowflake account (e.g. https://myorg-myaccount.snowflakecomputing.com).',
+            }
+          ),
         }),
-        helpText: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.accountUrl.helpText', {
-          defaultMessage:
-            'The base URL for your Snowflake account (e.g. https://myorg-myaccount.snowflakecomputing.com).',
+      warehouse: z
+        .string()
+        .optional()
+        .describe('Default warehouse for SQL execution')
+        .meta({
+          widget: 'text',
+          placeholder: 'COMPUTE_WH',
+          label: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.warehouse.label', {
+            defaultMessage: 'Default Warehouse',
+          }),
+          helpText: i18n.translate(
+            'core.kibanaConnectorSpecs.snowflake.config.warehouse.helpText',
+            {
+              defaultMessage:
+                'Default warehouse to use when executing statements. Case-sensitive. Can be overridden per request.',
+            }
+          ),
         }),
-      }),
-    warehouse: z
-      .string()
-      .optional()
-      .describe('Default warehouse for SQL execution')
-      .meta({
-        widget: 'text',
-        placeholder: 'COMPUTE_WH',
-        label: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.warehouse.label', {
-          defaultMessage: 'Default Warehouse',
+      database: z
+        .string()
+        .optional()
+        .describe('Default database for SQL execution')
+        .meta({
+          widget: 'text',
+          placeholder: 'MY_DATABASE',
+          label: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.database.label', {
+            defaultMessage: 'Default Database',
+          }),
+          helpText: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.database.helpText', {
+            defaultMessage:
+              'Default database to use when executing statements. Case-sensitive. Can be overridden per request.',
+          }),
         }),
-        helpText: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.warehouse.helpText', {
-          defaultMessage:
-            'Default warehouse to use when executing statements. Case-sensitive. Can be overridden per request.',
+      defaultSchema: z
+        .string()
+        .optional()
+        .describe('Default schema for SQL execution')
+        .meta({
+          widget: 'text',
+          placeholder: 'PUBLIC',
+          label: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.schema.label', {
+            defaultMessage: 'Default Schema',
+          }),
+          helpText: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.schema.helpText', {
+            defaultMessage:
+              'Default schema to use when executing statements. Case-sensitive. Can be overridden per request.',
+          }),
         }),
-      }),
-    database: z
-      .string()
-      .optional()
-      .describe('Default database for SQL execution')
-      .meta({
-        widget: 'text',
-        placeholder: 'MY_DATABASE',
-        label: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.database.label', {
-          defaultMessage: 'Default Database',
+      role: z
+        .string()
+        .optional()
+        .describe('Default role for SQL execution')
+        .meta({
+          widget: 'text',
+          placeholder: 'PUBLIC',
+          label: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.role.label', {
+            defaultMessage: 'Default Role',
+          }),
+          helpText: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.role.helpText', {
+            defaultMessage:
+              'Default role to use when executing statements. Case-sensitive. Can be overridden per request.',
+          }),
         }),
-        helpText: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.database.helpText', {
-          defaultMessage:
-            'Default database to use when executing statements. Case-sensitive. Can be overridden per request.',
-        }),
-      }),
-    defaultSchema: z
-      .string()
-      .optional()
-      .describe('Default schema for SQL execution')
-      .meta({
-        widget: 'text',
-        placeholder: 'PUBLIC',
-        label: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.schema.label', {
-          defaultMessage: 'Default Schema',
-        }),
-        helpText: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.schema.helpText', {
-          defaultMessage:
-            'Default schema to use when executing statements. Case-sensitive. Can be overridden per request.',
-        }),
-      }),
-    role: z
-      .string()
-      .optional()
-      .describe('Default role for SQL execution')
-      .meta({
-        widget: 'text',
-        placeholder: 'PUBLIC',
-        label: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.role.label', {
-          defaultMessage: 'Default Role',
-        }),
-        helpText: i18n.translate('core.kibanaConnectorSpecs.snowflake.config.role.helpText', {
-          defaultMessage:
-            'Default role to use when executing statements. Case-sensitive. Can be overridden per request.',
-        }),
-      }),
-  }),
+    })
+  ),
 
   validateUrls: {
     fields: ['accountUrl'],
