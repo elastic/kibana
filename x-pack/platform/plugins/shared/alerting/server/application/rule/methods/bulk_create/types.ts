@@ -28,7 +28,7 @@ export type BulkCreateDisabledReason =
   | 'api_key_creation_failed'
   | 'schedule_limit_exceeded'
   | 'task_schedule_failed'
-  | 'task_validation_failed';
+  | 'task_schedule_entry_failed';
 
 export interface BulkCreateOperationError extends BulkOperationError {
   disabledReason?: BulkCreateDisabledReason;
@@ -38,5 +38,11 @@ export interface BulkCreateRulesResult<Params extends RuleParams = never> {
   rules: Array<SanitizedRule<Params>>;
   errors: BulkCreateOperationError[];
   total: number;
-  taskIdsFailedToBeEnabled: string[];
+  /**
+   * Promise that resolves when the detached post-create work finishes:
+   *   - Task scheduling
+   *   - Failure recovery: rule SO enabled -> disabled.
+   *   - API key invalidations
+   */
+  backgroundWork: Promise<BulkCreateOperationError[]>;
 }

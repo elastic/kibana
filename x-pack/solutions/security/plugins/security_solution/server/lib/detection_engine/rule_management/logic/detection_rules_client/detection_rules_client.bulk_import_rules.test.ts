@@ -56,7 +56,7 @@ describe('detectionRulesClient.bulkImportRules', () => {
       rules: [],
       errors: [],
       total: 0,
-      taskIdsFailedToBeEnabled: [],
+      backgroundWork: Promise.resolve([]),
     });
 
     mockRuleSourceImporter = ruleSourceImporterMock.create();
@@ -72,7 +72,7 @@ describe('detectionRulesClient.bulkImportRules', () => {
       rules: [getRuleMock(getQueryRuleParams())],
       errors: [],
       total: 1,
-      taskIdsFailedToBeEnabled: [],
+      backgroundWork: Promise.resolve([]),
     });
 
     await subject.bulkImportRules({
@@ -94,7 +94,7 @@ describe('detectionRulesClient.bulkImportRules', () => {
       rules: [getRuleMock(getQueryRuleParams())],
       errors: [],
       total: 1,
-      taskIdsFailedToBeEnabled: [],
+      backgroundWork: Promise.resolve([]),
     });
 
     await subject.bulkImportRules({
@@ -119,7 +119,7 @@ describe('detectionRulesClient.bulkImportRules', () => {
       rules: [getRuleMock(getQueryRuleParams())],
       errors: [],
       total: 1,
-      taskIdsFailedToBeEnabled: [],
+      backgroundWork: Promise.resolve([]),
     });
 
     const result = await subject.bulkImportRules({
@@ -147,7 +147,7 @@ describe('detectionRulesClient.bulkImportRules', () => {
       rules: [getRuleMock(getQueryRuleParams())],
       errors: [],
       total: 1,
-      taskIdsFailedToBeEnabled: [],
+      backgroundWork: Promise.resolve([]),
     });
 
     await subject.bulkImportRules({
@@ -172,7 +172,7 @@ describe('detectionRulesClient.bulkImportRules', () => {
         rules: [],
         errors: [{ message: 'boom', status: 500, rule: { id, name: ruleToImport.name } }],
         total: 1,
-        taskIdsFailedToBeEnabled: [],
+        backgroundWork: Promise.resolve([]),
       };
     });
 
@@ -187,34 +187,6 @@ describe('detectionRulesClient.bulkImportRules', () => {
     expect(errors).toHaveLength(1);
     expect(errors[0].error.ruleId).toBe(ruleToImport.rule_id);
     expect(errors[0].error.message).toBe('boom');
-  });
-
-  it('taskIdsFailedToBeEnabled surfaces as a per-rule warning', async () => {
-    const ruleToImport = { ...getImportRulesSchemaMock(), enabled: true };
-    const created = getRuleMock(getQueryRuleParams());
-    rulesClient.bulkCreateRules.mockImplementationOnce(async (args) => {
-      const id = (args.rules[0].options as { id: string }).id;
-      return {
-        rules: [created],
-        errors: [],
-        total: 1,
-        taskIdsFailedToBeEnabled: [id],
-      };
-    });
-
-    const result = await subject.bulkImportRules({
-      allowMissingConnectorSecrets: false,
-      overwriteRules: false,
-      ruleSourceImporter: mockRuleSourceImporter,
-      rules: [ruleToImport],
-    });
-
-    expect(result.length).toBeGreaterThanOrEqual(2);
-    const warnings = result.filter(
-      (r) => isRuleImportError(r) && r.error.message.includes('task could not be enabled')
-    );
-    expect(warnings).toHaveLength(1);
-    expect(isRuleImportError(warnings[0]) && warnings[0].error.ruleId).toBe(ruleToImport.rule_id);
   });
 
   it('returns empty result for empty input without calling alerting/findRules', async () => {

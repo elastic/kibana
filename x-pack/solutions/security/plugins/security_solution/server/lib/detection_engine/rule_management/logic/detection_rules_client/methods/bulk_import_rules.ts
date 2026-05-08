@@ -271,20 +271,6 @@ export const bulkImportRules = async ({
     );
   });
 
-  // Surface task-enable failures as warnings: the rule was created but its
-  // task didn't start. We map back via id → rule_id and report a partial
-  // success so callers know to retry enabling.
-  bulkResult.taskIdsFailedToBeEnabled.forEach((taskId) => {
-    const source = inputById.get(taskId);
-    if (!source) return;
-    responses.push(
-      createRuleImportErrorObject({
-        ruleId: source.rule.rule_id,
-        message: 'Rule was created but its task could not be enabled; please retry enable.',
-      })
-    );
-  });
-
   return responses;
 };
 
