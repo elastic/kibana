@@ -172,12 +172,15 @@ The files live at:
 ```
 x-pack/solutions/security/.agents/skills/test-plan-generator/
 ├── SKILL.md                              # Agent instructions
-└── references/
-    ├── common-mistakes.md                # Quality checklist reviewed before every save
-    ├── document-structure.md             # Test plan template and structure
-    ├── optional-scenarios.md             # Gherkin templates and formatting rules
-    ├── output-formats.md                 # Sources Summary template and chat output formats
-    └── security-test-directories.md      # Map of existing test locations in the repo
+├── references/
+│   ├── common-mistakes.md                # Quality checklist reviewed before every save
+│   ├── document-structure.md             # Test plan template and structure
+│   ├── mode-update.md                    # Incremental update workflow
+│   ├── optional-scenarios.md             # Gherkin templates and formatting rules
+│   ├── output-formats.md                 # Sources Summary template and chat output formats
+│   └── security-test-directories.md      # Map of existing test locations in the repo
+└── scripts/
+    └── publish_test_plan.sh              # Deterministic publish step (invoked in Step 4)
 ```
 
 > **Why a skill and not a Cursor rule?** Skills are the current standard for extending AI agents in Kibana, agreed by Kibana tech leads and the AI guild. They are more efficient than rules (loaded on demand, not on every agent session), portable across agents, and version-controlled like any other code.
@@ -245,7 +248,7 @@ If you want to force a full re-read of all linked PRs regardless of activity:
 /test-plan-generator publish test plan for issue #1234
 ```
 
-The agent will use the `gh` CLI as the primary method. If `gh` is not available, it will fall back to the GitHub MCP. Either way, the result is the same: the comment is posted (or updated) on the issue and the local draft is deleted.
+The agent uses the `gh` CLI as the primary method, invoking `scripts/publish_test_plan.sh` for a deterministic publish — it detects any existing test plan comment, decides between PATCH and POST, posts the content, and deletes the local draft. If `gh` is not available, the agent falls back to the GitHub MCP and performs the same flow manually. Either way, the comment is posted (or updated) on the issue and the local draft is deleted.
 
 ---
 
@@ -287,6 +290,18 @@ The agent looks for a comment whose first two lines are exactly:
 <!-- generated-by: [model] -->
 ```
 to detect existing test plans and avoid duplicates. If those markers are missing or not at the very top of the comment, the agent will create a new comment instead of updating the existing one. Open the published comment on GitHub, make sure both lines are present and are the very first lines, save, and the update flow will work correctly from then on.
+
+### `publish_test_plan.sh` exits with an error code
+
+When publishing, the agent runs `scripts/publish_test_plan.sh`. If the script fails, you will see a message like `error: ...` followed by an exit code. The most common ones:
+
+| Exit code | Meaning | Fix |
+|---|---|---|
+| 65 | The draft does not start with `<!-- test-plan-generated -->` | The agent should have prepended the marker. If you see this, the draft was edited externally — open `.agents/tmp/test-plan-#<issue>.md` and make sure the first two lines are the marker and `generated-by:` lines. |
+| 66 | Draft file does not exist | Run `generate test plan for issue #<n>` first to create the draft. |
+| 69 | `gh` CLI is not installed | Run `brew install gh` (Step 4). |
+| 77 | `gh` CLI is not authenticated | Run `gh auth login` (Step 4). |
+| 64 | Argument or usage error | Re-run the publish command. If it persists, open an issue. |
 
 ### Cursor hangs or stops responding during generation
 
