@@ -33,7 +33,8 @@ export function convertDatatableColumnToDataViewFieldSpec(column: DatatableColum
     searchable: true,
     aggregatable: false,
     isNull: Boolean(column?.isNull),
-    isComputedColumn: true,
+    // Use the column's isComputedColumn property if set, otherwise default to true for backward compatibility
+    isComputedColumn: column.isComputedColumn ?? true,
     ...(timeSeriesMetric ? { timeSeriesMetric } : {}),
   };
 }

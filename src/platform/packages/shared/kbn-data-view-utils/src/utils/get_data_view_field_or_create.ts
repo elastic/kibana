@@ -12,6 +12,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from './convert_to_data_view_field_spec';
 
+export interface ColumnMetaWithComputedInfo extends DatatableColumnMeta {
+  isComputedColumn?: boolean;
+}
+
 export const getDataViewFieldOrCreateFromColumnMeta = ({
   dataView,
   fieldName,
@@ -19,7 +23,7 @@ export const getDataViewFieldOrCreateFromColumnMeta = ({
 }: {
   dataView: DataView;
   fieldName: string;
-  columnMeta?: DatatableColumnMeta; // based on ES|QL query
+  columnMeta?: ColumnMetaWithComputedInfo; // based on ES|QL query
 }) => {
   const dataViewField = dataView.fields.getByName(fieldName);
 
@@ -31,6 +35,7 @@ export const getDataViewFieldOrCreateFromColumnMeta = ({
     name: fieldName,
     id: fieldName,
     meta: columnMeta,
+    isComputedColumn: columnMeta.isComputedColumn,
   });
 
   if (

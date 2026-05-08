@@ -21,6 +21,7 @@ import {
 } from '@kbn/discover-utils';
 import { extractTextFromReactNode } from '@kbn/discover-contextual-components/src/data_types/logs/components/utils';
 import { FieldBadgeWithActions } from '@kbn/discover-contextual-components/src/data_types/logs/components/cell_actions_popover';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import type { CellRenderersExtensionParams } from '../../../context_awareness';
 import { AGENT_NAME_FIELD } from '../../../../common/data_types/logs/constants';
@@ -37,7 +38,11 @@ export const getServiceNameCell =
   (props: DataGridCellValueElementProps) => {
     const { core, share } = useDiscoverServices();
     const serviceNameValue = getFieldValue(props.row, serviceNameField);
-    const field = props.dataView.getFieldByName(serviceNameField);
+    const field = getDataViewFieldOrCreateFromColumnMeta({
+      dataView: props.dataView,
+      fieldName: serviceNameField,
+      columnMeta: props.columnsMeta?.[serviceNameField],
+    });
     const agentName = getFieldValue(props.row, AGENT_NAME_FIELD) as AgentName;
     const otelSdkLanguage = getFieldValue(
       props.row,
