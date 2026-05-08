@@ -8,6 +8,7 @@
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT } from './constants';
 
 export const EntityStoreGlobalStateTypeName = 'entity-store-global-state';
 
@@ -40,7 +41,6 @@ const logExtractionSchemaV1 = schema.object({
   maxLogsPerPage: schema.maybe(schema.number()),
   timeout: schema.maybe(schema.string()),
   frequency: schema.maybe(schema.string()),
-  maxTimeWindowSize: schema.maybe(schema.string()),
 });
 
 const globalStateSchemaV1 = schema.object({
@@ -58,6 +58,7 @@ const version1: SavedObjectsFullModelVersion = {
 
 const logExtractionSchemaV2 = logExtractionSchemaV1.extends({
   excludedIndexPatterns: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
+  maxTimeWindowSize: schema.maybe(schema.string()),
 });
 
 const globalStateSchemaV2 = globalStateSchemaV1.extends({
@@ -72,6 +73,7 @@ const version2: SavedObjectsFullModelVersion = {
         attributes: {
           logsExtraction: {
             excludedIndexPatterns: [],
+            maxTimeWindowSize: LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT,
           },
         },
       }),
