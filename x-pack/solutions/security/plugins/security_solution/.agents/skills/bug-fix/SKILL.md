@@ -21,6 +21,21 @@ Phase A (bug-reproduce) first.
 
 ## Phase 4: Fix (TDD)
 
+**Before doing anything in this phase**, verify:
+
+1. `reproduction-report.md` exists at the Kibana repo root
+2. Its `status` field is `reproduced`
+3. Its `user_acknowledged` field is `yes`
+
+If any of these are false, stop. Do not read any source file for fixing purposes. Return
+to Phase 3 and complete the browser reproduction first.
+
+The clearer the bug seems from code analysis, the more important this check is.
+Certainty before reproduction is a red flag, not a green light — a bug that looks
+obvious in isolation is still frequently misdiagnosed (wrong code path, wrong root
+cause, wrong fix strategy). The browser reproduction and plan approval steps exist
+precisely to catch that.
+
 Don't write any code until the user has explicitly approved the fix plan. Presenting the
 plan first is what allows engineers to catch misdiagnoses before implementation rather
 than during code review.
@@ -63,6 +78,10 @@ If the user identifies a misdiagnosis, revise the plan and ask for approval agai
 Re-read the user's last message. Did they explicitly approve ("yes", "proceed", "approved",
 "looks good")? Ambiguous or missing responses are not approval — present the plan again
 and wait. Don't interpret silence or a question as approval.
+
+If you are about to create or edit a test file and cannot point to an explicit approval
+message in the conversation, stop. Revert any edits made since presenting the plan and
+re-present it. No exceptions for bugs that seem obvious.
 
 For Scout tests, read before writing:
 1. `.agents/skills/scout-create-scaffold/SKILL.md`
