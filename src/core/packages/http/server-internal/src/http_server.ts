@@ -623,6 +623,10 @@ export class HttpServer {
     });
 
     this.server!.ext('onRequest', (request, responseToolkit) => {
+      // Capture the original URL before any rewrites — must precede stripConfiguredBasePath
+      // so app.rewrittenUrl preserves the full pre-strip URL for audit/observability consumers.
+      const originalUrl = request.url;
+
       if (!stripConfiguredBasePath(request, config, basePathService)) {
         throw Boom.notFound();
       }
@@ -630,7 +634,6 @@ export class HttpServer {
       const stop = startEluMeasurement(request.path, this.log, this.config?.eluMonitor);
       const requestId = getRequestId(request, config.requestId);
       const parentContext = executionContext?.getParentContextFrom(request.headers);
-      const originalUrl = request.url;
 
       const { spaceId, pathname } = getSpaceIdFromPath(request.url.pathname);
       if (pathname !== request.url.pathname) {

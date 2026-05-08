@@ -125,7 +125,13 @@ describe('space id extraction in onRequest', () => {
         security: { authz: { enabled: false, reason: 'integration test' } },
       },
       (_context, req, res) => {
-        return res.ok({ body: { spaceId: req.spaceId, url: req.url.pathname } });
+        return res.ok({
+          body: {
+            spaceId: req.spaceId,
+            url: req.url.pathname,
+            rewrittenUrl: req.rewrittenUrl?.pathname ?? null,
+          },
+        });
       }
     );
 
@@ -135,7 +141,13 @@ describe('space id extraction in onRequest', () => {
       .get('/kibana/s/myspace/api/echo')
       .expect(200);
 
-    expect(response.body).toEqual({ spaceId: 'myspace', url: '/api/echo' });
+    expect(response.body).toEqual({
+      spaceId: 'myspace',
+      url: '/api/echo',
+      // rewrittenUrl preserves the full pre-strip URL (with both config.basePath and /s/<id>)
+      // so audit/observability consumers see the original URL.
+      rewrittenUrl: '/kibana/s/myspace/api/echo',
+    });
   });
 
   it('does not match /s/<id>/ in the middle of the path', async () => {
