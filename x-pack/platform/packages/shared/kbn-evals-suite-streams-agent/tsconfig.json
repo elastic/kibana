@@ -11,12 +11,9 @@
     "@kbn/evals-phoenix-executor",
     "@kbn/evals-suite-agent-builder",
     "@kbn/evals-suite-streams",
-    "@kbn/agent-builder-common",
     "@kbn/scout",
     "@kbn/scout-synthtrace",
     "@kbn/tooling-log",
-    "@kbn/core",
     "@kbn/datemath",
-    "@kbn/repo-info",
   ]
 }
