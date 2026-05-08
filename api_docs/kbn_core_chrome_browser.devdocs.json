@@ -2865,7 +2865,7 @@
             "signature": [
               "() => ",
               "Observable",
-              "<\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | null>"
+              "<\"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\" | null>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "lineNumber": 314,
@@ -2885,7 +2885,7 @@
               "\nGet the id of the currently active project navigation synchronously."
             ],
             "signature": [
-              "() => \"security\" | \"es\" | \"workplaceai\" | \"oblt\" | null"
+              "() => \"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\" | null"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "lineNumber": 319,
@@ -3218,7 +3218,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"security\" | \"es\" | \"workplaceai\" | \"oblt\""
+              "\"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\""
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "lineNumber": 251,
@@ -4081,7 +4081,7 @@
               "Unique id for the solution navigation."
             ],
             "signature": [
-              "\"security\" | \"es\" | \"workplaceai\" | \"oblt\""
+              "\"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\""
             ],
             "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
             "lineNumber": 266,
@@ -4433,7 +4433,7 @@
         "label": "SolutionId",
         "description": [],
         "signature": [
-          "\"security\" | \"es\" | \"workplaceai\" | \"oblt\""
+          "\"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "lineNumber": 45,
@@ -4459,6 +4459,10 @@
           "<",
           "AppDeepLinkId",
           "> | undefined; workplaceai?: ",
+          "SolutionNavigationDefinition",
+          "<",
+          "AppDeepLinkId",
+          "> | undefined; vectordb?: ",
           "SolutionNavigationDefinition",
           "<",
           "AppDeepLinkId",
