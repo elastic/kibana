@@ -24,6 +24,7 @@ import type { ExpressionContext } from '../types';
 import { SuggestionBuilder } from '../suggestion_builder';
 import { getControlSuggestion, getVariablePrefix } from '../../helpers';
 import { buildValueDefinitions } from '../../../values';
+import { FunctionDefinitionTypes } from '../../../../types';
 import type {
   FunctionDefinition,
   FunctionParameter,
@@ -43,6 +44,18 @@ import { parametersFromHintsResolvers } from '../../parameters_from_hints';
 
 // functionDefinition is guaranteed by in_function.ts early return
 type FunctionParamContext = NonNullable<ExpressionContext['options']['functionParameterContext']>;
+
+interface HintKindSuggestionConfig {
+  functionTypes?: FunctionDefinitionTypes[];
+  suppressFields?: boolean;
+}
+
+const HINT_KIND_SUGGESTION_CONFIG: Partial<Record<string, HintKindSuggestionConfig>> = {
+  aggregation: {
+    functionTypes: [FunctionDefinitionTypes.AGG, FunctionDefinitionTypes.TIME_SERIES_AGG],
+    suppressFields: true,
+  },
+};
 
 /** Handles suggestions when starting a new expression (empty position) */
 export async function suggestForEmptyExpression(
@@ -223,9 +236,12 @@ async function buildFieldAndFunctionSuggestions(
   const hasConstantOnlyParam = paramDefinitions.some(({ constantOnly }) => constantOnly);
   const hasFieldsOnlyParam = paramDefinitions.some(({ fieldsOnly }) => fieldsOnly);
 
+  const hintKind = paramDefinitions.find((p) => p.hint?.kind !== undefined)?.hint?.kind;
+  const hintConfig = hintKind !== undefined ? HINT_KIND_SUGGESTION_CONFIG[hintKind] : undefined;
+
   // constantOnly params require literal values, not fields
   // (variadic functions work correctly: empty paramDefinitions → hasConstantOnlyParam = false)
-  if (!hasConstantOnlyParam) {
+  if (!hasConstantOnlyParam && !hintConfig?.suppressFields) {
     const canBeMultiValue = paramDefinitions.some(
       (t) => t && (t.supportsMultiValues === true || t.name === 'values')
     );
@@ -244,6 +260,7 @@ async function buildFieldAndFunctionSuggestions(
       types: config.acceptedTypes,
       addComma: config.shouldAddComma,
       excludeParentFunctions: true,
+      functionTypes: hintConfig?.functionTypes,
     });
   }
 
