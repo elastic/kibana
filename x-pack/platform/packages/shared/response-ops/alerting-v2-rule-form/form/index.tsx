@@ -80,3 +80,6 @@ export {
   mapRuleResponseToFormValues,
 } from './utils/rule_request_mappers';
 export type { RuleRequestCommon } from './utils/rule_request_mappers';
+
+export { useDataFields } from './hooks/use_data_fields';
+export { getTimeFieldOptions } from './utils';

@@ -5,102 +5,76 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiComboBox, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import type { HttpStart } from '@kbn/core-http-browser';
+import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
+import {
+  useDataFields,
+  getTimeFieldOptions,
+  useRuleFormServices,
+} from '@kbn/alerting-v2-rule-form';
 import type { DataSourceFormValues } from '../types';
 import type { IndexColumn } from '../hooks/use_index_columns';
+import { useIndexOptions } from '../hooks/use_index_options';
 import { SectionWrapper } from './section_wrapper';
 import { GroupByFields } from './group_by_fields';
 import { FilterInput } from './filter_input';
 
+const DEFAULT_TIME_FIELD = '@timestamp';
+
+const NO_TIME_FIELDS_OPTION = {
+  text: i18n.translate('xpack.alertingV2.ruleBuilder.dataSource.noTimeFields', {
+    defaultMessage: 'No time fields available',
+  }),
+  value: '',
+};
+
 interface DataSourceSectionProps {
-  http: HttpStart;
   allColumns: IndexColumn[];
   isColumnsLoading: boolean;
 }
 
-export const DataSourceSection = ({
-  http,
-  allColumns,
-  isColumnsLoading,
-}: DataSourceSectionProps) => {
-  const { control, watch, setValue } = useFormContext<DataSourceFormValues>();
-  const indexPattern = watch('indexPattern');
+export const DataSourceSection = ({ allColumns, isColumnsLoading }: DataSourceSectionProps) => {
+  const { http, dataViews } = useRuleFormServices();
+  const { control, setValue, getValues } = useFormContext<DataSourceFormValues>();
+  const indexPattern = useWatch({ control, name: 'indexPattern' });
 
-  const [indexOptions, setIndexOptions] = useState<Array<{ label: string }>>([]);
-  const [timeFieldOptions, setTimeFieldOptions] = useState<Array<{ value: string; text: string }>>(
-    []
-  );
-  const [isLoadingIndices, setIsLoadingIndices] = useState(false);
-  const [isLoadingFields, setIsLoadingFields] = useState(false);
+  const {
+    options: indexOptions,
+    isLoading: isLoadingIndices,
+    fetchOptions: fetchIndices,
+  } = useIndexOptions({ http });
 
-  const fetchIndices = useCallback(
-    async (searchValue: string) => {
-      if (!searchValue) {
-        setIndexOptions([]);
-        return;
-      }
-      setIsLoadingIndices(true);
-      try {
-        const response = await http.get<{
-          indices: Array<{ name: string }>;
-        }>(
-          `/internal/index-pattern-management/resolve_index/${encodeURIComponent(
-            `${searchValue}*`
-          )}`
-        );
-        setIndexOptions((response.indices ?? []).map((idx) => ({ label: idx.name })));
-      } catch {
-        setIndexOptions([]);
-      } finally {
-        setIsLoadingIndices(false);
+  const esqlQuery = useMemo(() => (indexPattern ? `FROM ${indexPattern}` : ''), [indexPattern]);
+
+  const handleAutoSelectTimeField = useCallback(
+    (fields: DataViewFieldMap) => {
+      const options = getTimeFieldOptions(fields);
+      const currentValue = getValues('timeField');
+      const isCurrentValueValid = options.some((opt) => opt.value === currentValue);
+
+      if (!currentValue || !isCurrentValueValid) {
+        const preferredField = options.find((opt) => opt.value === DEFAULT_TIME_FIELD);
+        const selectedField = preferredField?.value || options[0]?.value || '';
+        setValue('timeField', selectedField, { shouldValidate: true });
       }
     },
-    [http]
+    [getValues, setValue]
   );
 
-  useEffect(() => {
-    if (!indexPattern) {
-      setTimeFieldOptions([]);
-      return;
-    }
+  const { data: fieldsData, isLoading: isFieldsLoading } = useDataFields({
+    query: esqlQuery,
+    http,
+    dataViews,
+    onSuccess: handleAutoSelectTimeField,
+  });
 
-    let cancelled = false;
-    const fetchFields = async () => {
-      setIsLoadingFields(true);
-      try {
-        const response = await http.get<{
-          fields: Array<{ name: string; type: string }>;
-        }>(`/internal/index-pattern-management/resolve_index/${encodeURIComponent(indexPattern)}`);
-        if (!cancelled) {
-          const dateFields = (response.fields ?? [])
-            .filter((f: { name: string; type: string }) => f.type === 'date')
-            .map((f: { name: string; type: string }) => ({ value: f.name, text: f.name }));
-
-          if (dateFields.length === 0) {
-            setTimeFieldOptions([{ value: '@timestamp', text: '@timestamp' }]);
-          } else {
-            setTimeFieldOptions(dateFields);
-          }
-        }
-      } catch {
-        if (!cancelled) {
-          setTimeFieldOptions([{ value: '@timestamp', text: '@timestamp' }]);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoadingFields(false);
-        }
-      }
-    };
-    fetchFields();
-    return () => {
-      cancelled = true;
-    };
-  }, [indexPattern, http]);
+  const timeFieldOptions = useMemo(() => {
+    const options = getTimeFieldOptions(fieldsData ?? {});
+    return options.length > 0 ? options : [NO_TIME_FIELDS_OPTION];
+  }, [fieldsData]);
 
   return (
     <SectionWrapper
@@ -138,7 +112,7 @@ export const DataSourceSection = ({
                 const value = options.length > 0 ? options[0].label : '';
                 field.onChange(value);
                 if (!value) {
-                  setValue('timeField', '@timestamp');
+                  setValue('timeField', DEFAULT_TIME_FIELD);
                 }
               }}
               onCreateOption={(value) => {
@@ -180,7 +154,7 @@ export const DataSourceSection = ({
               value={value ?? ''}
               onChange={(e) => onChange(e.target.value)}
               inputRef={ref}
-              isLoading={isLoadingFields}
+              isLoading={isFieldsLoading}
               fullWidth
               aria-label={i18n.translate(
                 'xpack.alertingV2.ruleBuilder.dataSource.timeFieldAriaLabel',

@@ -372,11 +372,7 @@ const ThresholdRuleFormBody = ({
           <ErrorCallOut />
           <RuleDetailsFieldGroup />
           <EuiSpacer size="m" />
-          <DataSourceSection
-            http={http}
-            allColumns={allColumns}
-            isColumnsLoading={isColumnsLoading}
-          />
+          <DataSourceSection allColumns={allColumns} isColumnsLoading={isColumnsLoading} />
           <EuiSpacer size="m" />
           <StatsFieldGroup numericColumns={numericColumns} isColumnsLoading={isColumnsLoading} />
           <EuiSpacer size="m" />
