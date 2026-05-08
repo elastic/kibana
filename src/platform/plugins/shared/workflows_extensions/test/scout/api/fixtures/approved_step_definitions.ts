@@ -161,6 +161,10 @@ export const APPROVED_STEP_DEFINITIONS: Array<{ id: string; handlerHash: string 
     handlerHash: '0066f40a84dad03c0d745e43f342b72cc42a2d4ac3207533a9f7fe0695d79b78',
   },
   {
+    id: 'cases.removeTags',
+    handlerHash: '',
+  },
+  {
     id: 'cases.setCategory',
     handlerHash: '1704c6d46ccb5432e1df6c24f7ebde8d4b1686c007dcaf6a5c5cac02b0222e3e',
   },
