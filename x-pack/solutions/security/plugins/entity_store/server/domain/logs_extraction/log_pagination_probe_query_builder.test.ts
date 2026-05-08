@@ -15,7 +15,7 @@ import {
 } from './log_pagination_probe_query_builder';
 
 describe('buildLogPaginationCursorProbeEsql', () => {
-  it('adds sort, cap, inline count, and slice-end row after the probe WHERE', () => {
+  it('sorts, limits to maxLogsPerPage + 1, and reads slice-end + bounded count via terminal STATS', () => {
     const q = buildLogPaginationCursorProbeEsql({
       indexPatterns: ['logs-*'],
       type: 'user',
@@ -32,7 +32,7 @@ describe('interpretLogPaginationCursorRows', () => {
     expect(interpretLogPaginationCursorRows(undefined, 100)).toEqual({ hasLogsToProcess: false });
   });
 
-  it('returns isLastLogsPage false when more matching logs remain than one page', () => {
+  it('returns isLastLogsPage false at saturation marker (total_logs == maxLogsPerPage + 1)', () => {
     const row = {
       logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'a' },
       missingLogsToProcess: 101,

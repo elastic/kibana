@@ -14,12 +14,22 @@ import {
   type PaginationParams,
 } from './query_builder_commons';
 
-/** Column produced by {@link buildLogPaginationCursorProbeEsql} via `INLINE STATS` before `LIMIT` (total matching raw rows in the window from the probe). */
+/** Column produced by {@link buildLogPaginationCursorProbeEsql} via terminal `STATS COUNT(*)` over the `LIMIT maxLogsPerPage + 1` stream — bounded; `> maxLogsPerPage` ⇔ a next page exists. */
 export const LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD = 'total_logs';
 
 /**
- * Returns at most one row: the inclusive slice end (N-th doc in sort order, or last doc if fewer than N remain),
- * plus how many raw logs are still to be processed
+ * Returns at most one row holding the slice-end cursor and a bounded count.
+ *
+ * Pipeline: `SORT @timestamp ASC, _id ASC | LIMIT maxLogsPerPage + 1 | STATS LAST(...) , COUNT(*)`.
+ * `LIMIT N+1` upstream of a terminal `STATS` keeps the count within `[0, maxLogsPerPage + 1]`,
+ * avoiding the full-window scan that an `INLINE STATS count(*)` upstream of `LIMIT` would force
+ * (ES|QL forbids `LIMIT` before `INLINE STATS`). The terminal `STATS` collapses to one row, so
+ * `esql.query.result_truncation_max_size` does not constrain `maxLogsPerPage`.
+ *
+ * In the saturated case (`total_logs === maxLogsPerPage + 1`) the cursor lands on the row at
+ * ASC position `N+1` rather than `N`; the next slice's exclusive lower-bound `WHERE` consumes
+ * one extra row's worth of progress per iteration. Idempotent upserts absorb any minor
+ * reprocessing if `LAST` ties on `@timestamp` resolve to a non-maximal `_id`.
  */
 export function buildLogPaginationCursorProbeEsql(
   params: LogPageProbeSourceClauseParams & { maxLogsPerPage: number }
@@ -27,21 +37,17 @@ export function buildLogPaginationCursorProbeEsql(
   const { maxLogsPerPage, ...sourceParams } = params;
   return (
     buildLogPageProbeSourceClause(sourceParams) +
-    // The INLINE STATS will return more than maxLogsPerPage if there are more logs to be processed on purpose,
-    // since we can't have INLINE STATS after LIMIT. Yet, this communicates if there are more than 40k logs to be processed.
     `
-  | INLINE STATS ${LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD} = count(*)
   | SORT ${TIMESTAMP_FIELD} ASC, \`${DOCUMENT_ID_FIELD}\` ASC
-  | LIMIT ${maxLogsPerPage}
-  | SORT ${TIMESTAMP_FIELD} DESC, \`${DOCUMENT_ID_FIELD}\` DESC
-  | LIMIT 1
+  | LIMIT ${maxLogsPerPage + 1}
+  | STATS ${TIMESTAMP_FIELD} = LAST(${TIMESTAMP_FIELD}, ${TIMESTAMP_FIELD}), \`${DOCUMENT_ID_FIELD}\` = LAST(\`${DOCUMENT_ID_FIELD}\`, ${TIMESTAMP_FIELD}), ${LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD} = COUNT(*)
   | KEEP ${TIMESTAMP_FIELD}, \`${DOCUMENT_ID_FIELD}\`, ${LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD}`
   );
 }
 
 export interface LogPaginationCursorParsedRow {
   logsPaginationCursor: PaginationParams;
-  /** Total raw log rows matching the probe `WHERE` before `LIMIT` (remaining in the window from the cursor). */
+  /** Bounded count from terminal `STATS COUNT(*)` over the `LIMIT maxLogsPerPage + 1` stream — values in `[0, maxLogsPerPage + 1]`. */
   missingLogsToProcess: number;
 }
 
@@ -88,8 +94,8 @@ export function interpretLogPaginationCursorRows(
     return { hasLogsToProcess: false };
   }
   const { logsPaginationCursor, missingLogsToProcess } = row;
-  // total_logs is count(*) before LIMIT — total rows still in the window. If that fits in one slice (<= max),
-  // this slice exhausts the window (including the exact full-page case).
+  // total_logs is bounded by LIMIT maxLogsPerPage + 1; total_logs <= maxLogsPerPage means this
+  // slice exhausts the window, the value maxLogsPerPage + 1 is the saturation marker for "more pages exist".
   return {
     hasLogsToProcess: true,
     logsPaginationCursor,
