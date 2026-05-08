@@ -102,10 +102,9 @@ export const ResponseSection = memo<ResponseSectionProps>(
                 defaultMessage="Response actions"
               />
             }
-            aria-label={i18n.translate(
-              'xpack.securitySolution.flyout.response.previewAriaLabel',
-              { defaultMessage: 'Response actions' }
-            )}
+            aria-label={i18n.translate('xpack.securitySolution.flyout.response.previewAriaLabel', {
+              defaultMessage: 'Response actions',
+            })}
           >
             <FormattedMessage
               id="xpack.securitySolution.flyout.response.previewMessage"
