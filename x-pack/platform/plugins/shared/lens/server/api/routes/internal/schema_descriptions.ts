@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import {
   datatableConfigSchemaNoESQL,
@@ -63,7 +64,11 @@ export function registerSchemaDescriptionsRoute(router: IRouter) {
   router.get(
     {
       path: '/internal/lens/schema_descriptions',
-      validate: {},
+      validate: {
+        query: schema.object({
+          vizId: schema.maybe(schema.string()),
+        }),
+      },
       security: {
         authz: {
           enabled: false,
@@ -72,8 +77,15 @@ export function registerSchemaDescriptionsRoute(router: IRouter) {
       },
     },
     async (context, request, response) => {
+      const { vizId } = request.query;
+      const all = computeFieldDescriptors();
+      if (vizId) {
+        return response.ok({
+          body: vizId in all ? { [vizId]: all[vizId] } : {},
+        });
+      }
       return response.ok({
-        body: computeFieldDescriptors(),
+        body: all,
       });
     }
   );

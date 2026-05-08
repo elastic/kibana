@@ -145,7 +145,9 @@ describe('SchemaFlyoutEditor', () => {
     );
 
     await waitFor(() => {
-      expect(mockHttpGet).toHaveBeenCalledWith('/internal/lens/schema_descriptions');
+      expect(mockHttpGet).toHaveBeenCalledWith('/internal/lens/schema_descriptions', {
+        query: { vizId: 'unknownViz' },
+      });
     });
 
     expect(container.innerHTML).toBe('');

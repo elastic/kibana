@@ -17,9 +17,11 @@ export const useSchemaDescriptions = (visualizationId: string) => {
   const { services } = useKibana();
 
   const { data: allDescriptions } = useQuery(
-    ['lens', 'schema_descriptions'],
+    ['lens', 'schema_descriptions', visualizationId],
     () =>
-      services.http!.get<Record<string, VizSchemaResponse>>('/internal/lens/schema_descriptions'),
+      services.http!.get<Record<string, VizSchemaResponse>>('/internal/lens/schema_descriptions', {
+        query: { vizId: visualizationId },
+      }),
     {
       staleTime: Infinity,
       enabled: !!services.http,
