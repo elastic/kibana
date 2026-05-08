@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isConfigSchema } from '@kbn/config-schema';
 import { z, setLazySchemaDisabled } from '@kbn/zod';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import type { ActionTypeRegistry } from '../action_type_registry';
@@ -121,10 +122,10 @@ describe('Connector type config checks', () => {
         }).getSubActions();
 
         subActions.forEach((subAction) => {
-          // @ts-ignore
-          if (subAction.schema?.getSchema) {
-            // @ts-ignore
-            expect(subAction.schema.getSchema().describe()).toMatchSnapshot();
+          if (subAction.schema && isConfigSchema(subAction.schema)) {
+            expect(
+              (subAction.schema.getSchema() as unknown as { describe(): unknown }).describe()
+            ).toMatchSnapshot();
           }
         });
       }

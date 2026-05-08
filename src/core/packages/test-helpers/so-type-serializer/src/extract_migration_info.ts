@@ -150,12 +150,20 @@ export const normalizeForHash = (value: unknown): unknown => {
 };
 
 /**
+ * Structural snapshot from proxied `Type#getSchema()` (matches Joi-era `describe()` used for hashing).
+ * Zod v4 types `describe(string)` for metadata; `@kbn/config-schema` exposes no-arg `describe()` via Proxy.
+ */
+function legacyDescribeSchema(zh: unknown): unknown {
+  return (zh as { describe(): unknown }).describe();
+}
+
+/**
  * Converts a `@kbn/config-schema` `Type` instance to a Joi-version-stable,
  * JSON-serializable representation by using Joi's public `describe()` API and
  * replacing any remaining function values with their source text.
  */
 const serializeConfigSchema = (configSchema: Type<unknown>): unknown =>
-  replaceFunctionsWithSource(configSchema.getSchema().describe());
+  replaceFunctionsWithSource(legacyDescribeSchema(configSchema.getSchema()));
 
 /**
  * Recursively walks a value (typically from `schema.describe()`) and replaces
