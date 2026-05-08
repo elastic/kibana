@@ -25,7 +25,7 @@ const BACKGROUND_IMAGE_WIDTH = '296px';
 const BACKGROUND_IMAGE_BOTTOM_OFFSET = '-60px';
 const HEADER_CONTENT_MIN_HEIGHT = '140px';
 
-export const LandingHeader = (): JSX.Element => {
+export const LandingHeader = () => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -44,7 +44,7 @@ export const LandingHeader = (): JSX.Element => {
         `}
       >
         <EuiFlexItem grow={false}>
-          <EuiTitle size="l">
+          <EuiTitle size="l" data-test-subj="obltOnboardingHomeTitle">
             <h1>
               <FormattedMessage
                 id="xpack.observability_onboarding.experimentalOnboardingFlow.addObservabilityDataTitleLabel"

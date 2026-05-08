@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { IntegrationTile } from './integration_tile';
 import type { IntegrationCategoryDefinition } from './tiles_config';
 
@@ -15,7 +15,7 @@ interface Props {
 }
 
 export const IntegrationsCategory = ({ category }: Props) => {
-  const labelId = useGeneratedHtmlId({ prefix: `integrationsCategory-${category.id}` });
+  const labelId = `integrationsCategory-${category.id}`;
 
   return (
     <section aria-labelledby={labelId}>

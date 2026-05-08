@@ -15,7 +15,8 @@ interface Props {
 }
 
 export const IntegrationTile = ({ tile }: Props) => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
+  const resolvedLogo = colorMode === 'DARK' ? tile.darkLogo ?? tile.logo : tile.logo;
 
   return (
     <EuiCard
@@ -25,7 +26,7 @@ export const IntegrationTile = ({ tile }: Props) => {
       paddingSize="m"
       icon={
         <LogoIcon
-          logo={tile.logo}
+          logo={resolvedLogo}
           isAvatar
           size="l"
           type="space"

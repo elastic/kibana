@@ -15,6 +15,7 @@ export interface IntegrationTileDefinition {
   title: string;
   description: string;
   logo: SupportedLogo;
+  darkLogo?: SupportedLogo;
 }
 
 export interface IntegrationCategoryDefinition {
@@ -147,6 +148,7 @@ export const INTEGRATION_CATEGORIES: readonly IntegrationCategoryDefinition[] = 
           { defaultMessage: 'Collect logs and metrics from macOS endpoints.' }
         ),
         logo: 'apple_black',
+        darkLogo: 'apple_white',
       },
     ],
   },
