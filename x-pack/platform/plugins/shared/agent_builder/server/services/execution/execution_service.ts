@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
-import { EMPTY, shareReplay } from 'rxjs';
+import { of, shareReplay } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -18,6 +18,7 @@ import {
   agentBuilderDefaultAgentId,
   createBadRequestError,
   AgentExecutionMode,
+  ChatEventType,
 } from '@kbn/agent-builder-common';
 import type { Attachment, AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type {
@@ -414,7 +415,21 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         `[session] ${conversationId} is active; queued human message as pending trigger`
       );
 
-      return { executionId: uuidv4(), events$: EMPTY as Observable<never> };
+      // Emit a message_complete event so the chat UI shows immediate feedback.
+      // No round is created in the conversation — the actual round arrives when
+      // the queued trigger fires after the current round finishes.
+      const queuedEvent = {
+        type: ChatEventType.messageComplete,
+        data: {
+          message_id: uuidv4(),
+          message_content:
+            '✓ Message queued — the bot will process it when it finishes its current task.',
+        },
+      };
+      return {
+        executionId: uuidv4(),
+        events$: of(queuedEvent) as unknown as Observable<ChatEvent>,
+      };
     } catch (err) {
       this.logger.debug(
         `[session] queue check failed for ${conversationId}, proceeding normally: ${err}`

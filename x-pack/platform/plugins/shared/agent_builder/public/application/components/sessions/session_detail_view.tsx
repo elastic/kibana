@@ -7,7 +7,14 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useQueryClient } from '@kbn/react-query';
 import { useSession } from '../../hooks/use_session';
@@ -16,20 +23,22 @@ import { SessionStatusBadge } from './session_status_badge';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { queryKeys } from '../../query_keys';
 
-const standingSessionLabel = i18n.translate(
-  'xpack.agentBuilder.sessionDetail.standingSessionLabel',
-  { defaultMessage: 'Bot' }
-);
-
-const subscriptionsLabel = (count: number) =>
-  i18n.translate('xpack.agentBuilder.sessionDetail.subscriptionsLabel', {
-    defaultMessage: '{count} subscription(s)',
-    values: { count },
-  });
-
-const terminateLabel = i18n.translate('xpack.agentBuilder.sessionDetail.terminateLabel', {
-  defaultMessage: 'Terminate',
-});
+const labels = {
+  bot: i18n.translate('xpack.agentBuilder.sessionDetail.standingSessionLabel', {
+    defaultMessage: 'Bot',
+  }),
+  subscriptions: (count: number) =>
+    i18n.translate('xpack.agentBuilder.sessionDetail.subscriptionsLabel', {
+      defaultMessage: '{count} subscription(s)',
+      values: { count },
+    }),
+  terminate: i18n.translate('xpack.agentBuilder.sessionDetail.terminateLabel', {
+    defaultMessage: 'Terminate',
+  }),
+  processing: i18n.translate('xpack.agentBuilder.sessionDetail.processingLabel', {
+    defaultMessage: 'Processing — messages you send now will be queued',
+  }),
+};
 
 export const AgentBuilderSessionDetailView: React.FC = () => {
   const { conversationId, agentId } = useParams<{ conversationId: string; agentId: string }>();
@@ -37,6 +46,7 @@ export const AgentBuilderSessionDetailView: React.FC = () => {
   const { sessionsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const standingSession = session?.state?.standing_session;
+  const isActive = standingSession?.status === 'active';
 
   const handleTerminate = async () => {
     if (!conversationId) return;
@@ -46,11 +56,7 @@ export const AgentBuilderSessionDetailView: React.FC = () => {
   };
 
   const calloutColor =
-    standingSession?.status === 'terminated'
-      ? 'danger'
-      : standingSession?.status === 'active'
-      ? 'success'
-      : 'primary';
+    standingSession?.status === 'terminated' ? 'danger' : isActive ? 'success' : 'primary';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -58,26 +64,42 @@ export const AgentBuilderSessionDetailView: React.FC = () => {
         <EuiCallOut
           size="s"
           color={calloutColor}
-          iconType="clock"
+          iconType={isActive ? 'empty' : 'clock'}
           title={
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
-                  <strong>{standingSessionLabel}</strong>
+                  <strong>{labels.bot}</strong>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <SessionStatusBadge status={standingSession.status} />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="subdued">
-                  {subscriptionsLabel(standingSession.trigger_subscriptions.length)}
-                </EuiText>
-              </EuiFlexItem>
+              {isActive && (
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiLoadingSpinner size="s" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s" color="subdued">
+                        {labels.processing}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              )}
+              {!isActive && (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="subdued">
+                    {labels.subscriptions(standingSession.trigger_subscriptions.length)}
+                  </EuiText>
+                </EuiFlexItem>
+              )}
               {standingSession.status !== 'terminated' && (
                 <EuiFlexItem grow={false}>
                   <EuiButton size="s" color="danger" onClick={handleTerminate}>
-                    {terminateLabel}
+                    {labels.terminate}
                   </EuiButton>
                 </EuiFlexItem>
               )}
