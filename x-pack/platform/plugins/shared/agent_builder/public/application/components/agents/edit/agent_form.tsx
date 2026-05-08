@@ -32,7 +32,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import {
-  filterToolsBySelection,
+  defaultAgentToolIds,
   hasAgentWriteAccess,
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
@@ -63,6 +63,11 @@ import { useExperimentalFeatures } from '../../../hooks/use_experimental_feature
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { useCurrentUser } from '../../../hooks/agents/use_current_user';
+import {
+  getActivePlugins,
+  getActiveSkills,
+  getActiveTools,
+} from '../../../utils/tool_selection_utils';
 
 const BUTTON_IDS = {
   SAVE: 'save',
@@ -235,24 +240,27 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     shouldPromptOnReplace: false,
   });
 
+  const enableElasticCapabilities = watch('configuration.enable_elastic_capabilities') ?? false;
+  const defaultToolIdSet = useMemo(() => new Set<string>(defaultAgentToolIds), []);
+
   const agentTools = watch('configuration.tools');
-  const activeToolsCount = useMemo(() => {
-    return filterToolsBySelection(tools, agentTools).length;
-  }, [tools, agentTools]);
+  const activeToolsCount = useMemo(
+    () =>
+      getActiveTools(tools, agentTools ?? [], enableElasticCapabilities, defaultToolIdSet).length,
+    [tools, agentTools, enableElasticCapabilities, defaultToolIdSet]
+  );
 
   const agentSkills = watch('configuration.skill_ids') as string[] | undefined;
-  const activeSkillsCount = useMemo(() => {
-    const ids = agentSkills ?? [];
-    const selectedIds = new Set(ids);
-    return skills.filter((skill) => selectedIds.has(skill.id)).length;
-  }, [skills, agentSkills]);
+  const activeSkillsCount = useMemo(
+    () => getActiveSkills(skills, agentSkills, enableElasticCapabilities).length,
+    [skills, agentSkills, enableElasticCapabilities]
+  );
 
   const agentPlugins = watch('configuration.plugin_ids') as string[] | undefined;
-  const activePluginsCount = useMemo(() => {
-    const ids = agentPlugins ?? [];
-    const selectedIds = new Set(ids);
-    return plugins.filter((plugin) => selectedIds.has(plugin.id)).length;
-  }, [plugins, agentPlugins]);
+  const activePluginsCount = useMemo(
+    () => getActivePlugins(plugins, agentPlugins, enableElasticCapabilities).length,
+    [plugins, agentPlugins, enableElasticCapabilities]
+  );
 
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
@@ -283,6 +291,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             tools={tools}
             isLoading={isLoading}
             isFormDisabled={isFormDisabled || !canEditAgent}
+            areElasticCapabilitiesEnabled={enableElasticCapabilities}
           />
         ),
         append: (
@@ -309,6 +318,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             skills={skills}
             isLoading={isLoading}
             isFormDisabled={isFormDisabled || !manageAgents}
+            areElasticCapabilitiesEnabled={enableElasticCapabilities}
           />
         ),
         append: (
@@ -337,6 +347,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                   plugins={plugins}
                   isLoading={isLoading}
                   isFormDisabled={isFormDisabled || !manageAgents}
+                  areElasticCapabilitiesEnabled={enableElasticCapabilities}
                 />
               ),
               append: (
@@ -373,6 +384,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       activePluginsCount,
       manageAgents,
       isExperimentalFeaturesEnabled,
+      enableElasticCapabilities,
     ]
   );
 

@@ -246,7 +246,7 @@ export const Snowflake: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.snowflake.auth.oauth.tokenUrl.helpText',
                 {
                   defaultMessage:
-                    "Snowflake OAuth token endpoint. Replace '{account}' with your Snowflake account identifier.",
+                    'Snowflake OAuth token endpoint. Replace {accountPlaceholder} with your Snowflake account identifier.',
                   values: {
                     accountPlaceholder: '{account}',
                   },
