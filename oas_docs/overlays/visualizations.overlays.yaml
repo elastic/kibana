@@ -95,6 +95,19 @@ actions:
       x-displayName: Visualizations
 
   # ──────────────────────────────────────────────
+  # GET /api/visualizations — parameter descriptions
+  # ──────────────────────────────────────────────
+  - target: "$.paths['/api/visualizations']['get'].parameters[?(@.name=='fields')]"
+    description: Add description to fields parameter
+    update:
+      description: The saved object fields to include in each result. When omitted, all fields are returned.
+
+  - target: "$.paths['/api/visualizations']['get'].parameters[?(@.name=='search_fields')]"
+    description: Add description to search_fields parameter
+    update:
+      description: The fields to match the `query` text against. Defaults to `title` when omitted.
+
+  # ──────────────────────────────────────────────
   # POST /api/visualizations — examples and code samples
   # ──────────────────────────────────────────────
   - target: "$.paths['/api/visualizations']['post']"
@@ -364,7 +377,7 @@ actions:
                 }
               ]
             }
-        - lang: cURL
+        - lang: Shell
           label: Create an XY line chart - cURL
           source: |
             curl -X POST "${KIBANA_URL}/api/visualizations" \
@@ -394,7 +407,7 @@ actions:
                 }
               ]
             }'
-        - lang: Console
+        - lang: Dev Tools
           label: Create an XY line chart - Console
           source: |
             POST kbn:/api/visualizations
@@ -421,7 +434,7 @@ actions:
                 }
               ]
             }
-        - lang: cURL
+        - lang: bash
           label: Create a pie/donut chart - cURL
           source: |
             curl -X POST "${KIBANA_URL}/api/visualizations" \
@@ -452,7 +465,7 @@ actions:
                 }
               ]
             }'
-        - lang: Console
+        - lang: Kibana Console
           label: Create a pie/donut chart - Console
           source: |
             POST kbn:/api/visualizations
@@ -480,7 +493,7 @@ actions:
                 }
               ]
             }
-        - lang: cURL
+        - lang: curl
           label: Create a data table - cURL
           source: |
             curl -X POST "${KIBANA_URL}/api/visualizations" \
@@ -510,7 +523,7 @@ actions:
                 }
               ]
             }'
-        - lang: Console
+        - lang: DevConsole
           label: Create a data table - Console
           source: |
             POST kbn:/api/visualizations
@@ -537,7 +550,7 @@ actions:
                 }
               ]
             }
-        - lang: cURL
+        - lang: sh
           label: Create a visualization using a library data view - cURL
           source: |
             curl -X POST "${KIBANA_URL}/api/visualizations" \
@@ -558,7 +571,7 @@ actions:
                 }
               ]
             }'
-        - lang: Console
+        - lang: kibana
           label: Create a visualization using a library data view - Console
           source: |
             POST kbn:/api/visualizations
@@ -576,6 +589,34 @@ actions:
                 }
               ]
             }
+
+  # ──────────────────────────────────────────────
+  # POST /api/visualizations — overwrite parameter description
+  # ──────────────────────────────────────────────
+  - target: "$.paths['/api/visualizations']['post'].parameters[?(@.name=='overwrite')]"
+    description: Add description to overwrite parameter
+    update:
+      description: When `true`, overwrites an existing visualization with the same identifier. Defaults to `false`.
+
+  # ──────────────────────────────────────────────
+  # POST /api/visualizations — request body example
+  # ──────────────────────────────────────────────
+  - target: "$.paths['/api/visualizations']['post'].requestBody.content['application/json']"
+    description: Add request body example to create endpoint
+    update:
+      examples:
+        createMetricVisualization:
+          summary: Create a metric visualization
+          value:
+            type: metric
+            title: Total requests
+            data_source:
+              type: data_view_spec
+              index_pattern: kibana_sample_data_logs
+              time_field: timestamp
+            metrics:
+              - type: primary
+                operation: count
 
   # ──────────────────────────────────────────────
   # GET /api/visualizations — examples and code samples
@@ -852,6 +893,67 @@ actions:
                 }
               ]
             }
+
+  # ──────────────────────────────────────────────
+  # PUT /api/visualizations/{id} — request body example
+  # ──────────────────────────────────────────────
+  - target: "$.paths['/api/visualizations/{id}']['put'].requestBody.content['application/json']"
+    description: Add request body example to update endpoint
+    update:
+      examples:
+        updateVisualization:
+          summary: Update a visualization
+          value:
+            type: metric
+            title: Total requests (updated)
+            data_source:
+              type: data_view_spec
+              index_pattern: kibana_sample_data_logs
+              time_field: timestamp
+            metrics:
+              - type: primary
+                operation: count
+
+  # ──────────────────────────────────────────────
+  # PUT /api/visualizations/{id} — 201 response example
+  # ──────────────────────────────────────────────
+  - target: "$.paths['/api/visualizations/{id}']['put'].responses['201'].content['application/json']"
+    description: Add example to 201 Created response of update endpoint
+    update:
+      examples:
+        createVisualizationResponse:
+          summary: Create visualization response (PUT)
+          description: >
+            Response when PUT creates a new visualization (no existing visualization with the given ID).
+            Server-populated defaults are included in the response.
+          value:
+            id: 1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d
+            data:
+              title: Total requests
+              data_source:
+                type: data_view_spec
+                index_pattern: kibana_sample_data_logs
+                time_field: timestamp
+              type: metric
+              sampling: 1
+              ignore_global_filters: false
+              metrics:
+                - type: primary
+                  operation: count
+                  empty_as_null: false
+              styling:
+                primary:
+                  position: bottom
+                  labels:
+                    alignment: left
+                  value:
+                    sizing: auto
+                    alignment: right
+            meta:
+              created_at: "2026-04-13T10:00:00.000Z"
+              managed: false
+              updated_at: "2026-04-13T10:00:00.000Z"
+              version: WzU5LDFd
 
   # ──────────────────────────────────────────────
   # DELETE /api/visualizations/{id} — code samples
