@@ -49,7 +49,7 @@ Specific Panel description: "${state.description}"`;
 
     let finalQuery = esqlQuery;
 
-    if (!state.index_pattern) {
+    if (!hasValidIndexPattern(state.index_pattern)) {
       finalQuery = esqlQuery.replaceAll(
         TRANSLATION_INDEX_PATTERN,
         MISSING_INDEX_PATTERN_PLACEHOLDER

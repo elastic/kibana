@@ -39,7 +39,7 @@ export const getSelectIndexPatternNode = (params: TranslatePanelGraphParams): Gr
     const response = await indexExplorer({
       nlQuery,
       limit: 1,
-      esClient: params.esScopedClient.asInternalUser,
+      esClient: params.esScopedClient.asCurrentUser,
       indexPattern: '*,-lookup*',
       model: {
         chatModel: params.model,

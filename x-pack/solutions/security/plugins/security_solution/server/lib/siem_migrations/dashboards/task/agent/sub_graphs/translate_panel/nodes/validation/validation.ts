@@ -46,7 +46,7 @@ export const getValidationNode = (params: TranslatePanelGraphParams): GraphNode 
       };
     }
 
-    if (syntaxError) {
+    if (syntaxError || !hasValidIndexPattern(state.index_pattern)) {
       return {
         validation_errors: {
           esql_errors: syntaxError,
@@ -55,23 +55,12 @@ export const getValidationNode = (params: TranslatePanelGraphParams): GraphNode 
       };
     }
 
-    if (!hasValidIndexPattern(state.index_pattern)) {
-      // skip execution
-      return {
-        validation_errors: {
-          esql_errors: undefined,
-          retries_left: 0,
-        },
-      };
-    }
-
     const executionError = await executeEsqlQuery(state.esql_query, params);
-    const combinedError = executionError || undefined;
 
     return {
       validation_errors: {
-        esql_errors: combinedError,
-        retries_left: combinedError
+        esql_errors: executionError,
+        retries_left: executionError
           ? state.validation_errors.retries_left - 1
           : state.validation_errors.retries_left,
       },

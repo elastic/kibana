@@ -31,7 +31,7 @@ export const getSampleIndexRecordsNode = (params: TranslatePanelGraphParams): Gr
     try {
       const resolvedResource = await resolveResourceForEsqlWithSamplingStats({
         resourceName: state.index_pattern,
-        esClient: params.esScopedClient.asInternalUser,
+        esClient: params.esScopedClient.asCurrentUser,
         samplingSize: SAMPLING_SIZE,
       });
 
