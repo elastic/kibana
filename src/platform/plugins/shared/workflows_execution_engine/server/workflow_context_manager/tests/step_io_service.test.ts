@@ -640,6 +640,38 @@ describe('StepIoService', () => {
       expect(service.hasEvictedOutputs()).toBe(false);
     });
 
+    it('releases everything when called with no surviving consumer (workflow-end cleanup)', async () => {
+      // Mirrors the workflow-end safety release in workflow_execution_loop:
+      // after the last step, no further prepareForRead is going to run, so a
+      // direct call to releaseTransientlyRehydratedOutputs must drop any
+      // outputs left in the transient set.
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+      });
+      const originalOutput = { restored: true, data: 'x'.repeat(200) };
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        originalOutput,
+        250,
+        'connector'
+      );
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'step-1', output: originalOutput } as unknown as EsWorkflowStepExecution,
+      ]);
+      await service.rehydrateOutputs(['step-1']);
+      expect(state.getStepExecution('step-1')?.output).toEqual(originalOutput);
+
+      service.releaseTransientlyRehydratedOutputs();
+      expect(state.getStepExecution('step-1')?.output).toBeUndefined();
+      expect(service.hasEvictedOutputs()).toBe(true);
+    });
+
     it('clears the transient set after release (idempotent)', async () => {
       const { state, service, stepExecutionRepository } = buildHarness({
         evictionMinBytes: EVICTION_THRESHOLD,
@@ -1238,6 +1270,176 @@ describe('StepIoService', () => {
         ['exec-a'],
         ['id', 'output', 'workflowRunId']
       );
+    });
+
+    describe('deferred-release: keeps shared predecessors resident', () => {
+      // Workflow: step_a -> step_b, step_c, step_d (fanout, all consume step_a)
+      function buildFanoutWorkflow() {
+        const workflow: WorkflowYaml = {
+          name: 'Fanout',
+          version: '1',
+          description: 'test',
+          enabled: true,
+          triggers: [],
+          steps: [
+            { name: 'step_a', type: 'console', with: { message: 'A' } } as ConnectorStep,
+            {
+              name: 'step_b',
+              type: 'console',
+              with: { message: '{{steps.step_a.output}}' },
+            } as ConnectorStep,
+            {
+              name: 'step_c',
+              type: 'console',
+              with: { message: '{{steps.step_a.output}}' },
+            } as ConnectorStep,
+            {
+              name: 'step_d',
+              type: 'console',
+              with: { message: '{{steps.step_a.output}}' },
+            } as ConnectorStep,
+          ],
+        };
+        const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+        const lookup = (stepId: string) =>
+          graph.topologicalOrder
+            .map((nodeId) => graph.getNode(nodeId))
+            .find((n) => n.stepId === stepId)!;
+        return {
+          graph,
+          stepBNode: lookup('step_b'),
+          stepCNode: lookup('step_c'),
+          stepDNode: lookup('step_d'),
+        };
+      }
+
+      it('rehydrates a shared predecessor only on the first consumer', async () => {
+        const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+        const { graph, stepBNode, stepCNode, stepDNode } = buildFanoutWorkflow();
+
+        // Seed step_a, drive through deferred eviction so it ends up evicted.
+        seedCompletedStepWithSize(state, service, 'exec-a', 'step_a', { v: 'a' }, 1, 'connector');
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+        expect(service.hasEvictedOutputs()).toBe(true);
+
+        stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+          { id: 'exec-a', output: { v: 'a' } } as unknown as EsWorkflowStepExecution,
+        ]);
+
+        // Step B reads step_a — first rehydration.
+        await service.prepareForRead({
+          node: stepBNode,
+          predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+        });
+        expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
+
+        // Step C also reads step_a — should reuse the in-memory copy.
+        await service.prepareForRead({
+          node: stepCNode,
+          predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+        });
+        expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
+
+        // Step D too.
+        await service.prepareForRead({
+          node: stepDNode,
+          predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+        });
+        expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
+        expect(state.getStepExecution('exec-a')?.output).toEqual({ v: 'a' });
+      });
+
+      it('releases a transient predecessor that the next step does not need', async () => {
+        // Workflow: step_a -> step_b, step_a -> step_c. step_b reads step_a,
+        // step_c does not. After step_c's prepareForRead, step_a should be
+        // re-evicted (it was transient for step_b, not needed by step_c).
+        const workflow: WorkflowYaml = {
+          name: 'Selective release',
+          version: '1',
+          description: 'test',
+          enabled: true,
+          triggers: [],
+          steps: [
+            { name: 'step_a', type: 'console', with: { message: 'A' } } as ConnectorStep,
+            {
+              name: 'step_b',
+              type: 'console',
+              with: { message: '{{steps.step_a.output}}' },
+            } as ConnectorStep,
+            {
+              name: 'step_c',
+              type: 'console',
+              with: { message: 'static text' },
+            } as ConnectorStep,
+          ],
+        };
+        const graph = WorkflowGraph.fromWorkflowDefinition(workflow);
+        const stepBNode = graph.topologicalOrder
+          .map((nodeId) => graph.getNode(nodeId))
+          .find((n) => n.stepId === 'step_b')!;
+        const stepCNode = graph.topologicalOrder
+          .map((nodeId) => graph.getNode(nodeId))
+          .find((n) => n.stepId === 'step_c')!;
+
+        const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+        seedCompletedStepWithSize(state, service, 'exec-a', 'step_a', { v: 'a' }, 1, 'connector');
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+
+        stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+          { id: 'exec-a', output: { v: 'a' } } as unknown as EsWorkflowStepExecution,
+        ]);
+
+        // step_b rehydrates step_a.
+        await service.prepareForRead({
+          node: stepBNode,
+          predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+        });
+        expect(state.getStepExecution('exec-a')?.output).toEqual({ v: 'a' });
+
+        stepExecutionRepository.getStepExecutionsByIds.mockClear();
+        // step_c does not reference step_a — release should kick in.
+        await service.prepareForRead({
+          node: stepCNode,
+          predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+        });
+
+        expect(state.getStepExecution('exec-a')?.output).toBeUndefined();
+        expect(service.hasEvictedOutputs()).toBe(true);
+        // step_c didn't need step_a, so no rehydration was triggered.
+        expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
+      });
+
+      it('does not refetch on a retry attempt of the same step', async () => {
+        // Retry semantics: when a step fails and retries, its predecessors are
+        // already resident from the first attempt's prepareForRead. The second
+        // call must compute the same neededIds, not re-evict-then-rehydrate.
+        const { state, service, stepExecutionRepository } = buildHarness({ evictionMinBytes: 0 });
+        const { graph, stepBNode } = buildFanoutWorkflow();
+
+        seedCompletedStepWithSize(state, service, 'exec-a', 'step_a', { v: 'a' }, 1, 'connector');
+        await service.flushStepChanges();
+        await service.flushStepChanges();
+
+        stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+          { id: 'exec-a', output: { v: 'a' } } as unknown as EsWorkflowStepExecution,
+        ]);
+
+        // Attempt 1.
+        await service.prepareForRead({
+          node: stepBNode,
+          predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+        });
+        expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
+
+        // Attempt 2 (retry) — same node, same predecessors. No second ES hit.
+        await service.prepareForRead({
+          node: stepBNode,
+          predecessorsResolver: (n) => graph.getAllPredecessors(n.id),
+        });
+        expect(stepExecutionRepository.getStepExecutionsByIds).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });

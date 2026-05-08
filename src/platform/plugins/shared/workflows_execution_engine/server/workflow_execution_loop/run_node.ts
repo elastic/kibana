@@ -139,23 +139,12 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     await params.workflowRuntime.saveState(); // Ensure state is updated after each step
     saveStateSpan?.end();
 
-    // Re-evict any predecessor outputs that prepareForRead transiently
-    // rehydrated for this step's read. Without this, resume tasks would
-    // progressively grow in-memory state by accumulating outputs they only
-    // briefly needed.
-    //
-    // Skip the release when the step failed and the workflow is still
-    // running — that combination signals an in-flight retry / on-failure
-    // handler that will need the same predecessor outputs on the next
-    // attempt. Releasing now would cost a redundant ES round-trip per retry
-    // attempt for a large predecessor.
-    const stepFinished = stepExecutionRuntime?.stepExecution;
-    const willRetry =
-      stepFinished?.status === ExecutionStatus.FAILED &&
-      params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING;
-    if (!willRetry) {
-      params.stepIoService.releaseTransientlyRehydratedOutputs();
-    }
+    // Note: predecessor outputs that `prepareForRead` rehydrated for this
+    // step are released by the *next* step's `prepareForRead` (deferred
+    // release) so that consecutive consumers of the same predecessor reuse
+    // the in-memory copy instead of re-fetching from ES. The execution
+    // loop's final-flush path is responsible for the workflow-end cleanup
+    // — see `releaseTransientlyRehydratedOutputs` in `workflow_execution_loop`.
 
     nodeSpan?.end();
   }

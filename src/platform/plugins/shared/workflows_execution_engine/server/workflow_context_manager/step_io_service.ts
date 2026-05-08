@@ -395,32 +395,43 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   // ----- Rehydration --------------------------------------------------------
 
   /**
-   * Pre-warms the in-memory state by rehydrating any evicted step outputs that
-   * the upcoming step's context build will need. Targeted via static template
-   * analysis (`extractReferencedStepIds`); falls back to all predecessors when
-   * the analysis is ambiguous (dynamic bracket access, etc.). Also rehydrates
-   * scope-stack entries used by `enrichStepContextAccordingToStepScope`.
+   * Pre-warms the in-memory state by rehydrating any evicted step outputs
+   * that the upcoming step's context build will need. Targeted via static
+   * template analysis (`extractReferencedStepIds`); falls back to all
+   * predecessors when the analysis is ambiguous (dynamic bracket access,
+   * etc.). Also rehydrates scope-stack entries used by
+   * `enrichStepContextAccordingToStepScope`.
    *
-   * No-op (zero ES calls) when nothing is evicted.
+   * **Deferred-release semantics.** Outputs rehydrated for the *previous*
+   * step are released here, not at the end of the previous step's run.
+   * That lets us keep predecessors resident across consecutive consumers
+   * (fanout pattern: A → B, A → C, A → D — A stays in memory through C and
+   * D instead of being re-fetched each time) and removes the need for a
+   * "skip release on retry" hack: a retry attempt's `prepareForRead` will
+   * recompute the same `neededIds` and naturally retain the same outputs.
    *
-   * Reset of `transientlyRehydratedIds` happens here, not in
-   * `releaseTransientlyRehydratedOutputs`, so an error that bypasses the
-   * release in run_node's `finally` cannot leak previous-step IDs into the
-   * next step's transient set.
+   * Workflow-end cleanup is handled by `releaseTransientlyRehydratedOutputs`
+   * called from the execution loop's final-flush path.
+   *
+   * No-op (zero ES calls) when nothing is evicted and nothing is transiently
+   * rehydrated from a previous step.
    */
   public async prepareForRead({ node, predecessorsResolver }: PrepareForReadArgs): Promise<void> {
-    this.transientlyRehydratedIds = [];
-
-    if (!this.hasEvictedOutputs()) {
+    const noPriorTransients = this.transientlyRehydratedIds.length === 0;
+    if (!this.hasEvictedOutputs() && noPriorTransients) {
       return;
     }
 
     const neededIds = this.computeRehydrationTargets(node, predecessorsResolver);
 
+    // Drop the previous step's transient outputs that this step does not
+    // need. Anything still in `neededIds` stays resident — `rehydrateOutputs`
+    // will then skip those IDs because they are no longer in the evicted map.
+    this.releaseTransientExcept(neededIds);
+
     // data.set / waitForInput outputs are pinned (never evicted), so they
     // never appear in evictedOutputIdsAndBytes — rehydrateOutputs filters
     // out non-evicted IDs cheaply.
-
     await this.rehydrateOutputs(Array.from(neededIds));
   }
 
@@ -503,27 +514,48 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   }
 
   /**
-   * Re-evicts in memory the outputs that the most recent `prepareForRead`
-   * brought back from ES. Called after the consuming step finishes, so that
-   * predecessor outputs do not stay resident for the rest of the run.
+   * Releases all transiently-rehydrated outputs unconditionally. Used at
+   * workflow-end (final flush) as a safety net — by that point no further
+   * `prepareForRead` is going to run, so any IDs left in the transient set
+   * are dead weight.
    *
    * Memory-only: the doc is already on disk (it was evicted before we
    * rehydrated), so we just mark it evicted again and clear it from state.
    * Idempotent — calling with no transient rehydrations is a no-op.
    */
   public releaseTransientlyRehydratedOutputs(): void {
+    this.releaseTransientExcept(undefined);
+  }
+
+  /**
+   * Releases transiently-rehydrated outputs that are *not* in `keepIds`,
+   * leaving the kept ones resident for the next consumer.
+   *
+   * Called from `prepareForRead` to implement the deferred-release pattern:
+   * the next step computes its `neededIds` first, then we drop only the
+   * previous step's transient IDs that the next step does not need. Pass
+   * `undefined` to release everything (workflow-end cleanup).
+   *
+   * Re-eviction is identical to eviction except the threshold gate does
+   * not apply — the output is known to have been evictable since it came
+   * back from ES. Pinned step types still cannot be re-evicted (guarded
+   * by `isReleaseCandidate`).
+   */
+  private releaseTransientExcept(keepIds: ReadonlySet<string> | undefined): void {
     if (this.transientlyRehydratedIds.length === 0) {
       return;
     }
-    const idsToRelease = this.transientlyRehydratedIds;
-    this.transientlyRehydratedIds = [];
 
+    const ids = this.transientlyRehydratedIds;
+    const remaining: string[] = [];
     let releasedCount = 0;
-    for (const id of idsToRelease) {
-      // Re-eviction is identical to eviction except the threshold gate doesn't
-      // apply (the output is known to have been evictable since it came back
-      // from ES). Reuse the same predicate ignoring the size check.
-      if (this.isReleaseCandidate(id)) {
+
+    for (const id of ids) {
+      if (keepIds?.has(id)) {
+        // Keep this output resident; the upcoming step needs it. It will be
+        // re-evaluated for release at the *next* prepareForRead.
+        remaining.push(id);
+      } else if (this.isReleaseCandidate(id)) {
         const sizeBytes = this.outputSizes.get(id) ?? 0;
         this.state.clearStepOutputInMemory(id);
         this.evictedOutputIdsAndBytes.set(id, sizeBytes);
@@ -532,9 +564,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       }
     }
 
+    this.transientlyRehydratedIds = remaining;
+
     if (releasedCount > 0) {
       this.logger?.debug(
-        `Released ${releasedCount} transiently rehydrated step output(s); total evicted: ${this.evictedOutputIdsAndBytes.size}`
+        `Released ${releasedCount} transiently rehydrated step output(s); ${remaining.length} kept resident; total evicted: ${this.evictedOutputIdsAndBytes.size}`
       );
     }
   }
