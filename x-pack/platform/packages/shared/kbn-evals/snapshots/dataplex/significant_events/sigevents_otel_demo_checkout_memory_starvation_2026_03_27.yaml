@@ -6,5 +6,5 @@ elastic-observability.global.es-snapshot-dataset:
     indices: 'logs*,sigevents-streams-features-checkout-memory-starvation'
     timestamp_range: '2026-03-27'
     source: 'OTel Demo (opentelemetry-demo) checkout-memory-starvation scenario captured via scripts/capture_otel_demo_snapshots'
-    team: '@elastic/obs-sig-events-team'
+    team: 'obs-sig-events'
     deprecated: ''
