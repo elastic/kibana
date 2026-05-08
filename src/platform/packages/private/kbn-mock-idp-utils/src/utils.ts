@@ -305,6 +305,7 @@ export const projectTypeToAlias = new Map<string, string>([
   ['security', 'security'],
   ['search', 'es'],
   ['workplaceai', 'workplaceai'],
+  ['vectordb', 'vectordb'],
 ]);
 
 // Normalizes differences between Kibana solution names (`search`), CLI aliases (`es` and `oblt`),
@@ -316,6 +317,11 @@ const normalizeProjectType = (projectType: string) => {
 
   if (projectType === 'oblt') {
     return 'observability';
+  }
+
+  if (projectType === 'vectordb') {
+    // return 'vectordb' here once stateless ES and UIAM supports it
+    return 'elasticsearch';
   }
 
   return projectType;

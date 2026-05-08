@@ -17,7 +17,7 @@ import { AlertFlyoutHeader } from '.';
 import type { StartServices } from '../../types';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { alertFlyoutHistoryKey } from '../../flyout_v2/document/constants/flyout_history';
+import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 
 const mockDocumentHeader = jest.fn((props: unknown) => {
@@ -281,7 +281,7 @@ describe('AlertFlyoutHeader', () => {
     expect(servicesMock.overlays.openSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        historyKey: alertFlyoutHistoryKey,
+        historyKey: documentFlyoutHistoryKey,
       })
     );
   });

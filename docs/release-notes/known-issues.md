@@ -8,6 +8,20 @@ For Elastic {{observability}} known issues, refer to [Elastic Observability know
 
 For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
+::::{dropdown} Dashboards with controls might fail to open
+
+Applies to: {{stack}} 9.4.0
+
+**Details**
+
+Some existing dashboards are failing to load when a pinned control has `"title": null` in the saved object. This manifests as an error like `Invalid response. [pinned_panels.0.config.title]: expected value of type [string] but got [null].` error on the dashboard app.
+
+**Workaround**
+
+We're working on a way to mitigate the issue and will update this page shortly.
+
+::::
+
 ::::{dropdown} The connection between agentless integrations and {{fleet-server}} is broken
 :applies_to: ess: ga
 
