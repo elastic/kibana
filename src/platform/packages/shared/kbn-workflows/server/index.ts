@@ -10,6 +10,7 @@
 export { ExecutionError } from './errors/execution_error';
 export { loadWorkflowExampleContent } from './examples';
 export { validateWorkflowForExecution } from './lib/validate_workflow_for_execution';
+export { buildWorkflowSpaceFilter } from './lib/workflow_space_filter';
 export type { WorkflowsApiRequestHandlerContext, WorkflowsClient } from './types';
 
 export {
@@ -17,3 +18,4 @@ export {
   getStepExecutionsByWorkflowExecution,
 } from './repositories/step_execution_repository';
 export { WorkflowRepository } from './repositories/workflow_repository';
+export { GLOBAL_WORKFLOW_SPACE_ID } from './constants';

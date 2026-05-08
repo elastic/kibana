@@ -60,7 +60,7 @@ describe('WorkflowRepository.areWorkflowsEnabled', () => {
               },
             ],
             minimum_should_match: 1,
-            must_not: { exists: { field: 'deleted_at' } },
+            must_not: [{ exists: { field: 'deleted_at' } }],
           }),
         }),
       })
@@ -223,5 +223,23 @@ describe('WorkflowRepository.isWorkflowEnabled', () => {
     });
 
     await expect(repository.isWorkflowEnabled('wf-a', 'default')).resolves.toBe(false);
+  });
+
+  it('returns true for global workflow when includeGlobal is true', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [{ _id: 'wf-a', _source: { enabled: true, spaceId: '*' } }],
+        },
+      }),
+    };
+    const repository = new WorkflowRepository({
+      esClient: esClient as any,
+      logger: loggingSystemMock.create().get(),
+    });
+
+    await expect(
+      repository.isWorkflowEnabled('wf-a', 'default', { includeGlobal: true })
+    ).resolves.toBe(true);
   });
 });

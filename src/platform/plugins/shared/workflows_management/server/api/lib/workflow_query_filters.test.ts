@@ -7,22 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { buildWorkflowSpaceFilter } from '@kbn/workflows/server';
 import {
   buildConditionalTermsFilters,
   buildWorkflowTextSearchClause,
-  workflowSpaceFilter,
 } from './workflow_query_filters';
 
-describe('workflowSpaceFilter', () => {
+describe('buildWorkflowSpaceFilter', () => {
   it('returns spaceId must clause and deleted_at exclusion by default', () => {
-    const result = workflowSpaceFilter('my-space');
+    const result = buildWorkflowSpaceFilter('my-space');
     expect(result.must).toEqual([{ term: { spaceId: 'my-space' } }]);
     expect(result.must_not).toEqual([{ exists: { field: 'deleted_at' } }]);
   });
 
   it('omits deleted_at exclusion when includeDeleted is true', () => {
-    const result = workflowSpaceFilter('my-space', { includeDeleted: true });
+    const result = buildWorkflowSpaceFilter('my-space', { includeDeleted: true });
     expect(result.must).toEqual([{ term: { spaceId: 'my-space' } }]);
+    expect(result.must_not).toEqual([]);
+  });
+
+  it('returns space/global visibility clause when includeGlobal is true', () => {
+    const result = buildWorkflowSpaceFilter('my-space', { includeGlobal: true });
+    expect(result.must).toEqual([
+      {
+        bool: {
+          should: [{ term: { spaceId: 'my-space' } }, { term: { spaceId: '*' } }],
+          minimum_should_match: 1,
+        },
+      },
+    ]);
+    expect(result.must_not).toEqual([{ exists: { field: 'deleted_at' } }]);
+  });
+
+  it('omits deleted_at exclusion when includeDeleted is true for global visibility', () => {
+    const result = buildWorkflowSpaceFilter('my-space', {
+      includeDeleted: true,
+      includeGlobal: true,
+    });
+    expect(result.must).toEqual([
+      {
+        bool: {
+          should: [{ term: { spaceId: 'my-space' } }, { term: { spaceId: '*' } }],
+          minimum_should_match: 1,
+        },
+      },
+    ]);
     expect(result.must_not).toEqual([]);
   });
 });

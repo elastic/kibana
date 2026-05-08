@@ -17,13 +17,21 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import {
+  ENTITY_MONITOR_WORKFLOW_ID,
+  WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
 import { createWorkflowSmlType } from './agent_builder/sml_types/workflow';
 import { defineRoutes } from './api/routes';
 import { WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
 import { AvailabilityUpdater } from './availability';
-import { createWorkflowsClientProvider } from './client/workflows_client';
+import {
+  createManagedWorkflowsSystemApiProvider,
+  createWorkflowsClientProvider,
+} from './client/workflows_client';
 import type { WorkflowsManagementConfig } from './config';
 import {
   getWorkflowsConnectorAdapter,
@@ -42,6 +50,8 @@ import type {
 import { registerUISettings } from './ui_settings';
 import { stepSchemas } from '../common/step_schemas';
 
+const WORKFLOWS_MANAGEMENT_PLUGIN_ID = 'workflowsManagement';
+
 export class WorkflowsPlugin
   implements
     Plugin<
@@ -56,6 +66,7 @@ export class WorkflowsPlugin
   private config: WorkflowsManagementConfig;
   private availabilityUpdater: AvailabilityUpdater | null = null;
   private api: WorkflowsManagementApi | null = null;
+  private workflowsService: WorkflowsService | null = null;
 
   constructor(initializerContext: PluginInitializerContext<WorkflowsManagementConfig>) {
     this.logger = initializerContext.logger.get();
@@ -78,6 +89,7 @@ export class WorkflowsPlugin
     this.logger.debug('Workflows Management: Creating workflows service');
 
     const workflowsService = new WorkflowsService(core.getStartServices, this.logger);
+    this.workflowsService = workflowsService;
 
     const api = new WorkflowsManagementApi(workflowsService, this.config.available);
     this.api = api;
@@ -97,6 +109,10 @@ export class WorkflowsPlugin
     plugins.workflowsExtensions.registerWorkflowsClientProvider(
       createWorkflowsClientProvider(workflowsService, this.config, this.logger)
     );
+    plugins.workflowsExtensions.registerManagedWorkflowsSystemApiProvider(
+      createManagedWorkflowsSystemApiProvider(workflowsService, this.config, this.logger)
+    );
+    plugins.workflowsExtensions.registerManagedWorkflowOwner(WORKFLOWS_MANAGEMENT_PLUGIN_ID);
 
     const spaces = plugins.spaces.spacesService;
 
@@ -122,6 +138,12 @@ export class WorkflowsPlugin
         api: this.api,
         logger: this.logger,
       });
+    }
+
+    if (this.workflowsService) {
+      const managedWorkflowPluginIds = plugins.workflowsExtensions.getManagedWorkflowPluginIds();
+      void this.runManagedWorkflowsStartupReconciliation(managedWorkflowPluginIds);
+      void this.initializeManagedWorkflowsOnStart();
     }
 
     this.logger.debug('Workflows Management: Started');
@@ -195,6 +217,45 @@ export class WorkflowsPlugin
           `Workflows Management: Failed to wire SML indexing with Agent Context Layer: ${message}`
         );
       });
+  }
+
+  private async initializeManagedWorkflowsOnStart(): Promise<void> {
+    try {
+      await this.workflowsService?.installManagedWorkflow(
+        WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID,
+        { isStartupReconcile: true },
+        WORKFLOWS_MANAGEMENT_PLUGIN_ID
+      );
+      await this.workflowsService?.installManagedWorkflow(
+        ENTITY_MONITOR_WORKFLOW_ID,
+        {
+          isStartupReconcile: true,
+          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+          values: {
+            entityId: 'default',
+          },
+        },
+        WORKFLOWS_MANAGEMENT_PLUGIN_ID
+      );
+    } catch (error) {
+      this.logger.warn('Workflows Management: Failed to initialize managed workflows on start', {
+        error,
+      });
+    }
+  }
+
+  private async runManagedWorkflowsStartupReconciliation(pluginIds: string[]): Promise<void> {
+    try {
+      await this.workflowsService?.reconcileManagedWorkflowOrphans(pluginIds);
+      await this.workflowsService?.reconcileAutoManagedWorkflowUpdates();
+    } catch (error) {
+      this.logger.warn(
+        'Workflows Management: Failed to complete managed workflows startup reconciliation',
+        {
+          error,
+        }
+      );
+    }
   }
 
   public stop() {

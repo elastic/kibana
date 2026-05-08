@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createHash } from 'node:crypto';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import type {
   CreateWorkflowCommand,
@@ -30,6 +31,10 @@ export const getTriggerTypesFromDefinition = (
   return triggers
     .map((t) => (t && typeof t.type === 'string' ? t.type : null))
     .filter(<T>(v: T): v is NonNullable<T> => v != null);
+};
+
+export const computeDefinitionHash = (yaml: string): string => {
+  return createHash('sha256').update(yaml.trim()).digest('hex');
 };
 
 /** True when the YAML root map includes `enabled` (before Zod defaults). */
@@ -86,6 +91,11 @@ export const prepareWorkflowDocument = (params: {
     createdBy: authenticatedUser,
     lastUpdatedBy: authenticatedUser,
     spaceId,
+    managed: false,
+    managedBy: null,
+    definitionHash: null,
+    originSystemWorkflowId: null,
+    lifecycle: null,
     valid: workflowToCreate.valid,
     deleted_at: null,
     created_at: now.toISOString(),
