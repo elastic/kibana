@@ -95,6 +95,8 @@ describe('AiAssistantButton', () => {
     mockUseAgentBuilderAvailability.mockReturnValue({
       isAgentBuilderEnabled: true,
       isAgentChatExperienceEnabled: true,
+      hasAgentBuilderPrivilege: true,
+      hasValidAgentBuilderLicense: true,
     });
 
     render(<AiAssistantButton {...defaultProps} />, { wrapper: TestProviders });
@@ -124,6 +126,8 @@ describe('AiAssistantButton', () => {
     mockUseAgentBuilderAvailability.mockReturnValue({
       isAgentBuilderEnabled: true,
       isAgentChatExperienceEnabled: true,
+      hasAgentBuilderPrivilege: true,
+      hasValidAgentBuilderLicense: true,
     });
 
     render(<AiAssistantButton {...defaultProps} />, { wrapper: TestProviders });
@@ -143,6 +147,8 @@ describe('AiAssistantButton', () => {
     mockUseAgentBuilderAvailability.mockReturnValue({
       isAgentBuilderEnabled: true,
       isAgentChatExperienceEnabled: true,
+      hasAgentBuilderPrivilege: true,
+      hasValidAgentBuilderLicense: true,
     });
 
     render(<AiAssistantButton {...defaultProps} />, { wrapper: TestProviders });
