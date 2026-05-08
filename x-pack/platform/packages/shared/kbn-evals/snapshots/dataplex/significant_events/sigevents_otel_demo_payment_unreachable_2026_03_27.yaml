@@ -1,7 +1,7 @@
 elastic-observability.global.es-snapshot-dataset:
   data:
     gcs_path: 'gs://significant-events-datasets/2026-03-27/otel-demo/payment-unreachable'
-    description: 'OTel Demo payment-unreachable failure scenario — payment service becomes unreachable, causing gRPC INTERNAL/UNAVAILABLE errors, charge failures (dial tcp i/o timeout, connection refused) visible in frontend logs.'
+    description: 'SigEvents OTel Demo payment-unreachable failure scenario — payment service becomes unreachable, causing gRPC INTERNAL/UNAVAILABLE errors, charge failures (dial tcp i/o timeout, connection refused) visible in frontend logs.'
     es_version: '9.4.0-SNAPSHOT'
     indices: 'logs*,sigevents-streams-features-payment-unreachable'
     timestamp_range: '2026-03-27'

@@ -1,7 +1,7 @@
 elastic-observability.global.es-snapshot-dataset:
   data:
     gcs_path: 'gs://significant-events-datasets/2026-03-27/otel-demo/healthy-baseline'
-    description: 'OTel Demo healthy baseline - normal traffic across all microservices (cart, checkout, shipping, payment, frontend, email, recommendation, ad, quote, valkey) with no injected failures.'
+    description: 'SigEvents OTel Demo healthy baseline — normal traffic across all microservices (cart, checkout, shipping, payment, frontend, email, recommendation, ad, quote, valkey) with no injected failures.'
     es_version: '9.4.0-SNAPSHOT'
     indices: 'logs*,sigevents-streams-features-healthy-baseline'
     timestamp_range: '2026-03-27'

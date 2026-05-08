@@ -100,11 +100,6 @@ const lookupEntry = (
   return res.status === 0;
 };
 
-const formatLabels = (labels: Record<string, string>): string =>
-  Object.entries(labels)
-    .map(([k, v]) => `${k}=${v}`)
-    .join(',');
-
 const syncEntry = ({
   project,
   location,
@@ -113,7 +108,6 @@ const syncEntry = ({
   aspectsFile,
   gcsPath,
   description,
-  labels,
   dryRun,
   printCommands,
   log,
@@ -125,7 +119,6 @@ const syncEntry = ({
   aspectsFile: string;
   gcsPath: string;
   description: string | undefined;
-  labels?: Record<string, string>;
   dryRun: boolean;
   printCommands: boolean;
   log: { info: (m: string) => void };
@@ -133,7 +126,6 @@ const syncEntry = ({
   const fqn = buildFullyQualifiedName(gcsPath);
   const displayName = buildEntrySourceDisplayName(gcsPath);
   const updateTime = new Date().toISOString();
-  const labelsStr = labels && Object.keys(labels).length > 0 ? formatLabels(labels) : undefined;
 
   if (printCommands) {
     const createArgs = [
@@ -162,7 +154,6 @@ const syncEntry = ({
       updateTime,
       '--aspects',
       aspectsFile,
-      ...(labelsStr ? ['--labels', labelsStr] : []),
     ];
     const updateArgs = [
       'gcloud',
@@ -188,7 +179,6 @@ const syncEntry = ({
       updateTime,
       '--update-aspects',
       aspectsFile,
-      ...(labelsStr ? ['--update-labels', labelsStr] : []),
     ];
 
     log.info(`# ${entryId}`);
@@ -197,7 +187,7 @@ const syncEntry = ({
   }
 
   if (dryRun) {
-    log.info(`SYNC ${entryId} (gcs_path=${gcsPath}${labelsStr ? `, labels=${labelsStr}` : ''})`);
+    log.info(`SYNC ${entryId} (gcs_path=${gcsPath})`);
     return { action: 'skipped' };
   }
 
@@ -229,7 +219,6 @@ const syncEntry = ({
       updateTime,
       '--aspects',
       aspectsFile,
-      ...(labelsStr ? ['--labels', labelsStr] : []),
     ]);
     if (res.status !== 0) {
       const msg = res.stderr || res.stdout;
@@ -270,7 +259,6 @@ const syncEntry = ({
     updateTime,
     '--update-aspects',
     aspectsFile,
-    ...(labelsStr ? ['--update-labels', labelsStr] : []),
   ]);
   if (res.status !== 0) {
     const msg = res.stderr || res.stdout;
@@ -527,17 +515,6 @@ export const dataplexCmd: Command<void> = {
     for (const filePath of selected) {
       const entryId = Path.basename(filePath, Path.extname(filePath));
       const data = readAspectData(filePath);
-
-      const labels: Record<string, string> = {};
-      if (data.team) {
-        labels.team = data.team;
-      }
-      const relativePath = Path.relative(aspectsRootAbs, filePath);
-      const evalSuite = Path.dirname(relativePath).split(Path.sep)[0];
-      if (evalSuite && evalSuite !== '.') {
-        labels.eval_suite = evalSuite;
-      }
-
       const res = syncEntry({
         project,
         location,
@@ -546,7 +523,6 @@ export const dataplexCmd: Command<void> = {
         aspectsFile: filePath,
         gcsPath: data.gcs_path,
         description: data.description,
-        labels,
         dryRun,
         printCommands,
         log,
