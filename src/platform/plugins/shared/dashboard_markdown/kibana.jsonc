@@ -13,6 +13,7 @@
       "contentManagement",
       "dataViews",
       "embeddable",
+      "expressions",
       "uiActions",
       "dashboard",
       "data",
@@ -20,6 +21,9 @@
       "dataViewFieldEditor",
       "visualizations",
       "kibanaUtils"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
     ]
   }
 }
