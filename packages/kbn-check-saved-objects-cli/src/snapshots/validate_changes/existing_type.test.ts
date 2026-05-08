@@ -52,7 +52,7 @@ describe('validateChangesExistingType', () => {
     const to = loadSnapshot('migrations_deleted.json');
 
     expect(() => validateChangesWrapper({ from, to, type: { name: 'config' } })).toThrowError(
-      `❌ Modifications have been detected in the 'config.migrations'. This property is deprected and no modifications are allowed.`
+      `Modifications have been detected in the 'config.migrations'. This property is deprected and no modifications are allowed.`
     );
   });
 
@@ -61,7 +61,7 @@ describe('validateChangesExistingType', () => {
     const to = loadSnapshot('migrations_added.json');
 
     expect(() => validateChangesWrapper({ from, to, type: { name: 'config' } })).toThrowError(
-      `❌ Modifications have been detected in the 'config.migrations'. This property is deprected and no modifications are allowed.`
+      `Modifications have been detected in the 'config.migrations'. This property is deprected and no modifications are allowed.`
     );
   });
 
@@ -70,7 +70,7 @@ describe('validateChangesExistingType', () => {
     const to = loadSnapshot('model_versions_deleted.json');
 
     expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
-      `❌ Some model versions have been deleted for SO type 'task'.`
+      `Some model versions have been deleted for SO type 'task'.`
     );
   });
 
@@ -78,7 +78,7 @@ describe('validateChangesExistingType', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('two_new_model_versions.json');
     expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
-      `❌ The SO type 'task' is defining 2 new model versions, but can only define one at a time.`
+      `The SO type 'task' is defining 2 new model versions, but can only define one at a time.`
     );
   });
 
@@ -87,7 +87,7 @@ describe('validateChangesExistingType', () => {
     const to = loadSnapshot('mutated_model_versions.json');
 
     expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
-      `❌ Some modelVersions have been updated for SO type 'task' after they were defined: 10.6.0.`
+      `Some modelVersions have been updated for SO type 'task' after they were defined: 10.6.0.`
     );
   });
 
@@ -106,7 +106,7 @@ describe('validateChangesExistingType', () => {
       const to = loadSnapshot('schema_only_change_in_older_model_version.json');
 
       expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
-        `❌ Some modelVersions have been updated for SO type 'task' after they were defined`
+        `Some modelVersions have been updated for SO type 'task' after they were defined`
       );
     });
 
@@ -165,7 +165,7 @@ describe('validateChangesExistingType', () => {
     const to = loadSnapshot('non_consecutive_model_versions.json');
 
     expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
-      `❌ The 'task' SO type is missing model version '7'. Model versions defined: 1,2,3,4,5,6,8`
+      `The 'task' SO type is missing model version '7'. Model versions defined: 1,2,3,4,5,6,8`
     );
   });
 
@@ -174,7 +174,7 @@ describe('validateChangesExistingType', () => {
     const to = loadSnapshot('mappings_updated_no_bump.json');
 
     expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
-      `❌ The 'task' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.`
+      `The 'task' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.`
     );
   });
 
@@ -185,7 +185,7 @@ describe('validateChangesExistingType', () => {
     expect(() =>
       validateChangesWrapper({ from, to, type: { name: 'usage-counter' } })
     ).toThrowError(
-      `❌ The new model version '1' for SO type 'usage-counter' is defining mappings' changes. For backwards-compatibility reasons, the initial model version can only include schema definitions.`
+      `The new model version '1' for SO type 'usage-counter' is defining mappings' changes. For backwards-compatibility reasons, the initial model version can only include schema definitions.`
     );
   });
 

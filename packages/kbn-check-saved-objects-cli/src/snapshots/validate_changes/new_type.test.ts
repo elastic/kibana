@@ -92,7 +92,7 @@ describe('validateChangesNewType', () => {
     const to = buildNewType('my-type', { migrationVersions: ['7.14.0'] });
 
     expect(() => callValidate(to)).toThrowError(
-      `❌ New SO type my-type cannot define legacy 'migrations'.`
+      `New SO type 'my-type' cannot define legacy 'migrations'.`
     );
   });
 
@@ -100,7 +100,7 @@ describe('validateChangesNewType', () => {
     const to = buildNewType('my-type', { modelVersions: [] });
 
     expect(() => callValidate(to)).toThrowError(
-      `❌ New SO type my-type must define the first model version '1'.`
+      `New SO type 'my-type' must define the first model version '1'.`
     );
   });
 
@@ -108,7 +108,7 @@ describe('validateChangesNewType', () => {
     const snapshot = loadSnapshot('changes_in_initial_version.json');
 
     expect(() => callValidate(snapshot.typeDefinitions['usage-counter'])).toThrowError(
-      `❌ The new model version '1' for SO type 'usage-counter' is defining mappings' changes. For backwards-compatibility reasons, the initial model version can only include schema definitions.`
+      `The new model version '1' for SO type 'usage-counter' is defining mappings' changes. For backwards-compatibility reasons, the initial model version can only include schema definitions.`
     );
   });
 
@@ -118,7 +118,7 @@ describe('validateChangesNewType', () => {
     });
 
     expect(() => callValidate(to)).toThrowError(
-      `❌ The 'my-type' SO type is missing model version '2'. Model versions defined: 1,3`
+      `The 'my-type' SO type is missing model version '2'. Model versions defined: 1,3`
     );
   });
 
@@ -130,7 +130,7 @@ describe('validateChangesNewType', () => {
     });
 
     expect(() => callValidate(to)).toThrowError(
-      `❌ The new model version '1' for SO type 'my-type' is missing the 'forwardCompatibility' schema definition.`
+      `The new model version '1' for SO type 'my-type' is missing the 'forwardCompatibility' schema definition.`
     );
   });
 
@@ -142,7 +142,7 @@ describe('validateChangesNewType', () => {
     });
 
     expect(() => callValidate(to)).toThrowError(
-      `❌ The new model version '1' for SO type 'my-type' is missing the 'create' schema definition.`
+      `The new model version '1' for SO type 'my-type' is missing the 'create' schema definition.`
     );
   });
 

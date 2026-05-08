@@ -8,6 +8,7 @@
  */
 
 import type { MigrationSnapshot } from '../../types';
+import { RULE_IDS, SavedObjectsCheckError } from '../../findings';
 
 /**
  * Detects new types in 'to' that conflict with previously removed types
@@ -27,10 +28,15 @@ export async function detectConflictsWithRemovedTypes(
   }
 
   if (conflictingTypes.length > 0) {
-    throw new Error(
-      `❌ Cannot re-register previously removed type(s): ${conflictingTypes.join(
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.REMOVED_TYPE_NAME_REUSED,
+      severity: 'error',
+      typeName: conflictingTypes[0],
+      message: `Cannot re-register previously removed type(s): ${conflictingTypes.join(
         ', '
-      )}. Please use a different name.`
-    );
+      )}. Please use a different name.`,
+      fixHint: `Pick a different name for the SO type. Once removed, a name cannot be reused.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 }

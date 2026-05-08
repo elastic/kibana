@@ -8,6 +8,7 @@
  */
 
 import { jsonToFile } from '../../util/json';
+import { RULE_IDS, SavedObjectsCheckError } from '../../findings';
 import { REMOVED_TYPES_JSON_PATH } from './constants';
 
 /**
@@ -24,13 +25,22 @@ export async function updateRemovedTypes(
     await jsonToFile(REMOVED_TYPES_JSON_PATH, allTypes);
   }
 
-  const errorMessage = fix
-    ? `❌ The following SO types are no longer registered: '${removedTypes.join(
+  const message = fix
+    ? `The following SO types are no longer registered: '${removedTypes.join(
         ', '
       )}'. Updated 'removed_types.json' to prevent the same names from being reused in the future.`
-    : `❌ The following SO types are no longer registered: '${removedTypes.join(
+    : `The following SO types are no longer registered: '${removedTypes.join(
         ', '
       )}'. Please run with --fix to update 'removed_types.json'.`;
 
-  throw new Error(errorMessage);
+  throw new SavedObjectsCheckError({
+    ruleId: RULE_IDS.REMOVED_TYPE_NEEDS_UPDATE,
+    severity: 'error',
+    typeName: removedTypes[0],
+    message,
+    fixHint: fix
+      ? `Commit the updated 'removed_types.json' alongside your changes.`
+      : `Run 'node scripts/check_saved_objects --baseline <sha> --fix' locally to update 'removed_types.json' and commit it.`,
+    docsAnchor: '#defining-model-versions',
+  });
 }

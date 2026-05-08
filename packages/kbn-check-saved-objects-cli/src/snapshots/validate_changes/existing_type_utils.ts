@@ -11,6 +11,7 @@ import equal from 'fast-deep-equal';
 import { cloneDeep, difference } from 'lodash';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { MigrationInfoRecord, ModelVersionSummary } from '../../types';
+import { RULE_IDS, SavedObjectsCheckError } from '../../findings';
 import {
   getMappingFieldPaths,
   validateAllMappingsInModelVersion,
@@ -57,9 +58,14 @@ export function validateNoModelVersionChanges(
 ): void {
   const mutatedModelVersions = getMutatedModelVersions(from, to);
   if (mutatedModelVersions.length > 0) {
-    throw new Error(
-      `❌ Some modelVersions have been updated for SO type '${to.name}' after they were defined: ${mutatedModelVersions}.`
-    );
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.EXISTING_TYPE_MUTATED_MODEL_VERSION,
+      severity: 'error',
+      typeName: to.name,
+      message: `Some modelVersions have been updated for SO type '${to.name}' after they were defined: ${mutatedModelVersions}.`,
+      fixHint: `Existing model versions are immutable. Revert the change and add a new model version to capture the update instead.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 }
 
@@ -100,9 +106,14 @@ export function validateModelVersionsChanges({
         `Any future changes to the mappings will still require a proper model version bump.`
     );
   } else {
-    throw new Error(
-      `❌ Some modelVersions have been updated for SO type '${name}' after they were defined: ${mutatedModelVersions}.`
-    );
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.EXISTING_TYPE_MUTATED_MODEL_VERSION,
+      severity: 'error',
+      typeName: name,
+      message: `Some modelVersions have been updated for SO type '${name}' after they were defined: ${mutatedModelVersions}.`,
+      fixHint: `Existing model versions are immutable. Revert the change and add a new model version to capture the update instead.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 }
 

@@ -9,6 +9,7 @@
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { MigrationInfoRecord } from '../../types';
+import { RULE_IDS, SavedObjectsCheckError } from '../../findings';
 import {
   validateAllMappingsInModelVersion,
   validateNewModelVersionSchemas,
@@ -29,11 +30,25 @@ export function validateChangesNewType({ to, registeredType }: ValidateChangesNe
   const name = to.name;
 
   if (to.migrationVersions?.length) {
-    throw new Error(`❌ New SO type ${name} cannot define legacy 'migrations'.`);
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.NEW_TYPE_LEGACY_MIGRATIONS,
+      severity: 'error',
+      typeName: name,
+      message: `New SO type '${name}' cannot define legacy 'migrations'.`,
+      fixHint: `Remove the 'migrations' property and define a model version '1' instead.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 
   if (!to.modelVersions?.length) {
-    throw new Error(`❌ New SO type ${name} must define the first model version '1'.`);
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.NEW_TYPE_MISSING_INITIAL_MODEL_VERSION,
+      severity: 'error',
+      typeName: name,
+      message: `New SO type '${name}' must define the first model version '1'.`,
+      fixHint: `Add a 'modelVersions' map with key '1' that defines 'create' and 'forwardCompatibility' schemas.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 
   // check that the initial model version only has schemas
