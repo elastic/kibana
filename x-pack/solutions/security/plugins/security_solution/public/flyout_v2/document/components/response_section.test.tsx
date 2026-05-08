@@ -32,8 +32,12 @@ jest.mock('../../shared/components/flyout_provider', () => ({
 jest.mock('./response_section_content', () => ({
   ResponseSectionContent: jest.fn(
     ({ onShowResponseDetails }: { onShowResponseDetails: () => void }) => (
-      <button data-test-subj="responseSectionContentMock" onClick={onShowResponseDetails}>
-        show
+      <button
+        type="button"
+        data-test-subj="responseSectionContentMock"
+        onClick={onShowResponseDetails}
+      >
+        {'show'}
       </button>
     )
   ),
