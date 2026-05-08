@@ -24,7 +24,10 @@ import type {
   ManagementSetup,
   ManagementStart,
 } from '@kbn/management-plugin/public';
-import { CONNECTORS_LANDING_OVERLAY_ID } from '@kbn/management-plugin/public';
+import {
+  ALERTING_RULE_CREATE_LANDING_OVERLAY_ID,
+  CONNECTORS_LANDING_OVERLAY_ID,
+} from '@kbn/management-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
@@ -37,7 +40,12 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { getRulesAppDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
+import {
+  getCreateRuleFromTemplateRoute,
+  getCreateRuleRoute,
+  getRulesAppDetailsRoute,
+  triggersActionsRoute,
+} from '@kbn/rule-data-utils';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -52,10 +60,13 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ON_OPEN_PANEL_MENU, ALERT_RULE_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import { QueryClientProvider } from '@kbn/react-query';
+import { RuleTypeModal } from '@kbn/response-ops-rule-form';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { RulesLocatorDefinition } from './locators/rules';
 import type { Rule, RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
+import { queryClient } from './application/query_client';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { KibanaContextProvider } from './common/lib/kibana';
@@ -546,6 +557,37 @@ export class Plugin
             isServerless: !!plugins.serverless,
             onClose,
             onConnectorCreated: () => {},
+          })
+        )
+    );
+
+    plugins.management.registerLandingQuickActionOverlay(
+      ALERTING_RULE_CREATE_LANDING_OVERLAY_ID,
+      ({ onClose }) =>
+        React.createElement(
+          QueryClientProvider,
+          { client: queryClient },
+          React.createElement(RuleTypeModal, {
+            onClose,
+            onSelectRuleType: (ruleTypeId) => {
+              onClose();
+              core.application.navigateToApp('management', {
+                path: `insightsAndAlerting/triggersActions/${getCreateRuleRoute(ruleTypeId)}`,
+              });
+            },
+            onSelectTemplate: (templateId) => {
+              onClose();
+              core.application.navigateToApp('management', {
+                path: `insightsAndAlerting/triggersActions/${getCreateRuleFromTemplateRoute(
+                  encodeURIComponent(templateId)
+                )}`,
+              });
+            },
+            http: core.http,
+            toasts: core.notifications.toasts,
+            cps: plugins.cps,
+            registeredRuleTypes: this.ruleTypeRegistry.list(),
+            filteredRuleTypes: [],
           })
         )
     );

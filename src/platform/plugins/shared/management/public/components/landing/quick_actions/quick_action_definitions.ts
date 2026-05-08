@@ -9,17 +9,23 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  INDEX_CREATE_LANDING_OVERLAY_ID,
+  ALERTING_RULE_CREATE_LANDING_OVERLAY_ID,
   API_KEYS_CREATE_LANDING_OVERLAY_ID,
   CONNECTORS_LANDING_OVERLAY_ID,
   DATA_VIEWS_CREATE_LANDING_OVERLAY_ID,
   SAVED_OBJECTS_IMPORT_LANDING_OVERLAY_ID,
+  USER_CREATE_LANDING_OVERLAY_ID,
 } from '../../../../common/landing_quick_action_overlay_ids';
 
 export {
+  INDEX_CREATE_LANDING_OVERLAY_ID,
+  ALERTING_RULE_CREATE_LANDING_OVERLAY_ID,
   API_KEYS_CREATE_LANDING_OVERLAY_ID,
   CONNECTORS_LANDING_OVERLAY_ID,
   DATA_VIEWS_CREATE_LANDING_OVERLAY_ID,
   SAVED_OBJECTS_IMPORT_LANDING_OVERLAY_ID,
+  USER_CREATE_LANDING_OVERLAY_ID,
 };
 
 export interface QuickActionDefinition {
@@ -37,28 +43,31 @@ export interface QuickActionDefinition {
 
 export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
   {
-    id: 'index_management',
-    title: i18n.translate('management.landing.quickActions.manageIndices', {
-      defaultMessage: 'Manage indices',
+    id: 'create_index',
+    title: i18n.translate('management.landing.quickActions.createIndex', {
+      defaultMessage: 'Create an index',
     }),
-    description: i18n.translate('management.landing.quickActions.manageIndicesDescription', {
-      defaultMessage: 'Create, delete, and maintain Elasticsearch indices and index templates.',
+    description: i18n.translate('management.landing.quickActions.createIndexDescription', {
+      defaultMessage:
+        'Add a new Elasticsearch index with standard or lookup mode for your data and templates.',
     }),
     appId: 'management',
     path: 'data/index_management',
+    overlayId: INDEX_CREATE_LANDING_OVERLAY_ID,
     capabilityPath: 'management.data.index_management',
   },
   {
     id: 'alerting_rules',
-    title: i18n.translate('management.landing.quickActions.manageAlertingRules', {
-      defaultMessage: 'Manage alerting rules',
+    title: i18n.translate('management.landing.quickActions.createAlertingRule', {
+      defaultMessage: 'Create alerting rule',
     }),
-    description: i18n.translate('management.landing.quickActions.manageAlertingRulesDescription', {
+    description: i18n.translate('management.landing.quickActions.createAlertingRuleDescription', {
       defaultMessage:
-        'Create and tune rules that notify you when your data meets defined conditions.',
+        'Select a rule type or template and define when to send notifications about your data.',
     }),
     appId: 'management',
     path: 'insightsAndAlerting/triggersActions',
+    overlayId: ALERTING_RULE_CREATE_LANDING_OVERLAY_ID,
     capabilityPath: 'management.insightsAndAlerting.triggersActions',
   },
   {
@@ -139,6 +148,7 @@ export const QUICK_ACTION_DEFINITIONS: QuickActionDefinition[] = [
     }),
     appId: 'management',
     path: 'security/users/create',
+    overlayId: USER_CREATE_LANDING_OVERLAY_ID,
     capabilityPath: 'management.security.users',
   },
 ];

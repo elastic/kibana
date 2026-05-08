@@ -24,7 +24,26 @@ import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { LandingQuickActionOverlayRenderer } from '../../../types';
-import { QUICK_ACTION_DEFINITIONS, type QuickActionDefinition } from './quick_action_definitions';
+import { QUICK_ACTION_DEFINITIONS } from './quick_action_definitions';
+
+/** Management app link + Index Management feature (Elasticsearch) capabilities can diverge; show create-index card if either grants access. */
+export function hasIndexManagementQuickActionCapability(
+  capabilities: ApplicationStart['capabilities']
+): boolean {
+  if (Boolean(get(capabilities, 'management.data.index_management'))) {
+    return true;
+  }
+  const indexManagementFeature = (capabilities as Record<string, unknown>).index_management;
+  if (
+    indexManagementFeature &&
+    typeof indexManagementFeature === 'object' &&
+    indexManagementFeature !== null &&
+    !Array.isArray(indexManagementFeature)
+  ) {
+    return Object.values(indexManagementFeature as Record<string, boolean>).some((v) => v === true);
+  }
+  return false;
+}
 
 export const QuickActionsGrid = ({
   capabilities,
@@ -41,9 +60,12 @@ export const QuickActionsGrid = ({
   const quickActionCardTitleFont = useEuiFontSize('s');
   const visibleActions = useMemo(
     () =>
-      QUICK_ACTION_DEFINITIONS.filter((action) =>
-        Boolean(get(capabilities, action.capabilityPath))
-      ),
+      QUICK_ACTION_DEFINITIONS.filter((action) => {
+        if (action.id === 'create_index') {
+          return hasIndexManagementQuickActionCapability(capabilities);
+        }
+        return Boolean(get(capabilities, action.capabilityPath));
+      }),
     [capabilities]
   );
 

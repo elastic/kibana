@@ -238,6 +238,36 @@ describe('Security Plugin', () => {
       expect(startManagementServiceMock).toHaveBeenCalledTimes(1);
     });
 
+    it('registers management landing overlays via core.plugins.onStart when management is absent from sync start deps', async () => {
+      jest.spyOn(ManagementService.prototype, 'setup').mockImplementation(() => {});
+      jest.spyOn(ManagementService.prototype, 'start').mockImplementation(() => {});
+      const managementSetupMock = managementPluginMock.createSetupContract();
+      const managementStartMock = managementPluginMock.createStartContract();
+
+      const plugin = new SecurityPlugin(coreMock.createPluginInitializerContext());
+
+      plugin.setup(getCoreSetupMock(), {
+        licensing: licensingMock.createSetup(),
+        management: managementSetupMock,
+      });
+
+      const coreStart = coreMock.createStart({ basePath: '/some-base-path' });
+      coreStart.plugins.onStart.mockImplementation(() =>
+        Promise.resolve({
+          management: { found: true as const, contract: managementStartMock },
+        })
+      );
+
+      plugin.start(coreStart, {
+        dataViews: {} as DataViewsPublicPluginStart,
+        features: {} as FeaturesPluginStart,
+      });
+
+      expect(coreStart.plugins.onStart).toHaveBeenCalledWith('management');
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      expect(managementStartMock.registerLandingQuickActionOverlay).toHaveBeenCalled();
+    });
+
     it('calls UserProfileAPIClient start() to fetch the user profile', () => {
       const startUserProfileAPIClient = jest
         .spyOn(UserProfileAPIClient.prototype, 'start')

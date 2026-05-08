@@ -10,6 +10,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { USER_CREATE_LANDING_OVERLAY_ID } from '../../../common/landing_quick_action_overlay_ids';
 import { ManagementLandingWorkflowPaths } from './management_landing_workflow_paths';
 
 function fullManagementCaps() {
@@ -29,9 +30,11 @@ function fullManagementCaps() {
 
 describe('ManagementLandingWorkflowPaths', () => {
   const navigateToApp = jest.fn();
+  const onOpenLandingOverlay = jest.fn();
 
   beforeEach(() => {
     navigateToApp.mockClear();
+    onOpenLandingOverlay.mockClear();
   });
 
   it('renders workflow rows when capabilities allow', () => {
@@ -48,6 +51,43 @@ describe('ManagementLandingWorkflowPaths', () => {
     expect(
       screen.getByTestId('managementLandingWorkflowPathsFlow-setup_ingestion')
     ).toBeInTheDocument();
+  });
+
+  it('opens create-user landing overlay when Add user link is clicked and overlay is registered', () => {
+    const getLandingQuickActionOverlay = jest.fn().mockReturnValue(() => <div />);
+
+    render(
+      <I18nProvider>
+        <ManagementLandingWorkflowPaths
+          capabilities={fullManagementCaps()}
+          navigateToApp={navigateToApp}
+          getLandingQuickActionOverlay={getLandingQuickActionOverlay}
+          onOpenLandingOverlay={onOpenLandingOverlay}
+        />
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('managementLandingWorkflowPathsLink-access-add_user'));
+    expect(getLandingQuickActionOverlay).toHaveBeenCalledWith(USER_CREATE_LANDING_OVERLAY_ID);
+    expect(onOpenLandingOverlay).toHaveBeenCalledWith(USER_CREATE_LANDING_OVERLAY_ID);
+    expect(navigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('navigates to create user route when Add user overlay is not registered', () => {
+    render(
+      <I18nProvider>
+        <ManagementLandingWorkflowPaths
+          capabilities={fullManagementCaps()}
+          navigateToApp={navigateToApp}
+          getLandingQuickActionOverlay={jest.fn(() => undefined)}
+        />
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('managementLandingWorkflowPathsLink-access-add_user'));
+    expect(navigateToApp).toHaveBeenCalledWith('management', {
+      path: 'security/users/create',
+    });
   });
 
   it('navigates to management when a link is clicked', () => {

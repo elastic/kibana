@@ -29,6 +29,8 @@ export interface ManagementLandingNavigateSettingsRowDefinition {
   readonly icon: IconType;
   readonly capabilityPath: string;
   readonly managementPath: string;
+  /** When set, **Go** opens this landing overlay if registered; otherwise navigates to `managementPath`. */
+  readonly landingQuickActionOverlayId?: string;
   readonly sectionBreakBefore?: boolean;
 }
 
@@ -63,7 +65,7 @@ export const MANAGEMENT_LANDING_SETTINGS_ROWS: ManagementLandingSettingsRowDefin
     title: i18n.translate('management.landing.settingsPanel.row.dateFormat', {
       defaultMessage: 'Date format',
     }),
-    icon: 'document',
+    icon: 'calendar',
     capabilityPath: 'management.kibana.settings',
     uiSettingKey: 'dateFormat',
   },
@@ -86,15 +88,5 @@ export const MANAGEMENT_LANDING_SETTINGS_ROWS: ManagementLandingSettingsRowDefin
     icon: 'calendar',
     capabilityPath: 'management.kibana.settings',
     uiSettingKey: 'dateFormat:dow',
-  },
-  {
-    kind: 'navigate',
-    id: 'invite_users',
-    title: i18n.translate('management.landing.settingsPanel.row.inviteUsers', {
-      defaultMessage: 'Invite users / team',
-    }),
-    icon: 'users',
-    capabilityPath: 'management.security.users',
-    managementPath: 'security/users/create',
   },
 ];

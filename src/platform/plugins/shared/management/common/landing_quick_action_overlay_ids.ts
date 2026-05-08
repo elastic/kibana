@@ -8,7 +8,10 @@
  */
 
 /** IDs for `ManagementStart.registerLandingQuickActionOverlay` — keep in sync with quick action definitions. */
+export const INDEX_CREATE_LANDING_OVERLAY_ID = 'index_create';
 export const CONNECTORS_LANDING_OVERLAY_ID = 'connectors';
 export const SAVED_OBJECTS_IMPORT_LANDING_OVERLAY_ID = 'saved_objects_import';
 export const DATA_VIEWS_CREATE_LANDING_OVERLAY_ID = 'data_views_create';
 export const API_KEYS_CREATE_LANDING_OVERLAY_ID = 'api_keys_create';
+export const ALERTING_RULE_CREATE_LANDING_OVERLAY_ID = 'alerting_rule_create';
+export const USER_CREATE_LANDING_OVERLAY_ID = 'user_create';

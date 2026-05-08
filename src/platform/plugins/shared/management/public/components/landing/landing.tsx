@@ -152,7 +152,7 @@ function ManagementLandingClassicBody({
 
   const twoColumnLandingGridCss = css`
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
     gap: ${euiTheme.size.m};
     align-items: start;
     @media (max-width: ${euiTheme.breakpoint.m}px) {
@@ -302,12 +302,16 @@ function ManagementLandingClassicBody({
                 capabilities={coreStart.application.capabilities}
                 navigateToApp={coreStart.application.navigateToApp}
                 uiSettings={coreStart.uiSettings}
+                getLandingQuickActionOverlay={getLandingQuickActionOverlay}
+                onOpenLandingOverlay={setLandingOverlayId}
               />
             </div>
           </div>
           <ManagementLandingWorkflowPaths
             capabilities={coreStart.application.capabilities}
             navigateToApp={coreStart.application.navigateToApp}
+            getLandingQuickActionOverlay={getLandingQuickActionOverlay}
+            onOpenLandingOverlay={setLandingOverlayId}
           />
           <EuiSpacer size="m" />
           <ManagementLandingDocsFooter docLinks={coreStart.docLinks} />
@@ -337,9 +341,35 @@ export const ManagementLandingPage = ({
   setBreadcrumbs,
   onAppMounted,
 }: ManagementLandingPageProps) => {
-  const { appBasePath, sections, kibanaVersion, cardsNavigationConfig, chromeStyle, coreStart } =
-    useAppContext();
+  const {
+    appBasePath,
+    sections,
+    kibanaVersion,
+    cardsNavigationConfig,
+    chromeStyle,
+    coreStart,
+    getLandingQuickActionOverlay,
+  } = useAppContext();
   setBreadcrumbs();
+
+  const [nonClassicLandingOverlayId, setNonClassicLandingOverlayId] = useState<string | null>(null);
+
+  const nonClassicLandingQuickActionOverlay = useMemo(() => {
+    if (!nonClassicLandingOverlayId || !getLandingQuickActionOverlay) {
+      return null;
+    }
+    const render = getLandingQuickActionOverlay(nonClassicLandingOverlayId);
+    return render ? render({ onClose: () => setNonClassicLandingOverlayId(null) }) : null;
+  }, [nonClassicLandingOverlayId, getLandingQuickActionOverlay]);
+
+  const managementQuickActionsGrid = (
+    <QuickActionsGrid
+      capabilities={coreStart.application.capabilities}
+      navigateToApp={coreStart.application.navigateToApp}
+      getLandingQuickActionOverlay={getLandingQuickActionOverlay}
+      onOpenLandingOverlay={setNonClassicLandingOverlayId}
+    />
+  );
 
   const { loadState: envLoadState, data: envHealth } = useManagementEnvironmentHealth(
     coreStart.http
@@ -371,21 +401,34 @@ export const ManagementLandingPage = ({
 
   if (cardsNavigationConfig?.enabled) {
     return (
-      <EuiPageBody restrictWidth={true} data-test-subj="cards-navigation-page">
-        <CardsNavigation
-          sections={sections}
-          appBasePath={appBasePath}
-          hideLinksTo={cardsNavigationConfig?.hideLinksTo}
-          extendedCardNavigationDefinitions={cardsNavigationConfig?.extendCardNavDefinitions}
-        />
-      </EuiPageBody>
+      <>
+        <EuiPageBody restrictWidth={true} data-test-subj="cards-navigation-page">
+          {managementQuickActionsGrid}
+          <EuiSpacer size="l" />
+          <CardsNavigation
+            sections={sections}
+            appBasePath={appBasePath}
+            hideLinksTo={cardsNavigationConfig?.hideLinksTo}
+            extendedCardNavigationDefinitions={cardsNavigationConfig?.extendCardNavDefinitions}
+          />
+        </EuiPageBody>
+        {nonClassicLandingQuickActionOverlay}
+      </>
     );
   }
 
   if (!chromeStyle) return null;
 
   if (chromeStyle === 'project') {
-    return <SolutionEmptyPrompt kibanaVersion={kibanaVersion} coreStart={coreStart} />;
+    return (
+      <>
+        <SolutionEmptyPrompt kibanaVersion={kibanaVersion} coreStart={coreStart} />
+        <EuiPageBody restrictWidth={true} paddingSize="l">
+          {managementQuickActionsGrid}
+        </EuiPageBody>
+        {nonClassicLandingQuickActionOverlay}
+      </>
+    );
   }
 
   return <ManagementLandingClassicBody envLoadState={envLoadState} envHealth={envHealth} />;

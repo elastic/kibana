@@ -18,7 +18,6 @@ import React, {
 } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
   EuiFlexGroup,
@@ -35,6 +34,7 @@ import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
+import type { LandingQuickActionOverlayRenderer } from '../../types';
 import type {
   ManagementLandingNavigateSettingsRowDefinition,
   ManagementLandingUiSettingRowDefinition,
@@ -130,20 +130,35 @@ async function validateAndSet(
 export function ManagementLandingSettingsNavigateContent({
   row,
   navigateToApp,
+  getLandingQuickActionOverlay,
+  onOpenLandingOverlay,
 }: {
   row: ManagementLandingNavigateSettingsRowDefinition;
   navigateToApp: ApplicationStart['navigateToApp'];
+  getLandingQuickActionOverlay?: (id: string) => LandingQuickActionOverlayRenderer | undefined;
+  onOpenLandingOverlay?: (overlayId: string) => void;
 }) {
-  const handleNavigate = useCallback(() => {
+  const handleActivate = useCallback(() => {
+    const overlayId = row.landingQuickActionOverlayId;
+    if (overlayId && onOpenLandingOverlay && getLandingQuickActionOverlay?.(overlayId)) {
+      onOpenLandingOverlay(overlayId);
+      return;
+    }
     navigateToApp('management', { path: row.managementPath });
-  }, [navigateToApp, row.managementPath]);
+  }, [
+    getLandingQuickActionOverlay,
+    navigateToApp,
+    onOpenLandingOverlay,
+    row.landingQuickActionOverlayId,
+    row.managementPath,
+  ]);
 
   return (
     <EuiButtonEmpty
       size="xs"
       iconType="sortRight"
       iconSide="right"
-      onClick={handleNavigate}
+      onClick={handleActivate}
       data-test-subj={`managementLandingSettingsNavigate-${row.id}`}
       aria-label={i18n.translate('management.landing.settingsPanel.navigateRowAriaLabel', {
         defaultMessage: 'Open {title}',
@@ -199,6 +214,7 @@ export function ManagementLandingSettingsUiContent({
   const [error, setError] = useState<string | undefined>();
   const [saveBusy, setSaveBusy] = useState(false);
   const errorRegionId = `managementLandingSettings-row-${row.id}-error`;
+  const requiresReload = Boolean(uiSettings.getAll()[row.uiSettingKey]?.requiresPageReload);
 
   const handleSave = useCallback(async () => {
     setSaveBusy(true);
@@ -214,7 +230,7 @@ export function ManagementLandingSettingsUiContent({
 
   return (
     <>
-      <EuiFlexGroup alignItems="flexEnd" gutterSize="s" responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={true}>
           <ManagementLandingUiSettingEditor
             ref={editorRef}
@@ -226,17 +242,22 @@ export function ManagementLandingSettingsUiContent({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiButtonEmpty
             size="s"
-            fill
             isLoading={saveBusy}
             onClick={handleSave}
             data-test-subj={`managementLandingSettingsRowSave-${row.id}`}
           >
             <FormattedMessage id="management.landing.settingsPanel.saveRow" defaultMessage="Save" />
-          </EuiButton>
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {requiresReload ? (
+        <>
+          <EuiSpacer size="xs" />
+          <ReloadHint active />
+        </>
+      ) : null}
       {error ? (
         <>
           <EuiSpacer size="xs" />
@@ -260,8 +281,6 @@ const ManagementLandingUiSettingEditor = forwardRef<
   }
 >(function ManagementLandingUiSettingEditor(props, ref) {
   const { uiSettings, uiSettingKey, ariaLabel, ariaDescribedBy, onError } = props;
-  const meta = uiSettings.getAll()[uiSettingKey];
-  const requiresReload = Boolean(meta?.requiresPageReload);
 
   const tzRef = useRef<LandingSettingsUiEditorHandle>(null);
   const dmRef = useRef<LandingSettingsUiEditorHandle>(null);
@@ -295,7 +314,6 @@ const ManagementLandingUiSettingEditor = forwardRef<
         ariaLabel={ariaLabel}
         ariaDescribedBy={ariaDescribedBy}
         onError={onError}
-        requiresReload={requiresReload}
       />
     );
   }
@@ -308,7 +326,6 @@ const ManagementLandingUiSettingEditor = forwardRef<
         ariaLabel={ariaLabel}
         ariaDescribedBy={ariaDescribedBy}
         onError={onError}
-        requiresReload={requiresReload}
       />
     );
   }
@@ -321,7 +338,6 @@ const ManagementLandingUiSettingEditor = forwardRef<
         ariaLabel={ariaLabel}
         ariaDescribedBy={ariaDescribedBy}
         onError={onError}
-        requiresReload={requiresReload}
       />
     );
   }
@@ -334,7 +350,6 @@ const ManagementLandingUiSettingEditor = forwardRef<
       ariaLabel={ariaLabel}
       ariaDescribedBy={ariaDescribedBy}
       onError={onError}
-      requiresReload={requiresReload}
     />
   );
 });
@@ -360,10 +375,9 @@ const TimezoneSelect = forwardRef<
     ariaLabel: string;
     ariaDescribedBy?: string;
     onError: (msg: string | undefined) => void;
-    requiresReload: boolean;
   }
 >(function TimezoneSelect(props, ref) {
-  const { uiSettings, ariaLabel, ariaDescribedBy, onError, requiresReload } = props;
+  const { uiSettings, ariaLabel, ariaDescribedBy, onError } = props;
   const key = 'dateFormat:tz';
   const remote = useSyncedUiSettingString(uiSettings, key);
   const [local, setLocal] = useState(remote);
@@ -397,20 +411,16 @@ const TimezoneSelect = forwardRef<
   }, [uiSettings]);
 
   return (
-    <>
-      <EuiSuperSelect
-        compressed
-        options={options}
-        valueOfSelected={local}
-        onChange={(value: string) => setLocal(value)}
-        fullWidth
-        data-test-subj={`managementLandingSettingsUiControl-${key.replace(/:/g, '-')}`}
-        aria-label={ariaLabel}
-        aria-describedby={ariaDescribedBy}
-      />
-      <EuiSpacer size="xs" />
-      <ReloadHint active={requiresReload} />
-    </>
+    <EuiSuperSelect
+      compressed
+      options={options}
+      valueOfSelected={local}
+      onChange={(value: string) => setLocal(value)}
+      fullWidth
+      data-test-subj={`managementLandingSettingsUiControl-${key.replace(/:/g, '-')}`}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
+    />
   );
 });
 
@@ -421,10 +431,9 @@ const DarkModeSelect = forwardRef<
     ariaLabel: string;
     ariaDescribedBy?: string;
     onError: (msg: string | undefined) => void;
-    requiresReload: boolean;
   }
 >(function DarkModeSelect(props, ref) {
-  const { uiSettings, ariaLabel, ariaDescribedBy, onError, requiresReload } = props;
+  const { uiSettings, ariaLabel, ariaDescribedBy, onError } = props;
   const key = 'theme:darkMode';
   const remote = useSyncedUiSettingString(uiSettings, key);
   const [local, setLocal] = useState(remote);
@@ -463,20 +472,16 @@ const DarkModeSelect = forwardRef<
   }, [meta]);
 
   return (
-    <>
-      <EuiSelect
-        compressed
-        options={selectOptions}
-        value={local}
-        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setLocal(e.target.value)}
-        fullWidth
-        data-test-subj={`managementLandingSettingsUiControl-${key.replace(/:/g, '-')}`}
-        aria-label={ariaLabel}
-        aria-describedby={ariaDescribedBy}
-      />
-      <EuiSpacer size="xs" />
-      <ReloadHint active={requiresReload} />
-    </>
+    <EuiSelect
+      compressed
+      options={selectOptions}
+      value={local}
+      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setLocal(e.target.value)}
+      fullWidth
+      data-test-subj={`managementLandingSettingsUiControl-${key.replace(/:/g, '-')}`}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
+    />
   );
 });
 
@@ -487,10 +492,9 @@ const DayOfWeekSelect = forwardRef<
     ariaLabel: string;
     ariaDescribedBy?: string;
     onError: (msg: string | undefined) => void;
-    requiresReload: boolean;
   }
 >(function DayOfWeekSelect(props, ref) {
-  const { uiSettings, ariaLabel, ariaDescribedBy, onError, requiresReload } = props;
+  const { uiSettings, ariaLabel, ariaDescribedBy, onError } = props;
   const key = 'dateFormat:dow';
   const remote = useSyncedUiSettingString(uiSettings, key);
   const [local, setLocal] = useState(remote);
@@ -522,20 +526,16 @@ const DayOfWeekSelect = forwardRef<
   }, [meta?.options, local]);
 
   return (
-    <>
-      <EuiSelect
-        compressed
-        options={selectOptions}
-        value={local}
-        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setLocal(e.target.value)}
-        fullWidth
-        data-test-subj={`managementLandingSettingsUiControl-${key.replace(/:/g, '-')}`}
-        aria-label={ariaLabel}
-        aria-describedby={ariaDescribedBy}
-      />
-      <EuiSpacer size="xs" />
-      <ReloadHint active={requiresReload} />
-    </>
+    <EuiSelect
+      compressed
+      options={selectOptions}
+      value={local}
+      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setLocal(e.target.value)}
+      fullWidth
+      data-test-subj={`managementLandingSettingsUiControl-${key.replace(/:/g, '-')}`}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
+    />
   );
 });
 
@@ -547,10 +547,9 @@ const DebouncedTextSetting = forwardRef<
     ariaLabel: string;
     ariaDescribedBy?: string;
     onError: (msg: string | undefined) => void;
-    requiresReload: boolean;
   }
 >(function DebouncedTextSetting(props, ref) {
-  const { uiSettings, uiSettingKey, ariaLabel, ariaDescribedBy, onError, requiresReload } = props;
+  const { uiSettings, uiSettingKey, ariaLabel, ariaDescribedBy, onError } = props;
   const remote = useSyncedUiSettingString(uiSettings, uiSettingKey);
   const [draft, setDraft] = useState(remote);
 
@@ -572,18 +571,14 @@ const DebouncedTextSetting = forwardRef<
   );
 
   return (
-    <>
-      <EuiFieldText
-        fullWidth
-        compressed
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        data-test-subj={`managementLandingSettingsUiControl-${uiSettingKey.replace(/:/g, '-')}`}
-        aria-label={ariaLabel}
-        aria-describedby={ariaDescribedBy}
-      />
-      <EuiSpacer size="xs" />
-      <ReloadHint active={requiresReload} />
-    </>
+    <EuiFieldText
+      fullWidth
+      compressed
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      data-test-subj={`managementLandingSettingsUiControl-${uiSettingKey.replace(/:/g, '-')}`}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
+    />
   );
 });

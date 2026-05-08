@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type SemVer from 'semver/classes/semver';
 import type { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';
+import { createMemoryHistory } from 'history';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { ReindexService, ReindexServicePublicStart } from '@kbn/reindex-service-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
@@ -26,14 +27,15 @@ import { httpService } from './services/http';
 import type { ExtensionsService } from '../services/extensions_service';
 import type { StartDependencies } from '../types';
 
-function initSetup({
+/** Shared HTTP / notifications / metrics init for Index Management (full app mount or landing quick action). */
+export function initIndexManagementClientServices({
   usageCollection,
   reindexService,
   core,
 }: {
   core: CoreStart;
-  usageCollection: UsageCollectionSetup;
-  reindexService: ReindexService;
+  usageCollection: UsageCollectionSetup | undefined;
+  reindexService: ReindexService | undefined;
 }) {
   const { http, notifications } = core;
 
@@ -42,11 +44,61 @@ function initSetup({
 
   const uiMetricService = new UiMetricService(UIM_APP_NAME);
   setUiMetricService(uiMetricService);
-  uiMetricService.setup(usageCollection);
+  if (usageCollection) {
+    uiMetricService.setup(usageCollection);
+  }
 
-  setReindexService(reindexService);
+  if (reindexService) {
+    setReindexService(reindexService);
+  }
 
   return { uiMetricService, notificationService };
+}
+
+export function buildAppDependenciesForCreateIndexLandingModal({
+  core,
+  startDependencies,
+  extensionsService,
+  isFleetEnabled,
+  kibanaVersion,
+  config,
+  cloud,
+  canUseSyntheticSource,
+}: {
+  core: CoreStart;
+  startDependencies: StartDependencies;
+  extensionsService: ExtensionsService;
+  isFleetEnabled: boolean;
+  kibanaVersion: SemVer;
+  config: AppDependencies['config'];
+  cloud?: CloudSetup;
+  canUseSyntheticSource: boolean;
+}): AppDependencies {
+  const { uiMetricService, notificationService } = initIndexManagementClientServices({
+    core,
+    usageCollection: startDependencies.usageCollection,
+    reindexService: startDependencies.reindexService?.reindexService,
+  });
+
+  const history = createMemoryHistory({
+    initialEntries: ['/'],
+  }) as unknown as ScopedHistory<unknown>;
+
+  return getIndexManagementDependencies({
+    cloud,
+    config,
+    core,
+    extensionsService,
+    history,
+    isFleetEnabled,
+    kibanaVersion,
+    startDependencies,
+    uiMetricService,
+    usageCollection: startDependencies.usageCollection,
+    notificationService,
+    canUseSyntheticSource,
+    reindexService: startDependencies.reindexService,
+  });
 }
 
 export function getIndexManagementDependencies({
@@ -159,7 +211,7 @@ export async function mountManagementSection({
   breadcrumbService.setup(setBreadcrumbs);
   documentationService.setup(docLinks);
 
-  const { uiMetricService, notificationService } = initSetup({
+  const { uiMetricService, notificationService } = initIndexManagementClientServices({
     usageCollection,
     core,
     reindexService: reindexService?.reindexService,

@@ -32,6 +32,7 @@ import type {
 } from '@kbn/index-management-shared-types';
 import type { Subscription } from 'rxjs';
 import React from 'react';
+import { INDEX_CREATE_LANDING_OVERLAY_ID } from '@kbn/management-plugin/public';
 import { setExtensionsService } from './application/store/selectors/extension_service';
 import { ExtensionsService } from './services/extensions_service';
 
@@ -43,6 +44,9 @@ import { IndexMapping } from './application/sections/home/index_list/details_pag
 import { PublicApiService } from './services/public_api_service';
 import { IndexSettings } from './application/sections/home/index_list/details_page/with_context_components/index_settings_embeddable';
 import { IndexManagementLocatorDefinition } from './locator';
+import { AppContextProvider } from './application/app_context';
+import { CreateIndexModal } from './application/sections/home/index_list/create_index/create_index_modal';
+import { buildAppDependenciesForCreateIndexLandingModal } from './application/mount_management_section';
 import { ComponentTemplateFlyout } from './application/components/component_templates/component_templates_flyout_embeddable';
 import { DataStreamFlyout } from './application/sections/home/data_stream_list/data_stream_detail_panel/data_stream_flyout_embeddable';
 import { IndexTemplateFlyout } from './application/sections/home/template_list/template_details/index_template_flyout_embeddable';
@@ -278,6 +282,32 @@ export class IndexMgmtUIPlugin
     this.licensingSubscription = licensing?.license$.subscribe((next) => {
       this.canUseSyntheticSource = next.hasAtLeast('enterprise');
     });
+
+    if (this.config.isIndexManagementUiEnabled) {
+      const landingCreateIndexDependencies = buildAppDependenciesForCreateIndexLandingModal({
+        core: coreStart,
+        startDependencies: plugins,
+        extensionsService: this.extensionsService,
+        isFleetEnabled: Boolean(plugins.fleet),
+        kibanaVersion: this.kibanaVersion,
+        config: this.config,
+        cloud: plugins.cloud,
+        canUseSyntheticSource: this.canUseSyntheticSource,
+      });
+
+      plugins.management.registerLandingQuickActionOverlay(
+        INDEX_CREATE_LANDING_OVERLAY_ID,
+        ({ onClose }) =>
+          React.createElement(AppContextProvider, {
+            value: landingCreateIndexDependencies,
+            children: React.createElement(CreateIndexModal, {
+              closeModal: onClose,
+              loadIndices: () => {},
+            }),
+          })
+      );
+    }
+
     return {
       apiService: this.apiService!,
       extensionsService: this.extensionsService.setup(),

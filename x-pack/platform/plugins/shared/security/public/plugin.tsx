@@ -22,7 +22,10 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
-import { API_KEYS_CREATE_LANDING_OVERLAY_ID } from '@kbn/management-plugin/public';
+import {
+  API_KEYS_CREATE_LANDING_OVERLAY_ID,
+  USER_CREATE_LANDING_OVERLAY_ID,
+} from '@kbn/management-plugin/public';
 import type {
   AuthenticationServiceSetup,
   AuthenticationServiceStart,
@@ -44,6 +47,7 @@ import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
 import { ManagementLandingApiKeyFlyout } from './management/api_keys/management_landing_api_key_flyout';
+import { ManagementLandingCreateUserFlyout } from './management/users/management_landing_create_user_flyout';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
@@ -91,6 +95,7 @@ export class SecurityPlugin
   private authz!: AuthorizationServiceSetup;
   private securityApiClients!: SecurityApiClients;
   private buildFlavor: BuildFlavor;
+  private managementIntegrationEnabled = false;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.buildFlavor = initializerContext.env.packageInfo.buildFlavor;
@@ -154,6 +159,7 @@ export class SecurityPlugin
     );
 
     if (management) {
+      this.managementIntegrationEnabled = true;
       this.managementService.setup({
         license,
         management,
@@ -217,20 +223,40 @@ export class SecurityPlugin
     this.securityCheckupService.start(core);
     this.securityApiClients.userProfiles.start();
 
-    if (management) {
+    if (this.managementIntegrationEnabled) {
       this.managementService.start({
         capabilities: application.capabilities,
       });
+    }
 
-      management.registerLandingQuickActionOverlay(
-        API_KEYS_CREATE_LANDING_OVERLAY_ID,
-        ({ onClose }) =>
-          React.createElement(ManagementLandingApiKeyFlyout, {
-            onClose,
-            core,
-            authc: this.authc as AuthenticationServiceStart,
-          })
+    const registerManagementLandingOverlays = (mgmt: ManagementStart) => {
+      mgmt.registerLandingQuickActionOverlay(API_KEYS_CREATE_LANDING_OVERLAY_ID, ({ onClose }) =>
+        React.createElement(ManagementLandingApiKeyFlyout, {
+          onClose,
+          core,
+          authc: this.authc as AuthenticationServiceStart,
+        })
       );
+
+      mgmt.registerLandingQuickActionOverlay(USER_CREATE_LANDING_OVERLAY_ID, ({ onClose }) =>
+        React.createElement(ManagementLandingCreateUserFlyout, {
+          onClose,
+          core,
+        })
+      );
+    };
+
+    if (management) {
+      registerManagementLandingOverlays(management);
+    } else if (this.managementIntegrationEnabled) {
+      // `management` may be missing from synchronous `start` deps when it runs later in plugin order.
+      void core.plugins
+        .onStart<{ management: ManagementStart }>('management')
+        .then(({ management: managementStart }) => {
+          if (managementStart.found) {
+            registerManagementLandingOverlays(managementStart.contract);
+          }
+        });
     }
 
     if (share) {

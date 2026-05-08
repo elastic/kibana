@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import type { ApplicationStart } from '@kbn/core/public';
+import type { LandingQuickActionOverlayRenderer } from '../../types';
 import {
   MANAGEMENT_LANDING_WORKFLOW_PATH_FLOWS,
   type ManagementLandingWorkflowFlowDefinition,
@@ -45,9 +46,13 @@ function filterVisibleLinks(
 export function ManagementLandingWorkflowPaths({
   capabilities,
   navigateToApp,
+  getLandingQuickActionOverlay,
+  onOpenLandingOverlay,
 }: {
   capabilities: ApplicationStart['capabilities'];
   navigateToApp: ApplicationStart['navigateToApp'];
+  getLandingQuickActionOverlay?: (id: string) => LandingQuickActionOverlayRenderer | undefined;
+  onOpenLandingOverlay?: (overlayId: string) => void;
 }) {
   const { euiTheme } = useEuiTheme();
 
@@ -58,11 +63,16 @@ export function ManagementLandingWorkflowPaths({
     })).filter((entry) => entry.visibleLinks.length > 0);
   }, [capabilities]);
 
-  const handleNavigate = useCallback(
-    (path: string) => {
-      navigateToApp('management', { path });
+  const handleActivateLink = useCallback(
+    (link: ManagementLandingWorkflowLinkDefinition) => {
+      const overlayId = link.landingQuickActionOverlayId;
+      if (overlayId && onOpenLandingOverlay && getLandingQuickActionOverlay?.(overlayId)) {
+        onOpenLandingOverlay(overlayId);
+        return;
+      }
+      navigateToApp('management', { path: link.managementPath });
     },
-    [navigateToApp]
+    [getLandingQuickActionOverlay, navigateToApp, onOpenLandingOverlay]
   );
 
   const handleStartTourPlanned = useCallback((_flowId: string) => {
@@ -104,7 +114,7 @@ export function ManagementLandingWorkflowPaths({
             <WorkflowFlowRow
               flow={flow}
               visibleLinks={visibleLinks}
-              onNavigate={handleNavigate}
+              onActivateLink={handleActivateLink}
               onStartTour={handleStartTourPlanned}
               euiTheme={euiTheme}
             />
@@ -118,13 +128,13 @@ export function ManagementLandingWorkflowPaths({
 function WorkflowFlowRow({
   flow,
   visibleLinks,
-  onNavigate,
+  onActivateLink,
   onStartTour,
   euiTheme,
 }: {
   flow: ManagementLandingWorkflowFlowDefinition;
   visibleLinks: ManagementLandingWorkflowLinkDefinition[];
-  onNavigate: (path: string) => void;
+  onActivateLink: (link: ManagementLandingWorkflowLinkDefinition) => void;
   onStartTour: (flowId: string) => void;
   euiTheme: ReturnType<typeof useEuiTheme>['euiTheme'];
 }) {
@@ -168,7 +178,7 @@ function WorkflowFlowRow({
                 data-test-subj={`managementLandingWorkflowPathsLink-${flow.id}-${link.id}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  onNavigate(link.managementPath);
+                  onActivateLink(link);
                 }}
               >
                 {link.label}

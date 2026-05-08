@@ -14,11 +14,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { ManagementLandingSettingsPanel } from './management_landing_settings_panel';
 
-function buildCaps(settings: boolean, users: boolean) {
+function buildCaps(settings: boolean) {
   return {
     management: {
       kibana: { settings },
-      security: { users },
     },
   } as any;
 }
@@ -93,7 +92,7 @@ describe('ManagementLandingSettingsPanel', () => {
     render(
       <I18nProvider>
         <ManagementLandingSettingsPanel
-          capabilities={buildCaps(true, true)}
+          capabilities={buildCaps(true)}
           navigateToApp={navigateToApp}
           uiSettings={uiSettings}
         />
@@ -107,7 +106,7 @@ describe('ManagementLandingSettingsPanel', () => {
     render(
       <I18nProvider>
         <ManagementLandingSettingsPanel
-          capabilities={buildCaps(false, false)}
+          capabilities={buildCaps(false)}
           navigateToApp={navigateToApp}
           uiSettings={uiSettings}
         />
@@ -127,7 +126,7 @@ describe('ManagementLandingSettingsPanel', () => {
     render(
       <I18nProvider>
         <ManagementLandingSettingsPanel
-          capabilities={buildCaps(true, true)}
+          capabilities={buildCaps(true)}
           navigateToApp={navigateToApp}
           uiSettings={uiSettings}
         />
@@ -151,7 +150,7 @@ describe('ManagementLandingSettingsPanel', () => {
     render(
       <I18nProvider>
         <ManagementLandingSettingsPanel
-          capabilities={buildCaps(true, true)}
+          capabilities={buildCaps(true)}
           navigateToApp={navigateToApp}
           uiSettings={uiSettings}
         />
@@ -160,9 +159,7 @@ describe('ManagementLandingSettingsPanel', () => {
 
     expect(screen.getByTestId('managementLandingSettingsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('managementLandingSettingsUiRow-time_zone')).toBeInTheDocument();
-    expect(
-      screen.getByTestId('managementLandingSettingsNavigateRow-invite_users')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('managementLandingSettingsUiRow-day_of_week')).toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('managementLandingSettingsRowEdit-dark_mode'));
     const darkModeControl = screen.getByTestId('managementLandingSettingsUiRow-dark_mode');
@@ -178,29 +175,11 @@ describe('ManagementLandingSettingsPanel', () => {
     });
   });
 
-  it('navigates invite users when Go is clicked', () => {
-    render(
-      <I18nProvider>
-        <ManagementLandingSettingsPanel
-          capabilities={buildCaps(false, true)}
-          navigateToApp={navigateToApp}
-          uiSettings={uiSettings}
-        />
-      </I18nProvider>
-    );
-
-    fireEvent.click(screen.getByTestId('managementLandingSettingsRowEdit-invite_users'));
-    fireEvent.click(screen.getByTestId('managementLandingSettingsNavigate-invite_users'));
-    expect(navigateToApp).toHaveBeenCalledWith('management', {
-      path: 'security/users/create',
-    });
-  });
-
   it('dismiss hides the panel without writing localStorage', () => {
     render(
       <I18nProvider>
         <ManagementLandingSettingsPanel
-          capabilities={buildCaps(true, true)}
+          capabilities={buildCaps(true)}
           navigateToApp={navigateToApp}
           uiSettings={uiSettings}
         />

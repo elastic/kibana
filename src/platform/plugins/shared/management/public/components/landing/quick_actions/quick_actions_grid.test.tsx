@@ -12,10 +12,13 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QuickActionsGrid } from './quick_actions_grid';
 import {
+  INDEX_CREATE_LANDING_OVERLAY_ID,
+  ALERTING_RULE_CREATE_LANDING_OVERLAY_ID,
   API_KEYS_CREATE_LANDING_OVERLAY_ID,
   QUICK_ACTION_DEFINITIONS,
   CONNECTORS_LANDING_OVERLAY_ID,
   DATA_VIEWS_CREATE_LANDING_OVERLAY_ID,
+  USER_CREATE_LANDING_OVERLAY_ID,
 } from './quick_action_definitions';
 
 function buildCapabilities(
@@ -75,9 +78,38 @@ describe('QuickActionsGrid', () => {
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('managementQuickAction-index_management')).toBeInTheDocument();
+    expect(screen.getByTestId('managementQuickAction-create_index')).toBeInTheDocument();
     expect(screen.getByTestId('managementQuickAction-api_keys')).toBeInTheDocument();
     expect(screen.queryByTestId('managementQuickAction-reporting')).not.toBeInTheDocument();
+  });
+
+  it('shows create index quick action when only Elasticsearch index_management feature capabilities are set', () => {
+    const caps = {
+      management: {
+        insightsAndAlerting: { triggersActions: true, reporting: true },
+        data: {},
+      },
+      index_management: {
+        monitor: true,
+        manageEnrich: false,
+        monitorEnrich: false,
+        manageIndexTemplates: false,
+      },
+    };
+
+    render(
+      <I18nProvider>
+        <QuickActionsGrid
+          capabilities={caps as any}
+          navigateToApp={navigateToApp}
+          onOpenLandingOverlay={onOpenLandingOverlay}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('managementQuickAction-create_index')).toBeInTheDocument();
+    expect(screen.getByTestId('managementQuickAction-alerting_rules')).toBeInTheDocument();
+    expect(screen.getByTestId('managementQuickAction-reporting')).toBeInTheDocument();
   });
 
   it('renders nothing when user has no management capabilities', () => {
@@ -112,6 +144,49 @@ describe('QuickActionsGrid', () => {
     expect(navigateToApp).toHaveBeenCalledWith(dataViewDef.appId, {
       path: dataViewDef.path,
     });
+  });
+
+  it('opens landing overlay when registered for create index', () => {
+    const caps = buildCapabilities(['management.data.index_management']);
+
+    const getLandingQuickActionOverlay = jest.fn().mockReturnValue(() => <div />);
+
+    render(
+      <I18nProvider>
+        <QuickActionsGrid
+          capabilities={caps as any}
+          navigateToApp={navigateToApp}
+          getLandingQuickActionOverlay={getLandingQuickActionOverlay}
+          onOpenLandingOverlay={onOpenLandingOverlay}
+        />
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('managementQuickAction-create_index'));
+    expect(getLandingQuickActionOverlay).toHaveBeenCalledWith(INDEX_CREATE_LANDING_OVERLAY_ID);
+    expect(onOpenLandingOverlay).toHaveBeenCalledWith(INDEX_CREATE_LANDING_OVERLAY_ID);
+    expect(navigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('falls back to navigate when create index overlay is not registered', () => {
+    const caps = buildCapabilities(['management.data.index_management']);
+
+    render(
+      <I18nProvider>
+        <QuickActionsGrid
+          capabilities={caps as any}
+          navigateToApp={navigateToApp}
+          getLandingQuickActionOverlay={jest.fn(() => undefined)}
+          onOpenLandingOverlay={onOpenLandingOverlay}
+        />
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('managementQuickAction-create_index'));
+    expect(navigateToApp).toHaveBeenCalledWith('management', {
+      path: 'data/index_management',
+    });
+    expect(onOpenLandingOverlay).not.toHaveBeenCalled();
   });
 
   it('opens landing overlay when registered for connectors', () => {
@@ -180,7 +255,95 @@ describe('QuickActionsGrid', () => {
     expect(navigateToApp).not.toHaveBeenCalled();
   });
 
-  it('falls back to navigate when overlay is not registered', () => {
+  it('opens landing overlay when registered for add user', () => {
+    const caps = buildCapabilities(['management.security.users']);
+
+    const getLandingQuickActionOverlay = jest.fn().mockReturnValue(() => <div />);
+
+    render(
+      <I18nProvider>
+        <QuickActionsGrid
+          capabilities={caps as any}
+          navigateToApp={navigateToApp}
+          getLandingQuickActionOverlay={getLandingQuickActionOverlay}
+          onOpenLandingOverlay={onOpenLandingOverlay}
+        />
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('managementQuickAction-users'));
+    expect(getLandingQuickActionOverlay).toHaveBeenCalledWith(USER_CREATE_LANDING_OVERLAY_ID);
+    expect(onOpenLandingOverlay).toHaveBeenCalledWith(USER_CREATE_LANDING_OVERLAY_ID);
+    expect(navigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('falls back to navigate when add user overlay is not registered', () => {
+    const caps = buildCapabilities(['management.security.users']);
+
+    render(
+      <I18nProvider>
+        <QuickActionsGrid
+          capabilities={caps as any}
+          navigateToApp={navigateToApp}
+          getLandingQuickActionOverlay={jest.fn(() => undefined)}
+          onOpenLandingOverlay={onOpenLandingOverlay}
+        />
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('managementQuickAction-users'));
+    expect(navigateToApp).toHaveBeenCalledWith('management', {
+      path: 'security/users/create',
+    });
+    expect(onOpenLandingOverlay).not.toHaveBeenCalled();
+  });
+
+  it('opens landing overlay when registered for alerting rules', () => {
+    const caps = buildCapabilities(['management.insightsAndAlerting.triggersActions']);
+
+    const getLandingQuickActionOverlay = jest.fn().mockReturnValue(() => <div />);
+
+    render(
+      <I18nProvider>
+        <QuickActionsGrid
+          capabilities={caps as any}
+          navigateToApp={navigateToApp}
+          getLandingQuickActionOverlay={getLandingQuickActionOverlay}
+          onOpenLandingOverlay={onOpenLandingOverlay}
+        />
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('managementQuickAction-alerting_rules'));
+    expect(getLandingQuickActionOverlay).toHaveBeenCalledWith(
+      ALERTING_RULE_CREATE_LANDING_OVERLAY_ID
+    );
+    expect(onOpenLandingOverlay).toHaveBeenCalledWith(ALERTING_RULE_CREATE_LANDING_OVERLAY_ID);
+    expect(navigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('falls back to navigate when alerting rules overlay is not registered', () => {
+    const caps = buildCapabilities(['management.insightsAndAlerting.triggersActions']);
+
+    render(
+      <I18nProvider>
+        <QuickActionsGrid
+          capabilities={caps as any}
+          navigateToApp={navigateToApp}
+          getLandingQuickActionOverlay={jest.fn(() => undefined)}
+          onOpenLandingOverlay={onOpenLandingOverlay}
+        />
+      </I18nProvider>
+    );
+
+    fireEvent.click(screen.getByTestId('managementQuickAction-alerting_rules'));
+    expect(navigateToApp).toHaveBeenCalledWith('management', {
+      path: 'insightsAndAlerting/triggersActions',
+    });
+    expect(onOpenLandingOverlay).not.toHaveBeenCalled();
+  });
+
+  it('falls back to navigate when connectors overlay is not registered', () => {
     const caps = buildCapabilities(['management.insightsAndAlerting.triggersActionsConnectors']);
 
     render(

@@ -10,7 +10,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { LandingQuickActionOverlayRenderer } from '../../types';
 import {
   MANAGEMENT_LANDING_SETTINGS_ROWS,
   type ManagementLandingSettingsRowDefinition,
@@ -39,10 +40,14 @@ export function ManagementLandingSettingsPanel({
   capabilities,
   navigateToApp,
   uiSettings,
+  getLandingQuickActionOverlay,
+  onOpenLandingOverlay,
 }: {
   capabilities: ApplicationStart['capabilities'];
   navigateToApp: ApplicationStart['navigateToApp'];
   uiSettings: IUiSettingsClient;
+  getLandingQuickActionOverlay?: (id: string) => LandingQuickActionOverlayRenderer | undefined;
+  onOpenLandingOverlay?: (overlayId: string) => void;
 }) {
   const { euiTheme } = useEuiTheme();
   /** Prototype: dismiss applies until navigation/refresh only; no localStorage. */
@@ -92,8 +97,11 @@ export function ManagementLandingSettingsPanel({
       hasBorder
       data-test-subj="managementLandingSettingsPanel"
       css={css`
-        height: 100%;
+        display: flex;
+        flex-direction: column;
+        max-height: min(37.5rem, calc(100vh - 14rem));
         min-height: ${euiTheme.size.xl};
+        overflow: hidden;
       `}
     >
       <EuiFlexGroup
@@ -101,6 +109,9 @@ export function ManagementLandingSettingsPanel({
         justifyContent="spaceBetween"
         responsive={false}
         gutterSize="s"
+        css={css`
+          flex-shrink: 0;
+        `}
       >
         <EuiFlexItem grow={true}>
           <EuiTitle size="xs">
@@ -131,152 +142,163 @@ export function ManagementLandingSettingsPanel({
 
       <EuiSpacer size="m" />
 
-      <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
-        {visibleRows.map((row) => (
-          <EuiFlexItem key={row.id} grow={false}>
-            <div
-              css={
-                row.sectionBreakBefore
-                  ? css`
-                      padding-top: ${euiTheme.size.m};
-                      border-top: ${euiTheme.border.thin};
-                    `
-                  : undefined
-              }
-            >
-              <EuiPanel
-                color="subdued"
-                paddingSize="s"
-                hasBorder
-                hasShadow={false}
-                data-test-subj={rowTestSubj(row)}
+      <div
+        data-test-subj="managementLandingSettingsPanelScrollArea"
+        css={css`
+          flex: 1 1 auto;
+          min-height: 0;
+          overflow-y: auto;
+        `}
+      >
+        <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+          {visibleRows.map((row) => (
+            <EuiFlexItem key={row.id} grow={false}>
+              <div
+                css={
+                  row.sectionBreakBefore
+                    ? css`
+                        padding-top: ${euiTheme.size.m};
+                        border-top: ${euiTheme.border.thin};
+                      `
+                    : undefined
+                }
               >
-                <EuiFlexGroup
-                  alignItems="center"
-                  justifyContent="spaceBetween"
-                  responsive={false}
-                  gutterSize="s"
+                <EuiPanel
+                  color="subdued"
+                  paddingSize="s"
+                  hasBorder
+                  hasShadow={false}
+                  data-test-subj={rowTestSubj(row)}
                 >
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type={row.icon} size="m" aria-hidden />
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    grow={true}
-                    css={css`
-                      min-width: 0;
-                    `}
+                  <EuiFlexGroup
+                    alignItems="flexStart"
+                    justifyContent="spaceBetween"
+                    responsive={false}
+                    gutterSize="s"
                   >
-                    <EuiFlexGroup
-                      alignItems="center"
-                      gutterSize="m"
-                      responsive={false}
-                      wrap
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon type={row.icon} size="m" aria-hidden />
+                    </EuiFlexItem>
+                    <EuiFlexItem
+                      grow={true}
                       css={css`
-                        row-gap: ${euiTheme.size.xs};
+                        min-width: 0;
                       `}
                     >
-                      <EuiFlexItem grow={false}>
-                        <EuiTitle size="xxs">
-                          <h3
+                      <EuiFlexGroup
+                        direction="column"
+                        gutterSize="none"
+                        responsive={false}
+                        alignItems="stretch"
+                        css={css`
+                          row-gap: 8px;
+                        `}
+                      >
+                        <EuiFlexItem grow={false}>
+                          <EuiTitle size="xxs">
+                            <h3
+                              css={css`
+                                font-weight: ${euiTheme.font.weight.semiBold};
+                                margin-bottom: 0;
+                              `}
+                            >
+                              {row.title}
+                            </h3>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                        {editingRowId !== row.id && row.kind === 'uiSetting' ? (
+                          <EuiFlexItem
+                            grow={false}
                             css={css`
-                              font-weight: ${euiTheme.font.weight.semiBold};
-                              margin-bottom: 0;
+                              min-width: 0;
+                              padding-bottom: 8px;
                             `}
                           >
-                            {row.title}
-                          </h3>
-                        </EuiTitle>
-                      </EuiFlexItem>
-                      {editingRowId !== row.id && row.kind === 'uiSetting' ? (
-                        <EuiFlexItem
-                          grow={true}
-                          css={css`
-                            min-width: 0;
-                          `}
-                        >
-                          <ManagementLandingUiSettingReadonlyValue
-                            row={row}
-                            uiSettings={uiSettings}
-                          />
-                        </EuiFlexItem>
-                      ) : null}
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup gutterSize="xs" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          display="empty"
-                          iconType="pencil"
-                          aria-pressed={editingRowId === row.id}
-                          onClick={() => handleToggleEditRow(row.id)}
-                          aria-label={i18n.translate(
-                            'management.landing.settingsPanel.rowEditAriaLabel',
-                            {
-                              defaultMessage: 'Edit {title}',
-                              values: { title: row.title },
-                            }
-                          )}
-                          data-test-subj={`managementLandingSettingsRowEdit-${row.id}`}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          display="empty"
-                          iconType="cross"
-                          onClick={() => handleDismissRow(row.id)}
-                          aria-label={i18n.translate(
-                            'management.landing.settingsPanel.rowDismissAriaLabel',
-                            {
-                              defaultMessage: 'Dismiss {title}',
-                              values: { title: row.title },
-                            }
-                          )}
-                          data-test-subj={`managementLandingSettingsRowDismiss-${row.id}`}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                {editingRowId === row.id ? (
-                  <>
-                    <EuiSpacer size="s" />
-                    {row.kind === 'navigate' ? (
-                      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                        <EuiFlexItem grow={true}>
-                          <ManagementLandingSettingsNavigateContent
-                            row={row}
-                            navigateToApp={navigateToApp}
+                            <ManagementLandingUiSettingReadonlyValue
+                              row={row}
+                              uiSettings={uiSettings}
+                            />
+                          </EuiFlexItem>
+                        ) : null}
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup gutterSize="xs" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonIcon
+                            display="empty"
+                            iconType="pencil"
+                            aria-pressed={editingRowId === row.id}
+                            onClick={() => handleToggleEditRow(row.id)}
+                            aria-label={i18n.translate(
+                              'management.landing.settingsPanel.rowEditAriaLabel',
+                              {
+                                defaultMessage: 'Edit {title}',
+                                values: { title: row.title },
+                              }
+                            )}
+                            data-test-subj={`managementLandingSettingsRowEdit-${row.id}`}
                           />
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
-                          <EuiButton
-                            size="s"
-                            fill
-                            onClick={() => setEditingRowId(null)}
-                            data-test-subj={`managementLandingSettingsRowSave-${row.id}`}
-                          >
-                            <FormattedMessage
-                              id="management.landing.settingsPanel.saveRow"
-                              defaultMessage="Save"
-                            />
-                          </EuiButton>
+                          <EuiButtonIcon
+                            display="empty"
+                            iconType="cross"
+                            onClick={() => handleDismissRow(row.id)}
+                            aria-label={i18n.translate(
+                              'management.landing.settingsPanel.rowDismissAriaLabel',
+                              {
+                                defaultMessage: 'Dismiss {title}',
+                                values: { title: row.title },
+                              }
+                            )}
+                            data-test-subj={`managementLandingSettingsRowDismiss-${row.id}`}
+                          />
                         </EuiFlexItem>
                       </EuiFlexGroup>
-                    ) : (
-                      <ManagementLandingSettingsUiContent
-                        row={row}
-                        uiSettings={uiSettings}
-                        onDoneEditing={() => setEditingRowId(null)}
-                      />
-                    )}
-                  </>
-                ) : null}
-              </EuiPanel>
-            </div>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  {editingRowId === row.id ? (
+                    <>
+                      <EuiSpacer size="s" />
+                      {row.kind === 'navigate' ? (
+                        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                          <EuiFlexItem grow={true}>
+                            <ManagementLandingSettingsNavigateContent
+                              row={row}
+                              navigateToApp={navigateToApp}
+                              getLandingQuickActionOverlay={getLandingQuickActionOverlay}
+                              onOpenLandingOverlay={onOpenLandingOverlay}
+                            />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonEmpty
+                              size="s"
+                              onClick={() => setEditingRowId(null)}
+                              data-test-subj={`managementLandingSettingsRowSave-${row.id}`}
+                            >
+                              <FormattedMessage
+                                id="management.landing.settingsPanel.saveRow"
+                                defaultMessage="Save"
+                              />
+                            </EuiButtonEmpty>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      ) : (
+                        <ManagementLandingSettingsUiContent
+                          row={row}
+                          uiSettings={uiSettings}
+                          onDoneEditing={() => setEditingRowId(null)}
+                        />
+                      )}
+                    </>
+                  ) : null}
+                </EuiPanel>
+              </div>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </div>
     </EuiPanel>
   );
 }
