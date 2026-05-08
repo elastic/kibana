@@ -28,7 +28,7 @@ import {
   ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 import type { AnomalyDateFunction } from '@kbn/ml-anomaly-utils/types';
-import { getSpaceUrlPrefix } from '@kbn/core-spaces-common';
+import { getSpaceUrlPrefix, type SpaceId } from '@kbn/core-spaces-common';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
@@ -185,7 +185,8 @@ export function buildExplorerUrl(
     },
   };
 
-  const spacePathComponent = spaceId ? getSpaceUrlPrefix(spaceId) : '';
+  // spaceId comes from alerting executor contract (string) — written by validated handlers. Trusted boundary.
+  const spacePathComponent = spaceId ? getSpaceUrlPrefix(spaceId as SpaceId) : '';
 
   return `${spacePathComponent}/app/ml/explorer/?_g=${encodeURIComponent(
     rison.encode(globalState)
