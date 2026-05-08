@@ -11,16 +11,29 @@ description: >
 
 # Bug Fixer
 
-Fixing a Security Solution bug is a two-step process, each step run as a separate skill:
+Fixing a Security Solution bug is a two-step process. These skills are not
+auto-discovered — they must be invoked explicitly by path.
 
-**Step 1 — `/bug-reproduce #NUMBER`**
-Investigates the ticket, starts the environment, reproduces the bug through the browser,
-and writes `analysis.json` + `reproduction-report.md`. Ends by asking you to review the
-findings before proceeding.
+## How to invoke
 
-**Step 2 — `/bug-fix`**
-Reads the reproduction artifacts, presents a fix plan for your approval, implements a
-TDD fix, verifies in a clean environment, and optionally opens a draft PR.
+**Claude Code and Cursor — ask the agent:**
+
+Step 1 (reproduce):
+> "Read and follow `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-reproduce/SKILL.md` for issue #NUMBER"
+
+Step 2 (fix) — after reviewing the reproduction report:
+> "Read and follow `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fix/SKILL.md`"
+
+## What each step does
+
+**Step 1 — bug-reproduce**
+Fetches the ticket, starts the Scout server, reproduces the bug through the browser,
+and writes `analysis.json` + `reproduction-report.md`. Ends by asking you to review
+the findings before proceeding.
+
+**Step 2 — bug-fix**
+Reads the reproduction artifacts, presents a fix plan for your explicit approval,
+implements a TDD fix, verifies in a clean environment, and optionally opens a draft PR.
 
 ## Scope
 
@@ -38,9 +51,7 @@ stop — this workflow does not support serverless reproduction.
     { "mcpServers": { "playwright": { "command": "npx", "args": ["@playwright/mcp@latest"] } } }
     ```
 
-## Start now
+## Agent instruction
 
-Tell the user: _"Run `/bug-reproduce #NUMBER` to begin. After reviewing the reproduction
-report, run `/bug-fix` to implement the fix."_
-
-Do not read any other skill file. Do not start any work yourself. Your job is done.
+Tell the user the two invocation commands above. Do not read any other skill file.
+Do not start any work yourself.
