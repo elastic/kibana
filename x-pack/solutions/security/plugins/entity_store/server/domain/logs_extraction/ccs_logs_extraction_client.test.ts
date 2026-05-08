@@ -254,6 +254,10 @@ describe('CcsLogsExtractionClient', () => {
         ['2024-06-15T11:00:00.000Z', '2024-06-15T10:30:00.000Z', 'host:h4'],
       ],
     };
+    const probe3EntityPage: ESQLSearchResponse = {
+      columns: slice1EntityPage.columns,
+      values: [],
+    };
 
     // Probe 1: total_logs=4 > maxLogsPerPage=2 → not the last slice
     // Probe 2: total_logs=2 = maxLogsPerPage=2 → last slice
@@ -261,7 +265,8 @@ describe('CcsLogsExtractionClient', () => {
       .mockResolvedValueOnce(makeProbeResponse('2024-06-15T10:00:00.000Z', 'doc-2', 4))
       .mockResolvedValueOnce(slice1EntityPage)
       .mockResolvedValueOnce(makeProbeResponse('2024-06-15T11:00:00.000Z', 'doc-4', 2))
-      .mockResolvedValueOnce(slice2EntityPage);
+      .mockResolvedValueOnce(slice2EntityPage)
+      .mockResolvedValueOnce(probe3EntityPage);
 
     const result = await client.extractToUpdates({
       ...defaultExtractParams,
@@ -271,7 +276,7 @@ describe('CcsLogsExtractionClient', () => {
 
     expect(result).toEqual({ count: 4, pages: 2 });
     // 2 probes + 2 entity pages
-    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(4);
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(5);
     expect(mockIngestEntities).toHaveBeenCalledTimes(2);
 
     // Slice boundary state persisted after each slice completes

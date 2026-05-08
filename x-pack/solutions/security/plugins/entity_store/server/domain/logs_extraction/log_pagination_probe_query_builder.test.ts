@@ -15,7 +15,7 @@ import {
 } from './log_pagination_probe_query_builder';
 
 describe('buildLogPaginationCursorProbeEsql', () => {
-  it('sorts, limits to maxLogsPerPage + 1, and reads slice-end + bounded count via terminal STATS', () => {
+  it('sorts, limits to maxLogsPerPage, and reads slice-end + bounded count via terminal STATS', () => {
     const q = buildLogPaginationCursorProbeEsql({
       indexPatterns: ['logs-*'],
       type: 'user',
@@ -32,7 +32,7 @@ describe('interpretLogPaginationCursorRows', () => {
     expect(interpretLogPaginationCursorRows(undefined, 100)).toEqual({ hasLogsToProcess: false });
   });
 
-  it('returns isLastLogsPage false at saturation marker (total_logs == maxLogsPerPage + 1)', () => {
+  it('returns isLastLogsPage false at saturation marker (total_logs == maxLogsPerPage)', () => {
     const row = {
       logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'a' },
       missingLogsToProcess: 101,
@@ -52,7 +52,7 @@ describe('interpretLogPaginationCursorRows', () => {
     expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
       hasLogsToProcess: true,
       logsPaginationCursor: row.logsPaginationCursor,
-      isLastLogsPage: true,
+      isLastLogsPage: false,
     });
   });
 
