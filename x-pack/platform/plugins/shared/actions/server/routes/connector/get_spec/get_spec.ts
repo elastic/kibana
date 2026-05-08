@@ -69,7 +69,7 @@ export const getConnectorSpecRoute = (
                   displayName: schema.string(),
                   description: schema.string(),
                   minimumLicense: schema.string(),
-                  supportedFeatureIds: schema.arrayOf(schema.string()),
+                  supportedFeatureIds: schema.arrayOf(schema.string(), { maxSize: 100 }),
                   icon: schema.maybe(schema.string()),
                   docsUrl: schema.maybe(schema.string()),
                   isTechnicalPreview: schema.maybe(schema.boolean()),

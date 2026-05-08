@@ -381,7 +381,7 @@ describe('serializeConnectorSpec', () => {
       const specNames = Object.keys(connectorsSpecs);
       expect(specNames.length).toBeGreaterThan(0);
 
-      const skipUntilZodJsonSchemaSupportsTransforms = new Set(['SharepointServer']);
+      const skipUntilZodJsonSchemaSupportsTransforms = new Set(['SharepointServer', 'Snowflake']);
 
       for (const specName of specNames) {
         if (skipUntilZodJsonSchemaSupportsTransforms.has(specName)) {
