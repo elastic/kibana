@@ -70,9 +70,12 @@ export const fetchLogDocumentById = async (
       )
     );
   } catch (e) {
-    apm.captureError(e instanceof Error ? e : new Error(String(e)), {
-      labels: { [`kibana_meta_${OPERATION_ID_META_KEY}`]: FETCH_LOG_BY_ID_OPERATION_ID },
-    } as any);
+    apm.captureError(
+      e as Error,
+      {
+        labels: { [`kibana_meta_${OPERATION_ID_META_KEY}`]: FETCH_LOG_BY_ID_OPERATION_ID },
+      } as any
+    );
     throw e;
   }
 
