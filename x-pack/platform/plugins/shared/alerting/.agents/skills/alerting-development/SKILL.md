@@ -33,7 +33,6 @@ Methods on the rules client follow this pattern:
 
 The alerts client (`server/alerts_client/alerts_client.ts`) handles alert CRUD.
 - Always include audit events for state changes
-- Use `SavedObjectsUtils.getName()` for the `name` field in audit events
 - Alert data uses index templates with field limits — be aware of `total_fields.limit`
 
 ## Index Templates
@@ -56,12 +55,3 @@ When updating index templates:
 - `transformRuleToRuleResponseV1` — standard rule-to-response mapping
 - `handleDisabledApiKeysError` — standard API key error handling
 - `validateInternalRuleType` — check if a rule type is internal before mutation
-- `countUsageOfPredefinedIds` — telemetry for predefined IDs
-
-## Code Style
-
-- Use early returns to reduce nesting
-- Extract complex conditions into well-named boolean variables or functions
-- Remove dead code — don't leave TODOs for cleanup that won't happen
-- Use existing constants (e.g., `ALERT_ACTIONS_DATA_STREAM`) instead of hardcoded strings
-- Prefer lodash utilities (`groupBy`, `omit`) over manual implementations

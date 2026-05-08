@@ -11,8 +11,9 @@ Three main layers:
 
 ### Breaking Changes
 
-- Never add required validation to existing schemas without a deprecation path
-- Adding a new required field to an existing response is a breaking change
+- Never add required fields to existing request schemas (body, params, query) without a deprecation path — existing API callers will break
+- Never change the type of an existing field in a request or response schema
+- Always ask: "Does existing usage of this API still work after this change?"
 - Changing HTTP methods or status codes requires API versioning
 - Internal APIs have more flexibility but still need migration paths
 
@@ -22,9 +23,3 @@ Three main layers:
 - Feature privileges are split between `rule` and `alert` entities
 - When checking authorization, distinguish between feature being disabled vs user lacking permission
 - Use `alerting:rule` and `alerting:alert` privilege strings correctly
-
-### Performance
-
-- Avoid unnecessary ES searches — if the results aren't used, remove the query
-- For bulk operations, use a single code path that handles both single and bulk
-- Prefer single ESQL queries over multiple sequential ES calls when possible
