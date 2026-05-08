@@ -17,8 +17,7 @@ import {
   prefetchTriggerDefinitions,
 } from './prefetch';
 import { StateAnnotation, type StateType } from './state';
-import { buildBoundTools, isEditToolName } from './tools/schemas';
-import { dispatchToolCall } from './tools/dispatch';
+import { buildBoundTools, dispatchToolCall, isEditToolName } from './tools/tools';
 import { validateGeneratedYaml } from './validate';
 import { buildMessagesFromActions } from './prompts';
 import { agentStepAction, findLastAgentStep, toolResultAction, validateAction } from './actions';

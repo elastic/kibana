@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { dispatchToolCall } from './dispatch';
-import { TOOL_NAMES } from './schemas';
+import { dispatchToolCall } from './tools';
 
 describe('dispatchToolCall', () => {
   const baseDeps = {
@@ -18,7 +17,7 @@ describe('dispatchToolCall', () => {
   it('replaces YAML on set_yaml', async () => {
     const result = await dispatchToolCall(
       { yaml: '' },
-      { toolCallId: 't1', toolName: TOOL_NAMES.setYaml, args: { yaml: 'name: foo\nversion: "1"\n' } },
+      { toolCallId: 't1', toolName: 'set_yaml', args: { yaml: 'name: foo\nversion: "1"\n' } },
       baseDeps
     );
 
@@ -30,7 +29,8 @@ describe('dispatchToolCall', () => {
     const result = await dispatchToolCall(
       { yaml: '' },
       {
-        toolCallId: 't1', toolName: TOOL_NAMES.insertStep,
+        toolCallId: 't1',
+        toolName: 'insert_step',
         args: { step: { name: 's1', type: 'console', with: { message: 'hi' } } },
       },
       baseDeps
@@ -46,7 +46,8 @@ describe('dispatchToolCall', () => {
     const result = await dispatchToolCall(
       { yaml: initial },
       {
-        toolCallId: 't1', toolName: TOOL_NAMES.insertStep,
+        toolCallId: 't1',
+        toolName: 'insert_step',
         args: { step: { name: 'b', type: 'console', with: { message: 'bye' } } },
       },
       baseDeps
