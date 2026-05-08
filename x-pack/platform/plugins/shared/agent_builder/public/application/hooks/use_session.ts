@@ -23,7 +23,11 @@ export const useSession = (sessionId: string | undefined) => {
     enabled: !!sessionId,
     refetchInterval: (data) => {
       const status = (data as Conversation | undefined)?.state?.standing_session?.status;
-      return status === 'active' ? 3000 : false;
+      // Poll aggressively when active so live-status transitions are near-instant.
+      // Poll gently when idle so we notice when a new round starts.
+      if (status === 'active') return 1000;
+      if (status === 'idle') return 2000;
+      return false; // terminated — no need to keep polling
     },
   });
 

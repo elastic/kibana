@@ -21,6 +21,12 @@ export const useSessionList = ({ agentId }: { agentId?: string } = {}) => {
     queryFn: () => {
       return sessionsService.list({ agentId });
     },
+    // Poll every 2s so sidebar status dots and the list page update promptly.
+    refetchInterval: (data) => {
+      const list = data as typeof sessions;
+      const hasActive = list?.some((s) => s.state?.standing_session?.status === 'active');
+      return hasActive ? 1000 : 2000;
+    },
   });
 
   return {
