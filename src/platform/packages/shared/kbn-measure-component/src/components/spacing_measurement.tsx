@@ -10,6 +10,7 @@
 import React, { Fragment } from 'react';
 import { css } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
+import { useEuiSizeLookup } from '../hooks';
 import type { SpacingLine } from '../lib/dom/calculate_spacing';
 
 interface Props {
@@ -24,7 +25,7 @@ const ENDPOINT_SIZE = 5;
  */
 export const SpacingMeasurement = ({ lines }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const measureColor = euiTheme.colors.danger;
+  const sizeLookup = useEuiSizeLookup();
 
   if (lines.length === 0) return null;
 
@@ -33,11 +34,14 @@ export const SpacingMeasurement = ({ lines }: Props) => {
       {lines.map((line, index) => {
         if (line.distance === 0) return null;
 
+        const euiSizeKey = sizeLookup.get(line.distance);
+        const measureColor = euiSizeKey ? euiTheme.colors.success : euiTheme.colors.danger;
         const isHorizontal = line.orientation === 'horizontal';
         const midX = (line.x1 + line.x2) / 2;
         const midY = (line.y1 + line.y2) / 2;
 
         const lineCss = css({
+          label: `line-${index}`,
           position: 'fixed',
           backgroundColor: measureColor,
           pointerEvents: 'none',
@@ -58,6 +62,7 @@ export const SpacingMeasurement = ({ lines }: Props) => {
         });
 
         const startCapCss = css({
+          label: `startCap-${index}`,
           position: 'fixed',
           backgroundColor: measureColor,
           pointerEvents: 'none',
@@ -78,6 +83,7 @@ export const SpacingMeasurement = ({ lines }: Props) => {
         });
 
         const endCapCss = css({
+          label: `endCap-${index}`,
           position: 'fixed',
           backgroundColor: measureColor,
           pointerEvents: 'none',
@@ -98,6 +104,7 @@ export const SpacingMeasurement = ({ lines }: Props) => {
         });
 
         const labelCss = css({
+          label: `label-${index}`,
           position: 'fixed',
           left: `${midX}px`,
           top: `${midY}px`,
@@ -123,7 +130,7 @@ export const SpacingMeasurement = ({ lines }: Props) => {
             <div className={startCapCss} data-test-subj="spacingMeasurementStartCap" />
             <div className={endCapCss} data-test-subj="spacingMeasurementEndCap" />
             <div className={labelCss} data-test-subj="spacingMeasurementLabel">
-              {line.distance}
+              {euiSizeKey ? `${line.distance}px (${euiSizeKey})` : `${line.distance}px`}
             </div>
           </Fragment>
         );
