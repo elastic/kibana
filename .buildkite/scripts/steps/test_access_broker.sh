@@ -55,7 +55,7 @@ HTTP_STATUS="$(
     --header "Authorization: Bearer $OIDC_TOKEN" \
     --header "Content-Type: application/json" \
     --data @- \
-    "$ACCESS_BROKER_URL/proxy/$CAPABILITY/litellm/chat/completions" <<JSON
+    "$ACCESS_BROKER_URL/proxy/$CAPABILITY/v1/chat/completions" <<JSON
 {
   "model": "$MODEL",
   "messages": [
