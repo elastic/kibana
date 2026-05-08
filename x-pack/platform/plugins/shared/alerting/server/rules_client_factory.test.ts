@@ -982,4 +982,45 @@ describe('RulesClientFactory', () => {
       'Unable to clone an API key, expected ApiKey authorization scheme but got "Bearer"'
     );
   });
+
+  test('isAuthenticationTypeAPIKey() falls back to header when getCurrentUser returns null and ApiKey header present', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+    });
+
+    const apiKeyCredentials = Buffer.from('key-id:key-secret').toString('base64');
+    const request = mockRouter.createKibanaRequest({
+      headers: { authorization: `ApiKey ${apiKeyCredentials}` },
+    });
+    await factory.create(request, savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    securityService.authc.getCurrentUser.mockReturnValueOnce(null);
+
+    expect(constructorCall.isAuthenticationTypeAPIKey()).toBe(true);
+  });
+
+  test('isAuthenticationTypeAPIKey() returns false when getCurrentUser returns null and Bearer header present', async () => {
+    const factory = new RulesClientFactory();
+    factory.initialize({
+      ...rulesClientFactoryParams,
+      securityService,
+      securityPluginSetup,
+      securityPluginStart,
+    });
+
+    const request = mockRouter.createKibanaRequest({
+      headers: { authorization: 'Bearer some-token' },
+    });
+    await factory.create(request, savedObjectsService);
+    const constructorCall = jest.requireMock('./rules_client').RulesClient.mock.calls[0][0];
+
+    securityService.authc.getCurrentUser.mockReturnValueOnce(null);
+
+    expect(constructorCall.isAuthenticationTypeAPIKey()).toBe(false);
+  });
 });

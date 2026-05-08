@@ -111,6 +111,11 @@ async function distributeScoutTestsOnLanes() {
       loadIDsByStepKey[stepKey] = lane.loads;
     });
 
+  if (steps.length === 0) {
+    // Stop early. No test steps to upload. ✨
+    return;
+  }
+
   const bk = new BuildkiteClient();
 
   const lanesGroupStepDependencies: string[] = [];
