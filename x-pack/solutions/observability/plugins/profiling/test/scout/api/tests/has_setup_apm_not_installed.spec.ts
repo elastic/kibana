@@ -17,6 +17,7 @@ apiTest.describe(
   () => {
     let viewerApiCreditials: RoleApiCredentials;
     let adminApiCreditials: RoleApiCredentials;
+
     apiTest.beforeAll(async ({ profilingHelper, profilingSetup, requestAuth }) => {
       // Ensure the agent policy that the cloud setup attaches the profiler_collector and
       // profiler_symbolizer package policies to exists. Without this, setupResources()
