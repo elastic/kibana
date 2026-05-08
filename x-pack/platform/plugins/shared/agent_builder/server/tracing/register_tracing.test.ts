@@ -189,7 +189,7 @@ describe('registerTracingExporter', () => {
       { baggageKey: 'eval.run.id.baggage.key' },
     ]);
     const [providerOpts] = jest.mocked(initInferenceTracerProvider).mock.calls[0];
-    expect(providerOpts.processors).toHaveLength(2);
+    expect(providerOpts.processors).toHaveLength(3);
     expect(providerOpts.resource).toBeDefined();
   });
 
