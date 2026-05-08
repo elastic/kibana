@@ -9,7 +9,7 @@ import axios from 'axios';
 import { format } from 'url';
 import { pickBy } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { getSpaceUrlPrefix } from '@kbn/core-spaces-common';
 import type { FunctionRegistrationParameters } from '.';
 import { KIBANA_FUNCTION_NAME } from '..';
 
@@ -81,8 +81,7 @@ export function registerKibanaFunction({
       function getPathnameWithSpaceId() {
         const { serverBasePath } = core.http.basePath;
         const { spaceId } = request;
-        const spacePrefix = spaceId === DEFAULT_SPACE_ID ? '' : `/s/${spaceId}`;
-        return `${serverBasePath}${spacePrefix}${pathname}`;
+        return `${serverBasePath}${getSpaceUrlPrefix(spaceId)}${pathname}`;
       }
 
       function getLocalServerUrl() {

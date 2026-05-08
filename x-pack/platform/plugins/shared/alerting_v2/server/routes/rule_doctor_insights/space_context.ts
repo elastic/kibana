@@ -7,7 +7,7 @@
 
 import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
 import { CoreStart, Request } from '@kbn/core-di-server';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
+import { getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import { inject, injectable } from 'inversify';
 
 @injectable()

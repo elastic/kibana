@@ -42,6 +42,9 @@ export const DEFAULT_SPACE_ID: SpaceId = 'default' as SpaceId;
 /**
  * Returns the URL path prefix for the given space (`/s/<spaceId>`),
  * or an empty string for the default space.
+ *
+ * Accepts plain `string` since this is a pure URL builder; callers are
+ * responsible for spaceId validity (e.g. via {@link asSpaceId} at boundaries).
  */
-export const getSpaceUrlPrefix = (spaceId: SpaceId): string =>
+export const getSpaceUrlPrefix = (spaceId: string): string =>
   spaceId === DEFAULT_SPACE_ID ? '' : `/s/${spaceId}`;

@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { HTTPAuthorizationHeader, isUiamCredential } from '@kbn/core-security-server';
 import { truncate } from 'lodash';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
+import { getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance } from '../task';
 import { createApiKey, requestHasApiKey, getApiKeyFromRequest } from '../lib/api_key_utils';
