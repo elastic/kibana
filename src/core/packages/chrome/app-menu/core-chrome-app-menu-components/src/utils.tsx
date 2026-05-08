@@ -176,7 +176,7 @@ export const mapAppMenuItemToPanelItem = (
       return;
     }
 
-    const shouldClosePopover = !item?.href && childPanelId === undefined && onClose;
+    const shouldClosePopover = childPanelId === undefined && onClose;
 
     const triggerElement = event.currentTarget as HTMLElement;
     item.run?.({

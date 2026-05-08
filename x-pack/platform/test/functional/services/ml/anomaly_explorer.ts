@@ -96,10 +96,6 @@ export function MachineLearningAnomalyExplorerProvider(
       await testSubjects.existOrFail('mlAnomalyExplorerSwimlaneViewBy');
     },
 
-    async assertFeedbackButtonExists() {
-      await testSubjects.existOrFail('mlFeatureFeedbackButton');
-    },
-
     async assertAnnotationsPanelExists(state: string) {
       await testSubjects.existOrFail(`mlAnomalyExplorerAnnotationsPanel ${state}`, {
         timeout: 30 * 1000,

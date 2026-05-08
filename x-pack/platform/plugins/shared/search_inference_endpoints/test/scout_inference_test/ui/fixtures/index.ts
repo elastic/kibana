@@ -7,12 +7,13 @@
 
 import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout';
-import { FeatureSettingsPage, EisModelsPage } from './page_objects';
+import { FeatureSettingsPage, EisModelsPage, ExternalInferencePage } from './page_objects';
 
 export interface ExtScoutTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     featureSettings: FeatureSettingsPage;
     eisModels: EisModelsPage;
+    externalInference: ExternalInferencePage;
   };
 }
 
@@ -31,6 +32,7 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
       ...pageObjects,
       featureSettings: createLazyPageObject(FeatureSettingsPage, page),
       eisModels: createLazyPageObject(EisModelsPage, page),
+      externalInference: createLazyPageObject(ExternalInferencePage, page),
     };
 
     await use(extendedPageObjects);

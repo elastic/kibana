@@ -9,17 +9,37 @@ import type { ApplicationStart } from '@kbn/core/public';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import type { Streams as StreamsSchema } from '@kbn/streams-schema';
+import { LRUCache } from 'lru-cache';
+import type { StreamSummary } from '../../common';
 import type { StreamsRepositoryClient } from '../api';
 
+const STREAMS_CACHE_MAX = 10_000;
 export const STREAMS_CACHE_TTL_MS = 60_000;
+
+interface PendingBatch {
+  names: string[];
+  promise: Promise<StreamSummary[]>;
+}
+
+/**
+ * Sentinel stored in the LRU cache for stream names that the API confirmed do
+ * not correspond to any managed stream. Without this, every enricher call for
+ * an unmanaged index would be a cache miss and trigger a fresh API request
+ * because LRUCache does not cache `undefined` values returned by `fetchMethod`.
+ */
+const ABSENT = Symbol('absent');
+type CacheValue = StreamSummary | typeof ABSENT;
 
 /**
  * Creates a source enricher function that adds Streams metadata to ES|QL source suggestions.
  *
- * When registered with the ESQL plugin, this enricher fetches all managed streams and
- * annotates matching autocomplete sources with the stream's description, a link to its
- * streams page, and a visual indicator of the stream type (wired vs classic).
+ * When registered with the ESQL plugin, this enricher fetches metadata only for the streams
+ * that match the given sources, using a per-stream LRU cache with TTL. Only managed streams
+ * (stored in .kibana_streams) are enriched; unmanaged data streams are left as-is.
+ *
+ * Cache hits are served immediately. Cache misses are batched within a single microtask
+ * tick and resolved with a single `_bulk_get_summaries` API call. Concurrent requests for
+ * the same key are deduplicated natively by LRUCache's `fetchMethod` mechanism.
  *
  * @param repositoryClient - Streams repository client for fetching stream definitions
  * @param application - Promise resolving to the Core Application service
@@ -31,66 +51,74 @@ export function createStreamsSourceEnricher(
   application: Promise<Pick<ApplicationStart, 'getUrlForApp'>>,
   perf: { now: () => number } = performance
 ): (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]> {
-  let cachedStreams: Map<string, StreamsSchema.all.Definition> | undefined;
-  let cacheExpiry = 0;
-  let pendingFetch: Promise<Map<string, StreamsSchema.all.Definition>> | undefined;
+  // Microtask-batching: all cache misses within the same microtask tick are
+  // collected into a single `pendingBatch` and resolved with one API call.
+  // LRUCache deduplicates concurrent fetches for the same key natively, so
+  // overlapping enricher calls never trigger redundant per-key requests.
+  let pendingBatch: PendingBatch | null = null;
 
-  const getStreams = (): Promise<Map<string, StreamsSchema.all.Definition>> => {
-    if (cachedStreams !== undefined && perf.now() < cacheExpiry) {
-      return Promise.resolve(cachedStreams);
-    }
-    if (!pendingFetch) {
-      pendingFetch = repositoryClient
-        .fetch('GET /api/streams 2023-10-31', {
-          signal: null,
-        })
-        .then(({ streams }) => {
-          const map = new Map(streams.map((stream) => [stream.name, stream]));
-          cachedStreams = map;
-          cacheExpiry = perf.now() + STREAMS_CACHE_TTL_MS;
-          pendingFetch = undefined;
-          return map;
-        })
-        .catch((err) => {
-          pendingFetch = undefined;
-          throw err;
+  const cache = new LRUCache<string, CacheValue>({
+    max: STREAMS_CACHE_MAX,
+    ttl: STREAMS_CACHE_TTL_MS,
+    perf,
+    fetchMethod: async (name) => {
+      if (!pendingBatch) {
+        // First miss in this tick: create a new batch.
+        const names: string[] = [];
+        const promise = Promise.resolve().then(async () => {
+          // Clear `pendingBatch` *before* the await so that any fetchMethod
+          // calls triggered while this API request is in flight will start a
+          // fresh batch instead of appending to a stale one whose `names`
+          // have already been sent.
+          pendingBatch = null;
+          const { summaries } = await repositoryClient.fetch(
+            'POST /internal/streams/_bulk_get_summaries',
+            { params: { body: { names } }, signal: null }
+          );
+          return summaries;
         });
-    }
-    return pendingFetch;
-  };
-
-  // Importing the streams schema here so it stays outside the main code path
-  // but is still loaded lazily
-  const streamsSchemaPromise = import('@kbn/streams-schema');
+        pendingBatch = { names, promise };
+      }
+      // Append to the current batch and wait for its shared promise.
+      pendingBatch.names.push(name);
+      const streams = await pendingBatch.promise;
+      // Return ABSENT (not undefined) for names not found in the response so
+      // that LRUCache stores the result. Returning undefined would leave the
+      // entry uncached and cause a new API call on every subsequent request
+      // for the same unmanaged index name.
+      return streams.find((s) => s.name === name) ?? ABSENT;
+    },
+  });
 
   return async (sources: ESQLSourceResult[]): Promise<ESQLSourceResult[]> => {
     try {
-      const app = await application;
-      const { Streams } = await streamsSchemaPromise;
+      const [app, summaries] = await Promise.all([
+        application,
+        Promise.all(sources.map(({ name }) => cache.fetch(name))),
+      ]);
 
-      const streams = await getStreams();
+      return sources.map((source, i) => {
+        const summary = summaries[i];
 
-      return sources.map((source) => {
-        const stream = streams.get(source.name);
-        if (!stream) {
+        if (!summary || summary === ABSENT) {
           return source;
         }
 
-        const isWired = Streams.WiredStream.Definition.is(stream);
+        const isWired = summary.type === 'wired';
 
         const streamUrl = app.getUrlForApp('streams', {
           absolute: true,
-          path: `/${stream.name}/management/overview`,
+          path: `/${summary.name}/management/overview`,
         });
 
         return {
           ...source,
-          description: stream.description || undefined,
+          description: summary.description || undefined,
           links: [
             {
               label: i18n.translate('xpack.streams.esqlSourceEnricher.viewStreamDetailsLabel', {
                 defaultMessage: 'View {streamName} details',
-                values: { streamName: stream.name },
+                values: { streamName: summary.name },
               }),
               url: streamUrl,
             },

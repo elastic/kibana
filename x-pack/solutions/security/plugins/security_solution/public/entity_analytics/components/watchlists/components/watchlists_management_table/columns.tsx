@@ -191,12 +191,20 @@ const getActionsColumn = (
 export const buildWatchlistsManagementTableColumns = (
   euiTheme: EuiThemeComputed,
   onEdit: (record: WatchlistTableItemType) => void,
-  onDelete: (record: WatchlistTableItemType) => void
-): Array<EuiBasicTableColumn<WatchlistTableItemType>> => [
-  getWatchlistColumn(),
-  getNumberOfEntitiesColumn(),
-  getRiskScoreWeightingColumn(),
-  getSourceColumn(),
-  getLastUpdatedColumn(),
-  getActionsColumn(onEdit, onDelete),
-];
+  onDelete: (record: WatchlistTableItemType) => void,
+  canWrite: boolean = true
+): Array<EuiBasicTableColumn<WatchlistTableItemType>> => {
+  const columns: Array<EuiBasicTableColumn<WatchlistTableItemType>> = [
+    getWatchlistColumn(),
+    getNumberOfEntitiesColumn(),
+    getRiskScoreWeightingColumn(),
+    getSourceColumn(),
+    getLastUpdatedColumn(),
+  ];
+
+  if (canWrite) {
+    columns.push(getActionsColumn(onEdit, onDelete));
+  }
+
+  return columns;
+};

@@ -61,6 +61,12 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     triggeredBy: {
       type: 'keyword',
     },
+    eventChainDepth: {
+      type: 'long',
+    },
+    eventChainVisitedWorkflowIds: {
+      type: 'keyword',
+    },
     dispatchEventId: {
       type: 'keyword',
     },

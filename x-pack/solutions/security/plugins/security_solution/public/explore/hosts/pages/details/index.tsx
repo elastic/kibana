@@ -225,7 +225,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     ? experimentalSelectedPatterns
     : oldSelectedPatterns;
 
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const hostStoreIdentityFields = useMemo(() => {
     if (entityId) {
@@ -506,7 +506,13 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
               {!noEntityInStore && (
                 <>
                   <AnomalyTableProvider
-                    criteriaFields={hostToCriteria(hostDetailsForOverview, euidApi?.euid)}
+                    criteriaFields={hostToCriteria({
+                      hostItem: hostDetailsForOverview,
+                      euid: euidApi?.euid,
+                      entityRecord: entityStoreV2Enabled
+                        ? entityFromStoreResult.entityRecord
+                        : undefined,
+                    })}
                     filterQuery={buildAnomaliesTableInfluencersFilterQuery({
                       euid: euidApi?.euid,
                       entityType: 'host',
@@ -582,10 +588,12 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <AlertCountByRuleByStatus
-                        entityFilter={{ ...entityFilter, entityType: EntityType.host }}
+                        entityFilter={entityFilter}
                         identityFields={resolvedIdentityFields}
                         signalIndexName={signalIndexName}
                         additionalFilters={additionalFilters}
+                        entityType={EntityType.host}
+                        entityRecord={entityStoreV2Enabled ? observedHost.entityRecord : undefined}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>

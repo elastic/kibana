@@ -33,9 +33,6 @@ const dashboardCanvasContentStyles = {
       '& .dashboardViewport': {
         minHeight: 0,
       },
-      '& .embPanel__hoverActions': {
-        display: 'none !important',
-      },
       '.controlGroup': {
         flexGrow: `0 !important` as unknown as number,
         padding: `${euiTheme.size.s} !important`,

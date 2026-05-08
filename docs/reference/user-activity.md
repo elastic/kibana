@@ -34,7 +34,7 @@ user_activity:
 - `user_activity.appenders`: Logging appenders used by the service. This uses the same appender schema as Kibana logging. For more details, refer to [Logging settings](/reference/configuration-reference/logging-settings.md). By default, it uses a JSON console appender.
 - `user_activity.filters`: Optional list of filter rules applied to `event.action`.
 
-When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, object, metadata, user, session, ...}`.
+When enabled, events are logged under the logger context `user_activity.event` and include the fields `{ message, event, object, metadata, error, user, session, ...}`.
 
 ### Filters
 
@@ -71,6 +71,7 @@ User activity events are written as JSON log entries. When using the JSON loggin
 | --- | --- |
 | `event.action` | Human readable standardized description of the action performed. Refer to [Available actions](#available-actions) for a list of possible values. |
 | `event.type` | Human readable standardized categorization of actions performed. |
+| `event.outcome` {applies_to}`stack: ga 9.5+` | (Optional) Denotes whether the event represents a success or a failure from the perspective of the entity that produced the event: `success`, `failure`, or `unknown`. |
 | `event.start` | (Optional) ISO8601 timestamp of the event start time. |
 | `event.end` | (Optional) ISO8601 timestamp of the event end time. |
 | `event.duration` | (Optional) Duration (in ns) between the event start and end timestamps. |
@@ -128,6 +129,15 @@ Some actions, such as `log_in_user` and `log_out_user`, are recorded on unauthen
 | **Field** | **Description** |
 | --- | --- |
 | `metadata` | (Optional) Additional bucket of non-standard metadata specific to the Kibana usage log. |
+
+### Error fields
+
+| **Field** | **Description** |
+| --- | --- |
+| `error.type` {applies_to}`stack: ga 9.5+` | (Optional) The type of the error, for example the class name of the exception. |
+| `error.message` {applies_to}`stack: ga 9.5+` | (Optional) Error message. |
+| `error.stack_trace` {applies_to}`stack: ga 9.5+` | (Optional) The stack trace of this error in plain text. |
+| `error.code` {applies_to}`stack: ga 9.5+` | (Optional) Error code describing the error. |
 
 ### Service fields
 

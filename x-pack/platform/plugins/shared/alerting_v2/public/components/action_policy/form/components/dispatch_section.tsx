@@ -61,14 +61,14 @@ export const DispatchSection = () => {
         render={({ field }) => (
           <EuiFormRow
             label={i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.dispatchPer', {
-              defaultMessage: 'Dispatch per',
+              defaultMessage: 'Notify per',
             })}
             fullWidth
             helpText={GROUPING_MODE_HELP_TEXT[field.value]}
           >
             <EuiButtonGroup
               legend={i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.modeLegend', {
-                defaultMessage: 'Dispatch per',
+                defaultMessage: 'Notify per',
               })}
               options={GROUPING_MODE_OPTIONS}
               idSelected={field.value}
@@ -113,7 +113,7 @@ export const DispatchSection = () => {
               error={error?.message}
               helpText={i18n.translate('xpack.alertingV2.actionPolicy.form.groupBy.helpText', {
                 defaultMessage:
-                  'Episodes that share these field values are grouped together for dispatch.',
+                  'Episodes that share these field values are grouped into a single notification.',
               })}
             >
               <EuiComboBox

@@ -9,7 +9,7 @@
 
 import type { ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
+import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { EuiDelayRender, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -23,6 +23,7 @@ import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
+import { useStableCallback } from '@kbn/react-hooks';
 import { Histogram } from './histogram';
 import type {
   UnifiedHistogramBucketInterval,
@@ -40,13 +41,11 @@ import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { TimeIntervalSelector } from './time_interval_selector';
 import { useTotalHits } from './hooks/use_total_hits';
 import { useChartStyles } from './hooks/use_chart_styles';
-import { useChartActions } from './hooks/use_chart_actions';
 import { ChartConfigPanel } from './chart_config_panel';
 import { useEditVisualization } from './hooks/use_edit_visualization';
 import type { LensVisService } from '../../services/lens_vis_service';
 import { removeTablesFromLensAttributes } from '../../utils/lens_vis_from_table';
 import { useLensProps } from './hooks/use_lens_props';
-import { useStableCallback } from '../../hooks/use_stable_callback';
 import { buildBucketInterval } from './utils/build_bucket_interval';
 import { ChartSectionTemplate } from './chart_section_template';
 
@@ -58,7 +57,7 @@ export interface UnifiedHistogramChartProps {
   lensVisServiceState: LensVisServiceState;
   hits: UnifiedHistogramHitsContext | undefined;
   chart: UnifiedHistogramChartContext | undefined;
-  renderCustomChartToggleActions?: () => ReactElement | undefined;
+  renderToggleActions: () => ReactElement | undefined;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   fetch$: UnifiedHistogramFetch$;
@@ -86,7 +85,7 @@ export function UnifiedHistogramChart({
   chart,
   lensVisService,
   lensVisServiceState,
-  renderCustomChartToggleActions,
+  renderToggleActions,
   fetch$,
   fetchParams,
   lensAdapters,
@@ -105,10 +104,6 @@ export function UnifiedHistogramChart({
 
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-  const { chartRef, toggleHideChart } = useChartActions({
-    chart,
-    onChartHiddenChange,
-  });
 
   const chartVisible =
     isChartAvailable && !!chart && !chart.hidden && !!visContext && !!visContext?.attributes;
@@ -232,38 +227,10 @@ export function UnifiedHistogramChart({
     isPlainRecord,
   });
 
-  const toolbarToggleActions = useMemo(
-    () =>
-      renderCustomChartToggleActions ? (
-        renderCustomChartToggleActions()
-      ) : (
-        <IconButtonGroup
-          legend={i18n.translate('unifiedHistogram.hideChartButtongroupLegend', {
-            defaultMessage: 'Chart visibility',
-          })}
-          buttonSize="s"
-          buttons={[
-            {
-              label: chartVisible
-                ? i18n.translate('unifiedHistogram.hideChartButton', {
-                    defaultMessage: 'Hide chart',
-                  })
-                : i18n.translate('unifiedHistogram.showChartButton', {
-                    defaultMessage: 'Show chart',
-                  }),
-              iconType: chartVisible ? 'transitionTopOut' : 'transitionTopIn',
-              'data-test-subj': 'unifiedHistogramToggleChartButton',
-              onClick: toggleHideChart,
-            },
-          ]}
-        />
-      ),
-    [chartVisible, toggleHideChart, renderCustomChartToggleActions]
-  );
+  const toolbarToggleActions = useMemo(() => renderToggleActions(), [renderToggleActions]);
 
   const toolbarSelectors = useMemo(
     () => [
-      ,
       chartVisible && !isPlainRecord && !!onTimeIntervalChange ? (
         <TimeIntervalSelector chart={chart} onTimeIntervalChange={onTimeIntervalChange} />
       ) : null,
@@ -294,7 +261,7 @@ export function UnifiedHistogramChart({
     id: 'unifiedHistogramCollapsablePanel',
   };
 
-  if (Boolean(renderCustomChartToggleActions) && !chartVisible) {
+  if (!chartVisible) {
     return <div {...a11yCommonProps} data-test-subj="unifiedHistogramChartPanelHidden" />;
   }
 
@@ -360,7 +327,6 @@ export function UnifiedHistogramChart({
         {chartVisible && (
           <>
             <section
-              ref={(element) => (chartRef.current.element = element)}
               tabIndex={-1}
               aria-label={i18n.translate('unifiedHistogram.histogramOfFoundDocumentsAriaLabel', {
                 defaultMessage: 'Histogram of found documents',

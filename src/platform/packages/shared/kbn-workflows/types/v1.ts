@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JsonValue, RecursivePartial } from '@kbn/utility-types';
+import {
+  HUMAN_READABLE_ID_MAX_LENGTH,
+  HUMAN_READABLE_ID_MIN_LENGTH,
+  HUMAN_READABLE_ID_PATTERN,
+} from '@kbn/human-readable-id';
+import type { DotKeysOf, DotObject, JsonValue, RecursivePartial } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type { SerializedError, WorkflowYaml } from '../spec/schema';
@@ -120,6 +125,16 @@ export interface EsWorkflowExecution {
   stepExecutionIds?: string[];
   /** Caller-supplied execution metadata, separate from workflow inputs */
   metadata?: Record<string, unknown>;
+  /**
+   * Event-chain hop depth when scheduled by the event-driven trigger handler.
+   * Root copy survives partial `context` updates (same pattern as telemetry extraction).
+   */
+  eventChainDepth?: number;
+  /**
+   * Workflow ids that already ran earlier in this event chain (for cycle detection).
+   * Root copy survives partial `context` updates.
+   */
+  eventChainVisitedWorkflowIds?: string[];
   /** Trigger dispatch id from event-driven scheduling (`context.metadata.eventId`), when set */
   dispatchEventId?: string;
 }
@@ -260,27 +275,14 @@ export type EsWorkflowCreate = Omit<
 
 export const MAX_WORKFLOW_YAML_LENGTH = 1_048_576;
 const MAX_BULK_CREATE_WORKFLOWS = 500;
-// IDs must start and end with a lowercase alphanumeric character, contain only lowercase
-// alphanumeric chars and hyphens in the middle. Length is enforced separately via
-// WORKFLOW_ID_MIN_LENGTH (3) and WORKFLOW_ID_MAX_LENGTH (255).
-// This supports semantic IDs ("security-alert-enrichment"), legacy workflow-{uuid} format,
-// plain UUIDs, while rejecting leading/trailing separators, snake case and
-// special characters like spaces, dots, or '@'.
-//
-// NOTE: The regex intentionally allows 1-2 char IDs (the inner group is optional).
-// The 3-char minimum is enforced by WORKFLOW_ID_MIN_LENGTH at the Zod schema
-// level so that the pattern and length constraints remain independently testable.
-export const WORKFLOW_ID_PATTERN = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/;
-export const WORKFLOW_ID_MAX_LENGTH = 255;
-export const WORKFLOW_ID_MIN_LENGTH = 3;
 
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string().max(MAX_WORKFLOW_YAML_LENGTH),
   id: z
     .string()
-    .min(WORKFLOW_ID_MIN_LENGTH)
-    .max(WORKFLOW_ID_MAX_LENGTH)
-    .regex(WORKFLOW_ID_PATTERN)
+    .min(HUMAN_READABLE_ID_MIN_LENGTH)
+    .max(HUMAN_READABLE_ID_MAX_LENGTH)
+    .regex(HUMAN_READABLE_ID_PATTERN)
     .optional(),
 });
 export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
@@ -523,6 +525,64 @@ export interface InternalConnectorContract extends BaseConnectorContract {
   };
 }
 
+/**
+ * Editor handlers type, only used in the UI and extensions.
+ * Maintains type safety while allowing variance
+ */
+export interface EditorHandlers<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> {
+  config?: EditorHandlersConfig<Config, Input>;
+  input?: EditorHandlersInput<Input, Config>;
+  dynamicSchema?: DynamicSchema<Input, Output, Config>;
+}
+
+export type EditorHandlersConfig<
+  Config extends z.ZodObject = z.ZodObject,
+  Input extends z.ZodType = z.ZodType
+> = {
+  [K in DotKeysOf<z.infer<Config>>]?: StepPropertyHandler<
+    DotObject<z.infer<Config>>[K],
+    z.infer<Config>,
+    Input extends z.ZodObject ? z.infer<Input> : Record<string, unknown>
+  >;
+};
+
+export type EditorHandlersInput<
+  Input extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> = Input extends z.ZodObject
+  ? {
+      [K in DotKeysOf<z.infer<Input>>]?: StepPropertyHandler<
+        DotObject<z.infer<Input>>[K],
+        z.infer<Config>,
+        z.infer<Input>
+      >;
+    }
+  : {};
+
+/**
+ * Dynamic schema handlers for a step
+ */
+export interface DynamicSchema<
+  Input extends z.ZodType = z.ZodType,
+  Output extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject
+> {
+  /**
+   * Dynamic Zod schema for validating step output based on input.
+   * Allows for more flexible output structure based on the specific input provided.
+   * @param input The input data for the step.
+   * @returns A Zod schema defining structure and validation rules for the output of the step.
+   */
+  getOutputSchema?(params: {
+    input: z.infer<Input>;
+    config: z.infer<Config>;
+  }): z.ZodType<z.infer<Output>>;
+}
+
 export interface StepPropertyHandler<
   T = unknown,
   TConfig extends Record<string, unknown> = Record<string, unknown>,
@@ -587,8 +647,8 @@ export interface PropertySelectionHandler<
 export interface SelectionOption<T = unknown> {
   /** The value that will be stored in the YAML */
   value: T;
-  /** The label displayed in the UI */
-  label: string;
+  /** The label displayed in the UI (optional) */
+  label?: string;
   /** Description shown in completion popup or tooltips (optional) */
   description?: string;
   /** Extended documentation shown in side panel (optional) */

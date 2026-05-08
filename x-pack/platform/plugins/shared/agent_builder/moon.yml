@@ -51,6 +51,7 @@ dependsOn:
   - '@kbn/core-ui-settings-server'
   - '@kbn/utility-types'
   - '@kbn/inference-tracing'
+  - '@kbn/tracing'
   - '@kbn/std'
   - '@kbn/esql-language'
   - '@kbn/esql-utils'
@@ -117,6 +118,7 @@ dependsOn:
   - '@kbn/es-query'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/security-plugin-types-server'
+  - '@kbn/agent-context-layer-plugin'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/fs'
   - '@kbn/react-hooks'
@@ -124,6 +126,7 @@ dependsOn:
   - '@kbn/response-ops-oauth-hooks'
   - '@kbn/connector-specs'
   - '@kbn/core-user-profile-browser'
+  - '@kbn/security-plugin-types-public'
 tags:
   - plugin
   - prod

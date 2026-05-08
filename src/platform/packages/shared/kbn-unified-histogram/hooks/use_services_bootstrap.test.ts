@@ -8,9 +8,9 @@
  */
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
+import { getBreakdownField } from '@kbn/discover-utils';
 import { useServicesBootstrap } from './use_services_bootstrap';
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { getBreakdownField } from '../utils/local_storage_utils';
 import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
 import type { UnifiedHistogramFetchParamsExternal } from '../types';
@@ -18,7 +18,9 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 jest.mock('../services/state_service');
 jest.mock('./use_state_props');
-jest.mock('../utils/local_storage_utils');
+jest.mock('@kbn/discover-utils', () => ({
+  getBreakdownField: jest.fn(),
+}));
 
 const createStateServiceMock = createStateService as jest.MockedFunction<typeof createStateService>;
 const useStatePropsMock = useStateProps as jest.MockedFunction<typeof useStateProps>;

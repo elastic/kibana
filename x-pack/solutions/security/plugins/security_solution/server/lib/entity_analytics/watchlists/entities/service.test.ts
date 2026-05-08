@@ -151,7 +151,7 @@ describe('Watchlist entities service', () => {
     expect(result.entityIdsByType.user).toEqual(['user:jdoe']);
     expect(result.entityIdsByType.host).toEqual(['host:server-1']);
     expect(result.correlationMap?.get('jdoe')).toEqual({
-      euid: 'user:jdoe',
+      euids: ['user:jdoe'],
       entityType: 'user',
     });
     // host doesn't have user.name so it should not be in correlation map

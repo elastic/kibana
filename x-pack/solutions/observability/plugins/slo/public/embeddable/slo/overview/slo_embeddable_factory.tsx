@@ -64,7 +64,7 @@ export const getOverviewEmbeddableFactory = ({
     const deps = { ...coreStart, ...pluginsStart };
     const state = initialState;
 
-    const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+    const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
     const titleManager = initializeTitleManager(state);
     const overviewMode$ = new BehaviorSubject<OverviewEmbeddableState['overview_mode'] | undefined>(
