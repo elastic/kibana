@@ -416,14 +416,30 @@ function buildCustomFilteringContext(
 
   if (!isInBy) {
     statsSpecificFunctionsToIgnore.push(
-      ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
-      ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
-        ? getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
-        : []),
-      ...(isTimeseriesAggUsedAlready(command, finalCommandArgIndex)
-        ? getAllFunctions({ type: FunctionDefinitionTypes.TIME_SERIES_AGG }).map(({ name }) => name)
-        : [])
+      ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex)
     );
+
+    // The "no nested aggregations" rule applies unless the cursor's param
+    // explicitly expects an aggregation (e.g. SPARKLINE's first arg has
+    // hint.kind === 'aggregation'), in which case nesting is required, not forbidden.
+    const expectsAggregation = basicContext.paramDefinitions.some(
+      (p) => p.hint?.kind === 'aggregation'
+    );
+
+    if (!expectsAggregation) {
+      if (isAggFunctionUsedAlready(command, finalCommandArgIndex)) {
+        statsSpecificFunctionsToIgnore.push(
+          ...getAllFunctions({ type: FunctionDefinitionTypes.AGG }).map(({ name }) => name)
+        );
+      }
+      if (isTimeseriesAggUsedAlready(command, finalCommandArgIndex)) {
+        statsSpecificFunctionsToIgnore.push(
+          ...getAllFunctions({ type: FunctionDefinitionTypes.TIME_SERIES_AGG }).map(
+            ({ name }) => name
+          )
+        );
+      }
+    }
   }
 
   return {
