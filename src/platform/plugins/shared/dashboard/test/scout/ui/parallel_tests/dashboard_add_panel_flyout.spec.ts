@@ -13,7 +13,21 @@ import { expect } from '@kbn/scout/ui';
 import { DASHBOARD_DEFAULT_INDEX_TITLE, DASHBOARD_SAVED_SEARCH_ARCHIVE } from '../constants';
 
 const getExpected = (config: ScoutTestConfig) => {
-  if (config.projectType === 'es' || config.projectType === 'security') {
+  if (config.projectType === 'es') {
+    return {
+      groups: [
+        'visualizationsGroup',
+        'controlsGroup',
+        'annotation-and-navigationGroup',
+        'logs-aiopsGroup',
+        'mlGroup',
+        'legacyGroup',
+      ],
+      count: 17,
+    };
+  }
+  
+  if (config.projectType === 'security') {
     return {
       groups: [
         'visualizationsGroup',
