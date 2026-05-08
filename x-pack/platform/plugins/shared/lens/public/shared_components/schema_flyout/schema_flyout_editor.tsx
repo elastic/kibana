@@ -8,7 +8,7 @@
 import React, { useMemo, useEffect, useRef } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonRectangle } from '@elastic/eui';
-import type { FieldDescriptor } from './types';
+import type { FieldDescriptor } from '../../../common/schema_types';
 import { useSchemaDescriptions } from './use_schema_descriptions';
 import { SchemaFormField } from './fields';
 import { getStateAdapter } from './state_adapters';

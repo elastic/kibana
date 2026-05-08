@@ -8,17 +8,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFormRow, EuiRange } from '@elastic/eui';
 import { useController } from 'react-hook-form';
-import type { Control } from 'react-hook-form';
-import type { FieldDescriptor } from '../types';
-
-interface RangeFieldProps {
-  descriptor: FieldDescriptor;
-  control: Control;
-}
+import type { SchemaFieldProps } from '../types';
 
 const DEBOUNCE_MS = 256;
 
-export const RangeField = ({ descriptor, control }: RangeFieldProps) => {
+export const RangeField = ({ descriptor, control }: SchemaFieldProps) => {
   const { field } = useController({ name: descriptor.path, control });
 
   const min = (descriptor.props?.min as number) ?? descriptor.min ?? 0;

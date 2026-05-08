@@ -7,7 +7,7 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { FieldDescriptor } from './types';
+import type { FieldDescriptor } from '../../../common/schema_types';
 
 interface VizSchemaResponse {
   fields: FieldDescriptor[];

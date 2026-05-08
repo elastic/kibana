@@ -16,15 +16,9 @@ import React from 'react';
 import { EuiButtonGroup, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useController } from 'react-hook-form';
-import type { Control } from 'react-hook-form';
-import type { FieldDescriptor } from '../types';
+import type { SchemaFieldProps } from '../types';
 
-interface SelectFieldProps {
-  descriptor: FieldDescriptor;
-  control: Control;
-}
-
-export const SelectField = ({ descriptor, control }: SelectFieldProps) => {
+export const SelectField = ({ descriptor, control }: SchemaFieldProps) => {
   const { field } = useController({
     name: descriptor.path,
     control,

@@ -15,15 +15,9 @@
 import React from 'react';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { useController } from 'react-hook-form';
-import type { Control } from 'react-hook-form';
-import type { FieldDescriptor } from '../types';
+import type { SchemaFieldProps } from '../types';
 
-interface ToggleFieldProps {
-  descriptor: FieldDescriptor;
-  control: Control;
-}
-
-export const ToggleField = ({ descriptor, control }: ToggleFieldProps) => {
+export const ToggleField = ({ descriptor, control }: SchemaFieldProps) => {
   const { field } = useController({ name: descriptor.path, control });
 
   return (

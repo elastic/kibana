@@ -7,19 +7,13 @@
 
 import React from 'react';
 import { useController } from 'react-hook-form';
-import type { Control } from 'react-hook-form';
 import { RowHeightSettings } from '@kbn/unified-data-table';
 import type { RowHeightSettingsProps } from '@kbn/unified-data-table';
 
 type RowHeightMode = RowHeightSettingsProps['rowHeight'];
-import type { FieldDescriptor } from '../types';
+import type { SchemaFieldProps } from '../types';
 
-interface RowHeightFieldProps {
-  descriptor: FieldDescriptor;
-  control: Control;
-}
-
-export const RowHeightField = ({ descriptor, control }: RowHeightFieldProps) => {
+export const RowHeightField = ({ descriptor, control }: SchemaFieldProps) => {
   const maxRowHeight = (descriptor.props?.maxLines as number) ?? 20;
 
   const { field: typeField } = useController({

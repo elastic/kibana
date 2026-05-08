@@ -16,7 +16,7 @@ import {
   gaugeConfigSchemaNoESQL,
   tagcloudConfigSchemaNoESQL,
 } from '@kbn/lens-embeddable-utils/config_builder/schema';
-import type { FieldDescriptor } from '../../../ui_schemas';
+import type { FieldDescriptor } from '../../../../common/schema_types';
 import { uiSchemaRegistry } from '../../../ui_schemas';
 import { buildFieldDescriptors } from '../../../schema_walker';
 

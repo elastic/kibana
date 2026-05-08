@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { FieldDescriptor, UISchemaEntry } from './ui_schemas';
+import type { FieldDescriptor } from '../common/schema_types';
+import type { UISchemaEntry } from './ui_schemas';
 
 const humanizeLabel = (raw: string): string => {
   if (raw.includes(' ')) return raw;

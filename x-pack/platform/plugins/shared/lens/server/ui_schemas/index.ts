@@ -15,7 +15,6 @@ import { gaugeUISchema } from './gauge';
 import { tagcloudUISchema } from './tagcloud';
 
 export type { UISchemaEntry } from './types';
-export type { FieldDescriptor } from './types';
 
 /**
  * Registry mapping visualization IDs to their UI schemas.

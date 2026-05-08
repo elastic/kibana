@@ -15,15 +15,9 @@
 import React from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { useController } from 'react-hook-form';
-import type { Control } from 'react-hook-form';
-import type { FieldDescriptor } from '../types';
+import type { SchemaFieldProps } from '../types';
 
-interface TextFieldProps {
-  descriptor: FieldDescriptor;
-  control: Control;
-}
-
-export const TextField = ({ descriptor, control }: TextFieldProps) => {
+export const TextField = ({ descriptor, control }: SchemaFieldProps) => {
   const { field } = useController({ name: descriptor.path, control });
 
   return (

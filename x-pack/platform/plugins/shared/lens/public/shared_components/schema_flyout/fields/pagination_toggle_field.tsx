@@ -9,17 +9,11 @@ import React from 'react';
 import { EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { useController } from 'react-hook-form';
-import type { Control } from 'react-hook-form';
-import type { FieldDescriptor } from '../types';
+import type { SchemaFieldProps } from '../types';
 
 const DEFAULT_PAGE_SIZE = 10;
 
-interface PaginationToggleFieldProps {
-  descriptor: FieldDescriptor;
-  control: Control;
-}
-
-export const PaginationToggleField = ({ descriptor, control }: PaginationToggleFieldProps) => {
+export const PaginationToggleField = ({ descriptor, control }: SchemaFieldProps) => {
   const { field } = useController({ name: descriptor.path, control });
 
   // Form value is a number (page size) when enabled, or undefined when disabled.

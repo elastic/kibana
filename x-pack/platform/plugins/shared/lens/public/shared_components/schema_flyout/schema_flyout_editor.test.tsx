@@ -15,7 +15,7 @@ import {
   extractSettingsFromState,
   mergeSettingsIntoState,
 } from './schema_flyout_editor';
-import type { FieldDescriptor } from './types';
+import type { FieldDescriptor } from '../../../common/schema_types';
 
 // Mock useKibana to provide http service — stable reference to prevent useEffect loops
 const mockHttpGet = jest.fn();

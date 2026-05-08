@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FieldDescriptor, FieldVisibilityCondition } from './types';
+import type { FieldDescriptor, FieldVisibilityCondition } from '../../../common/schema_types';
 
 interface ConditionContext {
   /** Series types from all data layers */

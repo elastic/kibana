@@ -5,25 +5,12 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0"; you may not use this file except in compliance with the "Elastic License
- * 2.0".
- */
-
 import React from 'react';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import { useController } from 'react-hook-form';
-import type { Control } from 'react-hook-form';
-import type { FieldDescriptor } from '../types';
+import type { SchemaFieldProps } from '../types';
 
-interface NumberFieldProps {
-  descriptor: FieldDescriptor;
-  control: Control;
-}
-
-export const NumberField = ({ descriptor, control }: NumberFieldProps) => {
+export const NumberField = ({ descriptor, control }: SchemaFieldProps) => {
   const { field } = useController({ name: descriptor.path, control });
 
   return (
