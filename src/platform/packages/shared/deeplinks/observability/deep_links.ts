@@ -94,7 +94,7 @@ export type UptimeLinkId = 'Certificates';
 
 export type ProfilingLinkId = 'stacktraces' | 'flamegraphs' | 'functions';
 
-export type StreamsLinkId = 'overview' | 'manageEntityTypes';
+export type StreamsLinkId = 'overview' | 'manageEntityTypes' | 'significantEvents';
 
 export type LinkId =
   | LogsLinkId

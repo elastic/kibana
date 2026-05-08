@@ -136,9 +136,22 @@ function createNavTree({
                               pathNameSerialized === root ||
                               pathNameSerialized === `${root}/` ||
                               (pathNameSerialized.startsWith(root) &&
-                                !pathNameSerialized.startsWith(`${root}/manage-entity-types`))
+                                !pathNameSerialized.startsWith(`${root}/manage-entity-types`) &&
+                                !pathNameSerialized.startsWith(`${root}/significant-events`))
                             );
                           },
+                        },
+                      ],
+                    },
+                    {
+                      // Sits between `All streams` and `Manage entity types` —
+                      // its own group so the panel renders visual gaps on
+                      // either side. Backed by the `streams:significantEvents`
+                      // deep link registered in the streams app plugin.
+                      children: [
+                        {
+                          id: 'entityCentricLab-significantEvents',
+                          link: 'streams:significantEvents' as const,
                         },
                       ],
                     },

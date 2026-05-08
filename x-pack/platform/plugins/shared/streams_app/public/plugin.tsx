@@ -125,6 +125,14 @@ export class StreamsAppPlugin
           // entity-centric lab is enabled.
           visibleIn: [],
         },
+        {
+          id: 'significantEvents',
+          title: i18n.translate('xpack.streams.deepLinks.significantEventsTitle', {
+            defaultMessage: 'Significant events',
+          }),
+          path: '/significant-events',
+          visibleIn: [],
+        },
       ],
       updater$: from(startServicesPromise).pipe(
         switchMap(([_, pluginsStart]) =>

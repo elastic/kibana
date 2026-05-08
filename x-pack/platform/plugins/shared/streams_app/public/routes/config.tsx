@@ -17,7 +17,7 @@ import { StreamListView } from '../components/stream_list_view';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
 import { SignificantEventsDiscoveryPage } from '../components/sig_events/significant_events_discovery/page';
-import { ManageEntityTypesView } from '../components/entity_centric_lab';
+import { ManageEntityTypesView, SignificantEventsView } from '../components/entity_centric_lab';
 
 /**
  * Optional time range query params.
@@ -81,6 +81,14 @@ const streamsAppRoutes = {
             category: t.string,
           }),
         }),
+      },
+      /**
+       * Entity-centric lab: prototype landing for `Significant events`,
+       * reachable via the `streams:significantEvents` deep link. Same gating
+       * as `manage-entity-types`.
+       */
+      '/significant-events': {
+        element: <SignificantEventsView />,
       },
       '/_discovery': {
         element: <Outlet />,
