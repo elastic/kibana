@@ -27,7 +27,7 @@ import {
 } from '@kbn/es-query/src/filters/build_filters';
 import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { getIndexPatterns, getSearchService } from '../../services';
+import { getHttp, getIndexPatterns, getSearchService } from '../../services';
 import type { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
 
@@ -152,11 +152,13 @@ const createFilterFromRawColumnsESQL = async (
   const dataView = await getESQLAdHocDataview({
     query: 'FROM ' + indexPattern,
     dataViewsService: getIndexPatterns() as DataViewsPublicPluginStart,
+    http: getHttp(),
   });
 
-  // `column.name` can be a custom Lens label;
-  // `column.id` matches the ES|QL column / field used for lookup and filters
-  const fieldName = column.id;
+  // Prefer `sourceField` (index field name). Fall back to `column.name` when it is not a string
+  // (e.g. `column.name` is still the result column / display label in some cases).
+  const sourceFieldName = column.meta?.sourceParams?.sourceField;
+  const fieldName = typeof sourceFieldName === 'string' ? sourceFieldName : column.name;
 
   const field = dataView.getFieldByName(fieldName);
 

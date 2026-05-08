@@ -55,6 +55,10 @@ export function generateAlertingConfig(overwrites: Partial<AlertingConfig> = {})
       interval: '5m',
     },
     enableFrameworkAlerts: false,
+    ruleChangeTracking: {
+      enabled: false,
+      scope: ['security'],
+    },
     invalidateApiKeysTask: {
       interval: '5m',
       removalDelay: '1h',

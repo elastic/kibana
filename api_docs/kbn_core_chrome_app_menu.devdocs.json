@@ -37,6 +37,7 @@
             "lineNumber": 47,
             "columnNumber": 25,
             "deprecated": false,
+            "docsReferencedTypeName": "AppMenuProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -94,6 +95,7 @@
                 "lineNumber": 17,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "AppMenuConfig",
                 "trackAdoption": false,
                 "isRequired": false
               }

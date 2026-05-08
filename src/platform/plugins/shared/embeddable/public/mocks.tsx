@@ -19,11 +19,11 @@ import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, Subject } from 'rxjs';
 import type { EmbeddableStateTransfer } from '.';
 import { setKibanaServices } from './kibana_services';
 import { EmbeddablePublicPlugin } from './plugin';
-import { registerReactEmbeddableFactory } from './react_embeddable_system';
+import { registerEmbeddablePublicDefinition } from './react_embeddable_system';
 import { registerAddFromLibraryType } from './add_from_library/registry';
 import type {
   EmbeddableSetup,
@@ -44,6 +44,7 @@ export const createEmbeddableStateTransferMock = (): Partial<EmbeddableStateTran
     getIncomingEmbeddablePackage: jest.fn(),
     navigateToEditor: jest.fn(),
     navigateToWithEmbeddablePackages: jest.fn(),
+    onTransferEmbeddablePackage$: jest.fn().mockReturnValue(new Subject()),
   };
 };
 
@@ -51,7 +52,9 @@ const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerAddFromLibraryType: jest.fn().mockImplementation(registerAddFromLibraryType),
     registerDrilldown: jest.fn(),
-    registerReactEmbeddableFactory: jest.fn().mockImplementation(registerReactEmbeddableFactory),
+    registerEmbeddablePublicDefinition: jest
+      .fn()
+      .mockImplementation(registerEmbeddablePublicDefinition),
     registerLegacyURLTransform: jest.fn(),
   };
   return setupContract;
@@ -60,6 +63,7 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   const startContract: Start = {
     getAddFromLibraryComponent: jest.fn(),
+    getAddFromLibraryContentComponent: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
     getLegacyURLTransform: jest.fn(),
     hasLegacyURLTransform: jest.fn(),
@@ -140,9 +144,9 @@ export function mockDrilldownsManager(): DrilldownsManager {
   };
 }
 
-export async function mockInitializeDrilldownsManager(
+export function mockInitializeDrilldownsManager(
   embeddableUuid: string,
   state: SerializedDrilldowns
-): Promise<DrilldownsManager> {
+): DrilldownsManager {
   return mockDrilldownsManager();
 }

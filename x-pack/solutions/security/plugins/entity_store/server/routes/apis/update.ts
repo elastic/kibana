@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
@@ -24,6 +25,11 @@ export function registerUpdate(router: EntityStorePluginRouter) {
     .put({
       path: ENTITY_STORE_ROUTES.public.UPDATE,
       access: 'public',
+      summary: 'Update the Entity Store',
+      description: 'Update the Entity Store log extraction configuration.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -36,6 +42,9 @@ export function registerUpdate(router: EntityStorePluginRouter) {
           request: {
             body: buildRouteValidationWithZod(bodySchema),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/entity_store_update.yaml'),
         },
       },
       wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {

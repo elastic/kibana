@@ -759,6 +759,7 @@
                 "lineNumber": 213,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -794,6 +795,7 @@
                 "lineNumber": 215,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Observable",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -852,6 +854,7 @@
                 "lineNumber": 256,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpServerSetupOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -932,6 +935,7 @@
                 "lineNumber": 952,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetRoutersOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -991,6 +995,7 @@
                 "lineNumber": 64,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "StaticAssetsParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1274,6 +1279,7 @@
             "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1296,6 +1302,7 @@
             "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Server",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1316,6 +1323,7 @@
             "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SessionStorageCookieOptions",
             "trackAdoption": false,
             "isRequired": true
           },

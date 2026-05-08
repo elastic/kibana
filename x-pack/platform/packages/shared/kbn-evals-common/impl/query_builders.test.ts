@@ -133,12 +133,18 @@ describe('query_builders', () => {
       });
     });
 
-    it('filters by branch', () => {
+    it('filters by branch using wildcard', () => {
       const query = buildRunsListingFilterQuery({ branch: 'main' });
       expect(query).toEqual({
         bool: {
           must_not: [preflightExclusion],
-          filter: [{ term: { 'run_metadata.git_branch': 'main' } }],
+          filter: [
+            {
+              wildcard: {
+                'run_metadata.git_branch': { value: '*main*', case_insensitive: true },
+              },
+            },
+          ],
         },
       });
     });

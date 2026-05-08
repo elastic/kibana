@@ -53,6 +53,7 @@
             "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -242,6 +243,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RegExp",
             "trackAdoption": false,
             "isRequired": true
           }

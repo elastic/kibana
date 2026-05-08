@@ -210,9 +210,9 @@ Array [
         "items": Array [
           Object {
             "badgeType": undefined,
-            "data-test-subj": "nav-item nav-item-stack_management.node-1.management:triggersActions nav-item-deepLinkId-undefined nav-item-id-management:triggersActions",
-            "href": "/jom/app/management/insightsAndAlerting/triggersActions",
-            "id": "management:triggersActions",
+            "data-test-subj": "nav-item nav-item-stack_management.node-1.stackRules nav-item-deepLinkId-undefined nav-item-id-stackRules",
+            "href": "/jom/app/rules",
+            "id": "stackRules",
             "isExternal": false,
             "label": "Rules",
           },

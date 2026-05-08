@@ -29,7 +29,7 @@ export function configToAnnotatedYaml(config: SigEventsTuningConfig): string {
     '# Maximum LLM iterations per extraction task (1-20)',
     `max_iterations: ${config.max_iterations}`,
     '',
-    '# Days before an identified feature expires (1-90)',
+    '# Days before an identified feature expires (min 1)',
     `feature_ttl_days: ${config.feature_ttl_days}`,
     '',
     '# Proportion of entity-filtered samples (0.0-1.0)',

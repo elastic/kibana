@@ -863,7 +863,7 @@ export default ({ getService }: FtrProviderContext) => {
           excludeAlertStatuses: ['closed'],
           filter: {},
           interval: '1h',
-          pageSize: 3500,
+          pageSize: 10_000,
           range: {
             end: 'now',
             start: 'now-30d',

@@ -21,7 +21,7 @@ interface Options {
   filters?: BoolQuery;
   serviceName: string;
   apmEventClient: APMEventClient;
-  transactionType: string;
+  transactionType?: string;
   transactionName?: string;
   start: number;
   end: number;
@@ -64,7 +64,7 @@ export async function getThroughput({
       bool: {
         filter: [
           { term: { [SERVICE_NAME]: serviceName } },
-          { term: { [TRANSACTION_TYPE]: transactionType } },
+          ...termQuery(TRANSACTION_TYPE, transactionType),
           ...rangeQuery(startWithOffset, endWithOffset),
           ...environmentQuery(environment),
           ...kqlQuery(kuery),

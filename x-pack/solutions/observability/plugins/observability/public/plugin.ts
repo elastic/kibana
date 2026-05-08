@@ -79,7 +79,7 @@ import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/pub
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observability-agent-builder-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -93,8 +93,6 @@ import {
 } from '../common/locators/paths';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
-import { RuleDetailsLocatorDefinition } from './locators/rule_details';
-import { RulesLocatorDefinition } from './locators/rules';
 import type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
@@ -270,13 +268,8 @@ export class Plugin
       pluginsSetup.triggersActionsUi.ruleTypeRegistry
     );
 
-    const rulesLocator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
     pluginsSetup.share.url.locators.create(CaseDetailsLocatorDefinition());
     pluginsSetup.share.url.locators.create(CasesOverviewLocatorDefinition());
-
-    const ruleDetailsLocator = pluginsSetup.share.url.locators.create(
-      new RuleDetailsLocatorDefinition()
-    );
 
     const logsLocator =
       pluginsSetup.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
@@ -533,8 +526,6 @@ export class Plugin
       dashboard: { register: registerDataHandler },
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),
-      rulesLocator,
-      ruleDetailsLocator,
       config,
     };
   }

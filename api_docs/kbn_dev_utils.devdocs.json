@@ -170,6 +170,7 @@
             "lineNumber": 57,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "Options",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -599,6 +600,7 @@
             "lineNumber": 28,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "StartTSWorkerArgs",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1271,7 +1273,9 @@
             "type": "string",
             "tags": [],
             "label": "token",
-            "description": [],
+            "description": [
+              "\n`kibana-dev` service account token for connecting to ESS\nSee src/platform/packages/shared/kbn-es/src/serverless_resources/README.md"
+            ],
             "path": "src/platform/packages/shared/kbn-dev-utils/src/dev_service_account.ts",
             "lineNumber": 17,
             "columnNumber": 3,

@@ -11,12 +11,12 @@ import { AppMenuActionId } from '@kbn/discover-utils';
 import { omit } from 'lodash';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { TimeRange } from '@kbn/es-query';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { AppMenuItemType, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import type { ShowShareMenuOptions } from '@kbn/share-plugin/public';
-import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
+import type { ShareActionIntents, SharingData } from '@kbn/share-plugin/public/types';
 import type { IntlShape } from '@kbn/i18n-react';
+import type { ReportingCSVSharingData } from '@kbn/reporting-public/types';
 import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
 import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
@@ -35,16 +35,26 @@ interface BuildShareOptionsParams {
 }
 
 /**
+ * Specifies an explicit type for the sharing data of the Discover app.
+ */
+type DiscoverSharingData = SharingData<DiscoverAppLocatorParams> & ReportingCSVSharingData;
+
+/**
  * Builds share options for both share modal and export integrations
  */
-const buildShareOptions = async ({
+export const buildShareOptions = async ({
   discoverParams,
   services,
   currentTab,
   persistedDiscoverSession,
   totalHitsState,
   hasUnsavedChanges,
-}: BuildShareOptionsParams): Promise<Omit<ShowShareMenuOptions, 'anchorElement' | 'asExport'>> => {
+}: BuildShareOptionsParams): Promise<
+  Omit<
+    ShowShareMenuOptions<DiscoverAppLocatorParams, ReportingCSVSharingData>,
+    'anchorElement' | 'asExport'
+  >
+> => {
   const { dataView, isEsqlMode } = discoverParams;
 
   const searchSource = createSearchSource({
@@ -64,18 +74,19 @@ const buildShareOptions = async ({
   const { locator } = services;
   const { timefilter } = services.data.query.timefilter;
   const timeRange = timefilter.getTime();
+  const absoluteTimeRange = timefilter.getAbsoluteTime();
   const refreshInterval = timefilter.getRefreshInterval();
   const filters = services.filterManager.getFilters();
 
   // Share -> Get links -> Snapshot
-  const params: DiscoverAppLocatorParams & { timeRange: TimeRange | undefined } = {
+  const params: DiscoverSharingData['locatorParams'][number]['params'] = {
     ...omit(currentTab.appState, 'dataSource'),
     ...(persistedDiscoverSession?.id ? { savedSearchId: persistedDiscoverSession.id } : {}),
     ...(dataView?.isPersisted()
       ? { dataViewId: dataView?.id }
       : { dataViewSpec: dataView?.toMinimalSpec() }),
     filters,
-    timeRange: timeRange ?? undefined,
+    timeRange,
     refreshInterval,
   };
 
@@ -140,7 +151,7 @@ const buildShareOptions = async ({
     },
     sharingData: {
       isTextBased: isEsqlMode,
-      locatorParams: [{ id: locator.id, params }],
+      locatorParams: [{ id: locator.id, version: services.metadata.version, params }],
       ...searchSourceSharingData,
       // CSV reports can be generated without a saved search so we provide a fallback title
       title:
@@ -149,6 +160,7 @@ const buildShareOptions = async ({
           defaultMessage: 'Untitled Discover session',
         }),
       totalHits: totalHitsState.result || 0,
+      absoluteTimeRange: isEsqlMode ? absoluteTimeRange : undefined,
     },
     isDirty: !persistedDiscoverSession?.id || hasUnsavedChanges,
   };

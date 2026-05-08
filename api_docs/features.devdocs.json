@@ -76,6 +76,7 @@
                 "lineNumber": 182,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "RecursiveReadonly",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1376,6 +1377,7 @@
                 "lineNumber": 65,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "RecursiveReadonly",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1575,6 +1577,7 @@
                 "lineNumber": 182,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "RecursiveReadonly",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2417,6 +2420,7 @@
                 "lineNumber": 44,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaFeatureConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2467,6 +2471,7 @@
                 "lineNumber": 46,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchFeatureConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2804,6 +2809,7 @@
                 "lineNumber": 46,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaFeature",
                 "trackAdoption": false
               },
               {
@@ -2820,6 +2826,7 @@
                 "lineNumber": 47,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "FeaturePrivilegeIteratorOptions",
                 "trackAdoption": false
               }
             ]
@@ -2879,6 +2886,7 @@
                 "lineNumber": 18,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaFeature",
                 "trackAdoption": false
               },
               {
@@ -2912,6 +2920,7 @@
                     "lineNumber": 19,
                     "columnNumber": 23,
                     "deprecated": false,
+                    "docsReferencedTypeName": "LicenseType",
                     "trackAdoption": false
                   }
                 ]
@@ -3017,6 +3026,7 @@
                 "lineNumber": 92,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetKibanaFeaturesParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -3468,6 +3478,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaFeature",
             "trackAdoption": false
           },
           {
@@ -3501,6 +3512,7 @@
                 "lineNumber": 19,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "LicenseType",
                 "trackAdoption": false
               }
             ]
@@ -3606,6 +3618,7 @@
                 "lineNumber": 65,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "RecursiveReadonly",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3805,6 +3818,7 @@
                 "lineNumber": 182,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "RecursiveReadonly",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4137,6 +4151,7 @@
                 "lineNumber": 107,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "RecursiveReadonly",
                 "trackAdoption": false,
                 "isRequired": true
               }

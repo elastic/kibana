@@ -213,6 +213,7 @@
                 "lineNumber": 264,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TEndpoint",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -240,6 +241,7 @@
                 "lineNumber": 265,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "MaybeOptionalArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -298,6 +300,7 @@
                 "lineNumber": 272,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TEndpoint",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -325,6 +328,7 @@
                 "lineNumber": 273,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "MaybeOptionalArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }

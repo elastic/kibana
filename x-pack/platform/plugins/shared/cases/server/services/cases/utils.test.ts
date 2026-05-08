@@ -399,3 +399,270 @@ describe('convertFindQueryParams', () => {
     });
   });
 });
+
+describe('constructSearchQuery with extendedFieldFilters', () => {
+  it('returns undefined when no search, caseIds, or extendedFieldFilters', () => {
+    const result = constructSearchQuery({
+      caseIds: [],
+    });
+    expect(result).toBeUndefined();
+  });
+
+  it('produces filter clauses for extendedFieldFilters only', () => {
+    const result = constructSearchQuery({
+      caseIds: [],
+      extendedFieldFilters: [
+        [
+          {
+            storageKey: 'priority_as_keyword',
+            value: 'high',
+            esType: 'keyword',
+            control: 'TEXT',
+            templateVersions: [{ id: 'tmpl-a', version: 1 }],
+          },
+        ],
+      ],
+    });
+
+    expect(result).toEqual({
+      bool: {
+        filter: [
+          {
+            bool: {
+              filter: [
+                { term: { ef_priority_as_keyword: { value: 'high' } } },
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        bool: {
+                          must: [
+                            { term: { 'cases.template.id': 'tmpl-a' } },
+                            { term: { 'cases.template.version': 1 } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+
+  it('combines free text search with extended field filters', () => {
+    const result = constructSearchQuery({
+      search: 'some text',
+      searchFields: [`${CASE_SAVED_OBJECT}.title`],
+      caseIds: [],
+      extendedFieldFilters: [
+        [
+          {
+            storageKey: 'priority_as_keyword',
+            value: 'high',
+            esType: 'keyword',
+            control: 'TEXT',
+            templateVersions: [{ id: 'tmpl-a', version: 1 }],
+          },
+        ],
+      ],
+    });
+
+    expect(result?.bool?.filter).toBeDefined();
+    const filter = result!.bool!.filter as Array<Record<string, unknown>>;
+    expect(filter).toHaveLength(2);
+    expect(filter[0]).toHaveProperty('bool.should');
+    expect(filter[1]).toHaveProperty('bool.filter');
+  });
+
+  it('handles multiple extended field filters with AND semantics', () => {
+    const result = constructSearchQuery({
+      caseIds: [],
+      extendedFieldFilters: [
+        [
+          {
+            storageKey: 'priority_as_keyword',
+            value: 'high',
+            esType: 'keyword',
+            control: 'TEXT',
+            templateVersions: [{ id: 'tmpl-a', version: 1 }],
+          },
+        ],
+        [
+          {
+            storageKey: 'region_as_keyword',
+            value: 'emea',
+            esType: 'keyword',
+            control: 'TEXT',
+            templateVersions: [{ id: 'tmpl-a', version: 1 }],
+          },
+        ],
+      ],
+    });
+
+    expect(result).toEqual({
+      bool: {
+        filter: [
+          {
+            bool: {
+              filter: [
+                { term: { ef_priority_as_keyword: { value: 'high' } } },
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        bool: {
+                          must: [
+                            { term: { 'cases.template.id': 'tmpl-a' } },
+                            { term: { 'cases.template.version': 1 } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          {
+            bool: {
+              filter: [
+                { term: { ef_region_as_keyword: { value: 'emea' } } },
+                {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        bool: {
+                          must: [
+                            { term: { 'cases.template.id': 'tmpl-a' } },
+                            { term: { 'cases.template.version': 1 } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+  });
+});
+
+describe('constructSearchQuery with fieldLabelFilters', () => {
+  const labelFilter = {
+    storageKey: 'priority_as_keyword',
+    esType: 'keyword',
+    control: 'SELECT_BASIC',
+    templateVersions: [{ id: 'tmpl-a', version: 1 }],
+  };
+
+  it('adds label-existence clauses to shouldClauses when fieldLabelFilters provided alone', () => {
+    const result = constructSearchQuery({
+      caseIds: [],
+      fieldLabelFilters: [labelFilter],
+    });
+
+    expect(result).toEqual({
+      bool: {
+        should: [
+          {
+            bool: {
+              filter: [
+                { exists: { field: 'ef_priority_as_keyword' } },
+                {
+                  bool: {
+                    should: [
+                      {
+                        bool: {
+                          must: [
+                            { term: { 'cases.template.id': 'tmpl-a' } },
+                            { term: { 'cases.template.version': 1 } },
+                          ],
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+            },
+          },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  it('ORs label-existence clauses with free-text search clauses', () => {
+    const result = constructSearchQuery({
+      search: 'test',
+      searchFields: [`${CASE_SAVED_OBJECT}.title`],
+      caseIds: [],
+      fieldLabelFilters: [labelFilter],
+    });
+
+    const shouldClauses = result?.bool?.should as estypes.QueryDslQueryContainer[] | undefined;
+    expect(shouldClauses).toBeDefined();
+    expect(shouldClauses!.length).toBeGreaterThanOrEqual(3);
+
+    const existsClause = shouldClauses!.find(
+      (c: estypes.QueryDslQueryContainer) =>
+        (c?.bool?.filter as estypes.QueryDslQueryContainer[])?.[0]?.exists?.field ===
+        'ef_priority_as_keyword'
+    );
+    expect(existsClause).toBeDefined();
+
+    const multiMatchClause = shouldClauses!.find(
+      (c: estypes.QueryDslQueryContainer) => c?.multi_match != null
+    );
+    expect(multiMatchClause).toBeDefined();
+  });
+
+  it('combines fieldLabelFilters (should) with extendedFieldFilters (filter) correctly', () => {
+    const result = constructSearchQuery({
+      caseIds: [],
+      fieldLabelFilters: [labelFilter],
+      extendedFieldFilters: [
+        [
+          {
+            storageKey: 'region_as_keyword',
+            value: 'emea',
+            esType: 'keyword',
+            control: 'TEXT',
+            templateVersions: [{ id: 'tmpl-a', version: 1 }],
+          },
+        ],
+      ],
+    });
+
+    expect(result?.bool?.filter).toBeDefined();
+    const filter = result!.bool!.filter as estypes.QueryDslQueryContainer[];
+    expect(filter).toHaveLength(2);
+
+    const shouldWrapper = filter[0];
+    expect(shouldWrapper?.bool?.should).toBeDefined();
+    const shouldClauses = shouldWrapper!.bool!.should as estypes.QueryDslQueryContainer[];
+    const innerFilter = shouldClauses[0]?.bool?.filter as estypes.QueryDslQueryContainer[];
+    expect(innerFilter?.[0]?.exists?.field).toBe('ef_priority_as_keyword');
+
+    const extendedFilter = filter[1];
+    const extFilterClauses = extendedFilter?.bool?.filter as estypes.QueryDslQueryContainer[];
+    expect(extFilterClauses?.[0]?.term?.ef_region_as_keyword).toBeDefined();
+  });
+
+  it('returns undefined when no search, caseIds, extendedFieldFilters, or fieldLabelFilters', () => {
+    const result = constructSearchQuery({
+      caseIds: [],
+    });
+    expect(result).toBeUndefined();
+  });
+});

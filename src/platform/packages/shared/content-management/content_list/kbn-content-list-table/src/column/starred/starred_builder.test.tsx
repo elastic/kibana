@@ -110,13 +110,13 @@ describe('starred column builder', () => {
     });
   });
 
-  it('uses a custom width when provided', () => {
+  it('uses custom layout props when provided', () => {
     const result = buildStarredColumn(
-      { width: '64px' } satisfies StarredColumnProps,
+      { width: '64px', minWidth: '64px', maxWidth: '64px' } satisfies StarredColumnProps,
       defaultContext
     );
 
-    expect(result).toMatchObject({ width: '64px' });
+    expect(result).toMatchObject({ width: '64px', minWidth: '64px', maxWidth: '64px' });
   });
 
   it('renders the starred header and cell', () => {

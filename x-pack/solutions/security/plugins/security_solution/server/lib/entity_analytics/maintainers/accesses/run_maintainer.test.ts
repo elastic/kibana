@@ -221,15 +221,15 @@ describe('runMaintainer', () => {
       const page1Records: ProcessedEntityRecord[] = [
         {
           entityId: 'user-0',
-          accesses_frequently: ['host-a'],
-          accesses_infrequently: [],
+          accesses_frequently: { ids: ['host-a'] },
+          accesses_infrequently: { ids: [] },
         },
       ];
       const page2Records: ProcessedEntityRecord[] = [
         {
           entityId: 'user-last',
-          accesses_frequently: [],
-          accesses_infrequently: ['host-b'],
+          accesses_frequently: { ids: [] },
+          accesses_infrequently: { ids: ['host-b'] },
         },
       ];
 
@@ -303,15 +303,15 @@ describe('runMaintainer', () => {
       const records1: ProcessedEntityRecord[] = [
         {
           entityId: 'user-a',
-          accesses_frequently: ['host-1'],
-          accesses_infrequently: [],
+          accesses_frequently: { ids: ['host-1'] },
+          accesses_infrequently: { ids: [] },
         },
       ];
       const records2: ProcessedEntityRecord[] = [
         {
           entityId: 'user-b',
-          accesses_frequently: [],
-          accesses_infrequently: ['host-2'],
+          accesses_frequently: { ids: [] },
+          accesses_infrequently: { ids: ['host-2'] },
         },
       ];
 
@@ -429,8 +429,8 @@ describe('runMaintainer', () => {
       const records: ProcessedEntityRecord[] = [
         {
           entityId: 'user-1',
-          accesses_frequently: [],
-          accesses_infrequently: ['host-a'],
+          accesses_frequently: { ids: [] },
+          accesses_infrequently: { ids: ['host-a'] },
         },
       ];
       esClient.esql.query.mockResolvedValueOnce(createEsqlResponse() as never);
@@ -564,7 +564,11 @@ describe('runMaintainer', () => {
     it('skips bulk update when aborted after collecting records', async () => {
       const abortCtrl = new AbortController();
       const records: ProcessedEntityRecord[] = [
-        { entityId: 'user-1', accesses_frequently: ['host-a'], accesses_infrequently: [] },
+        {
+          entityId: 'user-1',
+          accesses_frequently: { ids: ['host-a'] },
+          accesses_infrequently: { ids: [] },
+        },
       ];
 
       esClient.search.mockResolvedValueOnce(createAggResponse([createBucket('user-1')]));

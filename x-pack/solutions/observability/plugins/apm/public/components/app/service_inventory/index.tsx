@@ -186,12 +186,12 @@ export function ServiceInventory() {
   const serviceOverflowCount = mainStatisticsData?.serviceOverflowCount ?? 0;
 
   // Determine the default sort field based on available data in service items
-  // Priority: alertsCount -> sloStatus -> healthStatus -> throughput
+  // Priority: alertsCount -> sloStatus -> anomalyScore -> throughput
   const {
     sortField: initialSortField,
     hasAlerts,
     hasSlos,
-    hasHealthStatuses,
+    hasAnomalyScores,
   } = getAvailableFields(mainStatisticsData.items);
 
   const initialSortDirection = 'desc';
@@ -303,12 +303,12 @@ export function ServiceInventory() {
     <>
       <EuiFlexGroup direction="column" gutterSize="m">
         {displayMlCallout && mlCallout}
-        <EuiFlexItem>
+        <EuiFlexItem style={{ minWidth: 0 }}>
           <ApmServicesTable
             status={mainStatisticsStatus}
             items={mainStatisticsData.items}
             comparisonDataLoading={comparisonFetch.status === FETCH_STATUS.LOADING}
-            displayHealthStatus={hasHealthStatuses}
+            displayAnomalies={hasAnomalyScores}
             displayAlerts={hasAlerts}
             displaySlos={hasSlos}
             initialSortField={initialSortField}

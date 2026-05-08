@@ -10,14 +10,11 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
-import type { RuleApiResponse } from '../../../services/rules_api';
+import { useRule } from '../rule_context';
 import { EMPTY_VALUE } from '../utils';
 
-export interface RuleMetadataProps {
-  rule: RuleApiResponse;
-}
-
-export const RuleMetadata: React.FunctionComponent<RuleMetadataProps> = ({ rule }) => {
+export const RuleMetadata: React.FunctionComponent = () => {
+  const rule = useRule();
   const uiSettings = useService(CoreStart('uiSettings'));
   const dateFormat = uiSettings.get('dateFormat');
   const formatDate = (value: string) => moment(value).format(dateFormat);

@@ -8,7 +8,8 @@
 import type { EuiFlyoutHeader } from '@elastic/eui';
 import { EuiSpacer, EuiTab } from '@elastic/eui';
 import type { FC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import type { RightPanelPaths } from '.';
 import type { RightPanelTabType } from './tabs';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
@@ -17,6 +18,7 @@ import { AlertHeaderTitle } from './components/alert_header_title';
 import { EventHeaderTitle } from './components/event_header_title';
 import { useDocumentDetailsContext } from '../shared/context';
 import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
+import { RemoteDocumentCallout } from '../../../flyout_v2/document/components/remote_document_callout';
 
 export interface PanelHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader> {
   /**
@@ -36,8 +38,10 @@ export interface PanelHeaderProps extends React.ComponentProps<typeof EuiFlyoutH
 
 export const PanelHeader: FC<PanelHeaderProps> = memo(
   ({ selectedTabId, setSelectedTabId, tabs, ...flyoutHeaderProps }) => {
-    const { dataFormattedForFieldBrowser } = useDocumentDetailsContext();
+    const { dataFormattedForFieldBrowser, searchHit } = useDocumentDetailsContext();
     const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+    const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+
     const onSelectedTabChanged = (id: RightPanelPaths) => setSelectedTabId(id);
 
     const renderTabs = tabs.map((tab, index) =>
@@ -63,11 +67,14 @@ export const PanelHeader: FC<PanelHeaderProps> = memo(
     );
 
     return (
-      <FlyoutHeader {...flyoutHeaderProps}>
-        {isAlert ? <AlertHeaderTitle /> : <EventHeaderTitle />}
-        <EuiSpacer size="m" />
-        <FlyoutHeaderTabs>{renderTabs}</FlyoutHeaderTabs>
-      </FlyoutHeader>
+      <>
+        <RemoteDocumentCallout hit={hit} />
+        <FlyoutHeader {...flyoutHeaderProps}>
+          {isAlert ? <AlertHeaderTitle /> : <EventHeaderTitle />}
+          <EuiSpacer size="m" />
+          <FlyoutHeaderTabs>{renderTabs}</FlyoutHeaderTabs>
+        </FlyoutHeader>
+      </>
     );
   }
 );

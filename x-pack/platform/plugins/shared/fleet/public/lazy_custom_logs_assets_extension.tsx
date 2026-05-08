@@ -8,10 +8,9 @@
 import { lazy } from 'react';
 
 import type { PackageAssetsComponent } from './types';
-import { CustomLogsAssetsExtension } from './custom_logs_assets_extension';
 
-export const LazyCustomLogsAssetsExtension = lazy<PackageAssetsComponent>(async () => {
-  return {
+export const LazyCustomLogsAssetsExtension = lazy<PackageAssetsComponent>(() =>
+  import('./custom_logs_assets_extension').then(({ CustomLogsAssetsExtension }) => ({
     default: CustomLogsAssetsExtension,
-  };
-});
+  }))
+);

@@ -103,7 +103,7 @@ export interface AgentSOAttributes {
   policy_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
-  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'disconnected';
   last_checkin_message?: string;
   tags?: string[];
   components?: FleetServerAgentComponent[];

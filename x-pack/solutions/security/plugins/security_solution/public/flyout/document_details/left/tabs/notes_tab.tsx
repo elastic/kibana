@@ -8,7 +8,8 @@
 import React, { memo, useMemo } from 'react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { useSelector } from 'react-redux';
-import { EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { NotesRemoteCallout } from '../../../../flyout_v2/notes/components/notes_remote_callout';
 import type { State } from '../../../../common/store';
 import { timelineSelectors } from '../../../../timelines/store';
 import { TimelineId } from '../../../../../common/types';
@@ -31,6 +32,9 @@ export const NotesTab = memo(() => {
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false}>
+      <NotesRemoteCallout hit={hit}>
+        <EuiSpacer size="m" />
+      </NotesRemoteCallout>
       <NotesDetailsContent hit={hit} timelineConfig={timelineConfig} hideTimelineIcon={false} />
     </EuiPanel>
   );

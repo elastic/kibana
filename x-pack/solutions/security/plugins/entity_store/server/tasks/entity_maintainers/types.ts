@@ -94,6 +94,7 @@ export interface RegisterEntityMaintainerConfig {
   id: string;
   description?: string;
   interval: string;
+  timeout?: string;
   initialState: EntityMaintainerState;
   run: EntityMaintainerTaskMethod;
   setup?: EntityMaintainerTaskMethod;

@@ -16,6 +16,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { StartPlugins } from '../../../../plugin';
 import { createLeadDataClient } from '../lead_data_client';
 import { getLeadGenerationTaskId } from '../tasks';
+import { getLeadGenerationConfig } from '../saved_object';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const getLeadGenerationStatusRoute = (
@@ -45,7 +46,9 @@ export const getLeadGenerationStatusRoute = (
         try {
           const { getSpaceId } = await context.securitySolution;
           const spaceId = getSpaceId();
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const coreCtx = await context.core;
+          const esClient = coreCtx.elasticsearch.client.asCurrentUser;
+          const soClient = coreCtx.savedObjects.client;
 
           let isEnabled = false;
           try {
@@ -62,8 +65,16 @@ export const getLeadGenerationStatusRoute = (
 
           const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
           const status = await leadDataClient.getStatus({ isEnabled });
+          const config = await getLeadGenerationConfig(soClient, spaceId);
 
-          return response.ok({ body: status });
+          return response.ok({
+            body: {
+              ...status,
+              connectorId: config?.connectorId,
+              lastExecutionUuid: config?.lastExecutionUuid,
+              lastError: config?.lastError ?? null,
+            },
+          });
         } catch (e) {
           logger.error(`[LeadGeneration] Error fetching status: ${e}`);
           const error = transformError(e);

@@ -55,7 +55,7 @@ interface StreamNameValidationMetaByError {
   reservedName: { name: string };
   invalidPrefix: { prefix: string };
   uppercase: never;
-  invalidCharacter: { character: string };
+  invalidCharacter: { characters: string[] };
 }
 
 type StreamNameValidationInvalidResult = {
@@ -107,16 +107,15 @@ export const validateStreamName = (name: string): StreamNameValidationResult => 
     }
   }
 
-  for (const char of INVALID_STREAM_NAME_CHARACTERS) {
-    if (name.includes(char)) {
-      const charDisplay = char === ' ' ? 'spaces' : `"${char}"`;
-      return {
-        valid: false,
-        error: 'invalidCharacter',
-        message: `Stream name cannot contain ${charDisplay}.`,
-        meta: { character: char },
-      };
-    }
+  const foundInvalid = INVALID_STREAM_NAME_CHARACTERS.filter((char) => name.includes(char));
+  if (foundInvalid.length > 0) {
+    const displays = foundInvalid.map((c) => (c === ' ' ? 'spaces' : `"${c}"`));
+    return {
+      valid: false,
+      error: 'invalidCharacter',
+      message: `Stream name cannot contain ${displays.join(', ')}.`,
+      meta: { characters: foundInvalid },
+    };
   }
 
   if (name !== name.toLowerCase()) {

@@ -24,14 +24,16 @@ paths:
             enum:
               - 'true'
               - 'false'
-          description: If true, only timelines that are marked as favorites by the user are returned.
+          description: If `true`, only Timelines that the current user has marked as favorite are returned.
         - in: query
           name: timeline_type
+          description: Restrict results to `default` investigation timelines or `template` timeline templates.
           schema:
             $ref: '../model/components.schema.yaml#/components/schemas/TimelineType'
             nullable: true
         - in: query
           name: sort_field
+          description: Field used to sort the list (`title`, `description`, `updated`, or `created`).
           schema:
             $ref: '../model/components.schema.yaml#/components/schemas/SortFieldTimeline'
         - in: query
@@ -62,12 +64,13 @@ paths:
             type: string
         - in: query
           name: status
+          description: Filter by timeline lifecycle state (`active`, `draft`, or `immutable`).
           schema:
             $ref: '../model/components.schema.yaml#/components/schemas/TimelineStatus'
             nullable: true
       responses:
         '200':
-          description: Indicates that the (template) Timelines were found and returned.
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -102,8 +105,25 @@ paths:
                     type: number
                     description: The amount of custom Timeline templates in the results
                     example: 2
+              examples:
+                timelineList:
+                  summary: Example list response
+                  value:
+                    timeline:
+                      - savedObjectId: 15c1929b-0af7-42bd-85a8-56e234cc7c4e
+                        version: WzE0LDFd
+                        title: Phishing investigation
+                        timelineType: default
+                        status: active
+                        updated: 1741344876825
+                    totalCount: 1
+                    defaultTimelineCount: 1
+                    templateTimelineCount: 0
+                    favoriteCount: 0
+                    elasticTemplateTimelineCount: 0
+                    customTemplateTimelineCount: 0
         '400':
-          description: Bad request. The user supplied invalid data.
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -111,8 +131,14 @@ paths:
                 properties:
                   body:
                     type: string
-                    description: The error message
+                    description: The error message.
                     example: get timeline error
                   statusCode:
                     type: number
-                    example: 405
+                    example: 400
+              examples:
+                badRequest:
+                  summary: Error response body
+                  value:
+                    body: get timeline error
+                    statusCode: 400

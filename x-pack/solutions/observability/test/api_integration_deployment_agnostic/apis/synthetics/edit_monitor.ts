@@ -20,6 +20,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { omitResponseTimestamps, omitEmptyValues } from './helpers/monitor';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
+import { cleanSyntheticsTestData } from '../../services/synthetics_private_location';
 import { LOCAL_PUBLIC_LOCATION } from './helpers/location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -71,7 +72,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
       await supertestWithAuth.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       await supertest
@@ -84,7 +85,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
     });
 
     it('edits the monitor', async () => {

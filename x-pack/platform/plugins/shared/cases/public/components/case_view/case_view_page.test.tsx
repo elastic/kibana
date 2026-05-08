@@ -109,6 +109,7 @@ describe('CaseViewPage', () => {
           <div data-test-subj="test-case-view-events-content">{'Events content'}</div>
         ),
       }),
+      schemaValidator: () => {},
     });
   });
 

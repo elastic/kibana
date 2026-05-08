@@ -40,6 +40,7 @@
             "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "BatcherConfig",
             "trackAdoption": false,
             "isRequired": true
           }

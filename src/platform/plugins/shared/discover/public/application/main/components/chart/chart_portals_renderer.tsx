@@ -213,7 +213,7 @@ const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) =
     setUnifiedHistogramApi(unifiedHistogram.api);
   }, [setUnifiedHistogramApi, unifiedHistogram.api]);
 
-  const { renderCustomChartToggleActions } = useUnifiedHistogramCommon({
+  const { renderToggleActions } = useUnifiedHistogramCommon({
     currentTabId,
     layoutProps: unifiedHistogram.layoutProps,
     panelsToggle,
@@ -226,7 +226,7 @@ const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) =
   return (
     <UnifiedHistogramChart
       {...unifiedHistogram.chartProps}
-      renderCustomChartToggleActions={renderCustomChartToggleActions}
+      renderToggleActions={renderToggleActions}
     />
   );
 };
@@ -280,7 +280,7 @@ const CustomChartSectionWrapper = ({
     ]
   );
 
-  const { renderCustomChartToggleActions } = useUnifiedHistogramCommon({
+  const { renderToggleActions } = useUnifiedHistogramCommon({
     currentTabId,
     layoutProps,
     panelsToggle,
@@ -306,7 +306,7 @@ const CustomChartSectionWrapper = ({
       {chartSectionConfig.renderChartSection({
         histogramCss,
         chartToolbarCss,
-        renderToggleActions: renderCustomChartToggleActions,
+        renderToggleActions,
         fetch$,
         fetchParams,
         isComponentVisible,

@@ -31,6 +31,6 @@ export function registerDatastreams({
   }
 }
 
-function getDataStreamResourceDefinitions(): ResourceDefinition[] {
+export function getDataStreamResourceDefinitions(): ResourceDefinition[] {
   return [getAlertEventsResourceDefinition(), getAlertActionsResourceDefinition()];
 }

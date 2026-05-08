@@ -82,8 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         await testSubjects.existOrFail('showQueryBarMenu');
-        // TODO: use timePicker page object instead of hard-coding test subjects (handles both old and new picker)
-        await testSubjects.existOrFail('superDatePickerToggleQuickMenuButton');
+        expect(await PageObjects.timePicker.timePickerExists()).to.be(true);
         await testSubjects.existOrFail('addFilter');
         await testSubjects.existOrFail('dscViewModeDocumentButton');
         await testSubjects.existOrFail('unifiedHistogramChart');
@@ -105,8 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.existOrFail('fieldListFiltersFieldSearch');
         await testSubjects.existOrFail('ESQLEditor');
-        // TODO: use timePicker page object instead of hard-coding test subjects (handles both old and new picker)
-        await testSubjects.existOrFail('superDatePickerToggleQuickMenuButton');
+        expect(await PageObjects.timePicker.timePickerExists()).to.be(true);
 
         await testSubjects.missingOrFail('showQueryBarMenu');
         await testSubjects.missingOrFail('addFilter');

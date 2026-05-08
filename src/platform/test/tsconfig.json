@@ -13,8 +13,6 @@
     "**/*",
     "../../../typings/**/*",
     "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
-    "api_integration/apis/logstash/pipeline/fixtures/*.json",
-    "api_integration/apis/logstash/pipelines/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json"
     , "../../../x-pack/platform/test/serverless/functional/test_suites/saved_objects_management/export_transform copy.ts"  ],

@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 import { EventLogListStatusFilter } from './event_log_list_status_filter';
 import { getIsExperimentalFeatureEnabled } from '../../../../../common/get_experimental_features';
 
@@ -27,45 +29,54 @@ describe('event_log_list_status_filter', () => {
   });
 
   it('renders correctly', () => {
-    const wrapper = mountWithIntl(
+    const { container } = renderWithI18n(
       <EventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
     );
 
-    expect(wrapper.find(EuiFilterSelectItem).exists()).toBeFalsy();
-    expect(wrapper.find(EuiFilterButton).exists()).toBeTruthy();
+    expect(screen.queryByRole('option')).not.toBeInTheDocument();
+    expect(screen.getByRole('button')).toBeInTheDocument();
 
-    expect(wrapper.find('.euiNotificationBadge').last().text()).toEqual('0');
+    const badge = container.querySelector('.euiNotificationBadge');
+    expect(badge).toHaveTextContent('0');
   });
 
-  it('can open the popover correctly', () => {
-    const wrapper = mountWithIntl(
+  it('can open the popover correctly', async () => {
+    const { container, rerender } = renderWithI18n(
       <EventLogListStatusFilter selectedOptions={[]} onChange={onChangeMock} />
     );
 
-    wrapper.find(EuiFilterButton).find('button').simulate('click');
+    await userEvent.click(screen.getByRole('button'));
 
-    const statusItems = wrapper.find(EuiFilterSelectItem);
-    expect(statusItems.length).toEqual(4);
+    expect(screen.getAllByRole('option')).toHaveLength(4);
 
-    statusItems.at(0).simulate('click');
+    await userEvent.click(screen.getAllByRole('option')[0]);
     expect(onChangeMock).toHaveBeenCalledWith(['success']);
 
-    wrapper.setProps({
-      selectedOptions: ['success'],
-    });
+    rerender(
+      <I18nProvider>
+        <EventLogListStatusFilter selectedOptions={['success']} onChange={onChangeMock} />
+      </I18nProvider>
+    );
 
-    expect(wrapper.find('.euiNotificationBadge').last().text()).toEqual('1');
+    const badge1 = container.querySelector('.euiNotificationBadge');
+    expect(badge1).toHaveTextContent('1');
 
-    statusItems.at(1).simulate('click');
+    await userEvent.click(screen.getAllByRole('option')[1]);
     expect(onChangeMock).toHaveBeenCalledWith(['success', 'failure']);
 
-    wrapper.setProps({
-      selectedOptions: ['success', 'failure'],
-    });
+    rerender(
+      <I18nProvider>
+        <EventLogListStatusFilter
+          selectedOptions={['success', 'failure']}
+          onChange={onChangeMock}
+        />
+      </I18nProvider>
+    );
 
-    expect(wrapper.find('.euiNotificationBadge').last().text()).toEqual('2');
+    const badge2 = container.querySelector('.euiNotificationBadge');
+    expect(badge2).toHaveTextContent('2');
 
-    statusItems.at(0).simulate('click');
+    await userEvent.click(screen.getAllByRole('option')[0]);
     expect(onChangeMock).toHaveBeenCalledWith(['failure']);
   });
 });

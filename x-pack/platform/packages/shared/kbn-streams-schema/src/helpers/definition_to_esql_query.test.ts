@@ -44,17 +44,13 @@ const alwaysCondition: Condition = { always: {} };
 
 describe('definitionToESQLQuery', () => {
   describe('basic query structure', () => {
-    it('generates SET directive, FROM parent view, and WHERE clause', async () => {
+    it('generates FROM parent view and WHERE clause', async () => {
       const result = await definitionToESQLQuery({
         definition: createDraftDefinition(),
         routingCondition: eqCondition,
       });
       expect(result).toBe(
-        [
-          'SET unmapped_fields="LOAD";',
-          'FROM $.logs.otel',
-          '| WHERE `service.name` == "nginx"',
-        ].join('\n')
+        ['FROM $.logs.otel', '| WHERE COALESCE(`service.name` == "nginx", FALSE)'].join('\n')
       );
     });
 
@@ -63,7 +59,7 @@ describe('definitionToESQLQuery', () => {
         definition: createDraftDefinition(),
         routingCondition: alwaysCondition,
       });
-      expect(result).toBe(['SET unmapped_fields="LOAD";', 'FROM $.logs.otel'].join('\n'));
+      expect(result).toBe('FROM $.logs.otel');
     });
 
     it('supports compound AND routing conditions', async () => {
@@ -73,11 +69,18 @@ describe('definitionToESQLQuery', () => {
       });
       expect(result).toBe(
         [
-          'SET unmapped_fields="LOAD";',
           'FROM $.logs.otel',
-          '| WHERE `service.name` == "nginx" AND `log.level` == "error"',
+          '| WHERE COALESCE(`service.name` == "nginx", FALSE) AND COALESCE(`log.level` == "error", FALSE)',
         ].join('\n')
       );
+    });
+
+    it('does not include SET directives (not supported in view definitions)', async () => {
+      const result = await definitionToESQLQuery({
+        definition: createDraftDefinition(),
+        routingCondition: eqCondition,
+      });
+      expect(result).not.toContain('SET');
     });
   });
 
@@ -88,11 +91,7 @@ describe('definitionToESQLQuery', () => {
         routingCondition: eqCondition,
       });
       expect(result).toBe(
-        [
-          'SET unmapped_fields="LOAD";',
-          'FROM $.logs.otel.nginx',
-          '| WHERE `service.name` == "nginx"',
-        ].join('\n')
+        ['FROM $.logs.otel.nginx', '| WHERE COALESCE(`service.name` == "nginx", FALSE)'].join('\n')
       );
     });
 
@@ -116,9 +115,8 @@ describe('definitionToESQLQuery', () => {
       });
       expect(result).toBe(
         [
-          'SET unmapped_fields="LOAD";',
           'FROM $.logs.otel',
-          '| WHERE `service.name` == "nginx"',
+          '| WHERE COALESCE(`service.name` == "nginx", FALSE)',
           '| WHERE NOT(old_field IS NULL)',
           '  | WHERE new_field IS NULL',
           '  | EVAL new_field = old_field',
@@ -127,17 +125,13 @@ describe('definitionToESQLQuery', () => {
       );
     });
 
-    it('produces only SET + FROM + WHERE when steps are empty', async () => {
+    it('produces only FROM + WHERE when steps are empty', async () => {
       const result = await definitionToESQLQuery({
         definition: createDraftDefinition({ steps: [] }),
         routingCondition: eqCondition,
       });
       expect(result).toBe(
-        [
-          'SET unmapped_fields="LOAD";',
-          'FROM $.logs.otel',
-          '| WHERE `service.name` == "nginx"',
-        ].join('\n')
+        ['FROM $.logs.otel', '| WHERE COALESCE(`service.name` == "nginx", FALSE)'].join('\n')
       );
     });
   });

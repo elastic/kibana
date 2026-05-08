@@ -11,12 +11,14 @@ import { BehaviorSubject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import { IntegrationManagement } from './integration_management';
+import { AutomaticImportTelemetryEventType } from '../../../common/telemetry/types';
 
 const mockNavigateToApp = jest.fn();
 const mockNavigateToUrl = jest.fn();
 const mockGetUrlForApp = jest.fn(() => '/mock-integrations-url');
 const mockReportCancelButtonClicked = jest.fn();
 const mockReportDoneButtonClicked = jest.fn();
+const mockReportEvent = jest.fn();
 const mockUseGetIntegrationById = jest.fn();
 const mockDeleteIntegrationMutateAsync = jest.fn().mockResolvedValue(undefined);
 const mockCreateUpdateIntegrationMutateAsync = jest.fn().mockResolvedValue(undefined);
@@ -47,6 +49,9 @@ jest.mock('../../common/hooks/use_kibana', () => ({
       licensing: {
         license$: mockLicense$,
       },
+      telemetry: {
+        reportEvent: mockReportEvent,
+      },
     },
   }),
 }));
@@ -76,12 +81,16 @@ jest.mock('../../common', () => ({
       licensing: {
         license$: mockLicense$,
       },
+      telemetry: {
+        reportEvent: mockReportEvent,
+      },
     },
   }),
 }));
 
 jest.mock('../telemetry_context', () => ({
   useTelemetry: () => ({
+    sessionId: 'test-session-id',
     reportCancelButtonClicked: mockReportCancelButtonClicked,
     reportDoneButtonClicked: mockReportDoneButtonClicked,
   }),
@@ -317,5 +326,29 @@ describe('IntegrationManagement telemetry', () => {
     });
 
     expect(mockNavigateToApp).toHaveBeenCalledWith('integrations', expect.any(Object));
+  });
+
+  it('fires CreateIntegrationPageLoaded on mount for create route', () => {
+    renderComponent('/create');
+
+    expect(mockReportEvent).toHaveBeenCalledWith(
+      AutomaticImportTelemetryEventType.CreateIntegrationPageLoaded,
+      expect.objectContaining({ sessionId: 'test-session-id' })
+    );
+  });
+
+  it('fires EditIntegrationPageLoaded on mount for edit route', () => {
+    mockUseGetIntegrationById.mockReturnValue({
+      integration: undefined,
+      isLoading: false,
+      isError: false,
+    });
+
+    renderComponent('/edit/int-1');
+
+    expect(mockReportEvent).toHaveBeenCalledWith(
+      AutomaticImportTelemetryEventType.EditIntegrationPageLoaded,
+      expect.objectContaining({ sessionId: 'test-session-id', integrationId: 'int-1' })
+    );
   });
 });

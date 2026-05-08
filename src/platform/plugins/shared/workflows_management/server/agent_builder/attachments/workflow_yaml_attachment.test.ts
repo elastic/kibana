@@ -13,7 +13,7 @@ import {
   workflowTools,
 } from '../../../common/agent_builder/constants';
 import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
-import type { AgentBuilderPluginSetupContract } from '../../types';
+import type { AgentBuilderPluginSetup } from '../../types';
 
 interface RegisteredAttachmentType {
   id: string;
@@ -49,7 +49,7 @@ const registerAndCapture = (api: Partial<WorkflowsManagementApi> = {}) => {
         registeredType = type as RegisteredAttachmentType;
       }),
     },
-  } as unknown as AgentBuilderPluginSetupContract;
+  } as unknown as AgentBuilderPluginSetup;
 
   registerWorkflowYamlAttachment(mockAgentBuilder, api as WorkflowsManagementApi);
   return registeredType!;

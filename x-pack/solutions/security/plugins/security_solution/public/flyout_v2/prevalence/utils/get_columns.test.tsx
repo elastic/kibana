@@ -41,6 +41,20 @@ jest.mock('../../../common/components/event_details/use_action_cell_data_provide
   getDataProviderAnd: jest.fn(() => ({ id: 'mock-and-provider' })),
 }));
 
+const MockChildLink = ({
+  field,
+  value,
+  children,
+}: {
+  field: string;
+  value: string;
+  children?: React.ReactNode;
+}) => (
+  <div data-test-subj="mockChildLink" data-field={field} data-value={value}>
+    {children}
+  </div>
+);
+
 const defaultRow: PrevalenceDetailsRow = {
   field: 'host.name',
   values: ['host-1'],
@@ -315,6 +329,34 @@ describe('getColumns', () => {
       renderComponent(callRender(valueColumn, row));
 
       expect(screen.getByText('value-one')).toBeInTheDocument();
+    });
+
+    it('wraps each value in a ChildLink when RenderChildLink is provided', () => {
+      const columns = getColumns(
+        null as unknown as CellActionRenderer,
+        true,
+        'alerts-page',
+        MockChildLink
+      );
+      const valueColumn = columns[1];
+      const row = { ...defaultRow, field: 'source.ip', values: ['10.0.0.1'] };
+
+      renderComponent(callRender(valueColumn, row));
+
+      const previewLink = screen.getByTestId('mockChildLink');
+      expect(previewLink).toHaveAttribute('data-field', 'source.ip');
+      expect(previewLink).toHaveAttribute('data-value', '10.0.0.1');
+    });
+
+    it('renders plain text without ChildLink when RenderChildLink is not provided', () => {
+      const columns = getColumns(null as unknown as CellActionRenderer, true, 'alerts-page');
+      const valueColumn = columns[1];
+      const row = { ...defaultRow, values: ['plain-value'] };
+
+      renderComponent(callRender(valueColumn, row));
+
+      expect(screen.getByText('plain-value')).toBeInTheDocument();
+      expect(screen.queryByTestId('mockChildLink')).not.toBeInTheDocument();
     });
 
     it('renders one item per value', () => {

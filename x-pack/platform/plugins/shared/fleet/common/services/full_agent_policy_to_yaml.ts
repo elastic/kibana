@@ -35,7 +35,11 @@ export const fullAgentPolicyToYaml = (
   apiKey?: string
 ): string => {
   const sortYamlKeys = createYamlKeysSorter(POLICY_KEYS_ORDER, yaml);
-  const yamlText = toYaml(policy, { sortMapEntries: sortYamlKeys, strict: false }, yaml);
+  const yamlText = toYaml(
+    policy,
+    { sortMapEntries: sortYamlKeys, strict: false, schema: 'yaml-1.1' },
+    yaml
+  );
   const formattedYml = apiKey ? replaceApiKey(yamlText, apiKey) : yamlText;
 
   if (!policy?.secret_references?.length) return formattedYml;

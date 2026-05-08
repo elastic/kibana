@@ -20,7 +20,6 @@ import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/co
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { registerScriptsLibraryRoutes } from './endpoint/routes/scripts_library';
-import { registerAgents } from './agent_builder/agents';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
 import { registerTools } from './agent_builder/tools/register_tools';
 import { registerSkills } from './agent_builder/skills/register_skills';
@@ -56,14 +55,13 @@ import { registerDeprecations } from './deprecations';
 import {
   APP_ID,
   APP_UI_ID,
-  CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
   DEFAULT_ALERTS_INDEX,
   DEFAULT_DETECTIONS_CLOSE_REASONS_KEY,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   SERVER_APP_ID,
   CASE_ATTACHMENT_INDICATOR_TYPE_ID,
 } from '../common/constants';
-import { getEventAttachmentType } from './cases/attachments/event';
+import { registerCaseAttachments } from './cases/attachments/register';
 import { DefaultClosingReasonSchema } from '../common/types';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
@@ -168,12 +166,10 @@ import { AIValueReportLocatorDefinition } from '../common/locators/ai_value_repo
 import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
+import { registerWorkflowSteps } from './workflows/step_types';
 import { registerWatchlistMaintainer } from './lib/entity_analytics/watchlists/maintainer/register_watchlist_maintainer';
 import { registerEndpointExceptionsRoutes } from './endpoint/routes/endpoint_exceptions_per_policy_opt_in';
-import {
-  initializeEndpointExceptionsPerPolicyOptInStatus,
-  REFERENCE_DATA_SAVED_OBJECT_TYPE,
-} from './endpoint/lib/reference_data';
+import { initializeEndpointExceptionsPerPolicyOptInStatus } from './endpoint/lib/reference_data';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -275,9 +271,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
     registerAttachments(agentBuilder).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
-    });
-    registerAgents(agentBuilder, core, logger).catch((error) => {
-      this.logger.error(`Error registering security agent: ${error}`);
     });
     registerSkills({
       agentBuilder,
@@ -478,6 +471,17 @@ export class Plugin implements ISecuritySolutionPlugin {
         taskType: 'chat_completion',
         recommendedEndpoints: [],
       });
+
+      if (experimentalFeatures.leadGenerationEnabled) {
+        plugins.searchInferenceEndpoints.features.register({
+          parentFeatureId: 'security_search_inference_parent',
+          featureId: 'lead_generation',
+          featureName: 'Threat Hunting Lead Generation',
+          featureDescription: 'Lead generation inference endpoint configuration',
+          taskType: 'chat_completion',
+          recommendedEndpoints: [],
+        });
+      }
     }
 
     const requestContextFactory = new RequestContextFactory({
@@ -524,10 +528,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
-    plugins.cases.attachmentFramework.registerExternalReference({
-      id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
-    });
-    plugins.cases.attachmentFramework.registerUnified(getEventAttachmentType());
+    registerCaseAttachments(plugins.cases.attachmentFramework);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
       const [coreStart] = await core.getStartServices();
@@ -589,6 +590,10 @@ export class Plugin implements ISecuritySolutionPlugin {
         osqueryCreateActionService: plugins.osquery?.createActionService,
       }),
       endpointAppContextService: this.endpointAppContextService,
+      getEntityStore: async () => {
+        const [, startPlugins] = await core.getStartServices();
+        return startPlugins.entityStore;
+      },
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
@@ -807,6 +812,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.registerAgentBuilderAttachmentsAndTools(plugins, core, this.logger);
 
+    if (plugins.workflowsExtensions) {
+      registerWorkflowSteps(plugins.workflowsExtensions, core);
+    }
+
     setupAlertsCapabilitiesSwitcher({
       core,
       logger: this.logger,
@@ -830,16 +839,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { config, logger, productFeaturesService } = this;
 
     initializeEndpointExceptionsPerPolicyOptInStatus(
-      new SavedObjectsClient(
-        core.savedObjects.createInternalRepository([REFERENCE_DATA_SAVED_OBJECT_TYPE])
-      ),
+      core.savedObjects,
       config.experimentalFeatures,
       logger
-    ).catch((error) => {
-      this.logger.error(
-        `Error initializing Endpoint Exceptions per-policy opt-in status: ${error}`
-      );
-    });
+    ).catch(() => {});
 
     this.ruleMonitoringService.start(core, plugins);
 

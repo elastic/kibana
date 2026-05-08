@@ -513,7 +513,7 @@ export const createNavigationTree = ({
               children: [
                 { link: 'management:rules', breadcrumbStatus: 'hidden' },
                 { link: 'management:episodes', breadcrumbStatus: 'hidden' },
-                { link: 'management:notification_policies', breadcrumbStatus: 'hidden' },
+                { link: 'management:action_policies', breadcrumbStatus: 'hidden' },
               ],
             },
             showAlertingV2
@@ -529,7 +529,7 @@ export const createNavigationTree = ({
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'management:triggersActionsAlerts' },
-              { link: 'management:triggersActions' },
+              { link: 'rules' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
               { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
             ],

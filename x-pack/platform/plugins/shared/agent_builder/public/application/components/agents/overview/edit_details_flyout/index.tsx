@@ -48,7 +48,6 @@ const { editDetails: flyoutLabels } = labels.agentOverview;
 interface EditDetailsFlyoutProps {
   agent: AgentDefinition;
   onClose: () => void;
-  isExperimentalFeaturesEnabled: boolean;
   canChangeVisibility: boolean;
   showWorkflowSection: boolean;
 }
@@ -56,7 +55,6 @@ interface EditDetailsFlyoutProps {
 export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
   agent,
   onClose,
-  isExperimentalFeaturesEnabled,
   canChangeVisibility,
   showWorkflowSection,
 }) => {
@@ -158,16 +156,16 @@ export const EditDetailsFlyout: React.FC<EditDetailsFlyoutProps> = ({
           <div css={contentPadding}>
             <IdentificationSection />
 
-            <EuiHorizontalRule margin="l" />
+            <EuiHorizontalRule margin="xl" />
             <AccessSection canChangeVisibility={canChangeVisibility} />
 
-            <EuiHorizontalRule margin="l" />
+            <EuiHorizontalRule margin="xl" />
             <CustomizationSection showWorkflowSection={showWorkflowSection} />
 
-            <EuiHorizontalRule margin="l" />
+            <EuiHorizontalRule margin="xl" />
             <CustomInstructionsSection />
 
-            <EuiHorizontalRule margin="l" />
+            <EuiHorizontalRule margin="xl" />
             <TagsSection />
           </div>
         </EuiFlyoutBody>

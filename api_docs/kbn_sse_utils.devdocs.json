@@ -71,6 +71,7 @@
                 "lineNumber": 23,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "TCode",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -105,6 +106,7 @@
                 "lineNumber": 23,
                 "columnNumber": 52,
                 "deprecated": false,
+                "docsReferencedTypeName": "TMeta",
                 "trackAdoption": false,
                 "isRequired": true
               }

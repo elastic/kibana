@@ -6,16 +6,18 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { FeatureWithFilter } from '@kbn/streams-schema';
-import { getDiverseSampleDocuments, getSampleDocuments } from '@kbn/ai-tools';
-import { conditionToQueryDsl, getConditionFields } from '@kbn/streamlang';
-import type { Condition } from '@kbn/streamlang';
+import { getDiverseSampleDocuments, getSampleDocumentsEsql } from '@kbn/ai-tools';
+import { conditionToESQLAst } from '@kbn/streamlang';
 import { getEntityFilters } from './get_entity_filters';
 import { parseError } from '../../../streams/errors/parse_error';
 
 const EMPTY_SAMPLE: { hits: Array<SearchHit<Record<string, unknown>>> } = { hits: [] };
+
+type SamplingStrategy = 'entity-filtered' | 'diverse' | 'random';
 
 export async function fetchSampleDocuments({
   esClient,
@@ -28,6 +30,7 @@ export async function fetchSampleDocuments({
   entityFilteredRatio,
   diverseRatio,
   maxEntityFilters,
+  diverseOffset = 0,
 }: {
   esClient: ElasticsearchClient;
   index: string;
@@ -38,29 +41,53 @@ export async function fetchSampleDocuments({
   size: number;
   entityFilteredRatio: number;
   diverseRatio: number;
+  diverseOffset?: number;
   maxEntityFilters: number;
 }) {
+  if (entityFilteredRatio < 0 || diverseRatio < 0) {
+    throw new Error(
+      `entityFilteredRatio (${entityFilteredRatio}) and diverseRatio (${diverseRatio}) must be >= 0`
+    );
+  }
+  if (entityFilteredRatio + diverseRatio > 1) {
+    throw new Error(
+      `entityFilteredRatio (${entityFilteredRatio}) + diverseRatio (${diverseRatio}) must be <= 1`
+    );
+  }
+
   const entityFilters = getEntityFilters(features, maxEntityFilters);
 
   if (entityFilters.length === 0) {
     const diverseSize = Math.round(size * diverseRatio);
 
     const [{ hits: diverseHits }, { hits: randomHits }] = await Promise.all([
-      getDiverseSampleDocuments({ esClient, index, start, end, size: diverseSize }),
-      getSampleDocuments({ esClient, index, start, end, size }),
+      diverseSize > 0
+        ? getDiverseSampleDocuments({
+            esClient,
+            index,
+            start,
+            end,
+            size: diverseSize,
+            offset: diverseOffset,
+          }).catch((err) => {
+            logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
+            return EMPTY_SAMPLE;
+          })
+        : Promise.resolve(EMPTY_SAMPLE),
+      getSampleDocumentsEsql({ esClient, index, start, end, sampleSize: size }),
     ]);
 
     const { documents, bucketCounts } = mergeDocuments(
       [
-        { hits: diverseHits, cap: diverseSize },
-        { hits: randomHits, cap: size },
+        { hits: diverseHits, cap: diverseSize, label: 'diverse' },
+        { hits: randomHits, cap: size, label: 'random' },
       ],
       size
     );
 
     logger.debug(
       () =>
-        `Sampled ${documents.length} documents (${bucketCounts[0]} diverse, ${bucketCounts[1]} random). No entities available to filter by.`
+        `Sampled ${documents.length} documents (${bucketCounts.diverse} diverse, ${bucketCounts.random} random). No entities available to filter by.`
     );
 
     return {
@@ -68,57 +95,66 @@ export async function fetchSampleDocuments({
       totalFilters: 0,
       filtersCapped: false,
       hasFilteredDocuments: false,
+      nextOffset: diverseOffset + diverseHits.length,
     };
   }
 
-  const runtimeMappings = await getRuntimeMappings(esClient, index, entityFilters);
   const entityFilteredSize = Math.round(size * entityFilteredRatio);
   const diverseSize = Math.round(size * diverseRatio);
+  const whereCondition = entityFilters
+    .map((filter) => conditionToESQLAst({ not: filter }))
+    .reduce((acc, current) => esql.exp`${acc} AND ${current}`);
 
   const [{ hits: entityFilteredHits }, { hits: diverseHits }, { hits: randomHits }] =
     await Promise.all([
-      getSampleDocuments({
+      getSampleDocumentsEsql({
         esClient,
         index,
         start,
         end,
-        size: entityFilteredSize,
-        filter: { bool: { must_not: entityFilters.map(conditionToQueryDsl) } },
-        runtime_mappings: runtimeMappings,
+        sampleSize: entityFilteredSize,
+        whereCondition,
+        loadUnmappedFields: true,
       }).catch((err) => {
         logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
         return EMPTY_SAMPLE;
       }),
-      getDiverseSampleDocuments({
+      diverseSize > 0
+        ? getDiverseSampleDocuments({
+            esClient,
+            index,
+            start,
+            end,
+            size: diverseSize + entityFilteredSize,
+            offset: diverseOffset,
+          }).catch((err) => {
+            logger.warn(`Diverse sampling query failed: ${parseError(err).message}`);
+            return EMPTY_SAMPLE;
+          })
+        : Promise.resolve(EMPTY_SAMPLE),
+      getSampleDocumentsEsql({
         esClient,
         index,
         start,
         end,
-        size: diverseSize + entityFilteredSize,
-      }),
-      getSampleDocuments({
-        esClient,
-        index,
-        start,
-        end,
-        size,
+        sampleSize: size,
       }),
     ]);
 
   const { documents, bucketCounts } = mergeDocuments(
     [
-      { hits: entityFilteredHits, cap: entityFilteredSize },
-      { hits: diverseHits, cap: diverseSize },
-      { hits: randomHits, cap: size },
+      { hits: entityFilteredHits, cap: entityFilteredSize, label: 'entity-filtered' },
+      { hits: diverseHits, cap: diverseSize, label: 'diverse' },
+      { hits: randomHits, cap: size, label: 'random' },
     ],
     size
   );
 
   logger.debug(
     () =>
-      `Sampled ${documents.length} documents (${bucketCounts[0]} entity-filtered, ${
-        bucketCounts[1]
-      } diverse, ${bucketCounts[2]} random). ${entityFilters.length} entity filters applied (${
+      `Sampled ${documents.length} documents (${bucketCounts['entity-filtered']} entity-filtered, ${
+        bucketCounts.diverse
+      } diverse, ${bucketCounts.random} random). ${entityFilters.length} entity filters applied (${
         features.length - entityFilters.length
       } omitted):\n${JSON.stringify(entityFilters)}`
   );
@@ -128,6 +164,7 @@ export async function fetchSampleDocuments({
     totalFilters: features.length,
     filtersCapped: features.length > maxEntityFilters,
     hasFilteredDocuments: entityFilteredHits.length > 0,
+    nextOffset: diverseOffset + Math.min(diverseHits.length, diverseSize),
   };
 }
 
@@ -135,15 +172,19 @@ function mergeDocuments(
   prioritizedHits: Array<{
     hits: Array<SearchHit<Record<string, unknown>>>;
     cap: number;
+    label: SamplingStrategy;
   }>,
   totalSize: number
-): { documents: Array<SearchHit<Record<string, unknown>>>; bucketCounts: number[] } {
+): {
+  documents: Array<SearchHit<Record<string, unknown>>>;
+  bucketCounts: Record<SamplingStrategy, number>;
+} {
   const seen = new Set<string>();
   const result: Array<SearchHit<Record<string, unknown>>> = [];
-  const bucketCounts = prioritizedHits.map(() => 0);
+  const bucketCounts = { 'entity-filtered': 0, diverse: 0, random: 0 };
 
   for (let i = 0; i < prioritizedHits.length; i++) {
-    const { hits, cap } = prioritizedHits[i];
+    const { hits, cap, label } = prioritizedHits[i];
     let added = 0;
     for (const hit of hits) {
       if (added >= cap || result.length >= totalSize) break;
@@ -152,28 +193,8 @@ function mergeDocuments(
       result.push(hit);
       added++;
     }
-    bucketCounts[i] = added;
+    bucketCounts[label] = added;
   }
 
   return { documents: result, bucketCounts };
-}
-
-async function getRuntimeMappings(
-  esClient: ElasticsearchClient,
-  index: string,
-  filters: Condition[]
-): Promise<Record<string, { type: 'keyword' }>> {
-  const usedFields = [
-    ...new Set(filters.flatMap((filter) => getConditionFields(filter).map(({ name }) => name))),
-  ];
-  if (usedFields.length === 0) {
-    return {};
-  }
-
-  const fieldCaps = await esClient.fieldCaps({ index, fields: usedFields });
-  return Object.fromEntries(
-    usedFields
-      .filter((field) => !fieldCaps.fields[field])
-      .map((field) => [field, { type: 'keyword' as const }])
-  );
 }

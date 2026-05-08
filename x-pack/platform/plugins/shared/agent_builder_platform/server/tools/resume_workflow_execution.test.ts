@@ -10,13 +10,11 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { resumeWorkflowExecutionTool } from './resume_workflow_execution';
 
-jest.mock('@kbn/agent-builder-genai-utils/tools/utils/workflows', () => ({
+jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
   getExecutionState: jest.fn(),
 }));
 
-const { getExecutionState } = jest.requireMock(
-  '@kbn/agent-builder-genai-utils/tools/utils/workflows'
-);
+const { getExecutionState } = jest.requireMock('@kbn/agent-builder-tools-base/workflows');
 
 describe('resumeWorkflowExecutionTool', () => {
   const createWorkflowsManagement = () => ({

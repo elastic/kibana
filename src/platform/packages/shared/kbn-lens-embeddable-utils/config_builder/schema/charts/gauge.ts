@@ -37,7 +37,7 @@ const gaugeStylingSchema = schema.object(
               meta: {
                 id: 'gaugeShapeBullet',
                 title: 'Shape (Bullet)',
-                description: 'Bullet gauge shape',
+                description: 'Bullet gauge shape.',
               },
             }
           ),
@@ -53,7 +53,7 @@ const gaugeStylingSchema = schema.object(
               meta: {
                 id: 'gaugeShapeCircular',
                 title: 'Shape (Circular)',
-                description: 'Circular gauge shape',
+                description: 'Circular gauge shape.',
               },
             }
           ),
@@ -71,7 +71,7 @@ const gaugeStylingSchema = schema.object(
   }
 );
 
-const gaugeStateMetricInnerNoESQLOpsSchema = {
+const gaugeConfigMetricInnerNoESQLOpsSchema = {
   /**
    * Minimum value for the gauge
    * Note: label, format and other visual options are ignored
@@ -89,7 +89,7 @@ const gaugeStateMetricInnerNoESQLOpsSchema = {
   goal: schema.maybe(metricOperationDefinitionSchema),
 };
 
-const gaugeStateMetricInnerESQLOpsSchema = {
+const gaugeConfigMetricInnerESQLOpsSchema = {
   /**
    * Minimum value for the gauge
    */
@@ -104,7 +104,7 @@ const gaugeStateMetricInnerESQLOpsSchema = {
   goal: schema.maybe(esqlColumnSchema),
 };
 
-const gaugeStateMetricOptionsSchema = {
+const gaugeConfigMetricOptionsSchema = {
   /**
    * Title configuration
    */
@@ -113,11 +113,11 @@ const gaugeStateMetricOptionsSchema = {
       {
         visible: schema.maybe(
           schema.boolean({
-            meta: { description: 'Show the title' },
+            meta: { description: 'When `true`, displays the title.' },
             defaultValue: true,
           })
         ),
-        text: schema.maybe(schema.string({ meta: { description: 'Title text' } })),
+        text: schema.maybe(schema.string({ meta: { description: 'Title text.' } })),
       },
       { meta: { description: 'Title configuration' } }
     )
@@ -126,13 +126,14 @@ const gaugeStateMetricOptionsSchema = {
    * Subtitle
    */
   subtitle: schema.maybe(
-    schema.string({ meta: { description: 'Subtitle below the gauge value' } })
+    schema.string({ meta: { description: 'Subtitle below the gauge value.' } })
   ),
   /**
    * Color configuration
    */
   color: schema.maybe(
     schema.oneOf([colorByValueSchema, noColorSchema, autoColorSchema], {
+      meta: { description: 'Color configuration for the gauge fill.' },
       defaultValue: AUTO_COLOR,
     })
   ),
@@ -144,13 +145,13 @@ const gaugeStateMetricOptionsSchema = {
       {
         visible: schema.maybe(
           schema.boolean({
-            meta: { description: 'Show tick marks' },
+            meta: { description: 'When `true`, displays tick marks on the gauge.' },
             defaultValue: true,
           })
         ),
         mode: schema.maybe(
           schema.oneOf([schema.literal('auto'), schema.literal('bands')], {
-            meta: { description: 'Tick placement mode' },
+            meta: { description: 'Tick placement mode.' },
             defaultValue: 'bands',
           })
         ),
@@ -160,7 +161,7 @@ const gaugeStateMetricOptionsSchema = {
   ),
 };
 
-export const gaugeStateSchemaNoESQL = schema.object(
+export const gaugeConfigSchemaNoESQL = schema.object(
   {
     type: schema.literal('gauge'),
     ...sharedPanelInfoSchema,
@@ -171,15 +172,24 @@ export const gaugeStateSchemaNoESQL = schema.object(
     /**
      * Primary value configuration, must define operation.
      */
-    metric: mergeAllMetricsWithChartDimensionSchema({
-      ...gaugeStateMetricOptionsSchema,
-      ...gaugeStateMetricInnerNoESQLOpsSchema,
-    }),
+    metric: mergeAllMetricsWithChartDimensionSchema(
+      {
+        ...gaugeConfigMetricOptionsSchema,
+        ...gaugeConfigMetricInnerNoESQLOpsSchema,
+      },
+      'gaugeMetric'
+    ),
   },
-  { meta: { id: 'gaugeNoESQL', title: 'Gauge Chart (DSL)' } }
+  {
+    meta: {
+      id: 'gaugeNoESQL',
+      title: 'Gauge Chart (DSL)',
+      description: 'Gauge configuration using a data view.',
+    },
+  }
 );
 
-export const gaugeStateSchemaESQL = schema.object(
+export const gaugeConfigSchemaESQL = schema.object(
   {
     type: schema.literal('gauge'),
     ...sharedPanelInfoSchema,
@@ -190,17 +200,28 @@ export const gaugeStateSchemaESQL = schema.object(
      * Primary value configuration, must define operation.
      */
     metric: esqlColumnWithFormatSchema.extends({
-      ...gaugeStateMetricOptionsSchema,
-      ...gaugeStateMetricInnerESQLOpsSchema,
+      ...gaugeConfigMetricOptionsSchema,
+      ...gaugeConfigMetricInnerESQLOpsSchema,
     }),
   },
-  { meta: { id: 'gaugeESQL', title: 'Gauge Chart (ES|QL)' } }
+  {
+    meta: {
+      id: 'gaugeESQL',
+      title: 'Gauge Chart (ES|QL)',
+      description: 'Gauge configuration using an ES|QL query.',
+    },
+  }
 );
 
-export const gaugeStateSchema = objectUnion([gaugeStateSchemaNoESQL, gaugeStateSchemaESQL], {
-  meta: { id: 'gaugeChart', title: 'Gauge Chart' },
+export const gaugeConfigSchema = objectUnion([gaugeConfigSchemaNoESQL, gaugeConfigSchemaESQL], {
+  meta: {
+    id: 'gaugeChart',
+    title: 'Gauge Chart',
+    description:
+      'A gauge chart with a metric value and optional minimum, maximum, and goal markers, in bullet or circular shape.',
+  },
 });
 
-export type GaugeState = TypeOf<typeof gaugeStateSchema>;
-export type GaugeStateNoESQL = TypeOf<typeof gaugeStateSchemaNoESQL>;
-export type GaugeStateESQL = TypeOf<typeof gaugeStateSchemaESQL>;
+export type GaugeConfig = TypeOf<typeof gaugeConfigSchema>;
+export type GaugeConfigNoESQL = TypeOf<typeof gaugeConfigSchemaNoESQL>;
+export type GaugeConfigESQL = TypeOf<typeof gaugeConfigSchemaESQL>;

@@ -17,6 +17,7 @@ import {
   getDetectionAlertsApiService,
   getEntityAnalyticsApiService,
   getTimelineApiService,
+  getAttackDiscoveryApiService,
 } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 
@@ -67,6 +68,10 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
         log,
       });
       extendedApiServices.timeline = getTimelineApiService({
+        kbnClient,
+        log,
+      });
+      extendedApiServices.attackDiscovery = getAttackDiscoveryApiService({
         kbnClient,
         log,
       });

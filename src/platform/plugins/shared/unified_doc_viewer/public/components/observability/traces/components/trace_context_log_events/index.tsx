@@ -16,6 +16,7 @@ import { useLogsQuery } from '../../hooks/use_logs_query';
 import { createTraceContextWhereClause } from '../../common/create_trace_context_where_clause';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS, TRACES_DOC_VIEWER_EBT_DETAILS } from '../../ebt_constants';
 
 const logsTitle = i18n.translate('unifiedDocViewer.observability.traces.section.logs.title', {
   defaultMessage: 'Logs',
@@ -63,6 +64,10 @@ export function TraceContextLogEvents({
     esql: esqlQueryString,
     tabLabel: logsTitle,
     dataTestSubj: 'unifiedDocViewerLogsOpenInDiscoverButton',
+    ebt: {
+      element: TRACES_DOC_VIEWER_EBT_ELEMENTS.LOGS,
+      detail: TRACES_DOC_VIEWER_EBT_DETAILS.SPAN_DOC,
+    },
   });
 
   const actions = useMemo(
@@ -88,7 +93,11 @@ export function TraceContextLogEvents({
       actions={actions}
     >
       <div tabIndex={0} className="eui-yScrollWithShadows" style={{ maxHeight: '400px' }}>
-        <LogEventsComponent query={query} timeRange={savedSearchTimeRange} index={indexes.logs} />
+        <LogEventsComponent
+          nonHighlightingQuery={query}
+          timeRange={savedSearchTimeRange}
+          index={indexes.logs}
+        />
       </div>
     </ContentFrameworkSection>
   );

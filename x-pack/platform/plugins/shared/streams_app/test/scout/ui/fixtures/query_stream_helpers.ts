@@ -9,7 +9,7 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
   OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE,
 } from '@kbn/management-settings-ids';
-import type { KbnClient, EsClient, ApiServicesFixture } from '@kbn/scout';
+import type { KbnClient, EsClient, ApiServicesFixture, ScoutLogger } from '@kbn/scout';
 
 const ROOT_STREAMS = ['logs.ecs', 'logs.otel'];
 
@@ -90,19 +90,20 @@ export const deleteQueryStream = async (
   apiServices: ApiServicesFixture,
   esClient: EsClient,
   queryStreamName: string,
-  esqlViewName: string
+  esqlViewName: string,
+  log: ScoutLogger
 ) => {
   try {
     await apiServices.streams.deleteStream(queryStreamName);
-  } catch {
-    // Stream may not exist or already deleted
+  } catch (e) {
+    log.warning(`Failed to delete stream "${queryStreamName}": ${(e as Error).message}`);
   }
   try {
     await esClient.transport.request({
       method: 'DELETE',
       path: `/_query/view/${encodeURIComponent(esqlViewName)}`,
     });
-  } catch {
-    // View may already be removed by stream delete or not exist
+  } catch (e) {
+    log.warning(`Failed to delete view "${esqlViewName}": ${(e as Error).message}`);
   }
 };

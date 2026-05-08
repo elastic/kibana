@@ -8,7 +8,7 @@
  */
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import type { SmlTypeDefinition } from './types';
+import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
 import {
   WORKFLOW_SML_TYPE,
   WORKFLOW_YAML_ATTACHMENT_TYPE,

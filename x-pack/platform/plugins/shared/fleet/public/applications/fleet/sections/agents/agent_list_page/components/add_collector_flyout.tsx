@@ -43,6 +43,7 @@ import {
   useGetFleetServerHosts,
   useFleetStatus,
   useDefaultOutput,
+  useStartServices,
 } from '../../../../hooks';
 import { AgentEnrollmentConfirmationStep, usePollingAgentCount } from '../../../../components';
 import { useGetCreateApiKey } from '../../../../../../components/agent_enrollment_flyout/hooks';
@@ -133,6 +134,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   onClickViewAgents,
 }) => {
   const instanceUid = useRef(uuidv4());
+  const { cloud } = useStartServices();
 
   const {
     apiKeyEncoded: esApiKeyEncoded,
@@ -236,7 +238,9 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
             http: {
               endpoint: `${defaultFleetServerHost}/v1/opamp`,
               headers: { Authorization: `ApiKey ${token}` },
-              tls: { insecure_skip_verify: true },
+              ...(!cloud?.isCloudEnabled && {
+                tls: { insecure_skip_verify: true },
+              }),
             },
           },
           instance_uid: instanceUid.current,
@@ -297,6 +301,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
     defaultEsHost,
     token,
     esApiKeyEncoded,
+    cloud?.isCloudEnabled,
   ]);
 
   const steps = [

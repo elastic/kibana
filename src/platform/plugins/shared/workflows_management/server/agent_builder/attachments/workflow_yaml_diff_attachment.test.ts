@@ -9,7 +9,7 @@
 
 import { registerWorkflowYamlDiffAttachment } from './workflow_yaml_diff_attachment';
 import { WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE } from '../../../common/agent_builder/constants';
-import type { AgentBuilderPluginSetupContract } from '../../types';
+import type { AgentBuilderPluginSetup } from '../../types';
 
 interface RegisteredDiffType {
   id: string;
@@ -33,7 +33,7 @@ const registerAndCapture = () => {
         registeredType = type as RegisteredDiffType;
       }),
     },
-  } as unknown as AgentBuilderPluginSetupContract;
+  } as unknown as AgentBuilderPluginSetup;
 
   registerWorkflowYamlDiffAttachment(mockAgentBuilder);
   return registeredType!;
