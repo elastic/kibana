@@ -9,6 +9,7 @@ import type { ActionCreator } from 'typescript-fsa';
 
 import type { Filter, Query } from '@kbn/es-query';
 
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { UsersQueryProps } from '../types';
 import type { NavTab } from '../../../../common/components/navigation/types';
 
@@ -51,15 +52,17 @@ export type UsersDetailsNavTab = Partial<Record<KeyUsersDetailsNavTab, NavTab>>;
 export type UsersDetailsTabsProps = UserBodyComponentDispatchProps &
   UsersQueryProps & {
     indexNames: string[];
+    /**
+     * Filter for user identity (either generated from euidApi or fallback user.name filter)
+     */
     userDetailFilter: Filter[];
     /**
-     * Serialized ES query built with {@link UsersDetailsTabsProps.userDetailFilter} (identity fields
-     * when Entity Store v2). Used for the Events histogram, Authentications tab, and Risk tab; other
-     * tabs use {@link UsersDetailsTabsProps.filterQuery} only.
+     * Stringified filter query that includes the user identity filter
+     * (either generated from euidApi or fallback user.name filter) and any global filters applied on the page.
      */
-    userDetailsIdentityFilterQuery?: string;
     filterQuery?: string;
     type: usersModel.UsersType;
     entityId?: string;
+    entityRecord?: EntityStoreRecord | null;
     identityFields?: Record<string, string>;
   };

@@ -36,7 +36,8 @@ export const createSkippedRuleStatus = (
  */
 export const createFailedConversionStatus = (
   ruleId: string,
-  message: string
+  message: string,
+  errorCode?: string
 ): ProvisioningStatusDocs => ({
   type: UIAM_API_KEYS_PROVISIONING_STATUS_SAVED_OBJECT_TYPE,
   id: ruleId,
@@ -46,6 +47,7 @@ export const createFailedConversionStatus = (
     entityType: UiamApiKeyProvisioningEntityType.RULE,
     status: UiamApiKeyProvisioningStatus.FAILED,
     message,
+    ...(errorCode ? { errorCode } : {}),
   },
 });
 

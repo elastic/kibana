@@ -137,7 +137,7 @@ const getMaintainerRouteWithId = (route: string, id: string): string =>
 export const useEntityAnalyticsRoutes = () => {
   const { http, uiSettings } = useKibana().services;
   const isEntityStoreV2UiSettingEnabled =
-    uiSettings?.get<boolean>(FF_ENABLE_ENTITY_STORE_V2) ?? false;
+    uiSettings?.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false) ?? false;
   const isEntityAnalyticsEntityStoreV2Enabled = useIsExperimentalFeatureEnabled(
     'entityAnalyticsEntityStoreV2'
   );
