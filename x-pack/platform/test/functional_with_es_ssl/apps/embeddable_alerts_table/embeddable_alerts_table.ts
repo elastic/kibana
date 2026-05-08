@@ -75,7 +75,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await objectRemover.removeAll();
     });
 
-    describe('Config editor', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/258426
+    describe.skip('Config editor', () => {
       it('should show the solution picker when multiple solutions are available', async () => {
         await toasts.dismissIfExists();
         await dashboardAddPanel.openAddPanelFlyout();

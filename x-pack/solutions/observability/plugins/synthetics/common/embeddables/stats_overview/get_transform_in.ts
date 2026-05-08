@@ -7,7 +7,7 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
-import type { OverviewStatsEmbeddableState } from './types';
+import type { OverviewStatsEmbeddableState } from '../../types';
 
 export function getTransformIn(transformDrilldownsIn: DrilldownTransforms['transformIn']) {
   function transformIn(state: OverviewStatsEmbeddableState): {

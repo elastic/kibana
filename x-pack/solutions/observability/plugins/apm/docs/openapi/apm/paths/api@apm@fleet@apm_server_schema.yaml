@@ -1,5 +1,10 @@
 post:
   summary: Save APM server schema
+  deprecated: true
+  description: >
+    DEPRECATED: This endpoint is intended for internal use by Fleet integrations to push the APM Server configuration schema.
+    Do not use for new integrations.
+    It stores the provided schema object as a Kibana saved object. If Fleet migration is not available on the current deployment, the API returns a 404.
   operationId: saveApmServerSchema
   tags:
     - APM server schema
@@ -27,6 +32,10 @@ post:
           schema:
             type: object
             additionalProperties: false
+            description: The response body is intentionally empty for this endpoint.
+          examples:
+            saveApmServerSchemaResponseExample1:
+              $ref: '../components/examples/fleet_apm_server_schema_200_response1.yaml'
     '400':
       description: Bad Request response
       content:

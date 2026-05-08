@@ -12,7 +12,7 @@ import { FieldName } from '@kbn/unified-doc-viewer';
 import { FieldDescription, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { TableFieldValue } from './table_cell_value';
 import type { FieldRow } from './field_row';
-import { TermMatch, type UseTableFiltersReturn } from './table_filters';
+import { TermMatch, type UseTableFiltersCallbacksReturn } from './table_filters';
 import { getUnifiedDocViewerServices } from '../../plugin';
 
 interface TableCellProps {
@@ -22,7 +22,7 @@ interface TableCellProps {
   columnId: string;
   isDetails: boolean;
   isESQLMode: boolean;
-  onFindSearchTermMatch?: UseTableFiltersReturn['onFindSearchTermMatch'];
+  onFindSearchTermMatch?: UseTableFiltersCallbacksReturn['onFindSearchTermMatch'];
 }
 
 export const TableCell: React.FC<TableCellProps> = React.memo(
@@ -83,7 +83,7 @@ export const TableCell: React.FC<TableCellProps> = React.memo(
       return (
         <TableFieldValue
           field={name}
-          formattedValue={row.formattedAsHtml ?? ''}
+          formattedValue={row.formattedAsReact}
           rawValue={flattenedValue}
           ignoreReason={ignoredReason}
           isDetails={isDetails}

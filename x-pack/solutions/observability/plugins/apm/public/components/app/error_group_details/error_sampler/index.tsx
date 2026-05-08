@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
+import { isFailure, isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { ErrorSampleDetails } from './error_sample_detail';
@@ -92,6 +93,22 @@ export function ErrorSampler({ errorSampleIds, errorSamplesFetchStatus, occurren
       ],
     });
   }, [observabilityAIAssistant, errorData]);
+
+  if (isFailure(errorFetchStatus) || isFailure(errorSamplesFetchStatus)) {
+    return (
+      <EuiEmptyPrompt
+        iconType="warning"
+        color="danger"
+        title={
+          <h2>
+            {i18n.translate('xpack.apm.errorSampler.fetchFailed', {
+              defaultMessage: 'Failed to fetch error sample',
+            })}
+          </h2>
+        }
+      />
+    );
+  }
 
   if (loadingErrorSamplesData || !errorData) {
     return (

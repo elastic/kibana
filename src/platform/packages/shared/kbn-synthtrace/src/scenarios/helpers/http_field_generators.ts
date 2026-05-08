@@ -12,6 +12,8 @@
  * Provides realistic data for service, deployment, container, cloud, network, and other fields.
  */
 
+import { random, randomItem, weightedRandomItem, randomId } from './http_random';
+
 /**
  * Service versions following semantic versioning.
  */
@@ -109,6 +111,39 @@ export const TLS_CIPHERS = [
   'ECDHE-RSA-AES128-GCM-SHA256',
   'ECDHE-RSA-AES256-GCM-SHA384',
 ];
+
+/**
+ * Realistic HTTP referrers with weighted distribution.
+ * Mirrors real-world traffic sources: organic search, direct, internal
+ * navigation, social media, email campaigns, and aggregator sites.
+ */
+export const REFERRERS = [
+  { value: '-', weight: 30 },
+  { value: 'https://www.google.com/search?q=products', weight: 20 },
+  { value: 'https://www.google.com/', weight: 8 },
+  { value: 'https://www.bing.com/search?q=services', weight: 4 },
+  { value: 'https://duckduckgo.com/?q=app', weight: 2 },
+  { value: 'https://app.example.com/dashboard', weight: 8 },
+  { value: 'https://app.example.com/products', weight: 5 },
+  { value: 'https://app.example.com/settings', weight: 3 },
+  { value: 'https://t.co/abc123', weight: 3 },
+  { value: 'https://www.facebook.com/', weight: 3 },
+  { value: 'https://www.linkedin.com/feed', weight: 2 },
+  { value: 'https://www.reddit.com/r/technology', weight: 2 },
+  { value: 'https://mail.google.com/', weight: 3 },
+  { value: 'https://outlook.office365.com/', weight: 2 },
+  { value: 'https://news.ycombinator.com/', weight: 2 },
+  { value: 'https://github.com/', weight: 1 },
+  { value: 'https://stackoverflow.com/', weight: 1 },
+  { value: 'android-app://com.example.app', weight: 1 },
+];
+
+/**
+ * Generate a realistic referrer using weighted distribution.
+ */
+export function generateReferrer(): string {
+  return getWeightedRandomItem(REFERRERS).value;
+}
 
 /**
  * Network protocols.
@@ -267,26 +302,18 @@ export const URL_PATHS = {
 
 /**
  * Get a random item from an array.
+ * Delegates to the seeded PRNG when initialized.
  */
 export function getRandomItem<T>(items: T[]): T {
-  return items[Math.floor(Math.random() * items.length)];
+  return randomItem(items);
 }
 
 /**
  * Get a weighted random item from an array of weighted items.
+ * Delegates to the seeded PRNG when initialized.
  */
 export function getWeightedRandomItem<T extends { weight: number }>(items: T[]): T {
-  const totalWeight = items.reduce((sum, item) => sum + item.weight, 0);
-  let random = Math.random() * totalWeight;
-
-  for (const item of items) {
-    random -= item.weight;
-    if (random <= 0) {
-      return item;
-    }
-  }
-
-  return items[items.length - 1];
+  return weightedRandomItem(items);
 }
 
 /**
@@ -296,13 +323,13 @@ export function generateCloudMetadata() {
   const provider = getRandomItem(CLOUD_PROVIDERS);
   const region = getRandomItem(provider.regions);
   const instanceType = getRandomItem(provider.instanceTypes);
-  const instanceId = `i-${Math.random().toString(36).substring(2, 15)}`;
-  const projectId = `project-${Math.random().toString(36).substring(2, 10)}`;
+  const instanceId = randomId('i-', 13);
+  const projectId = randomId('project-', 8);
 
   return {
     'cloud.provider': provider.name,
     'cloud.region': region,
-    'cloud.availability_zone': `${region}${['a', 'b', 'c'][Math.floor(Math.random() * 3)]}`,
+    'cloud.availability_zone': `${region}${getRandomItem(['a', 'b', 'c'])}`,
     'cloud.instance.id': instanceId,
     'cloud.instance.name': `${provider.name}-${instanceType}-${instanceId.substring(0, 8)}`,
     'cloud.project.id': projectId,
@@ -322,7 +349,7 @@ export function generateK8sMetadata() {
   ]);
   const app = getRandomItem(['web-app', 'api-gateway', 'auth-service', 'payment-service']);
   const workloadType = getRandomItem(K8S_WORKLOAD_TYPES);
-  const podId = Math.random().toString(36).substring(2, 15);
+  const podId = randomId('', 13);
 
   return {
     'kubernetes.namespace': namespace,
@@ -334,7 +361,7 @@ export function generateK8sMetadata() {
     'kubernetes.statefulset.name':
       workloadType === 'statefulset' ? `${app}-statefulset` : undefined,
     'kubernetes.daemonset.name': workloadType === 'daemonset' ? `${app}-daemonset` : undefined,
-    'kubernetes.node.name': `node-${Math.floor(Math.random() * 10)}`,
+    'kubernetes.node.name': `node-${Math.floor(random() * 10)}`,
     'kubernetes.labels.app': app,
     'kubernetes.labels.version': getRandomItem(SERVICE_VERSIONS),
     'kubernetes.labels.tier': getRandomItem(['frontend', 'backend', 'database']),
@@ -347,7 +374,7 @@ export function generateK8sMetadata() {
 export function generateContainerMetadata() {
   const image = getRandomItem(CONTAINER_IMAGES);
   const version = getRandomItem(['latest', '1.0', '1.1', '2.0', 'alpine', 'slim']);
-  const containerId = Math.random().toString(36).substring(2, 15);
+  const containerId = randomId('', 13);
 
   return {
     'container.id': containerId,
@@ -380,22 +407,17 @@ export function generateNetworkMetadata(isHttps: boolean) {
  * Generate correlation IDs for tracing.
  */
 export function generateCorrelationIds() {
-  const hasTracing = Math.random() < 0.6; // 60% have tracing
+  const hasTracing = random() < 0.6; // 60% have tracing
 
   if (!hasTracing) {
     return {};
   }
 
-  const traceId = Math.random().toString(36).substring(2, 18);
-  const spanId = Math.random().toString(36).substring(2, 10);
-  const transactionId = Math.random().toString(36).substring(2, 18);
-  const sessionId = Math.random().toString(36).substring(2, 18);
-
   return {
-    'trace.id': traceId,
-    'span.id': spanId,
-    'transaction.id': transactionId,
-    'session.id': sessionId,
+    'trace.id': randomId('', 16),
+    'span.id': randomId('', 8),
+    'transaction.id': randomId('', 16),
+    'session.id': randomId('', 16),
   };
 }
 
@@ -408,7 +430,7 @@ export function generateErrorMetadata(statusCode: number) {
   }
 
   const errorType = getRandomItem(ERROR_TYPES);
-  const errorCode = `ERR_${statusCode}_${Math.floor(Math.random() * 1000)}`;
+  const errorCode = `ERR_${statusCode}_${Math.floor(random() * 1000)}`;
 
   const metadata: Record<string, string> = {
     'error.type': errorType,
@@ -433,22 +455,19 @@ export function generateResponseSize(statusCode: number, isHeavy = false): numbe
   }
 
   if (isHeavy) {
-    // Heavy responses: 100KB to 5MB
-    return Math.floor(Math.random() * (5000000 - 100000) + 100000);
+    return Math.floor(random() * (5000000 - 100000) + 100000);
   }
 
   if (statusCode >= 400) {
-    // Error responses are typically small
-    return Math.floor(Math.random() * (5000 - 100) + 100);
+    return Math.floor(random() * (5000 - 100) + 100);
   }
 
-  // Normal responses: 500 bytes to 50KB
-  return Math.floor(Math.random() * (50000 - 500) + 500);
+  return Math.floor(random() * (50000 - 500) + 500);
 }
 
 /**
  * Generate a session ID.
  */
 export function generateSessionId(): string {
-  return `sess_${Math.random().toString(36).substring(2, 18)}`;
+  return randomId('sess_', 16);
 }

@@ -33,7 +33,7 @@ export const deleteCommentRoute = createCasesRoute({
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
       await client.attachments.delete({
-        attachmentID: request.params.comment_id,
+        savedObjectId: request.params.comment_id,
         caseID: request.params.case_id,
       });
 

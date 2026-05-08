@@ -16,6 +16,7 @@ import type { Runner } from '@kbn/agent-builder-server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { isAllowedBuiltinTool } from '@kbn/agent-builder-server/allow_lists';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import {
   createBuiltinToolRegistry,
@@ -28,10 +29,12 @@ import { isEnabledDefinition } from './tool_types/definitions';
 import { createPersistedProviderFn } from './persisted';
 import { createToolRegistry } from './tool_registry';
 import { createToolHealthClient } from './health';
+import type { AgentBuilderConfig } from '../../config';
 
 export interface ToolsServiceSetupDeps {
   logger: Logger;
   workflowsManagement?: WorkflowsServerPluginSetup;
+  config: AgentBuilderConfig;
 }
 
 export interface ToolsServiceStartDeps {
@@ -75,9 +78,17 @@ export class ToolsService {
     savedObjects,
     actions,
   }: ToolsServiceStartDeps): ToolsServiceStart {
-    const { logger, workflowsManagement } = this.setupDeps!;
+    const { logger, workflowsManagement, config } = this.setupDeps!;
 
-    const toolTypes = getToolTypeDefinitions({ workflowsManagement, actions });
+    const toolTypes = getToolTypeDefinitions({
+      workflowsManagement,
+      actions,
+      indexSearchDeps: {
+        uiSettings,
+        savedObjects,
+        topSnippetsDefaults: config.topSnippets,
+      },
+    });
 
     // Compute the set of tool types that have health tracking enabled
     const healthTrackedToolTypes = new Set(
@@ -106,6 +117,10 @@ export class ToolsService {
         logger,
         esClient: elasticsearch.client.asInternalUser,
       });
+      const soClient = savedObjects.getScopedClient(request);
+      const experimentalFeaturesEnabled = await uiSettings
+        .asScopedToClient(soClient)
+        .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
 
       return createToolRegistry({
         getRunner,
@@ -116,7 +131,9 @@ export class ToolsService {
         uiSettings,
         savedObjects,
         healthClient,
+        logger,
         healthTrackedToolTypes,
+        experimentalFeaturesEnabled,
       });
     };
 

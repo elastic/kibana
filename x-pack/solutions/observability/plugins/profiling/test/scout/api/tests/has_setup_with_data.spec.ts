@@ -5,15 +5,25 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { apiTest } from '../../common/fixtures';
 import { esArchiversPath, esResourcesEndpoint } from '../../common/fixtures/constants';
 
-apiTest.describe('Profiling is setup and data is loaded', { tag: ['@ess'] }, () => {
+apiTest.describe('Profiling is setup and data is loaded', { tag: tags.stateful.classic }, () => {
   let viewerApiCreditials: RoleApiCredentials;
   let adminApiCreditials: RoleApiCredentials;
-  apiTest.beforeAll(async ({ requestAuth, profilingSetup }) => {
+  apiTest.beforeAll(async ({ requestAuth, profilingHelper, profilingSetup }) => {
+    // Make this spec self-sufficient instead of relying on has_no_setup.spec running first:
+    // ensure the cloud agent policy exists and profiling resources are set up before
+    // attempting to load data.
+    await profilingHelper.installPolicies();
+
+    if (!(await profilingSetup.checkStatus()).has_setup) {
+      await profilingSetup.setupResources();
+    }
+
     await profilingSetup.loadData(esArchiversPath);
     viewerApiCreditials = await requestAuth.getApiKey('viewer');
     adminApiCreditials = await requestAuth.getApiKey('admin');

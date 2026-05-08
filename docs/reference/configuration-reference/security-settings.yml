@@ -1,0 +1,825 @@
+---
+# This file is used to generate "Security settings" page in the product docs
+# For the schema and an example refer to the automated settings reference: 
+# https://github.com/elastic/docs-builder/blob/main/docs/syntax/automated_settings.md
+
+product: Kibana
+collection: Security settings in Kibana
+id: security-settings-kb
+page_description: |
+  You do not need to configure any additional settings to use the {{security-features}} in {{kib}}. They are enabled by default.
+important: "In high-availability deployments, make sure you use the same security settings for all instances of {{kib}}. Also consider storing sensitive security settings, such as encryption and decryption keys, securely in the Kibana keystore, instead of keeping them in clear text in the `kibana.yml` file."
+
+groups:
+  - group: Authentication security settings
+    id: authentication-security-settings
+    description: |
+      You configure authentication settings in the `xpack.security.authc` namespace.
+    example: |
+      For example:
+
+      ```yaml
+      xpack.security.authc:
+          providers:
+            basic.basic1: <1>
+                order: 0 <2>
+                ...
+
+            saml.saml1: <3>
+                order: 1
+                ...
+
+            saml.saml2: <4>
+                order: 2
+                ...
+
+            pki.realm3:
+                order: 3
+                ...
+          ...
+      ```
+
+      1. Specifies the type of authentication provider (for example, `basic`, `token`, `saml`, `oidc`, `kerberos`, `pki`) and the provider name. This setting is mandatory.
+      2. Specifies the order of the provider in the authentication chain and on the Login Selector UI. This setting is mandatory.
+      3. Specifies the settings for the SAML authentication provider with a `saml1` name.
+      4. Specifies the settings for the SAML authentication provider with a `saml2` name.
+
+  - group: Valid settings for all authentication providers
+    id: authentication-provider-settings
+    description: |
+      The valid settings in the `xpack.security.authc.providers` namespace vary depending on the authentication provider type. For more information, refer to [Authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/user-authentication.md).
+    settings:
+
+      - setting: xpack.security.authc.providers.<provider-type>.<provider-name>.enabled
+        description: |
+          Determines if the authentication provider should be enabled. By default, {{kib}} enables the provider as soon as you configure any of its properties.
+        datatype: bool
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.authc.providers.<provider-type>.<provider-name>.order
+        description: |
+          Order of the provider in the authentication chain and on the Login Selector UI.
+        datatype: int
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.authc.providers.<provider-type>.<provider-name>.description
+        description: |
+          Custom description of the provider entry displayed on the Login Selector UI.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.authc.providers.<provider-type>.<provider-name>.hint
+        description: |
+          Custom hint for the provider entry displayed on the Login Selector UI.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.authc.providers.<provider-type>.<provider-name>.icon
+        description: |
+          Custom icon for the provider entry displayed on the Login Selector UI.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.authc.providers.<provider-type>.<provider-name>.origin
+        description: |
+          Specifies the origin(s) where the provider will appear to users in the Login Selector UI. Each origin must be a valid URI only containing an origin. By default, providers are not restricted to specific origins.
+        datatype: string
+        applies_to:
+          stack: ga 9.3
+          ech: ga
+          self: ga
+        example: |
+          For example:
+
+          ```yaml
+          xpack.security.authc:
+            providers:
+              basic.basic1:
+                origin: [http://localhost:5601, http://127.0.0.1:5601]
+                ...
+
+              saml.saml1:
+                origin: https://elastic.co
+                ...
+          ```
+
+      - setting: xpack.security.authc.providers.<provider-type>.<provider-name>.showInSelector
+        description: |
+          Flag that indicates if the provider should have an entry on the Login Selector UI. Setting this to `false` doesn't remove the provider from the authentication chain.
+        datatype: bool
+        note: "You are unable to set this setting to `false` for `basic` and `token` authentication providers."
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message
+        description: |
+          Access agreement text in Markdown format. For more information, refer to [Access agreement](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/access-agreement.md).
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.authc.providers.<provider-type>.<provider-name>.session.idleTimeout
+        id: xpack-security-provider-session-idletimeout
+        description: |
+          Ensures that user sessions will expire after a period of inactivity. Setting this to `0` will prevent sessions from expiring because of inactivity. By default, this setting is equal to [`xpack.security.session.idleTimeout`](#xpack-session-idletimeout).
+        datatype: string
+        note: "Use a string of `<count>[ms\\|s\\|m\\|h\\|d\\|w\\|M\\|Y]` (e.g. *20m*, *24h*, *7d*, *1w*)."
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.authc.providers.<provider-type>.<provider-name>.session.lifespan
+        id: xpack-security-provider-session-lifespan
+        description: |
+          Ensures that user sessions will expire after the defined time period. This behavior is also known as an "absolute timeout". If this is set to `0`, user sessions could stay active indefinitely. By default, this setting is equal to [`xpack.security.session.lifespan`](#xpack-session-lifespan).
+        datatype: string
+        note: "Use a string of `<count>[ms\\|s\\|m\\|h\\|d\\|w\\|M\\|Y]` (e.g. *20m*, *24h*, *7d*, *1w*)."
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+  - group: SAML authentication provider settings
+    id: saml-authentication-provider-settings
+    description: |
+      In addition to [the settings that are valid for all providers](#authentication-provider-settings), you can specify the following settings:
+    settings:
+
+      - setting: xpack.security.authc.providers.saml.<provider-name>.realm
+        description: |
+          SAML realm in {{es}} that provider should use.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize
+        description: |
+          Specifies the maximum size of the URL that Kibana is allowed to store during the SAML handshake.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.authc.providers.saml.<provider-name>.useRelayStateDeepLink
+        description: |
+          Determines if the provider should treat the `RelayState` parameter as a deep link in {{kib}} during Identity Provider initiated log in. By default, this setting is set to `false`. The link specified in `RelayState` should be a relative, URL-encoded {{kib}} URL. For example, the `/app/dashboards#/list` link in `RelayState` parameter would look like this: `RelayState=%2Fapp%2Fdashboards%23%2Flist`.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.authc.saml.maxRedirectURLSize
+        description: |
+          Specifies the maximum size of the URL that Kibana is allowed to store during the SAML handshake.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+  - group: Discontinued SAML settings
+    id: discontinued-saml-settings
+    description: |
+      The following settings are available in {{ecloud}} for all supported versions before 8.0:
+    settings:
+
+      - setting: xpack.security.authProviders
+        description: |
+          Set to `saml` to instruct Kibana to use SAML SSO as the authentication method.
+        datatype: string
+        applies_to:
+          ech: removed
+          stack: unavailable
+          self: unavailable
+
+      - setting: xpack.security.public.protocol
+        description: |
+          Set to HTTP or HTTPS. To access Kibana, HTTPS protocol is recommended.
+        datatype: enum
+        options:
+          - option: http
+          - option: https
+        applies_to:
+          ech: removed
+          stack: unavailable
+          self: unavailable
+
+      - setting: xpack.security.public.hostname
+        description: |
+          Set to a fully qualified hostname to connect your users to the proxy server.
+        datatype: string
+        applies_to:
+          ech: removed
+          stack: unavailable
+          self: unavailable
+
+      - setting: xpack.security.public.port
+        description: |
+          The port number that connects your users to the proxy server (for example, 80 for HTTP or 443 for HTTPS).
+        datatype: int
+        applies_to:
+          ech: removed
+          stack: unavailable
+          self: unavailable
+
+      - setting: xpack.security.authc.saml.useRelayStateDeepLink
+        description: |
+          Specifies if Kibana should treat the `RelayState` parameter as a deep link when Identity Provider Initiated login flow is used.
+        datatype: bool
+        applies_to:
+          ech: removed
+          stack: unavailable
+          self: unavailable
+
+      - setting: server.xsrf.whitelist
+        description: |
+          Explicitly allows the SAML authentication URL within Kibana, so that the Kibana server doesn't reject external authentication messages that originate from your Identity Provider. This setting is renamed to `server.xsrf.allowlist` in version 8.0.0.
+        datatype: string
+        applies_to:
+          ech: removed
+          stack: unavailable
+          self: unavailable
+
+  - group: OpenID Connect authentication provider settings
+    id: oidc-authentication-provider-settings
+    description: |
+      In addition to [the settings that are valid for all providers](#authentication-provider-settings), you can specify the following settings:
+    settings:
+
+      - setting: xpack.security.authc.providers.oidc.<provider-name>.realm
+        description: |
+          OpenID Connect realm in {{es}} that the provider should use.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+  - group: Anonymous authentication provider settings
+    id: anonymous-authentication-provider-settings
+    description: |
+      In addition to [the settings that are valid for all providers](#authentication-provider-settings), you can specify the following settings:
+
+      For more information, refer to [Anonymous authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#anonymous-authentication).
+    note: "You can configure only one anonymous provider per {{kib}} instance."
+    settings:
+
+      - setting: xpack.security.authc.providers.anonymous.<provider-name>.credentials
+        description: |
+          Credentials that {{kib}} should use internally to authenticate anonymous requests to {{es}}.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+        example: |
+          For example:
+
+          ```yaml
+          xpack.security.authc.providers.anonymous.anonymous1:
+            credentials:
+              username: "anonymous_service_account"
+              password: "anonymous_service_account_password"
+          ```
+
+  - group: HTTP authentication settings
+    id: http-authentication-settings
+    description: |
+      There is a very limited set of cases when you'd want to change these settings. For more information, refer to [HTTP authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#http-authentication).
+    settings:
+
+      - setting: xpack.security.authc.http.enabled
+        description: |
+          Determines if HTTP authentication should be enabled. By default, this setting is set to `true`.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.security.authc.http.autoSchemesEnabled
+        description: |
+          Determines if HTTP authentication schemes used by the enabled authentication providers should be automatically supported during HTTP authentication. By default, this setting is set to `true`.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.security.authc.http.schemes[]
+        description: |
+          List of HTTP authentication schemes that {{kib}} HTTP authentication should support. By default, this setting is set to `['apikey', 'bearer']` to support HTTP authentication with the [`ApiKey`](docs-content://deploy-manage/api-keys/elasticsearch-api-keys.md) and [`Bearer`](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#http-authentication) schemes.
+        datatype: string
+        default: "['apikey', 'bearer']"
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+  - group: Login user interface settings
+    id: login-ui-settings
+    settings:
+
+      - setting: xpack.security.loginAssistanceMessage
+        description: |
+          Adds a message to the login UI. Useful for displaying information about maintenance windows, links to corporate sign up pages, and so on.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.loginHelp
+        description: |
+          Adds a message accessible at the login UI with additional help information for the login process.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.authc.selector.enabled
+        description: |
+          Determines if the login selector UI should be enabled. By default, this setting is set to `true` if more than one authentication provider is configured.
+        datatype: bool
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+  - group: Configure a default access agreement
+    id: authentication-access-agreement-settings
+    settings:
+
+      - setting: xpack.security.accessAgreement.message
+        description: |
+          This setting specifies the access agreement text in Markdown format that will be used as the default access agreement for all providers that do not specify a value for `xpack.security.authc.providers.<provider-type>.<provider-name>.accessAgreement.message`. For more information, refer to [Access agreement](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/access-agreement.md).
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+  - group: Session and cookie security settings
+    id: security-session-and-cookie-settings
+    settings:
+
+      - setting: xpack.security.cookieName
+        description: |
+          Sets the name of the cookie used for the session. The default value is `"sid"`.
+        datatype: string
+        default: sid
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.security.encryptionKey
+        id: xpack-security-encryptionkey
+        description: |
+          An arbitrary string of 32 characters or more that is used to encrypt session information. Do **not** expose this key to users of {{kib}}. By default, a value is automatically generated in memory. If you use that default behavior, all sessions are invalidated when {{kib}} restarts. In addition, high-availability deployments of {{kib}} will behave unexpectedly if this setting isn't the same for all instances of {{kib}}.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.security.secureCookies
+        id: xpack-security-securecookies
+        description: |
+          Sets the `secure` flag of the session cookie. The default value is `false`. It is automatically set to `true` if [`server.ssl.enabled`](/reference/configuration-reference/general-settings.md#server-ssl-enabled) is set to `true`. Set this to `true` if SSL is configured outside of {{kib}} (for example, you are routing requests through a load balancer or proxy).
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.security.sameSiteCookies
+        id: xpack-security-samesitecookies
+        description: |
+          Sets the `SameSite` attribute of the session cookie. This allows you to declare whether your cookie should be restricted to a first-party or same-site context. Valid values are `Strict`, `Lax`, `None`. This is **not set** by default, which modern browsers will treat as `Lax`. If you use Kibana embedded in an iframe in modern browsers, you might need to set it to `None`. Setting this value to `None` requires cookies to be sent over a secure connection by setting [`xpack.security.secureCookies`](#xpack-security-securecookies): `true`.
+        datatype: enum
+        options:
+          - option: Strict
+          - option: Lax
+          - option: None
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.session.idleTimeout
+        id: xpack-session-idletimeout
+        description: |
+          Ensures that user sessions will expire after a period of inactivity. This and [`xpack.security.session.lifespan`](#xpack-session-lifespan) are both highly recommended. You can also specify this setting for [every provider separately](#xpack-security-provider-session-idletimeout). If this is set to `0`, then sessions will never expire due to inactivity. By default, this value is 3 days.
+        datatype: string
+        default: 3d
+        note: "Use a string of `<count>[ms\\|s\\|m\\|h\\|d\\|w\\|M\\|Y]` (e.g. *20m*, *24h*, *7d*, *1w*)."
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.session.lifespan
+        id: xpack-session-lifespan
+        description: |
+          Ensures that user sessions will expire after the defined time period. This behavior is also known as an "absolute timeout". If this is set to `0`, user sessions could stay active indefinitely. This and [`xpack.security.session.idleTimeout`](#xpack-session-idletimeout) are both highly recommended. You can also specify this setting for [every provider separately](#xpack-security-provider-session-lifespan). By default, this value is 30 days for on-prem installations, and 24 hours for Elastic Cloud installations.
+        datatype: string
+        default: "30d (on-prem), 24h (Elastic Cloud)"
+        tip: "Use a string of `<count>[ms\\|s\\|m\\|h\\|d\\|w\\|M\\|Y]` (e.g. *20m*, *24h*, *7d*, *1w*)."
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.session.cleanupInterval
+        description: |
+          Sets the interval at which {{kib}} tries to remove expired and invalid sessions from the session index. By default, this value is 1 hour. The minimum value is 10 seconds.
+        datatype: string
+        default: 1h
+        tip: "Use a string of `<count>[ms\\|s\\|m\\|h\\|d\\|w\\|M\\|Y]` (e.g. *20m*, *24h*, *7d*, *1w*)."
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.session.concurrentSessions.maxSessions
+        description: |
+          Set the maximum number of sessions each user is allowed to have active at any given time. By default, no limit is applied. If set, the value of this option should be an integer between `1` and `1000`. When the limit is exceeded, the oldest session is automatically invalidated.
+          It is available in {{ecloud}} 8.7.0 and later versions.
+        datatype: int
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+  - group: Encrypted saved objects settings
+    id: security-encrypted-saved-objects-settings
+    description: |
+      These settings control the encryption of saved objects with sensitive data. For more details, refer to [Secure saved objects](docs-content://deploy-manage/security/secure-saved-objects.md).
+    settings:
+
+      - setting: xpack.encryptedSavedObjects.encryptionKey
+        id: xpack-encryptedsavedobjects-encryptionkey
+        description: |
+          An arbitrary string of at least 32 characters that is used to encrypt sensitive properties of saved objects before they're stored in {{es}}. If not set, {{kib}} will generate a random key on startup, but certain features won't be available until you set the encryption key explicitly.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys
+        id: xpack-encryptedsavedobjects-keyrotation-decryptiononlykeys
+        description: |
+          An optional list of previously used encryption keys. Like [`xpack.encryptedSavedObjects.encryptionKey`](#xpack-encryptedsavedobjects-encryptionkey), these must be at least 32 characters in length. {{kib}} doesn't use these keys for encryption, but may still require them to decrypt some existing saved objects. Use this setting if you wish to change your encryption key, but don't want to lose access to saved objects that were previously encrypted with a different key.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+  - group: Audit logging settings
+    id: audit-logging-settings
+    description: |
+      You can enable audit logging to support compliance, accountability, and security. When enabled, {{kib}} will capture:
+
+      * Who performed an action
+      * What action was performed
+      * When the action occurred
+
+      For more details and a reference of audit events, refer to [Audit logs](/reference/kibana-audit-events.md).
+    settings:
+
+      - setting: xpack.security.audit.enabled
+        description: |
+          Set to `true` to enable audit logging. **Default:** `false`
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+        example: |
+          For example:
+
+          ```yaml
+          xpack.security.audit.enabled: true
+          xpack.security.audit.appender: <1>
+            type: rolling-file
+            fileName: ./logs/audit.log
+            policy:
+              type: time-interval
+              interval: 24h <2>
+            strategy:
+              type: numeric
+              max: 10 <3>
+            layout:
+              type: json
+          ```
+
+          1. This appender is the default and will be used if no `appender.*` config options are specified.
+          2. Rotates log files every 24 hours.
+          3. Keeps maximum of 10 log files before deleting older ones.
+
+      - setting: xpack.security.audit.appender
+        description: |
+          Optional. Specifies where audit logs should be written to and how they should be formatted. If no appender is specified, a default appender will be used (see above).
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.security.audit.appender.type
+        description: |
+          Required. Specifies where audit logs should be written to. Allowed values are `console`, `file`, or `rolling-file`.
+
+          Refer to [file appender](#audit-logging-file-appender) and [rolling file appender](#audit-logging-rolling-file-appender) for appender specific settings.
+        datatype: enum
+        options:
+          - option: console
+          - option: file
+          - option: rolling-file
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.audit.appender.layout.type
+        description: |
+          Required. Specifies how audit logs should be formatted. Allowed values are `json` or `pattern`.
+
+          Refer to [pattern layout](#audit-logging-pattern-layout) for layout specific settings.
+        datatype: enum
+        options:
+          - option: json
+          - option: pattern
+        tip: "We recommend using `json` format to allow ingesting {{kib}} audit logs into {{es}} using Filebeat."
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+  - group: File appender
+    id: audit-logging-file-appender
+    description: |
+      The `file` appender writes to a file and can be configured using the following settings:
+    settings:
+
+      - setting: xpack.security.audit.appender.fileName
+        description: |
+          Required. Full file path the log file should be written to.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+  - group: Rolling file appender
+    id: audit-logging-rolling-file-appender
+    description: |
+      The `rolling-file` appender writes to a file and rotates it using a rolling strategy, when a particular policy is triggered:
+    settings:
+
+      - setting: xpack.security.audit.appender.fileName
+        description: |
+          Required. Full file path the log file should be written to.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.security.audit.appender.policy.type
+        description: |
+          Specifies when a rollover should occur. Allowed values are `size-limit` and `time-interval`. **Default:** `time-interval`.
+
+          Refer to [size limit policy](#audit-logging-size-limit-policy) and [time interval policy](#audit-logging-time-interval-policy) for policy specific settings.
+        datatype: enum
+        default: time-interval
+        options:
+          - option: size-limit
+          - option: time-interval
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.security.audit.appender.strategy.type
+        description: |
+          Specifies how the rollover should occur. Only allowed value is currently `numeric`. **Default:** `numeric`
+
+          Refer to [numeric strategy](#audit-logging-numeric-strategy) for strategy specific settings.
+        datatype: enum
+        default: numeric
+        options:
+          - option: numeric
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+  - group: Size limit triggering policy
+    id: audit-logging-size-limit-policy
+    description: |
+      The `size-limit` triggering policy will rotate the file when it reaches a certain size:
+    settings:
+
+      - setting: xpack.security.audit.appender.policy.size
+        description: |
+          Maximum size the log file should reach before a rollover should be performed. **Default:** `100mb`
+        datatype: string
+        default: 100mb
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+  - group: Time interval triggering policy
+    id: audit-logging-time-interval-policy
+    description: |
+      The `time-interval` triggering policy will rotate the file every given interval of time:
+    settings:
+
+      - setting: xpack.security.audit.appender.policy.interval
+        description: |
+          How often a rollover should occur. **Default:** `24h`
+        datatype: string
+        default: 24h
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.security.audit.appender.policy.modulate
+        description: |
+          Whether the interval should be adjusted to cause the next rollover to occur on the interval boundary. **Default:** `true`
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+  - group: Numeric rolling strategy
+    id: audit-logging-numeric-strategy
+    description: |
+      The `numeric` rolling strategy will suffix the log file with a given pattern when rolling over, and will retain a fixed number of rolled files:
+    settings:
+
+      - setting: xpack.security.audit.appender.strategy.pattern
+        description: |
+          Suffix to append to the file name when rolling over. Must include `%i`. **Default:** `-%i`
+        datatype: string
+        default: "-%i"
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.security.audit.appender.strategy.max
+        description: |
+          Maximum number of files to keep. Once this number is reached, oldest files will be deleted. **Default:** `7`
+        datatype: int
+        default: 7
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+  - group: Pattern layout
+    id: audit-logging-pattern-layout
+    description: |
+      The `pattern` layout outputs a string, formatted using a pattern with special placeholders, which will be replaced with data from the actual log message:
+    settings:
+
+      - setting: xpack.security.audit.appender.layout.pattern
+        description: |
+          Optional. Specifies how the log line should be formatted. **Default:** `[%date][%level][%logger]%meta %message`
+        datatype: string
+        default: "[%date][%level][%logger]%meta %message"
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+      - setting: xpack.security.audit.appender.layout.highlight
+        description: |
+          Optional. Set to `true` to enable highlighting log messages with colors.
+        datatype: bool
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
+  - group: Ignore filters
+    id: audit-logging-ignore-filters
+    settings:
+
+      - setting: xpack.security.audit.ignore_filters[]
+        description: |
+          List of filters that determine which events should be excluded from the audit log. An event will get filtered out if at least one of the provided filters matches.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+        example: |
+          For example:
+
+          ```yaml
+          xpack.security.audit.ignore_filters:
+          - actions: [http_request] <1>
+          - categories: [database]
+            types: [creation, change, deletion] <2>
+          - spaces: [default] <3>
+          - users: [elastic, kibana_system] <4>
+          ```
+
+          1. Filters out HTTP request events
+          2. Filters out any data write events
+          3. Filters out events from the `default` space
+          4. Filters out events from the `elastic` and `kibana_system` users
+
+      - setting: xpack.security.audit.ignore_filters[].actions[]
+        description: |
+          List of values matched against the `event.action` field of an audit event. Refer to [Audit logs](/reference/kibana-audit-events.md) for a list of available events.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.audit.ignore_filters[].categories[]
+        description: |
+          List of values matched against the `event.category` field of an audit event. Refer to [ECS categorization field](ecs://reference/ecs-allowed-values-event-category.md) for allowed values.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.audit.ignore_filters[].outcomes[]
+        description: |
+          List of values matched against the `event.outcome` field of an audit event. Refer to [ECS outcome field](ecs://reference/ecs-allowed-values-event-outcome.md) for allowed values.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.audit.ignore_filters[].spaces[]
+        description: |
+          List of values matched against the `kibana.space_id` field of an audit event. This represents the space id in which the event took place.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.audit.ignore_filters[].types[]
+        description: |
+          List of values matched against the `event.type` field of an audit event. Refer to [ECS type field](ecs://reference/ecs-allowed-values-event-type.md) for allowed values.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga
+
+      - setting: xpack.security.audit.ignore_filters[].users[]
+        description: |
+          List of values matched against the `user.name` field of an audit event. This represents the `username` associated with the audit event.
+        datatype: string
+        applies_to:
+          stack: ga
+          ech: ga
+          self: ga

@@ -1832,11 +1832,10 @@ describe('getFullAgentPolicy', () => {
       await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
       expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
-      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0];
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
       expect(callArgs).toBeDefined();
-      // Third argument should be the packageInfoCache Map
-      expect(callArgs[2]).toBeInstanceOf(Map);
-      const packageInfoCache = callArgs[2] as Map<string, PackageInfo>;
+      expect(callArgs.packageInfoCache).toBeInstanceOf(Map);
+      const packageInfoCache = callArgs.packageInfoCache as Map<string, PackageInfo>;
       expect(packageInfoCache.has('otelpackage-1.0.0')).toBe(true);
       expect(packageInfoCache.get('otelpackage-1.0.0')).toEqual(packageInfo);
     });
@@ -1961,6 +1960,139 @@ describe('getFullAgentPolicy', () => {
       await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
       expect(mockedGenerateOtelcolConfig).not.toHaveBeenCalled();
+    });
+
+    it('should pass the resolved proxy to generateOtelcolConfig when dataOutput has a proxy_id', async () => {
+      const proxy = {
+        id: 'proxy-1',
+        name: 'my-proxy',
+        url: 'http://proxy.example.com:3128',
+        proxy_headers: { 'X-Custom': 'value' },
+        is_preconfigured: false,
+      };
+
+      mockedFetchRelatedSavedObjects.mockResolvedValue({
+        outputs: [
+          {
+            id: 'test-id',
+            is_default: true,
+            is_default_monitoring: true,
+            name: 'default',
+            type: 'elasticsearch',
+            hosts: ['http://127.0.0.1:9201'],
+            proxy_id: 'proxy-1',
+          },
+        ],
+        proxies: [proxy],
+        dataOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+          proxy_id: 'proxy-1',
+        },
+        monitoringOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+        downloadSource: {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+        downloadSourceProxy: undefined,
+        fleetServerHost: {
+          name: 'default Fleet Server',
+          id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+          is_preconfigured: false,
+        },
+      });
+
+      mockAgentPolicy({ package_policies: [] });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      // proxy should be the resolved proxy
+      expect(callArgs.proxy).toEqual(proxy);
+    });
+
+    it('should pass undefined proxy to generateOtelcolConfig when dataOutput has no proxy_id', async () => {
+      mockAgentPolicy({ package_policies: [] });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      // proxy should be undefined when no proxy_id
+      expect(callArgs.proxy).toBeUndefined();
+    });
+
+    it('should pass undefined proxy to generateOtelcolConfig when proxy_id does not match any proxy', async () => {
+      mockedFetchRelatedSavedObjects.mockResolvedValue({
+        outputs: [
+          {
+            id: 'test-id',
+            is_default: true,
+            is_default_monitoring: true,
+            name: 'default',
+            type: 'elasticsearch',
+            hosts: ['http://127.0.0.1:9201'],
+            proxy_id: 'nonexistent-proxy',
+          },
+        ],
+        proxies: [],
+        dataOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+          proxy_id: 'nonexistent-proxy',
+        },
+        monitoringOutput: {
+          id: 'test-id',
+          is_default: true,
+          is_default_monitoring: true,
+          name: 'default',
+          type: 'elasticsearch',
+          hosts: ['http://127.0.0.1:9201'],
+        },
+        downloadSource: {
+          id: 'default-download-source-id',
+          is_default: true,
+          name: 'Default host',
+          host: 'http://default-registry.co',
+        },
+        downloadSourceProxy: undefined,
+        fleetServerHost: {
+          name: 'default Fleet Server',
+          id: '93f74c0-e876-11ea-b7d3-8b2acec6f75c',
+          is_default: true,
+          host_urls: ['http://fleetserver:8220'],
+          is_preconfigured: false,
+        },
+      });
+
+      mockAgentPolicy({ package_policies: [] });
+
+      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+      expect(mockedGenerateOtelcolConfig).toHaveBeenCalled();
+      const callArgs = mockedGenerateOtelcolConfig.mock.calls[0][0];
+      // proxy should be undefined when proxy_id doesn't match
+      expect(callArgs.proxy).toBeUndefined();
     });
   });
 });
@@ -2891,6 +3023,230 @@ describe('getBinarySourceSettings', () => {
           certificate: 'proxy_cert',
           certificate_authorities: ['PROXY_CA'],
           key: 'PROXY_KEY1',
+        },
+      });
+    });
+  });
+
+  describe('with auth', () => {
+    it('should return agent download config with plain text auth (username/password)', () => {
+      const downloadSourceWithAuth = {
+        ...downloadSource,
+        auth: {
+          username: 'user1',
+          password: 'pass1',
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithAuth, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          username: 'user1',
+          password: 'pass1',
+        },
+      });
+    });
+
+    it('should return agent download config with plain text auth (api_key)', () => {
+      const downloadSourceWithApiKey = {
+        ...downloadSource,
+        auth: {
+          api_key: 'my-api-key',
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithApiKey, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          api_key: 'my-api-key',
+        },
+      });
+    });
+
+    it('should return agent download config with secrets.auth.password', () => {
+      const downloadSourceWithSecretPassword = {
+        ...downloadSource,
+        auth: {
+          username: 'user1',
+        },
+        secrets: {
+          auth: {
+            password: { id: 'password-secret-id' },
+          },
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithSecretPassword, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          username: 'user1',
+        },
+        secrets: {
+          auth: {
+            password: { id: 'password-secret-id' },
+          },
+        },
+      });
+    });
+
+    it('should return agent download config with secrets.auth.api_key', () => {
+      const downloadSourceWithSecretApiKey = {
+        ...downloadSource,
+        secrets: {
+          auth: {
+            api_key: { id: 'api-key-secret-id' },
+          },
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithSecretApiKey, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        secrets: {
+          auth: {
+            api_key: { id: 'api-key-secret-id' },
+          },
+        },
+      });
+    });
+
+    it('should use secret password over plain text password when both are present', () => {
+      const downloadSourceWithBoth = {
+        ...downloadSource,
+        auth: {
+          username: 'user1',
+          password: 'plain-text-password',
+        },
+        secrets: {
+          auth: {
+            password: { id: 'secret-password-id' },
+          },
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithBoth, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          username: 'user1',
+          // password should NOT be included here since it's in secrets
+        },
+        secrets: {
+          auth: {
+            password: { id: 'secret-password-id' },
+          },
+        },
+      });
+    });
+
+    it('should use secret api_key over plain text api_key when both are present', () => {
+      const downloadSourceWithBoth = {
+        ...downloadSource,
+        auth: {
+          api_key: 'plain-text-api-key',
+        },
+        secrets: {
+          auth: {
+            api_key: { id: 'secret-api-key-id' },
+          },
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithBoth, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        // auth should NOT be included since api_key is in secrets
+        secrets: {
+          auth: {
+            api_key: { id: 'secret-api-key-id' },
+          },
+        },
+      });
+    });
+
+    it('should return config with both SSL and auth secrets', () => {
+      const downloadSourceWithAllSecrets = {
+        ...downloadSource,
+        auth: {
+          username: 'user1',
+        },
+        secrets: {
+          ssl: {
+            key: { id: 'ssl-key-id' },
+          },
+          auth: {
+            password: { id: 'password-secret-id' },
+          },
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithAllSecrets, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          username: 'user1',
+        },
+        secrets: {
+          ssl: {
+            key: { id: 'ssl-key-id' },
+          },
+          auth: {
+            password: { id: 'password-secret-id' },
+          },
+        },
+      });
+    });
+
+    it('should return agent download config with auth headers', () => {
+      const downloadSourceWithHeaders = {
+        ...downloadSource,
+        auth: {
+          username: 'user1',
+          password: 'pass1',
+          headers: [
+            { key: 'X-Custom-Header', value: 'custom-value' },
+            { key: 'Authorization', value: 'Bearer token123' },
+          ],
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithHeaders, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          username: 'user1',
+          password: 'pass1',
+          headers: [
+            { key: 'X-Custom-Header', value: 'custom-value' },
+            { key: 'Authorization', value: 'Bearer token123' },
+          ],
+        },
+      });
+    });
+
+    it('should filter out empty headers', () => {
+      const downloadSourceWithEmptyHeaders = {
+        ...downloadSource,
+        auth: {
+          api_key: 'my-api-key',
+          headers: [
+            { key: 'X-Valid-Header', value: 'valid-value' },
+            { key: '', value: '' },
+            { key: 'Another-Header', value: 'another-value' },
+          ],
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithEmptyHeaders, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          api_key: 'my-api-key',
+          headers: [
+            { key: 'X-Valid-Header', value: 'valid-value' },
+            { key: 'Another-Header', value: 'another-value' },
+          ],
+        },
+      });
+    });
+
+    it('should not include headers in auth if all headers are empty', () => {
+      const downloadSourceWithOnlyEmptyHeaders = {
+        ...downloadSource,
+        auth: {
+          api_key: 'my-api-key',
+          headers: [{ key: '', value: '' }],
+        },
+      };
+      expect(getBinarySourceSettings(downloadSourceWithOnlyEmptyHeaders, undefined)).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        auth: {
+          api_key: 'my-api-key',
         },
       });
     });

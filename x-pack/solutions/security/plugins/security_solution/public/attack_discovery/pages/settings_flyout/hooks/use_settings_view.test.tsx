@@ -31,14 +31,17 @@ jest.mock('@elastic/eui', () => ({
 
 // Mock for discover-utils UI_SETTINGS in case META_FIELDS is imported from there
 jest.mock('@kbn/discover-utils', () => ({
+  ...jest.requireActual('@kbn/discover-utils/src/constants'),
   UI_SETTINGS: {
     META_FIELDS: 'metaFields',
     SORT_DEFAULT_ORDER_SETTING: 'discover:sort:defaultOrder',
     DOC_HIDE_TIME_COLUMN_SETTING: 'doc_table:hideTimeColumn',
   },
   buildDataTableRecord: jest.fn(),
+  getChartHidden: jest.fn().mockReturnValue(undefined),
   getDefaultSort: jest.fn().mockReturnValue([]),
   getSortArray: jest.fn().mockReturnValue([]),
+  getTableHidden: jest.fn().mockReturnValue(undefined),
 }));
 
 jest.mock('@kbn/data-plugin/common', () => ({

@@ -34,11 +34,8 @@ function ObservabilityCompleteLandingPage() {
   useEffect(() => {
     async function redirectToLanding() {
       if (isAllRequestsComplete) {
-        const { hasData: hasLogsData } = await logsDataAccess.services.logDataService.getStatus({
-          excludeIndices: FLEET_LOG_INDICES,
-        });
+        const hasLogsData = await getHasLogsData(logsDataAccess);
         const hasApmData = hasDataMap.apm?.hasData;
-
         const locators = getLocators(share);
 
         if (hasLogsData && locators.logs) {
@@ -62,10 +59,7 @@ function ObservabilityLogsEssentialsLandingPage() {
 
   useEffect(() => {
     async function redirectToLanding() {
-      const { hasData: hasLogsData } = await logsDataAccess.services.logDataService.getStatus({
-        excludeIndices: FLEET_LOG_INDICES,
-      });
-
+      const hasLogsData = await getHasLogsData(logsDataAccess);
       const locators = getLocators(share);
 
       if (hasLogsData && locators.logs) {
@@ -76,9 +70,23 @@ function ObservabilityLogsEssentialsLandingPage() {
     }
 
     redirectToLanding();
-  }, [logsDataAccess.services.logDataService, share]);
+  }, [logsDataAccess, share]);
 
   return <></>;
+}
+
+async function getHasLogsData(
+  logsDataAccess: ReturnType<typeof useKibana>['services']['logsDataAccess']
+): Promise<boolean> {
+  try {
+    const { hasData } = await logsDataAccess.services.logDataService.getStatus({
+      excludeIndices: FLEET_LOG_INDICES,
+    });
+    return hasData;
+  } catch {
+    // On failure, fall through to APM/onboarding redirect instead of stalling on a blank page
+    return false;
+  }
 }
 
 const getLocators = (share: SharePublicStart) => ({

@@ -52,7 +52,7 @@ describe('risk engine cleanup route', () => {
           security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
         },
       ]);
-      riskEngineCleanupRoute(server.router, getStartServicesMock);
+      riskEngineCleanupRoute(server.router, getStartServicesMock, false);
     });
 
     it('should call the router with the correct route and handler', async () => {
@@ -143,7 +143,7 @@ describe('risk engine cleanup route', () => {
           security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
         },
       ]);
-      riskEngineCleanupRoute(server.router, getStartServicesMock);
+      riskEngineCleanupRoute(server.router, getStartServicesMock, false);
     });
 
     it('returns a 400 when task manager is unavailable', async () => {
@@ -167,7 +167,7 @@ describe('risk engine cleanup route', () => {
           security: riskEnginePrivilegesMock.createMockSecurityStartWithNoRiskEngineAccess(),
         },
       ]);
-      riskEngineCleanupRoute(server.router, getStartServicesMock);
+      riskEngineCleanupRoute(server.router, getStartServicesMock, false);
     });
 
     it('returns a 403 when user does not have the required privileges', async () => {

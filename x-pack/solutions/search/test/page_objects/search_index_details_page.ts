@@ -14,214 +14,129 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
   const retry = getService('retry');
 
   const expectIndexDetailPageHeader = async function () {
-    await testSubjects.existOrFail('searchIndexDetailsHeader', { timeout: 2000 });
+    await testSubjects.existOrFail('indexDetailsHeader', { timeout: 2000 });
   };
   const expectSearchIndexDetailsTabsExists = async function () {
-    await testSubjects.existOrFail('dataTab');
-    await testSubjects.existOrFail('mappingsTab');
-    await testSubjects.existOrFail('settingsTab');
+    await testSubjects.existOrFail('indexDetailsTab-overview');
+    await testSubjects.existOrFail('indexDetailsTab-mappings');
+    await testSubjects.existOrFail('indexDetailsTab-settings');
   };
 
   return {
     expectIndexDetailPageHeader,
     expectSearchIndexDetailsTabsExists,
-    async expectAPIReferenceDocLinkExists() {
-      await testSubjects.existOrFail('ApiReferenceDoc', { timeout: 2000 });
-    },
     async expectIndexDetailsPageIsLoaded() {
       await expectIndexDetailPageHeader();
       await expectSearchIndexDetailsTabsExists();
     },
-    async expectActionItemReplacedWhenHasDocs() {
-      await testSubjects.missingOrFail('ApiReferenceDoc', { timeout: 2000 });
-      await testSubjects.existOrFail('useInPlaygroundLink', { timeout: 5000 });
-      await testSubjects.existOrFail('viewInDiscoverLink', { timeout: 5000 });
-    },
     async expectConnectionDetails() {
-      await testSubjects.existOrFail('connectionDetailsEndpoint', { timeout: 2000 });
-      expect(await (await testSubjects.find('connectionDetailsEndpoint')).getVisibleText()).match(
-        /^https?\:\/\/.*(\:\d+)?/
-      );
+      await testSubjects.existOrFail('openConnectionDetails', { timeout: 2000 });
     },
-    async expectQuickStats(counts: { total: number; deleted: number } = { total: 0, deleted: 0 }) {
-      await testSubjects.existOrFail('quickStats', { timeout: 2000 });
-      const quickStatsElem = await testSubjects.find('quickStats');
-      const quickStatsDocumentElem = await quickStatsElem.findByTestSubject(
-        'QuickStatsDocumentCount'
-      );
-      const documentCountVisibileText = await quickStatsDocumentElem.getVisibleText();
-      expect(documentCountVisibileText).to.contain(`Document count\n${counts.total}`);
-      expect(documentCountVisibileText).not.to.contain(`Total\n${counts.total}`);
-      await testSubjects.click('QuickStatsDocumentCount');
-      await retry.tryWithRetries(
-        'Wait for redirect to start page',
-        async () => {
-          expect(await testSubjects.getVisibleText('QuickStatsDocumentCount')).to.contain(
-            `Total\n${counts.total}\nDeleted\n${counts.deleted}`
-          );
-        },
-        {
-          retryCount: 2,
-          retryDelay: 1000,
-        }
-      );
+    async expectConnectionDetailsFlyoutToOpen() {
+      await testSubjects.click('openConnectionDetails');
+      await testSubjects.existOrFail('connectionDetailsModalBody', { timeout: 5000 });
+      await testSubjects.existOrFail('connectionDetailsModalTitle', { timeout: 2000 });
+    },
+    async closeConnectionDetailsFlyout() {
+      await testSubjects.click('euiFlyoutCloseButton');
+      await testSubjects.missingOrFail('connectionDetailsModalBody', { timeout: 2000 });
     },
 
-    async expectStatelessQuickStats() {
-      await testSubjects.existOrFail('quickStats', { timeout: 2000 });
-      const quickStatsElem = await testSubjects.find('quickStats');
-      const quickStatsDocumentElem = await quickStatsElem.findByTestSubject(
-        'QuickStatsDocumentCount'
-      );
-      expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Document count\n0');
-      expect(await quickStatsDocumentElem.getVisibleText()).not.to.contain('Index Size\n0.00 B');
-      await quickStatsDocumentElem.click();
-      expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Index Size\n0.00 B');
+    async expectSizeDocCountQuickStats() {
+      await testSubjects.existOrFail('indexDetailsSizeDocCount', { timeout: 2000 });
+    },
+    async expectSizeDocCountQuickStatsMissing() {
+      await testSubjects.missingOrFail('indexDetailsSizeDocCount', { timeout: 2000 });
+    },
+    async expectSizeDocCountToHaveDocumentCount(count: number) {
+      await testSubjects.existOrFail('indexDetailsSizeDocCount', { timeout: 2000 });
+      const cardElem = await testSubjects.find('indexDetailsSizeDocCount');
+      const visibleText = await cardElem.getVisibleText();
+      const label = count === 1 ? 'Document' : 'Documents';
+      expect(visibleText).to.contain(`${count}\n${label}`);
     },
 
     async expectQuickStatsToHaveIndexStatus() {
-      await testSubjects.existOrFail('QuickStatsIndexStatus');
+      await testSubjects.existOrFail('indexDetailsStatus');
     },
-
-    async expectQuickStatsToHaveIndexStorage(size?: string) {
-      await testSubjects.existOrFail('QuickStatsStorage');
-      if (!size) return;
-
-      const quickStatsElem = await testSubjects.find('quickStats');
-      const quickStatsStorageElem = await quickStatsElem.findByTestSubject('QuickStatsStorage');
-      expect(await quickStatsStorageElem.getVisibleText()).to.contain(`Storage\n${size}`);
+    async expectStatusDetailsToShowStatus(status: 'Open' | 'Closed') {
+      await testSubjects.existOrFail('indexDetailsStatus', { timeout: 2000 });
+      const statusElem = await testSubjects.find('indexDetailsStatus');
+      expect(await statusElem.getVisibleText()).to.contain(status);
     },
-
-    async expectQuickStatsToHaveDocumentCount(count: number) {
-      await testSubjects.existOrFail('QuickStatsDocumentCount');
-      const quickStatsElem = await testSubjects.find('quickStats');
-      const quickStatsDocumentElem = await quickStatsElem.findByTestSubject(
-        'QuickStatsDocumentCount'
-      );
-      expect(await quickStatsDocumentElem.getVisibleText()).to.contain(`Document count\n${count}`);
+    async expectStatusDetailsToShowHealthBadge() {
+      await testSubjects.existOrFail('indexDetailsHealthBadge', { timeout: 2000 });
     },
-
-    async expectQuickStatsAIMappings() {
-      await testSubjects.existOrFail('quickStats', { timeout: 2000 });
-      await testSubjects.existOrFail('QuickStatsAIMappings');
-      const quickStatsElem = await testSubjects.find('quickStats');
-      const quickStatsAIMappingsElem = await quickStatsElem.findByTestSubject(
-        'QuickStatsAIMappings'
-      );
-      await quickStatsAIMappingsElem.click();
-      await testSubjects.existOrFail('setupAISearchButton', { timeout: 2000 });
-    },
-
-    async expectQuickStatsAIMappingsToHaveSemanticFields() {
-      const quickStatsDocumentElem = await testSubjects.find('QuickStatsAIMappings');
-      await quickStatsDocumentElem.click();
-      expect(await quickStatsDocumentElem.getVisibleText()).to.contain('AI Search\n2 Fields');
-      await testSubjects.missingOrFail('setupAISearchButton', { timeout: 2000 });
-    },
-
-    async expectQuickStatsAIMappingsToHaveVectorFields() {
-      const quickStatsDocumentElem = await testSubjects.find('QuickStatsAIMappings');
-      await quickStatsDocumentElem.click();
-      expect(await quickStatsDocumentElem.getVisibleText()).to.contain('AI Search\n1 Field');
-      await testSubjects.missingOrFail('setupAISearchButton', { timeout: 2000 });
-    },
-
-    async expectAddDocumentCodeExamples() {
-      await testSubjects.existOrFail('SearchIndicesAddDocumentsCode', { timeout: 2000 });
-    },
-
-    async expectHasIndexDocuments() {
+    async expectStatusDetailsToHaveDocCount(count: number) {
+      const docCountElem = await testSubjects.find('indexDetailsStatusDocCount', 2000);
       await retry.try(async () => {
-        await testSubjects.existOrFail('search-index-documents-result', { timeout: 2000 });
+        expect(await docCountElem.getVisibleText()).to.contain(`${count}`);
       });
     },
 
-    async expectMoreOptionsActionButtonExists() {
-      await testSubjects.existOrFail('moreOptionsActionButton');
+    async expectQuickStatsToHaveIndexStorage(size?: string) {
+      await testSubjects.existOrFail('indexDetailsStorage');
+      if (!size) return;
+
+      const storageElem = await testSubjects.find('indexDetailsStorage');
+      expect(await storageElem.getVisibleText()).to.contain(size);
     },
-    async clickMoreOptionsActionsButton() {
-      await testSubjects.click('moreOptionsActionButton');
+
+    async expectManageIndexButtonExists() {
+      await testSubjects.existOrFail('indexActionsContextMenuButton');
     },
-    async expectMoreOptionsOverviewMenuIsShown() {
-      await testSubjects.existOrFail('moreOptionsContextMenu');
+    async clickManageIndexButton() {
+      await testSubjects.click('indexActionsContextMenuButton');
     },
-    async expectToNavigateToPlayground(indexName: string) {
-      await testSubjects.click('moreOptionsPlayground');
-      expect(await browser.getCurrentUrl()).contain(
-        `/search_playground/chat?default-index=${indexName}`
-      );
-      await testSubjects.existOrFail('chatPage');
+    async expectManageIndexContextMenuIsShown() {
+      await testSubjects.existOrFail('indexContextMenu');
     },
-    async expectAPIReferenceDocLinkExistsInMoreOptions() {
-      await testSubjects.existOrFail('moreOptionsApiReference', { timeout: 2000 });
-    },
-    async expectAPIReferenceDocLinkMissingInMoreOptions() {
-      await testSubjects.missingOrFail('moreOptionsApiReference', { timeout: 2000 });
-    },
-    async expectDeleteIndexButtonToBeDisabled() {
-      await testSubjects.existOrFail('moreOptionsDeleteIndex');
-      const deleteIndexButton = await testSubjects.isEnabled('moreOptionsDeleteIndex');
-      expect(deleteIndexButton).to.be(false);
-      await testSubjects.moveMouseTo('moreOptionsDeleteIndex');
-      await testSubjects.existOrFail('moreOptionsDeleteIndexTooltip');
-    },
-    async expectDeleteIndexButtonToBeEnabled() {
-      await testSubjects.existOrFail('moreOptionsDeleteIndex');
-      const deleteIndexButton = await testSubjects.isEnabled('moreOptionsDeleteIndex');
-      expect(deleteIndexButton).to.be(true);
-    },
-    async expectDeleteIndexButtonExistsInMoreOptions() {
-      await testSubjects.existOrFail('moreOptionsDeleteIndex');
+    async expectDeleteIndexButtonExists() {
+      await testSubjects.existOrFail('deleteIndexMenuButton');
     },
     async clickDeleteIndexButton() {
-      await testSubjects.click('moreOptionsDeleteIndex');
-    },
-    async expectDeleteIndexModalExists() {
-      await testSubjects.existOrFail('deleteIndexActionModal');
+      await testSubjects.click('deleteIndexMenuButton');
     },
     async clickConfirmingDeleteIndex() {
       await testSubjects.existOrFail('confirmModalConfirmButton');
       await testSubjects.click('confirmModalConfirmButton');
     },
+
     async expectPageLoadErrorExists() {
       await retry.tryForTime(60 * 1000, async () => {
-        await testSubjects.existOrFail('pageLoadError');
+        await testSubjects.existOrFail('indexDetailsErrorLoadingDetails');
       });
 
-      await testSubjects.existOrFail('loadingErrorBackToIndicesButton');
-      await testSubjects.existOrFail('reloadButton');
-    },
-    async expectIndexNotFoundErrorExists() {
-      const pageLoadErrorElement = await (
-        await testSubjects.find('pageLoadError')
-      ).findByClassName('euiTitle');
-      expect(await pageLoadErrorElement.getVisibleText()).to.contain('Not Found');
+      await testSubjects.existOrFail('indexDetailsReloadDetailsButton');
     },
     async hasPageReloadButton() {
-      await testSubjects.existOrFail('reloadButton');
+      await testSubjects.existOrFail('indexDetailsReloadDetailsButton');
     },
     async pageReloadButtonIsVisible() {
-      return testSubjects.isDisplayed('reloadButton');
+      return testSubjects.isDisplayed('indexDetailsReloadDetailsButton');
     },
     async clickPageReload() {
       await retry.tryForTime(
         60 * 1000,
         async () => {
-          await testSubjects.click('reloadButton', 2000);
+          await testSubjects.click('indexDetailsReloadDetailsButton', 2000);
         },
         undefined,
         100
       );
     },
     async expectTabsExists() {
-      await testSubjects.existOrFail('mappingsTab', { timeout: 2000 });
-      await testSubjects.existOrFail('dataTab', { timeout: 2000 });
+      await testSubjects.existOrFail('indexDetailsTab-mappings', { timeout: 2000 });
+      await testSubjects.existOrFail('indexDetailsTab-overview', { timeout: 2000 });
+      await testSubjects.existOrFail('indexDetailsTab-settings', { timeout: 2000 });
     },
-    async changeTab(tab: 'dataTab' | 'mappingsTab' | 'settingsTab') {
+    async changeTab(
+      tab: 'indexDetailsTab-overview' | 'indexDetailsTab-mappings' | 'indexDetailsTab-settings'
+    ) {
       await testSubjects.click(tab);
     },
-    async expectUrlShouldChangeTo(tab: 'data' | 'mappings' | 'settings') {
-      expect(await browser.getCurrentUrl()).contain(`/${tab}`);
+    async expectUrlShouldChangeTo(tab: 'overview' | 'mappings' | 'settings') {
+      expect(await browser.getCurrentUrl()).contain(`tab=${tab}`);
     },
     async expectMappingsComponentIsVisible() {
       await testSubjects.existOrFail('indexDetailsMappingsToggleViewButton', { timeout: 2000 });
@@ -245,91 +160,15 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
       );
       expect(isEditSettingsButtonDisabled).to.be(true);
     },
-    async expectSelectedLanguage(language: string) {
-      await testSubjects.existOrFail('codeExampleLanguageSelect');
-      expect(
-        (await testSubjects.getVisibleText('codeExampleLanguageSelect')).toLowerCase()
-      ).contain(language);
-    },
-    async selectCodingLanguage(language: string) {
-      await testSubjects.existOrFail('codeExampleLanguageSelect');
-      await testSubjects.click('codeExampleLanguageSelect');
-      await testSubjects.existOrFail(`lang-option-${language}`);
-      await testSubjects.click(`lang-option-${language}`);
-      expect(
-        (await testSubjects.getVisibleText('codeExampleLanguageSelect')).toLowerCase()
-      ).contain(language);
-    },
-    async codeSampleContainsValue(subject: string, value: string) {
-      const tstSubjId = `${subject}-code-block`;
-      await testSubjects.existOrFail(tstSubjId);
-      expect(await testSubjects.getVisibleText(tstSubjId)).contain(value);
-    },
-    async openConsoleCodeExample() {
-      await testSubjects.existOrFail('tryInConsoleButton');
-      await testSubjects.click('tryInConsoleButton');
-    },
-
-    async expectAPIKeyToBeVisibleInCodeBlock(apiKey: string) {
-      await testSubjects.existOrFail('ingestDataCodeExample-code-block');
-      expect(await testSubjects.getVisibleText('ingestDataCodeExample-code-block')).to.contain(
-        apiKey
-      );
-    },
-
-    async expectHasSampleDocuments() {
-      await testSubjects.existOrFail('ingestDataCodeExample-code-block');
-      expect(await testSubjects.getVisibleText('ingestDataCodeExample-code-block')).to.contain(
-        'Yellowstone National Park'
-      );
-      expect(await testSubjects.getVisibleText('ingestDataCodeExample-code-block')).to.contain(
-        'Yosemite National Park'
-      );
-      expect(await testSubjects.getVisibleText('ingestDataCodeExample-code-block')).to.contain(
-        'Rocky Mountain National Park'
-      );
-    },
-
-    async clickFirstDocumentDeleteAction() {
-      await testSubjects.existOrFail('documentMetadataButton');
-      await testSubjects.click('documentMetadataButton');
-      await testSubjects.existOrFail('deleteDocumentButton');
-      await testSubjects.click('deleteDocumentButton');
-    },
-    async expectDeleteDocumentActionNotVisible() {
-      await testSubjects.existOrFail('documentMetadataButton');
-      await testSubjects.click('documentMetadataButton');
-      await testSubjects.missingOrFail('deleteDocumentButton');
-    },
-    async expectDeleteDocumentActionIsDisabled() {
-      await testSubjects.existOrFail('documentMetadataButton');
-      await testSubjects.click('documentMetadataButton');
-      await testSubjects.existOrFail('deleteDocumentButton');
-      const isDeleteDocumentEnabled = await testSubjects.isEnabled('deleteDocumentButton');
-      expect(isDeleteDocumentEnabled).to.be(false);
-      await testSubjects.moveMouseTo('deleteDocumentButton');
-      await testSubjects.existOrFail('deleteDocumentButtonToolTip');
-    },
-    async expectDeleteDocumentActionToBeEnabled() {
-      await testSubjects.existOrFail('documentMetadataButton');
-      await testSubjects.click('documentMetadataButton');
-      await testSubjects.existOrFail('deleteDocumentButton');
-      const isDeleteDocumentEnabled = await testSubjects.isEnabled('deleteDocumentButton');
-      expect(isDeleteDocumentEnabled).to.be(true);
-    },
 
     async openIndicesDetailFromIndexManagementIndicesListTable(indexOfRow: number) {
       const indexList = await testSubjects.findAll('indexTableIndexNameLink');
       await indexList[indexOfRow].click();
       await retry.waitFor('index details page title to show up', async () => {
-        return (await testSubjects.isDisplayed('searchIndexDetailsHeader')) === true;
+        return (await testSubjects.isDisplayed('indexDetailsHeader')) === true;
       });
     },
 
-    async expectIndexNametoBeInBreadcrumbs(indexName: string) {
-      await testSubjects.existOrFail('euiBreadcrumb');
-      expect(await testSubjects.getVisibleText('breadcrumb last')).to.contain(indexName);
-    },
     async expectBreadcrumbsToBeAvailable(breadcrumbsName: string) {
       const breadcrumbs = await testSubjects.findAll('euiBreadcrumb');
       let isBreadcrumbShown: boolean = false;
@@ -363,6 +202,22 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
       await testSubjects.existOrFail('indexDetailsMappingsAddField');
       const isMappingsFieldEnabled = await testSubjects.isEnabled('indexDetailsMappingsAddField');
       expect(isMappingsFieldEnabled).to.be(true);
+    },
+
+    async expectDiscoverLinkExists() {
+      await testSubjects.existOrFail('discoverButtonLink', { timeout: 2000 });
+    },
+
+    async expectAddDataSectionExists() {
+      await testSubjects.existOrFail('codeBlockControlsPanel', { timeout: 2000 });
+    },
+    async expectDataPreviewExists() {
+      await retry.try(async () => {
+        await testSubjects.existOrFail('search-index-documents-result', { timeout: 5000 });
+      });
+    },
+    async expectDataPreviewNotExists() {
+      await testSubjects.missingOrFail('search-index-documents-result', { timeout: 2000 });
     },
   };
 }

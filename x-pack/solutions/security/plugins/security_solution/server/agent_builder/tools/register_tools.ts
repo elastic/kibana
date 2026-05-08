@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../common';
 import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
-import { entityRiskScoreTool } from './entity_risk_score_tool';
+import { entityRiskScoreTool, getEntityTool, searchEntitiesTool } from './entity_analytics';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
+import { pciComplianceTool } from './pci_compliance_tool';
+import { pciScopeDiscoveryTool } from './pci_scope_discovery_tool';
+import { pciFieldMapperTool } from './pci_field_mapper_tool';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**
- * Registers all security agent builder tools with the agentBuilder plugin
+ * Registers all security agent builder tools with the agentBuilder plugin.
+ *
+ * PCI compliance tools are gated behind `experimentalFeatures.pciComplianceAgentBuilder` so
+ * the feature can ship dark and be enabled per environment.
  */
 export const registerTools = async (
   agentBuilder: AgentBuilderPluginSetup,
@@ -29,4 +35,12 @@ export const registerTools = async (
   agentBuilder.tools.register(securityLabsSearchTool(core));
   agentBuilder.tools.register(createDetectionRuleTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(alertsTool(core, logger));
+  agentBuilder.tools.register(getEntityTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
+
+  if (experimentalFeatures.pciComplianceAgentBuilder) {
+    agentBuilder.tools.register(pciScopeDiscoveryTool(core, logger));
+    agentBuilder.tools.register(pciComplianceTool(core, logger));
+    agentBuilder.tools.register(pciFieldMapperTool(core, logger));
+  }
 };

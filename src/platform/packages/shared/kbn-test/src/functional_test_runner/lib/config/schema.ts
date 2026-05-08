@@ -230,6 +230,7 @@ export const schema = Joi.object()
           }),
         }),
         files: Joi.array().items(Joi.string()),
+        secureFiles: Joi.array().items(Joi.string()),
       })
       .default(),
 
@@ -309,6 +310,7 @@ export const schema = Joi.object()
     uiSettings: Joi.object()
       .keys({
         defaults: Joi.object().unknown(true),
+        globalDefaults: Joi.object().unknown(true),
       })
       .default(),
 

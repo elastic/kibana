@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import type {
   CanLockHoverActions,
   HasSerializableState,
@@ -15,6 +14,9 @@ import type {
   PublishesPhaseEvents,
 } from '@kbn/presentation-publishing';
 import type React from 'react';
+import type { DefaultPresentationPanelApi } from './panel_component/types';
+import type { initializeDrilldownsManager } from '../drilldowns/drilldowns_manager';
+import type { SerializedDrilldowns } from '../../server';
 
 /**
  * The default embeddable API that all Embeddables must implement.
@@ -28,8 +30,8 @@ export interface DefaultEmbeddableApi<SerializedState extends object = object>
     HasSerializableState<SerializedState> {}
 
 /**
- * Defines the subset of the default embeddable API that the `setApi` method uses, which allows implementors
- * to omit aspects of the API that will be automatically added by `setApi`.
+ * Defines the subset of the default embeddable API that the `finalizeApi` method uses, which allows implementors
+ * to omit aspects of the API that will be automatically added by `finalizeApi`.
  */
 export type EmbeddableApiRegistration<
   SerializedState extends object = object,
@@ -59,6 +61,14 @@ export interface BuildEmbeddableProps<
    * An optional parent API.
    */
   parentApi: unknown | undefined;
+
+  /**
+   *
+   */
+  initializeDrilldownsManager(
+    embeddableUuid: string,
+    state: SerializedDrilldowns
+  ): ReturnType<typeof initializeDrilldownsManager>;
 }
 
 /**

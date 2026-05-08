@@ -21,6 +21,7 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import type { CoreSetup } from '@kbn/core/server';
 import type { AlertingPluginsStart } from '../../../../plugin';
+import { ApiKeyType } from '../../../../task_runner/types';
 
 const rulesClient = rulesClientMock.create();
 
@@ -46,6 +47,10 @@ describe('createRuleRoute', () => {
     },
     enableFrameworkAlerts: true,
     cancelAlertsOnRuleTimeout: true,
+    ruleChangeTracking: {
+      enabled: false,
+      scope: ['security'] as string[],
+    },
     rules: {
       minimumScheduleInterval: {
         value: '1m',
@@ -60,6 +65,7 @@ describe('createRuleRoute', () => {
           max: 1000,
         },
       },
+      apiKeyType: ApiKeyType.ES,
     },
     rulesSettings: {
       enabled: true,
@@ -68,7 +74,7 @@ describe('createRuleRoute', () => {
     maintenanceWindow: {
       enabled: true,
     },
-  };
+  } as const;
   const action: RuleAction = {
     actionTypeId: 'test',
     group: 'default',

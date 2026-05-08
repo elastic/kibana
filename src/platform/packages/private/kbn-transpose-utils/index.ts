@@ -34,3 +34,16 @@ export function getOriginalId(id: string) {
   }
   return id;
 }
+
+export function parseTransposeId(id: string) {
+  const idParts = id.split(TRANSPOSE_SEPARATOR);
+
+  if (idParts.length <= 1) {
+    return undefined;
+  }
+
+  return {
+    id: idParts[idParts.length - 1],
+    values: idParts.slice(0, -1),
+  };
+}

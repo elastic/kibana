@@ -59,6 +59,7 @@
             "lineNumber": 310,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "AlertsGroupingProps",
             "trackAdoption": false
           }
         ],
@@ -222,7 +223,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "[]) => React.ReactElement<any>"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "lineNumber": 33,
@@ -363,7 +364,9 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[], groupNumber: number) => JSX.Element | undefined) | undefined"
+              "[], groupNumber: number, groupBucket: ",
+              "GroupingBucket",
+              "<T>, closePopover: () => void) => JSX.Element | undefined) | undefined"
             ],
             "path": "x-pack/solutions/observability/packages/kbn-alerts-grouping/src/types.ts",
             "lineNumber": 54,
@@ -641,6 +644,7 @@
                 "lineNumber": 109,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "GroupModel",
                 "trackAdoption": false,
                 "isRequired": true
               }

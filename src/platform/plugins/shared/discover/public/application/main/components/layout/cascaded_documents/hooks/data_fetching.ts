@@ -7,17 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useRef, useEffect } from 'react';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
-import type { CascadeQueryArgs } from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
-import {
-  type ESQLStatsQueryMeta,
-  constructCascadeQuery,
-} from '@kbn/esql-utils/src/utils/cascaded_documents_helpers';
-import { i18n } from '@kbn/i18n';
-import type { AggregateQuery } from '@kbn/es-query';
-import { useCallback, useMemo } from 'react';
-import { apm } from '@elastic/apm-rum';
+import { GROUP_NOT_SET_VALUE, type ESQLStatsQueryMeta } from '@kbn/esql-utils';
+import { useMemo, useState } from 'react';
 import {
   type DataCascadeRowProps,
   type DataCascadeRowCellProps,
@@ -25,9 +17,12 @@ import {
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { v5 as uuidv5 } from 'uuid';
 import { isNil } from 'lodash';
-import { fetchEsql } from '../../../../data_fetching/fetch_esql';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import useLatest from 'react-use/lib/useLatest';
 import { type ESQLDataGroupNode } from '../blocks';
 import type { CascadedDocumentsContext } from '../cascaded_documents_provider';
+import { useCascadedDocumentsContext } from '../cascaded_documents_provider';
+import { useCascadedDocumentsTelemetry } from '../telemetry';
 
 interface UseGroupedCascadeDataProps
   extends Pick<UnifiedDataTableProps, 'rows'>,
@@ -46,9 +41,11 @@ export const useGroupedCascadeData = ({
   queryMeta,
   esqlVariables,
 }: UseGroupedCascadeDataProps) => {
-  return useMemo(
-    () =>
-      selectedCascadeGroups.reduce<ESQLDataGroupNode[]>((allGroups, groupColumn, groupDepth) => {
+  return useMemo(() => {
+    const columnTypes = new Map<string, 'number' | 'array'>();
+
+    const data = selectedCascadeGroups.reduce<ESQLDataGroupNode[]>(
+      (allGroups, groupColumn, groupDepth) => {
         let resolvedGroupColumn: string = groupColumn;
 
         const matchingGroupVariable = esqlVariables?.find(
@@ -60,15 +57,10 @@ export const useGroupedCascadeData = ({
         }
 
         const rowsGroupedByValue = Object.groupBy(rows ?? [], (row) =>
-          String(row.flattened[resolvedGroupColumn])
+          String(row.flattened[resolvedGroupColumn] ?? GROUP_NOT_SET_VALUE)
         );
 
         Object.entries(rowsGroupedByValue).forEach(([groupValue, groupRows = []]) => {
-          // skip undefined and null values
-          if (groupValue === 'undefined' || groupValue === 'null') {
-            return;
-          }
-
           const groupNode: ESQLDataGroupNode = {
             id: uuidv5(`${groupColumn}-${groupValue}`, NODE_ID_NAMESPACE),
             // While we use explicit properties for better typing, the document_data_cascade package
@@ -88,12 +80,18 @@ export const useGroupedCascadeData = ({
                   const existingValue = allValues[identifier];
 
                   if (typeof currentValue === 'number') {
+                    if (!columnTypes.has(identifier)) {
+                      columnTypes.set(identifier, 'number');
+                    }
                     if (typeof existingValue === 'number') {
                       allValues[identifier] = existingValue + currentValue;
                     } else if (isNil(existingValue)) {
                       allValues[identifier] = currentValue;
                     }
                   } else if (Array.isArray(currentValue)) {
+                    if (!columnTypes.has(identifier)) {
+                      columnTypes.set(identifier, 'array');
+                    }
                     const valuesArray = currentValue.map(String);
 
                     if (Array.isArray(existingValue)) {
@@ -126,149 +124,28 @@ export const useGroupedCascadeData = ({
         });
 
         return allGroups;
-      }, []),
-    [esqlVariables, queryMeta.appliedFunctions, rows, selectedCascadeGroups]
-  );
+      },
+      []
+    );
+
+    return { data, columnTypes };
+  }, [esqlVariables, queryMeta.appliedFunctions, rows, selectedCascadeGroups]);
 };
 
-interface UseScopedESQLQueryFetchClientProps
-  extends Pick<
-    Parameters<typeof fetchEsql>[0],
-    | 'dataView'
-    | 'data'
-    | 'expressions'
-    | 'timeRange'
-    | 'scopedProfilesManager'
-    | 'esqlVariables'
-    | 'inspectorAdapters'
-  > {
-  query: AggregateQuery;
-}
+const useStableHandler = <T extends (...args: Parameters<T>) => ReturnType<T>>(handler: T): T => {
+  const latestHandler = useLatest(handler);
+  const [stableHandler] = useState(() => (...args: Parameters<T>) => {
+    return latestHandler.current?.(...args);
+  });
 
-/**
- * Returns a function that fetches the data for the scoped ESQL query.
- */
-export function useScopedESQLQueryFetchClient({
-  query,
-  dataView,
-  data,
-  expressions,
-  esqlVariables,
-  timeRange,
-  scopedProfilesManager,
-  inspectorAdapters,
-}: UseScopedESQLQueryFetchClientProps) {
-  const abortController = useRef<AbortController | null>(null);
-
-  const cancelRequest = useCallback((reason?: string) => {
-    abortController.current?.abort(reason);
-  }, []);
-
-  const scopedESQLQueryFetch = useCallback(
-    (esqlQuery: AggregateQuery, abortSignal: AbortSignal) =>
-      fetchEsql({
-        query: esqlQuery,
-        esqlVariables,
-        dataView,
-        data,
-        expressions,
-        abortSignal,
-        timeRange,
-        scopedProfilesManager,
-        inspectorAdapters,
-        inspectorConfig: {
-          title: i18n.translate('discover.dataCascade.inspector.cascadeQueryTitle', {
-            defaultMessage: 'Cascade Row Data Query',
-          }),
-          description: i18n.translate('discover.dataCascade.inspector.cascadeQueryDescription', {
-            defaultMessage:
-              'This request queries Elasticsearch to fetch the documents matching the value of the expanded cascade row.',
-          }),
-        },
-      }),
-    [
-      data,
-      dataView,
-      esqlVariables,
-      expressions,
-      inspectorAdapters,
-      scopedProfilesManager,
-      timeRange,
-    ]
-  );
-
-  const baseFetch = useCallback(
-    async ({
-      nodeType,
-      nodePath,
-      nodePathMap,
-    }: Omit<CascadeQueryArgs, 'query' | 'dataView' | 'esqlVariables'>) => {
-      const newQuery = constructCascadeQuery({
-        query,
-        esqlVariables,
-        dataView,
-        nodeType,
-        nodePath,
-        nodePathMap,
-      });
-
-      if (!newQuery) {
-        // maybe track the inputted query, to learn about the kind of queries that bug
-        apm.captureError(new Error('Failed to construct cascade query'));
-        return [];
-      }
-
-      if (!abortController.current?.signal?.aborted) {
-        cancelRequest('starting new request');
-      }
-
-      abortController.current = new AbortController();
-
-      const { records } = await scopedESQLQueryFetch(
-        newQuery,
-        abortController.current!.signal
-      ).catch((error) => {
-        // handle abort errors gracefully
-        if (error.message.includes('aborted')) {
-          return { records: [] };
-        }
-        // rethrow other errors
-        throw error;
-      });
-
-      return records;
-    },
-    [scopedESQLQueryFetch, esqlVariables, dataView, query, cancelRequest]
-  );
-
-  useEffect(
-    // handle cleanup for when the component unmounts
-    () => () => {
-      // cancel any pending requests
-      cancelRequest('unmount cleanup');
-    },
-    [cancelRequest]
-  );
-
-  return useMemo(
-    () =>
-      Object.assign(baseFetch, {
-        /**
-         * Cancels any pending requests for the cascade fetch client.
-         */
-        cancel: cancelRequest.bind(null, 'request cancellation'),
-      }),
-    [baseFetch, cancelRequest]
-  );
-}
-
-interface UseDataCascadePropsProps {
-  cascadeFetchClient: ReturnType<typeof useScopedESQLQueryFetchClient>;
-}
+  return stableHandler as T;
+};
 
 export function useDataCascadeRowExpansionHandlers({
-  cascadeFetchClient,
-}: UseDataCascadePropsProps): Pick<
+  dataView,
+}: {
+  dataView: DataView;
+}): Pick<
   DataCascadeRowProps<ESQLDataGroupNode, DataTableRecord>,
   'onCascadeGroupNodeExpanded' | 'onCascadeGroupNodeCollapsed'
 > &
@@ -276,63 +153,67 @@ export function useDataCascadeRowExpansionHandlers({
     DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>,
     'onCascadeLeafNodeExpanded' | 'onCascadeLeafNodeCollapsed'
   > {
+  const { cascadedDocumentsFetcher, esqlQuery, esqlVariables, timeRange } =
+    useCascadedDocumentsContext();
+  const { trackCascadeExpanded, trackCascadeCollapsed } = useCascadedDocumentsTelemetry();
+
   /**
    * Callback invoked when a group node gets expanded, used to fetch data for group nodes.
    */
-  const onCascadeGroupNodeExpanded = useCallback<
+  const onCascadeGroupNodeExpanded = useStableHandler<
     NonNullable<
       DataCascadeRowProps<ESQLDataGroupNode, DataTableRecord>['onCascadeGroupNodeExpanded']
     >
-  >(
-    ({ nodePath, nodePathMap }) => {
-      return cascadeFetchClient({
-        nodePath,
-        nodePathMap,
-        nodeType: 'group',
-      }) as unknown as Promise<ESQLDataGroupNode[]>;
-    },
-    [cascadeFetchClient]
-  );
+  >(() => {
+    // TODO: We don't support nested groups yet.
+    return Promise.resolve([]);
+  });
 
   /**
    * Callback invoked when a group node gets collapsed, cancels any pending requests for the group node if necessary.
    */
-  const onCascadeGroupNodeCollapsed = useCallback<
+  const onCascadeGroupNodeCollapsed = useStableHandler<
     NonNullable<
       DataCascadeRowProps<ESQLDataGroupNode, DataTableRecord>['onCascadeGroupNodeCollapsed']
     >
   >(() => {
-    return cascadeFetchClient.cancel();
-  }, [cascadeFetchClient]);
+    // TODO: We don't support nested groups yet.
+  });
 
   /**
    * Callback invoked when a leaf node gets expanded, used to fetch data for leaf nodes.
    */
-  const onCascadeLeafNodeExpanded = useCallback<
+  const onCascadeLeafNodeExpanded = useStableHandler<
     NonNullable<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>
     >['onCascadeLeafNodeExpanded']
-  >(
-    ({ nodePath, nodePathMap }) => {
-      return cascadeFetchClient({
-        nodePath,
-        nodePathMap,
-        nodeType: 'leaf',
-      });
-    },
-    [cascadeFetchClient]
-  );
+  >(({ row, nodePath, nodePathMap }) => {
+    trackCascadeExpanded(row.id);
+
+    return cascadedDocumentsFetcher.fetchCascadedDocuments({
+      nodeId: row.id,
+      nodeType: 'leaf',
+      nodePath,
+      nodePathMap,
+      query: esqlQuery,
+      esqlVariables,
+      timeRange,
+      dataView,
+    });
+  });
 
   /**
    * Callback invoked when a leaf node gets collapsed, cancels any pending requests for the leaf node if necessary.
    */
-  const onCascadeLeafNodeCollapsed = useCallback<
+  const onCascadeLeafNodeCollapsed = useStableHandler<
     NonNullable<
       DataCascadeRowCellProps<ESQLDataGroupNode, DataTableRecord>['onCascadeLeafNodeCollapsed']
     >
-  >(() => {
-    return cascadeFetchClient.cancel();
-  }, [cascadeFetchClient]);
+  >(({ row }) => {
+    trackCascadeCollapsed(row.id);
+
+    cascadedDocumentsFetcher.cancelFetch(row.id);
+  });
 
   return {
     onCascadeGroupNodeExpanded,

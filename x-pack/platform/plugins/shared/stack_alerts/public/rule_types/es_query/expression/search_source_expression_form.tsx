@@ -20,6 +20,7 @@ import type { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common'
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
+  convertFieldSpecToFieldOption,
   isCountAggregation,
   isGroupAggregation,
   parseAggregationResults,
@@ -37,7 +38,7 @@ import type {
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { DataViewSelectPopover } from '../../components/data_view_select_popover';
 import { RuleCommonExpressions } from '../rule_common_expressions';
-import { useTriggerUiActionServices, convertFieldSpecToFieldOption } from '../util';
+import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
 
 const HIDDEN_FILTER_PANEL_OPTIONS: SearchBarProps['hiddenFilterPanelOptions'] = [

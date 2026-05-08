@@ -8,12 +8,14 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { ESQLSourceResult } from '@kbn/esql-types';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { registerESQLEditorAnalyticsEvents } from '@kbn/esql-editor';
 import { registerIndexEditorActions, registerIndexEditorAnalyticsEvents } from '@kbn/index-editor';
@@ -22,15 +24,12 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import {
   ESQL_CONTROL_TRIGGER,
-  esqlControlTrigger,
-} from './triggers/esql_controls/esql_control_trigger';
-import {
   UPDATE_ESQL_QUERY_TRIGGER,
-  updateESQLQueryTrigger,
-} from './triggers/update_esql_query/update_esql_query_trigger';
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { ACTION_CREATE_ESQL_CONTROL, ACTION_UPDATE_ESQL_QUERY } from './triggers/constants';
 import { setKibanaServices } from './kibana_services';
 import { EsqlVariablesService } from './variables_service';
+import { SourceEnricherService } from './source_enricher_service';
 
 interface EsqlPluginSetupDependencies {
   uiActions: UiActionsSetup;
@@ -41,6 +40,7 @@ interface EsqlPluginStartDependencies {
   fieldsMetadata: FieldsMetadataPublicStart;
   licensing?: LicensingPluginStart;
   usageCollection?: UsageCollectionStart;
+  cps?: CPSPluginStart;
   // LOOKUP JOIN deps
   share: SharePluginStart;
   data: DataPublicPluginStart;
@@ -49,22 +49,40 @@ interface EsqlPluginStartDependencies {
   kql: KqlPluginStart;
 }
 
+export interface EsqlPluginSetup {
+  /**
+   * Register a function to enrich ES|QL source autocomplete suggestions.
+   * Multiple plugins can register enrichers; they are chained in registration order.
+   */
+  registerSourceEnricher(
+    enricher: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>
+  ): void;
+}
+
 export interface EsqlPluginStart {
   variablesService: EsqlVariablesService;
   isServerless: boolean;
+  enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
 }
 
-export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
-  constructor(private readonly initContext: PluginInitializerContext) {}
+export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
+  private readonly sourceEnricherService: SourceEnricherService;
 
-  public setup(core: CoreSetup, { uiActions }: EsqlPluginSetupDependencies) {
-    uiActions.registerTrigger(updateESQLQueryTrigger);
-    uiActions.registerTrigger(esqlControlTrigger);
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this.sourceEnricherService = new SourceEnricherService(
+      initContext.logger.get('sourceEnricher')
+    );
+  }
 
+  public setup(core: CoreSetup, { uiActions }: EsqlPluginSetupDependencies): EsqlPluginSetup {
     registerESQLEditorAnalyticsEvents(core.analytics);
     registerIndexEditorAnalyticsEvents(core.analytics);
 
-    return {};
+    return {
+      registerSourceEnricher: (enricher) => {
+        this.sourceEnricherService.register(enricher);
+      },
+    };
   }
 
   public start(
@@ -74,6 +92,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       uiActions,
       fieldsMetadata,
       usageCollection,
+      cps,
       licensing,
       fileUpload,
       fieldFormats,
@@ -126,9 +145,20 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       isServerless,
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
+      enrichSources: (sources: ESQLSourceResult[]) => this.sourceEnricherService.enrich(sources),
     };
 
-    setKibanaServices(start, core, data, storage, uiActions, kql, fieldsMetadata, usageCollection);
+    setKibanaServices(
+      start,
+      core,
+      data,
+      storage,
+      uiActions,
+      kql,
+      fieldsMetadata,
+      usageCollection,
+      cps
+    );
 
     return start;
   }

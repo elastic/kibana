@@ -17,6 +17,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { SessionCookie } from './session_cookie';
 import {
   SessionConcurrencyLimitError,
+  SessionErrorReason,
   SessionExpiredError,
   SessionMissingError,
   SessionUnexpectedError,
@@ -29,7 +30,7 @@ import type { ConfigType } from '../config';
 /**
  * The shape of the value that represents user's session information.
  */
-export interface SessionValue {
+export interface SessionValue<TState = unknown> {
   /**
    * Unique session ID.
    */
@@ -68,7 +69,7 @@ export interface SessionValue {
    * Session value that is fed to the authentication provider. The shape is unknown upfront and
    * entirely determined by the authentication provider that owns the current session.
    */
-  state: unknown;
+  state: TState;
 
   /**
    * Unique identifier of the user profile, if any. Not all users that have session will have an associated user
@@ -170,14 +171,19 @@ export class Session {
 
     const sessionLogger = this.getLoggerForSID(sessionCookieValue.sid);
     const now = Date.now();
-    if (
-      (sessionCookieValue.idleTimeoutExpiration &&
-        sessionCookieValue.idleTimeoutExpiration < now) ||
-      (sessionCookieValue.lifespanExpiration && sessionCookieValue.lifespanExpiration < now)
-    ) {
+    const idleExpired =
+      sessionCookieValue.idleTimeoutExpiration && sessionCookieValue.idleTimeoutExpiration < now;
+    const lifespanExpired =
+      sessionCookieValue.lifespanExpiration && sessionCookieValue.lifespanExpiration < now;
+
+    if (idleExpired || lifespanExpired) {
       sessionLogger.debug('Session has expired and will be invalidated.');
       await this.invalidate(request, { match: 'current' });
-      return { error: new SessionExpiredError(), value: null };
+      // Prefer lifespan if both expired (lifespan is the hard limit)
+      const reason = lifespanExpired
+        ? SessionErrorReason.SESSION_LIFESPAN_TIMEOUT
+        : SessionErrorReason.SESSION_IDLE_TIMEOUT;
+      return { error: new SessionExpiredError(reason), value: null };
     }
 
     const sessionIndexValue = await this.options.sessionIndex.get(sessionCookieValue.sid);

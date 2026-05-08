@@ -10,10 +10,84 @@
 import invariant from 'node:assert';
 import type api from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { prettyPrintAndSortKeys } from '@kbn/utils';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import { retryEs } from '../retry_es';
 import type { AnyDataStreamDefinition } from '../types';
+
+function normalizeLifecycle(
+  lifecycle: api.IndicesDataStreamLifecycleWithRollover | undefined
+): api.IndicesDataStreamLifecycle | undefined {
+  if (!lifecycle) {
+    return undefined;
+  }
+  return {
+    ...lifecycle,
+    // Set enabled `true` to make comparison with ES response stable
+    enabled: lifecycle.enabled ?? true,
+  };
+}
+
+function lifecycleDefinitionChanged({
+  existingIndexTemplate,
+  dataStream,
+}: {
+  existingIndexTemplate: api.IndicesGetIndexTemplateIndexTemplateItem | undefined;
+  dataStream: AnyDataStreamDefinition;
+}) {
+  const currentLifecycle = normalizeLifecycle(
+    existingIndexTemplate?.index_template.template?.lifecycle
+  );
+  const desiredLifecycle = normalizeLifecycle(dataStream.template.lifecycle);
+
+  const stringifyLifecycle = (lifecycle: api.IndicesDataStreamLifecycle | undefined) =>
+    lifecycle ? prettyPrintAndSortKeys(lifecycle) : undefined;
+
+  return stringifyLifecycle(currentLifecycle) !== stringifyLifecycle(desiredLifecycle);
+}
+
+async function applyDataStreamLifecycle({
+  logger,
+  elasticsearchClient,
+  dataStream,
+}: {
+  logger: Logger;
+  elasticsearchClient: ElasticsearchClient;
+  dataStream: AnyDataStreamDefinition;
+}) {
+  const lifecycle = dataStream.template.lifecycle;
+
+  if (lifecycle) {
+    logger.debug(`Updating lifecycle on existing data stream: ${dataStream.name}`);
+    await retryEs(
+      () =>
+        elasticsearchClient.indices.putDataLifecycle({
+          name: dataStream.name,
+          ...normalizeLifecycle(lifecycle),
+        }),
+      { logger, dataStreamName: dataStream.name }
+    );
+    return;
+  }
+
+  logger.debug(`Removing lifecycle from existing data stream: ${dataStream.name}`);
+  try {
+    await retryEs(
+      () =>
+        elasticsearchClient.indices.deleteDataLifecycle({
+          name: dataStream.name,
+        }),
+      { logger, dataStreamName: dataStream.name }
+    );
+  } catch (error) {
+    if (error instanceof EsErrors.ResponseError && error.statusCode === 404) {
+      // Data stream has no lifecycle configuration, treat as idempotent remove.
+      return;
+    }
+    throw error;
+  }
+}
 
 /**
  * https://www.elastic.co/docs/manage-data/data-store/data-streams/set-up-data-stream
@@ -76,17 +150,33 @@ export async function initializeDataStream({
     } else {
       const {
         template: { mappings },
-      } = await retryEs(() =>
-        elasticsearchClient.indices.simulateIndexTemplate({ name: dataStream.name })
+      } = await retryEs(
+        () => elasticsearchClient.indices.simulateIndexTemplate({ name: dataStream.name }),
+        { logger, dataStreamName: dataStream.name }
       );
 
       logger.debug(`Applying mappings to write index: ${writeIndex.index_name}`);
-      await retryEs(() =>
-        elasticsearchClient.indices.putMapping({
-          index: writeIndex.index_name,
-          ...mappings,
-        })
+      await retryEs(
+        () =>
+          elasticsearchClient.indices.putMapping({
+            index: writeIndex.index_name,
+            ...mappings,
+          }),
+        { logger, dataStreamName: dataStream.name }
       );
+    }
+
+    if (
+      lifecycleDefinitionChanged({
+        existingIndexTemplate,
+        dataStream,
+      })
+    ) {
+      await applyDataStreamLifecycle({
+        logger,
+        elasticsearchClient,
+        dataStream,
+      });
     }
 
     // data stream updated successfully
@@ -95,10 +185,12 @@ export async function initializeDataStream({
 
   logger.debug(`Creating data stream: ${dataStream.name}.`);
   try {
-    await retryEs(() =>
-      elasticsearchClient.indices.createDataStream({
-        name: dataStream.name,
-      })
+    await retryEs(
+      () =>
+        elasticsearchClient.indices.createDataStream({
+          name: dataStream.name,
+        }),
+      { logger, dataStreamName: dataStream.name }
     );
   } catch (error) {
     if (

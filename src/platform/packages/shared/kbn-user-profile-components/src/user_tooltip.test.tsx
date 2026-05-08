@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { shallow } from 'enzyme';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import { UserToolTip } from './user_tooltip';
 
 describe('UserToolTip', () => {
-  it('should render `EuiToolTip` correctly with `UserAvatar`', () => {
-    const wrapper = shallow(
+  it('should render tooltip with user avatar, display name, and email on hover', async () => {
+    render(
       <UserToolTip
         user={{
           username: 'delighted_nightingale',
@@ -32,62 +33,16 @@ describe('UserToolTip', () => {
         <button>Toggle</button>
       </UserToolTip>
     );
-    expect(wrapper).toMatchInlineSnapshot(`
-      <EuiToolTip
-        content={
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="s"
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <UserAvatar
-                avatar={
-                  Object {
-                    "color": "#09e8ca",
-                    "imageUrl": "https://source.unsplash.com/64x64/?cat",
-                    "initials": "DN",
-                  }
-                }
-                size="l"
-                user={
-                  Object {
-                    "email": "delighted_nightingale@elastic.co",
-                    "full_name": "Delighted Nightingale",
-                    "username": "delighted_nightingale",
-                  }
-                }
-              />
-            </EuiFlexItem>
-            <EuiFlexItem
-              grow={true}
-              style={
-                Object {
-                  "minWidth": 0,
-                }
-              }
-            >
-              <div>
-                Delighted Nightingale
-              </div>
-              <EuiText
-                size="xs"
-              >
-                delighted_nightingale@elastic.co
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        delay="regular"
-        disableScreenReaderOutput={false}
-        display="inlineBlock"
-        position="top"
-      >
-        <button>
-          Toggle
-        </button>
-      </EuiToolTip>
-    `);
+
+    expect(screen.getByText('Toggle')).toBeInTheDocument();
+
+    await userEvent.hover(screen.getByText('Toggle'));
+    await waitFor(() => {
+      expect(screen.getByRole('tooltip')).toBeInTheDocument();
+    });
+
+    expect(screen.getByText('Delighted Nightingale')).toBeInTheDocument();
+    expect(screen.getByText('delighted_nightingale@elastic.co')).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /Delighted Nightingale/ })).toBeInTheDocument();
   });
 });

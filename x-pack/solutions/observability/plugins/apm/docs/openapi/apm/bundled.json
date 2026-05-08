@@ -153,8 +153,10 @@
             "required": false,
             "description": "The start date for the search",
             "schema": {
-              "type": "string"
-            }
+              "type": "string",
+              "format": "date-time"
+            },
+            "example": "2024-01-01T00:00:00.000Z"
           },
           {
             "name": "end",
@@ -162,8 +164,10 @@
             "required": false,
             "description": "The end date for the search",
             "schema": {
-              "type": "string"
-            }
+              "type": "string",
+              "format": "date-time"
+            },
+            "example": "2024-01-31T23:59:59.999Z"
           }
         ],
         "responses": {
@@ -241,6 +245,11 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/create_annotation_object"
+              },
+              "examples": {
+                "createAnnotationRequest1": {
+                  "$ref": "#/components/examples/annotation_object_post_request1"
+                }
               }
             }
           }
@@ -313,6 +322,7 @@
     "/api/apm/settings/agent-configuration": {
       "get": {
         "summary": "Get a list of agent configurations",
+        "description": "Retrieve all agent configurations. You must have `read` privileges for the APM and User Experience feature in Kibana. If agent configuration is not available on the current deployment, the API returns a 404.\n",
         "operationId": "getAgentConfigurations",
         "tags": [
           "APM agent configuration"
@@ -372,6 +382,7 @@
       },
       "delete": {
         "summary": "Delete agent configuration",
+        "description": "Delete an existing agent configuration. You must have `all` privileges for the APM and User Experience feature in Kibana. When successful, the configuration is removed and, if Fleet is enabled, APM package policies are synchronized accordingly.\n",
         "operationId": "deleteAgentConfiguration",
         "tags": [
           "APM agent configuration"
@@ -406,6 +417,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/delete_agent_configurations_response"
+                },
+                "examples": {
+                  "deleteAgentConfigurationResponseExample1": {
+                    "$ref": "#/components/examples/agent_configuration_intake_object_delete_200_response1"
+                  }
                 }
               }
             }
@@ -454,6 +470,7 @@
       },
       "put": {
         "summary": "Create or update agent configuration",
+        "description": "Create or update an agent configuration. You must have `all` privileges for the APM and User Experience feature in Kibana. When updating an existing configuration, the `?overwrite=true` query parameter is required. If the configuration already exists and `overwrite` is not set to `true`, the API returns a 400 error. When successful and Fleet is enabled, APM package policies are synchronized accordingly.\n",
         "operationId": "createUpdateAgentConfiguration",
         "tags": [
           "APM agent configuration"
@@ -496,7 +513,13 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": false
+                  "additionalProperties": false,
+                  "description": "The response body is intentionally empty for this endpoint."
+                },
+                "examples": {
+                  "createUpdateAgentConfigurationResponseExample1": {
+                    "$ref": "#/components/examples/agent_configuration_intake_object_put_200_response1"
+                  }
                 }
               }
             }
@@ -547,6 +570,7 @@
     "/api/apm/settings/agent-configuration/view": {
       "get": {
         "summary": "Get single agent configuration",
+        "description": "Retrieve a single agent configuration matching the given service name and environment. You must have `read` privileges for the APM and User Experience feature in Kibana. If no matching configuration is found, the API returns a 404.\n",
         "operationId": "getSingleAgentConfiguration",
         "tags": [
           "APM agent configuration"
@@ -581,6 +605,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/single_agent_configuration_response"
+                },
+                "examples": {
+                  "getSingleAgentConfigurationResponseExample1": {
+                    "$ref": "#/components/examples/agent_configuration_intake_object_view_200_response1"
+                  }
                 }
               }
             }
@@ -621,7 +650,8 @@
     "/api/apm/settings/agent-configuration/search": {
       "post": {
         "summary": "Lookup single agent configuration",
-        "description": "This endpoint enables you to search for a single agent configuration and update the 'applied_by_agent' field.\n",
+        "deprecated": true,
+        "description": "DEPRECATED: This endpoint is intended for internal use by APM agents to fetch their configuration and mark it as applied. Do not use for new integrations. It searches for a single agent configuration matching the given service, and optionally updates the `applied_by_agent` field when the provided `etag` matches the current configuration.\n",
         "operationId": "searchSingleConfiguration",
         "tags": [
           "APM agent configuration"
@@ -701,6 +731,7 @@
     "/api/apm/settings/agent-configuration/environments": {
       "get": {
         "summary": "Get environments for service",
+        "description": "Retrieve the available environments for a given service, to be used in agent configuration. You must have `read` privileges for the APM and User Experience feature in Kibana. If `serviceName` is omitted, environments across all services are returned.\n",
         "operationId": "getEnvironmentsForService",
         "tags": [
           "APM agent configuration"
@@ -712,10 +743,11 @@
           {
             "name": "serviceName",
             "in": "query",
-            "description": "The name of the service",
+            "description": "The name of the service. If omitted, environments across all services are returned.",
             "schema": {
               "type": "string"
-            }
+            },
+            "example": "opbeans-node"
           }
         ],
         "responses": {
@@ -725,6 +757,11 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/service_environments_response"
+                },
+                "examples": {
+                  "getEnvironmentsForServiceResponseExample1": {
+                    "$ref": "#/components/examples/agent_configuration_environments_200_response1"
+                  }
                 }
               }
             }
@@ -1054,7 +1091,13 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": false
+                  "additionalProperties": false,
+                  "description": "The response body is intentionally empty for this endpoint."
+                },
+                "examples": {
+                  "deleteSourceMapResponseExample1": {
+                    "$ref": "#/components/examples/source_maps_delete_200_response1"
+                  }
                 }
               }
             }
@@ -1121,6 +1164,8 @@
     "/api/apm/fleet/apm_server_schema": {
       "post": {
         "summary": "Save APM server schema",
+        "deprecated": true,
+        "description": "DEPRECATED: This endpoint is intended for internal use by Fleet integrations to push the APM Server configuration schema. Do not use for new integrations. It stores the provided schema object as a Kibana saved object. If Fleet migration is not available on the current deployment, the API returns a 404.\n",
         "operationId": "saveApmServerSchema",
         "tags": [
           "APM server schema"
@@ -1160,7 +1205,13 @@
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": false
+                  "additionalProperties": false,
+                  "description": "The response body is intentionally empty for this endpoint."
+                },
+                "examples": {
+                  "saveApmServerSchemaResponseExample1": {
+                    "$ref": "#/components/examples/fleet_apm_server_schema_200_response1"
+                  }
                 }
               }
             }
@@ -1671,6 +1722,10 @@
           "mark_as_applied_by_agent": {
             "type": "boolean",
             "description": "`markAsAppliedByAgent=true` means \"force setting it to true regardless of etag\".\nThis is needed for Jaeger agent that doesn't have etags\n"
+          },
+          "error": {
+            "type": "string",
+            "description": "If provided, the agent configuration will be marked as error and `applied_by_agent` will be set to `false`.\nThis is useful for cases where the agent configuration was not applied successfully.\n"
           }
         }
       },
@@ -1914,39 +1969,259 @@
     "examples": {
       "agent_keys_object_post_request1": {
         "description": "Run `POST /api/apm/agent_keys` to create an APM agent API key with the specified privileges.",
-        "value": "{\n    \"name\": \"apm-key\",\n    \"privileges\": [\"event:write\", \"config_agent:read\"]\n}\n"
+        "value": {
+          "name": "apm-key",
+          "privileges": [
+            "event:write",
+            "config_agent:read"
+          ]
+        }
       },
       "agent_keys_object_post_200_response1": {
         "description": "An example of a successful response from `POST /api/apm/agent_keys`, which creates an APM agent API key.",
-        "value": "{\n  \"agentKey\": {\n    \"id\": \"3DCLmn0B3ZMhLUa7WBG9\",\n    \"name\": \"apm-key\",\n    \"api_key\": \"PjGloCGOTzaZr8ilUPvkjA\",\n    \"encoded\": \"M0RDTG1uMEIzWk1oTFVhN1dCRzk6UGpHbG9DR09UemFacjhpbFVQdmtqQQ==\"\n  }\n}\n"
+        "value": {
+          "agentKey": {
+            "id": "3DCLmn0B3ZMhLUa7WBG9",
+            "name": "apm-key",
+            "api_key": "PjGloCGOTzaZr8ilUPvkjA",
+            "encoded": "M0RDTG1uMEIzWk1oTFVhN1dCRzk6UGpHbG9DR09UemFacjhpbFVQdmtqQQ=="
+          }
+        }
+      },
+      "annotation_object_post_request1": {
+        "description": "Run `POST /api/apm/services/{serviceName}/annotation` to create a deployment annotation for a service.",
+        "value": {
+          "@timestamp": "2024-01-15T12:00:00.000Z",
+          "service": {
+            "version": "1.2.0",
+            "environment": "production"
+          },
+          "message": "Deployment 1.2.0",
+          "tags": [
+            "apm",
+            "deployment"
+          ]
+        }
       },
       "annotation_object_post_200_response1": {
         "description": "An example of a successful response from `POST /api/apm/services/opbeans-java/annotation`, which creates an annotation for a service named `opbeans-java`.",
-        "value": "{\n  \"_index\": \"observability-annotations\",\n  \"_id\": \"Lc9I93EBh6DbmkeV7nFX\",\n  \"_version\": 1,\n  \"_seq_no\": 12,\n  \"_primary_term\": 1,\n  \"found\": true,\n  \"_source\": {\n    \"message\": \"Deployment 1.2\",\n    \"@timestamp\": \"2020-05-08T10:31:30.452Z\",\n    \"service\": {\n      \"version\": \"1.2\",\n      \"name\": \"opbeans-java\"\n    },\n    \"tags\": [\n      \"apm\",\n      \"elastic.co\",\n      \"customer\"\n    ],\n    \"annotation\": {\n      \"type\": \"deployment\"\n    },\n    \"event\": {\n      \"created\": \"2020-05-09T02:34:43.937Z\"\n    }\n  }\n}\n"
+        "value": {
+          "_index": "observability-annotations",
+          "_id": "Lc9I93EBh6DbmkeV7nFX",
+          "_version": 1,
+          "_seq_no": 12,
+          "_primary_term": 1,
+          "found": true,
+          "_source": {
+            "message": "Deployment 1.2",
+            "@timestamp": "2020-05-08T10:31:30.452Z",
+            "service": {
+              "version": "1.2",
+              "name": "opbeans-java"
+            },
+            "tags": [
+              "apm",
+              "elastic.co",
+              "customer"
+            ],
+            "annotation": {
+              "type": "deployment"
+            },
+            "event": {
+              "created": "2020-05-09T02:34:43.937Z"
+            }
+          }
+        }
       },
       "agent_configuration_intake_object_get_200_response1": {
         "description": "An example of a successful response from `GET /api/apm/settings/agent-configuration`.",
-        "value": "[\n  {\n      \"agent_name\": \"go\",\n      \"service\": {\n      \"name\": \"opbeans-go\",\n      \"environment\": \"production\"\n      },\n      \"settings\": {\n      \"transaction_sample_rate\": \"1\",\n      \"capture_body\": \"off\",\n      \"transaction_max_spans\": \"200\"\n      },\n      \"@timestamp\": 1581934104843,\n      \"applied_by_agent\": false,\n      \"etag\": \"1e58c178efeebae15c25c539da740d21dee422fc\"\n  },\n  {\n      \"agent_name\": \"go\",\n      \"service\": {\n      \"name\": \"opbeans-go\"\n      },\n      \"settings\": {\n      \"transaction_sample_rate\": \"1\",\n      \"capture_body\": \"off\",\n      \"transaction_max_spans\": \"300\"\n      },\n      \"@timestamp\": 1581934111727,\n      \"applied_by_agent\": false,\n      \"etag\": \"3eed916d3db434d9fb7f039daa681c7a04539a64\"\n  },\n  {\n      \"agent_name\": \"nodejs\",\n      \"service\": {\n      \"name\": \"frontend\"\n      },\n      \"settings\": {\n      \"transaction_sample_rate\": \"1\",\n      },\n      \"@timestamp\": 1582031336265,\n      \"applied_by_agent\": false,\n      \"etag\": \"5080ed25785b7b19f32713681e79f46996801a5b\"\n  }\n]\n"
+        "value": [
+          {
+            "agent_name": "go",
+            "service": {
+              "name": "opbeans-go",
+              "environment": "production"
+            },
+            "settings": {
+              "transaction_sample_rate": "1",
+              "capture_body": "off",
+              "transaction_max_spans": "200"
+            },
+            "@timestamp": 1581934104843,
+            "applied_by_agent": false,
+            "etag": "1e58c178efeebae15c25c539da740d21dee422fc"
+          },
+          {
+            "agent_name": "go",
+            "service": {
+              "name": "opbeans-go"
+            },
+            "settings": {
+              "transaction_sample_rate": "1",
+              "capture_body": "off",
+              "transaction_max_spans": "300"
+            },
+            "@timestamp": 1581934111727,
+            "applied_by_agent": false,
+            "etag": "3eed916d3db434d9fb7f039daa681c7a04539a64"
+          },
+          {
+            "agent_name": "nodejs",
+            "service": {
+              "name": "frontend"
+            },
+            "settings": {
+              "transaction_sample_rate": "1"
+            },
+            "@timestamp": 1582031336265,
+            "applied_by_agent": false,
+            "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
+          }
+        ]
       },
       "agent_configuration_intake_object_put_request1": {
         "description": "Run `PUT /api/apm/settings/agent-configuration` to create or update configuration details.",
-        "value": "{\n    \"service\": {\n        \"name\": \"frontend\",\n        \"environment\": \"production\"\n    },\n    \"settings\": {\n        \"transaction_sample_rate\": \"0.4\",\n        \"capture_body\": \"off\",\n        \"transaction_max_spans\": \"500\"\n    },\n    \"agent_name\": \"nodejs\"\n}\n"
+        "value": {
+          "service": {
+            "name": "frontend",
+            "environment": "production"
+          },
+          "settings": {
+            "transaction_sample_rate": "0.4",
+            "capture_body": "off",
+            "transaction_max_spans": "500"
+          },
+          "agent_name": "nodejs"
+        }
+      },
+      "agent_configuration_intake_object_put_200_response1": {
+        "description": "An example of a successful response from `PUT /api/apm/settings/agent-configuration`. The response body is intentionally empty.",
+        "value": {}
       },
       "agent_configuration_intake_object_delete_request1": {
         "description": "Run `DELETE /api/apm/settings/agent-configuration` to delete a configuration.",
-        "value": "{\n    \"service\" : {\n        \"name\": \"frontend\",\n        \"environment\": \"production\"\n    }\n}\n"
+        "value": {
+          "service": {
+            "name": "frontend",
+            "environment": "production"
+          }
+        }
+      },
+      "agent_configuration_intake_object_delete_200_response1": {
+        "description": "An example of a successful response from `DELETE /api/apm/settings/agent-configuration`.",
+        "value": {
+          "result": "deleted"
+        }
+      },
+      "agent_configuration_intake_object_view_200_response1": {
+        "description": "An example of a successful response from `GET /api/apm/settings/agent-configuration/view`.",
+        "value": {
+          "id": "CIaqXXABmQCdPphWj8EJ",
+          "agent_name": "nodejs",
+          "service": {
+            "name": "frontend",
+            "environment": "production"
+          },
+          "settings": {
+            "transaction_sample_rate": "0.4",
+            "capture_body": "off",
+            "transaction_max_spans": "500"
+          },
+          "@timestamp": 1582031336265,
+          "applied_by_agent": true,
+          "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
+        }
       },
       "agent_configuration_intake_object_search_request1": {
         "description": "Run `POST /api/apm/settings/agent-configuration/search` to search configuration details.",
-        "value": "{\n    \"etag\": \"1e58c178efeebae15c25c539da740d21dee422fc\",\n    \"service\" : {\n        \"name\": \"frontend\",\n        \"environment\": \"production\"\n    }\n}\n"
+        "value": {
+          "etag": "1e58c178efeebae15c25c539da740d21dee422fc",
+          "service": {
+            "name": "frontend",
+            "environment": "production"
+          }
+        }
       },
       "agent_configuration_intake_object_search_200_response1": {
         "description": "An example of a successful response from `POST /api/apm/settings/agent-configuration/search`.",
-        "value": "{\n  \"_index\": \".apm-agent-configuration\",\n  \"_id\": \"CIaqXXABmQCdPphWj8EJ\",\n  \"_score\": 2,\n  \"_source\": {\n    \"agent_name\": \"nodejs\",\n    \"service\": {\n      \"name\": \"frontend\"\n    },\n    \"settings\": {\n      \"transaction_sample_rate\": \"1\",\n    },\n    \"@timestamp\": 1582031336265,\n    \"applied_by_agent\": false,\n    \"etag\": \"5080ed25785b7b19f32713681e79f46996801a5b\"\n  }\n}\n"
+        "value": {
+          "_index": ".apm-agent-configuration",
+          "_id": "CIaqXXABmQCdPphWj8EJ",
+          "_score": 2,
+          "_source": {
+            "agent_name": "nodejs",
+            "service": {
+              "name": "frontend"
+            },
+            "settings": {
+              "transaction_sample_rate": "1"
+            },
+            "@timestamp": 1582031336265,
+            "applied_by_agent": false,
+            "etag": "5080ed25785b7b19f32713681e79f46996801a5b"
+          }
+        }
+      },
+      "agent_configuration_environments_200_response1": {
+        "description": "An example of a successful response from `GET /api/apm/settings/agent-configuration/environments`.",
+        "value": {
+          "environments": [
+            {
+              "name": "production",
+              "alreadyConfigured": true
+            },
+            {
+              "name": "development",
+              "alreadyConfigured": false
+            },
+            {
+              "name": "ALL_OPTION_VALUE",
+              "alreadyConfigured": false
+            }
+          ]
+        }
       },
       "source_maps_get_200_response1": {
         "description": "A successful response from `GET /api/apm/sourcemaps`.",
-        "value": "{\n  \"artifacts\": [\n    {\n      \"type\": \"sourcemap\",\n      \"identifier\": \"foo-1.0.0\",\n      \"relative_url\": \"/api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456\",\n      \"body\": {\n        \"serviceName\": \"foo\",\n        \"serviceVersion\": \"1.0.0\",\n        \"bundleFilepath\": \"/test/e2e/general-usecase/bundle.js\",\n        \"sourceMap\": {\n          \"version\": 3,\n          \"file\": \"static/js/main.chunk.js\",\n          \"sources\": [\n            \"fleet-source-map-client/src/index.css\",\n            \"fleet-source-map-client/src/App.js\",\n            \"webpack:///./src/index.css?bb0a\",\n            \"fleet-source-map-client/src/index.js\",\n            \"fleet-source-map-client/src/reportWebVitals.js\"\n          ],\n          \"sourcesContent\": [\n            \"content\"\n          ],\n          \"mappings\": \"mapping\",\n          \"sourceRoot\": \"\"\n        }\n      },\n      \"created\": \"2021-07-09T20:47:44.812Z\",\n      \"id\": \"apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456\",\n      \"compressionAlgorithm\": \"zlib\",\n      \"decodedSha256\": \"644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456\",\n      \"decodedSize\": 441,\n      \"encodedSha256\": \"024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24\",\n      \"encodedSize\": 237,\n      \"encryptionAlgorithm\": \"none\",\n      \"packageName\": \"apm\"\n    }\n  ]\n}\n"
+        "value": {
+          "artifacts": [
+            {
+              "type": "sourcemap",
+              "identifier": "foo-1.0.0",
+              "relative_url": "/api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+              "body": {
+                "serviceName": "foo",
+                "serviceVersion": "1.0.0",
+                "bundleFilepath": "/test/e2e/general-usecase/bundle.js",
+                "sourceMap": {
+                  "version": 3,
+                  "file": "static/js/main.chunk.js",
+                  "sources": [
+                    "fleet-source-map-client/src/index.css",
+                    "fleet-source-map-client/src/App.js",
+                    "webpack:///./src/index.css?bb0a",
+                    "fleet-source-map-client/src/index.js",
+                    "fleet-source-map-client/src/reportWebVitals.js"
+                  ],
+                  "sourcesContent": [
+                    "content"
+                  ],
+                  "mappings": "mapping",
+                  "sourceRoot": ""
+                }
+              },
+              "created": "2021-07-09T20:47:44.812Z",
+              "id": "apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+              "compressionAlgorithm": "zlib",
+              "decodedSha256": "644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+              "decodedSize": 441,
+              "encodedSha256": "024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24",
+              "encodedSize": 237,
+              "encryptionAlgorithm": "none",
+              "packageName": "apm"
+            }
+          ]
+        }
       },
       "source_maps_upload_200_response1": {
         "description": "A successful response from `POST /api/apm/sourcemaps`.",
@@ -1965,6 +2240,14 @@
           "encryptionAlgorithm": "none",
           "packageName": "apm"
         }
+      },
+      "source_maps_delete_200_response1": {
+        "description": "An example of a successful response from `DELETE /api/apm/sourcemaps/{id}`. The response body is intentionally empty.",
+        "value": {}
+      },
+      "fleet_apm_server_schema_200_response1": {
+        "description": "An example of a successful response from `POST /api/apm/fleet/apm_server_schema`. The response body is intentionally empty.",
+        "value": {}
       }
     }
   }

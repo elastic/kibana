@@ -32,7 +32,7 @@
           "<Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]>"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/role_schema.ts",
-        "lineNumber": 278,
+        "lineNumber": 323,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -48,7 +48,7 @@
               "() => { global: string[]; space: string[]; }"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/role_schema.ts",
-            "lineNumber": 279,
+            "lineNumber": 324,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -202,7 +202,7 @@
           "<Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>>; }>"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 107,
+        "lineNumber": 111,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -218,7 +218,7 @@
               "() => { global: string[]; space: string[]; }"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 108,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -239,7 +239,7 @@
           "(params: any) => boolean"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 266,
+        "lineNumber": 294,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -255,7 +255,7 @@
               "any"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 266,
+            "lineNumber": 294,
             "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
@@ -600,6 +600,7 @@
                 "lineNumber": 11,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "ApiOperation",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -650,6 +651,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/lib/has_required_privilege_granted_in_all_spaces.ts"
+              },
+              {
+                "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/core.ts"
               },
               {
                 "plugin": "telemetry",
@@ -710,10 +715,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/routes/app/index.ts"
-              },
-              {
-                "plugin": "reporting",
-                "path": "x-pack/platform/plugins/private/reporting/server/core.ts"
               },
               {
                 "plugin": "profiling",
@@ -1612,7 +1613,15 @@
             "tags": [],
             "label": "log",
             "description": [
-              "\nLogs an {@link AuditEvent} and automatically adds meta data about the\ncurrent user, space and correlation id.\n\nGuidelines around what events should be logged and how they should be\nstructured can be found in: `/x-pack/platform/plugins/shared/security/README.md`\n"
+              "\nLogs an ",
+              {
+                "pluginId": "@kbn/security-plugin-types-server",
+                "scope": "server",
+                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "section": "def-server.AuditEvent",
+                "text": "AuditEvent"
+              },
+              " and automatically adds meta data about the\ncurrent user, space and correlation id.\n\nGuidelines around what events should be logged and how they should be\nstructured can be found in: `/x-pack/platform/plugins/shared/security/README.md`\n"
             ],
             "signature": [
               "(event: ",
@@ -1739,7 +1748,15 @@
             "tags": [],
             "label": "asScoped",
             "description": [
-              "\nCreates an {@link AuditLogger} scoped to the current request.\n\nThis audit logger logs events with all required user and session info and should be used for\nall user-initiated actions.\n"
+              "\nCreates an ",
+              {
+                "pluginId": "@kbn/security-plugin-types-server",
+                "scope": "server",
+                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "section": "def-server.AuditLogger",
+                "text": "AuditLogger"
+              },
+              " scoped to the current request.\n\nThis audit logger logs events with all required user and session info and should be used for\nall user-initiated actions.\n"
             ],
             "signature": [
               "(request: ",
@@ -1768,6 +1785,7 @@
                 "lineNumber": 24,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1781,7 +1799,15 @@
             "tags": [],
             "label": "withoutRequest",
             "description": [
-              "\n{@link AuditLogger} for background tasks only.\n\nThis audit logger logs events without any user or session info and should never be used to log\nuser-initiated actions.\n"
+              "\n",
+              {
+                "pluginId": "@kbn/security-plugin-types-server",
+                "scope": "server",
+                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
+                "section": "def-server.AuditLogger",
+                "text": "AuditLogger"
+              },
+              " for background tasks only.\n\nThis audit logger logs events without any user or session info and should never be used to log\nuser-initiated actions.\n"
             ],
             "signature": [
               "AuditLogger"
@@ -1861,6 +1887,7 @@
                 "lineNumber": 17,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1916,6 +1943,7 @@
                 "lineNumber": 11,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2005,6 +2033,7 @@
                 "lineNumber": 71,
                 "columnNumber": 43,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false
               }
             ]
@@ -2050,6 +2079,7 @@
                 "lineNumber": 22,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false
               }
             ]
@@ -2095,6 +2125,7 @@
                 "lineNumber": 13,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false
               }
             ]
@@ -2283,6 +2314,7 @@
                 "lineNumber": 76,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckPrivilegesPayload",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2307,6 +2339,7 @@
                 "lineNumber": 77,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckPrivilegesOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2390,6 +2423,7 @@
                 "lineNumber": 81,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckPrivilegesPayload",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2414,6 +2448,7 @@
                 "lineNumber": 82,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckPrivilegesOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2480,6 +2515,7 @@
                 "lineNumber": 85,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckPrivilegesPayload",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2504,6 +2540,7 @@
                 "lineNumber": 86,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckPrivilegesOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2745,6 +2782,7 @@
                 "lineNumber": 120,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CheckUserProfilesPrivilegesPayload",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2846,13 +2884,442 @@
       },
       {
         "parentPluginId": "@kbn/security-plugin-types-server",
+        "id": "def-server.ClientAuthentication",
+        "type": "Interface",
+        "tags": [],
+        "label": "ClientAuthentication",
+        "description": [
+          "\nRepresents client authentication information. Don't confuse with the authentication information which represents an\nauthenticated user. For example, if Kibana is making a request to Elasticsearch on behalf of an authenticated user, the\nclient authentication information would represent Kibana's own authentication information (e.g. shared secret), not the\nend user's."
+        ],
+        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/client_authentication.ts",
+        "lineNumber": 8,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ClientAuthentication.scheme",
+            "type": "string",
+            "tags": [],
+            "label": "scheme",
+            "description": [
+              "\nThe authentication scheme. Currently only `SharedSecret` scheme is supported."
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/client_authentication.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ClientAuthentication.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [
+              "\nThe authentication credentials for the scheme."
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/client_authentication.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-server",
+        "id": "def-server.CloneAPIKeyParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloneAPIKeyParams",
+        "description": [],
+        "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+        "lineNumber": 174,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.CloneAPIKeyParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "lineNumber": 175,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.CloneAPIKeyParams.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "lineNumber": 176,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-server",
+        "id": "def-server.CloneAPIKeyResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloneAPIKeyResult",
+        "description": [],
+        "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+        "lineNumber": 179,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.CloneAPIKeyResult.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.CloneAPIKeyResult.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "lineNumber": 181,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.CloneAPIKeyResult.api_key",
+            "type": "string",
+            "tags": [],
+            "label": "api_key",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "lineNumber": 182,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.CloneAPIKeyResult.encoded",
+            "type": "string",
+            "tags": [],
+            "label": "encoded",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "lineNumber": 183,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-server",
+        "id": "def-server.ConvertUiamAPIKeyResultFailed",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConvertUiamAPIKeyResultFailed",
+        "description": [
+          "\nA failed result from converting an Elasticsearch API key into a UIAM API key."
+        ],
+        "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+        "lineNumber": 91,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ConvertUiamAPIKeyResultFailed.status",
+            "type": "string",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"failed\""
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 95,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ConvertUiamAPIKeyResultFailed.code",
+            "type": "string",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 96,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ConvertUiamAPIKeyResultFailed.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 97,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ConvertUiamAPIKeyResultFailed.resource",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "resource",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 98,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ConvertUiamAPIKeyResultFailed.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-server",
+        "id": "def-server.ConvertUiamAPIKeyResultSuccess",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConvertUiamAPIKeyResultSuccess",
+        "description": [
+          "\nA successful result from converting an Elasticsearch API key into a UIAM API key."
+        ],
+        "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+        "lineNumber": 76,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.status",
+            "type": "string",
+            "tags": [],
+            "label": "status",
+            "description": [],
+            "signature": [
+              "\"success\""
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.key",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 82,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 83,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.organization_id",
+            "type": "string",
+            "tags": [],
+            "label": "organization_id",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 84,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.internal",
+            "type": "boolean",
+            "tags": [],
+            "label": "internal",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.role_assignments",
+            "type": "Object",
+            "tags": [],
+            "label": "role_assignments",
+            "description": [],
+            "signature": [
+              "{ [x: string]: unknown; }"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 86,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.creation_date",
+            "type": "string",
+            "tags": [],
+            "label": "creation_date",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ConvertUiamAPIKeyResultSuccess.expiration_date",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "expiration_date",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 88,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-server",
+        "id": "def-server.ConvertUiamAPIKeysResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConvertUiamAPIKeysResponse",
+        "description": [
+          "\nResponse from the UIAM convert API keys operation."
+        ],
+        "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+        "lineNumber": 109,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.ConvertUiamAPIKeysResponse.results",
+            "type": "Array",
+            "tags": [],
+            "label": "results",
+            "description": [],
+            "signature": [
+              "ConvertUiamAPIKeyResult",
+              "[]"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-server",
         "id": "def-server.CreateCrossClusterAPIKeyParams",
         "type": "Interface",
         "tags": [],
         "label": "CreateCrossClusterAPIKeyParams",
         "description": [],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 126,
+        "lineNumber": 141,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2868,7 +3335,7 @@
               "\"cross_cluster\""
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 127,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2884,7 +3351,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 128,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2897,7 +3364,7 @@
             "label": "name",
             "description": [],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 129,
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2913,7 +3380,7 @@
               "{ [key: string]: any; } | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 130,
+            "lineNumber": 145,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2929,7 +3396,7 @@
               "{ search?: { names: string[]; query?: unknown; field_security?: unknown; allow_restricted_indices?: boolean | undefined; }[] | undefined; replication?: { names: string[]; }[] | undefined; }"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 131,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2945,7 +3412,7 @@
         "label": "CreateRestAPIKeyParams",
         "description": [],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 104,
+        "lineNumber": 119,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2961,7 +3428,7 @@
               "\"rest\" | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 105,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2977,7 +3444,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 106,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2990,7 +3457,7 @@
             "label": "name",
             "description": [],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 107,
+            "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3006,7 +3473,7 @@
               "{ [x: string]: { [key: string]: any; }; }"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 108,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3022,7 +3489,7 @@
               "{ [key: string]: any; } | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 109,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3038,7 +3505,7 @@
         "label": "CreateRestAPIKeyWithKibanaPrivilegesParams",
         "description": [],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 112,
+        "lineNumber": 127,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3054,7 +3521,7 @@
               "\"rest\" | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 113,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3070,7 +3537,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 114,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3083,7 +3550,7 @@
             "label": "name",
             "description": [],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 115,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3099,7 +3566,7 @@
               "{ [key: string]: any; } | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 116,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3119,7 +3586,7 @@
               "; }; }"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 117,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3233,7 +3700,7 @@
         "label": "GrantAPIKeyResult",
         "description": [],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 144,
+        "lineNumber": 159,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3248,7 +3715,7 @@
               "\nUnique id for this API key"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 145,
+            "lineNumber": 160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3263,7 +3730,7 @@
               "\nName for this API key"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 149,
+            "lineNumber": 164,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3278,7 +3745,7 @@
               "\nGenerated API key"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 153,
+            "lineNumber": 168,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3296,7 +3763,7 @@
           "\nParameters for granting a UIAM API key."
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-        "lineNumber": 56,
+        "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3311,7 +3778,7 @@
               "\nName for the API key"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 60,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3329,7 +3796,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 65,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3477,7 +3944,7 @@
           "\nThe return value when invalidating an API key in Elasticsearch."
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 184,
+        "lineNumber": 211,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3495,7 +3962,7 @@
               "string[]"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 188,
+            "lineNumber": 215,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3513,7 +3980,7 @@
               "string[]"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 192,
+            "lineNumber": 219,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3528,7 +3995,7 @@
               "\nThe number of errors that were encountered when invalidating the API keys."
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 196,
+            "lineNumber": 223,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3543,10 +4010,10 @@
               "\nDetails about these errors. This field is not present in the response when error_count is 0."
             ],
             "signature": [
-              "{ type?: string | undefined; reason?: string | null | undefined; caused_by?: { type?: string | undefined; reason?: string | null | undefined; } | undefined; }[] | undefined"
+              "{ type?: string | undefined; code?: string | undefined; reason?: string | null | undefined; caused_by?: { type?: string | undefined; reason?: string | null | undefined; } | undefined; }[] | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 200,
+            "lineNumber": 227,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3564,7 +4031,7 @@
           "\nRepresents the params for invalidating multiple API keys"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 174,
+        "lineNumber": 201,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3582,7 +4049,7 @@
               "string[]"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 178,
+            "lineNumber": 205,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3600,7 +4067,7 @@
           "\nParameters for invalidating a UIAM API key."
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-        "lineNumber": 71,
+        "lineNumber": 66,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3615,7 +4082,7 @@
               "\nID of the API key to invalidate"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 75,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3719,6 +4186,7 @@
                 "lineNumber": 42,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3738,6 +4206,7 @@
                 "lineNumber": 43,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3785,6 +4254,7 @@
                 "lineNumber": 57,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3804,6 +4274,7 @@
                 "lineNumber": 58,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3853,6 +4324,7 @@
                 "lineNumber": 67,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3916,6 +4388,7 @@
                 "lineNumber": 75,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "ValidateAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3963,6 +4436,7 @@
                 "lineNumber": 83,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3982,6 +4456,7 @@
                 "lineNumber": 84,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "InvalidateAPIKeysParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4026,6 +4501,75 @@
                 "lineNumber": 91,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "InvalidateAPIKeysParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.NativeAPIKeysType.cloneAsInternalUser",
+            "type": "Function",
+            "tags": [],
+            "label": "cloneAsInternalUser",
+            "description": [
+              "\nClones an existing API key using the internal user, creating a new independent key\nwith the same role descriptors as the source. The source key credential is extracted\nfrom the request's Authorization header.\n\nRequires the `clone_api_key` cluster privilege (available to `kibana_system`).\n"
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, cloneParams: ",
+              "CloneAPIKeyParams",
+              ") => Promise<",
+              "CloneAPIKeyResult",
+              " | null>"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/security-plugin-types-server",
+                "id": "def-server.NativeAPIKeysType.cloneAsInternalUser.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "Request instance containing the source API key in the Authorization header."
+                ],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+                "lineNumber": 104,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/security-plugin-types-server",
+                "id": "def-server.NativeAPIKeysType.cloneAsInternalUser.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "cloneParams",
+                "description": [
+                  "Clone operation parameters."
+                ],
+                "signature": [
+                  "CloneAPIKeyParams"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+                "lineNumber": 105,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "CloneAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4201,6 +4745,7 @@
                 "lineNumber": 22,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "PrivilegeDeprecationsRolesByFeatureIdRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4373,14 +4918,6 @@
                 "path": "src/platform/plugins/shared/files/server/file_service/file_service_factory.ts"
               },
               {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
-              },
-              {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/alert_data_client/alerts_client_factory.ts"
               },
@@ -4393,8 +4930,20 @@
                 "path": "x-pack/platform/plugins/shared/cases/server/client/factory.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/audit_logging.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/request_context_factory.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -4488,10 +5037,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/rules_client_factory.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/invalidate_pending_api_keys/task.ts"
               },
               {
@@ -4501,6 +5046,10 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts"
+              },
+              {
+                "plugin": "observabilityAIAssistant",
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/index.ts"
               },
               {
                 "plugin": "fleet",
@@ -4517,10 +5066,6 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/routes/setup/handlers.ts"
-              },
-              {
-                "plugin": "observabilityAIAssistant",
-                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/index.ts"
               },
               {
                 "plugin": "reindexService",
@@ -4541,6 +5086,10 @@
               {
                 "plugin": "transform",
                 "path": "x-pack/platform/plugins/private/transform/server/routes/api/reauthorize_transforms/route_handler_factory.ts"
+              },
+              {
+                "plugin": "alertingVTwo",
+                "path": "x-pack/platform/plugins/shared/alerting_v2/server/lib/tasks/invalidate_pending_api_keys/task_runner.ts"
               },
               {
                 "plugin": "entityManager",
@@ -4643,6 +5192,10 @@
                 "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/api_key_routes.ts"
               },
               {
+                "plugin": "entityStore",
+                "path": "x-pack/solutions/security/plugins/entity_store/server/plugin.ts"
+              },
+              {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/auth/api_key.ts"
               },
@@ -4701,6 +5254,10 @@
                 "path": "x-pack/platform/plugins/shared/security/server/plugin.ts"
               },
               {
+                "plugin": "actions",
+                "path": "x-pack/platform/plugins/shared/actions/server/lib/get_current_user_profile_id.ts"
+              },
+              {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/server/services/notifications/email_notification_service.ts"
               },
@@ -4715,6 +5272,10 @@
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/server/services/user_profiles/index.ts"
+              },
+              {
+                "plugin": "alertingVTwo",
+                "path": "x-pack/platform/plugins/shared/alerting_v2/server/routes/suggestions/suggest_user_profiles_route.ts"
               },
               {
                 "plugin": "osquery",
@@ -4845,7 +5406,7 @@
           "\nInterface for managing UIAM-specific API key operations.\nThis interface handles API key grants and invalidations through the UIAM service."
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-        "lineNumber": 15,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4871,7 +5432,7 @@
               " | null>"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 20,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4890,9 +5451,10 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-                "lineNumber": 28,
+                "lineNumber": 27,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4909,9 +5471,10 @@
                   "GrantUiamAPIKeyParams"
                 ],
                 "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-                "lineNumber": 28,
+                "lineNumber": 27,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "GrantUiamAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4941,7 +5504,7 @@
               " | null>"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 30,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -4960,9 +5523,10 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-                "lineNumber": 39,
+                "lineNumber": 38,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4979,9 +5543,10 @@
                   "InvalidateUiamAPIKeyParams"
                 ],
                 "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-                "lineNumber": 40,
+                "lineNumber": 39,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "InvalidateUiamAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4992,46 +5557,46 @@
           },
           {
             "parentPluginId": "@kbn/security-plugin-types-server",
-            "id": "def-server.UiamAPIKeysType.getScopedClusterClientWithApiKey",
+            "id": "def-server.UiamAPIKeysType.convert",
             "type": "Function",
             "tags": [],
-            "label": "getScopedClusterClientWithApiKey",
+            "label": "convert",
             "description": [
-              "\nCreates a scoped Elasticsearch client authenticated with an API key.\n\nThis method creates a scoped cluster client that authenticates using the provided API key.\nIf the API key is a UIAM credential (starts with 'essu_'), it adds the appropriate UIAM\nauthentication headers.\n"
+              "\nConverts Elasticsearch API keys into UIAM API keys.\n"
             ],
             "signature": [
-              "(apiKey: string) => ",
-              "IScopedClusterClient",
-              " | null"
+              "(keys: string[]) => Promise<",
+              "ConvertUiamAPIKeysResponse",
+              " | null>"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-            "lineNumber": 43,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/security-plugin-types-server",
-                "id": "def-server.UiamAPIKeysType.getScopedClusterClientWithApiKey.$1",
-                "type": "string",
+                "id": "def-server.UiamAPIKeysType.convert.$1",
+                "type": "Array",
                 "tags": [],
-                "label": "apiKey",
+                "label": "keys",
                 "description": [
-                  "The API key secret."
+                  "The base64-encoded Elasticsearch API key values to convert."
                 ],
                 "signature": [
-                  "string"
+                  "string[]"
                 ],
                 "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
-                "lineNumber": 53,
-                "columnNumber": 36,
+                "lineNumber": 48,
+                "columnNumber": 11,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "A scoped cluster client configured with API key authentication"
+              "A promise that resolves to a response containing per-key success/failure results, or null if the license is not enabled."
             ]
           }
         ],
@@ -5045,7 +5610,7 @@
         "label": "UpdateCrossClusterAPIKeyParams",
         "description": [],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 234,
+        "lineNumber": 262,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5058,7 +5623,7 @@
             "label": "id",
             "description": [],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 235,
+            "lineNumber": 263,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5074,7 +5639,7 @@
               "\"cross_cluster\""
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 236,
+            "lineNumber": 264,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5090,7 +5655,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 237,
+            "lineNumber": 265,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5106,7 +5671,7 @@
               "{ [key: string]: any; } | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 238,
+            "lineNumber": 266,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5122,7 +5687,7 @@
               "{ search?: { names: string[]; query?: unknown; field_security?: unknown; allow_restricted_indices?: boolean | undefined; }[] | undefined; replication?: { names: string[]; }[] | undefined; }"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 239,
+            "lineNumber": 267,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5138,7 +5703,7 @@
         "label": "UpdateRestAPIKeyParams",
         "description": [],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 226,
+        "lineNumber": 254,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5151,7 +5716,7 @@
             "label": "id",
             "description": [],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 227,
+            "lineNumber": 255,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5167,7 +5732,7 @@
               "\"rest\" | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 228,
+            "lineNumber": 256,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5183,7 +5748,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 229,
+            "lineNumber": 257,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5199,7 +5764,7 @@
               "{ [x: string]: { [key: string]: unknown; }; }"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 230,
+            "lineNumber": 258,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5215,7 +5780,7 @@
               "{ [key: string]: any; } | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 231,
+            "lineNumber": 259,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5231,7 +5796,7 @@
         "label": "UpdateRestAPIKeyWithKibanaPrivilegesParams",
         "description": [],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 252,
+        "lineNumber": 280,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5244,7 +5809,7 @@
             "label": "id",
             "description": [],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 253,
+            "lineNumber": 281,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5260,7 +5825,7 @@
               "\"rest\" | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 254,
+            "lineNumber": 282,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5276,7 +5841,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 255,
+            "lineNumber": 283,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5292,7 +5857,7 @@
               "{ [key: string]: any; } | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 256,
+            "lineNumber": 284,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5312,7 +5877,7 @@
               "; }; }"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 257,
+            "lineNumber": 285,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5599,7 +6164,7 @@
           "\nRepresents the parameters for validating API Key credentials."
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 159,
+        "lineNumber": 186,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5614,7 +6179,7 @@
               "\nUnique id for this API key"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 163,
+            "lineNumber": 190,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5629,7 +6194,7 @@
               "\nGenerated API Key (secret)"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 168,
+            "lineNumber": 195,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5701,6 +6266,7 @@
             "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CheckPrivilegesPayload",
             "trackAdoption": false
           },
           {
@@ -5724,6 +6290,7 @@
             "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CheckPrivilegesOptions",
             "trackAdoption": false
           }
         ],
@@ -5770,6 +6337,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           }
         ],
@@ -5816,6 +6384,7 @@
             "lineNumber": 71,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           }
         ],
@@ -5922,9 +6491,31 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaRequest",
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-plugin-types-server",
+        "id": "def-server.ConvertUiamAPIKeyResult",
+        "type": "Type",
+        "tags": [],
+        "label": "ConvertUiamAPIKeyResult",
+        "description": [
+          "\nA single result entry from the convert API keys operation; either success or failure."
+        ],
+        "signature": [
+          "ConvertUiamAPIKeyResultSuccess",
+          " | ",
+          "ConvertUiamAPIKeyResultFailed"
+        ],
+        "path": "src/core/packages/security/server/src/authentication/api_keys/uiam/uiam_api_keys.ts",
+        "lineNumber": 102,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -5942,7 +6533,7 @@
           "CreateCrossClusterAPIKeyParams"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 94,
+        "lineNumber": 109,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5961,7 +6552,7 @@
           "SecurityCreateApiKeyResponse"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 99,
+        "lineNumber": 114,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6039,7 +6630,7 @@
           "UpdateRestAPIKeyWithKibanaPrivilegesParams"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 218,
+        "lineNumber": 246,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6058,7 +6649,7 @@
           "SecurityUpdateApiKeyResponse"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 213,
+        "lineNumber": 241,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -6369,7 +6960,7 @@
           "<Readonly<{} & { names: string[]; }>[] | undefined>; }>; }>"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 78,
+        "lineNumber": 80,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6433,7 +7024,7 @@
           "<Readonly<{} & {}> | undefined>; }>"
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 68,
+        "lineNumber": 70,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

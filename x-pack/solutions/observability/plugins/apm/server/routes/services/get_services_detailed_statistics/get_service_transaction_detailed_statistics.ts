@@ -17,6 +17,7 @@ import type { ApmServiceTransactionDocumentType } from '../../../../common/docum
 import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../common/es_fields/apm';
 import type { RollupInterval } from '../../../../common/rollup';
 import { isDefaultTransactionType } from '../../../../common/transaction_types';
+import { nullifyLeadingTrailingEmptyRedMetricPoints } from '../../../../common/utils/red_metric_value_for_histogram_bucket';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -27,8 +28,8 @@ import { maybe } from '../../../../common/utils/maybe';
 export interface ServiceTransactionDetailedStat {
   serviceName: string;
   latency: Array<{ x: number; y: number | null }>;
-  transactionErrorRate?: Array<{ x: number; y: number }>;
-  throughput?: Array<{ x: number; y: number }>;
+  transactionErrorRate?: Array<{ x: number; y: number | null }>;
+  throughput?: Array<{ x: number; y: number | null }>;
 }
 
 export async function getServiceTransactionDetailedStats({
@@ -140,23 +141,32 @@ export async function getServiceTransactionDetailedStats({
 
       return {
         serviceName: bucket.key as string,
-        latency:
+        latency: nullifyLeadingTrailingEmptyRedMetricPoints(
           topTransactionTypeBucket?.timeseries.buckets.map((dateBucket) => ({
             x: dateBucket.key + offsetInMs,
+            docCount: dateBucket.doc_count,
             y: dateBucket.avg_duration.value,
-          })) ?? [],
-        transactionErrorRate:
+          })) ?? []
+        ),
+        transactionErrorRate: topTransactionTypeBucket
+          ? nullifyLeadingTrailingEmptyRedMetricPoints(
+              topTransactionTypeBucket.timeseries.buckets.map((dateBucket) => ({
+                x: dateBucket.key + offsetInMs,
+                docCount: dateBucket.doc_count,
+                y: calculateFailedTransactionRate(dateBucket),
+              }))
+            )
+          : undefined,
+        throughput: nullifyLeadingTrailingEmptyRedMetricPoints(
           topTransactionTypeBucket?.timeseries.buckets.map((dateBucket) => ({
             x: dateBucket.key + offsetInMs,
-            y: calculateFailedTransactionRate(dateBucket),
-          })) ?? undefined,
-        throughput: topTransactionTypeBucket?.timeseries.buckets.map((dateBucket) => ({
-          x: dateBucket.key + offsetInMs,
-          y: calculateThroughputWithInterval({
-            bucketSize: bucketSizeInSeconds,
-            value: dateBucket.doc_count,
-          }),
-        })),
+            docCount: dateBucket.doc_count,
+            y: calculateThroughputWithInterval({
+              bucketSize: bucketSizeInSeconds,
+              value: dateBucket.doc_count,
+            }),
+          })) ?? []
+        ),
       };
     }) ?? [],
     'serviceName'

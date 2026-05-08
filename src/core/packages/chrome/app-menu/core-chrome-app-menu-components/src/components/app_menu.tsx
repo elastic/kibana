@@ -9,11 +9,11 @@
 
 import React, { useState } from 'react';
 import { EuiHeaderLinks, useIsWithinBreakpoints } from '@elastic/eui';
-import { getAppMenuItems } from '../utils';
+import { getAppMenuItems, processStaticItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
 import { AppMenuItem } from './app_menu_item';
 import { AppMenuOverflowButton } from './app_menu_overflow_button';
-import type { AppMenuConfig } from '../types';
+import type { AppMenuConfig, AppMenuStaticItem } from '../types';
 
 export interface AppMenuItemsProps {
   config?: AppMenuConfig;
@@ -24,26 +24,42 @@ export interface AppMenuItemsProps {
    * TODO: Remove this in favour of container queries once EUI supports them https://github.com/elastic/eui/issues/8822
    */
   isCollapsed?: boolean;
+  /**
+   * Static items that always appear at the end of the overflow menu.
+   */
+  staticItems?: AppMenuStaticItem[];
 }
 
-const hasNoItems = (config: AppMenuConfig) =>
-  !config.items?.length && !config?.primaryActionItem && !config?.secondaryActionItem;
+const hasNoItems = (config: AppMenuConfig) => !config.items?.length && !config?.primaryActionItem;
 
 export const AppMenuComponent = ({
   config,
   visible = true,
   isCollapsed = false,
+  staticItems,
 }: AppMenuItemsProps) => {
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null);
   const isBetweenMandXlBreakpoint = useIsWithinBreakpoints(['m', 'l']);
   const isAboveXlBreakpoint = useIsWithinBreakpoints(['xl']);
 
-  if (!config || hasNoItems(config) || !visible) {
+  /**
+   * Global static items are registered once, usually before
+   * an application is mounted, and this can cause flickering when
+   * the app menu is first rendered without app specific config.
+   * If only global static items are present, we don't want to render
+   * the app menu.
+   */
+  const hasNonGlobalStaticItems = !!staticItems?.length && staticItems.some((item) => !item.global);
+
+  if ((!config || hasNoItems(config)) && !hasNonGlobalStaticItems) {
+    return null;
+  }
+
+  if (!visible) {
     return null;
   }
 
   const primaryActionItem = config?.primaryActionItem;
-  const secondaryActionItem = config?.secondaryActionItem;
   const showMoreButtonId = 'show-more';
 
   const headerLinksProps = {
@@ -53,12 +69,22 @@ export const AppMenuComponent = ({
     className: 'kbnTopNavMenu__wrapper',
   };
 
-  const { displayedItems, overflowItems, shouldOverflow } = getAppMenuItems({
+  const {
+    displayedItems,
+    overflowItems,
+    shouldOverflow: shouldOverflowBase,
+  } = getAppMenuItems({
     config,
+    hasStaticItems: hasNonGlobalStaticItems,
   });
 
+  const processedStaticItems = processStaticItems(staticItems);
+
+  const allOverflowItems = [...overflowItems];
+  const shouldOverflow = shouldOverflowBase || processedStaticItems.length > 0;
+
   const handlePopoverToggle = (id: string) => {
-    setOpenPopoverId(openPopoverId === id ? null : id);
+    setOpenPopoverId((prev) => (prev === id ? null : id));
   };
 
   const handleOnPopoverClose = () => {
@@ -76,22 +102,11 @@ export const AppMenuComponent = ({
     />
   ) : undefined;
 
-  const secondaryActionComponent = secondaryActionItem ? (
-    <AppMenuActionButton
-      {...secondaryActionItem}
-      isPopoverOpen={openPopoverId === secondaryActionItem.id}
-      onPopoverToggle={() => {
-        handlePopoverToggle(secondaryActionItem.id);
-      }}
-      onPopoverClose={handleOnPopoverClose}
-    />
-  ) : undefined;
-
   const collapsedComponent = (
     <AppMenuOverflowButton
-      items={[...displayedItems, ...overflowItems]}
+      items={[...displayedItems, ...allOverflowItems]}
+      staticItems={processedStaticItems}
       isPopoverOpen={openPopoverId === showMoreButtonId}
-      secondaryActionItem={secondaryActionItem}
       primaryActionItem={primaryActionItem}
       onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
       onPopoverClose={handleOnPopoverClose}
@@ -106,12 +121,12 @@ export const AppMenuComponent = ({
     return (
       <EuiHeaderLinks {...headerLinksProps}>
         <AppMenuOverflowButton
-          items={[...displayedItems, ...overflowItems]}
+          items={[...displayedItems, ...allOverflowItems]}
+          staticItems={processedStaticItems}
           isPopoverOpen={openPopoverId === showMoreButtonId}
           onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
           onPopoverClose={handleOnPopoverClose}
         />
-        {secondaryActionComponent}
         {primaryActionComponent}
       </EuiHeaderLinks>
     );
@@ -132,13 +147,13 @@ export const AppMenuComponent = ({
           ))}
         {shouldOverflow && (
           <AppMenuOverflowButton
-            items={overflowItems}
+            items={allOverflowItems}
+            staticItems={processedStaticItems}
             isPopoverOpen={openPopoverId === showMoreButtonId}
             onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
             onPopoverClose={handleOnPopoverClose}
           />
         )}
-        {secondaryActionComponent}
         {primaryActionComponent}
       </EuiHeaderLinks>
     );

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ZodObject } from '@kbn/zod';
+import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { StaticToolRegistration, ToolRegistry } from '@kbn/agent-builder-server/tools';
 import type { AnyToolTypeDefinition } from './tool_types';

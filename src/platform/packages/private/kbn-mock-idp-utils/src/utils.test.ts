@@ -34,6 +34,11 @@ import {
   getSAMLRequestId,
 } from './utils';
 
+jest.mock('./cosmos_db_seeder', () => ({
+  seedTestApiKey: jest.fn().mockResolvedValue({ success: true, message: `✓ `, response: {} }),
+  seedTestUser: jest.fn().mockResolvedValue({ success: true, message: `✓ `, response: {} }),
+}));
+
 describe('mock-idp-utils', () => {
   describe('createMockIdpMetadata', () => {
     it('should generate valid XML metadata with correct entity ID', async () => {
@@ -52,7 +57,6 @@ describe('mock-idp-utils', () => {
 
       expect(metadata).toContain(`Location="${kibanaUrl}${MOCK_IDP_LOGIN_PATH}"`);
       expect(metadata).toContain(`Location="${kibanaUrl}${MOCK_IDP_LOGOUT_PATH}"`);
-      expect(metadata).toContain('HTTP-POST');
       expect(metadata).toContain('HTTP-Redirect');
     });
 

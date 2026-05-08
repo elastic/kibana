@@ -72,6 +72,7 @@ jest.mock('@kbn/unified-search-plugin/public', () => ({
 
 describe('DataViewPicker', () => {
   let mockDispatch = jest.fn();
+  const mockAddDanger = jest.fn();
 
   beforeEach(() => {
     jest.mocked(useUpdateUrlParam).mockReturnValue(jest.fn());
@@ -83,6 +84,11 @@ describe('DataViewPicker', () => {
     jest.mocked(useKibana).mockReturnValue({
       services: {
         ...mockUseKibana().services,
+        notifications: {
+          toasts: {
+            addDanger: mockAddDanger,
+          },
+        },
         dataViewFieldEditor: { openEditor: jest.fn() },
         dataViewEditor: {
           userPermissions: { editDataView: jest.fn().mockReturnValue(true) },
@@ -174,6 +180,27 @@ describe('DataViewPicker', () => {
         'security-solution-default'
       );
       expect(jest.mocked(useKibana().services.dataViewFieldEditor.openEditor)).toHaveBeenCalled();
+    });
+  });
+
+  it('shows a danger toast when adding field fails to load data view', async () => {
+    jest
+      .mocked(useKibana().services.data.dataViews.get)
+      .mockRejectedValue(new Error('conflict loading data view'));
+
+    render(
+      <TestProviders>
+        <DataViewPicker scope={PageScope.default} />
+      </TestProviders>
+    );
+
+    fireEvent.click(screen.getByTestId('addField'));
+
+    await waitFor(() => {
+      expect(mockAddDanger).toHaveBeenCalledWith({
+        title: 'Error retrieving data view',
+        text: 'Error: conflict loading data view',
+      });
     });
   });
 

@@ -594,6 +594,10 @@
                 "containerized": {
                   "type": "boolean"
                 },
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "entity": {
                   "properties": {
                     "id": {
@@ -616,6 +620,18 @@
                 },
                 "target": {
                   "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "hostname": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
                     "entity": {
                       "properties": {
                         "id": {
@@ -643,8 +659,66 @@
                 }
               }
             },
+            "source": {
+              "properties": {
+                "geo": {
+                  "properties": {
+                    "city_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "continent_code": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "continent_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "country_iso_code": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "country_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "location": {
+                      "type": "geo_point"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "postal_code": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "region_iso_code": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "region_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "timezone": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "ip": {
+                  "type": "ip"
+                }
+              }
+            },
             "service": {
               "properties": {
+                "name": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "entity": {
                   "properties": {
                     "id": {
@@ -655,6 +729,10 @@
                 },
                 "target": {
                   "properties": {
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
                     "entity": {
                       "properties": {
                         "id": {
@@ -681,6 +759,14 @@
             },
             "user": {
               "properties": {
+                "domain": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "email": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "entity": {
                   "properties": {
                     "id": {
@@ -691,6 +777,22 @@
                 },
                 "target": {
                   "properties": {
+                    "domain": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "email": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
                     "entity": {
                       "properties": {
                         "id": {

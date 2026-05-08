@@ -6,10 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLAstAllCommands, ESQLCommand } from '../../../types';
+import type { ESQLAstAllCommands, ESQLCommand } from '@elastic/esql/types';
+import { isColumn } from '@elastic/esql';
 import {
   columnExists as _columnExists,
-  getFragmentData,
   withAutoSuggest,
 } from '../../definitions/utils/autocomplete/helpers';
 import { suggestForExpression } from '../../definitions/utils';
@@ -21,13 +21,11 @@ import {
   type ISuggestionItem,
 } from '../types';
 import {
-  getNullsPrefixRange,
   getSortPos,
   getSuggestionsAfterCompleteExpression,
   rightAfterColumn,
   sortModifierSuggestions,
 } from './utils';
-import { isColumn } from '../../../ast/is';
 
 export async function autocomplete(
   query: string,
@@ -83,37 +81,19 @@ export async function autocomplete(
         suggestions.push(...expressionSuggestions);
       }
 
-      const nullsPrefixRange = getNullsPrefixRange(innerText);
-
-      if (nullsPrefixRange) {
-        suggestions.forEach((suggestion) => {
-          suggestion.rangeToReplace = nullsPrefixRange;
-        });
-      }
-
       return suggestions;
     }
 
     case 'order_complete': {
-      const { fragment, rangeToReplace } = getFragmentData(innerText);
-
       return [
-        { ...pipeCompleteItem, text: ' | ' },
-        { ...commaCompleteItem, text: ', ' },
-        prependSpace(sortModifierSuggestions.NULLS_FIRST),
-        prependSpace(sortModifierSuggestions.NULLS_LAST),
-      ].map((suggestion) =>
-        withAutoSuggest({
-          ...suggestion,
-          filterText: fragment,
-          text: fragment + suggestion.text,
-          rangeToReplace,
-        })
-      );
+        { ...pipeCompleteItem, text: ' | ', preserveTypedPrefix: true },
+        withAutoSuggest({ ...commaCompleteItem, text: ', ', preserveTypedPrefix: true }),
+        { ...prependSpace(sortModifierSuggestions.NULLS_FIRST), preserveTypedPrefix: true },
+        { ...prependSpace(sortModifierSuggestions.NULLS_LAST), preserveTypedPrefix: true },
+      ];
     }
 
     case 'after_order': {
-      const nullsPrefixRange = getNullsPrefixRange(innerText);
       return [
         sortModifierSuggestions.NULLS_FIRST,
         sortModifierSuggestions.NULLS_LAST,
@@ -121,24 +101,14 @@ export async function autocomplete(
         withAutoSuggest({ ...commaCompleteItem, text: ', ' }),
       ].map((suggestion) => ({
         ...suggestion,
-        rangeToReplace: nullsPrefixRange,
       }));
     }
 
     case 'nulls_complete': {
-      const { fragment, rangeToReplace } = getFragmentData(innerText);
-
       return [
-        { ...pipeCompleteItem, text: ' | ' },
-        { ...commaCompleteItem, text: ', ' },
-      ].map((suggestion) =>
-        withAutoSuggest({
-          ...suggestion,
-          filterText: fragment,
-          text: fragment + suggestion.text,
-          rangeToReplace,
-        })
-      );
+        { ...pipeCompleteItem, text: ' | ', preserveTypedPrefix: true },
+        withAutoSuggest({ ...commaCompleteItem, text: ', ', preserveTypedPrefix: true }),
+      ];
     }
 
     case 'after_nulls': {

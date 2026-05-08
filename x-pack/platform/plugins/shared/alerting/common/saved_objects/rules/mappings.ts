@@ -116,6 +116,10 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     updatedAt: {
       type: 'date',
     },
+    uiamApiKey: {
+      type: 'binary',
+    },
+    // NO NEED TO BE INDEXED
     // NEED TO CHECK WITH KIBANA SECURITY
     // apiKey: {
     //   type: 'binary',
@@ -135,6 +139,18 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     },
     mutedInstanceIds: {
       type: 'keyword',
+    },
+    snoozedInstances: {
+      type: 'nested',
+      properties: {
+        instanceId: {
+          type: 'keyword',
+        },
+        snoozeSnapshot: {
+          type: 'object',
+          dynamic: false,
+        },
+      },
     },
     // NO NEED TO BE INDEXED
     // meta: {

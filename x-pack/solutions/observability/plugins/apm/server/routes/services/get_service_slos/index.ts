@@ -35,7 +35,7 @@ export async function getServiceSlos({
   sloAlertsClient,
   serviceName,
   environment,
-  statusFilters,
+  statusFilters = [],
   kqlQuery,
   page,
   perPage,
@@ -77,7 +77,16 @@ export async function getServiceSlos({
   ];
 
   if (environment && environment !== ENVIRONMENT_ALL.value) {
-    filters.push({ term: { [SERVICE_ENVIRONMENT]: environment } });
+    filters.push({
+      bool: {
+        should: [
+          { term: { [SERVICE_ENVIRONMENT]: environment } },
+          { term: { [SERVICE_ENVIRONMENT]: ALL_VALUE } },
+          { bool: { must_not: { exists: { field: SERVICE_ENVIRONMENT } } } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
   }
 
   if (statusFilters && statusFilters.length > 0) {
@@ -105,6 +114,8 @@ export async function getServiceSlos({
       type: 'apm',
       serviceNames: [serviceName],
       ...(environment && environment !== ENVIRONMENT_ALL.value && { environment }),
+      ...(kqlQuery && { kqlQuery }),
+      ...(statusFilters.length > 0 && { statusFilters }),
     }),
   ]);
 

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {
   EuiPage,
   EuiPageBody,
@@ -59,11 +59,11 @@ export const renderApp = (
   { element }: AppMountParameters,
   startServices: StartServices
 ) => {
-  render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...startServices}>
       <App appName={appName} />
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 };

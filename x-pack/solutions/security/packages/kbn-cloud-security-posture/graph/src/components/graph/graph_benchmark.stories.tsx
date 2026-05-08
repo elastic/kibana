@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { css, ThemeProvider } from '@emotion/react';
+import { css } from '@emotion/react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/graph/v1';
@@ -87,7 +87,7 @@ const useExpandButtonPopover = () => {
     >
       <EuiListGroup color="primary" gutterSize="none" bordered={false} flush={true}>
         <PopoverListItem
-          iconType="visTagCloud"
+          iconType="chartTagCloud"
           label="Explore related entities"
           onClick={() => {}}
         />
@@ -98,7 +98,7 @@ const useExpandButtonPopover = () => {
           onClick={() => {}}
         />
         <EuiHorizontalRule margin="xs" />
-        <PopoverListItem iconType="expand" label="View entity details" onClick={() => {}} />
+        <PopoverListItem iconType="maximize" label="View entity details" onClick={() => {}} />
       </EuiListGroup>
     </GraphPopover>
   ));
@@ -191,7 +191,7 @@ const Template = ({ nodes, edges }: GraphResponse) => {
   }, [expandButtonClickHandler, nodeClickHandler, nodes]);
 
   return (
-    <ThemeProvider theme={{ darkMode: false }}>
+    <>
       <GraphPerfMonitor />
       <Graph
         css={css`
@@ -204,7 +204,7 @@ const Template = ({ nodes, edges }: GraphResponse) => {
         isLocked={isPopoverOpen}
       />
       {popovers?.map((popover) => popover.Popover && <popover.Popover key={popover.id} />)}
-    </ThemeProvider>
+    </>
   );
 };
 

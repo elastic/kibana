@@ -95,6 +95,22 @@ describe('useAttackTagsContextMenuItems', () => {
     });
   });
 
+  it('should pass telemetrySource to useBulkAttackTagsItems', () => {
+    renderHook(
+      () =>
+        useAttackTagsContextMenuItems({
+          ...defaultProps,
+          telemetrySource: 'attacks_page_group_take_action',
+        }),
+      { wrapper }
+    );
+
+    expect(mockUseBulkAttackTagsItems).toHaveBeenCalledWith({
+      onTagsUpdate: mockOnSuccess,
+      telemetrySource: 'attacks_page_group_take_action',
+    });
+  });
+
   it('should pass correct props to panel renderContent', () => {
     const mockRenderContent = jest.fn((props) => React.createElement('div', null, 'Tags Panel'));
     mockUseBulkAttackTagsItems.mockReturnValue({

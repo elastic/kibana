@@ -5,19 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiToolTip } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiLink, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { MonitorPageLink } from './monitor_page_link';
 import type { CertMonitor } from '../../../../../common/runtime_types';
+
+const DEFAULT_DISPLAY_COUNT = 10;
 
 interface Props {
   monitors: CertMonitor[];
 }
 
 export const CertMonitors: React.FC<Props> = ({ monitors }) => {
+  const [showAll, setShowAll] = useState(false);
+  const monitorsToDisplay = showAll ? monitors : monitors.slice(0, DEFAULT_DISPLAY_COUNT);
+  const remainingCount = monitors.length - DEFAULT_DISPLAY_COUNT;
+
   return (
     <span>
-      {monitors.map((mon: CertMonitor, ind: number) => (
+      {monitorsToDisplay.map((mon: CertMonitor, ind: number) => (
         <span key={mon.id}>
           {ind > 0 && ', '}
           <EuiToolTip content={mon.url}>
@@ -25,6 +32,27 @@ export const CertMonitors: React.FC<Props> = ({ monitors }) => {
           </EuiToolTip>
         </span>
       ))}
+      {monitors.length > DEFAULT_DISPLAY_COUNT && !showAll && (
+        <span>
+          {', '}
+          <EuiLink data-test-subj="certMonitorsViewAll" onClick={() => setShowAll(true)}>
+            {i18n.translate('xpack.synthetics.certs.monitors.viewAll', {
+              defaultMessage: '+{remainingCount} more',
+              values: { remainingCount },
+            })}
+          </EuiLink>
+        </span>
+      )}
+      {monitors.length > DEFAULT_DISPLAY_COUNT && showAll && (
+        <span>
+          {' '}
+          <EuiLink data-test-subj="certMonitorsShowFewer" onClick={() => setShowAll(false)}>
+            {i18n.translate('xpack.synthetics.certs.monitors.showFewer', {
+              defaultMessage: 'Show fewer',
+            })}
+          </EuiLink>
+        </span>
+      )}
     </span>
   );
 };

@@ -13,7 +13,7 @@ export interface RoundState {
 export interface AgentState {
   current_cycle: number;
   error_count: number;
-  node: AgentNodeState;
+  nodes: AgentNodeState[];
 }
 
 export interface ExecuteToolNodeState {

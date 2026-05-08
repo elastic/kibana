@@ -32,6 +32,7 @@ import type { ScheduleBackfillParam } from './types';
 import { adHocRunStatus } from '../../../../../common/constants';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { backfillInitiator } from '../../../../../common/constants';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 const kibanaVersion = 'v8.0.0';
 const taskManager = taskManagerMock.createStart();
@@ -60,6 +61,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
+  cloneAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,
@@ -78,6 +80,8 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   eventLogger,
+  featureFlags: coreFeatureFlagsMock.createStart(),
+  isServerless: false,
 };
 
 const fakeRuleName = 'fakeRuleName';
@@ -625,7 +629,7 @@ describe('scheduleBackfill()', () => {
           ],
         }),
       ];
-      authorization.ensureAuthorized.mockImplementationOnce(() => {
+      authorization.bulkEnsureAuthorized.mockImplementationOnce(() => {
         throw new Error('Unauthorized');
       });
 

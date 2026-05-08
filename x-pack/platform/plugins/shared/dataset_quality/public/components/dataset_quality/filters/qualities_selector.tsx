@@ -70,7 +70,7 @@ export function QualitiesSelector({
   const button = (
     <EuiFilterButton
       data-test-subj="datasetQualityQualitiesSelectableButton"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       badgeColor="success"
       onClick={onButtonClick}
       isSelected={isPopoverOpen}

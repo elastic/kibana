@@ -1,0 +1,41 @@
+responses:
+  200:
+    description: 'Fleet setup status'
+    content:
+      application/json:
+        examples:
+          agentsSetupReadyExample:
+            description: 'Fleet is ready to enroll agents — all requirements are met'
+            value:
+              isReady: true
+              missing_requirements: []
+              missing_optional_features: []
+              is_secrets_storage_enabled: true
+              is_space_awareness_enabled: false
+              is_ssl_secrets_storage_enabled: false
+              is_action_secrets_storage_enabled: true
+              package_verification_key_id: 'D88DB4CC'
+          agentsSetupNotReadyExample:
+            description: 'Fleet is not ready — a Fleet Server and API keys are required'
+            value:
+              isReady: false
+              missing_requirements:
+                - fleet_server
+                - api_keys
+              missing_optional_features:
+                - encrypted_saved_object_encryption_key_required
+              is_secrets_storage_enabled: false
+              is_space_awareness_enabled: false
+              is_ssl_secrets_storage_enabled: false
+              is_action_secrets_storage_enabled: false
+  400:
+    description: 'Bad Request'
+    content:
+      application/json:
+        examples:
+          genericErrorResponseExample:
+            description: 'Example of a generic error response'
+            value:
+              statusCode: 400
+              error: 'Bad Request'
+              message: 'An error message describing what went wrong'

@@ -21,12 +21,12 @@ import { useSpaceId } from '../../../../common/hooks/use_space_id';
 const DEFAULT_ATTACKS_PAGE_FILTERS: FilterControlConfig[] = [
   {
     title: 'Status',
-    fieldName: 'kibana.alert.workflow_status',
-    selectedOptions: ['open'],
+    field_name: 'kibana.alert.workflow_status',
+    selected_options: ['open'],
     persist: true,
-    displaySettings: {
-      hideActionBar: true,
-      hideExists: true,
+    display_settings: {
+      hide_action_bar: true,
+      hide_exists: true,
     },
   },
 ];
@@ -41,6 +41,7 @@ export type PageFiltersProps = Pick<
 };
 
 const FILTER_CONTROLS_STORAGE_KEY = 'attacks-page-filters';
+export const ATTACKS_PAGE_FILTER_CONTROLS_TEST_ID = 'attacksPageFilterControls';
 
 export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
   const { http, notifications, dataViews } = useKibana().services;
@@ -92,19 +93,21 @@ export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
   }
 
   return (
-    <AlertFilterControls
-      controlsUrlState={filterControlsUrlState}
-      dataViewSpec={customDataViewSpec}
-      defaultControls={DEFAULT_ATTACKS_PAGE_FILTERS}
-      maxControls={4}
-      preventCacheClearOnUnmount={true}
-      ruleTypeIds={RULE_TYPES}
-      services={services}
-      setControlsUrlState={setFilterControlsUrlState}
-      spaceId={spaceId}
-      storageKey={FILTER_CONTROLS_STORAGE_KEY}
-      {...props}
-    />
+    <div data-test-subj={ATTACKS_PAGE_FILTER_CONTROLS_TEST_ID}>
+      <AlertFilterControls
+        controlsUrlState={filterControlsUrlState}
+        dataViewSpec={customDataViewSpec}
+        defaultControls={DEFAULT_ATTACKS_PAGE_FILTERS}
+        maxControls={4}
+        preventCacheClearOnUnmount={true}
+        ruleTypeIds={RULE_TYPES}
+        services={services}
+        setControlsUrlState={setFilterControlsUrlState}
+        spaceId={spaceId}
+        storageKey={FILTER_CONTROLS_STORAGE_KEY}
+        {...props}
+      />
+    </div>
   );
 });
 

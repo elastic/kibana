@@ -164,7 +164,7 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
         }}
         data-test-subj="cloudSnapshotsLink"
         target="_blank"
-        iconType="popout"
+        iconType="external"
         iconSide="right"
       >
         <FormattedMessage

@@ -12,24 +12,38 @@ import type {
   InspectorSession,
   Start as InspectorPublicPluginStart,
 } from '@kbn/inspector-plugin/public';
-import type { RequestAdapter } from '@kbn/inspector-plugin/public';
-import type { DiscoverStateContainer } from '../state_management/discover_state';
+import type { DiscoverDataStateContainer } from '../state_management/discover_data_state_container';
+import type { CascadedDocumentsFetcher } from '../data_fetching/cascaded_documents_fetcher';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 import {
   internalStateActions,
   useInternalStateSelector,
   useCurrentTabAction,
+  useCurrentTabDataStateContainer,
   useInternalStateDispatch,
+  useCurrentTabRuntimeState,
 } from '../state_management/redux';
 import { useActiveContexts } from '../../../context_awareness/hooks';
 
-export function useInspector({
-  inspector,
-  stateContainer,
-}: {
-  inspector: InspectorPublicPluginStart;
-  stateContainer: DiscoverStateContainer;
-}) {
+/**
+ * Builds an AggregateRequestAdapter from the data state container's inspector adapters
+ * and the cascaded documents fetcher. Shared between useInspector and the tab menu inspector.
+ */
+export const getInspectorRequestAdapters = (
+  dataStateContainer: DiscoverDataStateContainer,
+  cascadedDocumentsFetcher: CascadedDocumentsFetcher
+): AggregateRequestAdapter => {
+  const { inspectorAdapters } = dataStateContainer;
+  const requestAdapters = [
+    inspectorAdapters.requests,
+    inspectorAdapters.lensRequests,
+    cascadedDocumentsFetcher.getRequestAdapter(),
+  ].filter((adapter) => !!adapter);
+
+  return new AggregateRequestAdapter(requestAdapters);
+};
+
+export function useInspector({ inspector }: { inspector: InspectorPublicPluginStart }) {
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
@@ -39,8 +53,14 @@ export function useInspector({
 
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
+  const cascadedDocumentsFetcher = useCurrentTabRuntimeState(
+    (runtimeState) => runtimeState.cascadedDocumentsFetcher$
+  );
+
+  const dataStateContainer = useCurrentTabDataStateContainer();
+
   const getContextsAdapter = useActiveContexts({
-    dataDocuments$: stateContainer.dataState.data$.documents$,
+    dataDocuments$: dataStateContainer.data$.documents$,
   });
 
   const onOpenInspector = useCallback(
@@ -48,17 +68,9 @@ export function useInspector({
       // prevent overlapping
       dispatch(setExpandedDoc({ expandedDoc: undefined }));
 
-      const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
-
-      const requestAdapters = [
-        inspectorAdapters.requests,
-        inspectorAdapters.lensRequests,
-        inspectorAdapters.cascadeRequests,
-      ].filter(Boolean) as RequestAdapter[];
-
       const session = inspector.open(
         {
-          requests: new AggregateRequestAdapter(requestAdapters),
+          requests: getInspectorRequestAdapters(dataStateContainer, cascadedDocumentsFetcher),
           contexts: getContextsAdapter({
             onOpenDocDetails: (record) => {
               session?.close();
@@ -80,7 +92,8 @@ export function useInspector({
     [
       dispatch,
       setExpandedDoc,
-      stateContainer.dataState.inspectorAdapters,
+      cascadedDocumentsFetcher,
+      dataStateContainer,
       inspector,
       getContextsAdapter,
       persistedDiscoverSession?.title,

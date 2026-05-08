@@ -162,6 +162,7 @@
                 "lineNumber": 57,
                 "columnNumber": 45,
                 "deprecated": false,
+                "docsReferencedTypeName": "IndexAdapterParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -200,6 +201,7 @@
                 "lineNumber": 64,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "SetComponentTemplateParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -250,6 +252,7 @@
                 "lineNumber": 71,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "SetIndexTemplateParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -288,6 +291,7 @@
                 "lineNumber": 85,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetInstallFnParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -338,6 +342,7 @@
                 "lineNumber": 104,
                 "columnNumber": 33,
                 "deprecated": false,
+                "docsReferencedTypeName": "InstallParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -388,6 +393,7 @@
                 "lineNumber": 139,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "InstallParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -422,7 +428,7 @@
           }
         ],
         "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
-        "lineNumber": 13,
+        "lineNumber": 18,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -438,7 +444,7 @@
               "Map<string, Promise<void>>"
             ],
             "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
-            "lineNumber": 14,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -462,7 +468,20 @@
               "> | undefined"
             ],
             "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
-            "lineNumber": 15,
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-adapter",
+            "id": "def-server.IndexPatternAdapter.expandIndexPattern",
+            "type": "boolean",
+            "tags": [],
+            "label": "expandIndexPattern",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -478,7 +497,7 @@
               "any"
             ],
             "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
-            "lineNumber": 17,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -494,7 +513,7 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
-                "lineNumber": 17,
+                "lineNumber": 23,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -503,23 +522,18 @@
               {
                 "parentPluginId": "@kbn/index-adapter",
                 "id": "def-server.IndexPatternAdapter.Unnamed.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/index-adapter",
-                    "scope": "server",
-                    "docId": "kibKbnIndexAdapterPluginApi",
-                    "section": "def-server.IndexAdapterParams",
-                    "text": "IndexAdapterParams"
-                  }
+                  "IndexPatternAdapterParams"
                 ],
                 "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
-                "lineNumber": 17,
+                "lineNumber": 23,
                 "columnNumber": 50,
                 "deprecated": false,
+                "docsReferencedTypeName": "IndexPatternAdapterParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -547,7 +561,7 @@
               ") => Promise<void>"
             ],
             "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
-            "lineNumber": 22,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -569,9 +583,10 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
-                "lineNumber": 23,
+                "lineNumber": 32,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "InstallParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -605,7 +620,7 @@
               ">"
             ],
             "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
-            "lineNumber": 28,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -627,9 +642,10 @@
                   }
                 ],
                 "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
-                "lineNumber": 28,
+                "lineNumber": 37,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "InstallParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -649,7 +665,7 @@
               "(indexSuffix: string) => Promise<void>"
             ],
             "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
-            "lineNumber": 53,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -665,7 +681,7 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
-                "lineNumber": 58,
+                "lineNumber": 68,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -687,7 +703,7 @@
               "(indexSuffix: string) => string"
             ],
             "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
-            "lineNumber": 83,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -703,7 +719,7 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
-                "lineNumber": 84,
+                "lineNumber": 94,
                 "columnNumber": 23,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -725,7 +741,7 @@
               "(indexSuffix: string) => Promise<string | undefined>"
             ],
             "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
-            "lineNumber": 88,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -741,7 +757,7 @@
                   "string"
                 ],
                 "path": "x-pack/solutions/security/packages/index-adapter/src/index_pattern_adapter.ts",
-                "lineNumber": 89,
+                "lineNumber": 99,
                 "columnNumber": 38,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -785,6 +801,7 @@
             "lineNumber": 106,
             "columnNumber": 55,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateOrUpdateComponentTemplateOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -824,6 +841,7 @@
             "lineNumber": 28,
             "columnNumber": 51,
             "deprecated": false,
+            "docsReferencedTypeName": "CreateOrUpdateIndexTemplateOpts",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1488,7 +1506,7 @@
           "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; search_inference_id?: string | undefined; copy_to?: string | undefined; }; }"
         ],
         "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/ecs_field_map.ts",
-        "lineNumber": 70,
+        "lineNumber": 77,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1642,7 +1660,7 @@
           "[] | undefined; index?: boolean | undefined; path?: string | undefined; scaling_factor?: number | undefined; dynamic?: boolean | \"strict\" | undefined; properties?: Record<string, { type: string; }> | undefined; inference_id?: string | undefined; search_inference_id?: string | undefined; copy_to?: string | undefined; }; }"
         ],
         "path": "x-pack/solutions/security/packages/index-adapter/src/field_maps/ecs_field_map.ts",
-        "lineNumber": 49,
+        "lineNumber": 56,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

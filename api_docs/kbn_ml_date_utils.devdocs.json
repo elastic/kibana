@@ -215,9 +215,7 @@
             "type": "Object",
             "tags": [],
             "label": "time",
-            "description": [
-              "- The time range to be validated."
-            ],
+            "description": [],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -232,6 +230,7 @@
             "lineNumber": 53,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeRange",
             "trackAdoption": false,
             "isRequired": false
           }

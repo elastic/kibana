@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { batchGetCompositeSLORoute } from './composite_slo/batch_get_composite_slo';
 import { bulkDeleteSLORoute, getBulkDeleteStatusRoute } from './bulk_delete';
 import { bulkPurgeRollupRoute } from './bulk_purge_rollup';
+import { createCompositeSLORoute } from './composite_slo/create_composite_slo';
 import { createSLORoute } from './create_slo';
+import { deleteCompositeSLORoute } from './composite_slo/delete_composite_slo';
 import { deleteSloInstancesRoute } from './delete_instances';
 import { findSLOInstancesRoute } from './find_instances';
 import { deleteSLORoute } from './delete_slo';
@@ -15,9 +18,11 @@ import { disableSLORoute } from './disable_slo';
 import { enableSLORoute } from './enable_slo';
 import { fetchSloHealthRoute } from './fetch_health';
 import { fetchHistoricalSummary } from './fetch_historical_summary';
+import { findCompositeSLORoute } from './composite_slo/find_composite_slo';
 import { findSloDefinitionsRoute } from './find_definitions';
 import { findSLOGroupsRoute } from './find_groups';
 import { findSLORoute } from './find_slo';
+import { getCompositeSLORoute } from './composite_slo/get_composite_slo';
 import { getDiagnosisRoute } from './get_diagnosis';
 import { getPreviewData } from './get_preview_data';
 import { getSLORoute } from './get_slo';
@@ -30,13 +35,29 @@ import { inspectSLORoute } from './inspect_slo';
 import { getPurgeInstancesStatusRoute, purgeInstancesRoute } from './purge_instances';
 import { resetSLORoute } from './reset_slo';
 import { repairSLORoute } from './repair_slo';
+import { fetchCompositeHistoricalSummaryRoute } from './composite_slo/fetch_composite_historical_summary';
+import { getCompositeSLOSuggestionsRoute } from './composite_slo/get_composite_slo_suggestions';
+import { postCompositeSloSummaryRefreshRoute } from './composite_slo/post_composite_slo_summary_refresh';
+import { updateCompositeSLORoute } from './composite_slo/update_composite_slo';
 import { updateSLORoute } from './update_slo';
 import { updateSloSettings } from './update_slo_settings';
-import { getSLOTemplateRoute, findSLOTemplatesRoute } from './slo_templates';
+import {
+  getSLOTemplateRoute,
+  findSLOTemplatesRoute,
+  findSLOTemplateTagsRoute,
+} from './slo_templates';
 import { healthScanRoutes } from './health_scan';
 import { searchSloDefinitionsRoute } from './search_slo_definitions';
 
-export const getSloRouteRepository = (isServerless?: boolean) => {
+interface RouteRepositoryOptions {
+  isServerless?: boolean;
+  isCompositeSloEnabled?: boolean;
+}
+
+export const getSloRouteRepository = ({
+  isServerless,
+  isCompositeSloEnabled,
+}: RouteRepositoryOptions = {}) => {
   return {
     ...fetchSloHealthRoute,
     ...getSloSettingsRoute,
@@ -69,7 +90,17 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...findSLOInstancesRoute,
     ...getSLOTemplateRoute,
     ...findSLOTemplatesRoute,
+    ...findSLOTemplateTagsRoute,
     ...healthScanRoutes,
     ...searchSloDefinitionsRoute,
+    ...(isCompositeSloEnabled ? createCompositeSLORoute : {}),
+    ...(isCompositeSloEnabled ? getCompositeSLORoute : {}),
+    ...(isCompositeSloEnabled ? findCompositeSLORoute : {}),
+    ...(isCompositeSloEnabled ? updateCompositeSLORoute : {}),
+    ...(isCompositeSloEnabled ? deleteCompositeSLORoute : {}),
+    ...(isCompositeSloEnabled ? fetchCompositeHistoricalSummaryRoute : {}),
+    ...(isCompositeSloEnabled ? batchGetCompositeSLORoute : {}),
+    ...(isCompositeSloEnabled ? getCompositeSLOSuggestionsRoute : {}),
+    ...(isCompositeSloEnabled ? postCompositeSloSummaryRefreshRoute : {}),
   };
 };

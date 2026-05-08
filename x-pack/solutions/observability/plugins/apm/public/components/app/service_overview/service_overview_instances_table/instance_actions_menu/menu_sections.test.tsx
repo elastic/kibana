@@ -8,6 +8,7 @@
 import { getMenuSections } from './menu_sections';
 import type { IBasePath } from '@kbn/core/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import type { AssetDetailsLocator } from '@kbn/observability-shared-plugin/common';
 import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
@@ -28,6 +29,13 @@ describe('getMenuSections', () => {
     getRedirectUrl: jest.fn(() => 'asset-details-url'),
   } as unknown as AssetDetailsLocator;
 
+  const mockDiscoverLocator = {
+    getRedirectUrl: jest.fn((params: SerializableRecord) => {
+      const query = (params.query as { query?: string })?.query || '';
+      return `/app/discover#/?_a=(query:(language:kuery,query:'${query}'))`;
+    }),
+  } as unknown as LocatorPublic<SerializableRecord>;
+
   const mockOnFilterByInstanceClick = jest.fn();
 
   beforeEach(() => {
@@ -46,6 +54,7 @@ describe('getMenuSections', () => {
       metricsHref: '/metrics-href',
       logsLocator: mockLogsLocator,
       assetDetailsLocator: mockAssetDetailsLocator,
+      infraLinksAvailable: true,
     });
 
     // Should have at least the APM section
@@ -86,6 +95,7 @@ describe('getMenuSections', () => {
       metricsHref: '/metrics-href',
       logsLocator: mockLogsLocator,
       assetDetailsLocator: mockAssetDetailsLocator,
+      infraLinksAvailable: true,
     });
 
     const allActions = sections.flat().flatMap((section) => section.actions);
@@ -97,7 +107,6 @@ describe('getMenuSections', () => {
 
     // Verify Pod metrics action exists
     const podMetricsAction = allActions.find((action) => action.key === 'podMetrics');
-    expect(podMetricsAction).toBeDefined();
     expect(podMetricsAction?.label).toBe('Pod metrics');
   });
 
@@ -116,6 +125,7 @@ describe('getMenuSections', () => {
       metricsHref: '/metrics-href',
       logsLocator: mockLogsLocator,
       assetDetailsLocator: mockAssetDetailsLocator,
+      infraLinksAvailable: true,
     });
 
     const allActions = sections.flat().flatMap((section) => section.actions);
@@ -151,6 +161,7 @@ describe('getMenuSections', () => {
       metricsHref: '/metrics-href',
       logsLocator: mockLogsLocator,
       assetDetailsLocator: mockAssetDetailsLocator,
+      infraLinksAvailable: true,
     });
 
     const allActions = sections.flat().flatMap((section) => section.actions);
@@ -182,6 +193,7 @@ describe('getMenuSections', () => {
       metricsHref: '/metrics-href',
       logsLocator: mockLogsLocator,
       assetDetailsLocator: undefined,
+      infraLinksAvailable: true,
     });
 
     const allActions = sections.flat().flatMap((section) => section.actions);
@@ -208,6 +220,7 @@ describe('getMenuSections', () => {
       metricsHref: '/metrics-href',
       logsLocator: mockLogsLocator,
       assetDetailsLocator: undefined,
+      infraLinksAvailable: true,
     });
 
     const allActions = sections.flat().flatMap((section) => section.actions);
@@ -236,6 +249,7 @@ describe('getMenuSections', () => {
       metricsHref: '/metrics-href',
       logsLocator: mockLogsLocator,
       assetDetailsLocator: mockAssetDetailsLocator,
+      infraLinksAvailable: true,
     });
 
     const podSection = sections.flat().find((section) => section.key === 'podDetails');
@@ -259,6 +273,7 @@ describe('getMenuSections', () => {
       metricsHref: '/metrics-href',
       logsLocator: mockLogsLocator,
       assetDetailsLocator: mockAssetDetailsLocator,
+      infraLinksAvailable: true,
     });
 
     const containerSection = sections.flat().find((section) => section.key === 'containerDetails');
@@ -267,5 +282,48 @@ describe('getMenuSections', () => {
     expect(containerSection?.subtitle).toBe(
       'View logs and metrics for this container to get further details.'
     );
+  });
+
+  it('uses Discover link for OTel-observed K8s pods instead of Infra UI', () => {
+    const instanceDetails: InstaceDetails = {
+      '@timestamp': '2021-10-10T00:00:00.000Z',
+      kubernetes: {
+        pod: {
+          uid: 'pod-123',
+        },
+      },
+      agent: {
+        name: 'otlp/nodejs',
+      },
+    } as InstaceDetails;
+
+    const sections = getMenuSections({
+      instanceDetails,
+      basePath: mockBasePath,
+      onFilterByInstanceClick: mockOnFilterByInstanceClick,
+      metricsHref: '/metrics-href',
+      logsLocator: mockLogsLocator,
+      assetDetailsLocator: mockAssetDetailsLocator,
+      discoverLocator: mockDiscoverLocator,
+      infraLinksAvailable: true,
+    });
+
+    const allActions = sections.flat().flatMap((section) => section.actions);
+    const podMetricsAction = allActions.find((action) => action.key === 'podMetrics');
+
+    expect(podMetricsAction?.condition).toBe(true);
+    // Should use Discover link, not Infra UI link
+    expect(mockAssetDetailsLocator.getRedirectUrl).not.toHaveBeenCalled();
+    expect(mockDiscoverLocator.getRedirectUrl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          language: 'kuery',
+          query: 'kubernetes.pod.uid: "pod-123"',
+        }),
+      })
+    );
+    // Verify the generated URL contains the correct query
+    expect(podMetricsAction?.href).toContain('/app/discover');
+    expect(podMetricsAction?.href).toContain('kubernetes.pod.uid: "pod-123"');
   });
 });

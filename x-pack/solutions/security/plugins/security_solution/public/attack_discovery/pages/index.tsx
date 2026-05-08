@@ -19,8 +19,8 @@ import {
   QUERY_LOCAL_STORAGE_KEY,
   START_LOCAL_STORAGE_KEY,
   useAssistantContext,
-  useLoadConnectors,
 } from '@kbn/elastic-assistant';
+import { useLoadConnectors } from '@kbn/inference-connectors';
 import type { Filter, Query } from '@kbn/es-query';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -58,10 +58,10 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     services: { uiSettings, settings },
   } = useKibana();
 
-  const { http, inferenceEnabled } = useAssistantContext();
+  const { http } = useAssistantContext();
   const { data: aiConnectors } = useLoadConnectors({
     http,
-    inferenceEnabled,
+    featureId: 'attack_discovery',
     settings,
   });
 
@@ -195,6 +195,12 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           size,
           start,
           overrideConnectorId: overrideOptions?.overrideConnectorId,
+          overrideConnectorName: overrideOptions?.overrideConnectorId
+            ? getConnectorNameFromId({
+                aiConnectors,
+                connectorId: overrideOptions.overrideConnectorId,
+              })
+            : undefined,
           overrideEnd: overrideOptions?.overrideEnd,
           overrideFilter: overrideOptions?.overrideFilter,
           overrideSize: overrideOptions?.overrideSize,
@@ -205,6 +211,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       }
     },
     [
+      aiConnectors,
       end,
       fetchAttackDiscoveries,
       filterQuery,

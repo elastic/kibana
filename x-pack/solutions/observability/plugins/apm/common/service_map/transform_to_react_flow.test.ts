@@ -6,11 +6,10 @@
  */
 
 import { MarkerType } from '@xyflow/react';
-import { ServiceHealthStatus } from '../service_health_status';
 import { transformToReactFlow } from './transform_to_react_flow';
 import type { ServiceMapRawResponse, ServiceMapSpan, ServicesResponse } from './types';
 import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
-import type { GroupedNodeData } from './react_flow_types';
+import type { GroupedNodeData } from './types';
 import { DEFAULT_EDGE_COLOR } from './constants';
 
 // Helper to create a minimal raw response
@@ -153,7 +152,6 @@ describe('transformToReactFlow', () => {
         serviceAnomalies: [
           {
             serviceName: 'opbeans-java',
-            healthStatus: ServiceHealthStatus.warning,
             jobId: 'apm-job-1',
             transactionType: 'request',
             actualValue: 100,
@@ -173,7 +171,7 @@ describe('transformToReactFlow', () => {
       expect(result.nodes[0].data).toEqual(
         expect.objectContaining({
           serviceAnomalyStats: expect.objectContaining({
-            healthStatus: ServiceHealthStatus.warning,
+            anomalyScore: 75,
           }),
         })
       );
@@ -411,7 +409,6 @@ describe('transformToReactFlow', () => {
           serviceAnomalies: [
             {
               serviceName: 'payment-service',
-              healthStatus: ServiceHealthStatus.critical,
               jobId: 'apm-payment',
               transactionType: 'request',
               actualValue: 500,
@@ -437,7 +434,7 @@ describe('transformToReactFlow', () => {
         expect.objectContaining({
           isService: true,
           serviceAnomalyStats: expect.objectContaining({
-            healthStatus: ServiceHealthStatus.critical,
+            anomalyScore: 95,
           }),
         })
       );

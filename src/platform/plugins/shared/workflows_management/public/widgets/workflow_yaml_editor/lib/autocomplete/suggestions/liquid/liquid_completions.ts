@@ -133,6 +133,14 @@ export const LIQUID_FILTERS = [
     example: '{{ "HELLO" | downcase }} => hello',
   },
   {
+    name: 'entries',
+    description:
+      'Converts an object into an array of {key, value} pairs, enabling iteration over object keys with foreach',
+    insertText: 'entries',
+    example:
+      '{{ {"a": 1, "b": 2} | entries }} => [{"key": "a", "value": 1}, {"key": "b", "value": 2}]',
+  },
+  {
     name: 'escape',
     description: 'Escapes a string by replacing characters with escape sequences',
     insertText: 'escape',

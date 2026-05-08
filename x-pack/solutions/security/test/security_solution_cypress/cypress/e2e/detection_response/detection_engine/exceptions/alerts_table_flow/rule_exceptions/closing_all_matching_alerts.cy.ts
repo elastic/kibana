@@ -67,7 +67,7 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless'] }, () => {
         interval: '1m',
         rule_id: 'rule_testing',
       })
-    ).then((rule) => visitRuleDetailsPage(rule.body.id));
+    ).then((rule) => visitRuleDetailsPage(rule.body.id, { tab: 'alerts' }));
 
     waitForAlertsToPopulate();
     // Disables enabled rule

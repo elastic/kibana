@@ -8,6 +8,7 @@
 import { EuiInMemoryTable } from '@elastic/eui';
 import type { EuiSearchBarProps, EuiTableSelectionType } from '@elastic/eui';
 import React, { useMemo, useState, useRef } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import styled from '@emotion/styled';
@@ -146,6 +147,12 @@ const ContextEditorComponent: React.FC<Props> = ({
         search={search}
         selection={selectionValue}
         sorting={sorting}
+        tableCaption={i18n.translate(
+          'xpack.elasticAssistant.assistant.dataAnonymizationEditor.contextEditor.contextEditorTableCaption',
+          {
+            defaultMessage: 'Context editor',
+          }
+        )}
         onTableChange={onTableChange}
       />
     </Wrapper>

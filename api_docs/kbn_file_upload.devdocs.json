@@ -179,6 +179,7 @@
                 "lineNumber": 170,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Dependencies",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -406,6 +407,7 @@
                 "lineNumber": 319,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "File",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -799,6 +801,7 @@
                 "lineNumber": 511,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1130,6 +1133,7 @@
                 "lineNumber": 992,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "MappingTypeMapping",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1178,7 +1182,7 @@
           ", {}>"
         ],
         "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
-        "lineNumber": 30,
+        "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1194,9 +1198,10 @@
               "CoreStart"
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
-            "lineNumber": 31,
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CoreStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1217,9 +1222,10 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
-            "lineNumber": 32,
+            "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FileUploadStartDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1434,6 +1440,7 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FileUploadManager",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1457,6 +1464,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DataPublicPluginStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1474,6 +1482,7 @@
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ApplicationStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1491,6 +1500,7 @@
             "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HttpSetup",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1508,6 +1518,7 @@
             "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "NotificationsStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1766,7 +1777,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => Promise<void>; getExportHandler: (options: Omit<",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>) => Promise<void>; getExportHandler: (options: Omit<",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -1774,7 +1793,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
               "IntlShape",
               ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
               {
@@ -1784,7 +1811,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -1828,7 +1863,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"register\" | \"init\"> & { deserialize: ",
+              ", \"init\" | \"register\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -1874,17 +1909,15 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly registerTrigger: (trigger: ",
+              "{ readonly getTrigger: (triggerId: string) => ",
               {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
-              "TriggerContract",
-              "<object>; readonly registerAction: <Context extends object>(definition: ",
+              "; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1892,31 +1925,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context, {}>) => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -1956,7 +1965,7 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object, alwaysShowPopup?: boolean | undefined) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               "UiActionsService",
               "; }"
             ],
@@ -2517,61 +2526,6 @@
       }
     ],
     "objects": [
-      {
-        "parentPluginId": "@kbn/file-upload",
-        "id": "def-public.createOpenFileUploadLiteTrigger",
-        "type": "Object",
-        "tags": [],
-        "label": "createOpenFileUploadLiteTrigger",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
-        "lineNumber": 20,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/file-upload",
-            "id": "def-public.createOpenFileUploadLiteTrigger.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
-            "lineNumber": 21,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/file-upload",
-            "id": "def-public.createOpenFileUploadLiteTrigger.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
-            "lineNumber": 22,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/file-upload",
-            "id": "def-public.createOpenFileUploadLiteTrigger.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/file-upload/src/file_upload_component/new/file_upload_lite_action.tsx",
-            "lineNumber": 25,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/file-upload",
         "id": "def-public.FileUploadContext",

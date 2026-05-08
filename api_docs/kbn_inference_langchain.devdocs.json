@@ -47,7 +47,11 @@
           },
           ", ",
           "AIMessageChunk",
-          ">"
+          "<",
+          "MessageStructure",
+          "<",
+          "MessageToolSet",
+          ">>>"
         ],
         "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
         "lineNumber": 81,
@@ -194,6 +198,7 @@
                 "lineNumber": 109,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "InferenceChatModelParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -460,7 +465,11 @@
               "BaseLanguageModelInput",
               ", ",
               "AIMessageChunk",
-              ", ",
+              "<",
+              "MessageStructure",
+              "<",
+              "MessageToolSet",
+              ">>, ",
               {
                 "pluginId": "@kbn/inference-langchain",
                 "scope": "common",
@@ -516,6 +525,7 @@
                 "lineNumber": 177,
                 "columnNumber": 47,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -959,7 +969,7 @@
               ">>> : never>>"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
-            "lineNumber": 201,
+            "lineNumber": 210,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1025,7 +1035,7 @@
                   "<string>> & { stream?: TStream | undefined; }"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
-                "lineNumber": 202,
+                "lineNumber": 211,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1044,14 +1054,18 @@
             "signature": [
               "(baseMessages: ",
               "BaseMessage",
-              "[], options: this[\"ParsedCallOptions\"], runManager?: ",
+              "<",
+              "MessageStructure",
+              "<",
+              "MessageToolSet",
+              ">, string>[], options: this[\"ParsedCallOptions\"], runManager?: ",
               "CallbackManagerForLLMRun",
               " | undefined) => Promise<",
               "ChatResult",
               ">"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
-            "lineNumber": 213,
+            "lineNumber": 222,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1065,10 +1079,14 @@
                 "description": [],
                 "signature": [
                   "BaseMessage",
-                  "[]"
+                  "<",
+                  "MessageStructure",
+                  "<",
+                  "MessageToolSet",
+                  ">, string>[]"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
-                "lineNumber": 214,
+                "lineNumber": 223,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1085,7 +1103,7 @@
                   "this[\"ParsedCallOptions\"]"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
-                "lineNumber": 215,
+                "lineNumber": 224,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1103,9 +1121,10 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
-                "lineNumber": 216,
+                "lineNumber": 225,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CallbackManagerForLLMRun",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1122,14 +1141,18 @@
             "signature": [
               "(baseMessages: ",
               "BaseMessage",
-              "[], options: this[\"ParsedCallOptions\"], runManager?: ",
+              "<",
+              "MessageStructure",
+              "<",
+              "MessageToolSet",
+              ">, string>[], options: this[\"ParsedCallOptions\"], runManager?: ",
               "CallbackManagerForLLMRun",
               " | undefined) => AsyncGenerator<",
               "ChatGenerationChunk",
               ", any, unknown>"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
-            "lineNumber": 263,
+            "lineNumber": 272,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1143,10 +1166,14 @@
                 "description": [],
                 "signature": [
                   "BaseMessage",
-                  "[]"
+                  "<",
+                  "MessageStructure",
+                  "<",
+                  "MessageToolSet",
+                  ">, string>[]"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
-                "lineNumber": 264,
+                "lineNumber": 273,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1163,7 +1190,7 @@
                   "this[\"ParsedCallOptions\"]"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
-                "lineNumber": 265,
+                "lineNumber": 274,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1181,9 +1208,10 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
-                "lineNumber": 266,
+                "lineNumber": 275,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CallbackManagerForLLMRun",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1218,12 +1246,16 @@
               "BaseLanguageModelInput",
               ", { raw: ",
               "BaseMessage",
-              "; parsed: RunOutput; }, ",
+              "<",
+              "MessageStructure",
+              "<",
+              "MessageToolSet",
+              ">, string>; parsed: RunOutput; }, ",
               "RunnableConfig",
               "<Record<string, any>>>; }"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
-            "lineNumber": 320,
+            "lineNumber": 329,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1241,7 +1273,7 @@
                   "<RunOutput, RunOutput>"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
-                "lineNumber": 321,
+                "lineNumber": 330,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1259,9 +1291,10 @@
                   "<boolean> | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
-                "lineNumber": 322,
+                "lineNumber": 331,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "StructuredOutputMethodOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1279,7 +1312,7 @@
               "() => {}"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
-            "lineNumber": 406,
+            "lineNumber": 418,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1513,9 +1546,10 @@
                   "TOptions"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
-                "lineNumber": 78,
+                "lineNumber": 79,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "TOptions",
                 "trackAdoption": false
               }
             ]

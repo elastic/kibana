@@ -34,11 +34,6 @@ export async function processNodeStackMonitoring(
 
   while (!nodeStack.isEmpty()) {
     const scopeData = nodeStack.getCurrentScope();
-
-    if (!scopeData) {
-      break;
-    }
-
     nodeStack = nodeStack.exitScope();
     const scopeStepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime(
       {

@@ -178,6 +178,7 @@ const AlertsTableContent = typedForwardRef(
       id,
       ruleTypeIds,
       consumers,
+      projectRouting,
       query,
       minScore,
       trackScores = false,
@@ -209,6 +210,8 @@ const AlertsTableContent = typedForwardRef(
       renderCellValue,
       renderCellPopover,
       renderActionsCell,
+      getAlertFormatter,
+      alertDetailsNavigation,
       expandedAlertIndex: expandedAlertIndexProp,
       onExpandedAlertIndexChange,
       renderExpandedAlertView,
@@ -359,6 +362,7 @@ const AlertsTableContent = typedForwardRef(
     const queryParams = useAlertsTableQueryParams({
       ruleTypeIds,
       consumers,
+      projectRouting,
       fields,
       query,
       sort,
@@ -383,8 +387,6 @@ const AlertsTableContent = typedForwardRef(
 
     const {
       alerts = [],
-      oldAlertsData = [],
-      ecsAlertsData = [],
       total: alertsCount = -1,
       querySnapshot: alertsQuerySnapshot,
       error: alertsError,
@@ -522,10 +524,6 @@ const AlertsTableContent = typedForwardRef(
           alerts,
           alertsCount,
 
-          // TODO deprecate
-          ecsAlertsData,
-          oldAlertsData,
-
           browserFields: selectedAlertsFields,
           isLoadingCases: casesQuery.isFetching,
           cases: casesQuery.data,
@@ -542,6 +540,8 @@ const AlertsTableContent = typedForwardRef(
           renderCellValue,
           renderCellPopover,
           renderActionsCell,
+          getAlertFormatter,
+          alertDetailsNavigation,
           openLinksInNewTab,
           services: memoizedServices,
           expandedAlertIndex,
@@ -564,8 +564,6 @@ const AlertsTableContent = typedForwardRef(
         fieldsQuery.isFetching,
         alerts,
         alertsCount,
-        ecsAlertsData,
-        oldAlertsData,
         selectedAlertsFields,
         pageIndex,
         setPageIndex,
@@ -576,6 +574,8 @@ const AlertsTableContent = typedForwardRef(
         renderCellValue,
         renderCellPopover,
         renderActionsCell,
+        getAlertFormatter,
+        alertDetailsNavigation,
         openLinksInNewTab,
         memoizedServices,
         expandedAlertIndex,

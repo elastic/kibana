@@ -481,7 +481,11 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .post(`${getUrlPrefix(Spaces.other.id)}/internal/alerting/rules/_bulk_edit`)
         .set('kbn-xsrf', 'foo')
         .send(payload)
-        .expect(200, { rules: [], errors: [], skipped: [], total: 0 });
+        .expect(400, {
+          error: 'Bad Request',
+          message: 'No rules found for bulk edit',
+          statusCode: 400,
+        });
     });
 
     it('should return mapped params after bulk edit', async () => {

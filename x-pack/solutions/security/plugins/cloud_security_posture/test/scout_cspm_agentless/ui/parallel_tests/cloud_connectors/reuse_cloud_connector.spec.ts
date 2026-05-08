@@ -6,7 +6,7 @@
  */
 
 import type { CreateAgentlessPolicyRequest } from '@kbn/fleet-plugin/common/types/rest_spec/agentless_policy';
-import { spaceTest } from '@kbn/scout-security';
+import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import { mockAgentlessPoliciesWithCapture, mockPackagePoliciesEmpty } from '../../fixtures/mocks';
 
@@ -89,7 +89,7 @@ function createMockCloudConnector(
  */
 spaceTest.describe(
   'Cloud Connectors - Reuse Existing Connector',
-  { tag: ['@ess', '@svlSecurity'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     spaceTest.beforeEach(async ({ browserAuth }) => {
       // Use admin for stateful tests (has all permissions including fleet-cloud-connector)
@@ -112,17 +112,38 @@ spaceTest.describe(
         await mockPackagePoliciesEmpty(page);
 
         // Intercept cloud connectors API to return mock existing connectors
+        // Also handle usage API calls (cloud_connectors/{id}/usage) that the
+        // policy-group filtering logic now makes for connectors with packagePolicyCount > 0
         await page.route(/\/api\/fleet\/cloud_connectors/, async (route, request) => {
           if (request.method() === 'GET') {
-            await route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify({
-                items: [
-                  createMockCloudConnector(existingConnectorId, existingConnectorName, 'aws'),
-                ],
-              }),
-            });
+            const url = request.url();
+            if (url.includes('/usage')) {
+              // Usage API: return policies belonging to cloud_security_posture (same policy group)
+              await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                  items: [
+                    {
+                      id: 'policy-1',
+                      name: 'cspm-policy',
+                      package: { name: 'cloud_security_posture', title: 'CSPM' },
+                    },
+                  ],
+                }),
+              });
+            } else {
+              // List API: return mock connectors
+              await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                  items: [
+                    createMockCloudConnector(existingConnectorId, existingConnectorName, 'aws'),
+                  ],
+                }),
+              });
+            }
           } else {
             await route.continue();
           }
@@ -213,17 +234,38 @@ spaceTest.describe(
         await mockPackagePoliciesEmpty(page);
 
         // Intercept cloud connectors API to return mock existing connectors
+        // Also handle usage API calls (cloud_connectors/{id}/usage) that the
+        // policy-group filtering logic now makes for connectors with packagePolicyCount > 0
         await page.route(/\/api\/fleet\/cloud_connectors/, async (route, request) => {
           if (request.method() === 'GET') {
-            await route.fulfill({
-              status: 200,
-              contentType: 'application/json',
-              body: JSON.stringify({
-                items: [
-                  createMockCloudConnector(existingConnectorId, existingConnectorName, 'azure'),
-                ],
-              }),
-            });
+            const url = request.url();
+            if (url.includes('/usage')) {
+              // Usage API: return policies belonging to cloud_security_posture (same policy group)
+              await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                  items: [
+                    {
+                      id: 'policy-1',
+                      name: 'cspm-policy',
+                      package: { name: 'cloud_security_posture', title: 'CSPM' },
+                    },
+                  ],
+                }),
+              });
+            } else {
+              // List API: return mock connectors
+              await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                  items: [
+                    createMockCloudConnector(existingConnectorId, existingConnectorName, 'azure'),
+                  ],
+                }),
+              });
+            }
           } else {
             await route.continue();
           }

@@ -1,0 +1,113 @@
+# APIs used by Terraform Provider (elastic/terraform-provider-elasticstack)
+# Extracted from provider source code - this is the source of truth
+#
+# To update this list:
+# 1. Clone terraform-provider-elasticstack
+# 2. Search for Kibana API paths: grep -R '"/api/' --include="*.go" -h | sort -u
+# 3. Map paths to Terraform resources
+# 4. Assign owners from .github/CODEOWNERS for the plugin/package that registers each route
+#
+# Last updated: 2026-03-25
+
+terraform_provider_apis:
+  # Action Connectors
+  - path: /api/actions/connector
+    methods: [GET, POST]
+    resource: elasticstack_kibana_action_connector
+    owners: ['@elastic/response-ops']
+  - path: /api/actions/connector/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_kibana_action_connector
+    owners: ['@elastic/response-ops']
+
+  # Alerting Rules
+  - path: /api/alerting/rule
+    methods: [GET, POST]
+    resource: elasticstack_kibana_alerting_rule
+    owners: ['@elastic/response-ops']
+  - path: /api/alerting/rule/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_kibana_alerting_rule
+    owners: ['@elastic/response-ops']
+
+  # Spaces
+  - path: /api/spaces/space
+    methods: [GET, POST]
+    resource: elasticstack_kibana_space
+    owners: ['@elastic/kibana-security']
+  - path: /api/spaces/space/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_kibana_space
+    owners: ['@elastic/kibana-security']
+
+  # Fleet - Agent Policies
+  - path: /api/fleet/agent_policies
+    methods: [GET, POST]
+    resource: elasticstack_fleet_agent_policy
+    owners: ['@elastic/fleet']
+  - path: /api/fleet/agent_policies/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_fleet_agent_policy
+    owners: ['@elastic/fleet']
+
+  # Fleet - Package Policies
+  - path: /api/fleet/package_policies
+    methods: [GET, POST]
+    resource: elasticstack_fleet_integration_policy
+    owners: ['@elastic/fleet']
+  - path: /api/fleet/package_policies/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_fleet_integration_policy
+    owners: ['@elastic/fleet']
+
+  # Fleet - Outputs
+  - path: /api/fleet/outputs
+    methods: [GET, POST]
+    resource: elasticstack_fleet_output
+    owners: ['@elastic/fleet']
+  - path: /api/fleet/outputs/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_fleet_output
+    owners: ['@elastic/fleet']
+
+  # Fleet - Server Hosts
+  - path: /api/fleet/fleet_server_hosts
+    methods: [GET, POST]
+    resource: elasticstack_fleet_server_host
+    owners: ['@elastic/fleet']
+  - path: /api/fleet/fleet_server_hosts/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_fleet_server_host
+    owners: ['@elastic/fleet']
+
+  # SLOs
+  - path: /api/observability/slos
+    methods: [GET, POST]
+    resource: elasticstack_kibana_slo
+    owners: ['@elastic/actionable-obs-team']
+  - path: /api/observability/slos/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_kibana_slo
+    owners: ['@elastic/actionable-obs-team']
+
+  # Data Views
+  - path: /api/data_views/data_view
+    methods: [GET, POST]
+    resource: elasticstack_kibana_data_view
+    owners: ['@elastic/kibana-data-discovery']
+  - path: /api/data_views/data_view/{id}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_kibana_data_view
+    owners: ['@elastic/kibana-data-discovery']
+
+  # Security - Roles
+  - path: /api/security/role/{name}
+    methods: [GET, PUT, DELETE]
+    resource: elasticstack_kibana_security_role
+    owners: ['@elastic/kibana-security']
+
+  # Import/Export (Saved Objects)
+  - path: /api/saved_objects/_import
+    methods: [POST]
+    resource: elasticstack_kibana_import_saved_objects
+    owners: ['@elastic/kibana-core']

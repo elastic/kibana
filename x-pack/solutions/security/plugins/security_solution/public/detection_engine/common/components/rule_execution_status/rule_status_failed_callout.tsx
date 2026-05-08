@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
-import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
+import { EuiCallOut, EuiCodeBlock, EuiSpacer } from '@elastic/eui';
 
 import { NewChat } from '@kbn/elastic-assistant';
 import { FormattedDate } from '../../../../common/components/formatted_date';
@@ -20,7 +20,10 @@ import { useAssistantAvailability } from '../../../../assistant/use_assistant_av
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { NewAgentBuilderAttachment } from '../../../../agent_builder/components/new_agent_builder_attachment';
 import { useAgentBuilderAttachment } from '../../../../agent_builder/hooks/use_agent_builder_attachment';
-import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
+import {
+  SecurityAgentBuilderAttachments,
+  SECURITY_RULE_ATTACHMENT_ID,
+} from '../../../../../common/constants';
 
 interface RuleStatusFailedCallOutProps {
   ruleNameForChat: string;
@@ -56,6 +59,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const ruleAttachment = useMemo(
     () => ({
+      attachmentId: SECURITY_RULE_ATTACHMENT_ID,
       attachmentType: SecurityAgentBuilderAttachments.rule,
       attachmentData: {
         text:
@@ -78,7 +82,6 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
     <div
       css={css`
         pre {
-          margin-block-end: 0;
           margin-right: 24px; // Otherwise the copy button overlaps the scrollbar
           padding-inline-end: 0;
         }
@@ -131,6 +134,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
           )}
         </>
       </EuiCallOut>
+      <EuiSpacer size="m" />
     </div>
   );
 };

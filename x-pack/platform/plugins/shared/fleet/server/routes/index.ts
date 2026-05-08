@@ -43,7 +43,7 @@ export function registerRoutes(
     config.experimentalFeatures || {}
   );
   // Always register app routes for permissions checking
-  registerAppRoutes(fleetAuthzRouter, experimentalFeatures, isServerless);
+  registerAppRoutes(fleetAuthzRouter, experimentalFeatures);
 
   // The upload package route is only authorized for the superuser
   registerEPMRoutes(fleetAuthzRouter, config);

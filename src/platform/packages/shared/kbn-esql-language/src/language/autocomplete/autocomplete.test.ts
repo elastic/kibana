@@ -34,7 +34,7 @@ import {
   TIME_PICKER_SUGGESTION,
 } from './__tests__/helpers';
 import { suggest } from './autocomplete';
-import { editorExtensions } from '../../__tests__/language/helpers';
+import { editorExtensions, views } from '../../__tests__/language/helpers';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
 
 const getRecommendedQueriesSuggestionsFromTemplates = (
@@ -124,6 +124,20 @@ describe('autocomplete', () => {
       .flat();
   };
 
+  /** Suggestion text for commands that are only available when source is TS (requiresTimeseriesSource) */
+  const getRequiresTimeseriesSourceSuggestionTexts = (): string[] =>
+    esqlCommandRegistry
+      .getAllCommands()
+      .filter((c) => c.metadata?.requiresTimeseriesSource === true)
+      .map((c) => c.name.toUpperCase() + ' ');
+
+  /** Suggestion text for commands that have hiddenAfterCommands (not suggested when any of those commands appear in the pipeline) */
+  const getCommandsWithHiddenAfterCommandsSuggestionTexts = (): string[] =>
+    esqlCommandRegistry
+      .getAllCommands()
+      .filter((c) => (c.metadata?.hiddenAfterCommands?.length ?? 0) > 0)
+      .map((c) => c.name.toUpperCase() + ' ');
+
   describe('New command', () => {
     const recommendedQuerySuggestions = getRecommendedQueriesSuggestionsFromTemplates(
       'FROM logs*',
@@ -137,11 +151,13 @@ describe('autocomplete', () => {
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
     const commands = getNonSourceHeaderCommands();
+    const tsOnlySuggestionTexts = getRequiresTimeseriesSourceSuggestionTexts();
+    const commandsAfterNonTsSource = commands.filter((c) => !tsOnlySuggestionTexts.includes(c));
 
-    testSuggestions('from a | /', commands);
-    testSuggestions('from a metadata _id | /', commands);
-    testSuggestions('from a | eval col0 = a | /', commands);
-    testSuggestions('from a metadata _id | eval col0 = a | /', commands);
+    testSuggestions('from a | /', commandsAfterNonTsSource);
+    testSuggestions('from a metadata _id | /', commandsAfterNonTsSource);
+    testSuggestions('from a | eval col0 = a | /', commandsAfterNonTsSource);
+    testSuggestions('from a metadata _id | eval col0 = a | /', commandsAfterNonTsSource);
 
     const promqlPipedQueries = [
       'PROMQL index=metrics (sum by (instance) rate(http_requests_total[5m])) | /',
@@ -152,7 +168,48 @@ describe('autocomplete', () => {
     ];
 
     promqlPipedQueries.forEach((query) => {
-      testSuggestions(query, commands);
+      testSuggestions(query, commandsAfterNonTsSource);
+    });
+  });
+
+  describe('command filtering by metadata (requiresTimeseriesSource, hiddenAfterCommands)', () => {
+    const tsOnlySuggestionTexts = getRequiresTimeseriesSourceSuggestionTexts();
+    const hiddenAfterCommandsSuggestionTexts = getCommandsWithHiddenAfterCommandsSuggestionTexts();
+
+    it('does not suggest commands with requiresTimeseriesSource when source is not TS (e.g. after FROM)', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (await suggestFn('FROM index | /')).map((s) => s.text);
+      for (const text of tsOnlySuggestionTexts) {
+        expect(suggestedTexts).not.toContain(text);
+      }
+    });
+
+    it('suggests commands with requiresTimeseriesSource when source is TS and cursor is after pipe', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (await suggestFn('TS index | /')).map((s) => s.text);
+      for (const text of tsOnlySuggestionTexts) {
+        expect(suggestedTexts).toContain(text);
+      }
+    });
+
+    it('does not suggest commands with hiddenAfterCommands when a listed command is the previous command', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (await suggestFn('TS index | STATS x = count(*) | /')).map(
+        (s) => s.text
+      );
+      for (const text of hiddenAfterCommandsSuggestionTexts) {
+        expect(suggestedTexts).not.toContain(text);
+      }
+    });
+
+    it('does not suggest commands with hiddenAfterCommands when a listed command appears anywhere in the pipeline', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (
+        await suggestFn('TS index | STATS AVG(field1) | EVAL test = "hello" | /')
+      ).map((s) => s.text);
+      for (const text of hiddenAfterCommandsSuggestionTexts) {
+        expect(suggestedTexts).not.toContain(text);
+      }
     });
   });
 
@@ -205,6 +262,16 @@ describe('autocomplete', () => {
       expect(await getSuggestions('from a_index | KEEP doubleField, /')).not.toContain(
         'doubleField'
       );
+    });
+
+    it('suggests generated STATS columns after inline WHERE filters', async () => {
+      const { suggest: suggestTest } = await setup();
+      const suggestions = await suggestTest(
+        `FROM index | STATS COUNT() WHERE integerField > 0 | ${command} /`
+      );
+      const suggestionTexts = suggestions.map((value) => value.text);
+
+      expect(suggestionTexts).toContain('`COUNT() WHERE integerField > 0`');
     });
   });
 
@@ -270,9 +337,11 @@ describe('autocomplete', () => {
     ]);
 
     const commands = getNonSourceHeaderCommands();
+    const tsOnlySuggestionTexts = getRequiresTimeseriesSourceSuggestionTexts();
+    const commandsAfterNonTsSource = commands.filter((c) => !tsOnlySuggestionTexts.includes(c));
 
     // pipe command
-    testSuggestions('FROM k | E/', commands);
+    testSuggestions('FROM k | E/', commandsAfterNonTsSource);
 
     describe('function arguments', () => {
       // function argument
@@ -306,7 +375,7 @@ describe('autocomplete', () => {
     });
 
     // FROM source
-    testSuggestions('FROM k/', ['index1', 'index2'], undefined, [
+    testSuggestions('FROM k/', ['index1', 'index2', ...views.map((v) => v.name)], undefined, [
       ,
       [
         { name: 'index1', hidden: false },
@@ -498,11 +567,12 @@ describe('autocomplete', () => {
     ]);
 
     const commands = getNonSourceHeaderCommands();
-
+    const tsOnlySuggestionTexts = getRequiresTimeseriesSourceSuggestionTexts();
+    const commandsAfterNonTsSource = commands.filter((c) => !tsOnlySuggestionTexts.includes(c));
     // Pipe command
     testSuggestions(
       'FROM a | E/',
-      commands.map((name) => attachTriggerCommand(name))
+      commandsAfterNonTsSource.map((name) => attachTriggerCommand(name))
     );
 
     describe('function arguments', () => {
@@ -593,6 +663,7 @@ describe('autocomplete', () => {
           withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
           withAutoSuggest({ text: 'index1' } as ISuggestionItem),
           withAutoSuggest({ text: 'index2' } as ISuggestionItem),
+          ...views.map((v) => withAutoSuggest({ text: v.name } as ISuggestionItem)),
         ],
         undefined,
         [
@@ -609,6 +680,7 @@ describe('autocomplete', () => {
         [
           withAutoSuggest({ text: 'index1' } as ISuggestionItem),
           withAutoSuggest({ text: 'index2' } as ISuggestionItem),
+          ...views.map((v) => withAutoSuggest({ text: v.name } as ISuggestionItem)),
         ],
         undefined,
         [
@@ -764,7 +836,7 @@ describe('autocomplete', () => {
         policies
           .map((p) => `${getSafeInsertText(p.name)} `)
           .map(attachTriggerCommand)
-          .map((s) => ({ ...s, rangeToReplace: { start: 17, end: 20 } }))
+          .map((s) => ({ ...s, rangeToReplace: { start: 16, end: 19 } }))
       );
       testSuggestions('FROM a | ENRICH policy /', ['ON ', 'WITH ', '| '].map(attachTriggerCommand));
 
@@ -788,14 +860,14 @@ describe('autocomplete', () => {
           'col0 = ',
           ...getPolicyFields('policy').map((name) => ({
             text: name,
-            rangeToReplace: { start: 43, end: 47 },
+            rangeToReplace: { start: 42, end: 46 },
           })),
         ]);
         testSuggestions(
           'FROM a | ENRICH policy ON @timestamp WITH col0 = othe/',
           getPolicyFields('policy').map((name) => ({
             text: name,
-            rangeToReplace: { start: 50, end: 54 },
+            rangeToReplace: { start: 49, end: 53 },
           }))
         );
       });

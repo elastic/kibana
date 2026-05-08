@@ -7,7 +7,7 @@ exports[`GroupsFilterPopover renders correctly against snapshot 1`] = `
     <EuiFilterButton
       data-test-subj="groups-filter-popover-button"
       hasActiveFilters={false}
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       isSelected={false}
       numActiveFilters={0}
       numFilters={3}

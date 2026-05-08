@@ -28,15 +28,18 @@ import {
   EuiFlyoutHeader,
 } from '@elastic/eui';
 
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
+import { DashboardNavigationOptionsEditor } from '@kbn/dashboard-navigation-options-components';
+import type { DashboardNavigationOptions } from '@kbn/dashboard-navigation-options-schema';
 import type { LinkType } from '../../../common/content_management';
 import { EXTERNAL_LINK_TYPE, DASHBOARD_LINK_TYPE } from '../../../common/content_management';
 import { LinksStrings } from '../links_strings';
 import { LinkInfo } from './constants';
-import { LinkOptionsComponent } from './link_options';
-import type { UnorderedLink } from '../../editor/open_link_editor_flyout';
 import { LinkDestination } from './link_destination';
-import type { LinkOptions } from '../../../server';
-import { getOptions } from '../../../common/embeddable/transforms/get_options';
+import type { ExternalLinkOptions } from '../../../server';
+import type { ResolvedLink } from '../../types';
+import { DEFAULT_EXTERNAL_LINK_OPTIONS } from '../../../common/constants';
+import { ExternalLinkOptionsEditor } from '../external_link/external_link_options_editor';
 
 export const LinkEditor = ({
   link,
@@ -46,8 +49,8 @@ export const LinkEditor = ({
 }: {
   onClose: () => void;
   parentDashboardId?: string;
-  link?: UnorderedLink; // will only be defined if **editing** a link; otherwise, creating a new link
-  onSave: (newLink: UnorderedLink) => void;
+  link?: ResolvedLink; // will only be defined if **editing** a link; otherwise, creating a new link
+  onSave: (newLink: ResolvedLink) => void;
 }) => {
   const [selectedLinkType, setSelectedLinkType] = useState<LinkType>(
     link?.type ?? DASHBOARD_LINK_TYPE
@@ -55,7 +58,14 @@ export const LinkEditor = ({
   const [defaultLinkLabel, setDefaultLinkLabel] = useState<string | undefined>(link?.title);
   const [currentLinkLabel, setCurrentLinkLabel] = useState<string>(link?.label ?? '');
   const [linkDescription, setLinkDescription] = useState<string | undefined>(link?.description);
-  const [linkOptions, setLinkOptions] = useState<LinkOptions | undefined>(link?.options);
+  const [dashboardLinkOptions, setDashboardLinkOptions] = useState<DashboardNavigationOptions>({
+    ...DEFAULT_DASHBOARD_NAVIGATION_OPTIONS,
+    ...(link && link.type === DASHBOARD_LINK_TYPE ? link.options : {}),
+  });
+  const [externalLinkOptions, setExternalLinkOptions] = useState<ExternalLinkOptions>({
+    ...DEFAULT_EXTERNAL_LINK_OPTIONS,
+    ...(link && link.type === EXTERNAL_LINK_TYPE ? link.options : {}),
+  });
   const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
 
   const linkTypes: EuiRadioGroupOption[] = useMemo(() => {
@@ -65,7 +75,7 @@ export const LinkEditor = ({
         label: (
           <EuiFlexGroup gutterSize="s" alignItems="center" aria-label={LinkInfo[type].description}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type={LinkInfo[type].icon} color="text" />
+              <EuiIcon type={LinkInfo[type].icon} color="text" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>{LinkInfo[type].displayName}</EuiFlexItem>
           </EuiFlexGroup>
@@ -95,7 +105,7 @@ export const LinkEditor = ({
           className="linkEditorBackButton"
           flush="left"
           color="text"
-          iconType={'arrowLeft'}
+          iconType={'chevronSingleLeft'}
           onClick={() => onClose()}
         >
           <EuiTitle size="s" aria-label={LinksStrings.editor.linkEditor.getGoBackAriaLabel()}>
@@ -141,11 +151,23 @@ export const LinkEditor = ({
               data-test-subj="links--linkEditor--linkLabel--input"
             />
           </EuiFormRow>
-          <LinkOptionsComponent
-            link={link}
-            setLinkOptions={setLinkOptions}
-            selectedLinkType={selectedLinkType}
-          />
+          <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkOptionsLabel()}>
+            {selectedLinkType === DASHBOARD_LINK_TYPE ? (
+              <DashboardNavigationOptionsEditor
+                options={dashboardLinkOptions}
+                onOptionChange={(change) => {
+                  setDashboardLinkOptions({ ...dashboardLinkOptions, ...change });
+                }}
+              />
+            ) : (
+              <ExternalLinkOptionsEditor
+                options={externalLinkOptions}
+                onOptionChange={(change) => {
+                  setExternalLinkOptions({ ...externalLinkOptions, ...change });
+                }}
+              />
+            )}
+          </EuiFormRow>
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -166,15 +188,26 @@ export const LinkEditor = ({
               onClick={() => {
                 // this check should always be true, since the button is disabled otherwise - this is just for type safety
                 if (linkDestination) {
+                  function getOptions() {
+                    if (selectedLinkType === DASHBOARD_LINK_TYPE) {
+                      return dashboardLinkOptions;
+                    }
+
+                    if (selectedLinkType === EXTERNAL_LINK_TYPE) {
+                      return externalLinkOptions;
+                    }
+
+                    throw new Error(`unexpected options type: ${selectedLinkType}`);
+                  }
                   onSave({
                     label: currentLinkLabel === defaultLinkLabel ? undefined : currentLinkLabel,
                     type: selectedLinkType,
                     id: link?.id ?? uuidv4(),
                     destination: linkDestination,
-                    options: getOptions(selectedLinkType, linkOptions),
+                    options: getOptions(),
                     title: defaultLinkLabel ?? '',
                     description: linkDescription,
-                  });
+                  } as ResolvedLink);
 
                   onClose();
                 }

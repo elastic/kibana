@@ -51,6 +51,42 @@ describe('readWithPit', () => {
     );
   });
 
+  it('returns a refreshed pit id when ES returns pit_id', async () => {
+    const client = elasticsearchClientMock.createInternalClient(
+      Promise.resolve({ pit_id: 'refreshed_pit_id', hits: { hits: [] } })
+    );
+
+    const result = await readWithPit({
+      client,
+      pitId: 'pitId',
+      query: { match_all: {} },
+      batchSize: 10_000,
+    })();
+
+    expect(Either.isRight(result)).toBe(true);
+    if (Either.isRight(result)) {
+      expect(result.right.pitId).toBe('refreshed_pit_id');
+    }
+  });
+
+  it('keeps the previous pit id when ES does not return pit_id', async () => {
+    const client = elasticsearchClientMock.createInternalClient(
+      Promise.resolve({ hits: { hits: [] } })
+    );
+
+    const result = await readWithPit({
+      client,
+      pitId: 'pitId',
+      query: { match_all: {} },
+      batchSize: 10_000,
+    })();
+
+    expect(Either.isRight(result)).toBe(true);
+    if (Either.isRight(result)) {
+      expect(result.right.pitId).toBe('pitId');
+    }
+  });
+
   it('returns left es_response_too_large when client throws RequestAbortedError', async () => {
     // Create a mock client that rejects all methods with a RequestAbortedError
     // response.

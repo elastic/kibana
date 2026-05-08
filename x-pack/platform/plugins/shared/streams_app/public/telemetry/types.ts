@@ -6,9 +6,10 @@
  */
 
 import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/attachments/types';
+import type { InsightImpactLevel, InsightUserEvaluation } from '@kbn/streams-schema';
 import type { EnrichmentDataSource } from '../../common/url_schema';
 
-type StreamType = 'wired' | 'classic' | 'unknown';
+type StreamType = 'wired' | 'classic' | 'query' | 'unknown';
 
 type ConfigurationMode = 'interactive' | 'yaml';
 
@@ -143,6 +144,13 @@ interface StreamsPartitioningSamplesFetchLatencyProps {
   duration_ms: number;
 }
 
+interface StreamsInsightFeedbackProps {
+  feedback: InsightUserEvaluation;
+  insight_id: string;
+  insight_title: string;
+  insight_impact: InsightImpactLevel;
+}
+
 interface StreamsTabVisitedProps {
   stream_name: string;
   stream_type: StreamType;
@@ -156,6 +164,7 @@ interface StreamsTabVisitedProps {
     text_structure: boolean;
     read_failure_store: boolean;
     manage_failure_store: boolean;
+    create_snapshot_repository: boolean;
   };
 }
 
@@ -183,4 +192,5 @@ export {
   type StreamsProcessingSimulationSamplesFetchLatencyProps,
   type StreamsPartitioningSamplesFetchLatencyProps,
   type StreamsTabVisitedProps,
+  type StreamsInsightFeedbackProps,
 };

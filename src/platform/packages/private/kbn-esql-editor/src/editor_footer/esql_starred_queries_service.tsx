@@ -147,8 +147,8 @@ export class EsqlStarredQueriesService {
       status: favoriteItem.metadata.status,
       id: favoriteItem.id,
     });
-    this.queries$.next(starredQueries);
     this.starredQueries = starredQueries;
+    this.queries$.next(starredQueries);
     await this.client.addFavorite(favoriteItem);
 
     // telemetry, add favorite click event
@@ -226,7 +226,7 @@ export class EsqlStarredQueriesService {
                     defaultMessage: 'Add ES|QL query to Starred',
                   })
             }
-            iconType={isStarred ? 'starFilled' : 'starEmpty'}
+            iconType={isStarred ? 'starFill' : 'star'}
             disabled={!isStarred && this.checkIfStarredQueriesLimitReached()}
             onClick={async () => {
               this.queryToEdit = trimmedQueryString;

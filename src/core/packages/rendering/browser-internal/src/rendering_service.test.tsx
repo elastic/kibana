@@ -12,10 +12,59 @@ import { render, screen } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 
+const mockRoots: Array<{ unmount: jest.Mock }> = [];
+jest.mock('react-dom/client', () => ({
+  createRoot: jest.fn((container: HTMLElement) => {
+    const { createRoot: actualCreateRoot } = jest.requireActual('react-dom/client');
+    const root = actualCreateRoot(container);
+    const mockRoot = {
+      render: (element: React.ReactNode) => root.render(element),
+      unmount: jest.fn(() => root.unmount()),
+    };
+    mockRoots.push(mockRoot);
+    return mockRoot;
+  }),
+}));
+
+const mockLegacyRender = jest.fn();
+jest.mock('react-dom', () => ({
+  ...jest.requireActual('react-dom'),
+  render: (...args: unknown[]) => {
+    mockLegacyRender(...args);
+    return jest.requireActual('react-dom').render(...args);
+  },
+}));
+
 jest.mock('@kbn/react-kibana-context-render', () => ({
   KibanaRenderContextProvider: jest.fn(({ children }) => (
     <div data-test-subj="kibana-render-context">{children}</div>
   )),
+}));
+jest.mock('@kbn/core-chrome-browser-components', () => ({
+  ChromeComponentsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  ClassicHeader: () => <div>Hello chrome!</div>,
+  ProjectHeader: () => <div>Project chrome!</div>,
+  GridLayoutProjectSideNav: () => <div>Side nav!</div>,
+  HeaderTopBanner: () => <div>Banner!</div>,
+  ChromelessHeader: () => <div>Chromeless!</div>,
+  AppMenuBar: () => <div>App menu!</div>,
+  Sidebar: () => <div>Sidebar!</div>,
+  useHasAppMenu: () => false,
+}));
+
+const mockChromeVisible$ = new BehaviorSubject(false);
+jest.mock('@kbn/core-chrome-browser-hooks', () => {
+  const { useObservable } = jest.requireActual('@kbn/use-observable');
+  return {
+    useChromeStyle: () => 'classic',
+    useIsChromeVisible: () => useObservable(mockChromeVisible$, mockChromeVisible$.getValue()),
+    useSidebarWidth: () => 0,
+    useSideNavWidth: () => 0,
+  };
+});
+jest.mock('@kbn/core-chrome-browser-hooks/internal', () => ({
+  useGlobalFooter: () => null,
+  useHasHeaderBanner: () => false,
 }));
 jest.mock('@elastic/eui', () => {
   const actualEui = jest.requireActual('@elastic/eui');
@@ -34,6 +83,9 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { RenderingService } from './rendering_service';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 
@@ -51,6 +103,16 @@ describe('RenderingService', () => {
   let rendering: RenderingService;
   let coreEnv: ReturnType<typeof coreContextMock.create>['env'];
 
+  const getRenderCoreDeps = () => ({
+    chrome,
+    application,
+    overlays,
+    featureFlags,
+    http: httpServiceMock.createStartContract(),
+    docLinks: docLinksServiceMock.createStartContract(),
+    customBranding: customBrandingServiceMock.createStartContract(),
+  });
+
   beforeEach(() => {
     analytics = analyticsServiceMock.createAnalyticsServiceStart();
 
@@ -58,7 +120,6 @@ describe('RenderingService', () => {
     application.getComponent.mockReturnValue(<div>Hello application!</div>);
 
     chrome = chromeServiceMock.createStartContract();
-    chrome.getClassicHeaderComponent.mockReturnValue(<div>Hello chrome!</div>);
 
     overlays = overlayServiceMock.createStartContract();
     overlays.banners.getComponent.mockReturnValue(<div>I&apos;m a banner!</div>);
@@ -74,22 +135,40 @@ describe('RenderingService', () => {
     rendering = new RenderingService();
   });
 
+  afterEach(() => {
+    act(() => {
+      mockRoots.forEach((root) => root.unmount());
+    });
+    mockRoots.length = 0;
+    mockLegacyRender.mockClear();
+    mockChromeVisible$.next(false);
+  });
+
   describe('renderCore', () => {
-    const startService = () => {
+    const startService = (overrides?: { isCoreRenderingInReactConcurrentMode?: boolean }) => {
+      const env =
+        overrides?.isCoreRenderingInReactConcurrentMode !== undefined
+          ? {
+              ...coreEnv,
+              isCoreRenderingInReactConcurrentMode: overrides.isCoreRenderingInReactConcurrentMode,
+            }
+          : coreEnv;
       return rendering.start({
         analytics,
         i18n,
         executionContext,
         theme,
         userProfile,
-        coreEnv,
+        coreEnv: env,
         chrome,
       });
     };
 
-    it('renders application service into provided DOM element', () => {
+    it('renders application service into provided DOM element', async () => {
       const service = startService();
-      service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+      await act(async () => {
+        service.renderCore(getRenderCoreDeps(), targetDomElement);
+      });
       expect(targetDomElement.querySelector('div.kbnAppWrapper')).toMatchInlineSnapshot(`
         <div
           class="kbnAppWrapper kbnAppWrapper--hiddenChrome"
@@ -105,19 +184,20 @@ describe('RenderingService', () => {
       `);
     });
 
-    it('adds the `kbnAppWrapper--hiddenChrome` class to the AppWrapper when chrome is hidden', () => {
-      const isVisible$ = new BehaviorSubject(true);
-      chrome.getIsVisible$.mockReturnValue(isVisible$);
+    it('adds the `kbnAppWrapper--hiddenChrome` class to the AppWrapper when chrome is hidden', async () => {
+      mockChromeVisible$.next(true);
       const service = startService();
-      service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+      await act(async () => {
+        service.renderCore(getRenderCoreDeps(), targetDomElement);
+      });
 
       const appWrapper = targetDomElement.querySelector('div.kbnAppWrapper')!;
       expect(appWrapper.className).toEqual('kbnAppWrapper');
 
-      act(() => isVisible$.next(false));
+      act(() => mockChromeVisible$.next(false));
       expect(appWrapper.className).toEqual('kbnAppWrapper kbnAppWrapper--hiddenChrome');
 
-      act(() => isVisible$.next(true));
+      act(() => mockChromeVisible$.next(true));
       expect(appWrapper.className).toEqual('kbnAppWrapper');
     });
 
@@ -126,9 +206,11 @@ describe('RenderingService', () => {
       expect(targetDomElement.querySelector('div.kbnAppWrapper')).toBeDefined();
     });
 
-    it('renders the banner UI', () => {
+    it('renders the banner UI', async () => {
       const service = startService();
-      service.renderCore({ chrome, application, overlays, featureFlags }, targetDomElement);
+      await act(async () => {
+        service.renderCore(getRenderCoreDeps(), targetDomElement);
+      });
       expect(targetDomElement.querySelector('#globalBannerList')).toMatchInlineSnapshot(`
                 <div
                   id="globalBannerList"
@@ -143,6 +225,32 @@ describe('RenderingService', () => {
     it('adds global styles via `KibanaRootRenderingContext` `globalStyles` configuration', () => {
       startService();
       expect(document.querySelector(`style[data-emotion="eui-styles-global"]`)).toBeDefined();
+    });
+
+    it('uses createRoot when isCoreRenderingInReactConcurrentMode is true', async () => {
+      const { createRoot } = jest.requireMock('react-dom/client');
+      (createRoot as jest.Mock).mockClear();
+
+      const service = startService({ isCoreRenderingInReactConcurrentMode: true });
+      await act(async () => {
+        service.renderCore(getRenderCoreDeps(), targetDomElement);
+      });
+
+      expect(createRoot).toHaveBeenCalledWith(targetDomElement);
+      expect(mockLegacyRender).not.toHaveBeenCalled();
+    });
+
+    it('uses legacy ReactDOM.render when isCoreRenderingInReactConcurrentMode is false', async () => {
+      const { createRoot } = jest.requireMock('react-dom/client');
+      (createRoot as jest.Mock).mockClear();
+
+      const service = startService({ isCoreRenderingInReactConcurrentMode: false });
+      await act(async () => {
+        service.renderCore(getRenderCoreDeps(), targetDomElement);
+      });
+
+      expect(mockLegacyRender).toHaveBeenCalledWith(expect.anything(), targetDomElement);
+      expect(createRoot).not.toHaveBeenCalled();
     });
   });
 

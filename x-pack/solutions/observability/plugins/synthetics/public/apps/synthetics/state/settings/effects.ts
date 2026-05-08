@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { takeLeading, put, call, takeLatest } from 'redux-saga/effects';
+import { takeLeading, put, call, select, takeLatest } from 'redux-saga/effects';
 import type { Action } from 'redux-actions';
 import { i18n } from '@kbn/i18n';
 import { updateDefaultAlertingAction } from '../alert_rules';
@@ -17,6 +17,7 @@ import {
   getDynamicSettingsAction,
   getLocationMonitorsAction,
 } from './actions';
+import { selectDynamicSettings } from './selectors';
 import { fetchEffectFactory } from '../utils/fetch_effect';
 import {
   fetchConnectors,
@@ -55,8 +56,20 @@ export function* setDynamicSettingsEffect() {
     String(setDynamicSettingsAction.get),
     function* (action: Action<DynamicSettings>) {
       try {
+        const { settings: prevSettings } = (yield select(selectDynamicSettings)) as {
+          settings: DynamicSettings | null;
+        };
         yield call(setDynamicSettings, { settings: action.payload });
-        yield put(updateDefaultAlertingAction.get());
+
+        const { privateLocationsSyncInterval: _prev, ...prevAlertSettings } = prevSettings ?? {};
+        const { privateLocationsSyncInterval: _next, ...nextAlertSettings } = action.payload;
+        const alertSettingsChanged =
+          JSON.stringify(prevAlertSettings) !== JSON.stringify(nextAlertSettings);
+
+        if (alertSettingsChanged) {
+          yield put(updateDefaultAlertingAction.get());
+        }
+
         yield put(setDynamicSettingsAction.success(action.payload));
         kibanaService.coreSetup.notifications.toasts.addSuccess(
           i18n.translate('xpack.synthetics.settings.saveSuccess', {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export type { ProcessedAttachment, ProcessedRoundInput } from './processed_input';
 export type {
   ToolProvider,
   ToolProviderHasOptions,
@@ -34,6 +35,7 @@ export type {
   ToolPromptManager,
   ToolStateManager,
 } from './runner';
+export { getAgentFromRunContext } from './runner';
 export type {
   ToolHandlerFn,
   ToolHandlerReturn,
@@ -70,5 +72,70 @@ export type {
   AgentEventEmitter,
   AgentEventEmitterFn,
   RunAgentOnEventFn,
+  ExperimentalFeatures,
+  SubAgentExecutor,
+  SubAgentExecution,
 } from './agents';
+export type {
+  AgentBuilderHooks,
+  HookContext,
+  HookContextByLifecycle as HookContextByEvent,
+  BlockingHookHandler as HookHandler,
+  HookHandlerResult,
+  HookHandlerResultByLifecycle as HookHandlerResultByEvent,
+  HookRegistration,
+  HooksServiceSetup,
+  HooksServiceStart,
+  BeforeAgentHookContext,
+  BeforeToolCallHookContext,
+  AfterToolCallHookContext,
+} from './hooks/types';
+export { HookLifecycle, HookExecutionMode } from './hooks/types';
+export {
+  applyHookResultByLifecycle,
+  applyBeforeAgentResult,
+  applyBeforeToolCallResult,
+  applyAfterToolCallResult,
+} from './hooks/apply_result';
 export { chatSystemIndex, chatSystemIndexPrefix } from './indices';
+export type {
+  BuiltInPluginDefinition,
+  PluginCreateRequest,
+  PluginUpdateRequest,
+  PersistedPluginManifestMetadata,
+  PluginRegistry,
+} from './plugins';
+export type {
+  AgentExecutionParams,
+  AgentExecution,
+  ExecuteAgentParams,
+  ExecuteAgentResult,
+  FindExecutionsFilter,
+  FindExecutionsOptions,
+  AgentExecutionService,
+} from './execution';
+export type {
+  InternalAgentDefinition,
+  InternalAgentDefinitionAvailabilityHandler,
+  AgentRegistry,
+} from './agents';
+export type { SkillRegistry } from './skills';
+export type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+  TopSnippetsConfig,
+  ToolsSetup,
+  ToolsStart,
+  AttachmentsSetup,
+  SkillsSetup,
+  SkillsStart,
+  AgentsSetup,
+  AgentsStart,
+  ExecutionStart,
+  PluginsSetup,
+  PluginsStart,
+  RuntimeStart,
+  ReadOnlyConversationClient,
+  ConversationsStart,
+} from './plugin_contract';
+export { describeZodSchema, formatSchemaForLlm } from './tools';

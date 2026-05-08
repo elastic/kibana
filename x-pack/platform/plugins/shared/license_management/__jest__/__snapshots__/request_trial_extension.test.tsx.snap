@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`RequestTrialExtension component should display when enterprise license is not active and trial has been used 1`] = `
+exports[
+  `RequestTrialExtension component should display when enterprise license is not active and trial has been used 1`
+] = `
 <DocumentFragment>
   <div
     class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -30,7 +32,7 @@ exports[`RequestTrialExtension component should display when enterprise license 
           >
             <p>
               <span>
-                If you’d like to continue using machine learning, advanced security, and our other awesome 
+                If you'd like to continue using machine learning, advanced security, and our other awesome 
                 <a
                   class="euiLink emotion-euiLink-primary"
                   href="https://www.elastic.co/subscriptions"
@@ -39,8 +41,8 @@ exports[`RequestTrialExtension component should display when enterprise license 
                 >
                   subscription features
                   <span
-                    class="emotion-EuiExternalLinkIcon"
-                    data-euiicon-type="popout"
+                    class="css-1j75qc1"
+                    data-euiicon-type="external"
                     role="presentation"
                   />
                   <span
@@ -77,7 +79,9 @@ exports[`RequestTrialExtension component should display when enterprise license 
 </DocumentFragment>
 `;
 
-exports[`RequestTrialExtension component should display when license is active and trial has been used 1`] = `
+exports[
+  `RequestTrialExtension component should display when license is active and trial has been used 1`
+] = `
 <DocumentFragment>
   <div
     class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -107,7 +111,7 @@ exports[`RequestTrialExtension component should display when license is active a
           >
             <p>
               <span>
-                If you’d like to continue using machine learning, advanced security, and our other awesome 
+                If you'd like to continue using machine learning, advanced security, and our other awesome 
                 <a
                   class="euiLink emotion-euiLink-primary"
                   href="https://www.elastic.co/subscriptions"
@@ -116,8 +120,8 @@ exports[`RequestTrialExtension component should display when license is active a
                 >
                   subscription features
                   <span
-                    class="emotion-EuiExternalLinkIcon"
-                    data-euiicon-type="popout"
+                    class="css-1j75qc1"
+                    data-euiicon-type="external"
                     role="presentation"
                   />
                   <span
@@ -154,7 +158,9 @@ exports[`RequestTrialExtension component should display when license is active a
 </DocumentFragment>
 `;
 
-exports[`RequestTrialExtension component should display when license is not active and trial has been used 1`] = `
+exports[
+  `RequestTrialExtension component should display when license is not active and trial has been used 1`
+] = `
 <DocumentFragment>
   <div
     class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -184,7 +190,7 @@ exports[`RequestTrialExtension component should display when license is not acti
           >
             <p>
               <span>
-                If you’d like to continue using machine learning, advanced security, and our other awesome 
+                If you'd like to continue using machine learning, advanced security, and our other awesome 
                 <a
                   class="euiLink emotion-euiLink-primary"
                   href="https://www.elastic.co/subscriptions"
@@ -193,8 +199,8 @@ exports[`RequestTrialExtension component should display when license is not acti
                 >
                   subscription features
                   <span
-                    class="emotion-EuiExternalLinkIcon"
-                    data-euiicon-type="popout"
+                    class="css-1j75qc1"
+                    data-euiicon-type="external"
                     role="presentation"
                   />
                   <span
@@ -231,7 +237,9 @@ exports[`RequestTrialExtension component should display when license is not acti
 </DocumentFragment>
 `;
 
-exports[`RequestTrialExtension component should display when platinum license is not active and trial has been used 1`] = `
+exports[
+  `RequestTrialExtension component should display when platinum license is not active and trial has been used 1`
+] = `
 <DocumentFragment>
   <div
     class="euiFlexItem emotion-euiFlexItem-grow-1"
@@ -261,7 +269,7 @@ exports[`RequestTrialExtension component should display when platinum license is
           >
             <p>
               <span>
-                If you’d like to continue using machine learning, advanced security, and our other awesome 
+                If you'd like to continue using machine learning, advanced security, and our other awesome 
                 <a
                   class="euiLink emotion-euiLink-primary"
                   href="https://www.elastic.co/subscriptions"
@@ -270,8 +278,8 @@ exports[`RequestTrialExtension component should display when platinum license is
                 >
                   subscription features
                   <span
-                    class="emotion-EuiExternalLinkIcon"
-                    data-euiicon-type="popout"
+                    class="css-1j75qc1"
+                    data-euiicon-type="external"
                     role="presentation"
                   />
                   <span

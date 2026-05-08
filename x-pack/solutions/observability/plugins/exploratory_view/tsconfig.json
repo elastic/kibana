@@ -3,7 +3,14 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "public/**/*.json", "../../../../../typings/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "public/**/*.json",
+    "test/scout/**/*",
+    "../../../../../typings/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -46,6 +53,7 @@
     "@kbn/ebt-tools",
     "@kbn/config-schema",
     "@kbn/chart-expressions-common",
+    "@kbn/scout-oblt",
   ],
   "exclude": ["target/**/*"]
 }

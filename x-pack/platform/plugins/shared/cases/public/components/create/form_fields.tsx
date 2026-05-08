@@ -26,7 +26,9 @@ import type { CasesConfigurationUI, CasesConfigurationUITemplate } from '../../c
 import { removeEmptyFields } from '../utils';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { TemplateSelector } from './templates';
-import { getInitialCaseValue } from './utils';
+import { TemplateSelector as TemplateSelectorV2 } from './templates_v2';
+import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
+import { KibanaServices } from '../../common/lib/kibana';
 import { CaseFormFields } from '../case_form_fields';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservablesToggle } from '../case_form_fields/observables_toggle';
@@ -67,6 +69,7 @@ const DEFAULT_EMPTY_TEMPLATE_KEY = 'defaultEmptyTemplateKey';
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
   ({ configuration, connectors, isLoading, withSteps, draftStorageKey }) => {
     const { reset, updateFieldValues, isSubmitting, setFieldValue } = useFormContext();
+
     const {
       isSyncAlertsEnabled,
       isExtractObservablesEnabled,
@@ -74,6 +77,8 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       connectorsAuthorized,
     } = useCasesFeatures();
     const canExtractObservables = observablesAuthorized && isExtractObservablesEnabled;
+    const config = KibanaServices.getConfig();
+    const isTemplatesV2Enabled = config?.templates?.enabled ?? false;
     const configurationOwner = configuration.owner;
 
     /**
@@ -117,7 +122,9 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     const firstStep = useMemo(
       () => ({
         title: i18n.STEP_ONE_TITLE,
-        children: (
+        children: isTemplatesV2Enabled ? (
+          <TemplateSelectorV2 isLoading={isSubmitting || isLoading} />
+        ) : (
           <TemplateSelector
             isLoading={isSubmitting || isLoading}
             templates={[defaultTemplate, ...configuration.templates]}
@@ -125,7 +132,14 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
           />
         ),
       }),
-      [configuration.templates, defaultTemplate, isLoading, isSubmitting, onTemplateChange]
+      [
+        configuration.templates,
+        defaultTemplate,
+        isLoading,
+        isSubmitting,
+        isTemplatesV2Enabled,
+        onTemplateChange,
+      ]
     );
 
     const secondStep = useMemo(

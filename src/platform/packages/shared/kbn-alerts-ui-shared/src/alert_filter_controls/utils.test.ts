@@ -19,50 +19,50 @@ import { isEqualWith } from 'lodash';
 
 const defaultControls: FilterControlConfig[] = [
   {
-    fieldName: 'first',
-    displaySettings: { hideActionBar: true },
-    selectedOptions: ['val1', 'val2'],
+    field_name: 'first',
+    display_settings: { hide_action_bar: true },
+    selected_options: ['val1', 'val2'],
   },
 
   {
-    fieldName: 'second',
-    displaySettings: { hideActionBar: true },
-    selectedOptions: ['val1', 'val2'],
+    field_name: 'second',
+    display_settings: { hide_action_bar: true },
+    selected_options: ['val1', 'val2'],
     persist: true,
   },
 ];
 
 const firstControlsSet: FilterControlConfig[] = [
   {
-    fieldName: 'first',
-    selectedOptions: ['firstVal'],
+    field_name: 'first',
+    selected_options: ['firstVal'],
   },
 ];
 
 const secondControlsSet: FilterControlConfig[] = [
   {
-    fieldName: 'first',
-    selectedOptions: ['secondVal1', 'secondVal2'],
-    existsSelected: true,
+    field_name: 'first',
+    selected_options: ['secondVal1', 'secondVal2'],
+    exists_selected: true,
   },
   {
-    fieldName: 'second',
-    displaySettings: { hideActionBar: false },
+    field_name: 'second',
+    display_settings: { hide_action_bar: false },
     exclude: true,
   },
 ];
 
 const thirdControlsSet: FilterControlConfig[] = [
   {
-    fieldName: 'new',
-    selectedOptions: [],
+    field_name: 'new',
+    selected_options: [],
   },
 ];
 
 const emptyControlSet: FilterControlConfig[] = [];
 
 const defaultControlsObj = defaultControls.reduce((prev, current) => {
-  prev[current.fieldName] = current;
+  prev[current.field_name] = current;
   return prev;
 }, {} as Record<string, FilterControlConfig>);
 describe('utils', () => {
@@ -75,10 +75,10 @@ describe('utils', () => {
           String(idx) as keyof typeof initialInputData.initialChildControlState
         ] as FilterControlConfig;
         expect(item).toMatchObject({
-          fieldName: panelObj.fieldName,
-          selectedOptions: panelObj.selectedOptions,
+          field_name: panelObj.field_name,
+          selected_options: panelObj.selected_options,
           title: panelObj.title,
-          existsSelected: panelObj.existsSelected,
+          exists_selected: panelObj.exists_selected,
           exclude: panelObj.exclude,
         });
       });
@@ -96,19 +96,19 @@ describe('utils', () => {
 
       let panelObj = newInputData.initialChildControlState['1'] as FilterControlConfig;
       expect(filterItemObjList[0]).toMatchObject({
-        fieldName: panelObj.fieldName,
-        selectedOptions: panelObj.selectedOptions,
+        field_name: panelObj.field_name,
+        selected_options: panelObj.selected_options,
         title: panelObj.title,
-        existsSelected: panelObj.existsSelected,
+        exists_selected: panelObj.exists_selected,
         exclude: panelObj.exclude,
       });
 
       panelObj = newInputData.initialChildControlState['0'] as FilterControlConfig;
       expect(filterItemObjList[1]).toMatchObject({
-        fieldName: panelObj.fieldName,
-        selectedOptions: panelObj.selectedOptions,
+        field_name: panelObj.field_name,
+        selected_options: panelObj.selected_options,
         title: panelObj.title,
-        existsSelected: panelObj.existsSelected,
+        exists_selected: panelObj.exists_selected,
         exclude: panelObj.exclude,
       });
     });
@@ -123,9 +123,9 @@ describe('utils', () => {
 
       const expectedResult = [
         {
-          fieldName: 'first',
-          selectedOptions: ['firstVal'],
-          displaySettings: { hideActionBar: true },
+          field_name: 'first',
+          selected_options: ['firstVal'],
+          display_settings: { hide_action_bar: true },
         },
       ];
 
@@ -140,15 +140,15 @@ describe('utils', () => {
 
       const expectedResult = [
         {
-          fieldName: 'first',
-          selectedOptions: ['secondVal1', 'secondVal2'],
-          displaySettings: { hideActionBar: true },
-          existsSelected: true,
+          field_name: 'first',
+          selected_options: ['secondVal1', 'secondVal2'],
+          display_settings: { hide_action_bar: true },
+          exists_selected: true,
         },
         {
-          fieldName: 'second',
-          selectedOptions: ['val1', 'val2'],
-          displaySettings: { hideActionBar: false },
+          field_name: 'second',
+          selected_options: ['val1', 'val2'],
+          display_settings: { hide_action_bar: false },
           exclude: true,
           persist: true,
         },
@@ -180,7 +180,7 @@ describe('utils', () => {
     it('should add persist controls in order if they are not available in the given controls', () => {
       const newControlsSet: FilterControlConfig[] = [
         {
-          fieldName: 'new',
+          field_name: 'new',
         },
       ];
 
@@ -191,13 +191,13 @@ describe('utils', () => {
 
       const expectedResult = [
         {
-          fieldName: 'second',
-          displaySettings: { hideActionBar: true },
-          selectedOptions: ['val1', 'val2'],
+          field_name: 'second',
+          display_settings: { hide_action_bar: true },
+          selected_options: ['val1', 'val2'],
           persist: true,
         },
         {
-          fieldName: 'new',
+          field_name: 'new',
         },
       ];
 
@@ -206,33 +206,33 @@ describe('utils', () => {
     it('should change controls order if they are available in the given controls', () => {
       const newControlsSet: FilterControlConfig[] = [
         {
-          fieldName: 'new',
+          field_name: 'new',
         },
         {
-          fieldName: 'second',
-          selectedOptions: ['val2'],
-          displaySettings: { hideActionBar: false },
+          field_name: 'second',
+          selected_options: ['val2'],
+          display_settings: { hide_action_bar: false },
         },
         {
-          fieldName: 'first',
-          selectedOptions: [],
+          field_name: 'first',
+          selected_options: [],
         },
       ];
 
       const expectedResult = [
         {
-          fieldName: 'second',
-          selectedOptions: ['val2'],
-          displaySettings: { hideActionBar: false },
+          field_name: 'second',
+          selected_options: ['val2'],
+          display_settings: { hide_action_bar: false },
           persist: true,
         },
         {
-          fieldName: 'new',
+          field_name: 'new',
         },
         {
-          fieldName: 'first',
-          selectedOptions: [],
-          displaySettings: { hideActionBar: true },
+          field_name: 'first',
+          selected_options: [],
+          display_settings: { hide_action_bar: true },
         },
       ];
 
@@ -259,24 +259,24 @@ describe('utils', () => {
       expect(result).toBe(false);
     });
     it('should return true when given set of fields match ', () => {
-      const comparator = getFilterControlsComparator('fieldName');
+      const comparator = getFilterControlsComparator('field_name');
       const result = isEqualWith(defaultControls, secondControlsSet, comparator);
 
       expect(result).toBe(true);
     });
     it("should return false when given set of fields don't match ", () => {
-      const comparator = getFilterControlsComparator('fieldName', 'selectedOptions');
+      const comparator = getFilterControlsComparator('field_name', 'selected_options');
       const result = isEqualWith(defaultControls, secondControlsSet, comparator);
       expect(result).toBe(false);
     });
 
     it('should return true when comparing empty set of filter controls', () => {
-      const comparator = getFilterControlsComparator('fieldName', 'selectedOptions');
+      const comparator = getFilterControlsComparator('field_name', 'selected_options');
       const result = isEqualWith([], [], comparator);
       expect(result).toBe(true);
     });
     it('should return false when comparing one empty and one non-empty set of filter controls', () => {
-      const comparator = getFilterControlsComparator('fieldName', 'selectedOptions');
+      const comparator = getFilterControlsComparator('field_name', 'selected_options');
       const result = isEqualWith(defaultControls, [], comparator);
       expect(result).toBe(false);
     });

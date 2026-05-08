@@ -5,7 +5,8 @@
   },
   "include": [
     "public/**/*",
-    "server/**/*"
+    "server/**/*",
+    "test/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -19,6 +20,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-application",
     "@kbn/spaces-plugin",
+    "@kbn/scout"
   ],
   "exclude": [
     "target/**/*",

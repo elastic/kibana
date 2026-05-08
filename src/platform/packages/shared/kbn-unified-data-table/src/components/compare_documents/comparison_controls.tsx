@@ -105,7 +105,7 @@ export const ComparisonControls = ({
       <EuiFlexItem grow={false}>
         <div className="unifiedDataTableToolbarControlButton" css={toolbarStyles.controlButton}>
           <EuiDataGridToolbarControl
-            iconType="exit"
+            iconType="logOut"
             onClick={() => {
               setIsCompareActive(false);
             }}

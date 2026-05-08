@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EMPTY } from 'rxjs';
+import { BehaviorSubject, EMPTY } from 'rxjs';
 import type {
   AgentsServiceStartContract,
   AttachmentServiceStartContract,
@@ -14,9 +14,9 @@ import type {
 import type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
-  ConversationFlyoutRef,
+  ConversationSidebarRef,
 } from './types';
-import type { OpenConversationFlyoutOptions } from './flyout/types';
+import type { OpenConversationSidebarOptions } from './sidebar/types';
 
 const createSetupContractMock = (): jest.Mocked<AgentBuilderPluginSetup> => {
   return {};
@@ -50,6 +50,7 @@ const createToolStartMock = (): ToolServiceStartContractMock => {
     get: jest.fn(),
     list: jest.fn(),
     execute: jest.fn(),
+    listWorkflows: jest.fn(),
   };
 };
 
@@ -60,20 +61,23 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     tools: createToolStartMock(),
     events: {
       chat$: EMPTY,
+      ui: {
+        activeConversation$: new BehaviorSubject(null),
+      },
     },
-    setConversationFlyoutActiveConfig: jest.fn(),
-    clearConversationFlyoutActiveConfig: jest.fn(),
-    toggleConversationFlyout: jest.fn(),
-    openConversationFlyout: jest
-      .fn()
-      .mockImplementation((options: OpenConversationFlyoutOptions) => {
-        const mockFlyoutRef: ConversationFlyoutRef = {
-          close: jest.fn(),
-        };
-        return {
-          flyoutRef: mockFlyoutRef,
-        };
-      }),
+    setChatConfig: jest.fn(),
+    clearChatConfig: jest.fn(),
+    toggleChat: jest.fn(),
+    openChat: jest.fn().mockImplementation((options: OpenConversationSidebarOptions) => {
+      const mockSidebarRef: ConversationSidebarRef = {
+        close: jest.fn(),
+      };
+      return {
+        chatRef: mockSidebarRef,
+      };
+    }),
+    addAttachment: jest.fn(),
+    updateAttachmentOrigin: jest.fn(),
   };
 };
 

@@ -23,7 +23,7 @@ export const CopyToClipboardButton: FunctionComponent<CopyToClipboardButtonProps
       {(copyToClipboard) => (
         <EuiButton
           data-test-subj="observabilityOnboardingCopyToClipboardButton"
-          iconType="copyClipboard"
+          iconType="copy"
           onClick={copyToClipboard}
           {...rest}
         >

@@ -22,17 +22,18 @@
       "triggersActionsUi",
       "spaces",
       "esUiShared",
+      "share",
       "stackConnectors",
       "data",
       "dataViews",
+      "kql",
       "fieldFormats",
       "unifiedSearch",
       "embeddable",
       "licensing"
     ],
-    "optionalPlugins": [
-      "alerting",
-      "serverless"
-    ]
+    "optionalPlugins": ["alerting", "serverless", "cloud"],
+    "runtimePluginDependencies": ["agentBuilder"],
+    "extraPublicDirs": ["common"]
   }
 }

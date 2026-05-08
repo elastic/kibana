@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/inference-connectors",
+  "owner": [
+    "@elastic/search-kibana"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

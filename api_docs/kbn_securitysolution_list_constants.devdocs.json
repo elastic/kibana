@@ -79,23 +79,6 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-list-constants",
-        "id": "def-common.EXCEPTION_LIST_NAMESPACE",
-        "type": "string",
-        "tags": [],
-        "label": "EXCEPTION_LIST_NAMESPACE",
-        "description": [],
-        "signature": [
-          "\"exception-list\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
-        "lineNumber": 41,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/securitysolution-list-constants",
         "id": "def-common.EXCEPTION_LIST_NAMESPACE_AGNOSTIC",
         "type": "string",
         "tags": [],
@@ -108,6 +91,23 @@
         ],
         "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
         "lineNumber": 40,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-list-constants",
+        "id": "def-common.EXCEPTION_LIST_NAMESPACE_AWARE",
+        "type": "string",
+        "tags": [],
+        "label": "EXCEPTION_LIST_NAMESPACE_AWARE",
+        "description": [],
+        "signature": [
+          "\"exception-list\""
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-list-constants/index.ts",
+        "lineNumber": 41,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

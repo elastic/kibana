@@ -23,6 +23,7 @@ import type {
   ResponseError,
 } from '@kbn/core-http-server';
 import type { MonitorConfigRepository } from '../services/monitor_config_repository';
+import type { MonitorIntegrationHealthApi } from '../services/monitor_integration_health_api';
 import type { SyntheticsEsClient } from '../lib';
 import type { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../types';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -103,6 +104,7 @@ export interface RouteContext<
   subject?: Subject<unknown>;
   spaceId: string;
   monitorConfigRepository: MonitorConfigRepository;
+  monitorIntegrationHealthApi: MonitorIntegrationHealthApi;
 }
 
 export type SyntheticsRouteHandler<

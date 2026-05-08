@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Liquid } from 'liquidjs';
 import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
+import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { resolvePathValue } from './resolve_path_value';
 import type { ExecutionContext } from '../execution_context/build_execution_context';
 
 // Create a liquid engine instance with the same configuration as the server
-const liquidEngine = new Liquid({
+const liquidEngine = createWorkflowLiquidEngine({
   strictFilters: true, // Match server-side behavior - error on unknown filters
   strictVariables: false,
 });
@@ -28,6 +28,13 @@ liquidEngine.registerFilter('json_parse', (value: unknown): unknown => {
   } catch (error) {
     return value;
   }
+});
+
+liquidEngine.registerFilter('entries', (value: unknown): unknown => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return value;
+  }
+  return Object.entries(value).map(([k, v]) => ({ key: k, value: v }));
 });
 
 export interface EvaluateExpressionOptions {
@@ -93,26 +100,79 @@ function buildEnhancedContext(
 }
 
 /**
- * Find foreach context by looking for foreach steps in execution
- * Returns the first foreach step found with its items
+ * Find foreach context by looking for foreach steps in execution.
+ * The server stores only { index, total } in state (not the full items array).
+ * The foreach expression is stored in input.foreach, so we re-evaluate it
+ * against the execution context to derive the items array.
  */
 function findForeachContext(
   context: ExecutionContext
 ): { item: JsonValue; index: number; total: number; items: JsonArray } | null {
-  // Look through all steps to find foreach steps
   for (const [, stepData] of Object.entries(context.steps)) {
-    // Check if this step has foreach state (items array)
-    if (stepData.state && 'items' in stepData.state && Array.isArray(stepData.state.items)) {
-      // This is a foreach step
-      const items = stepData.state.items as JsonArray;
-      // For simplicity, use the first item (as requested by user)
-      return {
-        item: items.length > 0 ? items[0] : null,
-        index: 0,
-        total: items.length,
-        items,
-      };
+    if (stepData.state && typeof stepData.state.index === 'number') {
+      const index = stepData.state.index as number;
+      const total = (stepData.state.total as number) ?? 0;
+
+      // Try to get items from state directly (legacy path)
+      if ('items' in stepData.state && Array.isArray(stepData.state.items)) {
+        const items = stepData.state.items as JsonArray;
+        return {
+          item: items[index] ?? (items.length > 0 ? items[0] : null),
+          index,
+          total,
+          items,
+        };
+      }
+
+      // Re-evaluate the foreach expression from the step's input to derive items
+      const foreachExpression = extractForeachExpression(stepData.input);
+      if (foreachExpression) {
+        const items = resolveForeachItems(foreachExpression, context);
+        if (items) {
+          return {
+            item: items[index] ?? (items.length > 0 ? items[0] : null),
+            index,
+            total,
+            items,
+          };
+        }
+      }
     }
+  }
+  return null;
+}
+
+function extractForeachExpression(input: JsonValue | undefined): string | undefined {
+  if (input !== null && typeof input === 'object' && !Array.isArray(input)) {
+    const { foreach: expression } = input as Record<string, unknown>;
+    return typeof expression === 'string' ? expression : undefined;
+  }
+  return undefined;
+}
+
+function resolveForeachItems(
+  foreachExpression: string,
+  context: ExecutionContext
+): JsonArray | null {
+  try {
+    let expression = foreachExpression.trim();
+    const openIdx = expression.indexOf('{{');
+    const closeIdx = expression.lastIndexOf('}}');
+    if (openIdx !== -1 && closeIdx !== -1) {
+      expression = expression.substring(openIdx + 2, closeIdx).trim();
+    }
+    const result = liquidEngine.evalValueSync(expression, context);
+    if (Array.isArray(result)) {
+      return result as JsonArray;
+    }
+    if (typeof result === 'string') {
+      const parsed = JSON.parse(result);
+      if (Array.isArray(parsed)) {
+        return parsed as JsonArray;
+      }
+    }
+  } catch {
+    // ignore evaluation errors
   }
   return null;
 }

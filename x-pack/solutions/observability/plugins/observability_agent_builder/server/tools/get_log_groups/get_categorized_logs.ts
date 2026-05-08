@@ -10,6 +10,7 @@ import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
 import { getTypedSearch } from '../../utils/get_typed_search';
 import { unwrapEsFields } from '../../utils/unwrap_es_fields';
 import { getTotalHits } from '../../utils/get_total_hits';
+import { computeSamplingProbability } from '../../utils/compute_sampling_probability';
 
 export async function getSamplingProbability({
   esClient,
@@ -30,12 +31,7 @@ export async function getSamplingProbability({
   });
 
   const totalHits = getTotalHits(countResponse);
-
-  // Calculate sampling probability to get ~10,000 samples
-  const targetSampleSize = 10000;
-  const rawSamplingProbability = targetSampleSize / totalHits;
-  // probability must be between 0.0 and 0.5 or exactly 1.0
-  const samplingProbability = rawSamplingProbability < 0.5 ? rawSamplingProbability : 1;
+  const samplingProbability = computeSamplingProbability({ totalHits, targetSampleSize: 10000 });
 
   return { samplingProbability, totalHits };
 }

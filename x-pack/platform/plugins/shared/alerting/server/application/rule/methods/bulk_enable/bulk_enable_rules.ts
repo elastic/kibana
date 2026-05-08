@@ -7,6 +7,7 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
+import { omit } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type {
@@ -19,6 +20,7 @@ import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { bulkCreateRulesSo } from '../../../../data/rule';
 import type { RawRule } from '../../../../types';
 import type { RuleDomain, RuleParams } from '../../types';
@@ -28,6 +30,7 @@ import {
   retryIfBulkOperationConflicts,
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
+  API_KEY_ATTRIBUTES_TO_STRIP,
 } from '../../../../rules_client/common';
 import type { SanitizedRule } from '../../../../../common';
 import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -37,6 +40,7 @@ import {
   createNewAPIKeySet,
   updateMetaAttributes,
   bulkMigrateLegacyActions,
+  migrateLegacyLastRunOutcomeMsg,
 } from '../../../../rules_client/lib';
 import type { RulesClientContext, BulkOperationError } from '../../../../rules_client/types';
 import { validateScheduleLimit } from '../get_schedule_frequency';
@@ -45,6 +49,7 @@ import type { BulkEnableRulesParams, BulkEnableRulesResult } from './types';
 import { bulkEnableRulesParamsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
+import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
 
 /**
  * Updating too many rules in parallel can cause the denial of service of the
@@ -106,7 +111,7 @@ export const bulkEnableRules = async <Params extends RuleParams>(
     action: 'ENABLE',
     logger: context.logger,
     bulkOperation: (filterKueryNode: KueryNode | null) =>
-      bulkEnableRulesWithOCC(context, { filter: filterKueryNode }),
+      bulkEnableRulesWithOCC(context, { filter: filterKueryNode, totalNumOfRules: total }),
     filter: kueryNodeFilterWithAuth,
   });
 
@@ -153,7 +158,7 @@ export const bulkEnableRules = async <Params extends RuleParams>(
 
 const bulkEnableRulesWithOCC = async (
   context: RulesClientContext,
-  { filter }: { filter: KueryNode | null }
+  { filter, totalNumOfRules }: { filter: KueryNode | null; totalNumOfRules: number }
 ) => {
   const rulesFinder = await withSpan(
     {
@@ -235,26 +240,39 @@ const bulkEnableRulesWithOCC = async (
               });
             }
 
-            const updatedAttributes = updateMetaAttributes(context, {
-              ...rule.attributes,
-              ...(!rule.attributes.apiKey &&
-                (await createNewAPIKeySet(context, {
+            const nowIso = new Date().toISOString();
+            const newApiKeyAttributes = !rule.attributes.apiKey
+              ? await createNewAPIKeySet(context, {
                   id: rule.attributes.alertTypeId,
                   ruleName,
                   username,
                   shouldUpdateApiKey: true,
-                }))),
+                  apiKeyOwnership: { apiKeyCreatedByUser: rule.attributes.apiKeyCreatedByUser },
+                })
+              : undefined;
+
+            const updatedAttributes = updateMetaAttributes(context, {
+              ...(newApiKeyAttributes
+                ? {
+                    ...omit(rule.attributes, API_KEY_ATTRIBUTES_TO_STRIP),
+                    ...newApiKeyAttributes,
+                  }
+                : rule.attributes),
               enabled: true,
               updatedBy: username,
-              updatedAt: new Date().toISOString(),
+              updatedAt: nowIso,
+              ...(!rule.attributes.enabled ? { lastEnabledAt: nowIso } : {}),
               executionStatus: {
                 status: 'pending',
                 lastDuration: 0,
-                lastExecutionDate: new Date().toISOString(),
+                lastExecutionDate: nowIso,
                 error: null,
                 warning: null,
               },
               scheduledTaskId: rule.id,
+              ...(rule.attributes.lastRun
+                ? { lastRun: migrateLegacyLastRunOutcomeMsg(rule.attributes.lastRun) }
+                : {}),
             });
 
             const shouldScheduleTask = await getShouldScheduleTask(
@@ -332,6 +350,7 @@ const bulkEnableRulesWithOCC = async (
     );
   }
 
+  const bulkEnableTimestamp = Date.now();
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },
     () =>
@@ -346,6 +365,16 @@ const bulkEnableRulesWithOCC = async (
         },
       })
   );
+
+  await logBulkRuleChanges({
+    ruleSOs: result.saved_objects,
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleEnable,
+      timestamp: bulkEnableTimestamp,
+      metadata: { bulkCount: totalNumOfRules },
+    },
+  });
 
   // Get a map of all rules that failed to enable so we do not clear their flapping
   const ruleIdsFailedToEnable: Record<string, boolean> = {};

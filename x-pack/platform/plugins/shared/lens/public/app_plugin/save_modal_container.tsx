@@ -19,7 +19,6 @@ import type {
   LensDocument,
   VisualizeEditorContext,
   LensSerializedState,
-  ILensDocumentService,
 } from '@kbn/lens-common';
 import type { Simplify } from '@kbn/chart-expressions-common';
 import { SaveModal } from './save_modal';
@@ -184,6 +183,7 @@ export function SaveModalContainer({
 
   return (
     <SaveModal
+      hasLibraryItemWithTitle={lensServices.lensDocumentService.hasLibraryItemWithTitle}
       originatingApp={originatingApp}
       getOriginatingPath={getOriginatingPath}
       savingToLibraryPermitted={savingToLibraryPermitted}
@@ -212,7 +212,7 @@ function fromDocumentToSerializedState(
   return {
     ...originalInput,
     attributes: omit(doc, 'savedObjectId'),
-    savedObjectId: doc.savedObjectId,
+    ref_id: doc.savedObjectId,
     ...panelSettings,
   };
 }
@@ -246,7 +246,6 @@ export type SaveVisualizationProps = Simplify<
     getOriginatingPath?: (dashboardId: string) => string;
     textBasedLanguageSave?: boolean;
     switchDatasource?: () => void;
-    lensDocumentService: ILensDocumentService;
     controlsState?: ControlPanelsState;
   } & ExtraProps &
     Pick<
@@ -285,7 +284,6 @@ export const runSaveLensVisualization = async (
     textBasedLanguageSave,
     switchDatasource,
     application,
-    lensDocumentService,
     controlsState,
   } = props;
 
@@ -309,31 +307,15 @@ export const runSaveLensVisualization = async (
   const docToSave = getDocToSave(lastKnownDoc, saveProps, references);
 
   const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
-  const originalSavedObjectId = originalInput?.savedObjectId;
-  if (options.saveToLibrary) {
-    await lensDocumentService.checkForDuplicateTitle(
-      {
-        id: originalSavedObjectId,
-        title: docToSave.title,
-        displayName: i18n.translate('xpack.lens.app.saveModalType', {
-          defaultMessage: 'Lens visualization',
-        }),
-        lastSavedTitle: lastKnownDoc.title,
-        copyOnSave: saveProps.newCopyOnSave,
-        isTitleDuplicateConfirmed: saveProps.isTitleDuplicateConfirmed,
-      },
-      saveProps.onTitleDuplicate
-    );
-    // ignore duplicate title failure, user notified in save modal
-  }
+  const originalSavedObjectId = originalInput?.ref_id;
 
   try {
     // wrap the doc into a serializable state
     const newDoc = fromDocumentToSerializedState(
       docToSave,
       {
-        timeRange: saveProps.panelTimeRange ?? originalInput?.timeRange,
-        savedObjectId: options.saveToLibrary ? originalSavedObjectId : undefined,
+        time_range: saveProps.panelTimeRange ?? originalInput?.time_range,
+        ref_id: options.saveToLibrary ? originalSavedObjectId : undefined,
       },
       originalInput
     );
@@ -373,7 +355,7 @@ export const runSaveLensVisualization = async (
     }
 
     if (shouldNavigateBackToOrigin) {
-      const apiConfig = transformToApiConfig({ ...newDoc, savedObjectId });
+      const apiConfig = transformToApiConfig({ ...newDoc, ref_id: savedObjectId });
       redirectToOrigin({
         state: apiConfig,
         isCopied: saveProps.newCopyOnSave,
@@ -386,7 +368,7 @@ export const runSaveLensVisualization = async (
     // without redirect?
     if (saveProps.dashboardId) {
       redirectToDashboard({
-        embeddableInput: { ...newDoc, savedObjectId },
+        embeddableInput: { ...newDoc, ref_id: savedObjectId },
         dashboardId: saveProps.dashboardId,
         stateTransfer,
         originatingApp: props.originatingApp,

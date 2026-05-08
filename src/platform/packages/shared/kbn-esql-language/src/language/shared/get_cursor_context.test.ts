@@ -9,9 +9,8 @@
 
 import { EDITOR_MARKER } from '../../commands/definitions/constants';
 import { correctQuerySyntax, isMarkerNode } from '../../commands/definitions/utils/ast';
-import type { ESQLAstItem } from '../../types';
-import { Parser } from '../../parser';
-import { Walker } from '../../ast';
+import type { ESQLAstItem } from '@elastic/esql/types';
+import { Parser, Walker } from '@elastic/esql';
 import { getCursorContext } from './get_cursor_context';
 
 const assertMarkerRemoved = (_query: string) => {
@@ -74,6 +73,7 @@ describe('it should remove marker nodes from the AST', () => {
     // EVAL command with binary operator and comma
     assertMarkerRemoved(`FROM employees | EVAL total = salary + `);
     assertMarkerRemoved(`FROM employees | EVAL total = salary + bonus, `);
+    assertMarkerRemoved(`FROM employees | EVAL total = ROUND(salary, `);
 
     // STATS command with binary operator and comma
     assertMarkerRemoved(`FROM employees | STATS avg(salary), `);
@@ -83,7 +83,13 @@ describe('it should remove marker nodes from the AST', () => {
 
     // SORT command with comma
     assertMarkerRemoved(`FROM employees | SORT age, `);
+
+    // WHERE tuple list with trailing comma
+    assertMarkerRemoved(`FROM employees | WHERE age IN (1, `);
   });
 
-  it.todo('removes marker from right-side of assignment'); // e.g. assertMarkerRemoved(`FROM employees | EVAL total = `);
+  it('removes marker from right-side of assignment', () => {
+    assertMarkerRemoved(`FROM employees | EVAL total = `);
+    assertMarkerRemoved(`ROW total = `);
+  });
 });

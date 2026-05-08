@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { AgentContextLayerPluginSetup } from '@kbn/agent-context-layer-plugin/server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
-import type { SharePluginStart } from '@kbn/share-plugin/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export interface DashboardAgentSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
+  agentContextLayer: AgentContextLayerPluginSetup;
 }
 
 export interface DashboardAgentStartDependencies {
   dashboard: DashboardPluginStart;
-  share: SharePluginStart;
-  spaces?: SpacesPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

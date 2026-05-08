@@ -18,7 +18,7 @@ describe('processMathProcessor', () => {
         to: 'result',
       };
       const result = processMathProcessor(processor);
-      expect(result).toEqual({
+      expect(result!).toEqual({
         script: {
           lang: 'painless',
           source: "ctx['result'] = (2 + 2);",
@@ -34,7 +34,7 @@ describe('processMathProcessor', () => {
         to: 'total',
       };
       const result = processMathProcessor(processor);
-      expect(result).toEqual({
+      expect(result!).toEqual({
         script: {
           lang: 'painless',
           source: "ctx['total'] = ($('price', null) * $('quantity', null));",
@@ -54,7 +54,7 @@ describe('processMathProcessor', () => {
       for (const { expr, expected } of expressions) {
         const processor: MathProcessor = { action: 'math', expression: expr, to: 'result' };
         const result = processMathProcessor(processor);
-        expect((result.script as Record<string, unknown>).source).toBe(
+        expect((result!.script as Record<string, unknown>).source).toBe(
           `ctx['result'] = ${expected};`
         );
       }
@@ -69,7 +69,7 @@ describe('processMathProcessor', () => {
         to: 'attributes.total',
       };
       const result = processMathProcessor(processor);
-      expect(result).toEqual({
+      expect(result!).toEqual({
         script: {
           lang: 'painless',
           source:
@@ -86,7 +86,7 @@ describe('processMathProcessor', () => {
         to: 'order.item.total',
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
+      expect((result!.script as Record<string, unknown>).source).toBe(
         "ctx['order.item.total'] = ($('order.item.price', null) * $('order.item.qty', null));"
       );
     });
@@ -100,7 +100,7 @@ describe('processMathProcessor', () => {
         to: 'ln_value',
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
+      expect((result!.script as Record<string, unknown>).source).toBe(
         "ctx['ln_value'] = Math.log($('value', null));"
       );
     });
@@ -112,7 +112,7 @@ describe('processMathProcessor', () => {
         to: 'result',
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
+      expect((result!.script as Record<string, unknown>).source).toBe(
         "ctx['result'] = Math.log(100);"
       );
     });
@@ -124,7 +124,7 @@ describe('processMathProcessor', () => {
         to: 'result',
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
+      expect((result!.script as Record<string, unknown>).source).toBe(
         "ctx['result'] = Math.log(($('a', null) * $('b', null)));"
       );
     });
@@ -138,7 +138,7 @@ describe('processMathProcessor', () => {
         to: 'is_cheap',
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
+      expect((result!.script as Record<string, unknown>).source).toBe(
         "ctx['is_cheap'] = ($('price', null) < 100);"
       );
     });
@@ -150,7 +150,7 @@ describe('processMathProcessor', () => {
         to: 'is_expensive',
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
+      expect((result!.script as Record<string, unknown>).source).toBe(
         "ctx['is_expensive'] = ($('price', null) > 100);"
       );
     });
@@ -162,7 +162,7 @@ describe('processMathProcessor', () => {
         to: 'is_active',
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
+      expect((result!.script as Record<string, unknown>).source).toBe(
         "ctx['is_active'] = ($('status', null) == 1);"
       );
     });
@@ -174,7 +174,7 @@ describe('processMathProcessor', () => {
         to: 'is_not_zero',
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
+      expect((result!.script as Record<string, unknown>).source).toBe(
         "ctx['is_not_zero'] = ($('status', null) != 0);"
       );
     });
@@ -186,7 +186,7 @@ describe('processMathProcessor', () => {
         to: 'in_budget',
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
+      expect((result!.script as Record<string, unknown>).source).toBe(
         "ctx['in_budget'] = ($('price', null) <= 50);"
       );
     });
@@ -198,7 +198,7 @@ describe('processMathProcessor', () => {
         to: 'passed',
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
+      expect((result!.script as Record<string, unknown>).source).toBe(
         "ctx['passed'] = ($('score', null) >= 60);"
       );
     });
@@ -210,7 +210,7 @@ describe('processMathProcessor', () => {
         to: 'is_expensive',
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
+      expect((result!.script as Record<string, unknown>).source).toBe(
         "ctx['is_expensive'] = ($('price', null) > 100);"
       );
     });
@@ -225,7 +225,7 @@ describe('processMathProcessor', () => {
         ignore_missing: true,
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
+      expect((result!.script as Record<string, unknown>).source).toBe(
         "if ($('value', null) != null) { ctx['result'] = ($('value', null) * 2); }"
       );
     });
@@ -238,7 +238,7 @@ describe('processMathProcessor', () => {
         ignore_missing: true,
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
+      expect((result!.script as Record<string, unknown>).source).toBe(
         "if ($('price', null) != null && $('quantity', null) != null && $('tax', null) != null) { ctx['total'] = (($('price', null) * $('quantity', null)) + $('tax', null)); }"
       );
     });
@@ -251,7 +251,7 @@ describe('processMathProcessor', () => {
         ignore_missing: true,
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
+      expect((result!.script as Record<string, unknown>).source).toBe(
         "if ($('attributes.price', null) != null && $('attributes.qty', null) != null) { ctx['total'] = ($('attributes.price', null) * $('attributes.qty', null)); }"
       );
     });
@@ -264,7 +264,7 @@ describe('processMathProcessor', () => {
         ignore_missing: false,
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).source).toBe(
+      expect((result!.script as Record<string, unknown>).source).toBe(
         "ctx['total'] = ($('price', null) * $('quantity', null));"
       );
     });
@@ -282,9 +282,9 @@ describe('processMathProcessor', () => {
         if: compiledIf,
       };
       const result = processMathProcessor(processor);
-      expect(result.script).toHaveProperty('if');
-      expect((result.script as Record<string, unknown>).if).toBe(compiledIf);
-      expect((result.script as Record<string, unknown>).if).toContain('active');
+      expect(result!.script).toHaveProperty('if');
+      expect((result!.script as Record<string, unknown>).if).toBe(compiledIf);
+      expect((result!.script as Record<string, unknown>).if).toContain('active');
     });
   });
 
@@ -297,7 +297,7 @@ describe('processMathProcessor', () => {
         tag: 'calc_total',
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).tag).toBe('calc_total');
+      expect((result!.script as Record<string, unknown>).tag).toBe('calc_total');
     });
 
     it('should include ignore_failure when true', () => {
@@ -308,7 +308,7 @@ describe('processMathProcessor', () => {
         ignore_failure: true,
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).ignore_failure).toBe(true);
+      expect((result!.script as Record<string, unknown>).ignore_failure).toBe(true);
     });
 
     it('should always include description', () => {
@@ -318,7 +318,7 @@ describe('processMathProcessor', () => {
         to: 'sum',
       };
       const result = processMathProcessor(processor);
-      expect((result.script as Record<string, unknown>).description).toBe('Math processor: a + b');
+      expect((result!.script as Record<string, unknown>).description).toBe('Math processor: a + b');
     });
   });
 
@@ -334,7 +334,7 @@ describe('processMathProcessor', () => {
     ])('should generate error-throwing script for: %s', (expression, funcName) => {
       const processor: MathProcessor = { action: 'math', expression, to: 'result' };
       const result = processMathProcessor(processor);
-      const source = (result.script as Record<string, unknown>).source as string;
+      const source = (result!.script as Record<string, unknown>).source as string;
       expect(source).toContain('throw new IllegalArgumentException("');
       expect(source).toContain(funcName);
       expect(source).toContain('not supported');
@@ -347,7 +347,7 @@ describe('processMathProcessor', () => {
         to: 'result',
       };
       const result = processMathProcessor(processor);
-      const source = (result.script as Record<string, unknown>).source as string;
+      const source = (result!.script as Record<string, unknown>).source as string;
       expect(source).toContain('throw new IllegalArgumentException("');
       expect(source).toContain('Unknown function');
     });
@@ -359,7 +359,7 @@ describe('processMathProcessor', () => {
         to: 'result',
       };
       const result = processMathProcessor(processor);
-      const source = (result.script as Record<string, unknown>).source as string;
+      const source = (result!.script as Record<string, unknown>).source as string;
       expect(source).toContain('throw new IllegalArgumentException("');
       expect(source).toContain('Failed to parse expression');
     });

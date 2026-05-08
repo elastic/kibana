@@ -5,8 +5,7 @@
     "types": [
       "jest",
       "node",
-      "@emotion/react/types/css-prop",
-      "@kbn/ambient-ui-types"
+      "@kbn/ambient-ui-types",
     ]
   },
   "include": [
@@ -48,5 +47,6 @@
     "@kbn/field-types",
     "@kbn/react-query",
     "@kbn/maintenance-windows-plugin",
+    "@kbn/es-query",
   ]
 }

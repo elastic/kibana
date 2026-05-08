@@ -8,15 +8,15 @@
  */
 
 import { type UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
-  VISUALIZE_FIELD_TRIGGER,
-  VISUALIZE_GEO_FIELD_TRIGGER,
-  visualizeFieldTrigger,
-  visualizeGeoFieldTrigger,
-} from '@kbn/ui-actions-browser/src/triggers';
+
 import type { AggregateQuery } from '@kbn/es-query';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import {
+  VISUALIZE_GEO_FIELD_TRIGGER,
+  VISUALIZE_FIELD_TRIGGER,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { triggers } from '@kbn/ui-actions-plugin/public';
 
 export function getTriggerConstant(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE
@@ -26,8 +26,8 @@ export function getTriggerConstant(type: string) {
 
 function getTrigger(type: string) {
   return type === KBN_FIELD_TYPES.GEO_POINT || type === KBN_FIELD_TYPES.GEO_SHAPE
-    ? visualizeGeoFieldTrigger
-    : visualizeFieldTrigger;
+    ? triggers[VISUALIZE_GEO_FIELD_TRIGGER]
+    : triggers[VISUALIZE_FIELD_TRIGGER];
 }
 
 async function getCompatibleActions(
@@ -60,7 +60,7 @@ export function triggerVisualizeActions(
     contextualFields,
     originatingApp,
   };
-  uiActions.getTrigger(trigger).exec(triggerOptions);
+  uiActions.executeTriggerActions(trigger, triggerOptions);
 }
 
 export function triggerVisualizeActionsTextBasedLanguages(
@@ -78,7 +78,7 @@ export function triggerVisualizeActionsTextBasedLanguages(
     originatingApp,
     query,
   };
-  uiActions.getTrigger(VISUALIZE_FIELD_TRIGGER).exec(triggerOptions);
+  uiActions.executeTriggerActions(VISUALIZE_FIELD_TRIGGER, triggerOptions);
 }
 
 export interface VisualizeInformation {

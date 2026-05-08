@@ -99,18 +99,9 @@ export class DashboardPageControls extends FtrService {
     }
   }
 
-  public async openControlsMenu() {
-    const isOpen = await this.testSubjects.exists(`controls-create-button`, { timeout: 2500 });
-    if (!isOpen) {
-      await this.dashboardAddPanel.clickTopNavAddMenu();
-      await this.testSubjects.click('dashboard-controls-menu-button');
-    }
-  }
-
   public async openCreateControlFlyout() {
     this.log.debug(`Opening flyout for creating a control`);
-    await this.openControlsMenu();
-    await this.testSubjects.click('controls-create-button');
+    await this.dashboardAddPanel.clickAddControlPanel();
     await this.retry.try(async () => {
       await this.testSubjects.existOrFail('control-editor-flyout');
     });
@@ -303,8 +294,8 @@ export class DashboardPageControls extends FtrService {
 
   public async createTimeSliderControl() {
     this.log.debug(`Creating time slider control`);
-    await this.openControlsMenu();
-    await this.testSubjects.click('controls-create-timeslider-button');
+    await this.dashboardAddPanel.openAddPanelFlyout();
+    await this.testSubjects.click('create-action-Time slider');
   }
 
   public async hoverOverExistingControl(controlId: string) {
@@ -771,7 +762,7 @@ export class DashboardPageControls extends FtrService {
   public async rangeSliderEnsurePopoverIsClosed(controlId: string) {
     this.log.debug(`Closing popover for Range Slider: ${controlId}`);
     const controlLabel = await this.find.byCssSelector(
-      `li:has([data-control-id='${controlId}']) label`
+      `li:has([data-control-id='${controlId}']) .controlFrame__dragHandle`
     );
     await controlLabel.click();
     await this.testSubjects.waitForDeleted(`rangeSlider__slider`);

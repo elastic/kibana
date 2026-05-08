@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-import type { CreateIntegrationCardButtonProps } from './create_integration_card_button';
-
-export type CreateIntegrationCardButtonComponent =
-  React.ComponentType<CreateIntegrationCardButtonProps>;
+export type CreateIntegrationSideCardButtonComponent = React.ComponentType;

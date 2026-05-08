@@ -28,6 +28,7 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
     >
       <div
         class="euiFlyoutBody__overflow emotion-euiFlyoutBody__overflow-noBanner"
+        data-test-subj="euiFlyoutBodyOverflow"
         tabindex="0"
       >
         <div
@@ -65,10 +66,10 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
                 >
                   <span
                     color="inherit"
-                    data-euiicon-type="copyClipboard"
+                    data-euiicon-type="copy"
                   />
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="eui-textTruncate euiButtonEmpty__text css-1shwb46-xs"
                   >
                     Copy to clipboard
                   </span>
@@ -118,7 +119,7 @@ exports[`ViewApiRequestFlyout is rendered 1`] = `
             data-euiicon-type="cross"
           />
           <span
-            class="eui-textTruncate euiButtonEmpty__text"
+            class="eui-textTruncate euiButtonEmpty__text css-13ifi6d-m"
           >
             Close
           </span>

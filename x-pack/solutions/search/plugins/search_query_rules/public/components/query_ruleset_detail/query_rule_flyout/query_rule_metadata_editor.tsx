@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import type { QueryRulesQueryRuleCriteria } from '@elastic/elasticsearch/lib/api/types';
 import {
@@ -41,6 +41,9 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
   error,
 }) => {
   const [metadataField, setMetadataField] = useState<string>(criteria.metadata || '');
+  useEffect(() => {
+    setMetadataField(criteria?.metadata ?? '');
+  }, [criteria]);
 
   return (
     <EuiPanel data-test-subj="searchQueryRulesQueryRuleMetadataEditor" hasBorder>
@@ -115,6 +118,12 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                       defaultMessage: 'Match type',
                     }
                   )}
+                  aria-label={i18n.translate(
+                    'xpack.search.queryRulesetDetail.queryRuleFlyout.metadataEditorOperatorLabel',
+                    {
+                      defaultMessage: 'Select matching type',
+                    }
+                  )}
                 >
                   <EuiSelect
                     data-test-subj="searchQueryRulesQueryRuleMetadataEditorSelect"
@@ -137,13 +146,6 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                         text: i18n.translate(
                           'xpack.search.queryRulesetDetail.queryRuleFlyout.operatorExact',
                           { defaultMessage: 'exact' }
-                        ),
-                      },
-                      {
-                        value: 'exact_fuzzy',
-                        text: i18n.translate(
-                          'xpack.search.queryRulesetDetail.queryRuleFlyout.operatorExactFuzzy',
-                          { defaultMessage: 'exact fuzzy' }
                         ),
                       },
                       {
@@ -259,6 +261,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
                   error={error?.values ? error.values.message : undefined}
                 >
                   <EuiComboBox
+                    isCaseSensitive
                     isInvalid={!!error?.values}
                     isDisabled={criteria.type === 'always'}
                     data-test-subj="searchQueryRulesQueryRuleMetadataEditorValues"
@@ -301,7 +304,7 @@ export const QueryRuleMetadataEditor: React.FC<QueryRuleMetadataEditorProps> = (
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             data-test-subj="searchQueryRulesQueryRuleMetadataEditorDeleteButton"
-            iconType="minusInCircle"
+            iconType="minusCircle"
             color="danger"
             onClick={onRemove}
             aria-label={i18n.translate(

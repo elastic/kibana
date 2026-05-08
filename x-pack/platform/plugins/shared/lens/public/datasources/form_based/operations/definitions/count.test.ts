@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { esql as esqlComposer } from '@kbn/esql-language';
+import { esql as esqlComposer } from '@elastic/esql';
 import { buildExpression, parseExpression } from '@kbn/expressions-plugin/common';
 import { operationDefinitionMap } from '.';
 import type { FormBasedLayer } from '../../../..';

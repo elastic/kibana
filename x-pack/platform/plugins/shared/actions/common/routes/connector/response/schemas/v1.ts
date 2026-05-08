@@ -40,6 +40,13 @@ export const connectorResponseSchema = schema.object({
   is_connector_type_deprecated: schema.boolean({
     meta: { description: 'Indicates whether the connector type is deprecated.' },
   }),
+  auth_mode: schema.maybe(
+    schema.oneOf([schema.literal('shared'), schema.literal('per-user')], {
+      meta: {
+        description: 'The authentication mode used for the connector.',
+      },
+    })
+  ),
 });
 
 const connectorResponseWithReferencesCountSchema = connectorResponseSchema.extends({
@@ -181,4 +188,43 @@ export const connectorExecuteResponseSchema = schema.object({
       },
     })
   ),
+  error_name: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          'When the status is error, identifies the error class name so consumers can branch on specific error types (e.g. ConnectorAuthorizationError).',
+      },
+    })
+  ),
+  error_meta: schema.maybe(
+    schema.recordOf(schema.string(), schema.any(), {
+      meta: {
+        description:
+          'When the status is error, carries structured metadata describing the failure (e.g. the auth method and reason for a ConnectorAuthorizationError).',
+      },
+    })
+  ),
 });
+
+export const connectorAuthStatusResponseSchema = schema.recordOf(
+  schema.string(),
+  schema.object({
+    user_auth_status: schema.oneOf(
+      [
+        schema.literal('connected'),
+        schema.literal('not_connected'),
+        schema.literal('not_applicable'),
+      ],
+      {
+        meta: {
+          description: 'The authentication status of the current user for this connector.',
+        },
+      }
+    ),
+  }),
+  {
+    meta: {
+      description: 'A map of connector IDs to their user authentication status.',
+    },
+  }
+);

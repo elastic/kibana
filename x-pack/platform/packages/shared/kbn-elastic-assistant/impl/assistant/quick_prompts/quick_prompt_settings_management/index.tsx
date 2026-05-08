@@ -155,13 +155,14 @@ const QuickPromptSettingsManagementComponent = () => {
             <EuiText size="m">{i18n.QUICK_PROMPTS_DESCRIPTION}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="plusInCircle" onClick={onCreate} disabled={!promptsLoaded}>
+            <EuiButton iconType="plusCircle" onClick={onCreate} disabled={!promptsLoaded}>
               {i18n.QUICK_PROMPTS_TABLE_CREATE_BUTTON_TITLE}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiInMemoryTable
+          tableCaption={i18n.QUICK_PROMPT_TABLE_CAPTION}
           columns={columns}
           items={quickPromptSettings}
           onTableChange={onTableChange}

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import type { GrokProcessor, StreamlangDSL } from '@kbn/streamlang';
 import { transpile } from '@kbn/streamlang/src/transpilers/ingest_pipeline';
+import { asDoc } from '../../fixtures/doc_utils';
 import { streamlangApiTest as apiTest } from '../..';
 
 apiTest.describe(
   'Streamlang to Ingest Pipeline - Grok Processor',
-  { tag: ['@ess', '@svlOblt'] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     apiTest('should correctly parse a log line with the grok processor', async ({ testBed }) => {
       const indexName = 'stream-e2e-test-grok';
@@ -29,19 +31,19 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: '55.3.244.1 GET /index.html 15824 0.043' }];
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source).toHaveProperty('client.ip', '55.3.244.1');
-      expect(source).toHaveProperty('http.request.method', 'GET');
-      expect(source).toHaveProperty('url.path', '/index.html');
-      expect(source).toHaveProperty('http.response.body.bytes', '15824');
-      expect(source).toHaveProperty('event.duration', '0.043');
+      const source = asDoc(ingestedDocs[0]);
+      expect(asDoc(source?.client)?.ip).toBe('55.3.244.1');
+      expect(asDoc(asDoc(source?.http)?.request)?.method).toBe('GET');
+      expect(asDoc(source?.url)?.path).toBe('/index.html');
+      expect(asDoc(asDoc(asDoc(source?.http)?.response)?.body)?.bytes).toBe('15824');
+      expect(asDoc(source?.event)?.duration).toBe('0.043');
     });
 
     apiTest('should ignore missing field when ignore_missing is true', async ({ testBed }) => {
@@ -58,15 +60,15 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ log: { level: 'info' } }]; // Not including 'message' field
       await testBed.ingest(indexName, docs, processors);
 
       const ingestedDocs = await testBed.getDocs(indexName);
       expect(ingestedDocs).toHaveLength(1);
-      const source = ingestedDocs[0];
-      expect(source).not.toHaveProperty('client.ip');
+      const source = asDoc(ingestedDocs[0]);
+      expect(asDoc(source?.client)?.ip).toBeUndefined();
     });
 
     apiTest('should fail if field is missing and ignore_missing is false', async ({ testBed }) => {
@@ -83,7 +85,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ log: { level: 'info' } }]; // 'message' field is missing
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -103,7 +105,7 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpile(streamlangDSL);
+      const { processors } = await transpile(streamlangDSL);
 
       const docs = [{ message: 'not_an_ip' }];
       const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -121,20 +123,20 @@ apiTest.describe(
       },
     ].forEach(({ templateFrom, description }) => {
       apiTest(`${description}`, async () => {
-        expect(() => {
-          const streamlangDSL: StreamlangDSL = {
-            steps: [
-              {
-                action: 'grok',
-                from: templateFrom,
-                patterns: [
-                  '%{IP:client.ip} %{WORD:http.request.method} %{URIPATHPARAM:url.path} %{NUMBER:http.response.body.bytes} %{NUMBER:event.duration}',
-                ],
-              } as GrokProcessor,
-            ],
-          };
-          transpile(streamlangDSL);
-        }).toThrow('Mustache template syntax {{ }} or {{{ }}} is not allowed');
+        const streamlangDSL: StreamlangDSL = {
+          steps: [
+            {
+              action: 'grok',
+              from: templateFrom,
+              patterns: [
+                '%{IP:client.ip} %{WORD:http.request.method} %{URIPATHPARAM:url.path} %{NUMBER:http.response.body.bytes} %{NUMBER:event.duration}',
+              ],
+            } as GrokProcessor,
+          ],
+        };
+        await expect(transpile(streamlangDSL)).rejects.toThrow(
+          'Mustache template syntax {{ }} or {{{ }}} is not allowed'
+        );
       });
     });
   }

@@ -60,6 +60,7 @@ export const VisualizationTableList = ({
   savedObjectsTagging,
   parentProps,
 }: VisualizationTableListProps) => {
+  const { getBreadcrumbs, onFetchSuccess, setPageDataTestSubject } = parentProps;
   const euiThemeContext = useEuiTheme();
   const tableStyles = useMemo(
     () => getVisualizationListingTableStyles(euiThemeContext),
@@ -75,12 +76,14 @@ export const VisualizationTableList = ({
 
   const createNewVis = useCallback(async () => {
     const currentApp = await firstValueFrom(core.application.currentAppId$);
+    const breadcrumbs = currentApp ? getBreadcrumbs?.(currentApp) : undefined;
     closeNewVisModal.current = visualizations.showNewVisModal({
       originatingApp: currentApp,
       originatingPath: window.location.hash,
+      breadcrumbs,
       outsideVisualizeApp: currentApp !== VISUALIZE_APP_NAME,
     });
-  }, [visualizations, core.application]);
+  }, [visualizations, core.application, getBreadcrumbs]);
 
   useEffect(() => {
     return () => {
@@ -110,6 +113,7 @@ export const VisualizationTableList = ({
           state: {
             originatingApp: currentApp,
             originatingPath: window.location.hash,
+            breadcrumbs: getBreadcrumbs?.(currentApp),
           },
         });
         return;
@@ -117,7 +121,7 @@ export const VisualizationTableList = ({
 
       core.application.navigateToApp(targetApp, { path });
     },
-    [core.application, embeddable]
+    [core.application, embeddable, getBreadcrumbs]
   );
 
   const fetchItems = useCallback(
@@ -273,7 +277,8 @@ export const VisualizationTableList = ({
               }
             : undefined
         }
-        {...parentProps}
+        onFetchSuccess={onFetchSuccess}
+        setPageDataTestSubject={setPageDataTestSubject}
       />
     </div>
   );

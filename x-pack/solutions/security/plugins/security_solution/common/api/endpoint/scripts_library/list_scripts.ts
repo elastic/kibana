@@ -6,7 +6,7 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { isScriptsLibraryKqlFilterValid } from '../../../endpoint/service/scripts_library/scripts_library_utils';
+import { isScriptLibraryKqlFilterValid } from '../../../endpoint/service/script_library/script_library_utils';
 import { ENDPOINT_DEFAULT_PAGE_SIZE } from '../../../endpoint/constants';
 import type { DeepMutable } from '../../../endpoint/types';
 
@@ -32,7 +32,7 @@ export const ListScriptsRequestSchema = {
       ),
       kuery: schema.maybe(
         schema.string({
-          validate: (value) => isScriptsLibraryKqlFilterValid(value).error,
+          validate: (value) => isScriptLibraryKqlFilterValid(value).error,
         })
       ),
     })

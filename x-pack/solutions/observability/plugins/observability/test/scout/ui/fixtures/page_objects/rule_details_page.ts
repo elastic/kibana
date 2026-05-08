@@ -16,7 +16,7 @@ export class RuleDetailsPage {
    * Navigates to the rule details page by rule ID
    */
   async gotoById(ruleId: string) {
-    await this.page.gotoApp(`observability/alerts/rules/${ruleId}`);
+    await this.page.gotoApp(`rules/rule/${ruleId}`);
     await this.page.testSubj.waitForSelector(RULE_DETAILS_TEST_SUBJECTS.RULE_DETAILS, {
       timeout: BIGGER_TIMEOUT,
     });
@@ -198,6 +198,25 @@ export class RuleDetailsPage {
     await this.page.keyboard.press('Escape');
 
     return optionsText;
+  }
+
+  /**
+   * Opens the dashboards combobox and returns the options locator
+   */
+  async getDashboardsOptionsLocator() {
+    // Click the dashboard selector to open the dropdown
+    await this.dashboardsSelector.click();
+
+    // Wait for the dropdown portal to be created
+    await expect(this.comboboxOptionsList).toBeAttached({ timeout: BIGGER_TIMEOUT });
+
+    // Wait for the loading spinner to disappear if present
+    const spinner = this.comboboxOptionsList.locator('.euiLoadingSpinner');
+    await spinner.waitFor({ state: 'hidden', timeout: SHORTER_TIMEOUT }).catch(() => {
+      // Spinner might not appear if data is cached or loads very quickly
+    });
+
+    return this.comboboxOptionsList.locator('[role="option"]');
   }
 
   /**

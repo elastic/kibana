@@ -7,8 +7,12 @@
 
 import type * as http from 'http';
 import expect from '@kbn/expect';
+import {
+  AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+  AWS_INPUT_TEST_SUBJECTS,
+} from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects([
     'svlCommonPage',
     'cspSecurity',
@@ -19,11 +23,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const CIS_AWS_OPTION_TEST_ID = 'cloudSetupAwsTestId';
   const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
-  const DIRECT_ACCESS_KEY_ID_TEST_ID = 'awsDirectAccessKeyId';
-  const DIRECT_ACCESS_SECRET_KEY_TEST_ID = 'passwordInput-secret-access-key';
 
-  // Failing: See https://github.com/elastic/kibana/issues/239363
-  describe.skip('Agentless API Serverless', function () {
+  describe('Agentless API Serverless', function () {
     this.tags(['skipMKI', 'cloud_security_posture_agentless']);
     let mockApiServer: http.Server;
     let cisIntegration: typeof pageObjects.cisAddIntegration;
@@ -50,9 +51,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
-      await cisIntegration.selectAwsCredentials('direct');
-      await cisIntegration.fillInTextField(DIRECT_ACCESS_KEY_ID_TEST_ID, 'test');
-      await cisIntegration.fillInTextField(DIRECT_ACCESS_SECRET_KEY_TEST_ID, 'test');
+      await cisIntegration.selectSetupTechnology('agentless');
+      await cisIntegration.selectValue(
+        AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+        'direct_access_keys'
+      );
+      await cisIntegration.fillInTextField(AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_KEY_ID, 'test');
+      await cisIntegration.fillInTextField(
+        AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_SECRET_KEY,
+        'test'
+      );
 
       await pageObjects.header.waitUntilLoadingHasFinished();
 

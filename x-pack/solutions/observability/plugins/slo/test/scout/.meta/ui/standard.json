@@ -1,14 +1,15 @@
 {
-  "lastModified": "2026-01-30T09:08:46.486Z",
-  "sha1": "49bf7f78d11965c80fdeb0515e9344301a80795b",
+  "sha1": "141ee12ba7c6d8ac5dd2c654f776a257139dd4bc",
   "tests": [
     {
       "id": "b77b3725a7cda3a-a405bc5e45e74c0",
       "title": "Setup environment for SLO tests",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/global.setup.ts",
@@ -21,11 +22,12 @@
       "title": "Annotations List create an annotation",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 17,
+        "line": 18,
         "column": 7
       }
     },
@@ -34,11 +36,12 @@
       "title": "Annotations List Go to SLOs and check that annotation is displayed",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 40,
+        "line": 41,
         "column": 7
       }
     },
@@ -47,11 +50,12 @@
       "title": "Annotations List update annotation",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 53,
+        "line": 54,
         "column": 7
       }
     },
@@ -60,12 +64,45 @@
       "title": "Annotations List delete annotation",
       "expectedStatus": "passed",
       "tags": [
-        "@ess"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/annotation_list.spec.ts",
-        "line": 72,
+        "line": 73,
         "column": 7
+      }
+    },
+    {
+      "id": "d0c1f04cf9e25c8-8345f73a5865487",
+      "title": "Explore from SLO Details - APM Navigation Source panel renders with APM links for APM-based SLO",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/explore_from_slo_details.spec.ts",
+        "line": 75,
+        "column": 9
+      }
+    },
+    {
+      "id": "3789b2ba4b5abe6-f1d0e5a2143a659",
+      "title": "Health Scan pagination paginates through health scan results and shows correct content per page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/health_scan_pagination.spec.ts",
+        "line": 71,
+        "column": 9
       }
     },
     {
@@ -73,13 +110,15 @@
       "title": "SLOs Overview Go to slos overview and validate data retention tab",
       "expectedStatus": "passed",
       "tags": [
-        "@ess",
-        "@svlOblt"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/ui/tests/slos_overview.spec.ts",
-        "line": 22,
-        "column": 7
+        "line": 26,
+        "column": 9
       }
     }
   ]

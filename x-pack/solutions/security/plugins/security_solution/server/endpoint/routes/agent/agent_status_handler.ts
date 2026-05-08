@@ -31,7 +31,6 @@ export const registerAgentStatusRoute = (
           requiredPrivileges: ['securitySolution'],
         },
       },
-      options: { authRequired: true },
     })
     .addVersion(
       {

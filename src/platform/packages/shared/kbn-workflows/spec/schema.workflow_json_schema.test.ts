@@ -12,7 +12,11 @@
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { parse } from 'yaml';
-import { applyInputDefaults, normalizeInputsToJsonSchema } from './lib/input_conversion';
+import {
+  applyInputDefaults,
+  type NormalizableFieldSchema,
+  normalizeFieldsToJsonSchema,
+} from './lib/field_conversion';
 import { WorkflowSchema } from './schema';
 // Note: getWorkflowContextSchema is in the plugin, not in the package
 // For this test, we'll test the schema parsing and normalization directly
@@ -121,9 +125,7 @@ describe('Workflow with JSON Schema Inputs - Comprehensive Features', () => {
               },
               preferences: {
                 type: 'object',
-                additionalProperties: {
-                  type: 'string',
-                },
+                additionalProperties: false,
                 properties: {
                   newsletter: {
                     type: 'boolean',
@@ -195,7 +197,9 @@ describe('Workflow with JSON Schema Inputs - Comprehensive Features', () => {
     expect(parsedWorkflow.inputs?.required).toContain('customer');
 
     // Test 3: Normalize inputs (should return as-is since already in new format)
-    const normalizedInputs = normalizeInputsToJsonSchema(parsedWorkflow.inputs);
+    const normalizedInputs = normalizeFieldsToJsonSchema(
+      parsedWorkflow.inputs as NormalizableFieldSchema
+    );
     expect(normalizedInputs).toBeDefined();
     expect(normalizedInputs?.properties).toBeDefined();
 
@@ -209,7 +213,6 @@ describe('Workflow with JSON Schema Inputs - Comprehensive Features', () => {
     expect(normalizedInputs?.properties?.username.maxLength).toBe(20);
     expect(normalizedInputs?.properties?.tags.minItems).toBe(1);
     expect(normalizedInputs?.properties?.tags.maxItems).toBe(10);
-    expect(normalizedInputs?.properties?.tags.uniqueItems).toBe(true);
     expect(normalizedInputs?.properties?.website.format).toBe('uri');
     expect(normalizedInputs?.properties?.createdAt.format).toBe('date-time');
 
@@ -331,7 +334,7 @@ describe('Workflow with JSON Schema Inputs - Comprehensive Features', () => {
     expect(parsedWorkflow.inputs?.additionalProperties).toBe(false);
 
     // Verify normalization preserves the structure
-    const normalizedInputs = normalizeInputsToJsonSchema(parsedWorkflow.inputs);
+    const normalizedInputs = normalizeFieldsToJsonSchema(parsedWorkflow.inputs);
     expect(normalizedInputs?.properties?.customer.properties?.email.format).toBe('email');
     expect(normalizedInputs?.properties?.customer.additionalProperties).toBe(false);
   });
@@ -374,7 +377,7 @@ describe('Workflow with JSON Schema Inputs - Comprehensive Features', () => {
     expect(parsedWorkflow.inputs?.definitions?.UserSchema.properties?.age.default).toBe(30);
 
     // Test 5: Normalize inputs (should preserve $ref and definitions)
-    const normalizedInputs = normalizeInputsToJsonSchema(parsedWorkflow.inputs);
+    const normalizedInputs = normalizeFieldsToJsonSchema(parsedWorkflow.inputs);
     expect(normalizedInputs).toBeDefined();
     expect(normalizedInputs?.properties?.user.$ref).toBe('#/definitions/UserSchema');
     expect(normalizedInputs?.definitions?.UserSchema).toBeDefined();

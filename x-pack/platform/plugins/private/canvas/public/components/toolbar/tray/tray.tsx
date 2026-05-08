@@ -7,7 +7,6 @@
 
 import type { ReactNode, MouseEventHandler } from 'react';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -32,16 +31,11 @@ export const Tray = ({ children, done }: Props) => {
             size="s"
             onClick={done}
             aria-label={strings.getCloseTrayAriaLabel()}
-            iconType="arrowDown"
+            iconType="chevronSingleDown"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
       <div className="canvasTray">{children}</div>
     </>
   );
-};
-
-Tray.propTypes = {
-  children: PropTypes.node.isRequired,
-  done: PropTypes.func.isRequired,
 };

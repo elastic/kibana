@@ -18,6 +18,7 @@ export interface ScoutTestFailureExtended extends TestFailure {
   location: string;
   duration: number;
   owners: string;
+  errorMessage?: string;
   file?: string;
   kibanaModule?: {
     id: string;
@@ -67,9 +68,20 @@ interface ScoutFailureTrackingEntry {
   };
 }
 
+// Failure substrings that indicate environmental/infrastructure issues rather than
+// real test failures. Matches mark the failure as "likely irrelevant" so we skip
+// filing GitHub issues for them.
+const LIKELY_IRRELEVANT_FAILURE_SUBSTRINGS: readonly string[] = [
+  // SAML response parsing failures are environmental (cloud IAM service, test account).
+  'Failed to parse SAML response value',
+  // Cloud session creation failures are environmental (cloud login endpoint unavailable, MFA, etc.).
+  'Failed to create the new cloud session',
+  // Network connection refused errors are environmental (target host/service unreachable).
+  'connect ECONNREFUSED',
+];
+
 const isLikelyIrrelevant = (name: string, failure: string) => {
-  // no filters for Scout failures at the moment
-  return false;
+  return LIKELY_IRRELEVANT_FAILURE_SUBSTRINGS.some((substring) => failure.includes(substring));
 };
 
 export async function getScoutFailures(reportPath: string): Promise<ScoutTestFailureExtended[]> {
@@ -105,6 +117,7 @@ export async function getScoutFailures(reportPath: string): Promise<ScoutTestFai
       name: entry.title,
       failure,
       likelyIrrelevant,
+      errorMessage: entry.error.message ? stripAnsi(entry.error.message) : undefined,
       'system-out': entry.stdout ? stripAnsi(entry.stdout) : undefined,
       owners: entry.owner.join(', '), // Convert array to string
       commandLine: entry.command,

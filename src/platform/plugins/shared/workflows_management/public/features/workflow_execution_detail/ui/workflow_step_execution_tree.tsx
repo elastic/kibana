@@ -36,15 +36,21 @@ import type {
   WorkflowStepExecutionDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-import { isDangerousStatus, isInProgressStatus, isTerminalStatus } from '@kbn/workflows';
+import {
+  isDangerousStatus,
+  isFailedBeforeSteps,
+  isInProgressStatus,
+  isTerminalStatus,
+} from '@kbn/workflows';
 import type { StepExecutionTreeItem } from './build_step_executions_tree';
-import { buildStepExecutionsTree } from './build_step_executions_tree';
+import { buildStepExecutionsTree, injectChildWorkflowSteps } from './build_step_executions_tree';
 import { StepExecutionTreeItemLabel } from './step_execution_tree_item_label';
 import {
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
 } from './workflow_pseudo_step_context';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
+import type { ChildWorkflowExecutionsMap } from '../model/use_child_workflow_executions';
 
 const TRIGGER_BOLT_ICON_SVG =
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="%23535966" d="M7.04 13.274a.5.5 0 1 0 .892.453l3.014-5.931a.5.5 0 0 0-.445-.727H5.316L8.03 1.727a.5.5 0 1 0-.892-.453L4.055 7.343a.5.5 0 0 0 .446.726h5.185L7.04 13.274Z"/></svg>';
@@ -64,10 +70,15 @@ function convertTreeToEuiTreeViewItems(
     const stepId = stepExecution?.stepId ?? item.stepId;
     const stepType = stepExecution?.stepType ?? item.stepType;
 
+    // Check if this is a skeleton step (not yet received from server) or a loading placeholder
+    const isSkeletonStep =
+      (stepExecution?.id?.startsWith('skeleton-') ?? false) || stepType === '__loading';
+
     const selectStepExecution: React.MouseEventHandler = (e) => {
       // Prevent the click event from bubbling up to the tree view item so that the tree view item is not expanded/collapsed when selected
       e.preventDefault();
       e.stopPropagation();
+      // Don't allow selecting skeleton steps
       if (stepExecution?.id) {
         onSelectStepExecution(stepExecution.id);
       }
@@ -80,6 +91,12 @@ function convertTreeToEuiTreeViewItems(
       id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
       css: [
         getStatusCss({ status, selected }, euiTheme),
+        // Don't allow selecting skeleton steps using css, as we don't have a 'disabled' prop on the tree view item
+        isSkeletonStep &&
+          css`
+            pointer-events: none;
+            cursor: not-allowed;
+          `,
         isTriggerPseudoStep &&
           css`
             .euiTreeView__arrowPlaceholder::before {
@@ -142,6 +159,8 @@ export interface WorkflowStepExecutionTreeProps {
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
   selectedId: string | null;
+  childExecutionsMap?: ChildWorkflowExecutionsMap;
+  isLoadingChildExecutions?: boolean;
 }
 
 const emptyPromptCommonProps: EuiEmptyPromptProps = { titleSize: 'xs', paddingSize: 's' };
@@ -152,9 +171,14 @@ export const WorkflowStepExecutionTree = ({
   definition,
   onStepExecutionClick,
   selectedId,
+  childExecutionsMap,
+  isLoadingChildExecutions,
 }: WorkflowStepExecutionTreeProps) => {
   const styles = useMemoCss(componentStyles);
   const { euiTheme } = useEuiTheme();
+
+  const failedBeforeSteps =
+    execution != null && isFailedBeforeSteps(execution.status, execution.stepExecutions);
 
   if (!execution) {
     return (
@@ -175,7 +199,7 @@ export const WorkflowStepExecutionTree = ({
     return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
-        icon={<EuiIcon type="error" size="l" />}
+        icon={<EuiIcon type="error" size="l" aria-hidden={true} />}
         title={
           <h2>
             <FormattedMessage
@@ -187,11 +211,15 @@ export const WorkflowStepExecutionTree = ({
         body={<EuiText>{error.message}</EuiText>}
       />
     );
-  } else if (execution?.stepExecutions?.length === 0 && !isInProgressStatus(execution?.status)) {
+  } else if (
+    execution?.stepExecutions?.length === 0 &&
+    !isInProgressStatus(execution?.status) &&
+    !failedBeforeSteps
+  ) {
     return (
       <EuiEmptyPrompt
         {...emptyPromptCommonProps}
-        icon={<EuiIcon type="list" size="l" />}
+        icon={<EuiIcon type="listBullet" size="l" />}
         title={
           <h2>
             <FormattedMessage
@@ -211,7 +239,7 @@ export const WorkflowStepExecutionTree = ({
       stepExecutionMap.set(stepExecution.id, stepExecution);
     }
 
-    if (!isTerminalStatus(execution.status)) {
+    if (!isTerminalStatus(execution.status) || failedBeforeSteps) {
       definition.steps
         .filter((step) => !stepExecutionNameMap.has(step.name)) // we put skeletons only for steps without execution
         .filter((step) => !execution.stepId || step.name === execution.stepId) // we create skeletons only for the executed step and its children
@@ -219,7 +247,7 @@ export const WorkflowStepExecutionTree = ({
           stepId: step.name,
           stepType: step.type,
           status: 'pending' as WorkflowStepExecutionDto['status'],
-          id: `${step.name}-${step.type}-${index}`,
+          id: `skeleton-${step.name}-${step.type}-${index}`,
           scopeStack: [],
           workflowRunId: '',
           workflowId: '',
@@ -235,11 +263,22 @@ export const WorkflowStepExecutionTree = ({
         );
     }
 
-    const stepExecutionsTree = buildStepExecutionsTree(
+    let stepExecutionsTree = buildStepExecutionsTree(
       Array.from(stepExecutionMap.values()),
       execution.context,
-      execution.status
+      execution.status,
+      execution.triggeredBy
     );
+
+    const { tree: treeWithChildren, childStepExecutions } = injectChildWorkflowSteps(
+      stepExecutionsTree,
+      childExecutionsMap ?? new Map(),
+      isLoadingChildExecutions ?? false
+    );
+    stepExecutionsTree = treeWithChildren;
+    for (const childStep of childStepExecutions) {
+      stepExecutionMap.set(childStep.id, childStep);
+    }
 
     const overviewPseudoStep = stepExecutionsTree.find((item) => item.stepType === '__overview');
     if (overviewPseudoStep) {
@@ -300,6 +339,7 @@ export const WorkflowStepExecutionTree = ({
           {/* Regular steps */}
           {regularItems.length > 0 && (
             <EuiTreeView
+              data-test-subj="workflowStepExecutionTree"
               showExpansionArrows
               expandByDefault
               items={regularItems}
@@ -359,6 +399,15 @@ const componentStyles = {
 
     & .euiTreeView__node {
       position: relative;
+
+      /*
+       * Override EUI's max-block-size: 100vh on expanded tree nodes.
+       * Without this, expanded foreach nodes with many iterations get clipped
+       * to the viewport height, causing sibling nodes after them to overlap
+       * and appear interleaved between the last children.
+       * See: https://github.com/elastic/eui/issues/9395
+       */
+      ${logicalCSS('max-height', 'none')}
 
       /* Draw the vertical line to group an expanded item's child items together. */
       &::after {

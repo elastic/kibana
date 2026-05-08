@@ -225,9 +225,7 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": [
-                  "Get current user profile operation parameters."
-                ],
+                "description": [],
                 "signature": [
                   "UserProfileGetCurrentParams",
                   " | undefined"
@@ -236,6 +234,7 @@
                 "lineNumber": 35,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UserProfileGetCurrentParams",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -282,6 +281,7 @@
                 "lineNumber": 47,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UserProfileBulkGetParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -347,6 +347,7 @@
                 "lineNumber": 68,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "UserProfileSuggestParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -389,6 +390,7 @@
                 "lineNumber": 75,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "D",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -431,6 +433,7 @@
                 "lineNumber": 81,
                 "columnNumber": 53,
                 "deprecated": false,
+                "docsReferencedTypeName": "D",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -489,6 +492,7 @@
                 "lineNumber": 24,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreUserProfileDelegateContract",
                 "trackAdoption": false,
                 "isRequired": true
               }

@@ -38,9 +38,9 @@ describe('requestOAuthClientCredentialsToken', () => {
     axiosInstanceMock.mockReturnValueOnce({
       status: 200,
       data: {
-        tokenType: 'Bearer',
-        accessToken: 'dfjsdfgdjhfgsjdf',
-        expiresIn: 123,
+        token_type: 'Bearer',
+        access_token: 'dfjsdfgdjhfgsjdf',
+        expires_in: 123,
       },
     });
     await requestOAuthClientCredentialsToken(
@@ -70,6 +70,7 @@ describe('requestOAuthClientCredentialsToken', () => {
           "beforeRedirect": [Function],
           "data": "client_id=123456&client_secret=secrert123&grant_type=client_credentials&scope=test",
           "headers": Object {
+            "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
           },
           "httpAgent": undefined,
@@ -123,9 +124,9 @@ describe('requestOAuthClientCredentialsToken', () => {
     axiosInstanceMock.mockReturnValueOnce({
       status: 200,
       data: {
-        tokenType: 'Bearer',
-        accessToken: 'tokenwithfields',
-        expiresIn: 456,
+        token_type: 'Bearer',
+        access_token: 'tokenwithfields',
+        expires_in: 456,
       },
     });
 
@@ -164,6 +165,47 @@ describe('requestOAuthClientCredentialsToken', () => {
 
     expect(axiosInstanceMock.mock.calls[0][1].data).toMatchInlineSnapshot(
       `"another_field=value%202%20with%20spaces&client_id=client-abc&client_secret=secret-xyz&custom_param=value1&grant_type=client_credentials&numeric_field=123&scope=test-scope"`
+    );
+  });
+
+  test('uses Basic Auth and excludes credentials from body for client_secret_basic', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    const clientId = 'client-basic';
+    const clientSecret = 'secret-basic';
+
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 200,
+      data: {
+        token_type: 'Bearer',
+        access_token: 'token123',
+      },
+    });
+
+    await requestOAuthClientCredentialsToken(
+      'https://test-basic',
+      mockLogger,
+      {
+        scope: 'openid',
+        clientId,
+        clientSecret,
+      },
+      configurationUtilities,
+      'client_secret_basic'
+    );
+
+    const requestConfig = axiosInstanceMock.mock.calls[0][1];
+
+    expect(requestConfig.data).toContain('grant_type=client_credentials');
+    expect(requestConfig.data).toContain('scope=openid');
+    expect(requestConfig.data).not.toContain('client_id');
+    expect(requestConfig.data).not.toContain('client_secret');
+
+    const encoded = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    expect(requestConfig.headers).toEqual(
+      expect.objectContaining({
+        Authorization: `Basic ${encoded}`,
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      })
     );
   });
 

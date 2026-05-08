@@ -27,6 +27,7 @@ import {
   updateRule,
   patchRule,
   fetchRules,
+  fetchSearchRules,
   fetchRuleById,
   importRules,
   exportRules,
@@ -56,7 +57,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith(
         '/api/detection_engine/rules',
         expect.objectContaining({
-          body: '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","rule_id":"rule-1"}',
+          body: '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"max_signals":100,"language":"kuery","rule_id":"rule-1"}',
           method: 'POST',
         })
       );
@@ -75,7 +76,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith(
         '/api/detection_engine/rules',
         expect.objectContaining({
-          body: '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","id":"04128c15-0d1b-4716-a4c5-46997ac7f3bd"}',
+          body: '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","max_signals":100,"type":"query","risk_score":55,"language":"kuery","id":"04128c15-0d1b-4716-a4c5-46997ac7f3bd"}',
           method: 'PUT',
         })
       );
@@ -115,7 +116,7 @@ describe('Detections Rules API', () => {
       expect(fetchMock).toHaveBeenCalledWith(
         '/api/detection_engine/rules/preview',
         expect.objectContaining({
-          body: '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"language":"kuery","rule_id":"rule-1","invocationCount":1,"timeframeEnd":"2015-03-12 05:17:10"}',
+          body: '{"description":"Detecting root and admin users","name":"Query with a rule id","query":"user.name: root or user.name: admin","severity":"high","type":"query","risk_score":55,"max_signals":100,"language":"kuery","rule_id":"rule-1","invocationCount":1,"timeframeEnd":"2015-03-12 05:17:10"}',
           method: 'POST',
           query: undefined,
         })
@@ -501,6 +502,80 @@ describe('Detections Rules API', () => {
     test('happy path', async () => {
       const rulesResp = await fetchRules({});
       expect(rulesResp).toEqual(rulesMock);
+    });
+  });
+
+  describe('fetchSearchRules', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(rulesMock);
+    });
+
+    test('uses _search with default sort and API version', async () => {
+      await fetchSearchRules({});
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/internal/detection_engine/rules/_search',
+        expect.objectContaining({
+          method: 'POST',
+          version: '1',
+          body: JSON.stringify({
+            page: 1,
+            per_page: 20,
+            sort_field: 'enabled',
+            sort_order: 'desc',
+          }),
+        })
+      );
+    });
+
+    test('sends structured filter, legacy search, and sort_field / sort_order', async () => {
+      await fetchSearchRules({
+        filter: 'alert.attributes.params.immutable: false',
+        search: { term: 'hello', mode: 'legacy' },
+        sort_field: 'name',
+        sort_order: 'asc',
+      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/internal/detection_engine/rules/_search',
+        expect.objectContaining({
+          method: 'POST',
+          version: '1',
+          body: JSON.stringify({
+            page: 1,
+            per_page: 20,
+            sort_field: 'name',
+            sort_order: 'asc',
+            filter: 'alert.attributes.params.immutable: false',
+            search: { term: 'hello', mode: 'legacy' },
+          }),
+        })
+      );
+    });
+
+    test('includes aggregations when provided', async () => {
+      await fetchSearchRules({
+        aggregations: { counts: ['tags', 'enabled'] },
+      });
+      const [, options] = fetchMock.mock.calls[0];
+      expect(JSON.parse(options.body as string)).toEqual(
+        expect.objectContaining({
+          aggregations: { counts: ['tags', 'enabled'] },
+        })
+      );
+    });
+
+    test('passes search_after in the body when provided', async () => {
+      await fetchSearchRules({ search_after: [42, 'rule-id'] });
+      const [, options] = fetchMock.mock.calls[0];
+      expect(JSON.parse(options.body as string)).toEqual(
+        expect.objectContaining({ search_after: [42, 'rule-id'] })
+      );
+    });
+
+    test('omits filter from the JSON body when the filter is empty or whitespace', async () => {
+      await fetchSearchRules({ filter: '   ' });
+      const [, options] = fetchMock.mock.calls[0];
+      expect(JSON.parse(options.body as string)).not.toHaveProperty('filter');
     });
   });
 

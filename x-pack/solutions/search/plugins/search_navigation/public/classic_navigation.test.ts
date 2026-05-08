@@ -11,6 +11,10 @@ import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 import { classicNavigationFactory } from './classic_navigation';
 import type { ClassicNavItem } from './types';
 
+jest.mock('./solution_navigation_footer', () => ({
+  getSolutionNavFooter: () => undefined,
+}));
+
 describe('classicNavigationFactory', function () {
   const mockedNavLinks: Array<Partial<ChromeNavLink>> = [
     {

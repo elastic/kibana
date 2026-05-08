@@ -341,7 +341,9 @@ describe('Common authentication routes', () => {
           currentURL: '/some-url',
           UnknownArg: 'arg',
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"[UnknownArg]: definition for this key is missing"`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[UnknownArg]: Additional properties are not allowed ('UnknownArg' was unexpected)"`
+      );
 
       expect(() =>
         bodyValidator.validate({

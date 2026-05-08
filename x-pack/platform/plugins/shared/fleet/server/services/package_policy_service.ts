@@ -287,7 +287,8 @@ export interface PackagePolicyClient {
 
   rollback(
     soClient: SavedObjectsClientContract,
-    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>
+    packagePolicies: Array<SavedObjectsFindResult<PackagePolicySOAttributes>>,
+    previousVersion: string
   ): Promise<RollbackResult>;
 
   restoreRollback(
@@ -340,6 +341,7 @@ export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
   skipUnassignFromAgentPolicies?: boolean;
   force?: boolean;
   asyncDeploy?: boolean;
+  ignoreMissing?: boolean;
 }
 
 export interface PackagePolicyClientBulkUpdateOptions {

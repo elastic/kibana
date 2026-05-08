@@ -6,6 +6,11 @@
  */
 
 /**
+ * Base path for all Cloud Connect internal API routes
+ */
+export const API_BASE_PATH = '/internal/cloud_connect';
+
+/**
  * Saved object type name for Cloud Connect API key storage
  */
 export const CLOUD_CONNECT_API_KEY_TYPE = 'cloud-connect-api-key';

@@ -12,6 +12,7 @@ import { setupAgents } from './setup/setup_agents';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { agentBuilder } = getPageObjects(['agentBuilder']);
   const browser = getService('browser');
+  const retry = getService('retry');
 
   describe('Edit agent', function () {
     const { agents, agentsHooks } = setupAgents({ getPageObjects, getService });
@@ -25,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('should navigate to agent edit form', async function () {
       await agentBuilder.clickAgentEdit(agent.id);
-      await browser.waitForUrlToBe(`/app/agent_builder/agents/${agent.id}`);
+      await browser.waitForUrlToBe(`/app/agent_builder/manage/agents/${agent.id}`);
     });
 
     it('should show agent name as page title', async function () {
@@ -49,13 +50,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const saveButton = agentBuilder.agentFormSaveButton();
       expect(await saveButton.isEnabled()).to.be(true);
       await saveButton.click();
-      expect(await agentBuilder.getAgentRowDisplayName(agent.id)).to.be(editedName);
+      // The list page renders before React-Query's background refetch lands, so
+      // the row can briefly show the previous name. Poll until the refresh hits.
+      await retry.try(async () => {
+        expect(await agentBuilder.getAgentRowDisplayName(agent.id)).to.be(editedName);
+      });
     });
 
     it('should clone agent', async function () {
       agent = agents[1];
       await agentBuilder.clickAgentClone(agent.id);
-      await browser.waitForUrlToBe(`/app/agent_builder/agents/new?source_id=${agent.id}`);
+      await browser.waitForUrlToBe(`/app/agent_builder/manage/agents/new?source_id=${agent.id}`);
       expect(await agentBuilder.getAgentFormDisplayName()).to.be(agent.name);
       const idInput = agentBuilder.getAgentIdInput();
       expect(await idInput.getValue()).to.be('test_agent_3');

@@ -13,51 +13,51 @@
   },
   "jobs": [
     {
-      "id": "azure_activitylogs_rare_event_action_for_a_city",
-      "file": "azure_activitylogs_rare_event_action_for_a_city.json"
+      "id": "azure_activitylogs_rare_event_action_for_a_city_ea",
+      "file": "azure_activitylogs_rare_event_action_for_a_city_ea.json"
     },
     {
-      "id": "azure_activitylogs_rare_event_action_for_a_country",
-      "file": "azure_activitylogs_rare_event_action_for_a_country.json"
+      "id": "azure_activitylogs_rare_event_action_for_a_country_ea",
+      "file": "azure_activitylogs_rare_event_action_for_a_country_ea.json"
     },
     {
-      "id": "azure_activitylogs_rare_event_action_for_a_username",
-      "file": "azure_activitylogs_rare_event_action_for_a_username.json"
+      "id": "azure_activitylogs_rare_event_action_for_a_user_email_ea",
+      "file": "azure_activitylogs_rare_event_action_for_a_user_email_ea.json"
     },
     {
-      "id": "azure_activitylogs_high_distinct_count_event_action_on_failure",
-      "file": "azure_activitylogs_high_distinct_count_event_action_on_failure.json"
+      "id": "azure_activitylogs_high_distinct_count_event_action_fail_ea",
+      "file": "azure_activitylogs_high_distinct_count_event_action_fail_ea.json"
     },
     {
-      "id": "azure_activitylogs_rare_event_action_on_failure",
-      "file": "azure_activitylogs_rare_event_action_on_failure.json"
+      "id": "azure_activitylogs_rare_event_action_on_failure_ea",
+      "file": "azure_activitylogs_rare_event_action_on_failure_ea.json"
     }
   ],
   "datafeeds": [
     {
-      "id": "datafeed-azure_activitylogs_rare_event_action_for_a_city",
-      "file": "datafeed_azure_activitylogs_rare_event_action_for_a_city.json",
-      "job_id": "azure_activitylogs_rare_event_action_for_a_city"
+      "id": "datafeed-azure_activitylogs_rare_event_action_for_a_city_ea",
+      "file": "datafeed_azure_activitylogs_rare_event_action_for_a_city_ea.json",
+      "job_id": "azure_activitylogs_rare_event_action_for_a_city_ea"
     },
     {
-      "id": "datafeed-azure_activitylogs_rare_event_action_for_a_country",
-      "file": "datafeed_azure_activitylogs_rare_event_action_for_a_country.json",
-      "job_id": "azure_activitylogs_rare_event_action_for_a_country"
+      "id": "datafeed-azure_activitylogs_rare_event_action_for_a_country_ea",
+      "file": "datafeed_azure_activitylogs_rare_event_action_for_a_country_ea.json",
+      "job_id": "azure_activitylogs_rare_event_action_for_a_country_ea"
     },
     {
-      "id": "datafeed-azure_activitylogs_rare_event_action_for_a_username",
-      "file": "datafeed_azure_activitylogs_rare_event_action_for_a_username.json",
-      "job_id": "azure_activitylogs_rare_event_action_for_a_username"
+      "id": "datafeed-azure_activitylogs_rare_event_action_for_a_user_email_ea",
+      "file": "datafeed_azure_activitylogs_rare_event_action_for_a_user_email_ea.json",
+      "job_id": "azure_activitylogs_rare_event_action_for_a_user_email_ea"
     },
     {
-      "id": "datafeed-azure_activitylogs_high_distinct_count_event_action_on_failure",
-      "file": "datafeed_azure_activitylogs_high_distinct_count_event_action_on_failure.json",
-      "job_id": "azure_activitylogs_high_distinct_count_event_action_on_failure"
+      "id": "datafeed-azure_activitylogs_high_distinct_count_event_action_fail_ea",
+      "file": "datafeed_azure_activitylogs_high_distinct_count_event_action_fail_ea.json",
+      "job_id": "azure_activitylogs_high_distinct_count_event_action_fail_ea"
     },
     {
-      "id": "datafeed-azure_activitylogs_rare_event_action_on_failure",
-      "file": "datafeed_azure_activitylogs_rare_event_action_on_failure.json",
-      "job_id": "azure_activitylogs_rare_event_action_on_failure"
+      "id": "datafeed-azure_activitylogs_rare_event_action_on_failure_ea",
+      "file": "datafeed_azure_activitylogs_rare_event_action_on_failure_ea.json",
+      "job_id": "azure_activitylogs_rare_event_action_on_failure_ea"
     }
   ],
   "tags": [

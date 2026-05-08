@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/kibana-manifest-schema'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-operations'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/kibana-manifest-schema'
+  title: '@kbn/kibana-manifest-schema'
   description: Moon project for @kbn/kibana-manifest-schema
   channel: ''
   owner: '@elastic/kibana-operations'
-  metadata:
-    sourceRoot: packages/kbn-kibana-manifest-schema
+  sourceRoot: packages/kbn-kibana-manifest-schema
 dependsOn:
   - '@kbn/projects-solutions-groups'
 tags:
@@ -30,16 +29,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

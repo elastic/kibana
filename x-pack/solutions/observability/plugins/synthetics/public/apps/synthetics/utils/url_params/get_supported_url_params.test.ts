@@ -67,6 +67,7 @@ describe('getSupportedUrlParams', () => {
       query: '',
       locations: [],
       monitorTypes: [],
+      configIds: [],
       projects: [],
       schedules: [],
       tags: [],

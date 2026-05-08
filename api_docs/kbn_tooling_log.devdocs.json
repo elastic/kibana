@@ -85,6 +85,7 @@
                 "lineNumber": 46,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLogTextWriterConfig",
                 "trackAdoption": false,
                 "isRequired": false
               },
@@ -109,6 +110,7 @@
                 "lineNumber": 46,
                 "columnNumber": 58,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLogOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -714,6 +716,7 @@
                 "lineNumber": 18,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogLevel",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -766,6 +769,7 @@
                 "lineNumber": 33,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "Message",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -873,6 +877,7 @@
                 "lineNumber": 91,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLogTextWriterConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -923,6 +928,7 @@
                 "lineNumber": 103,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "Message",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1007,6 +1013,7 @@
                 "lineNumber": 132,
                 "columnNumber": 74,
                 "deprecated": false,
+                "docsReferencedTypeName": "Message",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1020,6 +1027,43 @@
     "functions": [
       {
         "parentPluginId": "@kbn/tooling-log",
+        "id": "def-common.getLogLevelFlagHelpItems",
+        "type": "Function",
+        "tags": [],
+        "label": "getLogLevelFlagHelpItems",
+        "description": [],
+        "signature": [
+          "(defaultLogLevel: string) => { flag: string; description: string; }[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
+        "lineNumber": 38,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tooling-log",
+            "id": "def-common.getLogLevelFlagHelpItems.$1",
+            "type": "string",
+            "tags": [],
+            "label": "defaultLogLevel",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tooling-log",
         "id": "def-common.getLogLevelFlagsHelp",
         "type": "Function",
         "tags": [],
@@ -1029,7 +1073,7 @@
           "(defaultLogLevel: string) => string"
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
-        "lineNumber": 52,
+        "lineNumber": 46,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1045,7 +1089,7 @@
               "string"
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
-            "lineNumber": 52,
+            "lineNumber": 46,
             "columnNumber": 38,
             "deprecated": false,
             "trackAdoption": false,
@@ -1066,7 +1110,7 @@
           "(name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\") => { name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\"; flags: { info: boolean; error: boolean; success: boolean; warning: boolean; debug: boolean; verbose: boolean; silent: boolean; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
-        "lineNumber": 60,
+        "lineNumber": 55,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1082,9 +1126,10 @@
               "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\""
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
-            "lineNumber": 60,
+            "lineNumber": 55,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "LogLevel",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1122,6 +1167,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1187,7 +1233,7 @@
               "level/type of message"
             ],
             "signature": [
-              "\"info\" | \"error\" | \"success\" | \"warning\" | \"write\" | \"debug\" | \"verbose\""
+              "\"info\" | \"error\" | \"write\" | \"success\" | \"warning\" | \"debug\" | \"verbose\""
             ],
             "path": "src/platform/packages/shared/kbn-tooling-log/src/message.ts",
             "lineNumber": 16,
@@ -1477,6 +1523,7 @@
                 "lineNumber": 22,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "Message",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1514,7 +1561,7 @@
         "label": "LOG_LEVEL_FLAGS",
         "description": [],
         "signature": [
-          "{ name: \"info\" | \"debug\" | \"verbose\" | \"silent\" | \"quiet\"; help: string; }[]"
+          "{ name: \"info\" | \"debug\" | \"verbose\" | \"silent\" | \"quiet\"; flag: string; description: string; }[]"
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
         "lineNumber": 26,
@@ -1551,7 +1598,7 @@
           "{ name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\" | \"silent\"; flags: { info: boolean; error: boolean; success: boolean; warning: boolean; debug: boolean; verbose: boolean; silent: boolean; }; }"
         ],
         "path": "src/platform/packages/shared/kbn-tooling-log/src/log_levels.ts",
-        "lineNumber": 58,
+        "lineNumber": 53,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

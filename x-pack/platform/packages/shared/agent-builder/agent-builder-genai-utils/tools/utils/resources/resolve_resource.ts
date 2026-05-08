@@ -12,6 +12,7 @@ import { EsResourceType } from '@kbn/agent-builder-common';
 import type { MappingField } from '../mappings';
 import { flattenMapping, getIndexMappings, getDataStreamMappings } from '../mappings';
 import { processFieldCapsResponse } from '../field_caps';
+import { isCcsTarget, getFieldsFromFieldCaps } from '../ccs';
 
 export interface ResolveResourceResponse {
   /** name of the resource */
@@ -61,9 +62,84 @@ export const resolveResource = async ({
     throw new Error(`Found multiple targets when trying to resolve resource for ${resourceName}`);
   }
 
+  return resolveSingleResource({ resourceName, resolveRes, esClient });
+};
+
+/**
+ * Retrieve resource metadata for ES|QL generation.
+ * Supports index patterns and comma-separated targets by using field_caps
+ * when multiple resources are resolved. Multi-target results use {@link EsResourceType.indexPattern}.
+ */
+export const resolveResourceForEsql = async ({
+  resourceName,
+  esClient,
+}: {
+  resourceName: string;
+  esClient: ElasticsearchClient;
+}): Promise<ResolveResourceResponse> => {
+  let resolveRes: IndicesResolveIndexResponse;
+  try {
+    resolveRes = await esClient.indices.resolveIndex({
+      name: [resourceName],
+      allow_no_indices: false,
+      expand_wildcards: ['all'],
+    });
+  } catch (e) {
+    if (isNotFoundError(e)) {
+      throw new Error(`No resource found for '${resourceName}'`);
+    }
+    throw e;
+  }
+
+  const resourceCount =
+    resolveRes.indices.length + resolveRes.aliases.length + resolveRes.data_streams.length;
+
+  if (resourceCount === 0) {
+    throw new Error(`No resource found for pattern ${resourceName}`);
+  }
+
+  if (resourceCount === 1) {
+    return resolveSingleResource({ resourceName, resolveRes, esClient });
+  }
+
+  const fieldCapRes = await esClient.fieldCaps({
+    index: resourceName,
+    fields: ['*'],
+  });
+  const { fields } = processFieldCapsResponse(fieldCapRes);
+
+  return {
+    name: resourceName,
+    type: EsResourceType.indexPattern,
+    fields,
+  };
+};
+
+const resolveSingleResource = async ({
+  resourceName,
+  resolveRes,
+  esClient,
+}: {
+  resourceName: string;
+  resolveRes: IndicesResolveIndexResponse;
+  esClient: ElasticsearchClient;
+}): Promise<ResolveResourceResponse> => {
   // target is an index
   if (resolveRes.indices.length > 0) {
     const indexName = resolveRes.indices[0].name;
+
+    // CCS fallback: the _mapping API does not support remote indices,
+    // so we use the CCS-compatible _field_caps API instead.
+    // Trade-off: _meta.description is not available via _field_caps.
+    if (isCcsTarget(resourceName)) {
+      const fields = await getFieldsFromFieldCaps({ resource: indexName, esClient });
+      return {
+        name: resourceName,
+        type: EsResourceType.index,
+        fields,
+      };
+    }
+
     const mappingRes = await getIndexMappings({ indices: [indexName], esClient, cleanup: true });
     const mappings = mappingRes[indexName].mappings;
     const fields = flattenMapping(mappings);
@@ -77,6 +153,19 @@ export const resolveResource = async ({
   // target is a datastream
   if (resolveRes.data_streams.length > 0) {
     const datastream = resolveRes.data_streams[0].name;
+
+    // CCS fallback: the _data_stream/_mappings API does not support remote data streams,
+    // so we use the CCS-compatible _field_caps API instead.
+    // Trade-off: _meta.description is not available via _field_caps.
+    if (isCcsTarget(resourceName)) {
+      const fields = await getFieldsFromFieldCaps({ resource: datastream, esClient });
+      return {
+        name: resourceName,
+        type: EsResourceType.dataStream,
+        fields,
+      };
+    }
+
     const mappingRes = await getDataStreamMappings({
       datastreams: [datastream],
       esClient,

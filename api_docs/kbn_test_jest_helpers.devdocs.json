@@ -397,58 +397,6 @@
             "path": "x-pack/platform/plugins/shared/index_management/public/application/components/component_templates/__jest__/client_integration/helpers/index.ts"
           },
           {
-            "plugin": "@kbn/security-ui-components",
-            "path": "x-pack/platform/packages/private/security/ui_components/src/kibana_privilege_table/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "@kbn/security-ui-components",
-            "path": "x-pack/platform/packages/private/security/ui_components/src/kibana_privilege_table/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "@kbn/security-ui-components",
-            "path": "x-pack/platform/packages/private/security/ui_components/src/kibana_privilege_table/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
-            "plugin": "security",
-            "path": "x-pack/platform/plugins/shared/security/public/management/roles/edit_role/privileges/kibana/privilege_summary/__fixtures__/index.ts"
-          },
-          {
             "plugin": "dataViewFieldEditor",
             "path": "src/platform/plugins/shared/data_view_field_editor/__jest__/client_integration/helpers/index.ts"
           }
@@ -471,6 +419,7 @@
             "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ReactWrapper",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -490,6 +439,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -509,6 +459,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Matcher",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -683,7 +634,7 @@
             "tags": [],
             "label": "WrapperComponent",
             "description": [
-              "A component that, if provided, will be wrapped\naround the test component. This can be useful to provide context values."
+              "A component that, if provided, will be wrapped"
             ],
             "signature": [
               "React.ComponentType<{ children?: React.ReactNode; }> | undefined"
@@ -709,6 +660,7 @@
             "lineNumber": 147,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Args",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -728,7 +680,7 @@
         "label": "mountWithI18nProvider",
         "description": [],
         "signature": [
-          "(child: React.ReactElement<T, string | React.JSXElementConstructor<any>>, options: (Omit<",
+          "(child: React.ReactElement<T>, options: (Omit<",
           "MountRendererProps",
           ", \"wrappingComponent\"> & { wrappingComponent?: React.ComponentType<any> | ",
           "ComponentType",
@@ -757,6 +709,7 @@
             "lineNumber": 209,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ReactElement",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -796,7 +749,7 @@
         "label": "mountWithIntl",
         "description": [],
         "signature": [
-          "(node: React.ReactElement<any, string | React.JSXElementConstructor<any>>, options: ",
+          "(node: React.ReactElement<any>, options: ",
           "MountRendererProps",
           " | undefined) => ",
           "ReactWrapper",
@@ -862,6 +815,7 @@
             "lineNumber": 82,
             "columnNumber": 57,
             "deprecated": false,
+            "docsReferencedTypeName": "MountRendererProps",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -900,9 +854,9 @@
           "\nWhen using @kbn/i18n `injectI18n` on components, props.intl is required."
         ],
         "signature": [
-          "(node: React.ReactElement<T, string | React.JSXElementConstructor<any>>) => React.ReactElement<T & { intl: ",
+          "(node: React.ReactElement<T>) => React.ReactElement<T & { intl: ",
           "IntlShape",
-          "; }, string | React.JSXElementConstructor<any>>"
+          "; }>"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "lineNumber": 30,
@@ -924,6 +878,7 @@
             "lineNumber": 33,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "ReactElement",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1020,6 +975,7 @@
             "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ComponentType",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1046,6 +1002,7 @@
             "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AsyncTestBedConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1099,6 +1056,7 @@
             "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ComponentType",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1123,6 +1081,7 @@
             "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TestBedConfig",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1184,6 +1143,7 @@
             "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ComponentType",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1265,6 +1225,7 @@
             "lineNumber": 31,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "Parameters",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1314,6 +1275,7 @@
             "lineNumber": 25,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "Parameters",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1331,7 +1293,7 @@
         "label": "renderWithI18nProvider",
         "description": [],
         "signature": [
-          "(child: React.ReactElement<T, string | React.JSXElementConstructor<any>>, options: (Omit<",
+          "(child: React.ReactElement<T>, options: (Omit<",
           "MountRendererProps",
           ", \"wrappingComponent\"> & { wrappingComponent?: React.ComponentType<any> | ",
           "ComponentType",
@@ -1375,6 +1337,7 @@
             "lineNumber": 222,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ReactElement",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1414,7 +1377,7 @@
         "label": "renderWithIntl",
         "description": [],
         "signature": [
-          "(node: React.ReactElement<T, string | React.JSXElementConstructor<any>>, options: any) => cheerio.Cheerio"
+          "(node: React.ReactElement<T>, options: any) => cheerio.Cheerio"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
         "lineNumber": 93,
@@ -1509,6 +1472,7 @@
             "lineNumber": 15,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "Parameters",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1759,7 +1723,7 @@
         "label": "shallowWithI18nProvider",
         "description": [],
         "signature": [
-          "(child: React.ReactElement<T, string | React.JSXElementConstructor<any>>, options: (Omit<",
+          "(child: React.ReactElement<T>, options: (Omit<",
           "ShallowRendererProps",
           ", \"wrappingComponent\"> & { wrappingComponent?: React.ComponentType<any> | ",
           "ComponentType",
@@ -1788,6 +1752,7 @@
             "lineNumber": 196,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ReactElement",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1827,9 +1792,9 @@
         "label": "shallowWithIntl",
         "description": [],
         "signature": [
-          "(node: React.ReactElement<any, string | React.JSXElementConstructor<any>>, options: (",
+          "(node: React.ReactElement<any>, options: (",
           "ShallowRendererProps",
-          " & { wrappingComponent?: React.ComponentType<{}> | undefined; }) | undefined) => ",
+          " & { wrappingComponent?: React.ComponentType | undefined; }) | undefined) => ",
           "ShallowWrapper",
           "<any, Readonly<{}>, React.Component<{}, {}, any>>"
         ],
@@ -1957,7 +1922,7 @@
         "signature": [
           "(initialEntries?: ",
           "LocationDescriptor",
-          "<unknown>[], initialIndex?: number) => (WrappedComponent: React.ComponentType<{}>) => (props: any) => React.JSX.Element"
+          "<unknown>[], initialIndex?: number) => (WrappedComponent: React.ComponentType) => (props: any) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-test-jest-helpers/src/router_helpers.tsx",
         "lineNumber": 36,
@@ -2280,6 +2245,7 @@
                 "lineNumber": 42,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2342,6 +2308,7 @@
                 "lineNumber": 58,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2360,6 +2327,7 @@
                 "lineNumber": 58,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "ReactWrapper",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2557,6 +2525,7 @@
             "lineNumber": 14,
             "columnNumber": 58,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -2609,6 +2578,7 @@
             "lineNumber": 16,
             "columnNumber": 53,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -2653,6 +2623,7 @@
             "lineNumber": 15,
             "columnNumber": 57,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],

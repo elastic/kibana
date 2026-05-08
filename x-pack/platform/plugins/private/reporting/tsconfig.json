@@ -9,7 +9,6 @@
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/discover-plugin",
-    "@kbn/embeddable-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
     "@kbn/screenshot-mode-plugin",

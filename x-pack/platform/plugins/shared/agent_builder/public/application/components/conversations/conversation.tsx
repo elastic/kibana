@@ -13,14 +13,23 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useEffect, useRef } from 'react';
-import { useConversationError, useHasActiveConversation } from '../../hooks/use_conversation';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { isString } from 'lodash';
+import {
+  useConversationError,
+  useConversationRounds,
+  useHasActiveConversation,
+} from '../../hooks/use_conversation';
 import { ConversationInput } from './conversation_input/conversation_input';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
 import { useShouldStickToBottom } from '../../context/conversation/use_should_stick_to_bottom';
-import { useSendMessage } from '../../context/send_message/send_message_context';
+import {
+  useSendMessage,
+  useSendMessageContext,
+} from '../../context/send_message/send_message_context';
+import { useIsAnyConversationStreaming } from '../../hooks/use_is_any_conversation_streaming';
 import { useConversationScrollActions } from '../../hooks/use_conversation_scroll_actions';
 import { useConversationStatus } from '../../hooks/use_conversation';
 import { useSendPredefinedInitialMessage } from '../../hooks/use_initial_message';
@@ -35,22 +44,39 @@ import { useNavigationAbort } from '../../hooks/use_navigation_abort';
 import { ErrorPrompt } from '../common/prompt/error_prompt';
 import { PROMPT_LAYOUT_VARIANTS } from '../common/prompt/layout';
 import { StartNewConversationButton } from './actions/start_new_conversation_button';
+import { CanvasProvider } from './conversation_rounds/round_response/attachments/canvas_context';
+import { CanvasFlyout } from './conversation_rounds/round_response/attachments/canvas_flyout';
+import { RoundsScreenReaderStatus } from './conversation_rounds/rounds_screen_reader_status';
+import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
+import { useConversationContext } from '../../context/conversation/conversation_context';
+import { StaleAttachmentsPanel } from './stale_attachments_panel';
+import { useStaleAttachments } from '../../hooks/use_stale_attachments_check';
 
 export const Conversation: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
   const { isResponseLoading } = useSendMessage();
+  const isAnyStreaming = useIsAnyConversationStreaming();
+  const { cancelAllStreams } = useSendMessageContext();
+  const conversationRounds = useConversationRounds();
+  const lastRound = conversationRounds.at(-1);
   const { isFetched } = useConversationStatus();
   const { errorType } = useConversationError();
   const shouldStickToBottom = useShouldStickToBottom();
   const onAppLeave = useAppLeave();
-
+  const { attachmentsService } = useAgentBuilderServices();
+  const { attachments: stagedAttachments = [], upsertAttachments } = useConversationContext();
+  const { staleAttachments, scheduleStaleCheck } = useStaleAttachments(conversationId);
+  const [dismissStaleAttachments, setDismissStaleAttachments] = useState(false);
   useSendPredefinedInitialMessage();
 
+  // Page-leave guard fires for any in-flight stream, not just this conversation's.
+  // On confirmed leave, cancel every stream so background mutations don't keep running.
   useNavigationAbort({
     onAppLeave,
-    isResponseLoading,
+    isResponseLoading: isAnyStreaming,
+    cancelAll: cancelAllStreams,
   });
 
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -62,6 +88,27 @@ export const Conversation: React.FC<{}> = () => {
     });
 
   const scrollContainerHeight = scrollContainerRef.current?.clientHeight ?? 0;
+
+  const stagedAttachmentIds = useMemo(() => {
+    const ids = stagedAttachments.map((attachment) => attachment.id).filter(isString);
+    return new Set(ids);
+  }, [stagedAttachments]);
+
+  const staleAttachmentInputs = useMemo(() => {
+    return staleAttachments.filter((a) => !a.id || !stagedAttachmentIds.has(a.id));
+  }, [staleAttachments, stagedAttachmentIds]);
+
+  const handleStageStaleAttachments = useCallback(() => {
+    if (staleAttachmentInputs.length > 0) {
+      upsertAttachments?.(staleAttachmentInputs);
+    }
+    setDismissStaleAttachments(true);
+  }, [staleAttachmentInputs, upsertAttachments]);
+
+  // Display stale attachments panel when stale attachments response changes or conversationId changes
+  useEffect(() => {
+    setDismissStaleAttachments(false);
+  }, [staleAttachments, conversationId]);
 
   // Stick to bottom only when user returns to an existing conversation (conversationId is defined and changes)
   useEffect(() => {
@@ -100,6 +147,7 @@ export const Conversation: React.FC<{}> = () => {
   const scrollableStyles = css`
     ${useEuiScrollBar()}
     ${useEuiOverflowScroll('y')}
+    scrollbar-gutter: stable both-edges;
   `;
 
   const inputPaddingStyles = css`
@@ -121,26 +169,44 @@ export const Conversation: React.FC<{}> = () => {
   }
 
   return (
-    <EuiFlexGroup direction="column" alignItems="center" css={containerStyles} gutterSize="s">
-      <EuiFlexItem grow={true} css={scrollWrapperStyles}>
-        <EuiFlexGroup
-          direction="column"
-          alignItems="center"
-          ref={scrollContainerRef}
-          css={scrollableStyles}
+    <CanvasProvider>
+      <RoundsScreenReaderStatus lastRound={lastRound} />
+      <EuiFlexGroup direction="column" alignItems="center" css={containerStyles} gutterSize="s">
+        <EuiFlexItem grow={true} css={scrollWrapperStyles}>
+          <EuiFlexGroup
+            direction="column"
+            alignItems="center"
+            ref={scrollContainerRef}
+            css={scrollableStyles}
+          >
+            <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>
+              <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}
+        </EuiFlexItem>
+        <EuiFlexItem
+          css={[
+            conversationElementWidthStyles,
+            conversationElementPaddingStyles,
+            inputPaddingStyles,
+          ]}
+          grow={false}
         >
-          <EuiFlexItem css={[conversationElementWidthStyles, conversationElementPaddingStyles]}>
-            <ConversationRounds scrollContainerHeight={scrollContainerHeight} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {showScrollButton && <ScrollButton onClick={smoothScrollToBottom} />}
-      </EuiFlexItem>
-      <EuiFlexItem
-        css={[conversationElementWidthStyles, conversationElementPaddingStyles, inputPaddingStyles]}
-        grow={false}
-      >
-        <ConversationInput onSubmit={scrollToMostRecentRoundTop} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          {!dismissStaleAttachments && (
+            <StaleAttachmentsPanel
+              attachmentInputs={staleAttachmentInputs}
+              onAddToInput={handleStageStaleAttachments}
+              onDismiss={() => setDismissStaleAttachments(true)}
+            />
+          )}
+          <ConversationInput
+            onSubmit={scrollToMostRecentRoundTop}
+            onEditorFocus={scheduleStaleCheck}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <CanvasFlyout attachmentsService={attachmentsService} />
+    </CanvasProvider>
   );
 };

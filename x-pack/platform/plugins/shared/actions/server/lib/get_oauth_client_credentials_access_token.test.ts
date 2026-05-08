@@ -99,7 +99,8 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         clientSecret: 'clientSecret',
         ...defaultAdditionalFields,
       },
-      configurationUtilities
+      configurationUtilities,
+      undefined
     );
     expect(connectorTokenClient.updateOrReplace).toHaveBeenCalledWith({
       connectorId: '123',
@@ -145,7 +146,8 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         clientSecret: 'clientSecret',
         ...defaultAdditionalFields,
       },
-      configurationUtilities
+      configurationUtilities,
+      undefined
     );
     expect(connectorTokenClient.updateOrReplace).toHaveBeenCalledWith({
       connectorId: '123',
@@ -199,7 +201,8 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         scope: 'https://graph.microsoft.com/.default',
         ...specificAdditionalFields,
       }),
-      expect.any(Object) // configurationUtilities
+      expect.any(Object), // configurationUtilities
+      undefined
     );
   });
 
@@ -295,7 +298,8 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         clientSecret: 'clientSecret',
         ...defaultAdditionalFields,
       },
-      configurationUtilities
+      configurationUtilities,
+      undefined
     );
   });
 
@@ -336,7 +340,8 @@ describe('getOAuthClientCredentialsAccessToken', () => {
         clientSecret: 'clientSecret',
         ...defaultAdditionalFields,
       },
-      configurationUtilities
+      configurationUtilities,
+      undefined
     );
   });
 });

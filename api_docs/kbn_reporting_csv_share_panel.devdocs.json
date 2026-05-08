@@ -28,9 +28,9 @@
           "<",
           {
             "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
+            "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.EmbeddableApiContext",
+            "section": "def-common.EmbeddableApiContext",
             "text": "EmbeddableApiContext"
           },
           ", {}>"
@@ -103,6 +103,7 @@
                 "lineNumber": 110,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Params",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -197,6 +198,7 @@
                 "lineNumber": 126,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "SavedSearch",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -214,9 +216,9 @@
               "(context: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.EmbeddableApiContext",
+                "section": "def-common.EmbeddableApiContext",
                 "text": "EmbeddableApiContext"
               },
               ") => Promise<boolean>"
@@ -237,9 +239,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/presentation-publishing",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-public.EmbeddableApiContext",
+                    "section": "def-common.EmbeddableApiContext",
                     "text": "EmbeddableApiContext"
                   }
                 ],
@@ -247,6 +249,7 @@
                 "lineNumber": 141,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "EmbeddableApiContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -264,9 +267,9 @@
               "(context: ",
               {
                 "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
+                "scope": "common",
                 "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.EmbeddableApiContext",
+                "section": "def-common.EmbeddableApiContext",
                 "text": "EmbeddableApiContext"
               },
               ") => Promise<void>"
@@ -287,9 +290,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/presentation-publishing",
-                    "scope": "public",
+                    "scope": "common",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-public.EmbeddableApiContext",
+                    "section": "def-common.EmbeddableApiContext",
                     "text": "EmbeddableApiContext"
                   }
                 ],
@@ -297,6 +300,7 @@
                 "lineNumber": 210,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "EmbeddableApiContext",
                 "trackAdoption": false,
                 "isRequired": true
               }

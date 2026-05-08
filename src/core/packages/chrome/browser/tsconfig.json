@@ -29,8 +29,7 @@
     "@kbn/projects-solutions-groups",
     "@kbn/deeplinks-workflows",
     "@kbn/deeplinks-agent-builder",
-    "@kbn/deeplinks-data-sources",
-    "@kbn/core-chrome-navigation",
+    "@kbn/ui-side-navigation",
     "@kbn/core-chrome-sidebar"
   ],
   "exclude": [

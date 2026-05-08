@@ -16,10 +16,12 @@ import type {
   SearchSessionStatusRestResponse,
   SearchSessionsFindRestResponse,
   SearchSessionsUpdateRestResponse,
+  SearchSessionStatusesResponse,
 } from './response_types';
 import {
   searchSessionSchema,
   searchSessionStatusSchema,
+  searchSessionStatusesSchema,
   searchSessionsFindSchema,
   searchSessionsUpdateSchema,
 } from './response_schema';
@@ -59,7 +61,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
           },
           response: {
             200: {
-              body: () => schema.maybe(searchSessionSchema()),
+              body: () => schema.maybe(searchSessionSchema),
             },
           },
         },
@@ -109,7 +111,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
           },
           response: {
             200: {
-              body: searchSessionSchema,
+              body: () => searchSessionSchema,
             },
           },
         },
@@ -149,7 +151,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
           },
           response: {
             200: {
-              body: searchSessionStatusSchema,
+              body: () => searchSessionStatusSchema,
             },
           },
         },
@@ -194,13 +196,13 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
                 schema.oneOf([schema.literal('desc'), schema.literal('asc')])
               ),
               filter: schema.maybe(schema.string()),
-              searchFields: schema.maybe(schema.arrayOf(schema.string())),
+              searchFields: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
               search: schema.maybe(schema.string()),
             }),
           },
           response: {
             200: {
-              body: searchSessionsFindSchema,
+              body: () => searchSessionsFindSchema,
             },
           },
         },
@@ -324,7 +326,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
           },
           response: {
             200: {
-              body: searchSessionsUpdateSchema,
+              body: () => searchSessionsUpdateSchema,
             },
           },
         },
@@ -370,7 +372,7 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
           },
           response: {
             200: {
-              body: searchSessionsUpdateSchema,
+              body: () => searchSessionsUpdateSchema,
             },
           },
         },
@@ -384,6 +386,51 @@ export function registerSessionRoutes(router: DataPluginRouter, logger: Logger):
             id,
             new Date(expires)
           );
+
+          return res.ok({
+            body: response,
+          });
+        } catch (e) {
+          const err = e.output?.payload || e;
+          logger.error(err);
+          return reportServerError(res, err);
+        }
+      }
+    );
+
+  router.versioned
+    .post({
+      path: `${pathPrefix}/_status`,
+      access,
+      security: {
+        authz: { requiredPrivileges },
+      },
+    })
+    .addVersion(
+      {
+        version,
+        validate: {
+          request: {
+            body: schema.object({
+              // When a search is sent to the background the client starts polling for its status. All the searches that
+              // are in progress are sent to the server to get their updated status until they are in a completed status.
+              // For this endpoint the assumption is that the client won't have more than 100 searches in progress at the same time.
+              sessionIds: schema.arrayOf(schema.string(), { maxSize: 100 }),
+            }),
+          },
+          response: {
+            200: {
+              body: () => searchSessionStatusesSchema,
+            },
+          },
+        },
+      },
+      async (context, request, res) => {
+        const { sessionIds } = request.body;
+        try {
+          const searchContext = await context.search;
+          const response: SearchSessionStatusesResponse =
+            await searchContext!.updateSessionStatuses(sessionIds);
 
           return res.ok({
             body: response,

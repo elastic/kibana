@@ -16,15 +16,16 @@ import moment from 'moment';
 import { TasksConfig } from './config';
 import { EntityStoreTaskType } from './constants';
 import type * as types from '../types';
-import type { EntityType } from '../domain/definitions/entity_schema';
+import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { createLogsExtractionClient } from './factories';
+import { wrapTaskRun } from '../telemetry/traces';
 
 function getTaskType(entityType: EntityType): string {
-  const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
+  const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
   return `${config.type}:${entityType}`;
 }
 
-function getTaskId(entityType: EntityType, namespace: string): string {
+export function getExtractEntityTaskId(entityType: EntityType, namespace: string): string {
   return `${getTaskType(entityType)}:${namespace}`;
 }
 
@@ -85,6 +86,7 @@ async function runTask({
       runs: runs + 1,
       entityType,
       lastExtractionSuccess: extractionResult.success,
+      status: 'success',
     };
 
     return {
@@ -116,7 +118,7 @@ export function registerExtractEntityTasks({
   entityTypes: EntityType[];
 }): void {
   try {
-    const config = TasksConfig[EntityStoreTaskType.Values.extractEntity];
+    const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
     entityTypes.forEach((type) => {
       const taskType = getTaskType(type);
       taskManager.registerTaskDefinitions({
@@ -125,13 +127,23 @@ export function registerExtractEntityTasks({
           timeout: config.timeout,
           createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
             run: () =>
-              runTask({
-                taskInstance,
-                abortController,
-                logger: logger.get(taskInstance.id),
-                core,
-                entityType: type,
-                fakeRequest,
+              wrapTaskRun({
+                spanName: 'entityStore.task.extract_entity.run',
+                namespace: taskInstance.state.namespace,
+                attributes: {
+                  'entity_store.task.id': taskInstance.id,
+                  'entity_store.task.type': taskType,
+                  'entity_store.entity.type': type,
+                },
+                run: () =>
+                  runTask({
+                    taskInstance,
+                    abortController,
+                    logger: logger.get(taskInstance.id),
+                    core,
+                    entityType: type,
+                    fakeRequest,
+                  }),
               }),
           }),
         },
@@ -154,14 +166,14 @@ export async function scheduleExtractEntityTask({
   logger: Logger;
   taskManager: TaskManagerStartContract;
   type: EntityType;
-  frequency?: string;
+  frequency: string;
   namespace: string;
   request: KibanaRequest;
 }): Promise<void> {
   try {
     const taskType = getTaskType(type);
-    const taskId = getTaskId(type, namespace);
-    const interval = frequency ?? TasksConfig[EntityStoreTaskType.Values.extractEntity].interval;
+    const taskId = getExtractEntityTaskId(type, namespace);
+    const interval = frequency ?? TasksConfig[EntityStoreTaskType.enum.extractEntity].interval;
     await taskManager.ensureScheduled(
       {
         id: taskId,
@@ -189,7 +201,7 @@ export async function stopExtractEntityTask({
   type: EntityType;
   namespace: string;
 }): Promise<void> {
-  const taskId = getTaskId(type, namespace);
+  const taskId = getExtractEntityTaskId(type, namespace);
   await taskManager.removeIfExists(taskId);
-  logger.debug(`removed task: ${taskId}`);
+  logger.debug(`removed extract entity task: ${taskId}`);
 }

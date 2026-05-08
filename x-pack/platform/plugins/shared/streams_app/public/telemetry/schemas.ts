@@ -25,6 +25,7 @@ import type {
   StreamsFeatureIdentificationSavedProps,
   StreamsFeatureIdentificationDeletedProps,
   StreamsTabVisitedProps,
+  StreamsInsightFeedbackProps,
 } from './types';
 
 const attachmentTypeCountFields: Record<
@@ -478,6 +479,39 @@ const streamsTabVisitedSchema: RootSchema<StreamsTabVisitedProps> = {
           description: 'Whether the user can manage failure store',
         },
       },
+      create_snapshot_repository: {
+        type: 'boolean',
+        _meta: {
+          description: 'Whether the user can create snapshot repositories',
+        },
+      },
+    },
+  },
+};
+
+const streamsInsightFeedbackSchema: RootSchema<StreamsInsightFeedbackProps> = {
+  feedback: {
+    type: 'keyword',
+    _meta: {
+      description: 'Whether the user found the insight helpful or not_helpful',
+    },
+  },
+  insight_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The unique ID of the insight being rated',
+    },
+  },
+  insight_title: {
+    type: 'text',
+    _meta: {
+      description: 'The title of the insight being rated',
+    },
+  },
+  insight_impact: {
+    type: 'keyword',
+    _meta: {
+      description: 'The severity/impact level of the insight: critical, high, medium, or low',
     },
   },
 };
@@ -500,4 +534,5 @@ export {
   streamsFeatureIdentificationSavedSchema,
   streamsFeatureIdentificationDeletedSchema,
   streamsTabVisitedSchema,
+  streamsInsightFeedbackSchema,
 };

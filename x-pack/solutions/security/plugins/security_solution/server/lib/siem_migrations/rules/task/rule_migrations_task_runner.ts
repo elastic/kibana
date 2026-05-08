@@ -53,6 +53,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
       data: this.data,
       rules: this.dependencies.rulesClient,
       savedObjects: this.dependencies.savedObjectsClient,
+      experimentalFeatures: this.dependencies.experimentalFeatures,
     });
   }
 

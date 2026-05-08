@@ -14,7 +14,7 @@ import type {
 import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
 import type { CaseUserActionDeprecatedResponse } from '../../../common/types/api';
-import { UserActionActions, UserActionTypes } from '../../../common/types/domain';
+import { AttachmentType, UserActionActions, UserActionTypes } from '../../../common/types/domain';
 import { decodeOrThrow } from '../../common/runtime_types';
 import {
   CASE_COMMENT_SAVED_OBJECT,
@@ -48,6 +48,7 @@ import type {
 } from '../../common/types/user_actions';
 import { UserActionTransformedAttributesRt } from '../../common/types/user_actions';
 import { CaseUserActionDeprecatedResponseRt } from '../../../common/types/api';
+import { isCommentAttachmentType } from '../../../common/utils/attachments';
 
 export class CaseUserActionService {
   private readonly _creator: UserActionPersister;
@@ -712,6 +713,10 @@ export class CaseUserActionService {
   }
 
   public async getCaseUserActionStats({ caseId }: { caseId: string }) {
+    const isCasesAttachmentsEnabled = this.context.isCasesAttachmentsEnabled === true;
+    const isComment = (type: string) =>
+      isCasesAttachmentsEnabled ? isCommentAttachmentType(type) : type === AttachmentType.user;
+
     const response = await this.context.unsecuredSavedObjectsClient.find<
       unknown,
       UserActionsStatsAggsResult
@@ -736,20 +741,20 @@ export class CaseUserActionService {
     };
 
     response.aggregations?.totals.buckets.forEach(({ key, doc_count: docCount }) => {
-      if (key === 'user') {
-        result.total_comments = docCount;
+      if (isComment(key)) {
+        result.total_comments += docCount;
       }
     });
 
     response.aggregations?.deletions.deletions.buckets.forEach(({ key, doc_count: docCount }) => {
-      if (key === 'user') {
-        result.total_comment_deletions = docCount;
+      if (isComment(key)) {
+        result.total_comment_deletions += docCount;
       }
     });
 
     response.aggregations?.creations.creations.buckets.forEach(({ key, doc_count: docCount }) => {
-      if (key === 'user') {
-        result.total_comment_creations = docCount;
+      if (isComment(key)) {
+        result.total_comment_creations += docCount;
       }
     });
 
@@ -763,10 +768,12 @@ export class CaseUserActionService {
     for (const bucket of commentBuckets) {
       const hasBeenDeleted = bucket.reverse?.hasDelete?.doc_count > 0;
       if (hasBeenDeleted) {
-        const userCommentUpdates =
-          bucket.reverse?.updates?.byCommentType?.buckets?.find(
-            (b: { key: string; doc_count: number }) => b.key === 'user'
-          )?.doc_count ?? 0;
+        const commentTypeBuckets = bucket.reverse?.updates?.byCommentType?.buckets ?? [];
+        const userCommentUpdates = commentTypeBuckets.reduce(
+          (sum: number, b: { key: string; doc_count: number }) =>
+            isComment(b.key) ? sum + b.doc_count : sum,
+          0
+        );
         result.total_hidden_comment_updates += userCommentUpdates;
       }
     }

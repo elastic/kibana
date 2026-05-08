@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -38,7 +38,7 @@ import { SectionLoading } from '../../../../../shared_imports';
 import type { Error } from '../../../../components';
 import { TemplateDeleteModal, SectionError } from '../../../../components';
 import { useLoadIndexTemplate } from '../../../../services/api';
-import { useServices } from '../../../../app_context';
+import { useServices, useAppContext } from '../../../../app_context';
 import { TabAliases, TabMappings, TabSettings } from '../../../../components/shared';
 import { TemplateTypeIndicator, TemplateDeprecatedBadge } from '../components';
 import { TabSummary, TabPreview } from './tabs';
@@ -49,7 +49,7 @@ const ALIASES_TAB_ID = 'aliases';
 const SETTINGS_TAB_ID = 'settings';
 const PREVIEW_TAB_ID = 'preview';
 
-const TABS = [
+const BASE_TABS = [
   {
     id: SUMMARY_TAB_ID,
     name: i18n.translate('xpack.idxMgmt.templateDetails.summaryTabTitle', {
@@ -78,13 +78,6 @@ const TABS = [
     }),
     dataTestSubj: 'aliasesTabBtn',
   },
-  {
-    id: PREVIEW_TAB_ID,
-    name: i18n.translate('xpack.idxMgmt.templateDetails.previewTabTitle', {
-      defaultMessage: 'Preview',
-    }),
-    dataTestSubj: 'previewTabBtn',
-  },
 ];
 
 const tabToUiMetricMap: { [key: string]: string } = {
@@ -111,6 +104,7 @@ export const TemplateDetailsContent = ({
   reload,
 }: Props) => {
   const { uiMetricService } = useServices();
+  const { privs } = useAppContext();
   const { error, data: templateDetails, isLoading } = useLoadIndexTemplate(templateName, isLegacy);
   const isCloudManaged = templateDetails?._kbnMeta.type === 'cloudManaged';
   const templateType = templateDetails?._kbnMeta.type;
@@ -119,6 +113,20 @@ export const TemplateDetailsContent = ({
   >([]);
   const [activeTab, setActiveTab] = useState<string>(SUMMARY_TAB_ID);
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
+
+  const tabsToRender = useMemo(() => {
+    const tabs = [...BASE_TABS];
+    if (privs.manageIndexTemplates) {
+      tabs.push({
+        id: PREVIEW_TAB_ID,
+        name: i18n.translate('xpack.idxMgmt.templateDetails.previewTabTitle', {
+          defaultMessage: 'Preview',
+        }),
+        dataTestSubj: 'previewTabBtn',
+      });
+    }
+    return tabs;
+  }, [privs.manageIndexTemplates]);
 
   const renderHeader = () => {
     return (
@@ -208,25 +216,27 @@ export const TemplateDetailsContent = ({
           {managedTemplateCallout}
 
           <EuiTabs>
-            {TABS.filter((tab) => {
-              // Legacy index templates don't have the "simulate" template API
-              if (isLegacy && tab.id === PREVIEW_TAB_ID) {
-                return false;
-              }
-              return true;
-            }).map((tab) => (
-              <EuiTab
-                onClick={() => {
-                  uiMetricService.trackMetric(METRIC_TYPE.CLICK, tabToUiMetricMap[tab.id]);
-                  setActiveTab(tab.id);
-                }}
-                isSelected={tab.id === activeTab}
-                key={tab.id}
-                data-test-subj={tab.dataTestSubj}
-              >
-                {tab.name}
-              </EuiTab>
-            ))}
+            {tabsToRender
+              .filter((tab) => {
+                // Legacy index templates don't have the "simulate" template API
+                if (isLegacy && tab.id === PREVIEW_TAB_ID) {
+                  return false;
+                }
+                return true;
+              })
+              .map((tab) => (
+                <EuiTab
+                  onClick={() => {
+                    uiMetricService.trackMetric(METRIC_TYPE.CLICK, tabToUiMetricMap[tab.id]);
+                    setActiveTab(tab.id);
+                  }}
+                  isSelected={tab.id === activeTab}
+                  key={tab.id}
+                  data-test-subj={tab.dataTestSubj}
+                >
+                  {tab.name}
+                </EuiTab>
+              ))}
           </EuiTabs>
 
           <EuiSpacer size="l" />
@@ -254,7 +264,7 @@ export const TemplateDetailsContent = ({
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {templateDetails && (
+          {templateDetails && privs.manageIndexTemplates && (
             <EuiFlexItem grow={false}>
               {/* Manage templates context menu */}
               <EuiPopover
@@ -263,7 +273,7 @@ export const TemplateDetailsContent = ({
                   <EuiButton
                     fill
                     data-test-subj="manageTemplateButton"
-                    iconType="arrowDown"
+                    iconType="chevronSingleDown"
                     iconSide="right"
                     onClick={() => setIsPopOverOpen((prev) => !prev)}
                   >

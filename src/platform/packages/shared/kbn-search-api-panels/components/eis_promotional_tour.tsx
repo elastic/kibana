@@ -85,7 +85,7 @@ export const EisPromotionalTour = ({
                 data-telemetry-id={`${dataId}-learnMore-btn`}
                 target="_blank"
                 iconSide="right"
-                iconType="popout"
+                iconType="external"
               >
                 {TOUR_CTA}
               </EuiButton>,

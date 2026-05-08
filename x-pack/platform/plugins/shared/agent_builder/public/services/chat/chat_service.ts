@@ -16,7 +16,7 @@ import {
 } from '@kbn/agent-builder-common/agents';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import { publicApiPath } from '../../../common/constants';
+import { publicApiPath, internalApiPath } from '../../../common/constants';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapAgentBuilderErrors } from '../utils/errors';
 import type { EventsService } from '../events';
@@ -39,6 +39,10 @@ export type ChatParams = BaseConverseParams & {
 export type ResumeRoundParams = BaseConverseParams & {
   conversationId: string;
   prompts: Record<string, PromptResponse>;
+};
+
+export type RegenerateParams = BaseConverseParams & {
+  conversationId: string;
 };
 
 export class ChatService {
@@ -74,6 +78,31 @@ export class ChatService {
       prompts: params.prompts,
       browser_api_tools: params.browserApiTools ?? [],
     });
+  }
+
+  regenerate(params: RegenerateParams): Observable<ChatEvent> {
+    return this.converse(params.signal, {
+      agent_id: params.agentId,
+      conversation_id: params.conversationId,
+      connector_id: params.connectorId,
+      capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
+      browser_api_tools: params.browserApiTools ?? [],
+      action: 'regenerate',
+    });
+  }
+
+  followExecution(executionId: string, signal?: AbortSignal): Observable<ChatEvent> {
+    return defer(() => {
+      return this.http.get(`${internalApiPath}/executions/${executionId}/follow`, {
+        signal,
+        asResponse: true,
+        rawResponse: true,
+      });
+    }).pipe(
+      // @ts-expect-error SseEvent mixin issue
+      httpResponseIntoObservable<ChatEvent>(),
+      unwrapAgentBuilderErrors()
+    );
   }
 
   private converse(signal: AbortSignal | undefined, payload: ChatRequestBodyPayload) {

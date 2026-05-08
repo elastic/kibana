@@ -9,15 +9,17 @@ import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { parse as parseCookie } from 'tough-cookie';
 
 import { createSAMLResponse } from '@kbn/mock-idp-utils';
-import { apiTest, expect } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 
-import { COMMON_HEADERS } from '../fixtures/constants';
+import { COMMON_HEADERS } from '../fixtures';
 
 // These tests cannot be run on MKI because we cannot control the UIAM session lifetime to reduce it (it's 1h by default).
-apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: ['@svlSecurity'] }, () => {
+apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: tags.serverless.all }, () => {
   let userSessionCookieFactory: (params: {
     lifetime: { accessToken: number; refreshToken?: number };
   }) => Promise<string>;
+
   apiTest.beforeAll(async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
     userSessionCookieFactory = async ({ lifetime: { accessToken, refreshToken } }) =>
       parseCookie(
@@ -47,22 +49,24 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: ['@svlSecurity'] }, ()
     'should be able to authenticate as UIAM user even if the access token has expired',
     async ({ apiClient, log }) => {
       const userSessionCookie = await userSessionCookieFactory({ lifetime: { accessToken: 2 } });
-      let response = await apiClient.get('internal/security/me', {
+      let response = await apiClient.post('authentication/slow/me', {
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
+        body: { duration: 0, client: 'request-context' },
       });
-      expect(response.statusCode).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
 
       log.info('Waiting for the UIAM session to expire (+5s)…');
       await setTimeoutAsync(5000);
       log.info('Session expiration wait time is over, making the request again.');
 
-      response = await apiClient.get('internal/security/me', {
+      response = await apiClient.post('authentication/slow/me', {
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
+        body: { duration: 0, client: 'request-context' },
       });
-      expect(response.statusCode).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
     }
   );
@@ -71,11 +75,12 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: ['@svlSecurity'] }, ()
     'should be able to authenticate as UIAM user when the tokens are refreshed concurrently',
     async ({ apiClient, log }) => {
       const userSessionCookie = await userSessionCookieFactory({ lifetime: { accessToken: 2 } });
-      const response = await apiClient.get('internal/security/me', {
+      const response = await apiClient.post('authentication/slow/me', {
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
+        body: { duration: 0, client: 'request-context' },
       });
-      expect(response.statusCode).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
 
       log.info('Waiting for the UIAM session to expire (+5s)…');
@@ -84,14 +89,15 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: ['@svlSecurity'] }, ()
 
       const responses = await Promise.all(
         Array.from({ length: 10 }, () =>
-          apiClient.get('internal/security/me', {
+          apiClient.post('authentication/slow/me', {
             headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
             responseType: 'json',
+            body: { duration: 0, client: 'request-context' },
           })
         )
       );
       for (const res of responses) {
-        expect(res.statusCode).toBe(200);
+        expect(res).toHaveStatusCode(200);
         expect(res.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
       }
     }
@@ -103,22 +109,24 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: ['@svlSecurity'] }, ()
       const userSessionCookie = await userSessionCookieFactory({
         lifetime: { accessToken: 2, refreshToken: 2 },
       });
-      let response = await apiClient.get('internal/security/me', {
+      let response = await apiClient.post('authentication/slow/me', {
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
+        body: { duration: 0, client: 'request-context' },
       });
-      expect(response.statusCode).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual(expect.objectContaining({ username: '1234567890' }));
 
       log.info('Waiting for the UIAM session to expire (+5s)…');
       await setTimeoutAsync(5000);
       log.info('Session expiration wait time is over, making the request again.');
 
-      response = await apiClient.get('internal/security/me', {
+      response = await apiClient.post('authentication/slow/me', {
         headers: { ...COMMON_HEADERS, Cookie: userSessionCookie },
         responseType: 'json',
+        body: { duration: 0, client: 'request-context' },
       });
-      expect(response.statusCode).toBe(401);
+      expect(response).toHaveStatusCode(401);
     }
   );
 });

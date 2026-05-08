@@ -37,7 +37,7 @@ export const ToolQuickActions = ({ tool }: ToolQuickActionsProps) => {
     >
       <EuiButtonIcon
         data-test-subj="agentBuilderToolsRowEditButton"
-        iconType="documentEdit"
+        iconType="pencil"
         onClick={() => {
           editTool(tool.id);
         }}

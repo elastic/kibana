@@ -9,6 +9,7 @@
     "public/**/*.ts",
     "public/**/*.tsx",
     "server/**/*.ts",
+    "test/scout/**/*",
     "../../../../../typings/**/*"
   ],
   "exclude": [
@@ -30,9 +31,10 @@
     "@kbn/streams-plugin",
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/cases-plugin",
-    "@kbn/observability-nav-icons",
     "@kbn/deeplinks-management",
     "@kbn/ai-assistant-common",
     "@kbn/management-settings-ids",
+    "@kbn/scout-oblt",
+    "@kbn/workflows-management-plugin",
   ]
 }

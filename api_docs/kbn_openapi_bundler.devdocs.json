@@ -63,6 +63,7 @@
             "lineNumber": 42,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "BundlerConfig",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -114,6 +115,7 @@
             "lineNumber": 36,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "MergerConfig",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -26,7 +26,10 @@ import { stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/field.st
 import type { ISearchClient, IKibanaSearchResponse } from '@kbn/search-types';
 import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import type { IScopedSearchClient } from '@kbn/data-plugin/server';
+import {
+  type IScopedSearchClient,
+  INTERNAL_ENHANCED_ES_SEARCH_STRATEGY,
+} from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { CancellationToken } from '@kbn/reporting-common';
@@ -593,6 +596,62 @@ describe('CsvGenerator', () => {
 
         await generateCsv.generateData();
         expect(debugLogSpy).toHaveBeenCalledWith('Received total hits: 12345. Accuracy: unknown.');
+      });
+    });
+
+    describe('useInternalUser parameter', () => {
+      beforeEach(() => {
+        mockEsClient.asInternalUser.openPointInTime = jest
+          .fn()
+          .mockResolvedValue({ id: mockCursorId });
+        mockEsClient.asInternalUser.closePointInTime = jest.fn().mockResolvedValue({});
+      });
+
+      it('uses internal user client when useInternalUser is true', async () => {
+        const generateCsv = new CsvGenerator(
+          mockJobUsingPitPaging,
+          mockConfig,
+          mockTaskInstanceFields,
+          {
+            es: mockEsClient,
+            data: mockDataClient,
+            uiSettings: uiSettingsClient,
+          },
+          {
+            searchSourceStart: mockSearchSourceService,
+            fieldFormatsRegistry: mockFieldFormatsRegistry,
+          },
+          new CancellationToken(),
+          mockLogger,
+          stream,
+          false,
+          jobId,
+          true
+        );
+
+        await generateCsv.generateData();
+
+        expect(mockEsClient.asInternalUser.openPointInTime).toHaveBeenCalledWith(
+          {
+            ignore_unavailable: true,
+            index: 'logstash-*',
+            keep_alive: '30s',
+          },
+          {
+            maxConcurrentShardRequests: 5,
+            maxRetries: 0,
+            requestTimeout: '30s',
+            signal: expect.any(AbortSignal),
+          }
+        );
+        expect(mockEsClient.asCurrentUser.openPointInTime).not.toHaveBeenCalled();
+
+        expect(mockDataClient.search).toHaveBeenCalledWith(
+          expect.any(Object),
+          expect.objectContaining({
+            strategy: INTERNAL_ENHANCED_ES_SEARCH_STRATEGY,
+          })
+        );
       });
     });
   });

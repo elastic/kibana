@@ -30,6 +30,7 @@ export interface MetricVisParam {
     visuals?: string;
     baseline?: number | string;
     palette?: [string, string, string];
+    textPalette?: [string, string, string];
   };
   color?: string;
   icon?: string;
@@ -40,7 +41,6 @@ export interface MetricVisParam {
   secondaryAlign: MetricStyle['extraTextAlign'];
   iconAlign: MetricStyle['iconAlign'];
   valueFontSize: MetricStyle['valueFontSize'];
-  titleWeight: MetricStyle['titleWeight'];
   primaryPosition: MetricStyle['valuePosition'];
   maxCols: number;
   minTiles?: number;

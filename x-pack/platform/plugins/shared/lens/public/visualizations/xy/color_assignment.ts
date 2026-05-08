@@ -6,14 +6,10 @@
  */
 
 import { uniq, mapValues } from 'lodash';
-import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import type { PaletteRegistry } from '@kbn/coloring';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { euiLightVars } from '@kbn/ui-theme';
-import {
-  defaultAnnotationColor,
-  defaultAnnotationRangeColor,
-  isRangeAnnotationConfig,
-} from '@kbn/event-annotation-common';
+import { getResolvedAnnotationColor, isRangeAnnotationConfig } from '@kbn/event-annotation-common';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { FramePublicAPI } from '@kbn/lens-common';
 import { getColumnToLabelMap } from './state_helpers';
@@ -25,10 +21,19 @@ import {
   getSingleColorConfig,
 } from './reference_line_helpers';
 import type { XYDataLayerConfig, XYLayerConfig } from './types';
+import { getDefaultPalette } from './default_palette';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 
 export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
+
+export const getLayerPaletteName = (layer: XYDataLayerConfig): string =>
+  layer.collapseFn
+    ? getDefaultPalette(layer.seriesType)
+    : layer.colorMapping?.paletteId ?? layer.palette?.name ?? getDefaultPalette(layer.seriesType);
+
+const getPaletteDefinition = (paletteService: PaletteRegistry, paletteName: string) =>
+  paletteService.get(paletteName) ?? paletteService.get('default');
 
 export type ColorAssignments = Record<
   string,
@@ -46,7 +51,7 @@ export function getColorAssignments(
   const layersPerPalette: Record<string, XYDataLayerConfig[]> = {};
 
   layers.filter(isDataLayer).forEach((layer) => {
-    const palette = layer.palette?.name || 'default';
+    const palette = getLayerPaletteName(layer);
     if (!layersPerPalette[palette]) {
       layersPerPalette[palette] = [];
     }
@@ -120,7 +125,8 @@ export function getAssignedColorConfig(
   accessor: string,
   colorAssignments: ColorAssignments,
   frame: Pick<FramePublicAPI, 'datasourceLayers'>,
-  paletteService: PaletteRegistry
+  paletteService: PaletteRegistry,
+  isDarkMode = false
 ): AccessorConfig {
   if (isReferenceLayer(layer)) {
     return getSingleColorConfig(accessor);
@@ -130,29 +136,32 @@ export function getAssignedColorConfig(
     return {
       columnId: accessor,
       triggerIconType: annotation?.isHidden ? 'invisible' : 'color',
-      color: isRangeAnnotationConfig(annotation)
-        ? defaultAnnotationRangeColor
-        : defaultAnnotationColor,
+      color: getResolvedAnnotationColor({
+        color: annotation?.color,
+        isDarkMode,
+        isRange: isRangeAnnotationConfig(annotation),
+      }),
     };
   }
   const layerContainsSplits =
     isDataLayer(layer) && !layer.collapseFn && (layer.splitAccessors ?? []).length > 0;
-  const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
-  const totalSeriesCount = colorAssignments[currentPalette.name]?.totalSeriesCount;
+  const currentPaletteName = getLayerPaletteName(layer);
+  const currentPaletteParams = layer.palette?.params;
+  const totalSeriesCount = colorAssignments[currentPaletteName]?.totalSeriesCount;
 
   if (layerContainsSplits) {
     return getDisabledConfig(accessor);
   }
 
   const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
-  const rank = colorAssignments[currentPalette.name].getRank(
+  const rank = colorAssignments[currentPaletteName].getRank(
     layer,
     columnToLabel[accessor] || accessor,
     accessor
   );
   const assignedColor =
     totalSeriesCount != null
-      ? paletteService.get(currentPalette.name).getCategoricalColor(
+      ? getPaletteDefinition(paletteService, currentPaletteName).getCategoricalColor(
           [
             {
               name: columnToLabel[accessor] || accessor,
@@ -161,7 +170,7 @@ export function getAssignedColorConfig(
             },
           ],
           { maxDepth: 1, totalSeries: totalSeriesCount },
-          currentPalette.params
+          currentPaletteParams
         )
       : undefined;
   return {
@@ -175,13 +184,14 @@ export function getAccessorColorConfigs(
   colorAssignments: ColorAssignments,
   frame: Pick<FramePublicAPI, 'datasourceLayers'>,
   layer: XYLayerConfig,
-  paletteService: PaletteRegistry
+  paletteService: PaletteRegistry,
+  isDarkMode = false
 ): AccessorConfig[] {
   if (isReferenceLayer(layer)) {
     return getReferenceLineAccessorColorConfig(layer);
   }
   if (isAnnotationsLayer(layer)) {
-    return getAnnotationsAccessorColorConfig(layer);
+    return getAnnotationsAccessorColorConfig(layer, isDarkMode);
   }
   const layerContainsSplits = !layer.collapseFn && (layer.splitAccessors ?? []).length > 0;
   return layer.accessors.map((accessor) => {
@@ -196,6 +206,13 @@ export function getAccessorColorConfigs(
         color: currentYConfig.color,
       };
     }
-    return getAssignedColorConfig(layer, accessor, colorAssignments, frame, paletteService);
+    return getAssignedColorConfig(
+      layer,
+      accessor,
+      colorAssignments,
+      frame,
+      paletteService,
+      isDarkMode
+    );
   });
 }

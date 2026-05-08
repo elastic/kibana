@@ -29,6 +29,7 @@ import {
 
 const hourAgo = new Date(new Date().getTime() - 60 * 60 * 1000);
 const defaultProps: GraphInvestigationProps = {
+  scopeId: 'storybook-graph-investigation',
   initialState: {
     dataView: mockDataView,
     originEventIds: [
@@ -122,7 +123,7 @@ const meta = {
     supportNodePreviewPopover: {
       control: { type: 'boolean' },
       description:
-        'Enable or disable the support for node preview popover (When disabled `Show event details` list item is not shown)',
+        'Enable or disable the support for node preview popover (controls event and network preview popovers)',
     },
   },
   args: {

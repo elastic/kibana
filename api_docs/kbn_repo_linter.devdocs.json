@@ -53,7 +53,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "repoRel",
-                "description": [],
+                "description": [
+                  "/**\n     * Repo relative path to the target\n     */"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -70,7 +72,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "path",
-                "description": [],
+                "description": [
+                  "/**\n     * Absolute path to the the target\n     */"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -87,7 +91,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "dir",
-                "description": [],
+                "description": [
+                  "/**\n     * Absolute directory all resolutions occur relative to\n     */"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -104,7 +110,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "name",
-                "description": [],
+                "description": [
+                  "/**\n     * Name/id of the target\n     */"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -335,7 +343,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "pkg",
-                "description": [],
+                "description": [
+                  "/**\n     * The RepoPackage object for this LintPackage, access should be mediated through the LintPackage object so direct references are \"deprecated\"\n     */"
+                ],
                 "signature": [
                   "Package"
                 ],
@@ -343,6 +353,7 @@
                 "lineNumber": 71,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Package",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -352,7 +363,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "tsProject",
-                "description": [],
+                "description": [
+                  "/**\n     * The TsProject object for this LintPackage\n     */"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/ts-projects",
@@ -367,6 +380,7 @@
                 "lineNumber": 75,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "TsProject",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -555,6 +569,7 @@
                         "lineNumber": 27,
                         "columnNumber": 3,
                         "deprecated": false,
+                        "docsReferencedTypeName": "T",
                         "trackAdoption": false
                       }
                     ]
@@ -633,6 +648,7 @@
                 "lineNumber": 90,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "TsProject",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -821,6 +837,7 @@
                         "lineNumber": 27,
                         "columnNumber": 3,
                         "deprecated": false,
+                        "docsReferencedTypeName": "T",
                         "trackAdoption": false
                       }
                     ]
@@ -881,6 +898,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -933,6 +951,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "LintOptions",
             "trackAdoption": false,
             "isRequired": true
           }

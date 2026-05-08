@@ -16,6 +16,12 @@ import {
   AZURE_CLIENT_ID_VAR_NAME,
   AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID,
   AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME,
+  SERVICE_ACCOUNT_VAR_NAME,
+  AUDIENCE_VAR_NAME,
+  GCP_CREDENTIALS_CLOUD_CONNECTOR_ID,
+  GCP_SERVICE_ACCOUNT_VAR_NAME,
+  GCP_AUDIENCE_VAR_NAME,
+  GCP_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME,
 } from '../../constants/cloud_connector';
 
 import type { CloudProvider } from '../../types/models/cloud_connector';
@@ -59,7 +65,7 @@ export const AZURE_CREDENTIAL_SCHEMA: CloudConnectorCredentialSchema = {
       aliases: [AZURE_CLIENT_ID_VAR_NAME], // 'azure.credentials.client_id'
       isSecret: true,
     },
-    azureCredentialsCloudConnectorId: {
+    azure_credentials_cloud_connector_id: {
       primary: AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID, // 'azure_credentials_cloud_connector_id'
       aliases: [AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME], // 'azure.credentials.azure_credentials_cloud_connector_id'
       isSecret: false,
@@ -68,19 +74,27 @@ export const AZURE_CREDENTIAL_SCHEMA: CloudConnectorCredentialSchema = {
 };
 
 /**
- * GCP cloud connector credential schema (stub for future implementation)
+ * GCP cloud connector credential schema
+ * Maps logical field names to their actual var key names used in package policies.
+ * service_account and audience are non-secret text fields (type: text in integration manifests).
+ * Only gcp_credentials_cloud_connector_id is a secret.
  */
 export const GCP_CREDENTIAL_SCHEMA: CloudConnectorCredentialSchema = {
   provider: 'gcp',
   fields: {
-    projectId: {
-      primary: 'project_id',
-      aliases: ['gcp.project_id'],
+    serviceAccount: {
+      primary: SERVICE_ACCOUNT_VAR_NAME, // 'service_account'
+      aliases: [GCP_SERVICE_ACCOUNT_VAR_NAME], // 'gcp.credentials.service_account_email'
       isSecret: false,
     },
-    serviceAccountKey: {
-      primary: 'service_account_key',
-      aliases: ['gcp.credentials.service_account_key'],
+    audience: {
+      primary: AUDIENCE_VAR_NAME, // 'audience'
+      aliases: [GCP_AUDIENCE_VAR_NAME], // 'gcp.credentials.audience'
+      isSecret: false,
+    },
+    gcp_credentials_cloud_connector_id: {
+      primary: GCP_CREDENTIALS_CLOUD_CONNECTOR_ID, // 'gcp_credentials_cloud_connector_id'
+      aliases: [GCP_CREDENTIALS_CLOUD_CONNECTOR_ID_VAR_NAME], // 'gcp.credentials.gcp_credentials_cloud_connector_id'
       isSecret: true,
     },
   },
@@ -131,4 +145,35 @@ export function getAllSupportedVarNames(): string[] {
   }
 
   return allVarNames;
+}
+
+/**
+ * Gets the credential property name for a given var key name.
+ * Handles both primary keys and aliases, mapping them back to the logical credential field name.
+ *
+ * @param provider - The cloud provider (e.g., 'aws', 'azure')
+ * @param varName - The var key name (e.g., 'role_arn' or 'aws.role_arn')
+ * @returns The credential property name (e.g., 'roleArn') or undefined if not found
+ *
+ * @example
+ * getCredentialKeyFromVarName('aws', 'role_arn') // → 'roleArn'
+ * getCredentialKeyFromVarName('aws', 'aws.role_arn') // → 'roleArn'
+ * getCredentialKeyFromVarName('azure', 'tenant_id') // → 'tenantId'
+ */
+export function getCredentialKeyFromVarName(
+  provider: CloudProvider,
+  varName: string
+): string | undefined {
+  const schema = CREDENTIAL_SCHEMAS[provider];
+  if (!schema) {
+    return undefined;
+  }
+
+  for (const [credentialKey, mapping] of Object.entries(schema.fields)) {
+    if (mapping.primary === varName || mapping.aliases.includes(varName)) {
+      return credentialKey;
+    }
+  }
+
+  return undefined;
 }

@@ -189,6 +189,7 @@
                 "lineNumber": 112,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackageInfo",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -257,6 +258,7 @@
                 "lineNumber": 121,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackageInfo",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -307,6 +309,7 @@
                 "lineNumber": 133,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "PackageInfo",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -365,6 +368,7 @@
             "lineNumber": 27,
             "columnNumber": 22,
             "deprecated": false,
+            "docsReferencedTypeName": "LaunchArgs",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -416,6 +420,7 @@
             "lineNumber": 20,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -433,6 +438,7 @@
             "lineNumber": 20,
             "columnNumber": 58,
             "deprecated": false,
+            "docsReferencedTypeName": "ConfigType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -650,7 +656,7 @@
           "{ readonly enabled: boolean; readonly capture: Readonly<{ loadDelay?: number | moment.Duration | undefined; } & { zoom: number; timeouts: Readonly<{} & { renderComplete: number | moment.Duration; openUrl: number | moment.Duration; waitForElements: number | moment.Duration; }>; }>; readonly browser: Readonly<{} & { chromium: Readonly<{ disableSandbox?: boolean | undefined; } & { proxy: Readonly<{ server?: string | undefined; bypass?: string[] | undefined; } & { enabled: boolean; }>; }>; autoDownload: boolean; }>; readonly networkPolicy: Readonly<{} & { enabled: boolean; rules: Readonly<{ host?: string | undefined; protocol?: string | undefined; } & { allow: boolean; }>[]; }>; readonly poolSize: number; }"
         ],
         "path": "src/platform/packages/private/kbn-screenshotting-server/src/config/schema.ts",
-        "lineNumber": 90,
+        "lineNumber": 91,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

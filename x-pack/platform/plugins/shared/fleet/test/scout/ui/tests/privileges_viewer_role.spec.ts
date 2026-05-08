@@ -10,7 +10,8 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 // This role behaves like Fleet -> None, Integrations -> Read
-test.describe('When the user has Viewer built-in role', { tag: ['@ess'] }, () => {
+// TODO: skipped for running on ECH - needs investigation: https://github.com/elastic/kibana/issues/262268
+test.describe('When the user has Viewer built-in role', { tag: '@local-stateful-classic' }, () => {
   test('Fleet is accessible but user cannot perform any write actions on agent tabs', async ({
     browserAuth,
     pageObjects,

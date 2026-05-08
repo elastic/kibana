@@ -22,6 +22,8 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiTabbedContent,
+  EuiText,
+  EuiTextTruncate,
   EuiToolTip,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -29,7 +31,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
-import { filterToolsBySelection, type AgentDefinition } from '@kbn/agent-builder-common';
+import {
+  defaultAgentToolIds,
+  hasAgentWriteAccess,
+  type AgentDefinition,
+} from '@kbn/agent-builder-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -51,8 +57,17 @@ import { AgentAvatar } from '../../common/agent_avatar';
 import { agentFormSchema } from './agent_form_validation';
 import { AgentSettingsTab } from './tabs/settings_tab';
 import { ToolsTab } from './tabs/tools_tab';
-import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { SkillsTab } from './tabs/skills_tab';
+import { PluginsTab } from './tabs/plugins_tab';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+import { useCurrentUser } from '../../../hooks/agents/use_current_user';
+import {
+  getActivePlugins,
+  getActiveSkills,
+  getActiveTools,
+} from '../../../utils/tool_selection_utils';
 
 const BUTTON_IDS = {
   SAVE: 'save',
@@ -78,7 +93,10 @@ export type AgentFormData = Omit<AgentDefinition, 'type' | 'readonly'>;
 export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }) => {
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
-  const { manageAgents } = useUiPrivileges();
+  const { services } = useKibana();
+  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
+  const { manageAgents, isAdmin } = useUiPrivileges();
+  const { currentUser } = useCurrentUser();
   const { navigateToAgentBuilderUrl } = useNavigation();
   const { docLinksService } = useAgentBuilderServices();
   // Resolve state updates before navigation to avoid triggering unsaved changes prompt
@@ -88,7 +106,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     },
     [navigateToAgentBuilderUrl]
   );
-  const { services } = useKibana();
   const {
     notifications,
     http,
@@ -134,12 +151,23 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     isSubmitting,
     submit,
     tools,
+    skills,
+    plugins,
     error,
   } = useAgentEdit({
     editingAgentId,
     onSaveSuccess,
     onSaveError,
   });
+
+  const canEditAgent = !manageAgents
+    ? false
+    : hasAgentWriteAccess({
+        visibility: agentState?.visibility,
+        owner: agentState?.created_by,
+        currentUser: currentUser ?? undefined,
+        isAdmin,
+      });
 
   const formMethods = useForm<AgentFormData>({
     defaultValues: { ...agentState },
@@ -190,7 +218,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         buttonId: BUTTON_IDS.SAVE_AND_CHAT,
         navigateToListView: false,
       });
-      deferNavigateToAgentBuilderUrl(appPaths.chat.newWithAgent({ agentId: data.id }));
+      deferNavigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: data.id }));
     },
     [deferNavigateToAgentBuilderUrl, handleSave]
   );
@@ -212,10 +240,27 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     shouldPromptOnReplace: false,
   });
 
+  const enableElasticCapabilities = watch('configuration.enable_elastic_capabilities') ?? false;
+  const defaultToolIdSet = useMemo(() => new Set<string>(defaultAgentToolIds), []);
+
   const agentTools = watch('configuration.tools');
-  const activeToolsCount = useMemo(() => {
-    return filterToolsBySelection(tools, agentTools).length;
-  }, [tools, agentTools]);
+  const activeToolsCount = useMemo(
+    () =>
+      getActiveTools(tools, agentTools ?? [], enableElasticCapabilities, defaultToolIdSet).length,
+    [tools, agentTools, enableElasticCapabilities, defaultToolIdSet]
+  );
+
+  const agentSkills = watch('configuration.skill_ids') as string[] | undefined;
+  const activeSkillsCount = useMemo(
+    () => getActiveSkills(skills, agentSkills, enableElasticCapabilities).length,
+    [skills, agentSkills, enableElasticCapabilities]
+  );
+
+  const agentPlugins = watch('configuration.plugin_ids') as string[] | undefined;
+  const activePluginsCount = useMemo(
+    () => getActivePlugins(plugins, agentPlugins, enableElasticCapabilities).length,
+    [plugins, agentPlugins, enableElasticCapabilities]
+  );
 
   const tabs = useMemo<EuiTabbedContentTab[]>(
     () => [
@@ -229,7 +274,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             control={control}
             formState={formState}
             isCreateMode={isCreateMode}
-            isFormDisabled={isFormDisabled || !manageAgents}
+            isFormDisabled={isFormDisabled || !canEditAgent}
+            owner={agentState?.created_by}
+            agentId={editingAgentId}
           />
         ),
       },
@@ -243,7 +290,8 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             control={control}
             tools={tools}
             isLoading={isLoading}
-            isFormDisabled={isFormDisabled || !manageAgents}
+            isFormDisabled={isFormDisabled || !canEditAgent}
+            areElasticCapabilitiesEnabled={enableElasticCapabilities}
           />
         ),
         append: (
@@ -259,17 +307,84 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           </EuiNotificationBadge>
         ),
       },
+      {
+        id: 'skills',
+        name: i18n.translate('xpack.agentBuilder.agents.form.skillsTab', {
+          defaultMessage: 'Skills',
+        }),
+        content: (
+          <SkillsTab
+            control={control}
+            skills={skills}
+            isLoading={isLoading}
+            isFormDisabled={isFormDisabled || !manageAgents}
+            areElasticCapabilitiesEnabled={enableElasticCapabilities}
+          />
+        ),
+        append: (
+          <EuiNotificationBadge
+            color="subdued"
+            css={css`
+              block-size: 20px;
+              min-inline-size: ${euiTheme.size.l};
+              padding: 0 ${euiTheme.size.xs};
+            `}
+          >
+            {activeSkillsCount}
+          </EuiNotificationBadge>
+        ),
+      },
+      ...(isExperimentalFeaturesEnabled
+        ? [
+            {
+              id: 'plugins',
+              name: i18n.translate('xpack.agentBuilder.agents.form.pluginsTab', {
+                defaultMessage: 'Plugins',
+              }),
+              content: (
+                <PluginsTab
+                  control={control}
+                  plugins={plugins}
+                  isLoading={isLoading}
+                  isFormDisabled={isFormDisabled || !manageAgents}
+                  areElasticCapabilitiesEnabled={enableElasticCapabilities}
+                />
+              ),
+              append: (
+                <EuiNotificationBadge
+                  color="subdued"
+                  css={css`
+                    block-size: 20px;
+                    min-inline-size: ${euiTheme.size.l};
+                    padding: 0 ${euiTheme.size.xs};
+                  `}
+                >
+                  {activePluginsCount}
+                </EuiNotificationBadge>
+              ),
+            },
+          ]
+        : []),
     ],
     [
       control,
       formState,
       isCreateMode,
       isFormDisabled,
+      canEditAgent,
+      editingAgentId,
       tools,
+      skills,
+      plugins,
       isLoading,
       euiTheme,
       activeToolsCount,
+      agentState?.created_by,
+      activeSkillsCount,
+      activePluginsCount,
       manageAgents,
+      isExperimentalFeaturesEnabled,
+      enableElasticCapabilities,
     ]
   );
 
@@ -326,7 +441,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
         <EuiButton
           {...commonProps}
           onClick={() =>
-            navigateToAgentBuilderUrl(appPaths.chat.newWithAgent({ agentId: editingAgentId }))
+            navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: editingAgentId }))
           }
         >
           {i18n.translate('xpack.agentBuilder.agents.form.chatButton', {
@@ -413,6 +528,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
               <EuiFlexItem grow={false}>
                 <AgentAvatar
                   size="l"
+                  agentId={editingAgentId}
                   name={agentName}
                   symbol={agentAvatarSymbol}
                   color={agentAvatarColor}
@@ -422,6 +538,22 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             <EuiFlexItem data-test-subj="agentFormPageTitle">
               {isCreateMode ? labels.agents.newAgent : agentName}
             </EuiFlexItem>
+            {!isCreateMode && agentState?.created_by?.username && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued" data-test-subj="agentFormOwnerLabel">
+                  <EuiTextTruncate
+                    text={i18n.translate('xpack.agentBuilder.agents.form.ownerLabel', {
+                      defaultMessage: 'Owner: {username}',
+                      values: {
+                        username: agentState.created_by.username,
+                      },
+                    })}
+                    truncation="end"
+                    width={160}
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         }
         description={
@@ -456,7 +588,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           )
         }
         rightSideItems={[
-          ...(!manageAgents
+          ...(!canEditAgent
             ? []
             : !isCreateMode
             ? [
@@ -475,7 +607,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                         size="m"
                         isDisabled={isSaveDisabled}
                         display="fill"
-                        iconType="arrowDown"
+                        iconType="chevronSingleDown"
                         onClick={() => setAdditionalActionsMenuOpen((openState) => !openState)}
                       />
                     }
@@ -500,7 +632,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
               ]
             : [renderSaveButton({ size: 'm' })]),
           renderChatButton({ size: 'm' }),
-          ...(!manageAgents
+          ...(!canEditAgent
             ? []
             : !isCreateMode
             ? [
@@ -607,7 +739,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{renderChatButton()}</EuiFlexItem>
-          {manageAgents && <EuiFlexItem grow={false}>{renderSaveButton()}</EuiFlexItem>}
+          {canEditAgent && <EuiFlexItem grow={false}>{renderSaveButton()}</EuiFlexItem>}
         </EuiFlexGroup>
       </KibanaPageTemplate.BottomBar>
     </KibanaPageTemplate>

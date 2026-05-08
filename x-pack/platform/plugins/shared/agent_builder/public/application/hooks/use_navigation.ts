@@ -6,6 +6,8 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { combineLatest, map } from 'rxjs';
 import { AGENTBUILDER_APP_ID } from '../../../common/features';
 import { useKibana } from './use_kibana';
 
@@ -14,8 +16,28 @@ export interface LocationState {
   initialMessage?: string;
 }
 
-export const MANAGEMENT_APP_ID = 'management';
-const manageConnectorsPath = '/insightsAndAlerting/triggersActionsConnectors/connectors';
+export const INFERENCE_MANAGEMENT_APP_ID = 'management';
+
+export const INFERENCE_MANAGEMENT_PATH = '/modelManagement/model_settings';
+
+export const useIsOnManagementLlmConnectorsPage = (): boolean => {
+  const {
+    services: { application },
+  } = useKibana();
+
+  const isOnPage$ = useMemo(
+    () =>
+      combineLatest([application.currentAppId$, application.currentLocation$]).pipe(
+        map(
+          ([appId, location]) =>
+            appId === INFERENCE_MANAGEMENT_APP_ID && location.includes(INFERENCE_MANAGEMENT_PATH)
+        )
+      ),
+    [application]
+  );
+
+  return useObservable(isOnPage$, false);
+};
 
 export const useNavigation = () => {
   const {
@@ -44,14 +66,15 @@ export const useNavigation = () => {
   );
 
   const navigateToManageConnectors = useCallback(
-    () => application.navigateToApp(MANAGEMENT_APP_ID, { path: manageConnectorsPath }),
+    () =>
+      application.navigateToApp(INFERENCE_MANAGEMENT_APP_ID, { path: INFERENCE_MANAGEMENT_PATH }),
     [application]
   );
 
   const manageConnectorsUrl = useMemo(
     () =>
-      application.getUrlForApp(MANAGEMENT_APP_ID, {
-        path: manageConnectorsPath,
+      application.getUrlForApp(INFERENCE_MANAGEMENT_APP_ID, {
+        path: INFERENCE_MANAGEMENT_PATH,
       }),
     [application]
   );

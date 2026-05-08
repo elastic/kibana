@@ -11,9 +11,10 @@ import * as React from 'react';
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
+  IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
+import type { Trigger } from '../types';
 import type { Action, ActionExecutionContext, ActionInternal } from '../actions';
 
 export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
@@ -42,7 +43,7 @@ type ItemDescriptor = EuiContextMenuPanelItemDescriptor & {
 type PanelDescriptor = EuiContextMenuPanelDescriptor & {
   _order?: number;
   _level?: number;
-  _icon?: string;
+  _icon?: IconType;
   items: ItemDescriptor[];
 };
 
@@ -80,7 +81,7 @@ const wrapMainPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, 
   const more: ItemDescriptor = {
     name: txtMore,
     panel: morePanelId,
-    icon: 'boxesHorizontal',
+    icon: 'boxesVertical',
     'data-test-subj': `embeddablePanelMore-${id}`,
     _order: -1,
   };

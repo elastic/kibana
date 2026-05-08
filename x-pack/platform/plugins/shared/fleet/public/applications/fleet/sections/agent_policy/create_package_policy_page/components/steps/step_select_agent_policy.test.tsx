@@ -264,7 +264,7 @@ describe('stepStepSelectAgentPolicy', () => {
         result.getByText('Policy 2').closest('[data-test-subj="agentPolicyMultiItem"]')
       ).toBeDisabled();
       expect(
-        result.getByTitle('Policy 2').querySelector('[data-euiicon-type="warningFilled"]')
+        result.getByTitle('Policy 2').querySelector('[data-euiicon-type="warningFill"]')
       ).toBeInTheDocument();
     });
   });

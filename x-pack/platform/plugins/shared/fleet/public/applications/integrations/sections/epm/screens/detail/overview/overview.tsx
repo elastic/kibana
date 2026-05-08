@@ -46,6 +46,7 @@ import { Readme } from './readme';
 import { Details } from './details';
 import { Requirements } from './requirements';
 import { PrereleaseCallout } from './prerelease_callout';
+import { DeprecatedFeaturesCallout, DeprecationCallout } from './deprecation_callout';
 
 interface Props {
   packageInfo: PackageInfo;
@@ -140,6 +141,7 @@ export const getAnchorId = (name: string | undefined, index?: number) => {
 export const OverviewPage: React.FC<Props> = memo(
   ({ packageInfo, integrationInfo, latestGAVersion }) => {
     const config = useConfig();
+
     const screenshots = useMemo(
       () => integrationInfo?.screenshots || packageInfo.screenshots || [],
       [integrationInfo, packageInfo.screenshots]
@@ -292,10 +294,12 @@ export const OverviewPage: React.FC<Props> = memo(
               <EuiBadge color="default">{packageInfo.name}</EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
+          <EuiSpacer size="s" />
           <BidirectionalIntegrationsBanner integrationPackageName={packageInfo.name} />
           <CloudPostureThirdPartySupportCallout packageInfo={packageInfo} />
+          <DeprecationCallout packageInfo={packageInfo} integrationInfo={integrationInfo} />
+          <DeprecatedFeaturesCallout packageInfo={packageInfo} />
           <PrereleaseCallout packageInfo={packageInfo} latestGAVersion={latestGAVersion} />
-          <EuiSpacer size="l" />
 
           {packageInfo.readme ? (
             <Readme

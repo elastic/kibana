@@ -35,7 +35,7 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
   const shouldShowWarning = isOverThreshold || isZeroTools;
 
   const statusColor = shouldShowWarning ? 'warning' : 'success';
-  const iconType = shouldShowWarning ? 'alert' : 'checkInCircleFilled';
+  const iconType = shouldShowWarning ? 'alert' : 'checkCircleFill';
 
   const statusMessage = shouldShowWarning
     ? i18n.translate('xpack.agentBuilder.activeToolsStatus.warningStatusMessage', {

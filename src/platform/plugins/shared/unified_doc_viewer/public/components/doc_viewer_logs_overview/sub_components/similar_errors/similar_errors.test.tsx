@@ -62,7 +62,7 @@ describe('SimilarErrors', () => {
 
   const renderSimilarErrors = (hit: ReturnType<typeof buildHit>) => {
     return render(
-      <DataSourcesProvider indexes={indexes}>
+      <DataSourcesProvider indexes={indexes} profileId="test-profile">
         <SimilarErrors hit={hit} />
       </DataSourcesProvider>
     );

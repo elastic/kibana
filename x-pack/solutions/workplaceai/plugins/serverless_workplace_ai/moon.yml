@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/serverless-workplace-ai'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/search-kibana'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/serverless-workplace-ai'
+  title: '@kbn/serverless-workplace-ai'
   description: Moon project for @kbn/serverless-workplace-ai
   channel: ''
   owner: '@elastic/search-kibana'
-  metadata:
-    sourceRoot: x-pack/solutions/workplaceai/plugins/serverless_workplace_ai
+  sourceRoot: x-pack/solutions/workplaceai/plugins/serverless_workplace_ai
 dependsOn:
   - '@kbn/core'
   - '@kbn/serverless'
@@ -24,7 +23,6 @@ dependsOn:
   - '@kbn/serverless-workplace-ai-settings'
   - '@kbn/i18n'
   - '@kbn/core-chrome-browser'
-  - '@kbn/data-sources-plugin'
 tags:
   - plugin
   - prod

@@ -45,18 +45,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const response = await supertest
         .post('/internal/global_search/find')
         .send({
-          params: { term: 'logs' },
+          params: { term: 'logs.otel' },
         })
         .expect(200);
 
       expect(
         response.body.results.some((result: any) =>
           isEqual(result, {
-            id: 'logs',
+            id: 'logs.otel',
             score: 85,
-            title: 'logs',
+            title: 'logs.otel',
             type: 'Wired stream',
-            url: '/app/streams/logs',
+            url: '/app/streams/logs.otel',
           })
         )
       ).to.be(true);

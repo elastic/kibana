@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { CELL_VALUE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { History } from 'history';
-import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '@kbn/discover-plugin/public';
 import type { CoreSetup } from '@kbn/core/public';
+import {
+  CELL_VALUE_TRIGGER,
+  SECURITY_CELL_ACTIONS_ALERTS_COUNT,
+  SECURITY_CELL_ACTIONS_CASE_EVENTS,
+  SECURITY_CELL_ACTIONS_DEFAULT,
+  SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+  SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import {
@@ -31,7 +37,6 @@ import {
 } from './copy_to_clipboard';
 import { createToggleColumnCellActionFactory } from './toggle_column';
 import { createToggleUserAssetFieldCellActionFactory } from './toggle_asset_column';
-import { SecurityCellActionsTrigger } from './constants';
 import type {
   DiscoverCellActionName,
   DiscoverCellActions,
@@ -60,16 +65,32 @@ const registerLensEmbeddableActions = (store: SecurityAppStore, services: StartS
   const { uiActions } = services;
 
   const filterInLegendActions = createFilterInLensAction({ store, order: 2, services });
-  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterInLegendActions);
+  uiActions.addTriggerActionAsync(
+    CELL_VALUE_TRIGGER,
+    filterInLegendActions.id,
+    async () => filterInLegendActions
+  );
 
   const filterOutLegendActions = createFilterOutLensAction({ store, order: 3, services });
-  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, filterOutLegendActions);
+  uiActions.addTriggerActionAsync(
+    CELL_VALUE_TRIGGER,
+    filterOutLegendActions.id,
+    async () => filterOutLegendActions
+  );
 
   const addToTimelineAction = createAddToTimelineLensAction({ store, order: 4 });
-  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, addToTimelineAction);
+  uiActions.addTriggerActionAsync(
+    CELL_VALUE_TRIGGER,
+    addToTimelineAction.id,
+    async () => addToTimelineAction
+  );
 
   const copyToClipboardAction = createCopyToClipboardLensAction({ order: 5 });
-  uiActions.addTriggerAction(CELL_VALUE_TRIGGER, copyToClipboardAction);
+  uiActions.addTriggerActionAsync(
+    CELL_VALUE_TRIGGER,
+    copyToClipboardAction.id,
+    async () => copyToClipboardAction
+  );
 };
 
 const registerDiscoverCellActions = (store: SecurityAppStore, services: StartServices) => {
@@ -91,7 +112,11 @@ const registerDiscoverCellActions = (store: SecurityAppStore, services: StartSer
       if (actionFactory) {
         const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
         const actionWithTelemetry = enhanceActionWithTelemetry(action, services);
-        uiActions.addTriggerAction(triggerId, actionWithTelemetry);
+        uiActions.addTriggerActionAsync(
+          triggerId,
+          actionWithTelemetry.id,
+          async () => actionWithTelemetry
+        );
       }
     });
   };
@@ -124,21 +149,24 @@ const registerCellActions = (
   };
 
   const registerCellActionsTrigger = (
-    triggerId: SecurityCellActionsTrigger,
+    triggerId: string,
     actionsOrder: SecurityCellActionName[]
   ) => {
-    uiActions.registerTrigger({ id: triggerId });
     actionsOrder.forEach((actionName, order) => {
       const actionFactory = cellActionsFactories[actionName];
       if (actionFactory) {
         const action = actionFactory({ id: `${triggerId}-${actionName}`, order });
         const actionWithTelemetry = enhanceActionWithTelemetry(action, services);
-        uiActions.addTriggerAction(triggerId, actionWithTelemetry);
+        uiActions.addTriggerActionAsync(
+          triggerId,
+          actionWithTelemetry.id,
+          async () => actionWithTelemetry
+        );
       }
     });
   };
 
-  registerCellActionsTrigger(SecurityCellActionsTrigger.DEFAULT, [
+  registerCellActionsTrigger(SECURITY_CELL_ACTIONS_DEFAULT, [
     'filterIn',
     'filterOut',
     'addToTimeline',
@@ -146,7 +174,7 @@ const registerCellActions = (
     'copyToClipboard',
   ]);
 
-  registerCellActionsTrigger(SecurityCellActionsTrigger.DETAILS_FLYOUT, [
+  registerCellActionsTrigger(SECURITY_CELL_ACTIONS_DETAILS_FLYOUT, [
     'filterIn',
     'filterOut',
     'addToTimeline',
@@ -156,9 +184,9 @@ const registerCellActions = (
     'copyToClipboard',
   ]);
 
-  registerCellActionsTrigger(SecurityCellActionsTrigger.ALERTS_COUNT, ['investigateInNewTimeline']);
+  registerCellActionsTrigger(SECURITY_CELL_ACTIONS_ALERTS_COUNT, ['investigateInNewTimeline']);
 
-  registerCellActionsTrigger(SecurityCellActionsTrigger.CASE_EVENTS, [
+  registerCellActionsTrigger(SECURITY_CELL_ACTIONS_CASE_EVENTS, [
     'addToTimeline',
     'copyToClipboard',
   ]);

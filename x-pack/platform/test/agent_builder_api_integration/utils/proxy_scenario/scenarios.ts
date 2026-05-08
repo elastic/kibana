@@ -12,6 +12,7 @@ import {
   mockHandoverToAnswer,
   mockFinalAnswer,
   mockAgentToolCall,
+  mockAgentParallelToolCalls,
   mockSearchToolCallWithNaturalLanguageGen,
 } from './calls';
 
@@ -114,7 +115,34 @@ export const setupAgentCallSearchToolWithNoIndexSelectedThenAnswer = async ({
     toolName: 'platform_core_search',
     toolArg: {
       query: 'just a query',
+      index: 'agent-builder-test-no-match-*',
     },
+  });
+
+  mockHandoverToAnswer(proxy, 'ready to answer');
+
+  mockFinalAnswer(proxy, response);
+};
+
+/**
+ * Parallel tool call scenario - LLM calls two tools in a single response
+ */
+export const setupAgentParallelToolCallsThenAnswer = async ({
+  response,
+  proxy,
+  title = 'New discussion',
+  toolCalls,
+}: {
+  response: string;
+  title?: string;
+  proxy: LlmProxy;
+  toolCalls: Array<{ name: string; args: Record<string, any> }>;
+}) => {
+  mockTitleGeneration(proxy, title);
+
+  mockAgentParallelToolCalls({
+    llmProxy: proxy,
+    toolCalls,
   });
 
   mockHandoverToAnswer(proxy, 'ready to answer');

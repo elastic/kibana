@@ -4,25 +4,22 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/security-ai-prompts'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/security-generative-ai'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/security-ai-prompts'
+  title: '@kbn/security-ai-prompts'
   description: Moon project for @kbn/security-ai-prompts
   channel: ''
   owner: '@elastic/security-generative-ai'
-  metadata:
-    sourceRoot: x-pack/solutions/security/packages/security-ai-prompts
+  sourceRoot: x-pack/solutions/security/packages/security-ai-prompts
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/actions-plugin'
   - '@kbn/core-saved-objects-api-server'
-  - '@kbn/utility-types'
   - '@kbn/inference-common'
+  - '@kbn/core'
 tags:
   - shared-server
   - package
@@ -34,16 +31,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -8,13 +8,15 @@
 import { useCallback, useMemo } from 'react';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
+
+import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
 import type { AlertWorkflowStatus } from '../../../../../common/types';
 import type { AlertClosingReason } from '../../../../../../common/types';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../../common/types';
 import { useAttacksPrivileges } from '../use_attacks_privileges';
 import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detection_alert_ids';
 import { useApplyAttackWorkflowStatus } from '../apply_actions/use_apply_attack_workflow_status';
-import { useBulkAlertClosingReasonItems } from '../../../../../common/components/toolbar/bulk_actions/use_bulk_alert_closing_reason_items';
 import * as i18n from '../translations';
 import type { AttackContentPanelConfig, BulkAttackActionItems } from '../types';
 
@@ -23,6 +25,8 @@ export interface UseBulkAttackWorkflowStatusItemsProps {
   onWorkflowStatusUpdate?: () => void;
   /** Current workflow status of selected alerts */
   currentStatus?: AlertWorkflowStatus;
+  /** Source of the action for telemetry */
+  telemetrySource?: AttacksActionTelemetrySource;
 }
 
 /**
@@ -32,6 +36,7 @@ export interface UseBulkAttackWorkflowStatusItemsProps {
 export const useBulkAttackWorkflowStatusItems = ({
   onWorkflowStatusUpdate,
   currentStatus,
+  telemetrySource,
 }: UseBulkAttackWorkflowStatusItemsProps = {}): BulkAttackActionItems => {
   const { hasIndexWrite, hasAttackIndexWrite, loading } = useAttacksPrivileges();
   const { applyWorkflowStatus } = useApplyAttackWorkflowStatus();
@@ -49,10 +54,11 @@ export const useBulkAttackWorkflowStatusItems = ({
           relatedAlertIds,
           setIsLoading: setAlertLoading,
           onSuccess: onWorkflowStatusUpdate,
+          telemetrySource,
         });
       }) as Required<BulkActionsConfig>['onClick'];
     },
-    [applyWorkflowStatus, onWorkflowStatusUpdate]
+    [applyWorkflowStatus, onWorkflowStatusUpdate, telemetrySource]
   );
 
   const onSubmitCloseReason = useCallback(
@@ -66,13 +72,18 @@ export const useBulkAttackWorkflowStatusItems = ({
         attackIds,
         relatedAlertIds,
         onSuccess: onWorkflowStatusUpdate,
+        telemetrySource,
       });
     },
-    [applyWorkflowStatus, onWorkflowStatusUpdate]
+    [applyWorkflowStatus, onWorkflowStatusUpdate, telemetrySource]
   );
 
   const { item: alertClosingReasonItem, panels: alertClosingReasonPanels } =
-    useBulkAlertClosingReasonItems({ onSubmitCloseReason });
+    useBulkClosingReasonItems({
+      isEnabled: (hasIndexWrite && hasAttackIndexWrite) ?? false,
+      onSubmitCloseReason,
+      buttonLabel: i18n.CLOSE_ATTACK_BUTTON_MESSAGE,
+    });
 
   const workflowStatusItems: BulkActionsConfig[] = useMemo(() => {
     // Return empty array if user doesn't have required permissions or data is still loading

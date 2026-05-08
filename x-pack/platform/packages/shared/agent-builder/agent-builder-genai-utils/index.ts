@@ -11,6 +11,12 @@ export {
   cleanupMapping,
   getIndexMappings,
   executeEsql,
+  isCcsTarget,
+  partitionByCcs,
+  getFieldsFromFieldCaps,
+  getIndexFields,
+  type IndexFieldsResult,
+  type IndexFieldType,
   type MappingField,
 } from './tools/utils';
 export {
@@ -36,4 +42,5 @@ export {
   naturalLanguageSearch,
   type NaturalLanguageSearchResponse,
   runSearchTool,
+  type TopSnippetsConfig,
 } from './tools';

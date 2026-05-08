@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Ajv from 'ajv';
+import { stringify } from 'yaml';
 import { z } from '@kbn/zod/v4';
 import { getWorkflowJsonSchema } from './get_workflow_json_schema';
+import { getValidateWithYamlLsp } from './test_utils/validate_with_yaml_lsp';
 
 describe('getWorkflowJsonSchema', () => {
   it('should set `additionalProperties: {}` for loose objects', () => {
@@ -195,7 +196,7 @@ describe('setMarkdownDescriptionIfSyntaxDetected', () => {
 });
 
 describe('ZodPipe unwrapping for Monaco YAML', () => {
-  it('should unwrap ZodPipe to generate JSON Schema with properties for autocompletion and validation', () => {
+  it('should unwrap ZodPipe to generate JSON Schema with properties for autocompletion and validation', async () => {
     // This test verifies that ZodPipe schemas (returned by generateYamlSchemaFromConnectors)
     // are correctly unwrapped to generate a JSON Schema with properties at the root level.
     // This is critical for Monaco YAML autocompletion and validation to work.
@@ -247,14 +248,12 @@ describe('ZodPipe unwrapping for Monaco YAML', () => {
     expect(actualSchema.properties.name.type).toBe('string');
     expect(actualSchema.properties.enabled.type).toBe('boolean');
 
-    // Verify validation works with AJV (same validator Monaco uses)
-    if (!jsonSchema) {
-      throw new Error('JSON schema is null');
-    }
-    const ajv = new Ajv({ strict: false, validateFormats: false, discriminator: true });
-    const validate = ajv.compile(jsonSchema);
+    const validateWithYamlLsp = getValidateWithYamlLsp(jsonSchema as z.core.JSONSchema.JSONSchema);
 
-    // Valid workflow should pass
+    // Runtime: Zod. Editor / yaml-language-server: generated JSON Schema (same split as production).
+    // Asserting a well-formed document produces no LSP schema diagnostics exercises z.toJSONSchema
+    // output on the same path as Monaco; invalid cases stay on Zod because draft-7 output does not
+    // always surface required/type rules the same way for yaml-language-server.
     const validWorkflow = {
       name: 'Test Workflow',
       enabled: true,
@@ -262,9 +261,13 @@ describe('ZodPipe unwrapping for Monaco YAML', () => {
       triggers: [{ type: 'manual' }],
       steps: [{ name: 'step1', type: 'console' }],
     };
-    expect(validate(validWorkflow)).toBe(true);
+    expect(pipeSchema.safeParse(validWorkflow).success).toBe(true);
+    const validYamlDiagnostics = await validateWithYamlLsp(
+      'workflow.yaml',
+      stringify(validWorkflow)
+    );
+    expect(validYamlDiagnostics).toEqual([]);
 
-    // Invalid workflow (wrong type for enabled) should fail
     const invalidWorkflow = {
       name: 'Test Workflow',
       enabled: 23, // Should be boolean, not number
@@ -272,14 +275,13 @@ describe('ZodPipe unwrapping for Monaco YAML', () => {
       triggers: [{ type: 'manual' }],
       steps: [{ name: 'step1', type: 'console' }],
     };
-    expect(validate(invalidWorkflow)).toBe(false);
-    expect(validate.errors).toBeDefined();
-    expect(validate.errors?.length).toBeGreaterThan(0);
-
-    // Check that the error is about the enabled field
-    const enabledError = validate.errors?.find(
-      (error: any) => error.instancePath === '/enabled' || error.params?.type === 'boolean'
-    );
-    expect(enabledError).toBeDefined();
+    const invalidResult = pipeSchema.safeParse(invalidWorkflow);
+    expect(invalidResult.success).toBe(false);
+    if (!invalidResult.success) {
+      const enabledIssue = invalidResult.error.issues.find(
+        (issue) => issue.path[0] === 'enabled' || issue.path.join('.') === 'enabled'
+      );
+      expect(enabledIssue).toBeDefined();
+    }
   });
 });

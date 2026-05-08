@@ -79,10 +79,10 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             const exceptions = [
               'ml_file_data_visualizer',
               'monitoring',
+              'elasticsearchIndexManagement',
               'enterpriseSearchAnalytics',
               'enterpriseSearchApplications',
               'searchPlayground',
-              'searchInferenceEndpoints',
               'searchSynonyms',
               'searchQueryRules',
               'appSearch',

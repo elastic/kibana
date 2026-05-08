@@ -13,9 +13,6 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
   useEuiTheme,
   EuiFilterButton,
   EuiIcon,
@@ -80,6 +77,7 @@ export interface BrowserPopoverWrapperProps<TItem> {
   isLoading: boolean;
   searchValue: string;
   setSearchValue: (value: string) => void;
+  isMultiSelect?: boolean;
 }
 
 export function BrowserPopoverWrapper<TItem extends { name: string }>({
@@ -97,6 +95,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
   isLoading,
   searchValue,
   setSearchValue,
+  isMultiSelect = true,
 }: BrowserPopoverWrapperProps<TItem>) {
   const { euiTheme } = useEuiTheme();
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -104,15 +103,15 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
     searchInputRef.current = node;
   };
 
-  // Focus the search input when popover opens
+  // Focus the search input as soon as the popover opens so that focus
+  // transfers away from the editor immediately (avoids visible flicker).
   useEffect(() => {
-    if (isOpen && !isLoading) {
-      // Use setTimeout to ensure the DOM is ready
-      setTimeout(() => {
+    if (isOpen) {
+      requestAnimationFrame(() => {
         searchInputRef.current?.focus();
-      }, 0);
+      });
     }
-  }, [isOpen, isLoading]);
+  }, [isOpen]);
 
   const filterButton = (
     <EuiFilterButton
@@ -125,7 +124,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
       css={filterButtonStyle}
       onClick={() => setIsFilterOpen(!isFilterOpen)}
     >
-      <EuiIcon type="filter" />
+      <EuiIcon type="filter" aria-label={i18nKeys.filterTitle} />
     </EuiFilterButton>
   );
 
@@ -145,6 +144,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
         ...position,
         position: 'absolute',
       }}
+      aria-label={i18nKeys.title}
     >
       <EuiSelectable
         searchable
@@ -165,6 +165,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
               closePopover={() => setIsFilterOpen(false)}
               panelStyle={{ transform: `translateX(${FILTER_POPOVER_HORIZONTAL_OFFSET}px)` }}
               offset={FILTER_POPOVER_VERTICAL_OFFSET}
+              aria-label={i18nKeys.filterTitle}
             >
               {filterPanel}
             </EuiPopover>
@@ -181,22 +182,11 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
             truncation: 'middle',
           },
         }}
+        singleSelection={!isMultiSelect}
       >
         {(list, search) => (
           <div style={{ width: BROWSER_POPOVER_WIDTH, maxHeight: BROWSER_POPOVER_HEIGHT }}>
-            <EuiPopoverTitle paddingSize="s">
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem>{i18nKeys.title}</EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="cross"
-                    color="text"
-                    aria-label={i18nKeys.closeLabel}
-                    onClick={onClose}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPopoverTitle>
+            <EuiPopoverTitle paddingSize="s">{i18nKeys.title}</EuiPopoverTitle>
             <div style={{ padding: euiTheme.size.s }}>{search}</div>
             <div style={{ maxHeight: MAX_LIST_HEIGHT, overflowY: 'auto' }}>{list}</div>
           </div>

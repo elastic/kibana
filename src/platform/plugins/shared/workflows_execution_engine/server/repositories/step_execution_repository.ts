@@ -9,6 +9,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import { getStepExecutionsByWorkflowExecution as getStepExecutionsByWorkflowExecutionShared } from '@kbn/workflows/server';
 import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 export class StepExecutionRepository {
@@ -35,6 +36,47 @@ export class StepExecutionRepository {
     });
 
     return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);
+  }
+
+  /**
+   * Fetches all step executions for a workflow execution.
+   * Uses mget (real-time, O(1)) when stepExecutionIds are available,
+   * falls back to search for backward compatibility with older executions.
+   */
+  public async getStepExecutionsByWorkflowExecution(
+    workflowExecutionId: string,
+    stepExecutionIds?: string[]
+  ): Promise<EsWorkflowStepExecution[]> {
+    return getStepExecutionsByWorkflowExecutionShared({
+      esClient: this.esClient,
+      stepsExecutionIndex: this.indexName,
+      workflowExecutionId,
+      stepExecutionIds,
+    });
+  }
+
+  /*
+   * Retrieves step executions by their IDs using mget (O(1) operation).
+   * This is real-time (reads from translog) and doesn't require index refresh.
+   *
+   * @param stepExecutionIds - The IDs of the step executions to retrieve.
+   * @returns A promise that resolves to an array of step executions.
+   */
+  public async getStepExecutionsByIds(
+    stepExecutionIds: string[]
+  ): Promise<EsWorkflowStepExecution[]> {
+    const response = await this.esClient.mget<EsWorkflowStepExecution>({
+      index: this.indexName,
+      ids: stepExecutionIds,
+    });
+
+    const stepExecutions: EsWorkflowStepExecution[] = [];
+    for (const doc of response.docs) {
+      if ('found' in doc && doc.found && doc._source) {
+        stepExecutions.push(doc._source as EsWorkflowStepExecution);
+      }
+    }
+    return stepExecutions;
   }
 
   public async bulkUpsert(stepExecutions: Array<Partial<EsWorkflowStepExecution>>): Promise<void> {

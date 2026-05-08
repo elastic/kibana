@@ -5,110 +5,121 @@
  * 2.0.
  */
 
-import type { ToolResultStore } from '@kbn/agent-builder-server';
-import { ToolResultType } from '@kbn/agent-builder-common';
-import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils/config_builder';
-import { resolveLensConfig } from './utils';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { Logger } from '@kbn/core/server';
+import { resolvePanelsFromAttachments } from './manage_dashboard/utils';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
-const createMockResultStore = (
-  results: Map<string, { type: string; data: Record<string, unknown> }>
-): ToolResultStore => ({
-  has: (id: string) => results.has(id),
-  get: (id: string) => results.get(id) as ReturnType<ToolResultStore['get']>,
+const createMockLogger = (): Logger =>
+  ({
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+  } as unknown as Logger);
+
+const createAttachmentManager = (
+  attachmentsById: Record<string, VersionedAttachment>
+): AttachmentStateManager => {
+  return {
+    getAttachmentRecord: (id: string) => attachmentsById[id],
+  } as unknown as AttachmentStateManager;
+};
+
+const toVersionedAttachment = ({
+  id,
+  type,
+  data,
+}: {
+  id: string;
+  type: string;
+  data: unknown;
+}): VersionedAttachment => ({
+  id,
+  type,
+  current_version: 1,
+  versions: [
+    {
+      version: 1,
+      data,
+      created_at: '2026-01-01T00:00:00.000Z',
+      content_hash: `${id}-hash`,
+    },
+  ],
 });
 
-describe('resolveLensConfig', () => {
-  // Minimal valid config for testing
-  const validLensConfig = {
-    type: 'metric',
-    title: 'Test Metric',
-    dataset: { type: 'esql', query: 'FROM test' },
-    metric: { operation: 'count' },
-  } as unknown as LensApiSchemaType;
-
-  describe('when panel is a direct config object', () => {
-    it('should return the config when panel is a valid Lens API config', () => {
-      const result = resolveLensConfig(validLensConfig);
-      expect(result).toEqual(validLensConfig);
+describe('resolvePanelsFromAttachments', () => {
+  it('resolves visualization attachments into lens panels', async () => {
+    const attachments = createAttachmentManager({
+      'viz-1': toVersionedAttachment({
+        id: 'viz-1',
+        type: 'visualization',
+        data: {
+          query: 'Show request count',
+          visualization: { type: 'metric', title: 'Request count' },
+          chart_type: 'metric',
+          esql: 'FROM logs-* | STATS count(*)',
+        },
+      }),
     });
 
-    it.each([
-      ['null', null],
-      ['undefined', undefined],
-      ['a number', 42],
-      ['an object without type', { title: 'No type' }],
-    ])('should throw when panel is %s', (_, invalidPanel) => {
-      expect(() => resolveLensConfig(invalidPanel)).toThrow(
-        'Invalid panel configuration. Expected a Lens API config object with a "type" property.'
-      );
+    const result = resolvePanelsFromAttachments({
+      attachmentInputs: [{ attachmentId: 'viz-1', grid: { x: 0, y: 0, w: 24, h: 9 } }],
+      attachments,
+      logger: createMockLogger(),
+    });
+
+    expect(result.failures).toEqual([]);
+    expect(result.panels).toHaveLength(1);
+    expect(result.panels[0]).toMatchObject({
+      type: LENS_EMBEDDABLE_TYPE,
+      config: {
+        title: 'Request count',
+        type: 'metric',
+      },
     });
   });
 
-  describe('when panel is a string reference', () => {
-    it('should throw when string is not a valid tool result id format', () => {
-      expect(() => resolveLensConfig('invalid-id')).toThrow(
-        'Invalid panel reference "invalid-id". Expected a tool_result_id from a previous visualization tool call.'
-      );
+  it('treats unsupported attachment types as panel-resolution failures', async () => {
+    const attachments = createAttachmentManager({
+      'unsupported-1': toVersionedAttachment({
+        id: 'unsupported-1',
+        type: 'unsupported_type',
+        data: {
+          foo: 'bar',
+        },
+      }),
     });
 
-    it('should throw when resultStore is not provided', () => {
-      expect(() => resolveLensConfig('abc123')).toThrow(
-        'Panel reference "abc123" was not found in the tool result store.'
-      );
+    const result = resolvePanelsFromAttachments({
+      attachmentInputs: [{ attachmentId: 'unsupported-1', grid: { x: 0, y: 0, w: 24, h: 9 } }],
+      attachments,
+      logger: createMockLogger(),
     });
 
-    it('should throw when panel reference is not found in resultStore', () => {
-      const resultStore = createMockResultStore(new Map());
-      expect(() => resolveLensConfig('abc123', resultStore)).toThrow(
-        'Panel reference "abc123" was not found in the tool result store.'
-      );
+    expect(result.panels).toEqual([]);
+    expect(result.failures).toEqual([
+      expect.objectContaining({
+        type: 'attachment_panels',
+        identifier: 'unsupported-1',
+      }),
+    ]);
+  });
+
+  it('collects per-attachment failures without failing the whole operation', async () => {
+    const result = resolvePanelsFromAttachments({
+      attachmentInputs: [{ attachmentId: 'missing-id', grid: { x: 0, y: 0, w: 24, h: 9 } }],
+      attachments: createAttachmentManager({}),
+      logger: createMockLogger(),
     });
 
-    it('should throw when referenced result is not a visualization type', () => {
-      const results = new Map([
-        ['abc123', { type: ToolResultType.other, data: { someData: true } }],
-      ]);
-      const resultStore = createMockResultStore(results);
-
-      expect(() => resolveLensConfig('abc123', resultStore)).toThrow(
-        'Provided tool_result_id "abc123" is not a visualization result (got "other").'
-      );
-    });
-
-    it('should throw when visualization result has no visualization config', () => {
-      const results = new Map([['abc123', { type: ToolResultType.visualization, data: {} }]]);
-      const resultStore = createMockResultStore(results);
-
-      expect(() => resolveLensConfig('abc123', resultStore)).toThrow(
-        'Visualization result "abc123" does not contain a valid visualization config.'
-      );
-    });
-
-    it('should throw when visualization config is not an object', () => {
-      const results = new Map([
-        [
-          'abc123',
-          { type: ToolResultType.visualization, data: { visualization: 'not-an-object' } },
-        ],
-      ]);
-      const resultStore = createMockResultStore(results);
-
-      expect(() => resolveLensConfig('abc123', resultStore)).toThrow(
-        'Visualization result "abc123" does not contain a valid visualization config.'
-      );
-    });
-
-    it('should return the visualization config when valid', () => {
-      const results = new Map([
-        [
-          'abc123',
-          { type: ToolResultType.visualization, data: { visualization: validLensConfig } },
-        ],
-      ]);
-      const resultStore = createMockResultStore(results);
-
-      const result = resolveLensConfig('abc123', resultStore);
-      expect(result).toEqual(validLensConfig);
-    });
+    expect(result.panels).toEqual([]);
+    expect(result.failures).toEqual([
+      expect.objectContaining({
+        type: 'attachment_panels',
+        identifier: 'missing-id',
+      }),
+    ]);
   });
 });

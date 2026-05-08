@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import type { DashboardMigrationGetDashboardOptions } from '../../../../../../common/siem_migrations/dashboards/types';
 import type { GetDashboardMigrationDashboardsResponse } from '../../../../../../common/siem_migrations/model/api/dashboards/dashboard_migration.gen';

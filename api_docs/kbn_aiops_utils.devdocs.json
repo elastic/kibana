@@ -67,9 +67,7 @@
             "type": "Object",
             "tags": [],
             "label": "dataView",
-            "description": [
-              ", the DataView to check"
-            ],
+            "description": [],
             "signature": [
               {
                 "pluginId": "dataViews",
@@ -83,6 +81,7 @@
             "lineNumber": 55,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "DataView",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -116,9 +115,7 @@
             "type": "Array",
             "tags": [],
             "label": "fields",
-            "description": [
-              ", the list of fields to check"
-            ],
+            "description": [],
             "signature": [
               "string[]"
             ],

@@ -13,8 +13,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Query, Filter } from '@kbn/es-query';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import type { MlAnomalyResultType } from '@kbn/ml-anomaly-utils';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
-import type { CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
 import { getRelevantAnomalyFields } from './get_relevant_anomaly_fields';
 import { useMlKibana } from '../../application/contexts/kibana';
 
@@ -159,7 +159,7 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
           {unifiedSearch ? (
             <unifiedSearch.ui.SearchBar
               appName="ML"
-              iconType="search"
+              iconType="magnify"
               placeholder={i18n.translate('xpack.ml.anomalyDetectionAlert.kqlFilter.placeholder', {
                 defaultMessage: 'Filter anomalies using KQL syntax',
               })}
@@ -203,7 +203,7 @@ export const AnomalyKqlFilter: FC<AnomalyKqlFilterProps> = React.memo(
                   defaultMessage: 'Invalid KQL query',
                 })}
                 color="danger"
-                iconType="alert"
+                iconType="warning"
                 size="s"
               >
                 {errors.map((error, index) => (

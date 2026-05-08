@@ -12,8 +12,8 @@ import type { Document } from 'yaml';
 import { isPair, isScalar, visit } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { normalizeInputsToJsonSchema, resolveRef } from '@kbn/workflows/spec/lib/input_conversion';
-import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
+import { convertJsonSchemaToZod } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
+import { normalizeFieldsToJsonSchema, resolveRef } from '@kbn/workflows/spec/lib/field_conversion';
 import { getPathFromAncestors } from '../../../../common/lib/yaml';
 import type { YamlValidationResult } from '../model/types';
 
@@ -52,7 +52,7 @@ export function validateJsonSchemaDefaults(
   }
 
   // Normalize inputs to JSON Schema format
-  const normalizedInputs = normalizeInputsToJsonSchema(inputs);
+  const normalizedInputs = normalizeFieldsToJsonSchema(inputs);
   // Defensive check: ensure normalizedInputs has valid properties object
   if (
     !normalizedInputs ||
@@ -109,7 +109,7 @@ export function validateJsonSchemaDefaults(
   }
 
   // Only build property map if properties exist and is a valid object (not array, not null)
-  // Note: normalizeInputsToJsonSchema already converts legacy array format to JSON Schema format,
+  // Note: normalizeFieldsToJsonSchema already converts legacy array format to JSON Schema format,
   // so normalizedInputs.properties contains all properties regardless of input format
   if (
     normalizedInputs.properties &&
@@ -117,7 +117,10 @@ export function validateJsonSchemaDefaults(
     normalizedInputs.properties !== null &&
     !Array.isArray(normalizedInputs.properties)
   ) {
-    buildPropertyMap(normalizedInputs.properties, ['inputs', 'properties']);
+    buildPropertyMap(normalizedInputs.properties as Record<string, JSONSchema7>, [
+      'inputs',
+      'properties',
+    ]);
   }
 
   // Also build a map for definitions (for $ref schemas)

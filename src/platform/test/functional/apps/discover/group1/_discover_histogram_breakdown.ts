@@ -79,6 +79,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const list = await discover.getHistogramLegendList();
       // With top 9 values and only 5 extension types, no Other bucket
       expect(list).to.eql(['jpg', 'css', 'png', 'gif', 'php']);
+      expect(await discover.getBreakdownFieldValue()).to.be('Breakdown by extension.raw');
+    });
+
+    it('should clear breakdown field in persisted discover session', async () => {
+      const savedSearchName = 'with breakdown and then cleared';
+      await discover.chooseBreakdownField('geo.dest');
+      await header.waitUntilLoadingHasFinished();
+      await discover.saveSearch(savedSearchName);
+
+      await discover.clearBreakdownField();
+      await header.waitUntilLoadingHasFinished();
+      await discover.saveSearch(savedSearchName);
+
+      await discover.clickNewSearchButton();
+      await header.waitUntilLoadingHasFinished();
+
+      await discover.loadSavedSearch(savedSearchName);
+      await header.waitUntilLoadingHasFinished();
+      const list = await discover.getHistogramLegendList();
+      expect(list).to.eql([]);
+      expect(await discover.getBreakdownFieldValue()).to.be('No breakdown');
     });
   });
 }

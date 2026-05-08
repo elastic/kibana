@@ -10,8 +10,9 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'fs';
 import path from 'path';
 
-import type { JobType, MlSavedObjectType } from '@kbn/ml-plugin/common/types/saved_objects';
-import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { JobType, MlSavedObjectType } from '@kbn/ml-common-types/saved_objects';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -476,8 +477,8 @@ export function MachineLearningStackManagementJobsProvider(
           expectedJob.id,
           `Expected job id to be '${expectedJob.id}' (got '${sortedActualJobs[i].id}')`
         );
-        const expectedType = Object.keys(expectedJob.analysis)[0];
-        const actualType = Object.keys(sortedActualJobs[i].analysis)[0];
+        const expectedType = Object.keys(expectedJob.analysis!)[0];
+        const actualType = Object.keys(sortedActualJobs[i].analysis!)[0];
         expect(actualType).to.eql(
           expectedType,
           `Expected job type to be '${expectedType}' (got '${actualType}')`

@@ -50,6 +50,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -86,6 +87,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -102,7 +104,7 @@
           "React.NamedExoticComponent<DocumentationPopoverProps> & { readonly type: ({ language, sections, buttonProps, searchInDescription, linkToDocumentation, isHelpMenuOpen, onHelpMenuVisibilityChange, }: DocumentationPopoverProps) => React.JSX.Element; }"
         ],
         "path": "src/platform/packages/private/kbn-language-documentation/src/components/as_popover/index.tsx",
-        "lineNumber": 84,
+        "lineNumber": 90,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -122,6 +124,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -158,6 +161,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],

@@ -8,22 +8,66 @@
  */
 
 import * as Fs from 'fs';
-import os from 'os';
 
 import * as globby from 'globby';
 import minimatch from 'minimatch';
 
-import { load as loadYaml } from 'js-yaml';
+import { parse as loadYaml } from 'yaml';
 
 import type { BuildkiteStep } from '../buildkite';
 import { BuildkiteClient } from '../buildkite';
 import type { TestGroupRunOrderResponse } from './client';
 import { CiStatsClient } from './client';
+import { getTrackedBranch } from '../utils';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
+import SHARDED_JEST_CONFIGS from '../../sharded_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
 import { filterEmptyJestConfigs } from './get_tests_from_config';
+import {
+  getAffectedPackages,
+  listChangedFiles,
+  filterFilesByPackages,
+  PREVENT_SELECTIVE_TESTS_LABEL,
+  CRITICAL_FILES_JEST_UNIT_TESTS,
+  touchedCriticalFiles,
+  CRITICAL_FILES_JEST_INTEGRATION_TESTS,
+} from '../affected-packages';
 import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
+
+const prLabels =
+  process.env.GITHUB_PR_LABELS?.split(',')
+    .map((l) => l.trim())
+    .filter(Boolean) ?? [];
+const isPrBuild = Boolean(process.env.GITHUB_PR_NUMBER);
+const preventSelectiveTesting = prLabels.includes(PREVENT_SELECTIVE_TESTS_LABEL);
+const USE_SELECTIVE_TESTING = isPrBuild && !preventSelectiveTesting;
+
+const SHARD_ANNOTATION_SEP = '||shard=';
+/**
+ * Expands configs that appear in the shard map into N shard-annotated entries.
+ * For example, if `fleet/jest.integration.config.js` has 2 shards, it becomes:
+ *   - `fleet/jest.integration.config.js||shard=1/2`
+ *   - `fleet/jest.integration.config.js||shard=2/2`
+ * Configs not in the shard map are passed through unchanged.
+ */
+function expandShardedJestConfigs(configs: string[]): string[] {
+  const shardMap = SHARDED_JEST_CONFIGS as Record<string, number>;
+  const expanded: string[] = [];
+
+  for (const config of configs) {
+    const shardCount = shardMap[config];
+    if (shardCount && shardCount > 1) {
+      for (let i = 1; i <= shardCount; i++) {
+        expanded.push(`${config}${SHARD_ANNOTATION_SEP}${i}/${shardCount}`);
+      }
+    } else {
+      expanded.push(config);
+    }
+  }
+
+  return expanded;
+}
 
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 
@@ -43,19 +87,32 @@ export async function pickTestGroupRunOrder() {
   const INTEGRATION_TYPE = getRequiredEnv('TEST_GROUP_TYPE_INTEGRATION');
   const FUNCTIONAL_TYPE = getRequiredEnv('TEST_GROUP_TYPE_FUNCTIONAL');
 
-  const JEST_MAX_MINUTES = process.env.JEST_MAX_MINUTES
-    ? parseFloat(process.env.JEST_MAX_MINUTES)
-    : 40;
-  if (Number.isNaN(JEST_MAX_MINUTES)) {
-    throw new Error(`invalid JEST_MAX_MINUTES: ${process.env.JEST_MAX_MINUTES}`);
+  const JEST_UNIT_MAX_MINUTES = process.env.JEST_UNIT_MAX_MINUTES
+    ? parseFloat(process.env.JEST_UNIT_MAX_MINUTES)
+    : 35;
+  if (Number.isNaN(JEST_UNIT_MAX_MINUTES)) {
+    throw new Error(`invalid JEST_UNIT_MAX_MINUTES: ${process.env.JEST_UNIT_MAX_MINUTES}`);
+  }
+
+  const JEST_INTEGRATION_MAX_MINUTES = process.env.JEST_INTEGRATION_MAX_MINUTES
+    ? parseFloat(process.env.JEST_INTEGRATION_MAX_MINUTES)
+    : 30;
+  if (Number.isNaN(JEST_INTEGRATION_MAX_MINUTES)) {
+    throw new Error(
+      `invalid JEST_INTEGRATION_MAX_MINUTES: ${process.env.JEST_INTEGRATION_MAX_MINUTES}`
+    );
   }
 
   const FUNCTIONAL_MAX_MINUTES = process.env.FUNCTIONAL_MAX_MINUTES
     ? parseFloat(process.env.FUNCTIONAL_MAX_MINUTES)
-    : 37;
+    : 30;
   if (Number.isNaN(FUNCTIONAL_MAX_MINUTES)) {
     throw new Error(`invalid FUNCTIONAL_MAX_MINUTES: ${process.env.FUNCTIONAL_MAX_MINUTES}`);
   }
+
+  const JEST_UNIT_TOO_LONG_MINUTES = 27;
+  const JEST_INTEGRATION_TOO_LONG_MINUTES = 27;
+  const FUNCTIONAL_TOO_LONG_MINUTES = 27;
 
   /**
    * This env variable corresponds to the env stanza within
@@ -78,7 +135,7 @@ export async function pickTestGroupRunOrder() {
         .filter(Boolean)
     : undefined;
   if (LIMIT_SOLUTIONS) {
-    const validSolutions = ['observability', 'search', 'security', 'workplaceai'];
+    const validSolutions = ['observability', 'search', 'security', 'workplaceai', 'vectordb'];
     const invalidSolutions = LIMIT_SOLUTIONS.filter((s) => !validSolutions.includes(s));
     if (invalidSolutions.length) throw new Error('Unsupported LIMIT_SOLUTIONS value');
   }
@@ -126,7 +183,7 @@ export async function pickTestGroupRunOrder() {
       ? process.env.JEST_CONFIGS_DEPS.split(',')
           .map((t) => t.trim())
           .filter(Boolean)
-      : ['build'];
+      : [];
 
   const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
     ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
@@ -167,18 +224,26 @@ export async function pickTestGroupRunOrder() {
         ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
       })
     : [];
-  const jestUnitConfigs = await filterEmptyJestConfigs(
-    jestUnitConfigsWithEmpties,
-    os.availableParallelism()
-  );
+  const jestUnitConfigsFiltered = filterEmptyJestConfigs(jestUnitConfigsWithEmpties);
+  // Expand sharded unit configs (e.g. cases/jest.config.js) into shard-annotated entries
+  let jestUnitConfigs = expandShardedJestConfigs(jestUnitConfigsFiltered);
 
-  const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
-    ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.*js', '!**/__fixtures__/**']), {
+  const jestIntegrationConfigsRaw = LIMIT_CONFIG_TYPE.includes('integration')
+    ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.js', '!**/__fixtures__/**']), {
         cwd: process.cwd(),
         absolute: false,
         ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
       })
     : [];
+  // Expand sharded integration configs into shard-annotated entries
+  let jestIntegrationConfigs = expandShardedJestConfigs(jestIntegrationConfigsRaw);
+
+  if (USE_SELECTIVE_TESTING && process.env.GITHUB_PR_MERGE_BASE) {
+    const { filteredJestUnitConfigs, filteredJestIntegrationConfigs } =
+      await filterConfigsByAffectedPackages(jestUnitConfigs, jestIntegrationConfigs);
+    jestUnitConfigs = filteredJestUnitConfigs;
+    jestIntegrationConfigs = filteredJestIntegrationConfigs;
+  }
 
   if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
     throw new Error('unable to find any unit, integration, or FTR configs');
@@ -190,6 +255,7 @@ export async function pickTestGroupRunOrder() {
   const prNumber = process.env.GITHUB_PR_NUMBER as string | undefined;
 
   const { sources, types } = await ciStats.pickTestGroupRunOrder({
+    durationPercentile: 75,
     sources: [
       // try to get times from a recent successful job on this PR
       ...(prNumber
@@ -242,15 +308,21 @@ export async function pickTestGroupRunOrder() {
       {
         type: UNIT_TYPE,
         defaultMin: 4,
-        maxMin: JEST_MAX_MINUTES,
+        maxMin: JEST_UNIT_MAX_MINUTES,
+        tooLongMin: JEST_UNIT_TOO_LONG_MINUTES,
         overheadMin: 0.2,
+        warmupMin: 4,
+        concurrency: 3,
         names: jestUnitConfigs,
       },
       {
         type: INTEGRATION_TYPE,
-        defaultMin: 60,
-        maxMin: JEST_MAX_MINUTES,
+        defaultMin: 15,
+        maxMin: JEST_INTEGRATION_MAX_MINUTES,
+        tooLongMin: JEST_INTEGRATION_TOO_LONG_MINUTES,
         overheadMin: 0.2,
+        warmupMin: 5,
+        concurrency: 1,
         names: jestIntegrationConfigs,
       },
       ...Array.from(ftrConfigsByQueue).map(([queue, names]) => ({
@@ -258,8 +330,10 @@ export async function pickTestGroupRunOrder() {
         defaultMin: 60,
         queue,
         maxMin: FUNCTIONAL_MAX_MINUTES,
+        tooLongMin: FUNCTIONAL_TOO_LONG_MINUTES,
         minimumIsolationMin: FUNCTIONAL_MINIMUM_ISOLATION_MIN,
         overheadMin: 0,
+        warmupMin: 3,
         names,
       })),
     ],
@@ -330,97 +404,104 @@ export async function pickTestGroupRunOrder() {
     bk.uploadArtifacts('ftr_run_order.json');
   }
 
+  const steps = [
+    unit.count > 0
+      ? {
+          label: 'Jest Tests',
+          command: getRequiredEnv('JEST_UNIT_SCRIPT'),
+          parallelism: unit.count,
+          timeout_in_minutes: 50,
+          key: 'jest',
+          agents: expandAgentQueue('n2-4-spot', 110),
+          env: envFromlabels,
+          depends_on: JEST_CONFIGS_DEPS,
+          retry: {
+            automatic: [
+              { exit_status: '-1', limit: 3 },
+              ...(JEST_CONFIGS_RETRY_COUNT > 0
+                ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
+                : []),
+            ],
+          },
+        }
+      : [],
+    integration.count > 0
+      ? {
+          label: 'Jest Integration Tests',
+          command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
+          parallelism: integration.count,
+          // TODO: Reduce once we have identified the cause of random long-running tests
+          timeout_in_minutes: 50,
+          key: 'jest-integration',
+          agents: expandAgentQueue('n2-4-spot', 105),
+          env: envFromlabels,
+          depends_on: JEST_CONFIGS_DEPS,
+          retry: {
+            automatic: [
+              { exit_status: '-1', limit: 3 },
+              ...(JEST_CONFIGS_RETRY_COUNT > 0
+                ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
+                : []),
+            ],
+          },
+        }
+      : [],
+    functionalGroups.length
+      ? {
+          group: 'FTR Configs',
+          key: 'ftr-configs',
+          depends_on: FTR_CONFIGS_DEPS,
+          steps: functionalGroups
+            .sort((a, b) =>
+              // if both groups are sorted by number then sort by that
+              typeof a.sortBy === 'number' && typeof b.sortBy === 'number'
+                ? a.sortBy - b.sortBy
+                : // if both groups are sorted by string, sort by that
+                typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
+                ? a.sortBy.localeCompare(b.sortBy)
+                : // if a is sorted by number then order it later than b
+                typeof a.sortBy === 'number'
+                ? 1
+                : -1
+            )
+            .map(
+              ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
+                label: title,
+                command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
+                timeout_in_minutes: 50,
+                key,
+                agents: expandAgentQueue(queue, 105),
+                env: {
+                  FTR_CONFIG_GROUP_KEY: key,
+                  ...ftrExtraArgs,
+                  ...envFromlabels,
+                },
+                retry: {
+                  automatic: [
+                    { exit_status: '-1', limit: 3 },
+                    ...(FTR_CONFIGS_RETRY_COUNT > 0
+                      ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
+                      : []),
+                  ],
+                },
+              })
+            ),
+        }
+      : [],
+  ].flat();
+
+  // Register cancelable child keys before uploading so a concurrent gate failure
+  // can discover and short-circuit these jobs immediately.
+  // Child step keys (not group keys) are registered because `buildkite-agent step cancel`
+  // does not work on group keys.
+  const cancelKeys: string[] = [];
+  if (unit.count > 0) cancelKeys.push('jest');
+  if (integration.count > 0) cancelKeys.push('jest-integration');
+  for (const fg of functionalGroups) cancelKeys.push(fg.key);
+  bk.setMetadata('cancel_on_gate_failure_batch:test_groups', JSON.stringify(cancelKeys));
+
   // upload the step definitions to Buildkite
-  bk.uploadSteps(
-    [
-      unit.count > 0
-        ? {
-            label: 'Jest Tests',
-            command: getRequiredEnv('JEST_UNIT_SCRIPT'),
-            parallelism: unit.count,
-            timeout_in_minutes: 120,
-            key: 'jest',
-            agents: expandAgentQueue('n2-4-spot', 110),
-            env: {
-              SCOUT_TARGET_TYPE: 'local',
-            },
-            depends_on: JEST_CONFIGS_DEPS,
-            retry: {
-              automatic: [
-                { exit_status: '-1', limit: 3 },
-                ...(JEST_CONFIGS_RETRY_COUNT > 0
-                  ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
-                  : []),
-              ],
-            },
-          }
-        : [],
-      integration.count > 0
-        ? {
-            label: 'Jest Integration Tests',
-            command: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
-            parallelism: integration.count,
-            timeout_in_minutes: 120,
-            key: 'jest-integration',
-            agents: expandAgentQueue('n2-4-spot', 105),
-            env: {
-              SCOUT_TARGET_TYPE: 'local',
-            },
-            depends_on: JEST_CONFIGS_DEPS,
-            retry: {
-              automatic: [
-                { exit_status: '-1', limit: 3 },
-                ...(JEST_CONFIGS_RETRY_COUNT > 0
-                  ? [{ exit_status: '*', limit: JEST_CONFIGS_RETRY_COUNT }]
-                  : []),
-              ],
-            },
-          }
-        : [],
-      functionalGroups.length
-        ? {
-            group: 'FTR Configs',
-            key: 'ftr-configs',
-            depends_on: FTR_CONFIGS_DEPS,
-            steps: functionalGroups
-              .sort((a, b) =>
-                // if both groups are sorted by number then sort by that
-                typeof a.sortBy === 'number' && typeof b.sortBy === 'number'
-                  ? a.sortBy - b.sortBy
-                  : // if both groups are sorted by string, sort by that
-                  typeof a.sortBy === 'string' && typeof b.sortBy === 'string'
-                  ? a.sortBy.localeCompare(b.sortBy)
-                  : // if a is sorted by number then order it later than b
-                  typeof a.sortBy === 'number'
-                  ? 1
-                  : -1
-              )
-              .map(
-                ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
-                  label: title,
-                  command: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
-                  timeout_in_minutes: 120,
-                  agents: expandAgentQueue(queue, 105),
-                  env: {
-                    SCOUT_TARGET_TYPE: 'local',
-                    FTR_CONFIG_GROUP_KEY: key,
-                    ...ftrExtraArgs,
-                    ...envFromlabels,
-                  },
-                  retry: {
-                    automatic: [
-                      { exit_status: '-1', limit: 3 },
-                      ...(FTR_CONFIGS_RETRY_COUNT > 0
-                        ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
-                        : []),
-                    ],
-                  },
-                })
-              ),
-          }
-        : [],
-    ].flat()
-  );
+  bk.uploadSteps(steps);
 }
 
 function getRunGroups(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string): RunGroup[] {
@@ -428,6 +509,18 @@ function getRunGroups(bk: BuildkiteClient, allTypes: RunGroup[], typeName: strin
   if (!types.length) {
     throw new Error(`missing test group run order for group [${typeName}]`);
   }
+
+  const uniqueTooLongMin = [
+    ...new Set(
+      types.map((t) => t.tooLongMin).filter((value): value is number => typeof value === 'number')
+    ),
+  ];
+  const tooLongThresholdLabel =
+    uniqueTooLongMin.length > 0
+      ? `configured warning threshold${
+          uniqueTooLongMin.length === 1 ? ` of ${uniqueTooLongMin[0]} minutes` : ''
+        }`
+      : 'maximum amount of time desired for a single CI job';
 
   const misses = types.flatMap((t) => t.namesWithoutDurations);
   if (misses.length > 0) {
@@ -458,10 +551,10 @@ function getRunGroups(bk: BuildkiteClient, allTypes: RunGroup[], typeName: strin
       'warning',
       [
         tooLongs.length === 1
-          ? `The following "${typeName}" config has a duration that exceeds the maximum amount of time desired for a single CI job. ` +
+          ? `The following "${typeName}" config has a duration that exceeds the ${tooLongThresholdLabel}. ` +
             `This is not an error, and if you don't own this config then you can ignore this warning. ` +
             `If you own this config please split it up ASAP and ask Operations if you have questions about how to do that.`
-          : `The following "${typeName}" configs have durations that exceed the maximum amount of time desired for a single CI job. ` +
+          : `The following "${typeName}" configs have durations that exceed the ${tooLongThresholdLabel}. ` +
             `This is not an error, and if you don't own any of these configs then you can ignore this warning.` +
             `If you own any of these configs please split them up ASAP and ask Operations if you have questions about how to do that.`,
         '',
@@ -479,23 +572,6 @@ function getRunGroup(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string
     throw new Error(`expected to find exactly 1 "${typeName}" run group`);
   }
   return groups[0];
-}
-
-function getTrackedBranch(): string {
-  let pkg;
-  try {
-    pkg = JSON.parse(Fs.readFileSync('package.json', 'utf8'));
-  } catch (_) {
-    const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
-    throw new Error(`unable to read kibana's package.json file: ${error.message}`);
-  }
-
-  const branch = pkg.branch;
-  if (typeof branch !== 'string') {
-    throw new Error('missing `branch` field from package.json file');
-  }
-
-  return branch;
 }
 
 function isObj(x: unknown): x is Record<string, unknown> {
@@ -590,4 +666,56 @@ function getEnabledFtrConfigs(patterns?: string[], solutions?: string[]) {
     const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
     throw new Error(`unable to collect enabled FTR configs: ${error.message}`);
   }
+}
+
+async function filterConfigsByAffectedPackages(
+  jestUnitConfigs: string[],
+  jestIntegrationConfigs: string[]
+) {
+  const mergeBase = process.env.GITHUB_PR_MERGE_BASE!;
+  const affectedPackages = await getAffectedPackages(mergeBase, {
+    strategy: 'git',
+    includeDownstream: true,
+    ignorePatterns: [], // might want to exclude metadata/text changes in the future
+    ignoreUncategorizedChanges: true,
+  }).catch((error) => {
+    console.error('Error getting affected packages', error);
+    return null;
+  });
+
+  const shouldFilterByAffected = Boolean(affectedPackages);
+  if (!shouldFilterByAffected) {
+    console.log('Not filtering Jest unit/integration tests because no affected packages found');
+    return {
+      filteredJestUnitConfigs: jestUnitConfigs,
+      filteredJestIntegrationConfigs: jestIntegrationConfigs,
+    };
+  }
+
+  const prChangedFiles = listChangedFiles({ mergeBase, commit: 'HEAD' });
+  console.log('Filtering Jest unit/integration tests for affected packages:', affectedPackages);
+
+  let filteredJestUnitConfigs = jestUnitConfigs;
+  let filteredJestIntegrationConfigs = jestIntegrationConfigs;
+  if (!touchedCriticalFiles(prChangedFiles, CRITICAL_FILES_JEST_UNIT_TESTS)) {
+    filteredJestUnitConfigs = filterFilesByPackages(jestUnitConfigs, affectedPackages);
+    console.log(
+      `Filtering Jest unit tests: ${jestUnitConfigs.length} -> ${filteredJestUnitConfigs.length}`
+    );
+  } else {
+    console.log('Not filtering Jest unit tests because critical files changed');
+  }
+
+  if (!touchedCriticalFiles(prChangedFiles, CRITICAL_FILES_JEST_INTEGRATION_TESTS)) {
+    filteredJestIntegrationConfigs = filterFilesByPackages(
+      jestIntegrationConfigs,
+      affectedPackages
+    );
+    console.log(
+      `Filtering Jest integration tests: ${jestIntegrationConfigs.length} -> ${filteredJestIntegrationConfigs.length}`
+    );
+  } else {
+    console.log('Not filtering Jest integration tests because critical files changed');
+  }
+  return { filteredJestUnitConfigs, filteredJestIntegrationConfigs };
 }

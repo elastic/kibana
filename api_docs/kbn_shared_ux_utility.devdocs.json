@@ -59,6 +59,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Loader",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -82,6 +83,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "DynamicOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -159,6 +161,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "HTMLElement",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -226,6 +229,7 @@
             "lineNumber": 15,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "MouseEvent",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -243,7 +247,7 @@
           "\nA HOC which supplies React.Suspense with a fallback component, and a `KibanaErrorBoundary` to contain errors."
         ],
         "signature": [
-          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P & ",
+          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P & ",
           {
             "pluginId": "@kbn/shared-ux-utility",
             "scope": "common",
@@ -275,6 +279,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ComponentType",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -326,7 +331,7 @@
             "label": "fallback",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/kbn-shared-ux-utility/src/dynamic/dynamic.tsx",
             "lineNumber": 21,

@@ -12,6 +12,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { monaco } from '@kbn/monaco';
 import { useYamlValidation } from './use_yaml_validation';
+import { WorkflowsContextProvider } from '../../../common/context';
 import { selectDetail } from '../../../entities/workflows/store';
 import { createWorkflowsStore } from '../../../entities/workflows/store/store';
 import {
@@ -86,7 +87,11 @@ const renderHookWithProviders = (
   store.dispatch(setActiveTab('workflow'));
 
   const wrapper = ({ children }: { children: React.ReactNode }) => {
-    return React.createElement(Provider, { store }, children);
+    return React.createElement(
+      WorkflowsContextProvider,
+      null,
+      React.createElement(Provider, { store }, children)
+    );
   };
 
   return {
@@ -149,17 +154,18 @@ steps:
 
     // Wait for Monaco markers to be set
     await waitFor(() => {
-      const stepNameCalls = mockSetModelMarkers.mock.calls.filter(
-        (call) => call[1] === 'step-name-validation'
-      );
-      expect(stepNameCalls.length).toBeGreaterThan(0);
+      expect(mockSetModelMarkers).toHaveBeenCalled();
     });
 
-    // Should call setModelMarkers for step-name-validation with empty array
-    const stepNameCalls = mockSetModelMarkers.mock.calls.filter(
-      (call) => call[1] === 'step-name-validation'
+    // All custom markers are batched under 'custom-yaml-validation';
+    // filter the last batched call's markers by source
+    const batchedCalls = mockSetModelMarkers.mock.calls.filter(
+      (call) => call[1] === 'custom-yaml-validation'
     );
-    expect(stepNameCalls[0][2]).toEqual([]);
+    expect(batchedCalls.length).toBeGreaterThan(0);
+    const allMarkers = batchedCalls[batchedCalls.length - 1][2];
+    const stepNameMarkers = allMarkers.filter((m: any) => m.source === 'step-name-validation');
+    expect(stepNameMarkers).toEqual([]);
   });
 
   it('should report errors for duplicate step names', async () => {
@@ -190,12 +196,13 @@ steps:
       expect(result.current.error).toBeNull();
     });
 
-    // Should call setModelMarkers for step-name-validation with errors
-    const stepNameCalls = mockSetModelMarkers.mock.calls.filter(
-      (call) => call[1] === 'step-name-validation'
+    // All custom markers are batched; filter by source
+    const batchedCalls = mockSetModelMarkers.mock.calls.filter(
+      (call) => call[1] === 'custom-yaml-validation'
     );
-    expect(stepNameCalls).toHaveLength(1);
-    const markers = stepNameCalls[0][2];
+    expect(batchedCalls).toHaveLength(1);
+    const allMarkers = batchedCalls[0][2];
+    const markers = allMarkers.filter((m: any) => m.source === 'step-name-validation');
     expect(markers).toHaveLength(2); // Two errors for the duplicate "step1"
 
     markers.forEach((marker: any) => {
@@ -229,11 +236,11 @@ steps:
       expect(result.current.error).toBeNull();
     });
 
-    const stepNameCalls = mockSetModelMarkers.mock.calls.filter(
-      (call) => call[1] === 'step-name-validation'
+    const batchedCalls = mockSetModelMarkers.mock.calls.filter(
+      (call) => call[1] === 'custom-yaml-validation'
     );
-    expect(stepNameCalls).toHaveLength(1);
-    const markers = stepNameCalls[0][2];
+    expect(batchedCalls).toHaveLength(1);
+    const markers = batchedCalls[0][2].filter((m: any) => m.source === 'step-name-validation');
     expect(markers).toHaveLength(2); // Two errors for the duplicate "nested_step"
 
     markers.forEach((marker: any) => {
@@ -267,11 +274,11 @@ steps:
       expect(result.current.error).toBeNull();
     });
 
-    const stepNameCalls = mockSetModelMarkers.mock.calls.filter(
-      (call) => call[1] === 'step-name-validation'
+    const batchedCalls = mockSetModelMarkers.mock.calls.filter(
+      (call) => call[1] === 'custom-yaml-validation'
     );
-    expect(stepNameCalls).toHaveLength(1);
-    const markers = stepNameCalls[0][2];
+    expect(batchedCalls).toHaveLength(1);
+    const markers = batchedCalls[0][2].filter((m: any) => m.source === 'step-name-validation');
     expect(markers).toHaveLength(2); // Two errors for the duplicate "duplicate_name"
 
     markers.forEach((marker: any) => {
@@ -305,11 +312,11 @@ steps:
       expect(result.current.error).toBeNull();
     });
 
-    const stepNameCalls = mockSetModelMarkers.mock.calls.filter(
-      (call) => call[1] === 'step-name-validation'
+    const batchedCalls = mockSetModelMarkers.mock.calls.filter(
+      (call) => call[1] === 'custom-yaml-validation'
     );
-    expect(stepNameCalls).toHaveLength(1);
-    const markers = stepNameCalls[0][2];
+    expect(batchedCalls).toHaveLength(1);
+    const markers = batchedCalls[0][2].filter((m: any) => m.source === 'step-name-validation');
     expect(markers).toHaveLength(2); // Two errors for the duplicate "branch_step"
 
     markers.forEach((marker: any) => {
@@ -353,11 +360,11 @@ steps:
       expect(result.current.error).toBeNull();
     });
 
-    const stepNameCalls = mockSetModelMarkers.mock.calls.filter(
-      (call) => call[1] === 'step-name-validation'
+    const batchedCalls = mockSetModelMarkers.mock.calls.filter(
+      (call) => call[1] === 'custom-yaml-validation'
     );
-    expect(stepNameCalls).toHaveLength(1);
-    const markers = stepNameCalls[0][2];
+    expect(batchedCalls).toHaveLength(1);
+    const markers = batchedCalls[0][2].filter((m: any) => m.source === 'step-name-validation');
 
     // Should have 5 errors: 3 for "root_step", 2 for "inner_step"
     expect(markers).toHaveLength(5);
@@ -375,5 +382,98 @@ steps:
     innerStepErrors.forEach((marker: any) => {
       expect(marker.message).toContain('Found 2 steps with this name');
     });
+  });
+});
+
+describe('useYamlValidation - Marker Batching', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
+  it('should batch all custom markers into a single setModelMarkers call', async () => {
+    const yamlContent = `
+version: "1"
+name: "Test Workflow"
+enabled: true
+triggers:
+  - type: manual
+    enabled: true
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "{{ inputs.message }}"
+  - name: step2
+    type: http
+    with:
+      url: "https://example.com"
+      method: GET
+`;
+
+    const mockEditor = createMockEditor(yamlContent);
+    const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
+
+    jest.advanceTimersByTime(500);
+
+    await waitFor(() => {
+      expect(result.current.error).toBeNull();
+    });
+
+    await waitFor(() => {
+      expect(mockSetModelMarkers).toHaveBeenCalled();
+    });
+
+    // All custom validations should be batched into exactly one call
+    const batchedCalls = mockSetModelMarkers.mock.calls.filter(
+      (call) => call[1] === 'custom-yaml-validation'
+    );
+    expect(batchedCalls).toHaveLength(1);
+  });
+
+  it('should include markers from all validation sources in the batched call', async () => {
+    const yamlContent = `
+version: "1"
+name: "Test Workflow"
+enabled: true
+triggers:
+  - type: manual
+    enabled: true
+steps:
+  - name: step1
+    type: console
+    with:
+      message: "hello"
+`;
+
+    const mockEditor = createMockEditor(yamlContent);
+    const { result } = renderHookWithProviders(mockEditor as any, yamlContent);
+
+    jest.advanceTimersByTime(500);
+
+    await waitFor(() => {
+      expect(result.current.error).toBeNull();
+    });
+
+    await waitFor(() => {
+      expect(mockSetModelMarkers).toHaveBeenCalled();
+    });
+
+    // The batched call's markers should carry individual source names
+    const batchedCalls = mockSetModelMarkers.mock.calls.filter(
+      (call) => call[1] === 'custom-yaml-validation'
+    );
+    expect(batchedCalls).toHaveLength(1);
+
+    // Verify no individual owner calls were made (only batched)
+    const individualOwnerCalls = mockSetModelMarkers.mock.calls.filter(
+      (call) => call[1] !== 'custom-yaml-validation'
+    );
+    expect(individualOwnerCalls).toHaveLength(0);
   });
 });

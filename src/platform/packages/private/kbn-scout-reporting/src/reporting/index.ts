@@ -31,3 +31,12 @@ export const scoutFailedTestsReporter = (
     ? ['@kbn/scout-reporting/src/reporting/playwright/failed_test', options]
     : ['null'];
 };
+
+// Playwright failure summary reporting (local development only — disabled in CI)
+export const scoutFailureSummaryReporter = (
+  options?: ScoutPlaywrightReporterOptions
+): ReporterDescription => {
+  return process.env.CI
+    ? ['null']
+    : ['@kbn/scout-reporting/src/reporting/playwright/failure_summary', options];
+};

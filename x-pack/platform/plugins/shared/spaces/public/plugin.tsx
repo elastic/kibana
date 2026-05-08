@@ -9,6 +9,7 @@ import { combineLatest, type Subscription } from 'rxjs';
 
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
@@ -34,6 +35,7 @@ export interface PluginsStart {
   features: FeaturesPluginStart;
   management?: ManagementStart;
   cloud?: CloudStart;
+  cps?: CPSPluginStart;
 }
 
 /**

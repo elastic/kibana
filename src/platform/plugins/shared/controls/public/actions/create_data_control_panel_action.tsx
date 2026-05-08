@@ -14,8 +14,9 @@ import {
   apiCanAddNewPanel,
   apiCanPinPanels,
   apiIsPresentationContainer,
-} from '@kbn/presentation-containers';
-import { apiPublishesDataViews, type EmbeddableApiContext } from '@kbn/presentation-publishing';
+  apiPublishesDataViews,
+  type EmbeddableApiContext,
+} from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { ACTION_CREATE_CONTROL } from '@kbn/controls-constants';
@@ -26,15 +27,13 @@ import { dataViewsService } from '../services/kibana_services';
 
 let lastUsedDataViewId: string | undefined;
 
-export const createDataControlPanelAction = (): ActionDefinition<
-  EmbeddableApiContext & { isPinned: boolean }
-> => ({
+export const createDataControlPanelAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ACTION_CREATE_CONTROL,
   order: 1,
   grouping: [ADD_PANEL_CONTROL_GROUP],
-  getIconType: () => 'controlsHorizontal',
+  getIconType: () => 'controls',
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
-  execute: async ({ embeddable, isPinned }) => {
+  execute: async ({ embeddable }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
     const defaultDataViewId = apiHasEditorConfig(embeddable)
       ? embeddable.getEditorConfig()?.defaultDataViewId
@@ -50,10 +49,9 @@ export const createDataControlPanelAction = (): ActionDefinition<
 
     openDataControlEditor({
       initialState: {
-        dataViewId: parentDataViewId,
+        data_view_id: parentDataViewId,
       },
       parentApi: embeddable,
-      isPinned,
       setLastUsedDataViewId: (dataViewId) => {
         lastUsedDataViewId = dataViewId;
       },
@@ -72,11 +70,11 @@ export const createDataControlPanelAction = (): ActionDefinition<
 
 export const createDataControlOfType = <State extends DataControlState = DataControlState>(
   type: string,
-  { embeddable, state, controlId, isPinned }: CreateControlTypeContext<State>
+  { embeddable, state, controlId }: CreateControlTypeContext<State>
 ) => {
   if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
 
-  const { dataViewId, fieldName } = state;
+  const { data_view_id: dataViewId, field_name: fieldName } = state;
   if (!dataViewId || !fieldName) {
     // this shouldn't happen due to constraints in the editor UI - however, if it does, throw an error
     throw new Error(
@@ -95,8 +93,8 @@ export const createDataControlOfType = <State extends DataControlState = DataCon
   if (controlId) {
     // the control exists but changed type - so, replace the old control
     embeddable.replacePanel(controlId, newControl);
-  } else if (isPinned && apiCanPinPanels(embeddable)) {
-    // otherwise, add a new control as either pinned or not depending on provided context
+  } else if (apiCanPinPanels(embeddable)) {
+    // otherwise, add a new control as either pinned or not depending on whether the parent allows it
     embeddable.addPinnedPanel(newControl);
   } else {
     embeddable.addNewPanel(newControl, { displaySuccessMessage: true });

@@ -6,13 +6,15 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import { tags } from '@kbn/scout';
 
 import { test } from '../fixtures';
 import { getFleetAllIntegrationsReadRole } from '../fixtures/services/privileges';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/260143
+test.describe.skip(
   'When the user has All privilege for Fleet but Read for integrations',
-  { tag: ['@ess'] },
+  { tag: tags.stateful.classic },
   () => {
     const agentPolicyName = 'Test Agent Policy';
     let policyId: string;

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/workflows-management-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/workflows-eng'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/workflows-management-plugin'
+  title: '@kbn/workflows-management-plugin'
   description: Moon project for @kbn/workflows-management-plugin
   channel: ''
   owner: '@elastic/workflows-eng'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/workflows_management
+  sourceRoot: src/platform/plugins/shared/workflows_management
 dependsOn:
   - '@kbn/core'
   - '@kbn/kibana-react-plugin'
@@ -27,7 +26,9 @@ dependsOn:
   - '@kbn/navigation-plugin'
   - '@kbn/config-schema'
   - '@kbn/workflows'
+  - '@kbn/human-readable-id'
   - '@kbn/workflows-ui'
+  - '@kbn/workflows-yaml'
   - '@kbn/zod'
   - '@kbn/code-editor'
   - '@kbn/monaco'
@@ -55,6 +56,7 @@ dependsOn:
   - '@kbn/serverless'
   - '@kbn/field-types'
   - '@kbn/data-views-plugin'
+  - '@kbn/kql'
   - '@kbn/field-formats-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/es-query'
@@ -82,6 +84,21 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/licensing-types'
   - '@kbn/core-lifecycle-server-mocks'
+  - '@kbn/scout'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/share-plugin'
+  - '@kbn/core-security-server'
+  - '@kbn/logging'
+  - '@kbn/management-settings-ids'
+  - '@kbn/agent-context-layer-plugin'
+  - '@kbn/std'
+  - '@kbn/use-observable'
+  - '@kbn/cloud-plugin'
+  - '@kbn/kbn-client'
+  - '@kbn/rule-data-utils'
+  - '@kbn/std'
+  - '@kbn/core-saved-objects-common'
 tags:
   - plugin
   - prod
@@ -94,20 +111,11 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/**/*
     - .storybook/**/*.ts
     - .storybook/**/*.tsx
     - server/**/*.json
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

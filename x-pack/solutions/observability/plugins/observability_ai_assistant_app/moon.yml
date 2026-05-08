@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/observability-ai-assistant-app-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/obs-ai-team'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/observability-ai-assistant-app-plugin'
+  title: '@kbn/observability-ai-assistant-app-plugin'
   description: Moon project for @kbn/observability-ai-assistant-app-plugin
   channel: ''
   owner: '@elastic/obs-ai-team'
-  metadata:
-    sourceRoot: x-pack/solutions/observability/plugins/observability_ai_assistant_app
+  sourceRoot: x-pack/solutions/observability/plugins/observability_ai_assistant_app
 dependsOn:
   - '@kbn/es-types'
   - '@kbn/observability-ai-assistant-plugin'
@@ -92,8 +91,11 @@ dependsOn:
   - '@kbn/utility-types-jest'
   - '@kbn/zod'
   - '@kbn/connector-schemas'
-  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-browser'
   - '@kbn/object-utils'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/react-query'
+  - '@kbn/search-inference-endpoints'
 tags:
   - plugin
   - prod
@@ -109,16 +111,6 @@ fileGroups:
     - server/**/*
     - .storybook/**/*.tsx
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

@@ -7,17 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-import type { TriggerType } from '@kbn/workflows';
 import {
   AlertRuleTriggerSchema,
+  isTriggerType,
   ManualTriggerSchema,
   ScheduledTriggerSchema,
 } from '@kbn/workflows';
+import { triggerSchemas } from '../../../../../../trigger_schemas';
 import { generateTriggerSnippet } from '../../../snippets/generate_trigger_snippet';
 
+/** Shape used for both built-in and registered trigger suggestions */
+interface TriggerSuggestionItem {
+  type: string;
+  description: string;
+  icon: monaco.languages.CompletionItemKind;
+}
+
 /**
- * Get trigger type suggestions with snippets
+ * Get trigger type suggestions with snippets (built-in + registered from workflows_extensions).
  */
 export function getTriggerTypeSuggestions(
   typePrefix: string,
@@ -25,19 +34,28 @@ export function getTriggerTypeSuggestions(
 ): monaco.languages.CompletionItem[] {
   const suggestions: monaco.languages.CompletionItem[] = [];
 
-  // Get built-in trigger types from the schema (single source of truth)
   const builtInTriggerTypes = getBuiltInTriggerTypesFromSchema();
+  const registeredTriggers = triggerSchemas.getTriggerDefinitions().map(
+    (t): TriggerSuggestionItem => ({
+      type: t.id,
+      description: t.description ?? t.title ?? t.id,
+      icon: monaco.languages.CompletionItemKind.TypeParameter,
+    })
+  );
+  const allTriggerTypes: TriggerSuggestionItem[] = [...builtInTriggerTypes, ...registeredTriggers];
 
-  // Filter trigger types that match the prefix
   const matchingTriggerTypes =
     typePrefix.length > 0
-      ? builtInTriggerTypes.filter((triggerType) =>
+      ? allTriggerTypes.filter((triggerType) =>
           triggerType.type.toLowerCase().includes(typePrefix.toLowerCase().trim())
         )
-      : builtInTriggerTypes;
+      : allTriggerTypes;
 
   matchingTriggerTypes.forEach((triggerType) => {
-    const snippetText = generateTriggerSnippet(triggerType.type as TriggerType);
+    const triggerDef = triggerSchemas.getTriggerDefinition(triggerType.type);
+    const snippetText = generateTriggerSnippet(triggerType.type, {
+      defaultCondition: triggerDef?.snippets?.condition,
+    });
 
     // Extended range for multi-line insertion
     const extendedRange = {
@@ -47,6 +65,16 @@ export function getTriggerTypeSuggestions(
       endColumn: Math.max(range.endColumn, 1000),
     };
 
+    const isEventDriven = !isTriggerType(triggerType.type);
+    const detail = isEventDriven
+      ? i18n.translate('workflows.triggerSuggestions.eventDrivenTriggerDetail', {
+          defaultMessage: 'Event-driven trigger',
+        })
+      : i18n.translate('workflows.triggerSuggestions.workflowTriggerDetail', {
+          defaultMessage: 'Workflow trigger',
+        });
+
+    const sortPrefix = isEventDriven ? '1_' : '0_';
     suggestions.push({
       label: triggerType.type,
       kind: triggerType.icon,
@@ -55,13 +83,28 @@ export function getTriggerTypeSuggestions(
       range: extendedRange,
       documentation: triggerType.description,
       filterText: triggerType.type,
-      sortText: `!${triggerType.type}`, // Priority prefix to sort before other suggestions
-      detail: 'Workflow trigger',
+      sortText: `!${sortPrefix}${triggerType.type}`,
+      detail,
       preselect: false,
     });
   });
 
   return suggestions;
+}
+
+/**
+ * Get all trigger types (built-in + registered) for tests and other callers.
+ */
+export function getAllTriggerTypesForSuggestions(): TriggerSuggestionItem[] {
+  const builtIn = getBuiltInTriggerTypesFromSchema();
+  const registered = triggerSchemas.getTriggerDefinitions().map(
+    (t): TriggerSuggestionItem => ({
+      type: t.id,
+      description: t.description ?? t.title ?? t.id,
+      icon: monaco.languages.CompletionItemKind.TypeParameter,
+    })
+  );
+  return [...builtIn, ...registered];
 }
 
 // Cache for built-in trigger types extracted from schema
@@ -84,7 +127,7 @@ export function getBuiltInTriggerTypesFromSchema(): Array<{
   }
 
   // Extract trigger types from the actual schema definitions
-  const triggerSchemas = [
+  const builtInSchemaConfigs = [
     {
       schema: AlertRuleTriggerSchema,
       description: 'Trigger workflow when an alert rule fires',
@@ -102,7 +145,7 @@ export function getBuiltInTriggerTypesFromSchema(): Array<{
     },
   ];
 
-  const triggerTypes = triggerSchemas.map(({ schema, description, icon }) => {
+  const triggerTypes = builtInSchemaConfigs.map(({ schema, description, icon }) => {
     // Extract the literal type value from the Zod schema
     const typeField = schema.shape.type;
     const triggerType = typeField.def.values[0] as string; // Get the literal value from z.literal()

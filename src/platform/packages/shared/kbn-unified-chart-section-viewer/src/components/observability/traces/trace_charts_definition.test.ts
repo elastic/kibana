@@ -18,7 +18,11 @@ describe('trace_charts_definition', () => {
 
   describe('getErrorRateChart', () => {
     it('should return error rate chart configuration', () => {
-      const result = getErrorRateChart({ indexes: mockIndexes, filters: mockFilters });
+      const result = getErrorRateChart({
+        indexes: mockIndexes,
+        filters: mockFilters,
+        metadataFields: [],
+      });
 
       expect(result).toEqual({
         id: 'error_rate',
@@ -30,12 +34,19 @@ describe('trace_charts_definition', () => {
       });
 
       expect(result?.esqlQuery).toContain(unmappedFieldsPrefix);
+      expect(result?.esqlQuery).toContain(
+        'WHERE TO_STRING(processor.event) == "transaction" OR TO_STRING(processor.event) == "span" OR processor.event IS NULL'
+      );
       expect(result?.esqlQuery).toContain('TO_STRING(event.outcome) == "failure"');
       expect(result?.esqlQuery).toContain('TO_STRING(status.code) == "Error"');
     });
 
     it('should include all provided filters in the ESQL query', () => {
-      const result = getErrorRateChart({ indexes: mockIndexes, filters: mockFilters });
+      const result = getErrorRateChart({
+        indexes: mockIndexes,
+        filters: mockFilters,
+        metadataFields: [],
+      });
 
       expect(result?.esqlQuery).toContain('service.name == "test-service"');
       expect(result?.esqlQuery).toContain('environment == "production"');
@@ -43,27 +54,57 @@ describe('trace_charts_definition', () => {
     });
 
     it('should handle empty filters array', () => {
-      const result = getErrorRateChart({ indexes: mockIndexes, filters: [] });
+      const result = getErrorRateChart({ indexes: mockIndexes, filters: [], metadataFields: [] });
 
       expect(result?.esqlQuery).toContain('TO_STRING(processor.event) == "transaction"');
       expect(result?.esqlQuery).toContain('FROM traces-*');
     });
 
     it('should generate valid ESQL query structure', () => {
-      const result = getErrorRateChart({ indexes: mockIndexes, filters: mockFilters });
+      const result = getErrorRateChart({
+        indexes: mockIndexes,
+        filters: mockFilters,
+        metadataFields: [],
+      });
 
       expect(result?.esqlQuery).toMatch(/FROM .+/);
       expect(result?.esqlQuery).toContain('STATS');
       expect(result?.esqlQuery).toContain('EVAL');
       expect(result?.esqlQuery).toContain('KEEP');
       expect(result?.esqlQuery).toContain('SORT');
-      expect(result?.esqlQuery).toContain('BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
+      expect(result?.esqlQuery).toContain('TBUCKET(100)');
+    });
+
+    it('should include METADATA directive', () => {
+      const result = getErrorRateChart({
+        indexes: mockIndexes,
+        filters: ['_id == "abc" AND _index == "traces-0001"'],
+        metadataFields: ['_id', '_index'],
+      });
+
+      expect(result?.esqlQuery).toContain('FROM traces-* METADATA _id, _index');
+    });
+
+    it('should produce the expected full ESQL query', () => {
+      const result = getErrorRateChart({
+        indexes: mockIndexes,
+        filters: mockFilters,
+        metadataFields: [],
+      });
+
+      expect(result?.esqlQuery).toMatchInlineSnapshot(
+        `"SET unmapped_fields=\\"NULLIFY\\"; FROM traces-* | WHERE service.name == \\"test-service\\" | WHERE environment == \\"production\\" | WHERE TO_STRING(processor.event) == \\"transaction\\" OR TO_STRING(processor.event) == \\"span\\" OR processor.event IS NULL | STATS failure = COUNT(*) WHERE TO_STRING(event.outcome) == \\"failure\\" OR TO_STRING(status.code) == \\"Error\\", all = COUNT(*) BY timestamp = TBUCKET(100) | EVAL error_rate = TO_DOUBLE(failure) / all | KEEP timestamp, error_rate | SORT timestamp"`
+      );
     });
   });
 
   describe('getLatencyChart', () => {
     it('should return latency chart configuration', () => {
-      const result = getLatencyChart({ indexes: mockIndexes, filters: mockFilters });
+      const result = getLatencyChart({
+        indexes: mockIndexes,
+        filters: mockFilters,
+        metadataFields: [],
+      });
 
       expect(result).toEqual({
         id: 'latency',
@@ -76,7 +117,10 @@ describe('trace_charts_definition', () => {
 
       expect(result?.esqlQuery).toContain(unmappedFieldsPrefix);
       expect(result?.esqlQuery).toContain(
-        'duration_ms_ecs = ROUND(transaction.duration.us) / 1000'
+        'WHERE TO_STRING(processor.event) == "transaction" OR TO_STRING(processor.event) == "span" OR processor.event IS NULL'
+      );
+      expect(result?.esqlQuery).toContain(
+        'duration_ms_ecs = CASE(transaction.duration.us IS NOT NULL, TO_DOUBLE(transaction.duration.us) / 1000, span.duration.us IS NOT NULL, TO_DOUBLE(span.duration.us) / 1000, NULL)'
       );
       expect(result?.esqlQuery).toContain('duration_ms_otel = ROUND(duration) / 1000 / 1000');
       expect(result?.esqlQuery).toContain(
@@ -85,7 +129,11 @@ describe('trace_charts_definition', () => {
     });
 
     it('should include all provided filters in the ESQL query', () => {
-      const result = getLatencyChart({ indexes: mockIndexes, filters: mockFilters });
+      const result = getLatencyChart({
+        indexes: mockIndexes,
+        filters: mockFilters,
+        metadataFields: [],
+      });
 
       expect(result?.esqlQuery).toContain('service.name == "test-service"');
       expect(result?.esqlQuery).toContain('environment == "production"');
@@ -93,26 +141,46 @@ describe('trace_charts_definition', () => {
     });
 
     it('should handle empty filters array', () => {
-      const result = getLatencyChart({ indexes: mockIndexes, filters: [] });
+      const result = getLatencyChart({ indexes: mockIndexes, filters: [], metadataFields: [] });
 
       expect(result?.esqlQuery).toContain('FROM traces-*');
     });
 
     it('should generate valid ESQL query structure', () => {
-      const result = getLatencyChart({ indexes: mockIndexes, filters: mockFilters });
+      const result = getLatencyChart({
+        indexes: mockIndexes,
+        filters: mockFilters,
+        metadataFields: [],
+      });
 
       // Verify basic ESQL structure
       expect(result?.esqlQuery).toMatch(/FROM .+/);
       expect(result?.esqlQuery).toContain('EVAL');
       expect(result?.esqlQuery).toContain('STATS');
       expect(result?.esqlQuery).toContain('AVG(duration_ms)');
-      expect(result?.esqlQuery).toContain('BUCKET(@timestamp, 100, ?_tstart, ?_tend)');
+      expect(result?.esqlQuery).toContain('TBUCKET(100)');
+    });
+
+    it('should produce the expected full ESQL query', () => {
+      const result = getLatencyChart({
+        indexes: mockIndexes,
+        filters: mockFilters,
+        metadataFields: [],
+      });
+
+      expect(result?.esqlQuery).toMatchInlineSnapshot(
+        `"SET unmapped_fields=\\"NULLIFY\\"; FROM traces-* | WHERE service.name == \\"test-service\\" | WHERE environment == \\"production\\" | WHERE TO_STRING(processor.event) == \\"transaction\\" OR TO_STRING(processor.event) == \\"span\\" OR processor.event IS NULL | EVAL duration_ms_ecs = CASE(transaction.duration.us IS NOT NULL, TO_DOUBLE(transaction.duration.us) / 1000, span.duration.us IS NOT NULL, TO_DOUBLE(span.duration.us) / 1000, NULL) | EVAL duration_ms_otel = ROUND(duration) / 1000 / 1000 | EVAL duration_ms = COALESCE(TO_LONG(duration_ms_ecs), TO_LONG(duration_ms_otel)) | STATS AVG(duration_ms) BY TBUCKET(100)"`
+      );
     });
   });
 
   describe('getThroughputChart', () => {
     it('should return throughput chart configuration', () => {
-      const result = getThroughputChart({ indexes: mockIndexes, filters: mockFilters });
+      const result = getThroughputChart({
+        indexes: mockIndexes,
+        filters: mockFilters,
+        metadataFields: [],
+      });
 
       expect(result).toEqual({
         id: 'throughput',
@@ -124,13 +192,20 @@ describe('trace_charts_definition', () => {
       });
 
       expect(result?.esqlQuery).toContain(unmappedFieldsPrefix);
+      expect(result?.esqlQuery).toContain(
+        'WHERE TO_STRING(processor.event) == "transaction" OR TO_STRING(processor.event) == "span" OR processor.event IS NULL'
+      );
       expect(result?.esqlQuery).toContain('id = COALESCE(transaction.id, span.id)');
       expect(result?.esqlQuery).toContain('COUNT(id)');
       expect(result?.esqlQuery).toContain('TO_STRING(processor.event) == "transaction"');
     });
 
     it('should include all provided filters in the ESQL query', () => {
-      const result = getThroughputChart({ indexes: mockIndexes, filters: mockFilters });
+      const result = getThroughputChart({
+        indexes: mockIndexes,
+        filters: mockFilters,
+        metadataFields: [],
+      });
 
       expect(result?.esqlQuery).toContain('service.name == "test-service"');
       expect(result?.esqlQuery).toContain('environment == "production"');
@@ -138,17 +213,33 @@ describe('trace_charts_definition', () => {
     });
 
     it('should handle empty filters array', () => {
-      const result = getThroughputChart({ indexes: mockIndexes, filters: [] });
+      const result = getThroughputChart({ indexes: mockIndexes, filters: [], metadataFields: [] });
 
       expect(result?.esqlQuery).toContain('FROM traces-*');
     });
 
     it('should generate valid ESQL query structure', () => {
-      const result = getThroughputChart({ indexes: mockIndexes, filters: mockFilters });
+      const result = getThroughputChart({
+        indexes: mockIndexes,
+        filters: mockFilters,
+        metadataFields: [],
+      });
 
       // Verify basic ESQL structure
       expect(result?.esqlQuery).toMatch(/FROM .+/);
       expect(result?.esqlQuery).toContain('STATS');
+    });
+
+    it('should produce the expected full ESQL query', () => {
+      const result = getThroughputChart({
+        indexes: mockIndexes,
+        filters: mockFilters,
+        metadataFields: [],
+      });
+
+      expect(result?.esqlQuery).toMatchInlineSnapshot(
+        `"SET unmapped_fields=\\"NULLIFY\\"; FROM traces-* | WHERE service.name == \\"test-service\\" | WHERE environment == \\"production\\" | WHERE TO_STRING(processor.event) == \\"transaction\\" OR TO_STRING(processor.event) == \\"span\\" OR processor.event IS NULL | EVAL id = COALESCE(transaction.id, span.id) | STATS COUNT(id) BY TBUCKET(100)"`
+      );
     });
   });
 
@@ -157,6 +248,7 @@ describe('trace_charts_definition', () => {
       const result = getErrorRateChart({
         indexes: mockIndexes,
         filters: mockInvalidFilters,
+        metadataFields: [],
       });
 
       expect(result).toBeNull();
@@ -166,6 +258,7 @@ describe('trace_charts_definition', () => {
       const result = getLatencyChart({
         indexes: mockIndexes,
         filters: mockInvalidFilters,
+        metadataFields: [],
       });
 
       expect(result).toBeNull();
@@ -175,6 +268,7 @@ describe('trace_charts_definition', () => {
       const result = getThroughputChart({
         indexes: mockIndexes,
         filters: mockInvalidFilters,
+        metadataFields: [],
       });
 
       expect(result).toBeNull();

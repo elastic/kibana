@@ -65,6 +65,7 @@
             "lineNumber": 23,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "GlobalRedirectAppLinkProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -95,7 +96,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/private/kbn-global-redirect-app-links/global_redirect_app_links.tsx",
             "lineNumber": 15,

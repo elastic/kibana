@@ -64,6 +64,7 @@ export interface InjectedMetadata {
     mode: EnvironmentMode;
     packageInfo: PackageInfo;
     airgapped: boolean;
+    isCoreRenderingInReactConcurrentMode: boolean;
   };
   featureFlags?: {
     overrides: Record<string, unknown>;
@@ -72,6 +73,7 @@ export interface InjectedMetadata {
   anonymousStatusPage: boolean;
   i18n: {
     translationsUrl: string;
+    availableLocales: Array<{ id: string; label: string }>;
   };
   theme: InjectedMetadataTheme;
   csp: {

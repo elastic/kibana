@@ -13,18 +13,15 @@ import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
 import type { SampleDatasetProvider } from '../../lib/sample_dataset_registry_types';
 
-const ecommerceName = i18n.translate('home.sampleData.ecommerceSpecTitle', {
-  defaultMessage: 'Sample eCommerce orders',
-});
-const ecommerceDescription = i18n.translate('home.sampleData.ecommerceSpecDescription', {
-  defaultMessage: 'Sample data, visualizations, and dashboards for tracking eCommerce orders.',
-});
-
 export const ecommerceSpecProvider: SampleDatasetProvider = ({ staticAssets }) => {
   return {
     id: 'ecommerce',
-    name: ecommerceName,
-    description: ecommerceDescription,
+    name: i18n.translate('home.sampleData.ecommerceSpecTitle', {
+      defaultMessage: 'Sample eCommerce orders',
+    }),
+    description: i18n.translate('home.sampleData.ecommerceSpecDescription', {
+      defaultMessage: 'Sample data, visualizations, and dashboards for tracking eCommerce orders.',
+    }),
     previewImagePath: staticAssets.getPluginAssetHref(
       '/sample_data_resources/ecommerce/search_window_illustration.svg'
     ),

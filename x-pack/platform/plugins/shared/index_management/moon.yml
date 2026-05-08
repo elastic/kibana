@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/index-management-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/index-management-plugin'
+  title: '@kbn/index-management-plugin'
   description: Moon project for @kbn/index-management-plugin
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: x-pack/platform/plugins/shared/index_management
+  sourceRoot: x-pack/platform/plugins/shared/index_management
 dependsOn:
   - '@kbn/core'
   - '@kbn/management-plugin'
@@ -56,7 +55,6 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/react-kibana-mount'
   - '@kbn/rollup'
-  - '@kbn/ml-error-utils'
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/shared-ux-table-persist'
   - '@kbn/core-application-browser'
@@ -70,12 +68,17 @@ dependsOn:
   - '@kbn/reindex-service-plugin'
   - '@kbn/inference-common'
   - '@kbn/upgrade-assistant-pkg-common'
+  - '@kbn/ml-common-types'
   - '@kbn/failure-store-modal'
   - '@kbn/react-query'
   - '@kbn/scout'
   - '@kbn/deeplinks-management'
   - '@kbn/test-eui-helpers'
   - '@kbn/core-elasticsearch-server'
+  - '@kbn/cloud'
+  - '@kbn/search-index-documents'
+  - '@kbn/cloud-connect-plugin'
+  - '@kbn/shared-ux-column-presets'
 tags:
   - plugin
   - prod
@@ -91,16 +94,6 @@ fileGroups:
     - server/**/*
     - test/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
-  jestCI:
-    args:
-      - '--config'
-      - $projectRoot/jest.config.js
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

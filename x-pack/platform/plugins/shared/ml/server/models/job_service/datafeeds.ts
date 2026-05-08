@@ -8,9 +8,10 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import type { IScopedClusterClient } from '@kbn/core/server';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { DatafeedStats } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed_stats';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
-import type { Datafeed, DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
 import type { MlClient } from '../../lib/ml_client';
 
 export interface MlDatafeedsResponse {
@@ -111,13 +112,14 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
     });
   }
 
-  async function stopDatafeeds(datafeedIds: string[]) {
+  async function stopDatafeeds(datafeedIds: string[], closeJobs: boolean = true) {
     const results: Results = Object.create(null);
 
     for (const datafeedId of datafeedIds) {
       try {
         const body = await mlClient.stopDatafeed({
           datafeed_id: datafeedId,
+          close_job: closeJobs,
         });
         results[datafeedId] = { stopped: body.stopped };
       } catch (error) {

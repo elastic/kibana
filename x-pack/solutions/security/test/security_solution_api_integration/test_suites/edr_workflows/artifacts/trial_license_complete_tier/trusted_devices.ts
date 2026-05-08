@@ -544,7 +544,11 @@ export default function ({ getService }: FtrProviderContext) {
               .send(body)
               .expect(400)
               .expect(aValidationError)
-              .expect(anErrorMessageWith(/Invalid discriminator value|Expected.*match.*wildcard/));
+              .expect(
+                anErrorMessageWith(
+                  /Invalid discriminator value|Expected.*match.*wildcard|entries\.\d+\.type.*Invalid input/
+                )
+              );
           });
 
           it(`should error on [${trustedDeviceApiCall.method}] if policy id is invalid`, async () => {

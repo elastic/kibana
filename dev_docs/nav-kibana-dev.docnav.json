@@ -304,16 +304,16 @@
           "label": "Recently Viewed"
         },
         {
-          "id": "kibDevDocsFeedbackSnippet",
-          "label": "Feedback Snippet"
-        },
-        {
           "id": "kibDevDocsChromeAppMenu",
           "label": "App Menu"
         },
         {
           "id": "kibDevDocsChromeSidebar",
           "label": "Chrome Sidebar"
+        },
+        {
+          "id": "kibDevDocsFeedbackPlugin",
+          "label": "Feedback Plugin (One Feedback)"
         }
       ]
     },
@@ -654,9 +654,6 @@
         },
         {
           "id": "kibTelemetryPluginApi"
-        },
-        {
-          "id": "kibUiActionsEnhancedPluginApi"
         },
         {
           "id": "kibUiActionsPluginApi"

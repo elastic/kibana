@@ -33,8 +33,16 @@
               ">; application: jest.Mocked<",
               "ApplicationSetup",
               ">; chrome: ",
-              "InternalChromeSetup",
-              "; customBranding: { customBranding$: ",
+              {
+                "pluginId": "@kbn/utility-types-jest",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesJestPluginApi",
+                "section": "def-common.DeeplyMockedKeys",
+                "text": "DeeplyMockedKeys"
+              },
+              "<",
+              "ChromeSetup",
+              ">; customBranding: { customBranding$: ",
               "Observable",
               "<",
               "CustomBranding",
@@ -158,7 +166,7 @@
                 "id": "def-public.coreLifecycleMock.createCoreSetup.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n  basePath = '',\n  pluginStartDeps = {},\n  pluginStartContract,\n}",
                 "description": [],
                 "signature": [
                   "{ basePath?: string | undefined; pluginStartDeps?: object | undefined; pluginStartContract?: any; }"
@@ -265,7 +273,7 @@
                 "id": "def-public.coreLifecycleMock.createCoreStart.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{ basePath = '' }",
                 "description": [],
                 "signature": [
                   "{ basePath?: string | undefined; }"

@@ -4,19 +4,18 @@
 
 $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/dev-tools-plugin'
-type: unknown
+layer: unknown
 owners:
   defaultOwner: '@elastic/kibana-management'
-toolchain:
+toolchains:
   default: node
 language: typescript
 project:
-  name: '@kbn/dev-tools-plugin'
+  title: '@kbn/dev-tools-plugin'
   description: Moon project for @kbn/dev-tools-plugin
   channel: ''
   owner: '@elastic/kibana-management'
-  metadata:
-    sourceRoot: src/platform/plugins/shared/dev_tools
+  sourceRoot: src/platform/plugins/shared/dev_tools
 dependsOn:
   - '@kbn/core'
   - '@kbn/url-forwarding-plugin'

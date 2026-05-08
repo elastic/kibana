@@ -9,6 +9,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { DataGridDensity } from '@kbn/discover-utils';
 import {
   MIN_SAVED_SEARCH_SAMPLE_SIZE,
   MAX_SAVED_SEARCH_SAMPLE_SIZE,
@@ -134,7 +135,11 @@ export const SCHEMA_SEARCH_MODEL_VERSION_4 = SCHEMA_SEARCH_MODEL_VERSION_3.exten
 
 export const SCHEMA_SEARCH_MODEL_VERSION_5 = SCHEMA_SEARCH_MODEL_VERSION_4.extends({
   density: schema.maybe(
-    schema.oneOf([schema.literal('compact'), schema.literal('normal'), schema.literal('expanded')])
+    schema.oneOf([
+      schema.literal(DataGridDensity.COMPACT),
+      schema.literal(DataGridDensity.EXPANDED),
+      schema.literal(DataGridDensity.NORMAL),
+    ])
   ),
 });
 
@@ -222,7 +227,39 @@ export const SCHEMA_SEARCH_MODEL_VERSION_10_SO_API_WORKAROUND = schema.object({
   tabs: schema.maybe(tabsV10),
 });
 
+export const SCHEMA_SEARCH_MODEL_VERSION_11 = SCHEMA_SEARCH_MODEL_VERSION_10.extends({
+  chartInterval: schema.maybe(schema.string()),
+});
+
+const { tabs: tabsV11, ...restV11Props } = SCHEMA_SEARCH_MODEL_VERSION_11.getPropSchemas();
+
+export const SCHEMA_SEARCH_MODEL_VERSION_11_SO_API_WORKAROUND = schema.object({
+  ...restV11Props,
+  tabs: schema.maybe(tabsV11),
+});
+
+const DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_12 =
+  DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10.extends({
+    hideTable: schema.boolean({ defaultValue: false }),
+  });
+
+const SCHEMA_DISCOVER_SESSION_TAB_VERSION_12 = SCHEMA_DISCOVER_SESSION_TAB_VERSION_10.extends({
+  attributes: DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_12,
+});
+
+export const SCHEMA_SEARCH_MODEL_VERSION_12 = SCHEMA_SEARCH_MODEL_VERSION_11.extends({
+  hideTable: schema.maybe(schema.boolean({ defaultValue: false })),
+  tabs: schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB_VERSION_12, { minSize: 1, maxSize: 25 }),
+});
+
+const { tabs: tabsV12, ...restV12Props } = SCHEMA_SEARCH_MODEL_VERSION_12.getPropSchemas();
+
+export const SCHEMA_SEARCH_MODEL_VERSION_12_SO_API_WORKAROUND = schema.object({
+  ...restV12Props,
+  tabs: schema.maybe(tabsV12),
+});
+
 export type DiscoverSessionTabAttributes = TypeOf<
-  typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_10
+  typeof DISCOVER_SESSION_TAB_ATTRIBUTES_VERSION_12
 >;
-export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_10>;
+export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB_VERSION_12>;

@@ -99,6 +99,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ConnectorSelectableComponentProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -196,7 +197,7 @@
             "signature": [
               "(",
               "CommonProps",
-              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"mixed\" | \"off\" | \"on\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
               "EuiTextTruncateProps",
               ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
               "EuiToolTipProps",
@@ -220,7 +221,7 @@
             "signature": [
               "(",
               "CommonProps",
-              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"mixed\" | \"off\" | \"on\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
               "EuiTextTruncateProps",
               ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
               "EuiToolTipProps",
@@ -364,6 +365,7 @@
                 "lineNumber": 31,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "EuiSelectableOption",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -380,7 +382,7 @@
               "Selectable footer component"
             ],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
+              "React.ReactElement<any> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action/connector_selectable_component.tsx",
             "lineNumber": 32,
@@ -406,7 +408,7 @@
               "EuiSelectableLIOption",
               "<{}>> & ",
               "CommonProps",
-              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"mixed\" | \"off\" | \"on\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
+              " & { label: string; searchableLabel?: string | undefined; key?: string | undefined; checked?: \"on\" | \"off\" | \"mixed\" | undefined; disabled?: boolean | undefined; isGroupLabel?: false | undefined; prepend?: React.ReactNode; append?: React.ReactNode; ref?: ((optionIndex: number) => void) | undefined; id?: undefined; data?: { [key: string]: any; } | undefined; textWrap?: \"wrap\" | \"truncate\" | undefined; truncationProps?: Partial<Omit<",
               "EuiTextTruncateProps",
               ", \"text\" | \"children\">> | undefined; toolTipContent?: React.ReactNode; toolTipProps?: Partial<Omit<",
               "EuiToolTipProps",

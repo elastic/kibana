@@ -53,7 +53,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "repoRoot",
-                "description": [],
+                "description": [
+                  "/** root path of the repo where this file was found */"
+                ],
                 "signature": [
                   "string"
                 ],
@@ -70,7 +72,9 @@
                 "type": "string",
                 "tags": [],
                 "label": "repoRel",
-                "description": [],
+                "description": [
+                  "/** repo-relative path to the file */"
+                ],
                 "signature": [
                   "string"
                 ],

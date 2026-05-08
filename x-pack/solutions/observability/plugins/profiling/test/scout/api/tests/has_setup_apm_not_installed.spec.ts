@@ -5,50 +5,60 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import type { RoleApiCredentials } from '@kbn/scout-oblt';
 import { apiTest } from '../../common/fixtures';
 import { esResourcesEndpoint } from '../../common/fixtures/constants';
 
-apiTest.describe('APM integration not installed but setup completed', { tag: ['@ess'] }, () => {
-  let viewerApiCreditials: RoleApiCredentials;
-  let adminApiCreditials: RoleApiCredentials;
-  apiTest.beforeAll(async ({ profilingSetup, requestAuth }) => {
-    if (!(await profilingSetup.checkStatus()).has_setup) {
-      await profilingSetup.setupResources();
-    }
-    viewerApiCreditials = await requestAuth.getApiKey('viewer');
-    adminApiCreditials = await requestAuth.getApiKey('admin');
-  });
+apiTest.describe(
+  'APM integration not installed but setup completed',
+  { tag: tags.stateful.classic },
+  () => {
+    let viewerApiCreditials: RoleApiCredentials;
+    let adminApiCreditials: RoleApiCredentials;
+    apiTest.beforeAll(async ({ profilingHelper, profilingSetup, requestAuth }) => {
+      // Ensure the agent policy that the cloud setup attaches the profiler_collector and
+      // profiler_symbolizer package policies to exists. Without this, setupResources()
+      // returns 500 when this spec runs ahead of (or independently of) has_no_setup.spec.
+      await profilingHelper.installPolicies();
 
-  apiTest('Admin user', async ({ apiClient }) => {
-    const adminRes = await apiClient.get(esResourcesEndpoint, {
-      headers: {
-        ...adminApiCreditials.apiKeyHeader,
-        'content-type': 'application/json',
-        'kbn-xsrf': 'reporting',
-      },
+      if (!(await profilingSetup.checkStatus()).has_setup) {
+        await profilingSetup.setupResources();
+      }
+      viewerApiCreditials = await requestAuth.getApiKey('viewer');
+      adminApiCreditials = await requestAuth.getApiKey('admin');
     });
 
-    const adminStatus = adminRes.body;
-    expect(adminStatus.has_setup).toBe(true);
-    expect(adminStatus.has_data).toBe(false);
-    expect(adminStatus.pre_8_9_1_data).toBe(false);
-  });
+    apiTest('Admin user', async ({ apiClient }) => {
+      const adminRes = await apiClient.get(esResourcesEndpoint, {
+        headers: {
+          ...adminApiCreditials.apiKeyHeader,
+          'content-type': 'application/json',
+          'kbn-xsrf': 'reporting',
+        },
+      });
 
-  apiTest('Viewer user', async ({ apiClient }) => {
-    const readRes = await apiClient.get(esResourcesEndpoint, {
-      headers: {
-        ...viewerApiCreditials.apiKeyHeader,
-        'content-type': 'application/json',
-        'kbn-xsrf': 'reporting',
-      },
+      const adminStatus = adminRes.body;
+      expect(adminStatus.has_setup).toBe(true);
+      expect(adminStatus.has_data).toBe(false);
+      expect(adminStatus.pre_8_9_1_data).toBe(false);
     });
 
-    const readStatus = readRes.body;
-    expect(readStatus.has_setup).toBe(true);
-    expect(readStatus.has_data).toBe(false);
-    expect(readStatus.pre_8_9_1_data).toBe(false);
-    expect(readStatus.has_required_role).toBe(false);
-  });
-});
+    apiTest('Viewer user', async ({ apiClient }) => {
+      const readRes = await apiClient.get(esResourcesEndpoint, {
+        headers: {
+          ...viewerApiCreditials.apiKeyHeader,
+          'content-type': 'application/json',
+          'kbn-xsrf': 'reporting',
+        },
+      });
+
+      const readStatus = readRes.body;
+      expect(readStatus.has_setup).toBe(true);
+      expect(readStatus.has_data).toBe(false);
+      expect(readStatus.pre_8_9_1_data).toBe(false);
+      expect(readStatus.has_required_role).toBe(false);
+    });
+  }
+);

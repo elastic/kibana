@@ -17,8 +17,12 @@ import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { CaseFormFields } from '.';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { KibanaServices } from '../../common/lib/kibana';
 
 jest.mock('../../containers/user_profiles/api');
+jest.mock('../create/template_fields', () => ({
+  CreateCaseTemplateFields: () => <div data-test-subj="create-case-template-fields" />,
+}));
 
 describe('CaseFormFields', () => {
   let user: UserEvent;
@@ -345,6 +349,36 @@ describe('CaseFormFields', () => {
         },
         true
       );
+    });
+  });
+
+  describe('templates v2', () => {
+    it('does not render CreateCaseTemplateFields when templates v2 is disabled', () => {
+      jest.spyOn(KibanaServices, 'getConfig').mockReturnValue(undefined);
+
+      renderWithTestingProviders(
+        <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+          <CaseFormFields {...defaultProps} />
+        </FormTestComponent>
+      );
+
+      expect(screen.queryByTestId('create-case-template-fields')).not.toBeInTheDocument();
+    });
+
+    it('renders CreateCaseTemplateFields when templates v2 is enabled', async () => {
+      jest
+        .spyOn(KibanaServices, 'getConfig')
+        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
+          typeof KibanaServices.getConfig
+        >);
+
+      renderWithTestingProviders(
+        <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
+          <CaseFormFields {...defaultProps} />
+        </FormTestComponent>
+      );
+
+      expect(await screen.findByTestId('create-case-template-fields')).toBeInTheDocument();
     });
   });
 });

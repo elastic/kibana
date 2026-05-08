@@ -26,7 +26,7 @@ export function dashboardServiceProvider(
     async fetchDashboards(query?: string) {
       const findDashboardsService = await dashboardService.findDashboardsService();
       const responses = await findDashboardsService.search({
-        search: query ?? '',
+        query: query ?? '',
         per_page: 1000,
       });
       return responses.dashboards;

@@ -68,7 +68,7 @@
         "signature": [
           "React.FunctionComponent<Intl.DateTimeFormatOptions & ",
           "CustomFormatConfig",
-          "<string> & { value: string | number | Date | undefined; children?(formattedDate: string): React.ReactElement<any, string | React.JSXElementConstructor<any>> | null; }>"
+          "<string> & { value: string | number | Date | undefined; children?(formattedDate: string): React.ReactElement<any> | null; }>"
         ],
         "path": "node_modules/react-intl/index.d.ts",
         "lineNumber": 19,
@@ -91,6 +91,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -124,7 +125,7 @@
           "NumberFormatOptions",
           ", \"localeMatcher\"> & ",
           "CustomFormatConfig",
-          "<\"number\"> & { value: number; children?(formattedNumber: string): React.ReactElement<any, string | React.JSXElementConstructor<any>> | null; }>"
+          "<\"number\"> & { value: number; children?(formattedNumber: string): React.ReactElement<any> | null; }>"
         ],
         "path": "node_modules/react-intl/index.d.ts",
         "lineNumber": 27,
@@ -147,6 +148,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -199,6 +201,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -266,6 +269,7 @@
             "lineNumber": 25,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "FormattedRelativeProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -306,6 +310,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -337,7 +342,7 @@
         "signature": [
           "React.FunctionComponent<Intl.DateTimeFormatOptions & ",
           "CustomFormatConfig",
-          "<string> & { value: string | number | Date | undefined; children?(formattedTime: string): React.ReactElement<any, string | React.JSXElementConstructor<any>> | null; }>"
+          "<string> & { value: string | number | Date | undefined; children?(formattedTime: string): React.ReactElement<any> | null; }>"
         ],
         "path": "node_modules/react-intl/index.d.ts",
         "lineNumber": 23,
@@ -360,6 +365,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -472,6 +478,7 @@
             "lineNumber": 34,
             "columnNumber": 192,
             "deprecated": false,
+            "docsReferencedTypeName": "Opts",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -531,6 +538,7 @@
             "lineNumber": 37,
             "columnNumber": 232,
             "deprecated": false,
+            "docsReferencedTypeName": "Opts",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -678,11 +686,11 @@
         "signature": [
           "React.ComponentClass<",
           "Props",
-          "<Record<string, string | number | boolean | Date | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | ",
+          "<Record<string, string | number | boolean | Date | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | ",
           "FormatXMLElementFn",
           "<React.ReactNode, React.ReactNode> | null | undefined>>, any> | React.FunctionComponent<",
           "Props",
-          "<Record<string, string | number | boolean | Date | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | ",
+          "<Record<string, string | number | boolean | Date | React.ReactElement<any> | Iterable<React.ReactNode> | React.ReactPortal | ",
           "FormatXMLElementFn",
           "<React.ReactNode, React.ReactNode> | null | undefined>>>"
         ],

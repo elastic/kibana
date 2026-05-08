@@ -15,7 +15,6 @@ import { getUnknownTypesDeprecations } from './unknown_object_types';
 interface GetDeprecationProviderOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   savedObjectsConfig: SavedObjectConfig;
-  kibanaIndex: string;
   kibanaVersion: string;
 }
 

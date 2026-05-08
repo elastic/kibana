@@ -52,6 +52,14 @@ jest.mock('../../../../../common/hooks/use_missing_resources', () => ({
   }),
 }));
 
+jest.mock('../../../../../../common/experimental_features_service', () => ({
+  ExperimentalFeaturesService: {
+    get: () => ({
+      splunkV2DashboardsEnabled: false,
+    }),
+  },
+}));
+
 describe('MacrosDataInput', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
 

@@ -15,16 +15,21 @@ import type {
 import type { Streams } from '@kbn/streams-schema';
 import type {
   IndicesDataStreamFailureStore,
+  IndicesDataStreamOptionsTemplate,
+  IndicesPutDataLifecycleRequest,
   IndicesSimulateTemplateTemplate,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import { isDslLifecycle, isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import {
+  isDisabledFailureStore,
   isDisabledLifecycleFailureStore,
   isEnabledLifecycleFailureStore,
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import { getErrorMessage, parseError } from '../errors/parse_error';
+import { StatusError } from '../errors/status_error';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -66,9 +71,10 @@ export async function upsertDataStream({ esClient, name, logger }: DataStreamMan
   try {
     await retryTransientEsErrors(() => esClient.indices.createDataStream({ name }), { logger });
     logger.debug(() => `Installed data stream: ${name}`);
-  } catch (error: any) {
-    if (error?.meta?.body?.error?.type !== 'resource_already_exists_exception') {
-      logger.error(`Error creating data stream: ${error.message}`);
+  } catch (error) {
+    const { type, message } = parseError(error);
+    if (type !== 'resource_already_exists_exception') {
+      logger.error(`Error creating data stream: ${message}`);
       throw error;
     }
   }
@@ -80,8 +86,8 @@ export async function deleteDataStream({ esClient, name, logger }: DeleteDataStr
       () => esClient.indices.deleteDataStream({ name }, { ignore: [404] }),
       { logger }
     );
-  } catch (error: any) {
-    logger.error(`Error deleting data stream: ${error.message}`);
+  } catch (error) {
+    logger.error(`Error deleting data stream: ${getErrorMessage(error)}`);
     throw error;
   }
 }
@@ -122,8 +128,8 @@ export interface DataStreamMappingsUpdateResponse {
     name: string;
     applied_to_data_stream: boolean;
     error?: string;
-    mappings: Record<string, any>;
-    effective_mappings: Record<string, any>;
+    mappings: Record<string, unknown>;
+    effective_mappings: Record<string, unknown>;
   }>;
 }
 
@@ -181,12 +187,14 @@ export async function updateDataStreamsLifecycle({
         },
       });
     } else if (isDslLifecycle(lifecycle)) {
+      const dslDownsampling = lifecycle.dsl.downsample;
       await retryTransientEsErrors(
         () =>
           esClient.indices.putDataLifecycle({
             name: names,
             data_retention: lifecycle.dsl.data_retention,
-          }),
+            ...(dslDownsampling?.length ? { downsampling: dslDownsampling } : {}),
+          } as IndicesPutDataLifecycleRequest),
         { logger }
       );
 
@@ -220,14 +228,25 @@ export async function updateDataStreamsLifecycle({
             };
           };
 
+          // simulateIndexTemplate returns an empty response for replicated data streams
+          // that have no local index template
+          if (!template || !template.settings) {
+            throw new StatusError(
+              `Cannot determine template lifecycle for ${name} — the data stream may be replicated and managed by a remote cluster`,
+              400
+            );
+          }
+
           const templateLifecycle = getTemplateLifecycle(template);
           if (isDslLifecycle(templateLifecycle)) {
+            const templateDownsampling = templateLifecycle.dsl.downsample;
             await retryTransientEsErrors(
               () =>
                 esClient.indices.putDataLifecycle({
                   name,
                   data_retention: templateLifecycle.dsl.data_retention,
-                }),
+                  ...(templateDownsampling?.length ? { downsampling: templateDownsampling } : {}),
+                } as IndicesPutDataLifecycleRequest),
               { logger }
             );
           } else {
@@ -250,8 +269,8 @@ export async function updateDataStreamsLifecycle({
         })
       );
     }
-  } catch (err: any) {
-    logger.error(`Error updating data stream lifecycle: ${err.message}`);
+  } catch (err) {
+    logger.error(`Error updating data stream lifecycle: ${getErrorMessage(err)}`);
     throw err;
   }
 }
@@ -277,12 +296,66 @@ export async function putDataStreamsSettings({
       settings,
     })
   );
-  const errors = response.data_streams
+  const dataStreamErrors = response.data_streams
     .filter(({ error }) => Boolean(error))
-    .map(({ error }) => error);
-  if (errors.length) {
-    throw new Error(errors.join('\n'));
+    .map(({ error }) => (typeof error === 'string' ? error : JSON.stringify(error)));
+  if (dataStreamErrors.length) {
+    const joined = dataStreamErrors.join('\n');
+    throw new Error(joined);
   }
+}
+
+/**
+ * Maps a non-inherit stream failure_store definition to Elasticsearch failure_store options
+ * (put data stream API and index template data_stream_options).
+ */
+export function failureStoreDefinitionToElasticsearchOptions(
+  failureStore: FailureStore,
+  isServerless: boolean
+): IndicesDataStreamFailureStore {
+  if (isInheritFailureStore(failureStore)) {
+    throw new Error('Expected a resolved failure store, not { inherit: {} }');
+  }
+
+  if (isEnabledLifecycleFailureStore(failureStore)) {
+    const dataRetention = failureStore.lifecycle.enabled?.data_retention;
+    return {
+      enabled: true,
+      ...(dataRetention ? { lifecycle: { data_retention: dataRetention, enabled: true } } : {}),
+    };
+  }
+
+  if (isDisabledLifecycleFailureStore(failureStore)) {
+    return {
+      enabled: true,
+      ...(isServerless ? {} : { lifecycle: { enabled: false } }),
+    };
+  }
+
+  if (isDisabledFailureStore(failureStore)) {
+    return {
+      enabled: false,
+    };
+  }
+
+  throw new Error('Invalid failure store configuration');
+}
+
+/**
+ * Template-layer failure store options for wired stream index templates so new or restored
+ * data streams materialize with the correct failure store when deferral skips putDataStreamOptions.
+ */
+export function failureStoreToIndexTemplateDataStreamOptions(
+  failureStore: FailureStore,
+  isServerless: boolean
+): IndicesDataStreamOptionsTemplate | undefined {
+  if (isInheritFailureStore(failureStore)) {
+    return undefined;
+  }
+
+  return {
+    failure_store: failureStoreDefinitionToElasticsearchOptions(failureStore, isServerless),
+  };
 }
 
 export async function updateDataStreamsFailureStore({
@@ -312,25 +385,8 @@ export async function updateDataStreamsFailureStore({
       failureStoreConfig = response.template?.data_stream_options?.failure_store ?? {
         enabled: false,
       };
-    } else if (isEnabledLifecycleFailureStore(failureStore)) {
-      // Handle { lifecycle: { enabled: { data_retention?: string } } }
-      const dataRetention = failureStore.lifecycle.enabled?.data_retention;
-      failureStoreConfig = {
-        enabled: true,
-        ...(dataRetention ? { lifecycle: { data_retention: dataRetention, enabled: true } } : {}),
-      };
-    } else if (isDisabledLifecycleFailureStore(failureStore)) {
-      // Handle { lifecycle: { disabled: {} } }
-      // lifecycle cannot be disabled in serverless
-      failureStoreConfig = {
-        enabled: true,
-        ...(isServerless ? {} : { lifecycle: { enabled: false } }),
-      };
     } else {
-      // Handle { disabled: {} }
-      failureStoreConfig = {
-        enabled: false,
-      };
+      failureStoreConfig = failureStoreDefinitionToElasticsearchOptions(failureStore, isServerless);
     }
 
     await retryTransientEsErrors(
@@ -344,8 +400,8 @@ export async function updateDataStreamsFailureStore({
         ),
       { logger }
     );
-  } catch (err: any) {
-    logger.error(`Error updating data stream failure store: ${err.message}`);
+  } catch (err) {
+    logger.error(`Error updating data stream failure store: ${getErrorMessage(err)}`);
     throw err;
   }
 }

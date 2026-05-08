@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { type ObjectType, schema } from '@kbn/config-schema';
 import {
-  ruleParamsSchemaWithDefaultValueV1,
+  ruleParamsSchemasForCreateV1,
   createRuleParamsExamplesV1,
 } from '@kbn/response-ops-rule-params';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
@@ -133,15 +133,12 @@ export const actionSchema = schema.object(
   }
 );
 
-export const createBodySchema = schema.object({
+const baseCreateBodyFields = {
   name: schema.string({
     meta: {
       description:
         'The name of the rule. While this name does not have to be unique, a distinctive name can help you identify a rule.',
     },
-  }),
-  rule_type_id: schema.string({
-    meta: { description: 'The rule type identifier.' },
   }),
   enabled: schema.boolean({
     defaultValue: true,
@@ -171,7 +168,6 @@ export const createBodySchema = schema.object({
       })
     )
   ),
-  params: ruleParamsSchemaWithDefaultValueV1,
   schedule: schema.object(
     {
       interval: schema.string({
@@ -191,10 +187,26 @@ export const createBodySchema = schema.object({
   alert_delay: schema.maybe(alertDelaySchemaV1),
   flapping: schema.maybe(schema.nullable(flappingSchemaV2)),
   artifacts: schema.maybe(artifactsSchemaV1),
-});
+};
 
 export { createRuleParamsExamplesV1 };
 
+export const knownCreateBodySchema = schema.discriminatedUnion(
+  'rule_type_id',
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ruleParamsSchemasForCreateV1(baseCreateBodyFields) as [ObjectType<any>]
+);
+
+export const fallbackCreateBodySchema = schema.object({
+  ...baseCreateBodyFields,
+  rule_type_id: schema.string({ meta: { description: 'The rule type identifier.' } }),
+  params: schema.recordOf(schema.string(), schema.maybe(schema.any()), {
+    defaultValue: {},
+    meta: { description: 'The parameters for the rule.' },
+  }),
+});
+
+export const createBodySchema = schema.oneOf([knownCreateBodySchema, fallbackCreateBodySchema]);
 export const createParamsSchema = schema.object({
   id: schema.maybe(
     schema.string({

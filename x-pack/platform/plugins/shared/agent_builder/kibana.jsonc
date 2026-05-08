@@ -25,22 +25,29 @@
       "lens",
       "licensing",
       "management",
+      "agentContextLayer",
       "share",
       "spaces",
       "stackConnectors",
+      "taskManager",
       "licensing",
       "triggersActionsUi",
       "esUiShared",
       "workflowsExtensions",
+      "searchInferenceEndpoints"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "usageCollection"
     ],
     "optionalPlugins": [
       "cloud",
+      "evals",
       "licenseManagement",
+      "security",
       "workflowsManagement",
       "usageCollection",
+      "usageApi",
       "home",
     ],
     "extraPublicDirs": []

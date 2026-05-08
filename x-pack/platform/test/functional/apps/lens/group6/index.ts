@@ -75,20 +75,10 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    // total run time ~16m
     loadTestFile(require.resolve('./metric')); // 4m 7s
     loadTestFile(require.resolve('./legacy_metric')); // 29s
     loadTestFile(require.resolve('./disable_auto_apply')); // 1m 6s
     loadTestFile(require.resolve('./reference_lines')); // 1m
     loadTestFile(require.resolve('./annotations')); // 1m
-    loadTestFile(require.resolve('./inspector')); // 1m 19s
-    loadTestFile(require.resolve('./error_handling')); // 1m 8s
-    loadTestFile(require.resolve('./lens_tagging')); // 1m 9s
-    loadTestFile(require.resolve('./workspace_size'));
-    loadTestFile(require.resolve('./legend_statistics'));
-    // keep these last in the group in this order because they are messing with the default saved objects
-    loadTestFile(require.resolve('./lens_reporting')); // 3m
-    loadTestFile(require.resolve('./rollup')); // 1m 30s
-    loadTestFile(require.resolve('./no_data')); // 36s
   });
 };

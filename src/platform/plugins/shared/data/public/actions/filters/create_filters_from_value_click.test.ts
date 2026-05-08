@@ -257,7 +257,7 @@ describe('createFiltersFromClickEvent', () => {
         expect(filter).toEqual([]);
       });
 
-      test('should create phrase filter for string value', async () => {
+      test('should create phrase filter for string value using sourceField for index field name', async () => {
         const mockFilterableField = {
           name: 'message',
           filterable: true,
@@ -266,6 +266,7 @@ describe('createFiltersFromClickEvent', () => {
 
         const filter = await createFilterESQL(table, 0, 0);
 
+        expect(mockFieldByName).toHaveBeenCalledWith('message');
         expect(filter).toHaveLength(1);
         expect(filter[0]).toEqual(
           expect.objectContaining({
@@ -278,18 +279,20 @@ describe('createFiltersFromClickEvent', () => {
         );
       });
 
-      test('should create phrases filter for array value', async () => {
+      test('should create phrases filter for array value using sourceField for index field name', async () => {
         const mockFilterableField = {
           name: 'tags',
           filterable: true,
         };
         mockFieldByName.mockReturnValue(mockFilterableField);
         table.columns[0].name = 'tags';
+        (table.columns[0].meta!.sourceParams as Record<string, unknown>)!.sourceField = 'tags';
         table.columns[0].meta.type = 'string';
         table.rows[0]['1-1'] = ['tag1', 'tag2', 'tag3'];
 
         const filter = await createFilterESQL(table, 0, 0);
 
+        expect(mockFieldByName).toHaveBeenCalledWith('tags');
         expect(filter).toHaveLength(1);
         expect(filter[0]).toEqual(
           expect.objectContaining({

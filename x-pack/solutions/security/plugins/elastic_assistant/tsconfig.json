@@ -74,6 +74,7 @@
     "@kbn/security-solution-navigation",
     "@kbn/rison",
     "@kbn/search-errors",
+    "@kbn/shared-ux-ai-components",
     "@kbn/securitysolution-t-grid",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/discover-plugin",
@@ -103,6 +104,8 @@
     "@kbn/management-settings-ids",
     "@kbn/agent-builder-plugin",
     "@kbn/cloud-plugin",
+    "@kbn/search-inference-endpoints",
+    "@kbn/controls-constants",
   ],
   "exclude": [
     "target/**/*",

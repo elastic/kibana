@@ -17,6 +17,7 @@ const ENTITY_STORE_STATUS_URL = '/api/entity_store/status';
 const SAVED_OBJECTS_FIND_URL = '/api/saved_objects/_find';
 const RISK_ENGINE_CONFIGURATION_TYPE = 'risk-engine-configuration';
 const RISK_ENGINE_STATUS_URL = '/internal/risk_score/engine/status';
+const RISK_ENGINE_INIT_URL = '/internal/risk_score/engine/init';
 
 const API_VERSIONS = {
   public: {
@@ -30,6 +31,7 @@ const API_VERSIONS = {
 export interface EntityAnalyticsApiService {
   deleteEntityStoreEngines: () => Promise<void>;
   deleteRiskEngineConfiguration: () => Promise<void>;
+  initRiskEngine: () => Promise<void>;
   getRiskEngineStatus: () => Promise<RiskEngineStatusResponse>;
   getEntityStoreStatus: () => Promise<GetEntityStoreStatusResponse>;
   waitForEntityStoreStatus: (
@@ -107,6 +109,19 @@ export const getEntityAnalyticsApiService = ({
           }
         }
       );
+    },
+
+    initRiskEngine: async () => {
+      await measurePerformanceAsync(log, 'security.entityAnalytics.initRiskEngine', async () => {
+        await kbnClient.request({
+          method: 'POST',
+          path: `${basePath}${RISK_ENGINE_INIT_URL}`,
+          headers: {
+            'elastic-api-version': API_VERSIONS.internal.v1,
+          },
+          body: {},
+        });
+      });
     },
 
     getRiskEngineStatus: async () => {

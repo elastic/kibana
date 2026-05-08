@@ -24,3 +24,6 @@ export {
   CODE_EDITOR_DEFAULT_THEME_ID,
   CODE_EDITOR_TRANSPARENT_THEME_ID,
 } from './src/code_editor';
+
+export { getUndoRedoService } from './src/undo_redo_service';
+export type { UndoRedoService, UndoRedoElement } from './src/undo_redo_service';

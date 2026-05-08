@@ -8,20 +8,21 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { FunctionComponent, PropsWithChildren } from 'react';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { FunctionComponent } from 'react';
+import type React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type {
-  SpanLinks,
   ErrorsByTraceId,
-  TraceRootSpan,
-  UnifiedSpanDocument,
   FocusedTraceWaterfallProps,
   FullTraceWaterfallProps,
+  SpanLinks,
+  TraceRootSpan,
+  UnifiedSpanDocument,
 } from '@kbn/apm-types';
 import type { HistogramItem, ProcessorEvent } from '@kbn/apm-types-shared';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type React from 'react';
 import type { IndicatorType } from '@kbn/slo-schema';
 import type { FeaturesRegistry } from '../../../common';
 
@@ -40,11 +41,20 @@ import type { FeaturesRegistry } from '../../../common';
 export interface ObservabilityStreamsFeatureRenderDeps {
   doc: DataTableRecord;
   dataView: DataView;
+  renderCpsWarning?: boolean;
+}
+
+export interface ObservabilityStreamsFeatureRenderByStreamNameDeps {
+  streamName: string;
+  renderCpsWarning?: boolean;
 }
 
 export interface ObservabilityStreamsFeature {
   id: 'streams';
   renderFlyoutStreamField: (deps: ObservabilityStreamsFeatureRenderDeps) => JSX.Element;
+  renderFlyoutStreamFieldByStreamName: (
+    deps: ObservabilityStreamsFeatureRenderByStreamNameDeps
+  ) => JSX.Element;
   renderFlyoutStreamProcessingLink: (deps: ObservabilityStreamsFeatureRenderDeps) => JSX.Element;
 }
 
@@ -114,14 +124,48 @@ export interface SecuritySolutionCellRendererFeature {
   >;
 }
 
-export interface SecuritySolutionAppWrapperFeature {
-  id: 'security-solution-app-wrapper';
-  getWrapper: () => Promise<() => FunctionComponent<PropsWithChildren<{}>>>;
+interface SecuritySolutionAlertFlyoutRenderProps extends DocViewRenderProps {
+  onAlertUpdated: () => void;
+}
+
+export interface SecuritySolutionAlertFlyoutOverviewTabFeature {
+  id: 'security-solution-alert-flyout-overview-tab';
+  render: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionAlertFlyoutHeaderTitleFeature {
+  id: 'security-solution-alert-flyout-header-title';
+  renderHeader: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionAlertFlyoutFooterFeature {
+  id: 'security-solution-alert-flyout-footer';
+  renderFooter: (props: SecuritySolutionAlertFlyoutRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionIOCFlyoutOverviewTabFeature {
+  id: 'security-solution-ioc-flyout-overview-tab';
+  render: (props: DocViewRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionIOCFlyoutHeaderFeature {
+  id: 'security-solution-ioc-flyout-header';
+  renderHeader: (props: DocViewRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionIOCFlyoutFooterFeature {
+  id: 'security-solution-ioc-flyout-footer';
+  renderFooter: (props: DocViewRenderProps) => JSX.Element;
 }
 
 export type SecuritySolutionFeature =
   | SecuritySolutionCellRendererFeature
-  | SecuritySolutionAppWrapperFeature;
+  | SecuritySolutionAlertFlyoutOverviewTabFeature
+  | SecuritySolutionAlertFlyoutHeaderTitleFeature
+  | SecuritySolutionAlertFlyoutFooterFeature
+  | SecuritySolutionIOCFlyoutOverviewTabFeature
+  | SecuritySolutionIOCFlyoutHeaderFeature
+  | SecuritySolutionIOCFlyoutFooterFeature;
 
 /** ****************************************************************************************/
 

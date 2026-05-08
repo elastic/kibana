@@ -8,8 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    ".storybook/**/*.tsx",
-    "emotion.d.ts"
+    ".storybook/**/*.tsx"
   ],
   "kbn_references": [
     "@kbn/config-schema",
@@ -22,7 +21,7 @@
     "@kbn/es-query",
     "@kbn/discover-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/discover-utils",
+    "@kbn/discover-utils"
   ],
   "exclude": ["target/**/*"]
 }

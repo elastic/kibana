@@ -25,6 +25,9 @@ export const mapSelectionToIndicesOptions = ({
     dataStreams: dataStreams.map((dataStream): EuiSelectableOption => {
       return {
         label: dataStream,
+        // Prevent NVDA from reading the label twice: EUI sets title={label} on the
+        // list item, which screen readers announce in addition to the accessible name.
+        title: '',
         append: <DataStreamBadge />,
         checked: allSelected || selection.includes(dataStream) ? 'on' : undefined,
       };
@@ -32,6 +35,9 @@ export const mapSelectionToIndicesOptions = ({
     indices: indices.map((index): EuiSelectableOption => {
       return {
         label: index,
+        // Prevent NVDA from reading the label twice: EUI sets title={label} on the
+        // list item, which screen readers announce in addition to the accessible name.
+        title: '',
         checked: allSelected || selection.includes(index) ? 'on' : undefined,
       };
     }),

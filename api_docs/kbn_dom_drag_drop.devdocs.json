@@ -53,6 +53,7 @@
             "lineNumber": 336,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "ProviderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -94,6 +95,7 @@
             "lineNumber": 108,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "DraggableProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -206,6 +208,7 @@
             "lineNumber": 105,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "DroppableProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -250,7 +253,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/reorder_provider.tsx",
                 "lineNumber": 150,
@@ -343,7 +346,7 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                  "React.ReactNode"
                 ],
                 "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/providers/providers.tsx",
                 "lineNumber": 230,
@@ -681,7 +684,7 @@
               "\nThe React element which will be passed the draggable handlers"
             ],
             "signature": [
-              "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+              "React.ReactElement<any>"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
             "lineNumber": 49,
@@ -754,6 +757,7 @@
                 "lineNumber": 61,
                 "columnNumber": 34,
                 "deprecated": false,
+                "docsReferencedTypeName": "DropType",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -807,6 +811,7 @@
                 "lineNumber": 65,
                 "columnNumber": 38,
                 "deprecated": false,
+                "docsReferencedTypeName": "DropType",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -910,7 +915,7 @@
                 "section": "def-common.DropType",
                 "text": "DropType"
               },
-              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) | undefined"
+              ") => React.ReactElement<any> | null) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/droppable.tsx",
             "lineNumber": 86,
@@ -938,6 +943,7 @@
                 "lineNumber": 89,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "DropType",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1098,7 +1104,7 @@
                 "section": "def-common.DropType",
                 "text": "DropType"
               },
-              ") => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
+              ") => React.ReactElement<any> | null"
             ],
             "path": "src/platform/packages/shared/kbn-dom-drag-drop/src/drop_targets/index.ts",
             "lineNumber": 20,
@@ -1121,6 +1127,7 @@
                 "lineNumber": 103,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "DropType",
                 "trackAdoption": false
               }
             ]

@@ -94,8 +94,6 @@ describe('EnterForeachNodeImpl', () => {
 
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-          items: ['item1', 'item2', 'item3'],
-          item: 'item1',
           index: 0,
           total: 3,
         });
@@ -140,8 +138,6 @@ describe('EnterForeachNodeImpl', () => {
 
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-          items: ['item1', 'item2', 'item3'],
-          item: 'item1',
           index: 0,
           total: 3,
         });
@@ -198,8 +194,6 @@ describe('EnterForeachNodeImpl', () => {
 
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-          items: ['item1', 'item2', 'item3'],
-          item: 'item1',
           index: 0,
           total: 3,
         });
@@ -229,10 +223,9 @@ describe('EnterForeachNodeImpl', () => {
         node.configuration.foreach = JSON.stringify([]);
       });
 
-      it('should set empty items and total to 0', async () => {
+      it('should set total to 0', async () => {
         await underTest.run();
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-          items: [],
           total: 0,
         });
       });
@@ -253,6 +246,69 @@ describe('EnterForeachNodeImpl', () => {
           `Foreach step "testStep" has no items to iterate over. Skipping execution.`,
           { workflow: { step_id: 'testStep' } }
         );
+      });
+    });
+
+    describe('when foreach configuration is a native array', () => {
+      beforeEach(() => {
+        node.configuration.foreach = ['a', 'b', 'c'] as any;
+      });
+
+      it('should persist input as a JSON string', async () => {
+        await underTest.run();
+        expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
+          foreach: JSON.stringify(['a', 'b', 'c']),
+        });
+      });
+
+      it('should initialize foreach state with correct total', async () => {
+        await underTest.run();
+
+        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
+        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
+          index: 0,
+          total: 3,
+        });
+      });
+
+      it('should not call renderValueAccordingToContext or evaluateExpressionInContext', async () => {
+        await underTest.run();
+
+        expect(
+          stepExecutionRuntime.contextManager.renderValueAccordingToContext
+        ).not.toHaveBeenCalled();
+        expect(
+          stepExecutionRuntime.contextManager.evaluateExpressionInContext
+        ).not.toHaveBeenCalled();
+      });
+
+      it('should enter the first iteration scope', async () => {
+        await underTest.run();
+
+        expect(workflowExecutionRuntimeManager.enterScope).toHaveBeenCalledWith('0');
+        expect(workflowExecutionRuntimeManager.navigateToNextNode).toHaveBeenCalled();
+      });
+    });
+
+    describe('when foreach configuration is an empty native array', () => {
+      beforeEach(() => {
+        node.configuration.foreach = [] as any;
+      });
+
+      it('should persist input as a JSON string', async () => {
+        await underTest.run();
+        expect(stepExecutionRuntime.setInput).toHaveBeenCalledWith({
+          foreach: JSON.stringify([]),
+        });
+      });
+
+      it('should set total to 0 and skip execution', async () => {
+        await underTest.run();
+        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
+          total: 0,
+        });
+        expect(stepExecutionRuntime.finishStep).toHaveBeenCalled();
+        expect(workflowExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith('exitNode');
       });
     });
 
@@ -286,8 +342,6 @@ describe('EnterForeachNodeImpl', () => {
   describe('on next iterations', () => {
     beforeEach(() => {
       (stepExecutionRuntime.getCurrentStepState as jest.Mock).mockReturnValue({
-        items: ['item1', 'item2', 'item3'],
-        item: 'item1',
         index: 0,
         total: 3,
       });
@@ -311,13 +365,11 @@ describe('EnterForeachNodeImpl', () => {
       expect(stepExecutionRuntime.startStep).not.toHaveBeenCalledWith();
     });
 
-    it('should initialize foreach state', async () => {
+    it('should update foreach state with incremented index', async () => {
       await underTest.run();
 
       expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
       expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
-        items: ['item1', 'item2', 'item3'],
-        item: 'item2',
         index: 1,
         total: 3,
       });

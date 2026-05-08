@@ -5,26 +5,23 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { getSampleDocuments } from '@kbn/ai-tools';
+import { getSampleDocumentsEsql } from '@kbn/ai-tools';
+import { escapeQuotes } from '@kbn/es-query';
 import { ERROR_LOGS_FEATURE_TYPE } from '@kbn/streams-schema';
+import { compact } from 'lodash';
 import type { ComputedFeatureGenerator } from './types';
+import { formatRawDocument } from '../utils/format_raw_document';
 
 const SAMPLE_SIZE = 5;
 const LOG_MESSAGE_FIELDS = ['message', 'body.text'];
 const ERROR_KEYWORDS = ['error', 'exception'];
 
-const ERROR_FILTER: QueryDslQueryContainer = {
-  bool: {
-    should: [
-      { term: { 'log.level': 'error' } },
-      ...LOG_MESSAGE_FIELDS.flatMap((field) =>
-        ERROR_KEYWORDS.map((keyword) => ({ match_phrase: { [field]: keyword } }))
-      ),
-    ],
-    minimum_should_match: 1,
-  },
-};
+const ERROR_KQL = [
+  `log.level:"${escapeQuotes('error')}"`,
+  ...LOG_MESSAGE_FIELDS.flatMap((field) =>
+    ERROR_KEYWORDS.map((keyword) => `${field}:"${escapeQuotes(keyword)}"`)
+  ),
+].join(' OR ');
 
 export const errorLogsGenerator: ComputedFeatureGenerator = {
   type: ERROR_LOGS_FEATURE_TYPE,
@@ -36,17 +33,17 @@ Use the \`properties.samples\` array to see actual error log entries.
 This is useful for understanding error patterns, identifying recurring issues, and diagnosing problems in the system.`,
 
   generate: async ({ stream, start, end, esClient }) => {
-    const { hits } = await getSampleDocuments({
+    const { hits } = await getSampleDocumentsEsql({
       esClient,
       index: stream.name,
       start,
       end,
-      size: SAMPLE_SIZE,
-      filter: ERROR_FILTER,
+      sampleSize: SAMPLE_SIZE,
+      kql: ERROR_KQL,
     });
 
     return {
-      samples: hits.map((hit) => hit.fields ?? {}),
+      samples: compact(hits.map((hit) => formatRawDocument({ hit })?.fields)),
     };
   },
 };

@@ -15,7 +15,8 @@ type JsonSchemaParser = (schema: JsonSchema) => z.ZodType;
 
 export function parseObject(
   schema: JsonSchema,
-  parseJsonSchema: JsonSchemaParser
+  parseJsonSchema: JsonSchemaParser,
+  preserveMeta: boolean
 ): z.ZodObject<z.ZodRawShape> {
   const shape: Record<string, z.ZodType> = {};
   const requiredFields = new Set(schema.required || []);
@@ -33,7 +34,7 @@ export function parseObject(
       fieldSchema = fieldSchema.default(propSchema.default);
     }
 
-    if (Object.keys(fieldMeta).length > 0) {
+    if (preserveMeta && Object.keys(fieldMeta).length > 0) {
       z.globalRegistry.add(fieldSchema, fieldMeta as Record<string, unknown>);
     }
 

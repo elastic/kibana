@@ -24,6 +24,7 @@ interface RegisterRoutes {
   logger: Logger;
   plugins: DatasetQualityRouteHandlerResources['plugins'];
   getEsCapabilities: DatasetQualityRouteHandlerResources['getEsCapabilities'];
+  getIsSecurityEnabled: DatasetQualityRouteHandlerResources['getIsSecurityEnabled'];
 }
 
 export function registerRoutes({
@@ -32,6 +33,7 @@ export function registerRoutes({
   logger,
   plugins,
   getEsCapabilities,
+  getIsSecurityEnabled,
 }: RegisterRoutes) {
   const routes = Object.values(repository);
 
@@ -62,14 +64,15 @@ export function registerRoutes({
             (params as IoTsParamsObject) ?? t.strict({})
           );
 
-          const data = (await handler({
+          const data = await handler({
             context,
             request,
             logger,
             params: decodedParams,
             plugins,
             getEsCapabilities,
-          })) as any;
+            getIsSecurityEnabled,
+          });
 
           if (data === undefined) {
             return response.noContent();

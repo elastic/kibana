@@ -22,7 +22,7 @@ import {
   titleComparators,
   timeRangeComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 
 import fastIsEqual from 'fast-deep-equal';
 import React, { useMemo } from 'react';
@@ -34,6 +34,7 @@ import { initializeLogRateAnalysisControls } from './initialize_log_rate_analysi
 import type { LogRateAnalysisEmbeddableApi } from './types';
 import { EmbeddableLogRateAnalysisUserInput } from './log_rate_analysis_config_input';
 import type { LogRateAnalysisEmbeddableState } from '../../../common/embeddables/log_rate_analysis/types';
+import { canUseAiops } from '../../capabilities';
 
 export type EmbeddableLogRateAnalysisType = typeof EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE;
 
@@ -44,6 +45,7 @@ export const getLogRateAnalysisEmbeddableFactory = (
     type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
+      canUseAiops(coreStart, true);
       const runtimeState = initialState;
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const titleManager = initializeTitleManager(initialState);

@@ -11,7 +11,7 @@
         "label": "useAssetDetailsRedirect",
         "description": [],
         "signature": [
-          "() => { getAssetDetailUrl: ({ entityType, entityId, search, preferredSchema, }: { entityType: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\"; entityId: string; search: QueryParams; preferredSchema?: \"ecs\" | \"semconv\" | undefined; }) => ",
+          "() => { getAssetDetailUrl: ({ entityType, entityId, search, preferredSchema, }: { entityType: \"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\"; entityId: string; search: QueryParams; preferredSchema?: \"ecs\" | \"semconv\" | undefined; }) => ",
           "RouterLinkProps",
           "; }"
         ],
@@ -34,7 +34,7 @@
         "label": "RouteState",
         "description": [],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
-        "lineNumber": 25,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -47,7 +47,7 @@
             "label": "originAppId",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
-            "lineNumber": 26,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -60,7 +60,7 @@
             "label": "originPathname",
             "description": [],
             "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
-            "lineNumber": 27,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -76,7 +76,7 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -96,7 +96,7 @@
       "label": "MetricsDataPluginSetup",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
-      "lineNumber": 12,
+      "lineNumber": 11,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -112,7 +112,7 @@
             "MetricsDataClient"
           ],
           "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
-          "lineNumber": 13,
+          "lineNumber": 12,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -129,7 +129,7 @@
       "label": "MetricsDataPluginStart",
       "description": [],
       "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
-      "lineNumber": 16,
+      "lineNumber": 15,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -145,7 +145,7 @@
             "MetricsDataClient"
           ],
           "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
-          "lineNumber": 17,
+          "lineNumber": 16,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -163,7 +163,7 @@
             ") => JSX.Element"
           ],
           "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
-          "lineNumber": 18,
+          "lineNumber": 17,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -179,9 +179,10 @@
                 "NodeMetricsTableProps"
               ],
               "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
-              "lineNumber": 18,
+              "lineNumber": 17,
               "columnNumber": 22,
               "deprecated": false,
+              "docsReferencedTypeName": "NodeMetricsTableProps",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -201,7 +202,7 @@
             ") => JSX.Element"
           ],
           "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
-          "lineNumber": 19,
+          "lineNumber": 18,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -217,9 +218,10 @@
                 "NodeMetricsTableProps"
               ],
               "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
-              "lineNumber": 19,
+              "lineNumber": 18,
               "columnNumber": 21,
               "deprecated": false,
+              "docsReferencedTypeName": "NodeMetricsTableProps",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -234,12 +236,14 @@
           "label": "ContainerMetricsTable",
           "description": [],
           "signature": [
-            "(props: ",
-            "NodeMetricsTableProps",
-            ") => JSX.Element"
+            "(props: Omit<",
+            "UseNodeMetricsTableOptions",
+            ", \"metricsClient\"> & Partial<",
+            "SourceProviderProps",
+            "> & { isK8sContainer?: boolean | undefined; }) => JSX.Element"
           ],
           "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
-          "lineNumber": 20,
+          "lineNumber": 19,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -252,11 +256,15 @@
               "label": "props",
               "description": [],
               "signature": [
-                "NodeMetricsTableProps"
+                "Omit<",
+                "UseNodeMetricsTableOptions",
+                ", \"metricsClient\"> & Partial<",
+                "SourceProviderProps",
+                "> & { isK8sContainer?: boolean | undefined; }"
               ],
               "path": "x-pack/solutions/observability/plugins/metrics_data_access/public/types.ts",
               "lineNumber": 20,
-              "columnNumber": 27,
+              "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -328,6 +336,7 @@
                 "lineNumber": 23,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetMetricIndicesOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -380,6 +389,7 @@
                 "lineNumber": 37,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateMetricIndicesOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -430,6 +440,7 @@
                 "lineNumber": 48,
                 "columnNumber": 34,
                 "deprecated": false,
+                "docsReferencedTypeName": "DefaultMetricIndicesHandler",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -493,6 +504,7 @@
             "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ESSearchClient",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -516,6 +528,7 @@
             "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "MetricsAPIRequest",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -649,6 +662,7 @@
             "lineNumber": 12,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "CallWithRequestParams",
             "trackAdoption": false
           }
         ],
@@ -819,7 +833,7 @@
         "label": "findInventoryFields",
         "description": [],
         "signature": [
-          "(type: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\") => { id: string; name: string; os?: string | undefined; ip?: string | undefined; cloudProvider?: string | undefined; }"
+          "(type: \"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\") => { id: string; name: string; os?: string | undefined; ip?: string | undefined; cloudProvider?: string | undefined; }"
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
         "lineNumber": 61,
@@ -835,12 +849,13 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
+              "\"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
             ],
             "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
             "lineNumber": 61,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "InventoryItemType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -856,7 +871,7 @@
         "label": "findInventoryModel",
         "description": [],
         "signature": [
-          "<TType extends \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\">(type: TType) => { readonly host: ",
+          "<TType extends \"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\">(type: TType) => { readonly host: ",
           "InventoryModel",
           "<\"host\", { cpuV2: ",
           "SchemaBasedAggregations",
@@ -1006,7 +1021,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1047,8 +1070,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodeMemoryCapacity: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; nodeMemoryCapacity: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1080,7 +1109,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1121,8 +1158,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodeDiskCapacity: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; nodeDiskCapacity: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1154,7 +1197,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1195,8 +1246,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodePodCapacity: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; nodePodCapacity: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1228,7 +1285,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1269,8 +1334,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; } | undefined; cpu: { xy: { cpuUsageBreakdown: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; } | undefined; cpu: { xy: { cpuUsageBreakdown: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1302,7 +1373,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1343,8 +1422,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; loadBreakdown: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; loadBreakdown: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1376,7 +1461,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1417,8 +1510,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; cpuUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; cpuUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1450,7 +1549,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1491,8 +1598,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; normalizedLoad1m: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; normalizedLoad1m: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1524,7 +1637,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1565,8 +1686,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { cpuUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; metric: { cpuUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1574,7 +1701,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1590,7 +1717,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1630,7 +1757,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1671,8 +1806,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskUsageByMountPoint: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskUsageByMountPoint: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1704,7 +1845,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1745,8 +1894,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIOReadWrite: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskIOReadWrite: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1778,7 +1933,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1819,8 +1982,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskSpaceAvailable: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskSpaceAvailable: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1852,7 +2021,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1893,8 +2070,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIORead: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskIORead: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1926,7 +2109,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -1967,8 +2158,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIOWrite: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskIOWrite: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2000,7 +2197,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2041,8 +2246,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskReadThroughput: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskReadThroughput: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2074,7 +2285,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2115,8 +2334,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskWriteThroughput: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskWriteThroughput: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2148,7 +2373,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2189,8 +2422,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { diskUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; metric: { diskUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2198,7 +2437,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2238,7 +2477,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2279,8 +2526,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; memoryUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; memoryUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2312,7 +2565,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2353,8 +2614,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; memoryFree: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; memoryFree: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2386,7 +2653,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2427,8 +2702,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { memoryUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; metric: { memoryUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2436,7 +2717,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2476,7 +2757,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2517,8 +2806,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly rx: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; readonly rx: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2550,7 +2845,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2591,8 +2894,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly tx: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; readonly tx: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2624,7 +2933,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2665,8 +2982,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; logs: { xy: { logRate: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; }; logs: { xy: { logRate: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2698,7 +3021,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2739,8 +3070,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; }>; readonly pod: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; }; }>; readonly pod: ",
           "InventoryModel",
           "<\"pod\", { memory: ",
           {
@@ -2904,7 +3241,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2945,8 +3290,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly k8sContainerCpuUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; readonly k8sContainerCpuUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -2978,7 +3329,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3019,8 +3378,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; readonly metric: { readonly dockerContainerCpuUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; readonly metric: { readonly dockerContainerCpuUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3028,7 +3393,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3044,7 +3409,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3084,7 +3449,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3125,8 +3498,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; k8sContainerMemoryUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; k8sContainerMemoryUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3158,7 +3537,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3199,8 +3586,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { dockerContainerMemoryUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; metric: { dockerContainerMemoryUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3208,7 +3601,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3224,7 +3617,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3264,7 +3657,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3305,8 +3706,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; readonly diskIO: { xy: { dockerContainerDiskIOReadWrite: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; }; readonly diskIO: { xy: { dockerContainerDiskIOReadWrite: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3338,7 +3745,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -3379,8 +3794,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; }>; readonly awsEC2: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; }; }>; readonly awsEC2: ",
           "InventoryModel",
           "<\"awsEC2\", { cpu: ",
           {
@@ -3570,6 +3991,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3585,7 +4007,7 @@
         "label": "getFieldByType",
         "description": [],
         "signature": [
-          "(type: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\") => \"container.id\" | \"host.name\" | \"kubernetes.pod.uid\" | undefined"
+          "(type: \"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\") => \"container.id\" | \"host.name\" | \"kubernetes.pod.uid\" | undefined"
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
         "lineNumber": 50,
@@ -3601,12 +4023,13 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
+              "\"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
             ],
             "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
             "lineNumber": 50,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "InventoryItemType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -3694,6 +4117,45 @@
       },
       {
         "parentPluginId": "metricsDataAccess",
+        "id": "def-common.isFilterWithAggregations",
+        "type": "Function",
+        "tags": [],
+        "label": "isFilterWithAggregations",
+        "description": [],
+        "signature": [
+          "(agg: unknown) => agg is Pick<",
+          "AggregationsAggregationContainer",
+          ", \"filter\" | \"aggs\">"
+        ],
+        "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
+        "lineNumber": 105,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "metricsDataAccess",
+            "id": "def-common.isFilterWithAggregations.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "agg",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
+            "lineNumber": 106,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "metricsDataAccess",
         "id": "def-common.isSumBucketAgg",
         "type": "Function",
         "tags": [],
@@ -3741,7 +4203,7 @@
         "signature": [
           "(agg: unknown) => agg is Pick<",
           "AggregationsAggregationContainer",
-          ", \"aggregations\" | \"terms\">"
+          ", \"terms\" | \"aggregations\">"
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/index.ts",
         "lineNumber": 98,
@@ -4076,7 +4538,7 @@
         "label": "InventoryItemType",
         "description": [],
         "signature": [
-          "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
+          "\"container\" | \"host\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "lineNumber": 52,
@@ -4243,7 +4705,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4284,8 +4754,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodeMemoryCapacity: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; nodeMemoryCapacity: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4317,7 +4793,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4358,8 +4842,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodeDiskCapacity: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; nodeDiskCapacity: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4391,7 +4881,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4432,8 +4930,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; nodePodCapacity: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; nodePodCapacity: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4465,7 +4969,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4506,8 +5018,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; } | undefined; cpu: { xy: { cpuUsageBreakdown: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; } | undefined; cpu: { xy: { cpuUsageBreakdown: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4539,7 +5057,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4580,8 +5106,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; loadBreakdown: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; loadBreakdown: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4613,7 +5145,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4654,8 +5194,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; cpuUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; cpuUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4687,7 +5233,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4728,8 +5282,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; normalizedLoad1m: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; normalizedLoad1m: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4761,7 +5321,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4802,8 +5370,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { cpuUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; metric: { cpuUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4811,7 +5385,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4827,7 +5401,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4867,7 +5441,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4908,8 +5490,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskUsageByMountPoint: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskUsageByMountPoint: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4941,7 +5529,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -4982,8 +5578,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIOReadWrite: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskIOReadWrite: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5015,7 +5617,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5056,8 +5666,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskSpaceAvailable: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskSpaceAvailable: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5089,7 +5705,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5130,8 +5754,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIORead: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskIORead: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5163,7 +5793,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5204,8 +5842,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskIOWrite: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskIOWrite: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5237,7 +5881,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5278,8 +5930,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskReadThroughput: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskReadThroughput: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5311,7 +5969,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5352,8 +6018,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; diskWriteThroughput: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; diskWriteThroughput: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5385,7 +6057,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5426,8 +6106,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { diskUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; metric: { diskUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5435,7 +6121,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5475,7 +6161,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5516,8 +6210,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; memoryUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; memoryUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5549,7 +6249,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5590,8 +6298,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; memoryFree: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; memoryFree: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5623,7 +6337,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5664,8 +6386,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { memoryUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; metric: { memoryUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5673,7 +6401,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5713,7 +6441,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5754,8 +6490,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly rx: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; readonly rx: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5787,7 +6529,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5828,8 +6578,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly tx: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; readonly tx: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5861,7 +6617,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5902,8 +6666,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; logs: { xy: { logRate: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; }; logs: { xy: { logRate: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5935,7 +6705,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -5976,8 +6754,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; }> | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; }; }> | ",
           "InventoryModel",
           "<\"pod\", { memory: ",
           {
@@ -6141,7 +6925,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6182,8 +6974,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; readonly k8sContainerCpuUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; readonly k8sContainerCpuUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6215,7 +7013,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6256,8 +7062,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; readonly metric: { readonly dockerContainerCpuUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; readonly metric: { readonly dockerContainerCpuUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6265,7 +7077,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6281,7 +7093,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6321,7 +7133,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6362,8 +7182,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; k8sContainerMemoryUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; k8sContainerMemoryUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6395,7 +7221,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6436,8 +7270,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; metric: { dockerContainerMemoryUsage: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; metric: { dockerContainerMemoryUsage: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6445,7 +7285,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6461,7 +7301,7 @@
             "section": "def-common.LensDataset",
             "text": "LensDataset"
           },
-          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"s\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"currency\" | \"percent\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"s\" | \"d\" | \"h\" | undefined; suffix?: string | undefined; fromUnit?: string | undefined; toUnit?: string | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6501,7 +7341,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6542,8 +7390,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; readonly diskIO: { xy: { dockerContainerDiskIOReadWrite: { title: string; dataset?: ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; }; readonly diskIO: { xy: { dockerContainerDiskIOReadWrite: { title: string; dataset?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6575,7 +7429,15 @@
             "section": "def-common.LensBreakdownConfig",
             "text": "LensBreakdownConfig"
           },
-          " | undefined; xAxis?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensBreakdownConfig",
+            "text": "LensBreakdownConfig"
+          },
+          "[] | undefined; xAxis?: ",
           {
             "pluginId": "@kbn/lens-embeddable-utils",
             "scope": "common",
@@ -6616,8 +7478,14 @@
             "text": "XYLegendValue"
           },
           "[] | undefined; } | undefined; axisTitleVisibility?: { showXAxisTitle?: boolean | undefined; showYAxisTitle?: boolean | undefined; showYRightAxisTitle?: boolean | undefined; } | undefined; emphasizeFitting?: boolean | undefined; fittingFunction?: \"None\" | \"Average\" | \"Zero\" | \"Linear\" | \"Carry\" | \"Lookahead\" | \"Nearest\" | undefined; yBounds?: ",
-          "LensYBoundsConfig",
-          " | undefined; valueLabels?: \"hide\" | \"show\" | undefined; } & { id: string; }; }; }; }> | ",
+          {
+            "pluginId": "@kbn/lens-embeddable-utils",
+            "scope": "common",
+            "docId": "kibKbnLensEmbeddableUtilsPluginApi",
+            "section": "def-common.LensYBoundsConfig",
+            "text": "LensYBoundsConfig"
+          },
+          " | undefined; valueLabels?: \"show\" | \"hide\" | undefined; } & { id: string; }; }; }; }> | ",
           "InventoryModel",
           "<\"awsEC2\", { cpu: ",
           {
@@ -7063,13 +7931,13 @@
       },
       {
         "parentPluginId": "metricsDataAccess",
-        "id": "def-common.OS_NAME",
+        "id": "def-common.OS_TYPE",
         "type": "string",
         "tags": [],
-        "label": "OS_NAME",
+        "label": "OS_TYPE",
         "description": [],
         "signature": [
-          "\"os.name\""
+          "\"os.type\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/constants.ts",
         "lineNumber": 27,
@@ -7103,7 +7971,7 @@
         "label": "SnapshotMetricType",
         "description": [],
         "signature": [
-          "\"count\" | \"rx\" | \"custom\" | \"memory\" | \"logRate\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpuV2\" | \"cpu\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"txV2\" | \"rxV2\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"s3TotalRequests\" | \"s3NumberOfObjects\" | \"s3BucketSize\" | \"s3DownloadBytes\" | \"s3UploadBytes\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"rdsLatency\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesSent\" | \"sqsMessagesEmpty\" | \"sqsOldestMessage\""
+          "\"count\" | \"memory\" | \"custom\" | \"cpu\" | \"rx\" | \"logRate\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpuV2\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"txV2\" | \"rxV2\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"s3TotalRequests\" | \"s3NumberOfObjects\" | \"s3BucketSize\" | \"s3DownloadBytes\" | \"s3UploadBytes\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"rdsLatency\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesSent\" | \"sqsMessagesEmpty\" | \"sqsOldestMessage\""
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "lineNumber": 268,

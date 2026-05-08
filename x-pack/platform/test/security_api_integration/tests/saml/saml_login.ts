@@ -54,8 +54,11 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   function checkIntermediateSessionCookiePropsDefault(sessionCookie: Cookie) {
-    expect(sessionCookie.sameSite).to.be('none');
-    expect(sessionCookie.secure).to.be(true);
+    // Over HTTPS the SAML provider overrides cookie attributes to allow the IdP redirect
+    // to set the `sid` cookie cross-site (`SameSite=None; Secure`). Over plain HTTP we fall
+    // back to the default cookie options so Safari does not drop the intermediate cookie.
+    expect(sessionCookie.sameSite).to.be(isSSlEnabled ? 'none' : undefined);
+    expect(sessionCookie.secure).to.be(isSSlEnabled);
   }
 
   async function checkSessionCookie(sessionCookie: Cookie, username = 'a@b.c') {
@@ -976,6 +979,107 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie)
           .expect(500);
         expect(authFlow500ResponseText).to.contain('<h1>Unauthenticated</h1>');
+      });
+    });
+
+    it('should support minimal authentication', async () => {
+      // Authenticate via IdP initiated SAML login.
+      const samlAuthenticationResponse = await supertest
+        .post('/api/security/saml/callback')
+        .send({ SAMLResponse: await createSAMLResponse() })
+        .expect(302);
+
+      const cookies = samlAuthenticationResponse.headers['set-cookie'];
+      expect(cookies).to.have.length(1);
+
+      const sessionCookie = parseCookie(cookies[0])!;
+
+      // Access the minimal and default auth endpoint with the session cookie.
+      const minimalResponse = await supertest
+        .get('/authentication/fast/me')
+        .set('Cookie', sessionCookie.cookieString())
+        .expect(200);
+      const defaultResponse = await supertest
+        .get('/internal/security/me')
+        .set('Cookie', sessionCookie.cookieString())
+        .expect(200);
+
+      expect(minimalResponse.body.principal.username).to.eql(defaultResponse.body.username);
+      expect(minimalResponse.body.principal.username).to.eql('a@b.c');
+
+      expect(minimalResponse.body.principal.authentication_provider).to.eql(
+        defaultResponse.body.authentication_provider
+      );
+      expect(minimalResponse.body.principal.authentication_provider).to.eql({
+        type: 'saml',
+        name: 'saml',
+      });
+
+      // In minimal authentication mode, unlike when in default authentication mode, we don't call ES Authenticate API,
+      // so we don't have `authentication_realm` information available.
+      expect(minimalResponse.body.principal).to.not.have.property('authentication_realm');
+      expect(defaultResponse.body).to.have.property('authentication_realm');
+    });
+
+    it('should support minimal authentication even when access token is expired', async function () {
+      this.timeout(60000);
+
+      // Authenticate via IdP initiated SAML login.
+      const samlAuthenticationResponse = await supertest
+        .post('/api/security/saml/callback')
+        .send({ SAMLResponse: await createSAMLResponse() })
+        .expect(302);
+
+      const sessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
+
+      // Access token expiration is set to 15s for API integration tests.
+      // Let's wait for 20s to make sure token expires.
+      await setTimeoutAsync(20000);
+
+      // Access the minimal auth endpoint with the session cookie. The minimal route relies on
+      // Elasticsearch for credentials validation (e.g., via `_has_privileges` call), so the
+      // expired access token must be transparently refreshed via the re-authentication flow.
+      const minimalResponse = await supertest
+        .get('/authentication/fast/me')
+        .set('Cookie', sessionCookie.cookieString())
+        .expect(200);
+
+      expect(minimalResponse.body.principal.username).to.eql('a@b.c');
+      expect(minimalResponse.body.principal.authentication_provider).to.eql({
+        type: 'saml',
+        name: 'saml',
+      });
+    });
+
+    it('should support minimal authentication with `kbn-auth-full` header forcing full authentication', async () => {
+      // Authenticate via IdP initiated SAML login.
+      const samlAuthenticationResponse = await supertest
+        .post('/api/security/saml/callback')
+        .send({ SAMLResponse: await createSAMLResponse() })
+        .expect(302);
+
+      const sessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
+
+      // Access the minimal auth endpoint with the `kbn-auth-full` header set to `true` to force
+      // full authentication even on a route that otherwise supports the minimal authentication mode.
+      const fullAuthResponse = await supertest
+        .get('/authentication/fast/me')
+        .set('Cookie', sessionCookie.cookieString())
+        .set('kbn-auth-full', 'true')
+        .expect(200);
+
+      expect(fullAuthResponse.body.principal.username).to.eql('a@b.c');
+      expect(fullAuthResponse.body.principal.authentication_provider).to.eql({
+        type: 'saml',
+        name: 'saml',
+      });
+
+      // When `kbn-auth-full` header is set, Kibana calls ES `_authenticate` API, so full user
+      // information (including `authentication_realm`) should be available.
+      expect(fullAuthResponse.body.principal).to.have.property('authentication_realm');
+      expect(fullAuthResponse.body.principal.authentication_realm).to.eql({
+        name: 'saml1',
+        type: 'saml',
       });
     });
   });

@@ -7,6 +7,8 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
+import { useKibana } from '../../../../common/lib/kibana';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { useSyncRulesTableSavedState } from './rules_table/use_sync_rules_table_saved_state';
 import { RulesTables } from './rules_tables';
@@ -14,6 +16,7 @@ import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
 import { UpgradePrebuiltRulesTable } from './upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table';
 import { UpgradePrebuiltRulesTableContextProvider } from './upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
 import { RuleGapsCallout } from '../../../rule_gaps/components/rule_gaps_callout';
+import { GapSchedulerErrorsCallout } from '../../../rule_gaps/components/gap_scheduler_errors_callout';
 
 /**
  * Table Component for displaying all Rules for a given cluster. Provides the ability to filter
@@ -27,10 +30,13 @@ export const AllRules = React.memo(() => {
   useSyncRulesTableSavedState();
   const [{ tabName }] = useRouteSpy();
 
+  const { application, cps } = useKibana().services;
+  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   if (tabName !== AllRulesTabs.updates) {
     return (
       <>
         {tabName !== AllRulesTabs.monitoring && <RuleGapsCallout />}
+        <GapSchedulerErrorsCallout />
         <RulesTableToolbar />
         <EuiSpacer />
         <RulesTables selectedTab={tabName as AllRulesTabs} />

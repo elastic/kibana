@@ -42,6 +42,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -484,7 +485,7 @@
         "signature": [
           "Pick<",
           "LogsOverviewContentProps",
-          ", \"height\" | \"timeRange\"> & { dependencies: ",
+          ", \"timeRange\" | \"height\"> & { dependencies: ",
           {
             "pluginId": "@kbn/logs-overview",
             "scope": "public",

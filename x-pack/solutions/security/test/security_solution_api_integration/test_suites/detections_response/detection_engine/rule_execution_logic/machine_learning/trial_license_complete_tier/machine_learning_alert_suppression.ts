@@ -57,12 +57,12 @@ export default ({ getService }: FtrProviderContext) => {
 
   const { indexListOfDocuments } = dataGeneratorFactory({
     es,
-    index: '.ml-anomalies-custom-v3_linux_anomalous_network_activity',
+    index: '.ml-anomalies-custom-v3_linux_anomalous_network_activity_ea',
     log,
   });
 
   const mlModuleName = 'security_linux_v3';
-  const mlJobId = 'v3_linux_anomalous_network_activity';
+  const mlJobId = 'v3_linux_anomalous_network_activity_ea';
   const baseRuleProps: MachineLearningRuleCreateProps = {
     name: 'Test ML rule',
     description: 'Test ML rule description',

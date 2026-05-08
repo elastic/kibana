@@ -26,8 +26,7 @@ export interface WorkflowExecutionLoopParams {
   workflowExecutionRepository: WorkflowExecutionRepository;
   nodesFactory: NodesFactory;
   esClient: ElasticsearchClient;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fakeRequest: KibanaRequest<unknown, unknown, unknown, any>;
+  fakeRequest: KibanaRequest<unknown, unknown, unknown>;
   coreStart: CoreStart;
   taskAbortController: AbortController;
   workflowTaskManager: WorkflowTaskManager;

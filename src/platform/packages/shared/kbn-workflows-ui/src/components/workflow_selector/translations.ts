@@ -126,7 +126,7 @@ export const EMPTY_STATE_DESCRIPTION = i18n.translate(
 export const EMPTY_STATE_BUTTON_TEXT = i18n.translate(
   'xpack.stackConnectors.components.workflows.emptyStateButtonText',
   {
-    defaultMessage: 'Create your first workflow',
+    defaultMessage: 'Create workflow',
   }
 );
 

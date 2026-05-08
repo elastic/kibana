@@ -56,9 +56,11 @@ const renderPipelinesEdit = async (httpSetup: TestHttpSetup) => {
   );
 
   await screen.findByTestId('pipelineForm');
+  await screen.findByTestId('descriptionField');
 };
 
-describe('<PipelinesEdit />', () => {
+// Failing: See https://github.com/elastic/kibana/issues/253493
+describe.skip('<PipelinesEdit />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   const originalLocation = window.location;
 

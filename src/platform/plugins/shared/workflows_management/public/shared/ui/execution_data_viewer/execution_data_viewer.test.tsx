@@ -63,7 +63,7 @@ describe('ExecutionDataViewer', () => {
     it('should render in table view mode by default', () => {
       render(<ExecutionDataViewer data={mockData} />);
 
-      expect(screen.getByTestId('jsonDataTable')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowJsonDataViewer')).toBeInTheDocument();
       expect(screen.getByTestId('mocked-json-data-table')).toBeInTheDocument();
       expect(screen.queryByTestId('mocked-json-data-code')).not.toBeInTheDocument();
     });
@@ -94,12 +94,12 @@ describe('ExecutionDataViewer', () => {
 
       expect(screen.getByTestId('mocked-json-data-table')).toBeInTheDocument();
 
-      fireEvent.click(screen.getByTestId('json'));
+      fireEvent.click(screen.getByTestId('workflowViewMode_json'));
       expect(screen.queryByTestId('mocked-json-data-table')).not.toBeInTheDocument();
       expect(screen.getByTestId('mocked-json-data-code')).toBeInTheDocument();
       expect(mockJsonDataCode).toHaveBeenCalledWith({ json: mockData });
 
-      fireEvent.click(screen.getByTestId('table'));
+      fireEvent.click(screen.getByTestId('workflowViewMode_table'));
       expect(screen.getByTestId('mocked-json-data-table')).toBeInTheDocument();
       expect(screen.queryByTestId('mocked-json-data-code')).not.toBeInTheDocument();
     });
@@ -111,7 +111,7 @@ describe('ExecutionDataViewer', () => {
 
       expect(screen.getByPlaceholderText('Filter by field, value')).toBeInTheDocument();
 
-      fireEvent.click(screen.getByTestId('json'));
+      fireEvent.click(screen.getByTestId('workflowViewMode_json'));
       expect(screen.queryByPlaceholderText('Filter by field, value')).not.toBeInTheDocument();
     });
 
@@ -175,7 +175,7 @@ describe('ExecutionDataViewer', () => {
 
       expect(mockJSONDataTable).toHaveBeenCalledWith(expect.objectContaining({ data: testData }));
 
-      fireEvent.click(screen.getByTestId('json'));
+      fireEvent.click(screen.getByTestId('workflowViewMode_json'));
       expect(mockJsonDataCode).toHaveBeenCalledWith({ json: testData });
     });
   });

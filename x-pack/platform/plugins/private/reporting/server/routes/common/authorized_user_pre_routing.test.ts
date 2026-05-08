@@ -40,6 +40,7 @@ const getMockResponseFactory = () =>
     ...httpServerMock.createResponseFactory(),
     forbidden: (obj: unknown) => obj,
     unauthorized: (obj: unknown) => obj,
+    custom: (obj: unknown) => obj,
   } as unknown as KibanaResponseFactory);
 
 describe('authorized_user_pre_routing', function () {
@@ -68,7 +69,7 @@ describe('authorized_user_pre_routing', function () {
 
     let handlerCalled = false;
     await authorizedUserPreRouting(mockCore, (user: unknown) => {
-      expect(user).toBe(false); // verify the user is a false value
+      expect(user).toBeUndefined();
       handlerCalled = true;
       return Promise.resolve({ status: 200, options: {} });
     })(getMockContext(), getMockRequest(), mockResponseFactory);
@@ -85,7 +86,7 @@ describe('authorized_user_pre_routing', function () {
 
     let handlerCalled = false;
     await authorizedUserPreRouting(mockCore, (user: unknown) => {
-      expect(user).toBe(false); // verify the user is a false value
+      expect(user).toBeUndefined();
       handlerCalled = true;
       return Promise.resolve({ status: 200, options: {} });
     })(getMockContext(), getMockRequest(), mockResponseFactory);

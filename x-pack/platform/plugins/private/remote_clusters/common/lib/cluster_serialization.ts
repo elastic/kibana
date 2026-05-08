@@ -20,7 +20,7 @@ export interface ClusterInfoEs {
   num_nodes_connected?: number;
   max_connections_per_cluster?: string | number;
   initial_connect_timeout: string | number;
-  skip_unavailable?: boolean;
+  skip_unavailable?: boolean | string;
   transport?: {
     ping_schedule?: string;
     compress?: boolean;
@@ -30,8 +30,8 @@ export interface ClusterInfoEs {
   num_proxy_sockets_connected?: number;
   server_name?: string;
   cluster_credentials?: string;
-  node_connections?: number | undefined;
-  proxy_socket_connections?: number | undefined;
+  node_connections?: number | string | undefined;
+  proxy_socket_connections?: number | string | undefined;
 }
 
 export interface Cluster {
@@ -78,6 +78,26 @@ export interface ClusterSettingsPayloadEs {
   };
 }
 
+const parseEsBoolean = (value: unknown): boolean | undefined => {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+  }
+  return undefined;
+};
+
+const parseEsNumber = (value: unknown): number | undefined => {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : undefined;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed === '') return undefined;
+    const parsed = Number(trimmed);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+  return undefined;
+};
+
 export function deserializeCluster(
   name: string,
   esClusterObject: ClusterInfoEs,
@@ -108,6 +128,13 @@ export function deserializeCluster(
     proxy_socket_connections: proxySocketConnections,
   } = esClusterObject;
 
+  const parsedSkipUnavailable = parseEsBoolean(skipUnavailable);
+  const parsedNodeConnections = parseEsNumber(nodeConnections);
+  const parsedProxySocketConnections = parseEsNumber(proxySocketConnections);
+
+  const parsedNodeConnectionsSettings = parseEsNumber(nodeConnectionsSettings);
+  const parsedProxySocketConnectionsSettings = parseEsNumber(proxySocketConnectionsSettings);
+
   let deserializedClusterObject: Cluster = {
     name,
     mode,
@@ -115,23 +142,23 @@ export function deserializeCluster(
     connectedNodesCount,
     maxConnectionsPerCluster,
     initialConnectTimeout,
-    skipUnavailable,
+    skipUnavailable: parsedSkipUnavailable,
     seeds,
     proxyAddress,
-    proxySocketConnections,
+    proxySocketConnections: parsedProxySocketConnections,
     maxProxySocketConnections,
     connectedSocketsCount,
     serverName,
-    nodeConnections,
+    nodeConnections: parsedNodeConnections,
     securityModel: clusterCredentials ? SECURITY_MODEL.API : SECURITY_MODEL.CERTIFICATE,
   };
 
-  if (mode === SNIFF_MODE && !nodeConnections) {
-    deserializedClusterObject.nodeConnections = nodeConnectionsSettings || null;
+  if (mode === SNIFF_MODE && parsedNodeConnections == null) {
+    deserializedClusterObject.nodeConnections = parsedNodeConnectionsSettings ?? null;
   }
 
-  if (mode === PROXY_MODE && !proxySocketConnections) {
-    deserializedClusterObject.proxySocketConnections = proxySocketConnectionsSettings || null;
+  if (mode === PROXY_MODE && parsedProxySocketConnections == null) {
+    deserializedClusterObject.proxySocketConnections = parsedProxySocketConnectionsSettings ?? null;
   }
 
   if (transport) {

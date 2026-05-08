@@ -80,7 +80,7 @@ const ExceptionsAddToListsOptionsComponent: React.FC<ExceptionsAddToListsOptions
                 <EuiPopoverFooter>
                   <EuiButtonEmpty
                     size="s"
-                    iconType="popout"
+                    iconType="external"
                     iconSide="right"
                     onClick={() =>
                       navigateToApp('security', { openInNewTab: true, path: '/exceptions' })

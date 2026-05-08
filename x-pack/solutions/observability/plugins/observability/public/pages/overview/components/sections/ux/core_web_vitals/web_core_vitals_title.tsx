@@ -81,7 +81,7 @@ export function WebCoreVitalsTitle({
           {loading ? (
             <EuiLoadingSpinner />
           ) : (
-            <EuiText size="s">
+            <EuiText size="s" data-test-subj="uxCoreVitalsTrafficSummary">
               <FormattedMessage
                 id="xpack.observability.ux.dashboard.webCoreVitals.traffic"
                 defaultMessage="{trafficPerc} of the traffic represented"

@@ -15,6 +15,8 @@ import { get, getOr } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { flattenObject } from '@kbn/object-utils';
+import { useRunAlertWorkflowPanel } from './use_run_alert_workflow_panel';
+import { useRunDocumentWorkflowPanel } from './use_run_document_workflow_panel';
 import { EndpointExceptionsFlyout } from '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
@@ -234,12 +236,34 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     refetch: refetchAll,
   });
 
+  const { runWorkflowMenuItem, runAlertWorkflowPanel } = useRunAlertWorkflowPanel({
+    closePopover,
+    ecsRowData,
+  });
+
+  const documentForWorkflow = useMemo(() => {
+    const fields: Record<string, unknown> = {};
+    for (const { field, value } of flattenedEcsData) {
+      fields[field] = value;
+    }
+    return [{ _id: ecsRowData._id, _index: ecsRowData._index ?? '', ...fields }];
+  }, [ecsRowData._id, ecsRowData._index, flattenedEcsData]);
+
+  const {
+    runWorkflowMenuItem: runDocumentWorkflowMenuItem,
+    runDocumentWorkflowPanel: runDocumentWorkflowPanels,
+  } = useRunDocumentWorkflowPanel({
+    closePopover,
+    documents: documentForWorkflow,
+  });
+
   const items: AlertTableContextMenuItem[] = useMemo(
     () =>
       !isEvent && ruleId
         ? [
             ...addToCaseActionItems,
             ...statusActionItems,
+            ...runWorkflowMenuItem,
             ...alertTagsItems,
             ...alertAssigneesItems,
             ...exceptionActionItems,
@@ -247,10 +271,13 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           ]
         : [
             ...addToCaseActionItems,
+            ...runDocumentWorkflowMenuItem,
             ...(canCreateEndpointEventFilters ? eventFilterActionItems : []),
             ...(agentId ? osqueryActionItems : []),
           ],
     [
+      runWorkflowMenuItem,
+      runDocumentWorkflowMenuItem,
       isEvent,
       ruleId,
       addToCaseActionItems,
@@ -274,8 +301,17 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       ...alertTagsPanels,
       ...alertAssigneesPanels,
       ...statusActionPanels,
+      ...runAlertWorkflowPanel,
+      ...runDocumentWorkflowPanels,
     ],
-    [items, alertTagsPanels, alertAssigneesPanels, statusActionPanels]
+    [
+      items,
+      alertTagsPanels,
+      alertAssigneesPanels,
+      statusActionPanels,
+      runAlertWorkflowPanel,
+      runDocumentWorkflowPanels,
+    ]
   );
 
   const button = useMemo(() => {
@@ -288,7 +324,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
           aria-label={ariaLabel}
           data-test-subj="timeline-context-menu-button"
           size="s"
-          iconType="boxesHorizontal"
+          iconType="boxesVertical"
           data-popover-open={isPopoverOpen}
           onClick={onButtonClick}
           isDisabled={disabled || !hasItems}

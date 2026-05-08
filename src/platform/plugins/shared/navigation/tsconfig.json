@@ -8,10 +8,12 @@
     "common/**/*.ts",
     "public/**/*.ts",
     "public/**/*.tsx",
-    "server/**/*.ts"
+    "server/**/*.ts",
+    "test/**/*.ts"
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-feature-flags-server",
     "@kbn/unified-search-plugin",
     "@kbn/es-query",
     "@kbn/i18n-react",
@@ -28,6 +30,7 @@
     "@kbn/std",
     "@kbn/router-utils",
     "@kbn/split-button",
+    "@kbn/scout"
   ],
   "exclude": [
     "target/**/*",

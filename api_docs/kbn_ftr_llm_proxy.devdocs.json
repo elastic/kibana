@@ -165,6 +165,7 @@
                 "lineNumber": 44,
                 "columnNumber": 46,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -360,6 +361,7 @@
                         "lineNumber": 30,
                         "columnNumber": 10,
                         "deprecated": false,
+                        "docsReferencedTypeName": "ChatCompletionStreamParams",
                         "trackAdoption": false
                       }
                     ]
@@ -477,6 +479,7 @@
             "lineNumber": 21,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "LlmProxy",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -536,6 +539,47 @@
             "lineNumber": 242,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-llm-proxy",
+        "id": "def-common.createMultiToolCallMessage",
+        "type": "Function",
+        "tags": [],
+        "label": "createMultiToolCallMessage",
+        "description": [],
+        "signature": [
+          "(toolCalls: { name: string; args: Record<string, any>; }[]) => Omit<",
+          "ChatCompletionMessage",
+          ", \"refusal\">"
+        ],
+        "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/utils.ts",
+        "lineNumber": 33,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-llm-proxy",
+            "id": "def-common.createMultiToolCallMessage.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "toolCalls",
+            "description": [],
+            "signature": [
+              "{ name: string; args: Record<string, any>; }[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/utils.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -616,7 +660,7 @@
           "ChatCompletion"
         ],
         "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/create_response.ts",
-        "lineNumber": 41,
+        "lineNumber": 58,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -638,9 +682,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-ftr-llm-proxy/proxy/create_response.ts",
-            "lineNumber": 41,
+            "lineNumber": 58,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "LLMMessage",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -697,6 +742,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -877,7 +923,7 @@
         "label": "ToolMessage",
         "description": [],
         "signature": [
-          "{ role: \"assistant\"; content: string | null; audio?: ",
+          "{ content: string | null; role: \"assistant\"; audio?: ",
           "ChatCompletionAudio",
           " | null | undefined; annotations?: ",
           "ChatCompletionMessage",

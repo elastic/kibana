@@ -15,6 +15,10 @@ export class LensApp {
   private readonly chartSwitchPopover;
   private readonly chartSwitchList;
   private readonly saveAndReturnButton;
+  private readonly saveButton;
+  private readonly saveModal;
+  private readonly savedObjectTitleInput;
+  private readonly confirmSaveButton;
   private readonly closeDimensionEditorButton;
   public readonly applyChangesButton;
   private readonly dimensionFieldComboBox;
@@ -24,6 +28,10 @@ export class LensApp {
     this.chartSwitchPopover = this.page.testSubj.locator('lnsChartSwitchPopover');
     this.chartSwitchList = this.page.testSubj.locator('lnsChartSwitchList');
     this.saveAndReturnButton = this.page.testSubj.locator('lnsApp_saveAndReturnButton');
+    this.saveButton = this.page.testSubj.locator('lnsApp_saveButton');
+    this.saveModal = this.page.testSubj.locator('savedObjectSaveModal');
+    this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
+    this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
     this.closeDimensionEditorButton = this.page.testSubj.locator(
       'lns-indexPattern-dimensionContainerClose'
     );
@@ -54,6 +62,44 @@ export class LensApp {
     await this.saveAndReturnButton.click();
     await expect(this.lensApp).toBeHidden();
     await expect(this.page.testSubj.locator('dshDashboardViewport')).toBeVisible();
+  }
+
+  /**
+   * Opens the Lens save modal, fills in the title, optionally selects
+   * a dashboard target, and confirms.
+   */
+  async save(
+    title: string,
+    options?:
+      | {
+          addToDashboard: 'existing';
+          dashboardTitle: string;
+        }
+      | {
+          addToDashboard: 'new';
+        }
+      | {
+          addToDashboard: 'none';
+        }
+  ) {
+    await this.saveButton.click();
+    await expect(this.saveModal).toBeVisible();
+    await this.savedObjectTitleInput.fill(title);
+
+    if (options?.addToDashboard === 'existing') {
+      await this.page.locator('label[for="existing-dashboard-option"]').click();
+      await this.page.testSubj.locator('open-dashboard-picker').click();
+      await this.page.testSubj
+        .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
+        .click();
+    } else if (options?.addToDashboard === 'new') {
+      await this.page.locator('label[for="new-dashboard-option"]').click();
+    } else if (options?.addToDashboard === 'none') {
+      await this.page.locator('label[for="add-to-library-option"]').click();
+    }
+
+    await this.confirmSaveButton.click();
+    await expect(this.saveModal).toBeHidden();
   }
 
   async configureXYDimensions(options?: {
@@ -124,7 +170,8 @@ export class LensApp {
     await expect(input).toHaveValue(`${value}`);
   }
 
-  async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text') {
+  async setTableDynamicColoring(coloringType: 'none' | 'cell' | 'text' | 'badge') {
+    await this.page.testSubj.click('lnsDatatable_dynamicColoring_groups');
     await this.page.testSubj.click(`lnsDatatable_dynamicColoring_groups_${coloringType}`);
   }
 
@@ -188,6 +235,13 @@ export class LensApp {
     await expect(this.chartSwitchList).toBeVisible();
   }
 
+  async dragFieldToWorkspace(field: string) {
+    const fieldLocator = this.page.testSubj.locator(`lnsFieldListPanelField-___${field}___`);
+    const dropTarget = this.page.testSubj.locator('workspace-drag-drop-prompt');
+    await fieldLocator.dragTo(dropTarget);
+    await this.page.locator('.echCanvasRenderer').waitFor({ state: 'visible' });
+  }
+
   getConvertToEsqlButton() {
     return this.page.getByRole('button', { name: 'Convert to ES|QL' });
   }
@@ -198,5 +252,25 @@ export class LensApp {
 
   getConvertToEsqModalConfirmButton() {
     return this.page.getByTestId('confirmModalConfirmButton');
+  }
+
+  getApplyFlyoutButton() {
+    return this.page.getByTestId('applyFlyoutButton');
+  }
+
+  getSecondaryFlyoutBackButton() {
+    return this.page.getByTestId('lns-indexPattern-dimensionContainerClose');
+  }
+
+  getInlineEditor() {
+    return this.page.getByTestId('customizeLens');
+  }
+
+  getCancelFlyoutButton() {
+    return this.page.getByTestId('cancelFlyoutButton');
+  }
+
+  getEditInLensButton() {
+    return this.page.getByTestId('navigateToLensEditorLink');
   }
 }

@@ -10,10 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import {
-  defaultNavigationTree,
-  LazyIconAgentBuilder,
-} from '@kbn/security-solution-navigation/navigation_tree';
+import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 
 import { AiNavigationIcon } from './icon';
@@ -25,7 +22,8 @@ const SOLUTION_NAME = i18n.translate(
 
 export const createAiNavigationTree = (
   chatExperience: AIChatExperience = AIChatExperience.Classic,
-  workflowsUiEnabled: boolean = false
+  workflowsUiEnabled: boolean = false,
+  showAlertingV2: boolean = false
 ): NavigationTreeDefinition => ({
   body: [
     {
@@ -52,7 +50,7 @@ export const createAiNavigationTree = (
         {
           id: SecurityPageName.configurations,
           link: securityLink(SecurityPageName.configurations),
-          icon: 'controlsHorizontal',
+          icon: 'controls',
           children: [
             {
               id: SecurityPageName.configurationsIntegrations,
@@ -78,13 +76,17 @@ export const createAiNavigationTree = (
       breadcrumbStatus: 'hidden',
       children: [
         {
+          link: 'inbox' as AppDeepLinkId,
+          icon: 'email',
+        },
+        {
           link: 'discover' as AppDeepLinkId,
+          icon: 'productDiscover',
         },
         ...(chatExperience === AIChatExperience.Agent
           ? [
               {
-                // TODO: update icon to 'robot' once it's available in EUI
-                icon: LazyIconAgentBuilder,
+                icon: 'productAgent',
                 link: 'agent_builder' as AppDeepLinkId,
               },
             ]
@@ -108,12 +110,12 @@ export const createAiNavigationTree = (
     {
       id: SecurityPageName.landing,
       link: securityLink(SecurityPageName.landing),
-      icon: 'launch',
+      icon: 'rocket',
     },
     {
       link: 'dev_tools',
       title: i18nStrings.devTools,
-      icon: 'editorCodeBlock',
+      icon: 'code',
     },
     {
       title: i18nStrings.ingestAndManageData.title,
@@ -167,12 +169,22 @@ export const createAiNavigationTree = (
             },
           ],
         },
+        ...(showAlertingV2
+          ? [
+              {
+                id: 'v2_alerting_preview',
+                title: i18nStrings.stackManagementV2.v2AlertingPreview.title,
+                renderAs: 'panelOpener' as const,
+                children: [
+                  { link: 'management:rules' as const },
+                  { link: 'management:action_policies' as const },
+                ],
+              },
+            ]
+          : []),
         {
           title: i18nStrings.stackManagementV2.alertsAndInsights.title,
-          children: [
-            { link: 'management:triggersActions' },
-            { link: 'management:triggersActionsConnectors' },
-          ],
+          children: [{ link: 'rules' }, { link: 'management:triggersActionsConnectors' }],
         },
         {
           title: i18nStrings.ml.title,
@@ -183,6 +195,14 @@ export const createAiNavigationTree = (
             {
               link: 'management:trained_models',
             },
+          ],
+        },
+        {
+          title: i18nStrings.modelManagement.title,
+          children: [
+            { link: 'management:elastic_inference_service' },
+            { link: 'management:inference_endpoints' },
+            { link: 'management:model_settings' },
           ],
         },
         {

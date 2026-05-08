@@ -17,10 +17,11 @@ import {
   apiPublishesDataLoading,
   getViewModeSubject,
   useBatchedPublishingSubjects,
+  apiPublishesSettings,
+  initializeUnsavedChanges,
 } from '@kbn/presentation-publishing';
 
-import { apiPublishesSettings, initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
+import { DEFAULT_TIME_SLIDER_STATE, TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -54,10 +55,13 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
     type: TIME_SLIDER_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
+
       const { timeRangeMeta$, formatDate, cleanupTimeRangeSubscription } =
         initTimeRangeSubscription(parentApi);
       const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-      const isAnchored$ = new BehaviorSubject<boolean | undefined>(state.isAnchored);
+      const isAnchored$ = new BehaviorSubject<TimeSliderControlState['is_anchored']>(
+        state.is_anchored
+      );
       const isPopoverOpen$ = new BehaviorSubject(false);
       const hasTimeSliceSelection$ = new BehaviorSubject<boolean>(Boolean(timeslice$));
 
@@ -67,8 +71,8 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
       );
 
       function getTimesliceSyncedWithTimeRangePercentage(
-        startPercentage: number,
-        endPercentage: number
+        startPercentage: TimeSliderControlState['start_percentage_of_time_range'],
+        endPercentage: TimeSliderControlState['end_percentage_of_time_range']
       ): [number, number] {
         const { stepSize, timeRange, timeRangeBounds } = timeRangeMeta$.value;
         const from = timeRangeBounds[FROM_INDEX] + startPercentage * timeRange;
@@ -80,16 +84,9 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
       }
 
       function syncTimesliceWithTimeRangePercentage(
-        startPercentage: number | undefined,
-        endPercentage: number | undefined
+        startPercentage: TimeSliderControlState['start_percentage_of_time_range'],
+        endPercentage: TimeSliderControlState['end_percentage_of_time_range']
       ) {
-        if (startPercentage === undefined || endPercentage === undefined) {
-          if (timeslice$.value !== undefined) {
-            timeslice$.next(undefined);
-          }
-          return;
-        }
-
         const { timeRange, timeRangeBounds } = timeRangeMeta$.value;
 
         const from = timeRangeBounds[FROM_INDEX] + startPercentage * timeRange;
@@ -100,25 +97,18 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
 
       function setTimeslice(timeslice?: TimeSlice) {
         timeRangePercentage.setTimeRangePercentage(timeslice, timeRangeMeta$.value);
-        const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
+        const { start_percentage_of_time_range, end_percentage_of_time_range } =
           timeRangePercentage.getLatestState();
 
-        if (
-          timesliceStartAsPercentageOfTimeRange !== undefined &&
-          timesliceEndAsPercentageOfTimeRange !== undefined
-        ) {
-          timeslice$.next(
-            getTimesliceSyncedWithTimeRangePercentage(
-              timesliceStartAsPercentageOfTimeRange,
-              timesliceEndAsPercentageOfTimeRange
-            )
-          );
-        } else {
-          timeslice$.next(undefined);
-        }
+        timeslice$.next(
+          getTimesliceSyncedWithTimeRangePercentage(
+            start_percentage_of_time_range,
+            end_percentage_of_time_range
+          )
+        );
       }
 
-      function setIsAnchored(isAnchored: boolean | undefined) {
+      function setIsAnchored(isAnchored: TimeSliderControlState['is_anchored']) {
         isAnchored$.next(isAnchored);
       }
 
@@ -236,7 +226,7 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
       function serializeState() {
         return {
           ...timeRangePercentage.getLatestState(),
-          isAnchored: isAnchored$.value,
+          is_anchored: isAnchored$.value,
         };
       }
 
@@ -252,19 +242,19 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
           return {
             ...timeRangePercentageComparators,
             width: 'skip',
-            isAnchored: 'skip',
+            is_anchored: 'referenceEquality',
           };
         },
         onReset: (lastSaved) => {
           timeRangePercentage.reinitializeState(lastSaved);
-          setIsAnchored(lastSaved?.isAnchored);
+          setIsAnchored(lastSaved?.is_anchored ?? DEFAULT_TIME_SLIDER_STATE.is_anchored);
         },
       });
 
       const api = finalizeApi({
         ...unsavedChangesApi,
         isPinnable: false, // Disable the user-facing unpin action; panel can still be pinned programatically when it's created
-        defaultTitle$: new BehaviorSubject<string | undefined>(displayName),
+        label$: new BehaviorSubject<string>(displayName),
         appliedTimeslice$: timeslice$,
         serializeState,
         clearSelections: () => {
@@ -317,19 +307,19 @@ export const getTimesliderControlFactory = (): EmbeddableFactory<
             )
               return;
 
-            const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
+            const { start_percentage_of_time_range, end_percentage_of_time_range } =
               timeRangePercentage.getLatestState();
             syncTimesliceWithTimeRangePercentage(
-              timesliceStartAsPercentageOfTimeRange,
-              timesliceEndAsPercentageOfTimeRange
+              start_percentage_of_time_range,
+              end_percentage_of_time_range
             );
           }
         );
 
       // Initialize the timeslice
       syncTimesliceWithTimeRangePercentage(
-        state.timesliceStartAsPercentageOfTimeRange,
-        state.timesliceEndAsPercentageOfTimeRange
+        state.start_percentage_of_time_range,
+        state.end_percentage_of_time_range
       );
 
       return {

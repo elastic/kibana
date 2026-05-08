@@ -143,6 +143,7 @@
             "lineNumber": 39,
             "columnNumber": 53,
             "deprecated": false,
+            "docsReferencedTypeName": "ToMountPointParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -230,7 +231,7 @@
             "label": "children",
             "description": [],
             "signature": [
-              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+              "React.ReactNode"
             ],
             "path": "src/platform/packages/shared/react/kibana_mount/mount_point_portal.tsx",
             "lineNumber": 19,

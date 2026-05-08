@@ -58,7 +58,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(response.status).to.equal(400);
       expect(response.body.message).to.be(
-        '[request body]: new_terms_fields: Array must contain at most 3 element(s)'
+        '[request body]: new_terms_fields: Too big: expected array to have <=3 items'
       );
     });
   });

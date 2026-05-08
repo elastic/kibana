@@ -33,6 +33,10 @@ export const createTextAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
+    getAgentDescription: () => {
+      return `A text attachment contains plain text content.
+      Rendering it inline displays the text content as a plain text block in the conversation UI.`;
+    },
     getTools: () => [],
   };
 };

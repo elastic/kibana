@@ -59,7 +59,7 @@ export const ElasticsearchTemplate: React.FC<
           content={i18n.translate('xpack.monitoring.esNavigation.ingestPipelinesBetaTooltip', {
             defaultMessage: 'Ingest Pipeline monitoring is a beta feature',
           })}
-          type="beaker"
+          type="flask"
         />
       ),
       onClick: () => ingestPipelineTabOnClick(services),

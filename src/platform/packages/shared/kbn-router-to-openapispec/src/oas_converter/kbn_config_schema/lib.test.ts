@@ -25,7 +25,7 @@ describe('convert', () => {
       schema: {
         additionalProperties: false,
         properties: {
-          any: {},
+          any: { description: 'any type', nullable: true },
           array: {
             items: {
               additionalProperties: false,
@@ -125,6 +125,7 @@ describe('convert', () => {
             required: ['foo'],
           },
           type: 'array',
+          title: 'myArray',
         },
         myUnion: {
           anyOf: [
@@ -139,6 +140,7 @@ describe('convert', () => {
               type: 'number',
             },
           ],
+          title: 'myUnion',
         },
       },
     });
@@ -160,6 +162,7 @@ describe('convert', () => {
       },
       shared: {
         myId: {
+          title: 'myId',
           additionalProperties: false,
           properties: {
             a: {
@@ -214,7 +217,7 @@ describe('convertPathParameters', () => {
         {
           in: 'path',
           name: 'a',
-          required: false,
+          required: true,
           schema: {
             type: 'string',
           },
@@ -255,6 +258,57 @@ describe('convertQuery', () => {
           required: false,
           schema: {
             type: 'string',
+          },
+        },
+      ],
+      shared: {},
+    });
+  });
+
+  test('collapses oneOf [scalar, array] query params to array', () => {
+    expect(
+      convertQuery(
+        schema.object({
+          status: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+        })
+      )
+    ).toEqual({
+      query: [
+        {
+          in: 'query',
+          name: 'status',
+          required: false,
+          schema: {
+            type: 'array',
+            items: { type: 'string' },
+          },
+        },
+      ],
+      shared: {},
+    });
+  });
+
+  test('collapses oneOf [enum, array[enum]] query params preserving enum', () => {
+    expect(
+      convertQuery(
+        schema.object({
+          status: schema.maybe(
+            schema.oneOf([
+              schema.oneOf([schema.literal('running'), schema.literal('finished')]),
+              schema.arrayOf(schema.oneOf([schema.literal('running'), schema.literal('finished')])),
+            ])
+          ),
+        })
+      )
+    ).toEqual({
+      query: [
+        {
+          in: 'query',
+          name: 'status',
+          required: false,
+          schema: {
+            type: 'array',
+            items: { type: 'string', enum: ['running', 'finished'] },
           },
         },
       ],

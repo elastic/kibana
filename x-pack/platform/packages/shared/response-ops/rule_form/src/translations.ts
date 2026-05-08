@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { ShowRequestActivePage } from './types';
 
 export const DOC_LINK_TITLE = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleDefinition.docLinkTitle',
@@ -292,6 +293,20 @@ export const ADD_ACTION_DESCRIPTION_TEXT = i18n.translate(
   {
     defaultMessage:
       'Select a connector and configure the actions to be performed when an alert is triggered',
+  }
+);
+
+export const ADD_ACTION_MESSAGE_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleActions.addActionMessageLabel',
+  {
+    defaultMessage: 'Message',
+  }
+);
+
+export const ADD_ACTION_SETTINGS_LABEL = i18n.translate(
+  'responseOpsRuleForm.ruleForm.ruleActions.addActionSettingsLabel',
+  {
+    defaultMessage: 'Settings',
   }
 );
 
@@ -792,7 +807,7 @@ export const DISABLED_ACTIONS_WARNING_TITLE = i18n.translate(
 export const SHOW_REQUEST_MODAL_EDIT = i18n.translate(
   'responseOpsRuleForm.ruleForm.showRequestModal.subheadingTitleEdit',
   {
-    defaultMessage: 'edit',
+    defaultMessage: 'update',
   }
 );
 
@@ -803,16 +818,32 @@ export const SHOW_REQUEST_MODAL_CREATE = i18n.translate(
   }
 );
 
-export const SHOW_REQUEST_MODAL_SUBTITLE = (edit: boolean) =>
+export const SHOW_REQUEST_MODAL_CREATE_TAB = i18n.translate(
+  'responseOpsRuleForm.ruleForm.showRequestModal.showRequestModalCreateTab',
+  {
+    defaultMessage: 'Create',
+  }
+);
+
+export const SHOW_REQUEST_MODAL_UPDATE_TAB = i18n.translate(
+  'responseOpsRuleForm.ruleForm.showRequestModal.showRequestModalEditTab',
+  {
+    defaultMessage: 'Update',
+  }
+);
+
+export const SHOW_REQUEST_MODAL_SUBTITLE = (mode: ShowRequestActivePage) =>
   i18n.translate('responseOpsRuleForm.ruleForm.showRequestModal.subheadingTitle', {
     defaultMessage: 'This Kibana request will {requestType} this rule.',
-    values: { requestType: edit ? SHOW_REQUEST_MODAL_EDIT : SHOW_REQUEST_MODAL_CREATE },
+    values: {
+      requestType: mode === 'update' ? SHOW_REQUEST_MODAL_EDIT : SHOW_REQUEST_MODAL_CREATE,
+    },
   });
 
 export const SHOW_REQUEST_MODAL_TITLE_EDIT = i18n.translate(
   'responseOpsRuleForm.ruleForm.showRequestModal.headerTitleEdit',
   {
-    defaultMessage: 'Edit',
+    defaultMessage: 'Update',
   }
 );
 
@@ -823,11 +854,12 @@ export const SHOW_REQUEST_MODAL_TITLE_CREATE = i18n.translate(
   }
 );
 
-export const SHOW_REQUEST_MODAL_TITLE = (edit: boolean) =>
+export const SHOW_REQUEST_MODAL_TITLE = (mode: ShowRequestActivePage) =>
   i18n.translate('responseOpsRuleForm.ruleForm.showRequestModal.headerTitle', {
     defaultMessage: '{requestType} alerting rule request',
     values: {
-      requestType: edit ? SHOW_REQUEST_MODAL_TITLE_EDIT : SHOW_REQUEST_MODAL_TITLE_CREATE,
+      requestType:
+        mode === 'update' ? SHOW_REQUEST_MODAL_TITLE_EDIT : SHOW_REQUEST_MODAL_TITLE_CREATE,
     },
   });
 
@@ -843,3 +875,32 @@ export const DEFAULT_RULE_NAME = (ruleTypeName: string) =>
     defaultMessage: `{ruleTypeName} rule`,
     values: { ruleTypeName },
   });
+
+export const DEPRECATED_LABEL = i18n.translate(
+  'responseOpsRuleForm.deprecatedConnectorBadgeLabel',
+  {
+    defaultMessage: 'Deprecated',
+  }
+);
+
+export const DEPRECATED_CONNECTOR_TOOLTIP_CONTENT = i18n.translate(
+  'responseOpsRuleForm.deprecatedConnectorTooltipLabel',
+  {
+    defaultMessage: 'This connector type is deprecated and may be removed in future versions.',
+  }
+);
+
+export const DEPRECATED_LLM_CONNECTOR_INFO = i18n.translate(
+  'responseOpsRuleForm.deprecatedLLMConnectorInfo',
+  {
+    defaultMessage:
+      'Use Elasticsearch inference endpoints to connect to large language models instead.',
+  }
+);
+
+export const DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE = i18n.translate(
+  'responseOpsRuleForm.deprecatedLLMConnectorCalloutTitle',
+  {
+    defaultMessage: 'This connector type is deprecated',
+  }
+);

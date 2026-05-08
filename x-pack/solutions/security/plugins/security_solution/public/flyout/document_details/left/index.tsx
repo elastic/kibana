@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { DocumentDetailsLeftPanelKey } from '../shared/constants/panel_keys';
 import { useKibana } from '../../../common/lib/kibana';
@@ -17,7 +18,7 @@ import { PanelContent } from './content';
 import type { LeftPanelTabType } from './tabs';
 import * as tabs from './tabs';
 import { getField } from '../shared/utils';
-import { EventKind } from '../shared/constants/event_kinds';
+import { EventKind } from '../../../flyout_v2/document/constants/event_kinds';
 import { useDocumentDetailsContext } from '../shared/context';
 import type { DocumentDetailsProps } from '../shared/types';
 import { DocumentEventTypes } from '../../../common/lib/telemetry/types';
@@ -38,19 +39,26 @@ export const LeftPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
     notesPrivileges: { read: canSeeNotes },
   } = useUserPrivileges();
 
+  const isRemoteDocument = isNonLocalIndexName(indexName);
+
   const tabsDisplayed = useMemo(() => {
     const tabList =
       eventKind === EventKind.signal
-        ? [tabs.insightsTab, tabs.investigationTab, tabs.responseTab]
+        ? [
+            tabs.insightsTab,
+            ...(isRemoteDocument ? [] : [tabs.investigationTab]),
+            ...(isRemoteDocument ? [] : [tabs.responseTab]),
+          ]
         : [tabs.insightsTab];
     if (canSeeNotes && !isRulePreview) {
       tabList.push(tabs.notesTab);
     }
+
     if (!isRulePreview) {
       return [tabs.visualizeTab, ...tabList];
     }
     return tabList;
-  }, [eventKind, isRulePreview, canSeeNotes]);
+  }, [eventKind, isRemoteDocument, isRulePreview, canSeeNotes]);
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabsDisplayed[0].id;

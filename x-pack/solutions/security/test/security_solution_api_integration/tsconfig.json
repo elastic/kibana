@@ -5,7 +5,6 @@
     "types": [
       "node",
       "cheerio",
-      "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
       "@kbn/ambient-ftr-types"
     ],
@@ -67,5 +66,8 @@
     "@kbn/cloud-security-posture-common",
     "@kbn/detections-response-ftr-services",
     "@kbn/connector-schemas",
+    "@kbn/security-solution-features",
+    "@kbn/spaces-utils",
+    "@kbn/entity-store"
   ]
 }

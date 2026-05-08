@@ -9,7 +9,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import React from 'react';
-import { getDiscoverStateMock } from '../__mocks__/discover_state.mock';
+import { getDiscoverInternalStateMock } from '../__mocks__/discover_state.mock';
 import {
   type ConnectedCustomizationService,
   getConnectedCustomizationService,
@@ -21,6 +21,7 @@ import { createCustomizationService } from './customization_service';
 import type { CustomizationCallback } from './types';
 import { DiscoverTestProvider } from '../__mocks__/test_provider';
 import { createDiscoverServicesMock } from '../__mocks__/services';
+import { createTabActionInjector, selectTab } from '../application/main/state_management/redux';
 
 describe('getConnectedCustomizationService', () => {
   it('should provide customization service', async () => {
@@ -32,11 +33,20 @@ describe('getConnectedCustomizationService', () => {
       return promise;
     });
     const customizationCallbacks: CustomizationCallback[] = [callback];
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({ services });
+    await toolkit.initializeTabs();
+    const tabId = toolkit.getCurrentTab().id;
+    const injectCurrentTab = createTabActionInjector(tabId);
+    const getCurrentTab = () => selectTab(toolkit.internalState.getState(), tabId);
     const servicePromise = getConnectedCustomizationService({
-      stateContainer,
       customizationCallbacks,
-      services: createDiscoverServicesMock(),
+      internalState: toolkit.internalState,
+      injectCurrentTab,
+      getCurrentTab,
+      runtimeStateManager: toolkit.runtimeStateManager,
+      stateStorage: toolkit.stateStorageContainer,
+      services,
     });
     let service: ConnectedCustomizationService | undefined;
     expect(callback).toHaveBeenCalledTimes(1);

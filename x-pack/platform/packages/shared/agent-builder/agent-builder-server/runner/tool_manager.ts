@@ -6,8 +6,9 @@
  */
 
 import type { StructuredTool } from '@langchain/core/tools';
-import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import type { BrowserApiToolMetadata, ToolOrigin } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
+import type { ToolReturnSummarizerFn } from '../tools/builtin';
 import type { AgentEventEmitterFn, ExecutableTool } from '..';
 
 export interface ToolManagerParams {
@@ -20,6 +21,9 @@ export interface AddToolOptions {
   dynamic?: boolean;
 }
 
+export type ExecutableToolWithOrigin = ExecutableTool & { origin: ToolOrigin };
+export type BrowserToolWithOrigin = BrowserApiToolMetadata & { origin: ToolOrigin };
+
 export enum ToolManagerToolType {
   executable = 'executable',
   browser = 'browser',
@@ -27,14 +31,13 @@ export enum ToolManagerToolType {
 
 export interface ExecutableToolInput {
   type: ToolManagerToolType.executable;
-  tools: ExecutableTool | ExecutableTool[];
+  tools: ExecutableToolWithOrigin | ExecutableToolWithOrigin[];
   logger: Logger;
-  eventEmitter?: AgentEventEmitterFn;
 }
 
 export interface BrowserToolInput {
   type: ToolManagerToolType.browser;
-  tools: BrowserApiToolMetadata | BrowserApiToolMetadata[];
+  tools: BrowserToolWithOrigin | BrowserToolWithOrigin[];
 }
 
 export type AddToolInput = ExecutableToolInput | BrowserToolInput;
@@ -44,6 +47,12 @@ export type AddToolInput = ExecutableToolInput | BrowserToolInput;
  * Handles both static and dynamic tools with LRU eviction for dynamic tools.
  */
 export interface ToolManager {
+  /**
+   * Sets the event emitter to use for all tools added to this manager.
+   * Should be called once per run before adding tools.
+   */
+  setEventEmitter(eventEmitter: AgentEventEmitterFn): void;
+
   /**
    * Adds tools to the tool manager.
    * Supports both executable tools and browser API tools.
@@ -73,9 +82,20 @@ export interface ToolManager {
   getToolIdMapping(): Map<string, string>;
 
   /**
+   * Returns the origin for an internal tool ID, if known.
+   */
+  getToolOrigin(toolId: string): ToolOrigin | undefined;
+
+  /**
    * Gets the internal tool IDs of all dynamic tools currently in the tool manager.
    * Returns internal tool IDs (not LangChain names) for persistence.
    * @returns array of internal tool IDs
    */
   getDynamicToolIds(): string[];
+
+  /**
+   * Gets the summarizer function for a tool by its internal tool ID.
+   * Returns undefined if the tool is not found or has no summarizer.
+   */
+  getSummarizer(toolId: string): ToolReturnSummarizerFn | undefined;
 }

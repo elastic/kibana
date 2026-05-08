@@ -202,6 +202,7 @@ export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string
     sort: timelineQuerySortField,
     startDate: start,
     timerangeKind,
+    dateRangeField: experimentalDataView?.getTimeField()?.name ?? '@timestamp',
   });
 
   useEffect(() => {

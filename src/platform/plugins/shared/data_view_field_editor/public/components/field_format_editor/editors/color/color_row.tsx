@@ -134,7 +134,7 @@ export const ColorRow = ({
           button={
             <EuiButton
               minWidth="false"
-              iconType="lettering"
+              iconType="text"
               color="text"
               onClick={() => {}}
               aria-label={i18n.translate('indexPatternFieldEditor.color.letteringButtonAriaLabel', {
@@ -148,7 +148,7 @@ export const ColorRow = ({
                 aria-label={text}
                 color={text}
                 size="l"
-                type="stopFilled"
+                type="stopFill"
                 data-test-subj="buttonColorSwatchIcon"
               />
             </EuiButton>
@@ -171,7 +171,7 @@ export const ColorRow = ({
           button={
             <EuiButton
               minWidth="false"
-              iconType="color"
+              iconType="paintBucket"
               color="text"
               onClick={() => {}}
               aria-label={i18n.translate('indexPatternFieldEditor.color.letteringButtonAriaLabel', {
@@ -185,7 +185,7 @@ export const ColorRow = ({
                 aria-label={background}
                 color={background}
                 size="l"
-                type="stopFilled"
+                type="stopFill"
                 data-test-subj="buttonColorSwatchIcon"
               />
             </EuiButton>

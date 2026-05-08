@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
+import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import { SecurityCellActions, CellActionsMode } from '../cell_actions';
 
 interface Props {
   entityName: string;
@@ -20,7 +21,7 @@ export const EntityComponent: React.FC<Props> = ({ entityName, entityValue }) =>
         field: entityName,
         value: entityValue,
       }}
-      triggerId={SecurityCellActionsTrigger.DEFAULT}
+      triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
       mode={CellActionsMode.HOVER_DOWN}
       visibleCellActions={5}
     >

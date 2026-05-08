@@ -83,7 +83,7 @@ describe('createHandler', () => {
       });
     });
 
-    it('should use null for optional parameters without defaults', async () => {
+    it('should exclude null parameters from ES query', async () => {
       const config: EsqlToolConfig = {
         query: 'FROM users | WHERE status == ?status',
         params: {
@@ -97,11 +97,48 @@ describe('createHandler', () => {
 
       await handler(llmParams, mockContext as any);
 
-      // Verify ES|QL was called with null for missing parameter
+      // Null parameters should be filtered out, not sent to Elasticsearch
       expect(mockEsClient.asCurrentUser.esql.query).toHaveBeenCalledWith({
         query: 'FROM users | WHERE status == ?status',
-        params: [{ status: 'active' }, { name: null }],
+        params: [{ status: 'active' }],
       });
+    });
+
+    it('should omit params entirely when all parameters are null', async () => {
+      const config: EsqlToolConfig = {
+        query: 'FROM users | LIMIT 10',
+        params: {
+          name: { type: 'string', description: 'User name', optional: true }, // No default
+        },
+      };
+
+      const handler = createHandler(config);
+      const llmParams = {}; // LLM omits all params
+
+      await handler(llmParams, mockContext as any);
+
+      // When all params are null, params should not be sent at all
+      expect(mockEsClient.asCurrentUser.esql.query).toHaveBeenCalledWith({
+        query: 'FROM users | LIMIT 10',
+      });
+    });
+
+    it('should throw an error when required parameters are missing', async () => {
+      const config: EsqlToolConfig = {
+        query: 'FROM users | WHERE status == ?status',
+        params: {
+          status: { type: 'string', description: 'User status' }, // Required (no optional flag)
+        },
+      };
+
+      const handler = createHandler(config);
+      const llmParams = {}; // LLM omits required param
+
+      await expect(handler(llmParams, mockContext as any)).rejects.toThrow(
+        'Missing required ESQL tool parameters: status'
+      );
+
+      expect(mockEsClient.asCurrentUser.esql.query).not.toHaveBeenCalled();
     });
   });
 });

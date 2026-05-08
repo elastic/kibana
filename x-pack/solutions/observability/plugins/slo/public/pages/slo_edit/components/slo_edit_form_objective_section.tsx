@@ -283,6 +283,9 @@ export function SloEditFormObjectiveSection() {
                     min={0.001}
                     max={99.999}
                     step={0.001}
+                    aria-label={i18n.translate('xpack.slo.sloEdit.targetSlo.ariaLabel', {
+                      defaultMessage: 'Target / SLO (%)',
+                    })}
                     onChange={(event) => onChange(event.target.value)}
                   />
                 )}

@@ -254,6 +254,7 @@
                 "lineNumber": 137,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "CellActionCompatibilityContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -454,7 +455,7 @@
           {
             "parentPluginId": "@kbn/cell-actions",
             "id": "def-common.CellActionFactory.Unnamed",
-            "type": "Any",
+            "type": "Function",
             "tags": [],
             "label": "Unnamed",
             "description": [],
@@ -465,7 +466,35 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/cell-actions",
+                "id": "def-common.CellActionFactory.Unnamed.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "extend",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/cell-actions",
+                    "scope": "common",
+                    "docId": "kibKbnCellActionsPluginApi",
+                    "section": "def-common.CellActionExtend",
+                    "text": "CellActionExtend"
+                  },
+                  "<A>"
+                ],
+                "path": "src/platform/packages/shared/kbn-cell-actions/src/actions/types.ts",
+                "lineNumber": 34,
+                "columnNumber": 21,
+                "deprecated": false,
+                "docsReferencedTypeName": "CellActionExtend",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/cell-actions",
@@ -521,6 +550,7 @@
                 "lineNumber": 36,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -953,7 +983,7 @@
           "CellActionsMode",
           "; showActionTooltips?: boolean | undefined; visibleCellActions?: number | undefined; disabledActionTypes?: string[] | undefined; metadata?: Metadata | undefined; className?: string | undefined; extraActionsIconType?: ",
           "IconType",
-          " | undefined; extraActionsColor?: \"text\" | \"primary\" | \"neutral\" | \"success\" | \"accent\" | \"accentSecondary\" | \"warning\" | \"risk\" | \"danger\" | undefined; } & { children?: React.ReactNode; }"
+          " | undefined; extraActionsColor?: \"text\" | \"success\" | \"warning\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | \"neutral\" | \"risk\" | undefined; } & { children?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
         "lineNumber": 51,
@@ -1101,6 +1131,7 @@
             "lineNumber": 140,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "CellActionCompatibilityContext",
             "trackAdoption": false
           }
         ],
@@ -1165,6 +1196,7 @@
             "lineNumber": 51,
             "columnNumber": 6,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],

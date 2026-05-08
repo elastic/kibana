@@ -87,7 +87,7 @@ export function AttachmentFilters({
 
   const typeFilterButton = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       onClick={toggleTypePopover}
       isSelected={isTypePopoverOpen}
       numFilters={ATTACHMENT_TYPE_OPTIONS.length}
@@ -102,7 +102,7 @@ export function AttachmentFilters({
 
   const tagsFilterButton = (
     <EuiFilterButton
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       badgeColor="accent"
       onClick={toggleTagsPopover}
       isSelected={isTagsPopoverOpen}

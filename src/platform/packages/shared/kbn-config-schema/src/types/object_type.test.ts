@@ -95,7 +95,7 @@ test('fails if key does not exist in schema', () => {
   };
 
   expect(() => type.validate(value)).toThrowErrorMatchingInlineSnapshot(
-    `"[bar]: definition for this key is missing"`
+    `"[bar]: Additional properties are not allowed ('bar' was unexpected)"`
   );
 });
 
@@ -358,7 +358,9 @@ test('unknowns = `allow` affects only own keys', () => {
         baz: 'baz',
       },
     })
-  ).toThrowErrorMatchingInlineSnapshot(`"[foo.baz]: definition for this key is missing"`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"[foo.baz]: Additional properties are not allowed ('baz' was unexpected)"`
+  );
 });
 
 test('does not allow unknown keys when unknowns = `forbid`', () => {
@@ -370,7 +372,9 @@ test('does not allow unknown keys when unknowns = `forbid`', () => {
     type.validate({
       bar: 'baz',
     })
-  ).toThrowErrorMatchingInlineSnapshot(`"[bar]: definition for this key is missing"`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"[bar]: Additional properties are not allowed ('bar' was unexpected)"`
+  );
 });
 
 test('allow and remove unknown keys when unknowns = `ignore`', () => {
@@ -421,7 +425,9 @@ test('unknowns = `ignore` respects local preferences in sub-keys', () => {
         baz: 'baz',
       },
     })
-  ).toThrowErrorMatchingInlineSnapshot(`"[foo.baz]: definition for this key is missing"`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `"[foo.baz]: Additional properties are not allowed ('baz' was unexpected)"`
+  );
 });
 
 describe('nested unknowns', () => {
@@ -458,7 +464,9 @@ describe('nested unknowns', () => {
           },
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"[myObj.foo.baz]: definition for this key is missing"`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[myObj.foo.baz]: Additional properties are not allowed ('baz' was unexpected)"`
+    );
   });
 
   test('does not allow unknown keys when unknowns = `forbid`', () => {
@@ -474,7 +482,9 @@ describe('nested unknowns', () => {
           bar: 'baz',
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"[myObj.bar]: definition for this key is missing"`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[myObj.bar]: Additional properties are not allowed ('bar' was unexpected)"`
+    );
   });
 
   test('allow and remove unknown keys when unknowns = `ignore`', () => {
@@ -540,7 +550,9 @@ describe('nested unknowns', () => {
           },
         },
       })
-    ).toThrowErrorMatchingInlineSnapshot(`"[myObj.foo.baz]: definition for this key is missing"`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[myObj.foo.baz]: Additional properties are not allowed ('baz' was unexpected)"`
+    );
   });
 
   test('parent `allow`, child `ignore` should be honored', () => {
@@ -789,7 +801,9 @@ describe('#extends', () => {
 
     expect(() => {
       extended.validate({ string: 'foo', number: 12 });
-    }).toThrowErrorMatchingInlineSnapshot(`"[number]: definition for this key is missing"`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"[number]: Additional properties are not allowed ('number' was unexpected)"`
+    );
 
     expect(() => {
       extended.validate({ string: 'foo' });
@@ -981,6 +995,8 @@ describe('#extendsDeep', () => {
     const forbidSchema = type.extendsDeep({ unknowns: 'forbid' });
     expect(() =>
       forbidSchema.validate({ test: { foo: 'test', bar: 'test' } })
-    ).toThrowErrorMatchingInlineSnapshot(`"[test.bar]: definition for this key is missing"`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[test.bar]: Additional properties are not allowed ('bar' was unexpected)"`
+    );
   });
 });

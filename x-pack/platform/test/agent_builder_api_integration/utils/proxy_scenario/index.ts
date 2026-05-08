@@ -10,4 +10,5 @@ export {
   setupAgentDirectError,
   setupAgentCallSearchToolWithEsqlThenAnswer,
   setupAgentCallSearchToolWithNoIndexSelectedThenAnswer,
+  setupAgentParallelToolCallsThenAnswer,
 } from './scenarios';

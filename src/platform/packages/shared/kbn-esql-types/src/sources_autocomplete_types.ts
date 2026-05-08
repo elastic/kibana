@@ -20,6 +20,8 @@ export interface ESQLSourceResult {
   name: string;
   hidden: boolean;
   title?: string;
+  description?: string;
+  links?: Array<{ label: string; url: string }>;
   dataStreams?: Array<{ name: string; title?: string }>;
   type?: string;
 }
@@ -38,4 +40,23 @@ export interface ResolveIndexResponse {
   indices?: ResolveIndexResponseItem[];
   aliases?: ResolveIndexResponseItem[];
   data_streams?: ResolveIndexResponseItem[];
+}
+
+export interface EsqlView {
+  name: string;
+  query: string;
+}
+
+export interface EsqlViewsResult {
+  views: EsqlView[];
+}
+
+export interface EsqlDataset {
+  dataset_id: string;
+  datasource: string;
+  resource: string;
+}
+
+export interface EsqlDatasetsResult {
+  datasets: EsqlDataset[];
 }

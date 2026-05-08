@@ -101,6 +101,9 @@ export const AGENT_MAPPINGS = {
         version: {
           type: 'keyword',
         },
+        type: {
+          type: 'keyword',
+        },
       },
     },
     default_api_key: {
@@ -370,6 +373,172 @@ export const AGENT_MAPPINGS = {
     // added to allow validation on status field
     status: {
       type: 'keyword',
+    },
+    sequence_num: {
+      type: 'integer',
+    },
+    capabilities: {
+      type: 'keyword',
+    },
+    identifying_attributes: {
+      properties: {
+        service: {
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+            version: {
+              type: 'keyword',
+            },
+            instance: {
+              properties: {
+                id: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    service: {
+      properties: {
+        name: {
+          type: 'keyword',
+        },
+        version: {
+          type: 'keyword',
+        },
+        instance: {
+          properties: {
+            id: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
+    non_identifying_attributes: {
+      properties: {
+        host: {
+          properties: {
+            arch: {
+              type: 'keyword',
+            },
+            name: {
+              type: 'keyword',
+            },
+          },
+        },
+        os: {
+          properties: {
+            type: {
+              type: 'keyword',
+            },
+            description: {
+              type: 'keyword',
+            },
+          },
+        },
+        elastic: {
+          properties: {
+            display: {
+              properties: {
+                name: {
+                  type: 'keyword',
+                },
+              },
+            },
+            collector: {
+              properties: {
+                group: {
+                  type: 'keyword',
+                },
+                group_name: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+        config: {
+          properties: {
+            description: {
+              type: 'keyword',
+            },
+          },
+        },
+        deployment: {
+          properties: {
+            environment: {
+              properties: {
+                name: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    host: {
+      properties: {
+        arch: {
+          type: 'keyword',
+        },
+        name: {
+          type: 'keyword',
+        },
+      },
+    },
+    os: {
+      properties: {
+        type: {
+          type: 'keyword',
+        },
+        description: {
+          type: 'keyword',
+        },
+      },
+    },
+    elastic: {
+      properties: {
+        display: {
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+          },
+        },
+        collector: {
+          properties: {
+            group: {
+              type: 'keyword',
+            },
+            group_name: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
+    config: {
+      properties: {
+        description: {
+          type: 'keyword',
+        },
+      },
+    },
+    deployment: {
+      properties: {
+        environment: {
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
     },
   },
 } as const;

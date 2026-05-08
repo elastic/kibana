@@ -19,7 +19,7 @@ export function SvlRuleDetailsPageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.getVisibleText('ruleDetailsTitle');
     },
     async getRuleType() {
-      return await testSubjects.getVisibleText('ruleTypeLabel');
+      return await testSubjects.getVisibleText('ruleSummaryRuleType');
     },
     async getAPIKeyOwner() {
       return await testSubjects.getVisibleText('apiKeyOwnerLabel');
@@ -95,21 +95,21 @@ export function SvlRuleDetailsPageProvider({ getService }: FtrProviderContext) {
     },
     async isViewInAppDisabled() {
       await retry.try(async () => {
-        const viewInAppButton = await testSubjects.find(`ruleDetails-viewInApp`);
+        const viewInAppButton = await testSubjects.find(`ruleDetails-viewInDiscover`);
         expect(await viewInAppButton.getAttribute('disabled')).to.eql('true');
       });
       return true;
     },
     async isViewInAppEnabled() {
       await retry.try(async () => {
-        const viewInAppButton = await testSubjects.find(`ruleDetails-viewInApp`);
+        const viewInAppButton = await testSubjects.find(`ruleDetails-viewInDiscover`);
         await new Promise((resolve) => {});
         expect(await viewInAppButton.getAttribute('disabled')).to.not.eql('true');
       });
       return true;
     },
     async clickViewInApp() {
-      return await testSubjects.click('ruleDetails-viewInApp');
+      return await testSubjects.click('ruleDetails-viewInDiscover');
     },
     async getNoOpAppTitle() {
       await retry.try(async () => {

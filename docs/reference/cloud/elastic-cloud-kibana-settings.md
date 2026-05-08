@@ -50,6 +50,10 @@ If you want to allow anonymous authentication in Kibana, these settings are supp
 ### Visualizations [ec_visualizations]
 
 
+#### Version 8.0+ [ec_vis_supported_versions_8_0_0]
+
+`vis_type_timelion.enable`
+:   For 8.0 version and later, set to `false` to disable Timelion vizualizations. **Default: `true`**
 
 #### Supported versions before 8.0.0 [ec_vis_supported_versions_before_8_0_0]
 
@@ -86,6 +90,14 @@ stack: ga 9.4+
 
 You can configure the following X-Pack settings from the Kibana **User Settings** editor.
 
+### Version 9.4+ [ec_version_9_4]
+```{applies_to}
+stack: ga 9.4
+```
+
+`xpack.securitySolution.maxEndpointScriptFileSize`
+:    The maximum file size in bytes for scripts uploaded to the Elastic Defend script library. Default is `26214400` (25MB).
+
 ### Version 9.3+ [ec_version_9_3]
 ```{applies_to}
 stack: ga 9.3
@@ -107,6 +119,9 @@ stack: ga 9.2
 
 `xpack.actions.email.recipient_allowlist`
 :    A list of allowed email recipient patterns (`to`, `cc`, or `bcc`) that can be used with email connectors. If you attempt to send an email to a recipient that does not match the allowed patterns, the action will fail. The failure message indicates that the email is not allowed.
+
+`xpack.securitySolution.disableEndpointRuleAutoInstall` {applies_to}`stack: ga 9.2.4+`
+:   Set to `true` to disable the automatic installation of Elastic Defend SIEM rules when a new Endpoint integration policy is created. Default is `false`.
 
 ### Version 9.1+ [ec_version_9_1]
 ```{applies_to}

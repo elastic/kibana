@@ -14,7 +14,7 @@
           "({ logViewKey, sourceIdKey, toastsService, urlStateStorage, }: LogViewUrlStateDependencies) => { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | null"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
-        "lineNumber": 65,
+        "lineNumber": 63,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -30,9 +30,10 @@
               "LogViewUrlStateDependencies"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
-            "lineNumber": 65,
+            "lineNumber": 63,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "LogViewUrlStateDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -49,8 +50,10 @@
         "description": [],
         "signature": [
           "({ logViewKey, sourceIdKey, toastsService, urlStateStorage, }: LogViewUrlStateDependencies) => ",
-          "InvokeCreator",
+          "CallbackActorLogic",
           "<",
+          "LogViewEvent",
+          ", ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -105,9 +108,7 @@
             "text": "LogViewContextWithError"
           },
           "), ",
-          "LogViewEvent",
-          ", any, any, ",
-          "LogViewEvent",
+          "EventObject",
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
@@ -121,15 +122,16 @@
             "id": "def-public.initializeFromUrl.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    logViewKey = defaultLogViewKey,\n    sourceIdKey = defaultLegacySourceIdKey,\n    toastsService,\n    urlStateStorage,\n  }",
+            "label": "{\n  logViewKey = defaultLogViewKey,\n  sourceIdKey = defaultLegacySourceIdKey,\n  toastsService,\n  urlStateStorage,\n}",
             "description": [],
             "signature": [
               "LogViewUrlStateDependencies"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
-            "lineNumber": 44,
-            "columnNumber": 4,
+            "lineNumber": 43,
+            "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "LogViewUrlStateDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -154,8 +156,10 @@
             "text": "IKbnUrlStateStorage"
           },
           "; logViewKey?: string | undefined; }) => ",
-          "InvokeCreator",
+          "ObservableActorLogic",
           "<",
+          "LogViewEvent",
+          ", ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -210,13 +214,11 @@
             "text": "LogViewContextWithError"
           },
           "), ",
-          "LogViewEvent",
-          ", any, any, ",
-          "LogViewEvent",
+          "EventObject",
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
-        "lineNumber": 101,
+        "lineNumber": 99,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -226,11 +228,11 @@
             "id": "def-public.listenForUrlChanges.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    urlStateStorage,\n    logViewKey = defaultLogViewKey,\n  }",
+            "label": "{\n  urlStateStorage,\n  logViewKey = defaultLogViewKey,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
-            "lineNumber": 105,
-            "columnNumber": 6,
+            "lineNumber": 102,
+            "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -251,8 +253,8 @@
                   }
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
-                "lineNumber": 106,
-                "columnNumber": 5,
+                "lineNumber": 103,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -267,8 +269,8 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
-                "lineNumber": 107,
-                "columnNumber": 5,
+                "lineNumber": 104,
+                "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -317,6 +319,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -355,6 +358,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -370,9 +374,11 @@
         "signature": [
           "React.FunctionComponent<React.PropsWithChildren<{ initialLogViewReference?: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined; logViews: ",
           "ILogViewsClient",
-          "; useDevTools?: boolean | undefined; initializeFromUrl?: ",
-          "InvokeCreator",
+          "; initializeFromUrl?: ",
+          "CallbackActorLogic",
           "<",
+          "LogViewEvent",
+          ", ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -427,10 +433,8 @@
             "text": "LogViewContextWithError"
           },
           "), ",
-          "LogViewEvent",
-          ", any, any, ",
-          "LogViewEvent",
-          "> | undefined; updateContextInUrl?: ((context: ",
+          "EventObject",
+          "> | undefined; updateContextInUrl?: (({ context }: { context: ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -484,11 +488,13 @@
             "section": "def-public.LogViewContextWithError",
             "text": "LogViewContextWithError"
           },
-          "), _event: ",
+          "); event: ",
           "LogViewEvent",
-          ") => void) | undefined; listenForUrlChanges?: ",
-          "InvokeCreator",
+          "; }) => void) | undefined; listenForUrlChanges?: ",
+          "ObservableActorLogic",
           "<",
+          "LogViewEvent",
+          ", ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -543,13 +549,11 @@
             "text": "LogViewContextWithError"
           },
           "), ",
-          "LogViewEvent",
-          ", any, any, ",
-          "LogViewEvent",
+          "EventObject",
           "> | undefined; }>>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
-        "lineNumber": 212,
+        "lineNumber": 218,
         "columnNumber": 15,
         "deprecated": false,
         "trackAdoption": false,
@@ -569,6 +573,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -614,7 +619,7 @@
           "EuiButtonEmptyPropsForAnchor",
           "> & ",
           "CommonEuiButtonEmptyProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"size\" | \"href\" | \"flush\"> & { testSubject: string; } & React.RefAttributes<{}>>"
+          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement>), \"size\" | \"flush\" | \"href\"> & { testSubject: string; } & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/index.ts",
         "lineNumber": 39,
@@ -637,6 +642,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],
@@ -650,7 +656,7 @@
         "label": "updateContextInUrl",
         "description": [],
         "signature": [
-          "({ urlStateStorage, logViewKey }: LogViewUrlStateDependencies) => (context: ",
+          "({ urlStateStorage, logViewKey }: LogViewUrlStateDependencies) => ({ context }: { context: ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -704,9 +710,9 @@
             "section": "def-public.LogViewContextWithError",
             "text": "LogViewContextWithError"
           },
-          "), _event: ",
+          "); event: ",
           "LogViewEvent",
-          ") => void"
+          "; }) => void"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/url_state_storage_service.ts",
         "lineNumber": 31,
@@ -728,6 +734,7 @@
             "lineNumber": 32,
             "columnNumber": 4,
             "deprecated": false,
+            "docsReferencedTypeName": "LogViewUrlStateDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -743,11 +750,13 @@
         "label": "useLogView",
         "description": [],
         "signature": [
-          "({ initialLogViewReference, logViews, useDevTools, initializeFromUrl, updateContextInUrl, listenForUrlChanges, }: { initialLogViewReference?: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined; logViews: ",
+          "({ initialLogViewReference, logViews, initializeFromUrl, updateContextInUrl, listenForUrlChanges, }: { initialLogViewReference?: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } | undefined; logViews: ",
           "ILogViewsClient",
-          "; useDevTools?: boolean | undefined; initializeFromUrl?: ",
-          "InvokeCreator",
+          "; initializeFromUrl?: ",
+          "CallbackActorLogic",
           "<",
+          "LogViewEvent",
+          ", ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -802,10 +811,8 @@
             "text": "LogViewContextWithError"
           },
           "), ",
-          "LogViewEvent",
-          ", any, any, ",
-          "LogViewEvent",
-          "> | undefined; updateContextInUrl?: ((context: ",
+          "EventObject",
+          "> | undefined; updateContextInUrl?: (({ context }: { context: ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -859,11 +866,13 @@
             "section": "def-public.LogViewContextWithError",
             "text": "LogViewContextWithError"
           },
-          "), _event: ",
+          "); event: ",
           "LogViewEvent",
-          ") => void) | undefined; listenForUrlChanges?: ",
-          "InvokeCreator",
+          "; }) => void) | undefined; listenForUrlChanges?: ",
+          "ObservableActorLogic",
           "<",
+          "LogViewEvent",
+          ", ",
           "LogViewContextWithReference",
           " | (",
           "LogViewContextWithReference",
@@ -918,80 +927,10 @@
             "text": "LogViewContextWithError"
           },
           "), ",
-          "LogViewEvent",
-          ", any, any, ",
-          "LogViewEvent",
+          "EventObject",
           "> | undefined; }) => { logViewStateService: ",
-          "Interpreter",
-          "<",
-          "LogViewContextWithReference",
-          " | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          " & ",
-          "LogViewContextWithStatus",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          "), any, ",
-          "LogViewEvent",
-          ", ",
-          "LogViewTypestate",
-          ", ",
-          "ResolveTypegenMeta",
-          "<",
-          "TypegenDisabled",
-          ", ",
-          "LogViewEvent",
-          ", ",
-          "BaseActionObject",
-          ", ",
-          "ServiceMap",
-          ">>; logViewStateNotifications: ",
+          "Actor",
+          "<any>; logViewStateNotifications: ",
           {
             "pluginId": "@kbn/xstate-utils",
             "scope": "public",
@@ -1063,174 +1002,10 @@
             "section": "def-public.LogViewNotificationEvent",
             "text": "LogViewNotificationEvent"
           },
-          ">; hasFailedLoading: boolean; hasFailedLoadingLogView: boolean; hasFailedLoadingLogViewStatus: boolean; hasFailedResolvingLogView: boolean; latestLoadLogViewFailures: Error[]; isUninitialized: boolean; isLoading: boolean; isLoadingLogView: boolean; isLoadingLogViewStatus: boolean; isResolvingLogView: boolean; logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }; logView: ({ id: string; origin: \"inline\" | \"internal\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }) | undefined; resolvedLogView: ",
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.ResolvedLogView",
-            "text": "ResolvedLogView"
-          },
-          "<",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          "> | undefined; logViewStatus: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; } | undefined; derivedDataView: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          " | undefined; isInlineLogView: boolean; isPersistedLogView: boolean; load: () => ",
-          "State",
-          "<",
-          "LogViewContextWithReference",
-          " | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          " & ",
-          "LogViewContextWithStatus",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          "), ",
-          "LogViewEvent",
-          ", any, ",
-          "LogViewTypestate",
-          ", ",
-          "ResolveTypegenMeta",
-          "<",
-          "TypegenDisabled",
-          ", ",
-          "LogViewEvent",
-          ", ",
-          "BaseActionObject",
-          ", ",
-          "ServiceMap",
-          ">>; retry: () => ",
-          "State",
-          "<",
-          "LogViewContextWithReference",
-          " | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          " & ",
-          "LogViewContextWithStatus",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          "), ",
-          "LogViewEvent",
-          ", any, ",
-          "LogViewTypestate",
-          ", ",
-          "ResolveTypegenMeta",
-          "<",
-          "TypegenDisabled",
-          ", ",
-          "LogViewEvent",
-          ", ",
-          "BaseActionObject",
-          ", ",
-          "ServiceMap",
-          ">>; update: (logViewAttributes: Partial<{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }>) => Promise<void>; changeLogViewReference: (logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }) => void; revertToDefaultLogView: () => void; }"
+          ">; hasFailedLoading: boolean; hasFailedLoadingLogView: any; hasFailedLoadingLogViewStatus: any; hasFailedResolvingLogView: any; latestLoadLogViewFailures: any[]; isUninitialized: any; isLoading: any; isLoadingLogView: any; isLoadingLogViewStatus: any; isResolvingLogView: any; logViewReference: any; logView: any; resolvedLogView: any; logViewStatus: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; } | undefined; derivedDataView: any; isInlineLogView: boolean; isPersistedLogView: boolean; load: () => void; retry: () => void; update: (logViewAttributes: Partial<{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }>) => Promise<void>; changeLogViewReference: (logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }) => void; revertToDefaultLogView: () => void; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1240,7 +1015,7 @@
             "id": "def-public.useLogView.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  initialLogViewReference,\n  logViews,\n  useDevTools = isDevMode(),\n  initializeFromUrl,\n  updateContextInUrl,\n  listenForUrlChanges,\n}",
+            "label": "{\n  initialLogViewReference,\n  logViews,\n  initializeFromUrl,\n  updateContextInUrl,\n  listenForUrlChanges,\n}",
             "description": [],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
             "lineNumber": 33,
@@ -1282,30 +1057,16 @@
               },
               {
                 "parentPluginId": "logsShared",
-                "id": "def-public.useLogView.$1.useDevTools",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "useDevTools",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
-                "lineNumber": 36,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "logsShared",
                 "id": "def-public.useLogView.$1.initializeFromUrl",
-                "type": "Function",
+                "type": "Object",
                 "tags": [],
                 "label": "initializeFromUrl",
                 "description": [],
                 "signature": [
-                  "InvokeCreator",
+                  "CallbackActorLogic",
                   "<",
+                  "LogViewEvent",
+                  ", ",
                   "LogViewContextWithReference",
                   " | (",
                   "LogViewContextWithReference",
@@ -1360,13 +1121,11 @@
                     "text": "LogViewContextWithError"
                   },
                   "), ",
-                  "LogViewEvent",
-                  ", any, any, ",
-                  "LogViewEvent",
+                  "EventObject",
                   "> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
-                "lineNumber": 37,
+                "lineNumber": 36,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1379,7 +1138,7 @@
                 "label": "updateContextInUrl",
                 "description": [],
                 "signature": [
-                  "((context: ",
+                  "(({ context }: { context: ",
                   "LogViewContextWithReference",
                   " | (",
                   "LogViewContextWithReference",
@@ -1433,12 +1192,12 @@
                     "section": "def-public.LogViewContextWithError",
                     "text": "LogViewContextWithError"
                   },
-                  "), _event: ",
+                  "); event: ",
                   "LogViewEvent",
-                  ") => void) | undefined"
+                  "; }) => void) | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
-                "lineNumber": 38,
+                "lineNumber": 37,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1446,13 +1205,15 @@
               {
                 "parentPluginId": "logsShared",
                 "id": "def-public.useLogView.$1.listenForUrlChanges",
-                "type": "Function",
+                "type": "Object",
                 "tags": [],
                 "label": "listenForUrlChanges",
                 "description": [],
                 "signature": [
-                  "InvokeCreator",
+                  "ObservableActorLogic",
                   "<",
+                  "LogViewEvent",
+                  ", ",
                   "LogViewContextWithReference",
                   " | (",
                   "LogViewContextWithReference",
@@ -1507,13 +1268,11 @@
                     "text": "LogViewContextWithError"
                   },
                   "), ",
-                  "LogViewEvent",
-                  ", any, any, ",
-                  "LogViewEvent",
+                  "EventObject",
                   "> | undefined"
                 ],
                 "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
-                "lineNumber": 39,
+                "lineNumber": 38,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -1533,76 +1292,8 @@
         "description": [],
         "signature": [
           "() => { logViewStateService: ",
-          "Interpreter",
-          "<",
-          "LogViewContextWithReference",
-          " | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          " & ",
-          "LogViewContextWithStatus",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          "), any, ",
-          "LogViewEvent",
-          ", ",
-          "LogViewTypestate",
-          ", ",
-          "ResolveTypegenMeta",
-          "<",
-          "TypegenDisabled",
-          ", ",
-          "LogViewEvent",
-          ", ",
-          "BaseActionObject",
-          ", ",
-          "ServiceMap",
-          ">>; logViewStateNotifications: ",
+          "Actor",
+          "<any>; logViewStateNotifications: ",
           {
             "pluginId": "@kbn/xstate-utils",
             "scope": "public",
@@ -1674,174 +1365,10 @@
             "section": "def-public.LogViewNotificationEvent",
             "text": "LogViewNotificationEvent"
           },
-          ">; hasFailedLoading: boolean; hasFailedLoadingLogView: boolean; hasFailedLoadingLogViewStatus: boolean; hasFailedResolvingLogView: boolean; latestLoadLogViewFailures: Error[]; isUninitialized: boolean; isLoading: boolean; isLoadingLogView: boolean; isLoadingLogViewStatus: boolean; isResolvingLogView: boolean; logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }; logView: ({ id: string; origin: \"inline\" | \"internal\" | \"stored\" | \"infra-source-stored\" | \"infra-source-internal\" | \"infra-source-fallback\"; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; } & { updatedAt?: number | undefined; version?: string | undefined; }) | undefined; resolvedLogView: ",
-          {
-            "pluginId": "logsShared",
-            "scope": "common",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-common.ResolvedLogView",
-            "text": "ResolvedLogView"
-          },
-          "<",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          "> | undefined; logViewStatus: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; } | undefined; derivedDataView: ",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          " | undefined; isInlineLogView: boolean; isPersistedLogView: boolean; load: () => ",
-          "State",
-          "<",
-          "LogViewContextWithReference",
-          " | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          " & ",
-          "LogViewContextWithStatus",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          "), ",
-          "LogViewEvent",
-          ", any, ",
-          "LogViewTypestate",
-          ", ",
-          "ResolveTypegenMeta",
-          "<",
-          "TypegenDisabled",
-          ", ",
-          "LogViewEvent",
-          ", ",
-          "BaseActionObject",
-          ", ",
-          "ServiceMap",
-          ">>; retry: () => ",
-          "State",
-          "<",
-          "LogViewContextWithReference",
-          " | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithResolvedLogView",
-            "text": "LogViewContextWithResolvedLogView"
-          },
-          " & ",
-          "LogViewContextWithStatus",
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          ") | (",
-          "LogViewContextWithReference",
-          " & ",
-          "LogViewContextWithLogView",
-          " & ",
-          {
-            "pluginId": "logsShared",
-            "scope": "public",
-            "docId": "kibLogsSharedPluginApi",
-            "section": "def-public.LogViewContextWithError",
-            "text": "LogViewContextWithError"
-          },
-          "), ",
-          "LogViewEvent",
-          ", any, ",
-          "LogViewTypestate",
-          ", ",
-          "ResolveTypegenMeta",
-          "<",
-          "TypegenDisabled",
-          ", ",
-          "LogViewEvent",
-          ", ",
-          "BaseActionObject",
-          ", ",
-          "ServiceMap",
-          ">>; update: (logViewAttributes: Partial<{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }>) => Promise<void>; changeLogViewReference: (logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }) => void; revertToDefaultLogView: () => void; }"
+          ">; hasFailedLoading: boolean; hasFailedLoadingLogView: any; hasFailedLoadingLogViewStatus: any; hasFailedResolvingLogView: any; latestLoadLogViewFailures: any[]; isUninitialized: any; isLoading: any; isLoadingLogView: any; isLoadingLogViewStatus: any; isResolvingLogView: any; logViewReference: any; logView: any; resolvedLogView: any; logViewStatus: { index: \"unknown\" | \"missing\" | \"empty\" | \"available\"; } | undefined; derivedDataView: any; isInlineLogView: boolean; isPersistedLogView: boolean; load: () => void; retry: () => void; update: (logViewAttributes: Partial<{ name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }>) => Promise<void>; changeLogViewReference: (logViewReference: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; } | { type: \"kibana_advanced_setting\"; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }) => void; revertToDefaultLogView: () => void; }"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/hooks/use_log_view.ts",
-        "lineNumber": 212,
+        "lineNumber": 218,
         "columnNumber": 32,
         "deprecated": false,
         "trackAdoption": false,
@@ -2191,7 +1718,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => Promise<void>; getExportHandler: (options: Omit<",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>) => Promise<void>; getExportHandler: (options: Omit<",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -2199,7 +1734,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
               "IntlShape",
               ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
               {
@@ -2209,7 +1752,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -2245,17 +1796,15 @@
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly registerTrigger: (trigger: ",
+              "{ readonly getTrigger: (triggerId: string) => ",
               {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
-              "TriggerContract",
-              "<object>; readonly registerAction: <Context extends object>(definition: ",
+              "; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -2263,31 +1812,7 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<Context, {}>) => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.Action",
-                "text": "Action"
-              },
-              "<Context, object>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
-              },
-              "<any, {}>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              "<Context, {}>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -2327,7 +1852,7 @@
                 "section": "def-public.FrequentCompatibilityChangeAction",
                 "text": "FrequentCompatibilityChangeAction"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object, alwaysShowPopup?: boolean | undefined) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               "UiActionsService",
               "; }"
             ],
@@ -2353,7 +1878,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"register\" | \"init\"> & { deserialize: ",
+              ", \"init\" | \"register\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
@@ -2501,11 +2026,11 @@
               "MlJob",
               ">[] | undefined; estimateModelMemory?: boolean | undefined; }): Promise<",
               "DataRecognizerConfigResponse",
-              ">; getVisualizerFieldHistograms({ indexPattern, query, fields, samplerShardSize, runtimeMappings, }: { indexPattern: string; query: any; fields: ",
+              ">; getVisualizerFieldHistograms({ indexPattern, query, fields, samplerShardSize, runtimeMappings, projectRouting, }: { indexPattern: string; query: any; fields: ",
               "FieldHistogramRequestConfig",
               "[]; samplerShardSize?: number | undefined; runtimeMappings?: ",
               "MappingRuntimeFields",
-              " | undefined; }): Promise<any>; calendars(obj?: { calendarId?: string | undefined; calendarIds?: string[] | undefined; } | undefined): Promise<",
+              " | undefined; projectRouting?: string | undefined; }): Promise<any>; calendars(obj?: { calendarId?: string | undefined; calendarIds?: string[] | undefined; } | undefined): Promise<",
               "MlCalendar",
               "[]>; addCalendar(obj: ",
               "MlCalendar",
@@ -2521,11 +2046,11 @@
               "MlAnalysisConfig",
               "; indexPattern: string; query: any; timeFieldName: string; earliestMs: number; latestMs: number; }): ",
               "Observable",
-              "<{ modelMemoryLimit: string; }>; getCardinalityOfFields({ index, fieldNames, query, timeFieldName, earliestMs, latestMs, }: { index: string; fieldNames: string[]; query: any; timeFieldName: string; earliestMs: number; latestMs: number; }): Promise<any>; getTimeFieldRange({ index, timeFieldName, query, runtimeMappings, indicesOptions, allowFutureTime, }: { index: string; timeFieldName?: string | undefined; query: any; runtimeMappings?: ",
+              "<{ modelMemoryLimit: string; }>; getCardinalityOfFields({ index, fieldNames, query, timeFieldName, earliestMs, latestMs, }: { index: string; fieldNames: string[]; query: any; timeFieldName: string; earliestMs: number; latestMs: number; }): Promise<any>; getTimeFieldRange({ index, timeFieldName, query, runtimeMappings, indicesOptions, allowFutureTime, projectRouting, }: { index: string; timeFieldName?: string | undefined; query: any; runtimeMappings?: ",
               "MappingRuntimeFields",
               " | undefined; indicesOptions?: ",
               "IndicesOptions",
-              " | undefined; allowFutureTime?: boolean | undefined; }): Promise<",
+              " | undefined; allowFutureTime?: boolean | undefined; projectRouting?: string | undefined; }): Promise<",
               "GetTimeFieldRangeResponse",
               ">; esSearch(obj: any): Promise<any>; esSearch$(obj: any): ",
               "Observable",
@@ -2641,7 +2166,7 @@
               "Filter",
               ">; updateFilter(filterId: string, description: string, addItems: string[], removeItems: string[]): Promise<",
               "Filter",
-              ">; deleteFilter(filterId: string): Promise<{ acknowledged: boolean; }>; }; results: { getAnomaliesTableData(jobIds: string[], criteriaFields: string[], influencers: Readonly<{ operation?: \"+\" | \"-\" | undefined; cardinality?: number | undefined; fieldValue?: string | number | undefined; fieldType?: ",
+              ">; deleteFilter(filterId: string): Promise<{ acknowledged: boolean; }>; }; results: { getAnomaliesTableData(jobIds: string[], criteriaFields: string[], influencers: Readonly<{ cardinality?: number | undefined; operation?: \"+\" | \"-\" | undefined; fieldValue?: string | number | undefined; fieldType?: ",
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
                 "scope": "common",
@@ -2707,7 +2232,7 @@
               "GetStoppedPartitionResult",
               ">; getDatafeedResultChartData(jobId: string, start: number, end: number): Promise<",
               "GetDatafeedResultsChartDataResult",
-              ">; getAnomalyCharts$(jobIds: string[], influencers: Readonly<{ operation?: \"+\" | \"-\" | undefined; cardinality?: number | undefined; fieldValue?: string | number | undefined; fieldType?: ",
+              ">; getAnomalyCharts$(jobIds: string[], influencers: Readonly<{ cardinality?: number | undefined; operation?: \"+\" | \"-\" | undefined; fieldValue?: string | number | undefined; fieldType?: ",
               {
                 "pluginId": "@kbn/ml-anomaly-utils",
                 "scope": "common",
@@ -2717,7 +2242,7 @@
               },
               " | undefined; } & { fieldName: string; }>[], threshold: Readonly<{ max?: number | undefined; } & { min: number; }>[], earliestMs: number, latestMs: number, timeBounds: { min?: number | undefined; max?: number | undefined; }, maxResults: number, numberOfPoints: number, influencersFilterQuery?: ",
               "QueryDslQueryContainer",
-              " | undefined): ",
+              "): ",
               "Observable",
               "<",
               "ExplorerChartsData",
@@ -2757,7 +2282,7 @@
               "CombinedJobWithStats",
               "[]>; groups(): Promise<",
               "Group",
-              "[]>; updateGroups(updatedJobs: { jobId: string; groups: string[]; }[]): Promise<any>; forceStartDatafeeds(datafeedIds: string[], start: string, end: string): Promise<any>; stopDatafeeds(datafeedIds: string[]): Promise<any>; deleteJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined, deleteAlertingRules?: boolean | undefined): Promise<any>; closeJobs(jobIds: string[]): Promise<any>; resetJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined): Promise<",
+              "[]>; updateGroups(updatedJobs: { jobId: string; groups: string[]; }[]): Promise<any>; forceStartDatafeeds(datafeedIds: string[], start: string, end: string): Promise<any>; stopDatafeeds(datafeedIds: string[], closeJobs?: boolean | undefined): Promise<any>; deleteJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined, deleteAlertingRules?: boolean | undefined): Promise<any>; closeJobs(jobIds: string[]): Promise<any>; resetJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined): Promise<",
               "ResetJobsResponse",
               ">; forceStopAndCloseJob(jobId: string): Promise<{ success: boolean; }>; jobAuditMessages({ jobId, from, start, end, }: { jobId: string; from?: number | undefined; start?: string | undefined; end?: string | undefined; }): Promise<{ messages: ",
               "JobMessage",
@@ -2928,13 +2453,7 @@
               "<",
               "StartTrainedModelDeploymentResponse",
               ">; stopModelAllocation(modelId: string, deploymentsIds: string[], options?: { force: boolean; }): Promise<Record<string, { acknowledge: boolean; error?: ",
-              {
-                "pluginId": "@kbn/ml-error-utils",
-                "scope": "common",
-                "docId": "kibKbnMlErrorUtilsPluginApi",
-                "section": "def-common.ErrorType",
-                "text": "ErrorType"
-              },
+              "ErrorType",
               "; }>>; updateModelDeployment(modelId: string, deploymentId: string, params: ",
               "UpdateAllocationParams",
               "): Promise<",
@@ -2994,7 +2513,7 @@
         "label": "LogViewContextWithError",
         "description": [],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/types.ts",
-        "lineNumber": 36,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3010,7 +2529,7 @@
               "Error"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/types.ts",
-            "lineNumber": 37,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3026,7 +2545,7 @@
         "label": "LogViewContextWithResolvedLogView",
         "description": [],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/types.ts",
-        "lineNumber": 28,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3057,7 +2576,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/types.ts",
-            "lineNumber": 29,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3076,11 +2595,11 @@
         "label": "LogsOverviewProps",
         "description": [],
         "signature": [
-          "{ height?: ",
-          "Property",
-          ".Height<string | number> | undefined; timeRange: { start: string; end: string; } & { start: string; end: string; } & { start: string; end: string; } & { start: string; end: string; }; nonHighlightingFilters?: ",
+          "{ timeRange: { start: string; end: string; } & { start: string; end: string; } & { start: string; end: string; } & { start: string; end: string; }; nonHighlightingFilters?: ",
           "QueryDslQueryContainer",
-          "[] | undefined; logsSource?: ",
+          "[] | undefined; height?: ",
+          "Property",
+          ".Height<string | number> | undefined; logsSource?: ",
           {
             "pluginId": "@kbn/logs-overview",
             "scope": "public",
@@ -3181,7 +2700,7 @@
           ">"
         ],
         "path": "x-pack/platform/plugins/shared/logs_shared/public/observability_logs/log_view_state/src/types.ts",
-        "lineNumber": 161,
+        "lineNumber": 159,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3346,6 +2865,7 @@
               "lineNumber": 40,
               "columnNumber": 21,
               "deprecated": false,
+              "docsReferencedTypeName": "Omit",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -3437,6 +2957,7 @@
                 "lineNumber": 67,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogEntriesAdapter",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3456,6 +2977,7 @@
                 "lineNumber": 68,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Pick",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3512,6 +3034,7 @@
                 "lineNumber": 72,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogsSharedPluginRequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3529,6 +3052,7 @@
                 "lineNumber": 73,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogViewReference",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3546,6 +3070,7 @@
                 "lineNumber": 74,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogEntriesParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3603,6 +3128,7 @@
                 "lineNumber": 133,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogsSharedPluginRequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3763,6 +3289,7 @@
                 "lineNumber": 50,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogsSharedPluginRequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3780,6 +3307,7 @@
                 "lineNumber": 51,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogViewReference",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3797,6 +3325,7 @@
                 "lineNumber": 52,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogEntriesParams",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3854,6 +3383,7 @@
                 "lineNumber": 56,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogsSharedPluginRequestHandlerContext",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4042,6 +3572,7 @@
               "lineNumber": 28,
               "columnNumber": 35,
               "deprecated": false,
+              "docsReferencedTypeName": "UsageCollector",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -4158,6 +3689,7 @@
                 "lineNumber": 19,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4237,6 +3769,7 @@
                 "lineNumber": 27,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4316,6 +3849,7 @@
                 "lineNumber": 11,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "Error",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4468,6 +4002,7 @@
             "lineNumber": 11,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "UrlService",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4523,6 +4058,7 @@
             "lineNumber": 18,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "NodeLogsParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -4697,6 +4233,7 @@
             "lineNumber": 32,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "TraceLogsParams",
             "trackAdoption": false,
             "isRequired": true
           }

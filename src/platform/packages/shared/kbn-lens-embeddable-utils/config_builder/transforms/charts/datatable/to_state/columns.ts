@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ColumnState } from '@kbn/lens-common';
-import type { DatatableState } from '../../../../schema';
-import { fromColorMappingAPIToLensState, fromColorByValueAPIToLensState } from '../../../coloring';
-import { getAccessorName, isColorByValueColor, isColorMappingColor } from '../helpers';
+import type { DatatableConfig } from '../../../../schema';
+import {
+  fromColorMappingAPIToLensState,
+  fromColorByValueAPIToLensState,
+  isColorMappingColor,
+  isColorByValueColor,
+  isLegacyColorPalette,
+} from '../../../coloring';
+import { getAccessorName, applyColorToToColorMode } from '../helpers';
 import {
   METRIC_ACCESSOR_PREFIX,
   ROW_ACCESSOR_PREFIX,
@@ -17,13 +23,19 @@ import {
 } from '../constants';
 
 function buildColorProps(
-  config: DatatableState['metrics'][number] | NonNullable<DatatableState['rows']>[number]
+  config:
+    | NonNullable<DatatableConfig['metrics']>[number]
+    | NonNullable<DatatableConfig['rows']>[number]
 ): Partial<Pick<ColumnState, 'palette' | 'colorMapping' | 'colorMode'>> {
   if (!config.apply_color_to) return {};
-  const colorMode = config.apply_color_to === 'value' ? 'text' : 'cell';
+  const colorMode = applyColorToToColorMode(config.apply_color_to);
 
   if (isColorMappingColor(config.color)) {
-    return { colorMode, colorMapping: fromColorMappingAPIToLensState(config.color) };
+    const color = fromColorMappingAPIToLensState(config.color);
+    if (isLegacyColorPalette(color)) {
+      return { colorMode, palette: color.palette };
+    }
+    return { colorMode, colorMapping: color?.colorMapping };
   }
 
   if (isColorByValueColor(config.color)) {
@@ -34,7 +46,9 @@ function buildColorProps(
 }
 
 function buildCommonMetricRowState(
-  config: DatatableState['metrics'][number] | NonNullable<DatatableState['rows']>[number]
+  config:
+    | NonNullable<DatatableConfig['metrics']>[number]
+    | NonNullable<DatatableConfig['rows']>[number]
 ): Pick<
   ColumnState,
   'hidden' | 'alignment' | 'colorMode' | 'isTransposed' | 'palette' | 'colorMapping' | 'width'
@@ -48,7 +62,9 @@ function buildCommonMetricRowState(
   };
 }
 
-export function buildMetricsState(metrics: DatatableState['metrics']): ColumnState[] {
+export function buildMetricsState(metrics: DatatableConfig['metrics']): ColumnState[] {
+  if (!metrics) return [];
+
   return metrics.map((metric, index) => {
     const columnId = getAccessorName(METRIC_ACCESSOR_PREFIX, index);
 
@@ -66,7 +82,7 @@ export function buildMetricsState(metrics: DatatableState['metrics']): ColumnSta
   });
 }
 
-export function buildRowsState(rows: DatatableState['rows']): ColumnState[] {
+export function buildRowsState(rows: DatatableConfig['rows']): ColumnState[] {
   if (!rows) return [];
 
   return rows.map((row, index) => {
@@ -82,7 +98,7 @@ export function buildRowsState(rows: DatatableState['rows']): ColumnState[] {
 }
 
 export function buildSplitMetricsByState(
-  splitMetrics: DatatableState['split_metrics_by']
+  splitMetrics: DatatableConfig['split_metrics_by']
 ): ColumnState[] {
   if (!splitMetrics) return [];
 

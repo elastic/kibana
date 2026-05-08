@@ -111,7 +111,7 @@ export function TimeSliderPopoverContent({
           disableScreenReaderOutput
         >
           <EuiButtonIcon
-            iconType={isAnchored ? 'pinFilled' : 'pin'}
+            iconType={isAnchored ? 'pinFill' : 'pin'}
             onClick={() => {
               const nextIsAnchored = !isAnchored;
               if (nextIsAnchored) {

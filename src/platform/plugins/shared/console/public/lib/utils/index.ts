@@ -14,14 +14,12 @@ import type {
   RequestResult,
 } from '../../application/hooks/use_send_current_request/send_request';
 import type { DevToolsVariable } from '../../application/components';
+import { asArray } from './array_utils';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
 export function textFromRequest(request: { method: string; url: string; data: string | string[] }) {
-  let data = request.data;
-  if (typeof data !== 'string') {
-    data = data.join('\n');
-  }
+  const data = asArray(request.data).join('\n');
   return request.method + ' ' + request.url + '\n' + data;
 }
 
@@ -52,31 +50,6 @@ export function formatRequestBodyDoc(data: string[], indent: boolean) {
     changed,
     data: formattedData,
   };
-}
-
-// Regular expression to match different types of comments:
-// - Block comments, single and multiline (/* ... */)
-// - Single-line comments (// ...)
-// - Hash comments (# ...)
-export function hasComments(data: string) {
-  /*
-    1. (\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\/)
-       - (\/\*): Matches the start of a block comment
-       - [^*]*: Matches any number of characters that are NOT an asterisk (*), to avoid prematurely closing the comment.
-       - \*+: Matches one or more asterisks (*), which is part of the block comment closing syntax.
-       - (?:[^/*][^*]*\*+)*: This non-capturing group ensures that any characters between asterisks and slashes are correctly matched and prevents mismatching on nested or unclosed comments.
-       - \*\/: Matches the closing of a block comment
-
-    2. (\/\/.*)
-       - Matches single-line comments starting with '//'.
-       - .*: Matches any characters that follow until the end of the line.
-
-    3. (#.*)
-       - Matches single-line comments starting with a hash (#).
-       - .*: Matches any characters that follow until the end of the line.
-   */
-  const re = /(\/\*[^*]*\*+(?:[^/*][^*]*\*+)*\/)|(\/\/.*)|(#.*)/;
-  return re.test(data);
 }
 
 export function extractWarningMessages(warnings: string) {
@@ -124,10 +97,26 @@ export function splitOnUnquotedCommaSpace(s: string) {
 }
 
 /**
+ * Normalizes a URL string using the URL constructor so that comparisons
+ * are insensitive to trailing-slash differences and other minor formatting
+ * variations (e.g. default-port elision). Returns the original string when
+ * it cannot be parsed as a URL.
+ */
+export function normalizeUrl(url: string): string {
+  try {
+    return new URL(url).toString();
+  } catch {
+    return url;
+  }
+}
+
+/**
  *  Sorts the request data by statusCode in increasing order and
  *  returns the last one which will be rendered in network request status bar
  */
-export const getResponseWithMostSevereStatusCode = (requestData: RequestResult[] | null) => {
+export const getResponseWithMostSevereStatusCode = (
+  requestData: RequestResult[] | null | undefined
+) => {
   if (requestData) {
     return requestData
       .slice()

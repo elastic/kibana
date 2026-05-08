@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import { AI_VALUE_REPORT_LOCATOR } from '@kbn/deeplinks-analytics';
 import { encode } from '@kbn/rison';

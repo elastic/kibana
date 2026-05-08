@@ -4,11 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
-import { BaseStream } from '../base';
+import { z } from '@kbn/zod/v4';
+import type { BaseStream } from '../base';
 import { IngestBase, IngestBaseUpsertRequest } from './base';
-import type { ModelValidation } from '../validation/model_validation';
-import { joinValidation } from '../validation/model_validation';
 import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
 import { ClassicIngest, ClassicIngestUpsertRequest, ClassicStream } from './classic';
@@ -26,13 +24,43 @@ export namespace IngestStream {
     export type Model = WiredStream.Model | ClassicStream.Model;
   }
 
-  export const all: ModelValidation<BaseStream.Model, IngestStream.all.Model> = joinValidation(
-    BaseStream,
-    [
-      WiredStream as ModelValidation<BaseStream.Model, WiredStream.Model>,
-      ClassicStream as ModelValidation<BaseStream.Model, ClassicStream.Model>,
-    ]
-  );
+  const allDefinitionSchema = z.union([
+    WiredStream.Definition.right,
+    ClassicStream.Definition.right,
+  ]);
+  const allSourceSchema = z.union([WiredStream.Source.right, ClassicStream.Source.right]);
+  const allGetResponseSchema = z.union([
+    WiredStream.GetResponse.right,
+    ClassicStream.GetResponse.right,
+  ]);
+  const allUpsertRequestSchema = z.union([
+    WiredStream.UpsertRequest.right,
+    ClassicStream.UpsertRequest.right,
+  ]);
+
+  export const all: {
+    Definition: Validation<BaseStream.Model['Definition'], IngestStream.all.Definition>;
+    Source: Validation<BaseStream.Model['Definition'], IngestStream.all.Source>;
+    GetResponse: Validation<BaseStream.Model['GetResponse'], IngestStream.all.GetResponse>;
+    UpsertRequest: Validation<BaseStream.Model['UpsertRequest'], IngestStream.all.UpsertRequest>;
+  } = {
+    Definition: validation(
+      allDefinitionSchema as z.Schema<BaseStream.Model['Definition']>,
+      allDefinitionSchema
+    ),
+    Source: validation(
+      allSourceSchema as z.Schema<BaseStream.Model['Definition']>,
+      allSourceSchema
+    ),
+    GetResponse: validation(
+      allGetResponseSchema as z.Schema<BaseStream.Model['GetResponse']>,
+      allGetResponseSchema
+    ),
+    UpsertRequest: validation(
+      allUpsertRequestSchema as z.Schema<BaseStream.Model['UpsertRequest']>,
+      allUpsertRequestSchema
+    ),
+  };
 
   // Optimized implementation for Definition check - the fallback is a zod-based check
   all.Definition.is = (

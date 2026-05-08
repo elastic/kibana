@@ -6,9 +6,10 @@
  */
 
 import type { ToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
+import { ToolOrigin } from '@kbn/agent-builder-common/tools';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiText, EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../../../../hooks/use_navigation';
@@ -36,15 +37,25 @@ export const ToolCallDisplay: React.FC<ToolCallDisplayProps> = ({ step, icon, te
   const toolHref = createAgentBuilderUrl(appPaths.tools.details({ toolId }));
   const toolLinkId = `tool-link-${toolId}`;
 
+  const isLinkable = isRegistryTool(step);
+  const hasResults = step.results.length > 0;
+
   return (
-    <ThinkingItemLayout icon={icon} accordionContent={step.params} textColor={textColor}>
+    <ThinkingItemLayout
+      icon={icon}
+      accordionContent={step.params}
+      textColor={textColor}
+      loading={!hasResults}
+    >
       <EuiText size="s">
         <p role="status" aria-label={labels.toolCall}>
           <FormattedMessage
             id="xpack.agentBuilder.thinking.toolCallThinkingItem"
             defaultMessage="Calling tool {tool}"
             values={{
-              tool: (
+              tool: !isLinkable ? (
+                <EuiCode>{toolId}</EuiCode>
+              ) : (
                 <code>
                   <EuiLink
                     href={toolHref}
@@ -63,4 +74,10 @@ export const ToolCallDisplay: React.FC<ToolCallDisplayProps> = ({ step, icon, te
       </EuiText>
     </ThinkingItemLayout>
   );
+};
+
+const isRegistryTool = (step: ToolCallStep): boolean => {
+  // For legacy conversations, missing origin means we cannot distinguish
+  // registry vs inline; treat it as registry to keep tool details linkable.
+  return step.tool_origin === undefined || step.tool_origin === ToolOrigin.registry;
 };

@@ -55,7 +55,7 @@ describe('Breadcrumbs', () => {
       beforeEach(() => {
         jest.spyOn(discoverServiceMock.embeddableEditor, 'isByValueEditor').mockReturnValue(true);
         jest
-          .spyOn(discoverServiceMock.embeddableEditor, 'getByValueInput')
+          .spyOn(discoverServiceMock.embeddableEditor, 'getByValueTab')
           .mockReturnValue({ label: 'Mock Label' } as DiscoverSessionTab);
       });
 
@@ -82,7 +82,7 @@ describe('Breadcrumbs', () => {
       beforeEach(() => {
         jest.spyOn(discoverServiceMock.embeddableEditor, 'isByValueEditor').mockReturnValue(false);
         jest
-          .spyOn(discoverServiceMock.embeddableEditor, 'getByValueInput')
+          .spyOn(discoverServiceMock.embeddableEditor, 'getByValueTab')
           .mockReturnValue(undefined);
       });
 

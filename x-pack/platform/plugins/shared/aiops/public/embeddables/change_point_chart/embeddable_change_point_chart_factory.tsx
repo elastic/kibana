@@ -21,12 +21,12 @@ import {
   titleComparators,
   timeRangeComparators,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 
 import fastIsEqual from 'fast-deep-equal';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject, distinctUntilChanged, map, merge, skipWhile } from 'rxjs';
+import { BehaviorSubject, EMPTY, distinctUntilChanged, map, merge, skipWhile } from 'rxjs';
 import { getChangePointDetectionComponent } from '../../shared_components';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import {
@@ -35,6 +35,7 @@ import {
 } from './initialize_change_point_controls';
 import type { ChangePointEmbeddableApi } from './types';
 import type { ChangePointEmbeddableState } from '../../../common/embeddables/change_point_chart/types';
+import { canUseAiops } from '../../capabilities';
 
 export type EmbeddableChangePointChartType = typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
 
@@ -45,6 +46,7 @@ export const getChangePointChartEmbeddableFactory = (
     type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
+      canUseAiops(coreStart, true);
 
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const titleManager = initializeTitleManager(initialState);
@@ -166,9 +168,14 @@ export const getChangePointChartEmbeddableFactory = (
 
           const reload$ = useMemo(
             () =>
-              fetch$(api).pipe(
-                skipWhile((fetchContext) => !fetchContext.isReload),
-                map((fetchContext) => Date.now())
+              merge(
+                fetch$(api).pipe(
+                  skipWhile((fetchContext) => !fetchContext.isReload),
+                  map(() => Date.now())
+                ),
+                (pluginStart.cps?.cpsManager?.getProjectRouting$() ?? EMPTY).pipe(
+                  map(() => Date.now())
+                )
               ),
             []
           );

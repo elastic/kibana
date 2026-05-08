@@ -7,7 +7,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { COMMON_OBSERVABILITY_GROUPING } from '@kbn/observability-shared-plugin/common';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   IncompatibleActionError,
@@ -17,7 +17,7 @@ import type { SLOPublicPluginsStart } from '..';
 import {
   ADD_SLO_ALERTS_ACTION_ID,
   SLO_ALERTS_EMBEDDABLE_ID,
-} from '../embeddable/slo/alerts/constants';
+} from '../../common/embeddables/alerts/constants';
 import type { SLORepositoryClient } from '../types';
 import { openSloConfiguration } from '../embeddable/slo/alerts/slo_alerts_open_configuration';
 
