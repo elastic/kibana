@@ -169,10 +169,23 @@ export const createRemediationWorkflowToolGraph = async ({
       messages: state.messages,
     });
 
-    const serviceName = 'payment-service';
+    const lastAssistant = state.messages[state.messages.length - 1];
+    const [toolCall] = extractToolCalls(lastAssistant);
+    const args = (toolCall?.args ?? {}) as {
+      service_name?: string;
+      namespace?: string;
+      remediation_plan?: string[];
+    };
+    const planText = (args.remediation_plan ?? [])
+      .map((step, index) => `${index + 1}. ${step}`)
+      .join('\n');
 
     const confirmationMessage = dedent(`
-      If you continue, we'll run a remediation to **roll back ${serviceName}** and stabilize the unhealthy deployment revision.
+      We are about to run **Incident Remediation — Standard Coordination** for
+      **${args.service_name ?? 'unknown service'}** in **${args.namespace ?? 'default'}**.
+
+      Proposed plan:
+      ${planText || '_No plan derived._'}
 
       Do you want to proceed?
     `).trim();

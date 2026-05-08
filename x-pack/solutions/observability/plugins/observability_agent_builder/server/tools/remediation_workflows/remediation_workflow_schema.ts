@@ -21,6 +21,14 @@ const standardCoordinationFields = {
     .describe(
       'Short rationale recorded with this remediation closure (defaults in the workflow if omitted).'
     ),
+  remediation_plan: z
+    .array(z.string().min(1))
+    .min(1)
+    .describe(
+      'Ordered, brief remediation steps derived from the significant event `recommendations[]`. ' +
+        'Rephrase each recommendation into a single short imperative sentence (e.g. "Roll back payment-service to revision N-1"). ' +
+        'When any recommendation mentions rollback / revert / redeploy-previous, place that step first.'
+    ),
 };
 
 export const standardCoordinationRemediationToolSchema = z.object({
@@ -66,6 +74,11 @@ export const omitEmptyStrings = (params: Record<string, unknown>): Record<string
 export const mapRemediationParamsToWorkflowPayload = (
   params: RemediationWorkflowToolParams
 ): Record<string, unknown> => {
-  const { workflow_type: _workflowType, ...rest } = params;
-  return omitEmptyStrings(rest as Record<string, unknown>);
+  const { workflow_type: _workflowType, remediation_plan, ...rest } = params;
+
+  const planText = (remediation_plan ?? [])
+    .map((step, index) => `${index + 1}. ${step.trim()}`)
+    .join('\n');
+
+  return omitEmptyStrings({ ...rest, remediation_plan: planText });
 };

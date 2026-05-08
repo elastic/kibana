@@ -28,9 +28,13 @@ export const getRemediationWorkflowPrompt = ({
 
     ## Parameters
 
-    Infer from the user query: \`service_name\`, \`namespace\`, and \`reason\` (and any tool-specific fields). Use sensible defaults only when the user clearly implied them.
+    Infer from the user query: \`service_name\`, \`namespace\`, \`reason\`, and \`remediation_plan\` (and any tool-specific fields). Use sensible defaults only when the user clearly implied them.
 
-    If **any required field** for the chosen workflow cannot be inferred (e.g. missing \`service_name\`, \`namespace\`, or \`reason\` where the schema requires it), **do not** call a tool. Reply in natural language listing what is missing and ask the user to supply it.
+    ### Building \`remediation_plan\`
+
+    From the user remediation request, infer **3–6 ordered plan steps** to populate \`remediation_plan\`. Each step is **one short imperative sentence**. Source them from the significant event's \`recommendations[]\` referenced in the query — **do not invent** unrelated steps. If any recommendation mentions **rollback / revert / redeploy a previous version**, that step is **step 1**. Otherwise, paraphrase each recommendation into one short imperative step in the order given.
+
+    If **any required field** for the chosen workflow cannot be inferred (e.g. missing \`service_name\`, \`namespace\`, \`remediation_plan\`, or \`reason\` where the schema requires it), **do not** call a tool. Reply in natural language listing what is missing and ask the user to supply it.
 
     When you do call a tool, pass a single tool call with filled arguments matching that tool's schema.
   `);

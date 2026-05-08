@@ -13,9 +13,13 @@ You are helping after **Observability significant event** work has already produ
    - Use a **short** `time_range` (e.g. `now-2h` to `now` unless the user specified otherwise). Respect existing `LIMIT`; keep row counts small.
 3. **Complementary expansion** (next section) — when its conditions apply, you **must** run it before the final answer. This is **not** optional thoroughness; it is how you obtain **orthogonal** live data.
 4. **Synthesize**: prior findings from the document, delta from step 2, **new** facts from step 3 when you ran it, then prioritized remediation from `recommendations[]` adjusted only when tools justify it.
-5. **Remediation workflow (mandatory, always last)** — After steps 1–4, you **must** call **`observability.remediation_workflow`** **exactly once** in a **dedicated final tool round**, **alone**, **immediately before** your closing user-facing message. Do **not** batch it with step 2, step 3, complementary tools, or `ki_search`. Pass a single **`query`** string that clearly states **`service_name`**, **`namespace`**, and remediation **`reason`** / context. The server always runs **Incident Remediation — Standard Coordination** (records scope, coordination window, then closure). Phrase `query` so those fields are obvious from the text.
+5. **Remediation workflow (mandatory)** — After steps 1–4, you **must** call **`observability.remediation_workflow`** **exactly once** in a **dedicated tool round**, **alone**. Do **not** batch it with step 2, step 3, complementary tools, `ki_search`, or step 6. Pass a single **`query`** string that clearly states **`service_name`**, **`namespace`**, remediation **`reason`** / context, **and an ordered remediation plan derived from `recommendations[]`**. The server always runs **Incident Remediation — Standard Coordination** (records scope, coordination window, then closure). Phrase `query` so those fields — including the plan — are obvious from the text. If any `recommendations[]` entry mentions **rollback / revert / redeploy a previous revision**, place that as the **first** plan step. Otherwise, paraphrase each recommendation into one short imperative step, preserving the order from the document.
 
    Kibana will **prompt the user for confirmation** before the workflow runs (in-handler HITL, same pattern as `observability.elasticsearch`): the tool resolves the workflow, **interrupts** for confirmation, then **resumes** on the next agent step after the user accepts. Continue the conversation via **`/api/agent_builder/converse`** and supply the pending prompt id under `prompts` when the round is awaiting confirmation; in standalone / non-interactive mode the call is declined. Derive scope from the strongest validated evidence (`service.name`, `dependency_edges`, `recommendations[]`, APM/tool output, or user text). If `namespace` is absent from evidence, use **`default`** unless the event or user clearly names another; if the focal service is ambiguous, pick the single primary failing service from the attachment and reflect that choice in `query`.
+6. **Post-remediation verification (mandatory, always last)** — After step 5 has resolved (HITL accepted, declined, or the workflow returned a status), you **must** produce **two artifacts** in **one or two dedicated tool rounds** (never batched with step 5, step 2, complementary tools, or `ki_search`) so the user can decide whether anything has changed since the remediation action. Use the **same** evidence row that step 2 validated (prefer `confirmed: true`, else latest by `collected_at`); do **not** switch to a different evidence row here.
+
+   - **Area chart** — Call **`platform.core.create_visualization`** **exactly once** with `chartType: "XY"`. The natural-language `query` must request an **XY area chart** showing the significant-event signal **over time**, default window **`now-2h` to `now`**, with an appropriate time bucket and **no omitted empty intervals**. Pass the promoted evidence ES|QL **as intent only** — preserve data sources, filters, and `MATCH` semantics, but **adapt** it into a time-bucketed aggregation; do **not** paste it verbatim when it carries `LIMIT`, a sample-only window, or a non-trend shape. If the first attempt does not return a visualization, you may retry **once** with a tightened minimal XY time series (bucket by `@timestamp`, one `COUNT` measure, strict window).
+   - **Last-seen evidence query** — Run **`platform.core.execute_esql`** **exactly once** to surface a **single** last-seen `@timestamp` (or “no matches in window”). Either approach is acceptable: (a) **adapt** the evidence ES|QL into `STATS MAX(@timestamp)` while preserving filters / `MATCH` semantics and dropping `LIMIT`, **or** (b) **rerun** the original evidence ES|QL string against a narrow post-remediation window (e.g. `now-30m` to `now`) and take the latest row’s `@timestamp`. Pick one path; do not run both.
 
 ---
 
@@ -43,11 +47,9 @@ The document already carries `root_cause`, `summary`, `evidences`, `stream_names
 
 ---
 
-## Hard gates (token and precision)
-
 ### No parallel validation + expansion
 
-Do **not** batch the **first** validation **`execute_esql`** with **`ki_search`**, **`get_services`**, **`get_service_topology`**, **`get_traces`**, **`get_logs`**, or **`observability.remediation_workflow`** in the **same** tool round. Finish **attachment + one validation `execute_esql`** first; then run complementary tools in following round(s). **Exactly one** **`observability.remediation_workflow`** call is **terminal and mandatory** when this skill applies: run it **alone** in the **final** tool round (ladder step 5), after all other tool work for this skill is done.
+Do **not** batch the **first** validation **`execute_esql`** with **`ki_search`**, **`get_services`**, **`get_service_topology`**, **`get_traces`**, **`get_logs`**, **`observability.remediation_workflow`**, **`platform.core.create_visualization`**, or the step 6 last-seen **`platform.core.execute_esql`** in the **same** tool round. Finish **attachment + one validation `execute_esql`** first; then run complementary tools in following round(s). **Exactly one** **`observability.remediation_workflow`** call is **mandatory** when this skill applies: run it **alone** in its dedicated round (ladder step 5), after all other validation / complementary work. **Step 6 (post-remediation verification)** is the **terminal** phase — its **`platform.core.create_visualization`** and last-seen **`platform.core.execute_esql`** calls each run **alone** in their own tool round, **never batched** with `observability.remediation_workflow`, `ki_search`, complementary expansion tools, or each other.
 
 ### `ki_search` — narrow and late
 
@@ -88,7 +90,8 @@ Briefly list from the document: `title`, `summary`, `root_cause`, `rule_names`, 
 
 - **Cause story**: Start from **`root_cause`**, then add what validation and **complementary** tools changed or proved.
 - **Remediation**: Start from **`recommendations[]`**; cite new evidence from expansion where it supports or reprioritizes steps; mark human / out-of-band items when needed.
-- **Remediation workflow (required)**: Ladder step 5 **always** runs **`observability.remediation_workflow`** once — incorporate its result (workflow execution status / error) and the **`service_name`**, **`namespace`**, and rationale reflected in your **`query`** into your closing remediation summary.
+- **Remediation workflow (required)**: Ladder step 5 **always** runs **`observability.remediation_workflow`** once — incorporate its result (workflow execution status / error) and the **`service_name`**, **`namespace`**, and rationale reflected in your **`query`** into your closing remediation summary. Also report the **plan** that was approved and the workflow's **closure message** echoing that plan, so the user sees what was simulated.
+- **Post-remediation verification (required)**: Ladder step 6 **always** produces the area chart from **`platform.core.create_visualization`** and a single last-seen `@timestamp` (or "no matches in window") from **`platform.core.execute_esql`**. The closing user-facing message **must** explicitly surface all three — (a) the **workflow execution status** from step 5, (b) the **area chart** showing the post-remediation trend, and (c) the **last-seen `@timestamp`** — and use them to state whether anything has changed since the remediation action.
 
 ---
 
@@ -97,7 +100,11 @@ Briefly list from the document: `title`, `summary`, `root_cause`, `rule_names`, 
 - Do not run broad **`get_logs`** before the deduped evidence validation **`execute_esql`** when that query exists.
 - Do not ask which stream to use when `stream_names` is populated.
 - Do not fabricate results; tie claims to the attachment or tool output you ran.
-- Do not end the conversation without calling **exactly one** **`observability.remediation_workflow`** as the **last** tool round for this skill.
+- Do not end the conversation on the remediation workflow round; you **must** still complete **step 6** (post-remediation verification) afterwards.
+- Do not end the conversation without calling **exactly one** **`observability.remediation_workflow`** (step 5) **and** the **step 6** post-remediation verification — **`platform.core.create_visualization`** plus a last-seen **`platform.core.execute_esql`** — as the **final** tool rounds for this skill.
+- Do not paste the promoted evidence ES|QL **verbatim** into **`platform.core.create_visualization`**; adapt it into a time-bucketed aggregation. Do not run both last-seen variants (adapted `STATS MAX(@timestamp)` and a narrow rerun) — pick one.
+- Do not switch to a different evidence row in step 6 than the one validated in step 2.
+- Do not call **`observability.remediation_workflow`** without including a remediation plan derived from **`recommendations[]`** in the **`query`** (and prioritizing any rollback / revert / redeploy-previous step as step 1).
 
 ---
 
