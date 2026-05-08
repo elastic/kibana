@@ -25,9 +25,7 @@ export const isNextChrome = (featureFlags: FeatureFlagsBooleanReader): boolean =
   } catch {
     // sessionStorage may be unavailable
   }
-  // return featureFlags.getBooleanValue(NEXT_CHROME_FEATURE_FLAG_KEY, false);
-  // TODO: Remove this after integration branch manual testing is done
-  return true;
+  return featureFlags.getBooleanValue(NEXT_CHROME_FEATURE_FLAG_KEY, false);
 };
 
 export const toggleNextChrome = (featureFlags: FeatureFlagsBooleanReader): void => {
