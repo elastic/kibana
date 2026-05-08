@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { schema } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import { PluginStart } from '@kbn/core-di';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
@@ -19,18 +19,12 @@ import { ALERTING_V2_INTERNAL_SUGGEST_USER_PROFILES_API_PATH } from '../constant
 
 const ROUTE_AUTH_PRIVILEGES = [ALERTING_V2_API_PRIVILEGES.alerts.read] as const;
 
-const suggestUserProfilesBodySchema = z.object({
-  name: z.string().min(1).max(256).describe('Name fragment to search by.'),
-  size: z
-    .number()
-    .int()
-    .min(0)
-    .max(100)
-    .optional()
-    .describe('Maximum number of profiles to return. Defaults to 10'),
+const suggestUserProfilesBodySchema = schema.object({
+  name: schema.string(),
+  size: schema.maybe(schema.number({ min: 0, max: 100 })),
 });
 
-type SuggestUserProfilesBody = z.infer<typeof suggestUserProfilesBodySchema>;
+type SuggestUserProfilesBody = TypeOf<typeof suggestUserProfilesBodySchema>;
 
 /**
  *
@@ -67,7 +61,7 @@ export class SuggestUserProfilesRoute extends BaseAlertingRoute {
   } as const;
   static validate = {
     request: {
-      body: buildRouteValidationWithZod(suggestUserProfilesBodySchema),
+      body: suggestUserProfilesBodySchema,
     },
   } as const;
 
