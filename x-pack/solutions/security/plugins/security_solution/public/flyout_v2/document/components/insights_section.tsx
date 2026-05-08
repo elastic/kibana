@@ -83,7 +83,7 @@ export const InsightsSection = memo(
     const expanded = useExpandSection({
       storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,
       title: LOCAL_STORAGE_SECTION_KEY,
-      defaultValue: true,
+      defaultValue: false,
     });
 
     const isAlert = useMemo(
