@@ -7,6 +7,7 @@
 
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { isEmpty } from 'lodash/fp';
+import { hasValidIndexPattern } from '../../helpers/has_valid_index_pattern';
 import { getEcsMappingNode } from './nodes/ecs_mapping';
 import { getFixQueryErrorsNode } from './nodes/fix_query_errors';
 import { getInlineQueryNode } from './nodes/inline_query';
@@ -20,7 +21,6 @@ import { getSelectIndexPatternNode } from './nodes/select_index_pattern';
 import { RETRY_POLICY } from '../../constants';
 import { getExtractColumnsFromEsqlQueryNode } from './nodes/extract_columns';
 import { getSampleIndexRecordsNode } from './nodes/sample_index_records';
-import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../common/constants';
 
 export function getTranslatePanelGraph(params: TranslatePanelGraphParams) {
   const inlineQueryNode = getInlineQueryNode(params);
@@ -96,7 +96,7 @@ const translatableRouter = (state: TranslateDashboardPanelState) => {
 };
 
 const indexFoundRouter = (state: TranslateDashboardPanelState) => {
-  if (!state.index_pattern || state.index_pattern === MISSING_INDEX_PATTERN_PLACEHOLDER) {
+  if (!hasValidIndexPattern(state.index_pattern)) {
     return 'translateQuery';
   }
   return 'sampleIndexRecords';

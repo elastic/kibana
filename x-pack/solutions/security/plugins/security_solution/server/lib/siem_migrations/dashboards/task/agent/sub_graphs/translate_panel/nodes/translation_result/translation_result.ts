@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import { generateAssistantComment } from '../../../../../../../common/task/util/comments';
 import { MISSING_INDEX_PATTERN_PLACEHOLDER } from '../../../../../../../common/constants';
 import { TRANSLATION_INDEX_PATTERN } from '../../../../constants';
+import { hasValidIndexPattern } from '../../../../helpers/has_valid_index_pattern';
 import { MigrationTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
 import { processPanel } from './process_panel';
@@ -45,9 +46,7 @@ export const getTranslationResultNode = (params: GetTranslationResultNodeParams)
       };
     }
 
-    const isMissingIndex =
-      !state.index_pattern || state.index_pattern === MISSING_INDEX_PATTERN_PLACEHOLDER;
-    const query = isMissingIndex
+    const query = !hasValidIndexPattern(state.index_pattern)
       ? rawQuery.replaceAll(TRANSLATION_INDEX_PATTERN, MISSING_INDEX_PATTERN_PLACEHOLDER)
       : rawQuery;
 

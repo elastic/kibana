@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { hasValidIndexPattern } from '../../../../helpers/has_valid_index_pattern';
+import { executeEsqlQuery } from '../../../../../../../common/task/agent/helpers/execute_esql';
 import { generateAssistantComment } from '../../../../../../../common/task/util/comments';
 import { getValidateEsql } from '../../../../../../../common/task/agent/helpers/validate_esql/validation';
 import type {
@@ -53,6 +55,16 @@ export const getValidationNode = (params: TranslatePanelGraphParams): GraphNode 
       };
     }
 
+    if (!hasValidIndexPattern(state.index_pattern)) {
+      // skip execution
+      return {
+        validation_errors: {
+          esql_errors: undefined,
+          retries_left: 0,
+        },
+      };
+    }
+
     const executionError = await executeEsqlQuery(state.esql_query, params);
     const combinedError = executionError || undefined;
 
@@ -65,25 +77,4 @@ export const getValidationNode = (params: TranslatePanelGraphParams): GraphNode 
       },
     };
   };
-};
-
-const executeEsqlQuery = async (
-  query: string,
-  params: TranslatePanelGraphParams
-): Promise<string | undefined> => {
-  try {
-    await params.esScopedClient.asInternalUser.esql.query({
-      query,
-      format: 'json',
-    });
-    return undefined;
-  } catch (error) {
-    const reason =
-      error?.meta?.body?.error?.caused_by?.reason ??
-      error?.meta?.body?.error?.reason ??
-      error?.message ??
-      'Unknown execution error';
-    params.logger.debug(`ES|QL execution error: ${reason}`);
-    return `ES|QL execution error: ${reason}`;
-  }
 };

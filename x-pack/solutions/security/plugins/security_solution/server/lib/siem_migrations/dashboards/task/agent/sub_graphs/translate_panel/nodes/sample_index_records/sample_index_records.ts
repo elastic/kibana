@@ -6,6 +6,7 @@
  */
 
 import { resolveResourceForEsqlWithSamplingStats } from '@kbn/agent-builder-genai-utils';
+import { hasValidIndexPattern } from '../../../../helpers/has_valid_index_pattern';
 import { generateAssistantComment } from '../../../../../../../common/task/util/comments';
 import type { GraphNode, TranslatePanelGraphParams } from '../../types';
 
@@ -22,7 +23,7 @@ The index was identified but contains no data. This impacts the quality of the t
 
 export const getSampleIndexRecordsNode = (params: TranslatePanelGraphParams): GraphNode => {
   return async (state) => {
-    if (!state.index_pattern) {
+    if (!hasValidIndexPattern(state.index_pattern)) {
       params.logger.warn('No index pattern available for sampling');
       return {};
     }

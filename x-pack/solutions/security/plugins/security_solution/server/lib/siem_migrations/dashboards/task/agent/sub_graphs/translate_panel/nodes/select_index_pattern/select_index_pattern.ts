@@ -51,11 +51,11 @@ export const getSelectIndexPatternNode = (params: TranslatePanelGraphParams): Gr
       },
     });
 
-    const indexPattern = response?.resources[0]?.name ?? MISSING_INDEX_PATTERN_PLACEHOLDER;
+    const indexPattern = response?.resources[0]?.name;
 
-    if (indexPattern === MISSING_INDEX_PATTERN_PLACEHOLDER) {
+    if (!indexPattern) {
       return {
-        index_pattern: indexPattern,
+        index_pattern: MISSING_INDEX_PATTERN_PLACEHOLDER,
         comments: [generateAssistantComment(NO_INDEX_PATTERN_WARNING)],
       };
     }
