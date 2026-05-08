@@ -10,6 +10,12 @@ description: >
 Investigate and reproduce a Security Solution bug. Produces `analysis.json` and
 `reproduction-report.md` at the Kibana repo root.
 
+**Execute phases 0 → 1 → 2 → 3 in strict order.** Each phase produces evidence the
+next depends on. Do not skip or abbreviate any phase — not even for bugs that seem
+obvious after code analysis. Phase 0 analysis tells you where to look. Phase 3 browser
+reproduction tells you what is actually broken. These are not the same thing. Skipping
+any phase is a protocol violation regardless of how clear the root cause appears.
+
 ## Phase 0: Analyze
 
 Start the Scout server in the background immediately — it takes 5+ minutes to boot and
@@ -116,13 +122,14 @@ Stop services: `pkill -f 'node.*scripts/scout' ; pkill -f 'org.elasticsearch'`
 
 ## Phase 2: Prepare
 
-Set up the environment yourself — don't ask the user for things you can do via API.
-
-Verify Kibana is ready:
+**Phase 1 must be complete before anything here.** Verify the server is ready — if this
+command does not return `available`, stop and fix Phase 1 before continuing:
 ```bash
-curl -s -u elastic:changeme http://localhost:5601/api/status \
+curl -s -u elastic:changeme http://localhost:5620/api/status \
   | python3 -c "import sys,json; s=json.load(sys.stdin); print(s['status']['overall']['level'])"
 ```
+
+Set up the environment yourself — don't ask the user for things you can do via API.
 
 Execute from `prerequisites` and `reproduction_steps`:
 1. **Roles/users** — `POST /api/security/role/<name>` and `POST /internal/security/users/<name>`
@@ -136,15 +143,21 @@ Verify all prerequisites pass before reproducing.
 
 ## Phase 3: Reproduce
 
-Complete this phase before any source code is touched. The diagnostics collected here
-are the primary evidence for test writing and root cause analysis. Without them, any fix
-is a guess.
+**Phase 2 must be complete before anything here.**
+
+Reproduction means: you opened a browser session and followed the exact steps from
+`analysis.json`. Source code reading is not reproduction. API calls are not reproduction.
+If you have not personally navigated the UI and observed the bug, you have not completed
+this phase — regardless of how certain you feel about the root cause.
+
+The more obvious the bug seems from code analysis, the more important this phase is.
+Confidence before reproduction is a signal to slow down, not to skip ahead.
 
 Reproduce through the browser — not via API calls. The UI and API hit different code paths;
 an API shortcut can mask the real defect entirely.
 
-Ask yourself: _"Am I about to use curl or an API call to reproduce this?"_ If yes, stop
-and use the browser instead, following the exact steps from the issue.
+Ask yourself: _"Have I opened a browser and followed the reproduction steps?"_ If no, do
+that now before reading any further.
 
 **Login**: `http://localhost:5620/login?auth_provider_hint=cloud-basic` with `elastic` / `changeme`
 
