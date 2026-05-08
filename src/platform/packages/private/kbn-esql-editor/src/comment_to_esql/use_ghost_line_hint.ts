@@ -17,7 +17,7 @@ import { isMac } from '@kbn/shared-ux-utility';
 
 const EMPTY_LINE_HINT_CLASS = 'esqlGhostLineHint';
 const COMMENT_LINE_HINT_CLASS = 'esqlGhostCommentHint';
-const CURSOR_PAUSE_MS = 400;
+export const CURSOR_PAUSE_MS = 400;
 
 export type GhostHintKind = 'empty' | 'comment' | null;
 

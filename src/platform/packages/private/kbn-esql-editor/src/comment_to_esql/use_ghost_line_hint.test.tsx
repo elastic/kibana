@@ -9,7 +9,7 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { monaco } from '@kbn/code-editor';
-import { getGhostHintKind, useGhostLineHint } from './use_ghost_line_hint';
+import { CURSOR_PAUSE_MS, getGhostHintKind, useGhostLineHint } from './use_ghost_line_hint';
 
 const buildModel = (
   lines: string[]
@@ -59,9 +59,6 @@ describe('getGhostHintKind', () => {
 });
 
 describe('useGhostLineHint', () => {
-  // Pulled from the source file. If the source changes, the tests should track it.
-  const CURSOR_PAUSE_MS = 400;
-
   const setupEditorStubs = () => {
     const cursorListeners: Array<() => void> = [];
     const contentListeners: Array<() => void> = [];

@@ -7,21 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
+import { renderHook } from '@testing-library/react';
 import type { monaco } from '@kbn/code-editor';
 import { ReviewActionsWidget } from './review_actions_widget';
-
-const fakeEuiTheme = {
-  size: { xxs: '2px', s: '8px', m: '12px' },
-  border: { radius: { small: '4px' } },
-  font: { weight: { medium: 500 } },
-  colors: {
-    backgroundFilledSuccess: '#0a0',
-    backgroundFilledText: '#222',
-    textSuccess: '#0c0',
-    textInverse: '#fff',
-  },
-} as unknown as EuiThemeComputed;
 
 const buildEditor = () =>
   ({
@@ -37,11 +26,16 @@ const buildEditor = () =>
   } as unknown as monaco.editor.ICodeEditor);
 
 describe('ReviewActionsWidget', () => {
+  // Outside an EuiProvider, useEuiTheme returns the Amsterdam defaults — enough
+  // for the widget's constructor to build its DOM without us hand-rolling tokens.
+  const { result } = renderHook(() => useEuiTheme());
+  const euiTheme = result.current.euiTheme;
+
   it('invokes the matching callback when each button is clicked', () => {
     const onAccept = jest.fn();
     const onReject = jest.fn();
 
-    const widget = new ReviewActionsWidget(fakeEuiTheme, buildEditor(), 1, { onAccept, onReject });
+    const widget = new ReviewActionsWidget(euiTheme, buildEditor(), 1, { onAccept, onReject });
     const dom = widget.getDomNode();
     const [rejectBtn, acceptBtn] = Array.from(dom.querySelectorAll('button'));
 
@@ -57,11 +51,11 @@ describe('ReviewActionsWidget', () => {
   it('labels the accept button "Replace" when isReplaceMode is true and "Keep" otherwise', () => {
     const callbacks = { onAccept: jest.fn(), onReject: jest.fn() };
 
-    const keepWidget = new ReviewActionsWidget(fakeEuiTheme, buildEditor(), 1, callbacks, false);
+    const keepWidget = new ReviewActionsWidget(euiTheme, buildEditor(), 1, callbacks, false);
     const keepButtons = Array.from(keepWidget.getDomNode().querySelectorAll('button'));
     expect(keepButtons[1].textContent).toMatch(/^Keep/);
 
-    const replaceWidget = new ReviewActionsWidget(fakeEuiTheme, buildEditor(), 1, callbacks, true);
+    const replaceWidget = new ReviewActionsWidget(euiTheme, buildEditor(), 1, callbacks, true);
     const replaceButtons = Array.from(replaceWidget.getDomNode().querySelectorAll('button'));
     expect(replaceButtons[1].textContent).toMatch(/^Replace/);
   });

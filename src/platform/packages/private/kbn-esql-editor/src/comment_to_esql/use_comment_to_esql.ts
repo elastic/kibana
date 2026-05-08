@@ -7,15 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { monaco } from '@kbn/code-editor';
-import { useCallback, useRef, useMemo } from 'react';
+import { useCallback, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import { i18n } from '@kbn/i18n';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { ReviewActionsWidget } from './review_actions_widget';
+import {
+  CODE_ADDED_CLASS,
+  GENERATING_HINT_CLASS,
+  LINE_REPLACED_CLASS,
+  useCommentToEsqlStyle,
+} from './comment_to_esql.styles';
 
 import {
   findTargetComment,
@@ -23,9 +28,6 @@ import {
   markCommentInQuery,
   isModelStillValid,
 } from './utils';
-const CODE_ADDED_CLASS = 'esqlCodeAdded';
-const LINE_REPLACED_CLASS = 'esqlLineReplaced';
-const GENERATING_HINT_CLASS = 'esqlGeneratingHint';
 
 interface GenerateResult {
   content: string;
@@ -46,8 +48,8 @@ interface UseCommentToEsqlParams {
   notifications: NotificationsStart;
   isEnabled: boolean;
   // Hides any already-visible ghost-line hint so it doesn't overlap with the
-  // "Generating..." decoration during the LLM call.
-  clearGhostHint?: () => void;
+  // "Generating..." decoration during the LLM call. Populated by useGhostLineHint.
+  clearGhostHintRef?: MutableRefObject<() => void>;
 }
 
 export const useCommentToEsql = ({
@@ -56,9 +58,10 @@ export const useCommentToEsql = ({
   http,
   notifications,
   isEnabled,
-  clearGhostHint,
+  clearGhostHintRef,
 }: UseCommentToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
+  const commentToEsqlStyle = useCommentToEsqlStyle();
   const reviewStateRef = useRef<CommentReviewState | null>(null);
   const decorationsRef = useRef<monaco.editor.IEditorDecorationsCollection | undefined>(undefined);
   const widgetRef = useRef<ReviewActionsWidget | undefined>(undefined);
@@ -76,44 +79,6 @@ export const useCommentToEsql = ({
   );
   // Read by useGhostLineHint to suppress its hint while a generation is in flight.
   const isGeneratingRef = useRef(false);
-
-  const generatingText = i18n.translate('esqlEditor.commentToEsql.generating', {
-    defaultMessage: 'Generating...',
-  });
-
-  // Diff styles for the comment and the generated code
-  const commentToEsqlStyle = useMemo(
-    () => css`
-      .${CODE_ADDED_CLASS} {
-        background-color: ${euiTheme.colors.backgroundLightSuccess};
-      }
-      .${LINE_REPLACED_CLASS} {
-        background-color: ${euiTheme.colors.backgroundLightWarning};
-        text-decoration: line-through;
-      }
-      @keyframes esqlGeneratingPulse {
-        0%,
-        100% {
-          opacity: 0.4;
-        }
-        50% {
-          opacity: 0.75;
-        }
-      }
-      .${GENERATING_HINT_CLASS}::after {
-        content: ${JSON.stringify(' ' + generatingText)};
-        font-style: italic;
-        color: ${euiTheme.colors.textSubdued};
-        animation: esqlGeneratingPulse 1.4s ease-in-out infinite;
-      }
-    `,
-    [
-      euiTheme.colors.backgroundLightSuccess,
-      euiTheme.colors.backgroundLightWarning,
-      euiTheme.colors.textSubdued,
-      generatingText,
-    ]
-  );
 
   const clearCommentAnchor = useCallback(() => {
     commentAnchorRef.current?.clear();
@@ -337,6 +302,7 @@ export const useCommentToEsql = ({
     const targetComment = findTargetComment(model, position.lineNumber);
     if (!targetComment) return;
 
+    // Remove the leading // and trim the comment text
     const nlInstruction = targetComment.text.replace(/^\/\/\s*/, '').trim();
     if (!nlInstruction) return;
 
@@ -363,7 +329,7 @@ export const useCommentToEsql = ({
     ]);
 
     isGeneratingRef.current = true;
-    clearGhostHint?.();
+    clearGhostHintRef?.current();
     showGeneratingDecoration(targetComment.lineNumber);
 
     const controller = new AbortController();
@@ -429,7 +395,7 @@ export const useCommentToEsql = ({
     clearCommentAnchor,
     showGeneratingDecoration,
     clearGeneratingDecoration,
-    clearGhostHint,
+    clearGhostHintRef,
     generateESQL,
     showReview,
     isEnabled,

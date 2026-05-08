@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 
 export const findTargetComment = (
   model: monaco.editor.ITextModel,
