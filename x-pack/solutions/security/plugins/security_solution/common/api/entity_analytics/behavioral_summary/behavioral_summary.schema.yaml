@@ -1,0 +1,127 @@
+openapi: 3.0.0
+info:
+  title: Behavioral Summary API
+  version: "2023-10-31"
+
+paths:
+  /api/entity_analytics/entities/{entity_id}/behavioral_summary:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      x-state: Technical Preview
+      operationId: GetBehavioralSummary
+      summary: Get behavioral summary for an entity
+      description: Returns ML anomaly-based behavioral summary for a given entity.
+      parameters:
+        - name: entity_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: anomalyThreshold
+          in: query
+          required: false
+          schema:
+            type: number
+            minimum: 0
+            maximum: 100
+            default: 1
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: string
+            default: now-30d
+        - name: baselineSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Behavioral summary retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BehavioralSummaryResponse"
+
+components:
+  schemas:
+    BaselineBucket:
+      type: object
+      required:
+        - value
+        - docCount
+      properties:
+        value:
+          type: string
+        docCount:
+          type: number
+
+    AnomalySummaryEntry:
+      type: object
+      required:
+        - jobId
+        - detectorIndex
+        - byFieldName
+        - byFieldValue
+        - recordScore
+        - timestamp
+        - actual
+        - typical
+        - baseline
+        - sourceIndex
+      properties:
+        jobId:
+          type: string
+        detectorIndex:
+          type: number
+        byFieldName:
+          type: string
+          nullable: true
+        byFieldValue:
+          type: string
+          nullable: true
+        recordScore:
+          type: number
+        timestamp:
+          type: string
+          description: ISO-8601 timestamp
+        actual:
+          type: array
+          items:
+            type: number
+        typical:
+          type: array
+          items:
+            type: number
+        baseline:
+          type: array
+          items:
+            $ref: "#/components/schemas/BaselineBucket"
+        sourceIndex:
+          type: array
+          items:
+            type: string
+        error:
+          type: string
+          description: Populated if this entry partially failed
+
+    BehavioralSummaryResponse:
+      type: object
+      required:
+        - entityId
+        - anomalies
+      properties:
+        entityId:
+          type: string
+        entityType:
+          type: string
+        anomalies:
+          type: array
+          items:
+            $ref: "#/components/schemas/AnomalySummaryEntry"
