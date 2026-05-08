@@ -71,7 +71,7 @@ describe('OTelComponentDetail', () => {
     expect(result.getByText(/Receiver: otlp/)).toBeInTheDocument();
   });
 
-  it('renders the component configuration as YAML', () => {
+  it('renders the component configuration as YAML on Config tab', () => {
     const result = testRenderer.render(
       <OTelComponentDetail
         componentId="otlp"
@@ -81,6 +81,7 @@ describe('OTelComponentDetail', () => {
       />
     );
 
+    fireEvent.click(result.getByTestId('otelComponentDetailTab-config'));
     expect(result.getByText(/protocols:/)).toBeInTheDocument();
     expect(result.getByText(/grpc:/)).toBeInTheDocument();
     expect(result.getByText(/0.0.0.0:4317/)).toBeInTheDocument();
@@ -101,6 +102,7 @@ describe('OTelComponentDetail', () => {
       />
     );
 
+    fireEvent.click(result.getByTestId('otelComponentDetailTab-config'));
     expect(result.getByText('No additional configuration')).toBeInTheDocument();
   });
 
@@ -131,10 +133,11 @@ describe('OTelComponentDetail', () => {
     );
 
     expect(result.getByText(/Exporter: elasticsearch\/default/)).toBeInTheDocument();
+    fireEvent.click(result.getByTestId('otelComponentDetailTab-config'));
     expect(result.getByText(/localhost:9200/)).toBeInTheDocument();
   });
 
-  it('renders three tabs: Config, Health, Metrics', () => {
+  it('renders three tabs: Health, Metrics, Config', () => {
     const result = testRenderer.render(
       <OTelComponentDetail
         componentId="otlp"
@@ -144,12 +147,12 @@ describe('OTelComponentDetail', () => {
       />
     );
 
-    expect(result.getByTestId('otelComponentDetailTab-config')).toBeInTheDocument();
     expect(result.getByTestId('otelComponentDetailTab-health')).toBeInTheDocument();
+    expect(result.getByTestId('otelComponentDetailTab-config')).toBeInTheDocument();
     expect(result.getByTestId('otelComponentDetailTab-metrics')).toBeInTheDocument();
   });
 
-  it('shows Config tab content by default', () => {
+  it('shows Health tab by default', () => {
     const result = testRenderer.render(
       <OTelComponentDetail
         componentId="otlp"
@@ -159,14 +162,13 @@ describe('OTelComponentDetail', () => {
       />
     );
 
-    expect(result.getByTestId('otelComponentDetailTab-config')).toHaveAttribute(
+    expect(result.getByTestId('otelComponentDetailTab-health')).toHaveAttribute(
       'aria-selected',
       'true'
     );
-    expect(result.getByText(/protocols:/)).toBeInTheDocument();
   });
 
-  it('switches to Health tab and shows no data message when no health prop', () => {
+  it('shows no data message on Health tab when no health prop', () => {
     const result = testRenderer.render(
       <OTelComponentDetail
         componentId="otlp"
@@ -176,12 +178,10 @@ describe('OTelComponentDetail', () => {
       />
     );
 
-    fireEvent.click(result.getByTestId('otelComponentDetailTab-health'));
     expect(result.getByTestId('otelComponentDetailHealthNoData')).toBeInTheDocument();
-    expect(result.queryByText(/protocols:/)).not.toBeInTheDocument();
   });
 
-  it('shows health description list with status, reported status, and last updated', () => {
+  it('shows health description list with status and reported status', () => {
     const health: ComponentHealth = {
       healthy: true,
       status: 'StatusOK',
@@ -204,7 +204,6 @@ describe('OTelComponentDetail', () => {
       />
     );
 
-    fireEvent.click(result.getByTestId('otelComponentDetailTab-health'));
     const healthPanel = result.getByTestId('otelComponentDetailHealth');
     expect(healthPanel).toBeInTheDocument();
     expect(healthPanel.textContent).toContain('Healthy');
@@ -234,7 +233,6 @@ describe('OTelComponentDetail', () => {
       />
     );
 
-    fireEvent.click(result.getByTestId('otelComponentDetailTab-health'));
     const healthPanel = result.getByTestId('otelComponentDetailHealth');
     expect(healthPanel.textContent).toContain('Unhealthy');
     expect(healthPanel.textContent).toContain('StatusPermanentError');
@@ -269,7 +267,6 @@ describe('OTelComponentDetail', () => {
       />
     );
 
-    fireEvent.click(result.getByTestId('otelComponentDetailTab-health'));
     const healthPanel = result.getByTestId('otelComponentDetailHealth');
     expect(healthPanel).toBeInTheDocument();
     expect(healthPanel.textContent).toContain('Healthy');
@@ -286,23 +283,22 @@ describe('OTelComponentDetail', () => {
     );
 
     expect(result.getByText(/Pipeline: logs\/default/)).toBeInTheDocument();
+    fireEvent.click(result.getByTestId('otelComponentDetailTab-config'));
     expect(result.getByText(/receivers:/)).toBeInTheDocument();
     expect(result.getByText(/processors:/)).toBeInTheDocument();
     expect(result.getByText(/exporters:/)).toBeInTheDocument();
   });
 
-  it('switches to Metrics tab and shows placeholder', () => {
+  it('does not render Metrics tab for pipeline', () => {
     const result = testRenderer.render(
       <OTelComponentDetail
-        componentId="otlp"
-        componentType="receiver"
+        componentId="logs/default"
+        componentType="pipeline"
         config={config}
         onClose={jest.fn()}
       />
     );
 
-    fireEvent.click(result.getByTestId('otelComponentDetailTab-metrics'));
-    expect(result.getByTestId('otelComponentDetailMetricsPlaceholder')).toBeInTheDocument();
-    expect(result.queryByText(/protocols:/)).not.toBeInTheDocument();
+    expect(result.queryByTestId('otelComponentDetailTab-metrics')).not.toBeInTheDocument();
   });
 });

@@ -25,6 +25,7 @@ import {
 } from '../fixtures/synthtrace/metrics_services';
 import { testData } from '../fixtures';
 import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
+import { distributedTrace } from '../fixtures/synthtrace/distributed_trace';
 import { serviceMapMultiEnv } from '../fixtures/synthtrace/service_map_multi_env';
 
 globalSetupHook(
@@ -66,6 +67,11 @@ globalSetupHook(
     await apmSynthtraceEsClient.index(spanStacktraceData);
 
     await apmSynthtraceEsClient.index(serviceDataWithRecentErrors());
+
+    // Generate distributed trace data for trace waterfall flyout tests
+    const distributedTraceData = distributedTrace();
+    await apmSynthtraceEsClient.index(distributedTraceData);
+    log.info('Distributed trace waterfall data indexed');
 
     // Generate OTEL service data for OTEL service overview tests
     const otelData = otelSendotlp({

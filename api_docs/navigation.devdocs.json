@@ -1575,6 +1575,19 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-common.DEFAULT_ROUTES.vectordb",
+            "type": "string",
+            "tags": [],
+            "label": "vectordb",
+            "description": [],
+            "path": "src/platform/plugins/shared/navigation/common/constants.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -87,45 +87,11 @@
         "label": "SaveDiscoverSessionOptions",
         "description": [],
         "path": "src/platform/plugins/shared/saved_search/public/service/save_discover_session.ts",
-        "lineNumber": 28,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-public.SaveDiscoverSessionOptions.onTitleDuplicate",
-            "type": "Function",
-            "tags": [],
-            "label": "onTitleDuplicate",
-            "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/saved_search/public/service/save_discover_session.ts",
-            "lineNumber": 29,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-public.SaveDiscoverSessionOptions.isTitleDuplicateConfirmed",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isTitleDuplicateConfirmed",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/saved_search/public/service/save_discover_session.ts",
-            "lineNumber": 30,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
           {
             "parentPluginId": "savedSearch",
             "id": "def-public.SaveDiscoverSessionOptions.copyOnSave",
@@ -137,7 +103,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/public/service/save_discover_session.ts",
-            "lineNumber": 31,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -314,45 +280,11 @@
         "label": "SaveSavedSearchOptions",
         "description": [],
         "path": "src/platform/plugins/shared/saved_search/public/service/save_saved_searches.ts",
-        "lineNumber": 20,
+        "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-public.SaveSavedSearchOptions.onTitleDuplicate",
-            "type": "Function",
-            "tags": [],
-            "label": "onTitleDuplicate",
-            "description": [],
-            "signature": [
-              "(() => void) | undefined"
-            ],
-            "path": "src/platform/plugins/shared/saved_search/public/service/save_saved_searches.ts",
-            "lineNumber": 21,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "savedSearch",
-            "id": "def-public.SaveSavedSearchOptions.isTitleDuplicateConfirmed",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isTitleDuplicateConfirmed",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/plugins/shared/saved_search/public/service/save_saved_searches.ts",
-            "lineNumber": 22,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
           {
             "parentPluginId": "savedSearch",
             "id": "def-public.SaveSavedSearchOptions.copyOnSave",
@@ -364,7 +296,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/saved_search/public/service/save_saved_searches.ts",
-            "lineNumber": 23,
+            "lineNumber": 20,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -417,7 +349,7 @@
           ", \"id\">>"
         ],
         "path": "src/platform/plugins/shared/saved_search/public/service/save_discover_session.ts",
-        "lineNumber": 22,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -469,7 +401,7 @@
         "\nSaved search plugin public Start contract"
       ],
       "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-      "lineNumber": 49,
+      "lineNumber": 48,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -495,7 +427,7 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-          "lineNumber": 53,
+          "lineNumber": 52,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -511,7 +443,7 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-              "lineNumber": 54,
+              "lineNumber": 53,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -528,7 +460,7 @@
                 "Serialized | undefined"
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-              "lineNumber": 55,
+              "lineNumber": 54,
               "columnNumber": 5,
               "deprecated": false,
               "docsReferencedTypeName": "Serialized",
@@ -557,7 +489,7 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-          "lineNumber": 57,
+          "lineNumber": 56,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -573,7 +505,7 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-              "lineNumber": 57,
+              "lineNumber": 56,
               "columnNumber": 24,
               "deprecated": false,
               "trackAdoption": false,
@@ -600,7 +532,7 @@
             }
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-          "lineNumber": 58,
+          "lineNumber": 57,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -628,7 +560,7 @@
             ">[]>"
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-          "lineNumber": 59,
+          "lineNumber": 58,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -662,7 +594,7 @@
             " | undefined) => Promise<string | undefined>"
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-          "lineNumber": 60,
+          "lineNumber": 59,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -684,7 +616,7 @@
                 }
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-              "lineNumber": 61,
+              "lineNumber": 60,
               "columnNumber": 5,
               "deprecated": false,
               "docsReferencedTypeName": "SavedSearch",
@@ -709,7 +641,7 @@
                 " | undefined"
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-              "lineNumber": 62,
+              "lineNumber": 61,
               "columnNumber": 5,
               "deprecated": false,
               "docsReferencedTypeName": "SaveSavedSearchOptions",
@@ -754,7 +686,7 @@
             " | undefined>"
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-          "lineNumber": 64,
+          "lineNumber": 63,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -776,7 +708,7 @@
                 }
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-              "lineNumber": 65,
+              "lineNumber": 64,
               "columnNumber": 5,
               "deprecated": false,
               "docsReferencedTypeName": "SaveDiscoverSessionParams",
@@ -801,7 +733,7 @@
                 " | undefined"
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-              "lineNumber": 66,
+              "lineNumber": 65,
               "columnNumber": 5,
               "deprecated": false,
               "docsReferencedTypeName": "SaveDiscoverSessionOptions",
@@ -813,51 +745,34 @@
         },
         {
           "parentPluginId": "savedSearch",
-          "id": "def-public.SavedSearchPublicPluginStart.checkForDuplicateTitle",
+          "id": "def-public.SavedSearchPublicPluginStart.hasLibraryItemWithTitle",
           "type": "Function",
           "tags": [],
-          "label": "checkForDuplicateTitle",
+          "label": "hasLibraryItemWithTitle",
           "description": [],
           "signature": [
-            "(props: Pick<",
-            {
-              "pluginId": "savedObjects",
-              "scope": "public",
-              "docId": "kibSavedObjectsPluginApi",
-              "section": "def-public.OnSaveProps",
-              "text": "OnSaveProps"
-            },
-            ", \"newTitle\" | \"isTitleDuplicateConfirmed\" | \"onTitleDuplicate\">) => Promise<void>"
+            "(title: string) => Promise<boolean>"
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-          "lineNumber": 68,
+          "lineNumber": 67,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "savedSearch",
-              "id": "def-public.SavedSearchPublicPluginStart.checkForDuplicateTitle.$1",
-              "type": "Object",
+              "id": "def-public.SavedSearchPublicPluginStart.hasLibraryItemWithTitle.$1",
+              "type": "string",
               "tags": [],
-              "label": "props",
+              "label": "title",
               "description": [],
               "signature": [
-                "Pick<",
-                {
-                  "pluginId": "savedObjects",
-                  "scope": "public",
-                  "docId": "kibSavedObjectsPluginApi",
-                  "section": "def-public.OnSaveProps",
-                  "text": "OnSaveProps"
-                },
-                ", \"newTitle\" | \"isTitleDuplicateConfirmed\" | \"onTitleDuplicate\">"
+                "string"
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-              "lineNumber": 69,
-              "columnNumber": 5,
+              "lineNumber": 67,
+              "columnNumber": 29,
               "deprecated": false,
-              "docsReferencedTypeName": "Pick",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -893,7 +808,7 @@
             ">"
           ],
           "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-          "lineNumber": 71,
+          "lineNumber": 68,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -915,7 +830,7 @@
                 }
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-              "lineNumber": 72,
+              "lineNumber": 69,
               "columnNumber": 5,
               "deprecated": false,
               "docsReferencedTypeName": "SavedSearchUnwrapResult",
@@ -933,7 +848,7 @@
                 "Serialized | undefined"
               ],
               "path": "src/platform/plugins/shared/saved_search/public/plugin.ts",
-              "lineNumber": 73,
+              "lineNumber": 70,
               "columnNumber": 5,
               "deprecated": false,
               "docsReferencedTypeName": "Serialized",
