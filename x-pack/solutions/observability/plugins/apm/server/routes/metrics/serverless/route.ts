@@ -5,46 +5,31 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import {
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
 } from '@kbn/observability-plugin/common';
-import { toNumberRt } from '@kbn/io-ts-utils';
-import type { FetchAndTransformMetrics } from '@kbn/apm-api-shared';
+import {
+  routeDefinitions,
+  type ServerlessMetricsChartsResponse,
+  type ServerlessActiveInstancesResponse,
+  type ServerlessFunctionsOverviewRouteResponse,
+  type ServerlessSummaryResponse,
+  type AWSLambdaPriceFactor,
+} from '@kbn/apm-api-shared';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
-import { environmentRt, kueryRt, rangeRt, transactionDataSourceRt } from '../../default_api_types';
 import { getServerlessAgentMetricsCharts } from './get_serverless_agent_metrics_chart';
-import type { ActiveInstanceOverview } from './get_active_instances_overview';
 import { getServerlessActiveInstancesOverview } from './get_active_instances_overview';
-import type { ServerlessFunctionsOverviewResponse } from './get_serverless_functions_overview';
 import { getServerlessFunctionsOverview } from './get_serverless_functions_overview';
-import type { AWSLambdaPriceFactor, ServerlessSummaryResponse } from './get_serverless_summary';
 import { getServerlessSummary } from './get_serverless_summary';
 import { getActiveInstancesTimeseries } from './get_active_instances_timeseries';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
-import type { Coordinate } from '../../../../typings/timeseries';
 
 const serverlessMetricsChartsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/serverless/charts',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      t.partial({ serverlessId: t.string }),
-      t.intersection([transactionDataSourceRt, t.type({ bucketSizeInSeconds: toNumberRt })]),
-    ]),
-  }),
+  endpoint: routeDefinitions.metrics.serverlessCharts.endpoint,
+  params: routeDefinitions.metrics.serverlessCharts.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    charts: FetchAndTransformMetrics[];
-  }> => {
+  handler: async (resources): Promise<ServerlessMetricsChartsResponse> => {
     const { params, config } = resources;
     const apmEventClient = await getApmEventClient(resources);
 
@@ -79,20 +64,10 @@ const serverlessMetricsChartsRoute = createApmServerRoute({
 });
 
 const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([environmentRt, kueryRt, rangeRt, t.partial({ serverlessId: t.string })]),
-  }),
+  endpoint: routeDefinitions.metrics.serverlessActiveInstances.endpoint,
+  params: routeDefinitions.metrics.serverlessActiveInstances.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    activeInstances: ActiveInstanceOverview[];
-    timeseries: Coordinate[];
-  }> => {
+  handler: async (resources): Promise<ServerlessActiveInstancesResponse> => {
     const { params, config } = resources;
     const apmEventClient = await getApmEventClient(resources);
 
@@ -118,19 +93,10 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
 });
 
 const serverlessMetricsFunctionsOverviewRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/serverless/functions_overview',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([environmentRt, kueryRt, rangeRt]),
-  }),
+  endpoint: routeDefinitions.metrics.serverlessFunctionsOverview.endpoint,
+  params: routeDefinitions.metrics.serverlessFunctionsOverview.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    serverlessFunctionsOverview: ServerlessFunctionsOverviewResponse;
-  }> => {
+  handler: async (resources): Promise<ServerlessFunctionsOverviewRouteResponse> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
 
@@ -150,13 +116,8 @@ const serverlessMetricsFunctionsOverviewRoute = createApmServerRoute({
 });
 
 const serverlessMetricsSummaryRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/metrics/serverless/summary',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([environmentRt, kueryRt, rangeRt, t.partial({ serverlessId: t.string })]),
-  }),
+  endpoint: routeDefinitions.metrics.serverlessSummary.endpoint,
+  params: routeDefinitions.metrics.serverlessSummary.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServerlessSummaryResponse> => {
     const { params, context } = resources;
