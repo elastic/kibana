@@ -112,8 +112,9 @@ describe('starred column builder', () => {
   it('locks width / minWidth / maxWidth to 40px when no props supplied', () => {
     const result = buildStarredColumn({}, defaultContext);
 
-    // Pure-icon column — pinned to the EuiIcon footprint in both directions
-    // so it never absorbs slack from sibling columns.
+    // Setting all three to the same value keeps the column at a fixed 40px
+    // (the `EuiIcon` footprint plus a small gutter) regardless of available
+    // table width.
     expect(result).toMatchObject({ width: '40px', minWidth: '40px', maxWidth: '40px' });
   });
 
@@ -127,8 +128,8 @@ describe('starred column builder', () => {
   });
 
   it('treats explicit `undefined` as an opt-out — clears the lock so the icon column can flex', () => {
-    // Useful when a consumer wants the icon column to share its row height
-    // / width budget with sibling columns instead of being a fixed 40px box.
+    // Useful when a consumer wants the icon column to flex with sibling
+    // columns instead of being pinned to a fixed 40px box.
     const result = buildStarredColumn(
       { width: undefined, minWidth: undefined, maxWidth: undefined } satisfies StarredColumnProps,
       defaultContext

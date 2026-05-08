@@ -22,9 +22,9 @@ import { StarredCell } from './starred_cell';
  *
  * The header and cell render a single 16px `EuiIcon`; `40px` gives the icon
  * a small centered gutter on both sides without wasting horizontal space.
- * Both `minWidth` and `maxWidth` default to the same value so the column is
- * pinned at exactly the icon footprint and never absorbs slack from sibling
- * columns. No `'max-content'` floor needed because the header is iconic, not
+ * Both `minWidth` and `maxWidth` default to the same value so the column
+ * stays pinned at exactly the icon footprint regardless of available table
+ * width. No `'max-content'` floor needed because the header is iconic, not
  * textual, and so has no locale exposure.
  */
 const DEFAULT_WIDTH = '40px';
