@@ -24,6 +24,7 @@ plugins:
     - global_search
     - index_management
     - infra
+    - ingest_pipelines
     - intercepts
     - lens
     - logstash

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Management', () => {});
-}
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
