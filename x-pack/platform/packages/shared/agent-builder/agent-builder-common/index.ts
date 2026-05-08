@@ -255,3 +255,9 @@ export {
   type PluginDefinition,
 } from './plugins';
 export { EffortLevels, type EffortLevel } from './model_provider';
+export {
+  type OAuthClient,
+  type OAuthClientLogo,
+  type OAuthClientConnectionsSummary,
+  OAuthClientType,
+} from './oauth_clients';
