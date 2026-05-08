@@ -8,6 +8,13 @@
 import { globalSetupHook } from '@kbn/scout';
 
 globalSetupHook('Setup environment for streams tests', async ({ apiServices, log }) => {
+  log.debug('[setup] turning off discover.isEsqlDefault');
+  await apiServices.core.settings({
+    'feature_flags.overrides': {
+      'discover.isEsqlDefault': false,
+    },
+  });
+
   log.debug('[setup] Enabling streams...');
   await apiServices.streams.enable();
 });
