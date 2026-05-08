@@ -228,17 +228,20 @@ export const Snowflake: ConnectorSpec = {
         overrides: {
           meta: {
             authorizationUrl: {
-              placeholder: 'https://<account>.snowflakecomputing.com/oauth/authorize',
+              placeholder: 'https://{account}.snowflakecomputing.com/oauth/authorize',
               helpText: i18n.translate(
                 'core.kibanaConnectorSpecs.snowflake.auth.oauth.authorizationUrl.helpText',
                 {
                   defaultMessage:
-                    'Snowflake OAuth authorization URL. Replace <account> with your Snowflake account identifier.',
+                    "Snowflake OAuth authorization URL. Replace '{account}' with your Snowflake account identifier.",
+                  values: {
+                    accountPlaceholder: '{account}',
+                  },
                 }
               ),
             },
             tokenUrl: {
-              placeholder: 'https://<account>.snowflakecomputing.com/oauth/token-request',
+              placeholder: 'https://{account}.snowflakecomputing.com/oauth/token-request',
               helpText: i18n.translate(
                 'core.kibanaConnectorSpecs.snowflake.auth.oauth.tokenUrl.helpText',
                 {
