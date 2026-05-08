@@ -20,7 +20,7 @@ export const getDetectionRuleEditSkill = () =>
     getRegistryTools: () => [
       SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
       SECURITY_LABS_SEARCH_TOOL_ID,
-      platformCoreTools.executeEsql,
+      platformCoreTools.generateEsql,
       platformCoreTools.productDocumentation,
     ],
   });

@@ -91,18 +91,18 @@ GET kbn://api/agent_builder/tools
 # -----------------------------------------------
 # Step 4: Run a built-in tool 🚀
 # -----------------------------------------------
-# Let's run the built-in ES|QL executor against our sample data. The agent generates ES|QL itself
-# by following the "elasticsearch-esql" skill; here we pass a verbatim query directly.
+# Let's run the built-in ES|QL generator tool to create a query for our sample data.
 
 POST kbn://api/agent_builder/tools/_execute
 {
-  "tool_id": "platform.core.execute_esql",
+  "tool_id": "platform.core.generate_esql",
   "tool_params": {
-    "query": "FROM kibana_sample_data_agents | SORT page_count DESC | LIMIT 1"
+    "query": "Build an ES|QL query to get the book with the most pages",
+    "index": "kibana_sample_data_agents"
   }
 }
 
-# ✅ The response includes the rows returned by Elasticsearch.
+# ✅ The response includes the ES|QL query that you can use to create a custom tool.
 
 # -----------------------------------------------
 # Step 5: Create a custom ES|QL tool ✍️

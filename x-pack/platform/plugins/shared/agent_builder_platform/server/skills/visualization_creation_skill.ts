@@ -37,13 +37,9 @@ Do **not** use this skill when:
     platformCoreTools.createVisualization
   }**: Create or update visualization configurations and return \`attachment_id\` when persistence succeeds.
 - **${
-    platformCoreTools.executeEsql
-  }**: Run ES|QL queries to validate them and inspect sample result shape.
-
-For composing complex ES|QL queries, follow the \`elasticsearch-esql\` skill — it covers cluster/feature
-detection, schema discovery, and the syntax patterns you need before calling ${
-    platformCoreTools.executeEsql
-  }.
+    platformCoreTools.generateEsql
+  }**: Generate ES|QL for complex requests before visualization creation.
+- **${platformCoreTools.executeEsql}**: Validate ES|QL and inspect sample result shape.
 
 ## Visualization Creation Workflow
 
@@ -55,11 +51,10 @@ detection, schema discovery, and the syntax patterns you need before calling ${
    - For simple requests, pass natural language directly to ${
      platformCoreTools.createVisualization
    }.
-   - For complex aggregations or joins, follow the \`elasticsearch-esql\` skill to compose the ES|QL query
-     yourself, then optionally run ${
-       platformCoreTools.executeEsql
-     } to validate the result shape before
-     visualization creation.
+   - For complex aggregations or joins, use ${platformCoreTools.generateEsql}.
+   - Optionally run ${
+     platformCoreTools.executeEsql
+   } to validate result shape before visualization creation.
 
 3. **Call ${platformCoreTools.createVisualization}**
    - Provide:
@@ -151,5 +146,9 @@ When uncertain, omit \`chartType\` and let ${
 `,
     },
   ],
-  getRegistryTools: () => [platformCoreTools.executeEsql, platformCoreTools.createVisualization],
+  getRegistryTools: () => [
+    platformCoreTools.generateEsql,
+    platformCoreTools.executeEsql,
+    platformCoreTools.createVisualization,
+  ],
 });

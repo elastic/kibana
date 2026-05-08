@@ -57,11 +57,12 @@ describe('pciComplianceSkill', () => {
   describe('getRegistryTools', () => {
     const toolIds = pciComplianceSkill.getRegistryTools!() as string[];
 
-    it('exposes the consolidated PCI tool set plus the ES|QL executor', () => {
+    it('exposes the consolidated PCI tool set plus ES|QL generators', () => {
       expect(toolIds).toEqual(expect.arrayContaining([...PCI_COMPLIANCE_SKILL_TOOL_IDS]));
       expect(toolIds).toContain(PCI_SCOPE_DISCOVERY_TOOL_ID);
       expect(toolIds).toContain(PCI_COMPLIANCE_TOOL_ID);
       expect(toolIds).toContain(PCI_FIELD_MAPPER_TOOL_ID);
+      expect(toolIds).toContain(platformCoreTools.generateEsql);
       expect(toolIds).toContain(platformCoreTools.executeEsql);
     });
 

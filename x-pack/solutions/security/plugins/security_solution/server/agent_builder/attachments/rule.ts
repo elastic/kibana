@@ -54,7 +54,7 @@ export const createRuleAttachmentType = (): AttachmentTypeDefinition => {
       };
     },
     getTools: () => [
-      platformCoreTools.executeEsql,
+      platformCoreTools.generateEsql,
       platformCoreTools.productDocumentation,
       SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
       SECURITY_LABS_SEARCH_TOOL_ID,

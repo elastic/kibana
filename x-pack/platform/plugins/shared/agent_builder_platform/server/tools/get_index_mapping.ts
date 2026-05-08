@@ -6,11 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { MappingField } from '@kbn/agent-builder-genai-utils';
 import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
-import { getIndexFields, isCcsTarget } from '@kbn/agent-builder-genai-utils';
+import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 
 const getIndexMappingsSchema = z.object({
@@ -29,80 +28,11 @@ const formatField = (field: MappingField): string => {
   return `- ${field.path} [${field.type}]${description}`;
 };
 
-interface IndexModeInfo {
-  index_mode?: string;
-  data_stream?: string;
-  ts_hint?: string;
-}
-
-const TS_HINT =
-  'time_series mode detected. Use `TS <data-stream>` (not `FROM`), `TBUCKET(interval)` (not ' +
-  '`DATE_TRUNC`), wrap counter fields with `SUM(RATE(...))`, and use `AVG(...)` / `MAX(...)` ' +
-  'for gauges. TBUCKET takes only a duration: `TBUCKET(5 minutes)`.';
-
-const getIndexMode = async (
-  esClient: ElasticsearchClient,
-  index: string
-): Promise<string | undefined> => {
-  try {
-    const response = await esClient.indices.getSettings({ index, flat_settings: true });
-    const entry = response[index] ?? Object.values(response)[0];
-    const settings = entry?.settings as Record<string, string> | undefined;
-    return settings?.['index.mode'];
-  } catch {
-    return undefined;
-  }
-};
-
-const resolveDataStreamName = async (
-  esClient: ElasticsearchClient,
-  index: string
-): Promise<string | undefined> => {
-  try {
-    const response = await esClient.indices.resolveIndex({ name: index });
-    const match = response.indices?.find((i) => i.data_stream);
-    return match?.data_stream;
-  } catch {
-    return undefined;
-  }
-};
-
-const getIndexModeInfo = async (
-  esClient: ElasticsearchClient,
-  input: string,
-  resourceType: string
-): Promise<IndexModeInfo | undefined> => {
-  // index.mode detection only works for concrete local indices/data streams.
-  // CCS targets and patterns are skipped to avoid noisy errors.
-  if (isCcsTarget(input) || resourceType === 'indexPattern') {
-    return undefined;
-  }
-  const indexMode = await getIndexMode(esClient, input);
-  if (!indexMode) {
-    return undefined;
-  }
-  if (indexMode !== 'time_series') {
-    return { index_mode: indexMode };
-  }
-  // For data stream inputs, the input itself is the data stream name. For backing
-  // index inputs, resolve to the parent data stream so the agent can use it with TS.
-  const dataStream =
-    resourceType === 'dataStream' ? input : await resolveDataStreamName(esClient, input);
-  return {
-    index_mode: 'time_series',
-    ...(dataStream ? { data_stream: dataStream } : {}),
-    ts_hint: TS_HINT,
-  };
-};
-
 export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMappingsSchema> => {
   return {
     id: platformCoreTools.getIndexMapping,
     type: ToolType.builtin,
-    description: `Retrieve mappings for indices, aliases or datastreams.
-
-When an index is in time_series mode, the result includes 'index_mode: time_series', the parent
-'data_stream' name (when resolvable), and a 'ts_hint' string with TS-mode syntax guidance.`,
+    description: 'Retrieve mappings for indices, aliases or datastreams.',
     schema: getIndexMappingsSchema,
     handler: async ({ indices, raw }, { esClient }) => {
       // getIndexFields transparently handles the local-vs-CCS split:
@@ -113,35 +43,18 @@ When an index is in time_series mode, the result includes 'index_mode: time_seri
         esClient: esClient.asCurrentUser,
       });
 
-      const indexModeInfos = await Promise.all(
-        Object.entries(indexFields).map(async ([name, v]) => {
-          const info = await getIndexModeInfo(esClient.asCurrentUser, name, v.type);
-          return [name, info] as const;
-        })
-      );
-      const indexModeMap = new Map(indexModeInfos);
-
       const resources = Object.fromEntries(
         Object.entries(indexFields).map(([name, v]) => {
-          const indexModeInfo = indexModeMap.get(name);
-          const baseEntry = indexModeInfo ? { ...indexModeInfo } : {};
           if (raw && v.rawMapping) {
-            return [name, { ...baseEntry, type: v.type, mappings: v.rawMapping }];
+            return [name, { type: v.type, mappings: v.rawMapping }];
           }
           if (raw) {
             return [
               name,
-              {
-                ...baseEntry,
-                type: v.type,
-                fields: v.fields.map(({ path, type }) => ({ path, type })),
-              },
+              { type: v.type, fields: v.fields.map(({ path, type }) => ({ path, type })) },
             ];
           }
-          return [
-            name,
-            { ...baseEntry, type: v.type, fields: v.fields.map(formatField).join('\n') },
-          ];
+          return [name, { type: v.type, fields: v.fields.map(formatField).join('\n') }];
         })
       );
 

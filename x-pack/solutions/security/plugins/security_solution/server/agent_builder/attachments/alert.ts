@@ -68,7 +68,7 @@ export const createAlertAttachmentType = (): AttachmentTypeDefinition => {
       SECURITY_LABS_SEARCH_TOOL_ID,
       SECURITY_ALERTS_TOOL_ID,
       platformCoreTools.cases,
-      platformCoreTools.executeEsql,
+      platformCoreTools.generateEsql,
       platformCoreTools.productDocumentation,
     ],
     getAgentDescription: () => {

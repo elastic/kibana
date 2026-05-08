@@ -97,7 +97,7 @@ describe('createAlertAttachmentType', () => {
         expect(tools).toContain(SECURITY_LABS_SEARCH_TOOL_ID);
         expect(tools).toContain(SECURITY_ALERTS_TOOL_ID);
         expect(tools).toContain(platformCoreTools.cases);
-        expect(tools).toContain(platformCoreTools.executeEsql);
+        expect(tools).toContain(platformCoreTools.generateEsql);
         expect(tools).toContain(platformCoreTools.productDocumentation);
       }
     });

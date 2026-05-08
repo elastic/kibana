@@ -63,8 +63,9 @@ describe('registerAttachments', () => {
     expect(attachmentType.id).toBe(ESQL_QUERY_RESULTS_ATTACHMENT_TYPE);
   });
 
-  it('exposes executeEsql and createVisualization tools', () => {
+  it('exposes generateEsql, executeEsql, and createVisualization tools', () => {
     expect(attachmentType.getTools?.()).toEqual([
+      platformCoreTools.generateEsql,
       platformCoreTools.executeEsql,
       platformCoreTools.createVisualization,
     ]);

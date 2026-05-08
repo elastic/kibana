@@ -16,6 +16,7 @@ import rcaSkillContent from './skill.md.text';
 const RCA_TOOL_IDS = [
   platformStreamsSigEventsTools.searchKnowledgeIndicators,
   platformCoreTools.executeEsql,
+  platformCoreTools.generateEsql,
   OBSERVABILITY_GET_LOGS_TOOL_ID,
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   OBSERVABILITY_GET_INDEX_INFO_TOOL_ID,

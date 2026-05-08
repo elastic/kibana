@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Builtin Tools API', () => {
     describe(`DELETE /api/agent_builder/tools/{toolName}`, () => {
       it('should return 400 error when attempting to delete any read-only builtin system tool', async () => {
-        const toolId = platformCoreTools.executeEsql;
+        const toolId = platformCoreTools.generateEsql;
         const response = await supertest
           .delete(`/api/agent_builder/tools/${toolId}`)
           .set('kbn-xsrf', 'kibana')

@@ -42,8 +42,7 @@ Use this skill when:
 - Prefer ECS field names for cross-source portability
 
 ### 3. Explore Data Iteratively
-- Compose ES|QL by following the 'elasticsearch-esql' skill for syntax, time-series patterns, and feature availability, then run queries with 'platform.core.execute_esql'
-- Start with broad queries to establish baselines
+- Start with broad queries to establish baselines using 'platform.core.generate_esql' and 'platform.core.execute_esql'
 - Always scope queries with @timestamp ranges: WHERE @timestamp >= NOW() - 7 DAYS
 - Use STATS ... BY for aggregated views before drilling into raw events
 - Chain WHERE clauses to iteratively narrow down — avoid overly complex single queries
@@ -201,7 +200,7 @@ FROM logs-endpoint.events.process-*
     },
   ],
   getRegistryTools: () => [
-    platformCoreTools.testEsql,
+    platformCoreTools.generateEsql,
     platformCoreTools.executeEsql,
     platformCoreTools.search,
     platformCoreTools.listIndices,

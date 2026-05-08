@@ -13,6 +13,7 @@ import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { DISCOVER_DATA_ANALYSIS_SKILL_ID } from '../../common/agent_builder';
 
 const TOOL_IDS = [
+  platformCoreTools.generateEsql,
   platformCoreTools.executeEsql,
   platformCoreTools.search,
   platformCoreTools.listIndices,
@@ -42,7 +43,7 @@ This skill operates only in ES|QL mode. Before anything else, read the screen_co
 ### Critical Rules
 - ALWAYS read the column names from the attached ES|QL query results BEFORE writing any query. NEVER guess column names — use ONLY the exact column names listed in the attachment. For example, if the attachment lists a column named "@timestamp", use "@timestamp". If it lists "timestamp", use "timestamp". If there is no timestamp column, skip time-based queries.
 - ALWAYS format ES|QL queries as esql-tagged code blocks in your response (use triple backticks with "esql" language tag). This ensures the user gets a copy button on each query.
-- ALWAYS compose ES|QL queries by following the elasticsearch-esql skill (which covers ES|QL syntax, common patterns, and feature availability). Use the exact column names and index from the attachment. For execution, pass the composed query to executeEsql.
+- ALWAYS use the generateEsql tool to produce ES|QL queries — both for queries you will execute and for queries you suggest to the user. This ensures correct ES|QL syntax. When calling generateEsql, describe what you want in natural language and include the exact column names and index from the attachment. For execution, pass the generated query to executeEsql.
 - NEVER call getIndexMapping. All field names and types are already in the ES|QL query results attachment — use those directly.
 - NEVER use markdown tables in your responses — they do not render correctly in the chat UI. Use bullet lists or plain text instead.
 
@@ -53,7 +54,7 @@ This skill operates only in ES|QL mode. Before anything else, read the screen_co
 
 #### Path A: Raw document results (no aggregation in query)
 The sample rows are only for understanding the schema — do NOT just describe them.
-1. Run 2-3 SEPARATE, FOCUSED aggregation queries against the FULL dataset BEFORE writing any analysis. Do NOT run more than 3 — additional queries waste context. For each query, compose ES|QL (per the elasticsearch-esql skill) using the exact column names and index from the attachment, then run it with executeEsql.
+1. Run 2-3 SEPARATE, FOCUSED aggregation queries against the FULL dataset BEFORE writing any analysis. Do NOT run more than 3 — additional queries waste context. For each query, use generateEsql to produce the query, then executeEsql to run it. When calling generateEsql, describe what you want in natural language and include the exact column names and index from the attachment.
 2. CRITICAL: Each query must group by ONE field only (at most two). NEVER group by more than 2 fields in a single query — it creates too many rows and wastes tokens. Always use LIMIT 10 on aggregation results to keep output small.
 3. Run separate queries for different aspects. Good examples:
    - Response code distribution: STATS count BY response.keyword, sorted, limited to 10
@@ -65,10 +66,10 @@ The sample rows are only for understanding the schema — do NOT just describe t
 The sample rows ARE the actual aggregated results — analyze them directly.
 1. Interpret what the aggregation computes and present the results with real numbers from the rows.
 2. Highlight patterns, rankings, outliers, or notable distributions visible in the results.
-3. Optionally run 1 complementary query to deepen the analysis (compose ES|QL per the elasticsearch-esql skill, then run with executeEsql).
+3. Optionally run 1 complementary query to deepen the analysis (use generateEsql then executeEsql).
 
 #### Common rules for both paths
-- If a query fails, compose a corrected ES|QL query (per the elasticsearch-esql skill) and retry with executeEsql.
+- If a query fails, use generateEsql to produce a corrected query and retry.
 - Always present analysis based on ACTUAL results with real numbers.
 
 ### Visualizations
@@ -81,7 +82,7 @@ Use the same ES|QL query that produced the data you are visualizing.
 Mention the time range from the attachment in your overview. Do NOT run a separate query for data freshness — it is already provided in the attachment.
 
 ### On-Demand Analysis Capabilities
-The following analyses should ONLY be performed when the user explicitly asks for them (e.g. "any data quality issues?", "find correlations"). Do NOT run them as part of the default analysis. Always compose ES|QL by following the elasticsearch-esql skill before running queries with executeEsql.
+The following analyses should ONLY be performed when the user explicitly asks for them (e.g. "any data quality issues?", "find correlations"). Do NOT run them as part of the default analysis. Always use generateEsql to produce queries for these analyses.
 When responding to an on-demand request, return ONLY the requested analysis. Do NOT include the full Response Structure (overview, visualization, drill-down queries) — those are only for the initial "analyze my data" flow.
 
 #### Correlation Discovery (only when asked)
@@ -91,15 +92,15 @@ When responding to an on-demand request, return ONLY the requested analysis. Do 
 
 #### Time-over-Time Comparison (only when asked)
 When the user asks to compare time periods (e.g. "compare with last week", "how does today compare to yesterday"):
-1. Compose a SINGLE ES|QL query (per the elasticsearch-esql skill) that buckets by week (or appropriate period) so both time periods appear in one result. For example: STATS count = COUNT(*) BY BUCKET(@timestamp, 1 week), SORT bucket, LIMIT 10. This avoids running two separate queries.
-2. Execute it with executeEsql and compare the buckets: highlight absolute values, differences, and what grew or shrank.
+1. Use generateEsql to produce a SINGLE query that buckets by week (or appropriate period) so both time periods appear in one result. For example: STATS count = COUNT(*) BY BUCKET(@timestamp, 1 week), SORT bucket, LIMIT 10. This avoids running two separate queries.
+2. Execute it and compare the buckets: highlight absolute values, differences, and what grew or shrank.
 3. Calculate percentage changes yourself in the response text.
 
 #### Field Statistics (only when asked)
 When the user asks about field statistics, field distributions, or cardinality (e.g. "show field stats", "what are the top values?"):
 1. Identify the key fields from the attachment columns. Do NOT call getIndexMapping — use the column names and types already in the attachment.
-2. For categorical/keyword fields: compose an ES|QL query that counts occurrences of each value (STATS count BY field, SORT count DESC, LIMIT 10) and run it with executeEsql. Do NOT try to compute percentages in ES|QL — instead, calculate percentages yourself from the raw counts and the total, and present them in your response text (e.g. "status 200: 12,832 (91.2%)").
-3. For numeric fields: compose an ES|QL query that computes MIN, MAX, AVG of the field and run it with executeEsql.
+2. For categorical/keyword fields: use generateEsql to produce a query that counts occurrences of each value (STATS count BY field, SORT count DESC, LIMIT 10). Do NOT try to compute percentages in ES|QL — instead, calculate percentages yourself from the raw counts and the total, and present them in your response text (e.g. "status 200: 12,832 (91.2%)").
+3. For numeric fields: use generateEsql to produce a query that computes MIN, MAX, AVG of the field.
 4. For timestamp fields: report the time range (oldest and newest values).
 5. Present a concise summary per field. Skip fields that are not useful (e.g. unique IDs, raw text).
 6. Do NOT use markdown tables — they do not render well in the chat. Use bullet lists instead (e.g. "- 200: 12,832 (91.2%)").
@@ -117,7 +118,7 @@ Present the results from ALL 2-3 queries you ran (not just one). Include your in
 Call the createVisualization tool here to render a chart for the most important finding. Do not skip this step.
 
 #### 4. Drill-Down Queries
-You MUST include this section after the visualization. Write 3 targeted follow-up ES|QL queries directly in esql-tagged code blocks (do NOT call executeEsql for these — they are suggestions, not executed). Each query should drill into a specific finding from your analysis using WHERE clauses:
+You MUST include this section after the visualization. Write 3 targeted follow-up ES|QL queries directly in esql-tagged code blocks (do NOT call generateEsql for these — they are suggestions, not executed). Each query should drill into a specific finding from your analysis using WHERE clauses:
 1. A drill-down into the most interesting pattern or anomaly you found (e.g. filter to the time window where a spike occurred, or to the specific category that dominates the distribution).
 2. A correlation or comparison query (e.g. break down a metric by a second field to see if the pattern holds across categories, or compare two time windows).
 3. An outlier or edge-case exploration (e.g. filter to extreme values, errors, rare categories, or the tail of a distribution).

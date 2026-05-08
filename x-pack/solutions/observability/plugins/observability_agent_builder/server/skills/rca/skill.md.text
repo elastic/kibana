@@ -186,26 +186,24 @@ Write out your hypotheses explicitly before proceeding to Step A-4. For example:
 >
 > H2 (Medium): Payment service is receiving malformed requests from checkout.
 >   Supporting: Feature KI "log_patterns" (confidence=55, "invalid JSON payload received").
->   Test: compose ES|QL (per the elasticsearch-esql skill) to count "invalid JSON" messages in payment stream in the last hour, then run via execute_esql.
+>   Test: generate_esql to count "invalid JSON" messages in payment stream in the last hour.
 
 ### Step A-4: Test Each Hypothesis — Highest Confidence First
 
 For each hypothesis, execute its test query. Stop when one is confirmed (returns evidence).
 
-**Execution priority — reuse existing Query KI ES|QL before composing a new one:**
+**Execution priority — existing Query KI ES|QL before `generate_esql`:**
 - When a hypothesis cites a **Query KI**, its `query.esql.query` is the **primary** test: call
-  `execute_esql` (with time scoping and LIMIT rules below) **before** composing a new query.
-  Compose a new ES|QL query (following the elasticsearch-esql skill) for the same hypothesis
-  only if `execute_esql` still fails after you adapt the KI query (time filter, field fixes) or
-  the stored ES|QL is missing or unusable.
+  `execute_esql` (with time scoping and LIMIT rules below) **before** any `generate_esql` for
+  that hypothesis. Use `generate_esql` for the same hypothesis only if `execute_esql` still
+  fails after you adapt the KI query (time filter, field fixes) or the stored ES|QL is missing or unusable.
 - When a hypothesis is **Feature-only** (no query KI in the citation), scan **every Query KI**
   returned in Step A-2: if any query's title, description, evidence, or `esql.query` clearly
   tests the **same mechanism or pattern** (same error signature, component, or condition), run
   **that** `esql.query` via `execute_esql` **first**. Prefer backed queries and higher
   `severity_score` when multiple queries match.
-- Compose a new ES|QL query (per the elasticsearch-esql skill) and run it via `execute_esql`
-  only when **no** loaded Query KI supplies a suitable ES|QL — e.g. the pattern exists only as
-  a feature, or you need a genuinely new aggregate that no query KI encodes.
+- Call `generate_esql` only when **no** loaded Query KI supplies a suitable ES|QL to execute —
+  e.g. the pattern exists only as a feature, or you need a genuinely new aggregate that no query KI encodes.
 
 **Testing Query KI hypotheses:**
 Start from the KI's `query.esql.query`, apply **time scoping** and **row caps** (below), then call `execute_esql`.
@@ -229,17 +227,14 @@ Interpretation:
 
 **Testing Feature KI hypotheses:**
 Feature KIs do not carry a pre-built query. **First** apply the priority above: reuse a matching
-Query KI's `esql.query` with `execute_esql` if any. Only if none apply, compose a new ES|QL query
-following the elasticsearch-esql skill:
-- Target the stream as the source (`FROM <feature.stream_name>`)
-- Pass the investigation window via `time_range` to `execute_esql`
-- Incorporate the feature's `description`, key values from `properties`, and the `filter`
-  condition into your `WHERE` clause so the query scopes correctly
-- The query should confirm what the feature suggests, e.g. "count occurrences of [error pattern]
-  matching [filter] per 5-minute bucket"
-- Prefer **bounded** results: use `STATS` / aggregates; if the query returns raw events, append
-  `| LIMIT 20` (or lower).
-- Run the composed query with `execute_esql` against live data.
+Query KI's `esql.query` with `execute_esql` if any. Only if none apply, construct a new query using `generate_esql`:
+- Set `index` to the stream name (`feature.stream_name`)
+- Set `time_range` to the investigation window
+- Set `context` to include the feature's `description`, key values from `properties`,
+  and the `filter` condition (so the generated query scopes correctly)
+- Describe what you want to confirm: "count occurrences of [error pattern] matching [filter] per 5-minute bucket"
+- Ask for **bounded** results: prefer `STATS` / aggregates; if the generated query returns raw events, it must include `| LIMIT 20` (or lower).
+- Run `generate_esql` to obtain and execute ES|QL against live data.
 
 **After each query result:**
 - Write down what the result tells you: how many events? Which time range? Which services?
@@ -254,19 +249,15 @@ Once a hypothesis is confirmed, run two additional queries:
 
 **Onset** — when did it start?
 If you confirmed the issue using a Query KI's ES|QL, prefer adapting that same query (e.g. add a
-`STATS` with `MIN(@timestamp)` in one row) and run via `execute_esql` **before** composing a new
-query. Otherwise compose a new ES|QL query (per the elasticsearch-esql skill) to find the earliest
-occurrence of the error pattern within a wider window (e.g. now-24h) and run it with
-`execute_esql`. Use **MIN(@timestamp) inside a `STATS`** (or similar) so the tool returns **one
-row**, not every matching document. Cross-reference with the Feature KI's `last_seen` field (when
-the feature was last observed) as a sanity check.
+`STATS` with `MIN(@timestamp)` in one row) and `execute_esql` **before** `generate_esql`.
+Otherwise use `generate_esql` to find the earliest occurrence of the error pattern within a wider
+window (e.g. now-24h). Use **MIN(@timestamp) inside a `STATS`** (or similar) so the tool returns **one row**, not every matching document. Cross-reference with the Feature KI's
+`last_seen` field (when the feature was last observed) as a sanity check.
 
 **Blast radius** — what else is affected?
 Prefer extending the **confirmed** Query KI pipeline with a grouping `STATS` (e.g. by `service.name` or
 `host.name`) and `execute_esql` when filters stay aligned with the KI. If no Query KI pipeline fits,
-compose a new ES|QL query (per the elasticsearch-esql skill) for the same aggregate shape
-(**aggregate** output, not raw dumps) and run it with `execute_esql`. If you must list raw events,
-include `LIMIT`. Compare with the Feature KI's `filter` condition — if it scopes to a single
+use `generate_esql` for the same aggregate shape (**aggregate** output, not raw dumps). If you must list raw events, include `LIMIT`. Compare with the Feature KI's `filter` condition — if it scopes to a single
 service, the failure may be contained; if the filter is broad, the blast radius is wider.
 
 ### Step A-6: Synthesize and Report
@@ -354,8 +345,8 @@ Call `get_logs` at least 3 times before answering.
 3. **Never state a root cause without tool evidence.** Every claim must trace to a KI or query result.
 4. **Validate stale KIs.** `status: "stale"` or `status: "expired"` = historical — always confirm with a live query.
 5. **Apply the KI's `filter` in derived queries.** Omitting it means operating on a different data slice.
-6. **Always scope queries to the investigation time window.** Pass `time_range` to `execute_esql`.
-7. **Cap ES|QL row volume on KI queries.** If a Query KI's ES|QL has no `LIMIT` and can return many raw rows, append `| LIMIT 20` (or **10** for very wide fields). Prefer aggregates over document dumps. **Run existing Query KI ES|QL via `execute_esql` before composing a new query** when any returned query tests the hypothesis (including Feature-only hypotheses matched to a related Query KI).
+6. **Always scope queries to the investigation time window.** Pass `time_range` to `execute_esql` / `generate_esql`.
+7. **Cap ES|QL row volume on KI queries.** If a Query KI's ES|QL has no `LIMIT` and can return many raw rows, append `| LIMIT 20` (or **10** for very wide fields). Prefer aggregates over document dumps. **Run existing Query KI ES|QL via `execute_esql` before `generate_esql`** when any returned query tests the hypothesis (including Feature-only hypotheses matched to a related Query KI).
 8. **0 rows = refuted. Move on.** Do not retry a refuted hypothesis with the same parameters.
 9. **Do not fabricate.** Never invent scores, IDs, query names, or ES|QL results.
 
@@ -398,7 +389,7 @@ User: "The payment service has been throwing database errors since 2pm."
 >
 > H2 (Medium-High): PostgreSQL is issuing slow query warnings, degrading throughput.
 >   Supporting: F2 (log_patterns, confidence=61, stale) — note: stale, must validate.
->   Test: compose ES|QL (per the elasticsearch-esql skill) to count slow query warnings in payment stream since 14:00, then run via execute_esql.
+>   Test: generate_esql to count slow query warnings in payment stream since 14:00.
 
 **A-4 — Test H1:**
 execute_esql(query="FROM payment | WHERE error.message LIKE \\"*too many connections*\\" | STATS count=COUNT(*)", time_range={from:"<investigation_window_start>", to:"now"})
@@ -407,15 +398,15 @@ execute_esql(query="FROM payment | WHERE error.message LIKE \\"*too many connect
 → H1 = Confirmed.
 
 **A-4 — Test H2 (for completeness):**
-execute_esql(query="FROM payment | WHERE error.message LIKE \\"*slow query*\\" | STATS count=COUNT(*) BY bucket=BUCKET(@timestamp, 5 minutes) | SORT bucket", time_range={from:"<investigation_window_start>", to:"now"})
+generate_esql(query="count slow query warnings in payment stream in the investigation window, grouped by 5min bucket", index="payment", time_range={from:"<investigation_window_start>", to:"now"})
 → Returns: a few slow-warning buckets, all **ending before** the main incident window in this scenario.
 → H2 = Refuted for this window. Slow queries preceded the pool exhaustion — likely a contributing factor, not the root cause.
 
 **A-5 — Timeline:**
-execute_esql(query="FROM payment | WHERE error.message LIKE \\"*too many connections*\\" | STATS earliest=MIN(@timestamp)", time_range={from:"now-24h", to:"now"})
+generate_esql(query="find MIN(@timestamp) for error.message matching 'too many connections' in payment stream in the last 24h", index="payment", time_range={from:"now-24h", to:"now"})
 → MIN(@timestamp) is **just before** the user-reported window — consistent with "since 2pm" ✓.
 
-Blast radius: execute_esql with a query grouping by service.name → only "payment" affected (F1 filter confirms).
+Blast radius: generate_esql to group by service.name → only "payment" affected (F1 filter confirms).
 
 **A-6 — Report:**
 Root Cause (Confirmed): The payment service exhausted its PostgreSQL connection pool shortly before / at the user-reported window.

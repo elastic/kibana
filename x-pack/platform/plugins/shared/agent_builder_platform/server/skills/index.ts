@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { elasticsearchEsqlSkill } from './elasticsearch_esql';
 export { graphCreationSkill } from './graph_creation_skill';
 export { visualizationCreationSkill } from './visualization_creation_skill';
 export { registerSkills } from './register_skills';

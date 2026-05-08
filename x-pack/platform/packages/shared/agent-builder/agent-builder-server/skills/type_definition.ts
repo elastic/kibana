@@ -29,7 +29,6 @@ export type SkillsDirectoryStructure = Directory<{
       alerting: FileDirectory;
       dashboard: FileDirectory;
       discover: FileDirectory;
-      esql: FileDirectory;
       streams: FileDirectory;
       visualization: FileDirectory;
       workflows: FileDirectory;
