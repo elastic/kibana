@@ -7,9 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { latencyOverallTransactionDistributionRoute } from './overall_transaction_distribution';
+import { latencyOverallSpanDistributionRoute } from './overall_span_distribution';
 
 export const latencyDistributionRouteDefinitions = {
   overallTransactionDistribution: latencyOverallTransactionDistributionRoute,
+  overallSpanDistribution: latencyOverallSpanDistributionRoute,
 };
 
 export type { LatencyOverallTransactionDistributionResponse } from './overall_transaction_distribution';
+export type { LatencyOverallSpanDistributionResponse } from './overall_span_distribution';
