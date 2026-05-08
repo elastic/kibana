@@ -38,28 +38,32 @@ Read `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fix
 
 ## Workflow
 
-### Phase A: Reproduce
+This skill runs in **two separate turns**. Read only the section that matches your
+current turn. Executing both turns in a single response is a protocol violation.
+
+---
+
+### Turn 1 — Reproduce
 
 Read and follow `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-reproduce/SKILL.md` in full.
 
-When complete, `bug-reproduce` will have written two files to the Kibana repo root:
-- `analysis.json` — classification, affected paths, reproduction steps, server args
-- `reproduction-report.md` — browser diagnostics, data path trace, user acknowledgement
+When `bug-reproduce` presents the reproduction report, **your response ends**. Write a
+one-line summary of what was found and tell the user: _"Reply to start the fix phase."_
+Then stop — no more tool calls, no more text. Do not read Turn 2. Do not start Phase B.
+The fact that you may already know the fix is irrelevant: your turn is over.
 
-### Handoff gate
+Turn 2 starts only when the user replies.
 
-Before proceeding to Phase B, verify:
-1. `reproduction-report.md` exists
+---
+
+### Turn 2 — Fix (only after the user replies to the reproduction report)
+
+**Handoff gate.** Before doing anything, verify all three:
+1. `reproduction-report.md` exists at the Kibana repo root
 2. Its `status` field is `reproduced`
 3. Its `user_acknowledged` field is `yes`
 
-If any of these are false, return to Phase A. A fix without confirmed reproduction is a guess — do not proceed to Phase B until all three conditions are met.
+If any are false, return to Turn 1. `user_acknowledged` must only be `yes` after a real
+user reply in this conversation — never written pre-emptively.
 
-`user_acknowledged` must only be `yes` if the user replied in the conversation after seeing
-the reproduction report. If the agent wrote that field without a real user reply, treat it
-as `pending` and return to Phase A.
-
-### Phase B: Fix
-
-Read and follow `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fix/SKILL.md` in full, with `analysis.json` and
-`reproduction-report.md` available as context.
+If all three pass, read and follow `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fix/SKILL.md` in full, with `analysis.json` and `reproduction-report.md` available as context.
