@@ -18,7 +18,7 @@ jest.mock('@kbn/ai-tools', () => {
 
   return {
     formatDocumentAnalysis: module.formatDocumentAnalysis,
-    mergeSampleDocumentsWithFieldCaps: jest.fn().mockImplementation(({ hits }) => {
+    mergeSampleDocumentsWithSchema: jest.fn().mockImplementation(({ hits }) => {
       return {
         total: hits.length,
         sampled: hits.length > 0 ? Object.keys(hits[0]._source || {}) : [],

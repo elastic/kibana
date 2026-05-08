@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { dateRangeQuery } from '@kbn/es-query';
+import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { getSampleDocuments } from './get_sample_documents';
-import { mergeSampleDocumentsWithFieldCaps } from './merge_sample_documents_with_field_caps';
+import type { ESQLSearchResponse } from '@kbn/es-types';
+import { dateRangeQuery } from '@kbn/es-query';
+import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
+import { getSampleDocumentsEsql } from './get_sample_documents';
+import { mergeSampleDocumentsWithSchema } from './merge_sample_documents_with_schema';
 
 export async function describeDataset({
   esClient,
@@ -17,42 +19,67 @@ export async function describeDataset({
   end,
   index,
   kql,
-  filter,
 }: {
   esClient: ElasticsearchClient;
   start: number;
   end: number;
   index: string | string[];
   kql?: string;
-  filter?: QueryDslQueryContainer | QueryDslQueryContainer[];
 }) {
-  const [fieldCaps, hits] = await Promise.all([
-    esClient.fieldCaps({
-      index,
-      fields: '*',
-      index_filter: {
-        bool: {
-          filter: dateRangeQuery(start, end),
-        },
-      },
-    }),
-    getSampleDocuments({
+  const [columns, sampleDocs, total] = await Promise.all([
+    getEsqlColumnSchema({ esClient, index, start, end }),
+    getSampleDocumentsEsql({
       esClient,
       index,
       start,
       end,
       kql,
-      filter,
     }),
+    runEsqlPopulationCount({ esClient, index, start, end, kql }),
   ]);
 
-  const total = hits.total;
+  const schema = columns.map((column) => {
+    return {
+      name: column.name,
+      types: column.originalTypes ?? [column.type],
+    };
+  });
 
-  const analysis = mergeSampleDocumentsWithFieldCaps({
-    hits: hits.hits,
-    total: total ?? 0,
-    fieldCaps,
+  const analysis = mergeSampleDocumentsWithSchema({
+    hits: sampleDocs.hits,
+    total,
+    schema,
   });
 
   return analysis;
+}
+
+async function runEsqlPopulationCount({
+  esClient,
+  index,
+  start,
+  end,
+  kql,
+}: {
+  esClient: ElasticsearchClient;
+  index: string | string[];
+  start: number;
+  end: number;
+  kql?: string;
+}): Promise<number> {
+  const indices = Array.isArray(index) ? index : [index];
+  let query = esql.from(indices);
+
+  if (kql) {
+    query = query.where`KQL(${esql.str(kql)})`;
+  }
+
+  const response = (await esClient.esql.query({
+    query: query.pipe`STATS total = COUNT(*)`.print('basic'),
+    filter: { bool: { filter: dateRangeQuery(start, end) } },
+    drop_null_columns: true,
+  })) as unknown as ESQLSearchResponse;
+  const total = response.values[0]?.[0];
+
+  return typeof total === 'number' ? total : 0;
 }

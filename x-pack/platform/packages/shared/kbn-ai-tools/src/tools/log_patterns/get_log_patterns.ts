@@ -26,6 +26,7 @@ import moment from 'moment';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
+import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
 import { pValueToLabel } from '../../utils/p_value_to_label';
 
 const MAX_DOCS_TO_SAMPLE = 100_000;
@@ -430,21 +431,16 @@ export async function getSigEventsLogPatternsEsql({
   fields,
   logger,
 }: SigEventsLogPatternEsqlOptions): Promise<LogPatternEsqlEntry[]> {
-  // Keep the same text-field gating as the DSL helper for now. This is still a
-  // fieldCaps probe, but the field-caps migration is tracked separately in
-  // https://github.com/elastic/streams-program/issues/1220.
-  const fieldCapsResponse = await esClient.fieldCaps('get_field_caps_for_sigevents_log_patterns', {
-    fields,
-    index_filter: {
-      bool: {
-        filter: [...dateRangeQuery(start, end)],
-      },
-    },
+  const columns = await getEsqlColumnSchema({
+    esClient: esClient.client,
     index,
-    types: ['text', 'match_only_text'],
+    start,
+    end,
   });
-  const fieldsInFieldCaps = Object.keys(fieldCapsResponse.fields);
-  const eligibleFields = fields.filter((field) => fieldsInFieldCaps.includes(field));
+  const textColumnNames = new Set(
+    columns.filter((column) => column.type === 'text').map((column) => column.name)
+  );
+  const eligibleFields = fields.filter((field) => textColumnNames.has(field));
 
   if (!eligibleFields.length) {
     return [];

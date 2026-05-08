@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import type { FieldCapsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { mergeSampleDocumentsWithFieldCaps } from './merge_sample_documents_with_field_caps';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { mergeSampleDocumentsWithSchema } from './merge_sample_documents_with_schema';
 
-const createFieldCaps = (fields: string[]): FieldCapsResponse => {
-  return {
-    fields: fields.reduce<Record<string, Record<string, unknown>>>((accumulator, field) => {
-      accumulator[field] = { keyword: {} };
-      return accumulator;
-    }, {}),
-  } as unknown as FieldCapsResponse;
+const createSchema = (fields: string[]) => {
+  return fields.map((field) => ({ name: field, types: ['keyword'] }));
 };
 
-describe('mergeSampleDocumentsWithFieldCaps', () => {
+describe('mergeSampleDocumentsWithSchema', () => {
   it('counts documents for multi-valued fields and tracks empty coverage', () => {
     const hits: SearchHit[] = [
       {
@@ -46,10 +41,10 @@ describe('mergeSampleDocumentsWithFieldCaps', () => {
       } as SearchHit,
     ];
 
-    const analysis = mergeSampleDocumentsWithFieldCaps({
+    const analysis = mergeSampleDocumentsWithSchema({
       total: 100,
       hits,
-      fieldCaps: createFieldCaps(['attribute.a', 'tags', 'optional']),
+      schema: createSchema(['attribute.a', 'tags', 'optional']),
     });
 
     expect(analysis.total).toBe(100);
