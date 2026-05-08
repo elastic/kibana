@@ -190,6 +190,9 @@ const GraphViewInner: React.FunctionComponent<GraphViewProps> = ({
             componentType={
               selection.type === 'component' ? selection.node.data.componentType : 'pipeline'
             }
+            pipelineId={
+              selection.type === 'component' ? selection.node.data.pipelineId : selection.pipelineId
+            }
             config={config}
             health={health}
             onClose={handleClose}

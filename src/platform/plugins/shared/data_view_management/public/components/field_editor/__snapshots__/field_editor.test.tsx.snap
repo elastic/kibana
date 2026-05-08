@@ -968,6 +968,10 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
               "value": "tdigest",
             },
             Object {
+              "text": "flattened",
+              "value": "flattened",
+            },
+            Object {
               "text": "conflict",
               "value": "conflict",
             },

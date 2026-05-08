@@ -35,7 +35,7 @@
           "\"complete\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
-        "lineNumber": 45,
+        "lineNumber": 50,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -54,7 +54,7 @@
           "\"logs_essentials\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
-        "lineNumber": 49,
+        "lineNumber": 54,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -168,7 +168,7 @@
           "\"complete\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
-        "lineNumber": 53,
+        "lineNumber": 58,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -187,7 +187,7 @@
           "\"essentials\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
-        "lineNumber": 57,
+        "lineNumber": 62,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -225,7 +225,7 @@
           "\"search_ai_lake\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
-        "lineNumber": 61,
+        "lineNumber": 66,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -245,6 +245,44 @@
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
         "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_VECTORDB_PROJECT",
+        "type": "string",
+        "tags": [],
+        "label": "KIBANA_VECTORDB_PROJECT",
+        "description": [
+          "\nConstant for the Kibana Vectordb serverless project type."
+        ],
+        "signature": [
+          "\"vectordb\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
+        "lineNumber": 29,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/projects-solutions-groups",
+        "id": "def-common.KIBANA_VECTORDB_SOLUTION",
+        "type": "string",
+        "tags": [],
+        "label": "KIBANA_VECTORDB_SOLUTION",
+        "description": [
+          "\nConstant for the Kibana Vectordb solution."
+        ],
+        "signature": [
+          "\"vectordb\""
+        ],
+        "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
+        "lineNumber": 29,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -298,7 +336,7 @@
           "\nA type that defines the existing groups (platform + solutions)."
         ],
         "signature": [
-          "\"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"platform\""
+          "\"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"vectordb\" | \"platform\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
         "lineNumber": 22,
@@ -320,7 +358,7 @@
           "\"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
-        "lineNumber": 80,
+        "lineNumber": 86,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -336,10 +374,10 @@
           "\nA type that defines the existing serverless project types."
         ],
         "signature": [
-          "\"security\" | \"es\" | \"workplaceai\" | \"oblt\""
+          "\"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
-        "lineNumber": 37,
+        "lineNumber": 42,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -355,10 +393,10 @@
           "\nA type that defines the existing solutions."
         ],
         "signature": [
-          "\"search\" | \"security\" | \"observability\" | \"workplaceai\""
+          "\"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"vectordb\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
-        "lineNumber": 37,
+        "lineNumber": 42,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -374,7 +412,7 @@
           "\nThe groups to which a module can belong.\n'common' is the default for uncategorised modules."
         ],
         "signature": [
-          "\"search\" | \"security\" | \"common\" | \"observability\" | \"workplaceai\" | \"platform\""
+          "\"search\" | \"security\" | \"common\" | \"observability\" | \"workplaceai\" | \"vectordb\" | \"platform\""
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
         "lineNumber": 27,
@@ -414,7 +452,7 @@
           "\nA list of all Kibana groups (platform + solutions)."
         ],
         "signature": [
-          "readonly [\"platform\", \"observability\", \"security\", \"search\", \"workplaceai\"]"
+          "readonly [\"platform\", \"observability\", \"security\", \"search\", \"workplaceai\", \"vectordb\"]"
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/module_groups.ts",
         "lineNumber": 20,
@@ -433,10 +471,10 @@
           "\nPossible product tiers for Kibana solutions."
         ],
         "signature": [
-          "{ readonly observability: readonly [\"complete\", \"logs_essentials\"]; readonly security: readonly [\"complete\", \"essentials\", \"search_ai_lake\"]; readonly search: readonly []; readonly workplaceai: readonly []; }"
+          "{ readonly observability: readonly [\"complete\", \"logs_essentials\"]; readonly security: readonly [\"complete\", \"essentials\", \"search_ai_lake\"]; readonly search: readonly []; readonly workplaceai: readonly []; readonly vectordb: readonly []; }"
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
-        "lineNumber": 66,
+        "lineNumber": 71,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -452,10 +490,10 @@
           "\nA list of all Kibana serverless project types."
         ],
         "signature": [
-          "readonly [\"oblt\", \"security\", \"es\", \"workplaceai\"]"
+          "readonly [\"oblt\", \"security\", \"es\", \"workplaceai\", \"vectordb\"]"
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/project_types.ts",
-        "lineNumber": 30,
+        "lineNumber": 34,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -471,10 +509,10 @@
           "\nA list of all Kibana solutions."
         ],
         "signature": [
-          "readonly [\"observability\", \"security\", \"search\", \"workplaceai\"]"
+          "readonly [\"observability\", \"security\", \"search\", \"workplaceai\", \"vectordb\"]"
         ],
         "path": "src/platform/packages/private/kbn-projects-solutions-groups/src/solutions.ts",
-        "lineNumber": 30,
+        "lineNumber": 34,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,

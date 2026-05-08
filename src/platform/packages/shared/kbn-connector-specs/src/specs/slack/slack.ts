@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AxiosError, AxiosResponse } from 'axios';
 import type { ConnectorSpec, ActionContext } from '../../connector_spec';
 import {
@@ -202,11 +202,22 @@ export const Slack: ConnectorSpec = {
           tokenType: 'Bearer',
         },
       },
+      {
+        type: 'ears',
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'slack',
+          scope:
+            'channels:read chat:write files:read groups:read im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
+        },
+      },
     ],
   },
 
   // No additional configuration needed beyond OAuth credentials
-  schema: z.object({}),
+  schema: lazySchema(() => z.object({})),
 
   actions: {
     // https://api.slack.com/methods/assistant.search.context

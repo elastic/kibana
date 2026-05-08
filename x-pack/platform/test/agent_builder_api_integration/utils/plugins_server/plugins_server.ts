@@ -7,12 +7,12 @@
 
 import http from 'http';
 import archiver from 'archiver';
-import type { ToolingLog } from '@kbn/tooling-log';
 
 interface PluginsTestServerOptions {
   port: number;
   assetsDir: string;
-  log: ToolingLog;
+  /** Minimal logger surface (e.g. Scout `log` or FTR `ToolingLog`). */
+  log: { info: (message: string) => void };
 }
 
 /**
@@ -26,7 +26,7 @@ export class PluginsTestServer {
   private server?: http.Server;
   private readonly port: number;
   private readonly assetsDir: string;
-  private readonly log: ToolingLog;
+  private readonly log: { info: (message: string) => void };
 
   constructor({ port, assetsDir, log }: PluginsTestServerOptions) {
     this.port = port;
