@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
+  const retry = getService('retry');
   const monacoEditor = getService('monacoEditor');
   const testSubjects = getService('testSubjects');
   const { common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
@@ -86,7 +87,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.refresh();
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
-      expect(await dataGrid.getHeaderFields()).to.eql(columns);
+      await retry.try(async () => {
+        expect(await dataGrid.getHeaderFields()).to.eql(columns);
+      });
 
       await discover.saveSearch(SAVED_SEARCH_NON_TRANSFORMATIONAL_CUSTOM_COLUMNS);
       await header.waitUntilLoadingHasFinished();
