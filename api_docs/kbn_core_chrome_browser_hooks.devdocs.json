@@ -51,7 +51,7 @@
           "\nReturns the ID of the currently active solution navigation, or `null` when\nno solution nav is active (e.g. in classic nav mode)."
         ],
         "signature": [
-          "() => \"security\" | \"es\" | \"workplaceai\" | \"oblt\" | null"
+          "() => \"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\" | null"
         ],
         "path": "src/core/packages/chrome/browser-hooks/use_active_solution_nav_id.ts",
         "lineNumber": 14,

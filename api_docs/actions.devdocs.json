@@ -30,7 +30,7 @@
           ", void, never, never>"
         ],
         "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
-        "lineNumber": 41,
+        "lineNumber": 47,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -46,7 +46,7 @@
               "any"
             ],
             "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
-            "lineNumber": 47,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -65,7 +65,7 @@
                   ">"
                 ],
                 "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
-                "lineNumber": 47,
+                "lineNumber": 53,
                 "columnNumber": 15,
                 "deprecated": false,
                 "docsReferencedTypeName": "PluginInitializerContext",
@@ -93,7 +93,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
-            "lineNumber": 55,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -111,7 +111,7 @@
               "() => void"
             ],
             "path": "x-pack/platform/plugins/shared/actions/public/plugin.ts",
-            "lineNumber": 65,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

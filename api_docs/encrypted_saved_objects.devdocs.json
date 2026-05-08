@@ -1043,7 +1043,7 @@
             "SavedObjectsEncryptionExtension"
           ],
           "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-          "lineNumber": 51,
+          "lineNumber": 48,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,

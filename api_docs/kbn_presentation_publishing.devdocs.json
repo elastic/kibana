@@ -837,7 +837,7 @@
           "<StateT, object>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
-        "lineNumber": 59,
+        "lineNumber": 58,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -853,7 +853,7 @@
               "unknown"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
-            "lineNumber": 60,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7377,13 +7377,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.HasLibraryTransforms.checkForDuplicateTitle",
+            "id": "def-common.HasLibraryTransforms.hasLibraryItemWithTitle",
             "type": "Function",
             "tags": [],
-            "label": "checkForDuplicateTitle",
+            "label": "hasLibraryItemWithTitle",
             "description": [],
             "signature": [
-              "(newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>"
+              "(title: string) => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
             "lineNumber": 17,
@@ -7393,51 +7393,17 @@
             "children": [
               {
                 "parentPluginId": "@kbn/presentation-publishing",
-                "id": "def-common.HasLibraryTransforms.checkForDuplicateTitle.$1",
+                "id": "def-common.HasLibraryTransforms.hasLibraryItemWithTitle.$1",
                 "type": "string",
                 "tags": [],
-                "label": "newTitle",
+                "label": "title",
                 "description": [],
                 "signature": [
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
-                "lineNumber": 18,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/presentation-publishing",
-                "id": "def-common.HasLibraryTransforms.checkForDuplicateTitle.$2",
-                "type": "boolean",
-                "tags": [],
-                "label": "isTitleDuplicateConfirmed",
-                "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
-                "lineNumber": 19,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/presentation-publishing",
-                "id": "def-common.HasLibraryTransforms.checkForDuplicateTitle.$3",
-                "type": "Function",
-                "tags": [],
-                "label": "onTitleDuplicate",
-                "description": [],
-                "signature": [
-                  "() => void"
-                ],
-                "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
                 "lineNumber": 20,
-                "columnNumber": 5,
+                "columnNumber": 29,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -7458,7 +7424,7 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
-            "lineNumber": 23,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7480,7 +7446,7 @@
               "() => Promise<boolean>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
-            "lineNumber": 30,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7502,7 +7468,7 @@
               "(title: string) => Promise<string>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
-            "lineNumber": 37,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7518,7 +7484,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
-                "lineNumber": 42,
+                "lineNumber": 41,
                 "columnNumber": 19,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7542,7 +7508,7 @@
               "(newId: string) => ByReferenceSerializedState"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
-            "lineNumber": 44,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -7558,7 +7524,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
-                "lineNumber": 49,
+                "lineNumber": 48,
                 "columnNumber": 35,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -7582,7 +7548,7 @@
               "() => ByValueSerializedState"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_library_transforms.ts",
-            "lineNumber": 51,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
