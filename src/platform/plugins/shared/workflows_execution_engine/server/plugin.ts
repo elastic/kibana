@@ -17,7 +17,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { ExecutionStatus, isTerminalStatus, WorkflowRepository } from '@kbn/workflows';
+import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
   ConcurrencySettings,
@@ -31,7 +31,7 @@ import {
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
-  cancelWaitingWorkflow,
+  cancelWorkflow,
   checkAndSkipIfExistingScheduledExecution,
   resumeWorkflow,
   runWorkflow,
@@ -48,7 +48,6 @@ import { WorkflowExecutionTelemetryClient } from './lib/telemetry/workflow_execu
 import { validateWorkflowInputs } from './lib/validate_workflow_inputs';
 import { WorkflowsMeteringService } from './metering/metering_service';
 import { initializeLogsRepositoryDataStream } from './repositories/logs_repository/data_stream';
-import { StepExecutionRepository } from './repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from './repositories/workflow_execution_repository';
 import { initializeTriggerEventsDataStream, TriggerEventHandler } from './trigger_events';
 import type {
@@ -1138,45 +1137,14 @@ export class WorkflowsExecutionEnginePlugin
       schedulingRequest
     ) => {
       await checkLicense(plugins.licensing);
-
       await this.initialize(coreStart);
-      const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+
+      await cancelWorkflow({
         workflowExecutionId,
-        spaceId
-      );
-
-      if (!workflowExecution) {
-        throw new WorkflowExecutionNotFoundError(workflowExecutionId);
-      }
-
-      if (isTerminalStatus(workflowExecution.status)) {
-        return;
-      }
-
-      if (workflowExecution.status === ExecutionStatus.WAITING_FOR_INPUT) {
-        await cancelWaitingWorkflow({
-          workflowExecution,
-          workflowExecutionRepository,
-          stepExecutionRepository: new StepExecutionRepository(
-            coreStart.elasticsearch.client.asInternalUser
-          ),
-        });
-        return;
-      }
-
-      await workflowExecutionRepository.updateWorkflowExecution({
-        id: workflowExecution.id,
-        ...(workflowExecution.status === ExecutionStatus.PENDING
-          ? { status: ExecutionStatus.CANCELLED }
-          : {}),
-        cancelRequested: true,
-        cancellationReason: 'Cancelled by user',
-        cancelledAt: new Date().toISOString(),
-        cancelledBy: 'system', // TODO: set user if available
-      });
-      await workflowTaskManager.forceRunIdleTasks(workflowExecution.id, {
-        spaceId: workflowExecution.spaceId,
-        fakeRequest: schedulingRequest,
+        spaceId,
+        schedulingRequest,
+        workflowExecutionRepository,
+        workflowTaskManager,
       });
     };
 

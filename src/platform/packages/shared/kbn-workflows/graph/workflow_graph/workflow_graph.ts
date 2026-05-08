@@ -13,7 +13,7 @@ import { createTypedGraph } from './create_typed_graph';
 import type { WorkflowSettings, WorkflowYaml } from '../..';
 import { convertToWorkflowGraph } from '../build_execution_graph/build_execution_graph';
 import type { GraphNodeUnion } from '../types';
-import { isEnterStepTimeoutZone, isEnterWorkflowTimeoutZone } from '../types/guards';
+import { isEnterWorkflowTimeoutZone } from '../types/guards';
 
 /**
  * A class that encapsulates the logic of workflow graph operations and provides
@@ -174,22 +174,6 @@ export class WorkflowGraph {
   public getDirectSuccessors(nodeId: string): GraphNodeUnion[] {
     const successors = this.graph.successors(nodeId) || [];
     return successors.map((id) => this.graph.node(id));
-  }
-
-  /**
-   * Step-level timeout from a direct `enter-timeout-zone` predecessor with the same `stepId`.
-   * Incorrect if enter-foreach / enter-while sits between that zone and `nodeId`.
-   */
-  public getEnclosingStepLevelTimeout(nodeId: string): string | undefined {
-    const target = this.graph.node(nodeId);
-    const predIds = this.graph.predecessors(nodeId) ?? [];
-    for (const predId of predIds) {
-      const n = this.graph.node(predId);
-      if (isEnterStepTimeoutZone(n) && n.stepId === target.stepId) {
-        return n.timeout;
-      }
-    }
-    return undefined;
   }
 
   /** Workflow settings timeout from the workflow-level enter-timeout-zone node, if present. */

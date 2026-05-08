@@ -76,16 +76,7 @@ describe('convertToWorkflowGraph', () => {
       });
     });
 
-    it('WorkflowGraph.getEnclosingStepLevelTimeout returns timeout for the wrapped step node', () => {
-      const executionGraph = convertToWorkflowGraph(workflowDefinition as WorkflowYaml);
-      const wfGraph = new WorkflowGraph(executionGraph);
-      expect(wfGraph.getEnclosingStepLevelTimeout('testAtomicStep1')).toBe('30s');
-      expect(wfGraph.getEnclosingStepLevelTimeout('enterTimeoutZone_testAtomicStep1')).toBe(
-        undefined
-      );
-    });
-
-    it('getEnclosingStepLevelTimeout ignores other steps for workflow.execute', () => {
+    it('only steps with an explicit timeout get a wrapping enter-timeout-zone node', () => {
       const multiStepWorkflow = {
         name: 'Parent with timed step then workflow.execute',
         version: '1' as const,
@@ -107,10 +98,15 @@ describe('convertToWorkflowGraph', () => {
       } as WorkflowYaml;
 
       const executionGraph = convertToWorkflowGraph(multiStepWorkflow);
-      const wfGraph = new WorkflowGraph(executionGraph);
 
-      expect(wfGraph.getEnclosingStepLevelTimeout('parent-preflight')).toBe('30s');
-      expect(wfGraph.getEnclosingStepLevelTimeout('run-child-sync')).toBeUndefined();
+      expect(executionGraph.node('enterTimeoutZone_parent-preflight')).toEqual(
+        expect.objectContaining({
+          type: 'enter-timeout-zone',
+          stepId: 'parent-preflight',
+          timeout: '30s',
+        })
+      );
+      expect(executionGraph.node('enterTimeoutZone_run-child-sync')).toBeUndefined();
     });
   });
 

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { cancelWaitingWorkflow } from '../lib/cancel_waiting_workflow';
 export { setupDependencies } from './setup_dependencies';
 export { runWorkflow } from './run_workflow';
 export { resumeWorkflow } from './resume_workflow';
+export { cancelWorkflow } from './cancel_workflow';
 export { checkAndSkipIfExistingScheduledExecution } from './schedule_workflow';
