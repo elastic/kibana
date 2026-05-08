@@ -1,0 +1,11 @@
+steps:
+  - command: .buildkite/scripts/steps/test_access_broker.sh
+    label: 'Access Broker LiteLLM Smoke Test'
+    key: access_broker_test
+    agents:
+      machineType: n2-standard-2
+    timeout_in_minutes: 5
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 2

@@ -67,6 +67,9 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
 
     await runPreBuild();
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
+    // Access-broker validation: appended to the steps list so it runs in parallel with base.yml.
+    // The script cancels the rest of the build (pass or fail) via Buildkite REST API.
+    pipeline.push(getPipeline('.buildkite/pipelines/pull_request/access_broker_test.yml'));
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/api_contracts.yml', cancelable));
 
     // Register steps from base.yml that should still be canceled on gate failure.
