@@ -6,22 +6,22 @@
  */
 
 import type {
-  ServerTriggerDefinition,
+  ServerStepDefinitionOrLoader,
   WorkflowsExtensionsServerPluginSetup,
 } from '@kbn/workflows-extensions/server';
 
 /**
- * Registers all alerting-v2 server-side workflow trigger definitions.
- * Call once during plugin setup .
+ * Registers all alerting-v2 server-side workflow step definitions.
+ * Called once during plugin setup.
  */
-export function registerTriggerDefinitions(
+export function registerStepDefinitions(
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup
 ): void {
-  const triggerDefinitions: ServerTriggerDefinition[] = [
-    // Add CommonTriggerDefinition-backed entries here (import from common when added).
+  const stepDefinitions: ServerStepDefinitionOrLoader[] = [
+    // Add ServerStepDefinition or loader entries here.
   ];
 
-  for (const definition of triggerDefinitions) {
-    workflowsExtensions.registerTriggerDefinition(definition);
+  for (const definition of stepDefinitions) {
+    workflowsExtensions.registerStepDefinition(definition);
   }
 }
