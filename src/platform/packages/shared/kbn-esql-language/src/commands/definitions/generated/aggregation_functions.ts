@@ -4252,6 +4252,9 @@ const sparklineDefinition: FunctionDefinition = {
           optional: false,
           description:
             'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+          hint: {
+            kind: 'aggregation',
+          },
         },
         {
           name: 'key',
@@ -4288,6 +4291,9 @@ const sparklineDefinition: FunctionDefinition = {
           optional: false,
           description:
             'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+          hint: {
+            kind: 'aggregation',
+          },
         },
         {
           name: 'key',
@@ -4324,6 +4330,9 @@ const sparklineDefinition: FunctionDefinition = {
           optional: false,
           description:
             'Aggregation that calculates the y-axis value of the sparkline graph for each datapoint.',
+          hint: {
+            kind: 'aggregation',
+          },
         },
         {
           name: 'key',
