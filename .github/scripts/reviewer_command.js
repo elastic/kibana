@@ -27,9 +27,19 @@ const allowedRoles = new Set(['admin', 'maintain', 'write']);
 
 const getLabelNames = (labels = []) => labels.map((label) => label.name);
 
-const parseReviewerCommand = (body = '') => {
+const findMentionedReviewers = (body = '') => {
   const reviewers = Object.values(REVIEWERS);
-  return reviewers.find((reviewer) => body.includes(reviewer.command));
+  return reviewers.filter((reviewer) => body.includes(reviewer.command));
+};
+
+// Picks the reviewer that is BOTH mentioned in the comment AND has its label
+// on the PR. A comment may mention multiple reviewers (e.g. quoting an earlier
+// `@codex` thread while asking `@claude`); without this filter the dispatcher
+// would pick the first mention regardless of labels and silently drop the
+// actually-labeled reviewer.
+const selectActionableReviewer = ({ body, labelNames }) => {
+  const mentioned = findMentionedReviewers(body);
+  return mentioned.find((reviewer) => labelNames.includes(reviewer.label));
 };
 
 const isAllowedPermission = (permission) =>
@@ -127,8 +137,17 @@ const validatePullRequest = ({ core, pullRequest, reviewer }) => {
 };
 
 const routeReviewerCommand = async ({ context, core }) => {
-  const pullNumber = context.payload.issue?.number ?? context.payload.pull_request.number;
+  const issueOrPr = context.payload.issue ?? context.payload.pull_request;
+  const pullNumber = issueOrPr.number;
   const commentId = context.payload.comment.id;
+  const labelNames = getLabelNames(issueOrPr.labels);
+  const body = context.payload.comment.body ?? '';
+
+  const reviewer = selectActionableReviewer({ body, labelNames });
+  if (!reviewer) {
+    core.info(`Comment ${commentId} on PR #${pullNumber} did not mention a reviewer that is also labeled on the PR.`);
+    return;
+  }
 
   fs.mkdirSync(ARTIFACT_DIR, { recursive: true });
   fs.writeFileSync(
@@ -139,6 +158,7 @@ const routeReviewerCommand = async ({ context, core }) => {
         pr_number: String(pullNumber),
         comment_id: String(commentId),
         comment_type: context.eventName,
+        reviewer_id: reviewer.id,
       },
       null,
       2
@@ -159,6 +179,12 @@ const dispatchReviewerCommand = async ({ github, context, core }) => {
   const artifact = readCommandArtifact();
   if (!artifact) {
     core.info('No reviewer command artifact found.');
+    return;
+  }
+
+  const reviewer = REVIEWERS[artifact.reviewer_id];
+  if (!reviewer) {
+    core.setFailed(`Reviewer command artifact contained unknown reviewer id: ${artifact.reviewer_id}.`);
     return;
   }
 
@@ -184,13 +210,12 @@ const dispatchReviewerCommand = async ({ github, context, core }) => {
     return;
   }
 
-  const liveReviewer = parseReviewerCommand(liveComment.body);
-  if (!liveReviewer) {
-    core.info(`Comment ${commentId} no longer contains a reviewer mention.`);
+  if (!liveComment.body?.includes(reviewer.command)) {
+    core.info(`Comment ${commentId} no longer mentions ${reviewer.command}.`);
     return;
   }
 
-  if (!validatePullRequest({ core, pullRequest, reviewer: liveReviewer })) {
+  if (!validatePullRequest({ core, pullRequest, reviewer })) {
     return;
   }
 
@@ -201,7 +226,7 @@ const dispatchReviewerCommand = async ({ github, context, core }) => {
   await github.rest.actions.createWorkflowDispatch({
     owner,
     repo,
-    workflow_id: liveReviewer.workflowId,
+    workflow_id: reviewer.workflowId,
     ref: context.payload.repository.default_branch,
     inputs: {
       pr_number: String(pullNumber),
@@ -209,12 +234,13 @@ const dispatchReviewerCommand = async ({ github, context, core }) => {
     },
   });
 
-  core.info(`Dispatched ${liveReviewer.workflowId} for PR #${pullNumber} from comment ${commentId}.`);
+  core.info(`Dispatched ${reviewer.workflowId} for PR #${pullNumber} from comment ${commentId}.`);
 };
 
 module.exports = {
   REVIEWERS,
   dispatchReviewerCommand,
-  parseReviewerCommand,
+  findMentionedReviewers,
   routeReviewerCommand,
+  selectActionableReviewer,
 };
