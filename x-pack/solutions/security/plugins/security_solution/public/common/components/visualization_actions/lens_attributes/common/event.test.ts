@@ -101,6 +101,11 @@ describe('getEventsHistogramLensAttributes', () => {
                   _index: 'auditbeat-mytest-*',
                 },
               },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
+                },
+              },
             ],
           },
         },
@@ -161,6 +166,11 @@ describe('getEventsHistogramLensAttributes', () => {
               {
                 match_phrase: {
                   _index: 'auditbeat-mytest-*',
+                },
+              },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
                 },
               },
             ],
@@ -234,6 +244,11 @@ describe('getEventsHistogramLensAttributes', () => {
               {
                 match_phrase: {
                   _index: 'auditbeat-mytest-*',
+                },
+              },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
                 },
               },
             ],
@@ -332,6 +347,11 @@ describe('getEventsHistogramLensAttributes', () => {
                   _index: 'auditbeat-mytest-*',
                 },
               },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
+                },
+              },
             ],
           },
         },
@@ -398,6 +418,11 @@ describe('getEventsHistogramLensAttributes', () => {
               {
                 match_phrase: {
                   _index: 'auditbeat-mytest-*',
+                },
+              },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
                 },
               },
             ],
@@ -476,6 +501,11 @@ describe('getEventsHistogramLensAttributes', () => {
               {
                 match_phrase: {
                   _index: 'auditbeat-mytest-*',
+                },
+              },
+              {
+                match_phrase: {
+                  _index: '*:auditbeat-mytest-*',
                 },
               },
             ],

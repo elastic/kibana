@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  agentBuilder: 48000
+  agentBuilder: 52831
   agentBuilderPlatform: 8737
   agentContextLayer: 1883
   aiAssistantManagementSelection: 11569
@@ -13,7 +13,7 @@ pageLoadAssetSize:
   automaticImport: 18629
   banners: 4006
   canvas: 14881
-  cases: 177203
+  cases: 213452
   charts: 40269
   cloud: 10648
   cloudConnect: 9149
