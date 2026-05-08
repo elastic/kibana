@@ -23,6 +23,13 @@ export const enableStreamsRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          description: 'Streams were enabled successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
@@ -60,6 +67,13 @@ export const disableStreamsRoute = createServerRoute({
       since: '9.1.0',
       stability: 'experimental',
     },
+    oasOperationObject: () => ({
+      responses: {
+        200: {
+          description: 'Streams were disabled successfully.',
+        },
+      },
+    }),
   },
   security: {
     authz: {
