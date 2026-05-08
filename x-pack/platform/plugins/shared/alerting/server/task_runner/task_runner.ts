@@ -141,7 +141,6 @@ export class TaskRunner<
   private searchAbortController: AbortController;
   private cancelled: boolean;
   private stackTraceLog: RuleRunnerErrorStackTraceLog | null;
-  private snoozedInstances: RawRuleSnoozedInstance[] = [];
   private ruleMonitoring: RuleMonitoringService;
   private ruleRunning: RuleRunningHandler;
   private ruleResult: RuleResultService;
@@ -280,8 +279,9 @@ export class TaskRunner<
     apiKey,
     uiamApiKey,
     validatedParams: params,
-    snoozedInstances,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
+    const { activeInstances } = evaluatePerAlertSnooze(rule.snoozedInstances, this.runDate);
+
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
     }
@@ -342,7 +342,6 @@ export class TaskRunner<
         executionId: this.executionId,
         logger: this.logger,
         maxAlerts: this.context.maxAlerts,
-        snoozedInstances,
         rule: {
           id: rule.id,
           name: rule.name,
@@ -353,6 +352,7 @@ export class TaskRunner<
           params: rule.params,
           muteAll: rule.muteAll,
           mutedInstanceIds: rule.mutedInstanceIds,
+          snoozedInstances: activeInstances,
         },
         ruleType: this.ruleType as UntypedNormalizedRuleType,
         startedAt: this.taskInstance.startedAt,
@@ -422,7 +422,7 @@ export class TaskRunner<
       alertingEventLogger: this.alertingEventLogger,
       actionsClient,
       alertsClient,
-      snoozedInstances,
+      activeSnoozedIds: new Set(activeInstances.map((i) => i.instanceId)),
     });
 
     let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
@@ -443,11 +443,6 @@ export class TaskRunner<
           });
         }
       })
-    );
-
-    const { expiredInstances: expiredSnoozedInstances } = evaluatePerAlertSnooze(
-      snoozedInstances,
-      this.runDate
     );
 
     let alertsToReturn: Record<string, RawAlertInstance> = {};
@@ -487,7 +482,8 @@ export class TaskRunner<
         alertRecoveredInstances: recoveredAlertsToReturn,
         summaryActions: actionSchedulerResult.throttledSummaryActions,
       },
-      expiredSnoozedInstances,
+      prunedSnoozedInstances:
+        activeInstances.length < rule.snoozedInstances.length ? activeInstances : undefined,
     };
   }
 
@@ -698,18 +694,9 @@ export class TaskRunner<
         });
       }
 
-      const expiredSnoozedInstances = isOk(runRuleResult)
-        ? runRuleResult.value.expiredSnoozedInstances ?? []
-        : [];
-      const prunedSnoozedInstances =
-        expiredSnoozedInstances.length > 0
-          ? this.snoozedInstances.filter(
-              (instance) =>
-                !expiredSnoozedInstances.some(
-                  (expired) => expired.instanceId === instance.instanceId
-                )
-            )
-          : undefined;
+      const prunedSnoozedInstances = isOk(runRuleResult)
+        ? runRuleResult.value.prunedSnoozedInstances
+        : undefined;
 
       if (!this.cancelled) {
         this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
@@ -771,7 +758,6 @@ export class TaskRunner<
     let shouldDisableTask = false;
     try {
       const validatedRuleData = await this.prepareToRun();
-      this.snoozedInstances = validatedRuleData.snoozedInstances;
 
       runRuleResult = asOk(
         await withAlertingSpan('alerting:run', () => this.runRule(validatedRuleData))

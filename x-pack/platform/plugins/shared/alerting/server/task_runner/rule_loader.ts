@@ -118,10 +118,9 @@ export function validateRuleAndCreateFakeRequest<Params extends RuleTypeParams>(
     apiKey,
     uiamApiKey,
     fakeRequest,
-    rule,
+    rule: { ...rule, snoozedInstances: rawRule.snoozedInstances ?? [] },
     validatedParams,
     version,
-    snoozedInstances: rawRule.snoozedInstances ?? [],
   };
 }
 

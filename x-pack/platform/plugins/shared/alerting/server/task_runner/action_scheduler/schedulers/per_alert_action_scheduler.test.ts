@@ -539,9 +539,7 @@ describe('Per-Alert Action Scheduler', () => {
       // but alert 2 is snoozed (active snooze, no expiry), so only actions for alert 1 should be scheduled
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
-        snoozedInstances: [
-          { instanceId: '2', snoozedAt: '2024-01-01T00:00:00.000Z', snoozedBy: 'user' },
-        ],
+        activeSnoozedIds: new Set(['2']),
       });
       const results = await scheduler.getActionsToSchedule({
         activeAlerts: alerts,
@@ -567,24 +565,16 @@ describe('Per-Alert Action Scheduler', () => {
       expect(scheduler.skippedAlerts).toEqual({ '2': { reason: 'snoozed' } });
     });
 
-    test('should NOT skip snoozed alert when its snooze has expired', async () => {
+    test('should NOT skip alert when activeSnoozedIds does not contain it', async () => {
       // alert 2 has an expired snooze (expiresAt before epoch 0 since sinon fake timers start at 0)
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
-        snoozedInstances: [
-          {
-            instanceId: '2',
-            snoozedAt: '1969-01-01T00:00:00.000Z',
-            snoozedBy: 'user',
-            expiresAt: '1969-12-31T23:59:59.000Z',
-          },
-        ],
+        activeSnoozedIds: new Set(),
       });
       const results = await scheduler.getActionsToSchedule({
         activeAlerts: alerts,
       });
 
-      // Both alerts should be scheduled since the snooze is expired
       expect(results).toHaveLength(4);
     });
 
@@ -851,9 +841,7 @@ describe('Per-Alert Action Scheduler', () => {
       const scheduler = new PerAlertActionScheduler({
         ...getSchedulerContext(),
         rule: { ...rule, actions: [actionWithUseAlertDataForTemplate] },
-        snoozedInstances: [
-          { instanceId: '2', snoozedAt: '2024-01-01T00:00:00.000Z', snoozedBy: 'user' },
-        ],
+        activeSnoozedIds: new Set(['2']),
       });
       await scheduler.getActionsToSchedule({ activeAlerts: alerts });
 

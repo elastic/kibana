@@ -78,17 +78,16 @@ export const getDeleteRuleTaskRunResult = (): RuleTaskRunResult => ({
 export interface RunRuleResult {
   metrics: RuleRunMetrics;
   state: RuleTaskState;
-  expiredSnoozedInstances?: RawRuleSnoozedInstance[];
+  prunedSnoozedInstances?: RawRuleSnoozedInstance[];
 }
 
 export interface RunRuleParams<Params extends RuleTypeParams> {
   apiKey: RawRule['apiKey'];
   uiamApiKey?: RawRule['uiamApiKey'];
   fakeRequest: KibanaRequest;
-  rule: SanitizedRule<Params>;
+  rule: SanitizedRule<Params> & { snoozedInstances: RawRuleSnoozedInstance[] };
   validatedParams: Params;
   version: string | undefined;
-  snoozedInstances: RawRuleSnoozedInstance[];
 }
 
 export interface RuleTaskInstance extends ConcreteTaskInstance {

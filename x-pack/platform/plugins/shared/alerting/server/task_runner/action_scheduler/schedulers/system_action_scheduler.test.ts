@@ -166,13 +166,7 @@ describe('System Action Scheduler', () => {
 
       const scheduler = new SystemActionScheduler({
         ...getSchedulerContext(),
-        snoozedInstances: [
-          {
-            instanceId: 'alert-snoozed-1',
-            snoozedAt: '2024-01-01T00:00:00.000Z',
-            snoozedBy: 'user',
-          },
-        ],
+        activeSnoozedIds: new Set(['alert-snoozed-1']),
       });
       await scheduler.getActionsToSchedule({});
 

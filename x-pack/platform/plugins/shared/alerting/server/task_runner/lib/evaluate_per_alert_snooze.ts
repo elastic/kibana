@@ -8,7 +8,7 @@
 import type { RawRuleSnoozedInstance } from '../../saved_objects/schemas/raw_rule';
 
 export interface EvaluatePerAlertSnoozeResult {
-  activeSnoozedIds: Set<string>;
+  activeInstances: RawRuleSnoozedInstance[];
   expiredInstances: RawRuleSnoozedInstance[];
 }
 
@@ -16,7 +16,7 @@ export const evaluatePerAlertSnooze = (
   snoozedInstances: RawRuleSnoozedInstance[],
   now: Date
 ): EvaluatePerAlertSnoozeResult => {
-  const activeSnoozedIds = new Set<string>();
+  const activeInstances: RawRuleSnoozedInstance[] = [];
   const expiredInstances: RawRuleSnoozedInstance[] = [];
 
   for (const instance of snoozedInstances) {
@@ -24,9 +24,9 @@ export const evaluatePerAlertSnooze = (
     if (isExpired) {
       expiredInstances.push(instance);
     } else {
-      activeSnoozedIds.add(instance.instanceId);
+      activeInstances.push(instance);
     }
   }
 
-  return { activeSnoozedIds, expiredInstances };
+  return { activeInstances, expiredInstances };
 };

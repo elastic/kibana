@@ -23,7 +23,6 @@ import {
   logNumberOfFilteredAlerts,
   shouldScheduleAction,
 } from '../lib';
-import { evaluatePerAlertSnooze } from '../../lib';
 import type {
   ActionSchedulerOptions,
   ActionsToSchedule,
@@ -62,10 +61,7 @@ export class SummaryActionScheduler<
     const canGetSummarizedAlerts =
       !!context.ruleType.alerts && !!context.alertsClient.getSummarizedAlerts;
 
-    this.snoozedAlertIdsSet = evaluatePerAlertSnooze(
-      context.snoozedInstances ?? [],
-      new Date()
-    ).activeSnoozedIds;
+    this.snoozedAlertIdsSet = context.activeSnoozedIds ?? new Set();
 
     // filter for summary actions where the rule type supports summarized alerts
     this.actions = compact(

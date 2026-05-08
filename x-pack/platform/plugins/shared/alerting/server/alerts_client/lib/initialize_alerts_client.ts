@@ -33,7 +33,9 @@ export type RuleData<Params extends RuleTypeParams> = Pick<
   | 'params'
   | 'muteAll'
   | 'mutedInstanceIds'
->;
+> & {
+  snoozedInstances?: RawRuleSnoozedInstance[];
+};
 
 interface InitializeAlertsClientOpts<Params extends RuleTypeParams> {
   alertsService: AlertsService | null;
@@ -44,7 +46,6 @@ interface InitializeAlertsClientOpts<Params extends RuleTypeParams> {
   rule: RuleData<Params>;
   ruleType: UntypedNormalizedRuleType;
   runTimestamp?: Date;
-  snoozedInstances?: RawRuleSnoozedInstance[];
   startedAt: Date | null;
   taskInstance: RuleTaskInstance;
 }
@@ -65,7 +66,6 @@ export const initializeAlertsClient = async <
   rule,
   ruleType,
   runTimestamp,
-  snoozedInstances,
   startedAt,
   taskInstance,
 }: InitializeAlertsClientOpts<Params>) => {
@@ -141,7 +141,7 @@ export const initializeAlertsClient = async <
     runTimestamp,
     activeAlertsFromState: alertRawInstances,
     recoveredAlertsFromState: alertRecoveredRawInstances,
-    snoozedInstances,
+    snoozedInstances: rule.snoozedInstances,
   });
 
   return alertsClient;

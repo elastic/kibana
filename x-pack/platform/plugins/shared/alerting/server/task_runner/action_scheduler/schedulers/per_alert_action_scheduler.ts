@@ -24,7 +24,6 @@ import {
   logNumberOfFilteredAlerts,
   shouldScheduleAction,
 } from '../lib';
-import { evaluatePerAlertSnooze } from '../../lib';
 import type {
   ActionSchedulerOptions,
   ActionsToSchedule,
@@ -80,10 +79,7 @@ export class PerAlertActionScheduler<
       context.ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
     );
     this.mutedAlertIdsSet = new Set(context.rule.mutedInstanceIds);
-    this.snoozedAlertIdsSet = evaluatePerAlertSnooze(
-      context.snoozedInstances ?? [],
-      new Date()
-    ).activeSnoozedIds;
+    this.snoozedAlertIdsSet = context.activeSnoozedIds ?? new Set();
 
     const canGetSummarizedAlerts =
       !!context.ruleType.alerts && !!context.alertsClient.getSummarizedAlerts;

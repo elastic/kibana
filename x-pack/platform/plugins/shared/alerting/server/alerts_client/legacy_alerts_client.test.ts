@@ -182,6 +182,7 @@ describe('Legacy Alerts Client', () => {
       configuredMaxAlerts: 1000,
       canSetRecoveryContext: false,
       autoRecoverAlerts: true,
+      snoozedInstancesMap: new Map(),
     });
   });
 
@@ -207,6 +208,7 @@ describe('Legacy Alerts Client', () => {
       configuredMaxAlerts: 10000,
       canSetRecoveryContext: false,
       autoRecoverAlerts: true,
+      snoozedInstancesMap: new Map(),
     });
   });
 
@@ -284,6 +286,34 @@ describe('Legacy Alerts Client', () => {
 
     expect(setSnoozeConfigSpy).not.toHaveBeenCalled();
     setSnoozeConfigSpy.mockRestore();
+  });
+
+  test('factory().create() should pass snoozedInstancesMap to createAlertFactory so new alerts get snooze config set', async () => {
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
+
+    const snoozeConfig = {
+      instanceId: 'new-alert',
+      snoozedAt: '2024-01-01T00:00:00.000Z',
+      snoozedBy: 'user',
+    };
+    await alertsClient.initializeExecution({
+      ...defaultExecutionOpts,
+      activeAlertsFromState: {},
+      snoozedInstances: [snoozeConfig],
+    });
+
+    expect(createAlertFactory).toHaveBeenCalledWith(
+      expect.objectContaining({
+        snoozedInstancesMap: new Map([['new-alert', snoozeConfig]]),
+      })
+    );
   });
 
   test('factory() should call getPublicAlertFactory on alert factory', async () => {

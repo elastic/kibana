@@ -143,6 +143,7 @@ export class LegacyAlertsClient<
       configuredMaxAlerts: maxAlerts, // Pass in the configured max alerts value, so we can determine if alert limit is set above the allowed threshold
       autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
+      snoozedInstancesMap,
     });
   }
 

@@ -11,9 +11,9 @@ import type { RawRuleSnoozedInstance } from '../../saved_objects/schemas/raw_rul
 const NOW = new Date('1970-01-01T00:00:00.000Z');
 
 describe('evaluatePerAlertSnooze', () => {
-  it('returns empty sets when snoozedInstances is empty', () => {
+  it('returns empty arrays when snoozedInstances is empty', () => {
     const result = evaluatePerAlertSnooze([], NOW);
-    expect(result.activeSnoozedIds.size).toBe(0);
+    expect(result.activeInstances).toHaveLength(0);
     expect(result.expiredInstances).toHaveLength(0);
   });
 
@@ -24,7 +24,8 @@ describe('evaluatePerAlertSnooze', () => {
       snoozedBy: 'user',
     };
     const result = evaluatePerAlertSnooze([instance], NOW);
-    expect(result.activeSnoozedIds).toContain('alert-1');
+    expect(result.activeInstances).toHaveLength(1);
+    expect(result.activeInstances[0].instanceId).toBe('alert-1');
     expect(result.expiredInstances).toHaveLength(0);
   });
 
@@ -36,7 +37,8 @@ describe('evaluatePerAlertSnooze', () => {
       expiresAt: '1970-01-02T00:00:00.000Z',
     };
     const result = evaluatePerAlertSnooze([instance], NOW);
-    expect(result.activeSnoozedIds).toContain('alert-2');
+    expect(result.activeInstances).toHaveLength(1);
+    expect(result.activeInstances[0].instanceId).toBe('alert-2');
     expect(result.expiredInstances).toHaveLength(0);
   });
 
@@ -48,7 +50,7 @@ describe('evaluatePerAlertSnooze', () => {
       expiresAt: '1970-01-01T00:00:00.000Z',
     };
     const result = evaluatePerAlertSnooze([instance], NOW);
-    expect(result.activeSnoozedIds.size).toBe(0);
+    expect(result.activeInstances).toHaveLength(0);
     expect(result.expiredInstances).toHaveLength(1);
     expect(result.expiredInstances[0].instanceId).toBe('alert-3');
   });
@@ -61,7 +63,7 @@ describe('evaluatePerAlertSnooze', () => {
       expiresAt: '1969-12-31T23:59:59.000Z',
     };
     const result = evaluatePerAlertSnooze([instance], NOW);
-    expect(result.activeSnoozedIds.size).toBe(0);
+    expect(result.activeInstances).toHaveLength(0);
     expect(result.expiredInstances).toHaveLength(1);
   });
 
@@ -82,9 +84,9 @@ describe('evaluatePerAlertSnooze', () => {
       },
     ];
     const result = evaluatePerAlertSnooze(instances, NOW);
-    expect(result.activeSnoozedIds).toContain('active-indefinite');
-    expect(result.activeSnoozedIds).toContain('active-future');
-    expect(result.activeSnoozedIds.size).toBe(2);
+    expect(result.activeInstances.map((i) => i.instanceId)).toContain('active-indefinite');
+    expect(result.activeInstances.map((i) => i.instanceId)).toContain('active-future');
+    expect(result.activeInstances).toHaveLength(2);
     expect(result.expiredInstances).toHaveLength(1);
     expect(result.expiredInstances[0].instanceId).toBe('expired-past');
   });
