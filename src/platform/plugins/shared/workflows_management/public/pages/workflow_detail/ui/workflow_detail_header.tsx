@@ -24,6 +24,7 @@ import {
   EuiSwitch,
   EuiTitle,
   EuiToolTip,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -126,7 +127,27 @@ export const WorkflowDetailHeader = React.memo(
       [canReadWorkflowExecution]
     );
 
-    const { activeTab, setActiveTab } = useWorkflowUrlState();
+    const { activeTab, setActiveTab, editorView, setEditorView } = useWorkflowUrlState();
+    const isWideEnoughForGraphToggle = useIsWithinBreakpoints(['m', 'l', 'xl']);
+    const editorViewOptions = useMemo<EuiButtonGroupOptionProps[]>(
+      () => [
+        {
+          id: 'yaml',
+          iconType: 'editorCodeBlock',
+          label: i18n.translate('workflows.workflowDetailHeader.editorViewYaml', {
+            defaultMessage: 'YAML',
+          }),
+        },
+        {
+          id: 'graph',
+          iconType: 'workflow',
+          label: i18n.translate('workflows.workflowDetailHeader.editorViewGraph', {
+            defaultMessage: 'Graph',
+          }),
+        },
+      ],
+      []
+    );
 
     const workflow = useSelector(selectWorkflow);
     const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
@@ -266,7 +287,7 @@ export const WorkflowDetailHeader = React.memo(
                   flexBasis: '15%',
                 }}
               >
-                <EuiFlexGroup justifyContent="center">
+                <EuiFlexGroup justifyContent="center" gutterSize="s" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiButtonGroup
                       buttonSize="compressed"
@@ -317,6 +338,21 @@ export const WorkflowDetailHeader = React.memo(
                   />
                 </EuiToolTip>
                 <EuiFlexItem grow={false} css={styles.separator} />
+                {!isExecutionsTab && isWideEnoughForGraphToggle && (
+                  <EuiButtonGroup
+                    buttonSize="compressed"
+                    color="primary"
+                    isIconOnly
+                    legend={i18n.translate('workflows.workflowDetailHeader.editorViewLegend', {
+                      defaultMessage: 'Editor view',
+                    })}
+                    options={editorViewOptions}
+                    idSelected={editorView}
+                    onChange={(id) => setEditorView(id as 'yaml' | 'graph')}
+                    type="single"
+                    data-test-subj="workflowEditorViewToggle"
+                  />
+                )}
                 <EuiToolTip content={runWorkflowTooltipContent}>
                   <EuiButtonIcon
                     color="success"

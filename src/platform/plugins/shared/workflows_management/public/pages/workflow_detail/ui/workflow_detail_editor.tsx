@@ -15,10 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import type { monaco } from '@kbn/monaco';
-import {
-  WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
-  WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
-} from '@kbn/workflows';
+import { WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { useContextOverrideData } from './use_context_override_data';
 import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyout';
@@ -113,35 +110,40 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
     ]
   );
 
-  // UI settings
-  const isVisualEditorEnabled = useKibana().services.uiSettings?.get<boolean>(
-    WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
-    false
-  );
   const isExecutionGraphEnabled = useKibana().services.uiSettings?.get<boolean>(
     WORKFLOWS_UI_EXECUTION_GRAPH_SETTING_ID,
     false
   );
 
+  const { editorView } = useWorkflowUrlState();
+  const showGraph = editorView === 'graph';
+
   return (
     <>
       <EuiFlexGroup gutterSize="none" style={{ height: '100%' }}>
         <EuiFlexItem css={styles.yamlEditor}>
+          {/*
+           * The YAML editor is always mounted so its validation pipeline keeps
+           * running. When in graph view, the editor swaps Monaco out for the
+           * visual editor in the same flex column so the validation accordion
+           * stays pinned at the bottom for both views.
+           */}
           <React.Suspense fallback={<EuiLoadingSpinner />}>
             <WorkflowYAMLEditor
               highlightDiff={highlightDiff}
               onStepRun={handleStepRun}
               editorRef={editorRef}
+              hideEditorBody={showGraph}
+              bodyOverride={
+                showGraph ? (
+                  <React.Suspense fallback={<EuiLoadingSpinner />}>
+                    <WorkflowVisualEditor onStepRun={handleStepRun} />
+                  </React.Suspense>
+                ) : null
+              }
             />
           </React.Suspense>
         </EuiFlexItem>
-        {isVisualEditorEnabled && (
-          <EuiFlexItem css={styles.visualEditor}>
-            <React.Suspense fallback={<EuiLoadingSpinner />}>
-              <WorkflowVisualEditor />
-            </React.Suspense>
-          </EuiFlexItem>
-        )}
         {isExecutionGraphEnabled && (
           <EuiFlexItem css={styles.visualEditor}>
             <React.Suspense fallback={<EuiLoadingSpinner />}>

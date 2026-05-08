@@ -12,9 +12,11 @@ import { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
 export type WorkflowUrlStateTabType = 'workflow' | 'executions';
+export type WorkflowEditorView = 'yaml' | 'graph';
 
 export interface WorkflowUrlState {
   tab?: WorkflowUrlStateTabType;
+  view?: WorkflowEditorView;
   executionId?: string;
   stepExecutionId?: string;
   stepId?: string;
@@ -29,6 +31,7 @@ export function useWorkflowUrlState() {
     const params = parse(location.search);
     return {
       tab: (params.tab as WorkflowUrlStateTabType) || 'workflow',
+      view: (params.view as WorkflowEditorView) === 'graph' ? 'graph' : 'yaml',
       executionId: params.executionId as string | undefined,
       stepExecutionId: params.stepExecutionId as string | undefined,
       stepId: params.stepId as string | undefined,
@@ -113,9 +116,22 @@ export function useWorkflowUrlState() {
     updateUrlState({ resume: undefined });
   }, [updateUrlState]);
 
+  const setEditorView = useCallback(
+    (view: WorkflowEditorView) => {
+      updateUrlState({
+        // Omit default to keep the URL clean
+        view: view === 'yaml' ? undefined : view,
+        // Clear the flyout selection when switching views
+        stepId: undefined,
+      });
+    },
+    [updateUrlState]
+  );
+
   return {
     // Current state
     activeTab: urlState.tab,
+    editorView: urlState.view as WorkflowEditorView,
     selectedExecutionId: urlState.executionId,
     selectedStepExecutionId: urlState.stepExecutionId,
     selectedStepId: urlState.stepId,
@@ -123,6 +139,7 @@ export function useWorkflowUrlState() {
 
     // State setters
     setActiveTab,
+    setEditorView,
     setSelectedExecution,
     setSelectedStepExecution,
     setSelectedStep,

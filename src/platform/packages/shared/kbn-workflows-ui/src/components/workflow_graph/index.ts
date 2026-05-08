@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './workflow_selector';
-export * from './workflow_graph';
+export { WorkflowGraphCanvas, type WorkflowGraphCanvasProps } from './workflow_graph_canvas';

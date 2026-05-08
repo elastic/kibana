@@ -163,12 +163,27 @@ export interface WorkflowYAMLEditorProps {
   highlightDiff?: boolean;
   onStepRun: (params: { stepId: string; actionType: string }) => void;
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
+  /**
+   * When true, the Monaco editor body and assist/agent toolbar are hidden via
+   * CSS but kept mounted so YAML validation continues to run and the
+   * validation accordion stays visible. Used by the graph view to share the
+   * validation bar with the YAML view.
+   */
+  hideEditorBody?: boolean;
+  /**
+   * Optional alternate body rendered in place of the Monaco editor when
+   * `hideEditorBody` is true. Lives in the same flex column as the validation
+   * accordion so the accordion stays pinned at the bottom.
+   */
+  bodyOverride?: React.ReactNode;
 }
 
 export const WorkflowYAMLEditor = ({
   highlightDiff = false,
   onStepRun,
   editorRef: parentEditorRef,
+  hideEditorBody = false,
+  bodyOverride,
 }: WorkflowYAMLEditorProps) => {
   const { notifications, http } = useKibana().services;
 
@@ -801,7 +816,10 @@ export const WorkflowYAMLEditor = ({
         <StepActions onStepRun={onStepRun} />
       </div>
       {(isAgentBuilderAvailable || isDevelopment) && !isExecutionYaml ? (
-        <div css={styles.agentBuilderSectionCss}>
+        <div
+          css={styles.agentBuilderSectionCss}
+          style={hideEditorBody ? { display: 'none' } : undefined}
+        >
           <WorkflowYamlEditorAssistActions
             isAgentBuilderAvailable={isAgentBuilderAvailable}
             isDevelopment={isDevelopment}
@@ -816,6 +834,20 @@ export const WorkflowYAMLEditor = ({
       <div
         css={styles.editorContainer}
         className={classnames({ [EXECUTION_YAML_SNAPSHOT_CLASS]: isExecutionYaml })}
+        style={
+          hideEditorBody
+            ? {
+                position: 'absolute',
+                visibility: 'hidden',
+                width: 0,
+                height: 0,
+                overflow: 'hidden',
+                flex: 'none',
+                minHeight: 0,
+              }
+            : undefined
+        }
+        aria-hidden={hideEditorBody || undefined}
       >
         <YamlEditor
           editorDidMount={handleEditorDidMount}
@@ -829,6 +861,19 @@ export const WorkflowYAMLEditor = ({
           dataTestSubj="workflowYamlEditor"
         />
       </div>
+      {/*
+       * When the editor body is hidden (graph view), render the alternate
+       * body in the freed flex space so the validation accordion stays
+       * pinned to the bottom of the container.
+       */}
+      {hideEditorBody && (
+        <div
+          data-test-subj="workflowYamlEditorBodyPlaceholder"
+          css={css({ flex: '1 1 0', minHeight: 0, position: 'relative', overflow: 'hidden' })}
+        >
+          {bodyOverride}
+        </div>
+      )}
       <div css={styles.validationErrorsContainer}>
         <WorkflowYamlValidationAccordion
           isMounted={isEditorMounted}
