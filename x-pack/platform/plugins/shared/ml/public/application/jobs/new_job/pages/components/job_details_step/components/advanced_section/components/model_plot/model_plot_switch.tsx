@@ -28,6 +28,10 @@ export const ModelPlotSwitch: FC = () => {
 
   useEffect(() => {
     const aggs = [ML_JOB_AGGREGATION.RARE];
+    if (jobCreator.modelPlot !== modelPlotEnabled) {
+      setModelPlotEnabled(jobCreator.modelPlot);
+    }
+
     // disable model plot switch if the wizard is creating a categorization job
     // and a rare detector is being used.
     const isRareCategoryJob =

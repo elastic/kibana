@@ -162,3 +162,9 @@ export const EXCEPTION_DUPLICATE_ERROR_DESCRIPTION = i18n.translate(
     defaultMessage: 'An error occurred duplicating a list',
   }
 );
+
+export const SHARED_EXCEPTION_LIST_CREATED_SUCCESSFULLY = (listName: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.list.createdSuccessfully', {
+    values: { listName },
+    defaultMessage: 'Exception list "{listName}" was created successfully.',
+  });
