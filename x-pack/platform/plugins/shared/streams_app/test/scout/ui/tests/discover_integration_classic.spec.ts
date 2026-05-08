@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
+import { forceClassicDiscoverMode } from '../fixtures/discover_mode';
 import { generateLogsData } from '../fixtures/generators';
 
 const CLASSIC_STREAM_NAME = 'logs-generic-dataset';
@@ -24,6 +25,10 @@ test.describe(
         endTime: 'now',
         defaults: { 'stream.name': CLASSIC_STREAM_NAME },
       });
+    });
+
+    test.beforeEach(async ({ page }) => {
+      await forceClassicDiscoverMode(page);
     });
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
