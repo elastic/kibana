@@ -35,7 +35,7 @@ taskManager.registerTaskDefinitions({
       const { taskInstance, abortController } = context;
       return {
         run: async () => { /* ... */ },
-        cancel: async () => { /* cleanup */ },
+        cancel: async () => { /* cleanup */ }, // optional, see §3
       };
     },
   },
@@ -70,7 +70,9 @@ The validator only checks the format (`{number}{m|s|h|d}`); it does NOT check th
 
 **Rule:** `createTaskRunner` MUST destructure `abortController` from `RunContext` and propagate `abortController.signal` to every cancellable operation: ES client calls, `fetch`/HTTP requests, child loops, and any `setTimeout`/`setInterval` based polling.
 
-The `abortController` is the **only** mechanism Task Manager has to stop a task that has timed out or that is being cancelled during shutdown. Ignoring it lets in-flight work run past the timeout, hold ES connections open, and block clean shutdown.
+The `abortController` is **signal-only**: Task Manager signals it on timeout or shutdown but never reads `.signal` itself. The signal is the only channel Task Manager has to ask a task to stop — it is the task code's responsibility to comply by passing it to I/O and checking `signal.aborted` in loops. Ignoring it lets in-flight work run past the timeout, hold ES connections open, and block clean shutdown.
+
+**A task cannot exit by signalling its own controller.** Calling `abortController.abort()` from inside `run()` does nothing useful — Task Manager never reads the signal. To exit early, return from the top-level task function, or throw an error (Task Manager catches it; classify with the helpers in §4).
 
 ### Pass the signal to ES clients
 
@@ -121,13 +123,13 @@ createTaskRunner: ({ taskInstance }) => ({
 });
 ```
 
-## 3. `cancel()` — cleanup hook
+## 3. `cancel()` — optional cleanup hook
 
-**Rule:** Implement `cancel()` whenever the task holds resources that the abort signal alone does not release: open subscriptions, scheduled timers, file handles, in-memory caches you allocated, or AbortControllers you created downstream.
+**Rule:** `cancel()` is **optional**, and omitting it is the common case. Add it only when the task holds resources that the abort signal alone does not release: open subscriptions, scheduled timers, file handles, in-memory caches you allocated, or AbortControllers you created downstream.
 
-`cancel()` is invoked by Task Manager when the task is being torn down (timeout, shutdown). It runs **alongside** the abort signal — the signal stops in-flight I/O, `cancel()` releases everything else.
+When present, `cancel()` is invoked by Task Manager during teardown (timeout, shutdown). It runs **alongside** the abort signal — the signal stops in-flight I/O, `cancel()` releases everything else.
 
-If the task does no resource allocation beyond what the abort signal already covers, an empty `cancel: async () => {}` is acceptable and signals intent.
+Do **not** add an empty `cancel: async () => {}` just to satisfy the type. If there is nothing to clean up, omit the field entirely.
 
 ```ts
 createTaskRunner: ({ abortController }) => {
