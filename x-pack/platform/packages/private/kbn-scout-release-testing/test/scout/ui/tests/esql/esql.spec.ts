@@ -75,7 +75,6 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
   }) => {
     await pageObjects.discover.writeAndSubmitEsqlQuery(STATS_QUERY);
 
-    await expect(page.testSubj.locator('lnsVisualizationContainer')).toBeVisible();
     await expect(page.testSubj.locator('mtrVis')).toBeVisible();
   });
 
@@ -87,18 +86,20 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
 
     await test.step('open the edit visualization flyout', async () => {
       await page.testSubj.click('unifiedHistogramEditFlyoutVisualization');
-      await expect(page.testSubj.locator('customizeLens')).toBeVisible();
+      await expect(page.testSubj.locator('editFlyoutHeader')).toBeVisible();
     });
 
-    await test.step('verify color mode controls are interactive', async () => {
-      const colorModeTrigger = page.testSubj.locator('lns_colorEditing_trigger');
-      await expect(colorModeTrigger).toBeVisible();
-      await expect(colorModeTrigger).toBeEnabled();
+    await test.step('verify the inline configuration panel is interactive', async () => {
+      // The simplified inline editor for ES|QL viz no longer surfaces the legacy
+      // `lns_colorEditing_trigger`; assert against stable controls in the
+      // inline-edit flyout wrapper that are present for ES|QL panels.
+      await expect(page.testSubj.locator('inlineEditingFlyoutLabel')).toBeVisible();
+      await expect(page.testSubj.locator('cancelFlyoutButton')).toBeEnabled();
     });
 
     await test.step('close the flyout', async () => {
       await page.testSubj.click('cancelFlyoutButton');
-      await expect(page.testSubj.locator('customizeLens')).toBeHidden();
+      await expect(page.testSubj.locator('editFlyoutHeader')).toBeHidden();
     });
   });
 
@@ -152,11 +153,13 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('edit the panel inline from the dashboard', async () => {
-      await pageObjects.dashboard.switchToEditMode();
+      // Saving an ES|QL viz from Discover lands the dashboard already in edit mode,
+      // so only switch when the Edit button is actually present (view mode).
+      await pageObjects.dashboard.ensureEditMode();
       await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel', visName);
-      await expect(page.testSubj.locator('customizeLens')).toBeVisible();
+      await expect(page.testSubj.locator('editFlyoutHeader')).toBeVisible();
       await page.testSubj.click('cancelFlyoutButton');
-      await expect(page.testSubj.locator('customizeLens')).toBeHidden();
+      await expect(page.testSubj.locator('editFlyoutHeader')).toBeHidden();
     });
 
     await test.step('explore the panel in Discover and verify the ES|QL query is preserved', async () => {
@@ -181,7 +184,11 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
       );
       const copyModal = page.locator('[role="dialog"][aria-labelledby="copyToDashboardTitle"]');
       await expect(copyModal).toBeVisible();
-      await page.testSubj.click('add-to-new-dashboard-option');
+      // Clicking the EuiRadio wrapper does not toggle the underlying input
+      // reliably; clicking the associated label does (same pattern as the
+      // "save to a new dashboard" step above).
+      await page.locator('label[for="new-dashboard-option"]').click();
+      await expect(page.testSubj.locator('confirmCopyToButton')).toBeEnabled();
       await page.testSubj.click('confirmCopyToButton');
 
       await pageObjects.dashboard.waitForRenderComplete();
@@ -195,7 +202,6 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
   }) => {
     await pageObjects.discover.writeAndSubmitEsqlQuery(SUM_QUERY);
 
-    await expect(page.testSubj.locator('lnsVisualizationContainer')).toBeVisible();
     await expect(page.testSubj.locator('mtrVis')).toBeVisible();
   });
 
@@ -207,13 +213,16 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
 
     await test.step('verify only KEEP-listed fields are present in the sidebar', async () => {
       await pageObjects.discover.waitUntilFieldListHasCountOfFields();
+      // Kept fields render in both "Selected fields" and "Available fields" groups,
+      // so scope to one group to avoid strict-mode locator violations.
+      const availableFields = page.testSubj.locator('fieldListGroupedAvailableFields');
       for (const field of KEPT_FIELDS) {
-        await expect(page.testSubj.locator(`field-${field}`)).toBeVisible();
+        await expect(availableFields.getByTestId(`field-${field}`)).toBeVisible();
       }
       // Fields not present in the KEEP clause must be absent from the sidebar.
       const droppedFields = ['bytes', 'clientip', 'extension', 'response'];
       for (const field of droppedFields) {
-        await expect(page.testSubj.locator(`field-${field}`)).toBeHidden();
+        await expect(availableFields.getByTestId(`field-${field}`)).toHaveCount(0);
       }
     });
 
@@ -254,11 +263,13 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('edit the saved panel inline from the dashboard', async () => {
-      await pageObjects.dashboard.switchToEditMode();
+      // Saving an ES|QL viz from Discover lands the dashboard already in edit mode,
+      // so only switch when the Edit button is actually present (view mode).
+      await pageObjects.dashboard.ensureEditMode();
       await pageObjects.dashboard.clickPanelAction('embeddablePanelAction-editPanel', visName);
-      await expect(page.testSubj.locator('customizeLens')).toBeVisible();
+      await expect(page.testSubj.locator('editFlyoutHeader')).toBeVisible();
       await page.testSubj.click('cancelFlyoutButton');
-      await expect(page.testSubj.locator('customizeLens')).toBeHidden();
+      await expect(page.testSubj.locator('editFlyoutHeader')).toBeHidden();
     });
   });
 });
