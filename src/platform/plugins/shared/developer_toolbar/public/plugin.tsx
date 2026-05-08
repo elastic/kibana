@@ -29,6 +29,12 @@ const LazyMeasureButton = lazy(() =>
   }))
 );
 
+const LazyGridButton = lazy(() =>
+  import('@kbn/measure-component').then(({ GridButton }) => ({
+    default: GridButton,
+  }))
+);
+
 export class DeveloperToolbarPlugin
   implements Plugin<DeveloperToolbarSetup, DeveloperToolbarStart>
 {
@@ -55,6 +61,15 @@ export class DeveloperToolbarPlugin
       children: (
         <Suspense fallback={null}>
           <LazyMeasureButton />
+        </Suspense>
+      ),
+    });
+
+    this.registerItem({
+      id: 'Grid Overlay',
+      children: (
+        <Suspense fallback={null}>
+          <LazyGridButton />
         </Suspense>
       ),
     });

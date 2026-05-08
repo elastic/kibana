@@ -13,13 +13,14 @@ import { css } from '@emotion/css';
 import { Global } from '@emotion/react';
 import { EuiBadge, EuiPortal, EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
 
-import { getElementFromPoint, isEscapeKey } from '../lib';
-import { handleEventPropagation } from '../lib/dom/handle_event_propagation';
-
-import { calculateSpacingLines } from '../lib/dom/calculate_spacing';
-import type { SpacingLine } from '../lib/dom/calculate_spacing';
 import { SpacingMeasurement } from './spacing_measurement';
-import { MEASURE_OVERLAY_ID } from '../lib/constants';
+import { getElementFromPoint, isEscapeKey } from '../../lib';
+import { handleEventPropagation } from '../../lib/dom/handle_event_propagation';
+
+import { calculateSpacingLines } from '../../lib/dom/calculate_spacing';
+import type { SpacingLine } from '../../lib/dom/calculate_spacing';
+
+import { MEASURE_OVERLAY_ID } from '../../lib/constants';
 
 interface Props {
   setIsMeasuring: Dispatch<SetStateAction<boolean>>;
@@ -186,9 +187,7 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
             </div>
           </>
         )}
-
         {hoverRect && <div className={hoverHighlightCss} data-test-subj="measureHoverHighlight" />}
-
         <SpacingMeasurement lines={spacingLines} />
       </div>
     </EuiPortal>

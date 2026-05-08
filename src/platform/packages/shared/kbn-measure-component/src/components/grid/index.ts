@@ -7,5 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { MeasureButton } from './src/components';
-export { GridButton } from './src/components';
+export { GridButton } from './grid_button';
+export { GridOverlay, getDefaultGridConfig } from './grid_overlay';
+export { GridSettingsPanel } from './grid_settings_panel';
+export type { GridConfig, GridType } from './grid_overlay';

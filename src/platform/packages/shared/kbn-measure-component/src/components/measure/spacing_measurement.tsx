@@ -10,8 +10,8 @@
 import React, { Fragment } from 'react';
 import { css } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
-import { useEuiSizeLookup } from '../hooks';
-import type { SpacingLine } from '../lib/dom/calculate_spacing';
+import { useEuiSizeLookup } from '../../hooks';
+import type { SpacingLine } from '../../lib/dom/calculate_spacing';
 
 interface Props {
   lines: SpacingLine[];

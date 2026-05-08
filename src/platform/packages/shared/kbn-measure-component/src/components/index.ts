@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { MeasureButton } from './measure_button';
-export { MeasureOverlay } from './measure_overlay';
-export { SpacingMeasurement } from './spacing_measurement';
+export { GridButton } from './grid/grid_button';
+export { GridOverlay, getDefaultGridConfig } from './grid/grid_overlay';
+export { GridSettingsPanel } from './grid/grid_settings_panel';
+export type { GridConfig } from './grid/grid_overlay';
+
+export { MeasureButton } from './measure/measure_button';
+export { MeasureOverlay } from './measure/measure_overlay';
+export { SpacingMeasurement } from './measure/spacing_measurement';

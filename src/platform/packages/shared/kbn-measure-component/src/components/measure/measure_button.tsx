@@ -13,21 +13,9 @@ import { EuiButtonIcon, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 import { MeasureOverlay } from './measure_overlay';
-import { isMeasureShortcut } from '../lib';
-
-const buttonAriaLabel = () =>
-  i18n.translate('kbnMeasureComponent.measureButton.ariaLabel', {
-    defaultMessage: 'Measure spacing',
-  });
-
-const tooltipContent = () =>
-  i18n.translate('kbnMeasureComponent.measureButton.tooltip', {
-    values: { keyboardShortcut: isMac ? '⌘ .' : 'Ctrl .' },
-    defaultMessage: 'Measure spacing {keyboardShortcut}',
-  });
+import { isMeasureShortcut } from '../../lib';
 
 /**
- * The entry point for the measure component.
  * Toggles measure mode from the developer toolbar.
  */
 export const MeasureButton = () => {
@@ -40,10 +28,6 @@ export const MeasureButton = () => {
     }
   };
 
-  const handleToggleMeasureMode = () => {
-    setIsMeasuring((prev) => !prev);
-  };
-
   const preventTargetFromLosingFocus = (event: MouseEvent) => {
     event.preventDefault();
   };
@@ -51,14 +35,26 @@ export const MeasureButton = () => {
   return (
     <>
       <EuiWindowEvent event="keydown" handler={handleKeydown} />
-      <EuiToolTip content={isMeasuring ? '' : tooltipContent()} position="bottom">
+      <EuiToolTip
+        content={
+          isMeasuring
+            ? ''
+            : i18n.translate('kbnMeasureComponent.measureButton.tooltip', {
+                values: { keyboardShortcut: isMac ? '⌘ .' : 'Ctrl .' },
+                defaultMessage: 'Measure spacing {keyboardShortcut}',
+              })
+        }
+        position="bottom"
+      >
         <EuiButtonIcon
-          onClick={handleToggleMeasureMode}
+          onClick={() => setIsMeasuring((prev) => !prev)}
           onMouseDown={preventTargetFromLosingFocus}
           iconType="editorItemAlignCenter"
           isSelected={isMeasuring}
           aria-pressed={isMeasuring}
-          aria-label={buttonAriaLabel()}
+          aria-label={i18n.translate('kbnMeasureComponent.measureButton.ariaLabel', {
+            defaultMessage: 'Measure spacing',
+          })}
           color="text"
           data-test-subj="measureSpacingButton"
         />
