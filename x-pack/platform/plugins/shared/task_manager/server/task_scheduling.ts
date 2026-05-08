@@ -59,6 +59,15 @@ export interface BulkUpdateTaskResult {
 export interface RunSoonResult {
   id: ConcreteTaskInstance['id'];
   forced: boolean;
+  /**
+   * `true` when the task store update raced with another concurrent update
+   * and was rejected with a 409 version conflict. The conflict is otherwise
+   * swallowed (the task is not rescheduled), so callers that need to know
+   * whether the task was actually rescheduled should inspect this flag and
+   * retry as appropriate. Omitted when there was no conflict.
+   * See https://github.com/elastic/kibana/issues/259686.
+   */
+  conflict?: boolean;
 }
 
 export interface RunNowResult {
@@ -275,6 +284,7 @@ export class TaskScheduling {
    */
   public async runSoon(taskId: string, force: boolean = false): Promise<RunSoonResult> {
     let forced: boolean = false;
+    let conflict: boolean = false;
     const task = await this.store.get(taskId);
 
     if (task.status === TaskStatus.Unrecognized) {
@@ -316,12 +326,13 @@ export class TaskScheduling {
         this.logger.debug(
           `Failed to update the task (${taskId}) for runSoon due to conflict (409)`
         );
+        conflict = true;
       } else {
         this.logger.error(`Failed to update the task (${taskId}) for runSoon`);
         throw e;
       }
     }
-    return { id: task.id, forced };
+    return conflict ? { id: task.id, forced, conflict: true } : { id: task.id, forced };
   }
 
   /**
