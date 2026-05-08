@@ -62,7 +62,9 @@
     "@kbn/react-query",
     "@kbn/core-security-server",
     "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/event-log-plugin",
     "@kbn/workflows-management-plugin",
+    "@kbn/workflows-extensions",
     "@kbn/workflows",
     "@kbn/core-http-server-utils",
     "@kbn/eval-kql",
@@ -87,7 +89,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/charts-plugin",
     "@kbn/unified-data-table",
-    "@kbn/user-profile-components",
     "@kbn/cell-actions",
     "@kbn/discover-utils",
     "@kbn/shared-ux-page-kibana-template",
@@ -96,7 +97,17 @@
     "@kbn/usage-collection-plugin",
     "@kbn/share-plugin",
     "@kbn/deeplinks-analytics",
-    "@kbn/core-user-profile-browser"
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/core-user-profile-browser",
+    "@kbn/user-profile-components",
+    "@kbn/esql-types",
+    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-server",
+    "@kbn/agent-builder-common",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-context-layer-plugin",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-elasticsearch-server"
   ],
   "exclude": ["target/**/*"]
 }

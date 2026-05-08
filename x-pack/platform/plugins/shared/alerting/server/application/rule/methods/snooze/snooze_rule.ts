@@ -7,6 +7,8 @@
 
 import Boom from '@hapi/boom';
 import { withSpan } from '@kbn/apm-utils';
+import type { SavedObject } from '@kbn/core/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { ruleSnoozeScheduleSchema } from '../../../../../common/routes/rule/request';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRuleSavedObject } from '../../../../rules_client/lib';
@@ -25,6 +27,7 @@ import { updateRuleSo } from '../../../../data/rule';
 import { updateMetaAttributes } from '../../../../rules_client/lib/update_meta_attributes';
 import type { RuleParams } from '../../types';
 import { transformRuleDomainToRule, transformRuleAttributesToRuleDomain } from '../../transforms';
+import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
 import { snoozeRuleParamsSchema } from './schemas';
 import type { SnoozeRuleOptions } from './types';
 
@@ -102,15 +105,28 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
     throw Boom.badRequest(error.message);
   }
 
+  const username = await context.getUserName();
+  const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
+
+  const snoozeRuleTimestamp = Date.now();
   const updatedRuleRaw = await updateRuleSo({
     savedObjectsClient: context.unsecuredSavedObjectsClient,
     savedObjectsUpdateOptions: { version },
     id,
     updateRuleAttributes: updateMetaAttributes(context, {
       ...newAttrs,
-      updatedBy: await context.getUserName(),
+      updatedBy: username,
       updatedAt: new Date().toISOString(),
     }),
+  });
+
+  await logBulkRuleChanges({
+    ruleSOs: [updatedRuleRaw] as Array<SavedObject<RawRule>>,
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleSnooze,
+      timestamp: snoozeRuleTimestamp,
+    },
   });
 
   const ruleDomain = transformRuleAttributesToRuleDomain<Params>(
@@ -118,7 +134,7 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
     {
       id: updatedRuleRaw.id,
       logger: context.logger,
-      ruleType: context.ruleTypeRegistry.get(attributes.alertTypeId!),
+      ruleType,
       references: updatedRuleRaw.references,
     },
     context.isSystemAction

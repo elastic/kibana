@@ -123,28 +123,30 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
           schema.object({
             rules: schema.arrayOf(
               schema.object({
-                rule_id: schema.string(),
-                type: schema.string(),
+                rule_id: schema.string({ maxLength: 512 }),
+                type: schema.string({ maxLength: 512 }),
                 criteria: schema.arrayOf(
                   schema.object({
-                    type: schema.string(),
-                    metadata: schema.maybe(schema.string()),
-                    values: schema.maybe(schema.arrayOf(schema.string())),
-                  })
+                    type: schema.string({ maxLength: 512 }),
+                    metadata: schema.maybe(schema.string({ maxLength: 4096 })),
+                    values: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+                  }),
+                  { maxSize: 100 }
                 ),
                 actions: schema.object({
-                  ids: schema.maybe(schema.arrayOf(schema.string())),
+                  ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
                   docs: schema.maybe(
                     schema.arrayOf(
                       schema.object({
-                        _id: schema.string(),
-                        _index: schema.string(),
+                        _id: schema.string({ maxLength: 512 }),
+                        _index: schema.string({ maxLength: 255 }),
                       }),
                       { maxSize: 10000 }
                     )
                   ),
                 }),
-              })
+              }),
+              { maxSize: 100 }
             ),
           })
         ),

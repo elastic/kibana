@@ -10,7 +10,7 @@
 import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
 import { WORKFLOW_UPDATE_SECURITY } from '../utils/route_security';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerDisableAllWorkflowsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
@@ -24,7 +24,7 @@ export function registerDisableAllWorkflowsRoute({ router, api, spaces }: RouteD
         version: INTERNAL_API_VERSION,
         validate: false,
       },
-      withLicenseCheck(async (_context, request, response) => {
+      withAvailabilityCheck(async (_context, request, response) => {
         const spaceId = spaces.getSpaceId(request);
         const result = await api.disableAllWorkflows(spaceId);
         return response.ok({

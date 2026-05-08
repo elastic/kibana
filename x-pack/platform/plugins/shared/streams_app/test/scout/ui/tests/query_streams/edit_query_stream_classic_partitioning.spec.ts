@@ -49,9 +49,9 @@ test.describe(
       await pageObjects.streams.gotoStreamMainPage();
     });
 
-    test.afterAll(async ({ apiServices, esClient, kbnClient, logsSynthtraceEsClient }) => {
+    test.afterAll(async ({ apiServices, esClient, kbnClient, logsSynthtraceEsClient, log }) => {
       try {
-        await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME);
+        await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME, log);
         await apiServices.streams.deleteStream(CLASSIC_STREAM_NAME);
       } catch {
         // Streams may not exist
@@ -82,8 +82,7 @@ test.describe(
 
       await test.step('update the query and save', async () => {
         await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue(UPDATED_ESQL_QUERY);
-        await pageObjects.streams.clickQueryStreamFormSaveButton();
-        await expect(pageObjects.streams.queryStreamUpdatedSuccessToast).toBeVisible();
+        await pageObjects.streams.saveInlineQueryStreamEdit();
       });
 
       await test.step('verify the ES|QL view was updated', async () => {

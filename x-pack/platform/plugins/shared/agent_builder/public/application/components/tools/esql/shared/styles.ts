@@ -8,14 +8,18 @@
 import { css } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
-export const visualizationWrapper = (euiTheme: UseEuiTheme['euiTheme'], height: number) =>
+export const visualizationActionsClassName = 'agentBuilderVisualizationActions';
+export const visualizationTimePickerContainerClassName =
+  'agentBuilderVisualizationTimePickerContainer';
+
+export const visualizationWrapperStyles = ({ euiTheme }: UseEuiTheme) =>
   css({
     position: 'relative',
-    height,
     overflow: 'visible',
-    '&:hover > .visualization-button-actions, &:focus-within > .visualization-button-actions': {
-      opacity: 1,
-      pointerEvents: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    [`.${visualizationActionsClassName} + .${visualizationTimePickerContainerClassName}`]: {
+      width: `calc(100% - ${euiTheme.base * 4}px)`,
     },
     '.echChart ul': {
       marginInlineStart: 0,
@@ -26,15 +30,30 @@ export const visualizationWrapper = (euiTheme: UseEuiTheme['euiTheme'], height: 
     },
   });
 
-export const actionsContainer = (euiTheme: UseEuiTheme['euiTheme']) =>
+export const visualizationHeaderStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: euiTheme.size.s,
+    width: '100%',
+    boxSizing: 'border-box',
+    marginBlockStart: euiTheme.size.base,
+    marginBlockEnd: euiTheme.size.s,
+    paddingInline: euiTheme.size.base,
+  });
+
+export const visualizationEmbeddableStyles = (height: number) =>
+  css({
+    flex: '1 1 auto',
+    minHeight: 0,
+    height,
+  });
+
+export const actionsContainerStyles = ({ euiTheme }: UseEuiTheme) =>
   css({
     position: 'absolute',
-    top: `-${euiTheme.size.xs}`,
-    right: 0,
-    zIndex: 2,
-    opacity: 0,
-    pointerEvents: 'none',
-    transition: `opacity ${euiTheme.animation.fast} ease-in-out`,
-    display: 'inline-flex',
-    gap: 0,
+    top: euiTheme.size.base,
+    right: euiTheme.size.base,
+    zIndex: euiTheme.levels.flyout,
   });
