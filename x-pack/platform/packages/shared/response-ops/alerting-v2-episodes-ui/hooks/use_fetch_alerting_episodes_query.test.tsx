@@ -149,6 +149,30 @@ describe('useFetchAlertingEpisodesQuery', () => {
     expect(result.current.data).toEqual([]);
   });
 
+  it('normalizes last_tags from ES|QL to string[] in select', async () => {
+    const pageSize = 10;
+
+    fetchAlertingEpisodesMock.mockResolvedValue([
+      {
+        ...mockEpisodesData[0],
+        last_tags: 'solo',
+      },
+    ]);
+
+    const { result } = renderHook(
+      () =>
+        useFetchAlertingEpisodesQuery({
+          pageSize,
+          services: { dataViews, http, expressions: mockExpressions },
+        }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    expect(result.current.data?.[0].last_tags).toEqual(['solo']);
+  });
+
   it('should use keepPreviousData for smooth transitions', async () => {
     const pageSize = 10;
 
