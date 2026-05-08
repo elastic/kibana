@@ -138,6 +138,12 @@ class SmlIndexerImpl implements SmlIndexer {
       if (chunk.description !== undefined) {
         document.description = chunk.description;
       }
+      if (chunk.tags !== undefined) {
+        document.tags = chunk.tags;
+      }
+      if (chunk.payload !== undefined) {
+        document.payload = chunk.payload;
+      }
       if (chunk.user_id !== undefined) {
         document.user_id = chunk.user_id;
       }

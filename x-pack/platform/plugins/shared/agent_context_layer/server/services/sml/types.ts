@@ -27,9 +27,17 @@ export interface SmlChunk {
   title: string;
   /** Longer summary for semantic search (indexed as `semantic_text`); omit or empty if none */
   description?: string;
+  /** Free-form labels for filtering and discovery */
+  tags?: string[];
+  /**
+   * Type-specific structured data. Stored as `flattened` so leaves are
+   * keyword-searchable for sub-path filtering. SML treats this opaquely;
+   * type writers own its shape.
+   */
+  payload?: Record<string, unknown>;
   /** Owner or last-modifier user id when known */
   user_id?: string;
-  /** Other SML chunk ids this item references */
+  /** Other SML chunk ids (URI form preferred, e.g. `dashboard://abc`) this item references */
   references?: string[];
   /** Permissions required to access the underlying element (e.g., 'saved_object:lens/get') */
   permissions?: string[];
@@ -121,15 +129,19 @@ export interface SmlDocument {
   type: string;
   /** Display title */
   title: string;
-  /** Origin ID (e.g., saved object ID) */
+  /** Origin ID (e.g., saved object ID) of the underlying element. */
   origin_id: string;
   /** Searchable content (`semantic_text` in the index) */
   content: string;
   /** Semantic summary (`semantic_text` in the index) */
   description?: string;
+  /** Free-form labels */
+  tags?: string[];
+  /** Type-specific structured data (`flattened` mapping) */
+  payload?: Record<string, unknown>;
   /** Owner or last-modifier user id */
   user_id?: string;
-  /** Referenced SML chunk ids */
+  /** Referenced SML chunk ids (URI form preferred) */
   references?: string[];
   /** Timestamp when first created */
   created_at: string;

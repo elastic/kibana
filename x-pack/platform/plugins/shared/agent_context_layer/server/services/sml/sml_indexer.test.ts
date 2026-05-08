@@ -165,6 +165,70 @@ describe('createSmlIndexer', () => {
       });
     });
 
+    it('create action: round-trips all new schema fields (tags, payload, references, description, user_id)', async () => {
+      const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+      (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+      const smlData = {
+        chunks: [
+          {
+            type: 'dashboard',
+            title: 'Sales Q3',
+            content: 'sales dashboard for Q3 with revenue and conversion metrics',
+            description: 'Quarterly sales overview, executive audience',
+            tags: ['sales', 'executive', 'quarterly'],
+            payload: {
+              owner_team: 'sales-ops',
+              fields: [{ name: 'revenue', type: 'currency' }],
+            },
+            user_id: 'user-7',
+            references: ['category://sales', 'dashboard://parent-1'],
+            permissions: ['saved_object:dashboard/get'],
+          },
+        ],
+      };
+      const getSmlData = jest.fn().mockResolvedValue(smlData);
+      const registry = createMockRegistry(
+        createMockSmlTypeDefinition({ id: 'dashboard', getSmlData })
+      );
+      const logger = createMockLogger();
+      const esClient = createMockEsClient();
+      const indexer = createSmlIndexer({ registry, logger });
+
+      await indexer.indexAttachment(
+        createIndexerParams({
+          originId: 'dash-100',
+          attachmentType: 'dashboard',
+          action: 'create',
+          spaces: ['default'],
+          esClient,
+        })
+      );
+
+      expect(bulkMock).toHaveBeenCalledTimes(1);
+      const bulkCall = bulkMock.mock.calls[0][0];
+      expect(bulkCall.operations[0].index.document).toEqual({
+        id: 'dashboard:dash-100:mock-uuid',
+        type: 'dashboard',
+        title: 'Sales Q3',
+        origin_id: 'dash-100',
+        content: 'sales dashboard for Q3 with revenue and conversion metrics',
+        description: 'Quarterly sales overview, executive audience',
+        tags: ['sales', 'executive', 'quarterly'],
+        payload: {
+          owner_team: 'sales-ops',
+          fields: [{ name: 'revenue', type: 'currency' }],
+        },
+        user_id: 'user-7',
+        references: ['category://sales', 'dashboard://parent-1'],
+        created_at: expect.any(String),
+        updated_at: expect.any(String),
+        spaces: ['default'],
+        permissions: ['saved_object:dashboard/get'],
+      });
+    });
+
     it('update action: same as create (delete-then-write)', async () => {
       const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
       const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });

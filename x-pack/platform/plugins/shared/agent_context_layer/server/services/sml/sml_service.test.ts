@@ -167,10 +167,10 @@ describe('SmlService', () => {
 
   describe('search', () => {
     const saytBoolPrefixFields = [
-      'title',
-      'title._2gram',
-      'title._3gram',
-      'title._index_prefix',
+      'title_autocomplete',
+      'title_autocomplete._2gram',
+      'title_autocomplete._3gram',
+      'title_autocomplete._index_prefix',
       'type.autocomplete',
       'type.autocomplete._index_prefix',
     ];
@@ -217,8 +217,10 @@ describe('SmlService', () => {
                       fields: saytBoolPrefixFields,
                     },
                   },
-                  { match: { content: 'foo bar' } },
+                  { match: { title: 'foo bar' } },
                   { match: { description: 'foo bar' } },
+                  { match: { content: 'foo bar' } },
+                  { match: { unified_semantic: 'foo bar' } },
                 ],
                 minimum_should_match: 1,
               },
@@ -360,6 +362,66 @@ describe('SmlService', () => {
         score: 1.5,
       });
       expect(result.total).toBe(1);
+    });
+
+    it('surfaces all new schema fields (origin, tags, payload) in search results', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: 1,
+          hits: [
+            {
+              _source: {
+                id: 'chunk-2',
+                type: 'dashboard',
+                title: 'Sales Q3',
+                origin_id: 'dash-100',
+                content: 'sales content',
+                description: 'sales summary',
+                tags: ['sales', 'executive'],
+                payload: { owner_team: 'sales-ops' },
+                user_id: 'user-7',
+                references: ['category://sales'],
+                created_at: '2026-04-01T00:00:00.000Z',
+                updated_at: '2026-04-02T00:00:00.000Z',
+                spaces: ['default'],
+                permissions: ['saved_object:dashboard/get'],
+              },
+              _score: 2.5,
+            },
+          ],
+        },
+      } as any);
+
+      const result = await smlService.search({
+        query: 'sales',
+        size: 10,
+        spaceId: 'default',
+        esClient: scopedClient,
+        request,
+      });
+
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0]).toEqual({
+        id: 'chunk-2',
+        type: 'dashboard',
+        title: 'Sales Q3',
+        origin_id: 'dash-100',
+        content: 'sales content',
+        description: 'sales summary',
+        tags: ['sales', 'executive'],
+        payload: { owner_team: 'sales-ops' },
+        user_id: 'user-7',
+        references: ['category://sales'],
+        created_at: '2026-04-01T00:00:00.000Z',
+        updated_at: '2026-04-02T00:00:00.000Z',
+        spaces: ['default'],
+        permissions: ['saved_object:dashboard/get'],
+        score: 2.5,
+      });
     });
 
     it('handles total as object with value', async () => {
@@ -862,6 +924,61 @@ describe('SmlService', () => {
         updated_at: '2024-01-02',
         spaces: ['default'],
         permissions: [],
+      });
+    });
+
+    it('round-trips all new schema fields (origin, tags, payload)', async () => {
+      const service = createSmlService();
+      service.setup({ logger });
+      const smlService = service.start({ logger });
+
+      esClient.search.mockResolvedValue({
+        hits: {
+          total: 1,
+          hits: [
+            {
+              _source: {
+                id: 'doc-3',
+                type: 'dashboard',
+                title: 'Sales Q3',
+                origin_id: 'dash-100',
+                content: 'sales content',
+                description: 'sales summary',
+                tags: ['sales', 'executive'],
+                payload: { owner_team: 'sales-ops' },
+                user_id: 'user-7',
+                references: ['category://sales'],
+                created_at: '2026-04-01T00:00:00.000Z',
+                updated_at: '2026-04-02T00:00:00.000Z',
+                spaces: ['default'],
+                permissions: ['saved_object:dashboard/get'],
+              },
+            },
+          ],
+        },
+      } as any);
+
+      const result = await smlService.getDocuments({
+        ids: ['doc-3'],
+        spaceId: 'default',
+        esClient: scopedClient,
+      });
+
+      expect(result.get('doc-3')).toEqual({
+        id: 'doc-3',
+        type: 'dashboard',
+        title: 'Sales Q3',
+        origin_id: 'dash-100',
+        content: 'sales content',
+        description: 'sales summary',
+        tags: ['sales', 'executive'],
+        payload: { owner_team: 'sales-ops' },
+        user_id: 'user-7',
+        references: ['category://sales'],
+        created_at: '2026-04-01T00:00:00.000Z',
+        updated_at: '2026-04-02T00:00:00.000Z',
+        spaces: ['default'],
+        permissions: ['saved_object:dashboard/get'],
       });
     });
 

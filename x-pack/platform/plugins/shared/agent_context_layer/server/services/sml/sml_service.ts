@@ -314,18 +314,22 @@ const checkItemsAccess = async ({
 };
 
 const SML_SEARCH_AS_YOU_TYPE_FIELDS = [
-  'title',
-  'title._2gram', // Combination of two words
-  'title._3gram', // Combination of three words
-  'title._index_prefix',
+  'title_autocomplete',
+  'title_autocomplete._2gram', // Combination of two words
+  'title_autocomplete._3gram', // Combination of three words
+  'title_autocomplete._index_prefix',
   'type.autocomplete',
   'type.autocomplete._index_prefix',
 ] as const;
 
 /**
- * Build the search query from a single string. `type` and `title` use search_as_you_type + bool_prefix
- * for autocomplete-style matching, while `content` and `description` (semantic_text fields) are
- * matched with standard `match` queries so longer-form text is also retrievable.
+ * Build the search query from a single string. `title_autocomplete` and `type.autocomplete`
+ * (search_as_you_type) drive prefix matching via bool_prefix; `title`, `description`, and
+ * `content` (text) contribute BM25; `unified_semantic` (a single semantic_text field that
+ * copy_to-aggregates `title`, `description`, and `content`) drives vector retrieval.
+ *
+ * Search-API follow-up will refine this — splitting autocomplete from full retrieval,
+ * adding field weighting, etc.
  *
  * After trim: empty string or `*` → `match_all` (return everything).
  */
@@ -344,8 +348,10 @@ const buildSmlSearchQuery = (query: string): Record<string, unknown> => {
             fields: [...SML_SEARCH_AS_YOU_TYPE_FIELDS],
           },
         },
-        { match: { content: trimmed } },
+        { match: { title: trimmed } },
         { match: { description: trimmed } },
+        { match: { content: trimmed } },
+        { match: { unified_semantic: trimmed } },
       ],
       minimum_should_match: 1,
     },
@@ -482,6 +488,8 @@ const searchSml = async ({
           origin_id: source.origin_id ?? '',
           content: source.content,
           description: source.description,
+          tags: source.tags,
+          payload: source.payload,
           references: source.references,
           created_at: source.created_at ?? '',
           updated_at: source.updated_at ?? '',
@@ -559,6 +567,12 @@ const getDocumentsByIds = async ({
       };
       if (source.description !== undefined) {
         doc.description = source.description;
+      }
+      if (source.tags !== undefined) {
+        doc.tags = source.tags;
+      }
+      if (source.payload !== undefined) {
+        doc.payload = source.payload;
       }
       if (source.user_id !== undefined) {
         doc.user_id = source.user_id;
