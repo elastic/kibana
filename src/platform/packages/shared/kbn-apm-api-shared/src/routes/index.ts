@@ -21,6 +21,7 @@ import { dependenciesRouteDefinitions } from './dependencies';
 import { transactionsRouteDefinitions } from './transactions';
 import { servicesRouteDefinitions } from './services';
 import { serviceMapRouteDefinitions } from './service_map';
+import { errorsRouteDefinitions } from './errors';
 import type { BuildGroupedRepository } from './types';
 
 export const routeDefinitions = {
@@ -39,6 +40,7 @@ export const routeDefinitions = {
   transactions: transactionsRouteDefinitions,
   services: servicesRouteDefinitions,
   serviceMap: serviceMapRouteDefinitions,
+  errors: errorsRouteDefinitions,
 };
 
 export type SharedAPMRouteRepository = BuildGroupedRepository<typeof routeDefinitions>;
