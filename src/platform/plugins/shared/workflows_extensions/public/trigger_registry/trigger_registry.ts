@@ -31,9 +31,10 @@ export class PublicTriggerRegistry {
     if (typeof definitionOrLoader === 'function') {
       this.pending.push(async () => {
         definitionOrLoader().then((definition) => {
-          if (definition) {
-            this.addToRegistry(definition);
+          if (!definition) {
+            throw new Error('Trigger definition is not loaded correctly');
           }
+          this.addToRegistry(definition);
         });
       });
     } else {
