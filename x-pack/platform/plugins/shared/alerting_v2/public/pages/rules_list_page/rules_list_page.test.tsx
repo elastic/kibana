@@ -136,7 +136,8 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    expect(screen.getByRole('table')).toBeInTheDocument();
+    expect(screen.getByTestId('rulesListLoading')).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
   it('renders rules in the table', () => {
@@ -222,7 +223,7 @@ describe('RulesListPage', () => {
     expect(screen.getByText('Network error')).toBeInTheDocument();
   });
 
-  it('shows "Showing 0-0 of 0 Rules" when there are no rules', () => {
+  it('shows empty state when there are no rules and no active filters', () => {
     mockUseFetchRules.mockReturnValue({
       data: { items: [], total: 0, page: 1, perPage: 20 },
       isLoading: false,
@@ -232,8 +233,10 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    const showingLabel = screen.getByTestId('rulesListShowingLabel');
-    expect(showingLabel).toHaveTextContent('Showing 0-0 of 0 Rules');
+    expect(
+      screen.getByRole('heading', { level: 2, name: /welcome to the new alerting experience/i })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
   it('shows correct "Showing" range when rules exist', () => {
