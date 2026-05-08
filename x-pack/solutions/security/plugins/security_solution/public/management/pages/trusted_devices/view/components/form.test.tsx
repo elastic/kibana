@@ -462,8 +462,11 @@ describe('Trusted devices form', () => {
       const valueField = getEntryValueField();
       await setTextFieldValue(valueField, 'prefix**suffix');
 
+      // Re-render so currentItem reflects the typed value before blur
+      rerenderWithLatestProps();
+
       act(() => {
-        fireEvent.blur(valueField);
+        fireEvent.blur(getEntryValueField());
       });
 
       // Assert the help text is rendered within the conditions row
@@ -682,6 +685,131 @@ describe('Trusted devices form', () => {
           INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
         )
       ).toBeNull();
+    });
+
+    it('should show both empty-value and duplicate-field errors when both conditions exist', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', ''),
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'device-2'),
+        ],
+      });
+      await render();
+
+      await setTextFieldValue(getNameField(), 'My TD');
+
+      act(() => {
+        fireEvent.blur(getEntryValueField(0));
+      });
+
+      expect(renderResult.getByText(INPUT_ERRORS.entryValueEmpty)).toBeTruthy();
+      expect(
+        renderResult.getByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeTruthy();
+    });
+  });
+
+  describe('Per-entry blur validation', () => {
+    it('should show empty-value error when any entry is visited and any entry is empty', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', ''),
+          createEntry(TrustedDeviceConditionEntryField.HOST, 'match', ''),
+        ],
+      });
+      await render();
+
+      await setTextFieldValue(getNameField(), 'My TD');
+      rerenderWithLatestProps();
+
+      act(() => {
+        fireEvent.blur(getEntryValueField(1));
+      });
+
+      expect(renderResult.queryByText(INPUT_ERRORS.entryValueEmpty)).toBeTruthy();
+
+      // The form should be invalid (both entries are empty)
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.isValid).toBe(false);
+    });
+
+    it('should show both empty-value and duplicate-field errors when entry 0 is empty, entry 1 has a value, and both use the same field', async () => {
+      formProps.item = createItem({
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', ''),
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'some-device'),
+        ],
+      });
+      await render();
+
+      await setTextFieldValue(getNameField(), 'My TD');
+      rerenderWithLatestProps();
+
+      act(() => {
+        fireEvent.blur(getEntryValueField(1));
+      });
+
+      expect(renderResult.queryByText(INPUT_ERRORS.entryValueEmpty)).toBeTruthy();
+      expect(
+        renderResult.queryByText(
+          INPUT_ERRORS.noDuplicateField(TrustedDeviceConditionEntryField.DEVICE_ID)
+        )
+      ).toBeTruthy();
+
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.isValid).toBe(false);
+    });
+  });
+
+  describe('OS change preserves multiple entries', () => {
+    it('should preserve all entries when OS changes and no entry uses USERNAME field', async () => {
+      formProps.item = createItem({
+        os_types: [OperatingSystem.WINDOWS],
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'dev-1'),
+          createEntry(TrustedDeviceConditionEntryField.HOST, 'match', 'host-1'),
+        ],
+      });
+      await render();
+
+      (formProps.onChange as jest.Mock).mockClear();
+
+      await openOsCombo();
+      await userEvent.click(screen.getByRole('option', { name: OPERATING_SYSTEM_WINDOWS_AND_MAC }));
+
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.item.entries).toHaveLength(2);
+      expect(lastCall?.item.entries[0].field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
+      expect(lastCall?.item.entries[0].value).toBe('dev-1');
+      expect(lastCall?.item.entries[1].field).toBe(TrustedDeviceConditionEntryField.HOST);
+      expect(lastCall?.item.entries[1].value).toBe('host-1');
+    });
+
+    it('should reset only the USERNAME entry and keep other entries when OS changes to Mac', async () => {
+      formProps.item = createItem({
+        os_types: [OperatingSystem.WINDOWS],
+        entries: [
+          createEntry(TrustedDeviceConditionEntryField.DEVICE_ID, 'match', 'dev-1'),
+          createEntry(TrustedDeviceConditionEntryField.USERNAME, 'match', 'user-1'),
+        ],
+      });
+      await render();
+
+      (formProps.onChange as jest.Mock).mockClear();
+
+      await openOsCombo();
+      await userEvent.click(screen.getByRole('option', { name: OS_TITLES[OperatingSystem.MAC] }));
+
+      const lastCall = (formProps.onChange as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCall?.item.entries).toHaveLength(2);
+      // First entry preserved
+      expect(lastCall?.item.entries[0].field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
+      expect(lastCall?.item.entries[0].value).toBe('dev-1');
+      // USERNAME entry reset to DEVICE_ID with cleared value
+      expect(lastCall?.item.entries[1].field).toBe(TrustedDeviceConditionEntryField.DEVICE_ID);
+      expect(lastCall?.item.entries[1].value).toBe('');
     });
   });
 

@@ -150,6 +150,105 @@ const OPERATOR_OPTIONS = [
 
 const DEVICE_EVENTS_INDEX_NAMES = [DEVICE_EVENTS_INDEX_PATTERN];
 
+interface EntryValidationResult {
+  errors: string[];
+  warnings: string[];
+  anyEntryEmpty: boolean;
+  visitedEntryEmpty: boolean;
+}
+
+const validateEntries = (
+  entries: ExceptionListItemSchema['entries'],
+  hasVisitedAnyEntry: boolean
+): EntryValidationResult => {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  const fieldCounts = new Map<string, number>();
+  let anyEntryEmpty = false;
+
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i];
+    fieldCounts.set(entry.field, (fieldCounts.get(entry.field) ?? 0) + 1);
+
+    if ('value' in entry) {
+      const isEmpty =
+        (typeof entry.value === 'string' && !entry.value.trim()) ||
+        (Array.isArray(entry.value) && entry.value.length === 0);
+
+      if (isEmpty) {
+        anyEntryEmpty = true;
+      } else if (
+        typeof entry.value === 'string' &&
+        entry.type === 'wildcard' &&
+        entry.value.includes('**')
+      ) {
+        warnings.push(VALIDATION_WARNINGS.performanceWildcard);
+      }
+    }
+  }
+
+  const visitedEntryEmpty = anyEntryEmpty && hasVisitedAnyEntry;
+
+  if (visitedEntryEmpty) {
+    errors.push(INPUT_ERRORS.entryValueEmpty);
+  }
+
+  for (const [field, count] of fieldCounts) {
+    if (count > 1) {
+      errors.push(INPUT_ERRORS.noDuplicateField(field as TrustedDeviceConditionEntryField));
+    }
+  }
+
+  return { errors, warnings, anyEntryEmpty, visitedEntryEmpty };
+};
+
+const computeValidation = (
+  formData: ExceptionListItemSchema | CreateExceptionListItemSchema,
+  visitedFields: Record<string, boolean>,
+  hasVisitedAnyEntry: boolean
+): ValidationResult => {
+  const errors: Record<string, string[]> = {};
+  const warnings: Record<string, string[]> = {};
+
+  if (!formData.name?.trim()) {
+    errors.name = [INPUT_ERRORS.name];
+  } else if (formData.name.trim().length > 256) {
+    errors.name = [INPUT_ERRORS.nameMaxLength];
+  }
+
+  if (formData.description && formData.description.length > 256) {
+    errors.description = [INPUT_ERRORS.descriptionMaxLength];
+  }
+
+  if (!formData.os_types?.length) {
+    errors.os = [INPUT_ERRORS.osRequired];
+  }
+
+  const hasOsSelected = (formData.os_types?.length ?? 0) > 0;
+  const hasVisitedEntries = visitedFields.entries;
+
+  if (hasOsSelected || hasVisitedEntries) {
+    if (!formData.entries?.length) {
+      errors.entries = [INPUT_ERRORS.entriesAtLeastOne];
+    } else {
+      const entryValidation = validateEntries(formData.entries, hasVisitedAnyEntry);
+
+      if (entryValidation.errors.length > 0) {
+        errors.entries = entryValidation.errors;
+      }
+      if (entryValidation.warnings.length > 0) {
+        warnings.entries = entryValidation.warnings;
+      }
+
+      if (entryValidation.anyEntryEmpty && !entryValidation.visitedEntryEmpty) {
+        return { isValid: false, errors, warnings };
+      }
+    }
+  }
+
+  return { isValid: Object.keys(errors).length === 0, errors, warnings };
+};
+
 // DetailsSection ---------------------------------------------------------------
 
 const DetailsSection = memo<{
@@ -542,6 +641,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
   ({ item, onChange, mode = 'create', disabled = false, error: submitError }) => {
     const [hasUserSelectedOs, setHasUserSelectedOs] = useState<boolean>(false);
     const [hasFormChanged, setHasFormChanged] = useState(false);
+    const [hasVisitedAnyEntry, setHasVisitedAnyEntry] = useState(false);
 
     const getTestId = useTestIdGenerator('trustedDevices-form');
 
@@ -554,12 +654,6 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
     const hasIndexWithFields = !isIndexLoading && indexPatterns?.fields?.length > 0;
 
     const [visitedFields, setVisitedFields] = useState<Record<string, boolean>>({});
-
-    const [validationResult, setValidationResult] = useState<ValidationResult>({
-      isValid: false,
-      errors: {},
-      warnings: {},
-    });
 
     // For new TD items, ensure we start with the correct OS types
     const currentItem = useMemo(() => {
@@ -586,96 +680,20 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
       setVisitedFields((prev) => ({ ...prev, ...updates }));
     }, []);
 
-    const validateForm = useCallback(
-      (formData: typeof item): ValidationResult => {
-        const errors: Record<string, string[]> = {};
-        const warnings: Record<string, string[]> = {};
-
-        // Name validation
-        if (!formData.name?.trim()) {
-          errors.name = [INPUT_ERRORS.name];
-        } else if (formData.name.trim().length > 256) {
-          errors.name = [INPUT_ERRORS.nameMaxLength];
-        }
-
-        // Description validation
-        if (formData.description && formData.description.length > 256) {
-          errors.description = [INPUT_ERRORS.descriptionMaxLength];
-        }
-
-        // OS validation
-        if (!formData.os_types?.length) {
-          errors.os = [INPUT_ERRORS.osRequired];
-        }
-
-        // Condition validation — all entries must have a non-empty value
-        const hasOsSelected = (formData.os_types?.length ?? 0) > 0;
-        const hasVisitedEntries = visitedFields.entries;
-
-        if (hasOsSelected || hasVisitedEntries) {
-          if (!formData.entries?.length) {
-            errors.entries = [INPUT_ERRORS.entriesAtLeastOne];
-          } else {
-            const entryErrors: string[] = [];
-            const entryWarnings: string[] = [];
-            const fieldCounts = new Map<string, number>();
-
-            for (const entry of formData.entries) {
-              fieldCounts.set(entry.field, (fieldCounts.get(entry.field) ?? 0) + 1);
-
-              if ('value' in entry) {
-                if (typeof entry.value === 'string') {
-                  if (!entry.value.trim()) {
-                    entryErrors.push(INPUT_ERRORS.entryValueEmpty);
-                    break;
-                  }
-                  if (entry.type === 'wildcard' && entry.value.includes('**')) {
-                    entryWarnings.push(VALIDATION_WARNINGS.performanceWildcard);
-                  }
-                } else if (Array.isArray(entry.value) && entry.value.length === 0) {
-                  entryErrors.push(INPUT_ERRORS.entryValueEmpty);
-                  break;
-                }
-              }
-            }
-
-            for (const [field, count] of fieldCounts) {
-              if (count > 1) {
-                entryErrors.push(
-                  INPUT_ERRORS.noDuplicateField(field as TrustedDeviceConditionEntryField)
-                );
-              }
-            }
-
-            if (entryErrors.length > 0) {
-              errors.entries = entryErrors;
-            }
-            if (entryWarnings.length > 0) {
-              warnings.entries = entryWarnings;
-            }
-          }
-        }
-
-        return {
-          isValid: Object.keys(errors).length === 0,
-          errors,
-          warnings,
-        };
-      },
-      [visitedFields]
+    const validationResult = useMemo(
+      () => computeValidation(currentItem, visitedFields, hasVisitedAnyEntry),
+      [currentItem, visitedFields, hasVisitedAnyEntry]
     );
 
     const updateField = useCallback(
       (field: string, value: string) => {
         const updatedItem = { ...currentItem, [field]: value };
-        const validation = validateForm(updatedItem);
+        const { isValid } = computeValidation(updatedItem, visitedFields, hasVisitedAnyEntry);
 
-        setValidationResult(validation);
         setHasFormChanged(true);
-
-        onChange({ item: updatedItem, isValid: validation.isValid });
+        onChange({ item: updatedItem, isValid });
       },
-      [currentItem, onChange, validateForm]
+      [currentItem, visitedFields, hasVisitedAnyEntry, onChange]
     );
 
     const handleNameChange = useCallback(
@@ -702,46 +720,50 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
     const handleOsChange = useCallback(
       (selectedOptions: Array<EuiComboBoxOptionOption<OsTypeArray>>) => {
         const osTypes = selectedOptions[0]?.value || [];
-        const firstEntry = currentItem.entries?.[0];
 
         setHasUserSelectedOs(true);
         setHasFormChanged(true);
+        setHasVisitedAnyEntry(false);
 
-        let fieldToUse = firstEntry?.field || TrustedDeviceConditionEntryField.DEVICE_ID;
-        let shouldResetValue = false;
+        const existingEntries = currentItem.entries?.length
+          ? currentItem.entries
+          : [defaultDeviceEntry()];
 
-        if (
-          fieldToUse === TrustedDeviceConditionEntryField.USERNAME &&
-          !isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, osTypes)
-        ) {
-          fieldToUse = TrustedDeviceConditionEntryField.DEVICE_ID;
-          shouldResetValue = true;
-        }
+        const updatedEntries = existingEntries.map((entry) => {
+          const isUsernameUnavailable =
+            entry.field === TrustedDeviceConditionEntryField.USERNAME &&
+            !isTrustedDeviceFieldAvailableForOs(TrustedDeviceConditionEntryField.USERNAME, osTypes);
+
+          const fieldToUse = isUsernameUnavailable
+            ? TrustedDeviceConditionEntryField.DEVICE_ID
+            : entry.field;
+
+          const entryType =
+            'type' in entry && entry.type === 'wildcard'
+              ? ('wildcard' as const)
+              : ('match' as const);
+
+          return {
+            field: fieldToUse,
+            operator: 'included' as const,
+            type: entryType,
+            value: isUsernameUnavailable ? '' : 'value' in entry ? String(entry.value || '') : '',
+          };
+        });
 
         const updatedItem = {
           ...currentItem,
           os_types: osTypes,
-          entries: [
-            {
-              field: fieldToUse,
-              operator: 'included' as const,
-              type: 'match' as const,
-              value: shouldResetValue
-                ? ''
-                : firstEntry && 'value' in firstEntry
-                ? String(firstEntry.value || '')
-                : '',
-            } as const,
-          ],
+          entries: updatedEntries,
         };
 
-        const validation = validateForm(updatedItem);
+        const { isValid } = computeValidation(updatedItem, visitedFields, new Set());
 
         updateVisitedFields({ ...visitedFields, os: true });
 
-        onChange({ item: updatedItem, isValid: validation.isValid });
+        onChange({ item: updatedItem, isValid });
       },
-      [currentItem, onChange, validateForm, updateVisitedFields, visitedFields]
+      [currentItem, onChange, updateVisitedFields, visitedFields]
     );
 
     const updateEntryAtIndex = useCallback(
@@ -752,14 +774,12 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         const currentEntry = entries[index] ?? defaultDeviceEntry();
         entries[index] = { ...currentEntry, ...updates };
         const updatedItem = { ...currentItem, entries };
-        const validation = validateForm(updatedItem);
+        const { isValid } = computeValidation(updatedItem, visitedFields, hasVisitedAnyEntry);
 
-        setValidationResult(validation);
         setHasFormChanged(true);
-
-        onChange({ item: updatedItem, isValid: validation.isValid });
+        onChange({ item: updatedItem, isValid });
       },
-      [currentItem, onChange, validateForm]
+      [currentItem, visitedFields, hasVisitedAnyEntry, onChange]
     );
 
     const handleEntryFieldChange = useCallback(
@@ -787,43 +807,45 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
     );
 
     const handleEntryValueBlur = useCallback(
-      (_index: number) => {
+      (index: number) => {
+        setHasVisitedAnyEntry(true);
         updateVisitedFields({ ...visitedFields, entries: true });
       },
       [visitedFields, updateVisitedFields]
     );
 
     const handleAddEntry = useCallback(() => {
-      const entries = [...(currentItem.entries ?? []), defaultDeviceEntry()];
+      const existingEntries = currentItem.entries?.length
+        ? currentItem.entries
+        : [defaultDeviceEntry()];
+      const entries = [...existingEntries, defaultDeviceEntry()];
       const updatedItem = { ...currentItem, entries };
-      const validation = validateForm(updatedItem);
+      const { isValid } = computeValidation(updatedItem, visitedFields, hasVisitedAnyEntry);
 
-      setValidationResult(validation);
       setHasFormChanged(true);
-      onChange({ item: updatedItem, isValid: validation.isValid });
-    }, [currentItem, onChange, validateForm]);
+      onChange({ item: updatedItem, isValid });
+    }, [currentItem, visitedFields, hasVisitedAnyEntry, onChange]);
 
     const handleRemoveEntry = useCallback(
       (index: number) => {
         const entries = (currentItem.entries ?? []).filter((_, i) => i !== index);
         const updatedItem = { ...currentItem, entries };
-        const validation = validateForm(updatedItem);
 
-        setValidationResult(validation);
+        const { isValid } = computeValidation(updatedItem, visitedFields, hasVisitedAnyEntry);
         setHasFormChanged(true);
-        onChange({ item: updatedItem, isValid: validation.isValid });
+        onChange({ item: updatedItem, isValid });
       },
-      [currentItem, onChange, validateForm]
+      [currentItem, visitedFields, hasVisitedAnyEntry, onChange]
     );
 
     const handlePolicyChange = useCallback<EffectedPolicySelectProps['onChange']>(
       (updatedItem) => {
-        const validation = validateForm(updatedItem);
+        const { isValid } = computeValidation(updatedItem, visitedFields, hasVisitedAnyEntry);
 
         setHasFormChanged(true);
-        onChange({ item: updatedItem, isValid: validation.isValid });
+        onChange({ item: updatedItem, isValid });
       },
-      [onChange, validateForm]
+      [visitedFields, hasVisitedAnyEntry, onChange]
     );
 
     const selectedOs = useMemo((): OsTypeArray => {
