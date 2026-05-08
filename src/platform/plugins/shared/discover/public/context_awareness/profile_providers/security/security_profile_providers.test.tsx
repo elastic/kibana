@@ -8,6 +8,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { ALERT_RULE_TYPE_ID, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/rule-data-utils';
 import type { ProfileProviderServices } from '../profile_provider_services';
 import { DocumentType } from '../../profiles';
@@ -21,7 +22,12 @@ const createRecord = (flattened: DataTableRecord['flattened']): DataTableRecord 
     isAnchor: false,
   } as DataTableRecord);
 
-const getDocViewerResult = (record: DataTableRecord) => {
+const getDocViewerResult = (
+  record: DataTableRecord,
+  actions: {
+    refreshData?: () => void;
+  } = {}
+) => {
   const providerServices = {} as ProfileProviderServices;
   const [enhancedProvider] = createSecurityDocumentProfileProviders(providerServices);
   const prevRenderHeader = jest.fn();
@@ -35,7 +41,7 @@ const getDocViewerResult = (record: DataTableRecord) => {
   const getDocViewer = enhancedProvider.profile.getDocViewer!(prev, {
     context: { type: DocumentType.Default },
   });
-  const result = getDocViewer({ actions: {}, record } as Parameters<typeof getDocViewer>[0]);
+  const result = getDocViewer({ actions, record } as Parameters<typeof getDocViewer>[0]);
   return { result, prevRenderHeader, prevRenderFooter };
 };
 
@@ -227,6 +233,46 @@ describe('createSecurityDocumentProfileProviders', () => {
 
       expect(registry.add).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'doc_view_alerts_overview' })
+      );
+    });
+
+    it('forwards refreshData action to enhanced flyout header', () => {
+      const refreshData = jest.fn();
+      const hit = createRecord({ 'event.kind': 'signal' });
+      const { result } = getDocViewerResult(hit, { refreshData });
+
+      const renderedHeader = result.renderHeader?.({ hit, dataView: dataViewMock });
+      expect(renderedHeader).toBeDefined();
+      expect((renderedHeader as { props: { refreshData: () => void } }).props.refreshData).toBe(
+        refreshData
+      );
+    });
+
+    it('forwards refreshData action to enhanced flyout footer', () => {
+      const refreshData = jest.fn();
+      const hit = createRecord({ 'event.kind': 'signal' });
+      const { result } = getDocViewerResult(hit, { refreshData });
+
+      const renderedFooter = result.renderFooter?.({ hit, dataView: dataViewMock });
+      expect(renderedFooter).toBeDefined();
+      expect((renderedFooter as { props: { refreshData: () => void } }).props.refreshData).toBe(
+        refreshData
+      );
+    });
+
+    it('forwards refreshData action to enhanced overview tab', () => {
+      const refreshData = jest.fn();
+      const hit = createRecord({ 'event.kind': 'signal' });
+      const { result } = getDocViewerResult(hit, { refreshData });
+      const registry = { add: jest.fn() };
+
+      result.docViewsRegistry(registry as never);
+      const addedOverviewTab = registry.add.mock.calls[0][0];
+
+      const renderedOverview = addedOverviewTab.render({ hit, dataView: dataViewMock });
+      expect(renderedOverview).toBeDefined();
+      expect((renderedOverview as { props: { refreshData: () => void } }).props.refreshData).toBe(
+        refreshData
       );
     });
 

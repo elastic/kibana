@@ -1,0 +1,32 @@
+{
+  "10.1.0": [
+    {
+      "@timestamp": "2026-01-01T00:00:00.000Z",
+      "entityId": "rule-1",
+      "entityType": "rule",
+      "status": "completed"
+    },
+    {
+      "@timestamp": "2026-01-01T00:00:00.000Z",
+      "entityId": "rule-2",
+      "entityType": "rule",
+      "status": "failed",
+      "message": "Error generating UIAM API key for the rule with ID rule-2: boom"
+    }
+  ],
+  "10.2.0": [
+    {
+      "@timestamp": "2026-01-01T00:00:00.000Z",
+      "entityId": "rule-1",
+      "entityType": "rule",
+      "status": "completed"
+    },
+    {
+      "@timestamp": "2026-01-01T00:00:00.000Z",
+      "entityId": "rule-2",
+      "entityType": "rule",
+      "status": "failed",
+      "message": "Error generating UIAM API key for the rule with ID rule-2: boom"
+    }
+  ]
+}
