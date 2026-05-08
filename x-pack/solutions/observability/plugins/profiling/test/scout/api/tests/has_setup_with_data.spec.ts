@@ -12,10 +12,6 @@ import { apiTest } from '../../common/fixtures';
 import { esArchiversPath, esResourcesEndpoint } from '../../common/fixtures/constants';
 
 apiTest.describe('Profiling is setup and data is loaded', { tag: tags.stateful.classic }, () => {
-  // ES profiling resource creation can race with prior cleanup (background ProfilingIndexManager); allow extra hook budget so a fresh setup + data load completes reliably.
-  // eslint-disable-next-line @kbn/eslint/scout_no_describe_configure -- extended timeout applies to hooks (beforeAll); see https://playwright.dev/docs/test-timeouts
-  apiTest.describe.configure({ timeout: 180_000 });
-
   let viewerApiCreditials: RoleApiCredentials;
   let adminApiCreditials: RoleApiCredentials;
 
