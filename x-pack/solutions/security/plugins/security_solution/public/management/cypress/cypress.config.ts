@@ -13,5 +13,9 @@ export default defineCypressConfig(
     env: {
       grepTags: '@ess',
     },
+    e2e: {
+      specPattern:
+        'public/management/cypress/e2e/automated_response_actions/automated_response_actions.cy.ts',
+    },
   })
 );
