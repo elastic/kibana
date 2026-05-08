@@ -1743,6 +1743,7 @@
     "@kbn/evals-suite-security-automatic-migrations": "link:x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations",
     "@kbn/evals-suite-significant-events": "link:x-pack/platform/packages/shared/kbn-evals-suite-significant-events",
     "@kbn/evals-suite-streams": "link:x-pack/platform/packages/shared/kbn-evals-suite-streams",
+    "@kbn/evals-suite-streams-agent": "link:x-pack/platform/packages/shared/kbn-evals-suite-streams-agent",
     "@kbn/evals-suite-workflows": "link:src/platform/packages/shared/kbn-evals-suite-workflows",
     "@kbn/expect": "link:src/platform/packages/shared/kbn-expect",
     "@kbn/extract-plugin-translations": "link:packages/kbn-extract-plugin-translations",
