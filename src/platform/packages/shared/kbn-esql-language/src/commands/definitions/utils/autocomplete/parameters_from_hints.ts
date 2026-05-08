@@ -11,7 +11,10 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import { uniqBy } from 'lodash';
 import type { ParameterHint, ParameterHintEntityType } from '../../..';
 import type { ICommandContext, ISuggestionItem } from '../../../registry/types';
-import { createInferenceEndpointToCompletionItem } from './helpers';
+import { FunctionDefinitionTypes } from '../../types';
+import { filterFunctionDefinitions, getAllFunctions, getFunctionSuggestion } from '../functions';
+import { createInferenceEndpointToCompletionItem, withAutoSuggest } from './helpers';
+import type { ExpressionContext } from './expressions/types';
 
 type SuggestionResolver = (hint: ParameterHint, ctx?: ICommandContext) => ISuggestionItem[];
 
@@ -47,6 +50,49 @@ export const parametersFromHintsResolvers: Partial<
     contextResolver: inferenceEndpointContextResolver,
   },
 };
+
+type KindSuggestionResolver = (ctx: ExpressionContext) => ISuggestionItem[];
+
+/**
+ * Resolvers keyed by `hint.kind`. Returning items from one of these makes the
+ * suggestion exclusive — the composite path (fields + all functions) is skipped.
+ * Add a new entry to support a new kind; nothing else needs to change.
+ */
+export const kindBasedResolvers: Partial<Record<string, KindSuggestionResolver>> = {
+  aggregation: aggregationKindResolver,
+};
+
+// -------- AGGREGATION KIND HINT -------- //
+function aggregationKindResolver(ctx: ExpressionContext): ISuggestionItem[] {
+  const fnParamCtx = ctx.options.functionParameterContext;
+  const ignored = ctx.options.functionsToIgnore?.names ?? [];
+
+  // Filter by the param's accepted return types so e.g. SPARKLINE's numeric first arg
+  // doesn't surface aggregations that return non-numeric types (ST_CENTROID_AGG, etc.).
+  // When no param context is available, accept any return type.
+  const paramTypes = fnParamCtx?.paramDefinitions.map((p) => p.type as string) ?? [];
+  const returnTypes = paramTypes.length > 0 ? paramTypes : ['any'];
+
+  // Append a trailing comma when more mandatory args follow this one,
+  // matching the comma-handling done elsewhere in the suggestion path.
+  const shouldAddComma = fnParamCtx?.hasMoreMandatoryArgs ?? false;
+
+  return filterFunctionDefinitions(
+    getAllFunctions({
+      type: [FunctionDefinitionTypes.AGG, FunctionDefinitionTypes.TIME_SERIES_AGG],
+      includeOperators: false,
+    }),
+    { location: ctx.location, ignored, returnTypes },
+    ctx.callbacks?.hasMinimumLicenseRequired,
+    ctx.context?.activeProduct
+  ).map((fn) => {
+    const item = withAutoSuggest(getFunctionSuggestion(fn));
+    if (shouldAddComma) {
+      item.text += ',';
+    }
+    return item;
+  });
+}
 
 // -------- INFERENCE ENDPOINT HINT -------- //
 function inferenceEndpointSuggestionResolver(

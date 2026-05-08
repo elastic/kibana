@@ -8,8 +8,10 @@
  */
 
 import type { ICommandContext } from '../../../registry/types';
+import { Location } from '../../../registry/types';
 import type { ParameterHint } from '../../types';
-import { parametersFromHintsResolvers } from './parameters_from_hints';
+import { kindBasedResolvers, parametersFromHintsResolvers } from './parameters_from_hints';
+import type { ExpressionContext } from './expressions/types';
 import type { ESQLCallbacks, InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
 
 describe('Parameters from hints handlers', () => {
@@ -74,6 +76,104 @@ describe('Parameters from hints handlers', () => {
 
       expect(suggestions).toEqual(['text_embedding_endpoint']);
       expect(mockCallbacks.getInferenceEndpoints).toHaveBeenCalledWith('text_embedding');
+    });
+  });
+
+  describe('aggregation kind hint', () => {
+    const buildCtx = (overrides: Partial<ExpressionContext> = {}): ExpressionContext =>
+      ({
+        query: '',
+        cursorPosition: 0,
+        innerText: '',
+        location: Location.STATS,
+        command: {} as ExpressionContext['command'],
+        options: {},
+        ...overrides,
+      } as ExpressionContext);
+
+    const resolver = kindBasedResolvers.aggregation!;
+
+    it('returns AGG functions for the STATS location and excludes scalar/grouping functions', () => {
+      const labels = resolver(buildCtx()).map((s) => s.label);
+
+      // Sanity: known aggregation functions appear
+      expect(labels).toContain('AVG');
+      expect(labels).toContain('SUM');
+      expect(labels).toContain('MAX');
+
+      // Negative: scalar (ROUND, CONCAT) and grouping (BUCKET) functions are excluded
+      expect(labels).not.toContain('ROUND');
+      expect(labels).not.toContain('CONCAT');
+      expect(labels).not.toContain('BUCKET');
+    });
+
+    it('respects functionsToIgnore (e.g. self-recursion guard)', () => {
+      const labels = resolver(
+        buildCtx({
+          options: { functionsToIgnore: { names: ['avg'] } },
+        })
+      ).map((s) => s.label);
+
+      expect(labels).not.toContain('AVG');
+      // Other aggregations still appear
+      expect(labels).toContain('SUM');
+    });
+
+    it('filters by paramDefinitions return types so non-matching aggs are excluded', () => {
+      // Numeric-only param
+      const numericLabels = resolver(
+        buildCtx({
+          options: {
+            functionParameterContext: {
+              paramDefinitions: [{ name: 'aggregation', type: 'double' }],
+              hasMoreMandatoryArgs: false,
+              currentParameterIndex: 0,
+              signatures: [],
+            },
+          },
+        })
+      ).map((s) => s.label);
+
+      // AVG returns double → kept
+      expect(numericLabels).toContain('AVG');
+      // ST_CENTROID_AGG returns geo_point → dropped
+      expect(numericLabels).not.toContain('ST_CENTROID_AGG');
+    });
+
+    it('appends a trailing comma to the inserted text when more mandatory args follow', () => {
+      const item = resolver(
+        buildCtx({
+          options: {
+            functionParameterContext: {
+              paramDefinitions: [{ name: 'aggregation', type: 'double' }],
+              hasMoreMandatoryArgs: true,
+              currentParameterIndex: 0,
+              signatures: [],
+            },
+          },
+        })
+      ).find((s) => s.label === 'AVG');
+
+      expect(item).toBeDefined();
+      expect(item!.text.endsWith(',')).toBe(true);
+    });
+
+    it('does not append a trailing comma when no more mandatory args follow', () => {
+      const item = resolver(
+        buildCtx({
+          options: {
+            functionParameterContext: {
+              paramDefinitions: [{ name: 'aggregation', type: 'double' }],
+              hasMoreMandatoryArgs: false,
+              currentParameterIndex: 0,
+              signatures: [],
+            },
+          },
+        })
+      ).find((s) => s.label === 'AVG');
+
+      expect(item).toBeDefined();
+      expect(item!.text.endsWith(',')).toBe(false);
     });
   });
 });
