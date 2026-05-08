@@ -72,6 +72,7 @@ import {
   getState,
   getTaskRunError,
   evaluatePerAlertSnooze,
+  evaluatePerAlertSnoozeConditions,
 } from './lib';
 import {
   ErrorWithType,
@@ -407,6 +408,26 @@ export class TaskRunner<
     const alertsToUpdateWithMaintenanceWindows =
       await alertsClient.getAlertsToUpdateWithMaintenanceWindows();
 
+    const alertAsDataByInstanceId = new Map<string, Record<string, unknown>>();
+    for (const [instanceId, alert] of Object.entries(
+      alertsClient.getProcessedAlerts('active') ?? {}
+    )) {
+      const alertAsData = alert.getAlertAsData();
+      if (alertAsData) {
+        alertAsDataByInstanceId.set(instanceId, alertAsData as Record<string, unknown>);
+      }
+    }
+
+    const { conditionExpiredInstances } = evaluatePerAlertSnoozeConditions(
+      activeInstances,
+      alertAsDataByInstanceId
+    );
+    const conditionExpiredIds = new Set(conditionExpiredInstances.map((i) => i.instanceId));
+    const updatedActiveInstances =
+      conditionExpiredInstances.length > 0
+        ? activeInstances.filter((i) => !conditionExpiredIds.has(i.instanceId))
+        : activeInstances;
+
     const actionScheduler = new ActionScheduler({
       rule,
       ruleType: this.ruleType,
@@ -422,7 +443,7 @@ export class TaskRunner<
       alertingEventLogger: this.alertingEventLogger,
       actionsClient,
       alertsClient,
-      activeSnoozedIds: new Set(activeInstances.map((i) => i.instanceId)),
+      activeSnoozedIds: new Set(updatedActiveInstances.map((i) => i.instanceId)),
     });
 
     let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
@@ -483,7 +504,9 @@ export class TaskRunner<
         summaryActions: actionSchedulerResult.throttledSummaryActions,
       },
       prunedSnoozedInstances:
-        activeInstances.length < rule.snoozedInstances.length ? activeInstances : undefined,
+        updatedActiveInstances.length < rule.snoozedInstances.length
+          ? updatedActiveInstances
+          : undefined,
     };
   }
 
