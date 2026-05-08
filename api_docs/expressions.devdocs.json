@@ -7710,7 +7710,7 @@
           "(obj: Record<string, unknown>) => boolean"
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-        "lineNumber": 114,
+        "lineNumber": 115,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7726,7 +7726,7 @@
               "Record<string, unknown>"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 114,
+            "lineNumber": 115,
             "columnNumber": 36,
             "deprecated": false,
             "docsReferencedTypeName": "Record",
@@ -7867,7 +7867,7 @@
           "\nA `Datatable` in Canvas is a unique structure that represents tabulated data."
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-        "lineNumber": 168,
+        "lineNumber": 169,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7883,7 +7883,7 @@
               "\"datatable\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 172,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7906,7 +7906,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 173,
+            "lineNumber": 174,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7923,7 +7923,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 174,
+            "lineNumber": 175,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7946,7 +7946,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 175,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7962,7 +7962,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 176,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7980,7 +7980,7 @@
           "\nThis type represents the shape of a column in a `Datatable`."
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-        "lineNumber": 123,
+        "lineNumber": 124,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7993,7 +7993,7 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 127,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8006,7 +8006,7 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 128,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8028,7 +8028,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 129,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8044,7 +8044,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 130,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8060,7 +8060,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 132,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8076,7 +8076,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 133,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13279,7 +13279,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-        "lineNumber": 179,
+        "lineNumber": 180,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -13295,7 +13295,7 @@
               "string[][]"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 180,
+            "lineNumber": 181,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -13482,7 +13482,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"null\" | \"_source\" | \"attachment\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"flattened\" | \"histogram\" | \"conflict\" | \"null\" | \"_source\" | \"attachment\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "lineNumber": 37,
@@ -13504,7 +13504,7 @@
           "{ [x: string]: any; }"
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-        "lineNumber": 59,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -20633,7 +20633,7 @@
           "\nA `Datatable` in Canvas is a unique structure that represents tabulated data."
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-        "lineNumber": 168,
+        "lineNumber": 169,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -20649,7 +20649,7 @@
               "\"datatable\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 172,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20672,7 +20672,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 173,
+            "lineNumber": 174,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20689,7 +20689,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 174,
+            "lineNumber": 175,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20712,7 +20712,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 175,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20728,7 +20728,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 176,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20746,7 +20746,7 @@
           "\nThis type represents the shape of a column in a `Datatable`."
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-        "lineNumber": 123,
+        "lineNumber": 124,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -20759,7 +20759,7 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 127,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20772,7 +20772,7 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 128,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20794,7 +20794,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 129,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20810,7 +20810,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 130,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20826,7 +20826,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 132,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -20842,7 +20842,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 133,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -24357,7 +24357,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-        "lineNumber": 179,
+        "lineNumber": 180,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -24373,7 +24373,7 @@
               "string[][]"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 180,
+            "lineNumber": 181,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -24560,7 +24560,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"null\" | \"_source\" | \"attachment\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"flattened\" | \"histogram\" | \"conflict\" | \"null\" | \"_source\" | \"attachment\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "lineNumber": 37,
@@ -24582,7 +24582,7 @@
           "{ [x: string]: any; }"
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-        "lineNumber": 59,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -33907,7 +33907,7 @@
           "\nA `Datatable` in Canvas is a unique structure that represents tabulated data."
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-        "lineNumber": 168,
+        "lineNumber": 169,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -33923,7 +33923,7 @@
               "\"datatable\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 172,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33946,7 +33946,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 173,
+            "lineNumber": 174,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33963,7 +33963,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 174,
+            "lineNumber": 175,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -33986,7 +33986,7 @@
               "[]"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 175,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34002,7 +34002,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 176,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34020,7 +34020,7 @@
           "\nThis type represents the shape of a column in a `Datatable`."
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-        "lineNumber": 123,
+        "lineNumber": 124,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -34033,7 +34033,7 @@
             "label": "id",
             "description": [],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 127,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34046,7 +34046,7 @@
             "label": "name",
             "description": [],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 128,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34068,7 +34068,7 @@
               }
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 129,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34084,7 +34084,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 130,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34100,7 +34100,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 132,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34116,7 +34116,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 133,
+            "lineNumber": 134,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34134,7 +34134,7 @@
           "\nDatatable column meta information"
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-        "lineNumber": 65,
+        "lineNumber": 66,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -34149,10 +34149,10 @@
               "\nThe Kibana normalized type of the column"
             ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"null\" | \"_source\" | \"attachment\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"flattened\" | \"histogram\" | \"conflict\" | \"null\" | \"_source\" | \"attachment\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 69,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34170,7 +34170,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 73,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34188,7 +34188,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 77,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34206,7 +34206,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 81,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34224,7 +34224,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 85,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34242,7 +34242,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 89,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34275,7 +34275,7 @@
               "> | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 93,
+            "lineNumber": 94,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34293,7 +34293,7 @@
               "string | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 97,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -34318,7 +34318,7 @@
               " | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 101,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -40777,7 +40777,7 @@
           }
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-        "lineNumber": 179,
+        "lineNumber": 180,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -40793,7 +40793,7 @@
               "string[][]"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 180,
+            "lineNumber": 181,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -41109,7 +41109,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"null\" | \"_source\" | \"attachment\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_shape\" | \"nested\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"flattened\" | \"histogram\" | \"conflict\" | \"null\" | \"_source\" | \"attachment\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "lineNumber": 37,
@@ -41131,7 +41131,7 @@
           "{ [x: string]: any; }"
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-        "lineNumber": 59,
+        "lineNumber": 60,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -44104,7 +44104,7 @@
         "label": "datatable",
         "description": [],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-        "lineNumber": 190,
+        "lineNumber": 191,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -44120,7 +44120,7 @@
               "\"datatable\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 191,
+            "lineNumber": 192,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -44136,7 +44136,7 @@
               "(table: Record<string, unknown>) => void"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 192,
+            "lineNumber": 193,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -44152,7 +44152,7 @@
                   "Record<string, unknown>"
                 ],
                 "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-                "lineNumber": 192,
+                "lineNumber": 193,
                 "columnNumber": 14,
                 "deprecated": false,
                 "docsReferencedTypeName": "Record",
@@ -44191,7 +44191,7 @@
               " | undefined; warning?: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 202,
+            "lineNumber": 203,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -44213,7 +44213,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-                "lineNumber": 202,
+                "lineNumber": 203,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -44251,7 +44251,7 @@
               " | undefined; warning?: string | undefined; }"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 211,
+            "lineNumber": 212,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -44273,7 +44273,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-                "lineNumber": 211,
+                "lineNumber": 212,
                 "columnNumber": 17,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -44290,7 +44290,7 @@
             "label": "from",
             "description": [],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 220,
+            "lineNumber": 221,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -44306,7 +44306,7 @@
                   "() => { type: \"datatable\"; meta: {}; rows: never[]; columns: never[]; }"
                 ],
                 "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-                "lineNumber": 221,
+                "lineNumber": 222,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -44340,7 +44340,7 @@
                   "[]; columns: { id: string; name: string; meta: { type: \"string\" | \"number\"; }; }[]; }"
                 ],
                 "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-                "lineNumber": 227,
+                "lineNumber": 228,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -44362,7 +44362,7 @@
                       }
                     ],
                     "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-                    "lineNumber": 227,
+                    "lineNumber": 228,
                     "columnNumber": 19,
                     "deprecated": false,
                     "docsReferencedTypeName": "PointSeries",
@@ -44382,7 +44382,7 @@
             "label": "to",
             "description": [],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-            "lineNumber": 236,
+            "lineNumber": 237,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -44414,7 +44414,7 @@
                   "<RenderedDatatable>"
                 ],
                 "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-                "lineNumber": 237,
+                "lineNumber": 238,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -44436,7 +44436,7 @@
                       }
                     ],
                     "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-                    "lineNumber": 237,
+                    "lineNumber": 238,
                     "columnNumber": 14,
                     "deprecated": false,
                     "trackAdoption": false,
@@ -44471,7 +44471,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-                "lineNumber": 247,
+                "lineNumber": 248,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -44493,7 +44493,7 @@
                       }
                     ],
                     "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
-                    "lineNumber": 247,
+                    "lineNumber": 248,
                     "columnNumber": 19,
                     "deprecated": false,
                     "docsReferencedTypeName": "Datatable",
