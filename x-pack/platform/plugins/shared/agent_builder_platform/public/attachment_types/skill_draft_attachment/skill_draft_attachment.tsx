@@ -188,7 +188,7 @@ const SkillDraftCard: React.FC<SkillDraftCardProps> = ({ attachment }) => {
                   </EuiFlexItem>
                   {data.tool_ids.map((toolId) => (
                     <EuiFlexItem grow={false} key={toolId}>
-                      <EuiBadge color="hollow">{toolId}</EuiBadge>
+                      <EuiBadge>{toolId}</EuiBadge>
                     </EuiFlexItem>
                   ))}
                 </EuiFlexGroup>
@@ -214,7 +214,7 @@ const SkillDraftCard: React.FC<SkillDraftCardProps> = ({ attachment }) => {
                   </EuiFlexItem>
                   {data.referenced_content?.map((ref) => (
                     <EuiFlexItem grow={false} key={ref.relativePath}>
-                      <EuiBadge color="hollow">{ref.name}</EuiBadge>
+                      <EuiBadge>{ref.name}</EuiBadge>
                     </EuiFlexItem>
                   ))}
                 </EuiFlexGroup>
@@ -279,7 +279,16 @@ export const createSkillDraftAttachmentDefinition = ({
     getHeaderBadge: (attachment) => {
       const isCreated = Boolean(attachment.origin);
       const badge = getDraftBadge(isCreated);
-      return <EuiBadge color={badge.color}>{badge.label}</EuiBadge>;
+      return (
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{attachment.data.id}</EuiBadge>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color={badge.color}>{badge.label}</EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
     },
     renderInlineContent: (props) => <SkillDraftInlineContent {...props} />,
     getActionButtons: ({ attachment, updateOrigin }) => {
