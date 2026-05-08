@@ -31,6 +31,7 @@ export type * from './src/routes/transactions';
 export type * from './src/routes/services';
 export type * from './src/routes/service_map';
 export type * from './src/routes/errors';
+export type * from './src/routes/infrastructure';
 export {
   rangeRt,
   kueryRt,
