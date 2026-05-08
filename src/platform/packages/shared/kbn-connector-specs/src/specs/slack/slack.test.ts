@@ -71,6 +71,31 @@ describe('Slack', () => {
     });
   });
 
+  it('supports ears auth type with correct Slack defaults and overrides', () => {
+    const types = Slack.auth?.types as Array<
+      | string
+      | {
+          type: string;
+          defaults?: Record<string, unknown>;
+          overrides?: Record<string, unknown>;
+        }
+    >;
+    expect(types.map((t) => (typeof t === 'string' ? t : t.type))).toContain('ears');
+
+    const earsType = types.find((t) => typeof t === 'object' && t.type === 'ears');
+    expect(earsType).toMatchObject({
+      type: 'ears',
+      defaults: {
+        provider: 'slack',
+        scope:
+          'channels:read chat:write files:read groups:read im:read mpim:read search:read.files search:read.im search:read.mpim search:read.private search:read.public users:read',
+      },
+      overrides: {
+        meta: { scope: { disabled: true } },
+      },
+    });
+  });
+
   describe('searchMessages action', () => {
     it('should search messages with required query', async () => {
       const mockResponse = {

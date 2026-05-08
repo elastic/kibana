@@ -2,81 +2,7 @@
   "id": "inference",
   "client": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "inference",
-        "id": "def-public.getDefaultConnector",
-        "type": "Function",
-        "tags": [],
-        "label": "getDefaultConnector",
-        "description": [],
-        "signature": [
-          "({ connectors, }: { connectors: ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceConnector",
-            "text": "InferenceConnector"
-          },
-          "[]; }) => ",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.InferenceConnector",
-            "text": "InferenceConnector"
-          }
-        ],
-        "path": "x-pack/platform/plugins/shared/inference/common/utils/get_default_connector.ts",
-        "lineNumber": 11,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "inference",
-            "id": "def-public.getDefaultConnector.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  connectors,\n}",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/inference/common/utils/get_default_connector.ts",
-            "lineNumber": 13,
-            "columnNumber": 4,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "inference",
-                "id": "def-public.getDefaultConnector.$1.connectors",
-                "type": "Array",
-                "tags": [],
-                "label": "connectors",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/inference-common",
-                    "scope": "common",
-                    "docId": "kibKbnInferenceCommonPluginApi",
-                    "section": "def-common.InferenceConnector",
-                    "text": "InferenceConnector"
-                  },
-                  "[]"
-                ],
-                "path": "x-pack/platform/plugins/shared/inference/common/utils/get_default_connector.ts",
-                "lineNumber": 14,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],
@@ -1966,7 +1892,7 @@
               "section": "def-common.InferenceConnector",
               "text": "InferenceConnector"
             },
-            ">"
+            " | undefined>"
           ],
           "path": "x-pack/platform/plugins/shared/inference/server/types.ts",
           "lineNumber": 151,
