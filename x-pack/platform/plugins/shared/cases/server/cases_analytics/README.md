@@ -138,8 +138,8 @@ Templates declare typed extended fields via snake-keys of the form
 `<name>_as_<type>` (e.g. `riskScore_as_long`, `incidentDate_as_date`). The
 case writer indexes those values as **keywords** under
 `cases.extended_fields.<snake>`, then the data view publishes a typed
-**runtime field** at the **top-level** path `cases.<snake>` (e.g.
-`cases.riskScore_as_long`) so Lens / Discover surface numeric, date, and
+**runtime field** as a direct child of `cases` — at `cases.<snake>` (e.g.
+`cases.riskScore_as_long`) — so Lens / Discover surface numeric, date, and
 boolean filter operators instead of string contains.
 
 The runtime field deliberately **does not shadow** the indexed keyword path.
@@ -148,13 +148,15 @@ which means a runtime field at the indexed name (`cases.extended_fields.foo`)
 is silently overwritten by the mapped keyword and Lens loses the typed
 operators. Publishing at `cases.<snake>` sidesteps that.
 
-**Schema invariant: no top-level field on `cases.*` (or any `cases-data` index
-mapping) may end with `_as_<type>` for any type the template system can emit.**
-If one ever did, the runtime field would collide and disappear silently from
-Lens. The set of suffixes is exported from
-`data_view/runtime_fields.ts#ALL_TEMPLATE_TYPE_SUFFIXES` and enforced at CI
-time by `mappings/schema_drift.test.ts`. New top-level case fields must avoid
-the `_as_<type>` suffix shape.
+**Schema invariant: no field on a `cases-data` index mapping may have a leaf
+segment ending in `_as_<type>` for any supported suffix.** If one ever did,
+the runtime field would collide and disappear silently from Lens. The strict
+collision is at the exact path `cases.<snake>`; the broader leaf-segment rule
+is defense in depth against naming confusion and future widening of the
+publication scheme. Enforced at CI time by `mappings/schema_drift.test.ts`,
+which iterates over `ALL_TEMPLATE_TYPE_SUFFIXES` from
+`data_view/runtime_fields.ts`. New case-mapping fields must avoid the
+`_as_<type>` suffix shape.
 
 `unsigned_long` is mapped to the `long` runtime type; values exceeding
 `Long.MAX_VALUE` lose precision when surfaced through the data view but

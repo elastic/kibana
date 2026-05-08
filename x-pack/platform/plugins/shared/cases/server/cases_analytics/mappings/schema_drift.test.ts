@@ -161,52 +161,40 @@ const isExtendedFieldsLeaf = (path: string): boolean => path.startsWith('cases.e
 /**
  * Snake-key collision guard.
  *
- * Typed runtime fields are published at the **top-level** path
- * `cases.<snakeKey>` (e.g. `cases.score_as_long`) — sitting alongside
- * `cases.title`, `cases.severity`, etc. The painless reads from the indexed
- * keyword path `cases.extended_fields.<snakeKey>` and emits the typed value.
+ * Typed runtime fields are published at `cases.<snakeKey>` (e.g.
+ * `cases.score_as_long`) — direct children of `cases`, alongside
+ * `cases.title`, `cases.severity`, etc. — and read from the indexed keyword
+ * `cases.extended_fields.<snakeKey>` under the hood.
  *
- * For this scheme to be collision-safe, **no top-level mapped field on a case
- * surface may end in `_as_<type>` for any type the template system can emit.**
- * If one ever did, Kibana data views would resolve that path to the indexed
- * keyword (because mapped fields override runtime ones during merge), and the
- * typed runtime field would silently disappear from Lens / Discover.
+ * For this scheme to be collision-safe, **no mapped field on a case surface
+ * may have a leaf segment ending in `_as_<type>` for any supported suffix.**
+ * The strict collision is at exact full paths (`cases.foo_as_long` runtime
+ * shadowed by `cases.foo_as_long` mapping); checking the leaf segment
+ * everywhere is broader-than-strictly-necessary defense against future
+ * naming-confusion foot-guns and against any future widening of the runtime
+ * publication scheme to other levels of the tree.
  *
- * The set of suffixes we have to defend against is exported as
- * `ALL_TEMPLATE_TYPE_SUFFIXES` from the runtime-fields module — that's the
- * authoritative list keyed off `BaseFieldSchema.type`. Adding a new template
- * field type updates that list and these tests automatically widen with it.
+ * The set of suffixes is exported as `ALL_TEMPLATE_TYPE_SUFFIXES` from the
+ * runtime-fields module — that's the authoritative list keyed off
+ * `BaseFieldSchema.type`. Adding a new template field type extends it
+ * automatically.
  */
+const leafEndsInTypeSuffix = (path: string): boolean => {
+  const leaf = path.slice(path.lastIndexOf('.') + 1);
+  return ALL_TEMPLATE_TYPE_SUFFIXES.some((suffix) => leaf.endsWith(`_as_${suffix}`));
+};
+
 const expectNoSnakeKeyCollisions = (mapping: MappingTypeMapping): void => {
-  const collisions: string[] = [];
-  // Walk every dotted path in the mapping and assert that the **leaf segment**
-  // doesn't end with `_as_<type>`. We check leaf segment rather than full path
-  // because a runtime field at `cases.foo_as_long` collides with a mapped
-  // `cases.foo_as_long` regardless of nesting depth — only the last segment
-  // matters for the data-view merge.
-  const walk = (node: Record<string, MappingProperty>, prefix: string): void => {
-    for (const [k, prop] of Object.entries(node)) {
-      const path = prefix ? `${prefix}.${k}` : k;
-      for (const suffix of ALL_TEMPLATE_TYPE_SUFFIXES) {
-        if (k.endsWith(`_as_${suffix}`)) {
-          collisions.push(path);
-          break;
-        }
-      }
-      const props = (prop as { properties?: Record<string, MappingProperty> }).properties;
-      if (props) walk(props, path);
-    }
-  };
-  if (mapping.properties) walk(mapping.properties, '');
+  const collisions = [...collectMappedPaths(mapping)].filter(leafEndsInTypeSuffix);
   expect(collisions).toEqual([]);
 };
 
 describe('snake-key collision guard (runtime field naming invariant)', () => {
-  it('case mapping has no top-level field ending in _as_<type>', () => {
+  it('case mapping has no field ending in _as_<type>', () => {
     expectNoSnakeKeyCollisions(CASE_INDEX_MAPPING);
   });
 
-  it('case_lifecycle mapping has no top-level field ending in _as_<type>', () => {
+  it('case_lifecycle mapping has no field ending in _as_<type>', () => {
     expectNoSnakeKeyCollisions(CASE_LIFECYCLE_INDEX_MAPPING);
   });
 });

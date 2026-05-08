@@ -43,9 +43,12 @@ const SUFFIX_TO_RUNTIME_TYPE: Record<string, RuntimeType> = {
 const NO_RUNTIME_FIELD_SUFFIXES = new Set(['keyword']);
 
 /**
- * Every suffix the cases template system can emit, exported for the schema
- * collision guard test. Keep in sync with the union of the keys above and
- * `NO_RUNTIME_FIELD_SUFFIXES`.
+ * Every suffix the cases template system can emit — derived once from the two
+ * tables above so adding a new template type extends it automatically.
+ *
+ * Exported for `mappings/schema_drift.test.ts`, which uses it to forbid any
+ * mapping field whose leaf ends in `_as_<one of these>` from colliding with a
+ * runtime field of the same name.
  */
 export const ALL_TEMPLATE_TYPE_SUFFIXES: readonly string[] = [
   ...Object.keys(SUFFIX_TO_RUNTIME_TYPE),
@@ -110,33 +113,35 @@ export const buildPainlessSource = (snakeKey: string, runtimeType: RuntimeType):
   }
 };
 
-/**
- * Convenience: from a snake-key, decide whether to emit a runtime field and,
- * if so, return the spec ready to merge into the data view's
- * `runtimeFieldMap`.
- *
- * The runtime field is published at the **top-level** path
- * `cases.<snakeKey>` (e.g. `cases.score_as_integer`) — sitting alongside
- * `cases.title`, `cases.severity`, etc. The painless reads from the indexed
- * keyword path `cases.extended_fields.<snakeKey>` and emits the typed value.
- *
- * Why not shadow the indexed path directly (`cases.extended_fields.<snakeKey>`)?
- * Because Kibana data views resolve field names by merging
- * `{ ...runtime, ...mapped }` — mapped fields with the same name overwrite
- * runtime ones. A runtime field at the indexed name still appears as the
- * underlying keyword type in Lens, hiding the numeric/date filter operators.
- *
- * The collision risk for `cases.<snakeKey>` is bounded: no top-level field
- * on the case mapping ends in `_as_<type>` for any of our supported types,
- * and that invariant is enforced by `mappings/schema_drift.test.ts`. New
- * top-level case fields must avoid the `_as_<type>` suffix.
- */
+/** A runtime field ready to merge into a data view's `runtimeFieldMap`. */
 export interface RuntimeFieldEntry {
-  /** Field name in the data view, at the top-level under `cases.*`. */
+  /** Published name in the data view, a direct child of `cases` — e.g. `cases.score_as_long`. */
   fieldName: string;
   spec: RuntimeFieldSpec;
 }
 
+/**
+ * From a template snake-key, decide whether to emit a runtime field and, if
+ * so, return the spec ready to merge into a data view's `runtimeFieldMap`.
+ *
+ * Returns `null` when the suffix doesn't need a runtime field — either the
+ * snake-key isn't shaped like `<name>_as_<type>`, the suffix is `keyword`
+ * (already keyword in the index), or the suffix is unknown.
+ *
+ * Publication path: `cases.<snakeKey>` (e.g. `cases.riskScore_as_long`),
+ * sitting alongside `cases.title`, `cases.severity`, etc. The painless reads
+ * from the indexed keyword `cases.extended_fields.<snakeKey>` under the hood.
+ *
+ * Why not shadow the indexed path directly?
+ * Kibana data views resolve a field name by merging `{ ...runtime, ...mapped }`
+ * — mapped fields overwrite runtime ones at the same name. A runtime field at
+ * `cases.extended_fields.<snake>` would be silently shadowed by the keyword
+ * mapping, and Lens would lose the typed filter operators.
+ *
+ * Collision risk for the `cases.<snakeKey>` path is bounded by a schema
+ * invariant: no direct child of `cases` may end in `_as_<type>` for any
+ * supported suffix. Enforced at CI by `mappings/schema_drift.test.ts`.
+ */
 export const buildRuntimeFieldEntry = (snakeKey: string): RuntimeFieldEntry | null => {
   const split = splitSnakeKey(snakeKey);
   if (!split) return null;
