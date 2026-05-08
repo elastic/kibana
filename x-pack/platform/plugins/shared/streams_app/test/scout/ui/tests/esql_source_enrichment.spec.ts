@@ -8,6 +8,7 @@
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
+import { forceClassicDiscoverMode } from '../fixtures/discover_mode';
 
 const STREAM_NAME = 'logs.otel.enrichment-test';
 const STREAM_DESCRIPTION = 'Test stream for ES|QL autocomplete enrichment';
@@ -21,6 +22,10 @@ test.describe(
       await apiServices.streams.restoreDataStream('logs.otel');
       await apiServices.streams.forkStream('logs.otel', STREAM_NAME, { always: {} });
       await apiServices.streams.updateStream(STREAM_NAME, { description: STREAM_DESCRIPTION });
+    });
+
+    test.beforeEach(async ({ page }) => {
+      await forceClassicDiscoverMode(page);
     });
 
     test.afterAll(async ({ apiServices }) => {
