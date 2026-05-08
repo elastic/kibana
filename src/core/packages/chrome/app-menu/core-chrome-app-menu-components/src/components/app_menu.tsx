@@ -13,7 +13,7 @@ import { getAppMenuItems, processStaticItems } from '../utils';
 import { AppMenuActionButton } from './app_menu_action_button';
 import { AppMenuItem } from './app_menu_item';
 import { AppMenuOverflowButton } from './app_menu_overflow_button';
-import type { AppMenuConfig, AppMenuItemType } from '../types';
+import type { AppMenuConfig, AppMenuStaticItem } from '../types';
 
 export interface AppMenuItemsProps {
   config?: AppMenuConfig;
@@ -27,7 +27,7 @@ export interface AppMenuItemsProps {
   /**
    * Static items that always appear at the end of the overflow menu.
    */
-  staticItems?: AppMenuItemType[];
+  staticItems?: AppMenuStaticItem[];
 }
 
 const hasNoItems = (config: AppMenuConfig) => !config.items?.length && !config?.primaryActionItem;
@@ -42,9 +42,16 @@ export const AppMenuComponent = ({
   const isBetweenMandXlBreakpoint = useIsWithinBreakpoints(['m', 'l']);
   const isAboveXlBreakpoint = useIsWithinBreakpoints(['xl']);
 
-  const hasStaticItems = !!staticItems?.length;
+  /**
+   * Global static items are registered once, usually before
+   * an application is mounted, and this can cause flickering when
+   * the app menu is first rendered without app specific config.
+   * If only global static items are present, we don't want to render
+   * the app menu.
+   */
+  const hasNonGlobalStaticItems = !!staticItems?.length && staticItems.some((item) => !item.global);
 
-  if ((!config || hasNoItems(config)) && !hasStaticItems) {
+  if ((!config || hasNoItems(config)) && !hasNonGlobalStaticItems) {
     return null;
   }
 
@@ -68,7 +75,7 @@ export const AppMenuComponent = ({
     shouldOverflow: shouldOverflowBase,
   } = getAppMenuItems({
     config,
-    hasStaticItems,
+    hasStaticItems: hasNonGlobalStaticItems,
   });
 
   const processedStaticItems = processStaticItems(staticItems);
