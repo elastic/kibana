@@ -21,7 +21,7 @@ export const useEntityEnginePrivileges = (): UseQueryResult<
 > => {
   const { fetchEntityStorePrivileges, fetchEntityStoreV2Privileges } = useEntityAnalyticsRoutes();
   const { uiSettings } = useKibana().services;
-  const isEntityStoreV2Enabled = uiSettings?.get<boolean>(FF_ENABLE_ENTITY_STORE_V2);
+  const isEntityStoreV2Enabled = uiSettings?.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   return useQuery(
     [...GET_ENTITY_ENGINE_PRIVILEGES, isEntityStoreV2Enabled],
