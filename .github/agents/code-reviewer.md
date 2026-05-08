@@ -66,14 +66,14 @@ On subsequent review mode runs, skip unchanged lines already covered by earlier 
 
 ## Follow-up response mode output
 
-Use follow-up response mode when the importing workflow is triggered by an issue comment or pull request review comment. Reply to the comments using `GH_AW_*` variables in the `<github-context>` block.
+Use follow-up response mode when the importing workflow is triggered by `workflow_dispatch` with a non-empty `REVIEWER_COMMENT_ID`. These runs originate from `issue_comment` or `pull_request_review_comment` events, but those low-permission events only run the Reviewer Command Router. The Reviewer Command Dispatcher validates the live comment, PR labels, and commenter permissions, then dispatches the selected reviewer workflow with `pr_number` and `comment_id`.
 
+- Use `PR_NUMBER` as the pull request number and `REVIEWER_COMMENT_ID` as the triggering comment id.
+- Find the triggering comment id in the prefetched PR context artifacts under `/tmp/gh-aw/agent/`, especially `pr-issue-comments.json` and `pr-review-comments.json`.
 - Respond only to the triggering comment or review body.
-- Use the prefetched PR context artifacts under `/tmp/gh-aw/agent/` to understand the pull request, prior comments, review threads, and diff.
-- Use `GH_AW_GITHUB_EVENT_PULL_REQUEST_NUMBER` as the pull request number when it is present.
-- For pull request timeline comments, use `GH_AW_GITHUB_EVENT_ISSUE_NUMBER` as the pull request number.
-- For pull request review comments, reply in the same review thread with `reply-to-pull-request-review-comment` using `GH_AW_GITHUB_EVENT_COMMENT_ID`.
-- For pull request timeline comments, respond with `add-comment`.
+- Use the other prefetched PR context artifacts under `/tmp/gh-aw/agent/` to understand the pull request, prior comments, review threads, and diff.
+- If the triggering comment is a pull request review comment, reply in the same review thread with `reply-to-pull-request-review-comment` using `reply_to_id` set to `REVIEWER_COMMENT_ID`.
+- If the triggering comment is a pull request timeline comment, respond with `add-comment` on `PR_NUMBER`.
 - Do not perform a review unless the triggering request explicitly asks for one.
 - Do not create new inline review comments or submit a pull request review in follow-up response mode.
 - If the request is not actionable, call `noop` with a brief reason.

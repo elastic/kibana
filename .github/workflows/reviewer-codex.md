@@ -132,9 +132,3 @@ safe-outputs:
 Using the imported reviewer instructions:
 - Run in review mode for `pull_request_target` and manual `workflow_dispatch` events without a comment id.
 - Run in follow-up response mode when `workflow_dispatch` includes a comment id from the Reviewer Command Dispatcher.
-
-For dispatched follow-up runs, use this context:
-- PR number: the `PR_NUMBER` environment variable
-- Comment id: the `REVIEWER_COMMENT_ID` environment variable
-
-When `REVIEWER_COMMENT_ID` is non-empty, do not perform a full PR review. Find the triggering comment in the prefetched PR context under `/tmp/gh-aw/agent` or via GitHub tools, then answer that comment. For PR review comments, prefer `reply_to_pull_request_review_comment` with `reply_to_id` set to `REVIEWER_COMMENT_ID`.
