@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  FieldBasedIndexPatternColumn,
-  PercentileIndexPatternColumn,
-  PercentileRanksIndexPatternColumn,
-  TermsIndexPatternColumn,
+import {
+  LENS_DOCUMENT_FIELD_NAME,
+  type FieldBasedIndexPatternColumn,
+  type PercentileIndexPatternColumn,
+  type PercentileRanksIndexPatternColumn,
+  type TermsIndexPatternColumn,
 } from '@kbn/lens-common';
 import type {
   LensApiTermsOperation,
+  TermOperationRankByCustomCountOperationType,
   TermOperationRankByCustomOperationType,
   TermOperationRankByCustomPercentileRankType,
   TermOperationRankByCustomPercentileType,
@@ -33,6 +35,10 @@ function isPercentileRanksOrderAgg(
   orderAgg: FieldBasedIndexPatternColumn
 ): orderAgg is PercentileRanksIndexPatternColumn {
   return orderAgg.operationType === 'percentile_rank';
+}
+
+function isCountOperation(operation: string): operation is 'count' {
+  return operation === 'count';
 }
 
 function isBaseCustomOperation(
@@ -132,6 +138,7 @@ export function fromTermsLensApiToLensState(
 function getCustomOrderAgg(
   rankBy:
     | TermOperationRankByCustomOperationType
+    | TermOperationRankByCustomCountOperationType
     | TermOperationRankByCustomPercentileType
     | TermOperationRankByCustomPercentileRankType
 ): TermsIndexPatternColumn['params']['orderAgg'] {
@@ -157,6 +164,17 @@ function getCustomOrderAgg(
     };
     return orderAgg;
   }
+
+  if (rankBy.operation === 'count') {
+    return {
+      operationType: rankBy.operation,
+      sourceField: rankBy.field || LENS_DOCUMENT_FIELD_NAME,
+      dataType: 'number',
+      isBucketed: false,
+      label: '',
+    };
+  }
+
   return {
     operationType: rankBy.operation,
     sourceField: rankBy.field,
@@ -192,7 +210,17 @@ function getCustomRankByFromOrderAgg(
     };
     return rankBy;
   }
+
   if (isBaseCustomOperation(orderAgg.operationType)) {
+    if (isCountOperation(orderAgg.operationType)) {
+      const rankBy: TermOperationRankByCustomCountOperationType = {
+        type: 'custom',
+        operation: orderAgg.operationType,
+        direction: orderDirection,
+        ...(sourceField !== LENS_DOCUMENT_FIELD_NAME ? { field: sourceField } : {}),
+      };
+      return rankBy;
+    }
     const rankBy: TermOperationRankByCustomOperationType = {
       type: 'custom',
       operation: orderAgg.operationType,
