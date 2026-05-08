@@ -588,6 +588,7 @@ export class AlertingPlugin {
           if (this.changeTrackingService) {
             const { scope } = this.config.ruleChangeTracking;
             if (scope.includes('all') || scope.includes(ruleType.solution)) {
+              ruleType.trackChanges = true;
               this.changeTrackingService.register(ruleType.solution);
             }
           }
