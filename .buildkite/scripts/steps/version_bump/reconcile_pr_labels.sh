@@ -13,7 +13,7 @@ TEMP_DIR=$(mktemp -d)
 trap 'rm -rf "$TEMP_DIR"' EXIT
 
 echo "Cloning elastic/kibana-operations..."
-git clone --depth 1 https://github.com/elastic/kibana-operations.git "$TEMP_DIR/kibana-operations"
+git clone --depth 1 "https://x-access-token:${GITHUB_TOKEN}@github.com/elastic/kibana-operations.git" "$TEMP_DIR/kibana-operations"
 
 DRY_RUN_FLAG=""
 if [[ "${DRY_RUN:-false}" == "true" ]]; then
