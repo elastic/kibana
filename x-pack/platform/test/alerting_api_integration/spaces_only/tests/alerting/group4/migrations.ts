@@ -18,15 +18,19 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 export default function createGetTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('migrations', () => {
     before(async () => {
-      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/alerts');
+      await kibanaServer.importExport.load(
+        'x-pack/platform/test/functional/fixtures/kbn_archives/alerts/alerts.json'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/alerts');
+      await kibanaServer.importExport.unload(
+        'x-pack/platform/test/functional/fixtures/kbn_archives/alerts/alerts.json'
+      );
     });
 
     it('7.10.0 migrates the `alerting` consumer to be the `alerts`', async () => {
