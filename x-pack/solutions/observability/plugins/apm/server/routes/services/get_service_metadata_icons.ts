@@ -10,6 +10,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import type { FlattenedApmEvent } from '@kbn/apm-data-access-plugin/server/utils/utility_types';
 import { getAgentName } from '@kbn/elastic-agent-utils';
+import type { ServiceMetadataIcons } from '@kbn/apm-api-shared';
 import { maybe } from '../../../common/utils/maybe';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
@@ -26,19 +27,10 @@ import {
   TELEMETRY_SDK_NAME,
   TELEMETRY_SDK_LANGUAGE,
 } from '../../../common/es_fields/apm';
-import type { ContainerType } from '../../../common/service_metadata';
 import { SERVICE_METADATA_KUBERNETES_KEYS } from '../../../common/service_metadata';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import type { ServerlessType } from '../../../common/serverless';
 import { getServerlessTypeFromCloudData } from '../../../common/serverless';
-
-export interface ServiceMetadataIcons {
-  agentName?: string;
-  containerType?: ContainerType;
-  serverlessType?: ServerlessType;
-  cloudProvider?: string;
-}
 
 export const should = [
   { exists: { field: CONTAINER_ID } },

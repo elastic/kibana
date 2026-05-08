@@ -121,7 +121,8 @@ export function ThroughputChart({
       preferred,
       kuery,
       filters,
-    ]
+    ],
+    { useCallApmApiV2: true }
   );
 
   const dateFormat = (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT;

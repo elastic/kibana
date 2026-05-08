@@ -172,7 +172,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
       });
     },
     [serviceName, environment, selectedStatuses, kqlQuery, page, perPage],
-    { showToastOnError: false }
+    { showToastOnError: false, useCallApmApiV2: true }
   );
 
   const isLoading = isPending(fetchStatus);

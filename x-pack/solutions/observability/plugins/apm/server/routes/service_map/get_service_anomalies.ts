@@ -12,6 +12,7 @@ import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
 import { rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import type { ServiceHealthStatus } from '../../../common/service_health_status';
 import { getServiceHealthStatus } from '../../../common/service_health_status';
 import { defaultTransactionTypes } from '../../../common/transaction_types';
 import { withApmSpan } from '../../utils/with_apm_span';
@@ -26,12 +27,22 @@ import {
   ML_TRANSACTION_TYPE_FIELD,
 } from '../../lib/anomaly_detection/anomaly_search';
 
+export interface ServiceAnomaliesResponse {
+  mlJobIds: string[];
+  serviceAnomalies: Array<{
+    serviceName: string;
+    jobId: string;
+    transactionType: string;
+    actualValue: number;
+    anomalyScore: number;
+    healthStatus: ServiceHealthStatus;
+  }>;
+}
+
 export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
   mlJobIds: [],
   serviceAnomalies: [],
 };
-
-export type ServiceAnomaliesResponse = Awaited<ReturnType<typeof getServiceAnomalies>>;
 export async function getServiceAnomalies({
   mlClient,
   environment,
@@ -44,7 +55,7 @@ export async function getServiceAnomalies({
   start: number;
   end: number;
   searchQuery?: string;
-}) {
+}): Promise<ServiceAnomaliesResponse> {
   return withApmSpan('get_service_anomalies', async () => {
     if (!mlClient) {
       throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);

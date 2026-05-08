@@ -10,8 +10,8 @@ import type { AlertStatus } from '@kbn/rule-data-utils';
 import type { AgentName } from '@kbn/apm-types/src/es_schemas/ui/fields';
 import type { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '@kbn/apm-types';
 import type { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_SUBTYPE, SPAN_TYPE } from '@kbn/apm-types';
+import type { Coordinate } from '@kbn/apm-types';
 import type { ServiceAnomaliesResponse } from '../../server/routes/service_map/get_service_anomalies';
-import type { Coordinate } from '../../typings/timeseries';
 import type { ServiceAnomalyStats } from '../anomaly_detection';
 import type { SloStatus } from '../service_inventory';
 

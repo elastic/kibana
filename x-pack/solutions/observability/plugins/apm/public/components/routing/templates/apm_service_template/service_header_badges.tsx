@@ -57,7 +57,8 @@ export function ServiceHeaderBadges({
         },
       });
     },
-    [serviceName, start, end, environment, isAlertingAvailable, canReadAlerts]
+    [serviceName, start, end, environment, isAlertingAvailable, canReadAlerts],
+    { useCallApmApiV2: true }
   );
 
   const alertsCount = alertsData?.alertsCount ?? 0;

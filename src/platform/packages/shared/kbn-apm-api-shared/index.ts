@@ -28,6 +28,7 @@ export type * from './src/routes/correlations';
 export type * from './src/routes/custom_dashboards';
 export type * from './src/routes/dependencies';
 export type * from './src/routes/transactions';
+export type * from './src/routes/services';
 export {
   rangeRt,
   kueryRt,

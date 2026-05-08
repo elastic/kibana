@@ -10,15 +10,13 @@
  * Serverless id example: arn:aws:lambda:us-west-2:123456789012:function:my-function
  * The function name is the last part after "function:"
  */
+export { ServerlessType } from '@kbn/apm-types';
+import { ServerlessType } from '@kbn/apm-types';
+
 const serverlessIdRegex = /function:(.*)/;
 export function getServerlessFunctionNameFromId(serverlessId: string) {
   const match = serverlessIdRegex.exec(serverlessId);
   return match ? match[1] : serverlessId;
-}
-
-export enum ServerlessType {
-  AWS_LAMBDA = 'aws.lambda',
-  AZURE_FUNCTIONS = 'azure.functions',
 }
 
 export function getServerlessTypeFromCloudData(

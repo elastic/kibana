@@ -63,4 +63,4 @@ export const SERVICE_METADATA_KUBERNETES_KEYS = asMutableArray([
   KUBERNETES_REPLICASET_NAME,
 ] as const);
 
-export type ContainerType = 'Kubernetes' | 'Docker' | undefined;
+export type { ContainerType } from '@kbn/apm-types';
