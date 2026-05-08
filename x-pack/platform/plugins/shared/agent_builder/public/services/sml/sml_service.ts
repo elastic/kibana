@@ -6,10 +6,10 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { SmlSearchHttpResponse } from '../../../common/http_api/sml';
-import { internalApiPath } from '../../../common/constants';
+import type { SmlSearchHttpResponse } from '@kbn/agent-context-layer-plugin/public';
+import { smlSearchPath } from '@kbn/agent-context-layer-plugin/public';
 
-/** Browser client for Agent Builder internal SML search (`/internal/agent_builder/sml/_search`). */
+/** Browser client for SML search (`/internal/agent_context_layer/sml/_search`). */
 export class SmlService {
   private readonly http: HttpSetup;
 
@@ -22,7 +22,7 @@ export class SmlService {
     size: number;
     skipContent?: boolean;
   }): Promise<SmlSearchHttpResponse> {
-    return await this.http.post<SmlSearchHttpResponse>(`${internalApiPath}/sml/_search`, {
+    return await this.http.post<SmlSearchHttpResponse>(smlSearchPath, {
       body: JSON.stringify({
         query: params.query,
         size: params.size,

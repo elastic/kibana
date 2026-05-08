@@ -6,8 +6,14 @@
  */
 
 import type { GcsConfig } from '../data_generators/replay';
-import { OTEL_DEMO_NAMESPACE } from '../constants';
+import {
+  BANK_OF_ANTHOS_NAMESPACE,
+  OTEL_DEMO_NAMESPACE,
+  QUARKUS_SUPER_HEROES_NAMESPACE,
+} from '../constants';
+import { bankOfAnthosDataset } from './bank_of_anthos';
 import { otelDemoDataset } from './otel_demo';
+import { quarkusSuperHeroesDataset } from './quarkus_super_heroes';
 import type { DatasetConfig, SnapshotSourceOverride } from './types';
 
 export const MANAGED_STREAM_NAME = 'logs';
@@ -15,6 +21,8 @@ export const MANAGED_STREAM_SEARCH_PATTERN = `${MANAGED_STREAM_NAME}*`;
 
 const DATASETS: Record<string, DatasetConfig> = {
   [OTEL_DEMO_NAMESPACE]: otelDemoDataset,
+  [BANK_OF_ANTHOS_NAMESPACE]: bankOfAnthosDataset,
+  [QUARKUS_SUPER_HEROES_NAMESPACE]: quarkusSuperHeroesDataset,
 };
 
 let cachedActiveDatasets: DatasetConfig[] | undefined;

@@ -5,17 +5,25 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 
 export class RulesListPage {
-  constructor(private readonly page: ScoutPage) {}
+  public readonly tagsFilterButton: Locator;
+  public readonly selectAllRulesButton: Locator;
+  public readonly bulkActionsButton: Locator;
+  public readonly bulkDisableMenuItem: Locator;
+  public readonly rulesListTable: Locator;
+
+  constructor(private readonly page: ScoutPage) {
+    this.tagsFilterButton = this.page.testSubj.locator('rulesListTagsFilter');
+    this.selectAllRulesButton = this.page.testSubj.locator('selectAllRulesButton');
+    this.bulkActionsButton = this.page.testSubj.locator('bulkActionsButton');
+    this.bulkDisableMenuItem = this.page.testSubj.locator('bulkDisableRules');
+    this.rulesListTable = this.page.testSubj.locator('rulesListTable');
+  }
 
   async goto() {
     await this.page.gotoApp('management/alertingV2/rules');
-  }
-
-  tagsFilterButton() {
-    return this.page.testSubj.locator('rulesListTagsFilter');
   }
 
   tagsFilterOption(tag: string) {
@@ -26,29 +34,17 @@ export class RulesListPage {
     return this.page.testSubj.locator(`checkboxSelectRow-${ruleId}`);
   }
 
-  selectAllRulesButton() {
-    return this.page.testSubj.locator('selectAllRulesButton');
-  }
-
-  bulkActionsButton() {
-    return this.page.testSubj.locator('bulkActionsButton');
-  }
-
-  bulkDisableMenuItem() {
-    return this.page.testSubj.locator('bulkDisableRules');
-  }
-
-  rulesListTable() {
-    return this.page.testSubj.locator('rulesListTable');
-  }
-
   /**
    * Opens the Tags filter popover, selects one tag, and closes the popover.
+   * The first appearance of the option after opening can be slow on initial
+   * load while RBAC + tag aggregation runs server-side, hence the longer wait.
    */
   async filterBySingleTag(tag: string) {
-    await this.tagsFilterButton().click();
+    await this.tagsFilterButton.click();
+    // Initial tag aggregation can be slow on a freshly-booted Kibana before
+    // the alerting indexes are warm; default 5s is too tight in CI.
     await this.tagsFilterOption(tag).waitFor({ state: 'visible', timeout: 60_000 });
     await this.tagsFilterOption(tag).click();
-    await this.tagsFilterButton().click();
+    await this.tagsFilterButton.click();
   }
 }

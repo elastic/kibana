@@ -6,10 +6,10 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { tags } from '@kbn/scout';
 import { apiTest, testData } from '../fixtures';
 
-apiTest.describe('Maps - maps telemetry', { tag: [...tags.stateful.classic] }, () => {
+// skip for ECH: https://github.com/elastic/kibana/issues/265020
+apiTest.describe('Maps - maps telemetry', { tag: ['@local-stateful-classic'] }, () => {
   let cookieHeader: Record<string, string>;
 
   apiTest.beforeAll(async ({ samlAuth, esArchiver, kbnClient }) => {

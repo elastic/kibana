@@ -962,6 +962,22 @@ const triggerEventDispatchedSchema: RootSchema<TriggerEventDispatchedParams> = {
       optional: false,
     },
   },
+  workflowEventsIgnoreSkippedCount: {
+    type: 'integer',
+    _meta: {
+      description:
+        'Number of matched workflows skipped because on.workflowEvents is ignore and the emit was workflow-attributed',
+      optional: false,
+    },
+  },
+  workflowEventsCycleSkippedCount: {
+    type: 'integer',
+    _meta: {
+      description:
+        'Number of matched workflows skipped by the event-chain cycle guard (avoid-loop default)',
+      optional: false,
+    },
+  },
   scheduledAttemptCount: {
     type: 'integer',
     _meta: { description: 'Number of schedule attempts sent to execution engine', optional: false },

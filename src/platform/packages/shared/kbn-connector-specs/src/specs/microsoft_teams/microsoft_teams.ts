@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import {
   ListJoinedTeamsInputSchema,
@@ -33,10 +33,12 @@ import type {
  */
 const userPath = (userId?: string): string => (userId ? `/users/${userId}` : '/me');
 
-const GraphCollectionOutputSchema = z.object({
-  value: z.array(z.any()).describe('Array of items returned from the API'),
-  '@odata.nextLink': z.string().optional().describe('URL to fetch next page of results'),
-});
+const GraphCollectionOutputSchema = lazySchema(() =>
+  z.object({
+    value: z.array(z.any()).describe('Array of items returned from the API'),
+    '@odata.nextLink': z.string().optional().describe('URL to fetch next page of results'),
+  })
+);
 
 export const MicrosoftTeams: ConnectorSpec = {
   metadata: {
@@ -281,19 +283,21 @@ export const MicrosoftTeams: ConnectorSpec = {
       description:
         'Search Teams messages using the Microsoft Graph Search API. Requires delegated authentication (bearer token or OAuth authorization code). Not supported with app-only (client credentials) auth — Microsoft does not allow application permissions for chatMessage search.',
       input: SearchMessagesInputSchema,
-      output: z
-        .object({
-          value: z
-            .array(
-              z.object({
-                hitsContainers: z
-                  .array(z.any())
-                  .describe('Containers with search hits and associated metadata'),
-              })
-            )
-            .describe('Search response containers'),
-        })
-        .describe('Microsoft Graph Search API response'),
+      output: lazySchema(() =>
+        z
+          .object({
+            value: z
+              .array(
+                z.object({
+                  hitsContainers: z
+                    .array(z.any())
+                    .describe('Containers with search hits and associated metadata'),
+                })
+              )
+              .describe('Search response containers'),
+          })
+          .describe('Microsoft Graph Search API response')
+      ),
       handler: async (ctx, input: SearchMessagesInput) => {
         if (ctx.secrets?.authType === 'oauth_client_credentials') {
           throw new Error(

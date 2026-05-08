@@ -6,10 +6,7 @@
  */
 
 import type { CoreSetup } from '@kbn/core/server';
-import type {
-  AgentBuilderPluginSetup,
-  AgentBuilderPluginStart,
-} from '@kbn/agent-builder-plugin/server/types';
+import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,

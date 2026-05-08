@@ -17,8 +17,8 @@ import {
   ATTACHMENT_REF_OPERATION,
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
 import type { DashboardAttachment } from '@kbn/dashboard-agent-common/types';
 import type { DashboardApi, DashboardSaveEvent } from '@kbn/dashboard-plugin/public';

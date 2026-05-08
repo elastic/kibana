@@ -23,10 +23,11 @@ export const alertingV2UiSettings: Record<string, UiSettingsParams> = {
     type: 'boolean',
     value: false,
     description: i18n.translate('xpack.alertingVTwo.experimentalFeaturesSettingDescription', {
-      defaultMessage: 'Enables experimental alerting v2 features such as Rule Doctor.',
+      defaultMessage:
+        'Enables experimental alerting v2 features such as Agent Builder rule management.',
     }),
     schema: schema.boolean(),
-    requiresPageReload: true,
+    requiresPageReload: false,
     technicalPreview: true,
   },
   [ALERTING_V2_RULE_DOCTOR_INTERVAL_SETTING_ID]: {

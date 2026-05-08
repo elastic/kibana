@@ -26,6 +26,7 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/user-profile-components",
+    "@kbn/shared-ux-utility",
   ],
   "exclude": [
     "target/**/*"
