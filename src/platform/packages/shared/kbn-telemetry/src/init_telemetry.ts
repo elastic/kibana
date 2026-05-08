@@ -9,8 +9,7 @@
 import { loadConfiguration } from '@kbn/apm-config-loader';
 import { initTracing } from '@kbn/tracing';
 import { initMetrics } from '@kbn/metrics';
-import { core } from '@elastic/opentelemetry-node/sdk';
-import { context, propagation } from '@opentelemetry/api';
+import { context } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 
 import { maybeInitAutoInstrumentations } from './init_autoinstrumentations';
@@ -52,12 +51,6 @@ export const initTelemetry = (
   const contextManager = new AsyncLocalStorageContextManager();
   context.setGlobalContextManager(contextManager);
   contextManager.enable();
-
-  propagation.setGlobalPropagator(
-    new core.CompositePropagator({
-      propagators: [new core.W3CTraceContextPropagator(), new core.W3CBaggagePropagator()],
-    })
-  );
 
   if (telemetryConfig.enabled) {
     if (telemetryConfig.tracing.enabled) {
