@@ -31,7 +31,9 @@ function parseTemplateFieldTypes(input: string): TemplateFieldUserType[] {
       result.push(normalized as TemplateFieldUserType);
     } else {
       logger.warning(
-        `Skipping unknown template field type "${raw}". Valid types: ${TEMPLATE_FIELD_USER_TYPES.join(', ')}`
+        `Skipping unknown template field type "${raw}". Valid types: ${TEMPLATE_FIELD_USER_TYPES.join(
+          ', '
+        )}`
       );
     }
   }
@@ -47,6 +49,69 @@ function prompt(rl: readline.Interface, question: string, defaultVal?: string): 
 
 function printSection(title: string) {
   logger.info(`\n=== ${title} ===`);
+}
+
+function shellQuote(value: string): string {
+  if (value === '' || /[\s"'$`\\!*?{}[\]<>|&;()#~]/.test(value)) {
+    return `'${value.replace(/'/g, `'\\''`)}'`;
+  }
+  return value;
+}
+
+// eslint-disable-next-line complexity -- one branch per CLI flag; flat is clearer than abstracted here
+function buildShorthandCommand(config: GeneratorConfig, fieldTypesAllOf?: string[]): string {
+  const parts: string[] = ['node x-pack/platform/plugins/shared/cases/scripts/generate_cases.js'];
+  const push = (flag: string, value: string) => parts.push(`  --${flag} ${shellQuote(value)}`);
+
+  if (config.kibana !== 'http://127.0.0.1:5601') push('kibana', config.kibana);
+  if (config.node !== 'http://elastic:changeme@127.0.0.1:9200') push('node', config.node);
+  if (config.username !== 'elastic') push('username', config.username);
+  if (config.password !== 'changeme') push('password', config.password);
+  if (config.ssl) parts.push('  --ssl');
+  if (config.apiKey) push('apiKey', config.apiKey);
+  if (config.kibanaVersion !== '9.2.0') push('kibanaVersion', config.kibanaVersion);
+  if (config.space) push('space', config.space);
+  if (config.spaces) {
+    parts.push(`  --numSpaces ${config.spaces.count}`);
+    if (config.spaces.namePattern !== 'space-{i}')
+      push('spaceNamePattern', config.spaces.namePattern);
+  }
+  if (config.owners.join(',') !== 'securitySolution,observability,cases') {
+    parts.push(`  --owners ${config.owners.map(shellQuote).join(' --owners ')}`);
+  }
+  if (config.ownerDistribution) {
+    const dist = Object.entries(config.ownerDistribution)
+      .map(([k, v]) => `${k}:${v}`)
+      .join(',');
+    push('ownerDistribution', dist);
+  }
+  if (config.analyticsOwners && config.analyticsOwners.length > 0) {
+    parts.push(
+      `  --analyticsOwners ${config.analyticsOwners.map(shellQuote).join(' --analyticsOwners ')}`
+    );
+  }
+  if (config.count !== 10) parts.push(`  --count ${config.count}`);
+  if (config.comments > 0) parts.push(`  --comments ${config.comments}`);
+  if (config.alerts > 0) parts.push(`  --alerts ${config.alerts}`);
+  if (config.events > 0) parts.push(`  --events ${config.events}`);
+  if (config.templates.length > 0) {
+    parts.push(`  --templates ${config.templates.length}`);
+    if (config.templateOwners.join(',') !== config.owners.join(',')) {
+      parts.push(
+        `  --templateOwners ${config.templateOwners.map(shellQuote).join(' --templateOwners ')}`
+      );
+    }
+    if (config.templateSpace) push('templateSpace', config.templateSpace);
+    if (fieldTypesAllOf && fieldTypesAllOf.length > 0) {
+      push('templateFieldTypes', fieldTypesAllOf.join(','));
+    }
+  }
+  if (config.concurrency) parts.push(`  --concurrency ${config.concurrency}`);
+  if (config.seed) push('seed', config.seed);
+  if (config.dryRun) parts.push('  --dryRun');
+  if (config.cleanup) parts.push('  --cleanup');
+  if (config.cleanupTag !== AUTO_GENERATED_TAG) push('cleanupTag', config.cleanupTag);
+  return parts.join(' \\\n');
 }
 
 async function promptBoolean(
@@ -80,7 +145,9 @@ function validateOwners(owners: string[]) {
   if (owners.length === 0) {
     throw new Error(`At least one owner is required. Valid owners: ${VALID_OWNERS.join(', ')}`);
   }
-  const invalidOwner = owners.find((owner) => !VALID_OWNERS.includes(owner as (typeof VALID_OWNERS)[number]));
+  const invalidOwner = owners.find(
+    (owner) => !VALID_OWNERS.includes(owner as (typeof VALID_OWNERS)[number])
+  );
   if (invalidOwner) {
     throw new Error(`Invalid owner "${invalidOwner}". Valid owners: ${VALID_OWNERS.join(', ')}`);
   }
@@ -132,7 +199,10 @@ function validateConfig(config: GeneratorConfig): GeneratorConfig {
     throw new Error('cleanupTag must be a non-empty string');
   }
 
-  if (config.concurrency !== null && (!Number.isInteger(config.concurrency) || config.concurrency <= 0)) {
+  if (
+    config.concurrency !== null &&
+    (!Number.isInteger(config.concurrency) || config.concurrency <= 0)
+  ) {
     throw new Error('concurrency must be a positive integer when provided');
   }
 
@@ -194,7 +264,9 @@ async function collectTemplateInputs(
 
     const fieldTypesStr = await prompt(
       rl,
-      `Field types in declaration order (comma-separated; valid: ${TEMPLATE_FIELD_USER_TYPES.join(', ')})`,
+      `Field controls in declaration order, comma-separated. Valid: ${TEMPLATE_FIELD_USER_TYPES.join(
+        ', '
+      )} (each maps to a real {control, value type} pair — text→INPUT_TEXT/keyword, number→INPUT_NUMBER/integer, date→DATE_PICKER/date, etc.)`,
       ''
     );
     const fieldTypes = parseTemplateFieldTypes(fieldTypesStr);
@@ -227,9 +299,17 @@ async function interactiveMode(): Promise<GeneratorConfig> {
     const password = await prompt(rl, 'Password', 'changeme');
     const ssl = await promptBoolean(rl, 'Use SSL?', false);
     const apiKey = await prompt(rl, 'API Key (leave empty for basic auth)', '');
-    const kibanaVersion = await prompt(rl, 'Kibana version (stamped into generated alerts/events)', DEFAULT_KIBANA_VERSION);
+    const kibanaVersion = await prompt(
+      rl,
+      'Kibana version (stamped into generated alerts/events)',
+      DEFAULT_KIBANA_VERSION
+    );
     const dryRun = await promptBoolean(rl, 'Run as dry-run only (no writes)?', false);
-    const seedInput = await prompt(rl, 'Optional deterministic seed', '');
+    const seedInput = await prompt(
+      rl,
+      'Optional deterministic seed (any non-empty string, e.g. "demo-2026" — same seed reproduces the same owner picks, severities, tags, alert/event distribution; leave blank for fresh randomness)',
+      ''
+    );
     const seed = seedInput.trim() ? seedInput : null;
     const concurrencyInput = await prompt(rl, 'Concurrency override (blank = auto)', '');
     const concurrency = concurrencyInput.trim() ? Number.parseInt(concurrencyInput, 10) : null;
@@ -238,7 +318,11 @@ async function interactiveMode(): Promise<GeneratorConfig> {
       'Cleanup mode? (delete previously generated cases/templates and exit)',
       false
     );
-    const cleanupTag = await prompt(rl, 'Cleanup tag (matches case+template tags)', AUTO_GENERATED_TAG);
+    const cleanupTag = await prompt(
+      rl,
+      'Cleanup tag (matches case+template tags)',
+      AUTO_GENERATED_TAG
+    );
 
     printSection('2/6 Spaces');
     const singleSpace = normalizeSpace(
@@ -296,18 +380,61 @@ async function interactiveMode(): Promise<GeneratorConfig> {
     logger.info(`node=${node}`);
     logger.info(`dryRun=${dryRun}`);
     logger.info(`seed=${seed ?? 'none'}`);
-    logger.info(`spaces=${spaces ? `${spaces.count} x ${spaces.namePattern}` : singleSpace || 'default'}`);
+    logger.info(
+      `spaces=${spaces ? `${spaces.count} x ${spaces.namePattern}` : singleSpace || 'default'}`
+    );
     logger.info(`owners=${owners.join(', ')}`);
     logger.info(`count=${count}, comments=${comments}, alerts=${alerts}, events=${events}`);
     logger.info(
-      `templates=${templates.length}, templateOwners=${templateOwners.join(', ') || 'none'}, templateSpace=${templateSpace || 'default'}`
+      `templates=${templates.length}, templateOwners=${
+        templateOwners.join(', ') || 'none'
+      }, templateSpace=${templateSpace || 'default'}`
     );
     for (const tpl of templates) {
       const ftLabel = tpl.fieldTypes.length > 0 ? tpl.fieldTypes.join(', ') : 'none';
       logger.info(`  - ${tpl.name}: fields=[${ftLabel}]`);
     }
     logger.info(`analyticsOwners=${analyticsOwners?.join(', ') ?? 'none'}`);
-    const confirmed = await promptBoolean(rl, 'Proceed with this configuration?', true);
+
+    const previewConfig: GeneratorConfig = {
+      kibana,
+      node,
+      username,
+      password,
+      ssl,
+      apiKey,
+      space: singleSpace,
+      owners,
+      count,
+      comments,
+      alerts,
+      events,
+      templates,
+      templateOwners,
+      templateSpace,
+      spaces,
+      ownerDistribution,
+      analyticsOwners,
+      dryRun,
+      seed,
+      kibanaVersion,
+      cleanup,
+      cleanupTag,
+      concurrency,
+    };
+    const fieldTypesAllOf =
+      templates.length > 0 &&
+      templates.every(
+        (tpl) =>
+          tpl.fieldTypes.length === templates[0].fieldTypes.length &&
+          tpl.fieldTypes.every((ft, i) => ft === templates[0].fieldTypes[i])
+      )
+        ? templates[0].fieldTypes
+        : undefined;
+    logger.info('\nTo rerun this configuration non-interactively:');
+    logger.info(buildShorthandCommand(previewConfig, fieldTypesAllOf));
+
+    const confirmed = await promptBoolean(rl, '\nProceed with this configuration?', true);
     if (!confirmed) {
       throw new Error('Interactive run cancelled by user.');
     }
@@ -436,7 +563,9 @@ function parseCliConfig(): GeneratorConfig {
       type: 'string',
     },
     templateFieldTypes: {
-      describe: `Comma-separated field types for each auto-generated template, in order. Valid types: ${TEMPLATE_FIELD_USER_TYPES.join(', ')}. Example: "integer,keyword,boolean".`,
+      describe: `Comma-separated field types for each auto-generated template, in order. Valid types: ${TEMPLATE_FIELD_USER_TYPES.join(
+        ', '
+      )}. Example: "integer,keyword,boolean".`,
       type: 'string',
       default: '',
     },
@@ -524,7 +653,9 @@ function parseCliConfig(): GeneratorConfig {
     alerts: parseNonNegativeInteger(String(argv.alerts), 0),
     events: parseNonNegativeInteger(String(argv.events ?? 0), 0),
     templates: autoTemplates,
-    templateOwners: ((argv.templateOwners as string[] | undefined) ?? owners).map((owner) => owner.trim()),
+    templateOwners: ((argv.templateOwners as string[] | undefined) ?? owners).map((owner) =>
+      owner.trim()
+    ),
     templateSpace: normalizeSpace(argv.templateSpace ?? argv.space),
     spaces: numSpaces > 0 ? { namePattern: argv.spaceNamePattern, count: numSpaces } : null,
     ownerDistribution: parseOwnerDistribution(argv.ownerDistribution ?? ''),

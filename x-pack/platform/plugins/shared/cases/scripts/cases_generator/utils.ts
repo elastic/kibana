@@ -6,8 +6,22 @@
  */
 
 import { logger } from './logger';
+import type { TemplateFieldUserType } from './types';
 
 export const AUTO_GENERATED_TAG = 'auto-generated';
+
+// Maps the user-facing control name to the Elasticsearch value type that ends up
+// on the template field. Must stay in sync with buildTemplateField in kibana_ops.ts.
+export const USER_TYPE_TO_SCHEMA_TYPE: Record<TemplateFieldUserType, string> = {
+  text: 'keyword',
+  number: 'integer',
+  textarea: 'keyword',
+  date: 'date',
+  select: 'keyword',
+  radio: 'keyword',
+  checkbox: 'keyword',
+  user: 'keyword',
+};
 
 let scriptRandom: () => number = Math.random;
 
@@ -170,6 +184,27 @@ export function casesBasePath(space: string): string {
   return space ? `/s/${space}` : '';
 }
 
+export function fieldLetter(index: number): string {
+  // Excel-style: 0→A, 25→Z, 26→AA, 51→AZ, 52→BA, …, 701→ZZ, 702→AAA.
+  let n = index;
+  let result = '';
+  while (n >= 0) {
+    result = String.fromCharCode(65 + (n % 26)) + result;
+    n = Math.floor(n / 26) - 1;
+  }
+  return result;
+}
+
+export function templateFieldName(index: number): string {
+  return `field${fieldLetter(index)}`;
+}
+
+// Mirrors the cases plugin's getFieldSnakeKey helper — extended_fields keys must
+// match `${name}_as_${schemaType}` to be accepted by the server.
+export function extendedFieldKey(index: number, userType: TemplateFieldUserType): string {
+  return `${templateFieldName(index)}_as_${USER_TYPE_TO_SCHEMA_TYPE[userType]}`;
+}
+
 export function parseList(input: string): string[] {
   return input
     .split(',')
@@ -185,6 +220,9 @@ export function parseNonNegativeInteger(value: string, fallback: number): number
   return parsed;
 }
 
+// cyrb128 / sfc32: textbook seedable PRNG primitives. Bitwise ops and parameter
+// reassignment are inherent to the algorithm, hence the scoped lint disables.
+/* eslint-disable no-bitwise, no-param-reassign */
 function cyrb128(str: string): [number, number, number, number] {
   let h1 = 1_779_033_703;
   let h2 = 3_144_134_277;
@@ -220,6 +258,7 @@ function sfc32(a: number, b: number, c: number, d: number) {
     return (t >>> 0) / 4_294_967_296;
   };
 }
+/* eslint-enable no-bitwise, no-param-reassign */
 
 export function installSeededRandom(seed: string): () => void {
   const previous = scriptRandom;

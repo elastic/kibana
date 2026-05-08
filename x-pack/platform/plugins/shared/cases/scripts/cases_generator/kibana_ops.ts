@@ -11,6 +11,7 @@ import yaml from 'js-yaml';
 import { logger } from './logger';
 import type {
   CreatedAttachment,
+  CreatedTemplateRef,
   KbnContext,
   SpaceConfig,
   TemplateFieldUserType,
@@ -23,6 +24,7 @@ import {
   dedupe,
   formatRequestError,
   runWithRetry,
+  templateFieldName,
 } from './utils';
 
 const CASE_DELETE_BATCH_SIZE = 100;
@@ -34,27 +36,15 @@ function isAlreadyExistsError(err: unknown): boolean {
   return message.includes('already exists') || message.includes('409');
 }
 
-function fieldLetter(index: number): string {
-  // Excel-style: 0→A, 25→Z, 26→AA, 51→AZ, 52→BA, …, 701→ZZ, 702→AAA.
-  let n = index;
-  let result = '';
-  while (n >= 0) {
-    result = String.fromCharCode(65 + (n % 26)) + result;
-    n = Math.floor(n / 26) - 1;
-  }
-  return result;
-}
-
 function buildTemplateField(
   index: number,
   userType: TemplateFieldUserType
 ): Record<string, unknown> {
-  const letter = fieldLetter(index);
-  const name = `field${letter}_as_${userType}`;
-  const label = `Field ${letter} (${userType})`;
+  const name = templateFieldName(index);
+  const label = `${name} (${userType})`;
 
   switch (userType) {
-    case 'keyword':
+    case 'text':
       return {
         control: 'INPUT_TEXT',
         name,
@@ -62,21 +52,13 @@ function buildTemplateField(
         type: 'keyword',
         metadata: { default: 'sample-value' },
       };
-    case 'integer':
+    case 'number':
       return {
         control: 'INPUT_NUMBER',
         name,
         label,
         type: 'integer',
         metadata: { default: 42 },
-      };
-    case 'boolean':
-      return {
-        control: 'RADIO_GROUP',
-        name,
-        label,
-        type: 'keyword',
-        metadata: { options: ['true', 'false'], default: 'false' },
       };
     case 'textarea':
       return {
@@ -92,7 +74,7 @@ function buildTemplateField(
         name,
         label,
         type: 'date',
-        metadata: { show_time: false, timezone: 'utc' },
+        metadata: { default: '2024-01-01T00:00:00Z' },
       };
     case 'select':
       return {
@@ -100,15 +82,7 @@ function buildTemplateField(
         name,
         label,
         type: 'keyword',
-        metadata: { options: ['alpha', 'beta', 'gamma'] },
-      };
-    case 'checkbox':
-      return {
-        control: 'CHECKBOX_GROUP',
-        name,
-        label,
-        type: 'keyword',
-        metadata: { options: ['alpha', 'beta'], default: ['alpha'] },
+        metadata: { options: ['alpha', 'beta', 'gamma'], default: 'alpha' },
       };
     case 'radio':
       return {
@@ -118,13 +92,21 @@ function buildTemplateField(
         type: 'keyword',
         metadata: { options: ['alpha', 'beta', 'gamma'], default: 'alpha' },
       };
+    case 'checkbox':
+      return {
+        control: 'CHECKBOX_GROUP',
+        name,
+        label,
+        type: 'keyword',
+        metadata: { options: ['alpha', 'beta'], default: ['alpha'] },
+      };
     case 'user':
       return {
         control: 'USER_PICKER',
         name,
         label,
         type: 'keyword',
-        metadata: { multiple: false },
+        metadata: { multiple: false, default: [] },
       };
   }
 }
@@ -179,19 +161,23 @@ export async function bulkCreateAttachmentSOs({
   const docs = attachments.map((attachment) => buildAttachmentSO(attachment));
 
   const chunkSize = 200;
-  for (let start = 0; start < docs.length; start += chunkSize) {
-    const chunk = docs.slice(start, start + chunkSize);
+  for (const batch of chunk(docs, chunkSize)) {
     try {
       await runWithRetry(
         () =>
-          ctx.kbnClient.request({ method: 'POST', path: soPath, headers: ctx.headers, body: chunk }),
+          ctx.kbnClient.request({
+            method: 'POST',
+            path: soPath,
+            headers: ctx.headers,
+            body: batch,
+          }),
         { label: 'bulk_create_attachment_sos' }
       );
     } catch (err) {
       logger.error(`Error bulk-creating attachment SOs: ${formatRequestError(err)}`);
     }
-    logger.info(`  [attachments SO] ${Math.min(start + chunkSize, docs.length)}/${docs.length}`);
   }
+  logger.info(`  [attachments SO] ${docs.length}/${docs.length}`);
 }
 
 export async function createTemplates({
@@ -204,13 +190,16 @@ export async function createTemplates({
   space: string;
   owner: string;
   templates: TemplateInput[];
-}) {
-  if (templates.length === 0) return;
+}): Promise<CreatedTemplateRef[]> {
+  if (templates.length === 0) return [];
 
   const templatesPath = `${casesBasePath(space)}/internal/cases/templates`;
   const spaceLabel = space || 'default';
+  const created: CreatedTemplateRef[] = [];
 
-  logger.info(`Creating ${templates.length} template(s) for owner "${owner}" in space "${spaceLabel}"...`);
+  logger.info(
+    `Creating ${templates.length} template(s) for owner "${owner}" in space "${spaceLabel}"...`
+  );
 
   for (const template of templates) {
     const fields = template.fieldTypes.map((userType, index) =>
@@ -229,9 +218,9 @@ export async function createTemplates({
     if (template.description) body.description = template.description;
 
     try {
-      await runWithRetry(
+      const { data } = await runWithRetry(
         () =>
-          ctx.kbnClient.request({
+          ctx.kbnClient.request<{ templateId: string; templateVersion: number }>({
             method: 'POST',
             path: templatesPath,
             headers: ctx.headers,
@@ -239,6 +228,13 @@ export async function createTemplates({
           }),
         { label: `create_template_${template.name}` }
       );
+      if (data?.templateId && typeof data.templateVersion === 'number') {
+        created.push({
+          id: data.templateId,
+          version: data.templateVersion,
+          fieldTypes: template.fieldTypes,
+        });
+      }
       const fieldsLabel =
         fields.length > 0
           ? ` with ${fields.length} field(s): ${template.fieldTypes.join(', ')}`
@@ -249,11 +245,15 @@ export async function createTemplates({
         logger.info(`  Template "${template.name}" already exists for owner "${owner}", skipping`);
       } else {
         logger.error(
-          `Failed to create template "${template.name}" for owner "${owner}": ${formatRequestError(err)}`
+          `Failed to create template "${template.name}" for owner "${owner}": ${formatRequestError(
+            err
+          )}`
         );
       }
     }
   }
+
+  return created;
 }
 
 export async function createSpace(ctx: KbnContext, spaceId: string): Promise<void> {
@@ -344,7 +344,9 @@ export async function enableAnalyticsForOwner({
         }),
       { label: `create_case_config_${owner}_${spaceLabel}` }
     );
-    logger.info(`  Enabled analytics for owner "${owner}" in space "${spaceLabel}" (created new config)`);
+    logger.info(
+      `  Enabled analytics for owner "${owner}" in space "${spaceLabel}" (created new config)`
+    );
   } catch (err) {
     if (isAlreadyExistsError(err)) {
       logger.info(
@@ -353,7 +355,9 @@ export async function enableAnalyticsForOwner({
       return;
     }
     logger.error(
-      `  Failed to enable analytics for owner "${owner}" in space "${spaceLabel}": ${formatRequestError(err)}`
+      `  Failed to enable analytics for owner "${owner}" in space "${spaceLabel}": ${formatRequestError(
+        err
+      )}`
     );
   }
 }
@@ -368,7 +372,9 @@ export async function enableAnalyticsForSpaces({
   owners: string[];
 }): Promise<void> {
   if (owners.length === 0 || spaces.length === 0) return;
-  logger.info(`Enabling analytics for owners [${owners.join(', ')}] across ${spaces.length} space(s)...`);
+  logger.info(
+    `Enabling analytics for owners [${owners.join(', ')}] across ${spaces.length} space(s)...`
+  );
 
   const work = spaces.flatMap((space) => owners.map((owner) => ({ owner, space })));
 
@@ -386,7 +392,9 @@ async function findCaseIdsByTag(ctx: KbnContext, space: string, tag: string): Pr
       () =>
         ctx.kbnClient.request<{ cases: Array<{ id: string }>; total: number }>({
           method: 'GET',
-          path: `${findPath}?tags=${encodeURIComponent(tag)}&page=${page}&perPage=${FIND_PAGE_SIZE}&sortField=createdAt&sortOrder=asc`,
+          path: `${findPath}?tags=${encodeURIComponent(
+            tag
+          )}&page=${page}&perPage=${FIND_PAGE_SIZE}&sortField=createdAt&sortOrder=asc`,
           headers: ctx.headers,
         }),
       { label: `find_cases_by_tag_${tag}_p${page}` }
@@ -453,7 +461,9 @@ async function findTemplateIdsByTag(
             total: number;
           }>({
             method: 'GET',
-            path: `${listPath}?owner=${encodeURIComponent(owner)}&tags=${encodeURIComponent(tag)}&page=${page}&perPage=${FIND_PAGE_SIZE}`,
+            path: `${listPath}?owner=${encodeURIComponent(owner)}&tags=${encodeURIComponent(
+              tag
+            )}&page=${page}&perPage=${FIND_PAGE_SIZE}`,
             headers: ctx.headers,
           }),
         { label: `find_templates_${owner}_p${page}` }

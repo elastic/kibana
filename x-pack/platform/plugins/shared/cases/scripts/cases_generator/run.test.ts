@@ -46,7 +46,10 @@ describe('buildExecutionPlan', () => {
       expect(onlySpace.totalCases).toBe(baseConfig.count);
       expect(plan.totals.cases).toBe(baseConfig.count);
 
-      const countedCases = Object.values(onlySpace.ownerCaseCounts).reduce((sum, value) => sum + value, 0);
+      const countedCases = Object.values(onlySpace.ownerCaseCounts).reduce(
+        (sum, value) => sum + value,
+        0
+      );
       expect(countedCases).toBe(baseConfig.count);
 
       const nonObservabilityCases =

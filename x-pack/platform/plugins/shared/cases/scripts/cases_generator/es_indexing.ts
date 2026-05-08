@@ -45,7 +45,9 @@ export async function bulkIndexAlerts(
 
     if (res.errors) {
       logger.error(
-        `Bulk index errors: ${JSON.stringify(res.items.filter((item) => item.index?.error).slice(0, 3))}`
+        `Bulk index errors: ${JSON.stringify(
+          res.items.filter((item) => item.index?.error).slice(0, 3)
+        )}`
       );
     }
 
@@ -78,7 +80,10 @@ export async function bulkIndexEvents(
   for (let start = 0; start < count; start += EVENT_CHUNK_SIZE) {
     const chunkSize = Math.min(EVENT_CHUNK_SIZE, count - start);
     const chunk = Array.from({ length: chunkSize }, () => generateProcessEvent(ctx));
-    const operations = chunk.flatMap((eventDocument) => [{ create: { _index: eventIndex } }, eventDocument]);
+    const operations = chunk.flatMap((eventDocument) => [
+      { create: { _index: eventIndex } },
+      eventDocument,
+    ]);
 
     const res = await esClient.bulk({
       operations,
@@ -87,7 +92,9 @@ export async function bulkIndexEvents(
 
     if (res.errors) {
       logger.error(
-        `Bulk index errors: ${JSON.stringify(res.items.filter((item) => item.create?.error).slice(0, 3))}`
+        `Bulk index errors: ${JSON.stringify(
+          res.items.filter((item) => item.create?.error).slice(0, 3)
+        )}`
       );
     }
 
@@ -111,7 +118,10 @@ export async function indexAlertsForOwners(
 ): Promise<Map<string, AlertInfo[]>> {
   const alertsNeededByOwner = new Map<string, number>();
   for (const oneCase of cases) {
-    alertsNeededByOwner.set(oneCase.owner, (alertsNeededByOwner.get(oneCase.owner) ?? 0) + alertsPerCase);
+    alertsNeededByOwner.set(
+      oneCase.owner,
+      (alertsNeededByOwner.get(oneCase.owner) ?? 0) + alertsPerCase
+    );
   }
 
   const alertsByOwner = new Map<string, AlertInfo[]>();

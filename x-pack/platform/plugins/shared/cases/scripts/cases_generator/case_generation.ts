@@ -9,9 +9,107 @@ import pMap from 'p-map';
 import { logger } from './logger';
 import { bulkCreateAttachmentSOs } from './kibana_ops';
 import type { CreatedAttachment, GenerateCasesParams, KbnContext } from './types';
-import { casesBasePath, chunk, formatRequestError, runWithRetry } from './utils';
+import { casesBasePath, chunk, formatRequestError, rng, runWithRetry } from './utils';
 
 const ATTACHMENT_BULK_LIMIT = 100;
+const CASE_PATCH_BATCH_LIMIT = 100;
+
+type CaseStatus = 'open' | 'in-progress' | 'closed';
+
+interface CreatedCaseRef {
+  id: string;
+  version: string;
+  targetStatus: CaseStatus;
+}
+
+function pickRandomStatus(): CaseStatus {
+  const r = rng();
+  if (r < 0.6) return 'open';
+  if (r < 0.85) return 'in-progress';
+  return 'closed';
+}
+
+async function refreshCaseVersions(
+  ctx: KbnContext,
+  space: string,
+  refs: CreatedCaseRef[]
+): Promise<CreatedCaseRef[]> {
+  const basePath = casesBasePath(space);
+  const refreshed = await pMap(
+    refs,
+    async (ref) => {
+      try {
+        const { data } = await runWithRetry(
+          () =>
+            ctx.kbnClient.request<{ id: string; version: string }>({
+              method: 'GET',
+              path: `${basePath}/api/cases/${ref.id}`,
+              headers: ctx.headers,
+            }),
+          { label: `refresh_case_${ref.id}` }
+        );
+        return { ...ref, version: data.version };
+      } catch (err) {
+        logger.error(`Error refreshing case ${ref.id} version: ${formatRequestError(err)}`);
+        return null;
+      }
+    },
+    { concurrency: 25 }
+  );
+  return refreshed.filter((r): r is CreatedCaseRef => r !== null);
+}
+
+async function bulkPatchCaseStatuses({
+  ctx,
+  space,
+  refs,
+}: {
+  ctx: KbnContext;
+  space: string;
+  refs: CreatedCaseRef[];
+}): Promise<void> {
+  const needsPatch = refs.filter((ref) => ref.targetStatus !== 'open');
+  if (needsPatch.length === 0) return;
+
+  const distribution = needsPatch.reduce<Record<string, number>>((acc, ref) => {
+    acc[ref.targetStatus] = (acc[ref.targetStatus] ?? 0) + 1;
+    return acc;
+  }, {});
+  logger.info(
+    `Patching status on ${needsPatch.length} case(s): ${Object.entries(distribution)
+      .map(([status, n]) => `${status}=${n}`)
+      .join(', ')}`
+  );
+
+  // Versions captured at creation time are stale because attachment POSTs bump
+  // the case version. Refetch current versions before issuing the bulk PATCH.
+  const refreshed = await refreshCaseVersions(ctx, space, needsPatch);
+  if (refreshed.length === 0) return;
+
+  const path = `${casesBasePath(space)}/api/cases`;
+  for (const batch of chunk(refreshed, CASE_PATCH_BATCH_LIMIT)) {
+    try {
+      await runWithRetry(
+        () =>
+          ctx.kbnClient.request({
+            method: 'PATCH',
+            path,
+            headers: ctx.headers,
+            body: {
+              cases: batch.map((ref) => ({
+                id: ref.id,
+                version: ref.version,
+                status: ref.targetStatus,
+              })),
+            },
+          }),
+        { label: `bulk_patch_case_statuses_${batch.length}` }
+      );
+    } catch (err) {
+      logger.error(`Error patching case statuses: ${formatRequestError(err)}`);
+    }
+  }
+}
 
 interface PendingAttachment {
   body: Record<string, unknown>;
@@ -51,7 +149,9 @@ async function postBulkAttachments({
       }
     } catch (err) {
       logger.error(
-        `Error bulk-adding ${batch.length} attachment(s) to case ${caseId}: ${formatRequestError(err)}`
+        `Error bulk-adding ${batch.length} attachment(s) to case ${caseId}: ${formatRequestError(
+          err
+        )}`
       );
     }
   }
@@ -92,6 +192,7 @@ export async function generateCases(
       ? 10
       : 30;
   const createdAttachments: CreatedAttachment[] = [];
+  const createdCaseRefs: CreatedCaseRef[] = [];
 
   // Precompute per-case offsets so concurrent pMap tasks don't race on shared cursors.
   // Each case gets a stable position within its owner-bucket and within the non-observability
@@ -120,7 +221,7 @@ export async function generateCases(
       try {
         const { data: created } = await runWithRetry(
           () =>
-            ctx.kbnClient.request<{ id: string }>({
+            ctx.kbnClient.request<{ id: string; version: string }>({
               method: 'POST',
               path: casesPath,
               headers: ctx.headers,
@@ -130,6 +231,11 @@ export async function generateCases(
         );
 
         const caseId = created.id;
+        createdCaseRefs.push({
+          id: caseId,
+          version: created.version,
+          targetStatus: pickRandomStatus(),
+        });
         if (totalAttachments === 0) return;
 
         const pending: PendingAttachment[] = [];
@@ -210,4 +316,6 @@ export async function generateCases(
     logger.info(`Creating ${createdAttachments.length} attachment SOs via saved objects API...`);
     await bulkCreateAttachmentSOs({ ctx, attachments: createdAttachments, space });
   }
+
+  await bulkPatchCaseStatuses({ ctx, space, refs: createdCaseRefs });
 }

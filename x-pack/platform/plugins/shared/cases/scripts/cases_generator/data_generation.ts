@@ -7,7 +7,47 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { CaseSeverity, type CasePostRequest } from '../../common';
-import { AUTO_GENERATED_TAG, pick, rng, sampleN } from './utils';
+import type { CreatedTemplateRef, TemplateFieldUserType } from './types';
+import { AUTO_GENERATED_TAG, extendedFieldKey, pick, randomString, rng, sampleN } from './utils';
+
+const EXTENDED_FIELD_SAMPLE_TEXT = [
+  'Investigation pending triage',
+  'Awaiting customer confirmation',
+  'Reproducible in staging only',
+  'Suspected configuration drift',
+  'No customer impact observed',
+];
+
+function randomExtendedFieldValue(userType: TemplateFieldUserType): string {
+  switch (userType) {
+    case 'text':
+      return `demo-${randomString(6)}`;
+    case 'number':
+      return String(Math.floor(rng() * 1_000) + 1);
+    case 'textarea':
+      return pick(EXTENDED_FIELD_SAMPLE_TEXT);
+    case 'date': {
+      const now = Date.now();
+      const offset = Math.floor(rng() * 90 * 24 * 3_600_000);
+      return new Date(now - offset).toISOString();
+    }
+    case 'select':
+    case 'radio':
+      return pick(['alpha', 'beta', 'gamma']);
+    case 'checkbox':
+      return JSON.stringify(sampleN(['alpha', 'beta'], Math.max(1, Math.floor(rng() * 2) + 1)));
+    case 'user':
+      return JSON.stringify([]);
+  }
+}
+
+function buildExtendedFields(template: CreatedTemplateRef): Record<string, string> {
+  const result: Record<string, string> = {};
+  template.fieldTypes.forEach((userType, idx) => {
+    result[extendedFieldKey(idx, userType)] = randomExtendedFieldValue(userType);
+  });
+  return result;
+}
 
 const ENDPOINT_EVENTS_NAMESPACE = 'default';
 
@@ -245,9 +285,14 @@ const CASE_SEVERITIES = [
   CaseSeverity.CRITICAL,
 ];
 
-export function buildCaseRequest(counter: number, owner: string, reqId: string): CasePostRequest {
+export function buildCaseRequest(
+  counter: number,
+  owner: string,
+  reqId: string,
+  template?: CreatedTemplateRef | null
+): CasePostRequest {
   const sampledTags = sampleN(CASE_TAG_POOL, Math.floor(rng() * 3));
-  return {
+  const request: CasePostRequest = {
     title: `[${owner}] Sample Case ${reqId}-${counter}`,
     tags: [AUTO_GENERATED_TAG, ...sampledTags],
     severity: pick(CASE_SEVERITIES),
@@ -264,5 +309,20 @@ export function buildCaseRequest(counter: number, owner: string, reqId: string):
     customFields: [],
     category: pick(CASE_CATEGORY_POOL),
   };
+  if (template) {
+    (
+      request as CasePostRequest & {
+        template?: { id: string; version: number };
+        extended_fields?: Record<string, string>;
+      }
+    ).template = {
+      id: template.id,
+      version: template.version,
+    };
+    if (template.fieldTypes.length > 0) {
+      (request as CasePostRequest & { extended_fields?: Record<string, string> }).extended_fields =
+        buildExtendedFields(template);
+    }
+  }
+  return request;
 }
-

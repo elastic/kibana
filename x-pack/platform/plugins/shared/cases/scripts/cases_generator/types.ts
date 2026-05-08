@@ -36,18 +36,33 @@ export interface CreatedAttachment {
   rule?: { id: string; name: string };
 }
 
+// User-facing control names. Each maps 1:1 to a real {control, type} pair in
+// the cases template schema (see buildTemplateField in kibana_ops.ts).
+//   text     → control: INPUT_TEXT,      value type: keyword
+//   number   → control: INPUT_NUMBER,    value type: integer
+//   textarea → control: TEXTAREA,        value type: keyword
+//   date     → control: DATE_PICKER,     value type: date
+//   select   → control: SELECT_BASIC,    value type: keyword
+//   radio    → control: RADIO_GROUP,     value type: keyword
+//   checkbox → control: CHECKBOX_GROUP,  value type: keyword
+//   user     → control: USER_PICKER,     value type: keyword
 export const TEMPLATE_FIELD_USER_TYPES = [
-  'keyword',
-  'integer',
-  'boolean',
+  'text',
+  'number',
   'textarea',
   'date',
   'select',
-  'checkbox',
   'radio',
+  'checkbox',
   'user',
 ] as const;
 export type TemplateFieldUserType = (typeof TEMPLATE_FIELD_USER_TYPES)[number];
+
+export interface CreatedTemplateRef {
+  id: string;
+  version: number;
+  fieldTypes: TemplateFieldUserType[];
+}
 
 export interface TemplateInput {
   name: string;

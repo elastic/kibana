@@ -18,8 +18,8 @@ import {
   enableAnalyticsForSpaces,
 } from './kibana_ops';
 import { logger } from './logger';
-import type { AlertInfo, EventInfo, GeneratorConfig } from './types';
-import { dedupe, installSeededRandom, randomString, weightedOwnerPick } from './utils';
+import type { AlertInfo, CreatedTemplateRef, EventInfo, GeneratorConfig } from './types';
+import { dedupe, installSeededRandom, pick, randomString, weightedOwnerPick } from './utils';
 
 interface SpaceExecutionPlan {
   space: string;
@@ -54,13 +54,17 @@ function logFinalSummary(config: GeneratorConfig) {
   const perSpaceLabel = numSpaces > 1 ? ` × ${numSpaces} spaces = ${totalCases} total` : '';
 
   if (summaryParts.length > 0) {
-    logger.info(`Created ${config.count} cases${perSpaceLabel}, each with ${summaryParts.join(', ')}`);
+    logger.info(
+      `Created ${config.count} cases${perSpaceLabel}, each with ${summaryParts.join(', ')}`
+    );
   } else {
     logger.info(`Created ${config.count} cases${perSpaceLabel}`);
   }
 
   if (config.ownerDistribution) {
-    const distStr = config.owners.map((owner) => `${owner}:${config.ownerDistribution?.[owner] ?? 0}`).join(', ');
+    const distStr = config.owners
+      .map((owner) => `${owner}:${config.ownerDistribution?.[owner] ?? 0}`)
+      .join(', ');
     logger.info(`Owner distribution weights: ${distStr}`);
   }
 
@@ -80,19 +84,23 @@ function logFinalSummary(config: GeneratorConfig) {
   }
 
   if (config.analyticsOwners && config.analyticsOwners.length > 0) {
-    logger.info(`Analytics enabled for [${config.analyticsOwners.join(', ')}] across ${numSpaces} space(s)`);
+    logger.info(
+      `Analytics enabled for [${config.analyticsOwners.join(', ')}] across ${numSpaces} space(s)`
+    );
   }
 }
 
+// eslint-disable-next-line complexity -- top-level orchestrator branches on many config flags by design
 export async function runGenerator(): Promise<void> {
   const config = await loadConfig();
   const restoreRandom = config.seed ? installSeededRandom(config.seed) : null;
 
   try {
+    const spacesConfig = config.spaces;
     const plannedTargetSpaces: string[] =
-      config.spaces && config.spaces.count > 0
-        ? Array.from({ length: config.spaces.count }, (_, i) =>
-            config.spaces!.namePattern.replace('{i}', String(i + 1))
+      spacesConfig && spacesConfig.count > 0
+        ? Array.from({ length: spacesConfig.count }, (_, i) =>
+            spacesConfig.namePattern.replace('{i}', String(i + 1))
           )
         : [config.space];
 
@@ -101,7 +109,9 @@ export async function runGenerator(): Promise<void> {
         const cleanupSpaces = dedupe([...plannedTargetSpaces, config.templateSpace]);
         logger.info('DRY RUN: cleanup mode (no deletions performed).');
         logger.info(
-          `Would delete cases and templates tagged "${config.cleanupTag}" across ${cleanupSpaces.length} space(s): ${cleanupSpaces.map((s) => s || 'default').join(', ')}`
+          `Would delete cases and templates tagged "${config.cleanupTag}" across ${
+            cleanupSpaces.length
+          } space(s): ${cleanupSpaces.map((s) => s || 'default').join(', ')}`
         );
         return;
       }
@@ -130,20 +140,30 @@ export async function runGenerator(): Promise<void> {
         ? await createSpaces(ctx, config.spaces)
         : [config.space];
 
+    const templatesByOwner = new Map<string, CreatedTemplateRef[]>();
     if (config.templates.length > 0 && config.templateOwners.length > 0) {
       const tplSpace = config.templateSpace || 'default';
       logger.info(
-        `Creating ${config.templates.length} template(s) in space "${tplSpace}" for owners: ${config.templateOwners.join(', ')}`
+        `Creating ${
+          config.templates.length
+        } template(s) in space "${tplSpace}" for owners: ${config.templateOwners.join(', ')}`
       );
       for (const owner of config.templateOwners) {
-        await createTemplates({
+        const refs = await createTemplates({
           ctx,
           space: config.templateSpace,
           owner,
           templates: config.templates,
         });
+        if (refs.length > 0) templatesByOwner.set(owner, refs);
       }
-      logger.info('Template creation complete.');
+      const totalApplicable = Array.from(templatesByOwner.values()).reduce(
+        (sum, refs) => sum + refs.length,
+        0
+      );
+      logger.info(
+        `Template creation complete. ${totalApplicable} template(s) available to apply to generated cases.`
+      );
     }
 
     if (config.analyticsOwners && config.analyticsOwners.length > 0) {
@@ -171,7 +191,9 @@ export async function runGenerator(): Promise<void> {
 
       const cases = Array.from({ length: config.count }, (_, i) => {
         const owner = weightedOwnerPick(config.owners, config.ownerDistribution);
-        return buildCaseRequest(i + 1, owner, reqId);
+        const ownerTemplates = templatesByOwner.get(owner);
+        const template = ownerTemplates && ownerTemplates.length > 0 ? pick(ownerTemplates) : null;
+        return buildCaseRequest(i + 1, owner, reqId, template);
       });
 
       let alertsByOwner = new Map<string, AlertInfo[]>();
@@ -240,9 +262,7 @@ async function runCleanup(
       tag: config.cleanupTag,
     });
   }
-  logger.info(
-    `Cleanup complete. Removed ${totalCases} case(s) and ${totalTemplates} template(s).`
-  );
+  logger.info(`Cleanup complete. Removed ${totalCases} case(s) and ${totalTemplates} template(s).`);
 }
 
 function logDryRun(config: GeneratorConfig, executionPlan: ExecutionPlan) {

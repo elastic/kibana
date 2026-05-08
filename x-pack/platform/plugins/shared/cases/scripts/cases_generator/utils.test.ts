@@ -328,9 +328,7 @@ describe('utils', () => {
       const err = Object.assign(new Error('bad request'), {
         response: { status: 400, data: { reason: 'invalid' } },
       });
-      expect(formatRequestError(err)).toBe(
-        'bad request | status=400 | body={"reason":"invalid"}'
-      );
+      expect(formatRequestError(err)).toBe('bad request | status=400 | body={"reason":"invalid"}');
     });
 
     it('prefers axiosError status over response status', () => {
