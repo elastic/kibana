@@ -105,7 +105,6 @@ Follow the Kibana contribution guidelines:
 The linked pull request must:
 - Use branch `backlog-groom/issue-${{ github.event.issue.number }}`
 - Include `Closes #${{ github.event.issue.number }}` in the PR body
-- Be labeled `backlog-groom`
 - Be opened as a **draft**
 - Include a summary of what was changed and why
 - Stay focused on the triggering issue only
