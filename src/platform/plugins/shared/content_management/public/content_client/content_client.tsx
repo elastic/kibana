@@ -148,6 +148,7 @@ export class ContentClient {
     if (!crudClient.mSearch) {
       throw new Error('mSearch is not supported by provided crud client');
     }
+
     return crudClient.mSearch({
       ...input,
       contentTypes: input.contentTypes.map((contentType) =>

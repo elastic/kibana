@@ -18,8 +18,8 @@ export type RegistryItem<TSavedObjectAttributes extends FinderAttributes = Finde
     container: CanAddNewPanel,
     savedObject: SavedObjectCommon<TSavedObjectAttributes>
   ) => void;
-  // savedObjectMetaData: SavedObjectMetaData & { customPath?: string };
   savedObjectMetaData: SavedObjectMetaData & {
+    /* If the saved object is not in content management, provide a getter for it */
     getSavedObjects?: () => Promise<SavedObjectCommon<FinderAttributes>[]>;
   };
 };
