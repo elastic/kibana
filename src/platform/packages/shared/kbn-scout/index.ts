@@ -50,6 +50,9 @@ export type {
 // Fixture types
 export type {
   ApiServicesFixture,
+  ApiClientFixture,
+  ApiClientOptions,
+  ApiClientResponse,
   BrowserAuthFixture,
   RequestAuthFixture,
   SamlAuth,

@@ -43,9 +43,6 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
   options: CreateTestConfigOptions<T>
 ) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
-    // if config is executed on CI or locally
-    const isRunOnCI = process.env.CI;
-
     let kbnServerArgs: string[] = [];
 
     if (options.kbnServerArgs) {
@@ -121,8 +118,6 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
         ...xPackAPITestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-          // if the config is run locally, explicitly enable mock-idp-plugin for UI role selector
-          ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=true']),
           // This ensures that we register the Security SAML API endpoints.
           // In the real world the SAML config is injected by control plane.
           `--plugin-path=${samlIdPPlugin}`,

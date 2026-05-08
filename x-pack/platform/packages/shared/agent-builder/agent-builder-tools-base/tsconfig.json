@@ -23,6 +23,7 @@
     "@kbn/utility-types",
     "@kbn/workflows",
     "@kbn/workflows-management-plugin",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/palettes"
   ]
 }
