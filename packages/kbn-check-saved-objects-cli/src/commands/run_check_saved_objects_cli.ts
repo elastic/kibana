@@ -10,13 +10,9 @@
 import { writeFileSync } from 'fs';
 import { Listr, PRESET_TIMER } from 'listr2';
 import { run } from '@kbn/dev-cli-runner';
-<<<<<<< so-automated-feedback-prs
-import { setupKibana, startElasticsearch, stopElasticsearch, stopKibana } from '../util';
+import { getKibanaServer, startElasticsearch, stopElasticsearch } from '../util';
 import { FindingsCollector, type SavedObjectsCheckReport } from '../findings';
 import { getNewTypes, getUpdatedTypes } from '../snapshots';
-=======
-import { getKibanaServer, startElasticsearch, stopElasticsearch } from '../util';
->>>>>>> main
 import type { MigrationAlgorithm, TaskContext } from './types';
 import { automatedRollbackTests, getSnapshots, validateSOChanges, validateTestFlow } from './tasks';
 
