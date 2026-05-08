@@ -8,6 +8,7 @@
 import sinon from 'sinon';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AuthTypeRegistry, registerAuthTypes } from '../auth_types';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { buildUserAgent, getAxiosInstanceWithAuth } from './get_axios_instance';
 import { actionsConfigMock } from '../actions_config.mock';
 import { getCustomAgents } from './get_custom_agents';
@@ -422,13 +423,13 @@ describe('getAxiosInstance', () => {
 
 describe('buildUserAgent', () => {
   test('includes axios version and deployment ID for ESS', () => {
-    const ua = buildUserAgent({ deploymentId: 'abc123', serverless: {} });
+    const ua = buildUserAgent({ deploymentId: 'abc123', serverless: {} } as CloudSetup);
     expect(ua).toContain('axios/');
     expect(ua).toContain('elastic (deployment:abc123)');
   });
 
   test('includes axios version and project ID for serverless', () => {
-    const ua = buildUserAgent({ serverless: { projectId: 'my-project' } });
+    const ua = buildUserAgent({ serverless: { projectId: 'my-project' } } as CloudSetup);
     expect(ua).toContain('axios/');
     expect(ua).toContain('elastic (project:my-project)');
   });
@@ -437,7 +438,7 @@ describe('buildUserAgent', () => {
     const ua = buildUserAgent({
       deploymentId: 'abc123',
       serverless: { projectId: 'my-project' },
-    });
+    } as CloudSetup);
     expect(ua).toContain('elastic (project:my-project)');
     expect(ua).not.toContain('deployment');
   });
@@ -448,7 +449,7 @@ describe('buildUserAgent', () => {
   });
 
   test('returns only axios version when cloud context has no identifiers', () => {
-    const ua = buildUserAgent({ serverless: {} });
+    const ua = buildUserAgent({ serverless: {} } as CloudSetup);
     expect(ua).toMatch(/^axios\/\d+\.\d+\.\d+$/);
   });
 });
