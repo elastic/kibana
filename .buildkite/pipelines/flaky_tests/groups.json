@@ -93,6 +93,10 @@
       "name": "Security Solution Defend Workflows - Cypress"
     },
     {
+      "key": "cypress/defend_workflows_automated_response_actions",
+      "name": "Security Solution Defend Workflows - Automated Response Actions (Cypress)"
+    },
+    {
       "key": "cypress/defend_workflows_serverless",
       "name": "[Serverless] Security Solution Defend Workflows - Cypress"
     },
