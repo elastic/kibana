@@ -24,6 +24,7 @@ import { serviceMapRouteDefinitions } from './service_map';
 import { errorsRouteDefinitions } from './errors';
 import { infrastructureRouteDefinitions } from './infrastructure';
 import { environmentsRouteDefinitions } from './environments';
+import { eventMetadataRouteDefinitions } from './event_metadata';
 import type { BuildGroupedRepository } from './types';
 
 export const routeDefinitions = {
@@ -45,6 +46,7 @@ export const routeDefinitions = {
   errors: errorsRouteDefinitions,
   infrastructure: infrastructureRouteDefinitions,
   environments: environmentsRouteDefinitions,
+  eventMetadata: eventMetadataRouteDefinitions,
 };
 
 export type SharedAPMRouteRepository = BuildGroupedRepository<typeof routeDefinitions>;
