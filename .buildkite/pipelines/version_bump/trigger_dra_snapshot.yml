@@ -5,7 +5,7 @@ steps:
 
   - name: Trigger DRA Snapshot Build
     key: trigger-dra-snapshot
-    if: build.env("DRY_RUN") == "false"
+    if: build.env("DRY_RUN") != "true"
     trigger: kibana-artifacts-snapshot
     async: false
     build:

@@ -25,7 +25,7 @@ steps:
     label: Build ES Snapshot
     trigger: kibana-elasticsearch-snapshot-build
     async: false
-    if: build.env("DRY_RUN") == "false"
+    if: build.env("DRY_RUN") != "true"
     build:
       branch: $BRANCH
       env:
@@ -33,7 +33,7 @@ steps:
 
   - key: promote-es-snapshot
     label: 'Upload promote step'
-    if: build.env("DRY_RUN") == "false"
+    if: build.env("DRY_RUN") != "true"
     depends_on: build-es-snapshot
     agents:
       image: family/kibana-ubuntu-2404
