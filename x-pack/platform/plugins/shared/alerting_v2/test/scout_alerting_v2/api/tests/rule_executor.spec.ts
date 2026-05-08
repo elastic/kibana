@@ -15,11 +15,24 @@
 /* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
 import { setTimeout as wait } from 'timers/promises';
+import { keyBy } from 'lodash';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
+import type { AlertEvent } from '../../../../server/resources/datastreams/alert_events';
 import { apiTest, buildCreateRuleData, testData } from '../fixtures';
 
 const { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } = testData;
+
+/**
+ * Index a list of alert events by their `data['host.name']` value.
+ *
+ * Several tests breach multiple groups in a single executor batch and need to
+ * assert per-group output. Because the events share a `@timestamp`, their
+ * order in `.rule-events` is not deterministic, so we look them up by host
+ * name instead of asserting positional array order.
+ */
+const groupEventsByHost = (events: AlertEvent[]): Record<string, AlertEvent> =>
+  keyBy(events, (event) => event.data['host.name'] as string);
 
 /**
  * Isolated cases for the alerting_v2 rule executor's persisted output.
@@ -141,14 +154,15 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
       expect(breachEvents).toHaveLength(2);
 
-      expect(breachEvents).toMatchObject([
-        {
-          data: { 'host.name': 'host-data-1', count: 1 },
-        },
-        {
-          data: { 'host.name': 'host-data-2', count: 1 },
-        },
-      ]);
+      const eventsByHost = groupEventsByHost(breachEvents);
+      expect(eventsByHost['host-data-1'].data).toMatchObject({
+        'host.name': 'host-data-1',
+        count: 1,
+      });
+      expect(eventsByHost['host-data-2'].data).toMatchObject({
+        'host.name': 'host-data-2',
+        count: 1,
+      });
     }
   );
 
@@ -320,14 +334,15 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
     expect(breachEvents[0].group_hash).not.toBe(breachEvents[1].group_hash);
 
-    expect(breachEvents).toMatchObject([
-      {
-        data: { 'host.name': 'host-multi-1', count: 2 },
-      },
-      {
-        data: { 'host.name': 'host-multi-2', count: 2 },
-      },
-    ]);
+    const eventsByHost = groupEventsByHost(breachEvents);
+    expect(eventsByHost['host-multi-1'].data).toMatchObject({
+      'host.name': 'host-multi-1',
+      count: 2,
+    });
+    expect(eventsByHost['host-multi-2'].data).toMatchObject({
+      'host.name': 'host-multi-2',
+      count: 2,
+    });
   });
 
   apiTest(
@@ -434,21 +449,13 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       expect(breachEvents).toHaveLength(2);
       expect(breachEvents[0].group_hash).not.toBe(breachEvents[1].group_hash);
 
-      const dataByHost = breachEvents.reduce<Record<string, Record<string, unknown>>>(
-        (acc, event) => {
-          acc[event.data['host.name'] as string] = event.data;
-          return acc;
-        },
-        {}
-      );
-
-      expect(dataByHost['host-grouping-fallback-a']).toMatchObject({
+      const eventsByHost = groupEventsByHost(breachEvents);
+      expect(eventsByHost['host-grouping-fallback-a'].data).toMatchObject({
         'host.name': 'host-grouping-fallback-a',
         severity: 'high',
         value: 1,
       });
-
-      expect(dataByHost['host-grouping-fallback-b']).toMatchObject({
+      expect(eventsByHost['host-grouping-fallback-b'].data).toMatchObject({
         'host.name': 'host-grouping-fallback-b',
         severity: 'high',
         value: 2,
