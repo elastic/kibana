@@ -17,6 +17,8 @@ describe('buildRelatedBaseQuery', () => {
     const queryString = buildRelatedBaseQuery('rule-a', 'episode-b').print('basic');
 
     expect(queryString).toContain(ALERT_EVENTS_DATA_STREAM);
+    expect(queryString).toContain('METADATA');
+    expect(queryString).toContain('_source');
     expect(queryString).toContain('type == "alert"');
     expect(queryString).toContain('rule.id');
     expect(queryString).toContain('rule-a');

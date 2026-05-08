@@ -49,9 +49,11 @@ test.describe(
         await pageObjects.dashboard.openNewDashboard({ timeout: EXTENDED_TIMEOUT });
       });
 
-      await test.step('set time range to last 1 hour to ensure test data is visible', async () => {
-        await pageObjects.datePicker.setCommonlyUsedTime('Last_1_hour');
-        await expect(page.getByTestId('dateRangePickerControlButton')).toContainText('Last 1 hour');
+      await test.step('set time range to last 24 hours so synth data stays in range vs globalSetup', async () => {
+        await pageObjects.datePicker.setCommonlyUsedTime('Last_24_hours');
+        await expect(page.getByTestId('dateRangePickerControlButton')).toContainText(
+          'Last 24 hours'
+        );
         await page.getByTestId('dateRangePickerControlButton').blur();
       });
 
@@ -87,7 +89,10 @@ test.describe(
           page,
           'apmServiceMapEditorServiceNameComboBox'
         );
-        await serviceNameComboBox.selectSingleOption(SERVICE_MAP_TEST_SERVICE, { useFill: true });
+        await serviceNameComboBox.selectSingleOption(SERVICE_MAP_TEST_SERVICE, {
+          useFill: true,
+          optionVisibilityTimeoutMs: EXTENDED_TIMEOUT,
+        });
 
         // Select environment from dropdown (has a default value so manually type and select)
         const environmentInput = page.testSubj
@@ -98,7 +103,7 @@ test.describe(
         const environmentOption = page.getByRole('option', {
           name: SERVICE_MAP_TEST_ENVIRONMENT_STAGING,
         });
-        await environmentOption.waitFor({ state: 'visible', timeout: 10000 });
+        await environmentOption.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
         await environmentOption.click();
 
         // Add KQL filter matching the staging transaction
@@ -116,7 +121,7 @@ test.describe(
           page.testSubj.locator(
             `serviceMapNodeContextHighlightFrame > serviceMapNode-service-${SERVICE_MAP_TEST_SERVICE}`
           )
-        ).toBeVisible({ timeout: 10000 });
+        ).toBeVisible({ timeout: EXTENDED_TIMEOUT });
       });
 
       await test.step('verify embeddable fills the panel horizontally', async () => {
@@ -137,7 +142,7 @@ test.describe(
         const serviceNode = page.testSubj.locator(
           `serviceMapNode-service-${SERVICE_MAP_TEST_SERVICE}`
         );
-        await expect(serviceNode).toBeVisible({ timeout: 10000 });
+        await expect(serviceNode).toBeVisible({ timeout: EXTENDED_TIMEOUT });
         await serviceNode.click();
 
         const popover = page.testSubj.locator('serviceMapPopover');

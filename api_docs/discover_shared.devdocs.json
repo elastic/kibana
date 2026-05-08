@@ -14,7 +14,7 @@
           "\nService types"
         ],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 281,
+        "lineNumber": 299,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -45,7 +45,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 285,
+            "lineNumber": 303,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -61,7 +61,7 @@
         "label": "DiscoverFeaturesServiceStart",
         "description": [],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 288,
+        "lineNumber": 306,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -92,7 +92,7 @@
               ">"
             ],
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-            "lineNumber": 289,
+            "lineNumber": 307,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -825,7 +825,7 @@
           "SecuritySolutionFeature"
         ],
         "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
-        "lineNumber": 268,
+        "lineNumber": 286,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

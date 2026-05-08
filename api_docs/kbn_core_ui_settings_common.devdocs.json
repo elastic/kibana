@@ -937,7 +937,7 @@
         "label": "UiSettingsSolutions",
         "description": [],
         "signature": [
-          "(\"security\" | \"es\" | \"workplaceai\" | \"oblt\" | \"classic\")[]"
+          "(\"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\" | \"classic\")[]"
         ],
         "path": "src/core/packages/ui-settings/common/src/ui_settings.ts",
         "lineNumber": 67,

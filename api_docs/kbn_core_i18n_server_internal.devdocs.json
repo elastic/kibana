@@ -18,7 +18,7 @@
         "label": "I18nService",
         "description": [],
         "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
-        "lineNumber": 43,
+        "lineNumber": 47,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -34,7 +34,7 @@
               "any"
             ],
             "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
-            "lineNumber": 47,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -50,7 +50,7 @@
                   "CoreContext"
                 ],
                 "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
-                "lineNumber": 47,
+                "lineNumber": 51,
                 "columnNumber": 15,
                 "deprecated": false,
                 "docsReferencedTypeName": "CoreContext",
@@ -75,7 +75,7 @@
               ">"
             ],
             "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
-            "lineNumber": 52,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -91,7 +91,7 @@
                   "PrebootDeps"
                 ],
                 "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
-                "lineNumber": 52,
+                "lineNumber": 56,
                 "columnNumber": 24,
                 "deprecated": false,
                 "docsReferencedTypeName": "PrebootDeps",
@@ -116,7 +116,7 @@
               ">"
             ],
             "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
-            "lineNumber": 72,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -132,7 +132,7 @@
                   "SetupDeps"
                 ],
                 "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
-                "lineNumber": 72,
+                "lineNumber": 77,
                 "columnNumber": 22,
                 "deprecated": false,
                 "docsReferencedTypeName": "SetupDeps",
@@ -158,7 +158,7 @@
           "(pluginPaths: string[]) => Promise<string[]>"
         ],
         "path": "src/core/packages/i18n/server-internal/src/get_kibana_translation_files.ts",
-        "lineNumber": 16,
+        "lineNumber": 18,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -174,7 +174,7 @@
               "string[]"
             ],
             "path": "src/core/packages/i18n/server-internal/src/get_kibana_translation_files.ts",
-            "lineNumber": 16,
+            "lineNumber": 18,
             "columnNumber": 51,
             "deprecated": false,
             "trackAdoption": false,
@@ -195,7 +195,7 @@
           "(locale: string, pluginPaths: string[]) => Promise<string[]>"
         ],
         "path": "src/core/packages/i18n/server-internal/src/get_kibana_translation_files.ts",
-        "lineNumber": 41,
+        "lineNumber": 43,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -211,7 +211,7 @@
               "string"
             ],
             "path": "src/core/packages/i18n/server-internal/src/get_kibana_translation_files.ts",
-            "lineNumber": 42,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -228,7 +228,7 @@
               "string[]"
             ],
             "path": "src/core/packages/i18n/server-internal/src/get_kibana_translation_files.ts",
-            "lineNumber": 43,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -248,7 +248,7 @@
         "label": "InternalI18nServicePreboot",
         "description": [],
         "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
-        "lineNumber": 37,
+        "lineNumber": 41,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -264,7 +264,7 @@
               "() => string"
             ],
             "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
-            "lineNumber": 38,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -282,7 +282,7 @@
               "() => Record<string, string>"
             ],
             "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
-            "lineNumber": 39,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -308,7 +308,7 @@
               "[]"
             ],
             "path": "src/core/packages/i18n/server-internal/src/i18n_service.ts",
-            "lineNumber": 40,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

@@ -99,6 +99,11 @@ const fitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
   duration: 200,
 };
 
+const nonInteractiveFitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
+  ...fitViewOptions,
+  maxZoom: 0.85,
+};
+
 /**
  * Graph component renders a graph visualization using ReactFlow.
  * It takes nodes and edges as input and provides interactive controls
@@ -255,13 +260,17 @@ export const Graph = memo<GraphProps>(
 
     const onInitCallback = useCallback(
       (xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) => {
-        xyflow.fitView();
+        if (interactive) {
+          xyflow.fitView();
+        } else {
+          xyflow.fitView(nonInteractiveFitViewOptions);
+        }
         fitViewRef.current = xyflow.fitView;
 
         // When the graph is not initialized as interactive, we need to fit the view on resize
         if (!interactive) {
           const resizeObserver = new ResizeObserver(() => {
-            xyflow.fitView();
+            xyflow.fitView(nonInteractiveFitViewOptions);
           });
           resizeObserver.observe(document.querySelector('.react-flow') as Element);
           return () => resizeObserver.disconnect();
@@ -277,6 +286,7 @@ export const Graph = memo<GraphProps>(
           key={reactFlowKey}
           data-test-subj={GRAPH_ID}
           fitView={true}
+          fitViewOptions={interactive ? undefined : nonInteractiveFitViewOptions}
           onInit={onInitCallback}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
