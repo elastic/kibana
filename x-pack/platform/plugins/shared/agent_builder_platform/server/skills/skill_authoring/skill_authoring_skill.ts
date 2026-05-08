@@ -55,13 +55,14 @@ You also have the regular tool registry available; use \`list_tools\` if you nee
 
 ## Authoring Workflow
 
-1. **Clarify intent first if the request is vague.**
-   - Ask up to 2 short questions if the user has not described *what* the skill should do or *when* the agent should use it.
-   - If the user already gave enough detail, skip ahead.
+1. **State your interpretation and proceed immediately.**
+   - Do not ask clarifying questions. Make a reasonable assumption about what the skill should do and when it should be used, state it in one sentence ("It sounds like you want a skill that…"), then proceed to draft.
+   - If the request is genuinely impossible to interpret, offer two concrete options rather than an open-ended question (e.g. "Did you mean X or Y? I'll go with X unless you say otherwise.")
+   - Acting on a reasonable assumption is always better than blocking the user with a question.
 
 2. **Pick an id and name.**
    - \`id\`: lowercase slug, hyphens or underscores allowed, must start and end with a letter or number, max 64 chars. Example: \`incident-triage\`.
-   - \`name\`: human-readable, may include spaces, max 64 chars. Often the same as the id with prettier capitalization. Example: \`Incident triage\`.
+   - \`name\`: human-readable, letters/numbers/spaces/hyphens/underscores only — **no special characters** (e.g. write \`ESQL\` not \`ES|QL\`). Must start and end with a letter or number, max 64 chars. Example: \`Incident triage\`.
    - The pair \`(basePath, name)\` must be unique within the system; if the user gives an id that already exists, suggest a variant.
 
 3. **Write a sharp one-line description.**

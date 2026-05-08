@@ -61,6 +61,28 @@ const previewContent = (content: string): { preview: string; truncated: boolean 
   };
 };
 
+/** Badge label and color for the created vs. draft states. */
+const getDraftBadge = (
+  isCreated: boolean
+): { label: string; color: 'success' | 'primary' } => {
+  if (isCreated) {
+    return {
+      label: i18n.translate(
+        'xpack.agentBuilderPlatform.attachments.skillDraft.createdBadge',
+        { defaultMessage: 'Created' }
+      ),
+      color: 'success',
+    };
+  }
+  return {
+    label: i18n.translate(
+      'xpack.agentBuilderPlatform.attachments.skillDraft.draftBadge',
+      { defaultMessage: 'Draft' }
+    ),
+    color: 'primary',
+  };
+};
+
 interface SkillDraftCardProps extends AttachmentRenderProps<SkillDraftAttachment> {
   isCreated: boolean;
 }
@@ -69,6 +91,7 @@ const SkillDraftCard: React.FC<SkillDraftCardProps> = ({ attachment, isCreated }
   const { euiTheme } = useEuiTheme();
   const data = attachment.data;
   const { preview, truncated } = previewContent(data.content);
+  const badge = getDraftBadge(isCreated);
 
   return (
     <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
@@ -89,17 +112,7 @@ const SkillDraftCard: React.FC<SkillDraftCardProps> = ({ attachment, isCreated }
                   <EuiBadge color="hollow">{data.id}</EuiBadge>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color={isCreated ? 'success' : 'primary'}>
-                    {isCreated
-                      ? i18n.translate(
-                          'xpack.agentBuilderPlatform.attachments.skillDraft.createdBadge',
-                          { defaultMessage: 'Created' }
-                        )
-                      : i18n.translate(
-                          'xpack.agentBuilderPlatform.attachments.skillDraft.draftBadge',
-                          { defaultMessage: 'Draft' }
-                        )}
-                  </EuiBadge>
+                  <EuiBadge color={badge.color}>{badge.label}</EuiBadge>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -194,6 +207,23 @@ const SkillDraftCard: React.FC<SkillDraftCardProps> = ({ attachment, isCreated }
           </EuiText>
         </>
       )}
+
+      {isCreated && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued">
+            <p>
+              {i18n.translate(
+                'xpack.agentBuilderPlatform.attachments.skillDraft.mentionNudge',
+                {
+                  defaultMessage: 'Use /{skillId} to reference this skill in future conversations.',
+                  values: { skillId: data.id },
+                }
+              )}
+            </p>
+          </EuiText>
+        </>
+      )}
     </EuiPanel>
   );
 };
@@ -229,8 +259,9 @@ interface CreateSkillDraftDeps {
  * 1. Disables when the user lacks the `manageSkills` capability.
  * 2. POSTs the captured payload to `/api/agent_builder/skills`.
  * 3. On success, calls the framework-provided `updateOrigin(skillId)` so the
- *    same attachment now references the persisted skill (the card flips to
- *    a "Created" badge and the button disables).
+ *    same attachment now references the persisted skill. The card badge flips
+ *    to "Created", the button becomes a navigable "View skill" link, and a
+ *    /-mention nudge appears below the card.
  * 4. On failure, surfaces the agent_builder error message via core toasts.
  */
 export const createSkillDraftAttachmentDefinition = ({
@@ -251,25 +282,38 @@ export const createSkillDraftAttachmentDefinition = ({
     getActionButtons: ({ attachment, updateOrigin }) => {
       const isCreated = Boolean(attachment.origin);
 
+      if (isCreated) {
+        return [
+          {
+            label: i18n.translate(
+              'xpack.agentBuilderPlatform.attachments.skillDraft.viewSkillButtonLabel',
+              { defaultMessage: 'View skill' }
+            ),
+            icon: 'popout',
+            type: ActionButtonType.PRIMARY,
+            handler: () => {
+              application.navigateToApp('agentBuilder', {
+                path: `/manage/skills/${attachment.origin}`,
+              });
+            },
+          },
+        ];
+      }
+
       return [
         {
-          label: isCreated
-            ? i18n.translate(
-                'xpack.agentBuilderPlatform.attachments.skillDraft.createdButtonLabel',
-                { defaultMessage: 'Created' }
-              )
-            : i18n.translate('xpack.agentBuilderPlatform.attachments.skillDraft.createButtonLabel', {
-                defaultMessage: 'Create skill',
-              }),
-          icon: isCreated ? 'check' : 'save',
+          label: i18n.translate(
+            'xpack.agentBuilderPlatform.attachments.skillDraft.createButtonLabel',
+            { defaultMessage: 'Create skill' }
+          ),
+          icon: 'save',
           type: ActionButtonType.PRIMARY,
-          disabled: isCreated || !canCreate,
+          disabled: !canCreate,
           disabledReason: !canCreate
             ? i18n.translate(
                 'xpack.agentBuilderPlatform.attachments.skillDraft.createDisabledReason',
                 {
-                  defaultMessage:
-                    'You do not have permission to manage skills in this space.',
+                  defaultMessage: 'You do not have permission to manage skills in this space.',
                 }
               )
             : undefined,
@@ -282,15 +326,6 @@ export const createSkillDraftAttachmentDefinition = ({
                 }
               );
               await updateOrigin(response.id);
-              notifications.toasts.addSuccess({
-                title: i18n.translate(
-                  'xpack.agentBuilderPlatform.attachments.skillDraft.createSuccessToast',
-                  {
-                    defaultMessage: 'Skill "{skillId}" created.',
-                    values: { skillId: response.id },
-                  }
-                ),
-              });
             } catch (error) {
               notifications.toasts.addError(error as Error, {
                 title: i18n.translate(

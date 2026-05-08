@@ -26,6 +26,13 @@ export const SKILL_DRAFT_ATTACHMENT_TYPE = 'skill_draft' as const;
  * Mirrors `PersistedSkillCreateRequest` exactly so the same draft can be
  * shipped straight to the create endpoint without remapping. Keep this in
  * sync with `skillCreateRequestSchema` from `@kbn/agent-builder-common`.
+ *
+ * `is_latest` is set to `true` by `propose_skill` and maintained by
+ * `patch_skill_draft`. It drives the "Latest" / "Outdated" badge on the card,
+ * signalling to the user which draft card in the conversation thread is
+ * current. When the architecture shifts to creating a new attachment per patch
+ * (rather than mutating in-place), the previous attachment's `is_latest` will
+ * be set to `false` server-side, making the Outdated state fully automatic.
  */
 export interface SkillDraftAttachmentData {
   id: string;
@@ -34,6 +41,8 @@ export interface SkillDraftAttachmentData {
   content: string;
   tool_ids: string[];
   referenced_content?: SkillReferencedContent[];
+  /** Whether this is the most recent draft in the conversation thread. */
+  is_latest?: boolean;
 }
 
 export type SkillDraftAttachment = Attachment<
