@@ -204,7 +204,7 @@ export function buildCellActions(
 
   const showReverseCategorize =
     field.esTypes?.includes('text') === true &&
-    uiActions?.hasAction('ACTION_REVERSE_CATEGORIZE_FIELD');
+    uiActions?.hasAction('ACTION_REVERSE_CATEGORIZE_FIELD') === true;
 
   return [
     ...(shouldShowFilters
