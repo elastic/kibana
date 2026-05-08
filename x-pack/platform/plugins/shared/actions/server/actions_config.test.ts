@@ -499,9 +499,7 @@ describe('validateEmailAddresses()', () => {
   test('invalid format rejected even without domain allowlist', () => {
     const acu = getActionsConfigurationUtilities(defaultActionsConfig);
     const message = acu.validateEmailAddresses(testEmailsInvalid);
-    expect(message).toMatchInlineSnapshot(
-      `"not valid emails: invalid-email-address, (garbage)"`
-    );
+    expect(message).toMatchInlineSnapshot(`"not valid emails: invalid-email-address, (garbage)"`);
   });
 
   test('only filtered domains allowed if config set', () => {

@@ -489,9 +489,7 @@ describe('validate_email_address', () => {
 
     test('accepts address with whitespace around @ (parser normalizes)', () => {
       const result = validateEmailAddresses(null, ['something     @  example.com']);
-      expect(result).toEqual([
-        { address: 'something     @  example.com', valid: true },
-      ]);
+      expect(result).toEqual([{ address: 'something     @  example.com', valid: true }]);
     });
 
     test('accepts RFC 5322 quoted local part', () => {
@@ -505,9 +503,7 @@ describe('validate_email_address', () => {
     });
 
     test('rejects group address with invalid local part in a member', () => {
-      const result = validateEmailAddresses(null, [
-        'Team: -alice@example.com, bob@example.com;',
-      ]);
+      const result = validateEmailAddresses(null, ['Team: -alice@example.com, bob@example.com;']);
       expect(result).toEqual([
         {
           address: 'Team: -alice@example.com, bob@example.com;',
@@ -518,9 +514,7 @@ describe('validate_email_address', () => {
     });
 
     test('rejects group address with invalid domain in a member', () => {
-      const result = validateEmailAddresses(null, [
-        'Team: alice@-example.com, bob@example.com;',
-      ]);
+      const result = validateEmailAddresses(null, ['Team: alice@-example.com, bob@example.com;']);
       expect(result).toEqual([
         {
           address: 'Team: alice@-example.com, bob@example.com;',
@@ -531,9 +525,7 @@ describe('validate_email_address', () => {
     });
 
     test('accepts group address when all members are valid', () => {
-      const result = validateEmailAddresses(null, [
-        'Team: alice@example.com, bob@example.com;',
-      ]);
+      const result = validateEmailAddresses(null, ['Team: alice@example.com, bob@example.com;']);
       expect(result).toEqual([
         { address: 'Team: alice@example.com, bob@example.com;', valid: true },
       ]);
