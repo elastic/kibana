@@ -26,7 +26,12 @@ const getRawToolCallSteps = (output: unknown): ToolCallStep[] => {
   const steps =
     (
       output as {
-        steps?: Array<{ type?: string; tool_id?: string; params?: Record<string, unknown>; results?: unknown[] }>;
+        steps?: Array<{
+          type?: string;
+          tool_id?: string;
+          params?: Record<string, unknown>;
+          results?: unknown[];
+        }>;
       }
     )?.steps ?? [];
 
