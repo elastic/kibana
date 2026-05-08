@@ -11,6 +11,7 @@ import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type { Query, AggregateQuery, Filter, TimeRange, ProjectRouting } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -20,6 +21,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
+import { EsqlSource } from '@kbn/data-source';
 import type { RecordsFetchResponse } from '../../types';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
@@ -76,7 +78,7 @@ export function fetchEsql({
     inspectorConfig,
   });
   return textBasedQueryStateToAstWithValidation(props)
-    .then((ast) => {
+    .then((ast): Promise<RecordsFetchResponse> | RecordsFetchResponse => {
       if (ast) {
         const contract = expressions.execute(ast, null, {
           inspectorAdapters,
@@ -115,25 +117,36 @@ export function fetchEsql({
             });
           }
         });
-        return lastValueFrom(execution).then(() => {
+        return lastValueFrom(execution).then(async () => {
           if (error) {
             throw new Error(error);
-          } else {
-            const adapter = inspectorAdapters.requests;
-            const interceptedWarnings: SearchResponseWarning[] = [];
-            if (adapter) {
-              data.search.showWarnings(adapter, (warning) => {
-                interceptedWarnings.push(warning);
-                return true; // suppress the default behaviour
-              });
-            }
-            return {
-              records: finalData || [],
-              interceptedWarnings,
-              esqlQueryColumns,
-              esqlHeaderWarning,
-            };
           }
+          const adapter = inspectorAdapters.requests;
+          const interceptedWarnings: SearchResponseWarning[] = [];
+          if (adapter) {
+            data.search.showWarnings(adapter, (warning) => {
+              interceptedWarnings.push(warning);
+              return true; // suppress the default behaviour
+            });
+          }
+
+          const dataSource =
+            esqlQueryColumns && isOfAggregateQueryType(query)
+              ? await EsqlSource.create({
+                  query: query.esql,
+                  resultColumns: esqlQueryColumns,
+                  timeFieldName: dataView.timeFieldName,
+                  dataView,
+                })
+              : undefined;
+
+          return {
+            records: finalData || [],
+            interceptedWarnings,
+            esqlQueryColumns,
+            esqlHeaderWarning,
+            dataSource,
+          };
         });
       }
       return {

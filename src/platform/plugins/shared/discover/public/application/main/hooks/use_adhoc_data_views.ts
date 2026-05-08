@@ -7,18 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
 import { useFiltersValidation } from './use_filters_validation';
 import { useIsEsqlMode } from './use_is_esql_mode';
-import { useCurrentDataView } from '../state_management/redux';
+import { useCurrentDataView, useCurrentTabRuntimeState } from '../state_management/redux';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 
 export const useAdHocDataViews = () => {
   const dataView = useCurrentDataView();
   const isEsqlMode = useIsEsqlMode();
   const { filterManager, toastNotifications, trackUiMetric } = useDiscoverServices();
+  const dataStateContainer = useCurrentTabRuntimeState((tab) => tab.dataStateContainer$);
+
+  const dataSource = useMemo(
+    () => (dataView ? dataStateContainer?.dataSourceService.fromDataView(dataView) : undefined),
+    [dataView, dataStateContainer]
+  );
 
   useEffect(() => {
     if (dataView && !dataView.isPersisted()) {
@@ -29,5 +35,5 @@ export const useAdHocDataViews = () => {
   /**
    * Takes care of checking data view id references in filters
    */
-  useFiltersValidation({ dataView, filterManager, toastNotifications });
+  useFiltersValidation({ dataSource, filterManager, toastNotifications });
 };

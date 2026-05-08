@@ -26,6 +26,8 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataSource } from '@kbn/data-source';
+import { DataSourceService } from '@kbn/data-source';
 import {
   DEFAULT_COLUMNS_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
@@ -79,6 +81,8 @@ export interface DataDocumentsMsg extends DataMsg {
   esqlQueryColumns?: DatatableColumn[]; // columns from ES|QL request
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
+  /** Present only for ES|QL fetches. */
+  dataSource?: DataSource;
 }
 
 export interface DataTotalHitsMsg extends DataMsg {
@@ -150,6 +154,12 @@ export interface DiscoverDataStateContainer {
    * Clean up ES|QL state when saved search changes
    */
   cleanupEsql: () => void;
+  /**
+   * Polymorphic registry over `DataSource` instances. Cross-cutting consumers
+   * (filter resolution, etc.) use this to look up a source by id without
+   * branching on query kind.
+   */
+  dataSourceService: DataSourceService;
 }
 
 /**
@@ -175,6 +185,7 @@ export function getDataStateContainer({
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
+  const dataSourceService = new DataSourceService(services.dataViews);
   const fetchChart$ = new ReplaySubject<DiscoverLatestFetchDetails | null>(1);
   const disableNextFetchOnStateChange$ = new BehaviorSubject(false);
   let numberOfFetches = 0;
@@ -235,6 +246,8 @@ export function getDataStateContainer({
     dataSubjects,
     getCurrentTab,
     injectCurrentTab,
+    dataSourceService,
+    dataViews: services.dataViews,
   });
 
   // The main subscription to handle state changes
@@ -639,5 +652,6 @@ export function getDataStateContainer({
     cancel,
     getAbortController,
     cleanupEsql,
+    dataSourceService,
   };
 }

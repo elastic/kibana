@@ -33,8 +33,6 @@ import type {
 import {
   DataLoadingState,
   useColumns,
-  type DataTableColumnsMeta,
-  getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
   getRowHeight,
@@ -328,13 +326,7 @@ function DiscoverDocumentsComponent({
     [uiSettings]
   );
 
-  const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
-    () =>
-      documentState.esqlQueryColumns
-        ? getTextBasedColumnsMeta(documentState.esqlQueryColumns)
-        : undefined,
-    [documentState.esqlQueryColumns]
-  );
+  const currentDataSource = documentState.dataSource;
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
 
   const extensionActions = useMemo(
@@ -585,7 +577,7 @@ function DiscoverDocumentsComponent({
             ariaLabelledBy="documentsAriaLabel"
             cascadedDocumentsContext={cascadedDocumentsContext}
             columns={currentColumns}
-            columnsMeta={columnsMeta}
+            dataSource={currentDataSource}
             expandedDoc={expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER ? expandedDoc : undefined}
             dataView={dataView}
             loadingState={
@@ -650,7 +642,7 @@ function DiscoverDocumentsComponent({
           hits={renderDocumentViewMeta.displayedRows}
           // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
           columns={renderDocumentViewMeta.displayedColumns}
-          columnsMeta={columnsMeta}
+          dataSource={currentDataSource}
           savedSearchId={persistedDiscoverSession?.id!}
           query={query}
           initialTabId={initialDocViewerTabId}

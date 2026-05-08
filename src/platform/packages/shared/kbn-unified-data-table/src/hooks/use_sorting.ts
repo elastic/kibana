@@ -7,23 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getSortingCriteria, NonStringSortableFieldType } from '@kbn/sort-predicates';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import type { DataSource } from '@kbn/data-source';
 import { useMemo } from 'react';
 import type { EuiDataGridColumnSortingConfig, EuiDataGridProps } from '@elastic/eui';
 import type { SortOrder } from '../components/data_table';
-import type { DataTableColumnsMeta } from '../types';
 import { kibanaJSON } from '../constants';
 import { SOURCE_COLUMN } from '../utils/columns';
+import { getFieldFromDataSource } from '../utils/get_field_from_data_source';
+import { getCompatDataView } from '../utils/get_compat_data_view';
 
 export const useSorting = ({
   rows,
   visibleColumns,
-  columnsMeta,
+  dataSource,
   sort,
-  dataView,
   isPlainRecord,
   isSortEnabled,
   defaultColumns,
@@ -31,9 +31,8 @@ export const useSorting = ({
 }: {
   rows: DataTableRecord[] | undefined;
   visibleColumns: string[];
-  columnsMeta: DataTableColumnsMeta | undefined;
+  dataSource: DataSource | undefined;
   sort: SortOrder[];
-  dataView: DataView;
   isPlainRecord: boolean;
   isSortEnabled: boolean;
   defaultColumns: boolean;
@@ -49,14 +48,14 @@ export const useSorting = ({
     if (!isPlainRecord || !rows || !sortingColumns.length) {
       return;
     }
+    const dataView = getCompatDataView(dataSource);
+    if (!dataView) {
+      return;
+    }
 
     return sortingColumns.reduce<Array<(a: DataTableRecord, b: DataTableRecord) => number>>(
       (acc, { id, direction }) => {
-        const field = getDataViewFieldOrCreateFromColumnMeta({
-          dataView,
-          fieldName: id,
-          columnMeta: columnsMeta?.[id],
-        });
+        const field = getFieldFromDataSource(dataSource, id);
 
         if (!field) {
           return acc;
@@ -70,7 +69,7 @@ export const useSorting = ({
       },
       []
     );
-  }, [columnsMeta, dataView, isPlainRecord, rows, sortingColumns]);
+  }, [dataSource, isPlainRecord, rows, sortingColumns]);
 
   const sortedRows = useMemo(() => {
     if (!rows || !comparators) {

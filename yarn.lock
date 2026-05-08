@@ -6423,6 +6423,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-source@link:src/platform/packages/shared/kbn-data-source":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-stream-adapter@link:x-pack/solutions/security/packages/data-stream-adapter":
   version "0.0.0"
   uid ""
