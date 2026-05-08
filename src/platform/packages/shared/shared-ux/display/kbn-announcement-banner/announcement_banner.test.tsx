@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { useEuiTheme } from '@elastic/eui';
+import { fireEvent, renderHook, waitFor } from '@testing-library/react';
 import { renderWithEuiTheme } from '@kbn/test-jest-helpers';
 
 import { AnnouncementBanner } from './announcement_banner';
@@ -66,19 +67,27 @@ describe('AnnouncementBanner', () => {
 
   describe('color', () => {
     it('renders as color="highlighted" by default', () => {
+      const { result } = renderHook(() => useEuiTheme());
       const { getByTestId } = renderWithEuiTheme(<AnnouncementBanner {...requiredProps} />);
 
       expect(getByTestId('announcementBanner')).toHaveAttribute('data-color', 'highlighted');
-      expect(getByTestId('announcementBanner')).toHaveStyleRule('background-color', '#F6F9FC');
+      expect(getByTestId('announcementBanner')).toHaveStyleRule(
+        'background-color',
+        result.current.euiTheme.colors.backgroundBaseHighlighted
+      );
     });
 
     it('renders as color="plain"', () => {
+      const { result } = renderHook(() => useEuiTheme());
       const { getByTestId } = renderWithEuiTheme(
         <AnnouncementBanner {...requiredProps} color="plain" />
       );
 
       expect(getByTestId('announcementBanner')).toHaveAttribute('data-color', 'plain');
-      expect(getByTestId('announcementBanner')).toHaveStyleRule('background-color', '#FFFFFF');
+      expect(getByTestId('announcementBanner')).toHaveStyleRule(
+        'background-color',
+        result.current.euiTheme.colors.backgroundBasePlain
+      );
     });
   });
 
