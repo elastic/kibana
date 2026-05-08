@@ -194,6 +194,7 @@
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag/playwright.config.ts",
       "tags": ["security", "alerts-rag"],
       "ciLabels": ["evals:alerts-rag-regression"],
+      "schedule": "nightly",
       "weeklyEisModelGroups": [
         "eis/openai-gpt-4o",
         "eis/anthropic-claude-3-5-sonnet",

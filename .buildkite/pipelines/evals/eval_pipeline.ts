@@ -20,6 +20,7 @@ export interface EvalsSuiteMetadataEntry {
   configPath?: string;
   serverConfigSet?: string;
   weeklyEisModelGroups?: string[];
+  schedule?: 'nightly' | 'weekly';
 }
 
 function pathExistsInGitTree(repoRelativePath: string): boolean {
