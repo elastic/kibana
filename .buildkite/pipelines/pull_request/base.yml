@@ -1,3 +1,6 @@
+env:
+  KBN_ES_SNAPSHOT_USE_CACHED: 'true'
+
 steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
