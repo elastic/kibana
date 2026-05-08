@@ -30,10 +30,9 @@ describe('showDashboardSavedToast', () => {
     setCurrentAppId(DASHBOARD_APP_ID);
   });
 
-  it('omits the link when the user is already viewing the saved dashboard in the Dashboard app', async () => {
+  it('omits the link when in the Dashboard app', async () => {
     await showDashboardSavedToast({
       savedDashboardId: 'abc-123',
-      viewedDashboardId: 'abc-123',
       dashboardTitle: 'Dash Title',
     });
 
@@ -46,22 +45,11 @@ describe('showDashboardSavedToast', () => {
     );
   });
 
-  it('renders a link when saving as a different dashboard inside the Dashboard app', async () => {
-    await showDashboardSavedToast({
-      savedDashboardId: 'new-id',
-      viewedDashboardId: 'old-id',
-      dashboardTitle: 'Dash Title',
-    });
-
-    expect(getLastToastInput().text).toBeDefined();
-  });
-
-  it('renders a link when saving from a non-Dashboard app (e.g. chat sidebar)', async () => {
+  it('renders a link when the user is outside the Dashboard app', async () => {
     setCurrentAppId('agentBuilder');
 
     await showDashboardSavedToast({
       savedDashboardId: 'abc-123',
-      viewedDashboardId: 'abc-123',
       dashboardTitle: 'Dash Title',
     });
 
@@ -71,7 +59,6 @@ describe('showDashboardSavedToast', () => {
   it('interpolates the dashboard title into the toast title', async () => {
     await showDashboardSavedToast({
       savedDashboardId: 'abc',
-      viewedDashboardId: 'abc',
       dashboardTitle: 'My Dashboard',
     });
 
@@ -79,23 +66,28 @@ describe('showDashboardSavedToast', () => {
   });
 
   it('navigates to the saved dashboard when the link is clicked', async () => {
+    setCurrentAppId('agentBuilder');
+
     await showDashboardSavedToast({
       savedDashboardId: 'saved-id',
-      viewedDashboardId: 'old-id',
       dashboardTitle: 'Dash Title',
     });
 
     // `toMountPoint` exposes the original React node via `__reactMount__` outside of
     // production builds (see @kbn/react-kibana-mount/to_mount_point). This is the
     // same escape hatch used by Kibana's react_mount_serializer in @kbn/test, and
-    // lets us reach the EuiLink's onClick handler without rendering it. We rely on
-    // it here because Kibana's custom Jest resolver rewrites `@kbn/...` requests to
+    // lets us reach the rendered button without mounting it. We rely on it here
+    // because Kibana's custom Jest resolver rewrites `@kbn/...` requests to
     // absolute paths, which prevents `jest.mock('@kbn/react-kibana-mount', ...)`
     // from binding inside the dashboard plugin's test setup.
     const mount = getLastToastInput().text as MountPoint & {
-      __reactMount__: ReactElement<{ onClick: () => void }>;
+      __reactMount__: ReactElement;
     };
-    mount.__reactMount__.props.onClick();
+    // The rendered tree is <EuiFlexGroup><EuiFlexItem><EuiButton>...; the button
+    // sits two levels down. Walk into the children to reach its onClick.
+    const flexItem = (mount.__reactMount__.props as { children: ReactElement }).children;
+    const button = (flexItem.props as { children: ReactElement<{ onClick: () => void }> }).children;
+    button.props.onClick();
 
     expect(coreServices.application.navigateToApp).toHaveBeenCalledWith(DASHBOARD_APP_ID, {
       path: '#/view/saved-id',

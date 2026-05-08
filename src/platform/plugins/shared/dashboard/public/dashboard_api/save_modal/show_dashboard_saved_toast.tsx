@@ -9,43 +9,33 @@
 
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
-import { EuiLink } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { DASHBOARD_APP_ID } from '../../../common/page_bundle_constants';
 import { coreServices } from '../../services/kibana_services';
 import { createDashboardEditUrl } from '../../utils/urls';
-import { shouldShowOpenDashboardLink } from './should_show_open_dashboard_link';
 
 interface ShowDashboardSavedToastParams {
   /** The id returned by the save call, i.e. the dashboard that was just saved. */
   savedDashboardId: string;
-  /**
-   * The dashboard the user was viewing/editing when the save started. In the
-   * save flow this is `lastSavedId`; `undefined` when creating a new dashboard.
-   */
-  viewedDashboardId: string | undefined;
   /** The dashboard title to interpolate into the toast message. */
   dashboardTitle: string;
 }
 
 /**
- * Renders the dashboard save success toast and, when relevant, attaches a
- * "View dashboard" link that navigates to the saved dashboard. The link is
- * suppressed when the user is already viewing the saved dashboard inside
- * the Dashboard app, where opening it again would be a no-op.
+ * Renders the dashboard save success toast. When the user is outside the
+ * Dashboard app (for example the chat sidebar or a portable dashboard in a
+ * flyout), the toast also includes a "Go to dashboard" button that navigates
+ * to the saved dashboard. Inside the Dashboard app the save flow already
+ * places the user on the saved dashboard, so the button is omitted.
  */
 export const showDashboardSavedToast = async ({
   savedDashboardId,
-  viewedDashboardId,
   dashboardTitle,
 }: ShowDashboardSavedToastParams): Promise<void> => {
   const currentAppId = await firstValueFrom(coreServices.application.currentAppId$);
-  const showOpenLink = shouldShowOpenDashboardLink({
-    currentAppId,
-    viewedDashboardId,
-    savedDashboardId,
-  });
+  const showOpenLink = currentAppId !== DASHBOARD_APP_ID;
 
   coreServices.notifications.toasts.addSuccess({
     title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
@@ -54,18 +44,24 @@ export const showDashboardSavedToast = async ({
     }),
     text: showOpenLink
       ? toMountPoint(
-          <EuiLink
-            data-test-subj="dashboardSavedToastLink"
-            onClick={() =>
-              coreServices.application.navigateToApp(DASHBOARD_APP_ID, {
-                path: `#${createDashboardEditUrl(savedDashboardId)}`,
-              })
-            }
-          >
-            {i18n.translate('dashboard.savedToast.viewDashboardLink', {
-              defaultMessage: 'View dashboard',
-            })}
-          </EuiLink>,
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                color="primary"
+                data-test-subj="dashboardSavedToastLink"
+                onClick={() =>
+                  coreServices.application.navigateToApp(DASHBOARD_APP_ID, {
+                    path: `#${createDashboardEditUrl(savedDashboardId)}`,
+                  })
+                }
+              >
+                {i18n.translate('dashboard.savedToast.goToDashboardLink', {
+                  defaultMessage: 'Go to dashboard',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>,
           coreServices
         )
       : undefined,

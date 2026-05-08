@@ -47,7 +47,6 @@ describe('Save dashboard state', () => {
     expect(mockUpdate).toHaveBeenCalledWith('Boogaloo', dashboardState);
     expect(mockShowDashboardSavedToast).toHaveBeenCalledWith({
       savedDashboardId: 'Boogaloo',
-      viewedDashboardId: 'Boogaloo',
       dashboardTitle: 'BOO',
     });
   });
