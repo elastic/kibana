@@ -213,10 +213,31 @@ describe('useComparisonColumns', () => {
 
   it('should use result column display for plain records', () => {
     const { columns } = renderColumns({ isPlainRecord: true });
-    expect(columns[1].displayAsText).toBe(`Pinned result: 1`);
-    expect(columns[2].displayAsText).toBe(`Comparison result: 2`);
-    expect(columns[3].displayAsText).toBe(`Comparison result: 3`);
-    expect(columns[4].displayAsText).toBe(`Comparison result: 4`);
+    const plainRecordIds = docs.slice(0, selectedDocIds.length).map((doc) => doc.id);
+    expect(columns[1].displayAsText).toBe(`Pinned result: ${plainRecordIds[0]}`);
+    expect(columns[2].display).toBe(selectedDocIds[1]);
+    expect(columns[2].displayAsText).toBe(`Comparison result: ${plainRecordIds[1]}`);
+    expect(columns[3].displayAsText).toBe(`Comparison result: ${plainRecordIds[2]}`);
+    expect(columns[4].displayAsText).toBe(`Comparison result: ${plainRecordIds[3]}`);
+  });
+
+  it('should fall back to the plain record id when the raw id is missing', () => {
+    const getDocById = (id: string) => {
+      const doc = defaultGetDocById(id);
+      return doc
+        ? {
+            ...doc,
+            raw: {
+              ...doc.raw,
+              _id: undefined,
+            },
+          }
+        : doc;
+    };
+    const { columns } = renderColumns({ isPlainRecord: true, getDocById });
+    expect(columns[1].displayAsText).toBe(`Pinned result: ${docs[0].id}`);
+    expect(columns[2].display).toBe(docs[1].id);
+    expect(columns[2].displayAsText).toBe(`Comparison result: ${docs[1].id}`);
   });
 
   it('should skip columns for missing docs', () => {

@@ -96,13 +96,7 @@ export const useComparisonColumns = ({
         });
       }
 
-      const resultNumber = isPlainRecord ? Number(docId || 0) + 1 : undefined;
-      const columnTitle = isPlainRecord
-        ? i18n.translate('unifiedDataTable.comparisonColumnResultDisplay', {
-            defaultMessage: 'Result {resultNumber}',
-            values: { resultNumber },
-          })
-        : doc.raw._id;
+      const columnTitle = doc.raw._id ?? doc.id;
 
       const display =
         docIndex === 0 ? (
@@ -121,7 +115,7 @@ export const useComparisonColumns = ({
           ? isPlainRecord
             ? i18n.translate('unifiedDataTable.comparisonColumnResultPinnedTooltip', {
                 defaultMessage: 'Pinned result: {resultNumber}',
-                values: { resultNumber },
+                values: { resultNumber: doc.id },
               })
             : i18n.translate('unifiedDataTable.comparisonColumnPinnedTooltip', {
                 defaultMessage: 'Pinned document: {documentId}',
@@ -130,7 +124,7 @@ export const useComparisonColumns = ({
           : isPlainRecord
           ? i18n.translate('unifiedDataTable.comparisonColumnResultTooltip', {
               defaultMessage: 'Comparison result: {resultNumber}',
-              values: { resultNumber },
+              values: { resultNumber: doc.id },
             })
           : i18n.translate('unifiedDataTable.comparisonColumnTooltip', {
               defaultMessage: 'Comparison document: {documentId}',
