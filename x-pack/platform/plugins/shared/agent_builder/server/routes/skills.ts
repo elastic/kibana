@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import { skillCreateRequestSchema, skillUpdateRequestSchema } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
@@ -24,6 +23,13 @@ import { internalToPublicDefinition, internalToPublicSummary } from '../services
 import { AGENT_BUILDER_READ_SECURITY, SKILLS_WRITE_SECURITY } from './route_security';
 import { asError } from '../utils/as_error';
 import { SKILL_USED_BY_AGENTS_ERROR_CODE } from '../../common/http_api/skills';
+import {
+  listSkillsOas,
+  getSkillOas,
+  createSkillOas,
+  updateSkillOas,
+  deleteSkillOas,
+} from './oas_operations';
 
 const REFERENCED_CONTENT_SCHEMA = schema.arrayOf(
   schema.object({
@@ -86,7 +92,7 @@ export function registerSkillsRoutes({
           },
         },
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/skills_list.yaml'),
+          oasOperationObject: listSkillsOas,
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -128,7 +134,7 @@ export function registerSkillsRoutes({
           },
         },
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/skills_get_by_id.yaml'),
+          oasOperationObject: getSkillOas,
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -200,7 +206,7 @@ export function registerSkillsRoutes({
           },
         },
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/skills_create.yaml'),
+          oasOperationObject: createSkillOas,
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -277,7 +283,7 @@ export function registerSkillsRoutes({
           },
         },
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/skills_update.yaml'),
+          oasOperationObject: updateSkillOas,
         },
       },
       wrapHandler(async (ctx, request, response) => {
@@ -336,7 +342,7 @@ export function registerSkillsRoutes({
           },
         },
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/skills_delete.yaml'),
+          oasOperationObject: deleteSkillOas,
         },
       },
       wrapHandler(async (ctx, request, response) => {
