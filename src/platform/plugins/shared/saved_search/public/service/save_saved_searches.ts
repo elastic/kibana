@@ -14,12 +14,9 @@ import type { SavedSearch } from './types';
 import { SAVED_SEARCH_TYPE } from './constants';
 import { toSavedSearchAttributes } from '../../common/service/saved_searches_utils';
 import type { SavedSearchCrudTypes } from '../../common/content_management';
-import { checkForDuplicateTitle } from './check_for_duplicate_title';
 import type { SavedSearchAttributes } from '../../common';
 
 export interface SaveSavedSearchOptions {
-  onTitleDuplicate?: () => void;
-  isTitleDuplicateConfirmed?: boolean;
   copyOnSave?: boolean;
 }
 
@@ -63,19 +60,6 @@ export const saveSavedSearch = async (
   savedObjectsTagging: SavedObjectsTaggingApi | undefined
 ): Promise<string | undefined> => {
   const isNew = options.copyOnSave || !savedSearch.id;
-
-  if (isNew) {
-    try {
-      await checkForDuplicateTitle({
-        title: savedSearch.title,
-        isTitleDuplicateConfirmed: options.isTitleDuplicateConfirmed,
-        onTitleDuplicate: options.onTitleDuplicate,
-        contentManagement,
-      });
-    } catch {
-      return;
-    }
-  }
 
   const { searchSourceJSON, references: originalReferences } = savedSearch.searchSource.serialize();
   const references = savedObjectsTagging
