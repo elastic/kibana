@@ -255,6 +255,9 @@ test.describe(
       pageObjects: { inventoryPage },
     }) => {
       await inventoryPage.goToTime(DATE_WITH_SEMCONV_DATA);
+      await expect(inventoryPage.waffleMap.getByTestId('nodeContainer')).toHaveCount(
+        SEMCONV_HOSTS.length
+      );
       await inventoryPage.filterByQueryBar(`host.name: "${SEMCONV_HOST1_NAME}"`);
 
       await expect(inventoryPage.waffleMap.getByTestId('nodeContainer')).toHaveCount(1);
