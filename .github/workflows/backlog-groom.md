@@ -85,7 +85,6 @@ An issue is stale if any of these are true:
 If stale, use `noop` with a detailed explanation including:
 - What evidence you found (commit SHAs, PR numbers, file changes)
 - A recommended action (close as fixed, close as outdated, close as duplicate with link)
-- A comment on the issue explaining your findings
 
 ### If the issue is still valid
 
