@@ -496,7 +496,7 @@ const buildUserMessage = (
       }
       const truncatedSamples = f.sample_values.map((v) => {
         const s = String(v);
-        return s.length > 120 ? `"${s.slice(0, 117)}..."` : `"${s}"`;
+        return s.length > 80 ? `"${s.slice(0, 77)}..."` : `"${s}"`;
       });
       const distinctCount = f.distinct_count ?? f.sample_values.length;
       const plural = distinctCount !== 1 ? 's' : '';
