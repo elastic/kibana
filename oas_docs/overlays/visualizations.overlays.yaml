@@ -810,6 +810,42 @@ actions:
                       managed: false
                       updated_at: "2026-04-13T11:00:00.000Z"
                       version: WzYxLDFd
+        '201':
+          content:
+            application/json:
+              examples:
+                createdVisualizationResponse:
+                  summary: Update visualization response
+                  description: >
+                    The created visualization state. Server-populated defaults are included in the response.
+                  value:
+                    id: 1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d
+                    data:
+                      title: Total requests (updated)
+                      data_source:
+                        type: data_view_spec
+                        index_pattern: kibana_sample_data_logs
+                        time_field: timestamp
+                      type: metric
+                      sampling: 1
+                      ignore_global_filters: false
+                      metrics:
+                        - type: primary
+                          operation: count
+                          empty_as_null: false
+                      styling:
+                        primary:
+                          position: bottom
+                          labels:
+                            alignment: left
+                          value:
+                            sizing: auto
+                            alignment: right
+                    meta:
+                      created_at: '2026-04-13T11:00:00.000Z'
+                      managed: false
+                      updated_at: '2026-04-13T11:00:00.000Z'
+                      version: WzYxLDFd
       x-codeSamples:
         - lang: cURL
           label: Update a visualization - cURL
