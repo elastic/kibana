@@ -13,6 +13,7 @@ import {
   buildExtractionSourceClause,
   buildFieldEvaluations,
   buildSetFieldsByCondition,
+  type LogSlicePaginationCursor,
   type PaginationParams,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   MAIN_ENTITY_ID_FIELD,
@@ -44,8 +45,8 @@ export interface CcsLogsExtractionQueryParams {
   docsLimit: number;
   recoveryId?: string;
   pagination?: PaginationParams;
-  logsPageCursorStart?: PaginationParams;
-  logsPageCursorEnd?: PaginationParams;
+  logsPageCursorStart?: LogSlicePaginationCursor;
+  logsPageCursorEnd?: LogSlicePaginationCursor;
 }
 
 /**

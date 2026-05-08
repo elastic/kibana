@@ -45,11 +45,21 @@ export const TIMESTAMP_FIELD = '@timestamp';
 
 export const DOCUMENT_ID_FIELD = '_id';
 
-const METADATA_FIELDS = ['_index', '_id'];
+const METADATA_FIELDS = ['_index'];
 
 export interface PaginationParams {
   timestampCursor: string;
   idCursor: string;
+}
+
+/**
+ * Doc-level cursor for log-slice pagination — `@timestamp` only. Splits from {@link PaginationParams}
+ * (which is still used by entity-level pagination on `entity.EngineMetadata.UntypedId`) because the
+ * probe no longer carries `_id`: ES|QL reads `_id` from Lucene stored fields per-doc, and including
+ * it in `SORT` blocks index-order traversal on time-sorted data streams.
+ */
+export interface LogSlicePaginationCursor {
+  timestampCursor: string;
 }
 
 export interface PaginationFields {
@@ -66,22 +76,23 @@ export interface LogPageProbeSourceClauseParams {
   type: EntityType;
   fromDateISO: string;
   toDateISO: string;
-  /** Exclusive lower bound on (@timestamp, _id) for log-slice pagination within the time window. */
-  logsPageCursorStart?: PaginationParams;
+  /** Inclusive lower bound on `@timestamp` for log-slice pagination within the time window. */
+  logsPageCursorStart?: LogSlicePaginationCursor;
 }
 
-/** Bounded extraction: same as probe plus optional inclusive upper bound on (@timestamp, _id). */
+/** Bounded extraction: same as probe plus optional inclusive upper bound on `@timestamp`. */
 export type ExtractionSourceClauseParams = LogPageProbeSourceClauseParams & {
-  logsPageCursorEnd?: PaginationParams;
+  logsPageCursorEnd?: LogSlicePaginationCursor;
 };
 
 export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClauseParams): string {
   const { indexPatterns, type, fromDateISO, toDateISO, logsPageCursorStart } = params;
 
-  // Always use >= for the time-window start. When logsPageCursorStart is set its compound filter
-  // (@timestamp > T OR (@timestamp = T AND _id > id)) owns the exclusive lower bound. Using >
-  // here would drop documents with @timestamp = fromDateISO when the cursor timestamp equals
-  // fromDateISO (e.g. second recovery slice where all remaining logs share the same timestamp).
+  // The time-window start uses `>=` so the inclusive `logsPageCursorStart` filter (also `>=`)
+  // composes correctly. The cursor is non-strict on purpose: any doc at `cursorTs` not consumed
+  // by the prior slice is re-included in the next one and absorbed by idempotent upserts. The
+  // outer loop's stuck-detection guard handles the pathological "tie group bigger than
+  // maxLogsPerPage" path by bumping the cursor by 1ms.
   const baseWhere = `FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}
   | WHERE
@@ -98,7 +109,7 @@ export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClausePa
 }
 
 export function buildExtractionSourceClause(
-  params: LogPageProbeSourceClauseParams & { logsPageCursorEnd?: PaginationParams }
+  params: LogPageProbeSourceClauseParams & { logsPageCursorEnd?: LogSlicePaginationCursor }
 ): string {
   if (params.logsPageCursorEnd) {
     const { logsPageCursorEnd, ...probeParams } = params;
@@ -110,26 +121,12 @@ export function buildExtractionSourceClause(
   return buildLogPageProbeSourceClause(params);
 }
 
-function buildLogsPageStartFilter(cursor: PaginationParams): string {
-  const escapedId = escapeEsqlStringLiteral(cursor.idCursor);
-  return `(
-      ${TIMESTAMP_FIELD} > TO_DATETIME("${cursor.timestampCursor}")
-      OR (
-        ${TIMESTAMP_FIELD} == TO_DATETIME("${cursor.timestampCursor}")
-        AND \`${DOCUMENT_ID_FIELD}\` > "${escapedId}"
-      )
-    )`;
+function buildLogsPageStartFilter(cursor: LogSlicePaginationCursor): string {
+  return `${TIMESTAMP_FIELD} >= TO_DATETIME("${cursor.timestampCursor}")`;
 }
 
-function buildLogsPageEndFilter(end: PaginationParams): string {
-  const escapedId = escapeEsqlStringLiteral(end.idCursor);
-  return `(
-      ${TIMESTAMP_FIELD} < TO_DATETIME("${end.timestampCursor}")
-      OR (
-        ${TIMESTAMP_FIELD} == TO_DATETIME("${end.timestampCursor}")
-        AND \`${DOCUMENT_ID_FIELD}\` <= "${escapedId}"
-      )
-    )`;
+function buildLogsPageEndFilter(end: LogSlicePaginationCursor): string {
+  return `${TIMESTAMP_FIELD} <= TO_DATETIME("${end.timestampCursor}")`;
 }
 
 export function aggregationStats(fields: EntityField[], renameToRecent: boolean = true): string {

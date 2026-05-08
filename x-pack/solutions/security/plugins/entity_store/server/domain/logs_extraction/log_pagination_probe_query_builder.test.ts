@@ -8,6 +8,7 @@
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { TIMESTAMP_FIELD } from './query_builder_commons';
 import {
+  LOG_PAGINATION_CURSOR_MIN_TIMESTAMP_FIELD,
   LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD,
   buildLogPaginationCursorProbeEsql,
   interpretLogPaginationCursorRows,
@@ -15,7 +16,7 @@ import {
 } from './log_pagination_probe_query_builder';
 
 describe('buildLogPaginationCursorProbeEsql', () => {
-  it('sorts, limits to maxLogsPerPage, and reads slice-end + bounded count via terminal STATS', () => {
+  it('sorts by @timestamp only, limits to maxLogsPerPage, reads slice-end + min_ts + bounded count via terminal STATS', () => {
     const q = buildLogPaginationCursorProbeEsql({
       indexPatterns: ['logs-*'],
       type: 'user',
@@ -34,63 +35,53 @@ describe('interpretLogPaginationCursorRows', () => {
 
   it('returns isLastLogsPage false at saturation marker (total_logs == maxLogsPerPage)', () => {
     const row = {
-      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'a' },
-      missingLogsToProcess: 101,
-    };
-    expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
-      hasLogsToProcess: true,
-      logsPaginationCursor: row.logsPaginationCursor,
-      isLastLogsPage: false,
-    });
-  });
-
-  it('returns isLastLogsPage true when exactly maxLogsPerPage logs remain (last full page)', () => {
-    const row = {
-      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'a' },
+      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z' },
+      minTimestamp: '2024-01-01T00:00:00.000Z',
       missingLogsToProcess: 100,
     };
     expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
       hasLogsToProcess: true,
       logsPaginationCursor: row.logsPaginationCursor,
+      minTimestamp: row.minTimestamp,
       isLastLogsPage: false,
     });
   });
 
   it('returns isLastLogsPage true when fewer than maxLogsPerPage logs remain', () => {
     const row = {
-      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'a' },
+      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z' },
+      minTimestamp: '2024-01-01T00:00:00.000Z',
       missingLogsToProcess: 3,
     };
     expect(interpretLogPaginationCursorRows(row, 100)).toEqual({
       hasLogsToProcess: true,
       logsPaginationCursor: row.logsPaginationCursor,
+      minTimestamp: row.minTimestamp,
       isLastLogsPage: true,
     });
   });
 });
 
 describe('parseLogPaginationCursorRow', () => {
-  it('maps columns to slice end and total log count', () => {
+  it('maps columns to slice end, min @timestamp, and total log count', () => {
     const resp: ESQLSearchResponse = {
       columns: [
         { name: TIMESTAMP_FIELD, type: 'date' },
-        { name: '_id', type: 'keyword' },
+        { name: LOG_PAGINATION_CURSOR_MIN_TIMESTAMP_FIELD, type: 'date' },
         { name: LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD, type: 'long' },
       ],
-      values: [['2024-01-01T00:00:00.000Z', 'doc1', 42]],
+      values: [['2024-01-01T00:00:05.000Z', '2024-01-01T00:00:00.000Z', 42]],
     };
     expect(parseLogPaginationCursorRow(resp)).toEqual({
-      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: 'doc1' },
+      logsPaginationCursor: { timestampCursor: '2024-01-01T00:00:05.000Z' },
+      minTimestamp: '2024-01-01T00:00:00.000Z',
       missingLogsToProcess: 42,
     });
   });
 
-  it('returns undefined when there are no values without requiring total_logs column', () => {
+  it('returns undefined when there are no values without requiring all columns', () => {
     const resp: ESQLSearchResponse = {
-      columns: [
-        { name: TIMESTAMP_FIELD, type: 'date' },
-        { name: '_id', type: 'keyword' },
-      ],
+      columns: [{ name: TIMESTAMP_FIELD, type: 'date' }],
       values: [],
     };
     expect(parseLogPaginationCursorRow(resp)).toBeUndefined();

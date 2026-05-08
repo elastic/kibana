@@ -63,10 +63,10 @@ describe('buildExtractionSourceClause', () => {
   it('should always use inclusive >= lower bound on @timestamp regardless of cursor', () => {
     const withCursor = buildExtractionSourceClause({
       ...baseParams,
-      logsPageCursorStart: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: '1' },
+      logsPageCursorStart: { timestampCursor: '2024-01-01T00:00:00.000Z' },
     });
     expect(withCursor).toContain('FROM logs-*, metrics-*');
-    expect(withCursor).toContain('METADATA _index, _id');
+    expect(withCursor).toContain('METADATA _index');
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
     expect(withCursor).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
     expect(withCursor).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));

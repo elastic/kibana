@@ -23,6 +23,7 @@ import {
   buildLogPageProbeSourceClause,
   buildFieldEvaluations,
   buildSetFieldsByCondition,
+  type LogSlicePaginationCursor,
   type PaginationParams,
   type PaginationFields,
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
@@ -67,8 +68,8 @@ interface LogsExtractionQueryParams {
   toDateISO: string;
   recoveryId?: string;
   pagination?: PaginationParams;
-  logsPageCursorStart?: PaginationParams;
-  logsPageCursorEnd?: PaginationParams;
+  logsPageCursorStart?: LogSlicePaginationCursor;
+  logsPageCursorEnd?: LogSlicePaginationCursor;
 }
 
 export function buildRemainingLogsCountQuery(params: {
@@ -76,7 +77,7 @@ export function buildRemainingLogsCountQuery(params: {
   type: EntityType;
   fromDateISO: string;
   toDateISO: string;
-  logsPageCursorStart?: PaginationParams;
+  logsPageCursorStart?: LogSlicePaginationCursor;
 }): string {
   return (
     buildLogPageProbeSourceClause(params) +

@@ -3,7 +3,7 @@
 exports[`buildCcsLogsExtractionEsqlQuery generates expected query for host entity type 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM remote:metrics-*
-    METADATA _index, _id
+    METADATA _index
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -169,28 +169,18 @@ data_stream*,
 | LIMIT 5000"
 `;
 
-exports[`buildCcsLogsExtractionEsqlQuery generates expected query with log-slice cursor bounds 1`] = `
+exports[
+  `buildCcsLogsExtractionEsqlQuery generates expected query with log-slice cursor bounds 1`
+] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM remote:logs-*
-    METADATA _index, _id
+    METADATA _index
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
       AND (NOT(\`host.id\` IS NULL) AND COALESCE(\`host.id\` != \\"\\", TRUE) OR NOT(\`host.name\` IS NULL) AND COALESCE(\`host.name\` != \\"\\", TRUE) OR NOT(\`host.hostname\` IS NULL) AND COALESCE(\`host.hostname\` != \\"\\", TRUE))
-      AND (
-      @timestamp > TO_DATETIME(\\"2022-01-01T06:00:00.000Z\\")
-      OR (
-        @timestamp == TO_DATETIME(\\"2022-01-01T06:00:00.000Z\\")
-        AND \`_id\` > \\"start-doc-id\\"
-      )
-    )
-      AND (
-      @timestamp < TO_DATETIME(\\"2022-01-01T12:00:00.000Z\\")
-      OR (
-        @timestamp == TO_DATETIME(\\"2022-01-01T12:00:00.000Z\\")
-        AND \`_id\` <= \\"end-doc-id\\"
-      )
-    )
+      AND @timestamp >= TO_DATETIME(\\"2022-01-01T06:00:00.000Z\\")
+      AND @timestamp <= TO_DATETIME(\\"2022-01-01T12:00:00.000Z\\")
 | EVAL _src_entity_source0 = MV_FIRST(event.module),
  _src_entity_source1 = MV_FIRST(event.dataset),
  _src_entity_source2 = MV_FIRST(data_stream.dataset),
@@ -355,7 +345,7 @@ data_stream*,
 exports[`buildCcsLogsExtractionEsqlQuery generates expected query with pagination 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM remote:logs-*
-    METADATA _index, _id
+    METADATA _index
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")
@@ -512,7 +502,7 @@ host*,
 exports[`buildCcsLogsExtractionEsqlQuery generates query for generic entity type 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM remote_cluster:logs-*
-    METADATA _index, _id
+    METADATA _index
   | WHERE
       @timestamp >= TO_DATETIME(\\"2022-01-01T00:00:00.000Z\\")
       AND @timestamp <= TO_DATETIME(\\"2022-01-01T23:59:59.999Z\\")

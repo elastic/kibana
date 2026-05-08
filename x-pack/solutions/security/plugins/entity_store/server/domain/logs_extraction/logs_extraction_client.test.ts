@@ -19,23 +19,29 @@ import {
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
   TIMESTAMP_FIELD,
 } from './query_builder_commons';
-import { LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD } from './log_pagination_probe_query_builder';
+import {
+  LOG_PAGINATION_CURSOR_MIN_TIMESTAMP_FIELD,
+  LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD,
+} from './log_pagination_probe_query_builder';
 
 const LOG_PAGINATION_CURSOR_PROBE_COLUMNS: ESQLSearchResponse['columns'] = [
   { name: TIMESTAMP_FIELD, type: 'date' },
-  { name: '_id', type: 'keyword' },
+  { name: LOG_PAGINATION_CURSOR_MIN_TIMESTAMP_FIELD, type: 'date' },
   { name: LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD, type: 'long' },
 ];
 
-/** Default total_logs > maxLogsPerPage so interpret marks a non-final slice (matches default config cap). */
+/** Default total_logs == maxLogsPerPage so interpret marks a non-final slice (saturated). */
 function mockLogPaginationCursorProbeRow(
   timestamp: string,
-  id: string,
-  totalLogsInSlice: number = LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT + 1
+  // Kept for call-site compatibility with the previous (timestamp, id) signature, even though
+  // the probe no longer carries an id; existing tests pass an arbitrary string and ignore it.
+  _ignoredId: string,
+  totalLogsInSlice: number = LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
+  minTimestamp: string = timestamp
 ): ESQLSearchResponse {
   return {
     columns: LOG_PAGINATION_CURSOR_PROBE_COLUMNS,
-    values: [[timestamp, id, totalLogsInSlice]],
+    values: [[timestamp, minTimestamp, totalLogsInSlice]],
   };
 }
 
@@ -1176,7 +1182,7 @@ describe('LogsExtractionClient', () => {
       });
     });
 
-    it('should pass persisted log-slice start into remaining-count ESQL when present on engine', async () => {
+    it('should pass persisted log-slice start timestamp into remaining-count ESQL when present on engine', async () => {
       const fixedNow = new Date('2025-01-15T12:00:00.000Z');
       jest.useFakeTimers({ now: fixedNow.getTime() });
       const mockEsqlResponse: ESQLSearchResponse = {
@@ -1187,7 +1193,6 @@ describe('LogsExtractionClient', () => {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
       const paginationTimestamp = '2025-01-15T10:00:00.000Z';
-      const sliceStartId = 'slice-start';
       const sliceStartTs = '2025-01-15T10:20:00.000Z';
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user', {
@@ -1195,7 +1200,6 @@ describe('LogsExtractionClient', () => {
           delay: '1m',
           paginationTimestamp,
           logsPageCursorStartTimestamp: sliceStartTs,
-          logsPageCursorStartId: sliceStartId,
         }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
       );
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
@@ -1209,7 +1213,7 @@ describe('LogsExtractionClient', () => {
       });
       expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
         esClient: mockEsClient,
-        query: expect.stringContaining(sliceStartId),
+        query: expect.stringContaining(sliceStartTs),
       });
       jest.useRealTimers();
     });

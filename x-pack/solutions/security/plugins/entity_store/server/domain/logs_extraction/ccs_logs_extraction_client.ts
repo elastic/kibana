@@ -18,6 +18,7 @@ import {
 } from '../../../common/domain/definitions/entity_schema';
 import {
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+  type LogSlicePaginationCursor,
   type PaginationParams,
 } from './query_builder_commons';
 import {
@@ -217,7 +218,8 @@ export class CcsLogsExtractionClient {
 
     let effectiveFromDateISO = initialFromDateISO;
     let recoveryId = initialRecoveryId;
-    let sliceStart: PaginationParams | undefined;
+    let sliceStart: LogSlicePaginationCursor | undefined;
+    let previousSliceEndTs: string | undefined;
 
     let isLastLogsPage = false;
 
@@ -236,8 +238,26 @@ export class CcsLogsExtractionClient {
         break;
       }
 
-      const { logsPaginationCursor: sliceEnd } = logPaginationCursor;
+      // Stuck-detection: when the cursor doesn't advance AND the whole slice was at one
+      // timestamp AND the slice is saturated, > maxLogsPerPage docs share that millisecond.
+      // Bump the cursor by 1ms to escape; idempotent upserts absorbed the prior reprocessing.
+      const probeCursorTs = logPaginationCursor.logsPaginationCursor.timestampCursor;
+      const allAtOneMs = logPaginationCursor.minTimestamp === probeCursorTs;
+      const saturated = !logPaginationCursor.isLastLogsPage;
+      const stuck = previousSliceEndTs === probeCursorTs && allAtOneMs && saturated;
+
+      let sliceEnd: LogSlicePaginationCursor = logPaginationCursor.logsPaginationCursor;
+      if (stuck) {
+        const bumpedTs = moment(probeCursorTs).add(1, 'ms').toISOString();
+        this.logger.warn(
+          `CCS log extraction tie-group at @timestamp=${probeCursorTs} exceeds maxLogsPerPage=${maxLogsPerPage}; ` +
+            `bumping cursor to ${bumpedTs}. Some docs at this timestamp may be skipped.`
+        );
+        sliceEnd = { timestampCursor: bumpedTs };
+      }
+
       isLastLogsPage = logPaginationCursor.isLastLogsPage;
+      previousSliceEndTs = probeCursorTs;
 
       // Recovery cursor is only used in the first slice; clear it after consumption
       const recoveryIdForThisSlice = recoveryId;
@@ -294,7 +314,7 @@ export class CcsLogsExtractionClient {
     type: EntityType;
     fromDateISO: string;
     toDateISO: string;
-    sliceStart: PaginationParams | undefined;
+    sliceStart: LogSlicePaginationCursor | undefined;
     maxLogsPerPage: number;
     abortController?: AbortController;
   }): Promise<LogPaginationCursor> {
@@ -359,8 +379,8 @@ export class CcsLogsExtractionClient {
     docsLimit: number;
     entityDefinition: ManagedEntityDefinition;
     abortController?: AbortController;
-    sliceStart: PaginationParams | undefined;
-    sliceEnd: PaginationParams;
+    sliceStart: LogSlicePaginationCursor | undefined;
+    sliceEnd: LogSlicePaginationCursor;
     recoveryId: string | undefined;
     skipStateUpdates: boolean;
   }): Promise<{ count: number; pages: number }> {

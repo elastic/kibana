@@ -35,14 +35,20 @@ const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof exec
 const mockIngestEntities = ingestEntities as jest.MockedFunction<typeof ingestEntities>;
 
 /** Returns a probe response with one row: the slice end boundary. */
-function makeProbeResponse(ts: string, id: string, totalLogs: number): ESQLSearchResponse {
+function makeProbeResponse(
+  ts: string,
+  // Kept for call-site compatibility — the probe no longer carries an id; this argument is ignored.
+  _ignoredId: string,
+  totalLogs: number,
+  minTs: string = ts
+): ESQLSearchResponse {
   return {
     columns: [
       { name: '@timestamp', type: 'date' },
-      { name: '_id', type: 'keyword' },
+      { name: 'min_ts', type: 'date' },
       { name: 'total_logs', type: 'long' },
     ],
-    values: [[ts, id, totalLogs]],
+    values: [[ts, minTs, totalLogs]],
   };
 }
 
