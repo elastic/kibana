@@ -7,7 +7,6 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiButton,
   EuiCallOut,
   EuiContextMenu,
   EuiFieldSearch,
@@ -15,8 +14,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
-  EuiPopover,
   EuiSpacer,
+  EuiSplitButton,
   type Criteria,
 } from '@elastic/eui';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -51,9 +50,14 @@ const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
 
 export const RulesListPage = () => {
   const { basePath } = useService(CoreStart('http'));
+  const { navigateToUrl } = useService(CoreStart('application'));
   const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
   const toggleCreateMenu = useCallback(() => setIsCreateMenuOpen((prev) => !prev), []);
   const closeCreateMenu = useCallback(() => setIsCreateMenuOpen(false), []);
+  const navigateToCreateRule = useCallback(
+    () => navigateToUrl(basePath.prepend(paths.ruleCreate)),
+    [navigateToUrl, basePath]
+  );
 
   useBreadcrumbs('rules_list');
 
@@ -125,56 +129,61 @@ export const RulesListPage = () => {
           />
         }
         rightSideItems={[
-          <EuiPopover
-            key="create-rule-menu"
-            aria-label="Create rule"
-            button={
-              <EuiButton
-                fill
-                iconType="arrowDown"
-                iconSide="right"
-                onClick={toggleCreateMenu}
-                data-test-subj="createRuleButton"
-              >
-                <FormattedMessage
-                  id="xpack.alertingV2.rulesList.createRuleButton"
-                  defaultMessage="Create rule"
-                />
-              </EuiButton>
-            }
-            isOpen={isCreateMenuOpen}
-            closePopover={closeCreateMenu}
-            panelPaddingSize="none"
-            anchorPosition="downRight"
-          >
-            <EuiContextMenu
-              initialPanelId={0}
-              panels={[
-                {
-                  id: 0,
-                  items: [
-                    {
-                      name: i18n.translate('xpack.alertingV2.rulesList.createRuleMenu.esqlEditor', {
-                        defaultMessage: 'Create rule',
-                      }),
-                      icon: 'editorCodeBlock',
-                      href: basePath.prepend(paths.ruleCreate),
-                      'data-test-subj': 'createRuleEsqlEditor',
-                    },
-                    {
-                      name: i18n.translate(
-                        'xpack.alertingV2.rulesList.createRuleMenu.ruleBuilder',
-                        { defaultMessage: 'Create in Builder' }
-                      ),
-                      icon: 'wrench',
-                      href: basePath.prepend(paths.thresholdRuleCreate),
-                      'data-test-subj': 'createRuleBuilder',
-                    },
-                  ],
-                },
-              ]}
+          <EuiSplitButton key="create-rule-menu" fill data-test-subj="createRuleSplitButton">
+            <EuiSplitButton.ActionPrimary
+              onClick={navigateToCreateRule}
+              data-test-subj="createRuleButton"
+            >
+              <FormattedMessage
+                id="xpack.alertingV2.rulesList.createRuleButton"
+                defaultMessage="Create rule"
+              />
+            </EuiSplitButton.ActionPrimary>
+            <EuiSplitButton.ActionSecondary
+              iconType="arrowDown"
+              aria-label={i18n.translate('xpack.alertingV2.rulesList.createRuleDropdownAriaLabel', {
+                defaultMessage: 'More rule creation options',
+              })}
+              onClick={toggleCreateMenu}
+              data-test-subj="createRuleDropdown"
+              popoverProps={{
+                isOpen: isCreateMenuOpen,
+                closePopover: closeCreateMenu,
+                anchorPosition: 'downRight',
+                panelPaddingSize: 'none',
+                children: (
+                  <EuiContextMenu
+                    initialPanelId={0}
+                    panels={[
+                      {
+                        id: 0,
+                        items: [
+                          {
+                            name: i18n.translate(
+                              'xpack.alertingV2.rulesList.createRuleMenu.esqlEditor',
+                              { defaultMessage: 'Create ES|QL rule' }
+                            ),
+                            icon: 'editorCodeBlock',
+                            href: basePath.prepend(paths.ruleCreate),
+                            'data-test-subj': 'createRuleEsqlEditor',
+                          },
+                          {
+                            name: i18n.translate(
+                              'xpack.alertingV2.rulesList.createRuleMenu.ruleBuilder',
+                              { defaultMessage: 'Create in Builder' }
+                            ),
+                            icon: 'wrench',
+                            href: basePath.prepend(paths.thresholdRuleCreate),
+                            'data-test-subj': 'createRuleBuilder',
+                          },
+                        ],
+                      },
+                    ]}
+                  />
+                ),
+              }}
             />
-          </EuiPopover>,
+          </EuiSplitButton>,
         ]}
       />
       <EuiSpacer size="m" />

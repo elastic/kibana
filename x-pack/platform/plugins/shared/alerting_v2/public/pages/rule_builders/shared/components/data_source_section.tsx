@@ -154,7 +154,7 @@ export const DataSourceSection = ({ allColumns, isColumnsLoading }: DataSourceSe
               value={value ?? ''}
               onChange={(e) => onChange(e.target.value)}
               inputRef={ref}
-              isLoading={isFieldsLoading}
+              isLoading={Boolean(indexPattern) && isFieldsLoading}
               fullWidth
               aria-label={i18n.translate(
                 'xpack.alertingV2.ruleBuilder.dataSource.timeFieldAriaLabel',
