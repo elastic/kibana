@@ -231,7 +231,6 @@ describe('SecurityNavControl', () => {
               tabindex="-1"
             >
               <div
-                aria-labelledby="generated-id_euiContextMenuPanelTitle"
                 class="euiContextMenuPanel__list"
               >
                 <a
@@ -416,7 +415,6 @@ describe('SecurityNavControl', () => {
               tabindex="-1"
             >
               <div
-                aria-labelledby="generated-id_euiContextMenuPanelTitle"
                 class="euiContextMenuPanel__list"
               >
                 <a
@@ -571,7 +569,6 @@ describe('SecurityNavControl', () => {
               tabindex="-1"
             >
               <div
-                aria-labelledby="generated-id_euiContextMenuPanelTitle"
                 class="euiContextMenuPanel__list"
               >
                 <div

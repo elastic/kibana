@@ -118,7 +118,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                       class="euiCheckbox__square emotion-euiCheckbox__square"
                     >
                       <span
-                        class="EuiCheckboxControl emotion-EuiCheckboxControl-unselected"
+                        class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
                       >
                         <span
                           class="emotion-euiCheckbox__icon-check"
@@ -261,7 +261,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                       class="euiCheckbox__square emotion-euiCheckbox__square"
                     >
                       <span
-                        class="EuiCheckboxControl emotion-EuiCheckboxControl-unselected"
+                        class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
                       >
                         <span
                           class="emotion-euiCheckbox__icon-check"
@@ -341,7 +341,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
                       class="euiCheckbox__square emotion-euiCheckbox__square"
                     >
                       <span
-                        class="EuiCheckboxControl emotion-EuiCheckboxControl-unselected"
+                        class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
                       >
                         <span
                           class="emotion-euiCheckbox__icon-check"

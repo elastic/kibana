@@ -350,7 +350,7 @@ exports[`ImportedEvents Renders imported events 1`] = `
         class="euiCheckbox__square emotion-euiCheckbox__square"
       >
         <span
-          class="EuiCheckboxControl emotion-EuiCheckboxControl-unselected"
+          class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
         >
           <span
             class="emotion-euiCheckbox__icon-check"

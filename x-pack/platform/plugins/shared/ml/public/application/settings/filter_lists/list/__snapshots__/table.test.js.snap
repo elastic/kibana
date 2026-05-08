@@ -119,7 +119,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                       class="euiCheckbox__square emotion-euiCheckbox__square"
                     >
                       <span
-                        class="EuiCheckboxControl emotion-EuiCheckboxControl-unselected"
+                        class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
                       >
                         <span
                           class="emotion-euiCheckbox__icon-check"
@@ -296,7 +296,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                       class="euiCheckbox__square emotion-euiCheckbox__square"
                     >
                       <span
-                        class="EuiCheckboxControl emotion-EuiCheckboxControl-disabled-unselected"
+                        class="euiCheckboxControl emotion-euiCheckboxControl-disabled-unselected"
                       >
                         <span
                           class="emotion-euiCheckbox__icon-check"
@@ -393,7 +393,7 @@ exports[`Filter Lists Table renders with filter lists and selection supplied 1`]
                       class="euiCheckbox__square emotion-euiCheckbox__square"
                     >
                       <span
-                        class="EuiCheckboxControl emotion-EuiCheckboxControl-unselected"
+                        class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
                       >
                         <span
                           class="emotion-euiCheckbox__icon-check"
@@ -710,7 +710,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                       class="euiCheckbox__square emotion-euiCheckbox__square"
                     >
                       <span
-                        class="EuiCheckboxControl emotion-EuiCheckboxControl-unselected"
+                        class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
                       >
                         <span
                           class="emotion-euiCheckbox__icon-check"
@@ -887,7 +887,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                       class="euiCheckbox__square emotion-euiCheckbox__square"
                     >
                       <span
-                        class="EuiCheckboxControl emotion-EuiCheckboxControl-disabled-unselected"
+                        class="euiCheckboxControl emotion-euiCheckboxControl-disabled-unselected"
                       >
                         <span
                           class="emotion-euiCheckbox__icon-check"
@@ -984,7 +984,7 @@ exports[`Filter Lists Table renders with filter lists supplied 1`] = `
                       class="euiCheckbox__square emotion-euiCheckbox__square"
                     >
                       <span
-                        class="EuiCheckboxControl emotion-EuiCheckboxControl-unselected"
+                        class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
                       >
                         <span
                           class="emotion-euiCheckbox__icon-check"

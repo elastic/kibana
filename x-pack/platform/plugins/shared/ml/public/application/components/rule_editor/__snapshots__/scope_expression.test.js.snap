@@ -14,7 +14,7 @@ exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] =
         class="euiCheckbox__square emotion-euiCheckbox__square"
       >
         <span
-          class="EuiCheckboxControl emotion-EuiCheckboxControl-selected"
+          class="euiCheckboxControl emotion-euiCheckboxControl-selected"
         >
           <span
             class="emotion-euiCheckbox__icon-check"
@@ -68,7 +68,7 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
         class="euiCheckbox__square emotion-euiCheckbox__square"
       >
         <span
-          class="EuiCheckboxControl emotion-EuiCheckboxControl-unselected"
+          class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
         >
           <span
             class="emotion-euiCheckbox__icon-check"
@@ -146,7 +146,7 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
         class="euiCheckbox__square emotion-euiCheckbox__square"
       >
         <span
-          class="EuiCheckboxControl emotion-EuiCheckboxControl-selected"
+          class="euiCheckboxControl emotion-euiCheckboxControl-selected"
         >
           <span
             class="emotion-euiCheckbox__icon-check"
@@ -225,7 +225,7 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
         class="euiCheckbox__square emotion-euiCheckbox__square"
       >
         <span
-          class="EuiCheckboxControl emotion-EuiCheckboxControl-selected"
+          class="euiCheckboxControl emotion-euiCheckboxControl-selected"
         >
           <span
             class="emotion-euiCheckbox__icon-check"

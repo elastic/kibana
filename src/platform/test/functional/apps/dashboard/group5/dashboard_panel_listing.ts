@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '[data-test-subj*="dashboardEditorMenu-"]'
       );
       const panelTypes = await panelSelectionFlyout.findAllByCssSelector(
-        '[data-test-subj*="create-action-"]'
+        '[data-test-subj*="create-action-"]:not([data-test-subj$="-wrapper"])'
       );
 
       for (let i = 0; i < panelGroups.length; i++) {

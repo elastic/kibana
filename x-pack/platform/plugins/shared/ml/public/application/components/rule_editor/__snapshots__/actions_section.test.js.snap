@@ -25,7 +25,7 @@ exports[`ActionsSection renders with no actions selected 1`] = `
           class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="EuiCheckboxControl emotion-EuiCheckboxControl-unselected"
+            class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
           >
             <span
               class="emotion-euiCheckbox__icon-check"
@@ -79,7 +79,7 @@ exports[`ActionsSection renders with no actions selected 1`] = `
           class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="EuiCheckboxControl emotion-EuiCheckboxControl-unselected"
+            class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
           >
             <span
               class="emotion-euiCheckbox__icon-check"
@@ -145,7 +145,7 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
           class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="EuiCheckboxControl emotion-EuiCheckboxControl-selected"
+            class="euiCheckboxControl emotion-euiCheckboxControl-selected"
           >
             <span
               class="emotion-euiCheckbox__icon-check"
@@ -200,7 +200,7 @@ exports[`ActionsSection renders with skip_result and skip_model_update selected 
           class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="EuiCheckboxControl emotion-EuiCheckboxControl-selected"
+            class="euiCheckboxControl emotion-euiCheckboxControl-selected"
           >
             <span
               class="emotion-euiCheckbox__icon-check"
@@ -267,7 +267,7 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
           class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="EuiCheckboxControl emotion-EuiCheckboxControl-selected"
+            class="euiCheckboxControl emotion-euiCheckboxControl-selected"
           >
             <span
               class="emotion-euiCheckbox__icon-check"
@@ -322,7 +322,7 @@ exports[`ActionsSection renders with skip_result selected 1`] = `
           class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="EuiCheckboxControl emotion-EuiCheckboxControl-unselected"
+            class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
           >
             <span
               class="emotion-euiCheckbox__icon-check"

@@ -19,7 +19,7 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
       class="euiCheckbox__square emotion-euiCheckbox__square"
     >
       <span
-        class="EuiCheckboxControl emotion-EuiCheckboxControl-selected"
+        class="euiCheckboxControl emotion-euiCheckboxControl-selected"
       >
         <span
           class="emotion-euiCheckbox__icon-check"
@@ -83,7 +83,7 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
       class="euiCheckbox__square emotion-euiCheckbox__square"
     >
       <span
-        class="EuiCheckboxControl emotion-EuiCheckboxControl-selected"
+        class="euiCheckboxControl emotion-euiCheckboxControl-selected"
       >
         <span
           class="emotion-euiCheckbox__icon-check"
@@ -122,7 +122,7 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
           class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="EuiCheckboxControl emotion-EuiCheckboxControl-unselected"
+            class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
           >
             <span
               class="emotion-euiCheckbox__icon-check"
@@ -207,7 +207,7 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
       class="euiCheckbox__square emotion-euiCheckbox__square"
     >
       <span
-        class="EuiCheckboxControl emotion-EuiCheckboxControl-selected"
+        class="euiCheckboxControl emotion-euiCheckboxControl-selected"
       >
         <span
           class="emotion-euiCheckbox__icon-check"
@@ -246,7 +246,7 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
           class="euiCheckbox__square emotion-euiCheckbox__square"
         >
           <span
-            class="EuiCheckboxControl emotion-EuiCheckboxControl-selected"
+            class="euiCheckboxControl emotion-euiCheckboxControl-selected"
           >
             <span
               class="emotion-euiCheckbox__icon-check"
@@ -332,7 +332,7 @@ exports[`ScopeSection renders when not enabled 1`] = `
       class="euiCheckbox__square emotion-euiCheckbox__square"
     >
       <span
-        class="EuiCheckboxControl emotion-EuiCheckboxControl-unselected"
+        class="euiCheckboxControl emotion-euiCheckboxControl-unselected"
       >
         <span
           class="emotion-euiCheckbox__icon-check"
@@ -380,7 +380,7 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
       class="euiCheckbox__square emotion-euiCheckbox__square"
     >
       <span
-        class="EuiCheckboxControl emotion-EuiCheckboxControl-selected"
+        class="euiCheckboxControl emotion-euiCheckboxControl-selected"
       >
         <span
           class="emotion-euiCheckbox__icon-check"
