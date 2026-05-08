@@ -8,7 +8,10 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function canvasAutoplayPagesTest({ getService, getPageObjects }: FtrProviderContext) {
+export default function canvasAutoplayPagesTest({
+  getService,
+  getPageObjects,
+}: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -47,9 +50,7 @@ export default function canvasAutoplayPagesTest({ getService, getPageObjects }: 
       // Confirm basic autoplay works: fullscreen + 1 s interval starting on page 1
       // should advance to page 2 within a few seconds.
       await browser.navigateTo(`${appBase}/page/1?__fullScreen=true&__autoplayInterval=1s`);
-      await retry.waitFor('fullscreen to activate', () =>
-        testSubjects.exists('canvasWorkpadPage')
-      );
+      await retry.waitFor('fullscreen to activate', () => testSubjects.exists('canvasWorkpadPage'));
 
       await retry.tryForTime(5000, async () => {
         const url = await browser.getCurrentUrl();
