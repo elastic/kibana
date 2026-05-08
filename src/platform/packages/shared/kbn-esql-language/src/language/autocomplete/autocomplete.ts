@@ -80,7 +80,9 @@ export async function suggest(
 
   const activeProduct = resourceRetriever?.getActiveProduct?.();
   const licenseInstance = await resourceRetriever?.getLicense?.();
-  const hasMinimumLicenseRequired = licenseInstance?.hasAtLeast;
+  const hasMinimumLicenseRequired = licenseInstance
+    ? (license: LicenseType) => licenseInstance.hasAtLeast(license)
+    : undefined;
 
   if (astContext.type === 'newCommand') {
     // propose main commands here
