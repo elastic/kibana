@@ -16,7 +16,7 @@ interface VizSchemaResponse {
 export const useSchemaDescriptions = (visualizationId: string) => {
   const { services } = useKibana();
 
-  const { data: allDescriptions } = useQuery(
+  const { data: allDescriptions, isLoading } = useQuery(
     ['lens', 'schema_descriptions', visualizationId],
     () =>
       services.http!.get<Record<string, VizSchemaResponse>>('/internal/lens/schema_descriptions', {
@@ -30,6 +30,6 @@ export const useSchemaDescriptions = (visualizationId: string) => {
 
   return {
     data: allDescriptions?.[visualizationId]?.fields ?? [],
-    isLoading: !allDescriptions,
+    isLoading,
   };
 };

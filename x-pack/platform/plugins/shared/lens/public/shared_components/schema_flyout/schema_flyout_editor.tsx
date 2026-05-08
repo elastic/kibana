@@ -7,7 +7,7 @@
 
 import React, { useMemo, useEffect, useRef } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonRectangle } from '@elastic/eui';
 import type { FieldDescriptor } from './types';
 import { useSchemaDescriptions } from './use_schema_descriptions';
 import { SchemaFormField } from './fields';
@@ -161,7 +161,23 @@ export const SchemaFlyoutEditor: React.FC<SchemaFlyoutEditorProps> = ({
   state,
   setState,
 }) => {
-  const { data: fieldDescriptors } = useSchemaDescriptions(visualizationId);
+  const { data: fieldDescriptors, isLoading } = useSchemaDescriptions(visualizationId);
+
+  if (isLoading) {
+    return (
+      <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiSkeletonRectangle width="100%" height={32} borderRadius="s" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSkeletonRectangle width="100%" height={32} borderRadius="s" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiSkeletonRectangle width="100%" height={32} borderRadius="s" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   if (fieldDescriptors.length === 0) {
     return null;

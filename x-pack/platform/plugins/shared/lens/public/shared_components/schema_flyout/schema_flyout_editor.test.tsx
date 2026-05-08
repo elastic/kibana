@@ -198,6 +198,8 @@ describe('SchemaFlyoutEditor', () => {
 
     await waitFor(() => {
       expect(mockHttpGet).toHaveBeenCalled();
+      // After fetch fails, loading is done and no fields → empty
+      expect(container.querySelector('[role="progressbar"]')).not.toBeInTheDocument();
     });
 
     expect(container.innerHTML).toBe('');
