@@ -10,7 +10,7 @@ import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-dete
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
 import type { Reference } from '@kbn/content-management-utils';
-import type { AiopsCoreSetup } from '../plugin';
+import type { AiopsCoreSetup } from '../types';
 
 export const registerEmbeddables = (
   embeddable: EmbeddableSetup,

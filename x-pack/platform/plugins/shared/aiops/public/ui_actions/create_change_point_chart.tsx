@@ -16,7 +16,7 @@ import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-dete
 
 import type { ChangePointChartActionContext } from './change_point_action_context';
 import type { ChangePointEmbeddableState } from '../../common/embeddables/change_point_chart/types';
-import type { AiopsCoreSetup } from '../plugin';
+import type { AiopsCoreSetup } from '../types';
 import { canUseAiops } from '../capabilities';
 
 const parentApiIsCompatible = async (

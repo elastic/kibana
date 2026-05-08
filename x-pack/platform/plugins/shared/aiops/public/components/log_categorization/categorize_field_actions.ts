@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CATEGORIZE_FIELD, type CategorizeFieldContext } from '@kbn/ml-ui-actions';
-import type { AiopsCoreSetup } from '../../plugin';
+import type { AiopsCoreSetup } from '../../types';
 
 export const createCategorizeFieldAction = (getStartServices: AiopsCoreSetup['getStartServices']) =>
   createAction<CategorizeFieldContext>({

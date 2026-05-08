@@ -18,7 +18,7 @@ import type { PatternAnalysisEmbeddableApi } from '../embeddables/pattern_analys
 
 import type { PatternAnalysisActionContext } from './pattern_analysis_action_context';
 import { DEFAULT_MINIMUM_TIME_RANGE_OPTION } from '../components/log_categorization/log_categorization_for_embeddable/minimum_time_range';
-import type { AiopsCoreSetup } from '../plugin';
+import type { AiopsCoreSetup } from '../types';
 import { canUseAiops } from '../capabilities';
 
 const parentApiIsCompatible = async (

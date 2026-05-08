@@ -6,7 +6,6 @@
  */
 
 import type { CoreStart, Plugin } from '@kbn/core/public';
-import { type CoreSetup } from '@kbn/core/public';
 
 import { getChangePointDetectionComponent } from './shared_components';
 import { LogCategorizationForDiscover as PatternAnalysisComponent } from './shared_lazy_components';
@@ -15,13 +14,12 @@ import type {
   AiopsPluginSetupDeps,
   AiopsPluginStart,
   AiopsPluginStartDeps,
+  AiopsCoreSetup,
 } from './types';
 import { registerEmbeddables } from './embeddables';
 import { registerAiopsUiActions } from './ui_actions';
 import { registerCases } from './cases/register_cases';
 import { canUseAiops } from './capabilities';
-
-export type AiopsCoreSetup = CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>;
 
 export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>

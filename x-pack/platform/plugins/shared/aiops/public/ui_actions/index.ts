@@ -11,7 +11,7 @@ import {
   CATEGORIZE_FIELD_TRIGGER,
   ON_OPEN_PANEL_MENU,
 } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import type { AiopsCoreSetup } from '../plugin';
+import type { AiopsCoreSetup } from '../types';
 
 export function registerAiopsUiActions(
   uiActions: UiActionsSetup,

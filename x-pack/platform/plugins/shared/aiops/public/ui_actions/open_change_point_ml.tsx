@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
 import type { ChangePointEmbeddableApi } from '../embeddables/change_point_chart/types';
 import type { ChangePointChartActionContext } from './change_point_action_context';
-import type { AiopsCoreSetup } from '../plugin';
+import type { AiopsCoreSetup } from '../types';
 import { canUseAiops } from '../capabilities';
 
 export const OPEN_CHANGE_POINT_IN_ML_APP_ACTION = 'openChangePointInMlAppAction';

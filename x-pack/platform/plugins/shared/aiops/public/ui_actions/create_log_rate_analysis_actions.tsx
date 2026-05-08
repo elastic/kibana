@@ -20,7 +20,7 @@ import type { LogRateAnalysisEmbeddableApi } from '../embeddables/log_rate_analy
 
 import type { LogRateAnalysisActionContext } from './log_rate_analysis_action_context';
 import { EmbeddableLogRateAnalysisUserInput } from '../embeddables/log_rate_analysis/log_rate_analysis_config_input';
-import type { AiopsCoreSetup } from '../plugin';
+import type { AiopsCoreSetup } from '../types';
 import { canUseAiops } from '../capabilities';
 
 const parentApiIsCompatible = async (
