@@ -60,6 +60,13 @@ export const ERROR_MESSAGE = '[MockError] Foo';
 export const ERROR_GROUPING_KEY = generateLongIdWithSeed(ERROR_MESSAGE);
 export const ERROR_GROUPING_KEY_SHORT = ERROR_GROUPING_KEY.slice(0, 5);
 
+// Trace waterfall flyout test services (distributed trace)
+export const SERVICE_WATERFALL_RUM = 'apm-waterfall-rum';
+export const SERVICE_WATERFALL_NODE = 'apm-waterfall-node';
+export const WATERFALL_RUM_TRANSACTION_NAME = 'GET /products';
+export const WATERFALL_NODE_TRANSACTION_NAME = 'GET /api/products';
+export const WATERFALL_NODE_DB_SPAN_NAME = 'SELECT * FROM products';
+
 // Span links test data dates
 export const SPAN_LINKS_START_DATE = '2022-01-01T00:00:00.000Z';
 export const SPAN_LINKS_END_DATE = '2022-01-01T00:15:00.000Z';

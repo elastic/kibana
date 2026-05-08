@@ -11,18 +11,33 @@ import { Global } from '@kbn/core-di-internal';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { RulesClient } from '../lib/rules_client';
+import { RulesClientSpaceIdToken } from '../lib/rules_client/tokens';
 import type { AlertingServerStart, RulesClientApi } from '../types';
 
 export function bindContract({ bind }: ContainerModuleLoadOptions) {
   bind(Start).toDynamicValue(({ get }) => {
     const injection = get(CoreStart('injection'));
 
+    const buildScope = (request: KibanaRequest, spaceId?: string) => {
+      const scope = injection.fork();
+      scope.bind(Request).toConstantValue(request);
+      scope.bind(Global).toConstantValue(Request);
+      if (spaceId) {
+        scope.bind(RulesClientSpaceIdToken).toConstantValue(spaceId);
+        scope.bind(Global).toConstantValue(RulesClientSpaceIdToken);
+      }
+      return scope;
+    };
+
     const contract: AlertingServerStart = {
       async getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi> {
-        const scope = injection.fork();
-        scope.bind(Request).toConstantValue(request);
-        scope.bind(Global).toConstantValue(Request);
-        return scope.get(RulesClient);
+        return buildScope(request).get(RulesClient);
+      },
+      async getRulesClientWithRequestInSpace(
+        request: KibanaRequest,
+        spaceId: string
+      ): Promise<RulesClientApi> {
+        return buildScope(request, spaceId).get(RulesClient);
       },
     };
     return contract;
