@@ -69,6 +69,7 @@ export const ConnectorOverviewPanels: React.FC = () => {
       >
         {ingestionStatus === IngestionStatus.INCOMPLETE ? (
           <EuiLinkTo
+            data-test-subj="contentConnectorsConnectorOverviewPanelsIngestionStatusLink"
             to={generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
               indexName: index.name,
               tabId: SearchIndexTabId.CONFIGURATION,

@@ -122,6 +122,7 @@
                     "lineNumber": 43,
                     "columnNumber": 23,
                     "deprecated": false,
+                    "docsReferencedTypeName": "ControlsLayout",
                     "trackAdoption": false,
                     "isRequired": true
                   }

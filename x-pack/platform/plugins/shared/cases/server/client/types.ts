@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { SavedObjectsClientContract, Logger, KibanaRequest } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -33,6 +33,7 @@ import type { LicensingService } from '../services/licensing';
 import type { NotificationService } from '../services/notifications/types';
 import type { User } from '../common/types/user';
 import type { ConfigType } from '../config';
+import type { CasesEventBus } from '../events/event_bus';
 
 export interface CasesServices {
   alertsService: AlertService;
@@ -67,6 +68,8 @@ export interface CasesClientArgs {
   readonly fileService: FileServiceStart;
   readonly usageCounter?: IUsageCounter;
   readonly config: ConfigType;
+  readonly casesEventBus?: CasesEventBus;
+  readonly request: KibanaRequest;
   readonly closeReasonValidator?: (closeReason: string, owner: string) => Promise<boolean>;
 }
 

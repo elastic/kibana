@@ -188,6 +188,7 @@
                 "lineNumber": 102,
                 "columnNumber": 63,
                 "deprecated": false,
+                "docsReferencedTypeName": "Blob",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -513,6 +514,7 @@
                 "lineNumber": 13803,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map$1",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -593,6 +595,7 @@
                 "lineNumber": 13824,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "GeoJSONSourceDiff",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -628,7 +631,15 @@
             "tags": [],
             "label": "getBounds",
             "description": [
-              "\nAllows getting the source's boundaries.\nIf there's a problem with the source's data, it will return an empty {@link LngLatBounds}."
+              "\nAllows getting the source's boundaries.\nIf there's a problem with the source's data, it will return an empty ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.LngLatBounds",
+                "text": "LngLatBounds"
+              },
+              "."
             ],
             "signature": [
               "() => Promise<maplibregl.LngLatBounds>"
@@ -677,6 +688,7 @@
                 "lineNumber": 13847,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "SetClusterOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -881,6 +893,7 @@
                 "lineNumber": 13894,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "GeoJSONSourceDiff",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -935,6 +948,7 @@
                 "lineNumber": 13896,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tile",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -971,6 +985,7 @@
                 "lineNumber": 13897,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tile",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1007,6 +1022,7 @@
                 "lineNumber": 13898,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tile",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1082,7 +1098,15 @@
         ],
         "label": "LngLat",
         "description": [
-          "\nA `LngLat` object represents a given longitude and latitude coordinate, measured in degrees.\nThese coordinates are based on the [WGS84 (EPSG:4326) standard](https://en.wikipedia.org/wiki/World_Geodetic_System#WGS84).\n\nMapLibre GL JS uses longitude, latitude coordinate order (as opposed to latitude, longitude) to match the\n[GeoJSON specification](https://tools.ietf.org/html/rfc7946).\n\nNote that any MapLibre GL JS method that accepts a `LngLat` object as an argument or option\ncan also accept an `Array` of two numbers and will perform an implicit conversion.\nThis flexible type is documented as {@link LngLatLike}.\n"
+          "\nA `LngLat` object represents a given longitude and latitude coordinate, measured in degrees.\nThese coordinates are based on the [WGS84 (EPSG:4326) standard](https://en.wikipedia.org/wiki/World_Geodetic_System#WGS84).\n\nMapLibre GL JS uses longitude, latitude coordinate order (as opposed to latitude, longitude) to match the\n[GeoJSON specification](https://tools.ietf.org/html/rfc7946).\n\nNote that any MapLibre GL JS method that accepts a `LngLat` object as an argument or option\ncan also accept an `Array` of two numbers and will perform an implicit conversion.\nThis flexible type is documented as ",
+          {
+            "pluginId": "@kbn/mapbox-gl",
+            "scope": "common",
+            "docId": "kibKbnMapboxGlPluginApi",
+            "section": "def-common.LngLatLike",
+            "text": "LngLatLike"
+          },
+          ".\n"
         ],
         "signature": [
           "maplibregl.LngLat"
@@ -1280,6 +1304,7 @@
                 "lineNumber": 629,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "LngLat",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1322,6 +1347,7 @@
                 "lineNumber": 645,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "LngLatLike",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1342,7 +1368,23 @@
         ],
         "label": "LngLatBounds",
         "description": [
-          "\nA `LngLatBounds` object represents a geographical bounding box,\ndefined by its southwest and northeast points in longitude and latitude.\n\nIf no arguments are provided to the constructor, a `null` bounding box is created.\n\nNote that any Mapbox GL method that accepts a `LngLatBounds` object as an argument or option\ncan also accept an `Array` of two {@link LngLatLike} constructs and will perform an implicit conversion.\nThis flexible type is documented as {@link LngLatBoundsLike}.\n"
+          "\nA `LngLatBounds` object represents a geographical bounding box,\ndefined by its southwest and northeast points in longitude and latitude.\n\nIf no arguments are provided to the constructor, a `null` bounding box is created.\n\nNote that any Mapbox GL method that accepts a `LngLatBounds` object as an argument or option\ncan also accept an `Array` of two ",
+          {
+            "pluginId": "@kbn/mapbox-gl",
+            "scope": "common",
+            "docId": "kibKbnMapboxGlPluginApi",
+            "section": "def-common.LngLatLike",
+            "text": "LngLatLike"
+          },
+          " constructs and will perform an implicit conversion.\nThis flexible type is documented as ",
+          {
+            "pluginId": "@kbn/mapbox-gl",
+            "scope": "common",
+            "docId": "kibKbnMapboxGlPluginApi",
+            "section": "def-common.LngLatBoundsLike",
+            "text": "LngLatBoundsLike"
+          },
+          ".\n"
         ],
         "signature": [
           "maplibregl.LngLatBounds"
@@ -1436,6 +1478,7 @@
                 "lineNumber": 1791,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "LngLatLike",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1476,6 +1519,7 @@
                 "lineNumber": 1797,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "LngLatLike",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1516,6 +1560,7 @@
                 "lineNumber": 1803,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "LngLatLike",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1860,6 +1905,7 @@
                 "lineNumber": 1919,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "LngLatLike",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1944,6 +1990,7 @@
                 "lineNumber": 1948,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "LngLat",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2006,7 +2053,15 @@
         ],
         "label": "Map$1",
         "description": [
-          "\nThe `Map` object represents the map on your page. It exposes methods\nand properties that enable you to programmatically change the map,\nand fires events as users interact with it.\n\nYou create a `Map` by specifying a `container` and other options, see {@link MapOptions} for the full list.\nThen MapLibre GL JS initializes the map on the page and returns your `Map` object.\n"
+          "\nThe `Map` object represents the map on your page. It exposes methods\nand properties that enable you to programmatically change the map,\nand fires events as users interact with it.\n\nYou create a `Map` by specifying a `container` and other options, see ",
+          {
+            "pluginId": "@kbn/mapbox-gl",
+            "scope": "common",
+            "docId": "kibKbnMapboxGlPluginApi",
+            "section": "def-common.MapOptions",
+            "text": "MapOptions"
+          },
+          " for the full list.\nThen MapLibre GL JS initializes the map on the page and returns your `Map` object.\n"
         ],
         "signature": [
           "maplibregl.Map extends Camera"
@@ -2707,7 +2762,23 @@
             "tags": [],
             "label": "scrollZoom",
             "description": [
-              "\nThe map's {@link ScrollZoomHandler}, which implements zooming in and out with a scroll wheel or trackpad.\nFind more details and examples using `scrollZoom` in the {@link ScrollZoomHandler} section."
+              "\nThe map's ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.ScrollZoomHandler",
+                "text": "ScrollZoomHandler"
+              },
+              ", which implements zooming in and out with a scroll wheel or trackpad.\nFind more details and examples using `scrollZoom` in the ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.ScrollZoomHandler",
+                "text": "ScrollZoomHandler"
+              },
+              " section."
             ],
             "signature": [
               "maplibregl.ScrollZoomHandler"
@@ -2725,7 +2796,23 @@
             "tags": [],
             "label": "boxZoom",
             "description": [
-              "\nThe map's {@link BoxZoomHandler}, which implements zooming using a drag gesture with the Shift key pressed.\nFind more details and examples using `boxZoom` in the {@link BoxZoomHandler} section."
+              "\nThe map's ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.BoxZoomHandler",
+                "text": "BoxZoomHandler"
+              },
+              ", which implements zooming using a drag gesture with the Shift key pressed.\nFind more details and examples using `boxZoom` in the ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.BoxZoomHandler",
+                "text": "BoxZoomHandler"
+              },
+              " section."
             ],
             "signature": [
               "maplibregl.BoxZoomHandler"
@@ -2743,7 +2830,23 @@
             "tags": [],
             "label": "dragRotate",
             "description": [
-              "\nThe map's {@link DragRotateHandler}, which implements rotating the map while dragging with the right\nmouse button or with the Control key pressed. Find more details and examples using `dragRotate`\nin the {@link DragRotateHandler} section."
+              "\nThe map's ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.DragRotateHandler",
+                "text": "DragRotateHandler"
+              },
+              ", which implements rotating the map while dragging with the right\nmouse button or with the Control key pressed. Find more details and examples using `dragRotate`\nin the ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.DragRotateHandler",
+                "text": "DragRotateHandler"
+              },
+              " section."
             ],
             "signature": [
               "maplibregl.DragRotateHandler"
@@ -2761,7 +2864,23 @@
             "tags": [],
             "label": "dragPan",
             "description": [
-              "\nThe map's {@link DragPanHandler}, which implements dragging the map with a mouse or touch gesture.\nFind more details and examples using `dragPan` in the {@link DragPanHandler} section."
+              "\nThe map's ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.DragPanHandler",
+                "text": "DragPanHandler"
+              },
+              ", which implements dragging the map with a mouse or touch gesture.\nFind more details and examples using `dragPan` in the ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.DragPanHandler",
+                "text": "DragPanHandler"
+              },
+              " section."
             ],
             "signature": [
               "maplibregl.DragPanHandler"
@@ -2779,7 +2898,23 @@
             "tags": [],
             "label": "keyboard",
             "description": [
-              "\nThe map's {@link KeyboardHandler}, which allows the user to zoom, rotate, and pan the map using keyboard\nshortcuts. Find more details and examples using `keyboard` in the {@link KeyboardHandler} section."
+              "\nThe map's ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.KeyboardHandler",
+                "text": "KeyboardHandler"
+              },
+              ", which allows the user to zoom, rotate, and pan the map using keyboard\nshortcuts. Find more details and examples using `keyboard` in the ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.KeyboardHandler",
+                "text": "KeyboardHandler"
+              },
+              " section."
             ],
             "signature": [
               "maplibregl.KeyboardHandler"
@@ -2797,7 +2932,23 @@
             "tags": [],
             "label": "doubleClickZoom",
             "description": [
-              "\nThe map's {@link DoubleClickZoomHandler}, which allows the user to zoom by double clicking.\nFind more details and examples using `doubleClickZoom` in the {@link DoubleClickZoomHandler} section."
+              "\nThe map's ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.DoubleClickZoomHandler",
+                "text": "DoubleClickZoomHandler"
+              },
+              ", which allows the user to zoom by double clicking.\nFind more details and examples using `doubleClickZoom` in the ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.DoubleClickZoomHandler",
+                "text": "DoubleClickZoomHandler"
+              },
+              " section."
             ],
             "signature": [
               "maplibregl.DoubleClickZoomHandler"
@@ -2815,7 +2966,23 @@
             "tags": [],
             "label": "touchZoomRotate",
             "description": [
-              "\nThe map's {@link TwoFingersTouchZoomRotateHandler}, which allows the user to zoom or rotate the map with touch gestures.\nFind more details and examples using `touchZoomRotate` in the {@link TwoFingersTouchZoomRotateHandler} section."
+              "\nThe map's ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.TwoFingersTouchZoomRotateHandler",
+                "text": "TwoFingersTouchZoomRotateHandler"
+              },
+              ", which allows the user to zoom or rotate the map with touch gestures.\nFind more details and examples using `touchZoomRotate` in the ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.TwoFingersTouchZoomRotateHandler",
+                "text": "TwoFingersTouchZoomRotateHandler"
+              },
+              " section."
             ],
             "signature": [
               "maplibregl.TwoFingersTouchZoomRotateHandler"
@@ -2833,7 +3000,23 @@
             "tags": [],
             "label": "touchPitch",
             "description": [
-              "\nThe map's {@link TwoFingersTouchPitchHandler}, which allows the user to pitch the map with touch gestures.\nFind more details and examples using `touchPitch` in the {@link TwoFingersTouchPitchHandler} section."
+              "\nThe map's ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.TwoFingersTouchPitchHandler",
+                "text": "TwoFingersTouchPitchHandler"
+              },
+              ", which allows the user to pitch the map with touch gestures.\nFind more details and examples using `touchPitch` in the ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.TwoFingersTouchPitchHandler",
+                "text": "TwoFingersTouchPitchHandler"
+              },
+              " section."
             ],
             "signature": [
               "maplibregl.TwoFingersTouchPitchHandler"
@@ -2851,7 +3034,23 @@
             "tags": [],
             "label": "cooperativeGestures",
             "description": [
-              "\nThe map's {@link CooperativeGesturesHandler}, which allows the user to see cooperative gesture info when user tries to zoom in/out.\nFind more details and examples using `cooperativeGestures` in the {@link CooperativeGesturesHandler} section."
+              "\nThe map's ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.CooperativeGesturesHandler",
+                "text": "CooperativeGesturesHandler"
+              },
+              ", which allows the user to see cooperative gesture info when user tries to zoom in/out.\nFind more details and examples using `cooperativeGestures` in the ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.CooperativeGesturesHandler",
+                "text": "CooperativeGesturesHandler"
+              },
+              " section."
             ],
             "signature": [
               "maplibregl.CooperativeGesturesHandler"
@@ -2909,6 +3108,7 @@
                 "lineNumber": 10768,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "MapOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2924,7 +3124,23 @@
             ],
             "label": "addControl",
             "description": [
-              "\nAdds an {@link IControl} to the map, calling `control.onAdd(this)`.\n\nAn {@link ErrorEvent} will be fired if the image parameter is invalid.\n"
+              "\nAdds an ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.IControl",
+                "text": "IControl"
+              },
+              " to the map, calling `control.onAdd(this)`.\n\nAn ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.ErrorEvent",
+                "text": "ErrorEvent"
+              },
+              " will be fired if the image parameter is invalid.\n"
             ],
             "signature": [
               "(control: maplibregl.IControl, position?: maplibregl.ControlPosition | undefined) => maplibregl.Map"
@@ -2951,6 +3167,7 @@
                 "lineNumber": 10791,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "IControl",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -2970,6 +3187,7 @@
                 "lineNumber": 10791,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "ControlPosition",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -2983,7 +3201,15 @@
             "tags": [],
             "label": "removeControl",
             "description": [
-              "\nRemoves the control from the map.\n\nAn {@link ErrorEvent} will be fired if the image parameter is invalid.\n"
+              "\nRemoves the control from the map.\n\nAn ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.ErrorEvent",
+                "text": "ErrorEvent"
+              },
+              " will be fired if the image parameter is invalid.\n"
             ],
             "signature": [
               "(control: maplibregl.IControl) => maplibregl.Map"
@@ -3010,6 +3236,7 @@
                 "lineNumber": 10808,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "IControl",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3050,6 +3277,7 @@
                 "lineNumber": 10824,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "IControl",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3088,6 +3316,7 @@
                 "lineNumber": 10825,
                 "columnNumber": 31,
                 "deprecated": false,
+                "docsReferencedTypeName": "LngLat",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3122,6 +3351,7 @@
                 "lineNumber": 10825,
                 "columnNumber": 67,
                 "deprecated": false,
+                "docsReferencedTypeName": "LngLat",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3319,7 +3549,15 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": [
-              "The geographical bounds of the map as {@link LngLatBounds }."
+              "The geographical bounds of the map as ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.LngLatBounds",
+                "text": "LngLatBounds"
+              },
+              "."
             ]
           },
           {
@@ -3391,7 +3629,15 @@
             "tags": [],
             "label": "setMinZoom",
             "description": [
-              "\nSets or clears the map's minimum zoom level.\nIf the map's current zoom level is lower than the new minimum,\nthe map will zoom to the new minimum.\n\nIt is not always possible to zoom out and reach the set `minZoom`.\nOther factors such as map height may restrict zooming. For example,\nif the map is 512px tall it will not be possible to zoom below zoom 0\nno matter what the `minZoom` is set to.\n\nA {@link ErrorEvent} event will be fired if minZoom is out of bounds.\n"
+              "\nSets or clears the map's minimum zoom level.\nIf the map's current zoom level is lower than the new minimum,\nthe map will zoom to the new minimum.\n\nIt is not always possible to zoom out and reach the set `minZoom`.\nOther factors such as map height may restrict zooming. For example,\nif the map is 512px tall it will not be possible to zoom below zoom 0\nno matter what the `minZoom` is set to.\n\nA ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.ErrorEvent",
+                "text": "ErrorEvent"
+              },
+              " event will be fired if minZoom is out of bounds.\n"
             ],
             "signature": [
               "(minZoom?: number | null | undefined) => maplibregl.Map"
@@ -3453,7 +3699,15 @@
             "tags": [],
             "label": "setMaxZoom",
             "description": [
-              "\nSets or clears the map's maximum zoom level.\nIf the map's current zoom level is higher than the new maximum,\nthe map will zoom to the new maximum.\n\nA {@link ErrorEvent} event will be fired if minZoom is out of bounds.\n"
+              "\nSets or clears the map's maximum zoom level.\nIf the map's current zoom level is higher than the new maximum,\nthe map will zoom to the new maximum.\n\nA ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.ErrorEvent",
+                "text": "ErrorEvent"
+              },
+              " event will be fired if minZoom is out of bounds.\n"
             ],
             "signature": [
               "(maxZoom?: number | null | undefined) => maplibregl.Map"
@@ -3515,7 +3769,15 @@
             "tags": [],
             "label": "setMinPitch",
             "description": [
-              "\nSets or clears the map's minimum pitch.\nIf the map's current pitch is lower than the new minimum,\nthe map will pitch to the new minimum.\n\nA {@link ErrorEvent} event will be fired if minPitch is out of bounds.\n"
+              "\nSets or clears the map's minimum pitch.\nIf the map's current pitch is lower than the new minimum,\nthe map will pitch to the new minimum.\n\nA ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.ErrorEvent",
+                "text": "ErrorEvent"
+              },
+              " event will be fired if minPitch is out of bounds.\n"
             ],
             "signature": [
               "(minPitch?: number | null | undefined) => maplibregl.Map"
@@ -3577,7 +3839,15 @@
             "tags": [],
             "label": "setMaxPitch",
             "description": [
-              "\nSets or clears the map's maximum pitch.\nIf the map's current pitch is higher than the new maximum,\nthe map will pitch to the new maximum.\n\nA {@link ErrorEvent} event will be fired if maxPitch is out of bounds.\n"
+              "\nSets or clears the map's maximum pitch.\nIf the map's current pitch is higher than the new maximum,\nthe map will pitch to the new maximum.\n\nA ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.ErrorEvent",
+                "text": "ErrorEvent"
+              },
+              " event will be fired if maxPitch is out of bounds.\n"
             ],
             "signature": [
               "(maxPitch?: number | null | undefined) => maplibregl.Map"
@@ -3732,6 +4002,7 @@
                 "lineNumber": 11044,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "LngLatLike",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3747,7 +4018,15 @@
             "tags": [],
             "label": "unproject",
             "description": [
-              "\nReturns a {@link LngLat} representing geographical coordinates that correspond\nto the specified pixel coordinates.\n"
+              "\nReturns a ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.LngLat",
+                "text": "LngLat"
+              },
+              " representing geographical coordinates that correspond\nto the specified pixel coordinates.\n"
             ],
             "signature": [
               "(point: maplibregl.PointLike) => maplibregl.LngLat"
@@ -3774,12 +4053,21 @@
                 "lineNumber": 11059,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "PointLike",
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": [
-              "The {@link LngLat } corresponding to `point`."
+              "The ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.LngLat",
+                "text": "LngLat"
+              },
+              " corresponding to `point`."
             ]
           },
           {
@@ -3912,6 +4200,7 @@
                 "lineNumber": 11087,
                 "columnNumber": 82,
                 "deprecated": false,
+                "docsReferencedTypeName": "Listener",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3965,6 +4254,7 @@
                 "lineNumber": 11088,
                 "columnNumber": 60,
                 "deprecated": false,
+                "docsReferencedTypeName": "DelegatedListener",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4035,6 +4325,7 @@
                 "lineNumber": 11089,
                 "columnNumber": 61,
                 "deprecated": false,
+                "docsReferencedTypeName": "Listener",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4079,6 +4370,7 @@
                 "lineNumber": 11195,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4159,6 +4451,7 @@
                 "lineNumber": 11203,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4239,6 +4532,7 @@
                 "lineNumber": 11210,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4319,6 +4613,7 @@
                 "lineNumber": 11217,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "Listener",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4361,6 +4656,7 @@
                 "lineNumber": 11234,
                 "columnNumber": 42,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4443,6 +4739,7 @@
                 "lineNumber": 11242,
                 "columnNumber": 42,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4523,6 +4820,7 @@
                 "lineNumber": 11249,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4603,6 +4901,7 @@
                 "lineNumber": 11256,
                 "columnNumber": 42,
                 "deprecated": false,
+                "docsReferencedTypeName": "Listener",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -4645,6 +4944,7 @@
                 "lineNumber": 11265,
                 "columnNumber": 41,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4725,6 +5025,7 @@
                 "lineNumber": 11274,
                 "columnNumber": 41,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4805,6 +5106,7 @@
                 "lineNumber": 11281,
                 "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -4885,6 +5187,7 @@
                 "lineNumber": 11288,
                 "columnNumber": 41,
                 "deprecated": false,
+                "docsReferencedTypeName": "Listener",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4946,6 +5249,7 @@
                 "lineNumber": 11371,
                 "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "QueryRenderedFeaturesOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -5012,7 +5316,15 @@
               }
             ],
             "returnComment": [
-              "An array of MapGeoJSONFeature objects.\n\nIn contrast to {@link MapqueryRenderedFeatures }, this function returns all features matching the query parameters,\nwhether or not they are rendered by the current style (i.e. visible). The domain of the query includes all currently-loaded\nvector tiles and GeoJSON source tiles: this function does not check tiles outside the currently\nvisible viewport.\n\nBecause features come from tiled vector data or GeoJSON data that is converted to tiles internally, feature\ngeometries may be split or duplicated across tile boundaries and, as a result, features may appear multiple\ntimes in query results. For example, suppose there is a highway running through the bounding rectangle of a query.\nThe results of the query will be those parts of the highway that lie within the map tiles covering the bounding\nrectangle, even if the highway extends into other tiles, and the portion of the highway within each map tile\nwill be returned as a separate feature. Similarly, a point feature near a tile boundary may appear in multiple\ntiles due to tile buffering."
+              "An array of MapGeoJSONFeature objects.\n\nIn contrast to ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.MapqueryRenderedFeatures",
+                "text": "MapqueryRenderedFeatures"
+              },
+              ", this function returns all features matching the query parameters,\nwhether or not they are rendered by the current style (i.e. visible). The domain of the query includes all currently-loaded\nvector tiles and GeoJSON source tiles: this function does not check tiles outside the currently\nvisible viewport.\n\nBecause features come from tiled vector data or GeoJSON data that is converted to tiles internally, feature\ngeometries may be split or duplicated across tile boundaries and, as a result, features may appear multiple\ntimes in query results. For example, suppose there is a highway running through the bounding rectangle of a query.\nThe results of the query will be those parts of the highway that lie within the map tiles covering the bounding\nrectangle, even if the highway extends into other tiles, and the portion of the highway within each map tile\nwill be returned as a separate feature. Similarly, a point feature near a tile boundary may appear in multiple\ntiles due to tile buffering."
             ]
           },
           {
@@ -5108,6 +5420,7 @@
                 "lineNumber": 11462,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "RequestTransformFunction",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5304,6 +5617,7 @@
                 "lineNumber": 11467,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "StyleSpecification",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -5439,7 +5753,15 @@
             "tags": [],
             "label": "isSourceLoaded",
             "description": [
-              "\nReturns a Boolean indicating whether the source is loaded. Returns `true` if the source with\nthe given ID in the map's style has no outstanding network requests, otherwise `false`.\n\nA {@link ErrorEvent} event will be fired if there is no source wit the specified ID.\n"
+              "\nReturns a Boolean indicating whether the source is loaded. Returns `true` if the source with\nthe given ID in the map's style has no outstanding network requests, otherwise `false`.\n\nA ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.ErrorEvent",
+                "text": "ErrorEvent"
+              },
+              " event will be fired if there is no source wit the specified ID.\n"
             ],
             "signature": [
               "(id: string) => boolean"
@@ -5609,7 +5931,15 @@
             ],
             "label": "getSource",
             "description": [
-              "\nReturns the source with the specified ID in the map's style.\n\nThis method is often used to update a source using the instance members for the relevant\nsource type as defined in classes that derive from {@link Source}.\nFor example, setting the `data` for a GeoJSON source or updating the `url` and `coordinates`\nof an image source.\n"
+              "\nReturns the source with the specified ID in the map's style.\n\nThis method is often used to update a source using the instance members for the relevant\nsource type as defined in classes that derive from ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.Source",
+                "text": "Source"
+              },
+              ".\nFor example, setting the `data` for a GeoJSON source or updating the `url` and `coordinates`\nof an image source.\n"
             ],
             "signature": [
               "<TSource extends maplibregl.Source>(id: string) => TSource | undefined"
@@ -5654,7 +5984,15 @@
             ],
             "label": "addImage",
             "description": [
-              "\nAdd an image to the style. This image can be displayed on the map like any other icon in the style's\nsprite using the image's ID with\n[`icon-image`](https://maplibre.org/maplibre-style-spec/layers/#layout-symbol-icon-image),\n[`background-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-background-background-pattern),\n[`fill-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-fill-fill-pattern),\nor [`line-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-line-line-pattern).\n\nA {@link ErrorEvent} event will be fired if the image parameter is invalid or there is not enough space in the sprite to add this image.\n"
+              "\nAdd an image to the style. This image can be displayed on the map like any other icon in the style's\nsprite using the image's ID with\n[`icon-image`](https://maplibre.org/maplibre-style-spec/layers/#layout-symbol-icon-image),\n[`background-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-background-background-pattern),\n[`fill-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-fill-fill-pattern),\nor [`line-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-line-line-pattern).\n\nA ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.ErrorEvent",
+                "text": "ErrorEvent"
+              },
+              " event will be fired if the image parameter is invalid or there is not enough space in the sprite to add this image.\n"
             ],
             "signature": [
               "(id: string, image: HTMLImageElement | ImageBitmap | ImageData | { width: number; height: number; data: Uint8Array | Uint8ClampedArray; } | maplibregl.StyleImageInterface, options?: Partial<maplibregl.StyleImageMetadata> | undefined) => this"
@@ -5719,6 +6057,7 @@
                 "lineNumber": 11646,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "Partial",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -5732,7 +6071,15 @@
             "tags": [],
             "label": "updateImage",
             "description": [
-              "\nUpdate an existing image in a style. This image can be displayed on the map like any other icon in the style's\nsprite using the image's ID with\n[`icon-image`](https://maplibre.org/maplibre-style-spec/layers/#layout-symbol-icon-image),\n[`background-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-background-background-pattern),\n[`fill-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-fill-fill-pattern),\nor [`line-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-line-line-pattern).\n\nAn {@link ErrorEvent} will be fired if the image parameter is invalid.\n"
+              "\nUpdate an existing image in a style. This image can be displayed on the map like any other icon in the style's\nsprite using the image's ID with\n[`icon-image`](https://maplibre.org/maplibre-style-spec/layers/#layout-symbol-icon-image),\n[`background-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-background-background-pattern),\n[`fill-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-fill-fill-pattern),\nor [`line-pattern`](https://maplibre.org/maplibre-style-spec/layers/#paint-line-line-pattern).\n\nAn ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.ErrorEvent",
+                "text": "ErrorEvent"
+              },
+              " will be fired if the image parameter is invalid.\n"
             ],
             "signature": [
               "(id: string, image: HTMLImageElement | ImageBitmap | ImageData | maplibregl.StyleImageInterface | { width: number; height: number; data: Uint8Array | Uint8ClampedArray; }) => this"
@@ -5791,7 +6138,9 @@
             "tags": [],
             "label": "getImage",
             "description": [
-              "\nReturns an image, specified by ID, currently available in the map.\nThis includes both images from the style's original sprite\nand any images that have been added at runtime using {@link Map#addImage}.\n"
+              "\nReturns an image, specified by ID, currently available in the map.\nThis includes both images from the style's original sprite\nand any images that have been added at runtime using ",
+              "Map#addImage",
+              ".\n"
             ],
             "signature": [
               "(id: string) => maplibregl.StyleImage"
@@ -5833,7 +6182,17 @@
             "tags": [],
             "label": "hasImage",
             "description": [
-              "\nCheck whether or not an image with a specific ID exists in the style. This checks both images\nin the style's original sprite and any images\nthat have been added at runtime using {@link Map#addImage}.\n\nAn {@link ErrorEvent} will be fired if the image parameter is invalid.\n"
+              "\nCheck whether or not an image with a specific ID exists in the style. This checks both images\nin the style's original sprite and any images\nthat have been added at runtime using ",
+              "Map#addImage",
+              ".\n\nAn ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.ErrorEvent",
+                "text": "ErrorEvent"
+              },
+              " will be fired if the image parameter is invalid.\n"
             ],
             "signature": [
               "(id: string) => boolean"
@@ -5875,7 +6234,9 @@
             "tags": [],
             "label": "removeImage",
             "description": [
-              "\nRemove an image from a style. This can be an image from the style's original\nsprite or any images\nthat have been added at runtime using {@link Map#addImage}.\n"
+              "\nRemove an image from a style. This can be an image from the style's original\nsprite or any images\nthat have been added at runtime using ",
+              "Map#addImage",
+              ".\n"
             ],
             "signature": [
               "(id: string) => void"
@@ -5917,7 +6278,9 @@
             ],
             "label": "loadImage",
             "description": [
-              "\nLoad an image from an external URL to be used with {@link Map#addImage}. External\ndomains must support [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS).\n"
+              "\nLoad an image from an external URL to be used with ",
+              "Map#addImage",
+              ". External\ndomains must support [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS).\n"
             ],
             "signature": [
               "(url: string) => Promise<maplibregl.GetResourceResponse<HTMLImageElement | ImageBitmap>>"
@@ -5959,7 +6322,9 @@
             "tags": [],
             "label": "listImages",
             "description": [
-              "\nReturns an Array of strings containing the IDs of all images currently available in the map.\nThis includes both images from the style's original sprite\nand any images that have been added at runtime using {@link Map#addImage}.\n"
+              "\nReturns an Array of strings containing the IDs of all images currently available in the map.\nThis includes both images from the style's original sprite\nand any images that have been added at runtime using ",
+              "Map#addImage",
+              ".\n"
             ],
             "signature": [
               "() => string[]"
@@ -6012,6 +6377,7 @@
                 "lineNumber": 11827,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "AddLayerObject",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -6103,7 +6469,15 @@
             "tags": [],
             "label": "removeLayer",
             "description": [
-              "\nRemoves the layer with the given ID from the map's style.\n\nAn {@link ErrorEvent} will be fired if the image parameter is invalid.\n"
+              "\nRemoves the layer with the given ID from the map's style.\n\nAn ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.ErrorEvent",
+                "text": "ErrorEvent"
+              },
+              " will be fired if the image parameter is invalid.\n"
             ],
             "signature": [
               "(id: string) => this"
@@ -6355,6 +6729,7 @@
                 "lineNumber": 11935,
                 "columnNumber": 66,
                 "deprecated": false,
+                "docsReferencedTypeName": "StyleSetterOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -6497,6 +6872,7 @@
                 "lineNumber": 11959,
                 "columnNumber": 62,
                 "deprecated": false,
+                "docsReferencedTypeName": "StyleSetterOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -6655,6 +7031,7 @@
                 "lineNumber": 11980,
                 "columnNumber": 63,
                 "deprecated": false,
+                "docsReferencedTypeName": "StyleSetterOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -6775,6 +7152,7 @@
                 "lineNumber": 11999,
                 "columnNumber": 38,
                 "deprecated": false,
+                "docsReferencedTypeName": "StyleSetterOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -6875,6 +7253,7 @@
                 "lineNumber": 12017,
                 "columnNumber": 37,
                 "deprecated": false,
+                "docsReferencedTypeName": "StyleSetterOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -6996,6 +7375,7 @@
                 "lineNumber": 12048,
                 "columnNumber": 38,
                 "deprecated": false,
+                "docsReferencedTypeName": "StyleSetterOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -7036,6 +7416,7 @@
                 "lineNumber": 12060,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "LightSpecification",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -7055,6 +7436,7 @@
                 "lineNumber": 12060,
                 "columnNumber": 38,
                 "deprecated": false,
+                "docsReferencedTypeName": "StyleSetterOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -7117,6 +7499,7 @@
                 "lineNumber": 12078,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "SkySpecification",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -7136,6 +7519,7 @@
                 "lineNumber": 12078,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "StyleSetterOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -7200,6 +7584,7 @@
                 "lineNumber": 12125,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "FeatureIdentifier",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -7259,6 +7644,7 @@
                 "lineNumber": 12172,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "FeatureIdentifier",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -7318,6 +7704,7 @@
                 "lineNumber": 12199,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "FeatureIdentifier",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -7552,6 +7939,7 @@
                 "lineNumber": 12232,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ITransform",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -7569,6 +7957,7 @@
                 "lineNumber": 12232,
                 "columnNumber": 46,
                 "deprecated": false,
+                "docsReferencedTypeName": "ICameraHelper",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -7732,6 +8121,7 @@
                 "lineNumber": 12262,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "TaskID",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -8029,7 +8419,15 @@
             "tags": [],
             "label": "getProjection",
             "description": [
-              "\nGets the {@link ProjectionSpecification}."
+              "\nGets the ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.ProjectionSpecification",
+                "text": "ProjectionSpecification"
+              },
+              "."
             ],
             "signature": [
               "() => maplibregl.ProjectionSpecification"
@@ -8051,7 +8449,15 @@
             "tags": [],
             "label": "setProjection",
             "description": [
-              "\nSets the {@link ProjectionSpecification}."
+              "\nSets the ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.ProjectionSpecification",
+                "text": "ProjectionSpecification"
+              },
+              "."
             ],
             "signature": [
               "(projection: maplibregl.ProjectionSpecification) => this"
@@ -8078,6 +8484,7 @@
                 "lineNumber": 12378,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ProjectionSpecification",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -8204,7 +8611,39 @@
             "tags": [],
             "label": "preventDefault",
             "description": [
-              "\nPrevents subsequent default processing of the event by the map.\n\nCalling this method will prevent the following default map behaviors:\n\n  * On `mousedown` events, the behavior of {@link DragPanHandler}\n  * On `mousedown` events, the behavior of {@link DragRotateHandler}\n  * On `mousedown` events, the behavior of {@link BoxZoomHandler}\n  * On `dblclick` events, the behavior of {@link DoubleClickZoomHandler}\n"
+              "\nPrevents subsequent default processing of the event by the map.\n\nCalling this method will prevent the following default map behaviors:\n\n  * On `mousedown` events, the behavior of ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.DragPanHandler",
+                "text": "DragPanHandler"
+              },
+              "\n  * On `mousedown` events, the behavior of ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.DragRotateHandler",
+                "text": "DragRotateHandler"
+              },
+              "\n  * On `mousedown` events, the behavior of ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.BoxZoomHandler",
+                "text": "BoxZoomHandler"
+              },
+              "\n  * On `dblclick` events, the behavior of ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.DoubleClickZoomHandler",
+                "text": "DoubleClickZoomHandler"
+              },
+              "\n"
             ],
             "signature": [
               "() => void"
@@ -8292,6 +8731,7 @@
                 "lineNumber": 9376,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map$1",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -8309,6 +8749,7 @@
                 "lineNumber": 9376,
                 "columnNumber": 40,
                 "deprecated": false,
+                "docsReferencedTypeName": "MouseEvent",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -8654,6 +9095,7 @@
                 "lineNumber": 13972,
                 "columnNumber": 93,
                 "deprecated": false,
+                "docsReferencedTypeName": "Dispatcher",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -8671,6 +9113,7 @@
                 "lineNumber": 13972,
                 "columnNumber": 117,
                 "deprecated": false,
+                "docsReferencedTypeName": "Evented",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -8761,6 +9204,7 @@
                 "lineNumber": 13975,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map$1",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -8815,6 +9259,7 @@
                 "lineNumber": 13977,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "Function",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -8855,6 +9300,7 @@
                 "lineNumber": 13983,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -8949,6 +9395,7 @@
                 "lineNumber": 13991,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverscaledTileID",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -8985,6 +9432,7 @@
                 "lineNumber": 13992,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tile",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -9021,6 +9469,7 @@
                 "lineNumber": 13993,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tile",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -9057,6 +9506,7 @@
                 "lineNumber": 13994,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tile",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -9426,6 +9876,7 @@
                 "lineNumber": 14089,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "VectorTileSourceOptions",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -9443,6 +9894,7 @@
                 "lineNumber": 14089,
                 "columnNumber": 60,
                 "deprecated": false,
+                "docsReferencedTypeName": "Dispatcher",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -9460,6 +9912,7 @@
                 "lineNumber": 14089,
                 "columnNumber": 84,
                 "deprecated": false,
+                "docsReferencedTypeName": "Evented",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -9532,6 +9985,7 @@
                 "lineNumber": 14092,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverscaledTileID",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -9568,6 +10022,7 @@
                 "lineNumber": 14093,
                 "columnNumber": 8,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map$1",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -9604,6 +10059,7 @@
                 "lineNumber": 14094,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "Function",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -9644,6 +10100,7 @@
                 "lineNumber": 14100,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -9756,6 +10213,7 @@
                 "lineNumber": 14109,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tile",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -9792,6 +10250,7 @@
                 "lineNumber": 14111,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tile",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -9828,6 +10287,7 @@
                 "lineNumber": 14112,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tile",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -9865,7 +10325,21 @@
         "tags": [],
         "label": "CustomLayerInterface",
         "description": [
-          "\nInterface for custom style layers. This is a specification for\nimplementers to model: it is not an exported method or class.\n\nCustom layers allow a user to render directly into the map's GL context using the map's camera.\nThese layers can be added between any regular layers using {@link Map#addLayer}.\n\nCustom layers must have a unique `id` and must have the `type` of `\"custom\"`.\nThey must implement `render` and may implement `prerender`, `onAdd` and `onRemove`.\nThey can trigger rendering using {@link Map#triggerRepaint}\nand they should appropriately handle {@link MapContextEvent} with `webglcontextlost` and `webglcontextrestored`.\n\nThe `renderingMode` property controls whether the layer is treated as a `\"2d\"` or `\"3d\"` map layer. Use:\n\n- `\"renderingMode\": \"3d\"` to use the depth buffer and share it with other layers\n- `\"renderingMode\": \"2d\"` to add a layer with no depth. If you need to use the depth buffer for a `\"2d\"` layer you must use an offscreen\n  framebuffer and {@link CustomLayerInterface#prerender}\n"
+          "\nInterface for custom style layers. This is a specification for\nimplementers to model: it is not an exported method or class.\n\nCustom layers allow a user to render directly into the map's GL context using the map's camera.\nThese layers can be added between any regular layers using ",
+          "Map#addLayer",
+          ".\n\nCustom layers must have a unique `id` and must have the `type` of `\"custom\"`.\nThey must implement `render` and may implement `prerender`, `onAdd` and `onRemove`.\nThey can trigger rendering using ",
+          "Map#triggerRepaint",
+          "\nand they should appropriately handle ",
+          {
+            "pluginId": "@kbn/mapbox-gl",
+            "scope": "common",
+            "docId": "kibKbnMapboxGlPluginApi",
+            "section": "def-common.MapContextEvent",
+            "text": "MapContextEvent"
+          },
+          " with `webglcontextlost` and `webglcontextrestored`.\n\nThe `renderingMode` property controls whether the layer is treated as a `\"2d\"` or `\"3d\"` map layer. Use:\n\n- `\"renderingMode\": \"3d\"` to use the depth buffer and share it with other layers\n- `\"renderingMode\": \"2d\"` to add a layer with no depth. If you need to use the depth buffer for a `\"2d\"` layer you must use an offscreen\n  framebuffer and ",
+          "CustomLayerInterface#prerender",
+          "\n"
         ],
         "signature": [
           "maplibregl.CustomLayerInterface"
@@ -9980,6 +10454,7 @@
                 "lineNumber": 6271,
                 "columnNumber": 87,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomRenderMethodInput",
                 "trackAdoption": false
               }
             ]
@@ -10009,7 +10484,9 @@
             "tags": [],
             "label": "onAdd",
             "description": [
-              "\nOptional method called when the layer has been added to the Map with {@link Map#addLayer}. This\ngives the layer a chance to initialize gl resources and register event listeners.\n"
+              "\nOptional method called when the layer has been added to the Map with ",
+              "Map#addLayer",
+              ". This\ngives the layer a chance to initialize gl resources and register event listeners.\n"
             ],
             "signature": [
               "((map: maplibregl.Map, gl: WebGLRenderingContext | WebGL2RenderingContext) => void) | undefined"
@@ -10036,6 +10513,7 @@
                 "lineNumber": 6381,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map$1",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -10068,7 +10546,9 @@
             "tags": [],
             "label": "onRemove",
             "description": [
-              "\nOptional method called when the layer has been removed from the Map with {@link Map#removeLayer}. This\ngives the layer a chance to clean up gl resources and event listeners.\n"
+              "\nOptional method called when the layer has been removed from the Map with ",
+              "Map#removeLayer",
+              ". This\ngives the layer a chance to clean up gl resources and event listeners.\n"
             ],
             "signature": [
               "((map: maplibregl.Map, gl: WebGLRenderingContext | WebGL2RenderingContext) => void) | undefined"
@@ -10095,6 +10575,7 @@
                 "lineNumber": 6389,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map$1",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -10367,7 +10848,14 @@
             "tags": [],
             "label": "fire",
             "description": [
-              "\nAn ability to fire an event to all the listeners, see {@link Evented}"
+              "\nAn ability to fire an event to all the listeners, see ",
+              {
+                "pluginId": "@kbn/mapbox-gl",
+                "scope": "common",
+                "docId": "kibKbnMapboxGlPluginApi",
+                "section": "def-common.Evented",
+                "text": "Evented"
+              }
             ],
             "signature": [
               "(event: maplibregl.Event) => unknown"
@@ -10394,6 +10882,7 @@
                 "lineNumber": 2552,
                 "columnNumber": 7,
                 "deprecated": false,
+                "docsReferencedTypeName": "Event$1",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10434,6 +10923,7 @@
                 "lineNumber": 2557,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map$1",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10474,6 +10964,7 @@
                 "lineNumber": 2562,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Map$1",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10514,6 +11005,7 @@
                 "lineNumber": 2568,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tile",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10554,6 +11046,7 @@
                 "lineNumber": 2573,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "OverscaledTileID",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10594,6 +11087,7 @@
                 "lineNumber": 2578,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tile",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10634,6 +11128,7 @@
                 "lineNumber": 2583,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "Tile",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -10711,7 +11206,15 @@
         "tags": [],
         "label": "AttributionControlOptions",
         "description": [
-          "\nThe {@link AttributionControl} options object"
+          "\nThe ",
+          {
+            "pluginId": "@kbn/mapbox-gl",
+            "scope": "common",
+            "docId": "kibKbnMapboxGlPluginApi",
+            "section": "def-common.AttributionControl",
+            "text": "AttributionControl"
+          },
+          " options object"
         ],
         "signature": [
           "{ compact?: boolean | undefined; customAttribution?: string | string[] | undefined; }"
@@ -10802,7 +11305,15 @@
         "tags": [],
         "label": "MapOptions",
         "description": [
-          "\nThe {@link Map} options object."
+          "\nThe ",
+          {
+            "pluginId": "@kbn/mapbox-gl",
+            "scope": "common",
+            "docId": "kibKbnMapboxGlPluginApi",
+            "section": "def-common.Map",
+            "text": "Map"
+          },
+          " options object."
         ],
         "signature": [
           "{ hash?: string | boolean | undefined; interactive?: boolean | undefined; container: string | HTMLElement; bearingSnap?: number | undefined; attributionControl?: false | maplibregl.AttributionControlOptions | undefined; maplibreLogo?: boolean | undefined; logoPosition?: maplibregl.ControlPosition | undefined; canvasContextAttributes?: maplibregl.WebGLContextAttributesWithType | undefined; refreshExpiredTiles?: boolean | undefined; maxBounds?: maplibregl.LngLatBoundsLike | undefined; scrollZoom?: boolean | maplibregl.AroundCenterOptions | undefined; minZoom?: number | null | undefined; maxZoom?: number | null | undefined; minPitch?: number | null | undefined; maxPitch?: number | null | undefined; boxZoom?: boolean | undefined; dragRotate?: boolean | undefined; dragPan?: boolean | maplibregl.DragPanOptions | undefined; keyboard?: boolean | undefined; doubleClickZoom?: boolean | undefined; touchZoomRotate?: boolean | maplibregl.AroundCenterOptions | undefined; touchPitch?: boolean | maplibregl.AroundCenterOptions | undefined; cooperativeGestures?: boolean | undefined; trackResize?: boolean | undefined; center?: maplibregl.LngLatLike | undefined; elevation?: number | undefined; zoom?: number | undefined; bearing?: number | undefined; pitch?: number | undefined; roll?: number | undefined; renderWorldCopies?: boolean | undefined; maxTileCacheSize?: number | null | undefined; maxTileCacheZoomLevels?: number | undefined; transformRequest?: maplibregl.RequestTransformFunction | null | undefined; transformCameraUpdate?: maplibregl.CameraUpdateTransformFunction | null | undefined; locale?: any; fadeDuration?: number | undefined; crossSourceCollisions?: boolean | undefined; collectResourceTiming?: boolean | undefined; clickTolerance?: number | undefined; bounds?: maplibregl.LngLatBoundsLike | undefined; fitBoundsOptions?: maplibregl.FitBoundsOptions | undefined; localIdeographFontFamily?: string | false | undefined; style?: string | maplibregl.StyleSpecification | undefined; pitchWithRotate?: boolean | undefined; rollEnabled?: boolean | undefined; pixelRatio?: number | undefined; validateStyle?: boolean | undefined; maxCanvasSize?: [number, number] | undefined; cancelPendingTileRequestsWhileZooming?: boolean | undefined; centerClampedToGround?: boolean | undefined; }"

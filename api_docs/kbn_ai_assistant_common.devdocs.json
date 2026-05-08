@@ -53,6 +53,7 @@
             "lineNumber": 15,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "Capabilities",
             "trackAdoption": false,
             "isRequired": true
           }

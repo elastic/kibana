@@ -21,7 +21,7 @@ import {
 } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY } from '../utils/route_security';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 const querySchema = schema.object({
   query: schema.maybe(schema.string({ meta: { description: 'Free-text search query.' } })),
@@ -69,7 +69,7 @@ export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependen
         },
         validate: { request: { query: querySchema } },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           if (request.authzResult?.[WorkflowsManagementApiActions.read] !== true) {
             return response.forbidden();

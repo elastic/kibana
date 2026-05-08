@@ -35,6 +35,7 @@
             "lineNumber": 65,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "CheckIndexProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -92,7 +93,7 @@
           "React.NamedExoticComponent<Props>"
         ],
         "path": "x-pack/solutions/security/packages/ecs-data-quality-dashboard/impl/data_quality_panel/index.tsx",
-        "lineNumber": 171,
+        "lineNumber": 172,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -112,6 +113,7 @@
             "lineNumber": 630,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           }
         ],

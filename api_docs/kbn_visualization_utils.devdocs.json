@@ -71,6 +71,7 @@
             "lineNumber": 54,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeRange",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -94,6 +95,7 @@
             "lineNumber": 54,
             "columnNumber": 55,
             "deprecated": false,
+            "docsReferencedTypeName": "DataPublicPluginStart",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -131,6 +133,7 @@
             "lineNumber": 10,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -334,6 +337,7 @@
             "lineNumber": 16,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "IUiSettingsClient",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -484,6 +488,7 @@
                     "lineNumber": 28,
                     "columnNumber": 16,
                     "deprecated": false,
+                    "docsReferencedTypeName": "T",
                     "trackAdoption": false,
                     "isRequired": true
                   }

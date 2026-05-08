@@ -47,6 +47,7 @@
             "lineNumber": 79,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "NavigationProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -121,6 +122,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "NavigationStructure",
             "trackAdoption": false,
             "isRequired": true
           },

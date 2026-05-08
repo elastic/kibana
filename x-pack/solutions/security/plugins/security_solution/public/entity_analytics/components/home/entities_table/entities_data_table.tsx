@@ -154,7 +154,7 @@ const COLUMN_HEADERS: Record<string, string> = {
 const DEFAULT_COLUMNS: DefaultColumn[] = [
   { id: ENTITY_FIELDS.ENTITY_NAME, width: 200 },
   { id: ENTITY_FIELDS.ENTITY_ID, width: 300 },
-  { id: ENTITY_FIELDS.ENTITY_SOURCE, width: 200 },
+  { id: ENTITY_FIELDS.ENTITY_SOURCE, width: 216 },
   { id: ENTITY_FIELDS.RESOLVED_TO, width: 300 },
   { id: ENTITY_FIELDS.ENTITY_TYPE, width: 200 },
   { id: ENTITY_FIELDS.ENTITY_RISK, width: 200 },
@@ -189,7 +189,7 @@ export const EntitiesDataTable = ({
     setUrlQuery,
   } = state;
 
-  const { openRightPanel, closeFlyout } = useExpandableFlyoutApi();
+  const { openFlyout, closeFlyout } = useExpandableFlyoutApi();
   const { investigateInTimeline } = useInvestigateInTimeline();
   const {
     timelinePrivileges: { read: canUseTimeline },
@@ -210,17 +210,19 @@ export const EntitiesDataTable = ({
       const panelParam = EntityPanelParamByType[entityType];
       if (!panelKey || !panelParam) return;
 
-      openRightPanel({
-        id: panelKey,
-        params: {
-          [panelParam]: entityName,
-          entityId,
-          contextID: ENTITY_ANALYTICS_TABLE_ID,
-          scopeId: ENTITY_ANALYTICS_TABLE_ID,
+      openFlyout({
+        right: {
+          id: panelKey,
+          params: {
+            [panelParam]: entityName,
+            entityId,
+            contextID: ENTITY_ANALYTICS_TABLE_ID,
+            scopeId: ENTITY_ANALYTICS_TABLE_ID,
+          },
         },
       });
     },
-    [openRightPanel, closeFlyout]
+    [openFlyout, closeFlyout]
   );
 
   const {
@@ -455,7 +457,7 @@ export const EntitiesDataTable = ({
       [ENTITY_FIELDS.ENTITY_SOURCE]: ({ row }: DataGridCellValueElementProps) => {
         const values = toEntitySourceArray(row.flattened[ENTITY_FIELDS.ENTITY_SOURCE]);
         if (values.length === 0) return getEmptyTagValue();
-        return <EntitySourceValue values={values} />;
+        return <EntitySourceValue values={values} textSize="xs" />;
       },
       [ENTITY_FIELDS.ASSET_CRITICALITY]: ({ row }: DataGridCellValueElementProps) => {
         const value = row.flattened[ENTITY_FIELDS.ASSET_CRITICALITY] as

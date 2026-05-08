@@ -16,7 +16,7 @@ import {
   useNodesState,
 } from '@xyflow/react';
 import type { Edge, FitViewOptions, Node, ReactFlowInstance, FitView } from '@xyflow/react';
-import { useGeneratedHtmlId, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useGeneratedHtmlId } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui';
 import { SvgDefsMarker } from '../edge/markers';
 import {
@@ -68,11 +68,6 @@ export interface GraphProps extends CommonProps {
    */
   children?: React.ReactNode;
   /**
-   * Optional content to be rendered in the bottom-right corner of the graph.
-   * Typically used for callouts or other contextual messages displayed next to the controls.
-   */
-  interactiveBottomRightContent?: React.ReactNode;
-  /**
    * Callback invoked when the graph is updated with new nodes.
    * Receives one argument with the list of newly added nodes.
    * When callback is undefined, graph will center on new nodes (default behavior).
@@ -104,6 +99,11 @@ const fitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
   duration: 200,
 };
 
+const nonInteractiveFitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
+  ...fitViewOptions,
+  maxZoom: 0.85,
+};
+
 /**
  * Graph component renders a graph visualization using ReactFlow.
  * It takes nodes and edges as input and provides interactive controls
@@ -126,7 +126,6 @@ export const Graph = memo<GraphProps>(
     isLocked = false,
     showMinimap = false,
     children,
-    interactiveBottomRightContent,
     onCenterGraphAfterRefresh,
     ...rest
   }: GraphProps) => {
@@ -261,13 +260,17 @@ export const Graph = memo<GraphProps>(
 
     const onInitCallback = useCallback(
       (xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) => {
-        xyflow.fitView();
+        if (interactive) {
+          xyflow.fitView();
+        } else {
+          xyflow.fitView(nonInteractiveFitViewOptions);
+        }
         fitViewRef.current = xyflow.fitView;
 
         // When the graph is not initialized as interactive, we need to fit the view on resize
         if (!interactive) {
           const resizeObserver = new ResizeObserver(() => {
-            xyflow.fitView();
+            xyflow.fitView(nonInteractiveFitViewOptions);
           });
           resizeObserver.observe(document.querySelector('.react-flow') as Element);
           return () => resizeObserver.disconnect();
@@ -283,6 +286,7 @@ export const Graph = memo<GraphProps>(
           key={reactFlowKey}
           data-test-subj={GRAPH_ID}
           fitView={true}
+          fitViewOptions={interactive ? undefined : nonInteractiveFitViewOptions}
           onInit={onInitCallback}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
@@ -307,12 +311,7 @@ export const Graph = memo<GraphProps>(
         >
           {interactive && (
             <Panel position="bottom-right">
-              <EuiFlexGroup direction="row" gutterSize="s" alignItems="flexEnd">
-                {interactiveBottomRightContent}
-                <EuiFlexItem grow={false}>
-                  <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
             </Panel>
           )}
           {children}

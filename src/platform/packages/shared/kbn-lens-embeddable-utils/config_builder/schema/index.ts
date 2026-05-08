@@ -109,7 +109,14 @@ export const _lensApiConfigSchema: any = objectUnion(
     ...treemapConfigSchema.getUnionTypes(),
     ...waffleConfigSchema.getUnionTypes(),
   ],
-  { meta: { id: 'lensApiConfig', title: 'Visualizations' } }
+  {
+    meta: {
+      id: 'lensApiConfig',
+      title: 'Visualizations',
+      description:
+        'Visualization configuration. Use the `type` field to specify the chart type. Each chart type has its own set of required and optional fields.',
+    },
+  }
 );
 
 export type LensApiConfig =
@@ -238,6 +245,20 @@ export type LensApiAllOperations =
   | LensApiAllMetricOrFormulaOperations
   | LensApiBucketOperations
   | LensApiStaticValueOperation;
+
+/**
+ * Supported chart types in the Lens API
+ *
+ * @note snake cased
+ */
+export type LensApiConfigChartType = LensApiConfig['type'];
+
+/**
+ * Map of Lens API state types to their corresponding config type
+ */
+export type LensApiConfigByType = {
+  [K in LensApiConfig['type']]: Extract<LensApiConfig, { type: K }>;
+};
 
 export {
   // Combined schemas

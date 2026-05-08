@@ -847,6 +847,7 @@
                 "lineNumber": 26,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -3307,7 +3308,9 @@
             "type": "string",
             "tags": [],
             "label": "operator",
-            "description": [],
+            "description": [
+              "Maps KQL suggestion types to ISuggestionItem kind values"
+            ],
             "signature": [
               "KQLInESQLSuggestionType.Operator"
             ],
@@ -3323,7 +3326,9 @@
             "type": "string",
             "tags": [],
             "label": "field",
-            "description": [],
+            "description": [
+              "Maps KQL suggestion types to ISuggestionItem kind values"
+            ],
             "signature": [
               "KQLInESQLSuggestionType.Field"
             ],
@@ -3339,7 +3344,9 @@
             "type": "string",
             "tags": [],
             "label": "value",
-            "description": [],
+            "description": [
+              "Maps KQL suggestion types to ISuggestionItem kind values"
+            ],
             "signature": [
               "KQLInESQLSuggestionType.Value"
             ],

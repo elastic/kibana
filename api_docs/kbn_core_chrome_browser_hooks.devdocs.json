@@ -33,6 +33,7 @@
             "lineNumber": 18,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "AppMenuProps",
             "trackAdoption": false,
             "isRequired": true
           }

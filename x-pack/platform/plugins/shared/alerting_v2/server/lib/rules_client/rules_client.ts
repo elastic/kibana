@@ -11,24 +11,18 @@ import {
   createRuleDataSchema,
   updateRuleDataSchema,
 } from '@kbn/alerting-v2-schemas';
-import { PluginStart } from '@kbn/core-di';
-import { CoreStart, Request } from '@kbn/core-di-server';
-import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
-import { inject, injectable } from 'inversify';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
-import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
-import { UserService } from '../services/user_service/user_service';
 import type {
   BulkOperationError,
   BulkOperationResponse,
@@ -46,7 +40,7 @@ import {
   buildUpdateRuleAttributes,
 } from './utils';
 import { buildRuleSoFilter } from './build_rule_filter';
-import { buildFindRulesSearch } from './build_rule_search';
+import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 
 const withApm = withApmDecorator('RulesClient');
@@ -76,22 +70,35 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
   return sortFieldMap[sortField];
 };
 
-@injectable()
+interface RulesClientParams {
+  services: {
+    request: KibanaRequest;
+    rulesSavedObjectService: RulesSavedObjectServiceContract;
+    taskManager: TaskManagerStartContract;
+    userService: UserServiceContract;
+  };
+  options: {
+    spaceId: string;
+  };
+}
+
 export class RulesClient {
-  constructor(
-    @inject(Request) private readonly request: KibanaRequest,
-    @inject(CoreStart('http')) private readonly http: HttpServiceStart,
-    @inject(RulesSavedObjectServiceScopedToken)
-    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
-    @inject(PluginStart('taskManager')) private readonly taskManager: TaskManagerStartContract,
-    @inject(UserService) private readonly userService: UserServiceContract
-  ) {}
+  private readonly request: KibanaRequest;
+  private readonly rulesSavedObjectService: RulesSavedObjectServiceContract;
+  private readonly taskManager: TaskManagerStartContract;
+  private readonly userService: UserServiceContract;
+  private readonly spaceId: string;
+
+  constructor({ services, options }: RulesClientParams) {
+    this.request = services.request;
+    this.rulesSavedObjectService = services.rulesSavedObjectService;
+    this.taskManager = services.taskManager;
+    this.userService = services.userService;
+    this.spaceId = options.spaceId;
+  }
 
   private getSpaceContext(): { spaceId: string } {
-    const requestBasePath = this.http.basePath.get(this.request);
-    const space = getSpaceIdFromPath(requestBasePath, this.http.basePath.serverBasePath);
-    const spaceId = space?.spaceId || 'default';
-    return { spaceId };
+    return { spaceId: this.spaceId };
   }
 
   @withApm
@@ -372,13 +379,16 @@ export class RulesClient {
   public async findRules(params: FindRulesParams = {}): Promise<FindRulesResponse> {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? DEFAULT_PER_PAGE;
-    const filter = buildFindRulesSearch({ filter: params.filter, search: params.search });
+    const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
+    const search = buildSoSearch(params.search);
     const sortField = mapSortField(params.sortField);
 
     const res = await this.rulesSavedObjectService.find({
       page,
       perPage,
-      filter,
+      filter: soFilter,
+      search,
+      searchFields: search ? RULE_SEARCH_FIELDS : undefined,
       sortField,
       sortOrder: params.sortOrder,
     });
@@ -399,8 +409,8 @@ export class RulesClient {
    * IDs up to {@link BULK_FILTER_MAX_RULES}.
    */
   private async resolveRuleIds(params: BulkRulesParams): Promise<ResolveRuleIdsResult> {
-    if (params.ids && params.filter) {
-      throw Boom.badRequest('Only one of ids or filter can be provided');
+    if (params.ids && (params.filter || params.search)) {
+      throw Boom.badRequest('ids cannot be combined with filter or search');
     }
 
     if (params.ids) {
@@ -408,6 +418,7 @@ export class RulesClient {
     }
 
     const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
+    const search = buildSoSearch(params.search);
     const allIds: string[] = [];
     let currentPage = 1;
     const pageSize = 100;
@@ -418,6 +429,8 @@ export class RulesClient {
         page: currentPage,
         perPage: pageSize,
         filter: soFilter,
+        search,
+        searchFields: search ? RULE_SEARCH_FIELDS : undefined,
       });
 
       if (currentPage === 1) {
