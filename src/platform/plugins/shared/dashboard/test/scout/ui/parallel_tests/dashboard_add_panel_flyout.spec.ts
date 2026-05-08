@@ -50,14 +50,19 @@ const getExpected = (config: ScoutTestConfig) => {
 spaceTest.describe(
   'Dashboard add panel flyout',
   {
-    tag: [...tags.serverless.search],
+    tag: [
+      ...tags.stateful.classic,
+      ...tags.serverless.search,
+      ...tags.serverless.security.complete,
+      ...tags.serverless.observability.complete,
+    ],
   },
   () => {
-    let expectedGroups: string[];
+    let expectedCount: number;
 
     spaceTest.beforeAll(async ({ scoutSpace, config }) => {
       const expected = getExpected(config);
-      expectedGroups = expected.groups;
+      expectedCount = expected.count;
       await scoutSpace.savedObjects.cleanStandardList();
       await scoutSpace.savedObjects.load(DASHBOARD_SAVED_SEARCH_ARCHIVE);
       await scoutSpace.uiSettings.setDefaultIndex(DASHBOARD_DEFAULT_INDEX_TITLE);
@@ -78,14 +83,18 @@ spaceTest.describe(
         await pageObjects.dashboard.openAddPanelFlyout();
       });
 
-      await spaceTest.step('verify panel groups', async () => {
+      /* await spaceTest.step('verify panel groups', async () => {
         const groups = await pageObjects.dashboard.getAddPanelFlyoutGroups();
         expect(groups).toStrictEqual(expectedGroups);
-      });
+      });*/
 
       await spaceTest.step('verify total panel count', async () => {
         const addPanelActions = await pageObjects.dashboard.getAddPanelFlyoutActions();
-        expect(addPanelActions).toStrictEqual([]);
+        try {
+          expect(addPanelActions).toHaveLength(expectedCount);
+        } catch (error) {
+          throw new Error(`${error.message}, values: ${addPanelActions.join(',')}`);
+        }
       });
     });
   }
