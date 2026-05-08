@@ -8,13 +8,24 @@
 import type { CoreStart } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
+import { resources } from '@elastic/opentelemetry-node/sdk';
 import { SavedObjectsClient } from '@kbn/core/server';
-import { LateBindingSpanProcessor, ElasticsearchOtlpExporter } from '@kbn/tracing';
+import {
+  ElasticsearchOtlpExporter,
+  LateBindingSpanProcessor,
+  EvalSpanProcessor,
+} from '@kbn/tracing';
+import {
+  initInferenceTracerProvider,
+  shutdownInferenceTracerProvider,
+  EVAL_RUN_ID_BAGGAGE_KEY,
+} from '@kbn/inference-tracing';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { LRUCache } from 'lru-cache';
 import type { AgentBuilderConfig } from '../config';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
+import { GlobalBridgeProcessor } from './global_bridge_processor';
 
 const SETTING_CACHE_TTL_MS = 30_000;
 
@@ -92,16 +103,28 @@ export const registerTracingExporter = async ({
 
   const isEnabled = await createCachedIsEnabled(core, logger);
 
-  const tearDowns = exporters.map((exporter) => {
-    const processor = new AgentBuilderSpanProcessor({
-      exporter,
-      scheduledDelayMillis: tracingConfig.scheduledDelay,
-      isEnabled,
-    });
-    return LateBindingSpanProcessor.register(processor);
+  const processors: tracing.SpanProcessor[] = exporters.map(
+    (exporter) =>
+      new AgentBuilderSpanProcessor({
+        exporter,
+        scheduledDelayMillis: tracingConfig.scheduledDelay,
+        isEnabled,
+      })
+  );
+
+  processors.push(new EvalSpanProcessor([{ baggageKey: EVAL_RUN_ID_BAGGAGE_KEY }]));
+
+  const lateBindingProcessor = LateBindingSpanProcessor.get();
+  if (lateBindingProcessor) {
+    processors.push(new GlobalBridgeProcessor(lateBindingProcessor));
+  }
+
+  initInferenceTracerProvider({
+    processors,
+    resource: resources.defaultResource(),
   });
 
   return async () => {
-    await Promise.all(tearDowns.map((teardown) => teardown()));
+    await shutdownInferenceTracerProvider();
   };
 };

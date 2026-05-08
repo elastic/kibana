@@ -6,8 +6,8 @@
  */
 
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
-import { ElasticsearchOtlpExporter } from '@kbn/tracing';
-import { LateBindingSpanProcessor } from '@kbn/tracing';
+import { ElasticsearchOtlpExporter, EvalSpanProcessor } from '@kbn/tracing';
+import { initInferenceTracerProvider } from '@kbn/inference-tracing';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AgentBuilderConfig } from '../config';
@@ -39,11 +39,31 @@ jest.mock('lru-cache', () => ({
   }),
 }));
 
+jest.mock('@kbn/inference-tracing', () => ({
+  initInferenceTracerProvider: jest.fn(),
+  shutdownInferenceTracerProvider: jest.fn().mockResolvedValue(undefined),
+  EVAL_RUN_ID_BAGGAGE_KEY: 'eval.run.id.baggage.key',
+}));
+
+jest.mock('./global_bridge_processor', () => ({
+  GlobalBridgeProcessor: jest.fn(),
+}));
+
+const mockLateBindingInstance = {
+  onStart: jest.fn(),
+  onEnd: jest.fn(),
+  forceFlush: jest.fn().mockResolvedValue(undefined),
+  shutdown: jest.fn().mockResolvedValue(undefined),
+};
+
 jest.mock('@kbn/tracing', () => ({
   LateBindingSpanProcessor: {
     register: jest.fn(() => jest.fn().mockResolvedValue(undefined)),
+    hasInstance: jest.fn(() => false),
+    get: jest.fn(() => mockLateBindingInstance),
   },
   ElasticsearchOtlpExporter: jest.fn(),
+  EvalSpanProcessor: jest.fn(),
 }));
 
 jest.mock('@opentelemetry/exporter-trace-otlp-proto', () => ({
@@ -63,6 +83,7 @@ const MockedEsOtlpExporter = ElasticsearchOtlpExporter as jest.MockedClass<
 const MockedAgentBuilderProcessor = AgentBuilderSpanProcessor as jest.MockedClass<
   typeof AgentBuilderSpanProcessor
 >;
+const MockedEvalSpanProcessor = EvalSpanProcessor as jest.MockedClass<typeof EvalSpanProcessor>;
 
 const flushPromises = () => new Promise<void>((resolve) => setImmediate(resolve));
 
@@ -99,7 +120,7 @@ describe('registerTracingExporter', () => {
     });
 
     expect(result).toBeUndefined();
-    expect(LateBindingSpanProcessor.register).not.toHaveBeenCalled();
+    expect(initInferenceTracerProvider).not.toHaveBeenCalled();
   });
 
   it('creates OTLPTraceExporter when exporters with url are configured', async () => {
@@ -148,7 +169,7 @@ describe('registerTracingExporter', () => {
     expect(MockedOtlpExporter).not.toHaveBeenCalled();
   });
 
-  it('registers processor via LateBindingSpanProcessor', async () => {
+  it('initializes inference tracer provider with span processors', async () => {
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
       send_to_self: true,
@@ -162,10 +183,14 @@ describe('registerTracingExporter', () => {
       logger,
     });
 
-    expect(LateBindingSpanProcessor.register).toHaveBeenCalledTimes(1);
+    expect(initInferenceTracerProvider).toHaveBeenCalledTimes(1);
     expect(MockedAgentBuilderProcessor).toHaveBeenCalledTimes(1);
-    const [registeredProcessor] = jest.mocked(LateBindingSpanProcessor.register).mock.calls[0];
-    expect(registeredProcessor).toBe(MockedAgentBuilderProcessor.mock.instances[0]);
+    expect(MockedEvalSpanProcessor).toHaveBeenCalledWith([
+      { baggageKey: 'eval.run.id.baggage.key' },
+    ]);
+    const [providerOpts] = jest.mocked(initInferenceTracerProvider).mock.calls[0];
+    expect(providerOpts.processors).toHaveLength(2);
+    expect(providerOpts.resource).toBeDefined();
   });
 
   it('createCachedIsEnabled returns true after registerTracingExporter resolves', async () => {

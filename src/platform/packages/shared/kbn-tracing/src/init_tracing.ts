@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { resources } from '@elastic/opentelemetry-node/sdk';
-import { core, node, tracing } from '@elastic/opentelemetry-node/sdk';
+import { node, tracing } from '@elastic/opentelemetry-node/sdk';
 import {
   EVAL_RUN_ID_BAGGAGE_KEY,
   LangfuseSpanProcessor,
@@ -15,8 +15,7 @@ import {
 } from '@kbn/inference-tracing';
 import { fromExternalVariant } from '@kbn/std';
 import type { TracingConfig } from '@kbn/tracing-config';
-import { context, propagation, trace } from '@opentelemetry/api';
-import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
+import { trace } from '@opentelemetry/api';
 import { castArray } from 'lodash';
 import { cleanupBeforeExit } from '@kbn/cleanup-before-exit';
 import { EvalSpanProcessor } from './eval_span_processor';
@@ -36,22 +35,12 @@ export function initTracing({
   resource: resources.Resource;
   tracingConfig: TracingConfig;
 }) {
-  const contextManager = new AsyncLocalStorageContextManager();
-  context.setGlobalContextManager(contextManager);
-  contextManager.enable();
-
   // this is used for late-binding of span processors
   const lateBindingProcessor = LateBindingSpanProcessor.get();
 
   lateBindingProcessor.register(new EvalSpanProcessor([{ baggageKey: EVAL_RUN_ID_BAGGAGE_KEY }]));
 
   const allSpanProcessors: tracing.SpanProcessor[] = [lateBindingProcessor];
-
-  propagation.setGlobalPropagator(
-    new core.CompositePropagator({
-      propagators: [new core.W3CTraceContextPropagator(), new core.W3CBaggagePropagator()],
-    })
-  );
 
   const traceIdSampler = new tracing.TraceIdRatioBasedSampler(tracingConfig.sample_rate);
 
