@@ -15,7 +15,7 @@ import { isAnomalySwimlaneSelectionTriggerContext } from './triggers';
 import type { AppStateSelectedCells } from '../application/explorer/explorer_utils';
 import type { AnomalySwimLaneEmbeddableApi } from '../embeddables/anomaly_swimlane/types';
 import type { MlCoreSetup } from '../plugin';
-import { isMlAvailable } from '../../common/license/ml_license';
+import { checkPermissionAsync } from '../application/capabilities/check_capabilities';
 
 export const APPLY_TIME_RANGE_SELECTION_ACTION = 'applyTimeRangeSelectionAction';
 
@@ -65,7 +65,7 @@ export function createApplyTimeRangeSelectionAction(
       });
     },
     async isCompatible(context) {
-      if (!(await isMlAvailable(getStartServices))) return false;
+      if (!(await checkPermissionAsync(getStartServices, 'canGetJobs'))) return false;
       const [{ application }] = await getStartServices();
       const appId = await firstValueFrom(application.currentAppId$);
       return isAnomalySwimlaneSelectionTriggerContext(context) && supportedApps.includes(appId!);
