@@ -40,6 +40,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
         loadTestFile(require.resolve('./smoke_test'));
       } else {
         loadTestFile(require.resolve('./smoke_test'));
+        loadTestFile(require.resolve('./autoplay_pages'));
         loadTestFile(require.resolve('./expression'));
         loadTestFile(require.resolve('./filters'));
         loadTestFile(require.resolve('./custom_elements'));
