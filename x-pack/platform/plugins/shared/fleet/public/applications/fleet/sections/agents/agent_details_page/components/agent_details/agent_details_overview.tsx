@@ -32,7 +32,6 @@ import { hasVersionSuffix } from '../../../../../../../../common/services/versio
 import { isAgentUpgradeable } from '../../../../../services';
 import { AgentPolicySummaryLine } from '../../../../../components';
 import { AgentHealth } from '../../../components';
-import { Tags } from '../../../components/tags';
 import { formatAgentCPU, formatAgentMemory } from '../../../services/agent_metrics';
 import { AgentDashboardLink } from '../agent_dashboard_link';
 import { AgentUpgradeStatus } from '../../../agent_list_page/components/agent_upgrade_status';
@@ -353,7 +352,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
               title: i18n.translate('xpack.fleet.agentDetails.tagsLabel', {
                 defaultMessage: 'Tags',
               }),
-              description: (agent.tags ?? []).length > 0 ? <Tags tags={agent.tags ?? []} /> : '-',
+              description: (agent.tags ?? []).length > 0 ? agent.tags!.join(', ') : '-',
             },
             {
               title: i18n.translate('xpack.fleet.agentDetails.platformLabel', {
