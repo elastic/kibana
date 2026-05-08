@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.15>>
 * <<release-notes-8.19.14>>
 * <<release-notes-8.19.13>>
 * <<release-notes-8.19.12>>
@@ -137,6 +138,9 @@ Kibana platform::
 [float]
 [[fixes-v8.19.15]]
 === Fixes
+Alerting::
+* Fixes an issue where Stack and Observability alerts sent recovery notifications but remained `active` in {kib} instead of transitioning to `recovered` ({kibana-pull}261012[#261012]).
+
 Data ingestion and Fleet::
 * Fixes YAML file downloads being truncated at the first `#` character by properly URL-encoding the content ({kibana-pull}264083[#264083]).
 * Fixes Fleet Server diagnostic bundles failing to download when `elasticsearch.compression` is enabled ({kibana-pull}262394[#262394]).
@@ -164,7 +168,12 @@ Machine Learning::
 [[release-notes-8.19.14]]
 == {kib} 8.19.14
 
-The 8.19.14 release includes the following fixes.
+The 8.19.14 release includes the following known issues and fixes.
+
+[float]
+[[known-issues-8.19.14]]
+=== Known issues
+include::CHANGELOG.asciidoc[tag=known-issue-1168]
 
 [float]
 [[fixes-v8.19.14]]
@@ -188,9 +197,14 @@ Machine Learning::
 [[release-notes-8.19.13]]
 == {kib} 8.19.13
 
-The 8.19.13 release includes the following fixes.
+The 8.19.13 release includes the following known issues and fixes.
 
 IMPORTANT: This release contains fixes for potential security vulnerabilities. Check our link:https://discuss.elastic.co/c/announcements/security-announcements/31[security advisory] for more details.
+
+[float]
+[[known-issues-8.19.13]]
+=== Known issues
+include::CHANGELOG.asciidoc[tag=known-issue-1168]
 
 [float]
 [[fixes-v8.19.13]]
@@ -682,6 +696,22 @@ Set the alert delay value to 1 or turn on **Alert flapping detection**.
 
 ====
 // end::known-issue-3610[]
+
+// tag::known-issue-1168[]
+.Stack and Observability alerts remain active instead of transitioning to recovered.
+[%collapsible]
+====
+*Details* +
+
+Some Stack and Observability alerts send recovery notifications (for example, Slack, email, or webhook) but remain `active` in {kib} instead of transitioning to `recovered`.
+
+*Workaround* +
+Manually untrack stale alerts or upgrade to a later {stack} version that contains the fix.
+
+*Resolved* + 
+This issue is resolved in 8.19.15, 9.3.4, and 9.4.0.
+====
+// end::known-issue-1168[]
 
 [float]
 [[breaking-changes-8.19.0]]
