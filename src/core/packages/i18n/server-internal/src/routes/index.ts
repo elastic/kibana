@@ -15,11 +15,13 @@ export const registerRoutes = ({
   locale,
   isDist,
   translationHashes,
+  localeFileMap,
 }: {
   router: IRouter;
   locale: string;
   isDist: boolean;
   translationHashes: Record<string, string>;
+  localeFileMap: Record<string, string[]>;
 }) => {
-  registerTranslationsRoute({ router, locale, isDist, translationHashes });
+  registerTranslationsRoute({ router, locale, isDist, translationHashes, localeFileMap });
 };

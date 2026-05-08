@@ -24,7 +24,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { getColumns } from '../../prevalence/utils/get_columns';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { alertFlyoutHistoryKey } from '../constants/flyout_history';
+import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
 
 jest.mock('../../shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
@@ -200,7 +200,7 @@ describe('InsightsSection', () => {
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        historyKey: alertFlyoutHistoryKey,
+        historyKey: documentFlyoutHistoryKey,
         session: 'start',
       })
     );
