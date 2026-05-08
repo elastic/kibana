@@ -68,17 +68,29 @@ export const registerDeploymentStatsRoute = (router: IRouter, logger: Logger) =>
         let vectorDocsCount = 0;
         if (indicesCount > 0) {
           const indexNames = userIndices.map((i) => i.name);
-          const mappings = await client.asCurrentUser.indices.getMapping({ index: indexNames });
-          const vectorIndexNames = new Set(
-            Object.entries(mappings)
-              .filter(([, mapping]) =>
-                containsVectorField(mapping.mappings?.properties as Record<string, MappingProperty>)
-              )
-              .map(([name]) => name)
-          );
-          vectorDocsCount = userIndices
-            .filter((i) => vectorIndexNames.has(i.name))
-            .reduce((sum, i) => sum + (i.num_docs ?? 0), 0);
+
+          try {
+            const mappings = await client.asCurrentUser.indices.getMapping({
+              index: indexNames,
+            });
+            const vectorIndexNames = new Set(
+              Object.entries(mappings)
+                .filter(([, mapping]) =>
+                  containsVectorField(
+                    mapping.mappings?.properties as Record<string, MappingProperty>
+                  )
+                )
+                .map(([name]) => name)
+            );
+
+            vectorDocsCount = userIndices
+              .filter((i) => vectorIndexNames.has(i.name))
+              .reduce((sum, i) => sum + (i.num_docs ?? 0), 0);
+          } catch (error) {
+            logger.warn(
+              `Failed to fetch mappings for vectordb deployment stats. Returning partial stats: ${error.message}`
+            );
+          }
         }
 
         return response.ok({
