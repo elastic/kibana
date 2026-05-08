@@ -69,9 +69,9 @@ export class MarkdownStorage
 
   // TODO: Remove in the future at part of content management clean up
   // only required for populating SavedObjectFinder in AddFromLibrary flyout
-  mSearch = {
-    savedObjectType: MARKDOWN_SAVED_OBJECT_TYPE,
-    toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult<MarkdownAttributes>) =>
-      savedObjectToItem(savedObject) as MarkdownItem,
-  };
+  // mSearch = {
+  //   savedObjectType: MARKDOWN_SAVED_OBJECT_TYPE,
+  //   toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult<MarkdownAttributes>) =>
+  //     savedObjectToItem(savedObject) as MarkdownItem,
+  // };
 }

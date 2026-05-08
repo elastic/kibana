@@ -19,12 +19,15 @@ import { ADD_MARKDOWN_ACTION_ID, CONVERT_LEGACY_MARKDOWN_ACTION_ID } from './con
 import {
   APP_ICON,
   APP_NAME,
+  MARKDOWN_API_PATH,
+  MARKDOWN_API_VERSION,
   MARKDOWN_EMBEDDABLE_TYPE,
   MARKDOWN_SAVED_OBJECT_TYPE,
 } from '../common/constants';
 import { setKibanaServices } from './services/kibana_services';
 import type { MarkdownEmbeddableState } from '../server';
 import { setupLegacyVis } from './legacy_vis/setup';
+import type { MarkdownSearchResponseBody } from '../server/api';
 
 export interface MarkdownSetupDeps {
   contentManagement: ContentManagementPublicSetup;
@@ -76,6 +79,21 @@ export class DashboardMarkdownPlugin
       savedObjectType: MARKDOWN_SAVED_OBJECT_TYPE,
       savedObjectName: APP_NAME,
       getIconForSavedObject: () => APP_ICON,
+      // customPath: MARKDOWN_API_PATH,
+      getSavedObjects: async () => {
+        const result = (await core.http.get(MARKDOWN_API_PATH, {
+          version: MARKDOWN_API_VERSION,
+        })) as MarkdownSearchResponseBody;
+        return result.markdowns.map(({ id, data, meta }) => {
+          return {
+            type: MARKDOWN_SAVED_OBJECT_TYPE,
+            id,
+            attributes: data,
+            ...meta,
+            references: [],
+          };
+        });
+      },
     });
 
     setupLegacyVis(core.getStartServices, expressions, visualizations);

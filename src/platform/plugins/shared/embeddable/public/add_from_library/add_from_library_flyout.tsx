@@ -28,6 +28,7 @@ import {
   usageCollection,
 } from '../kibana_services';
 import { getAddFromLibraryType, useAddFromLibraryTypes } from './registry';
+import { asyncForEach } from '../../../../../packages/shared/kbn-std';
 
 const runAddTelemetry = (
   parent: unknown,
@@ -53,7 +54,7 @@ export interface AddFromLibraryContentProps {
 
 export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps) => {
   const libraryTypes = useAddFromLibraryTypes();
-
+  console.log({ libraryTypes });
   const onChoose: SavedObjectFinderProps['onChoose'] = useCallback(
     async (
       id: SavedObjectCommon['id'],
@@ -84,6 +85,7 @@ export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps)
         contentClient: contentManagement.client,
         savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
         uiSettings: core.uiSettings,
+        http: core.http,
       }}
       onChoose={onChoose}
       savedObjectMetaData={libraryTypes}
@@ -91,6 +93,12 @@ export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps)
       noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
         defaultMessage: 'No matching objects found.',
       })}
+      getExtraItems={async () => {
+        const getPromises = Object.values(libraryTypes)
+          .filter(({ getSavedObjects }) => Boolean(getSavedObjects))
+          .map(({ getSavedObjects }) => getSavedObjects!());
+        return (await Promise.all(getPromises)).flat();
+      }}
       getTooltipText={(item) => {
         return item.managed
           ? i18n.translate('embeddableApi.addPanel.managedPanelTooltip', {

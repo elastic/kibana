@@ -18,7 +18,10 @@ export type RegistryItem<TSavedObjectAttributes extends FinderAttributes = Finde
     container: CanAddNewPanel,
     savedObject: SavedObjectCommon<TSavedObjectAttributes>
   ) => void;
-  savedObjectMetaData: SavedObjectMetaData;
+  // savedObjectMetaData: SavedObjectMetaData & { customPath?: string };
+  savedObjectMetaData: SavedObjectMetaData & {
+    getSavedObjects?: () => Promise<SavedObjectCommon<FinderAttributes>[]>;
+  };
 };
 
 const registry: Map<string, RegistryItem<any>> = new Map();
@@ -34,6 +37,7 @@ export const registerAddFromLibraryType = <TSavedObjectAttributes extends Finder
   getIconForSavedObject,
   getSavedObjectSubType,
   getTooltipForSavedObject,
+  getSavedObjects,
 }: {
   onAdd: RegistryItem['onAdd'];
   savedObjectType: string;
@@ -41,6 +45,7 @@ export const registerAddFromLibraryType = <TSavedObjectAttributes extends Finder
   getIconForSavedObject: (savedObject: SavedObjectCommon<TSavedObjectAttributes>) => IconType;
   getSavedObjectSubType?: (savedObject: SavedObjectCommon<TSavedObjectAttributes>) => string;
   getTooltipForSavedObject?: (savedObject: SavedObjectCommon<TSavedObjectAttributes>) => string;
+  getSavedObjects?: () => Promise<SavedObjectCommon<FinderAttributes>[]>;
 }) => {
   if (registry.has(savedObjectType)) {
     throw new Error(
@@ -51,6 +56,7 @@ export const registerAddFromLibraryType = <TSavedObjectAttributes extends Finder
   registry.set(savedObjectType, {
     onAdd,
     savedObjectMetaData: {
+      getSavedObjects,
       name: savedObjectName,
       type: savedObjectType,
       getIconForSavedObject,

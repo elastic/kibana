@@ -38,9 +38,11 @@ import {
   withEuiTablePersist,
   type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist/src';
+import type { HttpSetup } from '@kbn/core/public';
 
 import type { FinderAttributes, SavedObjectCommon } from '../../common';
 import { LISTING_LIMIT_SETTING } from '../../common';
+// import { asyncForEach } from '../../../../../packages/shared/kbn-std';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 15, 25];
 
@@ -51,6 +53,9 @@ export interface SavedObjectMetaData<T extends FinderAttributes = FinderAttribut
   getTooltipForSavedObject?(savedObject: SavedObjectCommon<T>): string;
   showSavedObject?(savedObject: SavedObjectCommon<T>): boolean;
   getSavedObjectSubType?(savedObject: SavedObjectCommon<T>): string;
+
+  // customPath?: string;
+
   /** @deprecated doesn't do anything, the full object is returned **/
   includeFields?: string[];
 }
@@ -71,6 +76,7 @@ interface SavedObjectFinderServices {
   savedObjectsTagging?: SavedObjectsTaggingApi;
   contentClient: ContentClient;
   uiSettings: IUiSettingsClient;
+  http: HttpSetup;
 }
 
 interface BaseSavedObjectFinder {
@@ -85,6 +91,7 @@ interface BaseSavedObjectFinder {
   getHref?: (id: SavedObjectCommon['id'], type: SavedObjectCommon['type']) => string | undefined;
   noItemsMessage?: ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
+  getExtraItems?: () => Promise<SavedObjectCommon<FinderAttributes>[]>;
   showFilter?: boolean;
   leftChildren?: ReactElement | ReactElement[];
   children?: ReactElement | ReactElement[];
@@ -114,7 +121,7 @@ class SavedObjectFinderUiClass extends React.Component<
   private debouncedFetch = debounce(async (query: Query) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
     const { contentClient, uiSettings } = this.props.services;
-
+    console.log({ metaDataMap });
     const { queryText, visibleTypes, selectedTags } = parseQuery(
       query,
       Object.values(metaDataMap).map((metadata) => ({
@@ -131,16 +138,21 @@ class SavedObjectFinderUiClass extends React.Component<
 
     const types = visibleTypes ?? Object.keys(metaDataMap);
 
-    const response = await contentClient.mSearch<SavedObjectCommon<FinderAttributes>>({
-      contentTypes: types.map((type) => ({ contentTypeId: type })),
-      query: {
-        text: queryText ? `${queryText}*` : undefined,
-        ...(includeTags?.length ? { tags: { included: includeTags } } : {}),
-        limit: uiSettings.get(LISTING_LIMIT_SETTING), // TODO: support pagination,
-      },
-    });
+    const response = await Promise.all([
+      contentClient.mSearch<SavedObjectCommon<FinderAttributes>>({
+        contentTypes: types
+          // .filter((type) => !hasCustomPath.includes(type))
+          .map((type) => ({ contentTypeId: type })),
+        query: {
+          text: queryText ? `${queryText}*` : undefined,
+          ...(includeTags?.length ? { tags: { included: includeTags } } : {}),
+          limit: uiSettings.get(LISTING_LIMIT_SETTING), // TODO: support pagination,
+        },
+      }),
+      this.props.getExtraItems?.(),
+    ]);
 
-    const savedObjects = response.hits
+    const savedObjects = [...response[0].hits, ...(response.length >= 2 ? response[1]! : [])]
       .map((savedObject) => {
         const {
           attributes: { name, title, description },
