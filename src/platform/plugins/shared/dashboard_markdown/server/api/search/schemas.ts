@@ -8,48 +8,39 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
-
-const MAX_PER_PAGE = 10000;
+import {
+  asCodeMetaSchema,
+  asCodePaginationParamsSchema,
+  asCodePaginationResponseMetaSchema,
+} from '@kbn/as-code-shared-schemas';
 
 export const searchRequestQuerySchema = schema.object({
   query: schema.maybe(
     schema.string({
       meta: {
         description:
-          'An Elasticsearch simple_query_string query that filters markdown library items by "title" and "description"',
+          'Filters results by `title` and `description` using Elasticsearch [`simple_query_string`](https://www.elastic.co/docs/reference/query-languages/query-dsl/simple-query-string-query) syntax. Multi-word terms require all words to match.',
       },
     })
   ),
-  page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The search page to return',
-      },
-    })
-  ),
-  per_page: schema.maybe(
-    schema.number({
-      meta: {
-        description: 'The number of items to return per page',
-      },
-      max: MAX_PER_PAGE,
-    })
-  ),
+  ...asCodePaginationParamsSchema.getPropSchemas(),
 });
 
 export const searchResponseBodySchema = schema.object({
-  markdowns: schema.arrayOf(
+  data: schema.arrayOf(
     schema.object({
-      id: schema.string(),
+      id: schema.string({ meta: { description: 'The markdown library item ID.' } }),
       data: schema.object({
-        description: schema.maybe(schema.string()),
-        title: schema.string(),
+        description: schema.maybe(
+          schema.string({ meta: { description: 'The markdown library item description.' } })
+        ),
+        title: schema.string({ meta: { description: 'The markdown library item title.' } }),
       }),
       meta: asCodeMetaSchema,
     }),
-    { minSize: 0, maxSize: MAX_PER_PAGE }
+    {
+      meta: { description: 'List of markdown library items matching the query.' },
+    }
   ),
-  total: schema.number(),
-  page: schema.number(),
+  meta: asCodePaginationResponseMetaSchema,
 });
