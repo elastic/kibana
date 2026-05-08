@@ -649,15 +649,16 @@ export class HttpServer {
     });
 
     this.server!.ext('onRequest', (request, responseToolkit) => {
+      if (!stripConfiguredBasePath(request, config, basePathService)) {
+        throw Boom.notFound();
+      }
+
       const stop = startEluMeasurement(request.path, this.log, this.config?.eluMonitor);
 
       const requestId = getRequestId(request, config.requestId);
 
       const parentContext = executionContext?.getParentContextFrom(request.headers);
 
-      if (!stripConfiguredBasePath(request, config, basePathService)) {
-        throw Boom.notFound();
-      }
       const spaceId = extractSpaceFromUrl(request);
 
       const app: KibanaRequestState = request.app as KibanaRequestState;
