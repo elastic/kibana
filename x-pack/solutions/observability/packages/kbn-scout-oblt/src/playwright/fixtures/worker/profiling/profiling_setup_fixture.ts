@@ -47,10 +47,20 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
               'content-type': 'application/json',
               'kbn-xsrf': 'reporting',
             },
+            // The route is not idempotent on retry; we want a fast, clear failure so the
+            // underlying error (logged in Kibana by handleRouteHandlerError) is the first
+            // thing the developer sees instead of a series of 500s.
+            retries: 0,
           });
           log.info('Profiling resources set up successfully');
-        } catch (error) {
-          log.error(`Error setting up profiling resources: ${error}`);
+        } catch (error: any) {
+          const status = error?.response?.status ?? error?.originalError?.response?.status;
+          const body = error?.response?.data ?? error?.originalError?.response?.data;
+          log.error(
+            `Error setting up profiling resources POST /api/profiling/setup/es_resources: status=${status} body=${JSON.stringify(
+              body
+            )}`
+          );
           throw error;
         }
       };
@@ -74,6 +84,7 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
           const profilingData = fs.readFileSync(dataFilePath, 'utf8');
           const operations = profilingData.split('\n').filter((line: string) => line.trim());
 
+          // Use esClient for bulk operations
           const response = await esClient.bulk({
             body: operations.join('\n') + '\n',
             refresh: 'wait_for',
@@ -81,18 +92,10 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
           });
 
           if (response.errors) {
-            // Bulk items can be keyed by 'index' | 'create' | 'update' | 'delete'; surface whichever has an error so failures aren't silently swallowed.
-            const erroredItems = (response.items ?? []).filter((item: any) => {
-              const op = item ? Object.values(item)[0] : undefined;
-              return (op as { error?: unknown } | undefined)?.error !== undefined;
-            });
-            const message = `Some errors occurred during bulk indexing of profiling data: ${JSON.stringify(
-              erroredItems,
-              null,
-              2
-            )}`;
-            log.error(message);
-            throw new Error(message);
+            const erroredItems = response.items?.filter((item: any) => item?.index?.error);
+            log.error(
+              `Some errors occurred during bulk indexing: ${JSON.stringify(erroredItems, null, 2)}`
+            );
           } else {
             log.info(`Successfully indexed ${response.items?.length || 0} profiling documents`);
           }
@@ -104,35 +107,26 @@ export const profilingSetupFixture = base.extend<{}, { profilingSetup: Profiling
       const cleanup = async (): Promise<void> => {
         log.info(`Unloading Profiling data`);
 
-        // Profiling resources are managed by the ES profiling plugin as a mix of data streams (with hidden backing indices like `.profiling-stackframes-v001-000001`) and aliases (`profiling-stackframes`, `profiling-stacktraces`, `profiling-executables`, `profiling-hosts`).
-        // Deleting only `profiling-events*` data streams leaves the others behind and a subsequent `setupResources()` then fails with `InvalidAliasNameException` because the alias name still resolves to a stale entity.
-        // Order matters: delete data streams first (which removes their backing indices), then delete any remaining concrete `profiling*` / `.profiling*` indices.
-        const safeDeleteDataStream = async (name: string) => {
-          try {
-            await esClient.indices.deleteDataStream({ name }, { ignore: [404] });
-          } catch (error) {
-            log.error(`Error deleting profiling data stream '${name}': ${error}`);
-          }
+        const ignoreNotFound = (error: any) => {
+          if (error?.meta?.statusCode === 404) return undefined;
+          throw error;
         };
 
-        await safeDeleteDataStream('profiling-*');
-        await safeDeleteDataStream('.profiling-*');
-
-        const indices = await esClient.cat.indices({ format: 'json' });
-        const profilingIndices = indices
-          .filter((index) => index.index !== undefined)
+        const profilingIndices = (await esClient.cat.indices({ format: 'json' }))
           .map((index) => index.index)
-          .filter((index) => {
-            return index!.startsWith('profiling') || index!.startsWith('.profiling');
-          }) as string[];
+          .filter(
+            (name): name is string =>
+              !!name && (name.startsWith('profiling') || name.startsWith('.profiling'))
+          );
 
-        await Promise.all(
-          profilingIndices.map((index) =>
-            esClient.indices.delete({ index }, { ignore: [404] }).catch((error) => {
-              log.error(`Error deleting profiling index '${index}': ${error}`);
-            })
-          )
-        );
+        await Promise.all([
+          ...profilingIndices.map((index) =>
+            esClient.indices.delete({ index, ignore_unavailable: true }).catch(ignoreNotFound)
+          ),
+          // 'profiling-events*' may not exist on a fresh cluster; tolerate the 404 so we
+          // do not abort the whole Promise.all and leave preceding cleanup work half-done.
+          esClient.indices.deleteDataStream({ name: 'profiling-events*' }).catch(ignoreNotFound),
+        ]);
         log.info('Unloaded Profiling data');
       };
 
