@@ -1,11 +1,11 @@
 ---
 name: task-manager-development
-description: Working with the Task Manager plugin internals — task store, scheduling, runner lifecycle, health monitoring, or capacity estimation. Use when modifying task persistence, polling, capacity logic, or writing Task Manager integration tests.
+description: Working with the Task Manager plugin internals — task store, scheduling, runner lifecycle, health monitoring, or capacity estimation. Use when modifying task persistence, polling, capacity logic, or writing Task Manager integration tests. NOT for registering/scheduling tasks as a consumer — see the root-level task-manager-registration skill for that.
 ---
 
 # Task Manager Development
 
-Note: for registering and scheduling tasks as a *consumer* of Task Manager, use the `task-manager-registration` skill at `.agents/skills/task-manager-registration/SKILL.md` instead.
+For registering and scheduling tasks as a *consumer* of Task Manager, use the `task-manager-registration` skill at the repo root (`.agents/skills/task-manager-registration/SKILL.md`) instead. That skill covers `registerTaskDefinitions`, `ensureScheduled` / `schedule` / `bulkSchedule`, `timeout`, `cost`, `abortController`, error classification, and the CI gate.
 
 ## Testing Requirements
 
