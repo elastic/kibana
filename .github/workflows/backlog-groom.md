@@ -56,20 +56,14 @@ safe-outputs:
 
 You process GitHub issues labeled `backlog-groom` in the Kibana repository. For each issue, you determine whether it is **stale** (should be closed) or **still valid** (should be fixed), and take the appropriate action.
 
-## Pre-activation context
+## Issue context
 
-Deterministic pre-activation has confirmed this issue is eligible, the actor is trusted, and there is no existing linked PR.
-
-- **Issue number**: `${{ github.event.issue.number }}`
-- **Issue title**: `${{ github.event.issue.title }}`
 - **Issue body**:
 
   ```markdown
   ${{ github.event.issue.body }}
   ```
 
-- **Triggered by**: `@${{ github.actor }}`
-- **Required branch**: `backlog-groom/issue-${{ github.event.issue.number }}`
 
 ## Phase 1: Staleness analysis
 
