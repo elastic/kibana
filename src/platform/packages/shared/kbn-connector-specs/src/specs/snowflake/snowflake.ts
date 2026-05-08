@@ -234,6 +234,9 @@ export const Snowflake: ConnectorSpec = {
                 {
                   defaultMessage:
                     "Snowflake OAuth authorization URL. Replace '{account}' with your Snowflake account identifier.",
+                  values: {
+                    accountPlaceholder: '{account}',
+                  },
                 }
               ),
             },
@@ -244,6 +247,9 @@ export const Snowflake: ConnectorSpec = {
                 {
                   defaultMessage:
                     "Snowflake OAuth token endpoint. Replace '{account}' with your Snowflake account identifier.",
+                  values: {
+                    accountPlaceholder: '{account}',
+                  },
                 }
               ),
             },
