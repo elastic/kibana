@@ -7,6 +7,7 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
@@ -26,8 +27,20 @@ import { NotesDetails } from '../notes';
 import { useKibana } from '../../common/lib/kibana';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
-import { alertFlyoutHistoryKey } from './constants/flyout_history';
+import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 import { RemoteDocumentCallout } from './components/remote_document_callout';
+
+const footerStyles = css`
+  @media (max-width: 767px) {
+    overflow: auto;
+  }
+`;
+
+const headerStyles = css`
+  @media (max-width: 767px) {
+    overflow: auto;
+  }
+`;
 
 export interface DocumentFlyoutProps {
   /**
@@ -58,7 +71,7 @@ export const DocumentFlyout = memo(
       [hit]
     );
     const isSecurityApp = useIsInSecurityApp();
-    const historyKey = isSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
 
@@ -88,7 +101,7 @@ export const DocumentFlyout = memo(
     return (
       <>
         <RemoteDocumentCallout hit={hit} />
-        <EuiFlyoutHeader>
+        <EuiFlyoutHeader css={headerStyles}>
           <Header
             hit={hit}
             renderCellActions={renderCellActions}
@@ -103,7 +116,7 @@ export const DocumentFlyout = memo(
             onAlertUpdated={onAlertUpdated}
           />
         </EuiFlyoutBody>
-        <EuiFlyoutFooter>
+        <EuiFlyoutFooter css={footerStyles}>
           <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotes} />
         </EuiFlyoutFooter>
       </>

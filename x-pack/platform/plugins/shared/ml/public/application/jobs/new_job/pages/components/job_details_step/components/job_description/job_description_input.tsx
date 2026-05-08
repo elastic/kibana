@@ -12,7 +12,7 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
 export const JobDescriptionInput: FC = () => {
-  const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const [jobDescription, setJobDescription] = useState(jobCreator.description);
   const titleId = useGeneratedHtmlId({ prefix: 'jobDescriptionInput' });
   useEffect(() => {
@@ -20,6 +20,13 @@ export const JobDescriptionInput: FC = () => {
     jobCreatorUpdate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobDescription]);
+
+  useEffect(() => {
+    if (jobCreator.description !== jobDescription) {
+      setJobDescription(jobCreator.description);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobCreatorUpdated]);
 
   return (
     <Description titleId={titleId}>

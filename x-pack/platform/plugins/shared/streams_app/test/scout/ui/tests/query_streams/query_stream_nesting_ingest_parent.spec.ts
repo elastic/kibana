@@ -59,11 +59,11 @@ test.describe(
       const initialChildEsqlQuery =
         await pageObjects.streams.kibanaMonacoEditor.getCodeEditorValue();
       expect(initialChildEsqlQuery).toBe(`FROM $.${INGEST_PARENT_STREAM_NAME}`);
-      await pageObjects.streams.fillAndSaveChildQueryStream(
+      await pageObjects.streams.fillChildQueryStreamForm(
         CHILD_STREAM_NAME,
         `FROM $.${INGEST_PARENT_STREAM_NAME} | LIMIT 100`
       );
-      await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
+      await pageObjects.streams.saveChildQueryStream();
 
       await pageObjects.streams.gotoStreamMainPage();
       await pageObjects.streams.clickStreamNameLink(CHILD_FULL_NAME);
@@ -73,11 +73,11 @@ test.describe(
       const initialGrandchildEsqlQuery =
         await pageObjects.streams.kibanaMonacoEditor.getCodeEditorValue();
       expect(initialGrandchildEsqlQuery).toBe(`FROM $.${CHILD_FULL_NAME}`);
-      await pageObjects.streams.fillAndSaveChildQueryStream(
+      await pageObjects.streams.fillChildQueryStreamForm(
         GRANDCHILD_STREAM_NAME,
         `FROM $.${CHILD_FULL_NAME} | LIMIT 100`
       );
-      await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
+      await pageObjects.streams.saveChildQueryStream();
 
       await pageObjects.streams.gotoStreamMainPage();
       await pageObjects.streams.clickStreamNameLink(GRANDCHILD_FULL_NAME);

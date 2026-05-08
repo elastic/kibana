@@ -50,6 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(types).to.eql({
           lens: '45d27f9672c86ca48baf24ef1b04d4802555aee2',
           comment: '118a9989815489c24b81b160782015890ed2085e',
+          'security.endpoint': '16a05a198eed9dda49ac2997921142b7b6b602d9',
           'security.event': '0337735d3e57178e44b426e41e616aae57fd794d',
         });
       });
