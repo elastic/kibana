@@ -89,6 +89,7 @@ const PackagePolicyStreamsSchema = {
   var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
   compiled_stream: schema.maybe(schema.any()),
+  condition: schema.maybe(schema.string()),
   deprecated: schema.maybe(DeprecationInfoSchema),
   migrate_from: schema.maybe(schema.string()),
 };
@@ -104,6 +105,7 @@ export const PackagePolicyInputsSchema = {
   var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 }),
+  condition: schema.maybe(schema.string()),
   deprecated: schema.maybe(DeprecationInfoSchema),
   migrate_from: schema.maybe(schema.string()),
 };
@@ -265,6 +267,7 @@ export const PackagePolicyBaseSchema = {
     ])
   ),
   package_agent_version_condition: schema.maybe(schema.string()),
+  condition: schema.maybe(schema.string()),
   // Only available for agentless integration policies.
   // On standard package policies this field is rejected by server-side validation.
   global_data_tags: schema.maybe(
@@ -319,6 +322,13 @@ export const PackagePolicySchemaV23 = PackagePolicySchemaV22.extends(
   },
   { unknowns: 'ignore' }
 );
+
+/**
+ * Snapshot of the package policy SO schema as of model version 10.24.0.
+ * Inherits the integration-, input-, and stream-level `condition` field added
+ * to the base schemas — no extends overrides needed.
+ */
+export const PackagePolicySchemaV24 = PackagePolicySchemaV23.extends({}, { unknowns: 'ignore' });
 
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
