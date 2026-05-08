@@ -127,6 +127,7 @@ function DiffColumn({ diff, setCellProps }: DiffColumnProps) {
         <EuiIcon
           type={diff.rank > 0 ? 'sortUp' : 'sortDown'}
           color={diff.rank > 0 ? 'success' : 'danger'}
+          aria-hidden={true}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
