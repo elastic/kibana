@@ -1435,7 +1435,7 @@
           "ContentListProviderContextValue"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/context/provider.tsx",
-        "lineNumber": 207,
+        "lineNumber": 210,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2076,7 +2076,15 @@
         "tags": [],
         "label": "useSelection",
         "description": [
-          "\nHook to integrate content list selection with `EuiBasicTable`.\n\nBridges the provider's selection state with `EuiBasicTable`'s `selection` prop\nusing **controlled mode** (`selected`). This ensures programmatic selection\nchanges (e.g., clearing after delete) are reflected in the table checkboxes.\n"
+          "\nHook to integrate content list selection with `EuiBasicTable`.\n\nBridges the provider's selection state with `EuiBasicTable`'s `selection` prop\nusing **controlled mode** (`selected`). This ensures programmatic selection\nchanges (e.g., clearing after delete) are reflected in the table checkboxes.\n\nWhen `features.selection` is a ",
+          {
+            "pluginId": "@kbn/content-list",
+            "scope": "public",
+            "docId": "kibKbnContentListPluginApi",
+            "section": "def-public.SelectionConfig",
+            "text": "SelectionConfig"
+          },
+          ", its `selectable` and\n`selectableMessage` callbacks are forwarded to EUI so consumers can gate row\ncheckboxes (e.g. permission checks) and surface a tooltip describing the\ndisablement reason.\n"
         ],
         "signature": [
           "() => ",
@@ -2089,7 +2097,7 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/hooks/use_selection.ts",
-        "lineNumber": 38,
+        "lineNumber": 44,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3539,7 +3547,7 @@
           "\nFeature configuration for enabling/customizing content list capabilities."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-        "lineNumber": 72,
+        "lineNumber": 73,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3565,7 +3573,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 76,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3591,7 +3599,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 78,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3617,7 +3625,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 80,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3629,13 +3637,29 @@
             "tags": [],
             "label": "selection",
             "description": [
-              "\nSelection configuration.\nWhen `true` (default), row selection checkboxes are shown and bulk\nactions are enabled. Set to `false` to disable selection entirely.\nSelection is automatically disabled when `isReadOnly` is `true`."
+              "\nSelection configuration.\n\n- `true` (default): row checkboxes and bulk actions are enabled.\n- `false`: selection is disabled entirely.\n- ",
+              {
+                "pluginId": "@kbn/content-list",
+                "scope": "public",
+                "docId": "kibKbnContentListPluginApi",
+                "section": "def-public.SelectionConfig",
+                "text": "SelectionConfig"
+              },
+              ": selection is enabled with per-row gating (e.g.\n  `selectable`, `selectableMessage`).\n\nSelection is automatically disabled when `isReadOnly` is `true`,\nregardless of the value passed here."
             ],
             "signature": [
-              "boolean | undefined"
+              "boolean | ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.SelectionConfig",
+                "text": "SelectionConfig"
+              },
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 82,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3661,7 +3685,7 @@
               "<unknown> | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 89,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3679,7 +3703,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 98,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3705,7 +3729,7 @@
               "<unknown> | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 106,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3730,7 +3754,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 115,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3755,7 +3779,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 125,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5344,7 +5368,7 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-        "lineNumber": 16,
+        "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5359,7 +5383,7 @@
               "Unique key identifying this facet (e.g. user UID, tag ID)."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 24,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5374,7 +5398,7 @@
               "Human-readable display label."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 26,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5392,7 +5416,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5410,7 +5434,7 @@
               "T | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -7109,7 +7133,7 @@
           " hook."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/hooks/use_selection.ts",
-        "lineNumber": 18,
+        "lineNumber": 19,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7136,7 +7160,7 @@
               "<Record<string, unknown>>> | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-table/src/hooks/use_selection.ts",
-            "lineNumber": 22,
+            "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

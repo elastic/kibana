@@ -16,7 +16,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import type {
@@ -94,21 +94,23 @@ export const GithubConnector: ConnectorSpec = {
     },
   },
 
-  schema: z.object({
-    serverUrl: UISchemas.url()
-      .default(GITHUB_MCP_SERVER_URL)
-      .describe('GitHub MCP Server URL')
-      .meta({
-        widget: 'text',
-        placeholder: 'https://api.githubcopilot.com/mcp/',
-        label: i18n.translate('connectorSpecs.github.config.serverUrl.label', {
-          defaultMessage: 'MCP Server URL',
+  schema: lazySchema(() =>
+    z.object({
+      serverUrl: UISchemas.url()
+        .default(GITHUB_MCP_SERVER_URL)
+        .describe('GitHub MCP Server URL')
+        .meta({
+          widget: 'text',
+          placeholder: 'https://api.githubcopilot.com/mcp/',
+          label: i18n.translate('connectorSpecs.github.config.serverUrl.label', {
+            defaultMessage: 'MCP Server URL',
+          }),
+          helpText: i18n.translate('connectorSpecs.github.config.serverUrl.helpText', {
+            defaultMessage: 'The URL of the GitHub Copilot MCP server.',
+          }),
         }),
-        helpText: i18n.translate('connectorSpecs.github.config.serverUrl.helpText', {
-          defaultMessage: 'The URL of the GitHub Copilot MCP server.',
-        }),
-      }),
-  }),
+    })
+  ),
 
   validateUrls: {
     fields: ['serverUrl'],

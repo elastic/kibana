@@ -23,7 +23,7 @@ import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 import { ChildLink } from '../../../flyout_v2/shared/components/child_link';
 import { Network } from '../../../flyout_v2/network_details';
 import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
-import { defaultToolsFlyoutProperties } from '../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { useDefaultDocumentFlyoutProperties } from '../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 
 const tryStringify = (value: string | object | null | undefined): string => {
   try {
@@ -67,6 +67,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   const store = useStore();
   const history = useHistory();
   const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const eventContext = useContext(StatefulEventContext);
 
@@ -89,8 +90,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
             children: <Network ip={ip} flowTarget={flowTarget} />,
           }),
           {
-            ...defaultToolsFlyoutProperties,
-            size: 's',
+            ...defaultDocumentFlyoutProperties,
             session: 'start',
           }
         );
@@ -113,6 +113,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
       fieldName,
       openFlyout,
       newFlyoutSystemEnabled,
+      defaultDocumentFlyoutProperties,
       overlays,
       services,
       store,

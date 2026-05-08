@@ -104,7 +104,9 @@ async function validateAst(
   }
 
   const license = await callbacks?.getLicense?.();
-  const hasMinimumLicenseRequired = license?.hasAtLeast;
+  const hasMinimumLicenseRequired = license
+    ? (minimumLicenseRequired: LicenseType) => license.hasAtLeast(minimumLicenseRequired)
+    : undefined;
 
   // Validate the header commands
   for (const command of headerCommands) {

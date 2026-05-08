@@ -21,6 +21,7 @@ import { CellActionsProvider } from '@kbn/cell-actions';
 import type { SortOrder } from '@kbn/unified-data-table';
 import {
   DataLoadingState,
+  ROWS_HEIGHT_OPTIONS,
   UnifiedDataTable,
   type CustomCellRenderer,
   type CustomGridColumnsConfiguration,
@@ -59,7 +60,7 @@ const ALERT_EPISODES_TABLE_SETTINGS: UnifiedDataTableSettings = {
   columns: {
     duration: { width: 100 },
     assignees: { width: 120 },
-    'episode.status': { width: 220 },
+    'episode.status': { width: 110 },
   },
 };
 
@@ -86,12 +87,10 @@ const getTableCss = (euiTheme: EuiThemeComputed) => css`
 
   & .euiDataGridRowCell__content {
     display: flex;
-    align-items: center;
     block-size: 100%;
   }
 
   & .euiDataGridRowCell[data-gridcell-column-id='select'] .euiDataGridRowCell__content {
-    align-items: center;
     justify-content: flex-start;
     height: 100%;
   }
@@ -123,7 +122,7 @@ export const AlertEpisodesListPage = () => {
     'tags',
     'assignees',
   ]);
-  const [rowHeight, setRowHeight] = useState(2);
+  const [rowHeight, setRowHeight] = useState<number>(ROWS_HEIGHT_OPTIONS.default);
 
   const {
     data: episodesData,
@@ -345,6 +344,7 @@ export const AlertEpisodesListPage = () => {
                 onSort={onSort}
                 rowHeightState={rowHeight}
                 onUpdateRowHeight={setRowHeight}
+                configRowHeight={rowHeight}
                 customBulkActions={customBulkActions}
                 rowAdditionalLeadingControls={rowAdditionalLeadingControls}
                 enableComparisonMode={false}

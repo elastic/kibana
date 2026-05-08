@@ -40,6 +40,7 @@
     "@kbn/core-ui-settings-server",
     "@kbn/utility-types",
     "@kbn/inference-tracing",
+    "@kbn/tracing",
     "@kbn/std",
     "@kbn/esql-language",
     "@kbn/esql-utils",
@@ -113,6 +114,7 @@
     "@kbn/search-inference-endpoints",
     "@kbn/response-ops-oauth-hooks",
     "@kbn/connector-specs",
-    "@kbn/core-user-profile-browser"
+    "@kbn/core-user-profile-browser",
+    "@kbn/security-plugin-types-public"
   ]
 }
