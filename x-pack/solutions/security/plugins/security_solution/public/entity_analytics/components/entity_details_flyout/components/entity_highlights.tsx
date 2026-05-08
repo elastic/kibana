@@ -81,8 +81,7 @@ export const EntityHighlightsAccordion: React.FC<{
   }, [aiConnectors, connectorId]);
 
   const [isConnectorModalVisible, setIsConnectorModalVisible] = useState<boolean>(false);
-  const { hasConnectorsReadPrivilege, hasAssistantPrivilege, isAssistantVisible } =
-    useAssistantAvailability();
+  const { hasConnectorsReadPrivilege, hasAssistantPrivilege } = useAssistantAvailability();
   const { hasAgentBuilderPrivilege } = useAgentBuilderAvailability();
   const hasEntityHighlightsLicense = useHasEntityHighlightsLicense();
   const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
@@ -204,9 +203,6 @@ export const EntityHighlightsAccordion: React.FC<{
               openPopover={onButtonClick}
               isLoading={isLoading}
               isPopoverOpen={isPopoverOpen}
-              isAssistantVisible={isAssistantVisible}
-              entityType={entityType}
-              entityIdentifier={entityIdentifier}
             />
           )
         }
