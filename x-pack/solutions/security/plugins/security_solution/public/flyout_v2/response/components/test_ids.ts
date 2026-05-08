@@ -11,4 +11,3 @@ const RESPONSE_TEST_ID = `${PREFIX}Response` as const;
 export const RESPONSE_ACTIONS_VIEW_WRAPPER_TEST_ID = 'responseActionsViewWrapper' as const;
 export const RESPONSE_DETAILS_TEST_ID = `${RESPONSE_TEST_ID}Details` as const;
 export const RESPONSE_NO_DATA_TEST_ID = `${RESPONSE_TEST_ID}NoData` as const;
-export const RESPONSE_TAB_CONTENT_TEST_ID = `${RESPONSE_TEST_ID}TabContent` as const;

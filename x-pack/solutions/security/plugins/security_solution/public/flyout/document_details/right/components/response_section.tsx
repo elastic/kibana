@@ -10,7 +10,7 @@ import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { LeftPanelResponseTab } from '../../left';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
-import { ResponseSection as ResponseSectionComponent } from '../../../../flyout_v2/document/components/response_section';
+import { ResponseSectionContent } from '../../../../flyout_v2/document/components/response_section_content';
 
 /**
  * Response section adapter for the legacy expandable flyout overview tab.
@@ -23,7 +23,7 @@ export const ResponseSection = memo(() => {
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
   return (
-    <ResponseSectionComponent
+    <ResponseSectionContent
       hit={hit}
       isRulePreview={isRulePreview}
       onShowResponseDetails={goToResponseTab}

@@ -7,6 +7,7 @@
 
 import type { ReactElement } from 'react';
 import React, { useMemo } from 'react';
+import { EuiPanel } from '@elastic/eui';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NotesTab } from './tabs/notes_tab';
@@ -21,7 +22,8 @@ import {
   RESPONSE_TAB_TEST_ID,
   VISUALIZE_TAB_TEST_ID,
 } from './test_ids';
-import { ResponseTab as ResponseTabComponent } from '../../../flyout_v2/response/components/response_tab';
+import { RESPONSE_TAB_CONTENT_TEST_ID } from './tabs/test_ids';
+import { ResponseDetailsContent } from '../../../flyout_v2/response/components/response_details';
 import { useDocumentDetailsContext } from '../shared/context';
 
 export interface LeftPanelTabType {
@@ -71,7 +73,11 @@ const ResponseTab = () => {
   const { searchHit, isRulePreview } = useDocumentDetailsContext();
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
-  return <ResponseTabComponent hit={hit} isRulePreview={isRulePreview} />;
+  return (
+    <EuiPanel data-test-subj={RESPONSE_TAB_CONTENT_TEST_ID} hasShadow={false}>
+      <ResponseDetailsContent hit={hit} isRulePreview={isRulePreview} />
+    </EuiPanel>
+  );
 };
 
 export const responseTab: LeftPanelTabType = {

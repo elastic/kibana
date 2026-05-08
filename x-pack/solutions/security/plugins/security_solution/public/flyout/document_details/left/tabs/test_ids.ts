@@ -26,3 +26,4 @@ export const INSIGHTS_TAB_PREVALENCE_BUTTON_TEST_ID =
 export const INSIGHTS_TAB_CORRELATIONS_BUTTON_TEST_ID =
   `${INSIGHTS_TAB_TEST_ID}CorrelationsButton` as const;
 export const INVESTIGATION_TAB_CONTENT_TEST_ID = `${PREFIX}InvestigationsTabContent` as const;
+export const RESPONSE_TAB_CONTENT_TEST_ID = `${PREFIX}ResponseTabContent` as const;

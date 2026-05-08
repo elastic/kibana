@@ -71,6 +71,12 @@ export interface UseResponseActionsViewParams {
   hit: DataTableRecord;
 }
 
+/**
+ * Builds the Response actions view for a given alert document. Reads alert id and rule
+ * parameters from `hit`, fetches automated action results, and returns the rendered
+ * results, an empty state, or a privilege-required callout depending on user privileges
+ * and whether the alert has any automated actions.
+ */
 export const useResponseActionsView = ({ hit }: UseResponseActionsViewParams): React.ReactNode => {
   const { canAccessEndpointActionsLogManagement } = useUserPrivileges().endpointPrivileges;
 
