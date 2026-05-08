@@ -339,12 +339,14 @@ export class DatePicker {
   }
 
   async waitToBeHidden() {
-    if (await this.isNewDateRangePicker()) {
-      await this.page.testSubj
-        .locator('dateRangePickerCustomRangePanel')
-        .waitFor({ state: 'hidden' });
-    } else {
-      await this.page.testSubj.locator('superDatePickerAbsoluteTab').waitFor({ state: 'hidden' });
-    }
+    // Wait for both picker variants' popovers to be hidden. We don't call
+    // `isNewDateRangePicker()` first because pages can render multiple pickers
+    // (e.g. several data source cards in a flyout) which trip its strict-mode
+    // check. Both popover bodies are unmounted on close, so the locators
+    // resolve to zero elements and `waitFor({ state: 'hidden' })` succeeds.
+    await this.page.testSubj
+      .locator('dateRangePickerCustomRangePanel')
+      .waitFor({ state: 'hidden' });
+    await this.page.testSubj.locator('superDatePickerAbsoluteTab').waitFor({ state: 'hidden' });
   }
 }
