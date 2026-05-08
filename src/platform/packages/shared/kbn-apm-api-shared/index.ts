@@ -34,6 +34,7 @@ export type * from './src/routes/errors';
 export type * from './src/routes/infrastructure';
 export type * from './src/routes/environments';
 export type * from './src/routes/event_metadata';
+export type * from './src/routes/fallback_to_transactions';
 export {
   rangeRt,
   kueryRt,
