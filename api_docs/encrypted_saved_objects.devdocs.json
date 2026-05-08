@@ -1018,6 +1018,80 @@
               "trackAdoption": false
             }
           ]
+        },
+        {
+          "parentPluginId": "encryptedSavedObjects",
+          "id": "def-server.EncryptedSavedObjectsPluginSetup.__testCreateDangerousExtension",
+          "type": "Function",
+          "tags": [],
+          "label": "__testCreateDangerousExtension",
+          "description": [
+            "\nThis function is exposed for Core migration testing purposes only."
+          ],
+          "signature": [
+            "(typeRegistry: ",
+            "ISavedObjectTypeRegistry",
+            ", typeRegistrationOverrides?: ",
+            {
+              "pluginId": "encryptedSavedObjects",
+              "scope": "server",
+              "docId": "kibEncryptedSavedObjectsPluginApi",
+              "section": "def-server.EncryptedSavedObjectTypeRegistration",
+              "text": "EncryptedSavedObjectTypeRegistration"
+            },
+            "[] | undefined) => ",
+            "SavedObjectsEncryptionExtension"
+          ],
+          "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
+          "lineNumber": 48,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "encryptedSavedObjects",
+              "id": "def-server.EncryptedSavedObjectsPluginSetup.__testCreateDangerousExtension.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "typeRegistry",
+              "description": [],
+              "signature": [
+                "ISavedObjectTypeRegistry"
+              ],
+              "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
+              "lineNumber": 52,
+              "columnNumber": 5,
+              "deprecated": false,
+              "docsReferencedTypeName": "ISavedObjectTypeRegistry",
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "encryptedSavedObjects",
+              "id": "def-server.EncryptedSavedObjectsPluginSetup.__testCreateDangerousExtension.$2",
+              "type": "Array",
+              "tags": [],
+              "label": "typeRegistrationOverrides",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "encryptedSavedObjects",
+                  "scope": "server",
+                  "docId": "kibEncryptedSavedObjectsPluginApi",
+                  "section": "def-server.EncryptedSavedObjectTypeRegistration",
+                  "text": "EncryptedSavedObjectTypeRegistration"
+                },
+                "[] | undefined"
+              ],
+              "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
+              "lineNumber": 53,
+              "columnNumber": 5,
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "setup",
@@ -1031,7 +1105,7 @@
       "label": "EncryptedSavedObjectsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-      "lineNumber": 50,
+      "lineNumber": 57,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1047,7 +1121,7 @@
             "(error: Error) => boolean"
           ],
           "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-          "lineNumber": 51,
+          "lineNumber": 58,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1063,7 +1137,7 @@
                 "Error"
               ],
               "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-              "lineNumber": 51,
+              "lineNumber": 58,
               "columnNumber": 23,
               "deprecated": false,
               "docsReferencedTypeName": "Error",
@@ -1099,7 +1173,7 @@
             }
           ],
           "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-          "lineNumber": 52,
+          "lineNumber": 59,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1130,80 +1204,6 @@
               "trackAdoption": false
             }
           ]
-        },
-        {
-          "parentPluginId": "encryptedSavedObjects",
-          "id": "def-server.EncryptedSavedObjectsPluginStart.__testCreateDangerousExtension",
-          "type": "Function",
-          "tags": [],
-          "label": "__testCreateDangerousExtension",
-          "description": [
-            "\nThis function is exposed for Core migration testing purposes only."
-          ],
-          "signature": [
-            "(typeRegistry: ",
-            "ISavedObjectTypeRegistry",
-            ", typeRegistrationOverrides?: ",
-            {
-              "pluginId": "encryptedSavedObjects",
-              "scope": "server",
-              "docId": "kibEncryptedSavedObjectsPluginApi",
-              "section": "def-server.EncryptedSavedObjectTypeRegistration",
-              "text": "EncryptedSavedObjectTypeRegistration"
-            },
-            "[] | undefined) => ",
-            "SavedObjectsEncryptionExtension"
-          ],
-          "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-          "lineNumber": 53,
-          "columnNumber": 3,
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [
-            {
-              "parentPluginId": "encryptedSavedObjects",
-              "id": "def-server.EncryptedSavedObjectsPluginStart.__testCreateDangerousExtension.$1",
-              "type": "Object",
-              "tags": [],
-              "label": "typeRegistry",
-              "description": [],
-              "signature": [
-                "ISavedObjectTypeRegistry"
-              ],
-              "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-              "lineNumber": 57,
-              "columnNumber": 5,
-              "deprecated": false,
-              "docsReferencedTypeName": "ISavedObjectTypeRegistry",
-              "trackAdoption": false,
-              "isRequired": true
-            },
-            {
-              "parentPluginId": "encryptedSavedObjects",
-              "id": "def-server.EncryptedSavedObjectsPluginStart.__testCreateDangerousExtension.$2",
-              "type": "Array",
-              "tags": [],
-              "label": "typeRegistrationOverrides",
-              "description": [],
-              "signature": [
-                {
-                  "pluginId": "encryptedSavedObjects",
-                  "scope": "server",
-                  "docId": "kibEncryptedSavedObjectsPluginApi",
-                  "section": "def-server.EncryptedSavedObjectTypeRegistration",
-                  "text": "EncryptedSavedObjectTypeRegistration"
-                },
-                "[] | undefined"
-              ],
-              "path": "x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts",
-              "lineNumber": 58,
-              "columnNumber": 5,
-              "deprecated": false,
-              "trackAdoption": false,
-              "isRequired": false
-            }
-          ],
-          "returnComment": []
         }
       ],
       "lifecycle": "start",
