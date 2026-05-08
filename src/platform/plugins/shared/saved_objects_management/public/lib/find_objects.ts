@@ -14,7 +14,6 @@ export async function findObjects(
   http: HttpStart,
   findOptions: v1.FindQueryHTTP
 ): Promise<v1.FindResponseHTTP> {
-  console.log({ findOptions, http });
   return http.get('/api/kibana/management/saved_objects/_find', {
     query: {
       ...findOptions,

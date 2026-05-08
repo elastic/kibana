@@ -38,11 +38,9 @@ import {
   withEuiTablePersist,
   type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist/src';
-import type { HttpSetup } from '@kbn/core/public';
 
 import type { FinderAttributes, SavedObjectCommon } from '../../common';
 import { LISTING_LIMIT_SETTING } from '../../common';
-// import { asyncForEach } from '../../../../../packages/shared/kbn-std';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 15, 25];
 
@@ -53,8 +51,6 @@ export interface SavedObjectMetaData<T extends FinderAttributes = FinderAttribut
   getTooltipForSavedObject?(savedObject: SavedObjectCommon<T>): string;
   showSavedObject?(savedObject: SavedObjectCommon<T>): boolean;
   getSavedObjectSubType?(savedObject: SavedObjectCommon<T>): string;
-
-  // customPath?: string;
 
   /** @deprecated doesn't do anything, the full object is returned **/
   includeFields?: string[];
@@ -76,7 +72,6 @@ interface SavedObjectFinderServices {
   savedObjectsTagging?: SavedObjectsTaggingApi;
   contentClient: ContentClient;
   uiSettings: IUiSettingsClient;
-  http: HttpSetup;
 }
 
 interface BaseSavedObjectFinder {
@@ -91,7 +86,7 @@ interface BaseSavedObjectFinder {
   getHref?: (id: SavedObjectCommon['id'], type: SavedObjectCommon['type']) => string | undefined;
   noItemsMessage?: ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
-  getExtraItems?: () => Promise<SavedObjectCommon<FinderAttributes>[]>;
+  extraItems?: { types: string[]; get: () => Promise<SavedObjectCommon<FinderAttributes>[]> };
   showFilter?: boolean;
   leftChildren?: ReactElement | ReactElement[];
   children?: ReactElement | ReactElement[];
@@ -137,21 +132,25 @@ class SavedObjectFinderUiClass extends React.Component<
     })?.map(({ id, type }) => id);
 
     const types = visibleTypes ?? Object.keys(metaDataMap);
-
+    const contentTypes = types.filter((type) => {
+      return !this.props.extraItems?.types.includes(type);
+    });
     const response = await Promise.all([
-      contentClient.mSearch<SavedObjectCommon<FinderAttributes>>({
-        contentTypes: types.map((type) => ({ contentTypeId: type })),
-        query: {
-          text: queryText ? `${queryText}*` : undefined,
-          ...(includeTags?.length ? { tags: { included: includeTags } } : {}),
-          limit: uiSettings.get(LISTING_LIMIT_SETTING), // TODO: support pagination,
-        },
-      }),
-      this.props.getExtraItems?.(),
+      contentTypes.length
+        ? contentClient.mSearch<SavedObjectCommon<FinderAttributes>>({
+            contentTypes: contentTypes.map((type) => ({ contentTypeId: type })),
+            query: {
+              text: queryText ? `${queryText}*` : undefined,
+              ...(includeTags?.length ? { tags: { included: includeTags } } : {}),
+              limit: uiSettings.get(LISTING_LIMIT_SETTING), // TODO: support pagination,
+            },
+          })
+        : new Promise<{ hits: never[] }>((resolve) => resolve({ hits: [] })),
+      this.props.extraItems?.get() ?? new Promise<never[]>((resolve) => resolve([])),
     ]);
 
     const savedObjects = [
-      ...response[0].hits,
+      ...response[0]!.hits,
       ...(response.length >= 2
         ? response[1]!.filter(({ type }) => {
             return visibleTypes ? visibleTypes.includes(type) : true;

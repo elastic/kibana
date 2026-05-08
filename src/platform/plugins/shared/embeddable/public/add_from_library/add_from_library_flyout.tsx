@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
@@ -53,6 +53,9 @@ export interface AddFromLibraryContentProps {
 
 export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps) => {
   const libraryTypes = useAddFromLibraryTypes();
+  const typesWithoutCM = useMemo(() => {
+    return libraryTypes.filter(({ getSavedObjects }) => Boolean(getSavedObjects));
+  }, [libraryTypes]);
 
   const onChoose: SavedObjectFinderProps['onChoose'] = useCallback(
     async (
@@ -84,7 +87,6 @@ export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps)
         contentClient: contentManagement.client,
         savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
         uiSettings: core.uiSettings,
-        http: core.http,
       }}
       onChoose={onChoose}
       savedObjectMetaData={libraryTypes}
@@ -92,11 +94,12 @@ export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps)
       noItemsMessage={i18n.translate('embeddableApi.addPanel.noMatchingObjectsMessage', {
         defaultMessage: 'No matching objects found.',
       })}
-      getExtraItems={async () => {
-        const getPromises = libraryTypes
-          .filter(({ getSavedObjects }) => Boolean(getSavedObjects))
-          .map(({ getSavedObjects }) => getSavedObjects!());
-        return (await Promise.all(getPromises)).flat();
+      extraItems={{
+        types: typesWithoutCM.map(({ type }) => type),
+        get: async () => {
+          const getPromises = typesWithoutCM.map(({ getSavedObjects }) => getSavedObjects!());
+          return (await Promise.all(getPromises)).flat();
+        },
       }}
       getTooltipText={(item) => {
         return item.managed
