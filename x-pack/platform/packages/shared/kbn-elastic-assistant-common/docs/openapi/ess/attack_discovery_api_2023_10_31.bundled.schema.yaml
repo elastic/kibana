@@ -2983,9 +2983,12 @@ components:
       type: object
       properties:
         alertsIndexPattern:
-          description: |
-            The (space specific) index pattern that contains the alerts to use as
+          description: >
+            The (space specific) index pattern that contains the alerts to use
+            as
+
             context for the attack discovery.
+
             Example: .alerts-security.alerts-default
           type: string
         anonymizationFields:
@@ -3005,8 +3008,10 @@ components:
           type: string
         filter:
           additionalProperties: true
-          description: |-
-            An Elasticsearch-style query DSL object used to filter alerts. For example:
+          description: >-
+            An Elasticsearch-style query DSL object used to filter alerts. For
+            example:
+
             ```json {
               "filter": {
                 "bool": {

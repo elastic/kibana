@@ -14,10 +14,13 @@ servers:
 paths:
   /api/note:
     delete:
-      description: |
-        Deletes notes by saved object ID. Send either `noteId` (single ID) or `noteIds` (array of IDs) in the JSON body.
+      description: >
+        Deletes notes by saved object ID. Send either `noteId` (single ID) or
+        `noteIds` (array of IDs) in the JSON body.
+
 
         The response has HTTP 200 with an empty body on success.
+
 
         Requires the **Timeline and Notes** write privilege (`notes_write`).
       operationId: DeleteNote
@@ -50,9 +53,12 @@ paths:
                       type: array
                   required:
                     - noteIds
-        description: |
-          Exactly one shape: `{ "noteId": "<id>" }` for a single delete, or `{ "noteIds": ["<id>", ...] }` for bulk delete.
-          `noteIds` may be null in some clients; prefer an empty array or omit unused fields when possible.
+        description: >
+          Exactly one shape: `{ "noteId": "<id>" }` for a single delete, or `{
+          "noteIds": ["<id>", ...] }` for bulk delete.
+
+          `noteIds` may be null in some clients; prefer an empty array or omit
+          unused fields when possible.
         required: true
       responses:
         '200':
@@ -62,22 +68,38 @@ paths:
         - Security Timeline API
         - access:securitySolution
     get:
-      description: |
+      description: >
         Returns Security Timeline notes as saved objects.
+
 
         **Query modes (mutually exclusive branches on the server):**
 
-        1. **`documentIds` is set** — Returns notes whose `eventId` matches the given Elasticsearch document `_id` (single string or array). Pagination query parameters (`page`, `perPage`, etc.) are **not** applied; the server uses a fixed page size (up to 10000 notes).
 
-        2. **`savedObjectIds` is set** — Returns notes linked to the given Timeline saved object id(s). Same fixed cap as above; list-mode query parameters are **not** applied.
+        1. **`documentIds` is set** — Returns notes whose `eventId` matches the
+        given Elasticsearch document `_id` (single string or array). Pagination
+        query parameters (`page`, `perPage`, etc.) are **not** applied; the
+        server uses a fixed page size (up to 10000 notes).
 
-        3. **Neither `documentIds` nor `savedObjectIds`** — Lists notes using saved-objects find semantics: `page` (default 1), `perPage` (default 10), optional `search`, `sortField`, `sortOrder`, `filter`, `createdByFilter`, and `associatedFilter`.
+
+        2. **`savedObjectIds` is set** — Returns notes linked to the given
+        Timeline saved object id(s). Same fixed cap as above; list-mode query
+        parameters are **not** applied.
+
+
+        3. **Neither `documentIds` nor `savedObjectIds`** — Lists notes using
+        saved-objects find semantics: `page` (default 1), `perPage` (default
+        10), optional `search`, `sortField`, `sortOrder`, `filter`,
+        `createdByFilter`, and `associatedFilter`.
+
 
         Requires the **Timeline and Notes** read privilege (`notes_read`).
       operationId: GetNotes
       parameters:
-        - description: |
-            Event document `_id` values to match against each note's `eventId`. When this parameter is present, the response is all matching notes (up to the server's hard limit), not a paged list using `page`/`perPage`.
+        - description: >
+            Event document `_id` values to match against each note's `eventId`.
+            When this parameter is present, the response is all matching notes
+            (up to the server's hard limit), not a paged list using
+            `page`/`perPage`.
           examples:
             multiple:
               summary: Multiple document ids (array)
@@ -91,8 +113,10 @@ paths:
           name: documentIds
           schema:
             $ref: '#/components/schemas/DocumentIds'
-        - description: |
-            Timeline `savedObjectId` value(s). Returns notes that reference those timelines. When present, list-mode pagination parameters are not used; up to the server's hard limit of notes may be returned.
+        - description: >
+            Timeline `savedObjectId` value(s). Returns notes that reference
+            those timelines. When present, list-mode pagination parameters are
+            not used; up to the server's hard limit of notes may be returned.
           examples:
             singleTimeline:
               summary: Single timeline id
@@ -101,16 +125,18 @@ paths:
           name: savedObjectIds
           schema:
             $ref: '#/components/schemas/SavedObjectIds'
-        - description: |
-            Page number for list mode (when `documentIds` and `savedObjectIds` are omitted). Passed as a string; default 1.
+        - description: >
+            Page number for list mode (when `documentIds` and `savedObjectIds`
+            are omitted). Passed as a string; default 1.
           example: '1'
           in: query
           name: page
           schema:
             nullable: true
             type: string
-        - description: |
-            Page size for list mode (when `documentIds` and `savedObjectIds` are omitted). Passed as a string; default 10.
+        - description: >
+            Page size for list mode (when `documentIds` and `savedObjectIds` are
+            omitted). Passed as a string; default 10.
           example: '20'
           in: query
           name: perPage
@@ -136,23 +162,30 @@ paths:
           schema:
             nullable: true
             type: string
-        - description: |
-            Kuery filter string combined with other list-mode filters (for example `createdByFilter` or `associatedFilter`). Typed as a string for API compatibility; interpreted by the saved-objects layer (list mode only).
+        - description: >
+            Kuery filter string combined with other list-mode filters (for
+            example `createdByFilter` or `associatedFilter`). Typed as a string
+            for API compatibility; interpreted by the saved-objects layer (list
+            mode only).
           in: query
           name: filter
           schema:
             nullable: true
             type: string
-        - description: |
-            Kibana user profile **UID** (UUID). The server resolves the user's display identifiers and returns notes whose `createdBy` matches any of them (list mode only).
+        - description: >
+            Kibana user profile **UID** (UUID). The server resolves the user's
+            display identifiers and returns notes whose `createdBy` matches any
+            of them (list mode only).
           example: f1c2d3e4-5b6a-7890-abcd-ef1234567890
           in: query
           name: createdByFilter
           schema:
             nullable: true
             type: string
-        - description: |
-            Restricts notes by how they relate to a Timeline and/or an event document (list mode only). Some values apply extra filtering after the query. Ignored when `documentIds` or `savedObjectIds` is used.
+        - description: >
+            Restricts notes by how they relate to a Timeline and/or an event
+            document (list mode only). Some values apply extra filtering after
+            the query. Ignored when `documentIds` or `savedObjectIds` is used.
           in: query
           name: associatedFilter
           schema:
@@ -180,12 +213,17 @@ paths:
         - Security Timeline API
         - access:securitySolution
     patch:
-      description: |
+      description: >
         Creates a new note or updates an existing one.
+
 
         **Create:** Send `note` and omit `noteId` to create a new saved object.
 
-        **Update:** Send `note` with the changed fields and set `noteId` to the note's saved object ID. Optionally include `version` for optimistic concurrency when the client has it from a prior read.
+
+        **Update:** Send `note` with the changed fields and set `noteId` to the
+        note's saved object ID. Optionally include `version` for optimistic
+        concurrency when the client has it from a prior read.
+
 
         Requires the **Timeline and Notes** write privilege (`notes_write`).
       externalDocs:
@@ -223,9 +261,13 @@ paths:
                   type: string
               required:
                 - note
-        description: |
-          Body must include the `note` object. For updates, include `noteId` (and optionally `version`).
-          To attach a note to a specific event, set `note.eventId` to that event's document `_id`; for a timeline-wide note, omit or clear `eventId` per product rules.
+        description: >
+          Body must include the `note` object. For updates, include `noteId`
+          (and optionally `version`).
+
+          To attach a note to a specific event, set `note.eventId` to that
+          event's document `_id`; for a timeline-wide note, omit or clear
+          `eventId` per product rules.
         required: true
       responses:
         '200':
@@ -692,10 +734,13 @@ paths:
         - Security Timeline API
         - access:securitySolution
     post:
-      description: |
+      description: >
         Create a clean draft Timeline or Timeline template for the current user.
+
         > info
-        > If the user already has a draft Timeline, the existing draft Timeline is cleared and returned.
+
+        > If the user already has a draft Timeline, the existing draft Timeline
+        is cleared and returned.
       operationId: CleanDraftTimelines
       requestBody:
         content:
@@ -1301,8 +1346,17 @@ paths:
 components:
   schemas:
     AssociatedFilterType:
-      description: |
-        How the note is associated with a Timeline saved object and/or an event (`eventId`). `all`: no association-based restriction from this parameter. `document_only`: document-linked notes (non-empty `eventId`) without timeline association in the API's internal sense; post-filtering drops notes without a usable `eventId`. `saved_object_only`: timeline notes with no linked event (`eventId` empty or absent); post-filtering keeps timeline-only notes. `document_and_saved_object`: notes on a timeline and linked to an event; post-filtering enforces a real `eventId`. `orphan`: not on a timeline and `eventId` is empty (stricter than missing `eventId` in some cases).
+      description: >
+        How the note is associated with a Timeline saved object and/or an event
+        (`eventId`). `all`: no association-based restriction from this
+        parameter. `document_only`: document-linked notes (non-empty `eventId`)
+        without timeline association in the API's internal sense; post-filtering
+        drops notes without a usable `eventId`. `saved_object_only`: timeline
+        notes with no linked event (`eventId` empty or absent); post-filtering
+        keeps timeline-only notes. `document_and_saved_object`: notes on a
+        timeline and linked to an event; post-filtering enforces a real
+        `eventId`. `orphan`: not on a timeline and `eventId` is empty (stricter
+        than missing `eventId` in some cases).
       enum:
         - all
         - document_only
@@ -1316,8 +1370,10 @@ components:
         - type: object
           properties:
             eventId:
-              description: |
-                Elasticsearch document `_id` for the event or alert this note refers to. Same value as the `documentIds` query parameter when fetching notes via GET /api/note.
+              description: >
+                Elasticsearch document `_id` for the event or alert this note
+                refers to. Same value as the `documentIds` query parameter when
+                fetching notes via GET /api/note.
               example: d3a1d35a3e84a81b2f8f3859e064c224cdee1b4bc
               nullable: true
               type: string
@@ -1954,8 +2010,9 @@ components:
           nullable: true
           type: array
         kqlMode:
-          description: |-
-            Indicates whether the KQL bar filters the query results or searches for additional results, where:
+          description: >-
+            Indicates whether the KQL bar filters the query results or searches
+            for additional results, where:
               * `filter`: filters query results
               * `search`: displays additional search results
           example: search

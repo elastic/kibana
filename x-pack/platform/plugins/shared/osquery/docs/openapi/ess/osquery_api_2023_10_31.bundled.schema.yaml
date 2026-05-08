@@ -13,8 +13,9 @@ servers:
 paths:
   /api/osquery/history:
     get:
-      description: |
-        Get a unified, time-sorted history of live, rule-triggered, and scheduled osquery executions. The response uses cursor-based pagination.
+      description: >
+        Get a unified, time-sorted history of live, rule-triggered, and
+        scheduled osquery executions. The response uses cursor-based pagination.
       operationId: OsqueryGetUnifiedHistory
       parameters:
         - description: The number of results to return per page.
@@ -955,8 +956,10 @@ paths:
       x-state: Generally available; Added in 9.4.0
   /api/osquery/scheduled_results/{scheduleId}/{executionCount}:
     get:
-      description: |
-        Get paginated per-agent action results for a specific scheduled query execution, with success/failure aggregation and execution metadata (pack name, query name/text, timestamp).
+      description: >
+        Get paginated per-agent action results for a specific scheduled query
+        execution, with success/failure aggregation and execution metadata (pack
+        name, query name/text, timestamp).
       operationId: OsqueryGetScheduledActionResults
       parameters:
         - description: The schedule ID of the scheduled query.
@@ -1046,8 +1049,9 @@ paths:
       x-state: Generally available; Added in 9.4.0
   /api/osquery/scheduled_results/{scheduleId}/{executionCount}/results:
     get:
-      description: |
-        Get paginated query result rows (the actual osquery output data) for a specific scheduled query execution.
+      description: >
+        Get paginated query result rows (the actual osquery output data) for a
+        specific scheduled query execution.
       operationId: OsqueryGetScheduledQueryResults
       parameters:
         - description: The schedule ID of the scheduled query.

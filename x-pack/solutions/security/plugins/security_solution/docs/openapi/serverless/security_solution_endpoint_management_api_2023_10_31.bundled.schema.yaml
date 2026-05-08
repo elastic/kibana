@@ -209,11 +209,16 @@ paths:
           required: true
           schema:
             type: string
-        - description: |
+        - description: >
             The file identifier is constructed in one of two ways:
-            - For Elastic Defend agents (`agentType` of `endpoint`): combine the `action_id` and `agent_id` values using a dot (`.`) separator:
+
+            - For Elastic Defend agents (`agentType` of `endpoint`): combine the
+            `action_id` and `agent_id` values using a dot (`.`) separator:
+
             `{file_id}` = `{action_id}.{agent_id}`
-            - For all other agent types: the `file_id` is the `agent_id` for which the response action was sent to.
+
+            - For all other agent types: the `file_id` is the `agent_id` for
+            which the response action was sent to.
           in: path
           name: file_id
           required: true
@@ -294,11 +299,16 @@ paths:
           required: true
           schema:
             type: string
-        - description: |
+        - description: >
             The file identifier is constructed in one of two ways:
-            - For Elastic Defend agents (`agentType` of `endpoint`): combine the `action_id` and `agent_id` values using a dot (`.`) separator:
+
+            - For Elastic Defend agents (`agentType` of `endpoint`): combine the
+            `action_id` and `agent_id` values using a dot (`.`) separator:
+
             `{file_id}` = `{action_id}.{agent_id}`
-            - For all other agent types: the `file_id` is the `agent_id` for which the response action was sent to.
+
+            - For all other agent types: the `file_id` is the `agent_id` for
+            which the response action was sent to.
           in: path
           name: file_id
           required: true
@@ -1404,8 +1414,9 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/SortDirection'
-        - description: |
-            A KQL query string to filter the list of scripts. Nearly all fields in the script object are searchable.
+        - description: >
+            A KQL query string to filter the list of scripts. Nearly all fields
+            in the script object are searchable.
           in: query
           name: kuery
           required: false
@@ -1941,8 +1952,10 @@ components:
       type: object
       properties:
         downloadUri:
-          description: |
-            The server relative URI to download the file associated with the output of the response action.
+          description: >
+            The server relative URI to download the file associated with the
+            output of the response action.
+
             URI does **not** include the space prefix
           example: /api/endpoint/action/497f6eca-6276/file/35645-6276-4993/download
           format: uri-reference
@@ -2117,8 +2130,10 @@ components:
           example: Collect host data
           type: string
         pathToExecutable:
-          description: |
-            The relative path to the file included in the archive that should be executed once its contents are extracted. Applicable only for scripts uploaded as an archive (.zip file for example).
+          description: >
+            The relative path to the file included in the archive that should be
+            executed once its contents are extracted. Applicable only for
+            scripts uploaded as an archive (.zip file for example).
           type: string
         platform:
           items:
@@ -3234,9 +3249,12 @@ components:
               - content
             title: Agent ID
             type: object
-          description: |
-            The outputs of the response action for each agent ID that it was sent to. Content different depending on the
-            response action command and will only be present for agents that have responded to the response action
+          description: >
+            The outputs of the response action for each agent ID that it was
+            sent to. Content different depending on the
+
+            response action command and will only be present for agents that
+            have responded to the response action
           type: object
         parameters:
           description: The parameters of the response action. Content different depending
@@ -3389,8 +3407,9 @@ components:
         - type: object
           properties:
             parameters:
-              description: |
-                One of the following set of parameters must be provided for the `agentType` that is specified.
+              description: >
+                One of the following set of parameters must be provided for the
+                `agentType` that is specified.
               oneOf:
                 - $ref: '#/components/schemas/EndpointRunScriptParameters'
                 - $ref: '#/components/schemas/RawScriptParameters'
@@ -3690,8 +3709,10 @@ components:
                         type: string
               type: object
             parameters:
-              description: |
-                The parameters for upload returned on the details are derived via the API from the file that
+              description: >
+                The parameters for upload returned on the details are derived
+                via the API from the file that
+
                 was uploaded at the time that the response action was submitted
               type: object
               properties:

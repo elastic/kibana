@@ -187,7 +187,7 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: |-
+                    message: >-
                       [security_exception
                       	Root causes:
                       		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
@@ -546,9 +546,12 @@ paths:
       tags:
         - Security Lists API
     put:
-      description: |
-        Update a value list using the list `id`. The original list is replaced, and all unspecified fields are deleted.
+      description: >
+        Update a value list using the list `id`. The original list is replaced,
+        and all unspecified fields are deleted.
+
         > info
+
         > You cannot modify the `id` value.
       operationId: UpdateList
       requestBody:
@@ -723,8 +726,10 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/FindListsCursor'
-        - description: |
-            Filters the returned results according to the value of the specified field,
+        - description: >
+            Filters the returned results according to the value of the specified
+            field,
+
             using the <field name>:<field value> syntax.
           in: query
           name: filter
@@ -1019,13 +1024,21 @@ paths:
         - Security Lists API
     post:
       deprecated: true
-      description: |
-        **DEPRECATED.** `deprecated: true` is set on this operation. Value list backing data streams for the space
-        are now created as part of supported workflows; calling this explicitly is rarely required.
-        **WARNING:** Do not use for new integrations. Prefer the UI or the list and list-item APIs after confirming
+      description: >
+        **DEPRECATED.** `deprecated: true` is set on this operation. Value list
+        backing data streams for the space
+
+        are now created as part of supported workflows; calling this explicitly
+        is rarely required.
+
+        **WARNING:** Do not use for new integrations. Prefer the UI or the list
+        and list-item APIs after confirming
+
         indices exist with `GET /api/lists/index`.
 
-        Creates the `.lists` and `.items` data streams in the current Kibana space.
+
+        Creates the `.lists` and `.items` data streams in the current Kibana
+        space.
       operationId: CreateListIndex
       responses:
         '200':
@@ -1065,8 +1078,12 @@ paths:
                 unauthorized:
                   value:
                     error: Unauthorized
-                    message: |
-                      [security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    message: >
+                      [security_exception\n\tRoot
+                      causes:\n\t\tsecurity_exception: unable to authenticate
+                      user [elastic] for REST request
+                      [/_security/_authenticate]]: unable to authenticate user
+                      [elastic] for REST request [/_security/_authenticate]
                     statusCode: 401
               schema:
                 $ref: '#/components/schemas/PlatformErrorResponse'
@@ -1486,11 +1503,16 @@ paths:
       tags:
         - Security Lists API
     post:
-      description: |
+      description: >
         Create a value list item and associate it with the specified value list.
 
-        All value list items in the same list must be the same type. For example, each list item in an `ip` list must define a specific IP address.
+
+        All value list items in the same list must be the same type. For
+        example, each list item in an `ip` list must define a specific IP
+        address.
+
         > info
+
         > Before creating a list item, you must create a list.
       operationId: CreateListItem
       requestBody:
@@ -1661,9 +1683,12 @@ paths:
       tags:
         - Security Lists API
     put:
-      description: |
-        Update a value list item using the list item ID. The original list item is replaced, and all unspecified fields are deleted.
+      description: >
+        Update a value list item using the list item ID. The original list item
+        is replaced, and all unspecified fields are deleted.
+
         > info
+
         > You cannot modify the `id` value.
       operationId: UpdateListItem
       requestBody:
@@ -1928,15 +1953,18 @@ paths:
               - asc
             example: asc
             type: string
-        - description: |
-            Opaque cursor returned in a previous response; pass it to continue listing from the next page. Omit on the first request.
+        - description: >
+            Opaque cursor returned in a previous response; pass it to continue
+            listing from the next page. Omit on the first request.
           in: query
           name: cursor
           required: false
           schema:
             $ref: '#/components/schemas/FindListItemsCursor'
-        - description: |
-            Filters the returned results according to the value of the specified field,
+        - description: >
+            Filters the returned results according to the value of the specified
+            field,
+
             using the <field name>:<field value> syntax.
           in: query
           name: filter
@@ -2050,8 +2078,10 @@ paths:
         - Security Lists API
   /api/lists/items/_import:
     post:
-      description: |
-        Import value list items from a TXT or CSV file. The maximum file size is 9 million bytes.
+      description: >
+        Import value list items from a TXT or CSV file. The maximum file size is
+        9 million bytes.
+
 
         You can import items to a new or existing list.
       operationId: ImportListItems
@@ -2207,10 +2237,15 @@ paths:
         - Security Lists API
   /api/lists/privileges:
     get:
-      description: |
-        Returns the caller's authentication state and the Elasticsearch `cluster`, `index`, and `application`
-        privileges for `.lists` and `.items` data streams in the current Kibana space. Use this to decide which list
-        APIs (`read` vs `all` operations) are available before you create or import lists.
+      description: >
+        Returns the caller's authentication state and the Elasticsearch
+        `cluster`, `index`, and `application`
+
+        privileges for `.lists` and `.items` data streams in the current Kibana
+        space. Use this to decide which list
+
+        APIs (`read` vs `all` operations) are available before you create or
+        import lists.
       operationId: ReadListPrivileges
       responses:
         '200':
@@ -2578,12 +2613,17 @@ components:
         - index
         - application
     ListType:
-      description: |
-        Specifies the Elasticsearch data type of excludes the list container holds. Some common examples:
+      description: >
+        Specifies the Elasticsearch data type of excludes the list container
+        holds. Some common examples:
+
 
         - `keyword`: Many ECS fields are Elasticsearch keywords
+
         - `ip`: IP addresses
-        - `ip_range`: Range of IP addresses (supports IPv4, IPv6, and CIDR notation)
+
+        - `ip_range`: Range of IP addresses (supports IPv4, IPv6, and CIDR
+        notation)
       enum:
         - binary
         - boolean
@@ -2615,8 +2655,9 @@ components:
       minimum: 1
       type: integer
     ListVersionId:
-      description: |
-        The version id, normally returned by the API when the document is retrieved. Use it ensure updates are done against the latest version.
+      description: >
+        The version id, normally returned by the API when the document is
+        retrieved. Use it ensure updates are done against the latest version.
       example: WzIsMV0=
       type: string
     PlatformErrorResponse:

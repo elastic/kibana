@@ -1125,8 +1125,11 @@ paths:
                 KnowledgeBaseResponse400Example2:
                   summary: A response for a request that failed due to an invalid query parameter
                     value.
-                  value: |
-                    statusCode: 400 error: Bad Request message: "[request query]: ignoreSecurityLabs: Invalid enum value. Expected 'true' | 'false', received 'yes', ignoreSecurityLabs: Expected boolean, received string"
+                  value: >
+                    statusCode: 400 error: Bad Request message: "[request
+                    query]: ignoreSecurityLabs: Invalid enum value. Expected
+                    'true' | 'false', received 'yes', ignoreSecurityLabs:
+                    Expected boolean, received string"
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseResponse400'
           description: Bad Request response.
@@ -1241,8 +1244,11 @@ paths:
                 KnowledgeBaseResponse400Example1:
                   summary: A response for a request that failed due to an invalid query parameter
                     value.
-                  value: |
-                    statusCode: 400 error: Bad Request message: "[request query]: ignoreSecurityLabs: Invalid enum value. Expected 'true' | 'false', received 'yes', ignoreSecurityLabs: Expected boolean, received string"
+                  value: >
+                    statusCode: 400 error: Bad Request message: "[request
+                    query]: ignoreSecurityLabs: Invalid enum value. Expected
+                    'true' | 'false', received 'yes', ignoreSecurityLabs:
+                    Expected boolean, received string"
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseResponse400'
           description: Bad Request response.
