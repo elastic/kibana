@@ -9,7 +9,14 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { Feature, Streams } from '@kbn/streams-schema';
-import { conditionSchema, type Condition } from '@kbn/streamlang';
+import {
+  conditionSchema,
+  extractModifiedFields,
+  isActionBlock,
+  isConditionBlock,
+  type Condition,
+  type StreamlangStep,
+} from '@kbn/streamlang';
 import { DeepStrict } from '@kbn/zod-helpers/v4';
 import { clusterLogs } from '../../src/cluster_logs/cluster_logs';
 import { SuggestStreamPartitionsPrompt } from './prompt';
@@ -119,6 +126,8 @@ export async function partitionStream({
     };
   }
 
+  const processingSummary = summarizeProcessingPipeline(definition);
+
   const response = await executeAsReasoningAgent({
     inferenceClient,
     prompt: SuggestStreamPartitionsPrompt,
@@ -130,6 +139,7 @@ export async function partitionStream({
       ...(existingPartitions.length > 0
         ? { existing_partitions: JSON.stringify(existingPartitions) }
         : {}),
+      ...(processingSummary ? { processing_summary: processingSummary } : {}),
     },
     maxSteps,
     toolCallbacks: {
@@ -232,3 +242,67 @@ export async function partitionStream({
     reason: partitions.length === 0 ? 'no_clusters' : undefined,
   };
 }
+
+/**
+ * Builds a short, LLM-friendly summary of the fields produced by the stream's
+ * existing processing pipeline. The model uses cluster samples as its primary
+ * source of truth for which fields exist, but those samples reflect documents
+ * the pipeline has already processed — newly-added pipeline steps may produce
+ * fields that are not yet present in older indexed documents.
+ *
+ * Surfacing the pipeline's output fields in the prompt closes that gap so the
+ * model can confidently use them in partition conditions even when they are
+ * sparsely represented (or absent) in the cluster samples.
+ *
+ * Returns `null` when the stream has no processing pipeline (e.g. query
+ * streams or freshly-forked wired streams) so the caller can omit the
+ * section entirely.
+ */
+const summarizeProcessingPipeline = (definition: Streams.WiredStream.Definition): string | null => {
+  const steps = definition.ingest.processing.steps;
+  if (steps.length === 0) {
+    return null;
+  }
+
+  const producedFields = new Set<string>();
+  collectProducedFields(steps, producedFields);
+  if (producedFields.size === 0) {
+    return null;
+  }
+
+  const sortedFields = Array.from(producedFields).sort();
+  return [
+    `Existing processing pipeline (${steps.length} step${
+      steps.length === 1 ? '' : 's'
+    }) produces these fields:`,
+    ...sortedFields.map((field) => `- ${field}`),
+    '',
+    'These fields are populated by the pipeline at ingest time and are valid targets for partition conditions even when they appear sparsely (or not at all) in the cluster samples below — older documents indexed before the pipeline was added may not carry them yet.',
+  ].join('\n');
+};
+
+/**
+ * Walks a Streamlang DSL recursively, collecting the field names each step
+ * produces. Defers to `extractModifiedFields` from `@kbn/streamlang` for the
+ * per-action field detection (including grok/dissect capture parsing) so the
+ * summary stays in sync with how Streamlang itself reasons about modified
+ * fields, and recurses into condition blocks (`if/then/else`) which the
+ * single-step helper does not handle.
+ */
+const collectProducedFields = (steps: StreamlangStep[], acc: Set<string>): void => {
+  for (const step of steps) {
+    if (isConditionBlock(step)) {
+      collectProducedFields(step.condition.steps, acc);
+      if (step.condition.else) {
+        collectProducedFields(step.condition.else, acc);
+      }
+      continue;
+    }
+
+    if (!isActionBlock(step)) continue;
+
+    for (const field of extractModifiedFields(step)) {
+      acc.add(field);
+    }
+  }
+};

@@ -9,6 +9,7 @@ export type {
   StreamlangDSL,
   StreamlangDSLWithUpdatedAt,
   StreamType,
+  StreamlangStep,
   StreamlangConditionBlock,
 } from './types/streamlang';
 export {
@@ -47,6 +48,7 @@ export {
   getMathFunctionDefinition,
   getMathParameterNames,
 } from './src/transpilers/shared/math';
+export { extractModifiedFields } from './src/validation/validate_types';
 export type { MathFunctionDefinition } from './src/transpilers/shared/math';
 export {
   getAvailableGrokPatterns,

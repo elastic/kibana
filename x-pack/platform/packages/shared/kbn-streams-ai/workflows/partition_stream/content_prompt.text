@@ -3,6 +3,10 @@ Stream name:
 
 Stream description:
 - {{{stream.description}}}
+{{#processing_summary}}
+
+{{{processing_summary}}}
+{{/processing_summary}}
 {{#user_prompt}}
 
 User guidance:
