@@ -76,7 +76,7 @@ export const createExternalService = (
       };
     } catch (error) {
       logger.error(`Error running workflow ${workflowId}: ${error?.message}`);
-      if (error?.message?.includes('Workflow is disabled')) {
+      if ((error as { isUserError?: unknown })?.isUserError === true) {
         throw createTaskRunError(
           createServiceError(error, `Unable to run workflow ${workflowId}`),
           TaskErrorSource.USER
@@ -119,7 +119,7 @@ export const createExternalService = (
       return workflowRunId;
     } catch (error) {
       logger.error(`Error scheduling workflow ${workflowId}: ${error?.message}`);
-      if (error?.message?.includes('Workflow is disabled')) {
+      if ((error as { isUserError?: unknown })?.isUserError === true) {
         throw createTaskRunError(
           createServiceError(error, `Unable to schedule workflow ${workflowId}`),
           TaskErrorSource.USER

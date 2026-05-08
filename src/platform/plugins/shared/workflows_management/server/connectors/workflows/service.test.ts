@@ -17,6 +17,12 @@ import {
   type WorkflowsServiceFunction,
 } from './service';
 
+const createDisabledWorkflowError = (message: string) => {
+  const error = new Error(message);
+  (error as Error & { isUserError: boolean }).isUserError = true;
+  return error;
+};
+
 describe('Workflows Service', () => {
   let mockLogger: jest.Mocked<Logger>;
   let mockRequest: KibanaRequest;
@@ -222,7 +228,9 @@ describe('Workflows Service', () => {
       const mockWorkflowService: WorkflowsServiceFunction = jest
         .fn()
         .mockRejectedValue(
-          new Error('Workflow is disabled: test-workflow-id. Enable the workflow to run it.')
+          createDisabledWorkflowError(
+            'Workflow is disabled: test-workflow-id. Enable the workflow to run it.'
+          )
         );
 
       const service = createExternalService(
@@ -502,8 +510,8 @@ describe('Workflows Service', () => {
       const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest
         .fn()
         .mockRejectedValue(
-          new Error(
-            'Error scheduling workflow new-workflow: Workflow is disabled: new-workflow. Enable the workflow to run it.'
+          createDisabledWorkflowError(
+            'Workflow is disabled: new-workflow. Enable the workflow to run it.'
           )
         );
 
