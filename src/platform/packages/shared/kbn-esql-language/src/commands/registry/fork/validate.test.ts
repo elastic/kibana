@@ -38,12 +38,12 @@ describe('FORK Validation', () => {
     );
   });
 
-  test('requires at least two branches', () => {
+  test('Allows FORK with one branch', () => {
     forkExpectErrors(
       `FROM index
 | FORK
     (WHERE keywordField != "")`,
-      [`[FORK] Must include at least two branches.`]
+      []
     );
   });
 

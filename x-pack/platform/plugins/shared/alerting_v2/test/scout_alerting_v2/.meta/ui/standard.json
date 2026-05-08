@@ -1,5 +1,5 @@
 {
-  "sha1": "9c546a87ad4a37cd717a7cfd7fb0651ddd25803f",
+  "sha1": "b15ac5b20585854787e3089645133d6c41d0c5d4",
   "tests": [
     {
       "id": "8065d296c26f2cd-b37771106c4b8c3",
@@ -37,6 +37,34 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/discover_query_sync.spec.ts",
         "line": 44,
+        "column": 7
+      }
+    },
+    {
+      "id": "01469191962c32a-365fefaed06dbcf",
+      "title": "ES|QL rule flyout — ?param validation save button is enabled and no callout shown when query has no ?params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/esql_rule_flyout_validation.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "01469191962c32a-cedbfc207920e04",
+      "title": "ES|QL rule flyout — ?param validation save button is disabled and callout lists unresolved ?param when no matching control exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/esql_rule_flyout_validation.spec.ts",
+        "line": 58,
         "column": 7
       }
     },

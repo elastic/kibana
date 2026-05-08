@@ -33,6 +33,8 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { useQueryClient } from '@kbn/react-query';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AlertingEpisodeGroupingTags } from '@kbn/alerting-v2-episodes-ui/components/grouping/alerting_episode_grouping_tags';
+import { useFetchEpisodeEventDataQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_event_data_query';
 import { useFetchEpisodeEventsQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_events_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
 import { useFetchGroupActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
@@ -43,6 +45,7 @@ import {
   getRuleIdFromEpisodeRows,
   getTriggeredTimestamp,
 } from '@kbn/alerting-v2-episodes-ui/utils/episode_series_derived';
+import { getNonEmptyGroupingFields } from '@kbn/alerting-v2-episodes-ui/utils/episode_grouping_data';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import { EpisodeActionsBar } from '@kbn/alerting-v2-episodes-ui/components/episode_actions_bar';
 import { AlertEpisodeTags } from '@kbn/alerting-v2-episodes-ui/components/actions/tags';
@@ -109,6 +112,12 @@ export function EpisodeDetailsPage() {
     groupHashes: groupHash ? [groupHash] : [],
     expressions,
   });
+
+  const { data: episodeAlertDataPayload, refetch: refetchEpisodeEventData } =
+    useFetchEpisodeEventDataQuery({
+      episodeId,
+      data,
+    });
 
   const episodeBreadcrumbTitle =
     rule?.metadata.name != null && rule.metadata.name.length > 0
@@ -220,7 +229,8 @@ export function EpisodeDetailsPage() {
     refetchEpisodeEvents();
     refetchEpisodeActions();
     refetchGroupActions();
-  }, [refetchEpisodeEvents, refetchEpisodeActions, refetchGroupActions]);
+    refetchEpisodeEventData();
+  }, [refetchEpisodeEvents, refetchEpisodeActions, refetchGroupActions, refetchEpisodeEventData]);
 
   const ruleKindLabel = rule?.kind === 'signal' ? i18n.RULE_KIND_SIGNAL : i18n.RULE_KIND_ALERTING;
 
@@ -249,25 +259,40 @@ export function EpisodeDetailsPage() {
     );
   }
 
+  const ruleGroupingFields = rule?.grouping?.fields ?? [];
+  const episodeGroupingData = episodeAlertDataPayload?.data ?? {};
+  const showHeaderGroupingBadges =
+    ruleGroupingFields.length > 0 &&
+    getNonEmptyGroupingFields(ruleGroupingFields, episodeGroupingData).length > 0;
+
   const pageTitle = (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="l">
-          <h1 data-test-subj="alertingV2EpisodeDetailsRuleTitle">
-            {rule?.metadata.name ?? i18n.LOADING_RULE_TITLE}
-          </h1>
-        </EuiTitle>
-      </EuiFlexItem>
-      {lastStatus ? (
+    <>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <AlertEpisodeStatusBadges
-            status={lastStatus}
-            episodeAction={episodeAction}
-            groupAction={groupAction}
-          />
+          <EuiTitle size="l">
+            <h1 data-test-subj="alertingV2EpisodeDetailsRuleTitle">
+              {rule?.metadata.name ?? i18n.LOADING_RULE_TITLE}
+            </h1>
+          </EuiTitle>
         </EuiFlexItem>
+        {lastStatus ? (
+          <EuiFlexItem grow={false}>
+            <AlertEpisodeStatusBadges
+              status={lastStatus}
+              episodeAction={episodeAction}
+              groupAction={groupAction}
+            />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+      {showHeaderGroupingBadges ? (
+        <AlertingEpisodeGroupingTags
+          fields={ruleGroupingFields}
+          data={episodeGroupingData}
+          data-test-subj="alertingV2EpisodeDetailsHeaderGroupingTags"
+        />
       ) : null}
-    </EuiFlexGroup>
+    </>
   );
 
   const ruleDescriptionText =
@@ -276,22 +301,6 @@ export function EpisodeDetailsPage() {
         {rule.metadata.description}
       </EuiText>
     ) : null;
-
-  const showTagsInHeader = !isLoading && tags.length > 0;
-  const tagsInHeader = showTagsInHeader ? (
-    <div data-test-subj="alertingV2EpisodeDetailsHeaderTags">
-      <AlertEpisodeTags tags={tags} />
-    </div>
-  ) : null;
-
-  const headerDescription =
-    tagsInHeader || ruleDescriptionText ? (
-      <>
-        {ruleDescriptionText}
-        {tagsInHeader && ruleDescriptionText ? <EuiSpacer size="s" /> : null}
-        {tagsInHeader}
-      </>
-    ) : undefined;
 
   const sidebarHeaderTitle =
     sidebarPanel === 'episode_details'
@@ -387,6 +396,17 @@ export function EpisodeDetailsPage() {
                   title: i18n.DURATION_LABEL,
                   description:
                     durationMs != null ? i18n.FORMAT_EPISODE_DURATION_MS(durationMs) : '—',
+                },
+                {
+                  title: i18n.TAGS_LABEL,
+                  description:
+                    tags.length > 0 ? (
+                      <div data-test-subj="alertingV2EpisodeDetailsSidebarTags">
+                        <AlertEpisodeTags tags={tags} />
+                      </div>
+                    ) : (
+                      '—'
+                    ),
                 },
                 {
                   title: i18n.ASSIGNEE_LABEL,
@@ -614,7 +634,7 @@ export function EpisodeDetailsPage() {
       `}
       pageHeader={{
         pageTitle,
-        description: headerDescription,
+        description: ruleDescriptionText,
         bottomBorder: true,
         restrictWidth: false,
         paddingSize: 'none',

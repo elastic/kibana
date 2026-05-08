@@ -12,7 +12,6 @@ import type {
   AgentContextLayerSetupDependencies,
   AgentContextLayerStartDependencies,
 } from './types';
-import { AgentContextLayerPlugin } from './plugin';
 
 export type {
   AgentContextLayerPluginSetup,
@@ -41,5 +40,6 @@ export const plugin: PluginInitializer<
   AgentContextLayerSetupDependencies,
   AgentContextLayerStartDependencies
 > = async (pluginInitializerContext: PluginInitializerContext) => {
+  const { AgentContextLayerPlugin } = await import('./plugin');
   return new AgentContextLayerPlugin(pluginInitializerContext);
 };
