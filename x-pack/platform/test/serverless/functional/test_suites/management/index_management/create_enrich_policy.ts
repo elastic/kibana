@@ -20,7 +20,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Create enrich policy', function () {
     // TimeoutError:  Waiting for element to be located By(css selector, [data-test-subj="enrichPoliciesEmptyPromptCreateButton"])
-    this.tags(['failsOnMKI']);
+    // this.tags(['failsOnMKI']);
 
     before(async () => {
       log.debug('Creating test index');
