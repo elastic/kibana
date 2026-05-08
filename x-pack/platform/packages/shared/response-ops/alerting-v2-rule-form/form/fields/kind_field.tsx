@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller, useFormContext } from 'react-hook-form';
 import type { RuleKind } from '@kbn/alerting-v2-schemas';
@@ -53,34 +53,68 @@ const KIND_OPTIONS: KindOption[] = [
   },
 ];
 
-export const KindField = () => {
+export interface KindFieldProps {
+  disabled?: boolean;
+  compact?: boolean;
+}
+
+export const KindField = ({ disabled = false, compact = false }: KindFieldProps) => {
   const { control } = useFormContext<FormValues>();
 
   return (
     <Controller
       name="kind"
       control={control}
-      render={({ field: { value, onChange } }) => (
-        <EuiFlexGroup gutterSize="m" direction="column">
-          {KIND_OPTIONS.map((option) => (
-            <EuiFlexItem key={option.value}>
-              <EuiCheckableCard
-                id={`${CARD_ID}_${option.value}`}
-                name={CARD_ID}
-                checkableType="radio"
-                label={<strong>{option.label}</strong>}
-                checked={value === option.value}
-                onChange={() => onChange(option.value)}
-                data-test-subj={`kindField-${option.value}`}
-              >
-                <EuiText size="s" color="subdued">
-                  {option.description}
-                </EuiText>
-              </EuiCheckableCard>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      )}
+      render={({ field: { value, onChange } }) => {
+        if (compact) {
+          return (
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              {KIND_OPTIONS.map((option) => (
+                <EuiFlexItem key={option.value} grow={false}>
+                  <EuiCheckableCard
+                    id={`${CARD_ID}_${option.value}`}
+                    name={CARD_ID}
+                    checkableType="radio"
+                    label={
+                      <>
+                        {option.label}{' '}
+                        <EuiIconTip type="iInCircle" position="top" content={option.description} />
+                      </>
+                    }
+                    checked={value === option.value}
+                    onChange={() => onChange(option.value)}
+                    disabled={disabled}
+                    data-test-subj={`kindField-${option.value}`}
+                  />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          );
+        }
+
+        return (
+          <EuiFlexGroup gutterSize="m" direction="column">
+            {KIND_OPTIONS.map((option) => (
+              <EuiFlexItem key={option.value}>
+                <EuiCheckableCard
+                  id={`${CARD_ID}_${option.value}`}
+                  name={CARD_ID}
+                  checkableType="radio"
+                  label={<strong>{option.label}</strong>}
+                  checked={value === option.value}
+                  onChange={() => onChange(option.value)}
+                  disabled={disabled}
+                  data-test-subj={`kindField-${option.value}`}
+                >
+                  <EuiText size="s" color="subdued">
+                    {option.description}
+                  </EuiText>
+                </EuiCheckableCard>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        );
+      }}
     />
   );
 };
