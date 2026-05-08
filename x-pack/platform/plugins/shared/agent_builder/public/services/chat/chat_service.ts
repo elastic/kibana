@@ -106,6 +106,11 @@ export class ChatService {
   }
 
   private converse(signal: AbortSignal | undefined, payload: ChatRequestBodyPayload) {
+    // Every Agent Builder UI caller passes a client-generated UUID before chat fires.
+    // The fallback to `''` is defensive only - events with that tag won't reach any
+    // per-conversation subscriber but still flow through the deprecated `obs$` stream.
+    const conversationId = payload.conversation_id ?? '';
+
     return defer(() => {
       return this.http.post(`${publicApiPath}/converse/async`, {
         signal,
@@ -117,7 +122,10 @@ export class ChatService {
       // @ts-expect-error SseEvent mixin issue
       httpResponseIntoObservable<ChatEvent>(),
       unwrapAgentBuilderErrors(),
-      propagateEvents({ eventsService: this.events })
+      propagateEvents({
+        eventsService: this.events,
+        conversationId,
+      })
     );
   }
 }
