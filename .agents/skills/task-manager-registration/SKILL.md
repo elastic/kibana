@@ -127,7 +127,7 @@ createTaskRunner: ({ taskInstance }) => ({
 
 **Rule:** `cancel()` is **optional**, and omitting it is the common case. Add it only when the task holds resources that the abort signal alone does not release: open subscriptions, scheduled timers, file handles, in-memory caches you allocated, or AbortControllers you created downstream.
 
-When present, `cancel()` is invoked by Task Manager during teardown (timeout, shutdown). It runs **alongside** the abort signal — the signal stops in-flight I/O, `cancel()` releases everything else.
+When present, `cancel()` is invoked by Task Manager **on timeout only** — when a task exceeds its `timeout`, the pool calls `cancel()` (`task_pool/task_pool.ts`). On Kibana shutdown, Task Manager stops the poller but does **not** call `cancel()` on tasks that are still running; rely on the abort signal (and your own cleanup paths) for shutdown. `cancel()` runs **alongside** the abort signal — the signal stops in-flight I/O, `cancel()` releases everything else.
 
 Do **not** add an empty `cancel: async () => {}` just to satisfy the type. If there is nothing to clean up, omit the field entirely.
 
@@ -259,11 +259,13 @@ If the task is fully stateless (every run starts from scratch), return `{ state:
 
 `TaskCost` values are integers used by the capacity pool: `Tiny = 1`, `Normal = 2`, `ExtraLarge = 10`. Capacity is finite; an over-costed task starves its neighbours, an under-costed task gets starved by them.
 
-| Cost | When to pick |
-|---|---|
-| `TaskCost.Tiny` | Sub-second, no ES query — heartbeats, gauge reporting, light scheduling |
-| `TaskCost.Normal` | Default. A handful of ES queries, modest CPU |
-| `TaskCost.ExtraLarge` | Heavy aggregations, large bulk reads/writes, long-running scans |
+| Cost | Assumed memory budget | When to pick |
+|---|---|---|
+| `TaskCost.Tiny` | < 25 MB | Sub-second, no ES query — heartbeats, gauge reporting, light scheduling |
+| `TaskCost.Normal` | < 50 MB | Default. A handful of ES queries, modest CPU |
+| `TaskCost.ExtraLarge` | < 250 MB | Heavy aggregations, large bulk reads/writes, long-running scans |
+
+The memory budgets are the assumption capacity planning is built on; if the task's real footprint exceeds the budget for its tier, bump the cost rather than relying on the smaller tier's slot.
 
 | Priority | When to pick |
 |---|---|
@@ -303,9 +305,11 @@ const numericCost = getTaskCostFromInstance(taskInstance.params.cost);
 
 | API | Idempotent? | Use case |
 |---|---|---|
-| `ensureScheduled` | Yes — no-ops if a task with that `id` exists | Recurring system tasks created during plugin start |
+| `ensureScheduled` | Yes — won't create a duplicate if a task with that `id` exists | Recurring system tasks created during plugin start |
 | `schedule` | No — always creates a new instance | One-shot user-triggered work |
 | `bulkSchedule` | No — same as `schedule` for many | Bulk one-shot work |
+
+`ensureScheduled` is **not** a pure no-op: if a task with the given `id` already exists and the call supplies an interval-based `schedule`, it updates the existing task's schedule to match (`task_scheduling.ts`). Pass an `interval` only when you genuinely want to override whatever schedule is on disk; otherwise fetch the existing task first (see "Preserving user-configured schedules" below) and reuse its `schedule`.
 
 ```ts
 // Correct: recurring task on plugin start
