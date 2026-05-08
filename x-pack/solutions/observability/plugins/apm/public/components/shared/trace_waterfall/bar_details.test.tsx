@@ -544,26 +544,12 @@ describe('BarDetails', () => {
         const badge = getByTestId('apmBarDetailsServiceNameBadge');
         expect(badge).toHaveAttribute('aria-label', 'Go to my-service service overview');
       });
-    });
 
-    describe('when getServiceBadgeHref is provided in context and badge is clicked', () => {
-      it('stops propagation to prevent triggering the row click', async () => {
-        const user = userEvent.setup();
-        const parentClickHandler = jest.fn();
-
-        (useTraceWaterfallContext as jest.Mock).mockReturnValue({
-          getServiceBadgeHref: (serviceName: string) => `/services/${serviceName}/overview`,
-        });
-
-        const { getByTestId } = render(
-          <div onClick={parentClickHandler} onKeyDown={() => {}}>
-            <BarDetails item={{ ...mockItem, serviceName: 'my-service' }} left={10} />
-          </div>
+      it('sets data-prevent-row-click to prevent the row click handler from firing', () => {
+        const { getByTestId } = render(<BarDetails item={mockItemWithServiceName} left={10} />);
+        expect(getByTestId('apmBarDetailsServiceNameBadge')).toHaveAttribute(
+          'data-prevent-row-click'
         );
-
-        await user.click(getByTestId('apmBarDetailsServiceNameBadge'));
-
-        expect(parentClickHandler).not.toHaveBeenCalled();
       });
     });
 

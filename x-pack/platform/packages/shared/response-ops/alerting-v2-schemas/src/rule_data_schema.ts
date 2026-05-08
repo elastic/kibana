@@ -305,6 +305,28 @@ export type RuleResponse = z.infer<typeof ruleResponseSchema>;
 export const findRulesSortFieldSchema = z.enum(['kind', 'enabled', 'name']);
 export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
 
+/** Query parameters for the find rules (list) API. */
+export const findRulesParamsSchema = z.object({
+  page: z.coerce.number().min(1).optional().describe('The page number to return.'),
+  perPage: z.coerce
+    .number()
+    .min(1)
+    .max(1000)
+    .optional()
+    .describe('The number of rules to return per page.'),
+  filter: z.string().optional().describe('The filter to apply to the rules.'),
+  sortField: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
+  sortOrder: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
+  search: z
+    .string()
+    .trim()
+    .min(1)
+    .optional()
+    .describe('A text string to search across rule fields.'),
+});
+
+export type FindRulesParams = z.infer<typeof findRulesParamsSchema>;
+
 /** Paginated list response schema. */
 export const findRulesResponseSchema = z
   .object({
