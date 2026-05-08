@@ -105,7 +105,9 @@ describe('createAlertFactory()', () => {
       logger,
       configuredMaxAlerts: 1000,
       autoRecoverAlerts: true,
-      snoozedInstancesMap: new Map([['1', { instanceId: '1', snoozedAt: '2024-01-01T00:00:00.000Z', snoozedBy: 'user' }]]),
+      snoozedInstancesMap: new Map([
+        ['1', { instanceId: '1', snoozedAt: '2024-01-01T00:00:00.000Z', snoozedBy: 'user' }],
+      ]),
     });
     alertFactory.create('1');
     expect(setSnoozeConfigSpy).not.toHaveBeenCalled();
