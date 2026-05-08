@@ -20,7 +20,6 @@ export const LENS_API_VERSION = '2023-10-31';
  */
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
-  'x-elastic-internal-origin': 'kibana',
   'elastic-api-version': LENS_API_VERSION,
 } as const;
 
