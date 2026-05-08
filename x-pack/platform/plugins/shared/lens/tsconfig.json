@@ -143,6 +143,7 @@
     "@kbn/esql-composer",
     "@kbn/cps",
     "@kbn/core-http-browser",
+    "@kbn/scout",
   ],
   "exclude": ["target/**/*"]
 }
