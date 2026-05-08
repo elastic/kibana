@@ -42,6 +42,19 @@ interface UseMonacoMarkersChangedInterceptorProps {
   workflowYamlSchema: z.ZodSchema;
 }
 
+function formattedMarkerKey(marker: monaco.editor.IMarkerData): string {
+  return [
+    marker.startLineNumber,
+    marker.startColumn,
+    marker.endLineNumber,
+    marker.endColumn,
+    marker.severity,
+    marker.source ?? '',
+    typeof marker.code === 'string' ? marker.code : marker.code?.value ?? '',
+    marker.message ?? '',
+  ].join('|');
+}
+
 export function useMonacoMarkersChangedInterceptor({
   yamlDocumentRef,
   workflowYamlSchema,
@@ -49,9 +62,23 @@ export function useMonacoMarkersChangedInterceptor({
   const [validationErrors, setValidationErrors] = useState<YamlValidationResult[]>([]);
   const lastFingerprintRef = useRef<string>('');
   // yamlDocumentRef lags the model by the 500ms Redux compute debounce, so formatMonacoYamlMarker
-  // needs a parse matching the current model. Cache by versionId so multiple setModelMarkers
-  // bursts within the same version share one parse instead of reparsing per marker callback.
-  const freshYamlDocCacheRef = useRef<{ versionId: number; doc: YAML.Document } | null>(null);
+  // needs a parse matching the current model. Cache by (modelId, versionId) so repeated
+  // setModelMarkers bursts on the same model version share one parse; modelId guards against
+  // collisions when the editor swaps to a different model whose versionId starts over.
+  const freshYamlDocCacheRef = useRef<{
+    modelId: string;
+    versionId: number;
+    doc: YAML.Document;
+  } | null>(null);
+
+  // Memoize per-marker formatting output for the current model version. monaco-yaml's worker
+  // can re-emit the same marker set across multiple setModelMarkers callbacks (same model
+  // version, same markers); caching the formatted output collapses those into a Map lookup.
+  const formattedMarkerCacheRef = useRef<{
+    modelId: string;
+    versionId: number;
+    entries: Map<string, monaco.editor.IMarkerData>;
+  } | null>(null);
 
   const transformMonacoMarkers = useCallback(
     (
@@ -65,19 +92,42 @@ export function useMonacoMarkersChangedInterceptor({
         return filtered;
       }
 
+      const modelId = editorModel.id;
       const versionId = editorModel.getVersionId();
-      const cached = freshYamlDocCacheRef.current;
+
+      const docCached = freshYamlDocCacheRef.current;
       const freshYamlDocument =
-        cached && cached.versionId === versionId
-          ? cached.doc
+        docCached && docCached.modelId === modelId && docCached.versionId === versionId
+          ? docCached.doc
           : parseDocument(editorModel.getValue());
-      if (cached?.versionId !== versionId) {
-        freshYamlDocCacheRef.current = { versionId, doc: freshYamlDocument };
+      if (!docCached || docCached.modelId !== modelId || docCached.versionId !== versionId) {
+        freshYamlDocCacheRef.current = { modelId, versionId, doc: freshYamlDocument };
       }
 
-      return filtered.map((marker) =>
-        formatMonacoYamlMarker(marker, editorModel, workflowYamlSchema, freshYamlDocument)
-      );
+      const formatCached = formattedMarkerCacheRef.current;
+      const entries =
+        formatCached && formatCached.modelId === modelId && formatCached.versionId === versionId
+          ? formatCached.entries
+          : new Map<string, monaco.editor.IMarkerData>();
+      if (entries !== formatCached?.entries) {
+        formattedMarkerCacheRef.current = { modelId, versionId, entries };
+      }
+
+      return filtered.map((marker) => {
+        const cacheKey = formattedMarkerKey(marker);
+        const hit = entries.get(cacheKey);
+        if (hit) {
+          return hit;
+        }
+        const formatted = formatMonacoYamlMarker(
+          marker,
+          editorModel,
+          workflowYamlSchema,
+          freshYamlDocument
+        );
+        entries.set(cacheKey, formatted);
+        return formatted;
+      });
     },
     [workflowYamlSchema, yamlDocumentRef]
   );
