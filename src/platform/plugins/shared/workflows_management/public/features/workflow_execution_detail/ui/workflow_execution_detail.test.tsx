@@ -10,7 +10,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { useQueryClient } from '@kbn/react-query';
-import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionDetail } from './workflow_execution_detail';
 import {
@@ -44,36 +44,40 @@ jest.mock('../../../hooks/use_workflow_url_state', () => ({
   useWorkflowUrlState: () => mockUseWorkflowUrlState(),
 }));
 
-// Track step execution details props
-const mockStepExecutionDetailsProps: { current: Record<string, unknown> } = {
-  current: {},
-};
+// Track captured props for header / list / resume button
+const capturedHeaderProps: { current: Record<string, unknown> } = { current: {} };
+const capturedListProps: { current: Record<string, unknown> } = { current: {} };
+const capturedResumeProps: { current: Record<string, unknown> } = { current: {} };
 
-jest.mock('./workflow_execution_panel', () => ({
-  WorkflowExecutionPanel: ({
-    execution,
-    error,
-    showBackButton,
-  }: {
-    execution: WorkflowExecutionDto | null;
-    error: Error | null;
-    showBackButton: boolean;
-  }) => (
-    <div data-test-subj="execution-panel">
-      <div data-test-subj="show-back-button">{String(showBackButton)}</div>
-      <div data-test-subj="panel-execution-status">{execution?.status ?? 'no-execution'}</div>
-    </div>
-  ),
+jest.mock('./workflow_execution_header', () => ({
+  WorkflowExecutionTopBar: (props: Record<string, unknown>) => {
+    capturedHeaderProps.current = props;
+    return (
+      <div data-test-subj="execution-header">
+        <div data-test-subj="header-show-back-button">{String(props.showBackButton)}</div>
+      </div>
+    );
+  },
 }));
 
-jest.mock('./workflow_step_execution_details', () => ({
-  WorkflowStepExecutionDetails: (props: Record<string, unknown>) => {
-    mockStepExecutionDetailsProps.current = props;
+jest.mock('./workflow_execution_step_list', () => ({
+  WorkflowExecutionStepList: (props: Record<string, unknown>) => {
+    capturedListProps.current = props;
     return (
-      <div data-test-subj="step-details">
-        <div data-test-subj="step-resume-message">{String(props.resumeMessage ?? '')}</div>
-        <div data-test-subj="step-auto-resume">{String(props.shouldAutoResume)}</div>
-        <div data-test-subj="step-loading">{String(props.isLoadingStepData)}</div>
+      <div data-test-subj="execution-step-list">
+        <div data-test-subj="list-expanded-id">{String(props.expandedStepExecutionId ?? '')}</div>
+      </div>
+    );
+  },
+}));
+
+jest.mock('./resume_execution_button', () => ({
+  ResumeExecutionButton: (props: Record<string, unknown>) => {
+    capturedResumeProps.current = props;
+    return (
+      <div data-test-subj="resume-button">
+        <div data-test-subj="resume-message">{String(props.resumeMessage ?? '')}</div>
+        <div data-test-subj="resume-auto-open">{String(props.autoOpen)}</div>
       </div>
     );
   },
@@ -82,7 +86,6 @@ jest.mock('./workflow_step_execution_details', () => ({
 type UseStepExecutionParams = Parameters<
   typeof import('../model/use_step_execution').useStepExecution
 >;
-/** Subset of useQuery result; tests override via mockReturnValue */
 interface UseStepExecutionQueryStub {
   data: unknown;
   isLoading: boolean;
@@ -155,12 +158,14 @@ describe('WorkflowExecutionDetail', () => {
     mockPollingResult.workflowExecution = undefined;
     mockPollingResult.error = null;
     mockChildExecutions.clear();
+    capturedHeaderProps.current = {};
+    capturedListProps.current = {};
+    capturedResumeProps.current = {};
   });
 
   describe('cache invalidation', () => {
     it('should call removeQueries on unmount with the current execution query key', () => {
       mockPollingResult.workflowExecution = createMockExecution({ id: 'exec-1' });
-      mockUrlState.selectedStepExecutionId = '__overview';
 
       const { unmount } = render(
         <TestWrapper>
@@ -179,7 +184,6 @@ describe('WorkflowExecutionDetail', () => {
 
     it('should call removeQueries for the previous execution when executionId changes', () => {
       mockPollingResult.workflowExecution = createMockExecution({ id: 'exec-1' });
-      mockUrlState.selectedStepExecutionId = '__overview';
 
       const { rerender } = render(
         <TestWrapper>
@@ -203,30 +207,8 @@ describe('WorkflowExecutionDetail', () => {
     });
   });
 
-  describe('auto-select overview on failed before steps', () => {
-    it('should auto-select overview when execution is terminal with no step executions', () => {
-      mockPollingResult.workflowExecution = createMockExecution({
-        id: 'exec-fail',
-        status: ExecutionStatus.FAILED,
-        error: { type: 'InputValidationError', message: 'name: Required' },
-        stepExecutions: [],
-      });
-
-      mockUrlState.selectedStepExecutionId = '';
-
-      render(
-        <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-fail" onClose={jest.fn()} />
-        </TestWrapper>
-      );
-
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview');
-    });
-  });
-
-  describe('assignSelectedStepId helper (via Redux dispatch)', () => {
-    it('should dispatch highlighted step as undefined when selectedStepExecutionId is __overview', () => {
-      mockUrlState.selectedStepExecutionId = '__overview';
+  describe('layout', () => {
+    it('renders header, tabs, and step list', () => {
       mockPollingResult.workflowExecution = createMockExecution();
 
       render(
@@ -235,13 +217,14 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      // With __overview pseudo step, highlighted step should be undefined
-      // We verify this via the dispatch call
-      expect(screen.getByTestId('execution-panel')).toBeInTheDocument();
+      expect(screen.getByTestId('execution-header')).toBeInTheDocument();
+      expect(screen.getByTestId('execution-step-list')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowExecutionViewTab_table')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowExecutionViewTab_tracers')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowExecutionViewTab_json')).toBeInTheDocument();
     });
 
-    it('should dispatch HIGHLIGHTED_STEP_TRIGGER when selectedStepExecutionId is "trigger"', () => {
-      mockUrlState.selectedStepExecutionId = 'trigger';
+    it('shows back button when activeTab is executions', () => {
       mockPollingResult.workflowExecution = createMockExecution();
 
       render(
@@ -250,60 +233,19 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      expect(screen.getByTestId('execution-panel')).toBeInTheDocument();
+      expect(screen.getByTestId('header-show-back-button')).toHaveTextContent('true');
     });
   });
 
-  describe('resumeMessage derivation', () => {
-    it('should derive resume message for WAITING_FOR_INPUT status', () => {
-      const waitStep = createMockStepExecutionDto({
-        id: 'step-exec-1',
-        stepId: 'waitStep',
-        status: ExecutionStatus.WAITING_FOR_INPUT,
-        startedAt: '2024-01-01T10:00:00Z',
-      });
-
+  describe('expanded step propagation', () => {
+    it('passes selectedStepExecutionId from URL state to the list as expandedStepExecutionId', () => {
+      mockUrlState.selectedStepExecutionId = 'step-exec-1';
       mockPollingResult.workflowExecution = createMockExecution({
-        status: ExecutionStatus.WAITING_FOR_INPUT,
-        stepExecutions: [waitStep],
-        workflowDefinition: createMockWorkflowYaml({
-          steps: [
-            {
-              type: 'waitForInput',
-              name: 'waitStep',
-              with: { message: 'Please confirm' },
-            },
-          ],
-        }),
-      });
-
-      // The component reads resumeMessage from useStepExecution's input, not from the YAML definition
-      mockUseStepExecution.mockReturnValue({
-        data: {
-          id: 'step-exec-1',
-          status: ExecutionStatus.WAITING_FOR_INPUT,
-          input: { message: 'Please confirm' },
-        },
-        isLoading: false,
-      });
-
-      render(
-        <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
-        </TestWrapper>
-      );
-
-      expect(screen.getByTestId('step-resume-message')).toHaveTextContent('Please confirm');
-    });
-
-    it('should return undefined resume message when no paused step is found', () => {
-      mockPollingResult.workflowExecution = createMockExecution({
-        status: ExecutionStatus.WAITING_FOR_INPUT,
         stepExecutions: [
           createMockStepExecutionDto({
             id: 'step-exec-1',
-            stepId: 'runningStep',
-            status: ExecutionStatus.RUNNING,
+            stepId: 'someStep',
+            status: ExecutionStatus.COMPLETED,
             startedAt: '2024-01-01T10:00:00Z',
           }),
         ],
@@ -315,85 +257,12 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      expect(screen.getByTestId('step-resume-message')).toHaveTextContent('');
-    });
-
-    it('should return undefined resume message for non-WAITING_FOR_INPUT status', () => {
-      mockPollingResult.workflowExecution = createMockExecution({
-        status: ExecutionStatus.RUNNING,
-      });
-
-      render(
-        <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
-        </TestWrapper>
-      );
-
-      expect(screen.getByTestId('step-resume-message')).toHaveTextContent('');
-    });
-
-    it('should return undefined when paused step definition is not a waitForInput type', () => {
-      const waitStep = createMockStepExecutionDto({
-        id: 'step-exec-1',
-        stepId: 'someStep',
-        status: ExecutionStatus.WAITING_FOR_INPUT,
-        startedAt: '2024-01-01T10:00:00Z',
-      });
-
-      mockPollingResult.workflowExecution = createMockExecution({
-        status: ExecutionStatus.WAITING_FOR_INPUT,
-        stepExecutions: [waitStep],
-        workflowDefinition: createMockWorkflowYaml({
-          steps: [
-            {
-              type: 'noop',
-              name: 'someStep',
-            },
-          ],
-        }),
-      });
-
-      render(
-        <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
-        </TestWrapper>
-      );
-
-      expect(screen.getByTestId('step-resume-message')).toHaveTextContent('');
-    });
-  });
-
-  describe('shouldAutoResume pass-through', () => {
-    it('should pass shouldAutoResume from URL state to step details', () => {
-      mockUrlState.shouldAutoResume = true;
-      mockPollingResult.workflowExecution = createMockExecution();
-
-      render(
-        <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
-        </TestWrapper>
-      );
-
-      expect(screen.getByTestId('step-auto-resume')).toHaveTextContent('true');
-    });
-  });
-
-  describe('showBackButton', () => {
-    it('should show back button when activeTab is executions', () => {
-      mockPollingResult.workflowExecution = createMockExecution();
-
-      render(
-        <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
-        </TestWrapper>
-      );
-
-      expect(screen.getByTestId('show-back-button')).toHaveTextContent('true');
+      expect(screen.getByTestId('list-expanded-id')).toHaveTextContent('step-exec-1');
     });
   });
 
   describe('child workflow step resolution', () => {
-    it('should find step in child executions when not in root steps', () => {
+    it('finds step in child executions when not in root steps', () => {
       const rootStep = createMockStepExecutionDto({
         id: 'root-step-exec',
         stepId: 'rootStep',
@@ -428,401 +297,89 @@ describe('WorkflowExecutionDetail', () => {
         </TestWrapper>
       );
 
-      // The component should render without errors when finding child step
-      expect(screen.getByTestId('step-details')).toBeInTheDocument();
-    });
-  });
-
-  describe('auto-select overview pseudo step', () => {
-    it('should auto-select __overview when no step is selected and execution has step executions', () => {
-      mockUrlState.selectedStepExecutionId = undefined;
-      mockPollingResult.workflowExecution = createMockExecution({
-        id: 'exec-1',
-        stepExecutions: [
-          createMockStepExecutionDto({
-            id: 'step-1',
-            stepId: 's1',
-            status: ExecutionStatus.COMPLETED,
-            startedAt: '2024-01-01T10:00:00Z',
-          }),
-        ],
-      });
-
-      render(
-        <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
-        </TestWrapper>
+      // useStepExecution should be called with the child execution id, not the parent's
+      expect(mockUseStepExecution).toHaveBeenCalledWith(
+        'child-exec-1',
+        'child-step-exec',
+        ExecutionStatus.COMPLETED
       );
-
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview');
-    });
-
-    it('should auto-select __overview when no step is selected and execution is terminal with no steps', () => {
-      mockUrlState.selectedStepExecutionId = undefined;
-      mockPollingResult.workflowExecution = createMockExecution({
-        id: 'exec-1',
-        status: ExecutionStatus.FAILED,
-        stepExecutions: [],
-      });
-
-      render(
-        <TestWrapper>
-          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
-        </TestWrapper>
-      );
-
-      expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview');
-    });
-  });
-});
-
-describe('WorkflowExecutionDetail - resume input resolution', () => {
-  let mockRemoveQueries: jest.Mock;
-
-  const defaultWaitingLightweightStep = {
-    id: 'step-exec-1',
-    stepId: 'request_approval',
-    stepType: 'waitForInput',
-    status: ExecutionStatus.WAITING_FOR_INPUT,
-    startedAt: '2024-01-01T00:00:00Z',
-    globalExecutionIndex: 0,
-    // input absent: polling uses includeInput: false
-  } as const;
-
-  // Polling returns lightweight steps without input (includeInput: false).
-  // Resume copy is loaded via useStepExecution(waitingStepExecutionId) — not from workflowDefinition.
-  // We still embed nested `if` / `foreach` shapes below so regressions in flat stepExecutions
-  // detection do not go unnoticed when YAML nesting matches real workflows.
-  const makeWaitingExecution = (options?: {
-    steps?: WorkflowYaml['steps'];
-    stepExecutions?: WorkflowExecutionDto['stepExecutions'];
-  }): WorkflowExecutionDto => {
-    const stepExecutions = options?.stepExecutions ?? [defaultWaitingLightweightStep as any];
-    return {
-      spaceId: 'default',
-      id: 'exec-waiting',
-      status: ExecutionStatus.WAITING_FOR_INPUT,
-      error: null,
-      isTestRun: false,
-      startedAt: '2024-01-01T00:00:00Z',
-      finishedAt: '',
-      workflowId: 'workflow-1',
-      workflowName: 'Test Workflow',
-      workflowDefinition: {
-        version: '1',
-        name: 'test',
-        enabled: true,
-        triggers: [],
-        steps: options?.steps ?? [],
-      } as WorkflowYaml,
-      stepId: undefined,
-      stepExecutions,
-      duration: 0,
-      triggeredBy: 'manual',
-      yaml: 'version: "1"',
-    };
-  };
-
-  /** First hook invocation is always the paused-step fetch (see workflow_execution_detail). */
-  const expectPausedStepFetchArgs = (executionId: string, pausedStepExecutionId: string) => {
-    expect(mockUseStepExecution.mock.calls[0]).toEqual([
-      executionId,
-      pausedStepExecutionId,
-      ExecutionStatus.WAITING_FOR_INPUT,
-    ]);
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockStepExecutionDetailsProps.current = {};
-    mockRemoveQueries = jest.fn();
-    mockUseQueryClient.mockReturnValue({ removeQueries: mockRemoveQueries } as any);
-    mockUseWorkflowUrlState.mockReturnValue({
-      activeTab: 'executions',
-      setSelectedStepExecution: mockSetSelectedStepExecution,
-      selectedStepExecutionId: 'step-exec-1',
-    } as any);
-    mockUseWorkflowExecutionPolling.mockReturnValue({
-      workflowExecution: makeWaitingExecution(),
-      isLoading: false,
-      error: null,
     });
   });
 
-  it('passes resumeMessage and resumeSchema for a top-level waitForInput (fetch-driven)', () => {
-    const steps: WorkflowYaml['steps'] = [
-      {
-        name: 'request_approval',
-        type: 'waitForInput',
-        with: {
-          message: 'Top-level approval required',
-          schema: { type: 'object', properties: { approved: { type: 'boolean' } } },
-        },
-      } as any,
-    ];
-    mockUseWorkflowExecutionPolling.mockReturnValue({
-      workflowExecution: makeWaitingExecution({ steps }),
-      isLoading: false,
-      error: null,
-    });
-
-    mockUseStepExecution.mockReturnValue({
-      data: {
+  describe('resume execution button', () => {
+    it('renders ResumeExecutionButton when execution is WAITING_FOR_INPUT', () => {
+      const waitStep = createMockStepExecutionDto({
         id: 'step-exec-1',
+        stepId: 'waitStep',
         status: ExecutionStatus.WAITING_FOR_INPUT,
-        input: {
-          message: 'Top-level approval required',
-          schema: { type: 'object', properties: { approved: { type: 'boolean' } } },
-        },
-      },
-      isLoading: false,
-    });
+        startedAt: '2024-01-01T10:00:00Z',
+      });
 
-    render(
-      <TestWrapper>
-        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
-      </TestWrapper>
-    );
+      mockPollingResult.workflowExecution = createMockExecution({
+        status: ExecutionStatus.WAITING_FOR_INPUT,
+        stepExecutions: [waitStep],
+      });
 
-    expectPausedStepFetchArgs('exec-waiting', 'step-exec-1');
-    expect(mockStepExecutionDetailsProps.current.resumeMessage).toBe('Top-level approval required');
-    expect(mockStepExecutionDetailsProps.current.resumeSchema).toMatchObject({ type: 'object' });
-  });
-
-  it('passes undefined resumeMessage and resumeSchema when the paused-step fetch returns no data', () => {
-    // Default mock returns { data: undefined } — no data yet from the fetch.
-    mockUseStepExecution.mockReturnValue({ data: undefined, isLoading: true });
-
-    render(
-      <TestWrapper>
-        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
-      </TestWrapper>
-    );
-
-    expectPausedStepFetchArgs('exec-waiting', 'step-exec-1');
-    expect(mockStepExecutionDetailsProps.current.resumeMessage).toBeUndefined();
-    expect(mockStepExecutionDetailsProps.current.resumeSchema).toBeUndefined();
-  });
-
-  it('passes resumeMessage and resumeSchema when waitForInput is nested under if in YAML (fetch-driven)', () => {
-    const steps: WorkflowYaml['steps'] = [
-      {
-        name: 'should_ask',
-        type: 'if',
-        condition: 'true',
-        steps: [
-          {
-            name: 'request_approval',
-            type: 'waitForInput',
-            with: {
-              message: 'Nested approval required',
-              schema: { type: 'object', properties: { severity: { type: 'string' } } },
+      mockUseStepExecution.mockImplementation((_executionId, stepExecutionId) => {
+        if (stepExecutionId === 'step-exec-1') {
+          return {
+            data: {
+              id: 'step-exec-1',
+              status: ExecutionStatus.WAITING_FOR_INPUT,
+              input: { message: 'Please confirm' },
             },
-          },
-        ],
-      } as any,
-    ];
-    mockUseWorkflowExecutionPolling.mockReturnValue({
-      workflowExecution: makeWaitingExecution({ steps }),
-      isLoading: false,
-      error: null,
+            isLoading: false,
+          };
+        }
+        return { data: undefined, isLoading: false };
+      });
+
+      render(
+        <TestWrapper>
+          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+        </TestWrapper>
+      );
+
+      expect(screen.getByTestId('resume-button')).toBeInTheDocument();
+      expect(screen.getByTestId('resume-message')).toHaveTextContent('Please confirm');
     });
 
-    mockUseStepExecution.mockReturnValue({
-      data: {
-        id: 'step-exec-1',
-        status: ExecutionStatus.WAITING_FOR_INPUT,
-        input: {
-          message: 'Nested approval required',
-          schema: { type: 'object', properties: { severity: { type: 'string' } } },
-        },
-      },
-      isLoading: false,
-    });
-
-    render(
-      <TestWrapper>
-        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
-      </TestWrapper>
-    );
-
-    expectPausedStepFetchArgs('exec-waiting', 'step-exec-1');
-    expect(mockStepExecutionDetailsProps.current.resumeMessage).toBe('Nested approval required');
-    expect(mockStepExecutionDetailsProps.current.resumeSchema).toMatchObject({ type: 'object' });
-  });
-
-  it('targets the WAITING_FOR_INPUT row when earlier steps in stepExecutions are already finished', () => {
-    const stepExecutions = [
-      {
-        id: 'step-exec-done',
-        stepId: 'hello_world',
-        stepType: 'console',
+    it('does not render ResumeExecutionButton when execution is not WAITING_FOR_INPUT', () => {
+      mockPollingResult.workflowExecution = createMockExecution({
         status: ExecutionStatus.COMPLETED,
-        startedAt: '2024-01-01T00:00:00Z',
-        globalExecutionIndex: 0,
-      } as any,
-      {
-        id: 'step-exec-waiting',
-        stepId: 'request_approval',
-        stepType: 'waitForInput',
-        status: ExecutionStatus.WAITING_FOR_INPUT,
-        startedAt: '2024-01-01T00:00:01Z',
-        globalExecutionIndex: 1,
-      } as any,
-    ];
-    mockUseWorkflowExecutionPolling.mockReturnValue({
-      workflowExecution: makeWaitingExecution({ stepExecutions }),
-      isLoading: false,
-      error: null,
-    });
-    mockUseWorkflowUrlState.mockReturnValue({
-      activeTab: 'executions',
-      setSelectedStepExecution: mockSetSelectedStepExecution,
-      selectedStepExecutionId: 'step-exec-waiting',
-    } as any);
+      });
 
-    mockUseStepExecution.mockReturnValue({
-      data: {
-        id: 'step-exec-waiting',
-        status: ExecutionStatus.WAITING_FOR_INPUT,
-        input: { message: 'Blocked on second step' },
-      },
-      isLoading: false,
+      render(
+        <TestWrapper>
+          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+        </TestWrapper>
+      );
+
+      expect(screen.queryByTestId('resume-button')).not.toBeInTheDocument();
     });
 
-    render(
-      <TestWrapper>
-        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
-      </TestWrapper>
-    );
+    it('passes shouldAutoResume from URL state to ResumeExecutionButton', () => {
+      mockUrlState.shouldAutoResume = true;
 
-    expectPausedStepFetchArgs('exec-waiting', 'step-exec-waiting');
-    expect(mockStepExecutionDetailsProps.current.resumeMessage).toBe('Blocked on second step');
-  });
-
-  it('passes only resumeMessage when schema is absent from the paused-step input', () => {
-    mockUseStepExecution.mockReturnValue({
-      data: {
+      const waitStep = createMockStepExecutionDto({
         id: 'step-exec-1',
+        stepId: 'waitStep',
         status: ExecutionStatus.WAITING_FOR_INPUT,
-        input: { message: 'Approve?' },
-      },
-      isLoading: false,
-    });
+        startedAt: '2024-01-01T10:00:00Z',
+      });
 
-    render(
-      <TestWrapper>
-        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
-      </TestWrapper>
-    );
-
-    expectPausedStepFetchArgs('exec-waiting', 'step-exec-1');
-    expect(mockStepExecutionDetailsProps.current.resumeMessage).toBe('Approve?');
-    expect(mockStepExecutionDetailsProps.current.resumeSchema).toBeUndefined();
-  });
-
-  it('passes resumeSchema and evaluated message for waitForInput nested under foreach in YAML', () => {
-    const steps: WorkflowYaml['steps'] = [
-      {
-        name: 'process_each_item',
-        type: 'foreach',
-        foreach: '["alpha","beta"]',
-        steps: [
-          {
-            name: 'request_approval',
-            type: 'waitForInput',
-            with: {
-              message: 'Approve item {{ foreach.item }}',
-              schema: { type: 'object', properties: { approved: { type: 'boolean' } } },
-            },
-          },
-        ],
-      } as any,
-    ];
-    const stepExecutions = [
-      {
-        id: 'step-exec-foreach-alpha',
-        stepId: 'request_approval',
-        stepType: 'waitForInput',
+      mockPollingResult.workflowExecution = createMockExecution({
         status: ExecutionStatus.WAITING_FOR_INPUT,
-        startedAt: '2024-01-01T00:00:00Z',
-        globalExecutionIndex: 2,
-      } as any,
-    ];
-    mockUseWorkflowExecutionPolling.mockReturnValue({
-      workflowExecution: makeWaitingExecution({ steps, stepExecutions }),
-      isLoading: false,
-      error: null,
+        stepExecutions: [waitStep],
+      });
+
+      render(
+        <TestWrapper>
+          <WorkflowExecutionDetail executionId="exec-1" onClose={jest.fn()} />
+        </TestWrapper>
+      );
+
+      expect(screen.getByTestId('resume-auto-open')).toHaveTextContent('true');
     });
-    mockUseWorkflowUrlState.mockReturnValue({
-      activeTab: 'executions',
-      setSelectedStepExecution: mockSetSelectedStepExecution,
-      selectedStepExecutionId: 'step-exec-foreach-alpha',
-    } as any);
-
-    // Engine stores the Liquid-rendered message on stepExecution.input; UI must not re-parse YAML.
-    mockUseStepExecution.mockReturnValue({
-      data: {
-        id: 'step-exec-foreach-alpha',
-        status: ExecutionStatus.WAITING_FOR_INPUT,
-        input: {
-          message: 'Approve item alpha',
-          schema: { type: 'object', properties: { approved: { type: 'boolean' } } },
-        },
-      },
-      isLoading: false,
-    });
-
-    render(
-      <TestWrapper>
-        <WorkflowExecutionDetail executionId="exec-waiting" onClose={jest.fn()} />
-      </TestWrapper>
-    );
-
-    expectPausedStepFetchArgs('exec-waiting', 'step-exec-foreach-alpha');
-    expect(mockStepExecutionDetailsProps.current.resumeSchema).toMatchObject({ type: 'object' });
-    expect(mockStepExecutionDetailsProps.current.resumeMessage).toBe('Approve item alpha');
-  });
-});
-
-describe('WorkflowExecutionDetail - auto-select overview on failed before steps', () => {
-  let mockRemoveQueries: jest.Mock;
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockRemoveQueries = jest.fn();
-    mockUseQueryClient.mockReturnValue({
-      removeQueries: mockRemoveQueries,
-    } as any);
-  });
-
-  it('should auto-select overview when execution is terminal with no step executions', () => {
-    const failedExecution = {
-      ...createMockExecution({ id: 'exec-fail' }),
-      status: ExecutionStatus.FAILED,
-      error: { type: 'InputValidationError', message: 'name: Required' },
-      stepExecutions: [],
-    };
-
-    mockUseWorkflowExecutionPolling.mockReturnValue({
-      workflowExecution: failedExecution,
-      isLoading: false,
-      error: null,
-    });
-
-    mockUseWorkflowUrlState.mockReturnValue({
-      activeTab: 'executions',
-      setSelectedStepExecution: mockSetSelectedStepExecution,
-      selectedStepExecutionId: '',
-      shouldAutoResume: false,
-    });
-
-    render(
-      <TestWrapper>
-        <WorkflowExecutionDetail executionId="exec-fail" onClose={jest.fn()} />
-      </TestWrapper>
-    );
-
-    expect(mockSetSelectedStepExecution).toHaveBeenCalledWith('__overview');
   });
 });

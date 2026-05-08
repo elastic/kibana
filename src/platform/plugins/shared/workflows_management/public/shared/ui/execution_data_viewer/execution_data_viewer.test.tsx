@@ -97,7 +97,7 @@ describe('ExecutionDataViewer', () => {
       fireEvent.click(screen.getByTestId('workflowViewMode_json'));
       expect(screen.queryByTestId('mocked-json-data-table')).not.toBeInTheDocument();
       expect(screen.getByTestId('mocked-json-data-code')).toBeInTheDocument();
-      expect(mockJsonDataCode).toHaveBeenCalledWith({ json: mockData });
+      expect(mockJsonDataCode).toHaveBeenCalledWith(expect.objectContaining({ json: mockData }));
 
       fireEvent.click(screen.getByTestId('workflowViewMode_table'));
       expect(screen.getByTestId('mocked-json-data-table')).toBeInTheDocument();
@@ -176,7 +176,7 @@ describe('ExecutionDataViewer', () => {
       expect(mockJSONDataTable).toHaveBeenCalledWith(expect.objectContaining({ data: testData }));
 
       fireEvent.click(screen.getByTestId('workflowViewMode_json'));
-      expect(mockJsonDataCode).toHaveBeenCalledWith({ json: testData });
+      expect(mockJsonDataCode).toHaveBeenCalledWith(expect.objectContaining({ json: testData }));
     });
   });
 });

@@ -31,6 +31,8 @@ interface JsonCodeEditorCommonProps {
   hasLineNumbers?: boolean;
   hideCopyButton?: boolean;
   enableFindAction?: boolean;
+  /** Hide both vertical and horizontal scrollbars in the editor. */
+  hideScrollbars?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -42,6 +44,7 @@ export const JsonCodeEditorCommon = ({
   onEditorDidMount,
   hideCopyButton,
   enableFindAction,
+  hideScrollbars,
   'data-test-subj': dataTestSubj,
 }: JsonCodeEditorCommonProps) => {
   const styles = useMemoCss(componentStyles);
@@ -70,9 +73,18 @@ export const JsonCodeEditorCommon = ({
         },
         overviewRulerBorder: false,
         readOnly: true,
-        scrollbar: {
-          alwaysConsumeMouseWheel: false,
-        },
+        scrollbar: hideScrollbars
+          ? {
+              alwaysConsumeMouseWheel: false,
+              vertical: 'hidden',
+              horizontal: 'hidden',
+              verticalScrollbarSize: 0,
+              horizontalScrollbarSize: 0,
+              handleMouseWheel: false,
+            }
+          : {
+              alwaysConsumeMouseWheel: false,
+            },
         scrollBeyondLastLine: false,
         wordWrap: 'on',
         wrappingIndent: 'indent',

@@ -30,10 +30,18 @@ const Titles = {
 interface StepExecutionDataViewProps {
   stepExecution: WorkflowStepExecutionDto;
   mode: 'input' | 'output';
+  /** Initial page size for table view. Defaults to 20. */
+  defaultPageSize?: 10 | 20 | 50 | 100 | 200;
+  /** Initial view mode. Defaults to 'table'. */
+  initialViewMode?: 'table' | 'json';
+  /** Hide the search/view-mode toolbar. */
+  hideToolbar?: boolean;
+  /** Maximum number of code lines to display before requiring expansion. */
+  jsonClampLines?: number;
 }
 
 export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
-  ({ stepExecution, mode }) => {
+  ({ stepExecution, mode, defaultPageSize, initialViewMode, hideToolbar, jsonClampLines }) => {
     const { data, title } = useMemo<{ data: JsonValue | undefined; title: string }>(() => {
       if (mode === 'input') {
         return { data: stepExecution.input, title: Titles.input };
@@ -94,6 +102,10 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
         data={data}
         title={title}
         fieldPathActionsPrefix={fieldPathActionsPrefix}
+        defaultPageSize={defaultPageSize}
+        initialViewMode={initialViewMode}
+        hideToolbar={hideToolbar}
+        jsonClampLines={jsonClampLines}
       />
     );
   }
