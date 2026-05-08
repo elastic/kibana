@@ -27,21 +27,28 @@ const humaniseType = (type: string): string => {
 
 /** Plain-English descriptions shown in the badge tooltip, keyed by ES change-point type string. */
 const CHANGE_POINT_TYPE_DESCRIPTIONS: Record<string, string> = {
-  spike: i18n.translate('changePointChartViewer.badge.tooltip.spike', {
-    defaultMessage: 'A brief, sharp rise in the metric above its normal level.',
-  }),
   dip: i18n.translate('changePointChartViewer.badge.tooltip.dip', {
-    defaultMessage: 'A brief, sharp drop in the metric below its normal level.',
+    defaultMessage: 'A significant dip occurs at this change point.',
+  }),
+  distribution_change: i18n.translate('changePointChartViewer.badge.tooltip.distributionChange', {
+    defaultMessage: 'The overall distribution of the values has changed significantly.',
+  }),
+  non_stationary: i18n.translate('changePointChartViewer.badge.tooltip.nonStationary', {
+    defaultMessage:
+      'There is no change point, but the values are not from a stationary distribution.',
+  }),
+  spike: i18n.translate('changePointChartViewer.badge.tooltip.spike', {
+    defaultMessage: 'A significant spike occurs at this point.',
+  }),
+  stationary: i18n.translate('changePointChartViewer.badge.tooltip.stationary', {
+    defaultMessage: 'No change point found.',
   }),
   step_change: i18n.translate('changePointChartViewer.badge.tooltip.stepChange', {
     defaultMessage:
-      'A sudden, persistent shift in the metric\u2019s level that remains higher or lower than before.',
+      'The change indicates a statistically significant step up or down in value distribution.',
   }),
   trend_change: i18n.translate('changePointChartViewer.badge.tooltip.trendChange', {
-    defaultMessage: 'A change in the rate at which the metric is increasing or decreasing.',
-  }),
-  distribution_change: i18n.translate('changePointChartViewer.badge.tooltip.distributionChange', {
-    defaultMessage: 'A change in how the metric\u2019s values are spread or distributed over time.',
+    defaultMessage: 'There is an overall trend change occurring at this point.',
   }),
 };
 

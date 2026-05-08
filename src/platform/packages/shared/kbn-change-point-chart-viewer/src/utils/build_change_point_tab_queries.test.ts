@@ -7,7 +7,55 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildFocusedViewTimeRange } from './build_change_point_tab_queries';
+import {
+  buildFocusedViewRawQuery,
+  buildFocusedViewTimeRange,
+} from './build_change_point_tab_queries';
+
+describe('buildFocusedViewRawQuery', () => {
+  const lineEsql =
+    'FROM zookeeper-service | STATS avg_bytes=AVG(event.duration) BY agent.hostname.keyword, cloud.service.name.keyword, day=BUCKET(@timestamp, 1d)';
+
+  it('returns only the FROM clause when entityValues is empty', () => {
+    const result = buildFocusedViewRawQuery(lineEsql, {});
+    expect(result).toBe('FROM zookeeper-service');
+  });
+
+  it('appends a WHERE clause for a single entity value', () => {
+    const result = buildFocusedViewRawQuery(lineEsql, { 'agent.hostname.keyword': 'web-01' });
+    expect(result).toBe('FROM zookeeper-service | WHERE `agent.hostname.keyword` == "web-01"');
+  });
+
+  it('appends AND-joined predicates for multiple entity values', () => {
+    const result = buildFocusedViewRawQuery(lineEsql, {
+      'agent.hostname.keyword': 'director-us-central1',
+      'cloud.service.name.keyword': 'GCE',
+    });
+    expect(result).toBe(
+      'FROM zookeeper-service | WHERE `agent.hostname.keyword` == "director-us-central1" AND `cloud.service.name.keyword` == "GCE"'
+    );
+  });
+
+  it('backtick-quotes identifiers that contain dots or special characters', () => {
+    const result = buildFocusedViewRawQuery(lineEsql, { 'agent.hostname.keyword': 'host-1' });
+    expect(result).toContain('`agent.hostname.keyword`');
+  });
+
+  it('double-quotes string values in the predicate', () => {
+    const result = buildFocusedViewRawQuery(lineEsql, { host: 'my-server' });
+    expect(result).toContain('"my-server"');
+  });
+
+  it('escapes double-quote characters inside string values', () => {
+    const result = buildFocusedViewRawQuery(lineEsql, { host: 'with"quote' });
+    expect(result).toContain('"with\\"quote"');
+  });
+
+  it('returns undefined when the query has no FROM clause', () => {
+    const result = buildFocusedViewRawQuery('NOT A VALID ESQL QUERY', { host: 'web-01' });
+    expect(result).toBeUndefined();
+  });
+});
 
 // Pin "now" so that datemath expressions like "now-30d" resolve to known values.
 const FIXED_NOW = new Date('2024-02-01T00:00:00.000Z').getTime();

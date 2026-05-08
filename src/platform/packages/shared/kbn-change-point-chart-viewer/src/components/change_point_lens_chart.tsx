@@ -25,9 +25,13 @@ import {
   ACTION_INSPECT_PANEL,
   ADD_TO_EXISTING_CASE_ACTION_ID,
 } from '../constants';
-import { buildFocusedViewTimeRange } from '../utils/build_change_point_tab_queries';
+import {
+  buildFocusedViewRawQuery,
+  buildFocusedViewTimeRange,
+} from '../utils/build_change_point_tab_queries';
 import { useChangePointLensProps } from '../hooks/use_change_point_lens_props';
 import { ChangePointBadge } from './change_point_badge';
+import { ChangePointEntityTitle } from './change_point_entity_title';
 import type { ChangePointCardModel } from '../utils/derive_change_point_cards';
 import type { UnifiedChangePointGridProps } from '../types';
 
@@ -176,18 +180,19 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
             type: 'actionButton',
             getDisplayName() {
               return i18n.translate('changePointChartViewer.lens.focusedView', {
-                defaultMessage: 'Focused view in Discover tab',
+                defaultMessage: 'Open in Discover tab',
               });
             },
             getIconType() {
-              return 'magnifyPlus';
+              return 'productDiscover';
             },
             async isCompatible() {
               return true;
             },
             async execute() {
+              const rawEsql = buildFocusedViewRawQuery(card.lineEsql, card.entityValues);
               actions.openInNewTab!({
-                query: lensProps.attributes.state.query,
+                query: rawEsql ? { esql: rawEsql } : lensProps.attributes.state.query,
                 tabLabel: `${lensProps.attributes.title} - Focused view`,
                 timeRange,
               });
@@ -195,7 +200,14 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
           },
         ]
       : [];
-  }, [actions, card.annotationEvents, fetchParams.timeRange, lensProps]);
+  }, [
+    actions,
+    card.annotationEvents,
+    card.entityValues,
+    card.lineEsql,
+    fetchParams.timeRange,
+    lensProps,
+  ]);
 
   return (
     <div
@@ -203,12 +215,14 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
         display: flex;
         flex-direction: column;
         height: ${CHART_HEIGHT_PX}px;
+        overflow: hidden;
         outline: ${euiTheme.border.width.thin} solid ${euiTheme.colors.lightShade};
         border-radius: ${euiTheme.border.radius.medium};
       `}
       ref={chartRef}
       data-test-subj={`changePointLensChart-${cardIndex}`}
     >
+      <ChangePointEntityTitle card={card} />
       {/* Chart area fills the remaining height */}
       {lensProps ? (
         <div css={chartContainerCss}>
@@ -216,6 +230,7 @@ export const ChangePointLensChart: React.FC<ChangePointLensChartProps> = ({
             <EmbeddableComponent
               {...lensProps}
               title={lensProps.attributes.title}
+              hidePanelTitles
               extraActions={extraActions}
               abortController={fetchParams.abortController}
               disabledActions={DEFAULT_DISABLED_ACTIONS}

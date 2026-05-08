@@ -10,6 +10,7 @@
 import dateMath from '@elastic/datemath';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import type { ChangePointCardModel } from './derive_change_point_cards';
+import { formatEsqlIdentifier, formatEsqlLiteral } from './append_entity_filters_to_line_esql';
 
 // Resolves any time range bound (absolute ISO or relative expression) to epoch milliseconds.
 // Returns undefined if the string cannot be parsed (e.g. "$timeFrom").
@@ -17,6 +18,32 @@ import type { ChangePointCardModel } from './derive_change_point_cards';
 const toAbsoluteMs = (s: string, roundUp = false): number | undefined => {
   const parsed = dateMath.parse(s, { roundUp });
   return parsed?.isValid() ? parsed.valueOf() : undefined;
+};
+
+/**
+ * Builds a raw-documents ESQL query for the focused Discover tab.
+ *
+ * Extracts the FROM source from lineEsql and appends WHERE predicates derived
+ * from entityValues. The STATS / CHANGE_POINT pipeline is intentionally omitted
+ * so Discover shows individual events rather than aggregated rows.
+ *
+ * Returns undefined when the FROM source cannot be extracted from the query.
+ */
+export const buildFocusedViewRawQuery = (
+  lineEsql: string,
+  entityValues: Readonly<Record<string, string>>
+): string | undefined => {
+  const fromClause = lineEsql.match(/^FROM[^|]+/i)?.[0]?.trim();
+  if (!fromClause) return undefined;
+
+  const predicates = Object.entries(entityValues)
+    .map(([col, val]) => {
+      const lit = formatEsqlLiteral(val);
+      return lit !== undefined ? `${formatEsqlIdentifier(col)} == ${lit}` : undefined;
+    })
+    .filter((p): p is string => p !== undefined);
+
+  return predicates.length > 0 ? `${fromClause} | WHERE ${predicates.join(' AND ')}` : fromClause;
 };
 
 /**
