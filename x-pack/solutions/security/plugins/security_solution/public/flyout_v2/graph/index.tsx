@@ -12,11 +12,9 @@ import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
-import { PREFIX } from '../../flyout/shared/test_ids';
-import { GraphVisualization as SharedGraphVisualization } from '../../flyout/shared/components/graph_visualization';
+import { GraphVisualization as SharedGraphVisualization } from './components/graph_visualization';
 import { useGraphPreview } from '../document/hooks/use_graph_preview';
-
-export const GRAPH_TEST_ID = `${PREFIX}Graph` as const;
+import { GRAPH_TEST_ID } from './test_ids';
 
 const SCOPE_ID = 'flyout_v2_graph';
 

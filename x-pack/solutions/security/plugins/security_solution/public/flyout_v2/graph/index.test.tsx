@@ -9,11 +9,12 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { Graph, GRAPH_TEST_ID } from '.';
+import { Graph } from '.';
+import { GRAPH_TEST_ID } from './test_ids';
 import { useGraphPreview } from '../document/hooks/use_graph_preview';
 
 jest.mock('../document/hooks/use_graph_preview');
-jest.mock('../../flyout/shared/components/graph_visualization', () => ({
+jest.mock('./components/graph_visualization', () => ({
   GraphVisualization: jest.fn(() => <div data-test-subj="sharedGraphVisualizationMock" />),
 }));
 jest.mock('../shared/components/tools_flyout_header', () => ({

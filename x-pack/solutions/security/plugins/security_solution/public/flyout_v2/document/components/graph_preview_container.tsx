@@ -18,7 +18,7 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
-import { GraphPreview } from '../../../flyout/shared/components/graph_preview';
+import { GraphPreview } from './graph_preview';
 import { useGraphPreview } from '../hooks/use_graph_preview';
 import { GRAPH_PREVIEW_TECHNICAL_PREVIEW_TEST_ID, GRAPH_PREVIEW_TEST_ID } from './test_ids';
 

@@ -21,7 +21,7 @@ jest.mock('../../../common/hooks/use_upselling');
 jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
   useFetchGraphData: jest.fn(),
 }));
-jest.mock('../../../flyout/shared/components/graph_preview', () => ({
+jest.mock('./graph_preview', () => ({
   GraphPreview: () => <div data-test-subj="graphPreviewStub" />,
 }));
 

@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { GraphVisualization } from '../../../../shared/components/graph_visualization';
+import { GraphVisualization } from '../../../../../flyout_v2/graph/components/graph_visualization';
 
 export interface GraphViewTabProps {
   /** Entity Store v2 entity ID (`entity.id`) to center the graph on */
