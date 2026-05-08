@@ -101,33 +101,58 @@ describe('WorkflowContextManager', () => {
       .mockReturnValue({} as EsWorkflowStepExecution);
     workflowExecutionState.getAllStepExecutions = jest.fn().mockReturnValue([]);
 
+    // Service is sovereign over IO. The mock keeps its own input/output
+    // maps but also falls back to reading IO directly off the state mock
+    // when present — this lets pre-refactor test fixtures (which return a
+    // step with `input`/`output` baked into `getStepExecution`) keep working
+    // without mass churn while production goes through the service.
+    const stepInputs = new Map<string, unknown>();
+    const stepOutputs = new Map<string, unknown>();
+    const readIo = (id: string, field: 'input' | 'output'): unknown => {
+      if (field === 'input' && stepInputs.has(id)) return stepInputs.get(id);
+      if (field === 'output' && stepOutputs.has(id)) return stepOutputs.get(id);
+      const exec = workflowExecutionState.getStepExecution(id) as
+        | { input?: unknown; output?: unknown }
+        | undefined;
+      return exec?.[field];
+    };
     const stepIoService = {
       hasEvictedOutputs: jest.fn().mockReturnValue(false),
       prepareForRead: jest.fn().mockResolvedValue(undefined),
       rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
       releaseTransientlyRehydratedOutputs: jest.fn(),
-      getStepInput: jest.fn((id: string) => workflowExecutionState.getStepExecution(id)?.input),
-      getStepOutput: jest.fn((id: string) => workflowExecutionState.getStepExecution(id)?.output),
+      setStepInput: jest.fn((id: string, input: unknown) => stepInputs.set(id, input)),
+      setStepOutput: jest.fn((id: string, output: unknown) => stepOutputs.set(id, output)),
+      getStepInput: jest.fn((id: string) => readIo(id, 'input')),
+      getStepOutput: jest.fn((id: string) => readIo(id, 'output')),
       getStepError: jest.fn((id: string) => workflowExecutionState.getStepExecution(id)?.error),
       getLatestStepIO: jest.fn((stepId: string) => {
-        const latest = workflowExecutionState.getLatestStepExecution(stepId);
+        const latest = workflowExecutionState.getLatestStepExecution(stepId) as
+          | { id?: string; input?: unknown; output?: unknown; error?: unknown }
+          | undefined;
         if (!latest) return undefined;
-        return { input: latest.input, output: latest.output, error: latest.error };
+        // Fall back to reading IO directly off the mocked latest exec when
+        // the test fixture didn't bother attaching an id.
+        return {
+          input: latest.id ? readIo(latest.id, 'input') : latest.input,
+          output: latest.id ? readIo(latest.id, 'output') : latest.output,
+          error: latest.error,
+        };
       }),
       getDataSetVariables: jest.fn((): Record<string, unknown> => {
+        // Aggregate from data.set steps the test mocked into state. Falls
+        // back to reading `output` directly off the mocked exec when the
+        // mock didn't bother to attach an id, so old fixtures keep working.
         const result: Record<string, unknown> = {};
         const sorted = workflowExecutionState
           .getAllStepExecutions()
-          .filter(
-            (exec) =>
-              exec.stepType === 'data.set' &&
-              exec.output != null &&
-              typeof exec.output === 'object' &&
-              !Array.isArray(exec.output)
-          )
+          .filter((exec) => exec.stepType === 'data.set')
           .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex);
         for (const exec of sorted) {
-          Object.assign(result, exec.output);
+          const out = exec.id ? readIo(exec.id, 'output') : (exec as { output?: unknown }).output;
+          if (out != null && typeof out === 'object' && !Array.isArray(out)) {
+            Object.assign(result, out);
+          }
         }
         return result;
       }),
@@ -554,6 +579,7 @@ describe('WorkflowContextManager', () => {
         .mockImplementation((stepExecutionId) => {
           if (stepExecutionId === 'outerForeachStep_generated') {
             return {
+              id: stepExecutionId,
               stepType: 'foreach',
               input: { foreach: JSON.stringify(['item1', 'item2', 'item3']) },
               state: {
@@ -565,6 +591,7 @@ describe('WorkflowContextManager', () => {
 
           if (stepExecutionId === 'innerForeachStep_generated') {
             return {
+              id: stepExecutionId,
               stepType: 'foreach',
               input: { foreach: JSON.stringify(['1', '2', '3', '4']) },
               state: {
@@ -646,6 +673,7 @@ describe('WorkflowContextManager', () => {
         .mockImplementation((stepExecutionId) => {
           if (stepExecutionId === 'outerForeachStep_generated') {
             return {
+              id: stepExecutionId,
               stepType: 'foreach',
               input: { foreach: JSON.stringify(['item1', 'item2', 'item3']) },
               state: {
@@ -681,6 +709,7 @@ describe('WorkflowContextManager', () => {
         .mockImplementation((stepExecutionId) => {
           if (stepExecutionId === 'outerForeachStep_generated') {
             return {
+              id: stepExecutionId,
               stepId: 'outerForeachStep',
               stepType: 'foreach',
               input: { foreach: JSON.stringify(['item1', 'item2', 'item3']) },
@@ -730,6 +759,7 @@ describe('WorkflowContextManager', () => {
           .mockImplementation((stepExecutionId) => {
             if (stepExecutionId === 'outerForeachStep_generated') {
               return {
+                id: stepExecutionId,
                 stepId: 'outerForeachStep',
                 stepType: 'foreach',
                 input: { foreach: JSON.stringify(outerItems) },
@@ -738,6 +768,7 @@ describe('WorkflowContextManager', () => {
             }
             if (stepExecutionId === 'innerForeachStep_generated') {
               return {
+                id: stepExecutionId,
                 stepId: 'innerForeachStep',
                 stepType: 'foreach',
                 input: { foreach: '{{foreach.item}}' },
@@ -921,6 +952,7 @@ describe('WorkflowContextManager', () => {
           .mockImplementation((stepExecutionId) => {
             if (stepExecutionId === 'outerForeachStep_generated') {
               return {
+                id: stepExecutionId,
                 stepId: 'outerForeachStep',
                 stepType: 'foreach',
                 input: { foreach: JSON.stringify(outerItems) },
@@ -929,6 +961,7 @@ describe('WorkflowContextManager', () => {
             }
             if (stepExecutionId === 'innerForeachStep_generated') {
               return {
+                id: stepExecutionId,
                 stepId: 'innerForeachStep',
                 stepType: 'foreach',
                 input: { foreach: JSON.stringify(middleItems) },
@@ -937,6 +970,7 @@ describe('WorkflowContextManager', () => {
             }
             if (stepExecutionId === 'deepForeachStep_generated') {
               return {
+                id: stepExecutionId,
                 stepId: 'deepForeachStep',
                 stepType: 'foreach',
                 input: { foreach: JSON.stringify(innerItems) },
@@ -1008,6 +1042,7 @@ describe('WorkflowContextManager', () => {
           .mockImplementation((stepExecutionId) => {
             if (stepExecutionId === 'outerForeachStep_generated') {
               return {
+                id: stepExecutionId,
                 stepType: 'foreach',
                 input: null,
                 state: { index: 0, total: 3 },
@@ -1037,6 +1072,7 @@ describe('WorkflowContextManager', () => {
           .mockImplementation((stepExecutionId) => {
             if (stepExecutionId === 'outerForeachStep_generated') {
               return {
+                id: stepExecutionId,
                 stepType: 'foreach',
                 input: { other: 'value' },
                 state: { index: 0, total: 2 },
@@ -1098,6 +1134,7 @@ describe('WorkflowContextManager', () => {
         .mockImplementation((stepExecutionId: string) => {
           if (stepExecutionId === 'poll_loop_generated') {
             return {
+              id: stepExecutionId,
               stepId: 'poll_loop',
               stepType: 'while',
               input: { condition: 'steps.poll_loop.check_status.output: "ready"' },
@@ -1127,6 +1164,7 @@ describe('WorkflowContextManager', () => {
         .mockImplementation((stepExecutionId: string) => {
           if (stepExecutionId === 'poll_loop_generated') {
             return {
+              id: stepExecutionId,
               stepId: 'poll_loop',
               stepType: 'while',
               input: { condition: 'some condition' },
@@ -1156,6 +1194,7 @@ describe('WorkflowContextManager', () => {
         .mockImplementation((stepExecutionId: string) => {
           if (stepExecutionId === 'poll_loop_generated') {
             return {
+              id: stepExecutionId,
               stepId: 'poll_loop',
               stepType: 'while',
               input: { condition: 'some condition' },
@@ -1199,6 +1238,7 @@ describe('WorkflowContextManager', () => {
         .mockImplementation((stepExecutionId: string) => {
           if (stepExecutionId === 'outer_loop_generated') {
             return {
+              id: stepExecutionId,
               stepId: 'outer_loop',
               stepType: 'while',
               input: { condition: 'outer condition' },
@@ -1207,6 +1247,7 @@ describe('WorkflowContextManager', () => {
           }
           if (stepExecutionId === 'inner_loop_generated') {
             return {
+              id: stepExecutionId,
               stepId: 'inner_loop',
               stepType: 'while',
               input: { condition: 'inner condition' },

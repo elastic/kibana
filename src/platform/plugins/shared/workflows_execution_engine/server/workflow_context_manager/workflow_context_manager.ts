@@ -23,7 +23,7 @@ import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
-import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { StepExecutionMetadata, WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildStepExecutionId, isTemplateExpression } from '../utils';
@@ -46,7 +46,7 @@ export interface ContextManagerInit {
 
 interface ScopeEntry {
   topFrame: NonNullable<ReturnType<WorkflowScopeStack['getCurrentScope']>>;
-  stepExecution: EsWorkflowStepExecution | undefined;
+  stepExecution: StepExecutionMetadata | undefined;
 }
 
 type ContextPathSegment = string | number;
@@ -577,20 +577,21 @@ export class WorkflowContextManager {
    * This avoids storing the entire items array in the step execution state on every iteration.
    */
   private buildForeachContext(
-    stepExecution: EsWorkflowStepExecution,
+    stepExecution: StepExecutionMetadata,
     stepContext: StepContext
   ): StepContext['foreach'] {
     const foreachState = stepExecution.state ?? {};
     const index = typeof foreachState.index === 'number' ? foreachState.index : 0;
     const total = typeof foreachState.total === 'number' ? foreachState.total : 0;
 
-    // Re-evaluate the foreach expression (stored in the step input at entry time)
-    // to derive the full items array and current item without persisting them in state.
-    // The caller just resolved this stepExecution from state (synchronous walk in
-    // enrichStepContextAccordingToStepScope) and a foreach is non-terminal while
-    // iterating, so input cannot have been evicted between the lookup and this
-    // read — direct field access is safe here.
-    const foreachExpression = this.extractForeachExpression(stepExecution.input);
+    // Re-evaluate the foreach expression (stored in the step input at entry
+    // time) to derive the full items array and current item without
+    // persisting them in state. Input lives in `StepIoService` (lifecycle
+    // metadata vs IO data are owned separately); a foreach is non-terminal
+    // while iterating, so its input is never evicted by post-flush input
+    // eviction — the service read is safe here.
+    const foreachInput = this.stepIoService.getStepInput(stepExecution.id);
+    const foreachExpression = this.extractForeachExpression(foreachInput);
     const items = foreachExpression
       ? this.resolveForeachItems(foreachExpression, stepContext)
       : undefined;
@@ -605,7 +606,7 @@ export class WorkflowContextManager {
     };
   }
 
-  private buildWhileContext(stepExecution: EsWorkflowStepExecution): StepContext['while'] {
+  private buildWhileContext(stepExecution: StepExecutionMetadata): StepContext['while'] {
     const whileState = stepExecution.state ?? {};
     const iteration = typeof whileState.iteration === 'number' ? whileState.iteration : 0;
     return { iteration };

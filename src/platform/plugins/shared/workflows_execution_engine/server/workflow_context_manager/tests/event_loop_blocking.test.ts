@@ -168,10 +168,11 @@ const createBroaderSurfaceContainer = () => {
     .fn()
     .mockImplementation((stepId: string): Partial<EsWorkflowStepExecution> | undefined => {
       if (stepId in largeStepOutputs) {
+        // Metadata only — IO lives in the IO service mock below.
         return {
+          id: stepId,
+          stepId,
           state: { fetched: true, stepId },
-          input: undefined,
-          output: largeStepOutputs[stepId as keyof typeof largeStepOutputs],
           error: undefined,
         };
       }
@@ -196,17 +197,26 @@ const createBroaderSurfaceContainer = () => {
     return actualRender(obj, context);
   });
 
+  // IO maps live entirely in the service mock now (state holds metadata only).
   const stepIoService = {
     hasEvictedOutputs: jest.fn().mockReturnValue(false),
     prepareForRead: jest.fn().mockResolvedValue(undefined),
     releaseTransientlyRehydratedOutputs: jest.fn(),
-    getStepInput: jest.fn((id: string) => workflowExecutionState.getStepExecution(id)?.input),
-    getStepOutput: jest.fn((id: string) => workflowExecutionState.getStepExecution(id)?.output),
-    getStepError: jest.fn((id: string) => workflowExecutionState.getStepExecution(id)?.error),
+    getStepInput: jest.fn().mockReturnValue(undefined),
+    getStepOutput: jest.fn(
+      (id: string) =>
+        (largeStepOutputs as Record<string, unknown>)[id as keyof typeof largeStepOutputs]
+    ),
+    getStepError: jest.fn().mockReturnValue(undefined),
     getLatestStepIO: jest.fn((stepId: string) => {
-      const latest = workflowExecutionState.getLatestStepExecution(stepId);
-      if (!latest) return undefined;
-      return { input: latest.input, output: latest.output, error: latest.error };
+      if (stepId in largeStepOutputs) {
+        return {
+          input: undefined,
+          output: largeStepOutputs[stepId as keyof typeof largeStepOutputs],
+          error: undefined,
+        };
+      }
+      return undefined;
     }),
     getDataSetVariables: jest.fn((): Record<string, unknown> => ({})),
   } as unknown as StepIoService;

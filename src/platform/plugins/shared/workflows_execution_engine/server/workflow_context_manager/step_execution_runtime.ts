@@ -141,7 +141,7 @@ export class StepExecutionRuntime {
     const stepId = this.node.stepId;
     const stepStartedAt = new Date();
 
-    const stepExecution = {
+    this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
       stepId: this.node.stepId,
       stepType: this.node.stepType,
@@ -149,9 +149,7 @@ export class StepExecutionRuntime {
       topologicalIndex: this.topologicalOrder.indexOf(this.node.id),
       status: ExecutionStatus.RUNNING,
       startedAt: this.stepExecution?.startedAt ?? stepStartedAt.toISOString(),
-    } as Partial<EsWorkflowStepExecution>;
-
-    this.workflowExecutionState.upsertStep(stepExecution);
+    });
     this.logStepStart(stepId, this.stepExecutionId);
   }
 
