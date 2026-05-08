@@ -42,9 +42,9 @@ ajv@6.14.0
 ajv@8.18.0
 babel-loader@9.2.1
 baseline-browser-mapping@2.9.14
-browserslist@4.28.1
+browserslist@4.28.2
 buffer-from@1.1.1
-caniuse-lite@1.0.30001781
+caniuse-lite@1.0.30001791
 chroma-js@2.4.2
 chrome-trace-event@1.0.2
 commander@2.20.3
@@ -56,7 +56,7 @@ css-tree@1.1.3
 cssesc@3.0.0
 csstype@3.1.2
 dompurify@3.4.1
-electron-to-chromium@1.5.321
+electron-to-chromium@1.5.349
 enhanced-resolve@5.20.0
 error-stack-parser@2.1.4
 es-module-lexer@1.5.4
@@ -101,7 +101,7 @@ monaco-yaml@5.1.0
 nano-css@5.6.2
 nanoid@3.3.11
 neo-async@2.6.2
-node-releases@2.0.27
+node-releases@2.0.38
 p-limit@4.0.0
 p-locate@6.0.0
 path-browserify@1.0.1
