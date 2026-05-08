@@ -21,7 +21,8 @@ cmd="node scripts/capture_oas_snapshot\
   --include-path /api/maintenance_window \
   --include-path /api/agent_builder \
   --include-path /api/workflows \
-  --include-path /api/security/entity_store"
+  --include-path /api/security/entity_store \
+  --include-path /api/genie"
 
 run_check() {
   eval "$cmd"
