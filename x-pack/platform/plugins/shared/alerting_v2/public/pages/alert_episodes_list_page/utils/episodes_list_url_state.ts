@@ -8,6 +8,7 @@
 import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import type { TimeRange } from '@kbn/es-query';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { isArray, isNil, isPlainObject, isString } from 'lodash';
 
 /** Namespace for episodes list state inside the `_a` app-state blob */
 export const EPISODES_LIST_APP_STATE_KEY = 'episodesList' as const;
@@ -28,15 +29,15 @@ type AppStateRecord = Record<string, unknown> & {
   [EPISODES_LIST_APP_STATE_KEY]?: unknown;
 };
 
-const isNonEmptyString = (v: unknown): v is string => typeof v === 'string' && v.trim().length > 0;
+const isNonEmptyString = (v: unknown): v is string => isString(v) && v.trim().length > 0;
 
 const isStringArray = (v: unknown): v is string[] =>
-  Array.isArray(v) && v.length > 0 && v.every((x) => typeof x === 'string');
+  isArray(v) && v.length > 0 && v.every(isString);
 
 function decodeFilterFields(o: Record<string, unknown>): EpisodesFilterState {
   const result: EpisodesFilterState = {};
   if (o.status === EPISODES_LIST_STATUS_URL_ALL) {
-    result.status = null;
+    result.status = undefined;
   } else if (isNonEmptyString(o.status)) {
     result.status = o.status;
   }
@@ -59,7 +60,7 @@ function splitEpisodesListRaw(raw: unknown): {
   filter: EpisodesFilterState;
   timeRange?: TimeRange;
 } {
-  if (raw == null || typeof raw !== 'object' || Array.isArray(raw)) {
+  if (!isPlainObject(raw)) {
     return { filter: {} };
   }
   const o = raw as Record<string, unknown>;
@@ -74,7 +75,7 @@ function splitEpisodesListRaw(raw: unknown): {
 function encodeFilterFields(state: EpisodesFilterState): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   const st = state.status;
-  if (st === null || st === undefined) {
+  if (isNil(st)) {
     result.status = EPISODES_LIST_STATUS_URL_ALL;
   } else if (isNonEmptyString(st) && st !== DEFAULT_EPISODES_LIST_FILTER.status) {
     result.status = st;
@@ -109,20 +110,6 @@ function encodeEpisodesListRecord(
   return out;
 }
 
-export function episodesFilterStatesEqual(a: EpisodesFilterState, b: EpisodesFilterState): boolean {
-  const statusA = a.status ?? null;
-  const statusB = b.status ?? null;
-  if (statusA !== statusB) return false;
-  if (a.ruleId !== b.ruleId) return false;
-  if (a.queryString !== b.queryString) return false;
-  if (a.assigneeUid !== b.assigneeUid) return false;
-  const ta = a.tags ?? null;
-  const tb = b.tags ?? null;
-  if (ta === null && tb === null) return true;
-  if (ta === null || tb === null || ta.length !== tb.length) return false;
-  return ta.every((t, i) => t === tb[i]);
-}
-
 export function readEpisodesListAppStateFromUrlStorage(storage: IKbnUrlStateStorage): {
   filterState: EpisodesFilterState;
   timeRange?: TimeRange;
@@ -142,13 +129,15 @@ export async function writeEpisodesListAppStateToUrlStorage(
 ): Promise<void> {
   const serialized = encodeEpisodesListRecord(filter, timeRange);
   const appState = storage.get<AppStateRecord>('_a') ?? {};
-  const nextAppState: AppStateRecord = { ...appState };
+  const {
+    [EPISODES_LIST_APP_STATE_KEY]: _ignoredEpisodesListState,
+    ...appStateWithoutEpisodesList
+  } = appState;
 
-  if (Object.keys(serialized).length === 0) {
-    delete nextAppState[EPISODES_LIST_APP_STATE_KEY];
-  } else {
-    nextAppState[EPISODES_LIST_APP_STATE_KEY] = serialized;
-  }
+  const nextAppState: AppStateRecord =
+    Object.keys(serialized).length === 0
+      ? appStateWithoutEpisodesList
+      : { ...appStateWithoutEpisodesList, [EPISODES_LIST_APP_STATE_KEY]: serialized };
 
   await storage.set('_a', nextAppState, { replace: false });
 }

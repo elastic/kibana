@@ -11,9 +11,9 @@ import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/e
 import type { TimeRange } from '@kbn/es-query';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import deepEqual from 'fast-deep-equal';
 import {
   DEFAULT_EPISODES_LIST_TIME_RANGE,
-  episodesFilterStatesEqual,
   readEpisodesListAppStateFromUrlStorage,
   writeEpisodesListAppStateToUrlStorage,
 } from '../utils/episodes_list_url_state';
@@ -51,7 +51,7 @@ export function useEpisodesListUrlState(timefilter: TimefilterContract) {
      **/
     const { filterState: fromUrl, timeRange: urlTime } =
       readEpisodesListAppStateFromUrlStorage(urlStateStorage);
-    setFilterStateInternal((prev) => (episodesFilterStatesEqual(prev, fromUrl) ? prev : fromUrl));
+    setFilterStateInternal((prev) => (deepEqual(prev, fromUrl) ? prev : fromUrl));
     if (urlTime) {
       timefilter.setTime(urlTime);
     }

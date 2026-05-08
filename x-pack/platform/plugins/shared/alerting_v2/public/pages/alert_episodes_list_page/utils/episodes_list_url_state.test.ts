@@ -9,10 +9,11 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createMemoryHistory } from 'history';
 import {
-  episodesFilterStatesEqual,
+  DEFAULT_EPISODES_LIST_TIME_RANGE,
   EPISODES_LIST_APP_STATE_KEY,
   EPISODES_LIST_STATUS_URL_ALL,
   readEpisodesListAppStateFromUrlStorage,
+  writeEpisodesListAppStateToUrlStorage,
 } from './episodes_list_url_state';
 
 async function createKbnTestUrlStorage(
@@ -71,11 +72,11 @@ describe('episodes_list_url_state', () => {
       });
     });
 
-    it('maps "all" status to null', async () => {
+    it('maps "all" status to undefined', async () => {
       const storage = await createKbnTestUrlStorage({
         status: EPISODES_LIST_STATUS_URL_ALL,
       });
-      expect(readEpisodesListAppStateFromUrlStorage(storage).filterState.status).toBeNull();
+      expect(readEpisodesListAppStateFromUrlStorage(storage).filterState.status).toBeUndefined();
     });
 
     it('defaults status to active when _a is missing', async () => {
@@ -86,14 +87,38 @@ describe('episodes_list_url_state', () => {
     });
   });
 
-  describe('episodesFilterStatesEqual', () => {
-    it('treats missing and empty tags as different', () => {
-      expect(episodesFilterStatesEqual({}, { tags: [] })).toBe(false);
-      expect(episodesFilterStatesEqual({ tags: [] }, { tags: [] })).toBe(true);
+  describe('writeEpisodesListAppStateToUrlStorage', () => {
+    it('omits episodesList when values are defaults', async () => {
+      const storage = await createKbnTestUrlStorage({
+        queryString: 'host',
+      });
+
+      await writeEpisodesListAppStateToUrlStorage(
+        storage,
+        { status: 'active' },
+        DEFAULT_EPISODES_LIST_TIME_RANGE
+      );
+
+      expect(storage.get('_a')).toEqual({});
     });
 
-    it('treats null and undefined status as equal', () => {
-      expect(episodesFilterStatesEqual({ status: null }, { status: undefined })).toBe(true);
+    it('writes episodesList when there are non-default values', async () => {
+      const storage = await createKbnTestUrlStorage();
+
+      await writeEpisodesListAppStateToUrlStorage(
+        storage,
+        { status: undefined, queryString: ' host ' },
+        { from: 'now-7d', to: 'now' }
+      );
+
+      expect(storage.get('_a')).toEqual({
+        [EPISODES_LIST_APP_STATE_KEY]: {
+          status: EPISODES_LIST_STATUS_URL_ALL,
+          queryString: 'host',
+          timeFrom: 'now-7d',
+          timeTo: 'now',
+        },
+      });
     });
   });
 });

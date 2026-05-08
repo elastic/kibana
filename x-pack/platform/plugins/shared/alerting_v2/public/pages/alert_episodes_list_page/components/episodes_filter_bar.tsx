@@ -30,10 +30,8 @@ import { AlertEpisodesAssigneeFilter } from '@kbn/alerting-v2-episodes-ui/compon
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
 import useDebounce from 'react-use/lib/useDebounce';
-import {
-  DEFAULT_EPISODES_LIST_FILTER,
-  episodesFilterStatesEqual,
-} from '../utils/episodes_list_url_state';
+import deepEqual from 'fast-deep-equal';
+import { DEFAULT_EPISODES_LIST_FILTER } from '../utils/episodes_list_url_state';
 import * as i18n from '../translations';
 
 export interface EpisodesFilterBarProps {
@@ -109,9 +107,7 @@ export const EpisodesFilterBar = ({
   }, []);
 
   const hasActiveFilters = useMemo(
-    () =>
-      !episodesFilterStatesEqual(filterState, DEFAULT_EPISODES_LIST_FILTER) ||
-      queryStringInput.trim() !== '',
+    () => !deepEqual(filterState, DEFAULT_EPISODES_LIST_FILTER) || queryStringInput.trim() !== '',
     [filterState, queryStringInput]
   );
 

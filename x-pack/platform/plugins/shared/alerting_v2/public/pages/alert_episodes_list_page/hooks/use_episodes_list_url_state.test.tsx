@@ -9,24 +9,12 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
-import { Subject } from 'rxjs';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { EPISODES_LIST_APP_STATE_KEY } from '../utils/episodes_list_url_state';
 import { useEpisodesListUrlState } from './use_episodes_list_url_state';
 
-const createMockTimefilter = (): TimefilterContract => {
-  const timeUpdate$ = new Subject<void>();
-  const getTime = jest.fn().mockReturnValue({ from: 'now-24h', to: 'now' });
-  return {
-    getTimeUpdate$: jest.fn().mockReturnValue(timeUpdate$),
-    getTime,
-    setTime: jest.fn((range: { from: string; to: string }) => {
-      getTime.mockReturnValue(range);
-      timeUpdate$.next();
-    }),
-  } as unknown as TimefilterContract;
-};
+const createMockTimefilter = () => dataPluginMock.createStartContract().query.timefilter.timefilter;
 
 describe('useEpisodesListUrlState', () => {
   it('gets filter state from _a episodesList in the URL', async () => {
@@ -72,6 +60,8 @@ describe('useEpisodesListUrlState', () => {
     });
 
     expect(result.current.filterState).toEqual({ status: 'recovering', ruleId: 'r9' });
-    expect(history.location.search).toContain('_a=');
+    expect(history.location.search).toBe(
+      '?_a=(episodesList:(ruleId:r9,status:recovering,timeFrom:now-15m,timeTo:now))'
+    );
   });
 });
