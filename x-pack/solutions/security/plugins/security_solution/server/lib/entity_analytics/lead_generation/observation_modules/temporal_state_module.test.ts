@@ -9,10 +9,16 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createTemporalStateModule } from './temporal_state_module';
 import type { LeadEntity } from '../types';
+import { PRIVILEGED_USER_WATCHLIST_ID } from './utils';
 
 const createPrivilegedEntity = (type: string, name: string): LeadEntity => ({
   record: {
-    entity: { id: `euid-${name}`, name, type, attributes: { privileged: true } },
+    entity: {
+      id: `${type}:${name}`,
+      name,
+      type,
+      attributes: { watchlists: [PRIVILEGED_USER_WATCHLIST_ID] },
+    },
   } as never,
   type,
   name,
@@ -20,7 +26,7 @@ const createPrivilegedEntity = (type: string, name: string): LeadEntity => ({
 
 const createNonPrivilegedEntity = (type: string, name: string): LeadEntity => ({
   record: {
-    entity: { id: `euid-${name}`, name, type, attributes: { privileged: false } },
+    entity: { id: `${type}:${name}`, name, type, attributes: { watchlists: [] } },
   } as never,
   type,
   name,
@@ -37,7 +43,12 @@ const mockSnapshotResponse = (buckets: Array<{ key: string; wasPrivileged: boole
             hits: [
               {
                 _source: {
-                  entity: { id: b.key, attributes: { privileged: b.wasPrivileged } },
+                  entity: {
+                    id: b.key,
+                    attributes: {
+                      watchlists: b.wasPrivileged ? [PRIVILEGED_USER_WATCHLIST_ID] : [],
+                    },
+                  },
                 },
               },
             ],

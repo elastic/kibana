@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { LicenseLicense } from '@elastic/elasticsearch/lib/api/types';
 import { putLicense } from '../../../lib/license';
 import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../helpers';
@@ -39,7 +40,7 @@ export function registerLicenseRoute({
             acknowledge: Boolean(req.query.acknowledge),
             client,
             licensing,
-            licenses: [req.body.license as any],
+            licenses: [req.body.license as LicenseLicense],
           }),
         });
       } catch (error) {

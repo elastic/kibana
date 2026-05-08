@@ -8,7 +8,14 @@
 import type { Logger } from '@kbn/core/server';
 import type { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import type { LeadEntity, Observation, ObservationModule, ObservationSeverity } from '../types';
-import { makeObservation, getEntityField, groupEntitiesByType } from './utils';
+import {
+  makeObservation,
+  getEntityField,
+  getEntityId,
+  groupEntitiesByType,
+  entityTypeLabel,
+  extractIsPrivileged,
+} from './utils';
 
 const MODULE_ID = 'risk_analysis';
 const MODULE_NAME = 'Risk Analysis';
@@ -106,7 +113,9 @@ export const createRiskScoreModule = ({
       const internals = extractEntityInternals(entity);
       if (internals) {
         const { scoreNorm, level, isPrivileged } = internals;
-        const historicalScores = timeSeriesScores.get(`${entity.type}:${entity.name}`) ?? [];
+        const euid = getEntityId(entity);
+        const historicalScores =
+          (euid ? timeSeriesScores.get(`${entity.type}:${euid}`) : undefined) ?? [];
 
         const severity = RISK_LEVEL_TO_SEVERITY[level];
         const observationType = RISK_LEVEL_TO_TYPE[level];
@@ -117,9 +126,9 @@ export const createRiskScoreModule = ({
               score: scoreNorm,
               severity,
               confidence: RISK_LEVEL_CONFIDENCE[level] ?? 0.8,
-              description: `Entity ${entity.name} has a ${level} risk score of ${scoreNorm.toFixed(
-                1
-              )}`,
+              description: `${entityTypeLabel(entity)} ${
+                entity.name
+              } has a ${level} risk score of ${scoreNorm.toFixed(1)}`,
               metadata: {
                 calculated_score_norm: scoreNorm,
                 calculated_level: level,
@@ -140,7 +149,9 @@ export const createRiskScoreModule = ({
                 score: Math.min(100, esc.delta * 2),
                 severity: escalationSeverity,
                 confidence: 0.85,
-                description: `Entity ${entity.name} risk score escalated by ${esc.delta.toFixed(
+                description: `${entityTypeLabel(entity)} ${
+                  entity.name
+                } risk score escalated by ${esc.delta.toFixed(
                   1
                 )} points (from ${esc.previousScore.toFixed(1)} to ${scoreNorm.toFixed(
                   1
@@ -164,7 +175,7 @@ export const createRiskScoreModule = ({
               score: Math.min(100, scoreNorm * 1.2),
               severity: 'critical',
               confidence: 0.95,
-              description: `Privileged entity ${
+              description: `Privileged ${entityTypeLabel(entity).toLowerCase()} ${
                 entity.name
               } has a ${level} risk score of ${scoreNorm.toFixed(
                 1
@@ -206,14 +217,21 @@ const extractEntityInternals = (entity: LeadEntity): EntityInternals | undefined
   const scoreNorm = Number(risk.calculated_score_norm);
   if (Number.isNaN(scoreNorm)) return undefined;
 
-  const attributes = entityField.attributes as { privileged?: boolean } | undefined;
   return {
     scoreNorm,
     level: risk.calculated_level ?? 'Unknown',
-    isPrivileged: attributes?.privileged === true,
+    isPrivileged: extractIsPrivileged(entity),
   };
 };
 
+/**
+ * Fetches daily average risk score history from the time-series index.
+ *
+ * The risk engine writes `host.name` (or `user.name`) using the EUID
+ * (e.g. `"host:InnoDB"`), so we must query with EUIDs rather than plain
+ * entity names. The returned map is keyed by `"entityType:euid"` (the
+ * format `getDailyAverageRiskScoreNormSeries` produces).
+ */
 const fetchTimeSeriesRiskScores = async (
   riskScoreDataClient: RiskScoreDataClient,
   entities: LeadEntity[],
@@ -222,19 +240,21 @@ const fetchTimeSeriesRiskScores = async (
   const result = new Map<string, number[]>();
 
   for (const [entityType, group] of groupEntitiesByType(entities).entries()) {
-    const names = group.map((e) => e.name);
-    try {
-      const batch = await riskScoreDataClient.getDailyAverageRiskScoreNormSeries({
-        entityType,
-        entityNames: names,
-      });
-      for (const [key, scores] of batch.entries()) {
-        result.set(key, scores);
+    const euids = group.map((e) => getEntityId(e)).filter((id): id is string => id != null);
+    if (euids.length > 0) {
+      try {
+        const batch = await riskScoreDataClient.getDailyAverageRiskScoreNormSeries({
+          entityType,
+          entityNames: euids,
+        });
+        for (const [key, scores] of batch.entries()) {
+          result.set(key, scores);
+        }
+      } catch (error) {
+        logger.warn(
+          `[${MODULE_ID}] Failed to fetch time-series risk scores for ${entityType}: ${error}`
+        );
       }
-    } catch (error) {
-      logger.warn(
-        `[${MODULE_ID}] Failed to fetch time-series risk scores for ${entityType}: ${error}`
-      );
     }
   }
 

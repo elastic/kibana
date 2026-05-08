@@ -10,7 +10,7 @@ import { SecurityPageName } from '../../../../../common';
 
 export const getNavCategories = (
   enableAlertsAndAttacksAlignment?: boolean,
-  securityClassicNavUpdate?: boolean
+  isNewEAHomePageEnabled?: boolean
 ): SeparatorLinkCategory[] => {
   const categories: SeparatorLinkCategory[] = [
     {
@@ -32,7 +32,9 @@ export const getNavCategories = (
     {
       type: LinkCategoryType.separator,
       linkIds: [
-        SecurityPageName.entityAnalyticsLanding,
+        isNewEAHomePageEnabled
+          ? SecurityPageName.entityAnalyticsHomePage
+          : SecurityPageName.entityAnalyticsLanding,
         SecurityPageName.exploreLanding,
         SecurityPageName.timelines,
         SecurityPageName.threatIntelligence,
@@ -41,17 +43,5 @@ export const getNavCategories = (
     },
   ];
 
-  return securityClassicNavUpdate
-    ? categories
-    : [
-        ...categories,
-        {
-          type: LinkCategoryType.separator,
-          linkIds: [
-            SecurityPageName.siemReadiness,
-            SecurityPageName.aiValue,
-            SecurityPageName.siemMigrationsLanding,
-          ],
-        },
-      ];
+  return categories;
 };

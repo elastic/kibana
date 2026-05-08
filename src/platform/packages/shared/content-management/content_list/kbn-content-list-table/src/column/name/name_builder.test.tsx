@@ -27,6 +27,7 @@ const defaultContext: ColumnBuilderContext = {
     selection: true,
     tags: false,
     starred: false,
+    userProfiles: false,
   },
 };
 
@@ -50,11 +51,21 @@ describe('name column builder', () => {
       expect(result).toMatchObject({ name: 'Dashboard Name' });
     });
 
-    it('applies custom width', () => {
-      const props: NameColumnProps = { width: '50%' };
+    it('applies custom layout props', () => {
+      const props: NameColumnProps = {
+        width: '32em',
+        minWidth: '24em',
+        maxWidth: '64em',
+        truncateText: { lines: 4 },
+      };
       const result = buildNameColumn(props, defaultContext);
 
-      expect(result).toMatchObject({ width: '50%' });
+      expect(result).toMatchObject({
+        width: '32em',
+        minWidth: '24em',
+        maxWidth: '64em',
+        truncateText: { lines: 4 },
+      });
     });
 
     it('does not include width when not specified', () => {
@@ -79,6 +90,7 @@ describe('name column builder', () => {
           selection: true,
           tags: false,
           starred: false,
+          userProfiles: false,
         },
       };
 
@@ -100,6 +112,17 @@ describe('name column builder', () => {
       const item = { id: '1', title: 'Test' };
       result.render?.('Test', item);
       expect(customRender).toHaveBeenCalledWith(item);
+    });
+
+    it('passes title click handlers through to the rendered name cell', () => {
+      const handleClick = jest.fn();
+      const props: NameColumnProps = { onClick: handleClick, shouldUseHref: true };
+      const result = buildNameColumn(props, defaultContext) as NameColumn;
+
+      const item = { id: '1', title: 'Test' };
+      const rendered = result.render?.('Test', item) as React.ReactElement;
+
+      expect(rendered.props).toMatchObject({ onClick: handleClick, shouldUseHref: true });
     });
   });
 

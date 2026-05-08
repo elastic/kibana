@@ -18,7 +18,7 @@ import type {
   SecondaryMenuItem,
   SecondaryMenuSection,
   SideNavLogo,
-} from '@kbn/core-chrome-navigation/types';
+} from '@kbn/ui-side-navigation/types';
 import { toSentenceCase } from '@kbn/shared-ux-label-formatter';
 
 import { AppDeepLinkIdToIcon } from './known_icons_mappings';

@@ -16,7 +16,7 @@ import {
 } from '@kbn/agent-builder-common/agents';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
-import { publicApiPath } from '../../../common/constants';
+import { publicApiPath, internalApiPath } from '../../../common/constants';
 import type { ChatRequestBodyPayload } from '../../../common/http_api/chat';
 import { unwrapAgentBuilderErrors } from '../utils/errors';
 import type { EventsService } from '../events';
@@ -89,6 +89,20 @@ export class ChatService {
       browser_api_tools: params.browserApiTools ?? [],
       action: 'regenerate',
     });
+  }
+
+  followExecution(executionId: string, signal?: AbortSignal): Observable<ChatEvent> {
+    return defer(() => {
+      return this.http.get(`${internalApiPath}/executions/${executionId}/follow`, {
+        signal,
+        asResponse: true,
+        rawResponse: true,
+      });
+    }).pipe(
+      // @ts-expect-error SseEvent mixin issue
+      httpResponseIntoObservable<ChatEvent>(),
+      unwrapAgentBuilderErrors()
+    );
   }
 
   private converse(signal: AbortSignal | undefined, payload: ChatRequestBodyPayload) {

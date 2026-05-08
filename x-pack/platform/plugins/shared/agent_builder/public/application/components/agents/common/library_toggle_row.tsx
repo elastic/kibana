@@ -26,7 +26,6 @@ export interface LibraryToggleRowProps {
   description: string;
   isActive: boolean;
   onToggle: (isActive: boolean) => void;
-  isMutating: boolean;
   isDisabled?: boolean;
   isReadOnly?: boolean; // `readonly` is currently used as a soft indicator that a skill, plugin or tool was built by Elastic.
   disabledBadgeLabel?: string;
@@ -46,7 +45,6 @@ export const LibraryToggleRow: React.FC<LibraryToggleRowProps> = ({
   description,
   isActive,
   onToggle,
-  isMutating,
   isDisabled = false,
   isReadOnly = false,
   disabledBadgeLabel,
@@ -112,7 +110,6 @@ export const LibraryToggleRow: React.FC<LibraryToggleRowProps> = ({
             showLabel={false}
             checked={isActive}
             onChange={(e) => onToggle(e.target.checked)}
-            disabled={isMutating}
           />
         )}
       </EuiFlexItem>

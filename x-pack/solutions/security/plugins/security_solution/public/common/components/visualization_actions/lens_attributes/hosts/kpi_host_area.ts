@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { getLatestEntitiesIndexName } from '@kbn/entity-store/common';
 import { UNIQUE_COUNT } from '../../translations';
 import type { LensAttributes, GetLensAttributes } from '../../types';
 
 import {
   ENTITY_STORE_V2_HOSTS_KPI_LENS_AD_HOC_ID,
   getEntityStoreV2HostOnlyFilter,
-  getEntityStoreV2LatestHostsIndexTitle,
 } from './entity_store_v2_hosts_kpi_lens_shared';
 
 const columnTimestamp = '5eea817b-67b7-4268-8ecb-7688d1094721';
@@ -95,7 +95,7 @@ const getLegacyKpiHostAreaLensAttributes = (): LensAttributes => {
 };
 
 const getEntityStoreV2KpiHostAreaLensAttributes = (spaceId?: string): LensAttributes => {
-  const indexTitle = getEntityStoreV2LatestHostsIndexTitle(spaceId);
+  const indexTitle = getLatestEntitiesIndexName(spaceId ?? 'default');
 
   return {
     description: '',

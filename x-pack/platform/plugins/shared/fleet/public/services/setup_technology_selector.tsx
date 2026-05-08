@@ -24,8 +24,11 @@ import {
 import { useStartServices } from '../hooks';
 import type { PackageInfo } from '../../common/types';
 import { SetupTechnology } from '../../common/types';
+import { RELEASE_BADGE_DESCRIPTION } from '../components/release_badge';
 
 export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
+export const SETUP_TECHNOLOGY_SELECTOR_BETA_BADGE_TEST_SUBJ =
+  'setup-technology-selector-beta-badge';
 
 interface SetupTechnologySelectorProps {
   disabled: boolean;
@@ -48,7 +51,7 @@ export const SetupTechnologySelector = ({
   setupTechnology,
   onSetupTechnologyChange,
   isAgentlessDefault = false,
-  showBetaBadge = true,
+  showBetaBadge,
   useDescribedFormGroup = true,
   useCheckableCards = false,
   hideTitle = false,
@@ -80,34 +83,29 @@ export const SetupTechnologySelector = ({
                   id="xpack.fleet.setupTechnology.agentlessInputDisplay"
                   defaultMessage="Agentless"
                 />{' '}
-                {isAgentlessDefault ? (
+                {isAgentlessDefault && (
                   <EuiBadge>
                     <FormattedMessage
                       id="xpack.fleet.setupTechnology.agentlessDeployment.recommendedBadge"
                       defaultMessage="Recommended"
                     />
                   </EuiBadge>
-                ) : (
-                  showBetaBadge && (
-                    <EuiBetaBadge
-                      href={docLinks.links.fleet.agentlessIntegrations}
-                      target="_blank"
-                      label={
-                        <FormattedMessage
-                          id="xpack.fleet.setupTechnology.agentlessDeployment.betaBadge"
-                          defaultMessage="Beta"
-                        />
-                      }
-                      size="s"
-                      tooltipContent={
-                        <FormattedMessage
-                          id="xpack.fleet.setupTechnology.agentlessDeployment.betaTooltip"
-                          defaultMessage="This module is not yet GA. Please help us by reporting any bugs."
-                        />
-                      }
-                      alignment="middle"
-                    />
-                  )
+                )}{' '}
+                {showBetaBadge && (
+                  <EuiBetaBadge
+                    data-test-subj={SETUP_TECHNOLOGY_SELECTOR_BETA_BADGE_TEST_SUBJ}
+                    href={docLinks.links.fleet.agentlessIntegrations}
+                    target="_blank"
+                    label={
+                      <FormattedMessage
+                        id="xpack.fleet.setupTechnology.agentlessDeployment.betaBadge"
+                        defaultMessage="Beta"
+                      />
+                    }
+                    size="s"
+                    tooltipContent={RELEASE_BADGE_DESCRIPTION.beta}
+                    alignment="middle"
+                  />
                 )}
               </strong>
               <EuiText size="s">
@@ -171,34 +169,29 @@ export const SetupTechnologySelector = ({
                   id="xpack.fleet.setupTechnology.radioCardAgentlessInputDisplay"
                   defaultMessage="Agentless"
                 />{' '}
-                {isAgentlessDefault ? (
+                {isAgentlessDefault && (
                   <EuiBadge>
                     <FormattedMessage
                       id="xpack.fleet.setupTechnology.agentlessDeployment.recommendedBadge"
                       defaultMessage="Recommended"
                     />
                   </EuiBadge>
-                ) : (
-                  showBetaBadge && (
-                    <EuiBetaBadge
-                      href={docLinks.links.fleet.agentlessIntegrations}
-                      target="_blank"
-                      label={
-                        <FormattedMessage
-                          id="xpack.fleet.setupTechnology.agentlessDeployment.betaBadge"
-                          defaultMessage="Beta"
-                        />
-                      }
-                      size="s"
-                      tooltipContent={
-                        <FormattedMessage
-                          id="xpack.fleet.setupTechnology.radioCardAgentlessDeployment.betaTooltip"
-                          defaultMessage="This module is not yet GA. Please help us by reporting any bugs."
-                        />
-                      }
-                      alignment="middle"
-                    />
-                  )
+                )}{' '}
+                {showBetaBadge && (
+                  <EuiBetaBadge
+                    data-test-subj={SETUP_TECHNOLOGY_SELECTOR_BETA_BADGE_TEST_SUBJ}
+                    href={docLinks.links.fleet.agentlessIntegrations}
+                    target="_blank"
+                    label={
+                      <FormattedMessage
+                        id="xpack.fleet.setupTechnology.agentlessDeployment.betaBadge"
+                        defaultMessage="Beta"
+                      />
+                    }
+                    size="s"
+                    tooltipContent={RELEASE_BADGE_DESCRIPTION.beta}
+                    alignment="middle"
+                  />
                 )}
               </strong>
               <EuiText size="s">

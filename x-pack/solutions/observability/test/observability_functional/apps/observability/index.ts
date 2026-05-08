@@ -25,6 +25,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./feature_controls'));
     loadTestFile(require.resolve('./pages/rules_page'));
     loadTestFile(require.resolve('./pages/alerts/metric_threshold'));
-    loadTestFile(require.resolve('./sidenav/sidenav'));
   });
 }

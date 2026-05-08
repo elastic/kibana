@@ -83,7 +83,7 @@ test.describe(
       await page.route('**/internal/search_inference_endpoints/connectors*', async (route) => {
         await route.fulfill({
           status: 200,
-          body: JSON.stringify({ connectors: [], allConnectors: [], soEntryFound: false }),
+          body: JSON.stringify({ connectors: [], soEntryFound: false }),
         });
       });
       await page.reload();

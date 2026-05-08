@@ -96,6 +96,7 @@
             "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WriteFileOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -181,6 +182,7 @@
             "lineNumber": 233,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WriteFileOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -427,6 +429,7 @@
             "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -491,6 +494,7 @@
             "lineNumber": 276,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -706,6 +710,7 @@
             "lineNumber": 23,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "Buffer",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -772,6 +777,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WriteFileContent",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -792,6 +798,7 @@
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WriteFileOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -877,6 +884,7 @@
             "lineNumber": 198,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "WriteFileOptions",
             "trackAdoption": false,
             "isRequired": false
           }

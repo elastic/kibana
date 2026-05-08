@@ -8,8 +8,14 @@
  */
 
 // Feature types.
-export type { ContentListFeatures, ContentListSupports } from './types';
-export { isSortingConfig, isPaginationConfig, isSearchConfig } from './types';
+export type {
+  ContentListFeatures,
+  ContentListSupports,
+  FilterFacet,
+  FilterFacetParams,
+  FilterFacetConfig,
+} from './types';
+export { isSortingConfig, isPaginationConfig, isSearchConfig, isFilterFacetConfig } from './types';
 
 // Sorting feature.
 export type { SortField, SortOption, SortingConfig, UseContentListSortReturn } from './sorting';
@@ -24,16 +30,19 @@ export type { SearchConfig, UseContentListSearchReturn } from './search';
 export { useContentListSearch } from './search';
 
 // Selection feature.
-export type { UseContentListSelectionReturn } from './selection';
-export { useContentListSelection } from './selection';
+export type { UseContentListSelectionReturn, SelectionConfig } from './selection';
+export { useContentListSelection, isSelectionConfig } from './selection';
 
 // Filtering feature.
-export type { FilterDisplayState, UseContentListFiltersReturn } from './filtering';
+export type { UseContentListFiltersReturn } from './filtering';
 export {
-  useFilterDisplay,
   useContentListFilters,
+  useFilterToggle,
   useTagFilterToggle,
+  useCreatedByFilterToggle,
+  useFilterFacets,
   TAG_FILTER_ID,
+  CREATED_BY_FILTER_ID,
 } from './filtering';
 
 // Delete feature.

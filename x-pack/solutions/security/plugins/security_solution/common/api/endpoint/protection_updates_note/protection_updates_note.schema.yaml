@@ -7,24 +7,32 @@ paths:
     get:
       summary: Get a protection updates note
       operationId: GetProtectionUpdatesNote
+      description: Get the protection updates note for a package policy.
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       parameters:
         - name: package_policy_id
           in: path
           required: true
+          description: The package policy ID to retrieve the protection updates note for.
           schema:
             type: string
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
                 $ref: '../model/schema/common.schema.yaml#/components/schemas/ProtectionUpdatesNoteResponse'
+              examples:
+                protectionUpdatesNote:
+                  summary: The protection updates note for a package policy
+                  value:
+                    note: 'Pinned protection updates to 2025-01-01 while validating new signatures.'
     post:
       summary: Create or update a protection updates note
       operationId: CreateUpdateProtectionUpdatesNote
+      description: Create or update the protection updates note for a package policy.
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       requestBody:
@@ -36,16 +44,28 @@ paths:
               properties:
                 note:
                   type: string
+                  description: The note content.
+            examples:
+              setNote:
+                summary: Set a new protection updates note
+                value:
+                  note: 'Pinned protection updates to 2025-01-01 while validating new signatures.'
       parameters:
         - name: package_policy_id
           in: path
           required: true
+          description: The package policy ID to create or update the protection updates note for.
           schema:
             type: string
       responses:
         '200':
-          description: OK
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
-               $ref: '../model/schema/common.schema.yaml#/components/schemas/ProtectionUpdatesNoteResponse'
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/ProtectionUpdatesNoteResponse'
+              examples:
+                noteSaved:
+                  summary: Protection updates note saved
+                  value:
+                    note: 'Pinned protection updates to 2025-01-01 while validating new signatures.'

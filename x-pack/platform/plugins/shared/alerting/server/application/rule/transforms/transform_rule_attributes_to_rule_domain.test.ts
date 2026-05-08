@@ -333,4 +333,114 @@ describe('transformRuleAttributesToRuleDomain', () => {
       expect(res).not.toHaveProperty('lastRun');
     });
   });
+
+  it('preserves snoozedInstances alongside mutedInstanceIds', () => {
+    const references = [{ name: 'default-action-ref', type: 'action', id: 'default-action-id' }];
+    const snoozedInstances = [
+      {
+        instanceId: 'alert-1',
+        expiresAt: '2025-01-01T00:00:00.000Z',
+        conditions: [
+          { type: 'field_change' as const, field: 'kibana.alert.severity' },
+          { type: 'severity_equals' as const, value: 'high' as const },
+        ],
+        conditionOperator: 'any' as const,
+        snoozeSnapshot: {
+          'kibana.alert.severity': 'low',
+        },
+        snoozedAt: '2024-12-31T00:00:00.000Z',
+        snoozedBy: 'elastic',
+      },
+    ];
+
+    const res = transformRuleAttributesToRuleDomain(
+      {
+        enabled: false,
+        tags: ['foo'],
+        createdBy: 'user',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        legacyId: null,
+        muteAll: false,
+        mutedInstanceIds: ['muted-instance-1'],
+        snoozedInstances,
+        snoozeSchedule: [],
+        alertTypeId: 'myType',
+        schedule: { interval: '1m' },
+        consumer: 'myApp',
+        scheduledTaskId: 'task-123',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending' as const,
+          error: null,
+          warning: null,
+        },
+        params: {},
+        throttle: null,
+        notifyWhen: null,
+        actions: [defaultAction, systemAction],
+        name: 'my rule name',
+        revision: 0,
+        updatedBy: 'user',
+        apiKey: MOCK_API_KEY,
+        apiKeyOwner: 'user',
+      },
+      {
+        id: '1',
+        logger,
+        ruleType,
+        references,
+      },
+      isSystemAction
+    );
+
+    expect(res.mutedInstanceIds).toEqual(['muted-instance-1']);
+    expect(res.snoozedInstances).toEqual(snoozedInstances);
+  });
+
+  it('keeps older raw rules valid when snoozedInstances is absent', () => {
+    const references = [{ name: 'default-action-ref', type: 'action', id: 'default-action-id' }];
+
+    const res = transformRuleAttributesToRuleDomain(
+      {
+        enabled: false,
+        tags: ['foo'],
+        createdBy: 'user',
+        createdAt: '2019-02-12T21:01:22.479Z',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        legacyId: null,
+        muteAll: false,
+        mutedInstanceIds: [],
+        snoozeSchedule: [],
+        alertTypeId: 'myType',
+        schedule: { interval: '1m' },
+        consumer: 'myApp',
+        scheduledTaskId: 'task-123',
+        executionStatus: {
+          lastExecutionDate: '2019-02-12T21:01:22.479Z',
+          status: 'pending' as const,
+          error: null,
+          warning: null,
+        },
+        params: {},
+        throttle: null,
+        notifyWhen: null,
+        actions: [defaultAction, systemAction],
+        name: 'my rule name',
+        revision: 0,
+        updatedBy: 'user',
+        apiKey: MOCK_API_KEY,
+        apiKeyOwner: 'user',
+      },
+      {
+        id: '1',
+        logger,
+        ruleType,
+        references,
+      },
+      isSystemAction
+    );
+
+    expect(res).not.toHaveProperty('snoozedInstances');
+  });
 });

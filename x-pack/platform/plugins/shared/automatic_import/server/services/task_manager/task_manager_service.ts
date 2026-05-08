@@ -22,6 +22,7 @@ import type {
 import { TaskCost, TaskPriority } from '@kbn/task-manager-plugin/server/task';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
+import { getConnectorDefaultModel } from '@kbn/inference-common';
 import { MAX_ATTEMPTS_AI_WORKFLOWS, TASK_TIMEOUT_DURATION } from '../constants';
 import { TASK_STATUSES } from '../saved_objects/constants';
 import { AgentService } from '../agents/agent_service';
@@ -225,6 +226,9 @@ export class TaskManagerService {
     );
 
     const startTime = Date.now();
+    let modelName: string | undefined;
+    let connectorType: string | undefined;
+    let connectorName: string | undefined;
 
     try {
       if (!integrationId || !dataStreamId || !connectorId) {
@@ -250,6 +254,15 @@ export class TaskManagerService {
           telemetryMetadata: { pluginId: 'automatic_import' },
         },
       });
+
+      try {
+        const inferenceConnector = model.getConnector();
+        modelName = getConnectorDefaultModel(inferenceConnector);
+        connectorType = inferenceConnector.type;
+        connectorName = inferenceConnector.name;
+      } catch (resolveErr) {
+        this.logger.warn(`Failed to resolve model info for telemetry: ${resolveErr}`);
+      }
 
       const fieldsMetadataClient = await pluginsStart.fieldsMetadata.getClient(request);
 
@@ -318,6 +331,19 @@ export class TaskManagerService {
       this.logger.debug(`Data stream ${dataStreamId} updated successfully`);
       this.logger.debug(`Task ${taskId} result: ${JSON.stringify(result)}`);
 
+      this.reportDataStreamCreationComplete({
+        integrationId,
+        integrationName,
+        dataStreamId,
+        dataStreamName,
+        connectorId,
+        modelName,
+        connectorType,
+        connectorName,
+        durationMs: Date.now() - startTime,
+        success: true,
+      });
+
       return {
         state: {
           task_status: TASK_STATUSES.completed,
@@ -371,6 +397,10 @@ export class TaskManagerService {
         integrationName,
         dataStreamId,
         dataStreamName,
+        connectorId,
+        modelName,
+        connectorType,
+        connectorName,
         durationMs: Date.now() - startTime,
         success: false,
         errorMessage,
@@ -388,6 +418,10 @@ export class TaskManagerService {
     integrationName: string;
     dataStreamId: string;
     dataStreamName: string;
+    connectorId: string;
+    modelName?: string;
+    connectorType?: string;
+    connectorName?: string;
     durationMs: number;
     success: boolean;
     errorMessage?: string;
@@ -399,8 +433,12 @@ export class TaskManagerService {
         integrationName: params.integrationName,
         dataStreamId: params.dataStreamId,
         dataStreamName: params.dataStreamName,
+        connectorId: params.connectorId,
         durationMs: params.durationMs,
         success: params.success,
+        ...(params.modelName ? { modelName: params.modelName } : {}),
+        ...(params.connectorType ? { connectorType: params.connectorType } : {}),
+        ...(params.connectorName ? { connectorName: params.connectorName } : {}),
         ...(params.errorMessage ? { errorMessage: params.errorMessage } : {}),
       });
     } catch (telemetryError) {

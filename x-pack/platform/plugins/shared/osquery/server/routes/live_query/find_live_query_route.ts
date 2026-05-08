@@ -28,6 +28,7 @@ import { findLiveQueryRequestQuerySchema } from '../../../common/api';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
+import { findLiveQueryResponseSchema } from './response_schemas';
 
 export const findLiveQueryRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -53,6 +54,11 @@ export const findLiveQueryRoute = (
               typeof findLiveQueryRequestQuerySchema,
               FindLiveQueryRequestQuerySchema
             >(findLiveQueryRequestQuerySchema),
+          },
+          response: {
+            200: {
+              body: () => findLiveQueryResponseSchema,
+            },
           },
         },
       },

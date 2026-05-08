@@ -59,6 +59,7 @@
             "lineNumber": 19,
             "columnNumber": 54,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -102,6 +103,7 @@
             "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ZodSafeParseable",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -143,6 +145,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TBaseSchema",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -160,6 +163,7 @@
             "lineNumber": 15,
             "columnNumber": 23,
             "deprecated": false,
+            "docsReferencedTypeName": "TNarrowSchema",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -199,6 +203,7 @@
             "lineNumber": 39,
             "columnNumber": 55,
             "deprecated": false,
+            "docsReferencedTypeName": "TSchema",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -239,6 +244,7 @@
             "lineNumber": 13,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ZodSafeParseResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -279,6 +285,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ZodSafeParseResult",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -375,6 +382,7 @@
             "lineNumber": 31,
             "columnNumber": 55,
             "deprecated": false,
+            "docsReferencedTypeName": "RefinementCtx",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -432,6 +440,7 @@
             "lineNumber": 13,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "RefinementCtx",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -489,6 +498,7 @@
             "lineNumber": 13,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "RefinementCtx",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -566,6 +576,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TSchema",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -640,6 +651,7 @@
             "lineNumber": 25,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "RefinementCtx",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -689,6 +701,7 @@
             "lineNumber": 42,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -753,6 +766,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -795,6 +809,7 @@
             "lineNumber": 14,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "ZodError",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -13,7 +13,6 @@ import type { LinkInfo, LinkItem } from '../../../links';
 import { useBreadcrumbsNav } from './use_breadcrumbs_nav';
 import type { BreadcrumbsNav } from '../../../breadcrumbs';
 import * as kibanaLib from '../../../lib/kibana';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 jest.mock('../../../lib/kibana');
 
@@ -22,9 +21,6 @@ jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
   useDispatch: () => mockDispatch,
 }));
-
-jest.mock('../../../hooks/use_experimental_features');
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 
 const link1Id = 'link-1' as SecurityPageName;
 const link2Id = 'link-2' as SecurityPageName;
@@ -74,14 +70,13 @@ jest.mock('./trailing_breadcrumbs', () => ({
 }));
 
 const landingBreadcrumb = {
-  href: 'get_started',
+  href: 'launchpad',
   text: 'Security',
   onClick: expect.any(Function),
 };
 
 describe('useBreadcrumbsNav', () => {
   beforeEach(() => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
     jest.clearAllMocks();
   });
 
@@ -163,22 +158,7 @@ describe('useBreadcrumbsNav', () => {
     expect(reportEventMock).toHaveBeenCalled();
   });
 
-  it('should use SecurityPageName.landing when isClassicNavUpdateEnabled is false', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-
-    renderHook(useBreadcrumbsNav);
-
-    const calls = (mockSecuritySolutionUrl as jest.Mock).mock.calls;
-    const landingBreadcrumbCall = calls.find(
-      (call) => call[0].deepLinkId === SecurityPageName.landing
-    );
-
-    expect(landingBreadcrumbCall).toBeDefined();
-  });
-
-  it('should use SecurityPageName.launchpad when isClassicNavUpdateEnabled is true', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-
+  it('should use SecurityPageName.launchpad', () => {
     renderHook(useBreadcrumbsNav);
 
     const calls = (mockSecuritySolutionUrl as jest.Mock).mock.calls;

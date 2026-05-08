@@ -11,6 +11,7 @@ import type {
   RunAgentReturn,
   ExperimentalFeatures,
 } from '@kbn/agent-builder-server';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { withAgentSpan } from '../../../tracing';
 import { createAgentHandler } from '../run_agent/create_handler';
@@ -55,14 +56,23 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
 
+  const uiSettingsClient = manager.deps.uiSettings.asScopedToClient(
+    manager.deps.savedObjects.getScopedClient(request)
+  );
+  const isExperimentalEnabled = await uiSettingsClient
+    .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+    .catch(() => false);
+
   const experimentalFeatures: ExperimentalFeatures = {
     filestore: true,
     skills: true,
+    subagents: isExperimentalEnabled,
   };
 
   return {
     request,
     spaceId,
+    defaultConnectorId: manager.deps.defaultConnectorId,
     logger,
     modelProvider,
     esClient: elasticsearch.client.asScoped(request),
@@ -99,6 +109,8 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
     hooks: manager.deps.hooks,
     experimentalFeatures,
+    executionMode: manager.deps.executionMode,
+    subAgentExecutor: manager.deps.subAgentExecutor,
   };
 };
 
@@ -123,8 +135,16 @@ export const runAgent = async ({
   const agentRegistry = await agentsService.getRegistry({ request });
   const agent = await agentRegistry.get(agentId);
 
+  // Single merge point for runtime overrides — consumed by both the agent handler
+  // (prompt construction, tool selection) and tool handlers (via ToolHandlerContext).
+  const effectiveConfiguration = {
+    ...agent.configuration,
+    ...(agentParams.configurationOverrides || {}),
+  };
+  manager.deps.agentConfiguration = effectiveConfiguration;
+
   const agentResult = await withAgentSpan({ agent }, async () => {
-    const agentHandler = createAgentHandler({ agent });
+    const agentHandler = createAgentHandler({ agent, effectiveConfiguration });
     const agentHandlerContext = await createAgentHandlerContext({ agentExecutionParams, manager });
     return await agentHandler(
       {

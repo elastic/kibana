@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiTitle,
   EuiSpacer,
   EuiButtonEmpty,
   useIsWithinMinBreakpoint,
@@ -21,6 +22,7 @@ import {
 import type {
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
+  RegistrySection,
   RegistryVarGroup,
   RegistryVarsEntry,
 } from '../../../../../../types';
@@ -32,6 +34,59 @@ import { useAgentless } from '../../../single_page_layout/hooks/setup_technology
 
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { VarGroupSelector } from './var_group_selector';
+
+const renderVarsWithSections = (
+  vars: RegistryVarsEntry[],
+  renderVarItem: (varDef: RegistryVarsEntry) => React.ReactNode,
+  sectionDefs?: RegistrySection[]
+): React.ReactNode => {
+  if (!sectionDefs?.length) {
+    return <>{vars.map((varDef) => renderVarItem(varDef))}</>;
+  }
+
+  const sectionSet = new Set(sectionDefs.map((s) => s.name));
+  const varsBySectionName = new Map<string, RegistryVarsEntry[]>();
+  const varsWithoutSection: RegistryVarsEntry[] = [];
+
+  for (const varDef of vars) {
+    const sectionName = varDef.section;
+    if (sectionName && sectionSet.has(sectionName)) {
+      if (!varsBySectionName.has(sectionName)) {
+        varsBySectionName.set(sectionName, []);
+      }
+      varsBySectionName.get(sectionName)!.push(varDef);
+    } else {
+      varsWithoutSection.push(varDef);
+    }
+  }
+
+  return (
+    <>
+      {varsWithoutSection.map((varDef) => renderVarItem(varDef))}
+      {sectionDefs.map((section) => {
+        const sectionVars = varsBySectionName.get(section.name);
+        if (!sectionVars?.length) return null;
+        return (
+          <EuiFlexItem key={section.name}>
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <EuiFlexItem>
+                <EuiTitle size="xxs">
+                  <h4>{section.title}</h4>
+                </EuiTitle>
+                {section.description && (
+                  <EuiText size="s" color="subdued">
+                    <p>{section.description}</p>
+                  </EuiText>
+                )}
+              </EuiFlexItem>
+              {sectionVars.map((varDef) => renderVarItem(varDef))}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        );
+      })}
+    </>
+  );
+};
 
 export interface StreamAdvancedVarsConfig {
   vars: RegistryVarsEntry[];
@@ -53,6 +108,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
   onVarGroupSelectionChange?: (groupName: string, optionName: string) => void;
   showDescriptionColumn?: boolean;
   streamAdvancedVars?: StreamAdvancedVarsConfig;
+  sections?: RegistrySection[];
 }> = memo(
   ({
     hasInputStreams,
@@ -67,6 +123,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
     onVarGroupSelectionChange,
     showDescriptionColumn = true,
     streamAdvancedVars,
+    sections,
   }) => {
     // Showing advanced options toggle state
     const [isShowingAdvanced, setIsShowingAdvanced] = useState<boolean>(false);
@@ -198,36 +255,38 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
         ) : null}
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="m">
-            {preGroupRequiredVars.map((varDef) => {
-              const { name: varName, type: varType } = varDef;
-
-              const value = packagePolicyInput.vars?.[varName]?.value;
-              const frozen = packagePolicyInput.vars?.[varName]?.frozen;
-
-              return (
-                <EuiFlexItem key={varName}>
-                  <PackagePolicyInputVarField
-                    varDef={varDef}
-                    value={value}
-                    frozen={frozen}
-                    onChange={(newValue: any) => {
-                      updatePackagePolicyInput({
-                        vars: {
-                          ...packagePolicyInput.vars,
-                          [varName]: {
-                            type: varType,
-                            value: newValue,
+            {renderVarsWithSections(
+              preGroupRequiredVars,
+              (varDef) => {
+                const { name: varName, type: varType } = varDef;
+                const value = packagePolicyInput.vars?.[varName]?.value;
+                const frozen = packagePolicyInput.vars?.[varName]?.frozen;
+                return (
+                  <EuiFlexItem key={varName}>
+                    <PackagePolicyInputVarField
+                      varDef={varDef}
+                      value={value}
+                      frozen={frozen}
+                      onChange={(newValue: any) => {
+                        updatePackagePolicyInput({
+                          vars: {
+                            ...packagePolicyInput.vars,
+                            [varName]: {
+                              type: varType,
+                              value: newValue,
+                            },
                           },
-                        },
-                      });
-                    }}
-                    errors={inputValidationResults.vars?.[varName]}
-                    forceShowErrors={forceShowErrors}
-                    isEditPage={isEditPage}
-                  />
-                </EuiFlexItem>
-              );
-            })}
+                        });
+                      }}
+                      errors={inputValidationResults.vars?.[varName]}
+                      forceShowErrors={forceShowErrors}
+                      isEditPage={isEditPage}
+                    />
+                  </EuiFlexItem>
+                );
+              },
+              sections
+            )}
             {varGroups?.map((varGroup) => (
               <EuiFlexItem key={varGroup.name}>
                 <VarGroupSelector
@@ -238,36 +297,38 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                 />
               </EuiFlexItem>
             ))}
-            {postGroupRequiredVars.map((varDef) => {
-              const { name: varName, type: varType } = varDef;
-
-              const value = packagePolicyInput.vars?.[varName]?.value;
-              const frozen = packagePolicyInput.vars?.[varName]?.frozen;
-
-              return (
-                <EuiFlexItem key={varName}>
-                  <PackagePolicyInputVarField
-                    varDef={varDef}
-                    value={value}
-                    frozen={frozen}
-                    onChange={(newValue: any) => {
-                      updatePackagePolicyInput({
-                        vars: {
-                          ...packagePolicyInput.vars,
-                          [varName]: {
-                            type: varType,
-                            value: newValue,
+            {renderVarsWithSections(
+              postGroupRequiredVars,
+              (varDef) => {
+                const { name: varName, type: varType } = varDef;
+                const value = packagePolicyInput.vars?.[varName]?.value;
+                const frozen = packagePolicyInput.vars?.[varName]?.frozen;
+                return (
+                  <EuiFlexItem key={varName}>
+                    <PackagePolicyInputVarField
+                      varDef={varDef}
+                      value={value}
+                      frozen={frozen}
+                      onChange={(newValue: any) => {
+                        updatePackagePolicyInput({
+                          vars: {
+                            ...packagePolicyInput.vars,
+                            [varName]: {
+                              type: varType,
+                              value: newValue,
+                            },
                           },
-                        },
-                      });
-                    }}
-                    errors={inputValidationResults.vars?.[varName]}
-                    forceShowErrors={forceShowErrors}
-                    isEditPage={isEditPage}
-                  />
-                </EuiFlexItem>
-              );
-            })}
+                        });
+                      }}
+                      errors={inputValidationResults.vars?.[varName]}
+                      forceShowErrors={forceShowErrors}
+                      isEditPage={isEditPage}
+                    />
+                  </EuiFlexItem>
+                );
+              },
+              sections
+            )}
             {allAdvancedVars.length ? (
               <Fragment>
                 <EuiFlexItem>

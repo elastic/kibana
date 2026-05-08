@@ -21,7 +21,7 @@ import {
   EuiFlexGroup,
   EuiPanel,
 } from '@elastic/eui';
-import { useFetchAnonymizationFields } from '@kbn/elastic-assistant';
+import { useFetchAnonymizationFields, useMaybeAssistantContext } from '@kbn/elastic-assistant';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AddConnectorModal } from '@kbn/elastic-assistant/impl/connectorland/add_connector_modal';
@@ -43,6 +43,9 @@ export const EntityHighlightsAccordion: React.FC<{
   entityIdentifier: string;
   entityType: EntityType;
 }> = ({ entityType, entityIdentifier }) => {
+  // Degrade gracefully on surfaces that render outside `AssistantProvider` (e.g. the Agent
+  // Builder attachment Canvas). The Elastic Assistant–backed summary cannot work without it.
+  const assistantContext = useMaybeAssistantContext();
   const { data: anonymizationFields, isLoading: isAnonymizationFieldsLoading } =
     useFetchAnonymizationFields();
   const {
@@ -131,6 +134,12 @@ export const EntityHighlightsAccordion: React.FC<{
   }, []);
 
   const disabled = useMemo(() => {
+    // No `AssistantProvider` in the tree, e.g. Agent Builder attachment Canvas. Highlights
+    // relies on assistant context (anonymization fields, shared state), so hide the UI entirely.
+    if (!assistantContext) {
+      return true;
+    }
+
     if (!hasEntityHighlightsLicense) {
       return true;
     }
@@ -143,6 +152,7 @@ export const EntityHighlightsAccordion: React.FC<{
     // if user does not have access to assistant or agent builder, disable entity highlights
     return !(hasAssistantPrivilege || hasAgentBuilderPrivilege);
   }, [
+    assistantContext,
     hasConnectorsReadPrivilege,
     hasAgentBuilderPrivilege,
     hasAssistantPrivilege,

@@ -107,6 +107,7 @@
                 "lineNumber": 22,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "ItemSpec",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -813,6 +814,7 @@
             "lineNumber": 116,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "AstNode",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -884,6 +886,7 @@
             "lineNumber": 36,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "ParserOptions",
             "trackAdoption": false
           }
         ],

@@ -528,6 +528,17 @@ export function useOnSubmit({
 
   const newInputs = useMemo(() => {
     const varGroupSelections = packagePolicy.var_group_selections ?? {};
+
+    // For single-input agentless integrations the simplified UX shows no enable/disable
+    // toggle, so if the input is disabled by default the user has no way to enable it or
+    // see any configuration fields.  Auto-enable it when switching to agentless.
+    const agentlessAllowedInputCount = isAgentlessSelected
+      ? packagePolicy.inputs.filter((i) =>
+          isInputAllowedForDeploymentMode(i, 'agentless', packageInfo)
+        ).length
+      : 0;
+    const isSingleAgentlessInput = agentlessAllowedInputCount === 1;
+
     return packagePolicy.inputs.map((input) => {
       const allowedForDeploymentMode = isInputAllowedForDeploymentMode(
         input,
@@ -538,6 +549,13 @@ export function useOnSubmit({
         !enableVarGroups ||
         isInputVisibleForVarGroupSelections(input, packageInfo, varGroupSelections);
       if (allowedForDeploymentMode && visibleForVarGroup) {
+        if (isAgentlessSelected && !input.enabled && isSingleAgentlessInput) {
+          return {
+            ...input,
+            enabled: true,
+            streams: input.streams.map((stream) => ({ ...stream, enabled: true })),
+          };
+        }
         return input;
       }
       return { ...input, enabled: false };

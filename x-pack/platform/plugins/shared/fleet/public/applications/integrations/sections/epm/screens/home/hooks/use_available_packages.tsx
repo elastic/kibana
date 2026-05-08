@@ -210,39 +210,39 @@ export const useAvailablePackages = ({
       preference === 'agent' ? [] : replacementCustomIntegrations || []
     );
 
-  const cards: IntegrationCardItem[] = useMemo(() => {
+  // All cards before any filter (no agentless filter, no category filter).
+  // Used by useBrowseIntegrationHook which applies both filters from the live URL.
+  const allCards: IntegrationCardItem[] = useMemo(() => {
     const eprAndCustomPackages = [...mergedEprPackages, ...(appendCustomIntegrations || [])];
-
-    return (
-      eprAndCustomPackages
-        // If only showing agentless integrations, filter out non-agentless ones
-        .filter((item) => {
-          if (isAgentlessEnabled && onlyAgentlessFilter) {
-            return 'supportsAgentless' in item && item.supportsAgentless === true;
-          }
-          return true;
+    return eprAndCustomPackages
+      .map((item) =>
+        mapToCard({
+          getAbsolutePath,
+          getHref,
+          item,
+          addBasePath,
+          packageVerificationKeyId,
         })
-        .map((item) => {
-          return mapToCard({
-            getAbsolutePath,
-            getHref,
-            item,
-            addBasePath,
-            packageVerificationKeyId,
-          });
-        })
-        .sort((a, b) => a.title.localeCompare(b.title))
-    );
+      )
+      .sort((a, b) => a.title.localeCompare(b.title));
   }, [
     addBasePath,
     appendCustomIntegrations,
     getAbsolutePath,
     getHref,
     mergedEprPackages,
-    onlyAgentlessFilter,
-    isAgentlessEnabled,
     packageVerificationKeyId,
   ]);
+
+  // Cards with the agentless filter applied (used by the old home page and
+  // its category sidebar counts). Derived from allCards so the sort/map work
+  // is not duplicated.
+  const cards: IntegrationCardItem[] = useMemo(() => {
+    if (isAgentlessEnabled && onlyAgentlessFilter) {
+      return allCards.filter((item) => item.supportsAgentless === true);
+    }
+    return allCards;
+  }, [allCards, isAgentlessEnabled, onlyAgentlessFilter]);
 
   // Packages to show
   // Filters out based on selected category and subcategory (if any)
@@ -318,5 +318,6 @@ export const useAvailablePackages = ({
     eprPackageLoadingError,
     eprCategoryLoadingError,
     filteredCards,
+    allCards,
   };
 };

@@ -232,7 +232,7 @@ export interface SetProcessor extends ProcessorBaseWithWhere {
   copy_from?: string;
 }
 
-const setProcessorSchema = processorBaseWithWhereSchema
+export const setProcessorSchema = processorBaseWithWhereSchema
   .extend({
     action: z.literal('set'),
     to: StreamlangTargetField.describe('Target field to set or create'),

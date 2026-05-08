@@ -12,10 +12,10 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS_DISCOVERY,
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
-  OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
   OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS,
   OBSERVABILITY_STREAMS_ENABLE_OVERVIEW_PAGE,
+  OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
@@ -33,12 +33,12 @@ const sigEventsTuningConfigSchema = schema.object(
   {
     sample_size: schema.number({ min: 1, max: 100 }),
     max_iterations: schema.number({ min: 1, max: 20 }),
-    feature_ttl_days: schema.number({ min: 1, max: 90 }),
+    feature_ttl_days: schema.number({ min: 1 }),
     entity_filtered_ratio: schema.number({ min: 0, max: 1 }),
     diverse_ratio: schema.number({ min: 0, max: 1 }),
     max_excluded_features_in_prompt: schema.number({ min: 0, max: 50 }),
     max_entity_filters: schema.number({ min: 1, max: 50 }),
-    semantic_min_score: schema.number({ min: 0, max: 100 }),
+    semantic_min_score: schema.number({ min: 0, max: 1 }),
     rrf_rank_constant: schema.number({ min: 1, max: 100 }),
   },
   {
@@ -241,21 +241,6 @@ export function registerFeatureFlags(
       solutionViews: ['classic', 'oblt'],
       technicalPreview: true,
     },
-    [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: {
-      category: ['observability'],
-      name: i18n.translate('xpack.streams.streamsAttachmentsSettingsName', {
-        defaultMessage: 'Streams attachments',
-      }),
-      value: false,
-      description: i18n.translate('xpack.streams.streamsAttachmentsSettingsDescription', {
-        defaultMessage: 'Enable Streams attachments tab.',
-      }),
-      type: 'boolean',
-      schema: schema.boolean(),
-      requiresPageReload: true,
-      solutionViews: ['classic', 'oblt'],
-      technicalPreview: true,
-    },
     [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: {
       category: ['observability'],
       name: i18n.translate('xpack.streams.queryStreamsSettingsName', {
@@ -299,6 +284,24 @@ export function registerFeatureFlags(
       description: i18n.translate('xpack.streams.streamsOverviewPageSettingsDescription', {
         defaultMessage:
           'Enable the stream Overview tab. When disabled, the default management tab is Retention (ingest streams) or Schema (query streams).',
+      }),
+      type: 'boolean',
+      schema: schema.boolean(),
+      requiresPageReload: true,
+      solutionViews: ['classic', 'oblt'],
+      technicalPreview: true,
+      readonly: true,
+      readonlyMode: 'ui',
+    },
+    [OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS]: {
+      category: ['observability'],
+      name: i18n.translate('xpack.streams.draftStreamsSettingsName', {
+        defaultMessage: 'Draft streams',
+      }),
+      value: false,
+      description: i18n.translate('xpack.streams.draftStreamsSettingsDescription', {
+        defaultMessage:
+          'Enable draft streams. Draft streams use ES|QL views for read-time processing and can be materialized to ingest pipelines.',
       }),
       type: 'boolean',
       schema: schema.boolean(),

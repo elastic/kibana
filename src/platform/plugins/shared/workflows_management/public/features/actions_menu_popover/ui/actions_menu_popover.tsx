@@ -18,6 +18,10 @@ interface ActionsMenuPopoverProps extends EuiPopoverProps, ActionsMenuProps {}
 
 export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   onActionSelected,
+  commands,
+  jumpToStepEntries,
+  onCommandSelected,
+  onJumpToStep,
   ...props
 }: ActionsMenuPopoverProps) {
   return (
@@ -31,7 +35,13 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
       initialFocus="[name='actions-menu-search']"
       {...props}
     >
-      <ActionsMenu onActionSelected={onActionSelected} />
+      <ActionsMenu
+        onActionSelected={onActionSelected}
+        commands={commands}
+        jumpToStepEntries={jumpToStepEntries}
+        onCommandSelected={onCommandSelected}
+        onJumpToStep={onJumpToStep}
+      />
     </EuiPopover>
   );
 });

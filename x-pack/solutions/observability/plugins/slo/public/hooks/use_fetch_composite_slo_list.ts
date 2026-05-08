@@ -22,6 +22,7 @@ interface CompositeSLOListParams {
   tags?: string;
   sortBy?: CompositeSloSortBy;
   sortDirection?: CompositeSloSortDirection;
+  status?: string;
 }
 
 export interface UseFetchCompositeSloListResponse {
@@ -40,6 +41,7 @@ export function useFetchCompositeSloList({
   tags,
   sortBy = 'createdAt',
   sortDirection = 'desc',
+  status,
 }: CompositeSLOListParams = {}): UseFetchCompositeSloListResponse {
   const {
     notifications: { toasts },
@@ -47,13 +49,14 @@ export function useFetchCompositeSloList({
   const { sloClient } = usePluginContext();
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: sloKeys.compositeList({ page, perPage, search, tags, sortBy, sortDirection }),
+    queryKey: sloKeys.compositeList({ page, perPage, search, tags, sortBy, sortDirection, status }),
     queryFn: async ({ signal }) => {
       return await sloClient.fetch('GET /api/observability/slo_composites 2023-10-31', {
         params: {
           query: {
             ...(search && { search }),
             ...(tags && { tags }),
+            ...(status && { status }),
             page: String(page),
             perPage: String(perPage),
             sortBy,

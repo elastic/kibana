@@ -212,7 +212,7 @@ const UploadResult: React.FC<{
 
   if (allSuccessful) {
     color = 'success';
-    iconType = 'checkCircleFilled';
+    iconType = 'checkInCircleFilled';
     title = i18n.translate(
       'xpack.securitySolution.entityAnalytics.watchlists.flyout.csv.result.allSuccess',
       {

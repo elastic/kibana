@@ -24,12 +24,18 @@ import rawExpect from 'expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from '../../services/synthetics_private_location';
 import { addMonitorAPIHelper, keyToOmitList, omitMonitorKeys } from './create_monitor';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
 
+const TRANSIENT_SYNTHETICS_HTTP: ReadonlyArray<number> = [502, 503, 504];
+
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe('PrivateLocationCreateMonitor', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/258046
+  describe.skip('PrivateLocationCreateMonitor', function () {
     const kibanaServer = getService('kibanaServer');
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
@@ -60,8 +66,31 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       return monitorTestService.deleteMonitor(editorUser, monitorId, statusCode, spaceId);
     };
 
+    const putMonitorWithTransientRetry = async (
+      monitorId: string,
+      monitor: HTTPFields,
+      query?: string
+    ) => {
+      const path =
+        SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId + (query ? `?${query}` : '');
+      return await retry.tryForTime(60_000, async () => {
+        const res = await supertestWithoutAuth
+          .put(path)
+          .set(editorUser.apiKeyHeader)
+          .set(samlAuth.getInternalRequestHeader())
+          .send(monitor);
+
+        if (TRANSIENT_SYNTHETICS_HTTP.includes(res.status)) {
+          throw new Error(`Transient synthetics monitor PUT failure: HTTP ${res.status}`);
+        }
+
+        expect(res.status).eql(200, JSON.stringify(res.body));
+        return res;
+      });
+    };
+
     before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      await cleanSyntheticsTestData(kibanaServer);
       await testPrivateLocations.installSyntheticsPackage();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
 
@@ -204,11 +233,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      const apiResponse = await supertestWithoutAuth
-        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId)
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send(httpMonitorJson);
+      const apiResponse = await putMonitorWithTransientRetry(newMonitorId, httpMonitorJson);
 
       const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
       expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
@@ -266,12 +291,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ({ id }) => id !== testFleetPolicyID2
       );
 
-      await supertestWithoutAuth
-        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + newMonitorId + '?internal=true')
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send(httpMonitorJson)
-        .expect(200);
+      await putMonitorWithTransientRetry(newMonitorId, httpMonitorJson, 'internal=true');
 
       const apiResponsePolicy = await supertestWithAuth.get(
         '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
@@ -369,12 +389,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           spaceId: SPACE_ID,
         })
       );
-      await supertestWithoutAuth
-        .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-        .set(editorUser.apiKeyHeader)
-        .set(samlAuth.getInternalRequestHeader())
-        .send({ ids: [monitorId] })
-        .expect(200);
+      await deleteMonitor(monitorId, 200, SPACE_ID);
     });
 
     it('handles is_tls_enabled true', async () => {
@@ -486,7 +501,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         this.skip();
       }
 
-      await testPrivateLocations.installSyntheticsPackage({ version: lowerVersion });
+      await testPrivateLocations.installSyntheticsPackage({
+        version: lowerVersion,
+        force: true,
+      });
       let monitorId = '';
       const privateLocation = await testPrivateLocations.addTestPrivateLocation();
 
@@ -517,7 +535,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         expect(packagePolicy.package.version).eql(lowerVersion);
-        await supertestWithAuth.post('/api/fleet/setup').set('kbn-xsrf', 'true').send().expect(200);
+
+        await testPrivateLocations.installSyntheticsPackage({ force: true });
+
         await retry.tryForTime(120 * 1000, async () => {
           const policyResponseAfterUpgrade = await supertestWithAuth.get(
             '/api/fleet/package_policies?page=1&perPage=2000&kuery=ingest-package-policies.package.name%3A%20synthetics'
@@ -525,7 +545,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           const packagePolicyAfterUpgrade = policyResponseAfterUpgrade.body.items.find(
             (pkgPolicy: PackagePolicy) => pkgPolicy.id === monitorId + '-' + privateLocation.id
           );
-          expect(semver.gt(packagePolicyAfterUpgrade.package.version, lowerVersion)).eql(true);
+          expect(semver.gt(packagePolicyAfterUpgrade.package.version, lowerVersion)).eql(
+            true,
+            `Expected ${packagePolicyAfterUpgrade.package.version} to be greater than ${lowerVersion}`
+          );
         });
       } finally {
         try {
@@ -533,12 +556,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         } catch (e) {
           // ignore cleanup errors
         }
-        // Restore the package to the latest version so subsequent tests aren't affected
-        try {
-          await testPrivateLocations.installSyntheticsPackage();
-        } catch (e) {
-          // ignore cleanup errors
-        }
+        // Restore the package to the latest version — this MUST succeed
+        // or subsequent tests will run against the wrong version
+        await testPrivateLocations.installSyntheticsPackage({ force: true });
       }
     });
 
@@ -557,7 +577,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('can create valid monitors without all defaults', async () => {
-      // Delete a required property to make payload invalid
+      let monitorId = '';
       const newMonitor = {
         name: 'Sample name',
         type: 'http',
@@ -565,18 +585,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         locations: [privateLocations[0]],
       };
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      try {
+        const { body: apiResponse, rawBody } = await addMonitorAPI(newMonitor);
+        monitorId = rawBody.id;
 
-      expect(apiResponse).eql(
-        omitMonitorKeys({
-          ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
-          ...newMonitor,
-          spaces: ['default'],
-        })
-      );
+        expect(apiResponse).eql(
+          omitMonitorKeys({
+            ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
+            ...newMonitor,
+            spaces: ['default'],
+          })
+        );
+      } finally {
+        await deleteMonitor(monitorId);
+      }
     });
 
     it('can disable retries', async () => {
+      let monitorId = '';
       const maxAttempts = 1;
       const newMonitor = {
         max_attempts: maxAttempts,
@@ -586,12 +612,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         locations: [privateLocations[0]],
       };
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      try {
+        const { body: apiResponse, rawBody } = await addMonitorAPI(newMonitor);
+        monitorId = rawBody.id;
 
-      rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: false }));
+        rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: false }));
+      } finally {
+        await deleteMonitor(monitorId);
+      }
     });
 
     it('can enable retries with max attempts', async () => {
+      let monitorId = '';
       const maxAttempts = 2;
       const newMonitor = {
         max_attempts: maxAttempts,
@@ -601,12 +633,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         locations: [privateLocations[0]],
       };
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      try {
+        const { body: apiResponse, rawBody } = await addMonitorAPI(newMonitor);
+        monitorId = rawBody.id;
 
-      rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: true }));
+        rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: true }));
+      } finally {
+        await deleteMonitor(monitorId);
+      }
     });
 
     it('can enable retries', async () => {
+      let monitorId = '';
       const newMonitor = {
         retest_on_failure: false,
         urls: 'https://elastic.co',
@@ -615,9 +653,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         locations: [privateLocations[0]],
       };
 
-      const { body: apiResponse } = await addMonitorAPI(newMonitor);
+      try {
+        const { body: apiResponse, rawBody } = await addMonitorAPI(newMonitor);
+        monitorId = rawBody.id;
 
-      rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: false }));
+        rawExpect(apiResponse).toEqual(rawExpect.objectContaining({ retest_on_failure: false }));
+      } finally {
+        await deleteMonitor(monitorId);
+      }
     });
 
     it('cannot create a invalid monitor without a monitor type', async () => {

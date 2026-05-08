@@ -11,6 +11,13 @@ export const PAGE_TITLE = i18n.translate('xpack.evals.remotesListPage.pageTitle'
   defaultMessage: 'Remotes',
 });
 
+export const REMOTES_TABLE_CAPTION = i18n.translate(
+  'xpack.evals.remotesListPage.remotesTableCaption',
+  {
+    defaultMessage: 'Remote Kibana connections',
+  }
+);
+
 export const CREATE_REMOTE_BUTTON = i18n.translate(
   'xpack.evals.remotesListPage.createRemoteButton',
   {

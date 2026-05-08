@@ -39,6 +39,7 @@ import {
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { buildIndexNameWithNamespace } from '../../utils/build_index_name_with_namespace';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { getLiveQueryResultsResponseSchema } from './response_schemas';
 
 export const getLiveQueryResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -67,6 +68,11 @@ export const getLiveQueryResultsRoute = (
               typeof getLiveQueryResultsRequestParamsSchema,
               GetLiveQueryResultsRequestParamsSchema
             >(getLiveQueryResultsRequestParamsSchema),
+          },
+          response: {
+            200: {
+              body: () => getLiveQueryResultsResponseSchema,
+            },
           },
         },
       },

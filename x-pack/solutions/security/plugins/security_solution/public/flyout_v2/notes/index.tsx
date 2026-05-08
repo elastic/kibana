@@ -8,7 +8,7 @@
 import { css } from '@emotion/react';
 import React, { memo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
 import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
@@ -22,9 +22,16 @@ import {
   NO_NOTES,
   NotesDetailsContent,
 } from './components/notes_details_content';
+import { NotesRemoteCallout } from './components/notes_remote_callout';
 import { NOTES_DETAILS_TEST_ID } from './test_ids';
 
 export { FETCH_NOTES_ERROR, NO_NOTES };
+export {
+  LINKED_PROJECT_EVENT_NOTES_MESSAGE,
+  LINKED_PROJECT_NOTES_MESSAGE,
+  REMOTE_CLUSTER_EVENT_NOTES_MESSAGE,
+  REMOTE_CLUSTER_NOTES_MESSAGE,
+} from './components/notes_remote_callout';
 
 const TITLE = i18n.translate('xpack.securitySolution.flyout.notes.title', {
   defaultMessage: 'Notes',
@@ -54,22 +61,21 @@ export const NotesDetails = memo(({ hit }: NotesDetailsProps) => {
 
   return (
     <>
+      <NotesRemoteCallout hit={hit} />
       <EuiFlyoutHeader
         hasBorder
         css={css`
-          padding-block-end: ${euiTheme.size.m} !important;
+          padding-block: ${euiTheme.size.s} !important;
         `}
       >
         <ToolsFlyoutHeader hit={hit} title={TITLE} />
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiPanel data-test-subj={NOTES_DETAILS_TEST_ID} hasBorder={false} hasShadow={false}>
-          <NotesDetailsContent
-            hit={hit}
-            timelineConfig={timelineConfig}
-            hideTimelineIcon={!isInSecurityApp}
-          />
-        </EuiPanel>
+      <EuiFlyoutBody data-test-subj={NOTES_DETAILS_TEST_ID}>
+        <NotesDetailsContent
+          hit={hit}
+          timelineConfig={timelineConfig}
+          hideTimelineIcon={!isInSecurityApp}
+        />
       </EuiFlyoutBody>
     </>
   );

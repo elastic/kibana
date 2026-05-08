@@ -30,3 +30,13 @@ export enum EventLogOutcomes {
   success = 'success',
   failure = 'failure',
 }
+
+const UIAM_LOGS_COMMON_TAGS = ['serverless', 'task-manager', 'uiam'];
+
+export const UIAM_LOGS_GRANT_TAGS = [...UIAM_LOGS_COMMON_TAGS, 'uiam-api-key-grant'];
+export const UIAM_LOGS_INVALIDATE_TAGS = [...UIAM_LOGS_COMMON_TAGS, 'uiam-api-key-invalidate'];
+export const UIAM_LOGS_CREDENTIALS_TAGS = [
+  ...UIAM_LOGS_COMMON_TAGS,
+  'uiam-api-key-invalid-credentials',
+];
+export const UIAM_LOGS_USAGE_TAGS = [...UIAM_LOGS_COMMON_TAGS, 'uiam-api-key-missing'];

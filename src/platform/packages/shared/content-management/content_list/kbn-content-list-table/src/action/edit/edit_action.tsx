@@ -62,6 +62,7 @@ export const buildEditAction = (
     isPrimary: true,
     ...(getEditUrl && { href: (item) => getEditUrl(item) }),
     ...(onEdit && { onClick: (item) => onEdit(item) }),
+    ...(attributes.enabled && { enabled: attributes.enabled }),
     'data-test-subj': 'content-list-table-action-edit',
   };
 };

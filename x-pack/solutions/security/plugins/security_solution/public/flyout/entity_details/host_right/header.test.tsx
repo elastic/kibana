@@ -117,4 +117,24 @@ describe('HostPanelHeader', () => {
 
     expect(queryByText('Risk: High')).not.toBeInTheDocument();
   });
+
+  it('renders the host name as a link to the details page when isEntityInStore is false', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <HostPanelHeader {...mockProps} isEntityInStore={false} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('flyoutTitleLinkIcon')).toBeInTheDocument();
+  });
+
+  it('renders the host name without a link when isEntityInStore is true', () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <HostPanelHeader {...mockProps} isEntityInStore />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('flyoutTitleLinkIcon')).not.toBeInTheDocument();
+  });
 });

@@ -66,7 +66,6 @@ export interface LogPageProbeSourceClauseParams {
   type: EntityType;
   fromDateISO: string;
   toDateISO: string;
-  recoveryId?: string;
   /** Exclusive lower bound on (@timestamp, _id) for log-slice pagination within the time window. */
   logsPageCursorStart?: PaginationParams;
 }
@@ -77,11 +76,16 @@ export type ExtractionSourceClauseParams = LogPageProbeSourceClauseParams & {
 };
 
 export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClauseParams): string {
-  const { indexPatterns, type, fromDateISO, toDateISO, recoveryId, logsPageCursorStart } = params;
+  const { indexPatterns, type, fromDateISO, toDateISO, logsPageCursorStart } = params;
+
+  // Always use >= for the time-window start. When logsPageCursorStart is set its compound filter
+  // (@timestamp > T OR (@timestamp = T AND _id > id)) owns the exclusive lower bound. Using >
+  // here would drop documents with @timestamp = fromDateISO when the cursor timestamp equals
+  // fromDateISO (e.g. second recovery slice where all remaining logs share the same timestamp).
   const baseWhere = `FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}
-  | WHERE 
-      ${TIMESTAMP_FIELD} ${recoveryId ? '>=' : '>'} TO_DATETIME("${fromDateISO}")
+  | WHERE
+      ${TIMESTAMP_FIELD} >= TO_DATETIME("${fromDateISO}")
       AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")
       AND (${getEuidEsqlDocumentsContainsIdFilter(type)})`;
 
@@ -131,16 +135,16 @@ function buildLogsPageEndFilter(end: PaginationParams): string {
 export function aggregationStats(fields: EntityField[], renameToRecent: boolean = true): string {
   return fields
     .map((field) => {
-      const { retention, destination: dest, source } = field;
+      const { retention, destination: dest } = field;
       const finalDest = renameToRecent ? recentData(dest) : dest;
       const castedSrc = castSrcType(field);
       switch (retention.operation) {
         case 'collect_values':
-          return `${finalDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength})) WHERE ${source} IS NOT NULL`;
+          return `${finalDest} = MV_DEDUPE(TOP(${castedSrc}, ${retention.maxLength})) WHERE ${castedSrc} IS NOT NULL`;
         case 'prefer_newest_value':
-          return `${finalDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
+          return `${finalDest} = LAST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${castedSrc} IS NOT NULL`;
         case 'prefer_oldest_value':
-          return `${finalDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${source} IS NOT NULL`;
+          return `${finalDest} = FIRST(${castedSrc}, ${TIMESTAMP_FIELD}) WHERE ${castedSrc} IS NOT NULL`;
         default:
           throw new Error('unknown field operation');
       }
@@ -475,9 +479,10 @@ function buildPaginationWhereClause(
   { timestampCursor, idCursor }: PaginationParams,
   { timestampField, idFieldInQuery: idFieldExprForWhere }: PaginationFields
 ): string {
+  const escapedId = escapeEsqlStringLiteral(idCursor);
   return `| WHERE ${timestampField} > TO_DATETIME("${timestampCursor}") 
             OR (${timestampField} == TO_DATETIME("${timestampCursor}") 
-                AND ${idFieldExprForWhere} > "${idCursor}")`;
+                AND ${idFieldExprForWhere} > "${escapedId}")`;
 }
 
 export function hasFieldEvaluations(entityDefinition: EntityDefinition): boolean {

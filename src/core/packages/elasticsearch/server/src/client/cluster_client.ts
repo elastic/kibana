@@ -32,8 +32,8 @@ export interface AsScopedOptions {
    * through the scoped client.
    *
    * - `'space'`: Routes requests to the Named Project Routing Expression (NPRE) configured for
-   *   the current Kibana space. Requires a {@link ScopeableUrlRequest} to be passed to `asScoped`
-   *   so that the space can be extracted from the URL pathname. Use this when the scope of the
+   *   the current Kibana space. Requires a {@link ScopeableUrlRequest} to be passed to `asScoped`;
+   *   the active space is read from `request.spaceId`. Use this when the scope of the
    *   query should match the data boundaries of the active space (e.g. alerting rules).
    */
   projectRouting: 'space';

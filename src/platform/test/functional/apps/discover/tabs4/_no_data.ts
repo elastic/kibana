@@ -24,6 +24,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const monacoEditor = getService('monacoEditor');
 
+  const switchSpaceSolutionTypeAndWait = async (solution: 'search' | 'classic') => {
+    await spaceSettings.switchSpaceSolutionType({
+      spaceName: 'default',
+      solution,
+    });
+    await common.ensureModalOverlayHidden();
+    await header.waitUntilLoadingHasFinished();
+    await testSubjects.missingOrFail('spaces-view-page');
+  };
+
   describe('has ES data but no custom data view', function () {
     beforeEach(async () => {
       await common.navigateToApp('home');
@@ -49,10 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('non-classic solution type', function () {
       before(async () => {
-        await spaceSettings.switchSpaceSolutionType({
-          spaceName: 'default',
-          solution: 'search',
-        });
+        await switchSpaceSolutionTypeAndWait('search');
       });
 
       beforeEach(async () => {
@@ -60,10 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await spaceSettings.switchSpaceSolutionType({
-          spaceName: 'default',
-          solution: 'classic',
-        });
+        await switchSpaceSolutionTypeAndWait('classic');
       });
 
       it('can create a new data view', async () => {

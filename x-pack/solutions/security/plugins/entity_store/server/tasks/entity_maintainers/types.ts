@@ -43,6 +43,21 @@ export interface EntityMaintainerTaskEntry extends EntityMaintainerRegistryData 
   id: string;
 }
 
+export interface EntityMaintainerLifecycle {
+  run: EntityMaintainerTaskMethod;
+  setup?: EntityMaintainerTaskMethod;
+  initialState: EntityMaintainerState;
+}
+
+export interface EntityMaintainerRegistration
+  extends EntityMaintainerTaskEntry,
+    EntityMaintainerLifecycle {}
+
+export interface EntityMaintainerRegistryValue {
+  task: EntityMaintainerTaskEntry;
+  lifecycle: EntityMaintainerLifecycle;
+}
+
 export interface EntityMaintainerStatusMetadata {
   namespace: string;
   runs: number;
@@ -62,7 +77,7 @@ export interface EntityMaintainerStatus extends Record<string, unknown> {
   taskStatus: EntityMaintainerTaskStatus;
 }
 
-interface EntityMaintainerTaskMethodContext {
+export interface EntityMaintainerTaskMethodContext {
   status: EntityMaintainerStatus;
   abortController: AbortController;
   logger: Logger;
@@ -79,6 +94,7 @@ export interface RegisterEntityMaintainerConfig {
   id: string;
   description?: string;
   interval: string;
+  timeout?: string;
   initialState: EntityMaintainerState;
   run: EntityMaintainerTaskMethod;
   setup?: EntityMaintainerTaskMethod;

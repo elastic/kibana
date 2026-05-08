@@ -29,11 +29,9 @@ export interface FakeRequest {
 /**
  * A minimal synthetic request for space-level CPS routing (`projectRouting: 'space'`) in
  * non-HTTP contexts - for example, background tasks or scheduled jobs - where no real
- * {@link KibanaRequest} is available. The space is derived from the URL pathname
- * (e.g. `/s/<spaceId>/...`) using `getSpaceNPRE` from `@kbn/cps-server-utils`.
- *
- * Prefer setting {@link FakeRequest.spaceId} directly for space-scoped background tasks
- * rather than constructing a synthetic URL with `/s/{spaceId}`.
+ * {@link KibanaRequest} is available. Space resolution reads {@link FakeRequest.spaceId}
+ * directly; the `url` field is retained for back-compat and is no longer consulted for
+ * space derivation.
  *
  * In route handlers, pass the incoming {@link KibanaRequest} directly - it already satisfies
  * {@link ScopeableUrlRequest} without needing this type.
@@ -41,8 +39,8 @@ export interface FakeRequest {
  */
 export interface UrlRequest extends FakeRequest {
   /**
-   * URL used to resolve the space for CPS. Synthetic callers set this to a path that includes
-   * `/s/<spaceId>/...` when applicable; there is no `rewrittenUrl` on this shape.
+   * @deprecated Set {@link FakeRequest.spaceId} instead. This field is no longer
+   * consulted for space resolution and is retained only for back-compat.
    */
   url: URL;
 }
@@ -57,14 +55,11 @@ export interface UrlRequest extends FakeRequest {
 export type ScopeableRequest = KibanaRequest | FakeRequest;
 
 /**
- * A request that carries a URL, accepted by `asScoped` when `projectRouting: 'space'` is used.
+ * A request accepted by `asScoped` when `projectRouting: 'space'` is used.
  *
  * Covers both {@link KibanaRequest} (the typical caller from route handlers) and
- * {@link UrlRequest} (a lightweight synthetic alternative). Space resolution uses
- * `getSpaceNPRE` from `@kbn/cps-server-utils`: for {@link KibanaRequest}, when
- * `rewrittenUrl` is set (original URL before the first pre-routing `rewriteUrl`), that URL is
- * preferred over `url` so the space segment remains visible after Spaces strips `/s/:spaceId`
- * from `request.url`. Synthetic {@link UrlRequest} values only supply `url`.
+ * {@link UrlRequest} (a lightweight synthetic alternative). Space resolution reads
+ * `request.spaceId` directly via `getSpaceNPRE` from `@kbn/cps-server-utils`.
  *
  * @public
  */

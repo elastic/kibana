@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
@@ -22,6 +22,12 @@ export interface DeveloperToolbarItemRegistry {
 
 export type DeveloperToolbarSetup = DeveloperToolbarItemRegistry;
 export type DeveloperToolbarStart = DeveloperToolbarItemRegistry;
+
+const LazyMeasureButton = lazy(() =>
+  import('@kbn/measure-component').then(({ MeasureButton }) => ({
+    default: MeasureButton,
+  }))
+);
 
 export class DeveloperToolbarPlugin
   implements Plugin<DeveloperToolbarSetup, DeveloperToolbarStart>
@@ -43,6 +49,15 @@ export class DeveloperToolbarPlugin
         <LazyToolbar items$={this.items$} envInfo={this.context.env} />
       </Suspense>
     );
+
+    this.registerItem({
+      id: 'Measure Component',
+      children: (
+        <Suspense fallback={null}>
+          <LazyMeasureButton />
+        </Suspense>
+      ),
+    });
 
     return {
       registerItem: this.registerItem.bind(this),

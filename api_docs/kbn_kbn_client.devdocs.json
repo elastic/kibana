@@ -187,6 +187,7 @@
                 "lineNumber": 48,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "KbnClientOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -241,6 +242,7 @@
                 "lineNumber": 80,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "ReqOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -433,6 +435,7 @@
                 "lineNumber": 149,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -450,6 +453,7 @@
                 "lineNumber": 149,
                 "columnNumber": 49,
                 "deprecated": false,
+                "docsReferencedTypeName": "KbnClientRequester",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -508,6 +512,7 @@
                 "lineNumber": 169,
                 "columnNumber": 60,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -548,6 +553,7 @@
                 "lineNumber": 185,
                 "columnNumber": 61,
                 "deprecated": false,
+                "docsReferencedTypeName": "FindOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -586,6 +592,7 @@
                 "lineNumber": 213,
                 "columnNumber": 63,
                 "deprecated": false,
+                "docsReferencedTypeName": "IndexOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -624,6 +631,7 @@
                 "lineNumber": 235,
                 "columnNumber": 63,
                 "deprecated": false,
+                "docsReferencedTypeName": "UpdateOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -662,6 +670,7 @@
                 "lineNumber": 259,
                 "columnNumber": 23,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -698,6 +707,7 @@
                 "lineNumber": 273,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "CleanOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -784,6 +794,7 @@
                 "lineNumber": 295,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "DeleteObjectsOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -825,6 +836,7 @@
             "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TemplateStringsArray",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -842,6 +854,7 @@
             "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }

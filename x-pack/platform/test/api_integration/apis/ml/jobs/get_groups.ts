@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { Group } from '@kbn/ml-plugin/common/types/groups';
+import type { Group } from '@kbn/ml-common-types/groups';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 import { USER } from '../../../services/ml/security_common';

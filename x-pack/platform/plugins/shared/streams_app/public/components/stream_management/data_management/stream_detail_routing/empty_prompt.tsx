@@ -58,7 +58,7 @@ export const NoDataEmptyPrompt = ({
     <EuiEmptyPrompt
       aria-live="polite"
       css={css`
-        margin-top: unset;
+        margin-block: unset;
       `}
       body={
         <EuiFlexGroup direction="column" gutterSize="s">

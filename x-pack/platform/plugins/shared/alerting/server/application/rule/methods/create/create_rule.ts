@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -28,6 +29,7 @@ import {
   generateAPIKeyName,
   apiKeyAsRuleDomainProperties,
   addMissingUiamKeyTagIfNeeded,
+  resolveRuleAPIKey,
 } from '../../../../rules_client/common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import type { RulesClientContext } from '../../../../rules_client/types';
@@ -44,6 +46,7 @@ import { createRuleDataSchema } from './schemas';
 import { createRuleSavedObject } from '../../../../rules_client/lib';
 import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { validateScheduleLimit } from '../get_schedule_frequency';
+import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
 
 export interface CreateRuleOptions {
   id?: string;
@@ -140,19 +143,10 @@ export async function createRule<Params extends RuleParams = never>(
   let createdAPIKey = null;
   let isAuthTypeApiKey = false;
   try {
-    isAuthTypeApiKey = context.isAuthenticationTypeAPIKey();
-    const name = generateAPIKeyName(ruleType.id, data.name);
-    createdAPIKey = data.enabled
-      ? isAuthTypeApiKey
-        ? context.getAuthenticationAPIKey(`${name}-user-created`)
-        : await withSpan(
-            {
-              name: 'createAPIKey',
-              type: 'rules',
-            },
-            () => context.createAPIKey(name)
-          )
-      : null;
+    const apiKeyName = generateAPIKeyName(ruleType.id, data.name);
+    const resolved = await resolveRuleAPIKey(context, apiKeyName, data.enabled);
+    createdAPIKey = resolved.createdAPIKey;
+    isAuthTypeApiKey = resolved.isAuthTypeApiKey;
   } catch (error) {
     throw Boom.badRequest(`Error creating rule: could not create API key - ${error.message}`);
   }
@@ -258,6 +252,15 @@ export async function createRule<Params extends RuleParams = never>(
         returnRuleAttributes: true,
       })
   );
+
+  await logBulkRuleChanges({
+    ruleSOs: [createdRuleSavedObject],
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleCreate,
+      timestamp: createTime,
+    },
+  });
 
   // Convert ES RawRule back to domain rule object
   const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(

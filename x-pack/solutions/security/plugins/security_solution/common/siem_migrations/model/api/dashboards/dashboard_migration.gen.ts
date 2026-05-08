@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
@@ -35,159 +35,191 @@ import {
   SiemMigrationResourceBase,
 } from '../../common.gen';
 
+export const CreateDashboardMigrationRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * The dashboard migration name
+     */
+    name: NonEmptyString,
+  })
+);
 export type CreateDashboardMigrationRequestBody = z.infer<
   typeof CreateDashboardMigrationRequestBody
 >;
-export const CreateDashboardMigrationRequestBody = z.object({
-  /**
-   * The dashboard migration name
-   */
-  name: NonEmptyString,
-});
 export type CreateDashboardMigrationRequestBodyInput = z.input<
   typeof CreateDashboardMigrationRequestBody
 >;
 
+export const CreateDashboardMigrationResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The migration id created.
+     */
+    migration_id: NonEmptyString,
+  })
+);
 export type CreateDashboardMigrationResponse = z.infer<typeof CreateDashboardMigrationResponse>;
-export const CreateDashboardMigrationResponse = z.object({
-  /**
-   * The migration id created.
-   */
-  migration_id: NonEmptyString,
-});
 
+export const CreateDashboardMigrationDashboardsRequestParams = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString,
+  })
+);
 export type CreateDashboardMigrationDashboardsRequestParams = z.infer<
   typeof CreateDashboardMigrationDashboardsRequestParams
 >;
-export const CreateDashboardMigrationDashboardsRequestParams = z.object({
-  migration_id: NonEmptyString,
-});
 export type CreateDashboardMigrationDashboardsRequestParamsInput = z.input<
   typeof CreateDashboardMigrationDashboardsRequestParams
 >;
 
+export const CreateDashboardMigrationDashboardsRequestBody = lazySchema(() =>
+  z.array(SplunkOriginalDashboardExport)
+);
 export type CreateDashboardMigrationDashboardsRequestBody = z.infer<
   typeof CreateDashboardMigrationDashboardsRequestBody
 >;
-export const CreateDashboardMigrationDashboardsRequestBody = z.array(SplunkOriginalDashboardExport);
 export type CreateDashboardMigrationDashboardsRequestBodyInput = z.input<
   typeof CreateDashboardMigrationDashboardsRequestBody
 >;
 
+export const DeleteDashboardMigrationRequestParams = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString,
+  })
+);
 export type DeleteDashboardMigrationRequestParams = z.infer<
   typeof DeleteDashboardMigrationRequestParams
 >;
-export const DeleteDashboardMigrationRequestParams = z.object({
-  migration_id: NonEmptyString,
-});
 export type DeleteDashboardMigrationRequestParamsInput = z.input<
   typeof DeleteDashboardMigrationRequestParams
 >;
 
+export const GetAllDashboardMigrationsStatsResponse = lazySchema(() =>
+  z.array(DashboardMigrationTaskStats)
+);
 export type GetAllDashboardMigrationsStatsResponse = z.infer<
   typeof GetAllDashboardMigrationsStatsResponse
 >;
-export const GetAllDashboardMigrationsStatsResponse = z.array(DashboardMigrationTaskStats);
 
+export const GetAllTranslationStatsDashboardMigrationRequestParams = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString,
+  })
+);
 export type GetAllTranslationStatsDashboardMigrationRequestParams = z.infer<
   typeof GetAllTranslationStatsDashboardMigrationRequestParams
 >;
-export const GetAllTranslationStatsDashboardMigrationRequestParams = z.object({
-  migration_id: NonEmptyString,
-});
 export type GetAllTranslationStatsDashboardMigrationRequestParamsInput = z.input<
   typeof GetAllTranslationStatsDashboardMigrationRequestParams
 >;
 
+export const GetAllTranslationStatsDashboardMigrationResponse = lazySchema(
+  () => DashboardMigrationTranslationStats
+);
 export type GetAllTranslationStatsDashboardMigrationResponse = z.infer<
   typeof GetAllTranslationStatsDashboardMigrationResponse
 >;
-export const GetAllTranslationStatsDashboardMigrationResponse = DashboardMigrationTranslationStats;
 
+export const GetDashboardMigrationRequestParams = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString,
+  })
+);
 export type GetDashboardMigrationRequestParams = z.infer<typeof GetDashboardMigrationRequestParams>;
-export const GetDashboardMigrationRequestParams = z.object({
-  migration_id: NonEmptyString,
-});
 export type GetDashboardMigrationRequestParamsInput = z.input<
   typeof GetDashboardMigrationRequestParams
 >;
 
+export const GetDashboardMigrationResponse = lazySchema(() => DashboardMigration);
 export type GetDashboardMigrationResponse = z.infer<typeof GetDashboardMigrationResponse>;
-export const GetDashboardMigrationResponse = DashboardMigration;
+export const GetDashboardMigrationDashboardsRequestQuery = lazySchema(() =>
+  z.object({
+    page: z.coerce.number().optional(),
+    per_page: z.coerce.number().optional(),
+    sort_field: NonEmptyString.optional(),
+    sort_direction: z.enum(['asc', 'desc']).optional(),
+    search_term: z.string().optional(),
+    ids: ArrayFromString(NonEmptyString).optional(),
+    is_installed: BooleanFromString.optional(),
+    is_fully_translated: BooleanFromString.optional(),
+    is_partially_translated: BooleanFromString.optional(),
+    is_untranslatable: BooleanFromString.optional(),
+    is_failed: BooleanFromString.optional(),
+  })
+);
 export type GetDashboardMigrationDashboardsRequestQuery = z.infer<
   typeof GetDashboardMigrationDashboardsRequestQuery
 >;
-export const GetDashboardMigrationDashboardsRequestQuery = z.object({
-  page: z.coerce.number().optional(),
-  per_page: z.coerce.number().optional(),
-  sort_field: NonEmptyString.optional(),
-  sort_direction: z.enum(['asc', 'desc']).optional(),
-  search_term: z.string().optional(),
-  ids: ArrayFromString(NonEmptyString).optional(),
-  is_installed: BooleanFromString.optional(),
-  is_fully_translated: BooleanFromString.optional(),
-  is_partially_translated: BooleanFromString.optional(),
-  is_untranslatable: BooleanFromString.optional(),
-  is_failed: BooleanFromString.optional(),
-});
 export type GetDashboardMigrationDashboardsRequestQueryInput = z.input<
   typeof GetDashboardMigrationDashboardsRequestQuery
 >;
 
+export const GetDashboardMigrationDashboardsRequestParams = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString,
+  })
+);
 export type GetDashboardMigrationDashboardsRequestParams = z.infer<
   typeof GetDashboardMigrationDashboardsRequestParams
 >;
-export const GetDashboardMigrationDashboardsRequestParams = z.object({
-  migration_id: NonEmptyString,
-});
 export type GetDashboardMigrationDashboardsRequestParamsInput = z.input<
   typeof GetDashboardMigrationDashboardsRequestParams
 >;
 
+export const GetDashboardMigrationDashboardsResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The total number of rules in migration.
+     */
+    total: z.number(),
+    data: z.array(DashboardMigrationDashboard),
+  })
+);
 export type GetDashboardMigrationDashboardsResponse = z.infer<
   typeof GetDashboardMigrationDashboardsResponse
 >;
-export const GetDashboardMigrationDashboardsResponse = z.object({
-  /**
-   * The total number of rules in migration.
-   */
-  total: z.number(),
-  data: z.array(DashboardMigrationDashboard),
-});
+export const GetDashboardMigrationResourcesRequestQuery = lazySchema(() =>
+  z.object({
+    type: SiemMigrationResourceType.optional(),
+    names: ArrayFromString(z.string()).optional(),
+    from: z.coerce.number().optional(),
+    size: z.coerce.number().optional(),
+  })
+);
 export type GetDashboardMigrationResourcesRequestQuery = z.infer<
   typeof GetDashboardMigrationResourcesRequestQuery
 >;
-export const GetDashboardMigrationResourcesRequestQuery = z.object({
-  type: SiemMigrationResourceType.optional(),
-  names: ArrayFromString(z.string()).optional(),
-  from: z.coerce.number().optional(),
-  size: z.coerce.number().optional(),
-});
 export type GetDashboardMigrationResourcesRequestQueryInput = z.input<
   typeof GetDashboardMigrationResourcesRequestQuery
 >;
 
+export const GetDashboardMigrationResourcesRequestParams = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString,
+  })
+);
 export type GetDashboardMigrationResourcesRequestParams = z.infer<
   typeof GetDashboardMigrationResourcesRequestParams
 >;
-export const GetDashboardMigrationResourcesRequestParams = z.object({
-  migration_id: NonEmptyString,
-});
 export type GetDashboardMigrationResourcesRequestParamsInput = z.input<
   typeof GetDashboardMigrationResourcesRequestParams
 >;
 
+export const GetDashboardMigrationResourcesResponse = lazySchema(() =>
+  z.array(SiemMigrationResource)
+);
 export type GetDashboardMigrationResourcesResponse = z.infer<
   typeof GetDashboardMigrationResourcesResponse
 >;
-export const GetDashboardMigrationResourcesResponse = z.array(SiemMigrationResource);
 
+export const GetDashboardMigrationResourcesMissingRequestParams = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString,
+  })
+);
 export type GetDashboardMigrationResourcesMissingRequestParams = z.infer<
   typeof GetDashboardMigrationResourcesMissingRequestParams
 >;
-export const GetDashboardMigrationResourcesMissingRequestParams = z.object({
-  migration_id: NonEmptyString,
-});
 export type GetDashboardMigrationResourcesMissingRequestParamsInput = z.input<
   typeof GetDashboardMigrationResourcesMissingRequestParams
 >;
@@ -195,158 +227,188 @@ export type GetDashboardMigrationResourcesMissingRequestParamsInput = z.input<
 /**
  * The identified resources missing
  */
+export const GetDashboardMigrationResourcesMissingResponse = lazySchema(() =>
+  z.array(SiemMigrationResourceBase)
+);
 export type GetDashboardMigrationResourcesMissingResponse = z.infer<
   typeof GetDashboardMigrationResourcesMissingResponse
 >;
-export const GetDashboardMigrationResourcesMissingResponse = z.array(SiemMigrationResourceBase);
 
+export const GetDashboardMigrationStatsRequestParams = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString,
+  })
+);
 export type GetDashboardMigrationStatsRequestParams = z.infer<
   typeof GetDashboardMigrationStatsRequestParams
 >;
-export const GetDashboardMigrationStatsRequestParams = z.object({
-  migration_id: NonEmptyString,
-});
 export type GetDashboardMigrationStatsRequestParamsInput = z.input<
   typeof GetDashboardMigrationStatsRequestParams
 >;
 
+export const GetDashboardMigrationStatsResponse = lazySchema(() => DashboardMigrationTaskStats);
 export type GetDashboardMigrationStatsResponse = z.infer<typeof GetDashboardMigrationStatsResponse>;
-export const GetDashboardMigrationStatsResponse = DashboardMigrationTaskStats;
 
+export const InstallMigrationDashboardsRequestParams = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString,
+  })
+);
 export type InstallMigrationDashboardsRequestParams = z.infer<
   typeof InstallMigrationDashboardsRequestParams
 >;
-export const InstallMigrationDashboardsRequestParams = z.object({
-  migration_id: NonEmptyString,
-});
 export type InstallMigrationDashboardsRequestParamsInput = z.input<
   typeof InstallMigrationDashboardsRequestParams
 >;
 
+export const InstallMigrationDashboardsRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * The list of dashboard migration ids to install
+     */
+    ids: z.array(NonEmptyString).optional(),
+  })
+);
 export type InstallMigrationDashboardsRequestBody = z.infer<
   typeof InstallMigrationDashboardsRequestBody
 >;
-export const InstallMigrationDashboardsRequestBody = z.object({
-  /**
-   * The list of dashboard migration ids to install
-   */
-  ids: z.array(NonEmptyString).optional(),
-});
 export type InstallMigrationDashboardsRequestBodyInput = z.input<
   typeof InstallMigrationDashboardsRequestBody
 >;
 
+export const InstallMigrationDashboardsResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The number of dashboards that were installed.
+     */
+    installed: z.number(),
+  })
+);
 export type InstallMigrationDashboardsResponse = z.infer<typeof InstallMigrationDashboardsResponse>;
-export const InstallMigrationDashboardsResponse = z.object({
-  /**
-   * The number of dashboards that were installed.
-   */
-  installed: z.number(),
-});
 
+export const StartDashboardsMigrationRequestParams = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString,
+  })
+);
 export type StartDashboardsMigrationRequestParams = z.infer<
   typeof StartDashboardsMigrationRequestParams
 >;
-export const StartDashboardsMigrationRequestParams = z.object({
-  migration_id: NonEmptyString,
-});
 export type StartDashboardsMigrationRequestParamsInput = z.input<
   typeof StartDashboardsMigrationRequestParams
 >;
 
+export const StartDashboardsMigrationRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * Settings applicable to current dashboard migration task execution.
+     */
+    settings: DashboardMigrationTaskExecutionSettings,
+    langsmith_options: LangSmithOptions.optional(),
+    /**
+     * The optional indicator to retry the dashboard translation based on this filter criteria.
+     */
+    retry: DashboardMigrationRetryFilter.optional(),
+  })
+);
 export type StartDashboardsMigrationRequestBody = z.infer<
   typeof StartDashboardsMigrationRequestBody
 >;
-export const StartDashboardsMigrationRequestBody = z.object({
-  /**
-   * Settings applicable to current dashboard migration task execution.
-   */
-  settings: DashboardMigrationTaskExecutionSettings,
-  langsmith_options: LangSmithOptions.optional(),
-  /**
-   * The optional indicator to retry the dashboard translation based on this filter criteria.
-   */
-  retry: DashboardMigrationRetryFilter.optional(),
-});
 export type StartDashboardsMigrationRequestBodyInput = z.input<
   typeof StartDashboardsMigrationRequestBody
 >;
 
+export const StartDashboardsMigrationResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Indicates the migration has been started. `false` means the migration does not need to be started.
+     */
+    started: z.boolean(),
+  })
+);
 export type StartDashboardsMigrationResponse = z.infer<typeof StartDashboardsMigrationResponse>;
-export const StartDashboardsMigrationResponse = z.object({
-  /**
-   * Indicates the migration has been started. `false` means the migration does not need to be started.
-   */
-  started: z.boolean(),
-});
 
+export const StopDashboardsMigrationRequestParams = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString,
+  })
+);
 export type StopDashboardsMigrationRequestParams = z.infer<
   typeof StopDashboardsMigrationRequestParams
 >;
-export const StopDashboardsMigrationRequestParams = z.object({
-  migration_id: NonEmptyString,
-});
 export type StopDashboardsMigrationRequestParamsInput = z.input<
   typeof StopDashboardsMigrationRequestParams
 >;
 
+export const StopDashboardsMigrationResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Indicates the migration has been stopped.
+     */
+    stopped: z.boolean(),
+  })
+);
 export type StopDashboardsMigrationResponse = z.infer<typeof StopDashboardsMigrationResponse>;
-export const StopDashboardsMigrationResponse = z.object({
-  /**
-   * Indicates the migration has been stopped.
-   */
-  stopped: z.boolean(),
-});
 
+export const UpdateDashboardMigrationRequestParams = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString,
+  })
+);
 export type UpdateDashboardMigrationRequestParams = z.infer<
   typeof UpdateDashboardMigrationRequestParams
 >;
-export const UpdateDashboardMigrationRequestParams = z.object({
-  migration_id: NonEmptyString,
-});
 export type UpdateDashboardMigrationRequestParamsInput = z.input<
   typeof UpdateDashboardMigrationRequestParams
 >;
 
+export const UpdateDashboardMigrationRequestBody = lazySchema(() =>
+  z
+    .object({
+      /**
+       * The dashboard migration name
+       */
+      name: NonEmptyString.optional(),
+    })
+    .strict()
+);
 export type UpdateDashboardMigrationRequestBody = z.infer<
   typeof UpdateDashboardMigrationRequestBody
 >;
-export const UpdateDashboardMigrationRequestBody = z
-  .object({
-    /**
-     * The dashboard migration name
-     */
-    name: NonEmptyString.optional(),
-  })
-  .strict();
 export type UpdateDashboardMigrationRequestBodyInput = z.input<
   typeof UpdateDashboardMigrationRequestBody
 >;
 
+export const UpsertDashboardMigrationResourcesRequestParams = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString,
+  })
+);
 export type UpsertDashboardMigrationResourcesRequestParams = z.infer<
   typeof UpsertDashboardMigrationResourcesRequestParams
 >;
-export const UpsertDashboardMigrationResourcesRequestParams = z.object({
-  migration_id: NonEmptyString,
-});
 export type UpsertDashboardMigrationResourcesRequestParamsInput = z.input<
   typeof UpsertDashboardMigrationResourcesRequestParams
 >;
 
+export const UpsertDashboardMigrationResourcesRequestBody = lazySchema(() =>
+  z.array(SiemMigrationResourceData)
+);
 export type UpsertDashboardMigrationResourcesRequestBody = z.infer<
   typeof UpsertDashboardMigrationResourcesRequestBody
 >;
-export const UpsertDashboardMigrationResourcesRequestBody = z.array(SiemMigrationResourceData);
 export type UpsertDashboardMigrationResourcesRequestBodyInput = z.input<
   typeof UpsertDashboardMigrationResourcesRequestBody
 >;
 
+export const UpsertDashboardMigrationResourcesResponse = lazySchema(() =>
+  z.object({
+    /**
+     * The request has been processed correctly.
+     */
+    acknowledged: z.boolean(),
+  })
+);
 export type UpsertDashboardMigrationResourcesResponse = z.infer<
   typeof UpsertDashboardMigrationResourcesResponse
 >;
-export const UpsertDashboardMigrationResourcesResponse = z.object({
-  /**
-   * The request has been processed correctly.
-   */
-  acknowledged: z.boolean(),
-});

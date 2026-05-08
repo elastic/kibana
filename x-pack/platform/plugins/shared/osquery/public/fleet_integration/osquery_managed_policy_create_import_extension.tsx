@@ -31,8 +31,6 @@ import type {
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { useKibana } from '../common/lib/kibana';
-import { NavigationButtons } from './navigation_buttons';
-import { DisabledCallout } from './disabled_callout';
 import { ConfigUploader } from './config_uploader';
 import type { ValidationFunc } from '../shared_imports';
 import {
@@ -154,13 +152,6 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
     http,
   } = useKibana().services;
 
-  const policyIdsWithAgents = useMemo(
-    () =>
-      agentlessPolicyIds?.length
-        ? policy?.policy_ids.filter((id) => !agentlessPolicyIds.includes(id))
-        : policy?.policy_ids,
-    [agentlessPolicyIds, policy?.policy_ids]
-  );
   const { form: configForm } = useForm({
     defaultValue: {
       config: JSON.stringify(get(newPolicy, 'inputs[0].config.osquery.value', {}), null, 2),
@@ -387,7 +378,6 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
 
   return (
     <>
-      {!editMode ? <DisabledCallout /> : null}
       {agentlessPolicyIds?.length ? (
         <>
           <EuiFlexGroup>
@@ -426,19 +416,38 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
       ) : null}
       {!permissionDenied && (
         <>
-          <NavigationButtons isDisabled={!editMode} agentPolicyIds={policyIdsWithAgents} />
-          <EuiSpacer size="xxl" />
           <EuiAccordion
             css={euiAccordionCss}
-            id="advanced"
+            id="osqueryConfig"
             buttonContent={i18n.translate(
               'xpack.osquery.fleetIntegration.osqueryConfig.accordionFieldLabel',
               {
-                defaultMessage: 'Advanced',
+                defaultMessage: 'Osquery config',
               }
             )}
           >
-            <EuiSpacer size="xs" />
+            <EuiSpacer size="s" />
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.osquery.fleetIntegration.osqueryConfig.cautionCalloutTitle',
+                {
+                  defaultMessage: 'Proceed with caution',
+                }
+              )}
+              color="warning"
+              iconType="info"
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.osquery.fleetIntegration.osqueryConfig.cautionCalloutDescription',
+                  {
+                    defaultMessage:
+                      'Using a custom Osquery package is an advanced configuration and may introduce compatibility or stability issues. Elastic does not validate or support custom packages.',
+                  }
+                )}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
             <Form form={configForm}>
               <CommonUseField path="config" />
               <ConfigUploader onChange={handleConfigUpload} />

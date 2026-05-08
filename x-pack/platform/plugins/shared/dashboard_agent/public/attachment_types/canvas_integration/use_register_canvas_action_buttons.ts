@@ -27,6 +27,7 @@ interface UseRegisterCanvasActionButtonsParams {
   getExistingDashboardId: () => string | undefined;
   closeCanvas: () => void;
   openSidebarConversation?: () => void;
+  canWriteDashboards: boolean;
 }
 
 export const useRegisterCanvasActionButtons = ({
@@ -35,6 +36,7 @@ export const useRegisterCanvasActionButtons = ({
   updateOrigin,
   closeCanvas,
   openSidebarConversation,
+  canWriteDashboards,
   dashboardLocatorParams,
   getExistingDashboardId,
 }: UseRegisterCanvasActionButtonsParams) => {
@@ -42,11 +44,45 @@ export const useRegisterCanvasActionButtons = ({
   const getExistingDashboardIdRef = useLatest(getExistingDashboardId);
   const openSidebarConversationRef = useLatest(openSidebarConversation);
 
+  const missingDashboardWriteControlsReason = i18n.translate(
+    'xpack.dashboardAgent.attachments.dashboard.canvasWriteControlsDisabledReason',
+    {
+      defaultMessage: 'You need dashboard write permissions to edit or save dashboards.',
+    }
+  );
+  const managedDashboardDisabledReason = i18n.translate(
+    'xpack.dashboardAgent.attachments.dashboard.canvasManagedDashboardDisabledReason',
+    {
+      defaultMessage: 'Managed dashboards are read-only.',
+    }
+  );
+  const readOnlyDashboardDisabledReason = i18n.translate(
+    'xpack.dashboardAgent.attachments.dashboard.canvasReadOnlyDashboardDisabledReason',
+    {
+      defaultMessage: 'You do not have permission to edit this dashboard.',
+    }
+  );
+
   useEffect(() => {
     if (!dashboardApi) {
       registerActionButtons([]);
       return;
     }
+
+    const isLinkedSavedDashboard = getExistingDashboardIdRef.current?.() !== undefined;
+    const isManagedLinkedDashboard = isLinkedSavedDashboard && dashboardApi.isManaged;
+    const isReadOnlyLinkedDashboard = isLinkedSavedDashboard && !dashboardApi.isEditableByUser;
+
+    let disabledReason: string | undefined;
+    if (!canWriteDashboards) {
+      disabledReason = missingDashboardWriteControlsReason;
+    } else if (isManagedLinkedDashboard) {
+      disabledReason = managedDashboardDisabledReason;
+    } else if (isReadOnlyLinkedDashboard) {
+      disabledReason = readOnlyDashboardDisabledReason;
+    }
+
+    const isWriteActionDisabled = disabledReason !== undefined;
 
     const buttons: ActionButton[] = [];
 
@@ -57,7 +93,12 @@ export const useRegisterCanvasActionButtons = ({
           defaultMessage: 'Edit in Dashboards',
         }),
         type: ActionButtonType.PRIMARY,
+        disabled: isWriteActionDisabled,
+        disabledReason,
         handler: async () => {
+          if (isWriteActionDisabled) {
+            return;
+          }
           await handleEditInDashboard({
             locator,
             getExistingDashboardId: async () => getExistingDashboardIdRef.current(),
@@ -74,7 +115,12 @@ export const useRegisterCanvasActionButtons = ({
       }),
       icon: 'save',
       type: ActionButtonType.PRIMARY,
+      disabled: isWriteActionDisabled,
+      disabledReason,
       handler: async () => {
+        if (isWriteActionDisabled) {
+          return;
+        }
         const existingAttachmentOrigin = getExistingDashboardIdRef.current();
         if (existingAttachmentOrigin) {
           await dashboardApi.runQuickSave();
@@ -96,5 +142,9 @@ export const useRegisterCanvasActionButtons = ({
     openSidebarConversationRef,
     dashboardLocatorParamsRef,
     getExistingDashboardIdRef,
+    canWriteDashboards,
+    missingDashboardWriteControlsReason,
+    managedDashboardDisabledReason,
+    readOnlyDashboardDisabledReason,
   ]);
 };

@@ -58,6 +58,14 @@ import type { AttachmentService } from '../attachments';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 import { createCaseError, isSOError } from '../../common/error';
 import type {
+  ResolvedExtendedFieldFilter,
+  ResolvedFieldLabelFilter,
+} from './extended_field_search_utils';
+import {
+  buildExtendedFieldRuntimeMappings,
+  buildFieldLabelRuntimeMappings,
+} from './extended_field_search_utils';
+import type {
   CasePersistedAttributes,
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
@@ -94,6 +102,25 @@ import {
 } from './utils';
 
 const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
+
+/**
+ * `cases-comments.comment` is a text-analyzed field: we use `match_phrase` so the user's
+ * input has to appear as a contiguous sequence
+ *
+ * `cases-comments.alertId` and `cases-comments.eventId` are keyword fields used
+ * to look up an exact ID, so a regular `match` is the correct semantic
+ */
+const buildAttachmentSearchClause = (
+  field: string,
+  search: string
+): estypes.QueryDslQueryContainer => {
+  // TODO: add support for CASE_ATTACHMENT_SAVED_OBJECT
+  // https://github.com/elastic/security-team/issues/15066
+  if (field === `${CASE_COMMENT_SAVED_OBJECT}.comment`) {
+    return { match_phrase: { [field]: search } };
+  }
+  return { match: { [field]: search } };
+};
 
 export class CasesService {
   private readonly log: Logger;
@@ -198,14 +225,7 @@ export class CasesService {
       namespaces,
       query: {
         bool: {
-          should: [
-            ...attachmentSearchFields.map((field) => ({
-              // use match instead of term to support non-keyword search for fields like comments
-              match: {
-                [field]: search,
-              },
-            })),
-          ],
+          should: attachmentSearchFields.map((field) => buildAttachmentSearchClause(field, search)),
         },
       },
     });
@@ -271,9 +291,13 @@ export class CasesService {
   public async searchCasesGroupedByID({
     caseOptions,
     namespaces,
+    extendedFieldFilters,
+    fieldLabelFilters,
   }: {
     caseOptions: SavedObjectFindOptionsKueryNode;
     namespaces: string[];
+    extendedFieldFilters?: ResolvedExtendedFieldFilter[][];
+    fieldLabelFilters?: ResolvedFieldLabelFilter[];
   }): Promise<CasesMapWithPageInfo> {
     const caseIdsByAttachmentSearch = await this.getCaseIdsByAttachmentSearch(
       namespaces,
@@ -284,15 +308,35 @@ export class CasesService {
       search: caseOptions.search,
       searchFields: caseOptions.searchFields,
       caseIds: caseIdsByAttachmentSearch,
+      extendedFieldFilters,
+      fieldLabelFilters,
     });
 
     const filterQuery = caseOptions.filter ? toElasticsearchQuery(caseOptions.filter) : undefined;
     const query = mergeSearchQuery(searchQuery, filterQuery);
 
+    const extendedFieldRuntimeMappings =
+      extendedFieldFilters && extendedFieldFilters.length > 0
+        ? buildExtendedFieldRuntimeMappings(extendedFieldFilters)
+        : {};
+
+    const fieldLabelRuntimeMappings =
+      fieldLabelFilters && fieldLabelFilters.length > 0
+        ? buildFieldLabelRuntimeMappings(fieldLabelFilters)
+        : {};
+
+    const runtimeMappings = {
+      ...extendedFieldRuntimeMappings,
+      ...fieldLabelRuntimeMappings,
+    };
+
+    const hasRuntimeMappings = Object.keys(runtimeMappings).length > 0;
+
     const cases = await this.searchCases({
       type: [CASE_SAVED_OBJECT],
       namespaces,
       query,
+      ...(hasRuntimeMappings ? { runtime_mappings: runtimeMappings } : {}),
       ...convertFindQueryParams(caseOptions),
     });
 

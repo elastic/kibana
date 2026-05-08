@@ -21,7 +21,10 @@ export function createRulesClient(): {
   const taskManager = taskManagerMock.createStart();
   const { userService } = createUserService();
 
-  const rulesClient = new RulesClient(request, rulesSavedObjectService, taskManager, userService);
+  const rulesClient = new RulesClient({
+    services: { request, rulesSavedObjectService, taskManager, userService },
+    options: { spaceId: 'default' },
+  });
 
   return { rulesClient, mockSavedObjectsClient };
 }

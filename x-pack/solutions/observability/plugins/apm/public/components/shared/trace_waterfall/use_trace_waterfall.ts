@@ -9,10 +9,11 @@ import { euiPaletteColorBlind } from '@elastic/eui';
 import type { Error } from '@kbn/apm-types';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
+import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import { WaterfallLegendType, type IWaterfallLegend } from '../../../../common/waterfall/legend';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
-import type { ErrorMark } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
 import type { OnErrorClick } from './trace_waterfall_context';
+import type { ErrorMark } from '../charts/timeline/marker/error_marker';
 
 const FALLBACK_WARNING = i18n.translate(
   'xpack.apm.traceWaterfallItem.warningMessage.fallbackWarning',
@@ -141,8 +142,8 @@ function getWaterfallErrorsMarks({
       error,
       id: error.id,
       verticalLine: false,
-      offset: error.timestamp.us - rootTimestampUs,
-      skew: getClockSkew({ itemTimestamp: error.timestamp.us, itemDuration: 0, parent }),
+      offset: getTimestampUs(error) - rootTimestampUs,
+      skew: getClockSkew({ itemTimestamp: getTimestampUs(error), itemDuration: 0, parent }),
       serviceColor: parent?.color ?? '',
       onClick:
         onErrorClick && docId
@@ -399,4 +400,20 @@ export function getTraceWaterfallDuration(flattenedTraceWaterfall: TraceWaterfal
     ...flattenedTraceWaterfall.map((item) => item.offset + item.skew + item.duration),
     0
   );
+}
+
+export function getSubtreeIds(
+  parentChildMap: Record<string, TraceItem[]>,
+  rootId: string
+): string[] {
+  const ids: string[] = [];
+  const stack = [rootId];
+  while (stack.length > 0) {
+    const current = stack.pop()!;
+    ids.push(current);
+    for (const child of parentChildMap[current] ?? []) {
+      stack.push(child.id);
+    }
+  }
+  return ids;
 }
