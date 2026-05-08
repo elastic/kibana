@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type {
-  ServerStepDefinitionOrLoader,
-  WorkflowsExtensionsServerPluginSetup,
-} from '@kbn/workflows-extensions/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+
+type ServerStepDefinitionOrLoader = Parameters<
+  WorkflowsExtensionsServerPluginSetup['registerStepDefinition']
+>[0];
 
 /**
  * Registers all alerting-v2 server-side workflow step definitions.
