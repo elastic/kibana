@@ -204,16 +204,6 @@ describe('GroupFieldSelect', () => {
   });
 
   describe('auto-populate from query BY clause', () => {
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
-
-    afterEach(() => {
-      jest.useRealTimers();
-    });
-
-    // Helper that renders GroupFieldSelect with a button to change the query,
-    // so we can test that group fields react to query changes.
     const QueryChanger = ({ newQuery }: { newQuery: string }) => {
       const { setValue } = useFormContext<FormValues>();
       return (
@@ -256,10 +246,11 @@ describe('GroupFieldSelect', () => {
     };
 
     it('auto-populates group fields when query BY clause changes', async () => {
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-
       mockUseQueryColumns.mockReturnValue({
-        data: [{ name: 'service.name', type: 'keyword' }],
+        data: [
+          { name: 'host.name', type: 'keyword' },
+          { name: 'service.name', type: 'keyword' },
+        ],
         isLoading: false,
         error: null,
         isError: false,
@@ -269,7 +260,6 @@ describe('GroupFieldSelect', () => {
         fetchStatus: 'idle',
       } as any);
 
-      // First effect run records the initial BY columns, subsequent runs detect changes
       mockGetGroupByColumnsFromQuery.mockImplementation((q: string) => {
         if (q.includes('BY service.name')) return ['service.name'];
         if (q.includes('BY host.name')) return ['host.name'];
@@ -282,17 +272,11 @@ describe('GroupFieldSelect', () => {
         ['host.name']
       );
 
-      // Flush the initial debounce so the ref records the starting BY columns
-      jest.advanceTimersByTime(300);
-
-      // Initially should show host.name (set via initial form defaults)
+      // Initially should show host.name (set via form defaults)
       expect(screen.getByText('host.name')).toBeInTheDocument();
 
       // Change query to use service.name in BY clause
-      await user.click(screen.getByText('Change Query'));
-
-      // Advance past the debounce
-      jest.advanceTimersByTime(300);
+      await userEvent.click(screen.getByText('Change Query'));
 
       // Should now show service.name (auto-populated from new BY clause)
       await waitFor(() => {
@@ -301,10 +285,11 @@ describe('GroupFieldSelect', () => {
     });
 
     it('clears group fields when BY clause is removed', async () => {
-      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-
       mockUseQueryColumns.mockReturnValue({
-        data: [],
+        data: [
+          { name: 'host.name', type: 'keyword' },
+          { name: 'count', type: 'long' },
+        ],
         isLoading: false,
         error: null,
         isError: false,
@@ -325,17 +310,11 @@ describe('GroupFieldSelect', () => {
         ['host.name']
       );
 
-      // Flush the initial debounce
-      jest.advanceTimersByTime(300);
-
       // Initially should show host.name
       expect(screen.getByText('host.name')).toBeInTheDocument();
 
       // Change query to remove BY clause
-      await user.click(screen.getByText('Change Query'));
-
-      // Advance past the debounce
-      jest.advanceTimersByTime(300);
+      await userEvent.click(screen.getByText('Change Query'));
 
       // host.name should no longer be shown
       await waitFor(() => {
