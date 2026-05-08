@@ -10,13 +10,10 @@ import { notFound } from '@hapi/boom';
 import type { ServerRouteRepository } from '@kbn/server-route-repository-utils';
 import { apiPrivileges } from '@kbn/agent-builder-plugin/common/features';
 import { createObservabilityAgentBuilderServerRoute } from '../create_observability_agent_builder_server_route';
-import { runSigEventEvidenceTrend } from '../../utils/significant_event/run_sig_event_evidence_trend';
+import { buildEvidenceTrendLensConfig } from '../../utils/significant_event/run_sig_event_evidence_trend';
 import { getSignificantEventByEventId } from '../../utils/get_significant_event_by_event_id';
-import type { SigEventEvidenceCheckItem } from '../../utils/significant_event/sig_event_evidence_types';
 import {
-  buildSigEventEvidenceCheckEvaluation,
   getPromotedSigEventEvidencesWithEsql,
-  getSigEventEvidenceEsqlRowCount,
   type SigEventDocumentForEvidence,
 } from '../../utils/significant_event/evaluate_sig_event_evidences';
 import {
@@ -42,7 +39,7 @@ export function getSignificantEventEvidenceReviewRouteRepository(): ServerRouteR
       }),
     }),
     handler: async ({ core, request, params, response, logger }) => {
-      const [coreStart, startDeps] = await core.getStartServices();
+      const [coreStart] = await core.getStartServices();
       const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
 
       const document: SigEventDocumentForEvidence | undefined = await getSignificantEventByEventId({
@@ -58,31 +55,6 @@ export function getSignificantEventEvidenceReviewRouteRepository(): ServerRouteR
       }
 
       const promotedEvidences = getPromotedSigEventEvidencesWithEsql(document);
-      const evidenceChecks: SigEventEvidenceCheckItem[] = [];
-
-      for (const evidence of promotedEvidences) {
-        const ruleName = evidence.rule_name?.trim() || 'evidence';
-        try {
-          const rowCount = await getSigEventEvidenceEsqlRowCount({
-            esClient,
-            esql_query: evidence.esql_query,
-          });
-          evidenceChecks.push({
-            ruleName,
-            rowCount,
-            hasMatches: rowCount > 0,
-          });
-        } catch (err) {
-          evidenceChecks.push({
-            ruleName,
-            rowCount: 0,
-            hasMatches: false,
-            errorMessage: err instanceof Error ? err.message : String(err),
-          });
-        }
-      }
-
-      const evaluation = buildSigEventEvidenceCheckEvaluation({ evidenceChecks });
 
       const toMs = Date.now();
       const hours = 2;
@@ -91,41 +63,37 @@ export function getSignificantEventEvidenceReviewRouteRepository(): ServerRouteR
       const trendRangeTo = new Date(toMs).toISOString();
       const trendBucketMinutes = 5;
 
-      const matchingChecks = evaluation.evidenceChecks.filter((check) => check.hasMatches);
+      const evidenceItems = promotedEvidences.map((evidence) => {
+        const ruleName = evidence.rule_name?.trim() || 'evidence';
 
-      const evidenceItems = await Promise.all(
-        matchingChecks.map(async (check) => {
-          const lastSeenEntry = evaluation.progress.lastSeen.find(
-            (ls) => ls.symptomKey === check.ruleName.trim()
+        let trend: SigEventEvidenceReviewResponse['evidenceItems'][number]['trend'];
+        try {
+          trend = toEvidenceReviewTrendPayload(
+            buildEvidenceTrendLensConfig({
+              evidenceEsql: evidence.esql_query,
+              rangeFrom: trendRangeFrom,
+              rangeTo: trendRangeTo,
+              bucketMinutes: trendBucketMinutes,
+            })
           );
-          const lastSeen = lastSeenEntry?.at ?? null;
-
-          const fullTrend = await runSigEventEvidenceTrend({
-            esClient,
-            agentBuilder: startDeps.agentBuilder,
-            searchInferenceEndpoints: startDeps.searchInferenceEndpoints,
-            request,
-            logger,
-            eventId: params.body.significantEventId,
-            index: params.body.significantEventsIndex,
-            ruleName: check.ruleName,
-            rangeFrom: trendRangeFrom,
-            rangeTo: trendRangeTo,
-            bucketMinutes: trendBucketMinutes,
-          });
-
-          return {
-            ruleName: check.ruleName,
-            lastSeen,
-            trend: toEvidenceReviewTrendPayload(fullTrend),
+        } catch (err) {
+          trend = {
+            success: false as const,
+            error: err instanceof Error ? err.message : String(err),
           };
-        })
-      );
+        }
+
+        return { ruleName, lastSeen: null, trend };
+      });
 
       const body: SigEventEvidenceReviewResponse = {
-        status: evaluation.status,
-        recommendation: evaluation.recommendation,
-        signals: evaluation.signals,
+        status: 'failing',
+        recommendation: '',
+        signals: {
+          evidenceRowHits: 0,
+          eligibleEvidenceCount: promotedEvidences.length,
+          evidenceQueriesWithMatches: promotedEvidences.length,
+        },
         significantEventId: params.body.significantEventId,
         trendRange: {
           from: trendRangeFrom,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { VisualizationResultData } from '@kbn/agent-builder-common/tools/tool_result';
+import type { EvidenceTrendLensResult } from './run_sig_event_evidence_trend';
 
 export type SymptomStatus = 'healthy' | 'failing' | 'resolved';
 
@@ -39,12 +39,7 @@ export interface SigEventEvidenceCheckResponse extends SigEventEvidenceCheckEval
   significantEventId: string;
 }
 
-/** Result of Agent Builder `create_visualization` for an evidence time trend (full tool payload). */
-export type SigEventEvidenceTrendBody =
-  | { success: true; visualization: VisualizationResultData }
-  | { success: false; error: string };
-
-/** Lean trend payload for HTTP (Lens spec only). */
+/** Lean trend payload for HTTP (Lens API config). */
 export type SigEventEvidenceReviewTrendBody =
   | { success: true; lensVisualization: Record<string, unknown> }
   | { success: false; error: string };
@@ -72,10 +67,10 @@ export interface SigEventEvidenceReviewResponse {
 }
 
 export function toEvidenceReviewTrendPayload(
-  body: SigEventEvidenceTrendBody
+  result: EvidenceTrendLensResult
 ): SigEventEvidenceReviewTrendBody {
-  if (body.success === false) {
-    return body;
+  if (result.success === false) {
+    return result;
   }
-  return { success: true, lensVisualization: body.visualization.visualization };
+  return { success: true, lensVisualization: result.lensConfig };
 }

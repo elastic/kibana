@@ -5,182 +5,72 @@
  * 2.0.
  */
 
-import { isBoom, notFound } from '@hapi/boom';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { Logger } from '@kbn/core/server';
-import { platformCoreTools } from '@kbn/agent-builder-common';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/server/types';
-import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
-import dedent from 'dedent';
-import {
-  isErrorResult,
-  isVisualizationResult,
-  SupportedChartType,
-  type ToolResult,
-} from '@kbn/agent-builder-common/tools/tool_result';
-import { getSignificantEventByEventId } from '../get_significant_event_by_event_id';
-import { resolveConnectorForFeature } from '../resolve_connector_for_feature';
-import { OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID } from '../../../common/constants';
-import type { SigEventEvidenceTrendBody } from './sig_event_evidence_types';
+const PIPE_COMMANDS_TO_STRIP = /\|\s*(?:KEEP|SORT|LIMIT|EVAL)\b[^|]*/gi;
+const NOW_MINUS_PATTERN = /NOW\s*\(\s*\)\s*-\s*\d+\s*(?:minutes?|hours?|days?|seconds?|weeks?)/gi;
+const NOW_PATTERN = /NOW\s*\(\s*\)/gi;
 
-export type SigEventEvidenceTrendApiBody = SigEventEvidenceTrendBody;
-
-interface EvidenceSource {
-  readonly esql_query: string;
-  readonly result: string;
-  readonly rule_name: string;
-  readonly description?: string;
-  readonly stream_name?: string;
-}
-
-function findEvidence(
-  evidences: ReadonlyArray<EvidenceSource> | undefined,
-  ruleName: string
-): EvidenceSource | undefined {
-  const needle = ruleName.trim();
-  return evidences?.find(
-    (e) =>
-      e.result === 'found' &&
-      typeof e.esql_query === 'string' &&
-      e.esql_query.trim().length > 0 &&
-      (e.rule_name?.trim() ?? '') === needle
-  );
-}
-
-function buildTrendNlQuery(
-  evidence: EvidenceSource,
+function buildTrendEsql(
+  evidenceEsql: string,
   rangeFrom: string,
   rangeTo: string,
-  bucketMinutes: number,
-  tightened: boolean
+  bucketMinutes: number
 ): string {
-  const retryHint = tightened
-    ? dedent(`
+  let query = evidenceEsql.replace(PIPE_COMMANDS_TO_STRIP, '');
 
-      The previous attempt did not yield a visualization. Retry with a minimal XY time series:
-      bucket by the primary @timestamp (or time field implied by the evidence), one COUNT measure,
-      strictly within the requested window below.`)
-    : '';
+  query = query.replace(NOW_MINUS_PATTERN, `"${rangeFrom}"`);
+  query = query.replace(NOW_PATTERN, `"${rangeTo}"`);
 
-  return dedent(`
-    Create an XY area chart showing this significant-event signal over time.
+  query = query.replace(/\s+/g, ' ').trim();
 
-    Chart time window: from ${rangeFrom} to ${rangeTo}. Target bucket width about ${bucketMinutes} minutes (adjust slightly if required for valid ES|QL).
+  if (query.endsWith('|')) {
+    query = query.slice(0, -1).trim();
+  }
 
-    Evidence rule name: ${evidence.rule_name}
-    Stream: ${evidence.stream_name ?? '(unspecified)'}
-    Evidence description: ${evidence.description ?? '(none)'}
-
-    The following ES|QL is the promoted evidence query (often a sample / match query with LIMIT).
-    Use it ONLY as intent: preserve data sources, filters, MATCH semantics, and field meaning, but ADAPT it into a time-bucketed aggregation suitable for this chart window.
-    Do NOT use it verbatim when it contains LIMIT, a sample-only window, or shapes that are not a time-bucketed trend.
-
-    Note: Do not omit empty intervals.
-
-    Evidence ES|QL (intent only — adapt, do not paste verbatim):
-    """
-    ${evidence.esql_query}
-    """
-    ${retryHint}
-  `);
+  return `${query} | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, ${bucketMinutes} minutes) | SORT bucket ASC`;
 }
 
-function collectErrorMessages(results: ToolResult[] | undefined): string {
-  if (!results?.length) {
-    return 'No tool results returned from create_visualization.';
-  }
-  const messages = results.filter(isErrorResult).map((r) => r.data.message);
-  if (messages.length > 0) {
-    return messages.join('; ');
-  }
-  return 'create_visualization did not return a visualization result.';
+export interface EvidenceTrendLensConfig {
+  success: true;
+  lensConfig: Record<string, unknown>;
 }
 
-export const runSigEventEvidenceTrend = async ({
-  esClient,
-  agentBuilder,
-  searchInferenceEndpoints,
-  request,
-  logger,
-  eventId,
-  index,
-  ruleName,
+export interface EvidenceTrendLensError {
+  success: false;
+  error: string;
+}
+
+export type EvidenceTrendLensResult = EvidenceTrendLensConfig | EvidenceTrendLensError;
+
+export function buildEvidenceTrendLensConfig({
+  evidenceEsql,
   rangeFrom,
   rangeTo,
   bucketMinutes,
 }: {
-  esClient: ElasticsearchClient;
-  agentBuilder: AgentBuilderPluginStart;
-  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
-  request: KibanaRequest;
-  logger: Logger;
-  eventId: string;
-  index: string;
-  ruleName: string;
+  evidenceEsql: string;
   rangeFrom: string;
   rangeTo: string;
   bucketMinutes: number;
-}): Promise<SigEventEvidenceTrendBody> => {
-  try {
-    const document = await getSignificantEventByEventId({ esClient, eventId, index });
-    if (!document) {
-      throw notFound(`Significant event not found for event_id ${eventId} in ${index}`);
-    }
+}): EvidenceTrendLensResult {
+  const trendEsql = buildTrendEsql(evidenceEsql, rangeFrom, rangeTo, bucketMinutes);
 
-    const evidence = findEvidence(document.evidences, ruleName);
-    if (!evidence) {
-      throw notFound(`No found evidence with rule_name "${ruleName}" for this event`);
-    }
-
-    const { connectorId } = await resolveConnectorForFeature({
-      searchInferenceEndpoints,
-      featureId: OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID,
-      request,
-      logger,
-    });
-
-    const executeCreateVisualization = async (tightened: boolean) => {
-      const query = buildTrendNlQuery(evidence, rangeFrom, rangeTo, bucketMinutes, tightened);
-      return agentBuilder.tools.execute({
-        request,
-        toolId: platformCoreTools.createVisualization,
-        toolParams: {
-          query,
-          chartType: SupportedChartType.XY,
+  return {
+    success: true,
+    lensConfig: {
+      type: 'xy',
+      layers: [
+        {
+          type: 'bar',
+          data_source: { type: 'esql', query: trendEsql },
+          y: [{ column: 'count' }],
+          x: { column: 'bucket' },
         },
-        defaultConnectorId: connectorId,
-        source: 'user',
-      });
-    };
-
-    let { results } = await executeCreateVisualization(false);
-    let visualization = results?.find(isVisualizationResult);
-
-    if (!visualization) {
-      const firstError = collectErrorMessages(results);
-      logger.warn(`Evidence trend create_visualization first attempt: ${firstError}`);
-      ({ results } = await executeCreateVisualization(true));
-      visualization = results?.find(isVisualizationResult);
-    }
-
-    if (!visualization) {
-      return {
-        success: false,
-        error: collectErrorMessages(results),
-      };
-    }
-
-    return {
-      success: true,
-      visualization: visualization.data,
-    };
-  } catch (err) {
-    if (isBoom(err)) {
-      throw err;
-    }
-    const message = err instanceof Error ? err.message : String(err);
-    logger.warn(`Evidence trend pipeline failed: ${message}`);
-    return { success: false, error: message };
-  }
-};
+      ],
+      legend: { visibility: 'hidden' },
+      axis: {
+        x: { grid: { visible: false }, title: { visible: false } },
+        y: { grid: { visible: false }, title: { visible: false } },
+      },
+    },
+  };
+}

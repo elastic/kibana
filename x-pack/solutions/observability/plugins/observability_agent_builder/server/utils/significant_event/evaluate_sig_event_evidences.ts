@@ -71,6 +71,7 @@ export async function getSigEventEvidenceEsqlRowCount({
   const response = (await esClient.esql.query({
     query: esql_query,
     drop_null_columns: true,
+    allow_partial_results: true,
   })) as ESQLSearchResponse;
 
   return response.values?.length ?? 0;

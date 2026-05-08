@@ -6,10 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiErrorBoundary } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { VisualizeLens } from '@kbn/agent-builder-plugin/public';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
@@ -25,10 +25,6 @@ export interface SigEvidenceTrendLensProps {
   };
 }
 
-/**
- * Renders the same Lens chrome as Agent Builder chat (time picker, edit/save) from a
- * `create_visualization` tool payload.
- */
 export function SigEvidenceTrendLens({
   lensConfig,
   rangeFrom,
@@ -37,14 +33,18 @@ export function SigEvidenceTrendLens({
 }: SigEvidenceTrendLensProps) {
   const { lens, dataViews, uiActions } = services;
 
-  const absoluteTimeRange: TimeRange = useMemo(
-    () => ({
-      type: 'absolute',
-      from: rangeFrom,
-      to: rangeTo,
-    }),
+  const timeRange: TimeRange = useMemo(
+    () => ({ type: 'absolute', from: rangeFrom, to: rangeTo }),
     [rangeFrom, rangeTo]
   );
+
+  const attributes = useMemo(() => {
+    try {
+      return new LensConfigBuilder().fromAPIFormat(lensConfig as any);
+    } catch {
+      return null;
+    }
+  }, [lensConfig]);
 
   if (!lens || !dataViews || !uiActions) {
     return (
@@ -69,15 +69,27 @@ export function SigEvidenceTrendLens({
     );
   }
 
+  if (!attributes) {
+    return null;
+  }
+
+  const EmbeddableComponent = lens.EmbeddableComponent;
+
   return (
-    <div data-test-subj="obltSigeventsEvidenceTrendLens">
-      <VisualizeLens
-        lens={lens}
-        dataViews={dataViews}
-        uiActions={uiActions}
-        lensConfig={lensConfig}
-        timeRange={absoluteTimeRange}
-      />
-    </div>
+    <EuiErrorBoundary>
+      <div
+        data-test-subj="obltSigeventsEvidenceTrendLens"
+        style={{ height: 200, background: 'transparent' }}
+      >
+        <EmbeddableComponent
+          id=""
+          attributes={attributes}
+          timeRange={timeRange}
+          style={{ height: '100%' }}
+          withDefaultActions
+          disabledActions={['ACTION_OPEN_IN_DISCOVER']}
+        />
+      </div>
+    </EuiErrorBoundary>
   );
 }

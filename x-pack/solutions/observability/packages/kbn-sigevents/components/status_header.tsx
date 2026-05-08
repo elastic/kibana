@@ -11,7 +11,7 @@ import type { EuiAvatarProps, useEuiTheme as useEuiThemeFn } from '@elastic/eui'
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-const MAX_DESCRIPTION_WIDTH = '33em';
+const MAX_DESCRIPTION_WIDTH = '31em';
 
 export type StatusHeaderVariant = 'critical' | 'noCriticalEvents';
 

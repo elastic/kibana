@@ -8,19 +8,17 @@
 import React, { useMemo } from 'react';
 import {
   EuiBadge,
+  EuiButtonIcon,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiText,
-  EuiButton,
   EuiCallOut,
-  EuiPanel,
+  EuiSkeletonRectangle,
   EuiSpacer,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
@@ -133,8 +131,6 @@ export function SignificantEventDetailBody(props: SignificantEventDetailBodyProp
     services,
     evidenceReview,
   } = props;
-
-  const { euiTheme } = useEuiTheme();
 
   const event = useMemo<SignificantEventDetailFields>(
     () => ({
@@ -273,6 +269,55 @@ export function SignificantEventDetailBody(props: SignificantEventDetailBodyProp
     [event.recommendations]
   );
 
+  const trendByRuleName = useMemo(() => {
+    const map = new Map<string, SigEventEvidenceReviewResponse['evidenceItems'][number]>();
+    if (evidenceReview?.status) {
+      for (const item of evidenceReview.status.evidenceItems) {
+        map.set(item.ruleName, item);
+      }
+    }
+    return map;
+  }, [evidenceReview?.status]);
+
+  const evidenceHeaderRight = useMemo(() => {
+    if (!evidenceReview) return undefined;
+
+    return (
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        {evidenceReview.status ? (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('xpack.observability.sigeventsOverview.evidence.aggregateHint', {
+                defaultMessage: '{matchingRules}/{eligibleRules} rules match',
+                values: {
+                  matchingRules: evidenceReview.status.signals.evidenceQueriesWithMatches,
+                  eligibleRules: evidenceReview.status.signals.eligibleEvidenceCount,
+                },
+              })}
+            </EuiText>
+          </EuiFlexItem>
+        ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="refresh"
+            size="xs"
+            color="text"
+            isLoading={evidenceReview.isLoading}
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              evidenceReview.runReview();
+            }}
+            aria-label={i18n.translate(
+              'xpack.observability.sigeventsOverview.evidence.refreshAria',
+              { defaultMessage: 'Refresh evidence trends' }
+            )}
+            data-test-subj="obltSigeventsEvidenceRefreshButton"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }, [evidenceReview]);
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -342,41 +387,96 @@ export function SignificantEventDetailBody(props: SignificantEventDetailBodyProp
             title={i18n.translate('xpack.observability.sigeventsOverview.sigEvents.evidenceTitle', {
               defaultMessage: 'Evidence',
             })}
-            collapsible
+            headerRightContent={evidenceHeaderRight}
           >
             <EuiFlexGroup direction="column" gutterSize="m">
-              {event.evidences.map((evidence, idx) => (
-                <EuiFlexItem key={idx} grow={false}>
-                  <EuiFlexGroup direction="column" gutterSize="xs">
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+              {event.evidences.map((evidence, idx) => {
+                const trendItem = trendByRuleName.get(evidence.ruleName);
+                const ruleId = safeRuleTestSubjId(evidence.ruleName);
+
+                return (
+                  <EuiFlexItem key={idx} grow={false}>
+                    <EuiFlexGroup direction="column" gutterSize="xs">
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+                          <EuiFlexItem grow={false}>
+                            <EuiBadge color={evidence.confirmed ? 'success' : 'hollow'}>
+                              {evidence.confirmed ? 'confirmed' : evidence.result}
+                            </EuiBadge>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiText size="xs" color="subdued">
+                              {i18n.translate(
+                                'xpack.observability.sigeventsOverview.evidence.rowSummary',
+                                {
+                                  defaultMessage: '{rowCount} rows · {ruleName} · {streamName}',
+                                  values: {
+                                    rowCount: evidence.rowCount,
+                                    ruleName: evidence.ruleName,
+                                    streamName: evidence.streamName,
+                                  },
+                                }
+                              )}
+                            </EuiText>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s">
+                          <p>{evidence.description}</p>
+                        </EuiText>
+                      </EuiFlexItem>
+                      {evidenceReview?.isLoading && !trendItem ? (
                         <EuiFlexItem grow={false}>
-                          <EuiBadge color={evidence.confirmed ? 'success' : 'hollow'}>
-                            {evidence.confirmed ? 'confirmed' : evidence.result}
-                          </EuiBadge>
+                          <EuiSpacer size="s" />
+                          <EuiSkeletonRectangle
+                            width="100%"
+                            height={200}
+                            borderRadius="s"
+                            isLoading
+                          />
                         </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="xs" color="subdued">
-                            {evidence.rowCount} rows · {evidence.ruleName} · {evidence.streamName}
-                          </EuiText>
+                      ) : null}
+                      {trendItem && evidenceReview?.status ? (
+                        <EuiFlexItem
+                          grow={false}
+                          data-test-subj={`obltSigeventsEvidenceTrend-${ruleId}`}
+                        >
+                          <EuiSpacer size="s" />
+                          {trendItem.trend.success === false ? (
+                            <EuiCallOut
+                              announceOnMount={false}
+                              color="warning"
+                              size="s"
+                              title={trendItem.trend.error}
+                            />
+                          ) : services ? (
+                            <SigEvidenceTrendLens
+                              lensConfig={trendItem.trend.lensVisualization}
+                              rangeFrom={evidenceReview.status.trendRange.from}
+                              rangeTo={evidenceReview.status.trendRange.to}
+                              services={services}
+                            />
+                          ) : null}
                         </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="s">
-                        <p>{evidence.description}</p>
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">
-                        <code>{evidence.esqlQuery}</code>
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  {idx < event.evidences.length - 1 ? <EuiHorizontalRule margin="s" /> : null}
-                </EuiFlexItem>
-              ))}
+                      ) : null}
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="subdued">
+                          <code>{evidence.esqlQuery}</code>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    {idx < event.evidences.length - 1 ? <EuiHorizontalRule margin="s" /> : null}
+                  </EuiFlexItem>
+                );
+              })}
             </EuiFlexGroup>
+            {evidenceReview?.error ? (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut color="danger" size="s" title={evidenceReview.error} announceOnMount />
+              </>
+            ) : null}
           </InfoPanel>
         </EuiFlexItem>
       ) : null}
@@ -412,169 +512,6 @@ export function SignificantEventDetailBody(props: SignificantEventDetailBodyProp
           onOpenDetails={onOpenDetails}
         />
       </EuiFlexItem>
-
-      {evidenceReview ? (
-        <EuiFlexItem grow={false}>
-          <EuiPanel hasBorder hasShadow={false} data-test-subj="obltSigeventsRemediationStatus">
-            <EuiText size="s">
-              <h4>
-                {i18n.translate('xpack.observability.sigeventsOverview.remediationStatus.title', {
-                  defaultMessage: 'Evidence review',
-                })}
-              </h4>
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiButton
-              size="s"
-              onClick={evidenceReview.runReview}
-              isLoading={evidenceReview.isLoading}
-              data-test-subj="obltSigeventsRemediationCheckButton"
-            >
-              {i18n.translate(
-                'xpack.observability.sigeventsOverview.remediationStatus.reviewAllButton',
-                { defaultMessage: 'Review evidence' }
-              )}
-            </EuiButton>
-            <EuiSpacer size="s" />
-            {!evidenceReview.status ? (
-              <EuiText size="xs" color="subdued">
-                {i18n.translate(
-                  'xpack.observability.sigeventsOverview.remediationStatus.checkPrompt',
-                  {
-                    defaultMessage:
-                      'Re-runs promoted evidence ES|QL and shows last seen plus a trend chart (last 2 hours) for rules that still match.',
-                  }
-                )}
-              </EuiText>
-            ) : (
-              <EuiText size="xs" color="subdued">
-                {i18n.translate(
-                  'xpack.observability.sigeventsOverview.remediationStatus.aggregateHint',
-                  {
-                    defaultMessage:
-                      '{status} · {matchingRules} of {eligibleRules} promoted evidence rules still return rows ({rowHits} sample rows total).',
-                    values: {
-                      status: evidenceReview.status.status,
-                      matchingRules: evidenceReview.status.signals.evidenceQueriesWithMatches,
-                      eligibleRules: evidenceReview.status.signals.eligibleEvidenceCount,
-                      rowHits: evidenceReview.status.signals.evidenceRowHits,
-                    },
-                  }
-                )}
-              </EuiText>
-            )}
-            {evidenceReview.status ? (
-              evidenceReview.status.evidenceItems.length === 0 ? (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiText size="xs" color="subdued">
-                    {i18n.translate(
-                      evidenceReview.status.signals.eligibleEvidenceCount === 0
-                        ? 'xpack.observability.sigeventsOverview.remediationStatus.noPromotedEvidence'
-                        : 'xpack.observability.sigeventsOverview.remediationStatus.noMatchingEvidence',
-                      evidenceReview.status.signals.eligibleEvidenceCount === 0
-                        ? {
-                            defaultMessage:
-                              'This event has no promoted evidences with an ES|QL query to evaluate.',
-                          }
-                        : {
-                            defaultMessage:
-                              'No promoted evidence rules returned matching rows in this evaluation.',
-                          }
-                    )}
-                  </EuiText>
-                </>
-              ) : (
-                <>
-                  <EuiSpacer size="m" />
-                  {(() => {
-                    const reviewWithMatches = evidenceReview.status;
-                    if (!reviewWithMatches) {
-                      return null;
-                    }
-                    return reviewWithMatches.evidenceItems.map((evidenceItem) => {
-                      const ruleId = safeRuleTestSubjId(evidenceItem.ruleName);
-                      const trendState = evidenceItem.trend;
-                      return (
-                        <EuiPanel
-                          key={evidenceItem.ruleName}
-                          paddingSize="m"
-                          hasBorder
-                          hasShadow={false}
-                          css={css`
-                            margin-bottom: ${euiTheme.size.m};
-                          `}
-                          data-test-subj={`obltSigeventsEvidenceCheckPanel-${ruleId}`}
-                        >
-                          <EuiText size="s">
-                            <strong>{evidenceItem.ruleName}</strong>
-                          </EuiText>
-                          <EuiSpacer size="s" />
-                          <EuiText size="xs" color="subdued">
-                            {i18n.translate(
-                              'xpack.observability.sigeventsOverview.remediationStatus.evidenceStillMatches',
-                              {
-                                defaultMessage: 'Evidence query returns rows.',
-                              }
-                            )}
-                          </EuiText>
-                          <EuiSpacer size="s" />
-                          <EuiText size="s">
-                            {i18n.translate(
-                              'xpack.observability.sigeventsOverview.remediationStatus.lastSeenForRule',
-                              {
-                                defaultMessage: 'Last seen: {ts}',
-                                values: {
-                                  ts: evidenceItem.lastSeen ?? '—',
-                                },
-                              }
-                            )}
-                          </EuiText>
-                          <EuiSpacer size="m" />
-                          {trendState.success === false ? (
-                            <EuiCallOut
-                              announceOnMount
-                              color="warning"
-                              size="s"
-                              title={trendState.error}
-                            />
-                          ) : services ? (
-                            <SigEvidenceTrendLens
-                              lensConfig={trendState.lensVisualization}
-                              rangeFrom={reviewWithMatches.trendRange.from}
-                              rangeTo={reviewWithMatches.trendRange.to}
-                              services={services}
-                            />
-                          ) : (
-                            <EuiCallOut
-                              announceOnMount
-                              color="warning"
-                              size="s"
-                              title={i18n.translate(
-                                'xpack.observability.sigeventsOverview.remediationStatus.trendNeedsServices',
-                                {
-                                  defaultMessage:
-                                    'Trend charts require Lens and data view services from the host app.',
-                                }
-                              )}
-                            />
-                          )}
-                        </EuiPanel>
-                      );
-                    });
-                  })()}
-                </>
-              )
-            ) : null}
-            {evidenceReview.error ? (
-              <>
-                <EuiSpacer size="s" />
-                <EuiCallOut color="danger" size="s" title={evidenceReview.error} announceOnMount />
-              </>
-            ) : null}
-          </EuiPanel>
-        </EuiFlexItem>
-      ) : null}
     </EuiFlexGroup>
   );
 }
