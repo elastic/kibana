@@ -1607,7 +1607,7 @@
                 "section": "def-server.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
-              "<object>, \"attributes\" | \"references\"> & { attributes: object; references: ",
+              "<object>, \"references\" | \"attributes\"> & { attributes: object; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -2020,7 +2020,7 @@
                 "section": "def-server.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
-              "<Attributes>, \"attributes\" | \"references\"> & { attributes: Partial<Attributes>; references: ",
+              "<Attributes>, \"references\" | \"attributes\"> & { attributes: Partial<Attributes>; references: ",
               {
                 "pluginId": "@kbn/content-management-utils",
                 "scope": "server",
@@ -3737,7 +3737,7 @@
             "section": "def-server.SOWithMetadata",
             "text": "SOWithMetadata"
           },
-          "<Attributes>, \"attributes\" | \"references\"> & { attributes: Partial<Attributes>; references: ",
+          "<Attributes>, \"references\" | \"attributes\"> & { attributes: Partial<Attributes>; references: ",
           {
             "pluginId": "@kbn/content-management-utils",
             "scope": "server",

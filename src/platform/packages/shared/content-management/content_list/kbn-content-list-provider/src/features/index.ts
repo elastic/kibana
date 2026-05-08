@@ -30,8 +30,8 @@ export type { SearchConfig, UseContentListSearchReturn } from './search';
 export { useContentListSearch } from './search';
 
 // Selection feature.
-export type { UseContentListSelectionReturn } from './selection';
-export { useContentListSelection } from './selection';
+export type { UseContentListSelectionReturn, SelectionConfig } from './selection';
+export { useContentListSelection, isSelectionConfig } from './selection';
 
 // Filtering feature.
 export type { UseContentListFiltersReturn } from './filtering';

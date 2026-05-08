@@ -10,6 +10,7 @@
 import type { SortingConfig } from './sorting';
 import type { PaginationConfig } from './pagination';
 import type { SearchConfig } from './search';
+import type { SelectionConfig } from './selection';
 import type { ActiveFilters } from '../datasource';
 import type { FieldDefinition, FlagDefinition } from '../query_model/types';
 
@@ -81,11 +82,16 @@ export interface ContentListFeatures {
   search?: SearchConfig | boolean;
   /**
    * Selection configuration.
-   * When `true` (default), row selection checkboxes are shown and bulk
-   * actions are enabled. Set to `false` to disable selection entirely.
-   * Selection is automatically disabled when `isReadOnly` is `true`.
+   *
+   * - `true` (default): row checkboxes and bulk actions are enabled.
+   * - `false`: selection is disabled entirely.
+   * - {@link SelectionConfig}: selection is enabled with per-row gating (e.g.
+   *   `selectable`, `selectableMessage`).
+   *
+   * Selection is automatically disabled when `isReadOnly` is `true`,
+   * regardless of the value passed here.
    */
-  selection?: boolean;
+  selection?: boolean | SelectionConfig;
   /**
    * Tags feature configuration.
    *
