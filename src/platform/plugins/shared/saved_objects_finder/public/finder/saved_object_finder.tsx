@@ -51,7 +51,6 @@ export interface SavedObjectMetaData<T extends FinderAttributes = FinderAttribut
   getTooltipForSavedObject?(savedObject: SavedObjectCommon<T>): string;
   showSavedObject?(savedObject: SavedObjectCommon<T>): boolean;
   getSavedObjectSubType?(savedObject: SavedObjectCommon<T>): string;
-
   /** @deprecated doesn't do anything, the full object is returned **/
   includeFields?: string[];
 }
@@ -150,12 +149,10 @@ class SavedObjectFinderUiClass extends React.Component<
     ]);
 
     const savedObjects = [
-      ...response[0]!.hits,
-      ...(response.length >= 2
-        ? response[1]!.filter(({ type }) => {
-            return visibleTypes ? visibleTypes.includes(type) : true;
-          })
-        : []),
+      ...response[0].hits,
+      ...response[1].filter(({ type }) => {
+        return visibleTypes ? visibleTypes.includes(type) : true;
+      }),
     ]
       .map((savedObject) => {
         const {
