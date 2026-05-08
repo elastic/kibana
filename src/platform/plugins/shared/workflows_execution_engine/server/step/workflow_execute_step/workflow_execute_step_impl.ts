@@ -191,7 +191,9 @@ export class WorkflowExecuteStepImpl implements NodeImplementation, CancellableN
   }
 
   private async getWorkflow(workflowId: string): Promise<EsWorkflow | null> {
-    return this.init.workflowRepository.getWorkflow(workflowId, this.init.spaceId);
+    return this.init.workflowRepository.getWorkflow(workflowId, this.init.spaceId, {
+      includeGlobal: true,
+    });
   }
 
   private async ensureWorkflowIsExecutable(workflow: EsWorkflow): Promise<void> {
