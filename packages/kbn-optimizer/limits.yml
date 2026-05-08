@@ -1,7 +1,7 @@
 pageLoadAssetSize:
   actions: 20000
   advancedSettings: 6196
-  agentBuilder: 48000
+  agentBuilder: 52831
   agentBuilderPlatform: 8737
   agentContextLayer: 1883
   aiAssistantManagementSelection: 11569
@@ -13,7 +13,7 @@ pageLoadAssetSize:
   automaticImport: 18629
   banners: 4006
   canvas: 14881
-  cases: 177203
+  cases: 213452
   charts: 40269
   cloud: 10648
   cloudConnect: 9149
@@ -33,7 +33,7 @@ pageLoadAssetSize:
   customIntegrations: 11715
   dashboard: 20000
   dashboardAgent: 7786
-  dashboardMarkdown: 6151
+  dashboardMarkdown: 8661
   data: 496646
   dataQuality: 11469
   datasetQuality: 49315
@@ -169,6 +169,7 @@ pageLoadAssetSize:
   serverless: 7412
   serverlessObservability: 19104
   serverlessSearch: 26287
+  serverlessVectordb: 4389
   serverlessWorkplaceAI: 4855
   sessionView: 47912
   share: 64066
@@ -197,7 +198,6 @@ pageLoadAssetSize:
   visDefaultEditor: 35080
   visTypeGauge: 13006
   visTypeHeatmap: 12457
-  visTypeMarkdown: 8817
   visTypeMetric: 11966
   visTypePie: 9939
   visTypeTable: 18999
