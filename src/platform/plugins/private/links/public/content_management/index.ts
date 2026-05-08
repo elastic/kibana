@@ -8,5 +8,5 @@
  */
 
 export { linksClient } from './links_content_management_client';
-export { checkForDuplicateTitle } from './duplicate_title_check';
+export { hasLibraryItemWithTitle } from './has_library_item_with_title';
 export { runSaveToLibrary } from './save_to_library';

@@ -13,7 +13,7 @@ import type {
 } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSkeletonText } from '@elastic/eui';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';

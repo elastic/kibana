@@ -9,13 +9,15 @@ import React, { memo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { flyoutHeaderBlockStyles } from '../../../flyout_v2/document/constants/styles';
+import {
+  FlyoutHeaderBlock,
+  flyoutHeaderBlockStyles,
+} from '../../../flyout_v2/shared/components/flyout_header_block';
 import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { Status } from './status';
 import { Assignees } from './assignees';
 import { Notes } from '../../../flyout_v2/shared/components/notes';
-import { AlertHeaderBlock } from '../../../flyout_v2/shared/components/alert_header_block';
 import {
   HEADER_ALERTS_BLOCK_TEST_ID,
   HEADER_ASSIGNEES_BLOCK_TEST_ID,
@@ -67,7 +69,7 @@ export const HeaderTitle = memo(() => {
               <Status />
             </EuiFlexItem>
             <EuiFlexItem>
-              <AlertHeaderBlock
+              <FlyoutHeaderBlock
                 hasBorder
                 title={
                   <FormattedMessage
@@ -78,14 +80,14 @@ export const HeaderTitle = memo(() => {
                 data-test-subj={HEADER_ALERTS_BLOCK_TEST_ID}
               >
                 {alertsCount}
-              </AlertHeaderBlock>
+              </FlyoutHeaderBlock>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem css={flyoutHeaderBlockStyles}>
           <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
             <EuiFlexItem>
-              <AlertHeaderBlock
+              <FlyoutHeaderBlock
                 hasBorder
                 title={
                   <FormattedMessage
@@ -96,7 +98,7 @@ export const HeaderTitle = memo(() => {
                 data-test-subj={HEADER_ASSIGNEES_BLOCK_TEST_ID}
               >
                 <Assignees />
-              </AlertHeaderBlock>
+              </FlyoutHeaderBlock>
             </EuiFlexItem>
             <EuiFlexItem>
               <Notes documentId={attackId} onShowNotes={openNotesTab} />
