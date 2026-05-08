@@ -550,6 +550,57 @@ describe('params validation', () => {
     );
   });
 
+  test('params validation fails when email has invalid format (leading hyphen in local part)', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['-user@example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation fails when email has invalid format (leading hyphen in domain)', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['user@-example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation fails when email has invalid format (trailing hyphen in domain)', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['user@example-.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
   test('params validation for emails calls validateEmailAddresses', async () => {
     const configUtils = actionsConfigMock.create();
     configUtils.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);

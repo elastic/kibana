@@ -360,6 +360,64 @@ describe('validate_email_address', () => {
     });
   });
 
+  describe('email format validation', () => {
+    test('rejects addresses with leading hyphen in local part', () => {
+      const result = validateEmailAddresses(null, ['-user@example.com']);
+      expect(result).toEqual([
+        { address: '-user@example.com', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('rejects addresses with trailing hyphen in local part', () => {
+      const result = validateEmailAddresses(null, ['user-@example.com']);
+      expect(result).toEqual([
+        { address: 'user-@example.com', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('rejects addresses with leading hyphen in domain label', () => {
+      const result = validateEmailAddresses(null, ['user@-example.com']);
+      expect(result).toEqual([
+        { address: 'user@-example.com', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('rejects addresses with trailing hyphen in domain label', () => {
+      const result = validateEmailAddresses(null, ['user@example-.com']);
+      expect(result).toEqual([
+        { address: 'user@example-.com', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('rejects addresses with single-label domain (no dot)', () => {
+      const result = validateEmailAddresses(null, ['user@localhost']);
+      expect(result).toEqual([
+        { address: 'user@localhost', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('allows addresses with hyphens in the middle of local part', () => {
+      const result = validateEmailAddresses(null, ['first-last@example.com']);
+      expect(result).toEqual([{ address: 'first-last@example.com', valid: true }]);
+    });
+
+    test('allows addresses with hyphens in the middle of domain labels', () => {
+      const result = validateEmailAddresses(null, ['user@my-domain.example.com']);
+      expect(result).toEqual([{ address: 'user@my-domain.example.com', valid: true }]);
+    });
+
+    test('allows standard valid email addresses', () => {
+      const validEmails = [
+        'user@example.com',
+        'first.last@example.com',
+        'user+tag@example.com',
+        'user@sub.domain.example.com',
+      ];
+      const result = validateEmailAddresses(null, validEmails);
+      result.forEach((r) => expect(r.valid).toBe(true));
+    });
+  });
+
   test('isAddressMatchingSomePattern', () => {
     const patterns = ['*-list@example.com', '*@mydomain.com', 'foo.*@test.com'];
     const validEmails = [

@@ -85,6 +85,18 @@ function validateEmailAddress(
   }
 }
 
+function hasValidDomainLabels(domain: string): boolean {
+  const labels = domain.split('.');
+  if (labels.length < 2) return false;
+  return labels.every(
+    (label) => label.length > 0 && !label.startsWith('-') && !label.endsWith('-')
+  );
+}
+
+function hasValidLocalPart(local: string): boolean {
+  return local.length > 0 && !local.startsWith('-') && !local.endsWith('-');
+}
+
 function validateEmailAddress_(
   allowedDomains: string[] | null,
   address: string,
@@ -94,6 +106,20 @@ function validateEmailAddress_(
   const emailAddresses = parseAddressList(address);
   if (emailAddresses == null) {
     return { address, valid: false, reason: InvalidEmailReason.invalid };
+  }
+
+  for (const emailAddress of emailAddresses) {
+    if (emailAddress.type === 'mailbox') {
+      if (!hasValidLocalPart(emailAddress.local) || !hasValidDomainLabels(emailAddress.domain)) {
+        return { address, valid: false, reason: InvalidEmailReason.invalid };
+      }
+    } else if (emailAddress.type === 'group') {
+      for (const groupAddress of emailAddress.addresses) {
+        if (!hasValidLocalPart(groupAddress.local) || !hasValidDomainLabels(groupAddress.domain)) {
+          return { address, valid: false, reason: InvalidEmailReason.invalid };
+        }
+      }
+    }
   }
 
   if (allowedDomains !== null) {
