@@ -8164,6 +8164,22 @@
               },
               {
                 "parentPluginId": "@kbn/evals",
+                "id": "def-common.tags.serverless.vectordb",
+                "type": "Array",
+                "tags": [],
+                "label": "vectordb",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/tags.ts",
+                "lineNumber": 72,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/evals",
                 "id": "def-common.tags.serverless.all",
                 "type": "Array",
                 "tags": [],
@@ -8175,7 +8191,7 @@
                   "string[]"
                 ],
                 "path": "src/platform/packages/shared/kbn-scout/src/playwright/tags.ts",
-                "lineNumber": 73,
+                "lineNumber": 74,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false
@@ -8195,7 +8211,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/tags.ts",
-            "lineNumber": 81,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8211,7 +8227,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/tags.ts",
-            "lineNumber": 96,
+            "lineNumber": 103,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

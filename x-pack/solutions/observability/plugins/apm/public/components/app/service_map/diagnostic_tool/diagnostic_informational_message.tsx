@@ -13,7 +13,7 @@ export function DiagnosticInformationalMessage() {
   return (
     <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiIcon type="warning" size="s" />
+        <EuiIcon type="warning" size="s" aria-hidden={true} />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText size="s" color="subdued" style={{ fontStyle: 'italic' }}>
