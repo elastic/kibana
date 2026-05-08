@@ -4,7 +4,7 @@ set -euo pipefail
 
 ACCESS_BROKER_URL="${ACCESS_BROKER_URL:-https://access-broker-261553193300.us-central1.run.app}"
 CAPABILITY="kibana.litellm"
-MODEL="gpt-5-mini"
+MODEL="llm-gateway/gpt-5.4-mini"
 
 # Validation phase: always cancel the rest of the build after this step runs,
 # pass or fail. Remove this trap (and the cancel block below) once the
