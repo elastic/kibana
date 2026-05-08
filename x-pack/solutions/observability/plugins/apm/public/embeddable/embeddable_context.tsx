@@ -38,8 +38,12 @@ import { ApmIndexSettingsContextProvider } from '../context/apm_index_settings/a
 function ScopedRouterProvider({ children }: { children: React.ReactElement }) {
   return (
     <ReactRouterRouteContext.Provider value={{ outlet: null, matches: [], isDataRoute: false }}>
-      <ReactRouterNavigationContext.Provider value={null as any}>
-        <ReactRouterLocationContext.Provider value={null as any}>
+      <ReactRouterNavigationContext.Provider
+        value={null as unknown as React.ContextType<typeof ReactRouterNavigationContext>}
+      >
+        <ReactRouterLocationContext.Provider
+          value={null as unknown as React.ContextType<typeof ReactRouterLocationContext>}
+        >
           {children}
         </ReactRouterLocationContext.Provider>
       </ReactRouterNavigationContext.Provider>
