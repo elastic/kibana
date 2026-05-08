@@ -17,10 +17,6 @@ interface TaggedChatEvent {
 }
 
 export class EventsService {
-  /**
-   * Tagged event bus. Internal — public consumers see either `obs$` (deprecated, untagged)
-   * or `getChatEvents$(id)` (filtered to one conversation).
-   */
   private readonly events$ = new Subject<TaggedChatEvent>();
 
   /**
