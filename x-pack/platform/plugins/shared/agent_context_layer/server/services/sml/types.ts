@@ -20,10 +20,16 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 export interface SmlChunk {
   /** Type of the chunk (e.g., 'dashboard', 'lens', 'esql') */
   type: string;
-  /** Searchable content text */
+  /** Searchable content (indexed as `semantic_text`) */
   content: string;
   /** Display title */
   title: string;
+  /** Longer summary for semantic search (indexed as `semantic_text`); omit or empty if none */
+  description?: string;
+  /** Owner or last-modifier user id when known */
+  user_id?: string;
+  /** Other SML chunk ids this item references */
+  references?: string[];
   /** Permissions required to access the underlying element (e.g., 'saved_object:lens/get') */
   permissions?: string[];
 }
@@ -116,8 +122,14 @@ export interface SmlDocument {
   title: string;
   /** Origin ID (e.g., saved object ID) */
   origin_id: string;
-  /** Searchable content */
+  /** Searchable content (`semantic_text` in the index) */
   content: string;
+  /** Semantic summary (`semantic_text` in the index) */
+  description?: string;
+  /** Owner or last-modifier user id */
+  user_id?: string;
+  /** Referenced SML chunk ids */
+  references?: string[];
   /** Timestamp when first created */
   created_at: string;
   /** Timestamp when last updated */
@@ -130,7 +142,7 @@ export interface SmlDocument {
 
 /**
  * An SML search result — same fields as {@link SmlDocument} plus relevance score.
- * `content` is optional when the query excluded it from `_source` (e.g. `skipContent`).
+ * `content` and `description` are optional when excluded from `_source` (e.g. `skipContent`).
  */
 export type SmlSearchResult = Omit<SmlDocument, 'content'> & {
   content?: string;
