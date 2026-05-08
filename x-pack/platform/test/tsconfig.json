@@ -22,14 +22,9 @@
     "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
     "../../*.json",
     "./api_integration/apis/telemetry/fixtures/*.json",
-    "./monitoring_api_integration/fixtures/**/*.json",
+    "./monitoring_api_integration/fixtures/**/*.json"
   ],
-  "exclude": [
-    "target/**/*",
-    "*/plugins/**/*",
-    "*/packages/**/*",
-    "*/*/packages/**/*"
-  ],
+  "exclude": ["target/**/*", "*/plugins/**/*", "*/packages/**/*", "*/*/packages/**/*"],
   "kbn_references": [
     "@kbn/test-suites-src",
     "@kbn/telemetry-collection-manager-plugin",
@@ -160,6 +155,6 @@
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/reporting-test-routes",
     "@kbn/alerting-types",
-    "@kbn/setup-node-env",
+    "@kbn/setup-node-env"
   ]
 }
