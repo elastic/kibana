@@ -59,6 +59,7 @@ export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerCon
     },
     async (ctx, req, res) => {
       const user = (await ctx.core).security.authc.getCurrentUser();
+      const hasPanelErrors = (req.body.meta?.errors ?? []).length;
       coreServices.userActivity.trackUserAction({
         message: `User ${user ? `"${user.username}"` : ''} ${
           req.params.type === 'view' ? 'viewed' : 'refreshed'
@@ -69,7 +70,11 @@ export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerCon
           start: new Date(req.body.start).toISOString(),
           end: new Date(req.body.end).toISOString(),
           duration: (req.body.end - req.body.start) * 1000000, // convert to nanoseconds
+          outcome: hasPanelErrors ? 'failure' : 'success',
         },
+        ...(hasPanelErrors && {
+          error: { type: 'panel_errors', message: JSON.stringify(req.body.meta!.errors) },
+        }),
         object: await getUserActivityObject({ id: req.params.id, data: req.body }, req),
         ...(req.body.meta && {
           metadata: req.body.meta,
