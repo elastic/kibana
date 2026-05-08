@@ -20,16 +20,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 /**
  * Common output schema for Microsoft Graph API responses that return a collection.
  * Uses z.any() for the array items to avoid over-specifying the response structure.
  */
-const GraphCollectionOutputSchema = z.object({
-  value: z.array(z.any()).describe('Array of items returned from the API'),
-  '@odata.nextLink': z.string().optional().describe('URL to fetch next page of results'),
-});
+const GraphCollectionOutputSchema = lazySchema(() =>
+  z.object({
+    value: z.array(z.any()).describe('Array of items returned from the API'),
+    '@odata.nextLink': z.string().optional().describe('URL to fetch next page of results'),
+  })
+);
 
 export const SharepointOnline: ConnectorSpec = {
   metadata: {
@@ -165,13 +167,15 @@ export const SharepointOnline: ConnectorSpec = {
       isTool: true,
       description:
         'List all pages in a SharePoint site. Returns page metadata (id, title, description, webUrl, createdDateTime, lastModifiedDateTime). Use getAllSites to discover siteId values, and then use getSitePageContents to fetch the full content of a specific page.',
-      input: z.object({
-        siteId: z
-          .string()
-          .describe(
-            'The ID of the SharePoint site whose pages you want to list. Use getAllSites to discover site IDs.'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          siteId: z
+            .string()
+            .describe(
+              'The ID of the SharePoint site whose pages you want to list. Use getAllSites to discover site IDs.'
+            ),
+        })
+      ),
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -199,18 +203,20 @@ export const SharepointOnline: ConnectorSpec = {
       isTool: true,
       description:
         'Fetch the full HTML content of a SharePoint site page, including its canvas layout. Use this to read wiki/news pages. Use getAllSites to discover siteId values, and getSitePages to discover pageId values for a given site.',
-      input: z.object({
-        siteId: z
-          .string()
-          .describe(
-            'The ID of the SharePoint site that contains the page. Use getAllSites to discover site IDs.'
-          ),
-        pageId: z
-          .string()
-          .describe(
-            'The ID of the page to fetch. Use getSitePages to list pages and discover their IDs for a given site.'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          siteId: z
+            .string()
+            .describe(
+              'The ID of the SharePoint site that contains the page. Use getAllSites to discover site IDs.'
+            ),
+          pageId: z
+            .string()
+            .describe(
+              'The ID of the page to fetch. Use getSitePages to list pages and discover their IDs for a given site.'
+            ),
+        })
+      ),
       output: z.any(),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -245,26 +251,28 @@ export const SharepointOnline: ConnectorSpec = {
       isTool: true,
       description:
         'Retrieve details for a single SharePoint site by either its site ID or its relative URL. Returns id, displayName, webUrl, siteCollection, createdDateTime, and lastModifiedDateTime. Use getAllSites to discover site IDs, or provide a relativeUrl in the format "contoso.sharepoint.com:/sites/hr:".',
-      input: z.union([
-        z
-          .object({
-            siteId: z
-              .string()
-              .describe(
-                'The ID of the SharePoint site to retrieve. Use getAllSites to discover site IDs.'
-              ),
-          })
-          .strict(),
-        z
-          .object({
-            relativeUrl: z
-              .string()
-              .describe(
-                'The relative URL of the site as a path in the format "hostname:/path:", e.g. "contoso.sharepoint.com:/sites/hr:". Use this as an alternative to siteId when you know the URL but not the ID.'
-              ),
-          })
-          .strict(),
-      ]),
+      input: lazySchema(() =>
+        z.union([
+          z
+            .object({
+              siteId: z
+                .string()
+                .describe(
+                  'The ID of the SharePoint site to retrieve. Use getAllSites to discover site IDs.'
+                ),
+            })
+            .strict(),
+          z
+            .object({
+              relativeUrl: z
+                .string()
+                .describe(
+                  'The relative URL of the site as a path in the format "hostname:/path:", e.g. "contoso.sharepoint.com:/sites/hr:". Use this as an alternative to siteId when you know the URL but not the ID.'
+                ),
+            })
+            .strict(),
+        ])
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { siteId: string } | { relativeUrl: string };
         const hasSiteId = 'siteId' in typedInput && typedInput.siteId;
@@ -296,13 +304,15 @@ export const SharepointOnline: ConnectorSpec = {
       isTool: true,
       description:
         'List all document libraries (drives) within a SharePoint site. Returns drive metadata including id, name, driveType, webUrl, and owner. Use getAllSites to discover siteId values. Drive IDs returned here are required by getDriveItems and downloadDriveItem.',
-      input: z.object({
-        siteId: z
-          .string()
-          .describe(
-            'The ID of the SharePoint site whose document libraries (drives) you want to list. Use getAllSites to discover site IDs.'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          siteId: z
+            .string()
+            .describe(
+              'The ID of the SharePoint site whose document libraries (drives) you want to list. Use getAllSites to discover site IDs.'
+            ),
+        })
+      ),
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -332,15 +342,17 @@ export const SharepointOnline: ConnectorSpec = {
       isTool: true,
       description:
         'List all SharePoint lists within a site (e.g., custom lists, document libraries represented as lists). Returns id, displayName, name, webUrl, and description for each list. Use getAllSites to discover siteId values. List IDs returned here are required by getSiteListItems.',
-      input: z
-        .object({
-          siteId: z
-            .string()
-            .describe(
-              'The ID of the SharePoint site whose lists you want to enumerate. Use getAllSites to discover site IDs.'
-            ),
-        })
-        .strict(),
+      input: lazySchema(() =>
+        z
+          .object({
+            siteId: z
+              .string()
+              .describe(
+                'The ID of the SharePoint site whose lists you want to enumerate. Use getAllSites to discover site IDs.'
+              ),
+          })
+          .strict()
+      ),
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -370,18 +382,20 @@ export const SharepointOnline: ConnectorSpec = {
       isTool: true,
       description:
         'Fetch all items from a specific list within a SharePoint site. Returns item metadata (id, webUrl, createdDateTime, lastModifiedDateTime, createdBy, lastModifiedBy). Use getAllSites to discover siteId values and getSiteLists to discover listId values.',
-      input: z.object({
-        siteId: z
-          .string()
-          .describe(
-            'The ID of the SharePoint site that owns the list. Use getAllSites to discover site IDs.'
-          ),
-        listId: z
-          .string()
-          .describe(
-            'The ID of the list whose items you want to retrieve. Use getSiteLists to discover list IDs for a given site.'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          siteId: z
+            .string()
+            .describe(
+              'The ID of the SharePoint site that owns the list. Use getAllSites to discover site IDs.'
+            ),
+          listId: z
+            .string()
+            .describe(
+              'The ID of the list whose items you want to retrieve. Use getSiteLists to discover list IDs for a given site.'
+            ),
+        })
+      ),
       output: GraphCollectionOutputSchema,
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -418,19 +432,21 @@ export const SharepointOnline: ConnectorSpec = {
       isTool: true,
       description:
         'List files and folders within a SharePoint document library (drive), optionally scoped to a subfolder path. Returns item metadata including id, name, webUrl, size, and @microsoft.graph.downloadUrl. Use getSiteDrives to discover driveId values. The @microsoft.graph.downloadUrl field can be passed to downloadItemFromURL.',
-      input: z.object({
-        driveId: z
-          .string()
-          .describe(
-            'The ID of the document library (drive) to browse. Use getSiteDrives to discover drive IDs for a site.'
-          ),
-        path: z
-          .string()
-          .optional()
-          .describe(
-            'Optional relative path within the drive root to scope the listing (e.g. "Folder/Subfolder"). Omit to list the root of the drive.'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          driveId: z
+            .string()
+            .describe(
+              'The ID of the document library (drive) to browse. Use getSiteDrives to discover drive IDs for a site.'
+            ),
+          path: z
+            .string()
+            .optional()
+            .describe(
+              'Optional relative path within the drive root to scope the listing (e.g. "Folder/Subfolder"). Omit to list the root of the drive.'
+            ),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { driveId: string; path?: string };
         if (!typedInput.driveId) {
@@ -458,23 +474,27 @@ export const SharepointOnline: ConnectorSpec = {
       isTool: true,
       description:
         'Download the content of a file from a SharePoint document library and return it as UTF-8 text. Best suited for plain-text or markdown files. For PDFs, .docx, and other binary formats that require preprocessing, use downloadItemFromURL instead (which returns base64 for Elasticsearch ingest pipeline extraction). Use getSiteDrives to find driveId and getDriveItems to find itemId.',
-      input: z.object({
-        driveId: z
-          .string()
-          .describe(
-            'The ID of the document library (drive) that contains the file. Use getSiteDrives to discover drive IDs.'
-          ),
-        itemId: z
-          .string()
-          .describe(
-            'The ID of the file item to download. Use getDriveItems to list items in a drive and discover their IDs.'
-          ),
-      }),
-      output: z.object({
-        contentType: z.string().optional().describe('Content-Type header'),
-        contentLength: z.string().optional().describe('Content-Length header'),
-        text: z.string().describe('File content as UTF-8 text'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          driveId: z
+            .string()
+            .describe(
+              'The ID of the document library (drive) that contains the file. Use getSiteDrives to discover drive IDs.'
+            ),
+          itemId: z
+            .string()
+            .describe(
+              'The ID of the file item to download. Use getDriveItems to list items in a drive and discover their IDs.'
+            ),
+        })
+      ),
+      output: lazySchema(() =>
+        z.object({
+          contentType: z.string().optional().describe('Content-Type header'),
+          contentLength: z.string().optional().describe('Content-Length header'),
+          text: z.string().describe('File content as UTF-8 text'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           driveId: string;
@@ -508,19 +528,23 @@ export const SharepointOnline: ConnectorSpec = {
       isTool: true,
       description:
         'Download a SharePoint file using its pre-authenticated @microsoft.graph.downloadUrl and return the content as a base64-encoded string. Use this for PDFs, .docx, and other binary formats that require preprocessing via an Elasticsearch ingest pipeline attachment processor. For plain-text or markdown files you can use downloadDriveItem instead. Use getDriveItems to find the @microsoft.graph.downloadUrl field on a file item.',
-      input: z.object({
-        downloadUrl: z
-          .string()
-          .url()
-          .describe(
-            'The pre-authenticated download URL for the file. This is the @microsoft.graph.downloadUrl property returned by getDriveItems. Note: these URLs are time-limited and should be used promptly.'
-          ),
-      }),
-      output: z.object({
-        contentType: z.string().optional().describe('Content-Type header'),
-        contentLength: z.string().optional().describe('Content-Length header'),
-        base64: z.string().describe('File content as base64-encoded string'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          downloadUrl: z
+            .string()
+            .url()
+            .describe(
+              'The pre-authenticated download URL for the file. This is the @microsoft.graph.downloadUrl property returned by getDriveItems. Note: these URLs are time-limited and should be used promptly.'
+            ),
+        })
+      ),
+      output: lazySchema(() =>
+        z.object({
+          contentType: z.string().optional().describe('Content-Type header'),
+          contentLength: z.string().optional().describe('Content-Length header'),
+          base64: z.string().describe('File content as base64-encoded string'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           downloadUrl: string;
@@ -547,23 +571,25 @@ export const SharepointOnline: ConnectorSpec = {
     callGraphAPI: {
       isTool: true,
       description: 'Call a Microsoft Graph v1.0 endpoint by path only (e.g., /v1.0/me).',
-      input: z.object({
-        method: z.enum(['GET', 'POST']).describe('HTTP method'),
-        path: z
-          .string()
-          .describe("Graph path starting with '/v1.0/' (e.g., '/v1.0/me')")
-          .refine((value) => value.startsWith('/v1.0/'), {
-            message: "Path must start with '/v1.0/'",
-          })
-          .refine((value) => !/^https?:\/\//i.test(value), {
-            message: 'Path must not be a full URL',
-          }),
-        query: z
-          .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
-          .optional()
-          .describe('Query parameters (e.g., $top, $filter)'),
-        body: z.any().optional().describe('Request body (for POST)'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          method: z.enum(['GET', 'POST']).describe('HTTP method'),
+          path: z
+            .string()
+            .describe("Graph path starting with '/v1.0/' (e.g., '/v1.0/me')")
+            .refine((value) => value.startsWith('/v1.0/'), {
+              message: "Path must start with '/v1.0/'",
+            })
+            .refine((value) => !/^https?:\/\//i.test(value), {
+              message: 'Path must not be a full URL',
+            }),
+          query: z
+            .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
+            .optional()
+            .describe('Query parameters (e.g., $top, $filter)'),
+          body: z.any().optional().describe('Request body (for POST)'),
+        })
+      ),
       output: z.any(),
       handler: async (ctx, input) => {
         const typedInput = input as {
@@ -596,37 +622,39 @@ export const SharepointOnline: ConnectorSpec = {
       isTool: true,
       description:
         'Search SharePoint content using the Microsoft Graph Search API with Keyword Query Language (KQL). Supports searching across sites, lists, list items, drives, and drive items. Note: not all entity type combinations can be mixed in a single request — valid groupings are (driveItem, listItem), (site, list), or (drive) alone.',
-      input: z.object({
-        query: z
-          .string()
-          .describe(
-            'KQL search query string. Examples: "contoso product", "filename:budget filetype:xlsx", "author:jane AND filetype:docx". Supports standard KQL operators (AND, OR, NOT) and property restrictions.'
-          ),
-        entityTypes: z
-          .array(z.enum(['site', 'list', 'listItem', 'drive', 'driveItem']))
-          .optional()
-          .describe(
-            'Entity types to include in the search. Valid groupings (cannot be mixed arbitrarily): (driveItem, listItem), (site, list), or (drive) alone. Defaults to ["site"] if omitted.'
-          ),
-        region: z
-          .enum(['NAM', 'EUR', 'APC', 'LAM', 'MEA'])
-          .optional()
-          .describe(
-            'Search region. Only used with app-only (client credentials) auth — ignored for delegated auth. NAM=North America, EUR=Europe, APC=Asia Pacific, LAM=Latin America, MEA=Middle East/Africa. Defaults to NAM when using app-only auth.'
-          ),
-        from: z
-          .number()
-          .default(0)
-          .describe('Zero-based pagination offset (number of results to skip). Defaults to 0.'),
-        size: z
-          .number()
-          .min(1)
-          .max(500)
-          .default(25)
-          .describe(
-            'Number of results to return per page. Must be between 1 and 500. Defaults to 25.'
-          ),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          query: z
+            .string()
+            .describe(
+              'KQL search query string. Examples: "contoso product", "filename:budget filetype:xlsx", "author:jane AND filetype:docx". Supports standard KQL operators (AND, OR, NOT) and property restrictions.'
+            ),
+          entityTypes: z
+            .array(z.enum(['site', 'list', 'listItem', 'drive', 'driveItem']))
+            .optional()
+            .describe(
+              'Entity types to include in the search. Valid groupings (cannot be mixed arbitrarily): (driveItem, listItem), (site, list), or (drive) alone. Defaults to ["site"] if omitted.'
+            ),
+          region: z
+            .enum(['NAM', 'EUR', 'APC', 'LAM', 'MEA'])
+            .optional()
+            .describe(
+              'Search region. Only used with app-only (client credentials) auth — ignored for delegated auth. NAM=North America, EUR=Europe, APC=Asia Pacific, LAM=Latin America, MEA=Middle East/Africa. Defaults to NAM when using app-only auth.'
+            ),
+          from: z
+            .number()
+            .default(0)
+            .describe('Zero-based pagination offset (number of results to skip). Defaults to 0.'),
+          size: z
+            .number()
+            .min(1)
+            .max(500)
+            .default(25)
+            .describe(
+              'Number of results to return per page. Must be between 1 and 500. Defaults to 25.'
+            ),
+        })
+      ),
       output: z.any(),
       handler: async (ctx, input) => {
         const typedInput = input as {

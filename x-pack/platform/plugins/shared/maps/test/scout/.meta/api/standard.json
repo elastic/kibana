@@ -1,5 +1,5 @@
 {
-  "sha1": "2f4386dcf81fbf55a7643d3be3e9f4159c0c25c3",
+  "sha1": "2b3bf3b50ee69ab46cdf36d230f1326d42b750b7",
   "tests": [
     {
       "id": "79abdadc4886132-c537aed5c2bba8c",
@@ -398,8 +398,7 @@
       "title": "Maps - maps telemetry should return the correct telemetry values for map saved objects",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/maps_telemetry.spec.ts",

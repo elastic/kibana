@@ -154,7 +154,7 @@ export interface InferenceServerStart {
    * @param request - The Kibana request to scope the operation to
    * @returns A promise that resolves to the default inference connector
    */
-  getDefaultConnector: (request: KibanaRequest) => Promise<InferenceConnector>;
+  getDefaultConnector: (request: KibanaRequest) => Promise<InferenceConnector | undefined>;
 
   /**
    * Retrieves a specific inference connector by its ID.

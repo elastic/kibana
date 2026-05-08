@@ -30,9 +30,9 @@ export interface RelatedAlertsBySessionProps {
    */
   onShowAlert: (id: string, indexName: string) => void;
   /**
-   * Whether to hide the rule preview link
+   * Whether to render rule links as PreviewLink (legacy expandable flyout) instead of ChildLink (new flyout system)
    */
-  hidePreviewLink: boolean;
+  useLegacyExpandableFlyout: boolean;
 }
 
 /**
@@ -43,7 +43,7 @@ export const RelatedAlertsBySession: React.FC<RelatedAlertsBySessionProps> = ({
   scopeId,
   eventId,
   onShowAlert,
-  hidePreviewLink,
+  useLegacyExpandableFlyout,
 }) => {
   const { loading, error, data, dataCount } = useFetchRelatedAlertsBySession({
     entityId,
@@ -56,9 +56,9 @@ export const RelatedAlertsBySession: React.FC<RelatedAlertsBySessionProps> = ({
         scopeId,
         dataTestSubj: CORRELATIONS_DETAILS_BY_SESSION_SECTION_TEST_ID,
         onShowAlert,
-        hidePreviewLink,
+        useLegacyExpandableFlyout,
       }),
-    [scopeId, onShowAlert, hidePreviewLink]
+    [scopeId, onShowAlert, useLegacyExpandableFlyout]
   );
 
   if (error) {

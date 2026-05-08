@@ -9,6 +9,8 @@
 
 import {
   getAllKibanaTranslationFilesMock,
+  groupFilesByLocaleMock,
+  computeLocaleFileHashMock,
   initTranslationsMock,
   registerRoutesMock,
 } from './i18n_service.test.mocks';
@@ -46,6 +48,8 @@ describe('I18nService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    groupFilesByLocaleMock.mockReturnValue({});
+    computeLocaleFileHashMock.mockResolvedValue('mock-file-hash');
     configService = getConfigService();
 
     coreContext = mockCoreContext.create({ configService });
@@ -94,6 +98,7 @@ describe('I18nService', () => {
         router: expect.any(Object),
         isDist: coreContext.env.packageInfo.dist,
         translationHashes: expect.any(Object),
+        localeFileMap: expect.any(Object),
       });
     });
   });
@@ -143,6 +148,7 @@ describe('I18nService', () => {
         router: expect.any(Object),
         isDist: coreContext.env.packageInfo.dist,
         translationHashes: expect.any(Object),
+        localeFileMap: expect.any(Object),
       });
     });
 
@@ -190,6 +196,7 @@ describe('I18nService', () => {
         router: expect.any(Object),
         isDist: coreContext.env.packageInfo.dist,
         translationHashes: expect.objectContaining({ en: expect.any(String) }),
+        localeFileMap: expect.any(Object),
       });
     });
   });

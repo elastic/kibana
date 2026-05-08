@@ -9504,7 +9504,15 @@
                         "section": "def-server.ConnectorWithExtraFindData",
                         "text": "ConnectorWithExtraFindData"
                       },
-                      "[]>; getBulk: ({ ids, throwIfSystemAction, }: { ids: string[]; throwIfSystemAction?: boolean | undefined; }) => Promise<(",
+                      "[]>; getAuthStatus: () => Promise<",
+                      {
+                        "pluginId": "@kbn/actions-types",
+                        "scope": "common",
+                        "docId": "kibKbnActionsTypesPluginApi",
+                        "section": "def-common.ConnectorAuthStatusMap",
+                        "text": "ConnectorAuthStatusMap"
+                      },
+                      ">; getBulk: ({ ids, throwIfSystemAction, }: { ids: string[]; throwIfSystemAction?: boolean | undefined; }) => Promise<(",
                       {
                         "pluginId": "actions",
                         "scope": "server",

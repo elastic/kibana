@@ -110,7 +110,7 @@ export const AnomalyDetectionInfoButton: FC<Props> = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="boxesVertical" />
+          <EuiIcon type="boxesVertical" aria-hidden={true} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiButton>

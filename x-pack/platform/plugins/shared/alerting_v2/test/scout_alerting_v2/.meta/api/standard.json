@@ -1,5 +1,5 @@
 {
-  "sha1": "7b1b44a430d34843c3c2aeca4906f0f07918c398",
+  "sha1": "dd3b8b0d02420039c46ee446cc71dde5234d3a13",
   "tests": [
     {
       "id": "7d659b2da63538a-85f1c7853cd9e1b",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
-        "line": 120,
+        "line": 154,
         "column": 10
       }
     },
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
-        "line": 193,
+        "line": 220,
         "column": 10
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
-        "line": 262,
+        "line": 282,
         "column": 10
       }
     },
@@ -53,7 +53,319 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
-        "line": 326,
+        "line": 348,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-ba4af27519ebee0",
+      "title": "Find rules API search: should find rules by name prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 62,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-f997b5c125e7d4d",
+      "title": "Find rules API search: should find rules by description prefix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 77,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-9ff037b1732d39e",
+      "title": "Find rules API search: should AND multiple terms together",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 99,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-08e13abcec5a402",
+      "title": "Find rules API search: should match the name regardless of casing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 121,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-4608c273fe506d7",
+      "title": "Find rules API search: should not error on simple_query_string operators in user input",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 139,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-4721d07bc458d19",
+      "title": "Find rules API search: should return empty results when no fields match",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 161,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-3adb1c87eb03b3e",
+      "title": "Find rules API pagination: should respect page and perPage and report total / current page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 179,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-6bc4b8dbd227a03",
+      "title": "Find rules API pagination: should return zero items when page is beyond the result set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 212,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-57d82441b2661de",
+      "title": "Find rules API sort: should sort rules by name in ascending order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 230,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-71a4a22f9bafecd",
+      "title": "Find rules API sort: should sort rules by name in descending order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 247,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-625a67a728124a4",
+      "title": "Find rules API filter: should filter rules by enabled state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 264,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-3e558fb6db824a7",
+      "title": "Find rules API filter: should filter rules by metadata.tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 303,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-8b762cf8d4de1c7",
+      "title": "Find rules API filter: should support compound expressions with AND/OR/NOT",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 321,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-109d917528a30f4",
+      "title": "Find rules API filter: should reject filters that reference unknown fields with a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 348,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-3ff5bbecd4aa93b",
+      "title": "Find rules API validation: should reject perPage above the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 374,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-1cf96463f2a8b81",
+      "title": "Find rules API validation: should reject perPage below the minimum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 384,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-ffd9a719250529e",
+      "title": "Find rules API validation: should reject page values below 1",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 394,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-9fdcffaf84461ed",
+      "title": "Find rules API validation: should reject non-numeric page values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 404,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-d39d34a9b026eee",
+      "title": "Find rules API validation: should reject unknown sortField values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 414,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-7bf5bc5baa4ee8a",
+      "title": "Find rules API validation: should reject unknown sortOrder values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 424,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-3b75bb674fa02c5",
+      "title": "Find rules API validation: should reject empty search after trimming whitespace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 434,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-02c2fc5aa4d5806",
+      "title": "Find rules API authorization: should return 200 for a user with read-only alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 447,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-80e7c33cbe1160f",
+      "title": "Find rules API authorization: should return 200 for a user with full alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 467,
+        "column": 10
+      }
+    },
+    {
+      "id": "163ad0d6dc4ab42-cd0a223f395855a",
+      "title": "Find rules API authorization: should return 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/find_rules.spec.ts",
+        "line": 486,
         "column": 10
       }
     },
@@ -67,7 +379,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 92,
+        "line": 35,
         "column": 10
       }
     },
@@ -81,7 +393,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 108,
+        "line": 51,
         "column": 10
       }
     },
@@ -95,7 +407,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 121,
+        "line": 64,
         "column": 10
       }
     },
@@ -109,7 +421,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 135,
+        "line": 78,
         "column": 10
       }
     },
@@ -123,7 +435,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 144,
+        "line": 87,
         "column": 10
       }
     },
@@ -137,63 +449,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
-        "line": 165,
-        "column": 10
-      }
-    },
-    {
-      "id": "c54256d5fae7766-a41bda64b59ff23",
-      "title": "Search rules by name and description should find rules by name prefix",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
-        "line": 29,
-        "column": 10
-      }
-    },
-    {
-      "id": "c54256d5fae7766-9b60bc16fe20e1a",
-      "title": "Search rules by name and description should find rules by description prefix",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
-        "line": 46,
-        "column": 10
-      }
-    },
-    {
-      "id": "c54256d5fae7766-b3c19ceb2d2b713",
-      "title": "Search rules by name and description should AND multiple search terms together",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
-        "line": 70,
-        "column": 10
-      }
-    },
-    {
-      "id": "c54256d5fae7766-51e3dc1672dd5ab",
-      "title": "Search rules by name and description should return empty results when no fields match",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/search_rules.spec.ts",
-        "line": 97,
+        "line": 108,
         "column": 10
       }
     }

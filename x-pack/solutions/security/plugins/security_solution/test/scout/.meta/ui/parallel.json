@@ -1,5 +1,5 @@
 {
-  "sha1": "9b9ab0ca7c09fcc254ba73d72d770aaa49e76cc7",
+  "sha1": "42a8b29408f9359be4f283ccdea0d6d97d8f6272",
   "tests": [
     {
       "id": "4402bb6f4421c38-1054e603e578b92",
@@ -431,6 +431,34 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/investigations/timeline_read_only.spec.ts",
         "line": 25,
+        "column": 14
+      }
+    },
+    {
+      "id": "ddb1c74733457bd-38e67daa824cbab",
+      "title": "Serverless Security - Agent Builder item in project chrome vs chat experience shows Agent Builder in chrome nav when preferred chat experience has no saved value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/navigation/serverless_agent_builder_chrome_nav.spec.ts",
+        "line": 26,
+        "column": 14
+      }
+    },
+    {
+      "id": "ddb1c74733457bd-d5e6a7c7c474f5e",
+      "title": "Serverless Security - Agent Builder item in project chrome vs chat experience hides Agent Builder in chrome nav when chat experience is Classic",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/ui/parallel_tests/navigation/serverless_agent_builder_chrome_nav.spec.ts",
+        "line": 44,
         "column": 14
       }
     }

@@ -382,12 +382,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "agentBuilder",
-                "path": "x-pack/platform/plugins/shared/agent_builder/public/application/components/conversations/conversation_input/input_actions/connector_selector/connector_selector.tsx"
-              },
-              {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/platform/plugins/shared/observability_ai_assistant/public/hooks/use_genai_connectors.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/public/application/components/conversations/conversation_input/input_actions/connector_selector/connector_selector.tsx"
               },
               {
                 "plugin": "@kbn/elastic-assistant",
