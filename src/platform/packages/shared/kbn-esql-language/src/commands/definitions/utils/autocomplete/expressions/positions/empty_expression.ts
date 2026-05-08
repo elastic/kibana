@@ -39,7 +39,7 @@ import {
   buildAddValuePlaceholder,
   findConstantPlaceholderType,
 } from '../../../../../registry/complete_items';
-import { parametersFromHintsResolvers } from '../../parameters_from_hints';
+import { kindBasedResolvers, parametersFromHintsResolvers } from '../../parameters_from_hints';
 
 // functionDefinition is guaranteed by in_function.ts early return
 type FunctionParamContext = NonNullable<ExpressionContext['options']['functionParameterContext']>;
@@ -397,12 +397,25 @@ function buildSuggestionsFromHints(
     (a, b) => a.entityType === b.entityType && isEqual(a.constraints, b.constraints)
   );
 
-  const results = hints.map(
-    (hint) =>
-      parametersFromHintsResolvers[hint.entityType]?.suggestionResolver?.(hint, ctx.context) ?? []
+  // entityType-based dispatch (e.g. inference_endpoint)
+  const entityTypeResults = hints.flatMap((hint) =>
+    hint.entityType !== undefined
+      ? parametersFromHintsResolvers[hint.entityType]?.suggestionResolver?.(hint, ctx.context) ?? []
+      : []
   );
+  if (entityTypeResults.length > 0) {
+    return entityTypeResults;
+  }
 
-  return results.flat();
+  // hint.kind-based dispatch (e.g. 'aggregation' for SPARKLINE's first arg).
+  // The resolver receives the full ExpressionContext so it can apply location,
+  // license, and ignored-name filters consistently.
+  const hintKind = paramDefinitions.find((p) => p.hint?.kind !== undefined)?.hint?.kind;
+  if (hintKind !== undefined) {
+    return kindBasedResolvers[hintKind]?.(ctx) ?? [];
+  }
+
+  return [];
 }
 
 /** Builds suggestions for constant-only literal parameters */
