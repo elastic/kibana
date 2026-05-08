@@ -64,11 +64,27 @@ test.describe('Rules settings flyout', { tag: tags.stateful.classic }, () => {
     await page.gotoApp('rules');
   });
 
-  test.afterEach(async ({ apiServices }) => {
+  test.afterEach(async ({ apiServices, kbnClient }) => {
     if (createdRuleId) {
       await apiServices.alerting.rules.delete(createdRuleId);
       createdRuleId = undefined;
     }
+    await kbnClient.request({
+      method: 'POST',
+      path: '/internal/alerting/rules/settings/_flapping',
+      headers: { 'kbn-xsrf': 'scout' },
+      body: {
+        enabled: true,
+        look_back_window: DEFAULT_LOOK_BACK,
+        status_change_threshold: DEFAULT_STATUS_CHANGE_THRESHOLD,
+      },
+    });
+    await kbnClient.request({
+      method: 'POST',
+      path: '/internal/alerting/rules/settings/_query_delay',
+      headers: { 'kbn-xsrf': 'scout' },
+      body: { delay: DEFAULT_QUERY_DELAY },
+    });
   });
 
   test('the rules settings link is enabled', async ({ page }) => {
