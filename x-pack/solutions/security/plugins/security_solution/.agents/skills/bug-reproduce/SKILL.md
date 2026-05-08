@@ -142,6 +142,9 @@ Execute from `prerequisites` and `reproduction_steps`:
 4. **License** — `curl -u elastic:changeme http://localhost:5601/api/licensing/info`
 
 Ask the user only for: external tooling, large datasets, physical access requirements.
+If you are unsure how to create any required prerequisite — even via API or browser —
+ask the user rather than guessing or skipping it. A skipped or incorrect prerequisite
+will silently prevent the bug from reproducing or reproduce the wrong state.
 Verify all prerequisites pass before reproducing.
 
 ## Phase 3: Reproduce
