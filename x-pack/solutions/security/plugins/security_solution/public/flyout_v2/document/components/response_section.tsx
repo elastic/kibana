@@ -26,7 +26,7 @@ import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { ResponseDetails } from '../../response';
 import { useKibana } from '../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
-import { alertFlyoutHistoryKey } from '../../shared/constants/flyout_history';
+import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
 
 const KEY = 'response';
 
@@ -55,7 +55,7 @@ export const ResponseSection = memo<ResponseSectionProps>(
     const store = useStore();
     const history = useHistory();
     const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
     const indexName = useMemo(
       () => hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? '',
