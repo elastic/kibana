@@ -14,8 +14,8 @@ import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layou
 import {
   ChromeComponentsProvider,
   ClassicHeader,
+  ChromeNextGlobalHeader,
   ProjectHeader,
-  GlobalHeader,
   GridLayoutProjectSideNav,
   HeaderTopBanner,
   ChromelessHeader,
@@ -34,7 +34,6 @@ import {
   useSideNavWidth,
 } from '@kbn/core-chrome-browser-hooks';
 import { isNextChrome } from '@kbn/core-chrome-feature-flags';
-
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
 import { GridLayoutGlobalStyles } from './grid_global_app_style';
 import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
@@ -59,8 +58,7 @@ const layoutConfigs: {
     headerHeight: 48,
     bannerHeight: 32,
 
-    /** The application top bar renders the app specific menu */
-    /** we use it only in project style, because in classic it is included as part of the global header */
+    /** Project style renders the app-specific menu in a separate top bar. */
     applicationTopBarHeight: 48,
     applicationMarginRight: 8,
     applicationMarginBottom: 8,
@@ -72,7 +70,7 @@ const layoutConfigs: {
     chromeStyle: 'project',
     headerHeight: 48,
     bannerHeight: 32,
-
+    /** Chrome Next folds app-level header controls into the new header surface. */
     applicationTopBarHeight: 0,
     applicationMarginRight: 8,
     applicationMarginBottom: 8,
@@ -130,7 +128,7 @@ const useChromeSlots = (nextChrome: boolean): ChromeSlots => {
   if (nextChrome) {
     return {
       ...base,
-      header: <GlobalHeader />,
+      header: <ChromeNextGlobalHeader />,
       navigation: <GridLayoutProjectSideNav />,
       applicationTopBar: needsChromeAppHeader ? <ChromeAppHeaderRenderer /> : undefined,
     };

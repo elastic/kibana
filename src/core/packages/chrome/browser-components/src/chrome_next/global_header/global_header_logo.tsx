@@ -32,7 +32,7 @@ const logoLinkStyles = css`
   }
 `;
 
-export const GlobalHeaderLogo = React.memo(() => {
+export const ChromeNextGlobalHeaderLogo = React.memo(() => {
   const basePath = useBasePath();
   const homeHref = basePath.prepend(useProjectHome());
   const { logo: customLogo } = useCustomBranding();
@@ -51,4 +51,4 @@ export const GlobalHeaderLogo = React.memo(() => {
   );
 });
 
-GlobalHeaderLogo.displayName = 'GlobalHeaderLogo';
+ChromeNextGlobalHeaderLogo.displayName = 'ChromeNextGlobalHeaderLogo';

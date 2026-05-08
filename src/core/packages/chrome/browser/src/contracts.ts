@@ -10,7 +10,7 @@
 import type { ReactNode } from 'react';
 import type { Observable } from 'rxjs';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import type { ChromeNext } from './chrome_next/chrome_next';
+import type { ChromeNext } from './chrome_next';
 import type { ChromeNavLink, ChromeNavLinks } from './nav_links';
 import type { ChromeRecentlyAccessed } from './recently_accessed';
 import type { ChromeDocTitle } from './doc_title';
@@ -70,6 +70,12 @@ export interface ChromeStart {
   recentlyAccessed: ChromeRecentlyAccessed;
   /** {@inheritdoc ChromeDocTitle} */
   docTitle: ChromeDocTitle;
+  /**
+   * Chrome Next rollout namespace.
+   *
+   * {@inheritdoc ChromeNext}
+   */
+  next: ChromeNext;
 
   /**
    * Get an observable of the current visibility state of the chrome.
@@ -332,9 +338,6 @@ export interface ChromeStart {
    * Get the id of the currently active project navigation synchronously.
    */
   getActiveSolutionNavId(): SolutionId | null;
-
-  /** {@inheritdoc ChromeNext} */
-  next: ChromeNext;
 
   /**
    * Register a handler that opens the feedback UI.

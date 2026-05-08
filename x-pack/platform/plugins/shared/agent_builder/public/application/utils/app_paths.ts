@@ -37,6 +37,7 @@ export const appPaths = {
     plugins: '/manage/plugins',
     pluginDetails: ({ pluginId }: { pluginId: string }) => `/manage/plugins/${pluginId}`,
     connectors: '/manage/connectors',
+    mcpClients: '/manage/tools/mcp_clients',
   },
 
   // Legacy paths - redirect to new structure via LegacyConversationRedirect

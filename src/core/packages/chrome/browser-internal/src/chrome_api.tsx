@@ -184,7 +184,6 @@ export function createChromeApi({
       >,
     getActiveSolutionNavId: () => projectNavigation.getActiveSolutionNavId(),
     project,
-
     next: {
       get isEnabled() {
         return isNextChrome(featureFlags);
@@ -231,7 +230,6 @@ export function createChromeApi({
         },
       },
     },
-
     sidebar,
 
     registerFeedbackHandler: (handler: () => void) => {

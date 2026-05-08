@@ -73,11 +73,16 @@ export interface AppHeaderConfig {
 }
 
 /**
- * Chrome-Next APIs: AI button slot, global search, user menu, context switcher, and app header.
+ * Chrome Next rollout APIs.
+ *
+ * @remarks
+ * This namespace starts with the rollout state and hosts Chrome Next APIs as feature slices land
+ * behind the same flag.
+ *
  * @public
  */
 export interface ChromeNext {
-  /** Whether the Chrome-Next feature flag is enabled. */
+  /** Whether the Chrome Next feature flag is enabled. */
   readonly isEnabled: boolean;
   aiButton: {
     /**

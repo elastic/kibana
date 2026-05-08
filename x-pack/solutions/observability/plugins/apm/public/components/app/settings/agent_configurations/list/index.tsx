@@ -138,6 +138,7 @@ export function AgentConfigurationList({ status, configurations, refetch }: Prop
               size="s"
               color="danger"
               data-test-subj="apmAgentConfigurationErrorIcon"
+              aria-hidden={true}
             />
           ) : (
             <EuiHealth color={appliedByAgent ? 'success' : euiTheme.colors.lightShade} />

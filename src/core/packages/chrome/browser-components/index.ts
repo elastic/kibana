@@ -16,8 +16,12 @@ export {
   ChromeAppHeaderRenderer,
   useHasChromeAppHeaderContent,
 } from './src/project';
-export { GlobalHeader, GlobalHeaderShell, HeaderActionButton } from './src/chrome_next';
-export type { GlobalHeaderShellProps, HeaderActionButtonProps } from './src/chrome_next';
+export {
+  ChromeNextGlobalHeader,
+  ChromeNextGlobalHeaderShell,
+  HeaderActionButton,
+} from './src/chrome_next';
+export type { ChromeNextGlobalHeaderShellProps, HeaderActionButtonProps } from './src/chrome_next';
 export { GridLayoutProjectSideNav } from './src/project/sidenav/grid_layout_sidenav';
 export { Sidebar } from './src/sidebar';
 export { AppMenuBar } from './src/project/app_menu';

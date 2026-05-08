@@ -8,11 +8,11 @@
  */
 
 import type { ReactNode } from 'react';
+import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { COLLAPSED_WIDTH, EXPANDED_WIDTH } from '@kbn/ui-side-navigation';
 import { useSideNavWidth } from '@kbn/core-chrome-browser-hooks';
-import React, { useMemo } from 'react';
 
 const GLOBAL_HEADER_HEIGHT_PX = 48;
 
@@ -25,7 +25,7 @@ const logoSlot = css({
   flexShrink: 0,
 });
 
-export interface GlobalHeaderShellProps {
+export interface ChromeNextGlobalHeaderShellProps {
   logo?: ReactNode;
   switcher?: ReactNode;
   search?: ReactNode;
@@ -116,7 +116,7 @@ const useGlobalHeaderStyles = () => {
   }, [euiTheme]);
 };
 
-export const GlobalHeaderShell = React.memo<GlobalHeaderShellProps>(
+export const ChromeNextGlobalHeaderShell = React.memo<ChromeNextGlobalHeaderShellProps>(
   ({ logo, switcher, search, help, actions, userMenu }) => {
     const sideNavWidth = useSideNavWidth();
     const styles = useGlobalHeaderStyles();
@@ -164,4 +164,4 @@ export const GlobalHeaderShell = React.memo<GlobalHeaderShellProps>(
   }
 );
 
-GlobalHeaderShell.displayName = 'GlobalHeaderShell';
+ChromeNextGlobalHeaderShell.displayName = 'ChromeNextGlobalHeaderShell';
