@@ -13,13 +13,13 @@
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
  * Registry groups: 143
- * Metric groups: 517
+ * Metric groups: 525
  * Hardcoded fields: 34
- * Total fields: 1247
+ * Total fields: 1252
  *
  * @internal
  *
- * WARNING: This object contains 1247+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1252+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -4053,6 +4053,12 @@ export const semconvFlat = {
     description: 'Heap size target for the end of the GC cycle.',
     type: 'double',
   },
+  'metrics.go.memory.gc.pause.duration': {
+    name: 'metrics.go.memory.gc.pause.duration',
+    description:
+      'Distribution of individual GC-related stop-the-world pause latencies. This is the time from deciding to stop the world until the world is started again.',
+    type: 'double',
+  },
   'metrics.go.memory.limit': {
     name: 'metrics.go.memory.limit',
     description: 'Go runtime memory limit configured by the user, if a limit exists.',
@@ -4439,24 +4445,34 @@ export const semconvFlat = {
     description: 'Number of executing platform threads.',
     type: 'double',
   },
-  'metrics.k8s.container.cpu.limit': {
-    name: 'metrics.k8s.container.cpu.limit',
-    description: 'Maximum CPU resource limit set for the container.',
+  'metrics.k8s.container.cpu.limit.current': {
+    name: 'metrics.k8s.container.cpu.limit.current',
+    description: 'Maximum CPU resource limit currently configured for a running container.',
     type: 'double',
   },
-  'metrics.k8s.container.cpu.limit_utilization': {
-    name: 'metrics.k8s.container.cpu.limit_utilization',
-    description: 'The ratio of container CPU usage to its CPU limit.',
+  'metrics.k8s.container.cpu.limit.desired': {
+    name: 'metrics.k8s.container.cpu.limit.desired',
+    description: 'Maximum CPU resource limit as defined by the container spec.',
     type: 'double',
   },
-  'metrics.k8s.container.cpu.request': {
-    name: 'metrics.k8s.container.cpu.request',
-    description: 'CPU resource requested for the container.',
+  'metrics.k8s.container.cpu.limit.utilization': {
+    name: 'metrics.k8s.container.cpu.limit.utilization',
+    description: 'The ratio of container CPU usage to its current CPU limit.',
     type: 'double',
   },
-  'metrics.k8s.container.cpu.request_utilization': {
-    name: 'metrics.k8s.container.cpu.request_utilization',
-    description: 'The ratio of container CPU usage to its CPU request.',
+  'metrics.k8s.container.cpu.request.current': {
+    name: 'metrics.k8s.container.cpu.request.current',
+    description: 'CPU resource requested currently configured for a running container.',
+    type: 'double',
+  },
+  'metrics.k8s.container.cpu.request.desired': {
+    name: 'metrics.k8s.container.cpu.request.desired',
+    description: 'CPU resource requested as defined by the container spec.',
+    type: 'double',
+  },
+  'metrics.k8s.container.cpu.request.utilization': {
+    name: 'metrics.k8s.container.cpu.request.utilization',
+    description: 'The ratio of container CPU usage to its current CPU request.',
     type: 'double',
   },
   'metrics.k8s.container.ephemeral_storage.limit': {
@@ -5757,6 +5773,11 @@ export const semconvFlat = {
     description: 'Heap Memory size allocated.',
     type: 'double',
   },
+  'metrics.v8js.resource.active': {
+    name: 'metrics.v8js.resource.active',
+    description: 'Gauge of the active resources that are currently keeping the event loop alive.',
+    type: 'double',
+  },
   'metrics.vcs.change.count': {
     name: 'metrics.vcs.change.count',
     description:
@@ -6279,8 +6300,7 @@ export const semconvFlat = {
   },
   'process.executable.build_id.htlhash': {
     name: 'process.executable.build_id.htlhash',
-    description:
-      'Profiling specific build ID for executables. See the OTel specification for Profiles for more information.',
+    description: 'Deterministic build ID for executables.',
     type: 'keyword',
     example: '600DCAFE4A110000F2BF38C493F5FB92',
   },
@@ -7190,6 +7210,11 @@ export const semconvFlat = {
   'v8js.heap.space.name': {
     name: 'v8js.heap.space.name',
     description: 'The name of the space type of heap memory.',
+    type: 'keyword',
+  },
+  'v8js.resource.type': {
+    name: 'v8js.resource.type',
+    description: 'The type of resource keeping the event loop active.',
     type: 'keyword',
   },
   'vcs.change.id': {

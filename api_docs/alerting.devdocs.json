@@ -1953,7 +1953,7 @@
         "label": "AlertingServerSetup",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-        "lineNumber": 140,
+        "lineNumber": 141,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1985,7 +1985,7 @@
               "<RuleActionParams, ConnectorParams>) => void"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 141,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2008,7 +2008,7 @@
                   "<RuleActionParams, ConnectorParams>"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-                "lineNumber": 145,
+                "lineNumber": 146,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "ConnectorAdapter",
@@ -2093,7 +2093,7 @@
               "<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId, AlertData>) => void"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 147,
+            "lineNumber": 148,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2116,7 +2116,7 @@
                   "<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId, AlertData>"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-                "lineNumber": 157,
+                "lineNumber": 158,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "RuleType",
@@ -2139,7 +2139,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 169,
+            "lineNumber": 170,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2164,7 +2164,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 170,
+            "lineNumber": 171,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2183,7 +2183,7 @@
               " & { enabled: () => boolean; }"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 171,
+            "lineNumber": 172,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2206,7 +2206,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 172,
+            "lineNumber": 173,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2224,7 +2224,7 @@
         "label": "AlertingServerStart",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-        "lineNumber": 175,
+        "lineNumber": 176,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2242,7 +2242,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 176,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2260,7 +2260,7 @@
               "() => string[]"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 177,
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2344,7 +2344,7 @@
               "<Params, ExtractedParams, State, InstanceState, InstanceContext, ActionGroupIds, RecoveryActionGroupId, AlertData>"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 178,
+            "lineNumber": 179,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2376,7 +2376,7 @@
               "(rulesTypes: string[], spaceId?: string | undefined) => string[]"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 179,
+            "lineNumber": 180,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2426,12 +2426,20 @@
             "signature": [
               "(request: ",
               "KibanaRequest",
-              "<unknown, unknown, unknown, any>) => Promise<",
+              "<unknown, unknown, unknown, any>, options?: ",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.RulesClientCreateOptions",
+                "text": "RulesClientCreateOptions"
+              },
+              " | undefined) => Promise<",
               "RulesClientApi",
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 180,
+            "lineNumber": 181,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2448,12 +2456,37 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-                "lineNumber": 180,
-                "columnNumber": 29,
+                "lineNumber": 182,
+                "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingServerStart.getRulesClientWithRequest.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "alerting",
+                    "scope": "server",
+                    "docId": "kibAlertingPluginApi",
+                    "section": "def-server.RulesClientCreateOptions",
+                    "text": "RulesClientCreateOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
+                "lineNumber": 183,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "RulesClientCreateOptions",
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -2470,12 +2503,20 @@
             "signature": [
               "(request: ",
               "KibanaRequest",
-              "<unknown, unknown, unknown, any>, spaceId: string) => Promise<",
+              "<unknown, unknown, unknown, any>, spaceId: string, options?: ",
+              {
+                "pluginId": "alerting",
+                "scope": "server",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-server.RulesClientCreateOptions",
+                "text": "RulesClientCreateOptions"
+              },
+              " | undefined) => Promise<",
               "RulesClientApi",
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 181,
+            "lineNumber": 185,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2492,7 +2533,7 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-                "lineNumber": 186,
+                "lineNumber": 190,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "KibanaRequest",
@@ -2510,11 +2551,36 @@
                   "string"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-                "lineNumber": 187,
+                "lineNumber": 191,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "alerting",
+                "id": "def-server.AlertingServerStart.getRulesClientWithRequestInSpace.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "alerting",
+                    "scope": "server",
+                    "docId": "kibAlertingPluginApi",
+                    "section": "def-server.RulesClientCreateOptions",
+                    "text": "RulesClientCreateOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
+                "lineNumber": 192,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "RulesClientCreateOptions",
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -2548,7 +2614,7 @@
               ">>"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 189,
+            "lineNumber": 194,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2565,7 +2631,7 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-                "lineNumber": 190,
+                "lineNumber": 195,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "KibanaRequest",
@@ -2594,7 +2660,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/plugin.ts",
-            "lineNumber": 192,
+            "lineNumber": 197,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2612,7 +2678,7 @@
         "label": "BulkOperationError",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/types.ts",
-        "lineNumber": 173,
+        "lineNumber": 175,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2625,7 +2691,7 @@
             "label": "message",
             "description": [],
             "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/types.ts",
-            "lineNumber": 174,
+            "lineNumber": 176,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2641,7 +2707,7 @@
               "number | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/types.ts",
-            "lineNumber": 175,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2657,7 +2723,7 @@
               "{ id: string; name: string; }"
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/rules_client/types.ts",
-            "lineNumber": 176,
+            "lineNumber": 178,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -4755,6 +4821,40 @@
             ],
             "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
             "lineNumber": 182,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.RulesClientCreateOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "RulesClientCreateOptions",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/alerting/server/rules_client_factory.ts",
+        "lineNumber": 49,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.RulesClientCreateOptions.cloneApiKeysOnCreate",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cloneApiKeysOnCreate",
+            "description": [
+              "\nWhen true, clone the request's API key for each newly created rule.\nThe cloned key is independent, non-expiring, and managed by alerting\n(invalidated on rule delete/update). Only applies to rule creation."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/rules_client_factory.ts",
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

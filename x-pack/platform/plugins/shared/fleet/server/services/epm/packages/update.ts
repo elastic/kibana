@@ -18,14 +18,27 @@ import { auditLoggingService } from '../../audit_logging';
 
 import { getInstallationObject, getPackageInfo } from './get';
 
+export interface NamespaceCustomizationDiff {
+  addedNamespaces: string[];
+  removedNamespaces: string[];
+}
+
 export async function updatePackage(
   options: {
     savedObjectsClient: SavedObjectsClientContract;
     pkgName: string;
     keepPoliciesUpToDate?: boolean;
   } & TypeOf<typeof UpdatePackageRequestSchema.body>
-) {
-  const { savedObjectsClient, pkgName, keepPoliciesUpToDate } = options;
+): Promise<{
+  packageInfo: Awaited<ReturnType<typeof getPackageInfo>>;
+  namespaceCustomizationDiff: NamespaceCustomizationDiff;
+}> {
+  const {
+    savedObjectsClient,
+    pkgName,
+    keepPoliciesUpToDate,
+    namespace_customization_enabled_for: newNamespaceCustomization,
+  } = options;
   const installedPackage = await getInstallationObject({ savedObjectsClient, pkgName });
 
   if (!installedPackage) {
@@ -39,12 +52,27 @@ export async function updatePackage(
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
-  const updateAttrs: Partial<Installation> = {
-    keep_policies_up_to_date: keepPoliciesUpToDate ?? false,
+  const updateAttrs: Partial<Installation> = {};
+  const namespaceCustomizationDiff: NamespaceCustomizationDiff = {
+    addedNamespaces: [],
+    removedNamespaces: [],
   };
-  if (keepPoliciesUpToDate === false) {
-    updateAttrs.pending_upgrade_review = undefined;
+
+  if (keepPoliciesUpToDate !== undefined) {
+    updateAttrs.keep_policies_up_to_date = keepPoliciesUpToDate;
+    if (keepPoliciesUpToDate === false) {
+      updateAttrs.pending_upgrade_review = undefined;
+    }
   }
+
+  if (newNamespaceCustomization) {
+    const oldList = installedPackage.attributes.namespace_customization_enabled_for ?? [];
+    const newList = [...new Set(newNamespaceCustomization)];
+    namespaceCustomizationDiff.addedNamespaces = newList.filter((ns) => !oldList.includes(ns));
+    namespaceCustomizationDiff.removedNamespaces = oldList.filter((ns) => !newList.includes(ns));
+    updateAttrs.namespace_customization_enabled_for = newList;
+  }
+
   await savedObjectsClient.update<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     installedPackage.id,
@@ -57,7 +85,7 @@ export async function updatePackage(
     pkgVersion: installedPackage.attributes.version,
   });
 
-  return packageInfo;
+  return { packageInfo, namespaceCustomizationDiff };
 }
 
 export async function reviewUpgrade(options: {

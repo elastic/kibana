@@ -7,8 +7,9 @@
 
 import type { AlertStatus } from '@kbn/rule-data-utils';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
+import type { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { getSeverity } from '../../../../common/anomaly_detection';
 import type { SloStatus } from '../../../../common/service_inventory';
-import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import type {
   ServiceMapEdge as ServiceMapEdgeType,
   ServiceMapNode,
@@ -20,13 +21,14 @@ export interface ServiceMapViewFilters {
   /** Empty = show all alert statuses. If non-empty, service must have ≥1 alert in any selected status. */
   alertStatusFilter: AlertStatus[];
   sloStatusFilter: SloStatus[];
-  anomalyStatusFilter: ServiceHealthStatus[];
+  /** Empty = show all. If non-empty, service ML severity (from anomaly score) must match one of the selected bands. */
+  anomalySeverityFilter: ML_ANOMALY_SEVERITY[];
 }
 
 export const DEFAULT_SERVICE_MAP_VIEW_FILTERS: ServiceMapViewFilters = {
   alertStatusFilter: [],
   sloStatusFilter: [],
-  anomalyStatusFilter: [],
+  anomalySeverityFilter: [],
 };
 
 /**
@@ -56,6 +58,11 @@ export function getServiceNodeAlertCountForStatus(
   return 0;
 }
 
+/** ML severity band for map filters, derived from the same score → severity rules as service inventory. */
+export function getMlSeverityForServiceMapNode(data: ServiceNodeData): ML_ANOMALY_SEVERITY {
+  return getSeverity(data.serviceAnomalyStats?.anomalyScore);
+}
+
 function serviceMatchesFilters(data: ServiceNodeData, filters: ServiceMapViewFilters): boolean {
   if (filters.alertStatusFilter.length > 0) {
     const matchesAny = filters.alertStatusFilter.some(
@@ -73,9 +80,9 @@ function serviceMatchesFilters(data: ServiceNodeData, filters: ServiceMapViewFil
     }
   }
 
-  if (filters.anomalyStatusFilter.length > 0) {
-    const health = data.serviceAnomalyStats?.healthStatus ?? ServiceHealthStatus.unknown;
-    if (!filters.anomalyStatusFilter.includes(health)) {
+  if (filters.anomalySeverityFilter.length > 0) {
+    const severity = getMlSeverityForServiceMapNode(data);
+    if (!filters.anomalySeverityFilter.includes(severity)) {
       return false;
     }
   }

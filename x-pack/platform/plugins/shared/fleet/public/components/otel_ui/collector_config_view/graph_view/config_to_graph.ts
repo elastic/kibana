@@ -8,12 +8,14 @@
 import type { Node, Edge } from '@xyflow/react';
 
 import type { OTelCollectorConfig } from '../../../../../common/types';
-import { ALL_PIPELINES, SIGNAL_PREFIX, getSignalType } from '../utils';
+import { ALL_PIPELINES, type ComponentHealthStatus, SIGNAL_PREFIX, getSignalType } from '../utils';
 
 import type { OTelComponentType, OTelGraphNodeData } from './constants';
 
 export interface OTelPipelineGroupNodeData {
   label: string;
+  isSelected?: boolean;
+  healthStatus?: ComponentHealthStatus;
   [key: string]: unknown;
 }
 
@@ -37,34 +39,24 @@ const getPipelineEntries = (
   return Object.entries(allPipelines).filter(([id]) => id === selectedPipelineId);
 };
 
-const buildComponentTypeMap = (
-  config: OTelCollectorConfig,
-  referencedComponents: Set<string>
-): Map<string, OTelComponentType> => {
-  const typeMap = new Map<string, OTelComponentType>();
-  const sections: Array<{ section: Record<string, any> | undefined; type: OTelComponentType }> = [
-    { section: config.receivers, type: 'receiver' },
-    { section: config.processors, type: 'processor' },
-    { section: config.connectors, type: 'connector' },
-    { section: config.exporters, type: 'exporter' },
-  ];
-  for (const { section, type } of sections) {
-    if (section) {
-      for (const id of Object.keys(section)) {
-        if (referencedComponents.has(id)) {
-          typeMap.set(id, type);
-        }
-      }
-    }
+type PipelineRole = 'receiver' | 'processor' | 'exporter';
+
+const getComponentType = (
+  componentId: string,
+  role: PipelineRole,
+  config: OTelCollectorConfig
+): OTelComponentType => {
+  if (config.connectors && componentId in config.connectors) {
+    return 'connector';
   }
-  return typeMap;
+  return role;
 };
 
 const buildEdges = (
   pipelineEntries: Array<
     [string, { receivers?: string[]; processors?: string[]; exporters?: string[] }]
   >,
-  nodeIdFn: (componentId: string, pipelineId: string) => string
+  nodeIdFn: (componentId: string, pipelineId: string, role: PipelineRole) => string
 ): Edge[] => {
   const edgeSet = new Set<string>();
   const edges: Edge[] = [];
@@ -82,21 +74,30 @@ const buildEdges = (
 
     if (processors.length > 0) {
       for (const receiver of receivers) {
-        addEdge(nodeIdFn(receiver, pipelineId), nodeIdFn(processors[0], pipelineId));
+        addEdge(
+          nodeIdFn(receiver, pipelineId, 'receiver'),
+          nodeIdFn(processors[0], pipelineId, 'processor')
+        );
       }
       for (let i = 0; i < processors.length - 1; i++) {
-        addEdge(nodeIdFn(processors[i], pipelineId), nodeIdFn(processors[i + 1], pipelineId));
+        addEdge(
+          nodeIdFn(processors[i], pipelineId, 'processor'),
+          nodeIdFn(processors[i + 1], pipelineId, 'processor')
+        );
       }
       for (const exporter of exporters) {
         addEdge(
-          nodeIdFn(processors[processors.length - 1], pipelineId),
-          nodeIdFn(exporter, pipelineId)
+          nodeIdFn(processors[processors.length - 1], pipelineId, 'processor'),
+          nodeIdFn(exporter, pipelineId, 'exporter')
         );
       }
     } else {
       for (const receiver of receivers) {
         for (const exporter of exporters) {
-          addEdge(nodeIdFn(receiver, pipelineId), nodeIdFn(exporter, pipelineId));
+          addEdge(
+            nodeIdFn(receiver, pipelineId, 'receiver'),
+            nodeIdFn(exporter, pipelineId, 'exporter')
+          );
         }
       }
     }
@@ -105,25 +106,44 @@ const buildEdges = (
   return edges;
 };
 
+const getPipelineRoleEntries = (pipeline: {
+  receivers?: string[];
+  processors?: string[];
+  exporters?: string[];
+}): Array<{ ids: string[]; role: PipelineRole }> => [
+  { ids: pipeline.receivers ?? [], role: 'receiver' },
+  { ids: pipeline.processors ?? [], role: 'processor' },
+  { ids: pipeline.exporters ?? [], role: 'exporter' },
+];
+
 const buildMergedGraph = (
   config: OTelCollectorConfig,
   pipelineEntries: Array<
     [string, { receivers?: string[]; processors?: string[]; exporters?: string[] }]
-  >,
-  componentTypeMap: Map<string, OTelComponentType>
+  >
 ): ConfigToGraphResult => {
   const nodeMap = new Map<string, Node<OTelGraphNodeData>>();
 
-  for (const [id, type] of componentTypeMap) {
-    nodeMap.set(id, {
-      id,
-      type: 'component',
-      position: { x: 0, y: 0 },
-      data: { label: id, componentType: type },
-    });
+  for (const [, pipeline] of pipelineEntries) {
+    for (const { ids, role } of getPipelineRoleEntries(pipeline)) {
+      for (const id of ids) {
+        const nodeId = `${role}::${id}`;
+        if (!nodeMap.has(nodeId)) {
+          nodeMap.set(nodeId, {
+            id: nodeId,
+            type: 'component',
+            position: { x: 0, y: 0 },
+            data: { label: id, componentType: getComponentType(id, role, config) },
+          });
+        }
+      }
+    }
   }
 
-  const edges = buildEdges(pipelineEntries, (componentId) => componentId);
+  const edges = buildEdges(
+    pipelineEntries,
+    (componentId, _pipelineId, role) => `${role}::${componentId}`
+  );
 
   return { nodes: Array.from(nodeMap.values()), edges, isMergedView: true };
 };
@@ -134,8 +154,7 @@ const buildGroupedGraph = (
   config: OTelCollectorConfig,
   pipelineEntries: Array<
     [string, { receivers?: string[]; processors?: string[]; exporters?: string[] }]
-  >,
-  componentTypeMap: Map<string, OTelComponentType>
+  >
 ): ConfigToGraphResult => {
   const nodes: Array<Node<OTelGraphNodeData> | Node<OTelPipelineGroupNodeData>> = [];
   const nodeSet = new Set<string>();
@@ -150,25 +169,21 @@ const buildGroupedGraph = (
       data: { label: pipelineId },
     });
 
-    const componentIds = [
-      ...(pipeline.receivers ?? []),
-      ...(pipeline.processors ?? []),
-      ...(pipeline.exporters ?? []),
-    ];
-
-    for (const componentId of componentIds) {
-      const nodeId = `${pipelineId}::${componentId}`;
-      if (!nodeSet.has(nodeId)) {
-        nodeSet.add(nodeId);
-        const componentType = componentTypeMap.get(componentId);
-        if (componentType) {
+    for (const { ids, role } of getPipelineRoleEntries(pipeline)) {
+      for (const componentId of ids) {
+        const nodeId = `${pipelineId}::${componentId}`;
+        if (!nodeSet.has(nodeId)) {
+          nodeSet.add(nodeId);
           nodes.push({
             id: nodeId,
             type: 'component',
             position: { x: 0, y: 0 },
             parentId: groupId,
             extent: 'parent' as const,
-            data: { label: componentId, componentType },
+            data: {
+              label: componentId,
+              componentType: getComponentType(componentId, role, config),
+            },
           });
         }
       }
@@ -177,7 +192,7 @@ const buildGroupedGraph = (
 
   const edges = buildEdges(
     pipelineEntries,
-    (componentId, pipelineId) => `${pipelineId}::${componentId}`
+    (componentId, pipelineId, _role) => `${pipelineId}::${componentId}`
   );
 
   const connectorIds = config.connectors ? Object.keys(config.connectors) : [];
@@ -224,18 +239,9 @@ export const configToGraph = (
 
   const pipelineEntries = getPipelineEntries(allPipelines, selectedPipelineId);
 
-  const referencedComponents = new Set<string>();
-  for (const [, pipeline] of pipelineEntries) {
-    for (const id of pipeline.receivers ?? []) referencedComponents.add(id);
-    for (const id of pipeline.processors ?? []) referencedComponents.add(id);
-    for (const id of pipeline.exporters ?? []) referencedComponents.add(id);
-  }
-
-  const componentTypeMap = buildComponentTypeMap(config, referencedComponents);
-
   if (pipelineEntries.length > 1) {
-    return buildGroupedGraph(config, pipelineEntries, componentTypeMap);
+    return buildGroupedGraph(config, pipelineEntries);
   }
 
-  return buildMergedGraph(config, pipelineEntries, componentTypeMap);
+  return buildMergedGraph(config, pipelineEntries);
 };

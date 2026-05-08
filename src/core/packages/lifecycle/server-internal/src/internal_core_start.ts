@@ -26,6 +26,7 @@ import type { InternalUserProfileServiceStart } from '@kbn/core-user-profile-ser
 import type { PricingServiceStart } from '@kbn/core-pricing-server';
 import type { InternalCoreDiServiceStart } from '@kbn/core-di-internal';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
+import type { UserStorageServiceStart } from '@kbn/core-user-storage-server';
 
 /**
  * @internal
@@ -50,5 +51,6 @@ export interface InternalCoreStart {
   pricing: PricingServiceStart;
   injection: InternalCoreDiServiceStart;
   dataStreams: DataStreamsStart;
+  userStorage: UserStorageServiceStart;
   _plugins?: Map<string, any>;
 }

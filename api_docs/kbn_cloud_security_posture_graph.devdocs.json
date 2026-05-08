@@ -5,159 +5,6 @@
     "functions": [
       {
         "parentPluginId": "@kbn/cloud-security-posture-graph",
-        "id": "def-public.Callout",
-        "type": "Function",
-        "tags": [],
-        "label": "Callout",
-        "description": [],
-        "signature": [
-          "React.NamedExoticComponent<",
-          {
-            "pluginId": "@kbn/cloud-security-posture-graph",
-            "scope": "public",
-            "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
-            "section": "def-public.CalloutProps",
-            "text": "CalloutProps"
-          },
-          ">"
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/callout/callout.tsx",
-        "lineNumber": 32,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/cloud-security-posture-graph",
-            "id": "def-public.Callout.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "lineNumber": 630,
-            "columnNumber": 10,
-            "deprecated": false,
-            "docsReferencedTypeName": "P",
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture-graph",
-        "id": "def-public.getCalloutConfig",
-        "type": "Function",
-        "tags": [],
-        "label": "getCalloutConfig",
-        "description": [
-          "\nGet the callout configuration for a specific variant with provided URLs.\n"
-        ],
-        "signature": [
-          "(variant: ",
-          {
-            "pluginId": "@kbn/cloud-security-posture-graph",
-            "scope": "public",
-            "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
-            "section": "def-public.CalloutVariant",
-            "text": "CalloutVariant"
-          },
-          ", links: { integrationUrl: string; discoverUrl: string; }) => ",
-          {
-            "pluginId": "@kbn/cloud-security-posture-graph",
-            "scope": "public",
-            "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
-            "section": "def-public.CalloutConfig",
-            "text": "CalloutConfig"
-          }
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/callout/callout.config.ts",
-        "lineNumber": 27,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/cloud-security-posture-graph",
-            "id": "def-public.getCalloutConfig.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "variant",
-            "description": [
-              "- The callout variant to retrieve configuration for"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/cloud-security-posture-graph",
-                "scope": "public",
-                "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
-                "section": "def-public.CalloutVariant",
-                "text": "CalloutVariant"
-              }
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/callout/callout.config.ts",
-            "lineNumber": 28,
-            "columnNumber": 3,
-            "deprecated": false,
-            "docsReferencedTypeName": "CalloutVariant",
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/cloud-security-posture-graph",
-            "id": "def-public.getCalloutConfig.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "links",
-            "description": [
-              "- Object containing URLs for integration and discover"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/callout/callout.config.ts",
-            "lineNumber": 29,
-            "columnNumber": 10,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/cloud-security-posture-graph",
-                "id": "def-public.getCalloutConfig.$2.integrationUrl",
-                "type": "string",
-                "tags": [],
-                "label": "integrationUrl",
-                "description": [],
-                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/callout/callout.config.ts",
-                "lineNumber": 30,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/cloud-security-posture-graph",
-                "id": "def-public.getCalloutConfig.$2.discoverUrl",
-                "type": "string",
-                "tags": [],
-                "label": "discoverUrl",
-                "description": [],
-                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/callout/callout.config.ts",
-                "lineNumber": 31,
-                "columnNumber": 5,
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [
-          "The callout configuration"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture-graph",
         "id": "def-public.getNodeDocumentMode",
         "type": "Function",
         "tags": [],
@@ -287,7 +134,7 @@
           ">"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
-        "lineNumber": 121,
+        "lineNumber": 116,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -395,7 +242,7 @@
           ">"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_investigation/graph_investigation.tsx",
-        "lineNumber": 232,
+        "lineNumber": 230,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -683,65 +530,6 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture-graph",
-        "id": "def-public.useGraphCallout",
-        "type": "Function",
-        "tags": [],
-        "label": "useGraphCallout",
-        "description": [
-          "\nOrchestrator hook that combines callout status, links, and configuration.\nProvides a single entry point for graph callout functionality with dismiss tracking.\nWhen a user dismisses the callout, it won't be shown again until the component unmounts.\n"
-        ],
-        "signature": [
-          "(nodes: ",
-          {
-            "pluginId": "@kbn/cloud-security-posture-graph",
-            "scope": "public",
-            "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
-            "section": "def-public.NodeViewModel",
-            "text": "NodeViewModel"
-          },
-          "[]) => ",
-          "UseGraphCalloutResult"
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/hooks/use_graph_callout.ts",
-        "lineNumber": 47,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/cloud-security-posture-graph",
-            "id": "def-public.useGraphCallout.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "nodes",
-            "description": [
-              "- Array of graph nodes to analyze"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/cloud-security-posture-graph",
-                "scope": "public",
-                "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
-                "section": "def-public.NodeViewModel",
-                "text": "NodeViewModel"
-              },
-              "[]"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/hooks/use_graph_callout.ts",
-            "lineNumber": 47,
-            "columnNumber": 33,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "Object with shouldShowCallout flag, config, and onDismiss callback (if applicable)"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture-graph",
         "id": "def-public.useGraphPopoverState",
         "type": "Function",
         "tags": [],
@@ -818,148 +606,6 @@
       }
     ],
     "interfaces": [
-      {
-        "parentPluginId": "@kbn/cloud-security-posture-graph",
-        "id": "def-public.CalloutConfig",
-        "type": "Interface",
-        "tags": [],
-        "label": "CalloutConfig",
-        "description": [],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/callout/callout.translations.ts",
-        "lineNumber": 17,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/cloud-security-posture-graph",
-            "id": "def-public.CalloutConfig.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/callout/callout.translations.ts",
-            "lineNumber": 18,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cloud-security-posture-graph",
-            "id": "def-public.CalloutConfig.message",
-            "type": "string",
-            "tags": [],
-            "label": "message",
-            "description": [],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/callout/callout.translations.ts",
-            "lineNumber": 19,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cloud-security-posture-graph",
-            "id": "def-public.CalloutConfig.links",
-            "type": "Array",
-            "tags": [],
-            "label": "links",
-            "description": [],
-            "signature": [
-              "{ text: string; href: string; }[]"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/callout/callout.translations.ts",
-            "lineNumber": 20,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture-graph",
-        "id": "def-public.CalloutProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "CalloutProps",
-        "description": [],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/callout/callout.tsx",
-        "lineNumber": 13,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/cloud-security-posture-graph",
-            "id": "def-public.CalloutProps.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [
-              "\nThe title of the callout"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/callout/callout.tsx",
-            "lineNumber": 14,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cloud-security-posture-graph",
-            "id": "def-public.CalloutProps.message",
-            "type": "string",
-            "tags": [],
-            "label": "message",
-            "description": [
-              "\nThe message content of the callout"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/callout/callout.tsx",
-            "lineNumber": 18,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cloud-security-posture-graph",
-            "id": "def-public.CalloutProps.links",
-            "type": "Array",
-            "tags": [],
-            "label": "links",
-            "description": [
-              "\nLinks to display in the callout"
-            ],
-            "signature": [
-              "{ text: string; href: string; }[]"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/callout/callout.tsx",
-            "lineNumber": 22,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cloud-security-posture-graph",
-            "id": "def-public.CalloutProps.onDismiss",
-            "type": "Function",
-            "tags": [],
-            "label": "onDismiss",
-            "description": [
-              "\nOptional callback when the dismiss button is clicked"
-            ],
-            "signature": [
-              "(() => void) | undefined"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/callout/callout.tsx",
-            "lineNumber": 26,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/cloud-security-posture-graph",
         "id": "def-public.EdgeViewModel",
@@ -1336,24 +982,6 @@
           },
           {
             "parentPluginId": "@kbn/cloud-security-posture-graph",
-            "id": "def-public.GraphProps.interactiveBottomRightContent",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "interactiveBottomRightContent",
-            "description": [
-              "\nOptional content to be rendered in the bottom-right corner of the graph.\nTypically used for callouts or other contextual messages displayed next to the controls."
-            ],
-            "signature": [
-              "React.ReactNode"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
-            "lineNumber": 70,
-            "columnNumber": 3,
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cloud-security-posture-graph",
             "id": "def-public.GraphProps.onCenterGraphAfterRefresh",
             "type": "Function",
             "tags": [],
@@ -1373,7 +1001,7 @@
               "[]) => void | string[] | \"fit-view\") | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
-            "lineNumber": 75,
+            "lineNumber": 70,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1396,7 +1024,7 @@
                   "[]"
                 ],
                 "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
-                "lineNumber": 85,
+                "lineNumber": 80,
                 "columnNumber": 32,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1572,23 +1200,6 @@
     ],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "@kbn/cloud-security-posture-graph",
-        "id": "def-public.CalloutVariant",
-        "type": "Type",
-        "tags": [],
-        "label": "CalloutVariant",
-        "description": [],
-        "signature": [
-          "\"uninstalledIntegration\" | \"unavailableEntityInfo\" | \"unknownEntityType\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/callout/callout.translations.ts",
-        "lineNumber": 12,
-        "columnNumber": 1,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/cloud-security-posture-graph",
         "id": "def-public.EntityOrEventItem",

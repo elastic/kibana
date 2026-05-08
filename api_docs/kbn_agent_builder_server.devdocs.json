@@ -774,6 +774,378 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.AgentBuilderPluginSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentBuilderPluginSetup",
+        "description": [
+          "\nSetup contract of the agentBuilder plugin."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 192,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentBuilderPluginSetup.agents",
+            "type": "Object",
+            "tags": [],
+            "label": "agents",
+            "description": [
+              "\nAgents setup contract, which can be used to register built-in agents."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.AgentsSetup",
+                "text": "AgentsSetup"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 196,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentBuilderPluginSetup.tools",
+            "type": "Object",
+            "tags": [],
+            "label": "tools",
+            "description": [
+              "\nTools setup contract, which can be used to register built-in tools."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ToolsSetup",
+                "text": "ToolsSetup"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 200,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentBuilderPluginSetup.attachments",
+            "type": "Object",
+            "tags": [],
+            "label": "attachments",
+            "description": [
+              "\nAttachments setup contract, which can be used to register attachment types."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.AttachmentsSetup",
+                "text": "AttachmentsSetup"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 204,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentBuilderPluginSetup.hooks",
+            "type": "Object",
+            "tags": [],
+            "label": "hooks",
+            "description": [
+              "\nHooks setup contract, which can be used to register lifecycle event hooks."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.HooksServiceSetup",
+                "text": "HooksServiceSetup"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 208,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentBuilderPluginSetup.skills",
+            "type": "Object",
+            "tags": [],
+            "label": "skills",
+            "description": [
+              "\nSkills setup contract, which can be used to register skills."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.SkillsSetup",
+                "text": "SkillsSetup"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 212,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentBuilderPluginSetup.plugins",
+            "type": "Object",
+            "tags": [],
+            "label": "plugins",
+            "description": [
+              "\nPlugins setup contract, which can be used to register built-in plugins."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.PluginsSetup",
+                "text": "PluginsSetup"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 216,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentBuilderPluginSetup.topSnippets",
+            "type": "Object",
+            "tags": [],
+            "label": "topSnippets",
+            "description": [
+              "\nTOP_SNIPPETS configuration (numSnippets, numWords) from `xpack.agentBuilder.topSnippets`.\nExposed so that dependent plugins can pass these values to search utilities."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.TopSnippetsConfig",
+                "text": "TopSnippetsConfig"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 220,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.AgentBuilderPluginStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentBuilderPluginStart",
+        "description": [
+          "\nStart contract of the agentBuilder plugin."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 227,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentBuilderPluginStart.agents",
+            "type": "Object",
+            "tags": [],
+            "label": "agents",
+            "description": [
+              "\nAgents service, to execute agents."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.AgentsStart",
+                "text": "AgentsStart"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 231,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentBuilderPluginStart.tools",
+            "type": "Object",
+            "tags": [],
+            "label": "tools",
+            "description": [
+              "\nTools service, to manage or execute tools."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ToolsStart",
+                "text": "ToolsStart"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 235,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentBuilderPluginStart.skills",
+            "type": "Object",
+            "tags": [],
+            "label": "skills",
+            "description": [
+              "\nSkills service, to manage and access skills."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.SkillsStart",
+                "text": "SkillsStart"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 239,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentBuilderPluginStart.plugins",
+            "type": "Object",
+            "tags": [],
+            "label": "plugins",
+            "description": [
+              "\nPlugins service, to query built-in and persisted plugins."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.PluginsStart",
+                "text": "PluginsStart"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 243,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentBuilderPluginStart.execution",
+            "type": "Object",
+            "tags": [],
+            "label": "execution",
+            "description": [
+              "\nExecution service, to execute agents and retrieve execution status."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ExecutionStart",
+                "text": "ExecutionStart"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 247,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentBuilderPluginStart.runtime",
+            "type": "Object",
+            "tags": [],
+            "label": "runtime",
+            "description": [
+              "\nRuntime utilities for consumers that need to interact with LLM models\noutside of the agent builder's built-in tool/agent execution flow."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.RuntimeStart",
+                "text": "RuntimeStart"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 251,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentBuilderPluginStart.conversations",
+            "type": "Object",
+            "tags": [],
+            "label": "conversations",
+            "description": [
+              "\nConversations service (read-only), to list and retrieve conversations."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ConversationsStart",
+                "text": "ConversationsStart"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 256,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
         "id": "def-common.AgentEventEmitter",
         "type": "Interface",
         "tags": [],
@@ -932,6 +1304,321 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.AgentExecutionService",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentExecutionService",
+        "description": [
+          "\nThe agent execution service - entry point for deferred agent execution.\nReplaces the direct call to ChatService.converse in the request flow."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+        "lineNumber": 202,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentExecutionService.executeAgent",
+            "type": "Function",
+            "tags": [],
+            "label": "executeAgent",
+            "description": [
+              "\nExecute an agent, either locally or on a Task Manager node.\nCreates an execution document and returns the execution ID along with an events observable."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ExecuteAgentParams",
+                "text": "ExecuteAgentParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ExecuteAgentResult",
+                "text": "ExecuteAgentResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 207,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AgentExecutionService.executeAgent.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-server",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
+                    "section": "def-common.ExecuteAgentParams",
+                    "text": "ExecuteAgentParams"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+                "lineNumber": 211,
+                "columnNumber": 16,
+                "deprecated": false,
+                "docsReferencedTypeName": "ExecuteAgentParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentExecutionService.getExecution",
+            "type": "Function",
+            "tags": [],
+            "label": "getExecution",
+            "description": [
+              "\nRetrieve an agent execution by its ID."
+            ],
+            "signature": [
+              "(executionId: string) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.AgentExecution",
+                "text": "AgentExecution"
+              },
+              " | undefined>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 213,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AgentExecutionService.getExecution.$1",
+                "type": "string",
+                "tags": [],
+                "label": "executionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+                "lineNumber": 216,
+                "columnNumber": 16,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentExecutionService.abortExecution",
+            "type": "Function",
+            "tags": [],
+            "label": "abortExecution",
+            "description": [
+              "\nAbort an ongoing execution.\nSets the execution status to 'aborted', which the TM handler will detect via polling."
+            ],
+            "signature": [
+              "(executionId: string) => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 218,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AgentExecutionService.abortExecution.$1",
+                "type": "string",
+                "tags": [],
+                "label": "executionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+                "lineNumber": 222,
+                "columnNumber": 18,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentExecutionService.followExecution",
+            "type": "Function",
+            "tags": [],
+            "label": "followExecution",
+            "description": [
+              "\nFollow an execution by polling for events.\nReturns an observable that emits events as they are written to the data stream.\nThe observable completes when the execution reaches a terminal status."
+            ],
+            "signature": [
+              "(executionId: string, options?: ",
+              "FollowExecutionOptions",
+              " | undefined) => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ChatEvent",
+                "text": "ChatEvent"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 224,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AgentExecutionService.followExecution.$1",
+                "type": "string",
+                "tags": [],
+                "label": "executionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+                "lineNumber": 229,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AgentExecutionService.followExecution.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "FollowExecutionOptions",
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+                "lineNumber": 229,
+                "columnNumber": 40,
+                "deprecated": false,
+                "docsReferencedTypeName": "FollowExecutionOptions",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentExecutionService.findExecutions",
+            "type": "Function",
+            "tags": [],
+            "label": "findExecutions",
+            "description": [
+              "\nFind executions matching the given filters. Defaults to current space unless spaceId is explicitly provided.\nCallers that override spaceId are responsible for their own authorization.\nNote: returned executions have `events: []` (events are excluded for performance). Use `getExecution` or `readEvents` for full events."
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, options?: ",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.FindExecutionsOptions",
+                "text": "FindExecutionsOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.AgentExecution",
+                "text": "AgentExecution"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 231,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AgentExecutionService.findExecutions.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+                "lineNumber": 237,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AgentExecutionService.findExecutions.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-server",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
+                    "section": "def-common.FindExecutionsOptions",
+                    "text": "FindExecutionsOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+                "lineNumber": 238,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "FindExecutionsOptions",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1570,6 +2257,614 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.AgentRegistry",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentRegistry",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/registry.ts",
+        "lineNumber": 26,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentRegistry.has",
+            "type": "Function",
+            "tags": [],
+            "label": "has",
+            "description": [],
+            "signature": [
+              "(agentId: string) => Promise<boolean>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/registry.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AgentRegistry.has.$1",
+                "type": "string",
+                "tags": [],
+                "label": "agentId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/registry.ts",
+                "lineNumber": 27,
+                "columnNumber": 7,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentRegistry.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(agentId: string) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.InternalAgentDefinition",
+                "text": "InternalAgentDefinition"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/registry.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AgentRegistry.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "agentId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/registry.ts",
+                "lineNumber": 28,
+                "columnNumber": 7,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentRegistry.list",
+            "type": "Function",
+            "tags": [],
+            "label": "list",
+            "description": [],
+            "signature": [
+              "(opts?: ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.AgentListOptions",
+                "text": "AgentListOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.InternalAgentDefinition",
+                "text": "InternalAgentDefinition"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/registry.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AgentRegistry.list.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.AgentListOptions",
+                    "text": "AgentListOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/registry.ts",
+                "lineNumber": 29,
+                "columnNumber": 8,
+                "deprecated": false,
+                "docsReferencedTypeName": "AgentListOptions",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentRegistry.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "(createRequest: ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.AgentCreateRequest",
+                "text": "AgentCreateRequest"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.InternalAgentDefinition",
+                "text": "InternalAgentDefinition"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/registry.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AgentRegistry.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "createRequest",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.AgentCreateRequest",
+                    "text": "AgentCreateRequest"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/registry.ts",
+                "lineNumber": 30,
+                "columnNumber": 10,
+                "deprecated": false,
+                "docsReferencedTypeName": "AgentCreateRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentRegistry.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [],
+            "signature": [
+              "(agentId: string, update: ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.AgentUpdateRequest",
+                "text": "AgentUpdateRequest"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.InternalAgentDefinition",
+                "text": "InternalAgentDefinition"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/registry.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AgentRegistry.update.$1",
+                "type": "string",
+                "tags": [],
+                "label": "agentId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/registry.ts",
+                "lineNumber": 31,
+                "columnNumber": 10,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AgentRegistry.update.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "update",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.AgentUpdateRequest",
+                    "text": "AgentUpdateRequest"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/registry.ts",
+                "lineNumber": 31,
+                "columnNumber": 27,
+                "deprecated": false,
+                "docsReferencedTypeName": "AgentUpdateRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentRegistry.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "signature": [
+              "(args: ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.AgentDeleteRequest",
+                "text": "AgentDeleteRequest"
+              },
+              ") => Promise<boolean>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/registry.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AgentRegistry.delete.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.AgentDeleteRequest",
+                    "text": "AgentDeleteRequest"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/registry.ts",
+                "lineNumber": 32,
+                "columnNumber": 10,
+                "deprecated": false,
+                "docsReferencedTypeName": "AgentDeleteRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.AgentsSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentsSetup",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 86,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentsSetup.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [
+              "\nRegister a built-in agent to be available in agentBuilder."
+            ],
+            "signature": [
+              "(definition: ",
+              "BuiltInAgentDefinition",
+              ") => void"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 87,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AgentsSetup.register.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "definition",
+                "description": [],
+                "signature": [
+                  "BuiltInAgentDefinition"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 90,
+                "columnNumber": 14,
+                "deprecated": false,
+                "docsReferencedTypeName": "BuiltInAgentDefinition",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.AgentsStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentsStart",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 93,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentsStart.runAgent",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "runAgent",
+            "description": [
+              "\nExecutes an agent with the given parameters."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.RunAgentParams",
+                "text": "RunAgentParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.RunAgentReturn",
+                "text": "RunAgentReturn"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 94,
+            "columnNumber": 3,
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/plugin.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/server/mocks.ts"
+              }
+            ],
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AgentsStart.runAgent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-server",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
+                    "section": "def-common.RunAgentParams",
+                    "text": "RunAgentParams"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/runner.ts",
+                "lineNumber": 66,
+                "columnNumber": 27,
+                "deprecated": false,
+                "docsReferencedTypeName": "RunAgentParams",
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AgentsStart.getRegistry",
+            "type": "Function",
+            "tags": [],
+            "label": "getRegistry",
+            "description": [
+              "\nReturn an agent registry scoped to the current user and context."
+            ],
+            "signature": [
+              "(opts: { request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>; }) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.AgentRegistry",
+                "text": "AgentRegistry"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AgentsStart.getRegistry.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 102,
+                "columnNumber": 23,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/agent-builder-server",
+                    "id": "def-common.AgentsStart.getRegistry.$1.request",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "request",
+                    "description": [],
+                    "signature": [
+                      "KibanaRequest",
+                      "<unknown, unknown, unknown, any>"
+                    ],
+                    "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                    "lineNumber": 102,
+                    "columnNumber": 25,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.AttachmentsSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "AttachmentsSetup",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.AttachmentsSetup.registerType",
+            "type": "Function",
+            "tags": [],
+            "label": "registerType",
+            "description": [
+              "\nRegister an attachment type to be available in agentBuilder."
+            ],
+            "signature": [
+              "(attachmentType: ",
+              "AttachmentTypeDefinition",
+              "<string, unknown>) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.AttachmentsSetup.registerType.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "attachmentType",
+                "description": [],
+                "signature": [
+                  "AttachmentTypeDefinition",
+                  "<string, unknown>"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 59,
+                "columnNumber": 16,
+                "deprecated": false,
+                "docsReferencedTypeName": "AttachmentTypeDefinition",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
         "id": "def-common.BeforeAgentHookContext",
         "type": "Interface",
         "tags": [],
@@ -1649,14 +2944,14 @@
             "section": "def-common.ToolType",
             "text": "ToolType"
           },
-          ", Record<string, unknown>>, \"type\" | \"readonly\" | \"configuration\">,",
+          ", Record<string, unknown>>, \"type\" | \"readonly\" | \"experimental\" | \"configuration\">,",
           "BuiltInToolSpecificConfig",
           "<",
           "output",
           "<RunInput>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-        "lineNumber": 138,
+        "lineNumber": 143,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1681,7 +2976,7 @@
               ".builtin"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-            "lineNumber": 146,
+            "lineNumber": 151,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1699,7 +2994,7 @@
               "RunInput"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-            "lineNumber": 150,
+            "lineNumber": 155,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1743,7 +3038,7 @@
               "<TResult>>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-            "lineNumber": 154,
+            "lineNumber": 159,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1818,10 +3113,91 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-            "lineNumber": 158,
+            "lineNumber": 163,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.ConversationsStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConversationsStart",
+        "description": [
+          "\nAgentBuilder conversations service's start contract (read-only)."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 174,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.ConversationsStart.getScopedClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getScopedClient",
+            "description": [
+              "\nReturns a read-only conversation client scoped to the given request's user and space."
+            ],
+            "signature": [
+              "(opts: { request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>; }) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ReadOnlyConversationClient",
+                "text": "ReadOnlyConversationClient"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 178,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.ConversationsStart.getScopedClient.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 181,
+                "columnNumber": 25,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/agent-builder-server",
+                    "id": "def-common.ConversationsStart.getScopedClient.$1.request",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "request",
+                    "description": [],
+                    "signature": [
+                      "KibanaRequest",
+                      "<unknown, unknown, unknown, any>"
+                    ],
+                    "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                    "lineNumber": 181,
+                    "columnNumber": 27,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2016,6 +3392,274 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.ExecuteAgentResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExecuteAgentResult",
+        "description": [
+          "\nResult of executing an agent."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+        "lineNumber": 118,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.ExecuteAgentResult.executionId",
+            "type": "string",
+            "tags": [],
+            "label": "executionId",
+            "description": [
+              "The unique execution ID."
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 122,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.ExecuteAgentResult.events$",
+            "type": "Object",
+            "tags": [],
+            "label": "events$",
+            "description": [
+              "\nObservable of events for this execution.\n- Local mode: the live agent event stream (multicasted).\n- TM mode: polls the data stream (equivalent to followExecution)."
+            ],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ChatEvent",
+                "text": "ChatEvent"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 124,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.ExecutionStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExecutionStart",
+        "description": [
+          "\nAgentBuilder execution service's start contract."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 105,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.ExecutionStart.executeAgent",
+            "type": "Function",
+            "tags": [],
+            "label": "executeAgent",
+            "description": [
+              "\nExecute an agent."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ExecuteAgentParams",
+                "text": "ExecuteAgentParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ExecuteAgentResult",
+                "text": "ExecuteAgentResult"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 109,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.ExecutionStart.executeAgent.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-server",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
+                    "section": "def-common.ExecuteAgentParams",
+                    "text": "ExecuteAgentParams"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 112,
+                "columnNumber": 16,
+                "deprecated": false,
+                "docsReferencedTypeName": "ExecuteAgentParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.ExecutionStart.getExecution",
+            "type": "Function",
+            "tags": [],
+            "label": "getExecution",
+            "description": [
+              "\nRetrieve an agent execution by its ID."
+            ],
+            "signature": [
+              "(executionId: string) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.AgentExecution",
+                "text": "AgentExecution"
+              },
+              " | undefined>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 113,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.ExecutionStart.getExecution.$1",
+                "type": "string",
+                "tags": [],
+                "label": "executionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 116,
+                "columnNumber": 16,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.ExecutionStart.findExecutions",
+            "type": "Function",
+            "tags": [],
+            "label": "findExecutions",
+            "description": [
+              "\nFind executions matching the given filters."
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, options?: ",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.FindExecutionsOptions",
+                "text": "FindExecutionsOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.AgentExecution",
+                "text": "AgentExecution"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 117,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.ExecutionStart.findExecutions.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 121,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.ExecutionStart.findExecutions.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-server",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
+                    "section": "def-common.FindExecutionsOptions",
+                    "text": "FindExecutionsOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 122,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "FindExecutionsOptions",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
         "id": "def-common.ExperimentalFeatures",
         "type": "Interface",
         "tags": [],
@@ -2070,6 +3714,180 @@
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/provider.ts",
             "lineNumber": 101,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.FindExecutionsFilter",
+        "type": "Interface",
+        "tags": [],
+        "label": "FindExecutionsFilter",
+        "description": [
+          "\nFilter criteria for ",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.AgentExecutionService.findExecutions",
+            "text": "AgentExecutionService.findExecutions"
+          },
+          ".\nAll specified fields are ANDed together."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+        "lineNumber": 173,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.FindExecutionsFilter.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [
+              "Match executions whose metadata contains all specified key-value pairs."
+            ],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 178,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.FindExecutionsFilter.status",
+            "type": "Array",
+            "tags": [],
+            "label": "status",
+            "description": [
+              "Match executions with one of these statuses."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ExecutionStatus",
+                "text": "ExecutionStatus"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.FindExecutionsOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "FindExecutionsOptions",
+        "description": [
+          "\nOptions for ",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.AgentExecutionService.findExecutions",
+            "text": "AgentExecutionService.findExecutions"
+          },
+          "."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+        "lineNumber": 184,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.FindExecutionsOptions.spaceId",
+            "type": "string",
+            "tags": [],
+            "label": "spaceId",
+            "description": [
+              "Space to scope results to. Defaults to current space from request if omitted."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 188,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.FindExecutionsOptions.filter",
+            "type": "Object",
+            "tags": [],
+            "label": "filter",
+            "description": [
+              "Filter criteria. All specified fields are ANDed together."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.FindExecutionsFilter",
+                "text": "FindExecutionsFilter"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 190,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.FindExecutionsOptions.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [
+              "Maximum number of results to return. Defaults to 10."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 192,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.FindExecutionsOptions.sort",
+            "type": "Object",
+            "tags": [],
+            "label": "sort",
+            "description": [
+              "\nSort field and order. Defaults to `{ field: '@timestamp', order: 'desc' }`.\nNote: field is an explicit union rather than derived from AgentExecutionProperties to avoid\ncircular dependencies and to prevent exposing snake_case ES field names to consumers."
+            ],
+            "signature": [
+              "{ field: \"@timestamp\" | \"status\"; order: \"asc\" | \"desc\"; } | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+            "lineNumber": 194,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2429,6 +4247,21 @@
         "children": [
           {
             "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.InternalToolDefinition.experimental",
+            "type": "boolean",
+            "tags": [],
+            "label": "experimental",
+            "description": [
+              "\nWhen true, this tool is only available when experimental features are enabled."
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
             "id": "def-common.InternalToolDefinition.isAvailable",
             "type": "Function",
             "tags": [],
@@ -2464,7 +4297,7 @@
               ">"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-            "lineNumber": 28,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2487,7 +4320,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-                "lineNumber": 58,
+                "lineNumber": 62,
                 "columnNumber": 3,
                 "deprecated": false,
                 "docsReferencedTypeName": "ToolAvailabilityContext",
@@ -2516,7 +4349,7 @@
               "<TSchema>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-            "lineNumber": 32,
+            "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2562,7 +4395,7 @@
               ">>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-            "lineNumber": 36,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2589,7 +4422,7 @@
               "<TConfig> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-            "lineNumber": 40,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2614,7 +4447,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-            "lineNumber": 45,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2633,7 +4466,7 @@
               "<Record<string, unknown>> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-            "lineNumber": 51,
+            "lineNumber": 55,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2871,6 +4704,868 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.PersistedPluginManifestMetadata",
+        "type": "Interface",
+        "tags": [],
+        "label": "PersistedPluginManifestMetadata",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PersistedPluginManifestMetadata.author",
+            "type": "Object",
+            "tags": [],
+            "label": "author",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.PluginManifestAuthor",
+                "text": "PluginManifestAuthor"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 11,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PersistedPluginManifestMetadata.homepage",
+            "type": "string",
+            "tags": [],
+            "label": "homepage",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PersistedPluginManifestMetadata.repository",
+            "type": "string",
+            "tags": [],
+            "label": "repository",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PersistedPluginManifestMetadata.license",
+            "type": "string",
+            "tags": [],
+            "label": "license",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PersistedPluginManifestMetadata.keywords",
+            "type": "Array",
+            "tags": [],
+            "label": "keywords",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.PluginCreateRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginCreateRequest",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginCreateRequest.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginCreateRequest.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginCreateRequest.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginCreateRequest.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginCreateRequest.manifest",
+            "type": "Object",
+            "tags": [],
+            "label": "manifest",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.PersistedPluginManifestMetadata",
+                "text": "PersistedPluginManifestMetadata"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginCreateRequest.source_url",
+            "type": "string",
+            "tags": [],
+            "label": "source_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginCreateRequest.skill_ids",
+            "type": "Array",
+            "tags": [],
+            "label": "skill_ids",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginCreateRequest.unmanaged_assets",
+            "type": "Object",
+            "tags": [],
+            "label": "unmanaged_assets",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.UnmanagedPluginAssets",
+                "text": "UnmanagedPluginAssets"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.PluginRegistry",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginRegistry",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/registry.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginRegistry.has",
+            "type": "Function",
+            "tags": [],
+            "label": "has",
+            "description": [],
+            "signature": [
+              "(pluginId: string) => Promise<boolean>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/registry.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.PluginRegistry.has.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pluginId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/registry.ts",
+                "lineNumber": 12,
+                "columnNumber": 7,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginRegistry.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(pluginId: string) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.PluginDefinition",
+                "text": "PluginDefinition"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/registry.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.PluginRegistry.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pluginId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/registry.ts",
+                "lineNumber": 13,
+                "columnNumber": 7,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginRegistry.findByName",
+            "type": "Function",
+            "tags": [],
+            "label": "findByName",
+            "description": [],
+            "signature": [
+              "(name: string) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.PluginDefinition",
+                "text": "PluginDefinition"
+              },
+              " | undefined>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/registry.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.PluginRegistry.findByName.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/registry.ts",
+                "lineNumber": 14,
+                "columnNumber": 14,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginRegistry.list",
+            "type": "Function",
+            "tags": [],
+            "label": "list",
+            "description": [],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.PluginDefinition",
+                "text": "PluginDefinition"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/registry.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginRegistry.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "(request: ",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.PluginCreateRequest",
+                "text": "PluginCreateRequest"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.PluginDefinition",
+                "text": "PluginDefinition"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/registry.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.PluginRegistry.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-server",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
+                    "section": "def-common.PluginCreateRequest",
+                    "text": "PluginCreateRequest"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/registry.ts",
+                "lineNumber": 16,
+                "columnNumber": 10,
+                "deprecated": false,
+                "docsReferencedTypeName": "PluginCreateRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginRegistry.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [],
+            "signature": [
+              "(pluginId: string, update: ",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.PluginUpdateRequest",
+                "text": "PluginUpdateRequest"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.PluginDefinition",
+                "text": "PluginDefinition"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/registry.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.PluginRegistry.update.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pluginId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/registry.ts",
+                "lineNumber": 17,
+                "columnNumber": 10,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.PluginRegistry.update.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "update",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-server",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
+                    "section": "def-common.PluginUpdateRequest",
+                    "text": "PluginUpdateRequest"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/registry.ts",
+                "lineNumber": 17,
+                "columnNumber": 28,
+                "deprecated": false,
+                "docsReferencedTypeName": "PluginUpdateRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginRegistry.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "signature": [
+              "(pluginId: string) => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/registry.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.PluginRegistry.delete.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pluginId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/registry.ts",
+                "lineNumber": 18,
+                "columnNumber": 10,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.PluginsSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginsSetup",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 126,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginsSetup.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [
+              "\nRegister a built-in plugin to be available in agentBuilder.\nBuilt-in plugins are read-only and registered programmatically by solution teams."
+            ],
+            "signature": [
+              "(plugin: ",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.BuiltInPluginDefinition",
+                "text": "BuiltInPluginDefinition"
+              },
+              ") => void"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 127,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.PluginsSetup.register.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "plugin",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-server",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
+                    "section": "def-common.BuiltInPluginDefinition",
+                    "text": "BuiltInPluginDefinition"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 131,
+                "columnNumber": 14,
+                "deprecated": false,
+                "docsReferencedTypeName": "BuiltInPluginDefinition",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.PluginsStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginsStart",
+        "description": [
+          "\nAgentBuilder plugins service's start contract."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 134,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginsStart.getRegistry",
+            "type": "Function",
+            "tags": [],
+            "label": "getRegistry",
+            "description": [
+              "\nReturn a plugin registry scoped to the current user and context.\nThe registry provides access to both built-in and persisted plugins."
+            ],
+            "signature": [
+              "(opts: { request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>; }) => ",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.PluginRegistry",
+                "text": "PluginRegistry"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 138,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.PluginsStart.getRegistry.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 142,
+                "columnNumber": 23,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/agent-builder-server",
+                    "id": "def-common.PluginsStart.getRegistry.$1.request",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "request",
+                    "description": [],
+                    "signature": [
+                      "KibanaRequest",
+                      "<unknown, unknown, unknown, any>"
+                    ],
+                    "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                    "lineNumber": 142,
+                    "columnNumber": 25,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.PluginUpdateRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginUpdateRequest",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+        "lineNumber": 29,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginUpdateRequest.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginUpdateRequest.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginUpdateRequest.manifest",
+            "type": "Object",
+            "tags": [],
+            "label": "manifest",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.PersistedPluginManifestMetadata",
+                "text": "PersistedPluginManifestMetadata"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginUpdateRequest.source_url",
+            "type": "string",
+            "tags": [],
+            "label": "source_url",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginUpdateRequest.skill_ids",
+            "type": "Array",
+            "tags": [],
+            "label": "skill_ids",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.PluginUpdateRequest.unmanaged_assets",
+            "type": "Object",
+            "tags": [],
+            "label": "unmanaged_assets",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.UnmanagedPluginAssets",
+                "text": "UnmanagedPluginAssets"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/crud.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
         "id": "def-common.ProcessedAttachment",
         "type": "Interface",
         "tags": [],
@@ -2991,6 +5686,132 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.ReadOnlyConversationClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "ReadOnlyConversationClient",
+        "description": [
+          "\nA read-only conversation client exposing only get and list operations."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 160,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.ReadOnlyConversationClient.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "\nRetrieve a single conversation by its ID, including all rounds."
+            ],
+            "signature": [
+              "(conversationId: string) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.Conversation",
+                "text": "Conversation"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 164,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.ReadOnlyConversationClient.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "conversationId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 167,
+                "columnNumber": 7,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.ReadOnlyConversationClient.list",
+            "type": "Function",
+            "tags": [],
+            "label": "list",
+            "description": [
+              "\nList conversations for the current user, optionally filtered by agent ID."
+            ],
+            "signature": [
+              "(options?: ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ConversationListOptions",
+                "text": "ConversationListOptions"
+              },
+              " | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ConversationWithoutRounds",
+                "text": "ConversationWithoutRounds"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 168,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.ReadOnlyConversationClient.list.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.ConversationListOptions",
+                    "text": "ConversationListOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 171,
+                "columnNumber": 8,
+                "deprecated": false,
+                "docsReferencedTypeName": "ConversationListOptions",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3475,6 +6296,102 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.RuntimeStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuntimeStart",
+        "description": [
+          "\nAgentBuilder runtime service's start contract."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 145,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.RuntimeStart.createModelProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "createModelProvider",
+            "description": [
+              "\nCreates a model provider for the given request context.\nThe model provider can be used to obtain a ScopedModel for use\nwith utilities like `generateEsql` from `@kbn/agent-builder-genai-utils`."
+            ],
+            "signature": [
+              "(opts: { request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>; defaultConnectorId?: string | undefined; }) => ",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ModelProvider",
+                "text": "ModelProvider"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 149,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.RuntimeStart.createModelProvider.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 154,
+                "columnNumber": 31,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/agent-builder-server",
+                    "id": "def-common.RuntimeStart.createModelProvider.$1.request",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "request",
+                    "description": [],
+                    "signature": [
+                      "KibanaRequest",
+                      "<unknown, unknown, unknown, any>"
+                    ],
+                    "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                    "lineNumber": 155,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/agent-builder-server",
+                    "id": "def-common.RuntimeStart.createModelProvider.$1.defaultConnectorId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "defaultConnectorId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                    "lineNumber": 156,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4059,6 +6976,516 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.SkillRegistry",
+        "type": "Interface",
+        "tags": [],
+        "label": "SkillRegistry",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/registry.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.SkillRegistry.has",
+            "type": "Function",
+            "tags": [],
+            "label": "has",
+            "description": [],
+            "signature": [
+              "(skillId: string) => Promise<boolean>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/registry.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.SkillRegistry.has.$1",
+                "type": "string",
+                "tags": [],
+                "label": "skillId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/registry.ts",
+                "lineNumber": 16,
+                "columnNumber": 7,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.SkillRegistry.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(skillId: string) => Promise<",
+              "InternalSkillDefinition",
+              " | undefined>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/registry.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.SkillRegistry.get.$1",
+                "type": "string",
+                "tags": [],
+                "label": "skillId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/registry.ts",
+                "lineNumber": 17,
+                "columnNumber": 7,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.SkillRegistry.bulkGet",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkGet",
+            "description": [],
+            "signature": [
+              "(ids: string[]) => Promise<Map<string, ",
+              "InternalSkillDefinition",
+              ">>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/registry.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.SkillRegistry.bulkGet.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/registry.ts",
+                "lineNumber": 18,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.SkillRegistry.list",
+            "type": "Function",
+            "tags": [],
+            "label": "list",
+            "description": [],
+            "signature": [
+              "(options?: ",
+              "SkillRegistryListOptions",
+              " | undefined) => Promise<",
+              "InternalSkillDefinition",
+              "[]>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/registry.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.SkillRegistry.list.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SkillRegistryListOptions",
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/registry.ts",
+                "lineNumber": 19,
+                "columnNumber": 8,
+                "deprecated": false,
+                "docsReferencedTypeName": "SkillRegistryListOptions",
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.SkillRegistry.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.PersistedSkillCreateRequest",
+                "text": "PersistedSkillCreateRequest"
+              },
+              ") => Promise<",
+              "InternalSkillDefinition",
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/registry.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.SkillRegistry.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.PersistedSkillCreateRequest",
+                    "text": "PersistedSkillCreateRequest"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/registry.ts",
+                "lineNumber": 20,
+                "columnNumber": 10,
+                "deprecated": false,
+                "docsReferencedTypeName": "PersistedSkillCreateRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.SkillRegistry.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [],
+            "signature": [
+              "(skillId: string, update: ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.PersistedSkillUpdateRequest",
+                "text": "PersistedSkillUpdateRequest"
+              },
+              ") => Promise<",
+              "InternalSkillDefinition",
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/registry.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.SkillRegistry.update.$1",
+                "type": "string",
+                "tags": [],
+                "label": "skillId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/registry.ts",
+                "lineNumber": 21,
+                "columnNumber": 10,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.SkillRegistry.update.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "update",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.PersistedSkillUpdateRequest",
+                    "text": "PersistedSkillUpdateRequest"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/registry.ts",
+                "lineNumber": 21,
+                "columnNumber": 27,
+                "deprecated": false,
+                "docsReferencedTypeName": "PersistedSkillUpdateRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.SkillRegistry.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "signature": [
+              "(skillId: string) => Promise<boolean>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/registry.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.SkillRegistry.delete.$1",
+                "type": "string",
+                "tags": [],
+                "label": "skillId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/skills/registry.ts",
+                "lineNumber": 22,
+                "columnNumber": 10,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.SkillsSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "SkillsSetup",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 62,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.SkillsSetup.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [
+              "\nRegister a built-in skill to be available in agentBuilder.\nRegistration is synchronous; validation is deferred to start."
+            ],
+            "signature": [
+              "(skill: ",
+              "SkillDefinition",
+              "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/alerting\" | \"skills/platform/workflows\" | \"skills/platform/discover\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 63,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.SkillsSetup.register.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "skill",
+                "description": [],
+                "signature": [
+                  "SkillDefinition",
+                  "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/alerting\" | \"skills/platform/workflows\" | \"skills/platform/discover\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 67,
+                "columnNumber": 12,
+                "deprecated": false,
+                "docsReferencedTypeName": "SkillDefinition",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.SkillsStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "SkillsStart",
+        "description": [
+          "\nAgentBuilder skills service's start contract."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 70,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.SkillsStart.getRegistry",
+            "type": "Function",
+            "tags": [],
+            "label": "getRegistry",
+            "description": [
+              "\nCreate a skill registry scoped to the current user and context.\nThe registry provides access to both built-in and persisted skills."
+            ],
+            "signature": [
+              "(opts: { request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>; }) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.SkillRegistry",
+                "text": "SkillRegistry"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 74,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.SkillsStart.getRegistry.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 78,
+                "columnNumber": 21,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/agent-builder-server",
+                    "id": "def-common.SkillsStart.getRegistry.$1.request",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "request",
+                    "description": [],
+                    "signature": [
+                      "KibanaRequest",
+                      "<unknown, unknown, unknown, any>"
+                    ],
+                    "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                    "lineNumber": 78,
+                    "columnNumber": 23,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.SkillsStart.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [
+              "\nRegister a skill dynamically after plugin start.\nOnly affects future conversations (existing ones snapshot skills at creation time)."
+            ],
+            "signature": [
+              "(skill: ",
+              "SkillDefinition",
+              "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/alerting\" | \"skills/platform/workflows\" | \"skills/platform/discover\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">) => Promise<void>"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 79,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.SkillsStart.register.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "skill",
+                "description": [],
+                "signature": [
+                  "SkillDefinition",
+                  "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/alerting\" | \"skills/platform/workflows\" | \"skills/platform/discover\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 83,
+                "columnNumber": 14,
+                "deprecated": false,
+                "docsReferencedTypeName": "SkillDefinition",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -6345,6 +9772,240 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.ToolsSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolsSetup",
+        "description": [
+          "\nAgentBuilder tool service's setup contract."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 31,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.ToolsSetup.register",
+            "type": "Function",
+            "tags": [],
+            "label": "register",
+            "description": [
+              "\nRegister a built-in tool to be available in agentBuilder."
+            ],
+            "signature": [
+              "<RunInput extends ",
+              "ZodObject",
+              "<any, ",
+              "node_modules/zod/v4/core/schemas",
+              "$strip>>(tool: ",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.StaticToolRegistration",
+                "text": "StaticToolRegistration"
+              },
+              "<RunInput, ",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ToolResult",
+                "text": "ToolResult"
+              },
+              ">) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.ToolsSetup.register.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "tool",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-server",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
+                    "section": "def-common.StaticToolRegistration",
+                    "text": "StaticToolRegistration"
+                  },
+                  "<RunInput, ",
+                  {
+                    "pluginId": "@kbn/agent-builder-common",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderCommonPluginApi",
+                    "section": "def-common.ToolResult",
+                    "text": "ToolResult"
+                  },
+                  ">"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 38,
+                "columnNumber": 45,
+                "deprecated": false,
+                "docsReferencedTypeName": "StaticToolRegistration",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.ToolsStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "ToolsStart",
+        "description": [
+          "\nAgentBuilder tool service's start contract."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 41,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.ToolsStart.execute",
+            "type": "Function",
+            "tags": [],
+            "label": "execute",
+            "description": [
+              "\nExecute a tool."
+            ],
+            "signature": [
+              "<TParams = Record<string, unknown>>(params: ",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.RunToolParams",
+                "text": "RunToolParams"
+              },
+              "<TParams>) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.RunToolReturn",
+                "text": "RunToolReturn"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.ToolsStart.execute.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/agent-builder-server",
+                    "scope": "common",
+                    "docId": "kibKbnAgentBuilderServerPluginApi",
+                    "section": "def-common.RunToolParams",
+                    "text": "RunToolParams"
+                  },
+                  "<TParams>"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/runner/runner.ts",
+                "lineNumber": 199,
+                "columnNumber": 3,
+                "deprecated": false,
+                "docsReferencedTypeName": "RunToolParams",
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.ToolsStart.getRegistry",
+            "type": "Function",
+            "tags": [],
+            "label": "getRegistry",
+            "description": [
+              "\nReturn a tool registry scoped to the current user and context."
+            ],
+            "signature": [
+              "(opts: { request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>; }) => Promise<",
+              {
+                "pluginId": "@kbn/agent-builder-server",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderServerPluginApi",
+                "section": "def-common.ToolRegistry",
+                "text": "ToolRegistry"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-server",
+                "id": "def-common.ToolsStart.getRegistry.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                "lineNumber": 52,
+                "columnNumber": 23,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/agent-builder-server",
+                    "id": "def-common.ToolsStart.getRegistry.$1.request",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "request",
+                    "description": [],
+                    "signature": [
+                      "KibanaRequest",
+                      "<unknown, unknown, unknown, any>"
+                    ],
+                    "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+                    "lineNumber": 52,
+                    "columnNumber": 25,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
         "id": "def-common.ToolStateManager",
         "type": "Interface",
         "tags": [],
@@ -6489,6 +10150,50 @@
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/registry.ts",
             "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.TopSnippetsConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "TopSnippetsConfig",
+        "description": [
+          "\nConfiguration for the TOP_SNIPPETS search utility."
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+        "lineNumber": 184,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.TopSnippetsConfig.numSnippets",
+            "type": "number",
+            "tags": [],
+            "label": "numSnippets",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 188,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.TopSnippetsConfig.numWords",
+            "type": "number",
+            "tags": [],
+            "label": "numWords",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
+            "lineNumber": 189,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -6840,6 +10545,48 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.AgentExecution",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentExecution",
+        "description": [
+          "\nThe agent execution document persisted in the agent-executions index.\nDiscriminated union on `executionMode`."
+        ],
+        "signature": [
+          "ConversationAgentExecution",
+          " | ",
+          "StandaloneAgentExecution"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+        "lineNumber": 112,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.AgentExecutionParams",
+        "type": "Type",
+        "tags": [],
+        "label": "AgentExecutionParams",
+        "description": [
+          "\nUnion of all execution parameter types."
+        ],
+        "signature": [
+          "ConversationExecutionParams",
+          " | ",
+          "BaseExecutionParams"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+        "lineNumber": 65,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
         "id": "def-common.AgentHandlerFn",
         "type": "Type",
         "tags": [],
@@ -7041,7 +10788,7 @@
           },
           " | undefined; skills?: ",
           "SkillDefinition",
-          "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/workflows\" | \"skills/platform/discover\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">[] | undefined; }"
+          "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/alerting\" | \"skills/platform/workflows\" | \"skills/platform/discover\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/builtin_definition.ts",
         "lineNumber": 11,
@@ -7179,6 +10926,25 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.ExecuteAgentParams",
+        "type": "Type",
+        "tags": [],
+        "label": "ExecuteAgentParams",
+        "description": [],
+        "signature": [
+          "ExecuteConversationAgentParams",
+          " | ",
+          "ExecuteStandaloneAgentParams"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/execution/types.ts",
+        "lineNumber": 163,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
         "id": "def-common.HookContext",
         "type": "Type",
         "tags": [],
@@ -7246,6 +11012,87 @@
       },
       {
         "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.InternalAgentDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "InternalAgentDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/agent-builder-common",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderCommonPluginApi",
+            "section": "def-common.AgentDefinition",
+            "text": "AgentDefinition"
+          },
+          " & { isAvailable: ",
+          {
+            "pluginId": "@kbn/agent-builder-server",
+            "scope": "common",
+            "docId": "kibKbnAgentBuilderServerPluginApi",
+            "section": "def-common.InternalAgentDefinitionAvailabilityHandler",
+            "text": "InternalAgentDefinitionAvailabilityHandler"
+          },
+          "; }"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/registry.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
+        "id": "def-common.InternalAgentDefinitionAvailabilityHandler",
+        "type": "Type",
+        "tags": [],
+        "label": "InternalAgentDefinitionAvailabilityHandler",
+        "description": [],
+        "signature": [
+          "(ctx: ",
+          "AgentAvailabilityContext",
+          ") => ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.MaybePromise",
+            "text": "MaybePromise"
+          },
+          "<",
+          "AgentAvailabilityResult",
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/registry.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.InternalAgentDefinitionAvailabilityHandler.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "ctx",
+            "description": [],
+            "signature": [
+              "AgentAvailabilityContext"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/agents/registry.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "AgentAvailabilityContext",
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/agent-builder-server",
         "id": "def-common.InternalToolAvailabilityHandler",
         "type": "Type",
         "tags": [],
@@ -7279,7 +11126,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-        "lineNumber": 57,
+        "lineNumber": 61,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7302,7 +11149,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/internal.ts",
-            "lineNumber": 58,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "docsReferencedTypeName": "ToolAvailabilityContext",
@@ -7898,12 +11745,12 @@
             "section": "def-common.EsqlToolDefinition",
             "text": "EsqlToolDefinition"
           },
-          ", \"readonly\"> & ",
+          ", \"readonly\" | \"experimental\"> & ",
           "BuiltInToolSpecificConfig",
           "<Record<string, unknown>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-        "lineNumber": 168,
+        "lineNumber": 173,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7919,12 +11766,12 @@
         "signature": [
           "Omit<",
           "IndexSearchToolDefinition",
-          ", \"readonly\"> & ",
+          ", \"readonly\" | \"experimental\"> & ",
           "BuiltInToolSpecificConfig",
           "<Record<string, unknown>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-        "lineNumber": 169,
+        "lineNumber": 174,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7971,7 +11818,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-        "lineNumber": 172,
+        "lineNumber": 177,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7987,12 +11834,12 @@
         "signature": [
           "Omit<",
           "WorkflowToolDefinition",
-          ", \"readonly\"> & ",
+          ", \"readonly\" | \"experimental\"> & ",
           "BuiltInToolSpecificConfig",
           "<Record<string, unknown>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-        "lineNumber": 170,
+        "lineNumber": 175,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8296,7 +12143,7 @@
           "[] | undefined"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-        "lineNumber": 123,
+        "lineNumber": 128,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -8323,7 +12170,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/builtin.ts",
-            "lineNumber": 135,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "docsReferencedTypeName": "ToolCallWithResult",

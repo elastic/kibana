@@ -1,5 +1,5 @@
 {
-  "sha1": "e83c40689ad158533ce6264fdf77388b31d64d90",
+  "sha1": "102deb71133b638aeacc6f6e616252063ebc92fb",
   "tests": [
     {
       "id": "08c621ad2871856-3596071962e357d",
@@ -157,7 +157,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_logs_essentials.spec.ts",
-        "line": 84,
+        "line": 83,
         "column": 9
       }
     }

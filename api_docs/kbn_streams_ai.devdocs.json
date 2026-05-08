@@ -7854,7 +7854,7 @@
           "{ feature_id: string; feature_title: string; excluded_feature_id: string; reason: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/feature.ts",
-        "lineNumber": 67,
+        "lineNumber": 75,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

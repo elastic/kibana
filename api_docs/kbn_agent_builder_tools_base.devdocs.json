@@ -105,7 +105,7 @@
           " | null>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
-        "lineNumber": 40,
+        "lineNumber": 42,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -118,7 +118,7 @@
             "label": "{\n  executionId,\n  spaceId,\n  workflowApi,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
-            "lineNumber": 44,
+            "lineNumber": 46,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -131,7 +131,7 @@
                 "label": "executionId",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
-                "lineNumber": 45,
+                "lineNumber": 47,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -144,7 +144,7 @@
                 "label": "spaceId",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
-                "lineNumber": 46,
+                "lineNumber": 48,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -160,7 +160,7 @@
                   "WorkflowsManagementApi"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
-                "lineNumber": 47,
+                "lineNumber": 49,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -466,7 +466,7 @@
         "label": "WorkflowExecutionState",
         "description": [],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
-        "lineNumber": 23,
+        "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -479,7 +479,7 @@
             "label": "execution_id",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
-            "lineNumber": 24,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -501,7 +501,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
-            "lineNumber": 25,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -514,7 +514,7 @@
             "label": "workflow_id",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
-            "lineNumber": 26,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -527,7 +527,7 @@
             "label": "started_at",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
-            "lineNumber": 27,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -543,7 +543,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
-            "lineNumber": 28,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -566,7 +566,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
-            "lineNumber": 29,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -582,7 +582,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
-            "lineNumber": 30,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -600,7 +600,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
-            "lineNumber": 31,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -612,14 +612,14 @@
             "tags": [],
             "label": "waiting_input",
             "description": [
-              "Present when status is WAITING_FOR_INPUT; describes what input is needed to resume."
+              "Present when status is WAITING_FOR_INPUT."
             ],
             "signature": [
               "WaitingInputContext",
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-tools-base/workflows/get_execution_state.ts",
-            "lineNumber": 33,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

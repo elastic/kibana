@@ -2160,7 +2160,7 @@
             "tags": [],
             "label": "label",
             "description": [
-              "Custom label for the inspect action. Defaults to `'View {itemTitle} details'`."
+              "\nCustom label for the inspect action. Defaults to `'View details'`.\n\nPass a function to derive the label from the item (e.g.\n`'View {itemTitle} details'`); the default deliberately omits the\nitem title to keep the icon-button affordance terse."
             ],
             "signature": [
               "string | ((item: ",

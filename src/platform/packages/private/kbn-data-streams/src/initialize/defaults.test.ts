@@ -173,6 +173,7 @@ describe('applyDefaults', () => {
 
       expect(result.template?.mappings?.properties?.kibana).toEqual({
         type: 'object',
+        dynamic: false,
         properties: {
           custom_field: { type: 'keyword', ignore_above: 1024 },
           space_ids: { type: 'keyword', ignore_above: 1024 },

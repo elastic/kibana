@@ -10,7 +10,7 @@ import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { OTelCollectorConfig } from '../../../../common/types';
+import type { OTelCollectorConfig, ComponentHealth } from '../../../../common/types';
 
 import { ALL_PIPELINES } from './utils';
 import { PipelineSelector } from './pipeline_selector';
@@ -20,10 +20,12 @@ const GraphView = lazy(() => import('./graph_view').then((m) => ({ default: m.Gr
 
 interface CollectorConfigViewProps {
   config: OTelCollectorConfig;
+  health?: ComponentHealth;
 }
 
 export const CollectorConfigView: React.FunctionComponent<CollectorConfigViewProps> = ({
   config,
+  health,
 }) => {
   const [selectedPipelineId, setSelectedPipelineId] = useState(ALL_PIPELINES);
 
@@ -65,7 +67,7 @@ export const CollectorConfigView: React.FunctionComponent<CollectorConfigViewPro
       </EuiFlexItem>
       <EuiFlexItem>
         <Suspense fallback={<EuiLoadingSpinner />}>
-          <GraphView config={config} selectedPipelineId={selectedPipelineId} />
+          <GraphView config={config} selectedPipelineId={selectedPipelineId} health={health} />
         </Suspense>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

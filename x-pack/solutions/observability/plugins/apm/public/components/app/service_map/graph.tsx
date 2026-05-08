@@ -543,9 +543,9 @@ function GraphInner({
                 onSloStatusFilterChange={(next) =>
                   setViewFilters((prev) => ({ ...prev, sloStatusFilter: next }))
                 }
-                anomalyStatusFilter={viewFilters.anomalyStatusFilter}
-                onAnomalyStatusFilterChange={(next) =>
-                  setViewFilters((prev) => ({ ...prev, anomalyStatusFilter: next }))
+                anomalySeverityFilter={viewFilters.anomalySeverityFilter}
+                onAnomalySeverityFilterChange={(next) =>
+                  setViewFilters((prev) => ({ ...prev, anomalySeverityFilter: next }))
                 }
                 mapOrientation={mapOrientation}
                 onMapOrientationChange={setMapOrientation}
