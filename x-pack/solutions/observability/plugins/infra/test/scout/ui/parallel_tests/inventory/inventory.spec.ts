@@ -215,6 +215,7 @@ test.describe(
     test('OTel (semconv): loads OpenTelemetry schema, waffle map, and node metrics', async ({
       pageObjects: { inventoryPage },
     }) => {
+      await inventoryPage.showHosts();
       await inventoryPage.goToTime(DATE_WITH_SEMCONV_DATA);
       await expect(inventoryPage.datePickerInput).toHaveValue(DATE_WITH_SEMCONV_DATA);
 
@@ -241,6 +242,7 @@ test.describe(
     test('OTel (semconv): table view lists hosts with metric values', async ({
       pageObjects: { inventoryPage },
     }) => {
+      await inventoryPage.showHosts();
       await inventoryPage.goToTime(DATE_WITH_SEMCONV_DATA);
       await expect(inventoryPage.schemaSelect).toContainText('OpenTelemetry', {
         timeout: EXTENDED_TIMEOUT,
@@ -262,6 +264,7 @@ test.describe(
     test('OTel (semconv): filters waffle nodes by query bar', async ({
       pageObjects: { inventoryPage },
     }) => {
+      await inventoryPage.showHosts();
       await inventoryPage.goToTime(DATE_WITH_SEMCONV_DATA);
       await expect(inventoryPage.schemaSelect).toContainText('OpenTelemetry', {
         timeout: EXTENDED_TIMEOUT,
