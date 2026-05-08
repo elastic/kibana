@@ -1054,6 +1054,26 @@ export const hasWrongOperatorWithWildcard = (
   });
 };
 
+export const hasEscaping = (items: ExceptionsBuilderReturnExceptionItem[]): boolean => {
+  // flattens array of multiple entries added with OR
+  const multipleEntries = items.flatMap((item) => item.entries);
+  // flattens nested entries
+  const allEntries = multipleEntries.flatMap((item) => {
+    if (item.type === 'nested') {
+      return item.entries;
+    }
+    return item;
+  });
+
+  return allEntries.some((e) => {
+    if (e.type !== 'list' && 'value' in e && typeof e.value === 'string') {
+      return e.value.includes('\\\\') || e.value.includes('\\*') || e.value.includes('\\?');
+    }
+
+    return false;
+  });
+};
+
 /**
  * Event filters helper where given an exceptions list,
  * determine if both 'subject_name' and 'trusted' are

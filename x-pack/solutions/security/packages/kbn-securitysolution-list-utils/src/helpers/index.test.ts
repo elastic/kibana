@@ -9,6 +9,7 @@ import {
   getMappingConflictsInfo,
   fieldSupportsMatches,
   hasWrongOperatorWithWildcard,
+  hasEscaping,
   hasPartialCodeSignatureEntry,
   getOperatorOptions,
 } from '.';
@@ -280,6 +281,116 @@ describe('Helpers', () => {
           },
         ])
       ).toBeTruthy();
+    });
+  });
+
+  describe('hasEscaping', () => {
+    test('returns false for empty items', () => {
+      expect(hasEscaping([])).toBe(false);
+    });
+
+    test('returns false when no string value contains backslash escapes', () => {
+      expect(
+        hasEscaping([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'match', value: 'normal*?', field: '', operator: 'included' }],
+          },
+        ])
+      ).toBe(false);
+    });
+
+    test('returns true when a match value contains doubled backslashes', () => {
+      expect(
+        hasEscaping([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'match', value: 'a\\\\b', field: '', operator: 'included' }],
+          },
+        ])
+      ).toBe(true);
+    });
+
+    test('returns true when a match value contains backslash followed by asterisk', () => {
+      expect(
+        hasEscaping([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'match', value: 'prefix\\*suffix', field: '', operator: 'included' }],
+          },
+        ])
+      ).toBe(true);
+    });
+
+    test('returns true when a match value contains backslash followed by question mark', () => {
+      expect(
+        hasEscaping([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'match', value: 'prefix\\?suffix', field: '', operator: 'included' }],
+          },
+        ])
+      ).toBe(true);
+    });
+
+    test('returns false for list entries', () => {
+      expect(
+        hasEscaping([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [
+              {
+                type: 'list',
+                field: '',
+                operator: 'included',
+                list: { id: 'list-id', type: 'keyword' },
+              },
+            ],
+          },
+        ])
+      ).toBe(false);
+    });
+
+    test('returns true for nested entries when a leaf value has escaping', () => {
+      expect(
+        hasEscaping([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [
+              {
+                field: 'parent',
+                type: 'nested',
+                entries: [{ type: 'match', value: '\\*', field: 'child', operator: 'included' }],
+              },
+            ],
+          },
+        ])
+      ).toBe(true);
+    });
+
+    test('returns false when value is not a string', () => {
+      expect(
+        hasEscaping([
+          {
+            description: '',
+            name: '',
+            type: 'simple',
+            entries: [{ type: 'match_any', value: ['\\*'], field: '', operator: 'included' }],
+          },
+        ])
+      ).toBe(false);
     });
   });
 
