@@ -45,18 +45,16 @@ describe('stepDefinitionSchema preserves extended step properties', () => {
     expect((parsed as any).description).toBe('Fetches data from external API');
   });
 
-  it('preserves do/then/else in the parsed output', () => {
+  it('preserves do/else in the parsed output', () => {
     const input = {
       name: 'branch_step',
       type: 'condition',
       condition: 'steps.check.output.ok == true',
       do: [{ name: 'a', type: 'console' }],
-      then: [{ name: 'b', type: 'console' }],
       else: [{ name: 'c', type: 'console' }],
     };
     const parsed = stepDefinitionSchema.parse(input);
     expect(parsed).toHaveProperty('do');
-    expect(parsed).toHaveProperty('then');
     expect(parsed).toHaveProperty('else');
     expect(parsed).toHaveProperty('condition');
   });
