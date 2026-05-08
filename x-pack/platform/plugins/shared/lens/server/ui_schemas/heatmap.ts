@@ -28,6 +28,26 @@ export const heatmapUISchema: UISchemaEntry[] = [
       defaultMessage: 'X axis label orientation',
     }),
     widget: 'buttonGroup',
+    options: [
+      {
+        value: 'horizontal',
+        label: i18n.translate('xpack.lens.heatmap.orientationHorizontal', {
+          defaultMessage: 'Horizontal',
+        }),
+      },
+      {
+        value: 'vertical',
+        label: i18n.translate('xpack.lens.heatmap.orientationVertical', {
+          defaultMessage: 'Vertical',
+        }),
+      },
+      {
+        value: 'angled',
+        label: i18n.translate('xpack.lens.heatmap.orientationAngled', {
+          defaultMessage: 'Angled',
+        }),
+      },
+    ],
   },
   {
     path: 'axis.x.title.visible',
@@ -66,6 +86,26 @@ export const heatmapUISchema: UISchemaEntry[] = [
       defaultMessage: 'Legend visibility',
     }),
     widget: 'buttonGroup',
+    options: [
+      {
+        value: 'auto',
+        label: i18n.translate('xpack.lens.heatmap.legendVisibilityAuto', {
+          defaultMessage: 'Auto',
+        }),
+      },
+      {
+        value: 'visible',
+        label: i18n.translate('xpack.lens.heatmap.legendVisibilityShow', {
+          defaultMessage: 'Show',
+        }),
+      },
+      {
+        value: 'hidden',
+        label: i18n.translate('xpack.lens.heatmap.legendVisibilityHide', {
+          defaultMessage: 'Hide',
+        }),
+      },
+    ],
   },
   {
     path: 'legend.position',
@@ -79,6 +119,32 @@ export const heatmapUISchema: UISchemaEntry[] = [
     label: i18n.translate('xpack.lens.heatmap.legendSizeLabel', {
       defaultMessage: 'Legend size',
     }),
+    options: [
+      {
+        value: 'auto',
+        label: i18n.translate('xpack.lens.heatmap.legendSizeAuto', { defaultMessage: 'Auto' }),
+      },
+      {
+        value: 's',
+        label: i18n.translate('xpack.lens.heatmap.legendSizeSmall', { defaultMessage: 'Small' }),
+      },
+      {
+        value: 'm',
+        label: i18n.translate('xpack.lens.heatmap.legendSizeMedium', {
+          defaultMessage: 'Medium',
+        }),
+      },
+      {
+        value: 'l',
+        label: i18n.translate('xpack.lens.heatmap.legendSizeLarge', { defaultMessage: 'Large' }),
+      },
+      {
+        value: 'xl',
+        label: i18n.translate('xpack.lens.heatmap.legendSizeExtraLarge', {
+          defaultMessage: 'Extra large',
+        }),
+      },
+    ],
   },
   {
     path: 'legend.truncate_after_lines',

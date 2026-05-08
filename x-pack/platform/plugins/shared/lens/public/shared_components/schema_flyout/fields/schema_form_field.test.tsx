@@ -98,6 +98,22 @@ describe('SchemaFormField', () => {
     expect(screen.getByRole('switch')).toBeInTheDocument();
   });
 
+  it('renders EuiRange for range widget', () => {
+    renderField(
+      {
+        path: 'fillOpacity',
+        type: 'number',
+        label: 'Fill opacity',
+        widget: 'range',
+        props: { min: 0.1, max: 1, step: 0.1 },
+        defaultValue: 0.8,
+      },
+      { fillOpacity: 0.8 }
+    );
+    expect(screen.getByText('Fill opacity')).toBeInTheDocument();
+    expect(screen.getAllByTestId('schemaField-fillOpacity').length).toBeGreaterThan(0);
+  });
+
   it('renders nothing for unknown type', () => {
     const { container } = renderField({
       path: 'mystery',

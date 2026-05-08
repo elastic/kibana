@@ -22,6 +22,8 @@ export interface UISchemaEntry {
   tooltip?: string;
   /** Description override (replaces Joi meta description) */
   description?: string;
+  /** Override option labels for enum/select fields. Keys are raw schema values, values are i18n'd labels. */
+  options?: Array<{ value: string; label: string }>;
 }
 
 /**

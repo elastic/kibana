@@ -13,6 +13,20 @@ export const datatableUISchema: UISchemaEntry[] = [
     path: 'styling.density.mode',
     label: i18n.translate('xpack.lens.table.densityLabel', { defaultMessage: 'Density' }),
     widget: 'buttonGroup',
+    options: [
+      {
+        value: 'compact',
+        label: i18n.translate('xpack.lens.table.densityCompact', { defaultMessage: 'Compact' }),
+      },
+      {
+        value: 'default',
+        label: i18n.translate('xpack.lens.table.densityNormal', { defaultMessage: 'Normal' }),
+      },
+      {
+        value: 'expanded',
+        label: i18n.translate('xpack.lens.table.densityExpanded', { defaultMessage: 'Expanded' }),
+      },
+    ],
   },
   {
     path: 'styling.density.height.header',

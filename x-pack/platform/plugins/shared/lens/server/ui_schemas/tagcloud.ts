@@ -15,6 +15,26 @@ export const tagcloudUISchema: UISchemaEntry[] = [
       defaultMessage: 'Orientation',
     }),
     widget: 'buttonGroup',
+    options: [
+      {
+        value: 'horizontal',
+        label: i18n.translate('xpack.lens.tagcloud.orientationHorizontal', {
+          defaultMessage: 'Horizontal',
+        }),
+      },
+      {
+        value: 'vertical',
+        label: i18n.translate('xpack.lens.tagcloud.orientationVertical', {
+          defaultMessage: 'Vertical',
+        }),
+      },
+      {
+        value: 'angled',
+        label: i18n.translate('xpack.lens.tagcloud.orientationAngled', {
+          defaultMessage: 'Angled',
+        }),
+      },
+    ],
   },
   {
     path: 'styling.font_size.min',

@@ -22,6 +22,18 @@ export const partitionUISchema: UISchemaEntry[] = [
       defaultMessage: 'Value format',
     }),
     widget: 'buttonGroup',
+    options: [
+      {
+        value: 'absolute',
+        label: i18n.translate('xpack.lens.pie.valuesModeAbsolute', { defaultMessage: 'Value' }),
+      },
+      {
+        value: 'percentage',
+        label: i18n.translate('xpack.lens.pie.valuesModePercentage', {
+          defaultMessage: 'Percent',
+        }),
+      },
+    ],
   },
   {
     path: 'styling.values.percent_decimals',
@@ -42,6 +54,20 @@ export const partitionUISchema: UISchemaEntry[] = [
       defaultMessage: 'Label position',
     }),
     widget: 'buttonGroup',
+    options: [
+      {
+        value: 'inside',
+        label: i18n.translate('xpack.lens.pie.labelsPositionInside', {
+          defaultMessage: 'Inside',
+        }),
+      },
+      {
+        value: 'outside',
+        label: i18n.translate('xpack.lens.pie.labelsPositionOutside', {
+          defaultMessage: 'Outside',
+        }),
+      },
+    ],
   },
   // Style section — donut hole (pie/donut specific)
   {
@@ -50,6 +76,24 @@ export const partitionUISchema: UISchemaEntry[] = [
       defaultMessage: 'Inner area size',
     }),
     widget: 'buttonGroup',
+    options: [
+      {
+        value: 'none',
+        label: i18n.translate('xpack.lens.pie.donutHoleNone', { defaultMessage: 'None' }),
+      },
+      {
+        value: 's',
+        label: i18n.translate('xpack.lens.pie.donutHoleSmall', { defaultMessage: 'Small' }),
+      },
+      {
+        value: 'm',
+        label: i18n.translate('xpack.lens.pie.donutHoleMedium', { defaultMessage: 'Medium' }),
+      },
+      {
+        value: 'l',
+        label: i18n.translate('xpack.lens.pie.donutHoleLarge', { defaultMessage: 'Large' }),
+      },
+    ],
   },
   // Legend section
   {
@@ -58,6 +102,20 @@ export const partitionUISchema: UISchemaEntry[] = [
       defaultMessage: 'Legend visibility',
     }),
     widget: 'buttonGroup',
+    options: [
+      {
+        value: 'auto',
+        label: i18n.translate('xpack.lens.pie.legendVisibilityAuto', { defaultMessage: 'Auto' }),
+      },
+      {
+        value: 'visible',
+        label: i18n.translate('xpack.lens.pie.legendVisibilityShow', { defaultMessage: 'Show' }),
+      },
+      {
+        value: 'hidden',
+        label: i18n.translate('xpack.lens.pie.legendVisibilityHide', { defaultMessage: 'Hide' }),
+      },
+    ],
   },
   {
     path: 'legend.nested',
@@ -71,6 +129,30 @@ export const partitionUISchema: UISchemaEntry[] = [
       defaultMessage: 'Legend size',
     }),
     widget: 'buttonGroup',
+    options: [
+      {
+        value: 'auto',
+        label: i18n.translate('xpack.lens.pie.legendSizeAuto', { defaultMessage: 'Auto' }),
+      },
+      {
+        value: 's',
+        label: i18n.translate('xpack.lens.pie.legendSizeSmall', { defaultMessage: 'Small' }),
+      },
+      {
+        value: 'm',
+        label: i18n.translate('xpack.lens.pie.legendSizeMedium', { defaultMessage: 'Medium' }),
+      },
+      {
+        value: 'l',
+        label: i18n.translate('xpack.lens.pie.legendSizeLarge', { defaultMessage: 'Large' }),
+      },
+      {
+        value: 'xl',
+        label: i18n.translate('xpack.lens.pie.legendSizeExtraLarge', {
+          defaultMessage: 'Extra large',
+        }),
+      },
+    ],
   },
   {
     path: 'legend.truncate_after_lines',

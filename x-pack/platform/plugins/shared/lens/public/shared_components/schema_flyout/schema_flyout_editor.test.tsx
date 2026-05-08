@@ -29,6 +29,15 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => mockServices,
 }));
 
+// Mock field components to avoid react-hook-form useController registration
+// which causes watch() to fire and creates render loops in tests.
+// Field rendering is tested separately in schema_form_field.test.tsx.
+jest.mock('./fields', () => ({
+  SchemaFormField: ({ descriptor }: { descriptor: { path: string; label: string } }) => (
+    <div data-test-subj={`schemaField-${descriptor.path}`}>{descriptor.label}</div>
+  ),
+}));
+
 describe('getByPath', () => {
   it('returns nested value', () => {
     expect(getByPath({ a: { b: { c: 42 } } }, 'a.b.c')).toBe(42);

@@ -16,6 +16,20 @@ export const xyUISchema: UISchemaEntry[] = [
       defaultMessage: 'Legend visibility',
     }),
     widget: 'buttonGroup',
+    options: [
+      {
+        value: 'auto',
+        label: i18n.translate('xpack.lens.xy.legendVisibilityAuto', { defaultMessage: 'Auto' }),
+      },
+      {
+        value: 'visible',
+        label: i18n.translate('xpack.lens.xy.legendVisibilityShow', { defaultMessage: 'Show' }),
+      },
+      {
+        value: 'hidden',
+        label: i18n.translate('xpack.lens.xy.legendVisibilityHide', { defaultMessage: 'Hide' }),
+      },
+    ],
   },
   {
     path: 'legend.position',
@@ -44,6 +58,22 @@ export const xyUISchema: UISchemaEntry[] = [
       defaultMessage: 'Line interpolation',
     }),
     widget: 'buttonGroup',
+    options: [
+      {
+        value: 'linear',
+        label: i18n.translate('xpack.lens.xy.interpolationLinear', { defaultMessage: 'Linear' }),
+      },
+      {
+        value: 'smooth',
+        label: i18n.translate('xpack.lens.xy.interpolationSmooth', { defaultMessage: 'Smooth' }),
+      },
+      {
+        value: 'stepped',
+        label: i18n.translate('xpack.lens.xy.interpolationStepped', {
+          defaultMessage: 'Stepped',
+        }),
+      },
+    ],
   },
   // Styling — points
   {
@@ -52,6 +82,20 @@ export const xyUISchema: UISchemaEntry[] = [
       defaultMessage: 'Points visibility',
     }),
     widget: 'buttonGroup',
+    options: [
+      {
+        value: 'auto',
+        label: i18n.translate('xpack.lens.xy.pointsVisibilityAuto', { defaultMessage: 'Auto' }),
+      },
+      {
+        value: 'visible',
+        label: i18n.translate('xpack.lens.xy.pointsVisibilityShow', { defaultMessage: 'Show' }),
+      },
+      {
+        value: 'hidden',
+        label: i18n.translate('xpack.lens.xy.pointsVisibilityHide', { defaultMessage: 'Hide' }),
+      },
+    ],
   },
   // Styling — areas
   {
@@ -59,6 +103,8 @@ export const xyUISchema: UISchemaEntry[] = [
     label: i18n.translate('xpack.lens.xy.areaFillOpacityLabel', {
       defaultMessage: 'Area fill opacity',
     }),
+    widget: 'range',
+    props: { min: 0.1, max: 1, step: 0.1 },
   },
   // Styling — bars
   {
@@ -74,5 +120,35 @@ export const xyUISchema: UISchemaEntry[] = [
       defaultMessage: 'Missing values',
     }),
     widget: 'buttonGroup',
+    options: [
+      {
+        value: 'none',
+        label: i18n.translate('xpack.lens.xy.fittingNone', { defaultMessage: 'Hide' }),
+      },
+      {
+        value: 'zero',
+        label: i18n.translate('xpack.lens.xy.fittingZero', { defaultMessage: 'Zero' }),
+      },
+      {
+        value: 'linear',
+        label: i18n.translate('xpack.lens.xy.fittingLinear', { defaultMessage: 'Linear' }),
+      },
+      {
+        value: 'carry',
+        label: i18n.translate('xpack.lens.xy.fittingCarry', { defaultMessage: 'Last' }),
+      },
+      {
+        value: 'lookahead',
+        label: i18n.translate('xpack.lens.xy.fittingLookahead', { defaultMessage: 'Next' }),
+      },
+      {
+        value: 'average',
+        label: i18n.translate('xpack.lens.xy.fittingAverage', { defaultMessage: 'Average' }),
+      },
+      {
+        value: 'nearest',
+        label: i18n.translate('xpack.lens.xy.fittingNearest', { defaultMessage: 'Nearest' }),
+      },
+    ],
   },
 ];

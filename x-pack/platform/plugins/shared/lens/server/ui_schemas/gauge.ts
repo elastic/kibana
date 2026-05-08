@@ -15,6 +15,26 @@ export const gaugeUISchema: UISchemaEntry[] = [
       defaultMessage: 'Shape',
     }),
     widget: 'buttonGroup',
+    options: [
+      {
+        value: 'arc',
+        label: i18n.translate('xpack.lens.gauge.shapeArc', { defaultMessage: 'Arc' }),
+      },
+      {
+        value: 'circle',
+        label: i18n.translate('xpack.lens.gauge.shapeCircle', { defaultMessage: 'Circle' }),
+      },
+      {
+        value: 'semi_circle',
+        label: i18n.translate('xpack.lens.gauge.shapeSemiCircle', {
+          defaultMessage: 'Semi circle',
+        }),
+      },
+      {
+        value: 'bullet',
+        label: i18n.translate('xpack.lens.gauge.shapeBullet', { defaultMessage: 'Bullet' }),
+      },
+    ],
   },
   {
     path: 'styling.shape.orientation',
@@ -22,5 +42,19 @@ export const gaugeUISchema: UISchemaEntry[] = [
       defaultMessage: 'Orientation',
     }),
     widget: 'buttonGroup',
+    options: [
+      {
+        value: 'horizontal',
+        label: i18n.translate('xpack.lens.gauge.orientationHorizontal', {
+          defaultMessage: 'Horizontal',
+        }),
+      },
+      {
+        value: 'vertical',
+        label: i18n.translate('xpack.lens.gauge.orientationVertical', {
+          defaultMessage: 'Vertical',
+        }),
+      },
+    ],
   },
 ];

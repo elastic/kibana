@@ -20,14 +20,30 @@ import { SelectField } from './select_field';
 import { NumberField } from './number_field';
 import { TextField } from './text_field';
 import { SectionField } from './section_field';
+import { RangeField } from './range_field';
 
 interface SchemaFormFieldProps {
   descriptor: FieldDescriptor;
   control: Control;
 }
 
+// Map custom widget names to base field types they should render as.
+// Custom widgets that don't have dedicated renderers yet fall back to
+// the closest generic renderer based on the schema type.
+const widgetToBaseType: Record<string, string> = {
+  buttonGroup: 'select',
+  rowHeight: 'section',
+  paginationToggle: 'toggle',
+};
+
 export const SchemaFormField = ({ descriptor, control }: SchemaFormFieldProps) => {
-  switch (descriptor.type) {
+  // Resolve: explicit widget → mapped base type → schema type
+  const widget = descriptor.widget ?? descriptor.type;
+  const resolved = widgetToBaseType[widget] ?? widget;
+
+  switch (resolved) {
+    case 'range':
+      return <RangeField descriptor={descriptor} control={control} />;
     case 'toggle':
       return <ToggleField descriptor={descriptor} control={control} />;
     case 'select':
