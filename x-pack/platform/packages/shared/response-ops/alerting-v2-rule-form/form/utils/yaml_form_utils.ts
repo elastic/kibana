@@ -197,11 +197,11 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
 
   // Validate kind
   const kind = obj.kind;
-  if (kind !== undefined && kind !== 'alert' && kind !== 'signal') {
+  if (kind !== undefined && kind !== 'alert' && kind !== 'signal' && kind !== 'building_block') {
     return {
       values: null,
       error: i18n.translate('xpack.alertingV2.yamlRuleForm.invalidKindError', {
-        defaultMessage: 'Kind must be "alert" or "signal".',
+        defaultMessage: 'Kind must be "alert", "signal", or "building_block".',
       }),
     };
   }
@@ -238,7 +238,7 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
 
   return {
     values: {
-      kind: (kind as 'alert' | 'signal') ?? 'alert',
+      kind: (kind as 'alert' | 'signal' | 'building_block') ?? 'alert',
       metadata: {
         name: name.trim(),
         enabled: metadata?.enabled !== false,

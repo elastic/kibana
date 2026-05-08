@@ -40,7 +40,7 @@ export interface BuildAlertEventsBaseOpts {
   ruleId: string;
   ruleVersion: number;
   spaceId: string;
-  ruleAttributes: Pick<RuleResponse, 'grouping'>;
+  ruleAttributes: Pick<RuleResponse, 'grouping' | 'kind'>;
   /**
    * Stable identifier for this task run (used for deterministic ids to avoid duplicates on retry).
    */
@@ -48,6 +48,10 @@ export interface BuildAlertEventsBaseOpts {
 }
 
 export type AlertEventsBatchBuilder = (batch: Array<Record<string, unknown>>) => AlertEvent[];
+
+function resolveEventType(kind: RuleResponse['kind']): 'signal' | 'alert' {
+  return kind === 'signal' ? 'signal' : 'alert';
+}
 
 export function createAlertEventsBatchBuilder({
   ruleId,
@@ -77,6 +81,8 @@ export function createAlertEventsBatchBuilder({
         },
       });
 
+      const isBuildingBlock = ruleAttributes.kind === 'building_block';
+
       const doc: AlertEvent = {
         '@timestamp': wroteAt,
         scheduled_timestamp: scheduledTimestamp,
@@ -88,8 +94,9 @@ export function createAlertEventsBatchBuilder({
         data: rowDoc,
         status: 'breached',
         source,
-        type: 'signal',
+        type: resolveEventType(ruleAttributes.kind),
         space_id: spaceId,
+        ...(isBuildingBlock && { building_block: true }),
       };
 
       index++;
@@ -107,6 +114,7 @@ export interface BuildRecoveryAlertEventsOpts {
   activeGroupHashes: ActiveAlertGroupHash[];
   breachedGroupHashes: Set<string>;
   scheduledTimestamp: string;
+  kind: RuleResponse['kind'];
 }
 
 /**
@@ -122,8 +130,11 @@ export function buildRecoveryAlertEvents({
   activeGroupHashes,
   breachedGroupHashes,
   scheduledTimestamp,
+  kind,
 }: BuildRecoveryAlertEventsOpts): AlertEvent[] {
   const wroteAt = new Date().toISOString();
+
+  const isBuildingBlock = kind === 'building_block';
 
   return activeGroupHashes
     .filter(({ group_hash }) => !breachedGroupHashes.has(group_hash))
@@ -135,8 +146,9 @@ export function buildRecoveryAlertEvents({
       data: {},
       status: 'recovered' as const,
       source: 'internal',
-      type: 'signal' as const,
+      type: resolveEventType(kind),
       space_id: spaceId,
+      ...(isBuildingBlock && { building_block: true }),
     }));
 }
 
@@ -155,7 +167,7 @@ export interface BuildQueryRecoveryAlertEventsOpts {
   ruleId: string;
   ruleVersion: number;
   spaceId: string;
-  ruleAttributes: Pick<RuleResponse, 'grouping'>;
+  ruleAttributes: Pick<RuleResponse, 'grouping' | 'kind'>;
   activeGroupHashes: ActiveAlertGroupHash[];
   esqlResponse: EsqlQueryResponse;
   scheduledTimestamp: string;
@@ -176,6 +188,8 @@ export function buildQueryRecoveryAlertEvents({
   esqlResponse,
   scheduledTimestamp,
 }: BuildQueryRecoveryAlertEventsOpts): AlertEvent[] {
+  const { kind } = ruleAttributes;
+  const isBuildingBlock = kind === 'building_block';
   const columns = esqlResponse.columns ?? [];
   const values = esqlResponse.values ?? [];
 
@@ -218,7 +232,8 @@ export function buildQueryRecoveryAlertEvents({
     data,
     status: 'recovered' as const,
     source: 'internal',
-    type: 'signal' as const,
+    type: resolveEventType(kind),
     space_id: spaceId,
+    ...(isBuildingBlock && { building_block: true }),
   }));
 }

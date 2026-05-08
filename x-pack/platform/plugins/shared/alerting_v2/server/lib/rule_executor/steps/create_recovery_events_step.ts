@@ -42,9 +42,9 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
     return guardedExpandStep(streamState, ['rule', 'alertEventsBatch'], async function* (state) {
       const { input, rule, alertEventsBatch } = state;
 
-      if (rule.kind !== 'alert') {
+      if (rule.kind === 'signal') {
         step.logger.debug({
-          message: `[${step.name}] Skipping recovery for non-alert rule ${input.ruleId}`,
+          message: `[${step.name}] Skipping recovery for signal rule ${input.ruleId}`,
         });
         yield { type: 'continue', state };
         return;
@@ -75,6 +75,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
               activeGroupHashes,
               breachedGroupHashes: new Set(alertEventsBatch.map((e) => e.group_hash)),
               scheduledTimestamp: input.scheduledAt,
+              kind: rule.kind,
             });
 
       step.logger.debug({

@@ -32,9 +32,9 @@ export const esqlQuerySchema = z
 /** Kind */
 
 export const ruleKindSchema = z
-  .enum(['alert', 'signal'])
+  .enum(['alert', 'signal', 'building_block'])
   .describe(
-    'Rule kind: "alert" for stateful alerting with transitions, "signal" for stateless detection.'
+    'Rule kind: "alert" or "building_block" for stateful alerting with transitions, "signal" for stateless detection.'
   );
 
 export type RuleKind = z.infer<typeof ruleKindSchema>;

@@ -29,7 +29,7 @@ export class DirectorStep implements RuleExecutionStep {
     return guardedExpandStep(streamState, ['rule', 'alertEventsBatch'], async function* (state) {
       const { input, rule, alertEventsBatch } = state;
 
-      if (rule.kind !== 'alert') {
+      if (rule.kind === 'signal') {
         step.logger.debug({
           message: `[${step.name}] Skipping episode tracking for signal rule ${input.ruleId}`,
         });

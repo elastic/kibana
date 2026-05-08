@@ -11,7 +11,7 @@ import { z } from '@kbn/zod/v4';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
-export const ALERT_EVENTS_DATA_STREAM_VERSION = 2;
+export const ALERT_EVENTS_DATA_STREAM_VERSION = 3;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
 export const ALERT_EVENTS_ILM_POLICY_NAME = '.rule-events-ilm-policy';
 
@@ -56,6 +56,7 @@ const mappings: MappingsDefinition = {
       },
     },
     space_id: { type: 'keyword' },
+    building_block: { type: 'boolean' },
   },
 };
 
@@ -88,6 +89,7 @@ export const alertEventSchema = z.object({
     })
     .optional(),
   space_id: z.string(),
+  building_block: z.literal(true).optional(),
 });
 
 export type AlertEvent = z.infer<typeof alertEventSchema>;
