@@ -18,6 +18,7 @@ import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
 import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { useEventDetails } from '../../../flyout/document_details/shared/hooks/use_event_details';
@@ -62,6 +63,15 @@ export interface EntitiesOverviewProps {
    * Same as `onShowUserDetails` but for host entities.
    */
   onShowHostDetails?: (params: { hostName: string; entityId?: string }) => void;
+  /**
+   * Callback invoked when the user clicks the alerts insight chip on the user card.
+   * When omitted, the click falls back to `onShowUserDetails`.
+   */
+  onShowUserAlertsDetails?: (params: { userName: string; entityId?: string }) => void;
+  /**
+   * Same as `onShowUserAlertsDetails` but for host entities.
+   */
+  onShowHostAlertsDetails?: (params: { hostName: string; entityId?: string }) => void;
 }
 
 const HEADER_TITLE = (
@@ -83,6 +93,41 @@ const NO_DATA = (
   />
 );
 
+type ShowUserHandler = NonNullable<EntitiesOverviewProps['onShowUserDetails']>;
+type ShowHostHandler = NonNullable<EntitiesOverviewProps['onShowHostDetails']>;
+
+const buildShowUserDetailsHandler = (
+  userName: string,
+  entityId: string | undefined,
+  onShowDetails: ShowUserHandler | undefined,
+  onShowAlerts: ShowUserHandler | undefined
+) => {
+  if (!onShowDetails || !userName) return undefined;
+  return (path?: EntityDetailsPath) => {
+    if (path?.subTab === CspInsightLeftPanelSubTab.ALERTS && onShowAlerts) {
+      onShowAlerts({ userName, entityId });
+      return;
+    }
+    onShowDetails({ userName, entityId });
+  };
+};
+
+const buildShowHostDetailsHandler = (
+  hostName: string,
+  entityId: string | undefined,
+  onShowDetails: ShowHostHandler | undefined,
+  onShowAlerts: ShowHostHandler | undefined
+) => {
+  if (!onShowDetails || !hostName) return undefined;
+  return (path?: EntityDetailsPath) => {
+    if (path?.subTab === CspInsightLeftPanelSubTab.ALERTS && onShowAlerts) {
+      onShowAlerts({ hostName, entityId });
+      return;
+    }
+    onShowDetails({ hostName, entityId });
+  };
+};
+
 /**
  * Entities section under Insights section, overview tab. It contains a preview of host and user information.
  */
@@ -96,6 +141,8 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
     onShowEntitiesDetails,
     onShowUserDetails,
     onShowHostDetails,
+    onShowUserAlertsDetails,
+    onShowHostAlertsDetails,
   }) => {
     const hostName = getFieldValue(hit, 'host.name') as string | null;
     const userName = getFieldValue(hit, 'user.name') as string | null;
@@ -113,16 +160,22 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
     const dataAsNestedObject =
       dataAsNestedObjectProp !== undefined ? dataAsNestedObjectProp : fetchedData;
 
-    const hostEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
-      'host',
-      dataAsNestedObject
-    ) as IdentityFields;
+    // Memoize identifier extraction so AlertCountInsight (deep inside the host/user cards)
+    // doesn't churn on referential changes — `getEntityIdentifiersFromDocument` returns a fresh
+    // object every call. Same pattern as `highlighted_fields.tsx`.
+    const hostEntityIdentifiers = useMemo(
+      () =>
+        (euidApi?.euid.getEntityIdentifiersFromDocument('host', dataAsNestedObject) ??
+          undefined) as IdentityFields | undefined,
+      [euidApi?.euid, dataAsNestedObject]
+    );
+    const userEntityIdentifiers = useMemo(
+      () =>
+        (euidApi?.euid.getEntityIdentifiersFromDocument('user', dataAsNestedObject) ??
+          undefined) as IdentityFields | undefined,
+      [euidApi?.euid, dataAsNestedObject]
+    );
     const hostEntityId = euidApi?.euid.getEuidFromObject('host', dataAsNestedObject);
-
-    const userEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
-      'user',
-      dataAsNestedObject
-    ) as IdentityFields;
     const userEntityId = euidApi?.euid.getEuidFromObject('user', dataAsNestedObject);
 
     const userEntityFromStore = useEntityFromStore({
@@ -138,19 +191,18 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
       skip: !entityStoreV2Enabled,
     });
 
-    const userEntityRecordId = userEntityFromStore.entityRecord?.entity?.id;
-    const userEntityRecordName = userEntityFromStore.entityRecord?.entity?.name;
-    const resolvedUserName = userName || userEntityRecordName || '';
-
-    const hostEntityRecordId = hostEntityFromStore.entityRecord?.entity?.id;
-    const hostEntityRecordName = hostEntityFromStore.entityRecord?.entity?.name;
-    const resolvedHostName = hostName || hostEntityRecordName || '';
+    const userEntityRecord = userEntityFromStore.entityRecord;
+    const hostEntityRecord = hostEntityFromStore.entityRecord;
+    // Fall back to the store record's name when the document doesn't carry user/host.name —
+    // happens when the entity exists only in the store.
+    const resolvedUserName = userName || userEntityRecord?.entity?.name || '';
+    const resolvedHostName = hostName || hostEntityRecord?.entity?.name || '';
 
     const showUserOverview =
       (!entityStoreV2Enabled && userName != null) || (entityStoreV2Enabled && !!resolvedUserName);
     const showHostOverview =
       (!entityStoreV2Enabled && hostName != null) || (entityStoreV2Enabled && !!resolvedHostName);
-    const hasAnyEntity = showUserOverview || (showHostOverview && !!hostEntityIdentifiers);
+    const hasAnyEntity = showUserOverview || showHostOverview;
 
     const link = useMemo(
       () =>
@@ -163,32 +215,32 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
       [onShowEntitiesDetails]
     );
 
-    // The host/user overview's `onShowDetails` callback can pass an `EntityDetailsPath` to deep-link
-    // to a specific tab. The legacy expandable flyout consumed it via the left-panel tab API, but
-    // the flyout_v2 entity flyouts (HostEntityDetails/UserEntityDetails) are single-body views with
-    // no tab UI, so `path` is intentionally not forwarded. Surface tabbed details before re-introducing.
+    // `AlertCountInsight` calls back with `{ tab: CSP_INSIGHTS, subTab: ALERTS }` when the alerts
+    // chip is clicked; route those clicks to the dedicated alerts flyout. Other tabs fall through
+    // to the entity details flyout — flyout_v2 entity flyouts are single-body views, so the rest
+    // of the path is intentionally not forwarded.
+    const userEntityRecordId = userEntityRecord?.entity?.id;
     const handleShowUserDetails = useMemo(
       () =>
-        onShowUserDetails && resolvedUserName
-          ? (_path?: EntityDetailsPath) =>
-              onShowUserDetails({
-                userName: resolvedUserName,
-                entityId: userEntityRecordId,
-              })
-          : undefined,
-      [onShowUserDetails, resolvedUserName, userEntityRecordId]
+        buildShowUserDetailsHandler(
+          resolvedUserName,
+          userEntityRecordId,
+          onShowUserDetails,
+          onShowUserAlertsDetails
+        ),
+      [onShowUserDetails, onShowUserAlertsDetails, resolvedUserName, userEntityRecordId]
     );
 
+    const hostEntityRecordId = hostEntityRecord?.entity?.id;
     const handleShowHostDetails = useMemo(
       () =>
-        onShowHostDetails && resolvedHostName
-          ? (_path?: EntityDetailsPath) =>
-              onShowHostDetails({
-                hostName: resolvedHostName,
-                entityId: hostEntityRecordId,
-              })
-          : undefined,
-      [onShowHostDetails, resolvedHostName, hostEntityRecordId]
+        buildShowHostDetailsHandler(
+          resolvedHostName,
+          hostEntityRecordId,
+          onShowHostDetails,
+          onShowHostAlertsDetails
+        ),
+      [onShowHostDetails, onShowHostAlertsDetails, resolvedHostName, hostEntityRecordId]
     );
 
     return (
@@ -208,9 +260,7 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
                   <UserEntityOverview
                     userName={resolvedUserName}
                     identityFields={userEntityIdentifiers}
-                    entityRecord={
-                      entityStoreV2Enabled ? userEntityFromStore.entityRecord : undefined
-                    }
+                    entityRecord={entityStoreV2Enabled ? userEntityRecord : undefined}
                     scopeId={scopeId}
                     renderCellActions={renderCellActions}
                     onShowDetails={handleShowUserDetails}
@@ -219,12 +269,12 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
                 <EuiSpacer size="s" />
               </>
             )}
-            {showHostOverview && hostEntityIdentifiers && (
+            {showHostOverview && (
               <EuiFlexItem>
                 <HostEntityOverview
                   hostName={resolvedHostName}
                   identityFields={hostEntityIdentifiers}
-                  entityRecord={entityStoreV2Enabled ? hostEntityFromStore.entityRecord : undefined}
+                  entityRecord={entityStoreV2Enabled ? hostEntityRecord : undefined}
                   scopeId={scopeId}
                   renderCellActions={renderCellActions}
                   onShowDetails={handleShowHostDetails}

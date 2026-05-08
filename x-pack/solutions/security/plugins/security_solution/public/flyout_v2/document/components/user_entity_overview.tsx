@@ -91,7 +91,7 @@ export interface UserEntityOverviewProps {
   /**
    * These identity fields for the user are wrong and need to be fixed
    */
-  identityFields: Record<string, string>;
+  identityFields?: Record<string, string>;
   /**
    * When provided (e.g. from parent EntitiesOverview), use this record for risk/display
    * so Overview section uses the same entity store data used to decide visibility.

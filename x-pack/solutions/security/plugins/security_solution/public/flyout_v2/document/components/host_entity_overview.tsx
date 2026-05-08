@@ -53,9 +53,11 @@ import { RiskScoreLevel } from '../../../entity_analytics/components/severity/co
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useHostDetails } from '../../../explore/hosts/containers/hosts/details';
+import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
 import {
   getField,
   isRiskSeverity,
+  mergeLegacyIdentityWhenStoreEntityMissing,
   normalizeRiskLevel,
 } from '../../../flyout/document_details/shared/utils';
 import {
@@ -99,7 +101,7 @@ export interface HostEntityOverviewProps {
   /**
    * Entity identifiers for looking up host related ip addresses and risk level
    */
-  identityFields: Record<string, string>;
+  identityFields?: Record<string, string>;
   /**
    * When provided (e.g. from parent EntitiesOverview), use this record for risk/display
    * so Overview section uses the same entity store data used to decide visibility.
@@ -165,11 +167,20 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     [hostName]
   );
 
-  const storeHostEntityId = identityFields['entity.id'];
+  const hostIdentityFields = useMemo(() => {
+    const legacyFields =
+      hostName != null && hostName !== '' ? { 'host.name': hostName } : ({} as IdentityFields);
+    if (!entityStoreV2Enabled) {
+      return legacyFields;
+    }
+    return mergeLegacyIdentityWhenStoreEntityMissing(identityFields ?? {}, legacyFields);
+  }, [entityStoreV2Enabled, hostName, identityFields]);
+
+  const storeHostEntityId = hostIdentityFields['entity.id'];
 
   const entityFromStore = useEntityFromStore({
     entityId: storeHostEntityId,
-    identityFields,
+    identityFields: hostIdentityFields,
     entityType: 'host',
     skip: !entityStoreV2Enabled || entityRecordProp != null,
   });
@@ -310,23 +321,23 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   }, [hostRiskData]);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    identityFields,
+    identityFields: hostIdentityFields,
     entityType: EntityType.host,
     to,
     from,
     queryId: HOST_ENTITY_OVERVIEW_ID,
   });
-  const hostCspIdentityDoc = entityRecord ?? identityFields;
+  const hostCspIdentityDoc = entityRecord ?? hostIdentityFields;
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
     buildEuidCspPreviewOptions('host', hostCspIdentityDoc, euidApi, {
       entityStoreV2Enabled,
-      legacyIdentityFields: identityFields,
+      legacyIdentityFields: hostIdentityFields,
     })
   );
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
     buildEuidCspPreviewOptions('host', hostCspIdentityDoc, euidApi, {
       entityStoreV2Enabled,
-      legacyIdentityFields: identityFields,
+      legacyIdentityFields: hostIdentityFields,
     })
   );
 
@@ -426,20 +437,20 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
       )}
       <AlertCountInsight
         entityRecord={entityRecord}
-        identityFields={identityFields}
+        identityFields={hostIdentityFields}
         entityType={EntityType.host}
         queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${HOST_ENTITY_OVERVIEW_ID}`}
         openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID}
       />
       <MisconfigurationsInsight
-        identityFields={identityFields}
+        identityFields={hostIdentityFields}
         openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID}
         telemetryKey={MISCONFIGURATION_INSIGHT_HOST_ENTITY_OVERVIEW}
       />
       <VulnerabilitiesInsight
-        identityFields={identityFields}
+        identityFields={hostIdentityFields}
         openDetailsPanel={openDetailsPanel}
         data-test-subj={ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID}
         telemetryKey={VULNERABILITIES_INSIGHT_HOST_ENTITY_OVERVIEW}

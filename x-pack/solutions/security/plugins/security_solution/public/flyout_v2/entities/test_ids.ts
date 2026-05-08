@@ -8,3 +8,4 @@
 export const ENTITIES_DETAILS_VIEW_TEST_ID = 'entitiesDetailsView';
 export const HOST_DETAILS_VIEW_TEST_ID = 'hostDetailsView';
 export const USER_DETAILS_VIEW_TEST_ID = 'userDetailsView';
+export const ENTITY_ALERTS_DETAILS_VIEW_TEST_ID = 'entityAlertsDetailsView';

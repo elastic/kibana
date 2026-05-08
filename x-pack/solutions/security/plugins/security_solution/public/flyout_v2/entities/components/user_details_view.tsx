@@ -27,6 +27,10 @@ export interface UserDetailsViewProps {
    * Scope id used by cell actions and entity drill-ins.
    */
   scopeId: string;
+  /**
+   * Override invoked when the alerts insight chip is clicked.
+   */
+  onShowAlertsDetails?: () => void;
 }
 
 /**
@@ -37,9 +41,16 @@ export const UserDetailsView: FC<UserDetailsViewProps> = ({
   entityId,
   timestamp,
   scopeId,
+  onShowAlertsDetails,
 }) => (
   <div data-test-subj={USER_DETAILS_VIEW_TEST_ID}>
-    <UserDetails userName={userName} entityId={entityId} timestamp={timestamp} scopeId={scopeId} />
+    <UserDetails
+      userName={userName}
+      entityId={entityId}
+      timestamp={timestamp}
+      scopeId={scopeId}
+      onShowAlertsDetails={onShowAlertsDetails}
+    />
   </div>
 );
 

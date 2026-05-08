@@ -28,6 +28,10 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { MISCONFIGURATION_INSIGHT_USER_DETAILS } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import {
+  CspInsightLeftPanelSubTab,
+  type EntityDetailsPath,
+} from '../../../entity_details/shared/components/left_panel/left_panel_header';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
@@ -122,6 +126,13 @@ export interface UserDetailsProps {
    * Set for attack flyout entity panels; omit in document details flyout.
    */
   isAttackDetails?: boolean;
+  /**
+   * Override invoked when the alerts insight chip is clicked. When provided, the alerts subtab
+   * navigation routes here instead of opening the legacy two-panel user details flyout. Used by
+   * flyout_v2 to surface alerts in a dedicated tools flyout. Other insight chips (misconfig,
+   * vulnerabilities) keep their default navigation.
+   */
+  onShowAlertsDetails?: () => void;
 }
 
 /**
@@ -134,6 +145,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
   scopeId,
   expandedOnFirstRender = true,
   isAttackDetails = false,
+  onShowAlertsDetails,
 }) => {
   const EntityCellActions = isAttackDetails ? AttackDetailsCellActions : DocumentDetailsCellActions;
 
@@ -293,7 +305,7 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     queryId: USER_DETAILS_INSIGHTS_ID,
   });
 
-  const openDetailsPanel = useNavigateToUserDetails({
+  const navigateToUserDetails = useNavigateToUserDetails({
     userName,
     identityFields: userIdentityFields ?? {},
     entityId: entityFromStoreResult?.entityRecord?.entity.id,
@@ -304,6 +316,17 @@ export const UserDetails: React.FC<UserDetailsProps> = ({
     isPreviewMode: true, // setting to true to always open a new user flyout
     contextID: USER_DETAILS_INSIGHTS_ID,
   });
+
+  const openDetailsPanel = useCallback(
+    (path?: EntityDetailsPath) => {
+      if (onShowAlertsDetails && path?.subTab === CspInsightLeftPanelSubTab.ALERTS) {
+        onShowAlertsDetails();
+        return;
+      }
+      navigateToUserDetails(path as EntityDetailsPath);
+    },
+    [navigateToUserDetails, onShowAlertsDetails]
+  );
 
   const {
     loading: isRelatedHostLoading,

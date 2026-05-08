@@ -37,7 +37,13 @@ import {
   defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
 } from '../../shared/hooks/use_default_flyout_properties';
-import { EntitiesDetails, HostEntityDetails, UserEntityDetails } from '../../entities';
+import {
+  EntitiesDetails,
+  HostEntityAlertsDetails,
+  HostEntityDetails,
+  UserEntityAlertsDetails,
+  UserEntityDetails,
+} from '../../entities';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -181,7 +187,14 @@ export const InsightsSection = memo(
             store,
             history,
             children: (
-              <UserEntityDetails hit={hit} scopeId="" userName={userName} entityId={entityId} />
+              <UserEntityDetails
+                hit={hit}
+                scopeId=""
+                userName={userName}
+                entityId={entityId}
+                renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
+              />
             ),
           }),
           {
@@ -191,7 +204,7 @@ export const InsightsSection = memo(
           }
         );
       },
-      [history, historyKey, hit, overlays, services, store]
+      [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]
     );
 
     const onShowHostDetails = useCallback(
@@ -202,7 +215,14 @@ export const InsightsSection = memo(
             store,
             history,
             children: (
-              <HostEntityDetails hit={hit} scopeId="" hostName={hostName} entityId={entityId} />
+              <HostEntityDetails
+                hit={hit}
+                scopeId=""
+                hostName={hostName}
+                entityId={entityId}
+                renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
+              />
             ),
           }),
           {
@@ -212,7 +232,61 @@ export const InsightsSection = memo(
           }
         );
       },
-      [history, historyKey, hit, overlays, services, store]
+      [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]
+    );
+
+    const onShowUserAlertsDetails = useCallback(
+      ({ userName, entityId }: { userName: string; entityId?: string }) => {
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: (
+              <UserEntityAlertsDetails
+                hit={hit}
+                userName={userName}
+                entityId={entityId}
+                renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
+              />
+            ),
+          }),
+          {
+            ...defaultToolsFlyoutProperties,
+            historyKey,
+            session: 'start',
+          }
+        );
+      },
+      [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]
+    );
+
+    const onShowHostAlertsDetails = useCallback(
+      ({ hostName, entityId }: { hostName: string; entityId?: string }) => {
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: (
+              <HostEntityAlertsDetails
+                hit={hit}
+                hostName={hostName}
+                entityId={entityId}
+                renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
+              />
+            ),
+          }),
+          {
+            ...defaultToolsFlyoutProperties,
+            historyKey,
+            session: 'start',
+          }
+        );
+      },
+      [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]
     );
 
     const onShowEntitiesDetails = useCallback(() => {
@@ -280,6 +354,8 @@ export const InsightsSection = memo(
           onShowEntitiesDetails={onShowEntitiesDetails}
           onShowUserDetails={onShowUserDetails}
           onShowHostDetails={onShowHostDetails}
+          onShowUserAlertsDetails={onShowUserAlertsDetails}
+          onShowHostAlertsDetails={onShowHostAlertsDetails}
         />
         {isAlert && (
           <ThreatIntelligenceOverview

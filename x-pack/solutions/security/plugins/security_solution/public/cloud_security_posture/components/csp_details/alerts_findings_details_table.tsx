@@ -95,12 +95,18 @@ export const AlertsDetailsTable = memo(
     value,
     entityId,
     entityType,
+    onAlertOpened,
   }: {
     field: CloudPostureEntityIdentifier;
     value: string;
     /** Canonical entity store id (`host.entity.id` / `user.entity.id`); when set with Entity Store v2, identity is loaded from the store for EUID DSL. */
     entityId?: string;
     entityType?: 'host' | 'user';
+    /**
+     * Override invoked when the user clicks the expand icon on an alert row. When omitted the
+     * table falls back to the legacy `openPreviewPanel` API.
+     */
+    onAlertOpened?: (eventId: string, indexName: string) => void;
   }) => {
     const { euiTheme } = useEuiTheme();
 
@@ -332,6 +338,10 @@ export const AlertsDetailsTable = memo(
 
     const handleOnEventAlertDetailPanelOpened = useCallback(
       (eventId: string, indexName: string, tableId: string) => {
+        if (onAlertOpened) {
+          onAlertOpened(eventId, indexName);
+          return;
+        }
         openPreviewPanel({
           id: DocumentDetailsPreviewPanelKey,
           params: {
@@ -343,7 +353,7 @@ export const AlertsDetailsTable = memo(
           },
         });
       },
-      [openPreviewPanel]
+      [onAlertOpened, openPreviewPanel]
     );
 
     const tableId = TableId.alertsOnRuleDetailsPage;

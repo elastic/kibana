@@ -33,6 +33,10 @@ export interface HostDetailsViewProps {
    * Optional Entity Store result already resolved by the parent details view.
    */
   hostEntityFromStoreResult?: EntityFromStoreResult<HostItem> | null;
+  /**
+   * Override invoked when the alerts insight chip is clicked.
+   */
+  onShowAlertsDetails?: () => void;
 }
 
 /**
@@ -44,6 +48,7 @@ export const HostDetailsView: FC<HostDetailsViewProps> = ({
   timestamp,
   scopeId,
   hostEntityFromStoreResult,
+  onShowAlertsDetails,
 }) => (
   <div data-test-subj={HOST_DETAILS_VIEW_TEST_ID}>
     <HostDetails
@@ -52,6 +57,7 @@ export const HostDetailsView: FC<HostDetailsViewProps> = ({
       timestamp={timestamp}
       scopeId={scopeId}
       hostEntityFromStoreResult={hostEntityFromStoreResult}
+      onShowAlertsDetails={onShowAlertsDetails}
     />
   </div>
 );
