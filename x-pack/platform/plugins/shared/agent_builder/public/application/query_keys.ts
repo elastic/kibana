@@ -61,4 +61,7 @@ export const queryKeys = {
   connectors: {
     all: ['connectors'] as const,
   },
+  oauthClients: {
+    all: ['oauthClients', 'list'] as const,
+  },
 };

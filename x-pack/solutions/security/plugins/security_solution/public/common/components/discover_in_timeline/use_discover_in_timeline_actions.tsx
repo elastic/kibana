@@ -258,7 +258,6 @@ export const useDiscoverInTimelineActions = (
             })
           );
           const response = await persistSavedSearch(savedSearch, {
-            onTitleDuplicate: () => {},
             copyOnSave: !savedSearchId,
           });
 
