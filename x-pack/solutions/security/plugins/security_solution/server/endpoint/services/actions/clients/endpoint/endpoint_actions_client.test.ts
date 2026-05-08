@@ -260,7 +260,7 @@ describe('EndpointActionsClient', () => {
     );
   });
 
-  it('should update cases for valid agent ids', async () => {
+  it('should update cases with unified attachment for valid agent ids', async () => {
     await endpointActionsClient.isolate(
       responseActionsClientMock.createIsolateOptions({
         endpoint_ids: ['1-2-3'],
@@ -271,9 +271,9 @@ describe('EndpointActionsClient', () => {
     expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalledWith({
       attachments: [
         {
-          externalReferenceAttachmentTypeId: 'endpoint',
-          externalReferenceId: expect.any(String),
-          externalReferenceMetadata: {
+          type: 'security.endpoint',
+          attachmentId: expect.any(String),
+          metadata: {
             command: 'isolate',
             comment: 'test comment',
             targets: [
@@ -284,18 +284,14 @@ describe('EndpointActionsClient', () => {
               },
             ],
           },
-          externalReferenceStorage: {
-            type: 'elasticSearchDoc',
-          },
           owner: 'securitySolution',
-          type: 'externalReference',
         },
       ],
       caseId: 'case-a',
     });
   });
 
-  it('should update cases for valid/invalid agent ids', async () => {
+  it('should update cases with unified attachment for valid/invalid agent ids', async () => {
     await endpointActionsClient.isolate(
       responseActionsClientMock.createIsolateOptions(getCommonResponseActionOptions())
     );
@@ -303,9 +299,9 @@ describe('EndpointActionsClient', () => {
     expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalledWith({
       attachments: [
         {
-          externalReferenceAttachmentTypeId: 'endpoint',
-          externalReferenceId: expect.any(String),
-          externalReferenceMetadata: {
+          type: 'security.endpoint',
+          attachmentId: expect.any(String),
+          metadata: {
             command: 'isolate',
             comment:
               'test comment. (WARNING: The following agent ids are not valid: ["invalid-id"] and will not be included in action request)',
@@ -317,11 +313,7 @@ describe('EndpointActionsClient', () => {
               },
             ],
           },
-          externalReferenceStorage: {
-            type: 'elasticSearchDoc',
-          },
           owner: 'securitySolution',
-          type: 'externalReference',
         },
       ],
       caseId: 'case-a',

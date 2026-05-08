@@ -112,6 +112,7 @@ export const ParsedTemplateDefinitionSchema = z.object({
   tags: z.array(z.string()).optional(),
   severity: z.enum(['low', 'medium', 'high', 'critical']).optional(),
   category: z.string().nullable().optional(),
+  extends: z.string().optional(),
   fields: z.array(FieldSchema).refine(
     (fields) => {
       const fieldNames = new Set(fields.map((field) => field.name));
@@ -131,6 +132,11 @@ export const ParsedTemplateSchema = TemplateSchema.omit({
    * Parsed definition for the template. Needs to be validated programmatically.
    */
   definition: ParsedTemplateDefinitionSchema,
+  /**
+   * Original YAML definition string with preserved formatting and comments.
+   * This should be used when editing templates to preserve user formatting.
+   */
+  definitionString: z.string(),
   isLatest: z.boolean(),
   latestVersion: z.number(),
 });
