@@ -49,7 +49,12 @@ export const RangeField = ({ descriptor, control }: RangeFieldProps) => {
   }, [localValue]);
 
   const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement> | React.MouseEvent<HTMLButtonElement>) => {
+    (
+      e:
+        | React.ChangeEvent<HTMLInputElement>
+        | React.MouseEvent<HTMLButtonElement>
+        | React.KeyboardEvent<HTMLInputElement>
+    ) => {
       setLocalValue(Number((e.target as HTMLInputElement).value));
     },
     []
