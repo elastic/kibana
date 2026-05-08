@@ -285,20 +285,7 @@ export class WorkflowContextManager {
    * Steps are processed in execution order to ensure consistent variable assignment.
    */
   public getVariables(): Record<string, unknown> {
-    return this.workflowExecutionState
-      .getAllStepExecutions()
-      .filter(
-        (stepExecution) =>
-          stepExecution.stepType === 'data.set' &&
-          typeof stepExecution.output === 'object' &&
-          !Array.isArray(stepExecution.output)
-      )
-      .filter((stepExecution) => stepExecution.output)
-      .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex)
-      .reduce((acc, stepExecution) => {
-        Object.assign(acc, stepExecution.output);
-        return acc;
-      }, {});
+    return this.stepIoService.getDataSetVariables();
   }
 
   /**
@@ -599,6 +586,10 @@ export class WorkflowContextManager {
 
     // Re-evaluate the foreach expression (stored in the step input at entry time)
     // to derive the full items array and current item without persisting them in state.
+    // The caller just resolved this stepExecution from state (synchronous walk in
+    // enrichStepContextAccordingToStepScope) and a foreach is non-terminal while
+    // iterating, so input cannot have been evicted between the lookup and this
+    // read — direct field access is safe here.
     const foreachExpression = this.extractForeachExpression(stepExecution.input);
     const items = foreachExpression
       ? this.resolveForeachItems(foreachExpression, stepContext)
@@ -673,18 +664,18 @@ export class WorkflowContextManager {
         stepState: Record<string, unknown> | undefined;
       }
     | undefined {
-    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
-    if (!latestStepExecution) {
+    const io = this.stepIoService.getLatestStepIO(stepId);
+    if (!io) {
       return;
     }
-
+    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
     return {
       runStepResult: {
-        input: latestStepExecution?.input,
-        output: latestStepExecution?.output,
-        error: latestStepExecution?.error,
+        input: io.input,
+        output: io.output,
+        error: io.error,
       },
-      stepState: latestStepExecution.state,
+      stepState: latestStepExecution?.state,
     };
   }
 }

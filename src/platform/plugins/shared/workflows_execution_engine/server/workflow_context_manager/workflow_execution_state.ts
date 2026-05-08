@@ -29,6 +29,7 @@ export interface StepIoStateAccessor {
   // Reads
   getStepExecution(stepExecutionId: string): EsWorkflowStepExecution | undefined;
   getLatestStepExecution(stepId: string): EsWorkflowStepExecution | undefined;
+  getAllStepExecutions(): EsWorkflowStepExecution[];
   upsertStep(step: Partial<EsWorkflowStepExecution>): void;
 
   // Memory-only mutators — do NOT add entries to stepDocumentsChanges.
@@ -94,6 +95,7 @@ export class WorkflowExecutionState {
   public readonly ioStateAccessor: StepIoStateAccessor = {
     getStepExecution: (id) => this.stepExecutions.get(id),
     getLatestStepExecution: (stepId) => this.getLatestStepExecution(stepId),
+    getAllStepExecutions: () => this.getAllStepExecutions(),
     upsertStep: (step) => this.upsertStep(step),
     clearStepOutputInMemory: (id) => this.clearStepOutputInMemory(id),
     clearStepInputInMemory: (id) => this.clearStepInputInMemory(id),

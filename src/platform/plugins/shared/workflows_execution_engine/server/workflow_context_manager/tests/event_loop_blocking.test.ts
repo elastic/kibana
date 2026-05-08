@@ -199,6 +199,16 @@ const createBroaderSurfaceContainer = () => {
   const stepIoService = {
     hasEvictedOutputs: jest.fn().mockReturnValue(false),
     prepareForRead: jest.fn().mockResolvedValue(undefined),
+    releaseTransientlyRehydratedOutputs: jest.fn(),
+    getStepInput: jest.fn((id: string) => workflowExecutionState.getStepExecution(id)?.input),
+    getStepOutput: jest.fn((id: string) => workflowExecutionState.getStepExecution(id)?.output),
+    getStepError: jest.fn((id: string) => workflowExecutionState.getStepExecution(id)?.error),
+    getLatestStepIO: jest.fn((stepId: string) => {
+      const latest = workflowExecutionState.getLatestStepExecution(stepId);
+      if (!latest) return undefined;
+      return { input: latest.input, output: latest.output, error: latest.error };
+    }),
+    getDataSetVariables: jest.fn((): Record<string, unknown> => ({})),
   } as unknown as StepIoService;
 
   const contextManager = new WorkflowContextManager({

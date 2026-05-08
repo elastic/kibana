@@ -113,15 +113,14 @@ export class StepExecutionRuntime {
   }
 
   public getCurrentStepResult(): RunStepResult | undefined {
-    const stepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
-
-    if (!stepExecution) {
+    if (!this.stepExecutionExists()) {
       return undefined;
     }
+    const error = this.stepIoService.getStepError(this.stepExecutionId);
     return {
-      input: stepExecution.input || {},
-      output: stepExecution.output || {},
-      error: stepExecution.error ? new ExecutionError(stepExecution.error) : undefined,
+      input: this.stepIoService.getStepInput(this.stepExecutionId) || {},
+      output: this.stepIoService.getStepOutput(this.stepExecutionId) || {},
+      error: error ? new ExecutionError(error) : undefined,
     };
   }
 

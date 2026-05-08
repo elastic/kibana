@@ -107,6 +107,9 @@ describe('runNode', () => {
       workflowExecutionState: {
         getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
       } as unknown as jest.Mocked<WorkflowExecutionState>,
+      stepIoService: {
+        releaseTransientlyRehydratedOutputs: jest.fn(),
+      },
     } as unknown as jest.Mocked<WorkflowExecutionLoopParams>;
   });
 

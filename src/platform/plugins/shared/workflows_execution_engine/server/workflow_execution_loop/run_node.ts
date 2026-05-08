@@ -139,6 +139,12 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     await params.workflowRuntime.saveState(); // Ensure state is updated after each step
     saveStateSpan?.end();
 
+    // Re-evict any predecessor outputs that prepareForRead transiently
+    // rehydrated for this step's read. Without this, resume tasks would
+    // progressively grow in-memory state by accumulating outputs they only
+    // briefly needed.
+    params.stepIoService.releaseTransientlyRehydratedOutputs();
+
     nodeSpan?.end();
   }
 }

@@ -96,6 +96,14 @@ export class StepIoService {
   private readonly outputSizes = new Map<string, number>();
   /** IDs queued for eviction on the NEXT flush cycle (one-cycle deferral). */
   private pendingOutputEvictionIds: ReadonlyArray<string> = [];
+  /**
+   * IDs that the most recent `prepareForRead` had to rehydrate from ES. Used
+   * by `releaseTransientlyRehydratedOutputs` to drop those outputs back to
+   * the evicted state once the consuming step has finished, so resume tasks
+   * don't progressively grow in-memory state by accumulating predecessor
+   * outputs they only briefly needed.
+   */
+  private transientlyRehydratedIds: string[] = [];
 
   constructor(init: StepIoServiceInit) {
     this.stepRepository = init.stepRepository;
@@ -106,6 +114,10 @@ export class StepIoService {
   }
 
   // ----- IO reads -----------------------------------------------------------
+  // The service is the single chokepoint for IO reads as well as writes:
+  // every consumer of step `input`/`output`/`error` goes through here, so any
+  // future read-side concern (lazy rehydration, redaction, schema evolution)
+  // has exactly one place to land.
 
   public getStepOutput(stepExecutionId: string): JsonValue | null | undefined {
     return this.state.getStepExecution(stepExecutionId)?.output;
@@ -113,6 +125,53 @@ export class StepIoService {
 
   public getStepInput(stepExecutionId: string): JsonValue | undefined {
     return this.state.getStepExecution(stepExecutionId)?.input;
+  }
+
+  public getStepError(stepExecutionId: string): SerializedError | undefined {
+    return this.state.getStepExecution(stepExecutionId)?.error;
+  }
+
+  /**
+   * Returns the input/output/error of the latest execution of `stepId`, or
+   * `undefined` when the step has not run. Used by the context manager and
+   * retry path to read step results without poking at execution state.
+   */
+  public getLatestStepIO(stepId: string):
+    | {
+        input: JsonValue | undefined;
+        output: JsonValue | null | undefined;
+        error: SerializedError | undefined;
+      }
+    | undefined {
+    const latest = this.state.getLatestStepExecution(stepId);
+    if (!latest) {
+      return undefined;
+    }
+    return { input: latest.input, output: latest.output, error: latest.error };
+  }
+
+  /**
+   * Aggregates outputs from all completed `data.set` step executions in
+   * execution order. `data.set` is pinned (never evicted) so this read does
+   * not need rehydration. The shape mirrors the previous inline reducer in
+   * `WorkflowContextManager.getVariables`.
+   */
+  public getDataSetVariables(): Record<string, unknown> {
+    const result: Record<string, unknown> = {};
+    const sorted = this.state
+      .getAllStepExecutions()
+      .filter(
+        (exec) =>
+          exec.stepType === 'data.set' &&
+          exec.output != null &&
+          typeof exec.output === 'object' &&
+          !Array.isArray(exec.output)
+      )
+      .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex);
+    for (const exec of sorted) {
+      Object.assign(result, exec.output);
+    }
+    return result;
   }
 
   // ----- IO writes ----------------------------------------------------------
@@ -306,6 +365,43 @@ export class StepIoService {
   }
 
   /**
+   * Re-evicts in memory the outputs that the most recent `prepareForRead`
+   * brought back from ES. Called after the consuming step finishes, so that
+   * predecessor outputs do not stay resident for the rest of the run.
+   *
+   * Memory-only: the doc is already on disk (it was evicted before we
+   * rehydrated), so we just mark it evicted again and clear it from state.
+   * Idempotent — calling with no transient rehydrations is a no-op.
+   */
+  public releaseTransientlyRehydratedOutputs(): void {
+    if (this.transientlyRehydratedIds.length === 0) {
+      return;
+    }
+    const idsToRelease = this.transientlyRehydratedIds;
+    this.transientlyRehydratedIds = [];
+
+    let releasedCount = 0;
+    for (const id of idsToRelease) {
+      // Re-eviction is identical to eviction except the threshold gate doesn't
+      // apply (the output is known to have been evictable since it came back
+      // from ES). Reuse the same predicate ignoring the size check.
+      if (this.isReleaseCandidate(id)) {
+        const sizeBytes = this.outputSizes.get(id) ?? 0;
+        this.state.clearStepOutputInMemory(id);
+        this.evictedOutputIdsAndBytes.set(id, sizeBytes);
+        this.outputSizes.delete(id);
+        releasedCount++;
+      }
+    }
+
+    if (releasedCount > 0) {
+      this.logger?.debug(
+        `Released ${releasedCount} transiently rehydrated step output(s); total evicted: ${this.evictedOutputIdsAndBytes.size}`
+      );
+    }
+  }
+
+  /**
    * Re-fetches evicted output fields from Elasticsearch for the requested
    * step execution IDs. Only IDs that are actually evicted are fetched; if
    * none are, this is a no-op with zero ES calls.
@@ -340,6 +436,9 @@ export class StepIoService {
       // here was a COMPLETED output — coercing a missing value back to null
       // would lose the original signal, so we restore as-is.
       this.state.restoreStepOutputInMemory(doc.id, doc.output ?? null);
+      // Track for transient release: predecessors brought back into memory
+      // for one step's read should not stay there forever.
+      this.transientlyRehydratedIds.push(doc.id);
       restoredCount++;
 
       // Restore size tracking so:
@@ -507,6 +606,22 @@ export class StepIoService {
     if (recordedSize === undefined || recordedSize < this.evictionMinBytes) {
       return false;
     }
+    return true;
+  }
+
+  /**
+   * Eligibility check for releasing a transiently rehydrated output back to
+   * the evicted state. Same shape as {@link isEvictionCandidate} minus the
+   * size threshold — the output already met the threshold the first time it
+   * was evicted, so it remains eligible regardless of recorded size.
+   */
+  private isReleaseCandidate(stepExecutionId: string): boolean {
+    const step = this.state.getStepExecution(stepExecutionId);
+    if (!step) return false;
+    if (this.evictedOutputIdsAndBytes.has(stepExecutionId)) return false;
+    if (step.status !== ExecutionStatus.COMPLETED) return false;
+    if (step.output === undefined) return false;
+    if (step.stepType && this.pinnedStepTypes.has(step.stepType)) return false;
     return true;
   }
 }

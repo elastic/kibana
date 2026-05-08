@@ -105,6 +105,32 @@ describe('WorkflowContextManager', () => {
       hasEvictedOutputs: jest.fn().mockReturnValue(false),
       prepareForRead: jest.fn().mockResolvedValue(undefined),
       rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
+      releaseTransientlyRehydratedOutputs: jest.fn(),
+      getStepInput: jest.fn((id: string) => workflowExecutionState.getStepExecution(id)?.input),
+      getStepOutput: jest.fn((id: string) => workflowExecutionState.getStepExecution(id)?.output),
+      getStepError: jest.fn((id: string) => workflowExecutionState.getStepExecution(id)?.error),
+      getLatestStepIO: jest.fn((stepId: string) => {
+        const latest = workflowExecutionState.getLatestStepExecution(stepId);
+        if (!latest) return undefined;
+        return { input: latest.input, output: latest.output, error: latest.error };
+      }),
+      getDataSetVariables: jest.fn((): Record<string, unknown> => {
+        const result: Record<string, unknown> = {};
+        const sorted = workflowExecutionState
+          .getAllStepExecutions()
+          .filter(
+            (exec) =>
+              exec.stepType === 'data.set' &&
+              exec.output != null &&
+              typeof exec.output === 'object' &&
+              !Array.isArray(exec.output)
+          )
+          .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex);
+        for (const exec of sorted) {
+          Object.assign(result, exec.output);
+        }
+        return result;
+      }),
     } as unknown as StepIoService;
 
     const underTest = new WorkflowContextManager({

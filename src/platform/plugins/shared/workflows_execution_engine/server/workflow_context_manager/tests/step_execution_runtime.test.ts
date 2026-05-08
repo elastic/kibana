@@ -57,12 +57,20 @@ function createPassthroughStepIoService(state: WorkflowExecutionState): StepIoSe
         ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
       } as Partial<EsWorkflowStepExecution>),
     recordOutputSize: jest.fn(),
-    getStepInput: jest.fn(),
-    getStepOutput: jest.fn(),
+    getStepInput: jest.fn((id: string) => state.getStepExecution(id)?.input),
+    getStepOutput: jest.fn((id: string) => state.getStepExecution(id)?.output),
+    getStepError: jest.fn((id: string) => state.getStepExecution(id)?.error),
+    getLatestStepIO: jest.fn((stepId: string) => {
+      const latest = state.getLatestStepExecution(stepId);
+      if (!latest) return undefined;
+      return { input: latest.input, output: latest.output, error: latest.error };
+    }),
+    getDataSetVariables: jest.fn(() => ({} as Record<string, unknown>)),
     getOutputSizeStats: jest.fn().mockReturnValue({ totalBytes: 0, stepCount: 0 }),
     hasEvictedOutputs: jest.fn().mockReturnValue(false),
     rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
     prepareForRead: jest.fn().mockResolvedValue(undefined),
+    releaseTransientlyRehydratedOutputs: jest.fn(),
     onLoad: jest.fn().mockReturnValue({ pinnedIdsToFetch: [] }),
     onStepsFlushed: jest.fn(),
     clearStepIo: jest.fn(),

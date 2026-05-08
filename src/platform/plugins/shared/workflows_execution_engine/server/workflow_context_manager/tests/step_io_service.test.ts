@@ -107,6 +107,77 @@ describe('StepIoService', () => {
       expect(state.getStepExecution('step-1')?.input).toEqual({ foo: 'bar' });
     });
 
+    it('returns step error via service', () => {
+      const { service } = buildHarness();
+      service.failStep({
+        id: 'step-1',
+        stepId: 'myStep',
+        stepType: 'connector',
+        error: { type: 'BadThing', message: 'boom' },
+        finishedAt: '2025-08-06T00:00:01.000Z',
+        executionTimeMs: 50,
+        scopeStack: [],
+      });
+      expect(service.getStepError('step-1')).toEqual({ type: 'BadThing', message: 'boom' });
+    });
+
+    it('returns undefined for unknown step error', () => {
+      const { service } = buildHarness();
+      expect(service.getStepError('does-not-exist')).toBeUndefined();
+    });
+
+    it('getLatestStepIO returns input/output/error for the latest execution by stepId', () => {
+      const { state, service } = buildHarness();
+      state.upsertStep({
+        id: 'exec-1',
+        stepId: 'loopStep',
+        stepType: 'connector',
+        status: ExecutionStatus.COMPLETED,
+        input: { i: 1 },
+        output: { o: 'first' },
+      } as Partial<EsWorkflowStepExecution>);
+      state.upsertStep({
+        id: 'exec-2',
+        stepId: 'loopStep',
+        stepType: 'connector',
+        status: ExecutionStatus.COMPLETED,
+        input: { i: 2 },
+        output: { o: 'second' },
+      } as Partial<EsWorkflowStepExecution>);
+
+      expect(service.getLatestStepIO('loopStep')).toEqual({
+        input: { i: 2 },
+        output: { o: 'second' },
+        error: undefined,
+      });
+    });
+
+    it('getLatestStepIO returns undefined when no execution exists', () => {
+      const { service } = buildHarness();
+      expect(service.getLatestStepIO('never-ran')).toBeUndefined();
+    });
+
+    it('getDataSetVariables aggregates outputs from data.set steps in execution order', () => {
+      const { state, service } = buildHarness();
+      createCompletedStep(state, 'exec-1', 'setA', { foo: 1 }, 'data.set');
+      createCompletedStep(state, 'exec-2', 'setB', { bar: 2 }, 'data.set');
+      // Later data.set wins on conflict.
+      createCompletedStep(state, 'exec-3', 'setA', { foo: 99 }, 'data.set');
+      // Non-data.set should be ignored.
+      createCompletedStep(state, 'exec-4', 'connector', { ignored: true }, 'connector');
+
+      expect(service.getDataSetVariables()).toEqual({ foo: 99, bar: 2 });
+    });
+
+    it('getDataSetVariables ignores non-object data.set outputs', () => {
+      const { state, service } = buildHarness();
+      createCompletedStep(state, 'exec-1', 'setA', { foo: 1 }, 'data.set');
+      createCompletedStep(state, 'exec-2', 'setB', ['arr'], 'data.set');
+      createCompletedStep(state, 'exec-3', 'setC', null, 'data.set');
+
+      expect(service.getDataSetVariables()).toEqual({ foo: 1 });
+    });
+
     it('completeStep writes output, status, finishedAt, executionTimeMs atomically', () => {
       const { state, service } = buildHarness();
       service.completeStep({
@@ -407,6 +478,95 @@ describe('StepIoService', () => {
       await service.rehydrateOutputs(['step-1']);
 
       expect(service.hasEvictedOutputs()).toBe(false);
+      expect(state.getStepExecution('step-1')?.output).toBeUndefined();
+    });
+  });
+
+  describe('releaseTransientlyRehydratedOutputs', () => {
+    it('re-evicts outputs that were transiently rehydrated, without an ES call', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+      });
+      const originalOutput = { restored: true, data: 'x'.repeat(200) };
+      createCompletedStep(state, 'step-1', 'myStep', originalOutput, 'connector');
+      service.recordOutputSize('step-1', 250);
+
+      // Get to evicted state.
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+      expect(state.getStepExecution('step-1')?.output).toBeUndefined();
+
+      // Rehydrate.
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'step-1', output: originalOutput } as unknown as EsWorkflowStepExecution,
+      ]);
+      await service.rehydrateOutputs(['step-1']);
+      expect(state.getStepExecution('step-1')?.output).toEqual(originalOutput);
+      expect(service.hasEvictedOutputs()).toBe(false);
+      stepExecutionRepository.getStepExecutionsByIds.mockClear();
+
+      // Release should drop back to evicted with no ES round-trip.
+      service.releaseTransientlyRehydratedOutputs();
+      expect(state.getStepExecution('step-1')?.output).toBeUndefined();
+      expect(service.hasEvictedOutputs()).toBe(true);
+      expect(stepExecutionRepository.getStepExecutionsByIds).not.toHaveBeenCalled();
+    });
+
+    it('is a no-op when nothing was transiently rehydrated', () => {
+      const { state, service } = buildHarness({ evictionMinBytes: EVICTION_THRESHOLD });
+      createCompletedStep(state, 'step-1', 'myStep', { data: 'x' }, 'connector');
+
+      service.releaseTransientlyRehydratedOutputs();
+      expect(state.getStepExecution('step-1')?.output).toEqual({ data: 'x' });
+    });
+
+    it('does not release pinned step types', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+      });
+      // Pinned types are never evicted, so rehydrateOutputs would be a no-op
+      // for them — but if a future code path mistakenly added them to the
+      // transient set, release must guard against re-evicting them.
+      createCompletedStep(state, 'step-1', 'pinnedStep', { v: 1 }, 'data.set');
+      service.recordOutputSize('step-1', 250);
+
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+      // data.set is pinned — output is still present.
+      expect(state.getStepExecution('step-1')?.output).toEqual({ v: 1 });
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([]);
+      await service.rehydrateOutputs(['step-1']); // no-op, ID isn't evicted
+
+      service.releaseTransientlyRehydratedOutputs();
+      expect(state.getStepExecution('step-1')?.output).toEqual({ v: 1 });
+      expect(service.hasEvictedOutputs()).toBe(false);
+    });
+
+    it('clears the transient set after release (idempotent)', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+      });
+      createCompletedStep(state, 'step-1', 'myStep', { data: 'x'.repeat(200) }, 'connector');
+      service.recordOutputSize('step-1', 250);
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'step-1', output: { data: 'x'.repeat(200) } } as unknown as EsWorkflowStepExecution,
+      ]);
+      await service.rehydrateOutputs(['step-1']);
+
+      service.releaseTransientlyRehydratedOutputs();
+      expect(state.getStepExecution('step-1')?.output).toBeUndefined();
+
+      // Rehydrate again, then release — second cycle should still work.
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([
+        { id: 'step-1', output: { data: 'x'.repeat(200) } } as unknown as EsWorkflowStepExecution,
+      ]);
+      await service.rehydrateOutputs(['step-1']);
+      expect(state.getStepExecution('step-1')?.output).toBeDefined();
+      service.releaseTransientlyRehydratedOutputs();
       expect(state.getStepExecution('step-1')?.output).toBeUndefined();
     });
   });
