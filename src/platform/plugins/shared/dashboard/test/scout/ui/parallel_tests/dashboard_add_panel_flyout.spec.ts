@@ -96,7 +96,7 @@ spaceTest.describe(
         try {
           expect(addPanelActions).toHaveLength(expectedCount);
         } catch (error) {
-          throw new Error(`${error.message}, values: ${addPanelActions.join(',')}`) 
+          throw new Error(`${error.message}, values: ${addPanelActions.join(',')}`);
         }
       });
     });
