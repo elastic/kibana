@@ -67,7 +67,7 @@ test.describe(
 
       await expect(page.getByPlaceholder('Alert status')).toBeVisible();
       await expect(page.getByPlaceholder('SLO Status')).toBeVisible();
-      await expect(page.getByPlaceholder('Anomaly Status')).toBeVisible();
+      await expect(page.getByPlaceholder('Anomaly Severity')).toBeVisible();
 
       await serviceMapPage.serviceMapFindInPageInput.fill('opbeans');
       await expect(serviceMapPage.serviceMapFindMatchSummary).toHaveText(

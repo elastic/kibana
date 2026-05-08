@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLAstAllCommands, ESQLAst } from '@elastic/esql/types';
-import { isSubQuery, Walker } from '@elastic/esql';
 import { validateCommandArguments } from '../../definitions/utils/validation';
 import type { ICommandContext, ICommandCallbacks } from '../types';
-import { errors } from '../../definitions/utils';
 import type { ESQLMessage } from '../../definitions/types';
 
 export const validate = (
@@ -22,15 +20,6 @@ export const validate = (
   const messages: ESQLMessage[] = [];
 
   messages.push(...validateCommandArguments(command, ast, context, callbacks));
-
-  const allCommands = Walker.commands(ast);
-  const fromCommands = allCommands.filter(({ name }) => name.toLowerCase() === 'from');
-  const hasSubqueries = fromCommands.some((cmd) => cmd.args.some((arg) => isSubQuery(arg)));
-  const isInsideSubquery = !ast.some((cmd) => cmd.location === command.location);
-
-  if (hasSubqueries && !isInsideSubquery) {
-    messages.push(errors.inlineStatsNotAllowedAfterLimit(command));
-  }
 
   return messages;
 };

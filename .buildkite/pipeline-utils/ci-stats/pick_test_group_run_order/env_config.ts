@@ -10,7 +10,7 @@
 import { MAX_MINUTES, RETRIES, PREVENT_SELECTIVE_TESTS_LABEL } from './const';
 import { collectEnvFromLabels, getRequiredEnv } from '#pipeline-utils';
 
-const VALID_SOLUTIONS = ['observability', 'search', 'security', 'workplaceai'];
+const VALID_SOLUTIONS = ['observability', 'search', 'security', 'workplaceai', 'vectordb'];
 const VALID_LIMIT_CONFIG_TYPES = ['unit', 'integration', 'functional'];
 
 /**

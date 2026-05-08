@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod/v4';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
-import type { TypeOf } from '@kbn/config-schema';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -17,14 +17,14 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 
-const suggestionsBodySchema = schema.object({
-  field: schema.string(),
-  query: schema.string(),
-  filters: schema.maybe(schema.any()),
-  fieldMeta: schema.maybe(schema.any()),
+const suggestionsBodySchema = z.object({
+  field: z.string().min(1).max(256).describe('The field to suggest values for.'),
+  query: z.string().max(256).describe('Optional search query for filtering suggestions.'),
+  filters: z.array(z.any()).optional().describe('Optional filter clauses to scope suggestions'),
+  field_meta: z.any().optional().describe('Optional field metadata for suggestion behavior'),
 });
 
-type SuggestionsBody = TypeOf<typeof suggestionsBodySchema>;
+type SuggestionsBody = z.infer<typeof suggestionsBodySchema>;
 
 @injectable()
 export class MatcherValueSuggestionsRoute extends BaseAlertingRoute {
@@ -45,7 +45,7 @@ export class MatcherValueSuggestionsRoute extends BaseAlertingRoute {
   } as const;
   static validate = {
     request: {
-      body: suggestionsBodySchema,
+      body: buildRouteValidationWithZod(suggestionsBodySchema),
     },
   } as const;
 

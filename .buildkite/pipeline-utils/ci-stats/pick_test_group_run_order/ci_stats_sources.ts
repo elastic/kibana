@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Fs from 'fs';
-
 import { CI_STATS_DEFAULTS, PIPELINES } from './const';
 import type { RunOrderConfig } from './env_config';
 

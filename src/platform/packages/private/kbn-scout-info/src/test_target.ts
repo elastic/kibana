@@ -25,6 +25,7 @@ export const ScoutTargetDomainSchema = z.enum([
   'security_essentials',
   'security_ease',
   'workplaceai',
+  'vectordb',
 ]);
 export const ScoutTestTargetSchema = z.object({
   location: ScoutTargetLocationSchema,
@@ -172,6 +173,13 @@ export const VALID_SCOUT_TEST_TARGET_DEFINITIONS: [ScoutTargetDomain, ScoutTarge
   ],
   [
     'workplaceai',
+    {
+      locations: ['local', 'cloud'],
+      architectures: ['serverless'],
+    },
+  ],
+  [
+    'vectordb',
     {
       locations: ['local', 'cloud'],
       architectures: ['serverless'],
