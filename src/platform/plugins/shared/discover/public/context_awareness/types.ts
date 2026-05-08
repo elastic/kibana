@@ -231,6 +231,10 @@ export interface DocViewerExtensionParams {
      * Updates the current ES|QL query
      */
     updateESQLQuery?: UpdateESQLQueryFn;
+    /**
+     * Refreshes the current Discover table data.
+     */
+    refreshData?: () => void;
   };
   /**
    * The record being displayed in the doc viewer

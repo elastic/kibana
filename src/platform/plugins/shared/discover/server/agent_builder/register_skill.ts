@@ -9,7 +9,7 @@
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { DISCOVER_DATA_ANALYSIS_SKILL_ID } from '../../common/agent_builder';
 
 const TOOL_IDS = [

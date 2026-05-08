@@ -14,8 +14,7 @@ const APM_DASHBOARD_DATA_VIEW_TITLE = 'traces-apm*,logs-apm*,metrics-apm*';
 
 const { SERVICE_MAP_TEST_SERVICE, SERVICE_MAP_TEST_ENVIRONMENT_STAGING } = testData;
 
-// Failing: See https://github.com/elastic/kibana/issues/265639
-test.describe.skip(
+test.describe(
   'Service map embeddable',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
@@ -47,14 +46,14 @@ test.describe.skip(
       pageObjects,
     }) => {
       await test.step('open a new dashboard', async () => {
-        await pageObjects.dashboard.openNewDashboard();
+        await pageObjects.dashboard.openNewDashboard({ timeout: EXTENDED_TIMEOUT });
       });
 
-      await test.step('set time range to last 1 hour to ensure test data is visible', async () => {
-        await pageObjects.datePicker.setCommonlyUsedTime('Last_1_hour');
-        await page
-          .getByTestId('dateRangePickerControlButton')
-          .waitFor({ timeout: EXTENDED_TIMEOUT });
+      await test.step('set time range to last 24 hours so synth data stays in range vs globalSetup', async () => {
+        await pageObjects.datePicker.setCommonlyUsedTime('Last_24_hours');
+        await expect(page.getByTestId('dateRangePickerControlButton')).toContainText(
+          'Last 24 hours'
+        );
         await page.getByTestId('dateRangePickerControlButton').blur();
       });
 
@@ -78,21 +77,22 @@ test.describe.skip(
         // before interaction (see `euiLoadingSpinner` + `state: 'hidden'`).
         const serviceNameCombo = page.testSubj.locator('apmServiceMapEditorServiceNameComboBox');
         const environmentCombo = page.testSubj.locator('apmServiceMapEditorEnvironmentComboBox');
-        await Promise.all([
-          serviceNameCombo
-            .locator('.euiLoadingSpinner')
-            .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT }),
-          environmentCombo
-            .locator('.euiLoadingSpinner')
-            .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT }),
-        ]);
+        await serviceNameCombo
+          .locator('.euiLoadingSpinner')
+          .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
+        await environmentCombo
+          .locator('.euiLoadingSpinner')
+          .waitFor({ state: 'hidden', timeout: EXTENDED_TIMEOUT });
 
         // Select service name from dropdown
         const serviceNameComboBox = new EuiComboBoxWrapper(
           page,
           'apmServiceMapEditorServiceNameComboBox'
         );
-        await serviceNameComboBox.selectSingleOption(SERVICE_MAP_TEST_SERVICE);
+        await serviceNameComboBox.selectSingleOption(SERVICE_MAP_TEST_SERVICE, {
+          useFill: true,
+          optionVisibilityTimeoutMs: EXTENDED_TIMEOUT,
+        });
 
         // Select environment from dropdown (has a default value so manually type and select)
         const environmentInput = page.testSubj
@@ -103,7 +103,7 @@ test.describe.skip(
         const environmentOption = page.getByRole('option', {
           name: SERVICE_MAP_TEST_ENVIRONMENT_STAGING,
         });
-        await environmentOption.waitFor({ state: 'visible', timeout: 10000 });
+        await environmentOption.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
         await environmentOption.click();
 
         // Add KQL filter matching the staging transaction
@@ -121,7 +121,7 @@ test.describe.skip(
           page.testSubj.locator(
             `serviceMapNodeContextHighlightFrame > serviceMapNode-service-${SERVICE_MAP_TEST_SERVICE}`
           )
-        ).toBeVisible({ timeout: 10000 });
+        ).toBeVisible({ timeout: EXTENDED_TIMEOUT });
       });
 
       await test.step('verify embeddable fills the panel horizontally', async () => {
@@ -142,7 +142,7 @@ test.describe.skip(
         const serviceNode = page.testSubj.locator(
           `serviceMapNode-service-${SERVICE_MAP_TEST_SERVICE}`
         );
-        await expect(serviceNode).toBeVisible({ timeout: 10000 });
+        await expect(serviceNode).toBeVisible({ timeout: EXTENDED_TIMEOUT });
         await serviceNode.click();
 
         const popover = page.testSubj.locator('serviceMapPopover');
@@ -150,6 +150,9 @@ test.describe.skip(
 
         const popoverTitle = page.testSubj.locator('serviceMapPopoverTitle');
         await expect(popoverTitle).toHaveText(SERVICE_MAP_TEST_SERVICE);
+
+        await page.keyboard.press('Escape');
+        await expect(popoverTitle).toBeHidden();
       });
 
       await test.step('maximize the Service map panel', async () => {

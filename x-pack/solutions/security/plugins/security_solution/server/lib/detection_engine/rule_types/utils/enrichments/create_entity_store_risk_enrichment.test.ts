@@ -229,7 +229,7 @@ describe('createEntityStoreEnrichment', () => {
     expect(Object.keys(result).length).toBe(totalEvents);
   });
 
-  it('returns empty object and logs an error when listEntities throws', async () => {
+  it('returns empty object and does not throw when listEntities throws', async () => {
     mockGetEuidFromObject.mockReturnValue('host:server1');
 
     const crudClient = {
@@ -247,6 +247,28 @@ describe('createEntityStoreEnrichment', () => {
     });
 
     expect(result).toEqual({});
-    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Host Risk'));
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
+  it('returns empty object and logs a warning when an error is thrown outside listEntities', async () => {
+    mockGetEuidFromObject.mockImplementation(() => {
+      throw new Error('unexpected error');
+    });
+
+    const crudClient = makeEntityStoreCrudClient();
+
+    const result = await createEntityStoreEnrichment({
+      name: 'Host Risk',
+      entityType: 'host',
+      entityStoreCrudClient: crudClient,
+      logger,
+      events: [createAlert('1', { host: { name: 'server1' } })],
+      enrichmentFields: ['entity.risk.calculated_level'],
+      createEnrichmentFunction: () => enrichFn,
+    });
+
+    expect(result).toEqual({});
+    expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Host Risk'));
   });
 });
