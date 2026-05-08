@@ -39,3 +39,4 @@ export type * from './src/service_anomaly_timeseries';
 export type * from './src/service_anomalies';
 export type * from './src/service_anomaly_stats';
 export type * from './src/service_map';
+export * from './src/latency_distribution_chart_types';

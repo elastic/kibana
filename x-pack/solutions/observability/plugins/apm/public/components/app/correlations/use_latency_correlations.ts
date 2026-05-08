@@ -22,8 +22,6 @@ import type {
 } from '../../../../common/correlations/latency_correlations/types';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 
-import { callApmApi } from '../../../services/rest/create_call_apm_api';
-
 import type { CorrelationsProgress } from './utils/analysis_hook_utils';
 import {
   getInitialResponse,
@@ -42,7 +40,7 @@ const PROGRESS_STEP_FIELD_VALUE_PAIRS = 0.3;
 const PROGRESS_STEP_CORRELATIONS = 0.6;
 
 export function useLatencyCorrelations() {
-  const { callApmApi: callApmApiV2 } = getApmInternalServices();
+  const { callApmApi } = getApmInternalServices();
   const fetchParams = useFetchParams();
 
   // This use of useReducer (the dispatch function won't get reinstantiated
@@ -111,7 +109,7 @@ export function useLatencyCorrelations() {
       });
       setResponse.flush();
 
-      const { fieldCandidates } = await callApmApiV2(
+      const { fieldCandidates } = await callApmApi(
         'GET /internal/apm/correlations/field_candidates/transactions',
         {
           signal: abortCtrl.current.signal,
@@ -137,7 +135,7 @@ export function useLatencyCorrelations() {
       const fieldCandidateChunks = chunk(fieldCandidates, chunkSize);
 
       for (const fieldCandidateChunk of fieldCandidateChunks) {
-        const fieldValuePairChunkResponse = await callApmApiV2(
+        const fieldValuePairChunkResponse = await callApmApi(
           'POST /internal/apm/correlations/field_value_pairs/transactions',
           {
             signal: abortCtrl.current.signal,
@@ -180,7 +178,7 @@ export function useLatencyCorrelations() {
 
       const fallbackResults: LatencyCorrelation[] = [];
       for (const fieldValuePairChunk of fieldValuePairChunks) {
-        const significantCorrelations = await callApmApiV2(
+        const significantCorrelations = await callApmApi(
           'POST /internal/apm/correlations/significant_correlations/transactions',
           {
             signal: abortCtrl.current.signal,
@@ -258,7 +256,7 @@ export function useLatencyCorrelations() {
         setResponse.flush();
       }
     }
-  }, [fetchParams, setResponse, callApmApiV2]);
+  }, [fetchParams, setResponse, callApmApi]);
 
   const cancelFetch = useCallback(() => {
     abortCtrl.current.abort();

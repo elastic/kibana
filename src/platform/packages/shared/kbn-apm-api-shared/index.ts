@@ -35,6 +35,7 @@ export type * from './src/routes/infrastructure';
 export type * from './src/routes/environments';
 export type * from './src/routes/event_metadata';
 export type * from './src/routes/fallback_to_transactions';
+export type * from './src/routes/latency_distribution';
 export {
   rangeRt,
   kueryRt,
