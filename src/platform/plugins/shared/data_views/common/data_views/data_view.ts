@@ -46,7 +46,7 @@ export interface TimeBasedDataView extends DataView {
   /**
    * The timestamp field.
    */
-  getTimeField: () => DataViewField;
+  getTimeField: () => DataViewField | undefined;
 }
 
 /**
@@ -231,7 +231,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
    */
 
   isTimeBased(): this is TimeBasedDataView {
-    return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
+    return !!this.timeFieldName && (this.fields?.length === 0 || !!this.getTimeField());
   }
 
   /**

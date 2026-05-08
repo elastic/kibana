@@ -378,7 +378,7 @@ function getFieldsByType(dataView: DataView) {
     number: aggregatableFields.find((f) => f.type === 'number')?.displayName,
   };
   if (dataView.isTimeBased()) {
-    fields.date = dataView.getTimeField().displayName;
+    fields.date = dataView.getTimeField()?.displayName ?? dataView.timeFieldName;
   }
   // remove undefined values
   for (const type of ['string', 'number', 'date'] as const) {

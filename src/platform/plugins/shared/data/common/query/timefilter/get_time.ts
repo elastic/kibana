@@ -80,7 +80,7 @@ export function getRelativeTime(
 }
 
 function getTimeField(indexPattern?: DataView, fieldName?: string) {
-  if (!indexPattern && fieldName) {
+  if ((!indexPattern || !indexPattern.fields.length) && fieldName) {
     return { name: fieldName, type: KBN_FIELD_TYPES.DATE };
   }
 
