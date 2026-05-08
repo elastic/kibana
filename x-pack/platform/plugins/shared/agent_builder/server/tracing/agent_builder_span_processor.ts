@@ -6,11 +6,15 @@
  */
 
 import type { api } from '@elastic/opentelemetry-node/sdk';
-import { tracing } from '@elastic/opentelemetry-node/sdk';
+import { resources, tracing } from '@elastic/opentelemetry-node/sdk';
 import { TraceFlags } from '@opentelemetry/api';
 import { isInferenceSpan } from '@kbn/inference-tracing';
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
+
+const AGENT_BUILDER_DATASET_RESOURCE = resources.resourceFromAttributes({
+  'data_stream.dataset': 'agent_builder',
+});
 
 interface AgentBuilderSpanProcessorOpts {
   exporter: tracing.SpanExporter;
@@ -59,14 +63,12 @@ export class AgentBuilderSpanProcessor implements tracing.SpanProcessor {
 
     const exportSpan: tracing.ReadableSpan = {
       ...span,
+      resource: span.resource.merge(AGENT_BUILDER_DATASET_RESOURCE),
       spanContext: () => ({
         ...originalSpanContext,
         traceFlags: TraceFlags.SAMPLED, // force 100% sampling
       }),
-      attributes: {
-        ...cleanAttributes,
-        'data_stream.dataset': 'agent_builder',
-      },
+      attributes: cleanAttributes,
     };
 
     this.batchProcessor.onEnd(exportSpan);
