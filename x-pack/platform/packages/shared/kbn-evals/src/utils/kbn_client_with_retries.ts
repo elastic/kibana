@@ -45,11 +45,16 @@ function parseRetryAfterMsFromMessage(message: string): number | undefined {
 }
 
 function getStatusCode(error: any): number | undefined {
+  // KbnClientRequesterError keeps the HTTP status on its `axiosError` after
+  // `clean()` strips `response`/top-level fields, so it must be checked
+  // alongside the more conventional shapes.
   return (
     error?.statusCode ??
     error?.status ??
     error?.response?.status ??
     error?.meta?.status ??
+    error?.axiosError?.status ??
+    error?.axiosError?.response?.status ??
     undefined
   );
 }

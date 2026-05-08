@@ -15,19 +15,21 @@ function makeStatusError(status: number, message = `HTTP ${status}`) {
   return err;
 }
 
+// Mirrors the real `KbnClientRequesterError` shape: only `axiosError.status`
+// survives `clean()`, so the retry layer must read from there.
+function makeKbnClientRequesterError(status: number, message = `HTTP ${status}`) {
+  const err = new Error(message) as Error & { axiosError: { status: number } };
+  err.name = 'KbnClientRequesterError';
+  err.axiosError = { status };
+  return err;
+}
+
 describe('withRetry', () => {
   it('returns immediately on success', async () => {
     const fn = jest.fn().mockResolvedValue('ok');
     const result = await withRetry(fn, fastRetryOptions);
     expect(result).toBe('ok');
     expect(fn).toHaveBeenCalledTimes(1);
-  });
-
-  it('retries on transient HTTP 500 then succeeds', async () => {
-    const fn = jest.fn().mockRejectedValueOnce(makeStatusError(500)).mockResolvedValueOnce('ok');
-    const result = await withRetry(fn, fastRetryOptions);
-    expect(result).toBe('ok');
-    expect(fn).toHaveBeenCalledTimes(2);
   });
 
   it.each([502, 503, 504])('retries on HTTP %s', async (status) => {
@@ -44,6 +46,13 @@ describe('withRetry', () => {
     expect(fn).toHaveBeenCalledTimes(2);
   });
 
+  it('does NOT retry on HTTP 500 (treated as deterministic in this stack)', async () => {
+    const err = makeStatusError(500);
+    const fn = jest.fn().mockRejectedValue(err);
+    await expect(withRetry(fn, fastRetryOptions)).rejects.toBe(err);
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
   it('does NOT retry on HTTP 413 (payload too large)', async () => {
     const err = makeStatusError(413, 'Payload Too Large');
     const fn = jest.fn().mockRejectedValue(err);
@@ -58,8 +67,25 @@ describe('withRetry', () => {
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
-  it('throws last error after exhausting attempts on persistent 500', async () => {
-    const err = makeStatusError(500);
+  it('retries when status is exposed via axiosError (KbnClientRequesterError shape)', async () => {
+    const fn = jest
+      .fn()
+      .mockRejectedValueOnce(makeKbnClientRequesterError(503))
+      .mockResolvedValueOnce('ok');
+    const result = await withRetry(fn, fastRetryOptions);
+    expect(result).toBe('ok');
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
+  it('does NOT retry on terminal status exposed via axiosError', async () => {
+    const err = makeKbnClientRequesterError(413, 'Payload Too Large');
+    const fn = jest.fn().mockRejectedValue(err);
+    await expect(withRetry(fn, fastRetryOptions)).rejects.toBe(err);
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it('throws last error after exhausting attempts on persistent 503', async () => {
+    const err = makeStatusError(503);
     const fn = jest.fn().mockRejectedValue(err);
     await expect(withRetry(fn, { ...fastRetryOptions, maxAttempts: 3 })).rejects.toBe(err);
     expect(fn).toHaveBeenCalledTimes(3);
@@ -67,7 +93,7 @@ describe('withRetry', () => {
 
   it('invokes onRetry hook between attempts', async () => {
     const onRetry = jest.fn();
-    const fn = jest.fn().mockRejectedValueOnce(makeStatusError(500)).mockResolvedValueOnce('ok');
+    const fn = jest.fn().mockRejectedValueOnce(makeStatusError(503)).mockResolvedValueOnce('ok');
     await withRetry(fn, { ...fastRetryOptions, onRetry, label: 'upsert' });
     expect(onRetry).toHaveBeenCalledTimes(1);
     expect(onRetry).toHaveBeenCalledWith(expect.objectContaining({ attempt: 1, label: 'upsert' }));
