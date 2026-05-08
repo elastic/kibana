@@ -121,7 +121,6 @@ export const createDashboardSavedObjectType = ({
       timeTo: { type: 'keyword', index: false, doc_values: false },
       title: { type: 'text' },
       version: { type: 'integer' },
-      ciTestField: { type: 'keyword', index: false, doc_values: false },
     },
   },
   schemas: {
