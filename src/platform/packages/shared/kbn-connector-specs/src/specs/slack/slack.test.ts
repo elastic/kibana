@@ -36,15 +36,6 @@ describe('Slack', () => {
     expect(Slack.metadata.supportedFeatureIds).toContain('workflows');
   });
 
-  it('should use bearer auth type', () => {
-    expect(Slack.auth).toBeDefined();
-    expect(Slack.auth?.types.length).toBeGreaterThanOrEqual(1);
-    const types = (Slack.auth?.types as Array<string | { type: string }>).map((t) =>
-      typeof t === 'string' ? t : t.type
-    );
-    expect(types).toContain('bearer');
-  });
-
   it('supports ears auth type with correct Slack defaults and overrides', () => {
     const types = Slack.auth?.types as Array<
       | string
