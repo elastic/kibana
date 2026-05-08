@@ -707,6 +707,59 @@ describe('runExtractFieldsFlow', () => {
       );
     });
 
+    it('preserves an existing step with `ignore_failure: false` end-to-end without flipping it to true', async () => {
+      const userConfiguredFailLoudly = {
+        action: 'set',
+        to: 'attributes.environment',
+        value: 'staging',
+        ignore_failure: false,
+      } as unknown as StreamlangStep;
+
+      const deps = buildDeps();
+      arrangeStreamWithSamples(deps, [userConfiguredFailLoudly]);
+
+      mockProcessGrokPatterns.mockResolvedValue({
+        type: 'grok',
+        processor: grokCandidateProcessor,
+        parsedRate: 0.95,
+      });
+      mockProcessDissectPattern.mockResolvedValue(null);
+      mockExtractParsedSampleDocuments.mockResolvedValue({
+        parsedDocuments: [{ 'body.text': '...' } as FlattenRecord],
+        definitionError: false,
+      });
+      mockSuggestProcessingPipeline.mockResolvedValue({
+        pipeline: { steps: [] },
+        metadata: { stepsUsed: 1, maxSteps: 6 },
+      });
+      mockSimulateProcessing.mockResolvedValue(succeededSimulation());
+
+      const outcome = await runExtractFieldsFlow({ streamName: ingestStreamName }, deps);
+
+      expect(outcome.kind).toBe('success');
+      if (outcome.kind !== 'success') return;
+
+      // Find the existing `set` step in the proposal — it may sit at any
+      // position depending on the merge strategy, but its
+      // `ignore_failure: false` MUST round-trip exactly as the user set it.
+      const preservedSet = outcome.result.steps.find(
+        (step) =>
+          (step as { action?: string }).action === 'set' &&
+          (step as { to?: string }).to === 'attributes.environment'
+      ) as { action?: string; to?: string; value?: string; ignore_failure?: boolean } | undefined;
+
+      expect(preservedSet).toBeDefined();
+      expect(preservedSet?.ignore_failure).toBe(false);
+      expect(preservedSet?.value).toBe('staging');
+
+      // Newly-added grok still gets the safety default `ignore_failure: true`,
+      // so we know the preservation is targeted, not blanket.
+      const newGrok = outcome.result.steps.find(
+        (step) => (step as { action?: string }).action === 'grok'
+      ) as { ignore_failure?: boolean } | undefined;
+      expect(newGrok?.ignore_failure).toBe(true);
+    });
+
     it('returns `success` and PREPENDS new extraction when an existing step writes to the source field', async () => {
       // The existing `set` writes back into `body.text` BEFORE the new
       // grok would run — letting the existing step keep its position
