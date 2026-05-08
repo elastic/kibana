@@ -97,6 +97,7 @@ export function TraceContextLogEvents({
           nonHighlightingQuery={query}
           timeRange={savedSearchTimeRange}
           index={indexes.logs}
+          executionContext={{ meta: { operation_id: 'fetch-trace-context-logs' } }}
         />
       </div>
     </ContentFrameworkSection>
