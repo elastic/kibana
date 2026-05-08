@@ -67,11 +67,6 @@ export interface UserPanelProps extends Record<string, unknown> {
    * Canonical Entity Store v2 id (`entity.id`) when already resolved (e.g. from alerts/events table).
    */
   entityId?: string;
-  /**
-   * When true, suppresses the legacy expandable-flyout navigation header (expand/collapse details
-   * and history dropdown). Set by flyout_v2, where the system flyout supplies its own chrome.
-   */
-  hideNavigation?: boolean;
 }
 
 export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -92,7 +87,6 @@ export const UserPanel = memo(function UserPanel({
   isPreviewMode = false,
   userName,
   entityId: entityIdProp,
-  hideNavigation = false,
 }: UserPanelProps) {
   const { uiSettings } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
@@ -287,19 +281,17 @@ export const UserPanel = memo(function UserPanel({
 
   return (
     <>
-      {!hideNavigation && (
-        <FlyoutNavigation
-          flyoutIsExpandable={
-            hasUserDetailsData ||
-            hasMisconfigurationFindings ||
-            hasNonClosedAlerts ||
-            !!entityStoreEntityId
-          }
-          expandDetails={openDefaultPanel}
-          isPreviewMode={isPreviewMode}
-          isRulePreview={scopeId === TableId.rulePreview}
-        />
-      )}
+      <FlyoutNavigation
+        flyoutIsExpandable={
+          hasUserDetailsData ||
+          hasMisconfigurationFindings ||
+          hasNonClosedAlerts ||
+          !!entityStoreEntityId
+        }
+        expandDetails={openDefaultPanel}
+        isPreviewMode={isPreviewMode}
+        isRulePreview={scopeId === TableId.rulePreview}
+      />
       <UserPanelHeader
         lastSeen={observedUser.lastSeen}
         managedUser={managedUser}

@@ -66,11 +66,6 @@ export interface HostPanelProps extends Record<string, unknown> {
    * Canonical Entity Store v2 id (`entity.id`) when already resolved (e.g. from alerts/events table).
    */
   entityId?: string;
-  /**
-   * When true, suppresses the legacy expandable-flyout navigation header (expand/collapse details
-   * and history dropdown). Set by flyout_v2, where the system flyout supplies its own chrome.
-   */
-  hideNavigation?: boolean;
 }
 
 export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -91,7 +86,6 @@ export const HostPanel = memo(function HostPanel({
   isPreviewMode = false,
   hostName,
   entityId,
-  hideNavigation = false,
 }: HostPanelProps) {
   const { uiSettings } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
@@ -286,20 +280,18 @@ export const HostPanel = memo(function HostPanel({
 
   return (
     <>
-      {!hideNavigation && (
-        <FlyoutNavigation
-          flyoutIsExpandable={
-            isRiskScoreExist ||
-            hasMisconfigurationFindings ||
-            hasVulnerabilitiesFindings ||
-            hasNonClosedAlerts ||
-            !!entityStoreEntityId
-          }
-          expandDetails={openDefaultPanel}
-          isPreviewMode={isPreviewMode}
-          isRulePreview={scopeId === TableId.rulePreview}
-        />
-      )}
+      <FlyoutNavigation
+        flyoutIsExpandable={
+          isRiskScoreExist ||
+          hasMisconfigurationFindings ||
+          hasVulnerabilitiesFindings ||
+          hasNonClosedAlerts ||
+          !!entityStoreEntityId
+        }
+        expandDetails={openDefaultPanel}
+        isPreviewMode={isPreviewMode}
+        isRulePreview={scopeId === TableId.rulePreview}
+      />
       <HostPanelHeader
         hostName={hostName}
         lastSeen={observedHost.lastSeen}

@@ -57,19 +57,11 @@ export interface EntitiesOverviewProps {
    * Required in flyout_v2; without it the sub-overviews fall back to expandable-flyout actions
    * which are no-ops outside the legacy flyout.
    */
-  onShowUserDetails?: (params: {
-    userName: string;
-    entityId?: string;
-    path?: EntityDetailsPath;
-  }) => void;
+  onShowUserDetails?: (params: { userName: string; entityId?: string }) => void;
   /**
    * Same as `onShowUserDetails` but for host entities.
    */
-  onShowHostDetails?: (params: {
-    hostName: string;
-    entityId?: string;
-    path?: EntityDetailsPath;
-  }) => void;
+  onShowHostDetails?: (params: { hostName: string; entityId?: string }) => void;
 }
 
 const HEADER_TITLE = (
@@ -165,15 +157,18 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
       [onShowEntitiesDetails]
     );
 
+    // The host/user overview's `onShowDetails` callback can pass an `EntityDetailsPath` to deep-link
+    // to a specific tab. The legacy expandable flyout consumed it via the left-panel tab API, but
+    // the flyout_v2 entity flyouts (HostEntityDetails/UserEntityDetails) are single-body views with
+    // no tab UI, so `path` is intentionally not forwarded. Surface tabbed details before re-introducing.
     const userEntityRecordId = userEntityFromStore.entityRecord?.entity?.id;
     const handleShowUserDetails = useMemo(
       () =>
         onShowUserDetails
-          ? (path?: EntityDetailsPath) =>
+          ? (_path?: EntityDetailsPath) =>
               onShowUserDetails({
                 userName: userName ?? '',
                 entityId: userEntityRecordId,
-                path,
               })
           : undefined,
       [onShowUserDetails, userName, userEntityRecordId]
@@ -183,11 +178,10 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
     const handleShowHostDetails = useMemo(
       () =>
         onShowHostDetails
-          ? (path?: EntityDetailsPath) =>
+          ? (_path?: EntityDetailsPath) =>
               onShowHostDetails({
                 hostName: hostName ?? '',
                 entityId: hostEntityRecordId,
-                path,
               })
           : undefined,
       [onShowHostDetails, hostName, hostEntityRecordId]

@@ -7,8 +7,14 @@
 
 import React, { useMemo } from 'react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
+import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { getField } from '../../shared/utils';
+import type { IdentityFields } from '../../shared/utils';
+import {
+  getField,
+  resolveHostNameForEntityInsightsWithFallback,
+  resolveUserNameForEntityInsightsWithFallback,
+} from '../../shared/utils';
 import { EntitiesDetailsView } from '../../../../flyout_v2/entities/components/entities_details_view';
 import { ENTITIES_DETAILS_TEST_ID } from './test_ids';
 
@@ -21,8 +27,25 @@ export const EntitiesDetails: React.FC = () => {
   const { scopeId, dataAsNestedObject, searchHit, getFieldsData } = useDocumentDetailsContext();
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
   const timestamp = getField(getFieldsData('@timestamp'));
-  const hostName = getField(getFieldsData('host.name'));
-  const userName = getField(getFieldsData('user.name'));
+
+  const euidApi = useEntityStoreEuidApi();
+  const userEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
+    'user',
+    dataAsNestedObject
+  ) as IdentityFields;
+  const hostEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
+    'host',
+    dataAsNestedObject
+  ) as IdentityFields;
+
+  const userName = resolveUserNameForEntityInsightsWithFallback(
+    userEntityIdentifiers,
+    getFieldsData
+  );
+  const hostName = resolveHostNameForEntityInsightsWithFallback(
+    hostEntityIdentifiers,
+    getFieldsData
+  );
 
   return (
     <div data-test-subj={ENTITIES_DETAILS_TEST_ID}>
