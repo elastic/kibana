@@ -138,12 +138,18 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
       skip: !entityStoreV2Enabled,
     });
 
+    const userEntityRecordId = userEntityFromStore.entityRecord?.entity?.id;
+    const userEntityRecordName = userEntityFromStore.entityRecord?.entity?.name;
+    const resolvedUserName = userName || userEntityRecordName || '';
+
+    const hostEntityRecordId = hostEntityFromStore.entityRecord?.entity?.id;
+    const hostEntityRecordName = hostEntityFromStore.entityRecord?.entity?.name;
+    const resolvedHostName = hostName || hostEntityRecordName || '';
+
     const showUserOverview =
-      (!entityStoreV2Enabled && userName != null) ||
-      (entityStoreV2Enabled && (userEntityFromStore.entityRecord != null || userName != null));
+      (!entityStoreV2Enabled && userName != null) || (entityStoreV2Enabled && !!resolvedUserName);
     const showHostOverview =
-      (!entityStoreV2Enabled && hostName != null) ||
-      (entityStoreV2Enabled && (hostEntityFromStore.entityRecord != null || hostName != null));
+      (!entityStoreV2Enabled && hostName != null) || (entityStoreV2Enabled && !!resolvedHostName);
     const hasAnyEntity = showUserOverview || (showHostOverview && !!hostEntityIdentifiers);
 
     const link = useMemo(
@@ -161,30 +167,28 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
     // to a specific tab. The legacy expandable flyout consumed it via the left-panel tab API, but
     // the flyout_v2 entity flyouts (HostEntityDetails/UserEntityDetails) are single-body views with
     // no tab UI, so `path` is intentionally not forwarded. Surface tabbed details before re-introducing.
-    const userEntityRecordId = userEntityFromStore.entityRecord?.entity?.id;
     const handleShowUserDetails = useMemo(
       () =>
-        onShowUserDetails
+        onShowUserDetails && resolvedUserName
           ? (_path?: EntityDetailsPath) =>
               onShowUserDetails({
-                userName: userName ?? '',
+                userName: resolvedUserName,
                 entityId: userEntityRecordId,
               })
           : undefined,
-      [onShowUserDetails, userName, userEntityRecordId]
+      [onShowUserDetails, resolvedUserName, userEntityRecordId]
     );
 
-    const hostEntityRecordId = hostEntityFromStore.entityRecord?.entity?.id;
     const handleShowHostDetails = useMemo(
       () =>
-        onShowHostDetails
+        onShowHostDetails && resolvedHostName
           ? (_path?: EntityDetailsPath) =>
               onShowHostDetails({
-                hostName: hostName ?? '',
+                hostName: resolvedHostName,
                 entityId: hostEntityRecordId,
               })
           : undefined,
-      [onShowHostDetails, hostName, hostEntityRecordId]
+      [onShowHostDetails, resolvedHostName, hostEntityRecordId]
     );
 
     return (
@@ -202,7 +206,7 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
               <>
                 <EuiFlexItem>
                   <UserEntityOverview
-                    userName={userName ?? ''}
+                    userName={resolvedUserName}
                     identityFields={userEntityIdentifiers}
                     entityRecord={
                       entityStoreV2Enabled ? userEntityFromStore.entityRecord : undefined
@@ -218,7 +222,7 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
             {showHostOverview && hostEntityIdentifiers && (
               <EuiFlexItem>
                 <HostEntityOverview
-                  hostName={hostName ?? ''}
+                  hostName={resolvedHostName}
                   identityFields={hostEntityIdentifiers}
                   entityRecord={entityStoreV2Enabled ? hostEntityFromStore.entityRecord : undefined}
                   scopeId={scopeId}

@@ -118,8 +118,7 @@ export const EntitiesDetailsView: FC<EntitiesDetailsViewProps> = memo(
       hostEntityFromStore.entityRecord?.entity?.name ?? hostName ?? hostNameFromStore;
 
     const showUserDetails = timestamp != null && userDisplayName != null;
-    const showHostDetails =
-      hostEntityIdentifiers != null && timestamp != null && hostDisplayName != null;
+    const showHostDetails = timestamp != null && hostDisplayName != null;
     const showDetails = showUserDetails || showHostDetails;
 
     return (
