@@ -62,21 +62,43 @@ interface RunnerDeps {
 const PAGE_SIZE = 100;
 
 /**
+ * Maximum consecutive failing ticks before the runner gives up and advances
+ * the watermark anyway. Without this circuit-breaker, a single poison-pill SO
+ * (one whose write deterministically fails — bad mapping, malformed payload,
+ * etc.) would block the watermark forever, and every subsequent tick would
+ * re-walk the same growing window of SOs only to fail again.
+ *
+ * Five ticks at the default 30-minute interval = ~2.5 hours of retries before
+ * the runner moves past the bad SO. After that, the offending SO is
+ * permanently skipped from reconciliation and operators must run a manual
+ * backfill (`POST /internal/cases/_analytics/backfill/run_soon`) to retry it.
+ * The give-up is logged at ERROR with full counters so on-call sees it.
+ */
+const MAX_CONSECUTIVE_FAILURES = 5;
+
+/**
  * Reconciliation runner — the durability backstop for the synchronous writer.
  *
  * On each task tick:
- * 1. Read the last successful run timestamp from the state SO.
- * 2. Walk every case SO updated since that timestamp (across all spaces). For each,
- *    re-emit the `case` doc and recompute the `case_lifecycle` doc.
- * 3. Walk every user-action SO created since that timestamp. For each, re-emit the
- *    `case_activity` doc.
- * 4. Persist a new watermark.
+ * 1. Read the last successful run timestamp + consecutive_failure_count from
+ *    the state SO.
+ * 2. Walk every case SO updated since that timestamp (across all spaces),
+ *    awaiting writes via `writer.awaited.*` so failures are visible.
+ * 3. Walk every user-action SO created since that timestamp.
+ * 4. Recompute lifecycle docs for every case touched.
+ * 5. Optionally refresh data view runtime fields.
+ * 6. Decide whether to advance the watermark:
+ *    - If everything succeeded: advance, reset failure counter.
+ *    - If there were any failures and we're under the circuit-breaker
+ *      threshold: keep the same watermark, bump the failure counter so the
+ *      next tick re-walks the same window.
+ *    - If we've exceeded the threshold: advance anyway, log critical, reset
+ *      counter. (Otherwise a single poison-pill SO blocks reconciliation
+ *      indefinitely.)
  *
- * Idempotent. Worst case is overwriting an analytics doc with the same content.
- *
- * POC scope: walks all cases periodically. A future iteration can switch to
- * `_seq_no` watermarks for tighter coupling, but the timestamp-based approach is
- * sufficient for the demo.
+ * Per-write retries (3 jittered attempts) live inside the writer. The
+ * tick-level circuit breaker stacks ON TOP of those — total max retries for a
+ * given SO before being skipped is `3 in-call * MAX_CONSECUTIVE_FAILURES = 15`.
  */
 export const runReconciliation = async ({
   logger,
@@ -91,32 +113,44 @@ export const runReconciliation = async ({
 
   const previousState = await readState(internalSavedObjectsRepository, log);
   const since = previousState?.last_run_at ?? null;
+  const previousFailureCount = previousState?.consecutive_failure_count ?? 0;
 
-  let casesIndexed = 0;
-  let activityIndexed = 0;
-  let lifecycleIndexed = 0;
+  const stats = {
+    cases_indexed: 0,
+    activity_indexed: 0,
+    lifecycle_indexed: 0,
+    cases_failed: 0,
+    activity_failed: 0,
+    lifecycle_failed: 0,
+  };
+
+  let tickFailedSomewhere = false;
 
   try {
-    casesIndexed = await reconcileCases({
-      log,
-      unsecuredSavedObjectsClient,
-      writer,
-      since,
-    });
+    const caseResults = await reconcileCases({ log, unsecuredSavedObjectsClient, writer, since });
+    stats.cases_indexed = caseResults.succeeded;
+    stats.cases_failed = caseResults.failed;
 
-    activityIndexed = await reconcileActivity({
+    const activityResults = await reconcileActivity({
       log,
       unsecuredSavedObjectsClient,
       writer,
       since,
     });
+    stats.activity_indexed = activityResults.succeeded;
+    stats.activity_failed = activityResults.failed;
 
-    lifecycleIndexed = await reconcileLifecycle({
+    const lifecycleResults = await reconcileLifecycle({
       log,
       unsecuredSavedObjectsClient,
       writer,
       since,
     });
+    stats.lifecycle_indexed = lifecycleResults.succeeded;
+    stats.lifecycle_failed = lifecycleResults.failed;
+
+    tickFailedSomewhere =
+      stats.cases_failed > 0 || stats.activity_failed > 0 || stats.lifecycle_failed > 0;
 
     // Backstop the data view runtime field sync. Runs after the SO sweep so a
     // newly-discovered template (added between ticks) gets its runtime fields
@@ -131,25 +165,107 @@ export const runReconciliation = async ({
       }
     }
 
-    await writeState(internalSavedObjectsRepository, log, {
-      last_run_at: new Date(startedAt).toISOString(),
-      last_run_stats: {
-        cases_indexed: casesIndexed,
-        activity_indexed: activityIndexed,
-        lifecycle_indexed: lifecycleIndexed,
-        duration_ms: Date.now() - startedAt,
-      },
+    const nextState = decideNextState({
+      log,
+      previousFailureCount,
+      tickFailedSomewhere,
+      currentWatermark: since,
+      proposedWatermark: new Date(startedAt).toISOString(),
+      stats,
+      duration_ms: Date.now() - startedAt,
     });
 
+    await writeState(internalSavedObjectsRepository, log, nextState);
+
     log.info(
-      `reconciliation tick complete: cases=${casesIndexed} activity=${activityIndexed} lifecycle=${lifecycleIndexed} duration_ms=${
+      `reconciliation tick complete: indexed cases=${stats.cases_indexed} activity=${
+        stats.activity_indexed
+      } lifecycle=${stats.lifecycle_indexed}; failed cases=${stats.cases_failed} activity=${
+        stats.activity_failed
+      } lifecycle=${stats.lifecycle_failed}; watermark=${
+        nextState.last_run_at
+      } consecutive_failures=${nextState.consecutive_failure_count ?? 0} duration_ms=${
         Date.now() - startedAt
       }`
     );
   } catch (err) {
     log.error(`reconciliation tick failed: ${err.message}`);
-    // Do NOT advance the watermark on failure — the next run picks up where we left off.
+    // Do NOT advance the watermark on infrastructure failure (couldn't read
+    // SOs at all, etc.) — the next run picks up where we left off.
   }
+};
+
+/**
+ * Counters built up during the tick, before the duration_ms is folded in.
+ * Kept separate from `last_run_stats` (which carries duration_ms too) so the
+ * call sites that don't yet know the duration can build it up incrementally.
+ */
+type TickCounters = Omit<
+  NonNullable<CasesAnalyticsStateAttributes['last_run_stats']>,
+  'duration_ms'
+>;
+
+const decideNextState = ({
+  log,
+  previousFailureCount,
+  tickFailedSomewhere,
+  currentWatermark,
+  proposedWatermark,
+  stats,
+  duration_ms,
+}: {
+  log: Logger;
+  previousFailureCount: number;
+  tickFailedSomewhere: boolean;
+  currentWatermark: string | null;
+  proposedWatermark: string;
+  stats: TickCounters;
+  duration_ms: number;
+}): CasesAnalyticsStateAttributes => {
+  const baseStats = { ...stats, duration_ms };
+
+  if (!tickFailedSomewhere) {
+    // Happy path — full success. Advance watermark and reset the failure
+    // counter so we restart fresh next time something does fail.
+    return {
+      last_run_at: proposedWatermark,
+      last_run_stats: baseStats,
+      consecutive_failure_count: 0,
+    };
+  }
+
+  const nextFailureCount = previousFailureCount + 1;
+
+  if (nextFailureCount < MAX_CONSECUTIVE_FAILURES) {
+    // Still within the retry window. Keep the watermark put so the next tick
+    // re-walks the same SOs. Bump the failure counter so we eventually give
+    // up rather than retrying forever on a poison pill.
+    log.warn(
+      `reconciliation tick had failures (${stats?.cases_failed ?? 0} case + ${
+        stats?.activity_failed ?? 0
+      } activity + ${
+        stats?.lifecycle_failed ?? 0
+      } lifecycle); holding watermark, retry ${nextFailureCount}/${MAX_CONSECUTIVE_FAILURES}`
+    );
+    return {
+      last_run_at: currentWatermark,
+      last_run_stats: baseStats,
+      consecutive_failure_count: nextFailureCount,
+    };
+  }
+
+  // Circuit breaker — too many consecutive failing ticks. Advance the
+  // watermark anyway so we don't get stuck forever. The offending SOs are now
+  // permanently skipped from reconciliation; operators must run a manual
+  // backfill to retry them. Logged at ERROR so on-call sees it.
+  log.error(
+    `reconciliation circuit breaker tripped: ${nextFailureCount} consecutive failing ticks. Advancing watermark to skip the failing window. Run backfill to retry; see /internal/cases/_analytics/backfill/run_soon.`
+  );
+  return {
+    last_run_at: proposedWatermark,
+    last_run_stats: baseStats,
+    consecutive_failure_count: 0,
+  };
 };
 
 const readState = async (
@@ -186,6 +302,11 @@ const writeState = async (
   }
 };
 
+interface BatchResult {
+  succeeded: number;
+  failed: number;
+}
+
 const reconcileCases = async ({
   log,
   unsecuredSavedObjectsClient,
@@ -196,22 +317,24 @@ const reconcileCases = async ({
   unsecuredSavedObjectsClient: ReconciliationSavedObjectsFinder;
   writer: CasesAnalyticsWriterContract;
   since: string | null;
-}): Promise<number> => {
+}): Promise<BatchResult> => {
   const filter = since ? `${CASE_SAVED_OBJECT}.attributes.updated_at >= "${since}"` : undefined;
 
-  let count = 0;
+  let succeeded = 0;
+  let failed = 0;
   for await (const batch of pagedFind<CasePersistedAttributes>({
     unsecuredSavedObjectsClient,
     type: CASE_SAVED_OBJECT,
     filter,
   })) {
-    for (const so of batch) {
-      writer.upsertCase(so);
-      count += 1;
+    const results = await Promise.all(batch.map((so) => writer.awaited.upsertCase(so)));
+    for (const ok of results) {
+      if (ok) succeeded += 1;
+      else failed += 1;
     }
   }
-  log.debug(`reconciled ${count} cases`);
-  return count;
+  log.debug(`reconciled cases: succeeded=${succeeded} failed=${failed}`);
+  return { succeeded, failed };
 };
 
 const reconcileLifecycle = async ({
@@ -224,24 +347,26 @@ const reconcileLifecycle = async ({
   unsecuredSavedObjectsClient: ReconciliationSavedObjectsFinder;
   writer: CasesAnalyticsWriterContract;
   since: string | null;
-}): Promise<number> => {
+}): Promise<BatchResult> => {
   const filter = since
     ? `${CASE_SAVED_OBJECT}.attributes.updated_at >= "${since}" or ${CASE_SAVED_OBJECT}.attributes.closed_at >= "${since}"`
     : undefined;
 
-  let count = 0;
+  let succeeded = 0;
+  let failed = 0;
   for await (const batch of pagedFind<CasePersistedAttributes>({
     unsecuredSavedObjectsClient,
     type: CASE_SAVED_OBJECT,
     filter,
   })) {
-    for (const so of batch) {
-      writer.recomputeLifecycle(so.id);
-      count += 1;
+    const results = await Promise.all(batch.map((so) => writer.awaited.recomputeLifecycle(so.id)));
+    for (const ok of results) {
+      if (ok) succeeded += 1;
+      else failed += 1;
     }
   }
-  log.debug(`reconciled ${count} lifecycle docs`);
-  return count;
+  log.debug(`reconciled lifecycle: succeeded=${succeeded} failed=${failed}`);
+  return { succeeded, failed };
 };
 
 const reconcileActivity = async ({
@@ -254,24 +379,26 @@ const reconcileActivity = async ({
   unsecuredSavedObjectsClient: ReconciliationSavedObjectsFinder;
   writer: CasesAnalyticsWriterContract;
   since: string | null;
-}): Promise<number> => {
+}): Promise<BatchResult> => {
   const filter = since
     ? `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.created_at >= "${since}"`
     : undefined;
 
-  let count = 0;
+  let succeeded = 0;
+  let failed = 0;
   for await (const batch of pagedFind<UserActionPersistedAttributes>({
     unsecuredSavedObjectsClient,
     type: CASE_USER_ACTION_SAVED_OBJECT,
     filter,
   })) {
-    for (const so of batch) {
-      writer.appendActivity(so);
-      count += 1;
+    const results = await Promise.all(batch.map((so) => writer.awaited.appendActivity(so)));
+    for (const ok of results) {
+      if (ok) succeeded += 1;
+      else failed += 1;
     }
   }
-  log.debug(`reconciled ${count} activity rows`);
-  return count;
+  log.debug(`reconciled activity: succeeded=${succeeded} failed=${failed}`);
+  return { succeeded, failed };
 };
 
 async function* pagedFind<T>({
@@ -304,3 +431,9 @@ async function* pagedFind<T>({
     page += 1;
   }
 }
+
+// Exported for tests.
+export const __testing__ = {
+  decideNextState,
+  MAX_CONSECUTIVE_FAILURES,
+};

@@ -25,8 +25,20 @@ export interface CasesAnalyticsStateAttributes {
     cases_indexed: number;
     activity_indexed: number;
     lifecycle_indexed: number;
+    cases_failed: number;
+    activity_failed: number;
+    lifecycle_failed: number;
     duration_ms: number;
   };
+  /**
+   * Number of consecutive ticks where one or more writes failed. Drives the
+   * circuit-breaker policy in the runner: while this counter is below the
+   * threshold, the watermark stays put so the next tick re-walks the same
+   * window. Once it crosses the threshold, the runner advances the watermark
+   * anyway and emits a critical log so operators see the give-up. Resets to
+   * zero on any fully-successful tick.
+   */
+  consecutive_failure_count?: number;
 }
 
 export const casesAnalyticsStateSavedObjectType: SavedObjectsType<CasesAnalyticsStateAttributes> = {

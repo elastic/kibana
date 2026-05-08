@@ -39,10 +39,35 @@ interface WriterDependencies {
 }
 
 /**
+ * Awaited variant of the writer surface — same operations, but each method
+ * returns `Promise<boolean>` (true on success, false on failure) instead of
+ * fire-and-forget `void`.
+ *
+ * The reconciliation runner uses this so it can decide whether to advance the
+ * watermark based on whether the tick's writes actually succeeded. The
+ * synchronous SO-service path doesn't use this — it can't block the API
+ * response on analytics writes, so it sticks with the void-returning methods
+ * that swallow internally.
+ */
+export interface AwaitedWriterContract {
+  upsertCase: (so: SavedObject<CasePersistedAttributes>) => Promise<boolean>;
+  deleteCase: (caseId: string) => Promise<boolean>;
+  appendActivity: (so: SavedObject<UserActionPersistedAttributes>) => Promise<boolean>;
+  recomputeLifecycle: (caseId: string) => Promise<boolean>;
+}
+
+/**
  * Public hook surface invoked from the cases SO services.
  *
- * Every method is fire-and-forget by contract: callers don't await, and any error
- * is logged and swallowed. The reconciliation tail job is the durability backstop.
+ * The four primary methods (`upsertCase`, `deleteCase`, `appendActivity`,
+ * `recomputeLifecycle`) are fire-and-forget by contract: callers don't await,
+ * any error is logged and swallowed. The reconciliation tail job is the
+ * durability backstop.
+ *
+ * The same operations are also exposed via `awaited.*` for callers that want
+ * to know whether the write actually succeeded (today: only the reconciliation
+ * runner). Those methods share the same retry policy as the fire-and-forget
+ * variants but return a Promise<boolean> instead of swallowing.
  *
  * Constructed once per Kibana node by `CasesAnalyticsService`. The same instance is
  * shared across requests. Internally it depends on resolvers (fetchCase /
@@ -56,6 +81,12 @@ export class CasesAnalyticsWriter {
   private readonly fetchActivityForCase: WriterDependencies['fetchActivityForCase'];
   private readonly maxRetries: number;
   private readonly retryInitialDelayMs: number;
+  /**
+   * Awaited variant. Same operations, but each method returns Promise<boolean>
+   * — true on success, false on failure. Bound in the constructor so the
+   * methods retain `this` regardless of how callers destructure.
+   */
+  public readonly awaited: AwaitedWriterContract;
 
   constructor(deps: WriterDependencies) {
     this.esClient = deps.esClient;
@@ -64,6 +95,14 @@ export class CasesAnalyticsWriter {
     this.fetchActivityForCase = deps.fetchActivityForCase;
     this.maxRetries = deps.maxRetries ?? DEFAULT_WRITE_MAX_RETRIES;
     this.retryInitialDelayMs = deps.retryInitialDelayMs ?? DEFAULT_WRITE_RETRY_INITIAL_DELAY_MS;
+    this.awaited = {
+      upsertCase: (so) => this.tryAwait('case', so.id, () => this.doUpsertCase(so)),
+      deleteCase: (id) => this.tryAwait('case', id, () => this.doDeleteCase(id)),
+      appendActivity: (so) =>
+        this.tryAwait('case_activity', so.id, () => this.doAppendActivity(so)),
+      recomputeLifecycle: (id) =>
+        this.tryAwait('case_lifecycle', id, () => this.doRecomputeLifecycle(id)),
+    };
   }
 
   /**
@@ -72,14 +111,7 @@ export class CasesAnalyticsWriter {
    */
   upsertCase(so: SavedObject<CasePersistedAttributes>): void {
     this.logger.debug(`upsertCase id=${so.id} owner=${so.attributes?.owner}`);
-    void this.fireAndForget('case', so.id, async () => {
-      const doc = buildCaseDoc(so);
-      await this.esClient.index({
-        index: CASES_DATA_CASE_ALIAS,
-        id: so.id,
-        document: doc,
-      });
-    });
+    void this.fireAndForget('case', so.id, () => this.doUpsertCase(so));
   }
 
   /**
@@ -95,12 +127,73 @@ export class CasesAnalyticsWriter {
    * separate operator workflow (currently: manual delete-by-query).
    */
   deleteCase(caseId: string): void {
-    void this.fireAndForget('case', caseId, () =>
-      this.deleteByIdSwallow404(CASES_DATA_CASE_ALIAS, caseId)
-    );
-    void this.fireAndForget('case_lifecycle', caseId, () =>
-      this.deleteByIdSwallow404(CASES_DATA_CASE_LIFECYCLE_ALIAS, caseId)
-    );
+    void this.fireAndForget('case', caseId, () => this.doDeleteCase(caseId));
+  }
+
+  /**
+   * Append an activity row. Called by `CaseUserActionService` post-success.
+   */
+  appendActivity(so: SavedObject<UserActionPersistedAttributes>): void {
+    void this.fireAndForget('case_activity', so.id, () => this.doAppendActivity(so));
+  }
+
+  /**
+   * Recompute and upsert the lifecycle document for a case. Called from the cases
+   * client's update path on close/reopen.
+   */
+  recomputeLifecycle(caseId: string): void {
+    void this.fireAndForget('case_lifecycle', caseId, () => this.doRecomputeLifecycle(caseId));
+  }
+
+  // --- Private "do" methods. These throw on failure so both the fire-and-forget
+  //     and awaited paths can apply their own error handling. ---
+
+  private async doUpsertCase(so: SavedObject<CasePersistedAttributes>): Promise<void> {
+    const doc = buildCaseDoc(so);
+    await this.esClient.index({
+      index: CASES_DATA_CASE_ALIAS,
+      id: so.id,
+      document: doc,
+    });
+  }
+
+  private async doDeleteCase(caseId: string): Promise<void> {
+    // Both deletes run sequentially inside one logical "case delete" so a
+    // partial failure (case doc gone, lifecycle doc still present) is observable
+    // through the Promise contract on the awaited path. Reconciliation reruns
+    // delete on the next tick if the lifecycle doc is still around.
+    await this.deleteByIdSwallow404(CASES_DATA_CASE_ALIAS, caseId);
+    await this.deleteByIdSwallow404(CASES_DATA_CASE_LIFECYCLE_ALIAS, caseId);
+  }
+
+  private async doAppendActivity(so: SavedObject<UserActionPersistedAttributes>): Promise<void> {
+    const doc = buildActivityDoc(so);
+    if (doc == null) {
+      this.logger.debug(`cases.analytics: user-action ${so.id} has no case reference; skipping`);
+      return;
+    }
+    await this.esClient.index({
+      index: CASES_DATA_CASE_ACTIVITY_ALIAS,
+      id: so.id,
+      document: doc,
+    });
+  }
+
+  private async doRecomputeLifecycle(caseId: string): Promise<void> {
+    const caseSO = await this.fetchCase(caseId);
+    if (!caseSO) {
+      this.logger.debug(
+        `cases.analytics: lifecycle recompute for ${caseId} skipped — case not found`
+      );
+      return;
+    }
+    const activity = await this.fetchActivityForCase(caseId);
+    const doc = buildLifecycleDoc(caseSO, activity);
+    await this.esClient.index({
+      index: CASES_DATA_CASE_LIFECYCLE_ALIAS,
+      id: caseId,
+      document: doc,
+    });
   }
 
   private async deleteByIdSwallow404(index: string, id: string): Promise<void> {
@@ -118,46 +211,10 @@ export class CasesAnalyticsWriter {
   }
 
   /**
-   * Append an activity row. Called by `CaseUserActionService` post-success.
+   * Fire-and-forget wrapper used by the synchronous SO-service hooks. Errors
+   * are logged at ERROR and swallowed — the API response must never fail
+   * because analytics couldn't write.
    */
-  appendActivity(so: SavedObject<UserActionPersistedAttributes>): void {
-    void this.fireAndForget('case_activity', so.id, async () => {
-      const doc = buildActivityDoc(so);
-      if (doc == null) {
-        this.logger.debug(`cases.analytics: user-action ${so.id} has no case reference; skipping`);
-        return;
-      }
-      await this.esClient.index({
-        index: CASES_DATA_CASE_ACTIVITY_ALIAS,
-        id: so.id,
-        document: doc,
-      });
-    });
-  }
-
-  /**
-   * Recompute and upsert the lifecycle document for a case. Called from the cases
-   * client's update path on close/reopen.
-   */
-  recomputeLifecycle(caseId: string): void {
-    void this.fireAndForget('case_lifecycle', caseId, async () => {
-      const caseSO = await this.fetchCase(caseId);
-      if (!caseSO) {
-        this.logger.debug(
-          `cases.analytics: lifecycle recompute for ${caseId} skipped — case not found`
-        );
-        return;
-      }
-      const activity = await this.fetchActivityForCase(caseId);
-      const doc = buildLifecycleDoc(caseSO, activity);
-      await this.esClient.index({
-        index: CASES_DATA_CASE_LIFECYCLE_ALIAS,
-        id: caseId,
-        document: doc,
-      });
-    });
-  }
-
   private fireAndForget(
     surface: CasesDataSurface,
     targetId: string,
@@ -168,35 +225,68 @@ export class CasesAnalyticsWriter {
       maxRetries: this.maxRetries,
       initialDelayMs: this.retryInitialDelayMs,
     }).catch((err: Error) => {
-      // The reconciliation task is the durability backstop. Logged at ERROR (not
-      // WARN) so failures surface in default operator dashboards — silent failures
-      // here look identical to "the feature isn't wired up at all" and waste
-      // debug time. The error is still NOT propagated to the API caller.
+      // Logged at ERROR (not WARN) so failures surface in default operator
+      // dashboards — silent failures here look identical to "the feature isn't
+      // wired up at all" and waste debug time. The error is still NOT
+      // propagated to the API caller.
       this.logger.error(
         `cases.analytics write failed [surface=${surface} id=${targetId}]: ${err.message}`,
         { error: err }
       );
     });
   }
+
+  /**
+   * Awaited wrapper used by the reconciliation runner. Same retry policy as the
+   * fire-and-forget path, but returns whether the write succeeded so the runner
+   * can decide whether to advance the watermark. The error is logged once
+   * inside (so we don't lose visibility) but NOT thrown — the runner doesn't
+   * need to distinguish failure modes, just count them.
+   */
+  private async tryAwait(
+    surface: CasesDataSurface,
+    targetId: string,
+    op: () => Promise<void>
+  ): Promise<boolean> {
+    try {
+      await withRetry({
+        op,
+        maxRetries: this.maxRetries,
+        initialDelayMs: this.retryInitialDelayMs,
+      });
+      return true;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.error(
+        `cases.analytics write failed (awaited) [surface=${surface} id=${targetId}]: ${message}`,
+        { error: err }
+      );
+      return false;
+    }
+  }
 }
 
-/**
- * The writer is conceptually optional — when the analytics feature is disabled, SO
- * services receive `undefined` and skip the hook calls. This no-op stand-in lets the
- * services keep an unconditional call shape without an `if (writer)` guard at every
- * call site, simplifying the wiring once the feature is on by default in a future PR.
- */
-export const NOOP_WRITER: Pick<
+export type CasesAnalyticsWriterContract = Pick<
   CasesAnalyticsWriter,
-  'upsertCase' | 'deleteCase' | 'appendActivity' | 'recomputeLifecycle'
-> = {
+  'upsertCase' | 'deleteCase' | 'appendActivity' | 'recomputeLifecycle' | 'awaited'
+>;
+
+/**
+ * No-op stand-in for the writer when the analytics feature is disabled. SO
+ * services keep an unconditional call shape (no `if (writer)` guard at every
+ * call site). The awaited variant returns `Promise.resolve(true)` so a
+ * disabled feature looks like "every write succeeded" to the reconciliation
+ * runner — which is fine because the runner doesn't run when disabled either.
+ */
+export const NOOP_WRITER: CasesAnalyticsWriterContract = {
   upsertCase: () => {},
   deleteCase: () => {},
   appendActivity: () => {},
   recomputeLifecycle: () => {},
+  awaited: {
+    upsertCase: () => Promise.resolve(true),
+    deleteCase: () => Promise.resolve(true),
+    appendActivity: () => Promise.resolve(true),
+    recomputeLifecycle: () => Promise.resolve(true),
+  },
 };
-
-export type CasesAnalyticsWriterContract = Pick<
-  CasesAnalyticsWriter,
-  'upsertCase' | 'deleteCase' | 'appendActivity' | 'recomputeLifecycle'
->;

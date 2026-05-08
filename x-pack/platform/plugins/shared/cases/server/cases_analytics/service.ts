@@ -118,10 +118,10 @@ export class CasesAnalyticsService {
     coreStart: CoreStart;
     realWriter: CasesAnalyticsWriter;
     /** Live data view service so the reconciliation task can backstop the in‑process
-     * `onTemplateChanged` hook. */
+     * `onTemplateChanged` hook. Optional — set after data view bootstrap. */
     dataViewService: CasesAnalyticsDataViewService;
   };
-  /** Set once `start()` has wired everything up; surfaced via `getStatus()`. */
+  /** Set true after `start()` resolves; `getStatus()` surfaces this for ops. */
   private startedAt?: string;
   private dataViewBootstrapState: 'pending' | 'ready' | 'error' = 'pending';
   private dataViewBootstrapError?: string;
@@ -134,6 +134,15 @@ export class CasesAnalyticsService {
       deleteCase: (id) => this.writer.deleteCase(id),
       appendActivity: (so) => this.writer.appendActivity(so),
       recomputeLifecycle: (id) => this.writer.recomputeLifecycle(id),
+      // Awaited variant — used by the reconciliation runner to decide whether
+      // to advance the watermark. Each call resolves `this.writer.awaited` at
+      // call time so the proxy stays correct across the NOOP→real transition.
+      awaited: {
+        upsertCase: (so) => this.writer.awaited.upsertCase(so),
+        deleteCase: (id) => this.writer.awaited.deleteCase(id),
+        appendActivity: (so) => this.writer.awaited.appendActivity(so),
+        recomputeLifecycle: (id) => this.writer.awaited.recomputeLifecycle(id),
+      },
     };
     this.templateHookProxy = {
       onTemplateChanged: (template) => {
@@ -297,7 +306,12 @@ export class CasesAnalyticsService {
 
   /**
    * Operator-facing status snapshot. Surfaced via the
-   * `GET /internal/cases/_analytics/state` route.
+   * `GET /internal/cases/_analytics/state` route. Cheap to compute; called
+   * synchronously per request so it doesn't need to be awaitable.
+   *
+   * Distinct fields rather than a single "ready" boolean because the writer
+   * and data view bootstrap progress independently — at moments during start
+   * the writer is live but data views are still being created.
    */
   getStatus(): {
     enabled: boolean;
@@ -317,7 +331,8 @@ export class CasesAnalyticsService {
 
   /**
    * Internal: support-tool entry point for the data view service. Returns the
-   * live instance when started and enabled, otherwise `null`.
+   * live instance when started and enabled, otherwise `null` (operators get a
+   * 409 from the route in that case).
    */
   getDataViewService(): CasesAnalyticsDataViewService | null {
     return this.dataViewService ?? null;
