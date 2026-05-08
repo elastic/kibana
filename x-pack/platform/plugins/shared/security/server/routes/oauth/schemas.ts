@@ -56,7 +56,7 @@ export const nullableClientMetadataSchema = schema.recordOf(
 
 export const createClientBodySchema = schema.object({
   resource: schema.string({ minLength: 1, maxLength: OAUTH_MAX_URI_LENGTH }),
-  client_name: schema.maybe(schema.string({ maxLength: OAUTH_MAX_STRING_FIELD_LENGTH })),
+  client_name: schema.string({ minLength: 1, maxLength: OAUTH_MAX_STRING_FIELD_LENGTH }),
   client_type: schema.maybe(clientTypeSchema),
   client_metadata: schema.maybe(clientMetadataSchema),
   client_logo: schema.maybe(clientLogoSchema),

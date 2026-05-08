@@ -39,10 +39,9 @@ describe('useCreateAlertAction', () => {
       actionType: ALERT_EPISODE_ACTION_TYPE.ACK,
     });
 
-    expect(mockHttp.post).toHaveBeenCalledWith(
-      `${ALERTING_V2_ALERT_API_PATH}/group-hash-1/action/_ack`,
-      { body: JSON.stringify({}) }
-    );
+    expect(mockHttp.post).toHaveBeenCalledWith(`${ALERTING_V2_ALERT_API_PATH}/group-hash-1/_ack`, {
+      body: JSON.stringify({}),
+    });
   });
 
   it('stringifies a custom body when provided', async () => {
@@ -60,7 +59,7 @@ describe('useCreateAlertAction', () => {
       body,
     });
 
-    expect(mockHttp.post).toHaveBeenCalledWith(`${ALERTING_V2_ALERT_API_PATH}/gh/action/_snooze`, {
+    expect(mockHttp.post).toHaveBeenCalledWith(`${ALERTING_V2_ALERT_API_PATH}/gh/_snooze`, {
       body: JSON.stringify(body),
     });
   });

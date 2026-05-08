@@ -22,7 +22,7 @@ export const useCreateAlertAction = (http: HttpStart) => {
 
   return useMutation({
     mutationFn: async ({ groupHash, actionType, body = {} }: CreateAlertActionParams) => {
-      await http.post(`${ALERTING_V2_ALERT_API_PATH}/${groupHash}/action/_${actionType}`, {
+      await http.post(`${ALERTING_V2_ALERT_API_PATH}/${groupHash}/_${actionType}`, {
         body: JSON.stringify(body),
       });
     },
