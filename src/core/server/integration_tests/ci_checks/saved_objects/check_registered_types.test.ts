@@ -659,7 +659,6 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "entity-store-global-state|mappings: e1b10e5bec060a176469a5e9a4f80c94e23abcd7",
         "entity-store-global-state|schemas: da39a3ee5e6b4b0d3255bfef95601890afd80709",
         "entity-store-global-state|10.2.0: 8ca1d721cd25deb3d210545c2b6fce67ebe4f7559e30c479681dc2e0f77495b9",
-        "entity-store-global-state|10.1.0: caef2dfeda1429952c1866e8bb93fc15e790a32fa9336f1141f06b49e52dc0fa",
         "==================================================================================================",
         "epm-packages|global: 9d90d41b665a6b53aa6e984ad0e100ff733e05b9",
         "epm-packages|mappings: 1cbcdbf7f2f945430538f54a97fafaa76b428223",
