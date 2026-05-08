@@ -438,6 +438,8 @@
       "@kbn/core-chrome-browser-internal-types/*": ["src/core/packages/chrome/browser-internal-types/*"],
       "@kbn/core-chrome-browser-mocks": ["src/core/packages/chrome/browser-mocks"],
       "@kbn/core-chrome-browser-mocks/*": ["src/core/packages/chrome/browser-mocks/*"],
+      "@kbn/core-chrome-feature-flags": ["src/core/packages/chrome/feature-flags"],
+      "@kbn/core-chrome-feature-flags/*": ["src/core/packages/chrome/feature-flags/*"],
       "@kbn/core-chrome-layout": ["src/core/packages/chrome/layout/core-chrome-layout"],
       "@kbn/core-chrome-layout/*": ["src/core/packages/chrome/layout/core-chrome-layout/*"],
       "@kbn/core-chrome-layout-components": ["src/core/packages/chrome/layout/core-chrome-layout-components"],
