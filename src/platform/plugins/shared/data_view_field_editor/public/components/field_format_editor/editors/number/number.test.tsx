@@ -16,6 +16,10 @@ import { NumberFormatEditor } from './number';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  context: jest.requireActual('@kbn/kibana-react-plugin/public/context').context,
+}));
+
 const fieldType = 'number';
 
 const format = createFieldFormatMock({
