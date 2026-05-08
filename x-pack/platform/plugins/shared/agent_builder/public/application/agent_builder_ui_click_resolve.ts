@@ -73,14 +73,40 @@ function findInteractiveAncestor(start: Element | null, root: HTMLElement): Elem
   return null;
 }
 
-function resolveNearestTestSubj(interactive: Element, root: HTMLElement): string {
+function collectEbtFromAncestors(
+  interactive: Element,
+  root: HTMLElement
+): { ebt_element?: string; ebt_action?: string; ebt_detail?: string } {
+  let ebtElement: string | undefined;
+  let ebtAction: string | undefined;
+  let ebtDetail: string | undefined;
+
   for (let cur: Element | null = interactive; cur && root.contains(cur); cur = cur.parentElement) {
-    const dts = cur.getAttribute('data-test-subj');
-    if (dts) {
-      return dts;
+    if (!ebtElement) {
+      const v = cur.getAttribute('data-ebt-element');
+      if (v) {
+        ebtElement = v;
+      }
+    }
+    if (!ebtAction) {
+      const v = cur.getAttribute('data-ebt-action');
+      if (v) {
+        ebtAction = v;
+      }
+    }
+    if (!ebtDetail) {
+      const v = cur.getAttribute('data-ebt-detail');
+      if (v) {
+        ebtDetail = v;
+      }
     }
   }
-  return 'unknown';
+
+  return {
+    ...(ebtElement ? { ebt_element: ebtElement } : {}),
+    ...(ebtAction ? { ebt_action: ebtAction } : {}),
+    ...(ebtDetail ? { ebt_detail: ebtDetail } : {}),
+  };
 }
 
 export function resolveAgentBuilderUiClickPayload(
@@ -107,8 +133,16 @@ export function resolveAgentBuilderUiClickPayload(
     return null;
   }
 
+  const ebt = collectEbtFromAncestors(interactive, root);
+  const ebtElement = ebt.ebt_element;
+  if (!ebtElement) {
+    return null;
+  }
+
   return {
-    target_test_subj: resolveNearestTestSubj(interactive, root),
+    ebt_element: ebtElement,
+    ...(ebt.ebt_action ? { ebt_action: ebt.ebt_action } : {}),
+    ...(ebt.ebt_detail ? { ebt_detail: ebt.ebt_detail } : {}),
     element_kind: classifyInteractiveKind(interactive),
     location_pathname: locationPathname,
   };

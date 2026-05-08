@@ -78,7 +78,7 @@ describe('agent_builder_ui_click_resolve', () => {
 
     it('returns null when button is not primary', () => {
       const btn = document.createElement('button');
-      btn.setAttribute('data-test-subj', 'x');
+      btn.setAttribute('data-ebt-element', 'x');
       root.appendChild(btn);
       expect(resolveAgentBuilderUiClickPayload(clickEvent(btn, 2), root, '/agents')).toBeNull();
     });
@@ -92,42 +92,80 @@ describe('agent_builder_ui_click_resolve', () => {
     it('returns null when interactive control is disabled', () => {
       const btn = document.createElement('button');
       btn.disabled = true;
-      btn.setAttribute('data-test-subj', 'disabledBtn');
+      btn.setAttribute('data-ebt-element', 'disabledBtn');
       root.appendChild(btn);
       expect(resolveAgentBuilderUiClickPayload(clickEvent(btn), root, '/agents')).toBeNull();
     });
 
-    it('uses data-test-subj on the button', () => {
+    it('returns null when no data-ebt-element on the path (test subj alone is ignored)', () => {
       const btn = document.createElement('button');
       btn.setAttribute('data-test-subj', 'mySaveBtn');
       root.appendChild(btn);
+      expect(resolveAgentBuilderUiClickPayload(clickEvent(btn), root, '/manage/agents')).toBeNull();
+    });
+
+    it('uses data-ebt-element on the button', () => {
+      const btn = document.createElement('button');
+      btn.setAttribute('data-ebt-element', 'mySaveBtn');
+      root.appendChild(btn);
       expect(resolveAgentBuilderUiClickPayload(clickEvent(btn), root, '/manage/agents')).toEqual({
-        target_test_subj: 'mySaveBtn',
+        ebt_element: 'mySaveBtn',
         element_kind: 'button',
         location_pathname: '/manage/agents',
       });
     });
 
-    it('walks up to nearest data-test-subj', () => {
+    it('walks up to nearest data-ebt-element', () => {
       const wrap = document.createElement('div');
-      wrap.setAttribute('data-test-subj', 'panelActions');
+      wrap.setAttribute('data-ebt-element', 'panelActions');
       const btn = document.createElement('button');
       wrap.appendChild(btn);
       root.appendChild(wrap);
       expect(resolveAgentBuilderUiClickPayload(clickEvent(btn), root, '/')).toEqual({
-        target_test_subj: 'panelActions',
+        ebt_element: 'panelActions',
         element_kind: 'button',
         location_pathname: '/',
+      });
+    });
+
+    it('prefers closest data-ebt-element over outer ancestors', () => {
+      root.setAttribute('data-ebt-element', 'outer');
+      const wrap = document.createElement('div');
+      wrap.setAttribute('data-ebt-element', 'inner');
+      const btn = document.createElement('button');
+      wrap.appendChild(btn);
+      root.appendChild(wrap);
+      expect(resolveAgentBuilderUiClickPayload(clickEvent(btn), root, '/skills')).toEqual({
+        ebt_element: 'inner',
+        element_kind: 'button',
+        location_pathname: '/skills',
+      });
+    });
+
+    it('includes data-ebt-action and data-ebt-detail when present', () => {
+      const wrap = document.createElement('div');
+      wrap.setAttribute('data-ebt-element', 'skillsPanel');
+      wrap.setAttribute('data-ebt-action', 'openLibrary');
+      wrap.setAttribute('data-ebt-detail', 'v1');
+      const btn = document.createElement('button');
+      wrap.appendChild(btn);
+      root.appendChild(wrap);
+      expect(resolveAgentBuilderUiClickPayload(clickEvent(btn), root, '/skills')).toEqual({
+        ebt_element: 'skillsPanel',
+        ebt_action: 'openLibrary',
+        ebt_detail: 'v1',
+        element_kind: 'button',
+        location_pathname: '/skills',
       });
     });
 
     it('classifies link with href', () => {
       const a = document.createElement('a');
       a.setAttribute('href', 'https://example.com');
-      a.setAttribute('data-test-subj', 'docLink');
+      a.setAttribute('data-ebt-element', 'docLink');
       root.appendChild(a);
       expect(resolveAgentBuilderUiClickPayload(clickEvent(a), root, '/x')).toEqual({
-        target_test_subj: 'docLink',
+        ebt_element: 'docLink',
         element_kind: 'link',
         location_pathname: '/x',
       });

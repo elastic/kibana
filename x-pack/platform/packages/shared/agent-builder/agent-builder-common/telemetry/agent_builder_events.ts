@@ -71,7 +71,9 @@ export type AgentBuilderUiClickElementKind =
   | 'other';
 
 export interface ReportUiClickParams {
-  target_test_subj: string;
+  ebt_element: string;
+  ebt_action?: string;
+  ebt_detail?: string;
   element_kind: AgentBuilderUiClickElementKind;
   location_pathname: string;
 }
@@ -366,12 +368,26 @@ const OPT_OUT_EVENT: AgentBuilderTelemetryEvent = {
 const UI_CLICK_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.UiClick,
   schema: {
-    target_test_subj: {
+    ebt_element: {
       type: 'keyword',
       _meta: {
         description:
-          'Nearest data-test-subj from the clicked control upward within Agent Builder, or unknown',
+          'Primary click identity from data-ebt-element (nearest ancestor from the interactive element upward)',
         optional: false,
+      },
+    },
+    ebt_action: {
+      type: 'keyword',
+      _meta: {
+        description: 'Optional data-ebt-action from DOM',
+        optional: true,
+      },
+    },
+    ebt_detail: {
+      type: 'keyword',
+      _meta: {
+        description: 'Optional data-ebt-detail from DOM',
+        optional: true,
       },
     },
     element_kind: {

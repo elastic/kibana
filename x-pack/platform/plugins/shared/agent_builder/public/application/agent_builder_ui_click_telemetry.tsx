@@ -11,6 +11,7 @@ import {
   type ReportUiClickParams,
 } from '@kbn/agent-builder-common/telemetry';
 import React, { type ReactNode, useEffect, useRef } from 'react';
+import { AGENT_BUILDER_UI_EBT_ELEMENT } from './agent_builder_ui_ebt';
 import { resolveAgentBuilderUiClickPayload } from './agent_builder_ui_click_resolve';
 import { useKibana } from './hooks/use_kibana';
 
@@ -23,8 +24,8 @@ const rootStyles = css`
 
 /**
  * Capture-phase click listener scoped to the Agent Builder mount root.
- * Emits structured EBT (`agent_builder_ui_click`) for buttons, links, and role="button" controls,
- * resolving `target_test_subj` from the nearest ancestor `data-test-subj` on the DOM path.
+ * Emits structured EBT (`agent_builder_ui_click`) for buttons, links, and role="button" controls.
+ * Each emitted event requires `data-ebt-element` on the interactive element or an ancestor (closest wins).
  */
 export const AgentBuilderUiClickTelemetry: React.FC<{ children: ReactNode }> = ({ children }) => {
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -63,7 +64,12 @@ export const AgentBuilderUiClickTelemetry: React.FC<{ children: ReactNode }> = (
   }, [services.analytics, services.appParams.history]);
 
   return (
-    <div ref={rootRef} css={rootStyles} data-test-subj="agentBuilderUiClickTelemetryRoot">
+    <div
+      ref={rootRef}
+      css={rootStyles}
+      data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.APP_ROOT}
+      data-test-subj="agentBuilderUiClickTelemetryRoot"
+    >
       {children}
     </div>
   );
