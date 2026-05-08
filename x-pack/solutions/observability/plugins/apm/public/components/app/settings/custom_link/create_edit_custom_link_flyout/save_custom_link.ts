@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
 import type { Filter, CustomLink } from '../../../../../../common/custom_link/custom_link_types';
-import { callApmApi } from '../../../../../services/rest/create_call_apm_api';
+import { getApmInternalServices } from '../../../../../plugin';
 
 export async function saveCustomLink({
   id,
@@ -23,6 +23,7 @@ export async function saveCustomLink({
   filters: Filter[];
   toasts: NotificationsStart['toasts'];
 }) {
+  const { callApmApi } = getApmInternalServices();
   try {
     const customLink: CustomLink = {
       label,
