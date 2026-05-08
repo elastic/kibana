@@ -17,7 +17,7 @@ describe('bulkCreateAlertActions', () => {
     const result = await bulkCreateAlertActions(mockHttp, [
       { group_hash: 'g1', action_type: 'snooze', expiry: 'e' } as any,
     ]);
-    expect(mockHttp.post).toHaveBeenCalledWith(`${ALERTING_V2_ALERT_API_PATH}/action/_bulk`, {
+    expect(mockHttp.post).toHaveBeenCalledWith(`${ALERTING_V2_ALERT_API_PATH}/_bulk_action`, {
       body: JSON.stringify([{ group_hash: 'g1', action_type: 'snooze', expiry: 'e' }]),
     });
     expect(result).toEqual({ processed: 2, total: 2 });

@@ -29,6 +29,8 @@ jobs:
               // { user: 'kibanamachine', branchPrefix: 'api_docs', baseMatch: /^main$/, token: 'kibana' },
               // { user: 'kibanamachine', branchPrefix: 'backport', baseNotMatch: /^main$/, token: 'kibana' },
               { user: 'kibanamachine', branchPrefix: 'scout_metadata_update', token: 'github' },
+              { user: 'kibanamachine', branchPrefix: 'update-pipeline-resource-defs', baseMatch: /^main$/, token: 'github' },
+              { user: 'elastic-vault-github-plugin-prod[bot]', branchPrefix: 'bump-versions', token: 'kibana' },
               { user: 'elastic-vault-github-plugin-prod[bot]', branchPrefix: 'update-bundled-packages', paths: ['fleet_packages.json'], token: 'kibana' },
             ];
 

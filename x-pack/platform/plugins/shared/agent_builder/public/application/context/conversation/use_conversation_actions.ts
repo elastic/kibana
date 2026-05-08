@@ -109,7 +109,15 @@ export const createConversationActions = ({
 
   return {
     invalidateConversation: () => {
-      queryClient.invalidateQueries({ queryKey });
+      // Prefix-match: invalidates the per-conversation key AND the list queries so the
+      // sidebar (sorted by updated_at) reflects the bumped timestamp.
+
+      // Safe under concurrent streams because of the `enabled: false` gate in
+      // use_conversation.ts: while another conversation is streaming, its per-conversation
+      // query is inactive. The list query stays active and refetches - that's safe
+      // because the list payload is summaries only (no rounds/steps), so it can't clash with
+      // per-conversation streaming data.
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
     },
 
     addOptimisticRound: ({

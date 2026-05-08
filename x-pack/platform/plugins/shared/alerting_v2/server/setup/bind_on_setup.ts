@@ -23,6 +23,8 @@ import { createRuleSmlType } from '../agent_builder/sml/rule_sml_type';
 import { registerSkills } from '../agent_builder/skills/register_skills';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { EventLoggerToken } from '../lib/services/event_log_service/tokens';
+import { WorkflowExtensionsService } from '../lib/services/workflow_extensions_service/workflow_extensions_service';
+import { registerTriggerDefinitions } from '../lib/workflow_extensions/register_trigger_definitions';
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
@@ -70,6 +72,8 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
       event: { provider: ACTION_POLICY_EVENT_PROVIDER },
     });
     container.bind(EventLoggerToken).toConstantValue(eventLogger);
+
+    registerTriggerDefinitions(container.get(WorkflowExtensionsService));
 
     // Trigger task registration via onActivation callbacks
     container.getAll(TaskDefinition);

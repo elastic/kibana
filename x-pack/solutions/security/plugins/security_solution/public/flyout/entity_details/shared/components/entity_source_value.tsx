@@ -74,6 +74,9 @@ interface TruncatedBadgeListProps {
    * comma-joined list of hidden values.
    */
   overflowTooltipTitle?: string;
+  /**
+   * Optional text size to apply to the value text. Defaults to `xs`.
+   */
   textSize?: EuiTextProps['size'];
   'data-test-subj'?: string;
 }
@@ -119,16 +122,18 @@ export const TruncatedBadgeList = memo(
         gutterSize="xs"
         alignItems="center"
         responsive={false}
-        wrap
         data-test-subj={dataTestSubj}
+        css={{ width: '100%' }}
       >
         {visible.map((value) => (
-          <EuiFlexItem grow={false} key={value}>
-            <EuiText size={textSize}>{value}</EuiText>
+          <EuiFlexItem grow={false} key={value} css={{ minWidth: 0 }}>
+            <EuiText size={textSize} className="eui-textTruncate">
+              {value}
+            </EuiText>
           </EuiFlexItem>
         ))}
         {hidden.length > 0 && (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
             <EuiToolTip position="top" title={overflowTooltipTitle} content={hidden.join(', ')}>
               <EuiBadge
                 color="hollow"

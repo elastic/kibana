@@ -10,6 +10,8 @@ import { EuiCodeBlock, EuiText } from '@elastic/eui';
 import { dump } from 'js-yaml';
 import { i18n } from '@kbn/i18n';
 
+import { DETAIL_PANEL_CONTENT_MAX_HEIGHT } from '../graph_view/constants';
+
 interface ComponentConfigTabProps {
   componentId: string;
   componentConfig: unknown;
@@ -37,7 +39,13 @@ export const ComponentConfigTab: React.FunctionComponent<ComponentConfigTabProps
   }
 
   return (
-    <EuiCodeBlock overflowHeight="390px" language="yaml" isCopyable fontSize="m" paddingSize="s">
+    <EuiCodeBlock
+      overflowHeight={`${DETAIL_PANEL_CONTENT_MAX_HEIGHT}px`}
+      language="yaml"
+      isCopyable
+      fontSize="m"
+      paddingSize="s"
+    >
       {yamlContent}
     </EuiCodeBlock>
   );

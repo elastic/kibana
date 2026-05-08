@@ -147,6 +147,8 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/cps-utils'
   - '@kbn/lens-common'
+  - '@kbn/scout'
+  - '@kbn/core-http-common'
 tags:
   - plugin
   - prod
@@ -160,6 +162,7 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - __mocks__/**/*
+    - test/scout/**/*
     - common/**/*.json
     - public/**/*.json
     - server/**/*.json
