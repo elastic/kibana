@@ -143,7 +143,10 @@ export class ArrayType<T> extends Type<T[]> {
       } catch (e) {
         const inner = unwrapValidationError(e);
         if (inner) {
-          throw new ValidationError(prependPathSegment(String(i), inner), namespace);
+          throw new ValidationError(
+            prependPathSegment(String(i), inner, { recurseIntoAggregateChildren: true }),
+            namespace
+          );
         }
         throw e;
       }

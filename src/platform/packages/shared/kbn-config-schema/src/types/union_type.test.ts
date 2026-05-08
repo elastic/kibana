@@ -167,6 +167,22 @@ test('rejects undefined for single object branch when every key is optional (Joi
   expect(type.validate({})).toEqual({});
 });
 
+test('rejects undefined for null | all-maybe-object (Joi parity for required keys)', () => {
+  const type = schema.oneOf([
+    schema.literal(null),
+    schema.object({
+      all: schema.maybe(schema.string()),
+      read: schema.maybe(schema.string()),
+    }),
+  ]);
+
+  expect(() => type.validate(undefined)).toThrowErrorMatchingInlineSnapshot(
+    `"expected at least one defined value but got [undefined]"`
+  );
+  expect(type.validate(null)).toBe(null);
+  expect(type.validate({})).toEqual({});
+});
+
 test('fails if not matching type', () => {
   const type = schema.oneOf([schema.string()]);
 

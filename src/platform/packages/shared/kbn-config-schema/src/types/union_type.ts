@@ -20,6 +20,7 @@ import type {
 } from './interfaces';
 import { prependPathSegment, unwrapValidationError } from './error_utils';
 import { Reference } from '../references';
+import { LiteralType } from './literal_type';
 import { MaybeType } from './maybe_type';
 import { ObjectType } from './object_type';
 import { Type } from './type';
@@ -39,6 +40,23 @@ function isOnlyMaybeObjectBranch(branch: Type<any>): branch is ObjectType<any> {
     return false;
   }
   return Object.values(props).every((p) => p instanceof MaybeType);
+}
+
+/** Object branches where `undefined` is coerced to `{}` and validates (empty shape or all-`maybe` keys). */
+function objectBranchTreatsUndefinedAsEmptyObject(branch: Type<any>): boolean {
+  if (!(branch instanceof ObjectType)) {
+    return false;
+  }
+  const props = branch.getPropSchemas();
+  const keys = Object.keys(props);
+  if (keys.length === 0) {
+    return true;
+  }
+  return Object.values(props).every((p) => p instanceof MaybeType);
+}
+
+function hasNullLiteralBranch(types: readonly Type<any>[]): boolean {
+  return types.some((t) => t instanceof LiteralType && t.expectedValue === null);
 }
 
 export type UnionTypeOptions<T> = TypeOptions<T>;
@@ -99,6 +117,18 @@ export class UnionType<
       this.unionTypes.length === 1 &&
       this.typeOptions.defaultValue === undefined &&
       isOnlyMaybeObjectBranch(this.unionTypes[0])
+    ) {
+      throw new ValidationError(
+        new SchemaTypeError(`expected at least one defined value but got [${typeDetect(val)}]`, []),
+        namespace
+      );
+    }
+
+    if (
+      val === undefined &&
+      this.typeOptions.defaultValue === undefined &&
+      hasNullLiteralBranch(this.unionTypes) &&
+      this.unionTypes.some(objectBranchTreatsUndefinedAsEmptyObject)
     ) {
       throw new ValidationError(
         new SchemaTypeError(`expected at least one defined value but got [${typeDetect(val)}]`, []),

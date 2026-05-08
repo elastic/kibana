@@ -21,12 +21,34 @@ export function prependPropertyKey(key: string, err: SchemaTypeError): SchemaTyp
   return new SchemaTypeError(err.message, [key, ...err.path]);
 }
 
+export interface PrependPathSegmentOptions {
+  /**
+   * When prepending an **array index**, also prefix each child of a {@link SchemaTypesError}
+   * so leaf paths include the index (Joi parity for e.g. `[arr.0.field]`).
+   * When prepending a **union branch index**, leave aggregate children unchanged so nested
+   * `types that failed validation` bullets stay branch-relative (`[1]` then `- [0]:`).
+   */
+  recurseIntoAggregateChildren?: boolean;
+}
+
 /**
- * Prefix a union branch index or array index onto paths without rewriting nested aggregate errors.
- * Used so `[1]: … - [0]:` stays grouped instead of becoming `[1.0]:` when wrapping SchemaTypesError.
+ * Prefix a union branch index or array index onto paths. For {@link SchemaTypesError},
+ * see {@link PrependPathSegmentOptions.recurseIntoAggregateChildren}.
  */
-export function prependPathSegment(segment: string, err: SchemaTypeError): SchemaTypeError {
+export function prependPathSegment(
+  segment: string,
+  err: SchemaTypeError,
+  options?: PrependPathSegmentOptions
+): SchemaTypeError {
+  const recurse = options?.recurseIntoAggregateChildren === true;
   if (err instanceof SchemaTypesError) {
+    if (recurse) {
+      return new SchemaTypesError(
+        err.message,
+        [segment, ...err.path],
+        err.errors.map((e) => prependPathSegment(segment, e, options))
+      );
+    }
     return new SchemaTypesError(err.message, [segment, ...err.path], err.errors);
   }
   return new SchemaTypeError(err.message, [segment, ...err.path]);
