@@ -44,7 +44,7 @@ const buildClient = (initial: Record<string, unknown> = {}): IUserStorageClient 
 const wrapper =
   (client: IUserStorageClient) =>
   ({ children }: { children: React.ReactNode }) =>
-    <UserStorageProvider client={client}>{children}</UserStorageProvider>;
+    <UserStorageProvider userStorage={client}>{children}</UserStorageProvider>;
 
 // React surfaces render-time errors via console.error; suppress to keep
 // expected-throw tests from polluting test output.

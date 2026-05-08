@@ -14,7 +14,7 @@ import { UserStorageContext } from './user_storage_context';
 
 const PROVIDER_MISSING_MESSAGE =
   'useUserStorage / useUserStorageClient must be used inside a <UserStorageProvider>. ' +
-  'Wrap your component tree in <UserStorageProvider client={core.userStorage}>.';
+  'Wrap your component tree in <UserStorageProvider userStorage={core.userStorage}>.';
 
 /**
  * Returns the {@link IUserStorageClient} provided by the nearest

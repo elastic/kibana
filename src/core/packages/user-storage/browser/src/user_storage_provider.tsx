@@ -12,7 +12,7 @@ import type { IUserStorageClient } from './types';
 import { UserStorageContext } from './user_storage_context';
 
 export interface UserStorageProviderProps {
-  client: IUserStorageClient;
+  userStorage: IUserStorageClient;
   children: ReactNode;
 }
 
@@ -22,6 +22,6 @@ export interface UserStorageProviderProps {
  *
  * @public
  */
-export const UserStorageProvider = ({ client, children }: UserStorageProviderProps) => (
-  <UserStorageContext.Provider value={client}>{children}</UserStorageContext.Provider>
+export const UserStorageProvider = ({ userStorage, children }: UserStorageProviderProps) => (
+  <UserStorageContext.Provider value={userStorage}>{children}</UserStorageContext.Provider>
 );
