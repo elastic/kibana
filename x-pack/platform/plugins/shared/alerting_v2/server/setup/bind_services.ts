@@ -7,6 +7,7 @@
 
 import { PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
@@ -23,6 +24,7 @@ import { ALERTING_V2_DISPATCHER_ENABLED_SETTING_ID } from '../../common/advanced
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { RulesClient } from '../lib/rules_client';
+import { RulesClientSpaceIdToken } from '../lib/rules_client/tokens';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { EventLogService } from '../lib/services/event_log_service/event_log_service';
@@ -81,7 +83,28 @@ import type { AlertingServerSetupDependencies, AlertingServerStartDependencies }
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
-  bind(RulesClient).toSelf().inRequestScope();
+  bind(RulesClient)
+    .toDynamicValue(({ get }) => {
+      return new RulesClient({
+        services: {
+          request: get(Request),
+          rulesSavedObjectService: get(RulesSavedObjectServiceScopedToken),
+          taskManager: get(PluginStart<TaskManagerStartContract>('taskManager')),
+          userService: get(UserService),
+        },
+        options: {
+          spaceId: get(RulesClientSpaceIdToken),
+        },
+      });
+    })
+    .inRequestScope();
+  bind(RulesClientSpaceIdToken)
+    .toDynamicValue(({ get }) => {
+      const request = get(Request);
+      const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
+      return spaces.spacesService.getSpaceId(request);
+    })
+    .inRequestScope();
   bind(ActionPolicyNamespaceToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);

@@ -66,4 +66,5 @@ export interface InternalCoreSetup {
   injection: InternalCoreDiServiceSetup;
   dataStreams: DataStreamsSetup;
   userStorage: UserStorageServiceSetup;
+  _plugins?: Map<string, any>;
 }

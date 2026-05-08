@@ -8,13 +8,13 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
 import { DeleteFilterConfirmationModal } from './confirmation_modal';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
 describe('Header', () => {
-  test('should render normally', () => {
-    const component = shallow(
+  it('should render normally', () => {
+    renderWithI18n(
       <DeleteFilterConfirmationModal
         filterToDeleteValue={'test'}
         onCancelConfirmationModal={() => {}}
@@ -22,6 +22,6 @@ describe('Header', () => {
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(screen.getByText("Delete field filter 'test'?")).toBeVisible();
   });
 });
