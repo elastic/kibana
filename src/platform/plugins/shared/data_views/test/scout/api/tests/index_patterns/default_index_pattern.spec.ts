@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ApiClientFixture } from '@kbn/scout';
 import { apiTest, tags, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { COMMON_HEADERS, SERVICE_PATH_LEGACY, SERVICE_KEY_LEGACY } from '../../fixtures/constants';
@@ -20,6 +21,21 @@ apiTest.describe(
     const newId = () => `default-id-${Date.now()}-${Math.random()}`;
     const defaultPath = `${SERVICE_PATH_LEGACY}/default`;
     const serviceKeyId = `${SERVICE_KEY_LEGACY}_id`;
+
+    function expectDefaultIndexPattern(apiClient: ApiClientFixture, defaultId: string) {
+      return expect
+        .poll(async () => {
+          const getResponse = await apiClient.get(defaultPath, {
+            headers: {
+              ...COMMON_HEADERS,
+              ...adminApiCredentials.apiKeyHeader,
+            },
+            responseType: 'json',
+          });
+          return getResponse.body[serviceKeyId];
+        })
+        .toBe(defaultId);
+    }
 
     apiTest.beforeAll(async ({ requestAuth }) => {
       adminApiCredentials = await requestAuth.getApiKey('admin');
@@ -57,21 +73,13 @@ apiTest.describe(
       expect(setResponse).toHaveStatusCode(200);
       expect(setResponse.body.acknowledged).toBe(true);
 
-      const getResponse = await apiClient.get(defaultPath, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-      });
-
-      expect(getResponse).toHaveStatusCode(200);
-      expect(getResponse.body[serviceKeyId]).toBe(defaultId);
+      await expectDefaultIndexPattern(apiClient, defaultId);
     });
 
     apiTest('does not override existing default without force flag', async ({ apiClient }) => {
       const defaultId = newId();
 
+      // Set a default index pattern
       await apiClient.post(defaultPath, {
         headers: {
           ...COMMON_HEADERS,
@@ -83,7 +91,9 @@ apiTest.describe(
           force: true,
         },
       });
+      await expectDefaultIndexPattern(apiClient, defaultId);
 
+      // Try to override the default index pattern without the force flag
       const overrideResponse = await apiClient.post(defaultPath, {
         headers: {
           ...COMMON_HEADERS,
@@ -94,24 +104,16 @@ apiTest.describe(
           [serviceKeyId]: newId(),
         },
       });
-
       expect(overrideResponse).toHaveStatusCode(200);
 
-      const getResponse = await apiClient.get(defaultPath, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-      });
-
-      expect(getResponse).toHaveStatusCode(200);
-      expect(getResponse.body[serviceKeyId]).toBe(defaultId);
+      // Verify that the default index pattern is still the same
+      await expectDefaultIndexPattern(apiClient, defaultId);
     });
 
     apiTest('can clear default index pattern with force flag', async ({ apiClient }) => {
       const defaultId = newId();
 
+      // Set a default index pattern
       await apiClient.post(defaultPath, {
         headers: {
           ...COMMON_HEADERS,
@@ -123,7 +125,9 @@ apiTest.describe(
           force: true,
         },
       });
+      await expectDefaultIndexPattern(apiClient, defaultId);
 
+      // Clear the default index pattern
       const clearResponse = await apiClient.post(defaultPath, {
         headers: {
           ...COMMON_HEADERS,
@@ -135,19 +139,10 @@ apiTest.describe(
           force: true,
         },
       });
-
       expect(clearResponse).toHaveStatusCode(200);
 
-      const getResponse = await apiClient.get(defaultPath, {
-        headers: {
-          ...COMMON_HEADERS,
-          ...adminApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-      });
-
-      expect(getResponse).toHaveStatusCode(200);
-      expect(getResponse.body[serviceKeyId]).toBe('');
+      // Verify that the default index pattern is cleared
+      await expectDefaultIndexPattern(apiClient, '');
     });
   }
 );
