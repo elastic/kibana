@@ -39,7 +39,8 @@ const END = 'now';
 interface ServiceResult {
   serviceName: string;
   environments?: string[];
-  healthStatus?: string;
+  anomalyScore?: number;
+  anomalySeverity?: string;
   latency?: number;
   throughput?: number;
   transactionErrorRate?: number;
@@ -259,7 +260,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('filtering by health status', () => {
+    describe('filtering by anomaly severity', () => {
       before(async () => {
         apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         logsSynthtraceEsClient = synthtrace.createLogsSynthtraceEsClient();
@@ -305,13 +306,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await logsSynthtraceEsClient.clean();
       });
 
-      it('excludes log-only services when filtering by healthStatus', async () => {
+      it('excludes log-only services when filtering by anomalySeverities', async () => {
         const results = await agentBuilderApiClient.executeTool<GetServicesToolResult>({
           id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
           params: {
             start: START,
             end: END,
-            healthStatus: ['unknown'],
+            anomalySeverities: ['unknown'],
           },
         });
 

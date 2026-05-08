@@ -409,6 +409,8 @@ export default function ({ getService }: FtrProviderContext) {
               'file_operations_all',
               'execute_operations_all',
               'scan_operations_all',
+              'scripts_management_all',
+              'scripts_management_read',
               'soc_management_all',
               'trusted_devices_all',
               'trusted_devices_read',

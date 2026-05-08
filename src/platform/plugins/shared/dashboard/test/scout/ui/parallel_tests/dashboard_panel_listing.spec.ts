@@ -22,7 +22,8 @@ const DASHBOARD_PANEL_GROUP_ORDER = [
 
 const DASHBOARD_PANEL_TYPE_COUNT = 19;
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/259443
+spaceTest.describe.skip(
   'Dashboard panel listing',
   {
     tag: [

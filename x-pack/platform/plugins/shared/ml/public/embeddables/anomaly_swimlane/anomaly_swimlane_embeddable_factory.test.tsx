@@ -33,6 +33,12 @@ const mockResponse = of([
   },
 ]);
 
+jest.mock('../ensure_license', () => {
+  return {
+    ensureLicense: jest.fn(),
+  };
+});
+
 jest.mock('../../application/services/anomaly_detector_service', () => {
   return {
     AnomalyDetectorService: jest.fn().mockImplementation(() => {

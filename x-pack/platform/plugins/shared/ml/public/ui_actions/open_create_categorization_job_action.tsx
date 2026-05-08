@@ -12,6 +12,7 @@ import {
   type CreateCategorizationADJobContext,
 } from '@kbn/ml-ui-actions';
 import type { MlCoreSetup } from '../plugin';
+import { isValidLicense } from './action_license_check';
 
 export function createCategorizationADJobAction(
   getStartServices: MlCoreSetup['getStartServices']
@@ -50,6 +51,7 @@ export function createCategorizationADJobAction(
       }
     },
     async isCompatible({ dataView, field }: CreateCategorizationADJobContext) {
+      if (!(await isValidLicense(getStartServices))) return false;
       return (
         dataView.timeFieldName !== undefined &&
         dataView.fields.find((f) => f.name === field.name) !== undefined

@@ -36,6 +36,7 @@ import { getServices } from './get_services';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { getSingleMetricViewerComponent } from '../../shared_components/single_metric_viewer';
 import { EmbeddableSingleMetricViewerUserInput } from './single_metric_viewer_setup_flyout';
+import { ensureLicense } from '../ensure_license';
 
 export const getSingleMetricViewerEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
@@ -47,6 +48,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
   > = {
     type: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      await ensureLicense(getStartServices);
       const services = await getServices(getStartServices, usageCollection);
       const subscriptions = new Subscription();
       const titleManager = initializeTitleManager(initialState);

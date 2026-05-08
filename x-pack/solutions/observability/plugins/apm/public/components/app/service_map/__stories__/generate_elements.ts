@@ -14,7 +14,6 @@ import type {
   DependencyNodeData,
   GroupedNodeData,
 } from '../../../../../common/service_map';
-import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import type { ServiceAnomalyStats } from '../../../../../common/anomaly_detection';
 
 const AGENT_NAMES: AgentName[] = [
@@ -65,13 +64,6 @@ const DEPENDENCY_TYPES = [
   { spanType: 'external', spanSubtype: 'grpc', label: 'grpc-service' },
 ];
 
-const HEALTH_STATUSES = [
-  undefined,
-  ServiceHealthStatus.healthy,
-  ServiceHealthStatus.warning,
-  ServiceHealthStatus.critical,
-];
-
 function range(n: number): number[] {
   return Array(n)
     .fill(0)
@@ -100,30 +92,14 @@ function getRandomDependency(): (typeof DEPENDENCY_TYPES)[0] {
   return DEPENDENCY_TYPES[randn(DEPENDENCY_TYPES.length)];
 }
 
-function getRandomHealthStatus(): ServiceHealthStatus | undefined {
-  return HEALTH_STATUSES[randn(HEALTH_STATUSES.length)];
-}
-
-function createAnomalyStats(
-  healthStatus: ServiceHealthStatus | undefined
-): ServiceAnomalyStats | undefined {
-  if (!healthStatus) return undefined;
-
-  let anomalyScore: number | undefined;
-  switch (healthStatus) {
-    case ServiceHealthStatus.healthy:
-      anomalyScore = randn(25);
-      break;
-    case ServiceHealthStatus.warning:
-      anomalyScore = 25 + randn(50);
-      break;
-    case ServiceHealthStatus.critical:
-      anomalyScore = 75 + randn(25);
-      break;
+function createAnomalyStats(hasAnomalyData: boolean): ServiceAnomalyStats | undefined {
+  if (!hasAnomalyData) {
+    return undefined;
   }
 
+  const anomalyScore = randn(100);
+
   return {
-    healthStatus,
     transactionType: 'request',
     anomalyScore,
     actualValue: Math.random() * 2000000,
@@ -174,13 +150,12 @@ export function generateServiceMapElements(options: GenerateOptions): {
 
   range(serviceCount).forEach((i) => {
     const id = getRandomServiceName(i);
-    const healthStatus = hasAnomalies ? getRandomHealthStatus() : undefined;
     const data: ServiceNodeData = {
       id,
       label: id,
       isService: true,
       agentName: getRandomAgent(),
-      serviceAnomalyStats: createAnomalyStats(healthStatus),
+      serviceAnomalyStats: createAnomalyStats(hasAnomalies),
     };
     nodes.push({
       id,
@@ -327,7 +302,7 @@ export function createSimpleServiceMap(): { nodes: ServiceMapNode[]; edges: Serv
         isService: true,
         agentName: 'java',
         serviceAnomalyStats: {
-          healthStatus: ServiceHealthStatus.healthy,
+          anomalyScore: 10,
           transactionType: 'request',
         },
       },
@@ -342,7 +317,6 @@ export function createSimpleServiceMap(): { nodes: ServiceMapNode[]; edges: Serv
         isService: true,
         agentName: 'python',
         serviceAnomalyStats: {
-          healthStatus: ServiceHealthStatus.warning,
           transactionType: 'request',
           anomalyScore: 55,
         },

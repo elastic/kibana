@@ -39,7 +39,8 @@ const getExpectedPanelTypeCount = (config: ScoutTestConfig) => {
   return config.serverless && config.productTier === 'logs_essentials' ? 14 : 27;
 };
 
-spaceTest.describe(
+// Failing: See https://github.com/elastic/kibana/issues/259576
+spaceTest.describe.skip(
   'Dashboard panel listing (includes observability group)',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.all] },
   () => {

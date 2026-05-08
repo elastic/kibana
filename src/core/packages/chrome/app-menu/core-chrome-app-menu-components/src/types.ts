@@ -8,7 +8,7 @@
  */
 
 import type { EuiHideForProps, IconType } from '@elastic/eui';
-import type { SplitButtonWithNotificationProps } from '@kbn/split-button';
+import type { SplitButtonWithNotificationProps } from './components/split_button_with_notification';
 
 /**
  * Parameters passed to AppMenuRunAction
@@ -43,15 +43,11 @@ export type AppMenuRunAction = (params?: AppMenuRunActionParams) => void;
 type BaseSplitProps = Pick<
   SplitButtonWithNotificationProps,
   | 'isMainButtonLoading'
-  | 'isMainButtonDisabled'
-  | 'isSecondaryButtonLoading'
   | 'isSecondaryButtonDisabled'
   | 'secondaryButtonAriaLabel'
-  | 'secondaryButtonTitle'
-  | 'secondaryButtonIcon'
   | 'iconType'
   | 'showNotificationIndicator'
-  | 'notifcationIndicatorTooltipContent'
+  | 'notificationIndicatorTooltipContent'
 >;
 
 type AppMenuSecondarySplitButton = BaseSplitProps & {

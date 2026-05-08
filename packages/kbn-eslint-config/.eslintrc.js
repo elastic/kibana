@@ -400,4 +400,27 @@ module.exports = {
     '@elastic/eui/prefer-eui-icon-tip': 'error',
     '@elastic/eui/sr-output-disabled-tooltip': 'error',
   },
+
+  overrides: [
+    {
+      files: [
+        'src/platform/plugins/**/server/index.ts',
+        'x-pack/platform/plugins/**/server/index.ts',
+        'x-pack/solutions/**/plugins/**/server/index.ts',
+        'examples/**/server/index.ts',
+        'packages/kbn-mock-idp-plugin/server/index.ts',
+      ],
+      excludedFiles: ['**/test/**'],
+      rules: {
+        /**
+         * Plugin server entry should not load ./plugin until the plugin is enabled.
+         * @see https://github.com/elastic/kibana/pull/170856
+         * @see https://github.com/elastic/kibana/issues/171080
+         *
+         * Enforced in CI; violation count should fall as lazy-load `server/index.ts` migrations land.
+         */
+        '@kbn/eslint/no_sync_import_from_plugin': 'error',
+      },
+    },
+  ],
 };

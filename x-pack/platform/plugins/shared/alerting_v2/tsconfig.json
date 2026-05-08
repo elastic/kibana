@@ -99,6 +99,7 @@
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/core-user-profile-browser",
     "@kbn/user-profile-components",
+    "@kbn/esql-types",
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
