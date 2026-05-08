@@ -231,6 +231,10 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'
 
       cy.wait('@findRulesError');
 
+      cy.get('[data-test-subj="rulesListNotifyBadge-unsnoozed"] .euiLoadingSpinner').should(
+        'not.exist'
+      );
+
       cy.get(DISABLED_SNOOZE_BADGE)
         .find('[data-test-subj="rulesListNotifyBadge-unsnoozed"]')
         .closest('.euiToolTipAnchor')
