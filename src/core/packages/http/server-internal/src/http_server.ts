@@ -53,6 +53,7 @@ import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monito
 import type { Env } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { type Attributes, metrics, ValueType } from '@opentelemetry/api';
+import { getSpaceUrlPrefix } from '@kbn/core-spaces-common';
 import type { HttpConfig } from './http_config';
 import { getSpaceIdFromPath } from './spaces_url_parser';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
@@ -165,8 +166,8 @@ function extractSpaceFromUrl(request: Request) {
   if (!pathHasExplicitSpaceIdentifier) {
     return spaceId;
   }
-  const reqBasePath = `/s/${spaceId}`;
-  const newPathname = request.url.pathname.slice(reqBasePath.length) || '/';
+  const spacePrefix = getSpaceUrlPrefix(spaceId);
+  const newPathname = request.url.pathname.slice(spacePrefix.length) || '/';
   setRewrittenUrl(request, `${newPathname}${request.url.search}`);
   return spaceId;
 }

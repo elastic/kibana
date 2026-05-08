@@ -38,3 +38,10 @@ export const asSpaceId = (value: string): SpaceId => {
  * The identifier of the built-in default Kibana space.
  */
 export const DEFAULT_SPACE_ID: SpaceId = 'default' as SpaceId;
+
+/**
+ * Returns the URL path prefix for the given space (`/s/<spaceId>`),
+ * or an empty string for the default space.
+ */
+export const getSpaceUrlPrefix = (spaceId: SpaceId): string =>
+  spaceId === DEFAULT_SPACE_ID ? '' : `/s/${spaceId}`;

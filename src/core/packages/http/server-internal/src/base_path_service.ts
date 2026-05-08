@@ -9,7 +9,7 @@
 
 import { modifyUrl } from '@kbn/std';
 import type { KibanaRequest, IBasePath } from '@kbn/core-http-server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { getSpaceUrlPrefix } from '@kbn/core-spaces-common';
 
 /**
  * Core internal implementation of {@link IBasePath}
@@ -26,8 +26,7 @@ export class BasePath implements IBasePath {
   }
 
   public get = (request: KibanaRequest) => {
-    const spacePath = request.spaceId === DEFAULT_SPACE_ID ? '' : `/s/${request.spaceId}`;
-    return `${this.serverBasePath}${spacePath}`;
+    return `${this.serverBasePath}${getSpaceUrlPrefix(request.spaceId)}`;
   };
 
   public prepend = (path: string): string => {
