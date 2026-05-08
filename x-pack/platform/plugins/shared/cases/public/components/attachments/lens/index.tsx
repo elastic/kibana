@@ -6,83 +6,152 @@
  */
 
 import React from 'react';
-
 import deepEqual from 'fast-deep-equal';
 import { LENS_ATTACHMENT_TYPE } from '../../../../common/constants';
 import {
   LensAttachmentPayloadSchema,
-  type LensAttachmentData,
+  isLensPersistableData,
+  type LensPersistableAttachmentData,
+  type LensSavedObjectAttachmentMetadata,
 } from '../../../../common/types/domain_zod/attachment/lens/v2';
 import * as i18n from './translations';
 
 import {
   AttachmentActionType,
   defineAttachment,
-  type UnifiedValueAttachmentViewProps,
+  type UnifiedHybridAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 import type { LensProps } from './types';
 import { OpenLensButton } from './open_lens_button';
 import { LensRenderer } from './lens_renderer';
+import { LensReferenceEvent } from './reference_event';
+import { LensSavedObjectEmbed } from './lens_saved_object_embed';
 
-type LensViewProps = UnifiedValueAttachmentViewProps<LensAttachmentData>;
+type LensViewProps = UnifiedHybridAttachmentViewProps<
+  LensPersistableAttachmentData,
+  LensSavedObjectAttachmentMetadata
+>;
 
-function getOpenLensButton(savedObjectId: string, props: LensProps) {
-  return (
-    <OpenLensButton
-      savedObjectId={savedObjectId}
-      attributes={props.attributes}
-      timeRange={props.timeRange}
-      metadata={props.metadata}
-    />
-  );
-}
+const toLensPropsFromState = (data: LensPersistableAttachmentData): LensProps =>
+  // `state` is `Record<string, unknown>` in the schema; the concrete shape
+  // (`LensProps`) is owned by the lens plugin and asserted here.
+  data.state as unknown as LensProps;
 
-const getVisualizationAttachmentActions = (savedObjectId: string, props: LensProps) => [
+const PersistableEmbed = React.memo(
+  ({ data }: { data: LensPersistableAttachmentData }) => {
+    const { attributes, timeRange, metadata } = toLensPropsFromState(data);
+    return <LensRenderer attributes={attributes} timeRange={timeRange} metadata={metadata} />;
+  },
+  (prev, next) => deepEqual(prev.data, next.data)
+);
+PersistableEmbed.displayName = 'PersistableLensEmbed';
+
+/** Lens schema enforces `attachmentId: string`; framework type is broader (allows alert batches). */
+const toLensId = (attachmentId: string | string[] | undefined): string | undefined =>
+  Array.isArray(attachmentId) ? attachmentId[0] : attachmentId;
+
+const LensEmbedAttachmentLazy = React.lazy(async () => {
+  const Component: React.FC<LensViewProps> = ({ data, attachmentId, metadata }) => {
+    if (data && isLensPersistableData(data)) {
+      return <PersistableEmbed data={data} />;
+    }
+    const id = toLensId(attachmentId);
+    if (id) {
+      return (
+        <LensSavedObjectEmbed
+          attachmentId={id}
+          title={metadata?.title}
+          snapshot={metadata?.config as LensProps['attributes'] | undefined}
+          timeRange={metadata?.timeRange}
+        />
+      );
+    }
+    return null;
+  };
+  Component.displayName = 'LensEmbedAttachment';
+  return { default: Component };
+});
+
+const getPersistableActions = (savedObjectId: string, lensProps: LensProps) => [
   {
     type: AttachmentActionType.CUSTOM as const,
-    render: () => getOpenLensButton(savedObjectId, props),
+    render: () => (
+      <OpenLensButton
+        savedObjectId={savedObjectId}
+        attributes={lensProps.attributes}
+        timeRange={lensProps.timeRange}
+        metadata={lensProps.metadata}
+      />
+    ),
     isPrimary: false,
   },
 ];
 
-const LensAttachment = React.memo(
-  (props: LensViewProps) => {
-    // `data.state` is `Record<string, unknown>` in the schema; the concrete
-    // shape (`LensProps`) is owned by the lens plugin and asserted here.
-    const { attributes, timeRange, metadata } = props.data.state as LensProps;
-    return <LensRenderer attributes={attributes} timeRange={timeRange} metadata={metadata} />;
-  },
-  (prevProps, nextProps) => deepEqual(prevProps.data.state, nextProps.data.state)
-);
+const getSavedObjectActions = (
+  attachmentId: string,
+  metadata?: LensSavedObjectAttachmentMetadata
+) => {
+  // Open-in-lens needs `attributes`. With Model C we have a snapshot under
+  // `metadata.config` only when one was captured; defer the action otherwise.
+  const snapshot = metadata?.config as LensProps['attributes'] | undefined;
+  if (!snapshot) return [];
+  return [
+    {
+      type: AttachmentActionType.CUSTOM as const,
+      render: () => (
+        <OpenLensButton
+          savedObjectId={attachmentId}
+          attributes={snapshot}
+          timeRange={metadata?.timeRange}
+        />
+      ),
+      isPrimary: false,
+    },
+  ];
+};
 
-LensAttachment.displayName = 'LensAttachment';
+const getLensAttachmentViewObject = (props: LensViewProps) => {
+  const { savedObjectId, data, attachmentId, metadata } = props;
 
-const LensAttachmentRendererLazyComponent = React.lazy(async () => ({
-  default: LensAttachment,
-}));
+  // Persistable arm — value-typed payload with full state in `data.state`.
+  if (data && isLensPersistableData(data)) {
+    const lensProps = toLensPropsFromState(data);
+    return {
+      event: i18n.ADDED_LENS_VISUALIZATION,
+      timelineAvatar: 'lensApp',
+      getActions: () => getPersistableActions(savedObjectId, lensProps),
+      hideDefaultActions: false,
+      children: LensEmbedAttachmentLazy,
+    };
+  }
 
-const getVisualizationAttachmentViewObject = ({ savedObjectId, data }: LensViewProps) => {
-  const { attributes: lensAttributes, timeRange: lensTimeRange } = data.state as LensProps;
+  // SO-ref arm — `LensSavedObjectEmbed` does live-fetch + snapshot fallback +
+  // title-only fallback internally; the event row stays consistent.
+  const id = toLensId(attachmentId);
+  if (id) {
+    return {
+      event: i18n.ADDED_LENS_VISUALIZATION,
+      timelineAvatar: 'lensApp',
+      getActions: () => getSavedObjectActions(id, metadata),
+      hideDefaultActions: false,
+      children: LensEmbedAttachmentLazy,
+    };
+  }
 
+  // Defensive fallback — schema validation should already prevent this.
   return {
-    event: i18n.ADDED_VISUALIZATION,
+    event: <LensReferenceEvent savedObjectId={savedObjectId} title={metadata?.title} />,
     timelineAvatar: 'lensApp',
-    getActions: () =>
-      getVisualizationAttachmentActions(savedObjectId, {
-        attributes: lensAttributes,
-        timeRange: lensTimeRange,
-      }),
     hideDefaultActions: false,
-    children: LensAttachmentRendererLazyComponent,
   };
 };
 
-export const getVisualizationAttachmentType = () =>
+export const getLensAttachmentType = () =>
   defineAttachment({
     id: LENS_ATTACHMENT_TYPE,
     icon: 'document',
-    displayName: i18n.VISUALIZATIONS,
-    getAttachmentViewObject: getVisualizationAttachmentViewObject,
-    getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_VISUALIZATION }),
+    displayName: i18n.LENS_VISUALIZATIONS,
+    getAttachmentViewObject: getLensAttachmentViewObject,
+    getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_LENS_VISUALIZATION }),
     schema: LensAttachmentPayloadSchema,
   });

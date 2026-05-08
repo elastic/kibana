@@ -7,3 +7,6 @@
 
 export { commentAttachmentType } from './comment';
 export { lensAttachmentType } from './lens';
+export { dashboardAttachmentType } from './dashboard';
+export { mapAttachmentType } from './map';
+export { discoverSessionAttachmentType } from './saved_object';

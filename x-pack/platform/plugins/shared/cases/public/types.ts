@@ -16,6 +16,8 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ManagementSetup, ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { MapsStartApi } from '@kbn/maps-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
@@ -81,11 +83,13 @@ export interface CasesPublicSetupDependencies {
 export interface CasesPublicStartDependencies {
   apm?: ApmBase;
   cloud?: CloudStart;
+  dashboard: DashboardStart;
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   features: FeaturesPluginStart;
   files: FilesStart;
   lens: LensPublicStart;
+  maps: MapsStartApi;
   /**
    * Cases in used by other plugins. Plugins pass the
    * service to their KibanaContext. ML does not pass

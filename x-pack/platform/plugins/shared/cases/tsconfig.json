@@ -14,6 +14,7 @@
     "@kbn/core",
     // optionalPlugins from ./kibana.json
     "@kbn/lens-plugin",
+    "@kbn/maps-plugin",
     "@kbn/security-plugin",
     "@kbn/spaces-plugin",
     // Required from './kibana.json'
@@ -105,6 +106,8 @@
     "@kbn/workflows-extensions",
     "@kbn/workflows",
     "@kbn/lens-embeddable-utils",
+    "@kbn/dashboard-plugin",
+    "@kbn/dashboard-agent-common",
     "@kbn/resizable-layout",
     "@kbn/css-utils",
     "@kbn/shared-ux-column-presets",

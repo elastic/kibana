@@ -31,6 +31,7 @@ import type { EditConnectorProps } from '../../edit_connector';
 import { EditConnector } from '../../edit_connector';
 import type { CasesNavigation } from '../../links';
 import { StatusActionButton } from '../../status/button';
+import { CaseViewAttachButton } from './case_view_attach_button';
 import { EditTags } from './edit_tags';
 import { UserActions } from '../../user_actions';
 import { UserList } from './user_list';
@@ -281,6 +282,11 @@ export const CaseViewActivity = ({
                         (isLoading && loadingKey === 'status') || statusAction.isUpdatingStatus
                       }
                     />
+                  ) : null
+                }
+                attachActionButton={
+                  permissions.createComment ? (
+                    <CaseViewAttachButton caseId={caseData.id} caseOwner={caseData.owner} />
                   ) : null
                 }
                 useFetchAlertData={useFetchAlertData}

@@ -9,7 +9,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
-import { OPEN_IN_VISUALIZATION } from './translations';
+import { OPEN_IN_LENS } from './translations';
 import type { LensProps } from './types';
 
 type Props = LensProps & { savedObjectId: string };
@@ -41,13 +41,13 @@ const OpenLensButtonComponent: React.FC<Props> = ({ savedObjectId, attributes, t
 
   return (
     <EuiButtonEmpty
-      aria-label={OPEN_IN_VISUALIZATION}
-      data-test-subj="cases-open-in-visualization-btn"
+      aria-label={OPEN_IN_LENS}
+      data-test-subj="cases-open-in-lens-btn"
       iconType="lensApp"
       isDisabled={!hasLensPermissions}
       onClick={onClick}
     >
-      {OPEN_IN_VISUALIZATION}
+      {OPEN_IN_LENS}
     </EuiButtonEmpty>
   );
 };

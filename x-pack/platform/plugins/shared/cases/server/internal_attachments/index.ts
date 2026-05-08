@@ -7,13 +7,19 @@
 
 import { badRequest } from '@hapi/boom';
 import { FileAttachmentMetadataRt } from '../../common/types/domain';
-import { FILE_ATTACHMENT_TYPE, LENS_ATTACHMENT_TYPE } from '../../common/constants';
+import { FILE_ATTACHMENT_TYPE } from '../../common/constants';
 
 import { decodeWithExcessOrThrow } from '../common/runtime_types';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import type { UnifiedAttachmentTypeRegistry } from '../attachment_framework/unified_attachment_registry';
-import { commentAttachmentType, lensAttachmentType } from '../attachment_framework/attachments';
+import {
+  commentAttachmentType,
+  dashboardAttachmentType,
+  discoverSessionAttachmentType,
+  lensAttachmentType,
+  mapAttachmentType,
+} from '../attachment_framework/attachments';
 
 export const registerInternalAttachments = (
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry,
@@ -23,6 +29,9 @@ export const registerInternalAttachments = (
   externalRefRegistry.register({ id: FILE_ATTACHMENT_TYPE, schemaValidator });
   unifiedRegistry.register(lensAttachmentType);
   unifiedRegistry.register(commentAttachmentType);
+  unifiedRegistry.register(dashboardAttachmentType);
+  unifiedRegistry.register(discoverSessionAttachmentType);
+  unifiedRegistry.register(mapAttachmentType);
 };
 
 const schemaValidator = (data: unknown): void => {
