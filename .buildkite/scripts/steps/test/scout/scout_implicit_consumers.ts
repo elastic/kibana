@@ -34,12 +34,12 @@ const IMPLICIT_REGISTRY_CONSUMERS: readonly ImplicitConsumerRule[] = [
   {
     reason: 'Runtime registry coupling not captured by static @kbn/ references.',
     patterns: [
-      '**/plugins/**/public/embeddables/**',
-      '**/plugins/**/public/embeddable/**',
-      '**/plugins/**/public/react_embeddable/**',
-      '**/plugins/**/public/apps/embeddables/**',
-      '**/plugins/**/public/ui_actions/**',
-      '**/plugins/**/public/trigger_actions/**',
+      '**/plugins/**/public/embeddables/**/*.{ts,tsx}',
+      '**/plugins/**/public/embeddable/**/*.{ts,tsx}',
+      '**/plugins/**/public/react_embeddable/**/*.{ts,tsx}',
+      '**/plugins/**/public/apps/embeddables/**/*.{ts,tsx}',
+      '**/plugins/**/public/ui_actions/**/*.{ts,tsx}',
+      '**/plugins/**/public/trigger_actions/**/*.{ts,tsx}',
       '**/plugins/**/public/**/actions/register*.{ts,tsx}',
     ],
     consumers: [
