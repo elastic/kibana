@@ -11,6 +11,7 @@
  */
 
 import { AlertsV2 } from './alerts_v2';
+import { RulesV2 } from './rules_v2';
 import { AssetInventory } from './asset_inventory';
 import { AttackDiscovery } from './attack_discovery';
 import { Cases } from './cases';
@@ -38,6 +39,7 @@ import { Configurations } from './configurations';
  */
 const subPluginClasses = {
   AlertsV2,
+  RulesV2,
   AssetInventory,
   AttackDiscovery,
   Detections,

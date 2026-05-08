@@ -26,6 +26,16 @@ export interface StandaloneRuleFormProps {
   /** Callback invoked after a successful internal submission (useCreateRule). */
   onSuccess?: () => void;
   onCancel?: () => void;
+  /** Whether to include the ES|QL query editor (default: true). When false, the base query is shown read-only. */
+  includeQueryEditor?: boolean;
+  /** Whether to show the kind field (alert vs signal toggle). Default: true. */
+  includeKindField?: boolean;
+  /** Whether to show the alert conditions section (delay, recovery). Default: true. */
+  includeAlertConditions?: boolean;
+  /** Content rendered before the standard form fields (inside the form column). */
+  prependContent?: React.ReactNode;
+  /** Override the default "Group Fields" label on the group-by selector. */
+  groupFieldLabel?: string;
   /** Whether to include YAML editor toggle (default: false). Requires services.application. */
   includeYaml?: boolean;
   /** Whether the form is in a loading/disabled state */
@@ -65,6 +75,11 @@ export const StandaloneRuleForm = ({
   layout,
   onSubmit,
   onSuccess,
+  includeQueryEditor = true,
+  includeKindField = true,
+  includeAlertConditions = true,
+  prependContent,
+  groupFieldLabel,
   includeYaml = false,
   isDisabled = false,
   isSubmitting = false,
@@ -124,6 +139,11 @@ export const StandaloneRuleForm = ({
         layout={layout}
         onSubmit={onSubmit}
         onSuccess={onSuccess}
+        includeQueryEditor={includeQueryEditor}
+        includeKindField={includeKindField}
+        includeAlertConditions={includeAlertConditions}
+        prependContent={prependContent}
+        groupFieldLabel={groupFieldLabel}
         includeYaml={includeYaml}
         isDisabled={isDisabled}
         isSubmitting={isSubmitting}

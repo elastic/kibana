@@ -108,6 +108,7 @@ export enum SecurityPageName {
   notes = 'notes',
   alertSummary = 'alert_summary',
   alertsV2 = 'alerts_v2',
+  rulesV2 = 'rules_v2',
   configurations = 'configurations',
   configurationsIntegrations = 'configurations-integrations',
   configurationsAiSettings = 'configurations-ai_settings',

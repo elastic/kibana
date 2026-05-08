@@ -19,6 +19,7 @@ import { siemReadinessLinks } from '../../siem_readiness/links';
 import type { AppLinkItems } from '../../common/links/types';
 import { indicatorsLinks } from '../../threat_intelligence/links';
 import { alertsV2Link } from '../../alerts_v2/links';
+import { rulesV2Link } from '../../rules_v2/links';
 import { alertDetectionsLinks, alertsLink, alertSummaryLink } from '../../detections/links';
 import { links as rulesLinks } from '../../rules/links';
 import { links as siemMigrationsLinks } from '../../siem_migrations/links';
@@ -36,6 +37,7 @@ export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLinks,
   alertsLink,
   alertsV2Link,
+  rulesV2Link,
   alertSummaryLink,
   attackDiscoveryLinks,
   findingsLinks,
@@ -78,6 +80,7 @@ export const getFilteredLinks = async (
       ? alertDetectionsLinks
       : alertsLink,
     alertsV2Link,
+    rulesV2Link,
     alertSummaryLink,
     attackDiscoveryLinks,
     findingsLinks,

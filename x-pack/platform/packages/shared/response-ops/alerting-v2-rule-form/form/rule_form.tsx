@@ -44,6 +44,14 @@ export interface RuleFormProps {
   onCancel?: () => void;
   /** Whether to include the ES|QL query editor (default: true) */
   includeQueryEditor?: boolean;
+  /** Whether to show the kind field (alert vs signal toggle). Default: true. */
+  includeKindField?: boolean;
+  /** Whether to show the alert conditions section (delay, recovery). Default: true. */
+  includeAlertConditions?: boolean;
+  /** Content rendered before the standard form fields (inside the form column). */
+  prependContent?: React.ReactNode;
+  /** Override the default "Group Fields" label on the group-by selector. */
+  groupFieldLabel?: string;
   /** Whether to include YAML editor toggle (default: false) */
   includeYaml?: boolean;
   isDisabled?: boolean;
@@ -69,6 +77,10 @@ const RuleFormContent = ({
   onSubmit: externalOnSubmit,
   onSuccess,
   includeQueryEditor = true,
+  includeKindField = true,
+  includeAlertConditions = true,
+  prependContent,
+  groupFieldLabel,
   includeYaml = false,
   isDisabled = false,
   isSubmitting: externalIsSubmitting = false,
@@ -195,7 +207,14 @@ const RuleFormContent = ({
           setYamlText={setYamlText}
         />
       ) : (
-        <GuiRuleForm onSubmit={onSubmit} includeQueryEditor={includeQueryEditor} />
+        <GuiRuleForm
+          onSubmit={onSubmit}
+          includeQueryEditor={includeQueryEditor}
+          includeKindField={includeKindField}
+          includeAlertConditions={includeAlertConditions}
+          prependContent={prependContent}
+          groupFieldLabel={groupFieldLabel}
+        />
       )}
 
       {includeSubmission && (

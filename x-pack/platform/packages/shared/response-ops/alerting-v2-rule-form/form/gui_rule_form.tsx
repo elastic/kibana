@@ -21,6 +21,14 @@ export interface GuiRuleFormProps {
   onSubmit: (values: FormValues) => void;
   /** Whether to include the ES|QL query editor (default: true) */
   includeQueryEditor?: boolean;
+  /** Whether to show the kind field (alert vs signal toggle). Default: true. */
+  includeKindField?: boolean;
+  /** Whether to show the alert conditions section (delay, recovery). Default: true. */
+  includeAlertConditions?: boolean;
+  /** Content rendered before the standard form fields (inside the form column). */
+  prependContent?: React.ReactNode;
+  /** Override the default "Group Fields" label on the group-by selector. */
+  groupFieldLabel?: string;
 }
 
 /**
@@ -30,25 +38,46 @@ export interface GuiRuleFormProps {
  * - Rule details (name, tags, description — no wrapper panel)
  * - Rule evaluation (full ES|QL query)
  * - Rule execution settings (schedule, lookback)
- * - Rule kind (alert vs monitor)
- * - Alert conditions (alert delay, recovery policy, recovery delay)
+ * - Rule kind (alert vs monitor) — hidden when `includeKindField` is false
+ * - Alert conditions (alert delay, recovery policy, recovery delay) — hidden when `includeAlertConditions` is false
  *
  * Requires a FormProvider context with FormValues type to be present in the component tree.
  */
-export const GuiRuleForm = ({ onSubmit, includeQueryEditor = true }: GuiRuleFormProps) => {
+export const GuiRuleForm = ({
+  onSubmit,
+  includeQueryEditor = true,
+  includeKindField = true,
+  includeAlertConditions = true,
+  prependContent,
+  groupFieldLabel,
+}: GuiRuleFormProps) => {
   const { handleSubmit } = useFormContext<FormValues>();
 
   return (
     <EuiForm id={RULE_FORM_ID} component="form" onSubmit={handleSubmit(onSubmit)}>
+      {prependContent && (
+        <>
+          {prependContent}
+          <EuiSpacer size="m" />
+        </>
+      )}
       <RuleDetailsFieldGroup />
       <EuiSpacer size="m" />
-      <ConditionFieldGroup includeBase={includeQueryEditor} />
+      <ConditionFieldGroup includeBase={includeQueryEditor} groupFieldLabel={groupFieldLabel} />
       <EuiSpacer size="m" />
       <RuleExecutionFieldGroup />
-      <EuiSpacer size="m" />
-      <KindField />
-      <EuiSpacer size="m" />
-      <AlertConditionsFieldGroup />
+      {includeKindField && (
+        <>
+          <EuiSpacer size="m" />
+          <KindField />
+        </>
+      )}
+      {includeAlertConditions && (
+        <>
+          <EuiSpacer size="m" />
+          <AlertConditionsFieldGroup />
+        </>
+      )}
       <EuiSpacer size="m" />
       <AttachmentRunbookFieldGroup />
     </EuiForm>
