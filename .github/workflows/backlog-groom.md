@@ -211,7 +211,7 @@ network:
 checkout:
   fetch-depth: 0
 safe-outputs:
-  staged: false
+  staged: true
   create-pull-request:
     max: 1
   noop:
