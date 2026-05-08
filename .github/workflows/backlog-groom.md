@@ -91,9 +91,8 @@ Follow the Kibana contribution guidelines:
 
 1. **Identify the root cause** — read the relevant code thoroughly. Do not guess.
 2. **Create or update your implementation** on branch `backlog-groom/issue-<issue_number>` (using the issue number from `<github-context>`).
-3. **Follow Kibana code style** as defined in [`AGENTS.md`](../../AGENTS.md) (see the *Code Style Guidelines* section).
-4. **Validate your changes** using the linting, type-checking, and testing commands documented in [`AGENTS.md`](../../AGENTS.md).
-5. **Open exactly one PR** using the `create-pull-request` safe output.
+3. **Validate your changes** — run linting, type-checking, and tests for affected code.
+4. **Open exactly one PR** using the `create-pull-request` safe output.
 
 ## Pull request contract
 
@@ -106,7 +105,7 @@ The linked pull request must:
 
 ## Guardrails
 
-Follow the *Contribution Hygiene* guidelines in [`AGENTS.md`](../../AGENTS.md). In addition, the following workflow-specific rules apply:
+Additional workflow-specific rules:
 
 - Do not re-check trigger eligibility or actor trust; pre-activation handled those.
 - Do not open a second PR for the same issue.
