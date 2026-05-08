@@ -83,7 +83,7 @@ steps:
           - name: start_onboarding
             type: workflow.executeAsync
             with:
-              workflow-id: "workflow-68c0af3c-dbfa-536b-bdda-dc598f389ab3"
+              workflow-id: "system-streams-ki-onboarding"
               inputs:
                 streamName: "{{ foreach.item.streamName }}"
                 featuresStart: "${{ steps.get_eligible.output.timeRange.from }}"

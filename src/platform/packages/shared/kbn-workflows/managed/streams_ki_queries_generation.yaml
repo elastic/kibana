@@ -1,0 +1,68 @@
+version: "1"
+name: ".streams-ki-queries-generation"
+enabled: true
+description: "Generates KI queries for a stream using LLM inference."
+tags:
+  - observability
+  - streams
+  - knowledge-indicators
+  - queries-generation
+settings:
+  timeout: "10m"
+  concurrency:
+    key: "streams-ki-queries-generation-{{ inputs.streamName }}"
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+inputs:
+  - name: streamName
+    type: string
+    required: true
+    description: "The name of the stream to generate queries for."
+  - name: connectorId
+    type: string
+    description: "Optional connector ID override. When omitted the connector is resolved via the Inference Feature Registry."
+  - name: maxExistingQueriesForContext
+    type: number
+    description: "Max number of existing queries to include as LLM context. When omitted the server-side default is used."
+steps:
+  - name: generate_queries
+    type: kibana.request
+    with:
+      method: POST
+      path: "/internal/streams/{{ inputs.streamName }}/queries/_generate"
+      use_server_info: true
+      headers:
+        x-elastic-internal-origin: "kibana"
+      body:
+        connectorId: "${{ inputs.connectorId }}"
+        maxExistingQueriesForContext: "${{ inputs.maxExistingQueriesForContext }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
+  - name: persist_queries
+    type: kibana.request
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
+    with:
+      method: POST
+      path: "/internal/streams/{{ inputs.streamName }}/queries/_persist"
+      use_server_info: true
+      headers:
+        x-elastic-internal-origin: "kibana"
+      body:
+        queries: "${{ steps.generate_queries.output.queries }}"
+  - name: output_result
+    type: workflow.output
+    with:
+      connectorId: "${{ steps.generate_queries.output.connectorId }}"
+      queries: "${{ steps.generate_queries.output.queries }}"
+      tokensUsed: "${{ steps.generate_queries.output.tokensUsed }}"
+      persistedQueries: "${{ steps.persist_queries.output.persistedQueries }}"
+      skippedQueries: "${{ steps.persist_queries.output.skippedQueries }}"

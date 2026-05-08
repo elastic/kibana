@@ -7,12 +7,12 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { OnboardingStep } from '@kbn/streams-schema';
+import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { getStreamsLocation } from '../../../../common/get_streams_location/get_streams_location';
 import {
   WorkflowExecutionClient,
   type WorkflowsManagementApi,
 } from '../../../lib/workflows/workflow_execution_client';
-import { KI_ONBOARDING_WORKFLOW_UUID } from '../../../../common/constants';
 
 const DEFAULT_LOOKBACK_MS = 24 * 60 * 60 * 1000;
 
@@ -40,7 +40,10 @@ export async function startKiIdentificationToolHandler({
 }: StartKiIdentificationHandlerParams): Promise<StartKiIdentificationHandlerResult> {
   const now = Date.now();
 
-  const client = new WorkflowExecutionClient(workflowsManagementApi, KI_ONBOARDING_WORKFLOW_UUID);
+  const client = new WorkflowExecutionClient(
+    workflowsManagementApi,
+    STREAMS_KI_ONBOARDING_WORKFLOW_ID
+  );
 
   const skipFeatures = !steps.includes('features_identification' as OnboardingStep);
   const skipQueries = !steps.includes('queries_generation' as OnboardingStep);

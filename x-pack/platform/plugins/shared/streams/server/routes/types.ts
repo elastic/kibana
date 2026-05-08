@@ -14,6 +14,7 @@ import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository'
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
+import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { ContentClient } from '../lib/content/content_client';
 import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
 import type { QueryClient } from '../lib/streams/assets/query/query_client';
@@ -64,6 +65,7 @@ export interface RouteDependencies {
   patternExtractionService: IPatternExtractionService;
   continuousKiExtractionWorkflowService?: ContinuousKiExtractionWorkflowService;
   workflowsManagementApi?: WorkflowsManagementApi;
+  getManagedWorkflowsClient?: () => Promise<PluginScopedManagedWorkflowsApi>;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;

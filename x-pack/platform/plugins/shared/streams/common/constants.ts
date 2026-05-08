@@ -67,7 +67,6 @@ export const STREAMS_SETTINGS_DOCUMENT_ID = 'kibana_streams_settings';
 
 // Workflow identity
 export const CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID = 'workflow-ad83678a-dba7-55d1-8caa-3010f6f46b81';
-export const KI_ONBOARDING_WORKFLOW_UUID = 'workflow-68c0af3c-dbfa-536b-bdda-dc598f389ab3';
 
 // Scheduling: the workflow runs every COORDINATOR_INTERVAL_MINUTES with a
 // timeout 1 minute shorter to avoid overlapping with the next run.

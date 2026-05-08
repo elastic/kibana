@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  COORDINATOR_INTERVAL_MINUTES,
-  MAX_SCHEDULED_STREAMS,
-  KI_ONBOARDING_WORKFLOW_UUID,
-} from '../../../common/constants';
+import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { COORDINATOR_INTERVAL_MINUTES, MAX_SCHEDULED_STREAMS } from '../../../common/constants';
 import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
 
 const assertYamlContains = (expected: string) => {
@@ -59,7 +56,7 @@ describe('continuous_extraction_workflow.yaml stays in sync with constants', () 
 
   it('launches the onboarding subworkflow asynchronously by UUID with skipQueries', () => {
     assertYamlContains('type: workflow.executeAsync');
-    assertYamlContains(`workflow-id: "${KI_ONBOARDING_WORKFLOW_UUID}"`);
+    assertYamlContains(`workflow-id: "${STREAMS_KI_ONBOARDING_WORKFLOW_ID}"`);
     assertYamlContains('skipQueries: true');
   });
 

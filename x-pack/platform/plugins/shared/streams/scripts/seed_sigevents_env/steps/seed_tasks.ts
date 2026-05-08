@@ -8,10 +8,10 @@
 import { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { LogsManifest } from '@kbn/synthtrace/src/lib/service_graph_logs/types';
+import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { SeedContext, SeedScenario, SeededQuery } from '../types';
 import { deterministicId } from '../types';
 import { buildFeaturePayloads, buildInsightPayloads } from '../lib/builders';
-import { KI_ONBOARDING_WORKFLOW_UUID } from '../../../common/constants';
 
 const INSIGHTS_TASK_TYPE = 'streams_insights_discovery';
 
@@ -97,7 +97,7 @@ function buildWorkflowExecutionDoc(
   return {
     id: executionId,
     spaceId: 'default',
-    workflowId: KI_ONBOARDING_WORKFLOW_UUID,
+    workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
     status: 'completed',
     isTestRun: false,
     createdAt: ctx.generatedAt,

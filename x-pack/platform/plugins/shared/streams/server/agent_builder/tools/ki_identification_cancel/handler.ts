@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
   WorkflowExecutionClient,
   type WorkflowsManagementApi,
 } from '../../../lib/workflows/workflow_execution_client';
-import { KI_ONBOARDING_WORKFLOW_UUID } from '../../../../common/constants';
 
 interface CancelKiIdentificationHandlerParams {
   stream_name: string;
@@ -25,7 +25,10 @@ export async function cancelKiIdentificationToolHandler({
   stream_name: streamName,
   workflowsManagementApi,
 }: CancelKiIdentificationHandlerParams): Promise<CancelKiIdentificationHandlerResult> {
-  const client = new WorkflowExecutionClient(workflowsManagementApi, KI_ONBOARDING_WORKFLOW_UUID);
+  const client = new WorkflowExecutionClient(
+    workflowsManagementApi,
+    STREAMS_KI_ONBOARDING_WORKFLOW_ID
+  );
 
   await client.cancelExecution(streamName);
 

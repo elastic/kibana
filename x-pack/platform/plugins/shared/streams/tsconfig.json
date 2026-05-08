@@ -92,6 +92,7 @@
     "@kbn/dev-cli-runner",
     "@kbn/core-security-server",
     "@kbn/workflows-management-plugin",
+    "@kbn/workflows-extensions",
     "@kbn/workflows",
     "@kbn/agent-builder-plugin"
   ]

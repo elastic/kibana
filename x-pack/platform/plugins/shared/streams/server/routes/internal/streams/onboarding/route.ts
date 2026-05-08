@@ -7,10 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import { OnboardingStep } from '@kbn/streams-schema';
-import {
-  STREAMS_API_PRIVILEGES,
-  KI_ONBOARDING_WORKFLOW_UUID,
-} from '../../../../../common/constants';
+import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { getSpaceIdFromPath } from '@kbn/spaces-utils';
+import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import {
@@ -61,25 +61,27 @@ const onboardingRunRoute = createServerRoute({
     request,
     getScopedClients,
     server,
-    workflowsManagementApi,
+    getManagedWorkflowsClient,
   }): Promise<WorkflowExecutionResult> => {
     const { licensing, uiSettingsClient } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    if (!workflowsManagementApi) {
-      throw new Error('Workflows management is not available');
+    if (!getManagedWorkflowsClient) {
+      throw new Error('Managed workflows client is not available');
     }
 
+    const managed = await getManagedWorkflowsClient();
     const { streamName } = params.path;
     const { from, to, steps, connectors } = params.body;
-
-    const client = new WorkflowExecutionClient(workflowsManagementApi, KI_ONBOARDING_WORKFLOW_UUID);
 
     const skipFeatures = !steps.includes(OnboardingStep.FeaturesIdentification);
     const skipQueries = !steps.includes(OnboardingStep.QueriesGeneration);
 
-    return client.run(
-      {
+    const { spaceId = DEFAULT_SPACE_ID } = getSpaceIdFromPath(request.url.pathname);
+
+    const executionId = await managed.execute(request, STREAMS_KI_ONBOARDING_WORKFLOW_ID, {
+      spaceId,
+      inputs: {
         streamName,
         featuresStart: from,
         featuresEnd: to,
@@ -88,8 +90,10 @@ const onboardingRunRoute = createServerRoute({
         ...(connectors?.features && { featuresConnectorId: connectors.features }),
         ...(connectors?.queries && { queriesConnectorId: connectors.queries }),
       },
-      request
-    );
+      triggeredBy: 'manual',
+    });
+
+    return { executionId, status: 'pending' };
   },
 });
 
@@ -123,7 +127,10 @@ const onboardingExecutionRoute = createServerRoute({
     }
 
     const { streamName } = params.path;
-    const client = new WorkflowExecutionClient(workflowsManagementApi, KI_ONBOARDING_WORKFLOW_UUID);
+    const client = new WorkflowExecutionClient(
+      workflowsManagementApi,
+      STREAMS_KI_ONBOARDING_WORKFLOW_ID
+    );
 
     return client.getLatestExecution(streamName);
   },
@@ -160,7 +167,10 @@ const onboardingCancelRoute = createServerRoute({
     }
 
     const { streamName } = params.path;
-    const client = new WorkflowExecutionClient(workflowsManagementApi, KI_ONBOARDING_WORKFLOW_UUID);
+    const client = new WorkflowExecutionClient(
+      workflowsManagementApi,
+      STREAMS_KI_ONBOARDING_WORKFLOW_ID
+    );
 
     await client.cancelExecution(streamName);
 

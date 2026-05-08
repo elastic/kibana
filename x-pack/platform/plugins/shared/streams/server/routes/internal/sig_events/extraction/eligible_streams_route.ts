@@ -15,6 +15,7 @@ import {
   Streams,
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
 } from '@kbn/streams-schema';
+import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import {
@@ -26,7 +27,6 @@ import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { classifyStreams, parseExcludePatterns, type StreamCandidate } from './classify_streams';
 import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 import { shouldIdentifyFeaturesBatch } from '../../../../lib/sig_events/features/should_identify_features';
-import { KI_ONBOARDING_WORKFLOW_UUID } from '../../../../../common/constants';
 import { WorkflowExecutionClient } from '../../../../lib/workflows/workflow_execution_client';
 
 const DEFAULT_LOOKBACK_HOURS = 24;
@@ -120,7 +120,7 @@ const eligibleStreamsRoute = createServerRoute({
     const resolvedExcludedPatterns = query.excludedStreamPatterns ?? excludedStreamPatterns ?? '';
 
     const onboardingClient = workflowsManagementApi
-      ? new WorkflowExecutionClient(workflowsManagementApi, KI_ONBOARDING_WORKFLOW_UUID)
+      ? new WorkflowExecutionClient(workflowsManagementApi, STREAMS_KI_ONBOARDING_WORKFLOW_ID)
       : undefined;
 
     const [connectorId, allStreams, featureClient, runningStreamNames] = await Promise.all([

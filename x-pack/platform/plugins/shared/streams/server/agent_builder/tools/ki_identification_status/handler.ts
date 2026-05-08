@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
   WorkflowExecutionClient,
   type WorkflowsManagementApi,
   type WorkflowExecutionResult,
 } from '../../../lib/workflows/workflow_execution_client';
-import { KI_ONBOARDING_WORKFLOW_UUID } from '../../../../common/constants';
 
 interface GetKiIdentificationStatusHandlerParams {
   streamName: string;
@@ -23,7 +23,10 @@ export async function getKiIdentificationStatusToolHandler({
 }: GetKiIdentificationStatusHandlerParams): Promise<
   WorkflowExecutionResult & { stream_name: string }
 > {
-  const client = new WorkflowExecutionClient(workflowsManagementApi, KI_ONBOARDING_WORKFLOW_UUID);
+  const client = new WorkflowExecutionClient(
+    workflowsManagementApi,
+    STREAMS_KI_ONBOARDING_WORKFLOW_ID
+  );
   const execution = await client.getLatestExecution(streamName);
 
   return {

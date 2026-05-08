@@ -9,10 +9,8 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
-import {
-  CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID,
-  KI_ONBOARDING_WORKFLOW_UUID,
-} from '../../../common/constants';
+import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import { CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID } from '../../../common/constants';
 import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
 import { pollUntil } from './poll_until';
 
@@ -40,7 +38,7 @@ export const createContinuousKiExtractionWorkflowService = (
   const cancelChildOnboardingWorkflows = async () => {
     const { results } = await managementApi.getWorkflowExecutions(
       {
-        workflowId: KI_ONBOARDING_WORKFLOW_UUID,
+        workflowId: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
         statuses: [...NonTerminalExecutionStatuses],
         omitStepRuns: true,
         size: 50,

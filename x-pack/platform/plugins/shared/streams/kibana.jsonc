@@ -36,6 +36,7 @@
       "globalSearch",
       "searchInferenceEndpoints",
       "spaces",
+      "workflowsExtensions",
       "workflowsManagement"
     ],
     "requiredBundles": [],

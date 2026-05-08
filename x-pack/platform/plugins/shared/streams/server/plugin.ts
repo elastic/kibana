@@ -25,6 +25,12 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
+import {
+  STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
+  STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+  STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
+import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { StreamsConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
@@ -96,6 +102,9 @@ export class StreamsPlugin
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
+  private managedWorkflowsClientPromise?: Promise<
+    import('@kbn/workflows/server/types').PluginScopedManagedWorkflowsApi
+  >;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -273,6 +282,10 @@ export class StreamsPlugin
         });
     }
 
+    if (plugins.workflowsExtensions) {
+      plugins.workflowsExtensions.registerManagedWorkflowOwner('streams');
+    }
+
     let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;
 
     if (plugins.workflowsManagement) {
@@ -359,6 +372,12 @@ export class StreamsPlugin
         getScopedClients,
         continuousKiExtractionWorkflowService,
         workflowsManagementApi: plugins.workflowsManagement?.management,
+        getManagedWorkflowsClient: () => {
+          if (!this.managedWorkflowsClientPromise) {
+            return Promise.reject(new Error('Managed workflows client is not available'));
+          }
+          return this.managedWorkflowsClientPromise;
+        },
       },
       core,
       logger: this.logger,
@@ -541,6 +560,25 @@ export class StreamsPlugin
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
+
+    if (plugins.workflowsExtensions) {
+      this.managedWorkflowsClientPromise = plugins.workflowsExtensions
+        .initManagedWorkflowsClient('streams')
+        .then(async (managed) => {
+          const installOptions = { spaceId: GLOBAL_WORKFLOW_SPACE_ID };
+          await Promise.all([
+            managed.install(STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID, installOptions),
+            managed.install(STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID, installOptions),
+            managed.install(STREAMS_KI_ONBOARDING_WORKFLOW_ID, installOptions),
+          ]);
+          this.logger.info('Managed KI workflows installed successfully');
+          return managed;
+        })
+        .catch((err) => {
+          this.logger.error(`Failed to install managed KI workflows: ${(err as Error).message}`);
+          throw err;
+        });
+    }
 
     return {};
   }
