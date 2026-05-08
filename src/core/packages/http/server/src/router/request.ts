@@ -223,7 +223,12 @@ export interface KibanaRequest<
   readonly spaceId: SpaceId;
 
   /**
-   * URL rewritten in onPreRouting request interceptor.
+   * The original request URL, captured before any rewrites by Core's onRequest
+   * handler (basePath strip, space prefix strip) or by `onPreRouting` interceptors
+   * via `toolkit.rewriteUrl`. Undefined when no rewrite occurred.
+   *
+   * Despite the name, this holds the URL as it was received — not the rewritten
+   * URL. The current (post-rewrite) URL is always {@link KibanaRequest.url}.
    */
   readonly rewrittenUrl?: URL;
 
