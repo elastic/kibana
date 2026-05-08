@@ -21,6 +21,8 @@ import { NumberField } from './number_field';
 import { TextField } from './text_field';
 import { SectionField } from './section_field';
 import { RangeField } from './range_field';
+import { PaginationToggleField } from './pagination_toggle_field';
+import { RowHeightField } from './row_height_field';
 
 interface SchemaFormFieldProps {
   descriptor: FieldDescriptor;
@@ -32,8 +34,6 @@ interface SchemaFormFieldProps {
 // the closest generic renderer based on the schema type.
 const widgetToBaseType: Record<string, string> = {
   buttonGroup: 'select',
-  rowHeight: 'section',
-  paginationToggle: 'toggle',
 };
 
 export const SchemaFormField = ({ descriptor, control }: SchemaFormFieldProps) => {
@@ -42,6 +42,10 @@ export const SchemaFormField = ({ descriptor, control }: SchemaFormFieldProps) =
   const resolved = widgetToBaseType[widget] ?? widget;
 
   switch (resolved) {
+    case 'rowHeight':
+      return <RowHeightField descriptor={descriptor} control={control} />;
+    case 'paginationToggle':
+      return <PaginationToggleField descriptor={descriptor} control={control} />;
     case 'range':
       return <RangeField descriptor={descriptor} control={control} />;
     case 'toggle':
