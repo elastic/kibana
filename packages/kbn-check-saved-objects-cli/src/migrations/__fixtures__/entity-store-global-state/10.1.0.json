@@ -13,8 +13,7 @@
         "docsLimit": 10000,
         "maxLogsPerPage": 40000,
         "timeout": "59s",
-        "frequency": "1m",
-        "maxTimeWindowSize": "15m"
+        "frequency": "1m"
       }
     }
   ],
@@ -32,8 +31,7 @@
         "docsLimit": 10000,
         "maxLogsPerPage": 40000,
         "timeout": "59s",
-        "frequency": "1m",
-        "maxTimeWindowSize": "15m"
+        "frequency": "1m"
       }
     }
   ]

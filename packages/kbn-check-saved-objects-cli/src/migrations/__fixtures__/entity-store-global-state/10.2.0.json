@@ -30,7 +30,8 @@
         "docsLimit": 10000,
         "timeout": "30s",
         "frequency": "1h",
-        "excludedIndexPatterns": []
+        "excludedIndexPatterns": [],
+        "maxTimeWindowSize": "15m"
       }
     }
   ]
