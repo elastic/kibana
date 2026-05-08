@@ -1,0 +1,15 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["**/*"],
+  "kbn_references": [
+    "@kbn/synthtrace-client",
+    "@kbn/synthtrace",
+    "@kbn/scout-oblt",
+    "@kbn/scout-synthtrace",
+    "@kbn/apm-types"
+  ],
+  "exclude": ["target/**/*"]
+}

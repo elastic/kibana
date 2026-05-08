@@ -59,6 +59,18 @@ export class MetricsTab extends ServiceDetailsTab {
     return this.panels.getPanelsWithNoResults();
   }
 
+  getPanelByTitle(title: string): Locator {
+    return this.panels.getPanelByTitle(title);
+  }
+
+  async getPanelTitles(): Promise<string[]> {
+    return this.panels.getPanelTitles();
+  }
+
+  async getLegendLabels(panelTitle: string): Promise<string[]> {
+    return this.panels.getLegendLabels(panelTitle);
+  }
+
   async waitForAllPanelsToRender(): Promise<void> {
     await this.page.getByTestId('querySubmitButton').waitFor({ timeout: EXTENDED_TIMEOUT });
     await this.panels.waitForAllPanelsToRender(EXTENDED_TIMEOUT);

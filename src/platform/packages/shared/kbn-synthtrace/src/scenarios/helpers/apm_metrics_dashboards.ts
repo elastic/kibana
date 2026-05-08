@@ -44,6 +44,27 @@ export const APM_METRICS_SERVICE_NAMES = {
   RUST: 'metrics-rust',
 } as const;
 
+/*
+ * Each *_METRICS map below is the source-of-truth for the values seeded into
+ * Elasticsearch by the synthtrace scenario / Scout fixture, AND the values
+ * Scout tests assert against. When tweaking a number here, update the
+ * corresponding assertion in `metrics_dashboards.spec.ts` /
+ * `metrics_non_dashboard.spec.ts`.
+ *
+ * Constant -> dashboard files it powers:
+ *   SYSTEM_METRICS                 -> CPU / System Memory panels in every classic_apm dashboard
+ *   JAVA_APM_METRICS               -> dashboards/java.json
+ *   NODEJS_APM_METRICS             -> dashboards/nodejs.json
+ *   OTEL_JAVA_*_METRICS (x2)       -> dashboards/opentelemetry_java.json
+ *   OTEL_NODEJS_METRICS            -> opentelemetry_nodejs.json + otel_native-{edot,otel_other}-nodejs.json
+ *   OTEL_DOTNET_METRICS            -> opentelemetry_dotnet.json + opentelemetry_dotnet_lte_v8.json
+ *   OTEL_NATIVE_EDOT_JAVA_METRICS  -> otel_native-edot-java.json
+ *   OTEL_NATIVE_OTHER_JAVA_METRICS -> otel_native-otel_other-java.json
+ *   OTEL_PYTHON_METRICS            -> otel_native-{edot,otel_other}-python.json
+ *   OTEL_GO_METRICS                -> otel_native-otel_other-go.json
+ *   RUBY_JRUBY_METRICS             -> JVM table on the metrics tab (non-dashboard variation)
+ */
+
 export const SYSTEM_METRICS: Record<string, unknown> = {
   'system.cpu.total.norm.pct': 0.4,
   'system.process.cpu.total.norm.pct': 0.2,
@@ -52,7 +73,7 @@ export const SYSTEM_METRICS: Record<string, unknown> = {
   'system.process.memory.rss.bytes': 500_000_000,
 };
 
-const JAVA_APM_METRICS: Record<string, unknown> = {
+export const JAVA_APM_METRICS: Record<string, unknown> = {
   ...SYSTEM_METRICS,
   'jvm.memory.heap.used': 300_000_000,
   'jvm.memory.heap.max': 512_000_000,
@@ -69,7 +90,7 @@ const JAVA_APM_METRICS: Record<string, unknown> = {
   'labels.name': 'G1 Old Gen',
 };
 
-const NODEJS_APM_METRICS: Record<string, unknown> = {
+export const NODEJS_APM_METRICS: Record<string, unknown> = {
   ...SYSTEM_METRICS,
   'nodejs.eventloop.delay.avg.ms': 1.5,
   'nodejs.handles.active': 12,
@@ -80,7 +101,7 @@ const NODEJS_APM_METRICS: Record<string, unknown> = {
   'nodejs.memory.arrayBuffers.bytes': 2_000_000,
 };
 
-const OTEL_JAVA_HEAP_METRICS: Record<string, unknown> = {
+export const OTEL_JAVA_HEAP_METRICS: Record<string, unknown> = {
   'jvm.cpu.recent_utilization': 0.3,
   'jvm.system.cpu.utilization': 0.5,
   'jvm.memory.committed': 400_000_000,
@@ -91,7 +112,7 @@ const OTEL_JAVA_HEAP_METRICS: Record<string, unknown> = {
   'labels.jvm_memory_type': 'heap',
 };
 
-const OTEL_JAVA_NON_HEAP_METRICS: Record<string, unknown> = {
+export const OTEL_JAVA_NON_HEAP_METRICS: Record<string, unknown> = {
   'jvm.cpu.recent_utilization': 0.3,
   'jvm.system.cpu.utilization': 0.5,
   'jvm.memory.committed': 120_000_000,
@@ -102,7 +123,7 @@ const OTEL_JAVA_NON_HEAP_METRICS: Record<string, unknown> = {
   'labels.jvm_memory_type': 'non_heap',
 };
 
-const OTEL_NODEJS_METRICS: Record<string, unknown> = {
+export const OTEL_NODEJS_METRICS: Record<string, unknown> = {
   'nodejs.eventloop.delay.p50': 1.2,
   'nodejs.eventloop.delay.p90': 3.5,
   'nodejs.eventloop.utilization': 0.15,
@@ -110,14 +131,14 @@ const OTEL_NODEJS_METRICS: Record<string, unknown> = {
   'process.memory.usage': 100_000_000,
 };
 
-const OTEL_DOTNET_METRICS: Record<string, unknown> = {
+export const OTEL_DOTNET_METRICS: Record<string, unknown> = {
   'process.memory.usage': 150_000_000,
   'process.runtime.dotnet.gc.collections.count': 25,
   'process.runtime.dotnet.gc.heap.size': 80_000_000,
   'process.runtime.dotnet.thread_pool.threads.count': 10,
 };
 
-const OTEL_NATIVE_EDOT_JAVA_METRICS: Record<string, unknown> = {
+export const OTEL_NATIVE_EDOT_JAVA_METRICS: Record<string, unknown> = {
   'jvm.cpu.recent_utilization': 0.3,
   'jvm.system.cpu.utilization': 0.5,
   'jvm.memory.used': 300_000_000,
@@ -134,7 +155,7 @@ const OTEL_NATIVE_EDOT_JAVA_METRICS: Record<string, unknown> = {
   'jvm.gc.name': 'G1 Old Generation',
 };
 
-const OTEL_NATIVE_OTHER_JAVA_METRICS: Record<string, unknown> = {
+export const OTEL_NATIVE_OTHER_JAVA_METRICS: Record<string, unknown> = {
   'jvm.cpu.recent_utilization': 0.3,
   'jvm.memory.used': 300_000_000,
   'jvm.memory.limit': 512_000_000,
@@ -148,20 +169,33 @@ const OTEL_NATIVE_OTHER_JAVA_METRICS: Record<string, unknown> = {
   'jvm.class.count': 8500,
 };
 
-const OTEL_PYTHON_METRICS: Record<string, unknown> = {
+export const OTEL_PYTHON_METRICS: Record<string, unknown> = {
   'cpython.gc.collected_objects': 500,
   'cpython.gc.collections': 20,
   'cpython.gc.uncollectable_objects': 0,
   'process.runtime.cpython.memory': 80_000_000,
+  // Memory usage panel on otel_native-otel_other-python.json queries the
+  // metrics-prefixed variant of the same field, so we seed both.
+  'metrics.process.runtime.cpython.memory': 80_000_000,
 };
 
-const OTEL_GO_METRICS: Record<string, unknown> = {
+export const OTEL_GO_METRICS: Record<string, unknown> = {
   'go.goroutine.count': 50,
   'go.memory.allocated': 30_000_000,
   'go.memory.allocations': 100_000,
   'go.memory.gc.goal': 60_000_000,
   'go.memory.used': 45_000_000,
   'go.processor.limit': 8,
+};
+
+export const RUBY_JRUBY_METRICS: Record<string, unknown> = {
+  ...SYSTEM_METRICS,
+  'jvm.memory.heap.used': 200_000_000,
+  'jvm.memory.heap.max': 512_000_000,
+  'jvm.memory.non_heap.used': 80_000_000,
+  'jvm.thread.count': 30,
+  'jvm.gc.time': 100,
+  'jvm.gc.count': 5,
 };
 
 /**
@@ -290,15 +324,7 @@ export const APM_METRICS_NON_DASHBOARD_SERVICES: ApmMetricsServiceConfig[] = [
     name: APM_METRICS_SERVICE_NAMES.RUBY_JRUBY,
     agentName: 'ruby',
     runtimeName: 'jruby',
-    extraMetrics: {
-      ...SYSTEM_METRICS,
-      'jvm.memory.heap.used': 200_000_000,
-      'jvm.memory.heap.max': 512_000_000,
-      'jvm.memory.non_heap.used': 80_000_000,
-      'jvm.thread.count': 30,
-      'jvm.gc.time': 100,
-      'jvm.gc.count': 5,
-    },
+    extraMetrics: RUBY_JRUBY_METRICS,
   },
   {
     name: APM_METRICS_SERVICE_NAMES.GO_CLASSIC,
@@ -347,10 +373,11 @@ export const createMetricsServiceInstance = (
   return { instance, config };
 };
 
-const BASE_METRICS: Record<string, unknown> = {
-  'system.cpu.total.norm.pct': 0.4,
-  'system.memory.actual.free': 2_000_000_000,
-  'system.memory.total': 8_000_000_000,
+const extraMetricFieldSets = (
+  extraMetrics: ApmMetricsServiceConfig['extraMetrics']
+): Array<Record<string, unknown>> => {
+  if (!extraMetrics) return [{}];
+  return Array.isArray(extraMetrics) ? extraMetrics : [extraMetrics];
 };
 
 /**
@@ -361,16 +388,9 @@ export const generateAppMetrics = (
   instance: Instance,
   config: ApmMetricsServiceConfig,
   timestamp: number
-) => {
-  const extraList = Array.isArray(config.extraMetrics)
-    ? config.extraMetrics
-    : config.extraMetrics
-    ? [config.extraMetrics]
-    : [{}];
-
-  return extraList.map((extra) => {
-    const metricset = instance.appMetrics(BASE_METRICS).timestamp(timestamp);
-    Object.assign(metricset.fields, extra);
+) =>
+  extraMetricFieldSets(config.extraMetrics).map((extraFields) => {
+    const metricset = instance.appMetrics(SYSTEM_METRICS).timestamp(timestamp);
+    metricset.fields = { ...metricset.fields, ...extraFields };
     return metricset;
   });
-};

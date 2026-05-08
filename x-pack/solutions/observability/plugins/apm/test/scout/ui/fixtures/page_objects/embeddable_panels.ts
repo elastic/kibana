@@ -12,6 +12,9 @@ const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
 const EMBEDDABLE_PANEL_SELECTOR = '[data-test-subj="embeddablePanel"]';
 const EMBEDDABLE_ERROR_SELECTOR = '[data-test-subj="embeddableError"]';
 const EMPTY_PLACEHOLDER_SELECTOR = '[data-test-subj="emptyPlaceholder"]';
+const PANEL_HEADING_SELECTOR = '[data-test-subj^="embeddablePanelHeading-"]';
+const PANEL_TITLE_SELECTOR = '[data-test-subj="embeddablePanelTitle"]';
+const LEGEND_ITEM_LABEL_SELECTOR = '.echLegendItem__label';
 
 export class EmbeddablePanels {
   constructor(private readonly page: ScoutPage, private readonly root?: Locator) {}
@@ -34,6 +37,28 @@ export class EmbeddablePanels {
 
   getPanelsWithNoResults(): Locator {
     return this.getEmbeddablePanels().locator(EMPTY_PLACEHOLDER_SELECTOR);
+  }
+
+  getPanelByTitle(title: string): Locator {
+    const slug = title.replace(/\s/g, '');
+    return this.getEmbeddablePanels().filter({
+      has: this.page.locator(`[data-test-subj="embeddablePanelHeading-${slug}"]`),
+    });
+  }
+
+  async getPanelTitles(): Promise<string[]> {
+    // `embeddablePanelTitle` wraps just the visible title text (no
+    // visually-hidden "Panel: " prefix), so reading its inner text gives us
+    // a clean, deterministic per-panel title.
+    const titles = await this.getEmbeddablePanels().locator(PANEL_TITLE_SELECTOR).allInnerTexts();
+    return titles.map((title) => title.trim()).filter((title) => title.length > 0);
+  }
+
+  async getLegendLabels(panelTitle: string): Promise<string[]> {
+    const labels = await this.getPanelByTitle(panelTitle)
+      .locator(LEGEND_ITEM_LABEL_SELECTOR)
+      .allInnerTexts();
+    return labels.map((label) => label.trim()).filter((label) => label.length > 0);
   }
 
   async waitForAllPanelsToRender(timeout = 30_000): Promise<void> {
