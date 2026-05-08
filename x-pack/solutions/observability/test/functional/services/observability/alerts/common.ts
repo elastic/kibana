@@ -318,6 +318,12 @@ export function ObservabilityAlertsCommonProvider({
 
   // Date picker
   const getTimeRange = async () => {
+    if (await testSubjects.exists('dateRangePickerControlButton', { timeout: 2000 })) {
+      // New DateRangePicker exposes the displayed range via the button's `value`
+      // attribute (e.g. "Last 10 days" or "Feb 3, 2016, 19:00:00 → ...").
+      return (await testSubjects.getAttribute('dateRangePickerControlButton', 'value')) ?? '';
+    }
+
     const isAbsoluteRange = await testSubjects.exists('superDatePickerstartDatePopoverButton');
 
     if (isAbsoluteRange) {
