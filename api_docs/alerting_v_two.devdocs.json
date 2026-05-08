@@ -187,7 +187,7 @@
           "ContainerModule"
         ],
         "path": "x-pack/platform/plugins/shared/alerting_v2/public/index.ts",
-        "lineNumber": 37,
+        "lineNumber": 39,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -207,7 +207,7 @@
         "label": "AlertingServerStart",
         "description": [],
         "path": "x-pack/platform/plugins/shared/alerting_v2/server/types.ts",
-        "lineNumber": 34,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -233,7 +233,7 @@
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/alerting_v2/server/types.ts",
-            "lineNumber": 35,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -250,10 +250,75 @@
                   "<unknown, unknown, unknown, any>"
                 ],
                 "path": "x-pack/platform/plugins/shared/alerting_v2/server/types.ts",
-                "lineNumber": 35,
+                "lineNumber": 39,
                 "columnNumber": 29,
                 "deprecated": false,
                 "docsReferencedTypeName": "KibanaRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "alertingVTwo",
+            "id": "def-server.AlertingServerStart.getRulesClientWithRequestInSpace",
+            "type": "Function",
+            "tags": [],
+            "label": "getRulesClientWithRequestInSpace",
+            "description": [],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, spaceId: string) => Promise<",
+              {
+                "pluginId": "alertingVTwo",
+                "scope": "server",
+                "docId": "kibAlertingVTwoPluginApi",
+                "section": "def-server.RulesClientApi",
+                "text": "RulesClientApi"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting_v2/server/types.ts",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "alertingVTwo",
+                "id": "def-server.AlertingServerStart.getRulesClientWithRequestInSpace.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "x-pack/platform/plugins/shared/alerting_v2/server/types.ts",
+                "lineNumber": 41,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "alertingVTwo",
+                "id": "def-server.AlertingServerStart.getRulesClientWithRequestInSpace.$2",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/alerting_v2/server/types.ts",
+                "lineNumber": 42,
+                "columnNumber": 5,
+                "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -304,7 +369,7 @@
           ") => Promise<{ items: { kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; id: string; enabled: boolean; createdBy: string | null; createdAt: string; updatedBy: string | null; updatedAt: string; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }[]; total: number; page: number; perPage: number; }>; }"
         ],
         "path": "x-pack/platform/plugins/shared/alerting_v2/server/types.ts",
-        "lineNumber": 30,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
