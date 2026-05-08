@@ -20,7 +20,7 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import type { VisualizationSavedObject } from '../../common/content_management';
-import { checkForDuplicateTitle, saveWithConfirmation } from './saved_objects_utils';
+import { saveWithConfirmation } from './saved_objects_utils';
 import type { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type {
   VisSavedObject,
@@ -299,12 +299,7 @@ export async function getSavedVisualization(
 export async function saveVisualization(
   savedObject: ISavedVis &
     Pick<VisSavedObject, 'displayName' | 'lastSavedTitle' | 'searchSource' | 'tags' | 'version'>,
-  {
-    confirmOverwrite = false,
-    isTitleDuplicateConfirmed = false,
-    onTitleDuplicate,
-    copyOnSave = false,
-  }: SaveVisOptions,
+  { confirmOverwrite = false, copyOnSave = false }: SaveVisOptions,
   services: StartServices & {
     savedObjectsTagging?: SavedObjectsTaggingApi;
   },
@@ -364,18 +359,6 @@ export async function saveVisualization(
   }
 
   try {
-    if (onTitleDuplicate) {
-      // Only checks dups if onTitleDuplicate is passed.
-      // The save action is done from multiple places. In some cases like the embeddable,
-      // the title dup check is done before save is called and in other places we need to check.
-      await checkForDuplicateTitle(
-        savedObject,
-        copyOnSave,
-        isTitleDuplicateConfirmed,
-        onTitleDuplicate
-      );
-    }
-
     const resp = confirmOverwrite
       ? await saveWithConfirmation(
           attributes,

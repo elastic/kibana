@@ -44,3 +44,4 @@ If you want implementation detail for one subsystem, continue with:
 - Notification matching, grouping, throttling, or delivery: start in [`server/lib/dispatcher/README.md`](server/lib/dispatcher/README.md)
 - Document shape or ES|QL views: start in [`server/resources/README.md`](server/resources/README.md)
 - API shape or saved object contracts: inspect `server/routes/` and `server/saved_objects/` together with the relevant subsystem docs
+- Workflow triggers (workflows_extensions registration, server + public wiring): start in [`common/workflows_extensions/README.md`](common/workflows_extensions/README.md)

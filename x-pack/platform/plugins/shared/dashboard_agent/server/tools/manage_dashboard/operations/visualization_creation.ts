@@ -12,6 +12,7 @@ import type { VisualizationPanelInput } from './panel_kinds';
 
 type ResolvedVisualizationPanel = Awaited<ReturnType<ResolveVisualizationConfig>>;
 export type VisualizationCreationOperationType = 'add_section' | 'add_panels';
+
 export type VisualizationCreationRequest =
   | {
       operationType: 'add_section';

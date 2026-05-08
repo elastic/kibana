@@ -372,6 +372,13 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
+  /**
+   * When true, the alerting framework records change history events for this
+   * rule type via the registered `IChangeTrackingService`. Rule types must
+   * opt in (typically gated behind a config setting) before any history is
+   * tracked.
+   */
+  trackChanges?: boolean;
   alerts?: IRuleTypeAlerts<AlertData>;
   /**
    * Determines whether framework should
