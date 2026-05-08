@@ -55,7 +55,6 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import { type Attributes, metrics, ValueType } from '@opentelemetry/api';
 import { getSpaceUrlPrefix, getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import type { HttpConfig } from './http_config';
-import { setRewrittenUrl } from './rewrite_url';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPostAuthFormat } from './lifecycle/on_post_auth';
@@ -152,7 +151,7 @@ function stripConfiguredBasePath(
   if (newUrl === oldUrl) {
     return false;
   }
-  setRewrittenUrl(request, newUrl);
+  request.setUrl(newUrl);
   return true;
 }
 
@@ -629,16 +628,15 @@ export class HttpServer {
       }
 
       const stop = startEluMeasurement(request.path, this.log, this.config?.eluMonitor);
-
       const requestId = getRequestId(request, config.requestId);
-
       const parentContext = executionContext?.getParentContextFrom(request.headers);
+      const originalUrl = request.url;
 
       const { spaceId, pathHasExplicitSpaceIdentifier } = getSpaceIdFromPath(request.url.pathname);
       if (pathHasExplicitSpaceIdentifier) {
         const spacePrefix = getSpaceUrlPrefix(spaceId);
         const newPathname = request.url.pathname.slice(spacePrefix.length) || '/';
-        setRewrittenUrl(request, `${newPathname}${request.url.search}`);
+        request.setUrl(`${newPathname}${request.url.search}`);
       }
 
       const app: KibanaRequestState = request.app as KibanaRequestState;
@@ -669,6 +667,7 @@ export class HttpServer {
       app.requestId = requestId;
       app.requestUuid = uuidv4();
       app.spaceId = spaceId;
+      app.rewrittenUrl = request.url !== originalUrl ? originalUrl : undefined;
       app.measureElu = stop;
       // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
       // The current implementation of the APM agent ends a request transaction before "response" log is emitted.

@@ -10,6 +10,7 @@
 import type { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
 import type { Logger } from '@kbn/logging';
 import type {
+  KibanaRequestState,
   OnPreRoutingToolkit,
   OnPreRoutingResultRewriteUrl,
   OnPreRoutingResultNext,
@@ -23,7 +24,6 @@ import {
   CoreKibanaRequest,
   lifecycleResponseFactory,
 } from '@kbn/core-http-router-server-internal';
-import { setRewrittenUrl } from '../rewrite_url';
 
 const preRoutingResult = {
   next(): OnPreRoutingResult {
@@ -68,7 +68,9 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
       }
 
       if (preRoutingResult.isRewriteUrl(result)) {
-        setRewrittenUrl(request, result.url);
+        const app = request.app as KibanaRequestState;
+        app.rewrittenUrl = app.rewrittenUrl ?? request.url;
+        request.setUrl(result.url);
         return responseToolkit.continue;
       }
       throw new Error(
