@@ -2716,7 +2716,8 @@
       // Force ESM (.d.ts) types for packages with dual CJS/ESM exports. With module: "commonjs" +
       // moduleResolution: "bundler", TS picks the "require" condition → .d.cts types, which causes
       // TS2883 during declaration emit because .cjs paths are not portable in .d.ts output.
-      "axios": ["./node_modules/axios/index.d.ts"],
+      // axios is fixed via patches/axios+1.15.2.patch (collapses package.json#exports.types to a
+      // single .d.ts) — avoids paths workarounds that break tsx/rspack at runtime.
       "@langchain/core": ["./node_modules/@langchain/core/dist/index.d.ts"],
       "@langchain/core/messages": ["./node_modules/@langchain/core/dist/messages/index.d.ts"],
       "@langchain/core/tools": ["./node_modules/@langchain/core/dist/tools/index.d.ts"],

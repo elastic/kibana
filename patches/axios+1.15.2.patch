@@ -1,0 +1,27 @@
+Why this patch:
+  Kibana flattens axios's `exports['.'].types` to a single `index.d.ts`. With
+  module:commonjs + moduleResolution:bundler, TS would otherwise pick the
+  "require" condition and resolve to `index.d.cts` (a structurally different,
+  namespace-shaped declaration). That triggers TS2883 in declaration emit
+  ("cannot be named without a reference to ../axios/index.cjs") for inferred
+  AxiosResponse return types in generated clients.
+  We avoid the alternative `tsconfig.base.json#paths.axios -> index.d.ts`
+  workaround because tsconfig `paths` are also consumed by runtime tools
+  (tsx via Cypress, rspack), which then try to execute the .d.ts as JS.
+  See PR #170856 / issue #171080.
+
+diff --git a/node_modules/axios/package.json b/node_modules/axios/package.json
+--- a/node_modules/axios/package.json
++++ b/node_modules/axios/package.json
+@@ -11,10 +11,7 @@
+   "typings": "./index.d.ts",
+   "exports": {
+     ".": {
+-      "types": {
+-        "require": "./index.d.cts",
+-        "default": "./index.d.ts"
+-      },
++      "types": "./index.d.ts",
+       "bun": {
+         "require": "./dist/node/axios.cjs",
+         "default": "./index.js"
