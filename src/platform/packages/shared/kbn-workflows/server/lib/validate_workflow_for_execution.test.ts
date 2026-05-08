@@ -57,18 +57,22 @@ describe('validateWorkflowForExecution', () => {
     );
   });
 
-  it('should throw a disabled workflow user error', () => {
+  it('should throw when workflow is disabled', () => {
     const workflow = createMockWorkflow({ enabled: false });
+    const error = (() => {
+      try {
+        validateWorkflowForExecution(workflow, 'test-workflow-id');
+      } catch (caughtError) {
+        return caughtError;
+      }
+      return undefined;
+    })();
 
-    try {
-      validateWorkflowForExecution(workflow, 'test-workflow-id');
-      throw new Error('Expected validateWorkflowForExecution to throw');
-    } catch (error) {
-      expect((error as Error).message).toBe(
-        'Workflow is disabled: test-workflow-id. Enable the workflow to run it.'
-      );
-      expect((error as { isUserError?: boolean }).isUserError).toBe(true);
-    }
+    expect(error).toBeDefined();
+    expect((error as Error).message).toBe(
+      'Workflow is disabled: test-workflow-id. Enable the workflow to run it.'
+    );
+    expect((error as { isUserError?: boolean }).isUserError).toBe(true);
   });
 
   it('should check conditions in order: not found > no definition > not valid > disabled', () => {
