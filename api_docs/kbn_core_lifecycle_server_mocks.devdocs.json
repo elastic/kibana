@@ -118,6 +118,8 @@
               "InternalCoreDiServiceSetup",
               ">; dataStreams: jest.Mocked<",
               "DataStreamsSetup",
+              ">; userStorage: jest.Mocked<",
+              "UserStorageServiceSetup",
               ">; }"
             ],
             "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
@@ -170,6 +172,8 @@
               "InternalCoreDiServiceStart",
               ">; dataStreams: jest.Mocked<",
               "DataStreamsStart",
+              ">; userStorage: jest.Mocked<",
+              "UserStorageServiceStart",
               ">; }"
             ],
             "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
@@ -242,7 +246,7 @@
                   "{ pluginStartDeps?: object | undefined; pluginStartContract?: any; }"
                 ],
                 "path": "src/core/packages/lifecycle/server-mocks/src/core_setup.mock.ts",
-                "lineNumber": 45,
+                "lineNumber": 46,
                 "columnNumber": 37,
                 "deprecated": false,
                 "trackAdoption": false
