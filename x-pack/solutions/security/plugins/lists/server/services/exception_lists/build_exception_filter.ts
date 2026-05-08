@@ -539,10 +539,14 @@ export const buildListClause = async (
     }
     const rangeClauses = buildIpRangeClauses(dashNotationRange, field);
     if (slashNotationRange.length > 0) {
-      rangeClauses.push({
-        terms: {
-          [field]: slashNotationRange,
-        },
+      // `terms` queries against an `ip` field do not support CIDR notation,
+      // but `term` queries do. Emit one `term` clause per CIDR value.
+      slashNotationRange.forEach((cidr) => {
+        rangeClauses.push({
+          term: {
+            [field]: cidr,
+          },
+        });
       });
     }
     return {

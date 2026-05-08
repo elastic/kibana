@@ -1,0 +1,7 @@
+{
+  "setup": [
+    "nvm use && yarn kbn bootstrap"
+  ],
+  "teardown": [],
+  "run": []
+}

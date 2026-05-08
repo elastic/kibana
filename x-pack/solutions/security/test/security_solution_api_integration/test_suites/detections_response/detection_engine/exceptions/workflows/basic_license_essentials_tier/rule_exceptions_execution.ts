@@ -6,7 +6,8 @@
  */
 
 import expect from 'expect';
-import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { v4 as uuidv4 } from 'uuid';
+import type { CreateExceptionListItemSchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
 import type {
   RuleCreateProps,
@@ -44,6 +45,35 @@ import {
   importFile,
 } from '../../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
+
+interface AuditbeatValueListSample {
+  hostName: string;
+  sourceIp: string;
+  sourcePort: number;
+  timestampIso: string;
+  containerized: string;
+  riskScore?: number;
+  geoLatLon?: string;
+}
+
+const ipToSlash16 = (ip: string): string => {
+  const parts = ip.split('.');
+  if (parts.length === 4) {
+    return `${parts[0]}.${parts[1]}.0.0/16`;
+  }
+  return `${ip}/128`;
+};
+
+const toDateNanosLine = (iso: string): string => {
+  const match = iso.match(/^(.+T\d{2}:\d{2}:\d{2})(\.\d+)?Z$/);
+  if (match == null) {
+    return `${iso.replace(/Z$/, '')}.000000000Z`;
+  }
+  const base = match[1];
+  const fractionalDigits = (match[2] ?? '.0').slice(1);
+  const padded = `${fractionalDigits}000000000`.slice(0, 9);
+  return `${base}.${padded}Z`;
+};
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -438,6 +468,283 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
           const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
           expect(alertsOpen.hits.hits).toHaveLength(0);
+        });
+
+        describe('query rule: value list exception filters documents for Elasticsearch list types', function () {
+          this.timeout(120000);
+
+          let sample: AuditbeatValueListSample;
+
+          before(async () => {
+            const res = await es.search({
+              index: ['auditbeat-*'],
+              size: 50,
+              query: {
+                bool: {
+                  filter: [
+                    { exists: { field: 'host.name' } },
+                    { exists: { field: 'source.ip' } },
+                    { exists: { field: 'source.port' } },
+                    { exists: { field: 'destination.port' } },
+                    { exists: { field: '@timestamp' } },
+                    { exists: { field: 'host.containerized' } },
+                    // { exists: { field: 'source.geo.location' } },
+                  ],
+                },
+              },
+              _source: [
+                'host.name',
+                'source.ip',
+                'source.port',
+                'destination.port',
+                '@timestamp',
+                'host.containerized',
+              ],
+            });
+            const hit = res.hits.hits.find((h) => {
+              const loc = (h._source as { host?: { containerized?: { location?: unknown } } })?.host
+                ?.containerized;
+              return loc != null;
+            });
+            if (hit == null || hit._source == null) {
+              throw new Error(
+                'Expected an auditbeat-* document with host, source, timestamp, risk_score, and geo for value list matrix tests'
+              );
+            }
+            const src = hit._source as Record<string, unknown>;
+            const tsRaw = src['@timestamp'];
+            const timestampIso =
+              typeof tsRaw === 'string'
+                ? tsRaw
+                : typeof tsRaw === 'number'
+                ? new Date(tsRaw).toISOString()
+                : new Date(String(tsRaw)).toISOString();
+
+            sample = {
+              hostName: String((src as { host?: { name?: string } }).host?.name),
+              sourceIp: String((src as { source?: { ip?: string } }).source?.ip),
+              sourcePort: Number((src as { source?: { port?: number } }).source?.port),
+              timestampIso,
+              containerized: String(
+                (src as { host?: { containerized?: boolean } }).host?.containerized
+              ),
+              riskScore:
+                typeof (src as { event?: { risk_score?: number } }).event?.risk_score === 'number'
+                  ? (src as { event: { risk_score: number } }).event.risk_score
+                  : undefined,
+            };
+          });
+
+          const runValueListFilterCase = async ({
+            listType,
+            field,
+            listLines,
+            ruleQuery,
+            testValues,
+          }: {
+            listType: Type;
+            field: string;
+            listLines: string[];
+            ruleQuery: string;
+            testValues?: string[];
+          }) => {
+            const valueListId = `vl-${listType}-${uuidv4()}.txt`;
+            await importFile(supertest, log, listType, listLines, valueListId, testValues);
+            const rule: QueryRuleCreateProps = {
+              name: `Value list matrix ${listType}`,
+              description: 'Value list exception matrix',
+              enabled: true,
+              risk_score: 1,
+              rule_id: `rule-vl-${listType}-${uuidv4()}`,
+              severity: 'high',
+              index: ['auditbeat-*'],
+              type: 'query',
+              from: '1900-01-01T00:00:00.000Z',
+              query: ruleQuery,
+            };
+            const createdRule = await createRuleWithExceptionEntries(supertest, log, rule, [
+              [
+                {
+                  field,
+                  operator: 'included',
+                  type: 'list',
+                  list: {
+                    id: valueListId,
+                    type: listType,
+                  },
+                },
+              ],
+            ]);
+            const alertsOpen = await getOpenAlerts(supertest, log, es, createdRule);
+            expect(alertsOpen.hits.hits).toHaveLength(0);
+          };
+
+          it('keyword', async () => {
+            await runValueListFilterCase({
+              listType: 'keyword',
+              field: 'host.name',
+              listLines: [sample.hostName],
+              ruleQuery: `host.name: "${sample.hostName}"`,
+            });
+          });
+
+          it('text', async () => {
+            await runValueListFilterCase({
+              listType: 'text',
+              field: 'host.name',
+              listLines: [sample.hostName],
+              ruleQuery: `host.name: "${sample.hostName}"`,
+            });
+          });
+
+          it('ip', async () => {
+            await runValueListFilterCase({
+              listType: 'ip',
+              field: 'source.ip',
+              listLines: [sample.sourceIp],
+              ruleQuery: `source.ip: "${sample.sourceIp}"`,
+            });
+          });
+
+          it('ip_range', async () => {
+            await runValueListFilterCase({
+              listType: 'ip_range',
+              field: 'source.ip',
+              listLines: [ipToSlash16(sample.sourceIp)],
+              ruleQuery: `source.ip: "${sample.sourceIp}"`,
+              testValues: [sample.sourceIp],
+            });
+          });
+
+          it('boolean', async () => {
+            await runValueListFilterCase({
+              listType: 'boolean',
+              field: 'host.containerized',
+              listLines: [sample.containerized],
+              ruleQuery: `host.containerized: ${sample.containerized}`,
+            });
+          });
+
+          it('short', async () => {
+            await runValueListFilterCase({
+              listType: 'short',
+              field: 'destination.port',
+              listLines: [sample.sourcePort.toString()],
+              ruleQuery: `source.port: ${sample.sourcePort}`,
+            });
+          });
+
+          it('integer', async () => {
+            await runValueListFilterCase({
+              listType: 'integer',
+              field: 'destination.port',
+              listLines: [String(sample.sourcePort)],
+              ruleQuery: `source.port: ${sample.sourcePort}`,
+            });
+          });
+
+          it('long', async () => {
+            await runValueListFilterCase({
+              listType: 'long',
+              field: 'source.port',
+              listLines: [String(sample.sourcePort)],
+              ruleQuery: `source.port: ${sample.sourcePort}`,
+            });
+          });
+
+          it('date', async () => {
+            await runValueListFilterCase({
+              listType: 'date',
+              field: '@timestamp',
+              listLines: [sample.timestampIso],
+              ruleQuery: `@timestamp: "${sample.timestampIso}"`,
+            });
+          });
+
+          it('date_nanos', async () => {
+            await runValueListFilterCase({
+              listType: 'date_nanos',
+              field: '@timestamp',
+              listLines: [toDateNanosLine(sample.timestampIso)],
+              ruleQuery: `@timestamp: "${sample.timestampIso}"`,
+            });
+          });
+
+          it('float', async () => {
+            expect(sample.riskScore).toBeDefined();
+            await runValueListFilterCase({
+              listType: 'float',
+              field: 'event.risk_score',
+              listLines: [String(sample.riskScore)],
+              ruleQuery: `event.risk_score: ${sample.riskScore}`,
+            });
+          });
+
+          it('half_float', async () => {
+            expect(sample.riskScore).toBeDefined();
+            await runValueListFilterCase({
+              listType: 'half_float',
+              field: 'event.risk_score',
+              listLines: [String(sample.riskScore)],
+              ruleQuery: `event.risk_score: ${sample.riskScore}`,
+            });
+          });
+
+          it('double', async () => {
+            expect(sample.riskScore).toBeDefined();
+            await runValueListFilterCase({
+              listType: 'double',
+              field: 'event.risk_score',
+              listLines: [String(sample.riskScore)],
+              ruleQuery: `event.risk_score: ${sample.riskScore}`,
+            });
+          });
+
+          it.skip('geo_point', async () => {
+            expect(sample.geoLatLon).toBeDefined();
+            await runValueListFilterCase({
+              listType: 'geo_point',
+              field: 'source.geo.location',
+              listLines: [sample.geoLatLon!],
+              ruleQuery: `host.name: "${sample.hostName}" and _exists_: "source.geo.location"`,
+            });
+          });
+
+          it.skip('byte — auditbeat fixture typically uses source.port outside signed byte range', async () => {
+            /* covered by short/integer/long */
+          });
+
+          it.skip('binary — list values are Base64; no compatible keyword/ip/port field pairing in this fixture', async () => {
+            /* requires a binary-mapped source field */
+          });
+
+          it.skip('geo_shape — requires WKT or lat,lon against a geo_shape mapped field not exercised here', async () => {
+            /* no geo_shape field in auditbeat hosts archive used by this suite */
+          });
+
+          it.skip('shape — same as geo_shape for this fixture', async () => {
+            /* no cartesian shape field in auditbeat hosts archive used by this suite */
+          });
+
+          it.skip('integer_range — range serialization is not compatible with terms queries on numeric source.port in the small-list exception path', async () => {
+            /* would need dedicated range query support in buildListClause */
+          });
+
+          it.skip('float_range — same as integer_range for numeric fields in small-list exception path', async () => {
+            /* would need dedicated range query support in buildListClause */
+          });
+
+          it.skip('long_range — same as integer_range for numeric fields in small-list exception path', async () => {
+            /* would need dedicated range query support in buildListClause */
+          });
+
+          it.skip('double_range — same as integer_range for numeric fields in small-list exception path', async () => {
+            /* would need dedicated range query support in buildListClause */
+          });
+
+          it.skip('date_range — range strings are not compatible with terms on @timestamp in small-list exception path', async () => {
+            /* would need dedicated range query support in buildListClause */
+          });
         });
 
         it('should Not allow deleting value list when there are references and ignoreReferences is false', async () => {
