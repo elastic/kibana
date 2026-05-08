@@ -10,6 +10,7 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { pick, uniqBy } from 'lodash';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import {
   type DiscoverAppState,
   DEFAULT_PROFILE_STATE_FIELDS,
@@ -44,10 +45,15 @@ export const getDefaultProfileState = ({
 
       if (
         shouldResetDefaultProfileField(defaultProfileState, 'breakdownField') &&
-        defaultState.breakdownField !== undefined &&
-        dataView.fields.getByName(defaultState.breakdownField)
+        defaultState.breakdownField !== undefined
       ) {
-        stateUpdate.breakdownField = defaultState.breakdownField;
+        // In ES|QL mode, we skip validation since the data view may not have fields
+        // (skipFetchFields: true) and columns are determined by the query result
+        const isValidBreakdownField =
+          dataView.type === ESQL_TYPE || dataView.fields.getByName(defaultState.breakdownField);
+        if (isValidBreakdownField) {
+          stateUpdate.breakdownField = defaultState.breakdownField;
+        }
       }
 
       if (

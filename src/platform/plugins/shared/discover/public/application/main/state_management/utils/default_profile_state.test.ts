@@ -21,9 +21,15 @@ import {
   getFieldsToReset,
   getProfileStateSnapshot,
 } from './default_profile_state';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 
 const emptyDataView = buildDataViewMock({
   name: 'emptyDataView',
+  fields: fieldList(),
+});
+const emptyESQLDataView = buildDataViewMock({
+  name: 'emptyESQLDataView',
+  type: ESQL_TYPE,
   fields: fieldList(),
 });
 const { profilesManagerMock, scopedEbtManagerMock } = createContextAwarenessMocks();
@@ -66,6 +72,17 @@ describe('getDefaultProfileState', () => {
       }).getPreFetchState();
 
       expect(appStateWithoutBreakdownField).toBeUndefined();
+    });
+
+    it('should return breakdownField in ES|QL mode even with empty data view', () => {
+      const appState = getDefaultProfileState({
+        scopedProfilesManager,
+        defaultProfileState: createDefaultProfileState(['breakdownField']),
+        dataView: emptyESQLDataView,
+      }).getPreFetchState();
+      expect(appState).toEqual({
+        breakdownField: 'extension',
+      });
     });
 
     it('should return expected hideChart', () => {
