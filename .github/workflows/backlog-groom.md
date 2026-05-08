@@ -58,12 +58,7 @@ You process GitHub issues labeled `backlog-groom` in the Kibana repository. For 
 
 ## Issue context
 
-- **Issue body**:
-
-  ```markdown
-  ${{ github.event.issue.body }}
-  ```
-
+Read the issue identified by `GH_AW_GITHUB_EVENT_ISSUE_NUMBER` in the `<github-context>` block using the GitHub tools.
 
 ## Phase 1: Staleness analysis
 
@@ -95,7 +90,7 @@ Proceed to Phase 2.
 Follow the Kibana contribution guidelines:
 
 1. **Identify the root cause** — read the relevant code thoroughly. Do not guess.
-2. **Create or update your implementation** on branch `backlog-groom/issue-${{ github.event.issue.number }}`.
+2. **Create or update your implementation** on branch `backlog-groom/issue-<issue_number>` (using the issue number from `<github-context>`).
 3. **Follow Kibana code style** as defined in [`AGENTS.md`](../../AGENTS.md) (see the *Code Style Guidelines* section).
 4. **Validate your changes** using the linting, type-checking, and testing commands documented in [`AGENTS.md`](../../AGENTS.md).
 5. **Open exactly one PR** using the `create-pull-request` safe output.
@@ -103,8 +98,8 @@ Follow the Kibana contribution guidelines:
 ## Pull request contract
 
 The linked pull request must:
-- Use branch `backlog-groom/issue-${{ github.event.issue.number }}`
-- Include `Closes #${{ github.event.issue.number }}` in the PR body
+- Use branch `backlog-groom/issue-<issue_number>`
+- Include `Closes #<issue_number>` in the PR body
 - Be opened as a **draft**
 - Include a summary of what was changed and why
 - Stay focused on the triggering issue only
