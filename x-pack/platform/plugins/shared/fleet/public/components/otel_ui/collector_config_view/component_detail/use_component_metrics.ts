@@ -10,7 +10,7 @@ import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-ty
 import { lastValueFrom } from 'rxjs';
 
 import { useStartServices } from '../../../../hooks';
-import type { OTelComponentType } from '../graph_view/constants';
+import type { OTelComponentType } from '../constants';
 import { useCollectorMetrics } from '../collector_metrics_context';
 
 interface MetricSeries {
