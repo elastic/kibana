@@ -12,38 +12,7 @@ on:
     contents: read
     issues: write
     pull-requests: read
-  steps:
-    - name: Check duplicate PR
-      id: check_duplicate_pr
-      uses: actions/github-script@v9
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const { owner, repo } = context.repo;
-          const issueNumber = context.payload.issue.number;
-          const expectedBranch = `backlog-groom/issue-${issueNumber}`;
-
-          const pulls = await github.paginate(github.rest.pulls.list, {
-            owner, repo, state: 'open',
-            head: `${owner}:${expectedBranch}`,
-            per_page: 100,
-          });
-
-          const duplicate = pulls.find(pr =>
-            pr.state === 'open' &&
-            pr.head.ref === expectedBranch &&
-            pr.labels.some(l => l.name === 'backlog-groom') &&
-            new RegExp(`Closes #${issueNumber}`).test(pr.body ?? '')
-          );
-
-          core.setOutput('duplicate_pr_found', duplicate ? 'true' : 'false');
-          core.setOutput('duplicate_pr_url', duplicate?.html_url ?? '');
-          if (duplicate) core.info(`Duplicate PR found: ${duplicate.html_url}`);
-          else core.info('No duplicate PR found.');
-
-if: >-
-  github.event.label.name == 'backlog-groom' &&
-  needs.pre_activation.outputs.duplicate_pr_found != 'true'
+if: github.event.label.name == 'backlog-groom'
 steps:
   - uses: actions/setup-node@v4
     with:
@@ -57,11 +26,6 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
-jobs:
-  pre-activation:
-    outputs:
-      duplicate_pr_found: ${{ steps.check_duplicate_pr.outputs.duplicate_pr_found }}
-      duplicate_pr_url: ${{ steps.check_duplicate_pr.outputs.duplicate_pr_url }}
 engine:
   id: claude
   version: "2.1.111"
