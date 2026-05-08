@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import { useController } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import type { FieldDescriptor } from '../types';
@@ -24,7 +25,7 @@ export const PaginationToggleField = ({ descriptor, control }: PaginationToggleF
   // Form value is a number (page size) when enabled, or undefined when disabled.
   const isEnabled = field.value != null && field.value !== false;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: EuiSwitchEvent) => {
     field.onChange(e.target.checked ? DEFAULT_PAGE_SIZE : undefined);
   };
 

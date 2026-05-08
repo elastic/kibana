@@ -9,7 +9,9 @@ import React from 'react';
 import { useController } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import { RowHeightSettings } from '@kbn/unified-data-table';
-import type { RowHeightModeType } from '@kbn/unified-data-table';
+import type { RowHeightSettingsProps } from '@kbn/unified-data-table';
+
+type RowHeightMode = RowHeightSettingsProps['rowHeight'];
 import type { FieldDescriptor } from '../types';
 
 interface RowHeightFieldProps {
@@ -32,7 +34,7 @@ export const RowHeightField = ({ descriptor, control }: RowHeightFieldProps) => 
     defaultValue: 2,
   });
 
-  const onChangeRowHeight = (mode: RowHeightModeType | undefined) => {
+  const onChangeRowHeight = (mode: RowHeightMode | undefined) => {
     typeField.onChange(mode ?? 'auto');
   };
 
@@ -42,7 +44,7 @@ export const RowHeightField = ({ descriptor, control }: RowHeightFieldProps) => 
 
   return (
     <RowHeightSettings
-      rowHeight={(typeField.value as RowHeightModeType) ?? 'auto'}
+      rowHeight={(typeField.value as RowHeightMode) ?? 'auto'}
       lineCountInput={linesField.value as number}
       maxRowHeight={maxRowHeight}
       label={descriptor.label}
