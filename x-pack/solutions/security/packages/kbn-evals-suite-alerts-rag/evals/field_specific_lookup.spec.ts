@@ -55,8 +55,30 @@ evaluate.describe('Alerts RAG – Field-Specific Lookups', { tag: tags.stateful.
             }
             const { question, context } = input;
             const contextText = buildAlertContextText(context);
+            const questionPreview = `${question.slice(0, 120)}${
+              question.length > 120 ? '...' : ''
+            }`;
 
-            log.debug(`[field-specific-lookup] Invoking Security AI Assistant API: "${question}"`);
+            log.info(
+              `[field-specific-lookup] API request: connector=${connector.id} question="${questionPreview}" context=${context.length} alert(s)`
+            );
+            log.debug(
+              `[field-specific-lookup] API request body: ${JSON.stringify(
+                {
+                  connectorId: connector.id,
+                  persist: false,
+                  isStream: false,
+                  messages: [
+                    {
+                      role: 'user',
+                      content: `Here are the security alerts:\n\n${contextText}\n\nQuestion: ${question}`,
+                    },
+                  ],
+                },
+                null,
+                2
+              )}`
+            );
 
             try {
               const response = await withRetry(
@@ -90,7 +112,14 @@ evaluate.describe('Alerts RAG – Field-Specific Lookups', { tag: tags.stateful.
                 }
               );
 
-              return { answer: response.data?.data ?? '' };
+              const answer = response.data?.data ?? '';
+              const answerPreview = `${answer.slice(0, 500)}${answer.length > 500 ? '...' : ''}`;
+              log.info(
+                `[field-specific-lookup] API response: status=${
+                  response.data?.status ?? 'unknown'
+                } answer="${answerPreview}"`
+              );
+              return { answer };
             } catch (err) {
               log.error(
                 new Error(

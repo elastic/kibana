@@ -116,14 +116,18 @@ export const createAlertsCorrectnessEvaluator = ({
         };
       }
 
+      const label =
+        parsed.score >= ALERTS_RAG_THRESHOLDS.CORRECTNESS_PARTIAL
+          ? 'correct'
+          : parsed.score >= ALERTS_RAG_THRESHOLDS.CORRECTNESS_PASSING
+          ? 'partial'
+          : 'incorrect';
+      log.debug(
+        `${EVALUATOR_NAME}: score=${parsed.score} label="${label}" reasoning="${parsed.reasoning}"`
+      );
       return {
         score: parsed.score,
-        label:
-          parsed.score >= ALERTS_RAG_THRESHOLDS.CORRECTNESS_PARTIAL
-            ? 'correct'
-            : parsed.score >= ALERTS_RAG_THRESHOLDS.CORRECTNESS_PASSING
-            ? 'partial'
-            : 'incorrect',
+        label,
         explanation: parsed.reasoning,
       };
     } catch (err) {

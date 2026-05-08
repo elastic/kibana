@@ -124,14 +124,18 @@ export const createAlertsFaithfulnessEvaluator = ({
         };
       }
 
+      const label =
+        parsed.score >= ALERTS_RAG_THRESHOLDS.FAITHFULNESS_PARTIAL
+          ? 'faithful'
+          : parsed.score >= ALERTS_RAG_THRESHOLDS.FAITHFULNESS_PASSING
+          ? 'partial'
+          : 'unfaithful';
+      log.debug(
+        `${EVALUATOR_NAME}: score=${parsed.score} label="${label}" reasoning="${parsed.reasoning}"`
+      );
       return {
         score: parsed.score,
-        label:
-          parsed.score >= ALERTS_RAG_THRESHOLDS.FAITHFULNESS_PARTIAL
-            ? 'faithful'
-            : parsed.score >= ALERTS_RAG_THRESHOLDS.FAITHFULNESS_PASSING
-            ? 'partial'
-            : 'unfaithful',
+        label,
         explanation: parsed.reasoning,
       };
     } catch (err) {

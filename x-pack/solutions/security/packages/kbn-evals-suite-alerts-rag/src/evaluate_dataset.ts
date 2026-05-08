@@ -152,8 +152,14 @@ export const createEvaluateAlertsRagDataset = ({
             return { answer: '' };
           }
           const { question, context } = input;
-          log.debug(`Alerts RAG task: "${question}" with ${context.length} alert documents`);
+          const questionPreview = `${question.slice(0, 120)}${question.length > 120 ? '...' : ''}`;
+          log.info(
+            `[alerts-rag] task request: question="${questionPreview}" context=${context.length} alert(s)`
+          );
           const contextText = buildAlertContextText(context);
+          log.debug(
+            `[alerts-rag] task request body:\nSystem: You are a security analyst...\nUser: Security alerts:\n${contextText}\n\nQuestion: ${question}`
+          );
           const response = await withRetry(
             () =>
               inferenceClient.chatComplete({
@@ -177,6 +183,10 @@ export const createEvaluateAlertsRagDataset = ({
               },
             }
           );
+          const answerPreview = `${response.content.slice(0, 500)}${
+            response.content.length > 500 ? '...' : ''
+          }`;
+          log.info(`[alerts-rag] task response: answer="${answerPreview}"`);
           return { answer: response.content };
         },
       },
