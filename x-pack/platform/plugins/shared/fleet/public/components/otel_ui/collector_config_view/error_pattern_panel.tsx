@@ -29,9 +29,10 @@ import { FormattedDate, FormattedRelative } from '@kbn/i18n-react';
 
 import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
 
-import { AGENT_LOG_INDEX_PATTERN } from '../../../../common/constants';
 import { useDiscoverLocator } from '../../../hooks/use_locator';
 
+import { useCollectorContext } from './collector_context';
+import { OTEL_LOG_INDEX } from './constants';
 import type { ErrorPattern, LogLevel, SortField, TimeRange } from './use_error_patterns';
 import { useErrorPatterns } from './use_error_patterns';
 
@@ -114,7 +115,8 @@ const sortPatterns = (patterns: ErrorPattern[], sortField: SortField): ErrorPatt
   return sorted;
 };
 
-export const ErrorPatternPanel: React.FC<{ agentId: string }> = ({ agentId }) => {
+export const ErrorPatternPanel: React.FC = () => {
+  const { serviceInstanceId } = useCollectorContext();
   const [selectedLevel, setSelectedLevel] = useState<LogLevel>('error');
   const [timeRange, setTimeRange] = useState<TimeRange>('1h');
   const [sortField, setSortField] = useState<SortField>('count');
@@ -123,7 +125,7 @@ export const ErrorPatternPanel: React.FC<{ agentId: string }> = ({ agentId }) =>
   const discoverLocator = useDiscoverLocator();
 
   const { errorPatterns, warningPatterns, errorCount, warningCount, totalLogCount, isLoading } =
-    useErrorPatterns({ agentId, timeRange });
+    useErrorPatterns({ serviceInstanceId: serviceInstanceId ?? '', timeRange });
 
   const patterns = useMemo(
     () => sortPatterns(selectedLevel === 'error' ? errorPatterns : warningPatterns, sortField),
@@ -137,19 +139,19 @@ export const ErrorPatternPanel: React.FC<{ agentId: string }> = ({ agentId }) =>
     (pattern: ErrorPattern) =>
       discoverLocator?.getRedirectUrl({
         dataViewSpec: {
-          id: AGENT_LOG_INDEX_PATTERN,
-          name: AGENT_LOG_INDEX_PATTERN,
-          title: AGENT_LOG_INDEX_PATTERN,
+          id: OTEL_LOG_INDEX,
+          name: OTEL_LOG_INDEX,
+          title: OTEL_LOG_INDEX,
           timeFieldName: '@timestamp',
         },
         timeRange: { from: `now-${timeRange}`, to: 'now' },
         filters: [
           buildCustomFilter(
-            AGENT_LOG_INDEX_PATTERN,
+            OTEL_LOG_INDEX,
             {
               bool: {
                 filter: [
-                  { term: { 'elastic_agent.id': agentId } },
+                  { term: { 'service.instance.id': serviceInstanceId } },
                   {
                     match: {
                       message: {
@@ -173,7 +175,7 @@ export const ErrorPatternPanel: React.FC<{ agentId: string }> = ({ agentId }) =>
           ),
         ],
       }),
-    [discoverLocator, timeRange, agentId]
+    [discoverLocator, timeRange, serviceInstanceId]
   );
 
   const columns: Array<EuiBasicTableColumn<ErrorPattern>> = [

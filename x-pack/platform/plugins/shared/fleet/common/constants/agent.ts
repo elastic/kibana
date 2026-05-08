@@ -69,8 +69,6 @@ export const PRIVILEGED_AGENT_KUERY = `not ${AGENTS_PREFIX}.local_metadata.elast
 // Kuery to find fips agents
 export const FIPS_AGENT_KUERY = `${AGENTS_PREFIX}.local_metadata.elastic.agent.fips: true`;
 
-export const AGENT_LOG_INDEX_PATTERN = 'logs-elastic_agent-*,logs-elastic_agent.*-*';
-
 export const AGENT_STATUS_CHANGE_DATA_STREAM = {
   type: 'logs',
   dataset: 'elastic_agent.status_change',

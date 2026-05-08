@@ -19,6 +19,10 @@ jest.mock('./use_error_patterns', () => ({
   useErrorPatterns: (...args: any[]) => mockUseErrorPatterns(...args),
 }));
 
+jest.mock('./collector_context', () => ({
+  useCollectorContext: () => ({ serviceInstanceId: 'collector-001' }),
+}));
+
 const mockGetRedirectUrl = jest.fn().mockReturnValue('http://discover-link');
 jest.mock('../../../hooks/use_locator', () => ({
   useDiscoverLocator: () => ({ getRedirectUrl: mockGetRedirectUrl }),
@@ -73,7 +77,7 @@ describe('ErrorPatternPanel', () => {
   });
 
   it('renders the panel with title and table', () => {
-    const result = testRenderer.render(<ErrorPatternPanel agentId="agent-001" />);
+    const result = testRenderer.render(<ErrorPatternPanel />);
 
     expect(result.getByTestId('collectorErrorPatternPanel')).toBeInTheDocument();
     expect(result.getByText('Error patterns')).toBeInTheDocument();
@@ -81,14 +85,14 @@ describe('ErrorPatternPanel', () => {
   });
 
   it('shows error patterns by default', () => {
-    const result = testRenderer.render(<ErrorPatternPanel agentId="agent-001" />);
+    const result = testRenderer.render(<ErrorPatternPanel />);
 
     expect(result.getByText('Failed to export spans connection refused')).toBeInTheDocument();
     expect(result.getByText('TLS handshake failed certificate expired')).toBeInTheDocument();
   });
 
   it('switches to warning patterns when warning toggle is clicked', () => {
-    const result = testRenderer.render(<ErrorPatternPanel agentId="agent-001" />);
+    const result = testRenderer.render(<ErrorPatternPanel />);
 
     fireEvent.click(result.getByTestId('errorPatternLevelToggle-warning'));
 
@@ -97,7 +101,7 @@ describe('ErrorPatternPanel', () => {
   });
 
   it('shows correct counts in toggle buttons', () => {
-    const result = testRenderer.render(<ErrorPatternPanel agentId="agent-001" />);
+    const result = testRenderer.render(<ErrorPatternPanel />);
 
     expect(result.getByTestId('errorPatternLevelToggle-error')).toHaveTextContent('Errors (2)');
     expect(result.getByTestId('errorPatternLevelToggle-warning')).toHaveTextContent('Warnings (1)');
@@ -112,7 +116,7 @@ describe('ErrorPatternPanel', () => {
       })
     );
 
-    const result = testRenderer.render(<ErrorPatternPanel agentId="agent-001" />);
+    const result = testRenderer.render(<ErrorPatternPanel />);
 
     expect(
       result.getByText('No error patterns found in the selected time range')
@@ -127,7 +131,7 @@ describe('ErrorPatternPanel', () => {
       })
     );
 
-    const result = testRenderer.render(<ErrorPatternPanel agentId="agent-001" />);
+    const result = testRenderer.render(<ErrorPatternPanel />);
     fireEvent.click(result.getByTestId('errorPatternLevelToggle-warning'));
 
     expect(
@@ -136,7 +140,7 @@ describe('ErrorPatternPanel', () => {
   });
 
   it('renders discover link for each pattern row', () => {
-    const result = testRenderer.render(<ErrorPatternPanel agentId="agent-001" />);
+    const result = testRenderer.render(<ErrorPatternPanel />);
 
     const discoverButtons = result.getAllByLabelText('Explore matching logs in Kibana Discover');
     expect(discoverButtons).toHaveLength(2);
@@ -146,27 +150,27 @@ describe('ErrorPatternPanel', () => {
   it('hides discover links when locator returns undefined', () => {
     mockGetRedirectUrl.mockReturnValue(undefined);
 
-    const result = testRenderer.render(<ErrorPatternPanel agentId="agent-001" />);
+    const result = testRenderer.render(<ErrorPatternPanel />);
 
     expect(result.queryAllByLabelText('Explore matching logs in Kibana Discover')).toHaveLength(0);
   });
 
-  it('passes agentId and default timeRange to the hook', () => {
-    testRenderer.render(<ErrorPatternPanel agentId="agent-001" />);
+  it('passes serviceInstanceId and default timeRange to the hook', () => {
+    testRenderer.render(<ErrorPatternPanel />);
 
     expect(mockUseErrorPatterns).toHaveBeenCalledWith({
-      agentId: 'agent-001',
+      serviceInstanceId: 'collector-001',
       timeRange: '1h',
     });
   });
 
   it('updates timeRange when selector changes', () => {
-    const result = testRenderer.render(<ErrorPatternPanel agentId="agent-001" />);
+    const result = testRenderer.render(<ErrorPatternPanel />);
 
     fireEvent.change(result.getByTestId('errorPatternTimeRange'), { target: { value: '1d' } });
 
     expect(mockUseErrorPatterns).toHaveBeenLastCalledWith({
-      agentId: 'agent-001',
+      serviceInstanceId: 'collector-001',
       timeRange: '1d',
     });
   });
@@ -174,7 +178,7 @@ describe('ErrorPatternPanel', () => {
   it('renders loading state', () => {
     mockUseErrorPatterns.mockReturnValue(makePattern({ isLoading: true }));
 
-    const result = testRenderer.render(<ErrorPatternPanel agentId="agent-001" />);
+    const result = testRenderer.render(<ErrorPatternPanel />);
 
     expect(result.getByTestId('errorPatternTable')).toBeInTheDocument();
   });
@@ -184,7 +188,7 @@ describe('ErrorPatternPanel', () => {
       makePattern({ errorPatterns: [], errorCount: 0, totalLogCount: 15 })
     );
 
-    const result = testRenderer.render(<ErrorPatternPanel agentId="agent-001" />);
+    const result = testRenderer.render(<ErrorPatternPanel />);
     const errorButton = result.getByTestId('errorPatternLevelToggle-error');
 
     expect(errorButton).not.toHaveClass('euiFilterButton--danger');
@@ -195,7 +199,7 @@ describe('ErrorPatternPanel', () => {
       makePattern({ warningPatterns: [], warningCount: 0, totalLogCount: 52 })
     );
 
-    const result = testRenderer.render(<ErrorPatternPanel agentId="agent-001" />);
+    const result = testRenderer.render(<ErrorPatternPanel />);
     fireEvent.click(result.getByTestId('errorPatternLevelToggle-warning'));
 
     const warningButton = result.getByTestId('errorPatternLevelToggle-warning');

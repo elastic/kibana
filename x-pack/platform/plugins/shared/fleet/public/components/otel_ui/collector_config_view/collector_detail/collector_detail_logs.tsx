@@ -10,8 +10,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSuperDatePicker } from '@elasti
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import useAsync from 'react-use/lib/useAsync';
 
-import { AGENT_LOG_INDEX_PATTERN } from '../../../../../common/constants';
 import { useStartServices } from '../../../../hooks';
+
+const AGENT_LOG_INDEX_PATTERN = 'logs-elastic_agent-*,logs-elastic_agent.*-*';
 
 interface CollectorDetailLogsProps {
   agentId: string;

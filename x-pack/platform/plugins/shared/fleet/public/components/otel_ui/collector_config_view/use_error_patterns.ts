@@ -9,8 +9,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { lastValueFrom } from 'rxjs';
 
-import { AGENT_LOG_INDEX_PATTERN } from '../../../../common/constants';
 import { useStartServices } from '../../../hooks';
+
+import { OTEL_LOG_INDEX } from './constants';
 
 export type LogLevel = 'error' | 'warning';
 export type TimeRange = '5m' | '1h' | '1d' | '1w';
@@ -56,9 +57,11 @@ interface CategorizeTextBucket {
   sample: {
     hits: {
       hits: Array<{
+        _source?: {
+          component?: { id?: string };
+        };
         fields?: {
           message?: string[];
-          'component.id'?: string[];
         };
       }>;
     };
@@ -71,16 +74,21 @@ interface ErrorPatternsAggregations {
   };
 }
 
-const buildQuery = (agentId: string, level: LogLevel, now: number, timeRangeMs: number) => ({
+const buildQuery = (
+  serviceInstanceId: string,
+  level: LogLevel,
+  now: number,
+  timeRangeMs: number
+) => ({
   params: {
-    index: AGENT_LOG_INDEX_PATTERN,
+    index: OTEL_LOG_INDEX,
     track_total_hits: false,
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
-            { term: { 'elastic_agent.id': agentId } },
+            { term: { 'service.instance.id': serviceInstanceId } },
             { terms: { 'log.level': LOG_LEVEL_VALUES[level] } },
             { range: { '@timestamp': { gte: now - timeRangeMs, lte: now } } },
           ],
@@ -98,8 +106,8 @@ const buildQuery = (agentId: string, level: LogLevel, now: number, timeRangeMs: 
             sample: {
               top_hits: {
                 size: 1,
-                _source: false,
-                fields: ['message', 'component.id'],
+                _source: { includes: ['component.id'] },
+                fields: ['message'],
                 sort: { _score: { order: 'desc' as const } },
               },
             },
@@ -118,14 +126,14 @@ const mapBucketsToPatterns = (buckets: CategorizeTextBucket[]): ErrorPattern[] =
     firstSeen: bucket.min_timestamp.value ? new Date(bucket.min_timestamp.value).toISOString() : '',
     lastSeen: bucket.max_timestamp.value ? new Date(bucket.max_timestamp.value).toISOString() : '',
     exampleMessage: bucket.sample?.hits?.hits?.[0]?.fields?.message?.[0] ?? bucket.key,
-    component: bucket.sample?.hits?.hits?.[0]?.fields?.['component.id']?.[0] ?? null,
+    component: bucket.sample?.hits?.hits?.[0]?._source?.component?.id ?? null,
   }));
 
 export const useErrorPatterns = ({
-  agentId,
+  serviceInstanceId,
   timeRange,
 }: {
-  agentId: string;
+  serviceInstanceId: string;
   timeRange: TimeRange;
 }): UseErrorPatternsResult => {
   const { data } = useStartServices();
@@ -153,7 +161,7 @@ export const useErrorPatterns = ({
                 data.search.search<
                   IKibanaSearchRequest,
                   IKibanaSearchResponse<{ aggregations?: ErrorPatternsAggregations }>
-                >(buildQuery(agentId, level, now, timeRangeMs), {
+                >(buildQuery(serviceInstanceId, level, now, timeRangeMs), {
                   abortSignal,
                 })
               )
@@ -179,10 +187,15 @@ export const useErrorPatterns = ({
 
       run();
     },
-    [agentId, timeRange, data.search]
+    [serviceInstanceId, timeRange, data.search]
   );
 
   useEffect(() => {
+    if (!serviceInstanceId) {
+      setIsLoading(false);
+      return;
+    }
+
     const abortController = new AbortController();
     fetchPatterns(abortController.signal, true);
 
@@ -194,7 +207,7 @@ export const useErrorPatterns = ({
       abortController.abort();
       clearInterval(interval);
     };
-  }, [fetchPatterns]);
+  }, [fetchPatterns, serviceInstanceId]);
 
   const totalLogCount = useMemo(
     () => [...errorPatterns, ...warningPatterns].reduce((sum, p) => sum + p.docCount, 0),

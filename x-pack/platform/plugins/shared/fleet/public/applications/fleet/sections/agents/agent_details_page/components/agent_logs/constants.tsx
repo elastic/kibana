@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import {
-  AGENT_LOG_INDEX_PATTERN,
-  DATASET_VAR_NAME,
-} from '../../../../../../../../common/constants';
+import { DATASET_VAR_NAME } from '../../../../../../../../common/constants';
 
 import type { AgentLogsState } from './agent_logs';
 
-export { AGENT_LOG_INDEX_PATTERN };
+export const AGENT_LOG_INDEX_PATTERN = 'logs-elastic_agent-*,logs-elastic_agent.*-*';
 export const AGENT_DATASET = 'elastic_agent';
 export const AGENT_DATASET_FILEBEAT = 'elastic_agent.filebeat';
 export const AGENT_DATASET_METRICBEAT = 'elastic_agent.metricbeat';
