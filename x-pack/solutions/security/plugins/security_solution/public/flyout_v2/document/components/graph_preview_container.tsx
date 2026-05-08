@@ -5,10 +5,22 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useEffect, useMemo } from 'react';
+import { EuiBetaBadge, useGeneratedHtmlId } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { GraphPreviewContainer as SharedGraphPreviewContainer } from '../../../flyout/shared/components/graph_preview_container';
+import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
+import {
+  GRAPH_PREVIEW,
+  uiMetricService,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { ExpandablePanel } from '../../shared/components/expandable_panel';
+import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
+import { GraphPreview } from '../../../flyout/shared/components/graph_preview';
 import { useGraphPreviewData } from '../../graph/hooks/use_graph_preview_data';
+import { GRAPH_PREVIEW_TECHNICAL_PREVIEW_TEST_ID, GRAPH_PREVIEW_TEST_ID } from './test_ids';
 
 export interface GraphPreviewContainerProps {
   /**
@@ -19,28 +31,107 @@ export interface GraphPreviewContainerProps {
    * Callback invoked when the user expands the preview into the Graph tools flyout.
    */
   onShowGraph: () => void;
+  /**
+   * Whether to show the header icon.
+   */
+  showIcon: boolean;
+  /**
+   * Whether to disable the graph navigation link.
+   */
+  disableNavigation: boolean;
 }
 
 /**
- * Flyout v2 wrapper around the shared graph preview container. Reads graph parameters from
- * the document `hit` and forwards them in 'event' mode.
+ * Graph preview under Overview, Visualizations. Shows a non-interactive graph representation
+ * of the document's actor/target entities with a link to the Graph tools flyout.
  */
-export const GraphPreviewContainer = memo(({ hit, onShowGraph }: GraphPreviewContainerProps) => {
-  const { eventIds, timestamp, isAlert, shouldShowGraph } = useGraphPreviewData(hit);
+export const GraphPreviewContainer = memo(
+  ({ hit, onShowGraph, showIcon, disableNavigation }: GraphPreviewContainerProps) => {
+    const renderingId = useGeneratedHtmlId();
+    const { eventIds, timestamp, isAlert, shouldShowGraph } = useGraphPreviewData(hit);
 
-  return (
-    <SharedGraphPreviewContainer
-      mode="event"
-      shouldShowGraph={shouldShowGraph}
-      isAlert={isAlert}
-      timestamp={timestamp ?? new Date().toISOString()}
-      eventIds={eventIds}
-      indexName={hit.raw._index}
-      isPreviewMode={false}
-      isRulePreview={false}
-      onExpandGraph={onShowGraph}
-    />
-  );
-});
+    const iconType = useMemo(() => (showIcon ? 'arrowStart' : undefined), [showIcon]);
+    const isNavigationEnabled = !disableNavigation;
+
+    const { isLoading, isError, data } = useFetchGraphData({
+      req: {
+        query: {
+          originEventIds: eventIds.map((id) => ({ id, isAlert })),
+          start: `${timestamp ?? new Date().toISOString()}||-30m`,
+          end: `${timestamp ?? new Date().toISOString()}||+30m`,
+        },
+      },
+      options: {
+        enabled: shouldShowGraph,
+        refetchOnWindowFocus: false,
+      },
+    });
+
+    useEffect(() => {
+      if (shouldShowGraph) {
+        uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, GRAPH_PREVIEW);
+      }
+    }, [shouldShowGraph, renderingId]);
+
+    const GraphVisualizationUpsell = useUpsellingComponent('graph_visualization');
+
+    if (!shouldShowGraph && !GraphVisualizationUpsell) {
+      return null;
+    }
+
+    return (
+      <ExpandablePanel
+        header={{
+          title: (
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.document.visualizations.graphPreview.graphPreviewTitle"
+              defaultMessage="Graph preview"
+            />
+          ),
+          headerContent: (
+            <EuiBetaBadge
+              alignment="middle"
+              iconType="beaker"
+              data-test-subj={GRAPH_PREVIEW_TECHNICAL_PREVIEW_TEST_ID}
+              label={i18n.translate(
+                'xpack.securitySolution.flyout.document.visualizations.graphPreview.technicalPreviewLabel',
+                {
+                  defaultMessage: 'Technical Preview',
+                }
+              )}
+              tooltipContent={i18n.translate(
+                'xpack.securitySolution.flyout.document.visualizations.graphPreview.technicalPreviewTooltip',
+                {
+                  defaultMessage:
+                    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+                }
+              )}
+            />
+          ),
+          iconType,
+          ...(isNavigationEnabled && {
+            link: {
+              callback: onShowGraph,
+              tooltip: (
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.document.visualizations.graphPreview.openGraphTooltip"
+                  defaultMessage="Open graph"
+                />
+              ),
+            },
+          }),
+        }}
+        data-test-subj={GRAPH_PREVIEW_TEST_ID}
+        content={!isLoading && !isError ? { paddingSize: 'none' } : undefined}
+      >
+        {shouldShowGraph ? (
+          <GraphPreview isLoading={isLoading} isError={isError} data={data} />
+        ) : (
+          GraphVisualizationUpsell && <GraphVisualizationUpsell />
+        )}
+      </ExpandablePanel>
+    );
+  }
+);
 
 GraphPreviewContainer.displayName = 'GraphPreviewContainer';

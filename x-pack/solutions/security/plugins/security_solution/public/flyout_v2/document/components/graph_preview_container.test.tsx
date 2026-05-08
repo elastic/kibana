@@ -8,17 +8,29 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { TestProviders } from '../../../common/mock';
 import { GraphPreviewContainer } from './graph_preview_container';
 import { useGraphPreviewData } from '../../graph/hooks/use_graph_preview_data';
-import { GraphPreviewContainer as SharedGraphPreviewContainer } from '../../../flyout/shared/components/graph_preview_container';
+import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
+import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
+import {
+  GRAPH_PREVIEW_TECHNICAL_PREVIEW_TEST_ID,
+  GRAPH_PREVIEW_TEST_ID,
+} from './test_ids';
+import { EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID } from '../../shared/components/test_ids';
 
 jest.mock('../../graph/hooks/use_graph_preview_data');
-jest.mock('../../../flyout/shared/components/graph_preview_container', () => ({
-  GraphPreviewContainer: jest.fn(() => <div data-test-subj="sharedGraphPreviewContainerMock" />),
+jest.mock('../../../common/hooks/use_upselling');
+jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
+  useFetchGraphData: jest.fn(),
+}));
+jest.mock('../../../flyout/shared/components/graph_preview', () => ({
+  GraphPreview: () => <div data-test-subj="graphPreviewStub" />,
 }));
 
 const mockUseGraphPreviewData = jest.mocked(useGraphPreviewData);
-const mockSharedGraphPreviewContainer = jest.mocked(SharedGraphPreviewContainer);
+const mockUseUpsellingComponent = jest.mocked(useUpsellingComponent);
+const mockUseFetchGraphData = jest.mocked(useFetchGraphData);
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -28,61 +40,95 @@ const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord
     isAnchor: false,
   } as DataTableRecord);
 
-describe('GraphPreviewContainer (flyout v2)', () => {
-  const onShowGraph = jest.fn();
+const renderContainer = (
+  overrides: Partial<React.ComponentProps<typeof GraphPreviewContainer>> = {}
+) =>
+  render(
+    <TestProviders>
+      <GraphPreviewContainer
+        hit={createMockHit({})}
+        onShowGraph={onShowGraph}
+        showIcon={false}
+        disableNavigation={false}
+        {...overrides}
+      />
+    </TestProviders>
+  );
 
+const onShowGraph = jest.fn();
+
+describe('GraphPreviewContainer (flyout v2)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseUpsellingComponent.mockReturnValue(undefined);
+    mockUseFetchGraphData.mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: { nodes: [{ id: 'n1' } as never], edges: [] },
+    } as ReturnType<typeof useFetchGraphData>);
   });
 
-  it('forwards graph parameters in event mode to the shared container', () => {
-    mockUseGraphPreviewData.mockReturnValue({
-      eventIds: ['event-id'],
-      timestamp: '2025-01-01T00:00:00.000Z',
-      actorIds: ['alice'],
-      targetIds: ['bob'],
-      action: ['process-started'],
-      isAlert: true,
-      hasGraphData: true,
-      shouldShowGraph: true,
-    });
+  const populatedPreviewData = {
+    eventIds: ['event-id'],
+    timestamp: '2025-01-01T00:00:00.000Z',
+    actorIds: ['alice'],
+    targetIds: ['bob'],
+    action: ['process-started'],
+    isAlert: true,
+    hasGraphData: true,
+    shouldShowGraph: true,
+  } as const;
 
-    render(<GraphPreviewContainer hit={createMockHit({})} onShowGraph={onShowGraph} />);
+  it('renders the panel and the technical preview badge when graph data is available', () => {
+    mockUseGraphPreviewData.mockReturnValue(populatedPreviewData);
 
-    const lastProps = mockSharedGraphPreviewContainer.mock.calls.at(-1)?.[0];
-    expect(lastProps).toMatchObject({
-      mode: 'event',
-      shouldShowGraph: true,
-      isAlert: true,
-      timestamp: '2025-01-01T00:00:00.000Z',
-      eventIds: ['event-id'],
-      indexName: 'index-1',
-      isPreviewMode: false,
-      isRulePreview: false,
-      onExpandGraph: onShowGraph,
-    });
+    const { getByTestId } = renderContainer();
+
+    expect(getByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(GRAPH_PREVIEW_TECHNICAL_PREVIEW_TEST_ID)).toBeInTheDocument();
   });
 
-  it('falls back to a synthesized timestamp when the document has none', () => {
+  it('returns null when graph cannot be shown and no upsell is registered', () => {
     mockUseGraphPreviewData.mockReturnValue({
-      eventIds: [],
-      timestamp: null,
-      actorIds: [],
-      targetIds: [],
-      action: [],
-      isAlert: false,
-      hasGraphData: false,
+      ...populatedPreviewData,
       shouldShowGraph: false,
     });
 
-    render(<GraphPreviewContainer hit={createMockHit({})} onShowGraph={onShowGraph} />);
+    const { queryByTestId } = renderContainer();
 
-    const lastProps = mockSharedGraphPreviewContainer.mock.calls.at(-1)?.[0];
-    expect(lastProps).toMatchObject({
-      mode: 'event',
+    expect(queryByTestId(GRAPH_PREVIEW_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('renders the upsell component when the license is insufficient', () => {
+    mockUseGraphPreviewData.mockReturnValue({
+      ...populatedPreviewData,
       shouldShowGraph: false,
-      eventIds: [],
-      timestamp: expect.any(String),
     });
+    mockUseUpsellingComponent.mockReturnValue(() => (
+      <div data-test-subj="graphUpsellStub" />
+    ));
+
+    const { getByTestId } = renderContainer();
+
+    expect(getByTestId('graphUpsellStub')).toBeInTheDocument();
+  });
+
+  it('wires the header link callback when navigation is enabled', () => {
+    mockUseGraphPreviewData.mockReturnValue(populatedPreviewData);
+
+    const { getByTestId } = renderContainer({ disableNavigation: false });
+
+    getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID)).click();
+    expect(onShowGraph).toHaveBeenCalled();
+  });
+
+  it('omits the header link when navigation is disabled', () => {
+    mockUseGraphPreviewData.mockReturnValue(populatedPreviewData);
+
+    const { queryByTestId } = renderContainer({ disableNavigation: true });
+
+    expect(
+      queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
+    ).not.toBeInTheDocument();
   });
 });

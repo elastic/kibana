@@ -182,7 +182,12 @@ export const VisualizationsSection = memo(
           shouldUseAncestor={false}
           showIcon={false}
         />
-        <GraphPreviewContainer hit={hit} onShowGraph={onShowGraph} />
+        <GraphPreviewContainer
+          disableNavigation={false}
+          hit={hit}
+          onShowGraph={onShowGraph}
+          showIcon={false}
+        />
       </ExpandableSection>
     );
   }
