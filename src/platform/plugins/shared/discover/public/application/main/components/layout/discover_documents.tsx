@@ -33,8 +33,6 @@ import type {
 import {
   DataLoadingState,
   useColumns,
-  type DataTableColumnsMeta,
-  getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
   getRowHeight,
@@ -333,13 +331,7 @@ function DiscoverDocumentsComponent({
     [uiSettings, query]
   );
 
-  const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
-    () =>
-      documentState.esqlQueryColumns
-        ? getTextBasedColumnsMeta(documentState.esqlQueryColumns)
-        : undefined,
-    [documentState.esqlQueryColumns]
-  );
+  const currentDataSource = documentState.dataSource;
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
 
   const cellActionsMetadata = useAdditionalCellActions({
@@ -547,12 +539,14 @@ function DiscoverDocumentsComponent({
     viewModeToggle,
   ]);
 
+  // Cascaded documents haven't migrated to `DataSource` yet, so their columns metadata
+  // is passed explicitly to the flyout; the default owner's is derived from `dataSource`.
   const flyoutColumnsMeta = useMemo(() => {
     if (!expandedDocOwner || expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER) {
-      return columnsMeta;
+      return undefined;
     }
     return cascadedColumnsMeta;
-  }, [expandedDocOwner, columnsMeta, cascadedColumnsMeta]);
+  }, [expandedDocOwner, cascadedColumnsMeta]);
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
@@ -584,7 +578,7 @@ function DiscoverDocumentsComponent({
             ariaLabelledBy="documentsAriaLabel"
             cascadedDocumentsContext={cascadedDocumentsContext}
             columns={currentColumns}
-            columnsMeta={columnsMeta}
+            dataSource={currentDataSource}
             expandedDoc={expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER ? expandedDoc : undefined}
             dataView={dataView}
             loadingState={
@@ -648,6 +642,7 @@ function DiscoverDocumentsComponent({
           hits={renderDocumentViewMeta.displayedRows}
           // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
           columns={renderDocumentViewMeta.displayedColumns}
+          dataSource={currentDataSource}
           columnsMeta={flyoutColumnsMeta}
           savedSearchId={persistedDiscoverSession?.id!}
           query={query}

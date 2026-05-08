@@ -67,12 +67,12 @@ import {
   useDataGridInTableSearch,
 } from '@kbn/data-grid-in-table-search';
 import { useThrottleFn } from '@kbn/react-hooks';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { type DataSource, IndexPatternSource } from '@kbn/data-source';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
+import { getFieldFromDataSource } from '../utils/get_field_from_data_source';
 import type {
   UnifiedDataTableSettings,
   ValueToStringConverter,
-  DataTableColumnsMeta,
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
   DataGridPaginationMode,
@@ -137,7 +137,7 @@ export type RenderDocumentViewCallback = (
   hit: DataTableRecord,
   displayedRows: DataTableRecord[],
   displayedColumns: string[],
-  columnsMeta?: DataTableColumnsMeta
+  dataSource?: DataSource
 ) => JSX.Element | undefined;
 
 export interface RenderDocumentViewMeta {
@@ -162,11 +162,12 @@ interface InternalUnifiedDataTableProps {
    */
   columns: string[];
   /**
-   * If not provided, types will be derived by default from the dataView field types.
-   * For displaying text-based search results, pass columns meta (which are available separately in the fetch request) down here.
-   * Check available utils in `utils/get_columns_meta.ts`
+   * Polymorphic data source — `IndexPatternSource` for DSL queries, `EsqlSource`
+   * for ES|QL. Internal helpers consume this exclusively. If not provided, will
+   * be derived from `dataView` (wrapped in `IndexPatternSource`) for backward
+   * compatibility.
    */
-  columnsMeta?: DataTableColumnsMeta;
+  dataSource?: DataSource;
   /**
    * Field tokens could be rendered in column header next to the field name.
    */
@@ -535,7 +536,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     {
       ariaLabelledBy,
       columns,
-      columnsMeta,
+      dataSource: dataSourceProp,
       showColumnTokens,
       canDragAndDropColumns,
       configHeaderRowHeight,
@@ -622,6 +623,13 @@ const InternalUnifiedDataTable = React.forwardRef<
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
     useImperativeHandle(ref, () => dataGridRef.current!);
 
+    // Derive a DataSource from the prop or from the DataView for backward
+    // compatibility with callers that haven't migrated yet.
+    const dataSource = useMemo<DataSource | undefined>(
+      () => dataSourceProp ?? (dataView?.id ? new IndexPatternSource(dataView) : undefined),
+      [dataSourceProp, dataView]
+    );
+
     const [isFilterActive, setIsFilterActive] = useRestorableState('isFilterActive', false);
     const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
     const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
@@ -664,11 +672,11 @@ const InternalUnifiedDataTable = React.forwardRef<
         canPrependTimeFieldColumn(
           activeColumns,
           timeFieldName,
-          columnsMeta,
+          undefined,
           showTimeCol,
           isPlainRecord
         ),
-      [timeFieldName, isPlainRecord, showTimeCol, columnsMeta]
+      [timeFieldName, isPlainRecord, showTimeCol]
     );
 
     const visibleColumns = useMemo(() => {
@@ -682,9 +690,8 @@ const InternalUnifiedDataTable = React.forwardRef<
     const { sortedRows, sorting } = useSorting({
       rows,
       visibleColumns,
-      columnsMeta,
+      dataSource,
       sort,
-      dataView,
       isPlainRecord,
       isSortEnabled,
       isInMemorySortEnabled,
@@ -716,14 +723,13 @@ const InternalUnifiedDataTable = React.forwardRef<
         return convertValueToString({
           rowIndex,
           rows: displayedRows,
-          dataView,
+          dataSource,
           columnId,
           fieldFormats,
-          columnsMeta,
           options,
         });
       },
-      [displayedRows, dataView, fieldFormats, columnsMeta]
+      [displayedRows, dataSource, fieldFormats]
     );
 
     /**
@@ -867,7 +873,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     const renderCellValue = useMemo(
       () =>
         getRenderCellValueFn({
-          dataView,
+          dataSource,
           rows: displayedRows,
           shouldShowFieldHandler,
           closePopover: () => dataGridRef.current?.closeCellPopover(),
@@ -876,10 +882,9 @@ const InternalUnifiedDataTable = React.forwardRef<
           externalCustomRenderers,
           isPlainRecord,
           isCompressed: dataGridDensity === DataGridDensity.COMPACT,
-          columnsMeta,
         }),
       [
-        dataView,
+        dataSource,
         displayedRows,
         shouldShowFieldHandler,
         maxDocFieldsDisplayed,
@@ -887,7 +892,6 @@ const InternalUnifiedDataTable = React.forwardRef<
         externalCustomRenderers,
         isPlainRecord,
         dataGridDensity,
-        columnsMeta,
       ]
     );
 
@@ -983,11 +987,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       }
 
       return visibleColumns.map((columnName) => {
-        const field = getDataViewFieldOrCreateFromColumnMeta({
-          dataView,
-          fieldName: columnName,
-          columnMeta: columnsMeta?.[columnName],
-        });
+        const field = getFieldFromDataSource(dataSource, columnName);
         return (
           field?.toSpec() ?? {
             name: '',
@@ -997,7 +997,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           }
         );
       });
-    }, [cellActionsTriggerId, visibleColumns, dataView, columnsMeta]);
+    }, [cellActionsTriggerId, visibleColumns, dataSource]);
 
     const allCellActionsMetadata = useMemo(
       () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
@@ -1050,7 +1050,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           cellActionsHandling,
           rowsCount: displayedRows.length,
           settings,
-          dataView,
+          dataSource,
           defaultColumns,
           isSortEnabled,
           isPlainRecord,
@@ -1064,7 +1064,6 @@ const InternalUnifiedDataTable = React.forwardRef<
           onFilter,
           editField,
           visibleCellActions,
-          columnsMeta,
           showColumnTokens,
           headerRowHeightLines,
           customGridColumnsConfiguration,
@@ -1076,10 +1075,9 @@ const InternalUnifiedDataTable = React.forwardRef<
         }),
       [
         cellActionsHandling,
-        columnsMeta,
+        dataSource,
         columnsCellActions,
         customGridColumnsConfiguration,
-        dataView,
         dataViewFieldEditor,
         defaultColumns,
         displayedRows.length,
@@ -1532,7 +1530,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           {canSetExpandedDoc &&
             expandedDoc &&
             typeof renderDocumentView === 'function' &&
-            renderDocumentView(expandedDoc, displayedRows, displayedColumns, columnsMeta)}
+            renderDocumentView(expandedDoc, displayedRows, displayedColumns, dataSource)}
         </span>
       </UnifiedDataTableContext.Provider>
     );

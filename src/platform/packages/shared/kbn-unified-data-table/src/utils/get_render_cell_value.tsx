@@ -14,12 +14,8 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
-import type {
-  DataTableColumnsMeta,
-  DataTableRecord,
-  ShouldShowFieldInTableHandler,
-} from '@kbn/discover-utils/types';
+import type { DataSource } from '@kbn/data-source';
+import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
 import { formatFieldValueReact, tryPrettyPrintJsonBlocks } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
 import { UnifiedDataTableContext } from '../table_context';
@@ -27,13 +23,15 @@ import type { CustomCellRenderer } from '../types';
 import { SourceDocument } from '../components/source_document';
 import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
+import { getFieldFromDataSource } from './get_field_from_data_source';
+import { getCompatDataView } from './get_compat_data_view';
 
 export const CELL_CLASS = 'unifiedDataTable__cellValue';
 
 const IS_JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
 export const getRenderCellValueFn = ({
-  dataView,
+  dataSource,
   rows,
   shouldShowFieldHandler,
   closePopover,
@@ -42,9 +40,8 @@ export const getRenderCellValueFn = ({
   externalCustomRenderers,
   isPlainRecord,
   isCompressed = true,
-  columnsMeta,
 }: {
-  dataView: DataView;
+  dataSource: DataSource | undefined;
   rows: DataTableRecord[] | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   closePopover: () => void;
@@ -53,7 +50,6 @@ export const getRenderCellValueFn = ({
   externalCustomRenderers?: CustomCellRenderer;
   isPlainRecord?: boolean;
   isCompressed?: boolean;
-  columnsMeta: DataTableColumnsMeta | undefined;
 }) => {
   const UnifiedDataTableRenderCellValue = ({
     rowIndex,
@@ -65,11 +61,8 @@ export const getRenderCellValueFn = ({
     isExpanded,
   }: EuiDataGridCellValueElementProps) => {
     const row = rows ? rows[rowIndex] : undefined;
-    const field = getDataViewFieldOrCreateFromColumnMeta({
-      dataView,
-      fieldName: columnId,
-      columnMeta: columnsMeta?.[columnId],
-    });
+    const field = getFieldFromDataSource(dataSource, columnId);
+    const dataView = getCompatDataView(dataSource);
     const ctx = useContext(UnifiedDataTableContext);
     const internalCellProps = useRef<EuiDataGridSetCellProps>({});
     const customCellProps = useRef<EuiDataGridSetCellProps>({});
@@ -141,11 +134,11 @@ export const getRenderCellValueFn = ({
             isExpanded={isExpanded}
             colIndex={colIndex}
             row={row}
-            dataView={dataView}
+            dataView={dataView!}
             fieldFormats={fieldFormats}
             closePopover={closePopover}
             isCompressed={isCompressed}
-            columnsMeta={columnsMeta}
+            dataSource={dataSource}
           />
         </span>
       );
@@ -164,7 +157,7 @@ export const getRenderCellValueFn = ({
         row,
         field,
         columnId,
-        dataView,
+        dataView: dataView!,
         useTopLevelObjectColumns,
         fieldFormats,
         closePopover,
@@ -181,14 +174,13 @@ export const getRenderCellValueFn = ({
         <SourceDocument
           useTopLevelObjectColumns={useTopLevelObjectColumns}
           row={row}
-          dataView={dataView}
+          dataSource={dataSource}
           columnId={columnId}
           fieldFormats={fieldFormats}
           shouldShowFieldHandler={shouldShowFieldHandler}
           maxEntries={maxEntries}
           isPlainRecord={isPlainRecord}
           isCompressed={isCompressed}
-          columnsMeta={columnsMeta}
         />
       );
     }
@@ -199,7 +191,7 @@ export const getRenderCellValueFn = ({
           value: row.flattened[columnId],
           hit: row.raw,
           fieldFormats,
-          dataView,
+          dataView: dataView!,
           field,
         })}
       </span>

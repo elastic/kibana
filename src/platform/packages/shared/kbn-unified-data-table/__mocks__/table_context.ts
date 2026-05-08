@@ -34,8 +34,7 @@ const buildTableContext = (dataView: DataView, rows: DataTableRecord[]): DataTab
         columnId,
         fieldFormats: servicesMock.fieldFormats,
         rows,
-        dataView,
-        columnsMeta: undefined,
+        dataSource: undefined,
         options,
       }),
   };

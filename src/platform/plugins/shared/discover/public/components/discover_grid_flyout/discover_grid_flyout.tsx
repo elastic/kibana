@@ -11,9 +11,10 @@ import React, { useEffect, useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
+import { type DataSource, EsqlSource } from '@kbn/data-source';
+import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import type { DocViewerProps, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { UnifiedDocViewerFlyoutProps } from '@kbn/unified-doc-viewer-plugin/public';
@@ -35,6 +36,12 @@ export interface DiscoverGridFlyoutProps
   filters?: Filter[];
   query?: Query | AggregateQuery;
   columns: string[];
+  dataSource?: DataSource;
+  /**
+   * Explicit columns metadata override. Used by consumers (e.g. cascaded documents)
+   * that haven't migrated to `DataSource` yet; takes precedence over the metadata
+   * derived from `dataSource` when provided.
+   */
   columnsMeta?: DataTableColumnsMeta;
   hit: DataTableRecord;
   hits?: DataTableRecord[];
@@ -63,6 +70,7 @@ export function DiscoverGridFlyout({
   hits,
   dataView,
   columns,
+  dataSource,
   columnsMeta,
   savedSearchId,
   filters,
@@ -130,7 +138,12 @@ export function DiscoverGridFlyout({
       hits={hits}
       dataView={dataView}
       columns={columns}
-      columnsMeta={columnsMeta}
+      columnsMeta={
+        columnsMeta ??
+        (dataSource instanceof EsqlSource
+          ? getTextBasedColumnsMeta(dataSource.resultColumns as never)
+          : undefined)
+      }
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
       onClose={onClose}

@@ -10,6 +10,13 @@
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import { isEqual } from 'lodash';
+import type { DataSourceService } from '@kbn/data-source';
+import {
+  EsqlSource,
+  registerEsqlSourceInDataViewsCache,
+  unregisterFromDataViewsCache,
+} from '@kbn/data-source';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataDocumentsMsg, SavedSearchData } from '../discover_data_state_container';
 import { FetchStatus } from '../../../types';
 import type { InternalStateStore, TabActionInjector, TabState } from '../redux';
@@ -28,11 +35,15 @@ export const buildEsqlFetchSubscribe = ({
   dataSubjects,
   getCurrentTab,
   injectCurrentTab,
+  dataSourceService,
+  dataViews,
 }: {
   internalState: InternalStateStore;
   dataSubjects: SavedSearchData;
   getCurrentTab: () => TabState;
   injectCurrentTab: TabActionInjector;
+  dataSourceService: DataSourceService;
+  dataViews: DataViewsPublicPluginStart;
 }) => {
   let prevEsqlData: {
     initialFetch: boolean;
@@ -46,7 +57,22 @@ export const buildEsqlFetchSubscribe = ({
     defaultColumns: [],
   };
 
+  // Tracks the EsqlSource currently registered with `dataSourceService` so we
+  // can unregister it on cleanup or when the query changes. We re-register when
+  // the query text changes (different KEEP / DROP / STATS clauses can yield
+  // different columns even when the source id — derived from indexPattern +
+  // timeField — stays the same). Same query text across fetches is a no-op.
+  let registeredEsqlSourceId: string | undefined;
+  let lastRegisteredQuery: string | undefined;
+
   const cleanupEsql = () => {
+    if (registeredEsqlSourceId) {
+      dataSourceService.unregisterEsqlSource(registeredEsqlSourceId);
+      unregisterFromDataViewsCache(dataViews, registeredEsqlSourceId);
+      registeredEsqlSourceId = undefined;
+    }
+    lastRegisteredQuery = undefined;
+
     if (!prevEsqlData.query) {
       return;
     }
@@ -61,6 +87,28 @@ export const buildEsqlFetchSubscribe = ({
   };
 
   const esqlFetchSubscribe = async (next: DataDocumentsMsg) => {
+    // Register the freshly-fetched EsqlSource so cross-cutting consumers
+    // (filter resolution, etc.) can resolve it via dataSourceService.get(id).
+    // Re-register when the query text changes; same query text across fetches
+    // deterministically produces the same columns, so the registry entry is
+    // already current.
+    if (next.dataSource instanceof EsqlSource && next.query && isOfAggregateQueryType(next.query)) {
+      const currentQuery = next.query.esql;
+      if (currentQuery !== lastRegisteredQuery) {
+        // If the source identity also changed (different indexPattern or time
+        // field), unregister the previous id to avoid an orphan in the
+        // registry. Same id with new query text just overwrites via Map.set.
+        if (registeredEsqlSourceId && registeredEsqlSourceId !== next.dataSource.id) {
+          dataSourceService.unregisterEsqlSource(registeredEsqlSourceId);
+          unregisterFromDataViewsCache(dataViews, registeredEsqlSourceId);
+        }
+        dataSourceService.registerEsqlSource(next.dataSource);
+        await registerEsqlSourceInDataViewsCache(dataViews, next.dataSource);
+        registeredEsqlSourceId = next.dataSource.id;
+        lastRegisteredQuery = currentQuery;
+      }
+    }
+
     const { query: nextQuery } = next;
 
     if (!nextQuery) {
