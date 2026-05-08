@@ -1,0 +1,40 @@
+{
+  "dynamic": "false",
+  "properties": {
+    "@timestamp": { "type": "date" },
+    "message": { "type": "keyword" },
+    "ecs": {
+      "properties": {
+        "version": { "type": "keyword" }
+      }
+    },
+    "error": {
+      "properties": {
+        "message": { "type": "text", "norms": false }
+      }
+    },
+    "event": {
+      "properties": {
+        "action": { "type": "keyword" },
+        "duration": { "type": "long" },
+        "end": { "type": "date" },
+        "outcome": { "type": "keyword" },
+        "provider": { "type": "keyword" },
+        "start": { "type": "date" }
+      }
+    },
+    "kibana": {
+      "properties": {
+        "saved_objects": {
+          "properties": {
+            "id": { "type": "keyword" },
+            "rel": { "type": "keyword" },
+            "type": { "type": "keyword" }
+          }
+        },
+        "server_uuid": { "type": "keyword" },
+        "version": { "type": "keyword" }
+      }
+    }
+  }
+}

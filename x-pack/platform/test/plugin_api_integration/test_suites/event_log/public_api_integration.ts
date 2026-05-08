@@ -9,173 +9,15 @@ import { merge, omit, chunk, isEmpty } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import moment from 'moment';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { IEvent } from '@kbn/event-log-plugin/server';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server/types';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import EVENT_LOG_INDEX_MAPPINGS from './fixtures/event_log_index_mappings.json';
+import MULTI_INDEX_DOCS from './fixtures/event_log_multi_index_docs.json';
+import LEGACY_IDS_DOCS from './fixtures/event_log_legacy_ids_docs.json';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-// Minimal mapping shared by the two legacy event-log index fixtures below.
-// Using dynamic: 'false' (same as the original archives) so only the fields
-// we explicitly declare are indexed, which is sufficient for the queries
-// made by the Event Log public API.
-const EVENT_LOG_INDEX_MAPPINGS = {
-  dynamic: 'false' as const,
-  properties: {
-    '@timestamp': { type: 'date' as const },
-    message: { type: 'keyword' as const },
-    ecs: { properties: { version: { type: 'keyword' as const } } },
-    event: {
-      properties: {
-        action: { type: 'keyword' as const },
-        duration: { type: 'long' as const },
-        end: { type: 'date' as const },
-        provider: { type: 'keyword' as const },
-        start: { type: 'date' as const },
-      },
-    },
-    kibana: {
-      properties: {
-        saved_objects: {
-          properties: {
-            id: { type: 'keyword' as const },
-            rel: { type: 'keyword' as const },
-            type: { type: 'keyword' as const },
-          },
-        },
-        server_uuid: { type: 'keyword' as const },
-        version: { type: 'keyword' as const },
-      },
-    },
-  },
-};
-
-const SERVER_UUID = '5b2de169-2785-441b-ae8c-186a1936b17d';
-
-// Documents seeded for the Index Lifecycle test — 3 events per legacy index.
-const MULTI_INDEX_DOCS: Array<{ index: string; id: string; doc: object }> = [
-  {
-    index: '.kibana-event-log-7.9.0-000001',
-    id: 'XKbLb3UBt6Z_MVvSSPbe',
-    doc: {
-      '@timestamp': '2020-10-28T15:19:54.841Z',
-      ecs: { version: '1.5.0' },
-      event: { action: 'test', duration: 0, end: '2020-10-28T15:19:54.841Z', provider: 'event_log_fixture', start: '2020-10-28T15:19:54.841Z' },
-      kibana: { saved_objects: [{ id: '421f2511-5cd1-44fd-95df-e0df83e354d5', rel: 'primary', type: 'event_log_test' }], server_uuid: SERVER_UUID },
-      message: 'test 2020-10-28T15:19:53.825Z',
-    },
-  },
-  {
-    index: '.kibana-event-log-7.9.0-000001',
-    id: 'XabLb3UBt6Z_MVvSSfYD',
-    doc: {
-      '@timestamp': '2020-10-28T15:19:54.879Z',
-      ecs: { version: '1.5.0' },
-      event: { action: 'test', duration: 0, end: '2020-10-28T15:19:54.879Z', provider: 'event_log_fixture', start: '2020-10-28T15:19:54.879Z' },
-      kibana: { saved_objects: [{ id: '421f2511-5cd1-44fd-95df-e0df83e354d5', rel: 'primary', type: 'event_log_test' }], server_uuid: SERVER_UUID },
-      message: 'test 2020-10-28T15:19:54.849Z',
-    },
-  },
-  {
-    index: '.kibana-event-log-7.9.0-000001',
-    id: 'XqbLb3UBt6Z_MVvSSfYe',
-    doc: {
-      '@timestamp': '2020-10-28T15:19:54.905Z',
-      ecs: { version: '1.5.0' },
-      event: { action: 'test', duration: 0, end: '2020-10-28T15:19:54.905Z', provider: 'event_log_fixture', start: '2020-10-28T15:19:54.905Z' },
-      kibana: { saved_objects: [{ id: '421f2511-5cd1-44fd-95df-e0df83e354d5', rel: 'primary', type: 'event_log_test' }], server_uuid: SERVER_UUID },
-      message: 'test 2020-10-28T15:19:54.881Z',
-    },
-  },
-  {
-    index: '.kibana-event-log-8.0.0-000001',
-    id: 'X6bLb3UBt6Z_MVvSTfYk',
-    doc: {
-      '@timestamp': '2020-10-28T15:19:55.933Z',
-      ecs: { version: '1.5.0' },
-      event: { action: 'test', duration: 0, end: '2020-10-28T15:19:55.933Z', provider: 'event_log_fixture', start: '2020-10-28T15:19:55.933Z' },
-      kibana: { saved_objects: [{ id: '421f2511-5cd1-44fd-95df-e0df83e354d5', rel: 'primary', type: 'event_log_test' }], server_uuid: SERVER_UUID, version: '8.0.0' },
-      message: 'test 2020-10-28T15:19:55.913Z',
-    },
-  },
-  {
-    index: '.kibana-event-log-8.0.0-000001',
-    id: 'YKbLb3UBt6Z_MVvSTfY8',
-    doc: {
-      '@timestamp': '2020-10-28T15:19:55.957Z',
-      ecs: { version: '1.5.0' },
-      event: { action: 'test', duration: 0, end: '2020-10-28T15:19:55.957Z', provider: 'event_log_fixture', start: '2020-10-28T15:19:55.957Z' },
-      kibana: { saved_objects: [{ id: '421f2511-5cd1-44fd-95df-e0df83e354d5', rel: 'primary', type: 'event_log_test' }], server_uuid: SERVER_UUID, version: '8.0.0' },
-      message: 'test 2020-10-28T15:19:55.938Z',
-    },
-  },
-  {
-    index: '.kibana-event-log-8.0.0-000001',
-    id: 'YabLb3UBt6Z_MVvSTfZc',
-    doc: {
-      '@timestamp': '2020-10-28T15:19:55.991Z',
-      ecs: { version: '1.5.0' },
-      event: { action: 'test', duration: 0, end: '2020-10-28T15:19:55.991Z', provider: 'event_log_fixture', start: '2020-10-28T15:19:55.991Z' },
-      kibana: { saved_objects: [{ id: '421f2511-5cd1-44fd-95df-e0df83e354d5', rel: 'primary', type: 'event_log_test' }], server_uuid: SERVER_UUID, version: '8.0.0' },
-      message: 'test 2020-10-28T15:19:55.962Z',
-    },
-  },
-];
-
-// Documents seeded for the Legacy Ids test — 5 events sharing the 8.0.0 index,
-// mixing a "current" id (621f...) and a "legacy" id (521f...).
-const LEGACY_IDS_DOCS: Array<{ id: string; doc: object }> = [
-  {
-    id: 'X6bLb3UBt6Z_MVvSTfYk',
-    doc: {
-      '@timestamp': '2020-10-28T15:19:55.933Z',
-      ecs: { version: '1.5.0' },
-      event: { action: 'test', duration: 0, end: '2020-10-28T15:19:55.933Z', provider: 'event_log_fixture', start: '2020-10-28T15:19:55.933Z' },
-      kibana: { saved_objects: [{ id: '621f2511-5cd1-44fd-95df-e0df83e354d5', rel: 'primary', type: 'event_log_test' }], server_uuid: SERVER_UUID, version: '8.0.0' },
-      message: 'test 2020-10-28T15:19:55.913Z',
-    },
-  },
-  {
-    id: 'X6bLb3UBt6Z_MVvSTfYk0000',
-    doc: {
-      '@timestamp': '2020-10-28T15:19:55.933Z',
-      ecs: { version: '1.5.0' },
-      event: { action: 'test legacy', duration: 0, end: '2020-10-28T15:19:55.933Z', provider: 'event_log_fixture', start: '2020-10-28T15:19:55.933Z' },
-      kibana: { saved_objects: [{ id: '521f2511-5cd1-44fd-95df-e0df83e354d5', rel: 'primary', type: 'event_log_test' }], server_uuid: SERVER_UUID, version: '7.14.0' },
-      message: 'test legacy 2020-10-28T15:19:55.913Z',
-    },
-  },
-  {
-    id: 'YKbLb3UBt6Z_MVvSTfY8',
-    doc: {
-      '@timestamp': '2020-10-28T15:19:55.957Z',
-      ecs: { version: '1.5.0' },
-      event: { action: 'test', duration: 0, end: '2020-10-28T15:19:55.957Z', provider: 'event_log_fixture', start: '2020-10-28T15:19:55.957Z' },
-      kibana: { saved_objects: [{ id: '621f2511-5cd1-44fd-95df-e0df83e354d5', rel: 'primary', type: 'event_log_test' }], server_uuid: SERVER_UUID, version: '8.0.0' },
-      message: 'test 2020-10-28T15:19:55.938Z',
-    },
-  },
-  {
-    id: 'YabLb3UBt6Z_MVvSTfZc0000',
-    doc: {
-      '@timestamp': '2020-10-28T15:19:55.991Z',
-      ecs: { version: '1.5.0' },
-      event: { action: 'test', duration: 0, end: '2020-10-28T15:19:55.991Z', provider: 'event_log_fixture', start: '2020-10-28T15:19:55.991Z' },
-      kibana: { saved_objects: [{ id: '521f2511-5cd1-44fd-95df-e0df83e354d5', rel: 'primary', type: 'event_log_test' }], server_uuid: SERVER_UUID, version: '7.0.0' },
-      message: 'test legacy 2020-10-28T15:19:55.962Z',
-    },
-  },
-  {
-    id: 'YabLb3UBt6Z_MVvSTfZc',
-    doc: {
-      '@timestamp': '2020-10-28T15:19:55.991Z',
-      ecs: { version: '1.5.0' },
-      event: { action: 'test', duration: 0, end: '2020-10-28T15:19:55.991Z', provider: 'event_log_fixture', start: '2020-10-28T15:19:55.991Z' },
-      kibana: { saved_objects: [{ id: '621f2511-5cd1-44fd-95df-e0df83e354d5', rel: 'primary', type: 'event_log_test' }], server_uuid: SERVER_UUID, version: '8.0.0' },
-      message: 'test 2020-10-28T15:19:55.962Z',
-    },
-  },
-];
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -329,7 +171,7 @@ export default function ({ getService }: FtrProviderContext) {
         const indices = ['.kibana-event-log-7.9.0-000001', '.kibana-event-log-8.0.0-000001'];
         await es.indices.delete({ index: indices, ignore_unavailable: true });
         for (const index of indices) {
-          await es.indices.create({ index, mappings: EVENT_LOG_INDEX_MAPPINGS });
+          await es.indices.create({ index, mappings: EVENT_LOG_INDEX_MAPPINGS as MappingTypeMapping });
         }
         await es.bulk({
           operations: MULTI_INDEX_DOCS.flatMap(({ index, id, doc }) => [
@@ -366,7 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe(`Legacy Ids`, () => {
       before(async () => {
         await es.indices.delete({ index: '.kibana-event-log-8.0.0-000001', ignore_unavailable: true });
-        await es.indices.create({ index: '.kibana-event-log-8.0.0-000001', mappings: EVENT_LOG_INDEX_MAPPINGS });
+        await es.indices.create({ index: '.kibana-event-log-8.0.0-000001', mappings: EVENT_LOG_INDEX_MAPPINGS as MappingTypeMapping });
         await es.bulk({
           operations: LEGACY_IDS_DOCS.flatMap(({ id, doc }) => [
             { index: { _index: '.kibana-event-log-8.0.0-000001', _id: id } },
