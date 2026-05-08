@@ -18,8 +18,7 @@ import { casesTool } from './cases/cases';
 import { getDocumentByIdTool } from './get_document_by_id';
 import { getIndexMappingsTool } from './get_index_mapping';
 import { listIndicesTool } from './list_indices';
-import { indexExplorerTool } from './index_explorer';
-import { generateEsqlTool } from './generate_esql';
+import { testEsqlTool } from './test_esql';
 import { executeEsqlTool } from './execute_esql';
 import { searchTool } from './search';
 import { createVisualizationTool } from './create_visualization';
@@ -38,11 +37,10 @@ export const registerTools = ({
   const tools: Array<BuiltinToolDefinition<any>> = [
     searchTool({ coreSetup, topSnippetsDefaults: agentBuilder.topSnippets }),
     getDocumentByIdTool(),
+    testEsqlTool(),
     executeEsqlTool(),
-    generateEsqlTool(),
     getIndexMappingsTool(),
     listIndicesTool(),
-    indexExplorerTool(),
     createVisualizationTool(),
     productDocumentationTool(coreSetup),
     integrationKnowledgeTool(coreSetup),

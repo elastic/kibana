@@ -25,7 +25,6 @@ export const PCI_COMPLIANCE_SKILL_TOOL_IDS = [
   PCI_SCOPE_DISCOVERY_TOOL_ID,
   PCI_COMPLIANCE_TOOL_ID,
   PCI_FIELD_MAPPER_TOOL_ID,
-  platformCoreTools.generateEsql,
   platformCoreTools.executeEsql,
 ] as const;
 
@@ -59,14 +58,16 @@ Do **not** use this skill when:
 - **${PCI_SCOPE_DISCOVERY_TOOL_ID}**: Discover PCI-relevant indices and classify them by scope area (network, identity, endpoint, cloud, application). Uses a single batched field-capabilities call.
 - **${PCI_COMPLIANCE_TOOL_ID}**: Unified PCI DSS evaluation. Pass \`mode: "check"\` to run violation/coverage/preflight per requirement and return findings with evidence, or \`mode: "report"\` to produce a scorecard roll-up across requirements.
 - **${PCI_FIELD_MAPPER_TOOL_ID}**: Inspect non-ECS fields and suggest ECS mappings when scope discovery reports low ECS coverage.
-- **${platformCoreTools.generateEsql}**: Generate ES|QL queries for adapted compliance checks when mapped fields differ from ECS.
 - **${platformCoreTools.executeEsql}**: Execute ES|QL queries against discovered data.
+
+When you need to compose ES|QL for adapted compliance checks (mapped fields differ from ECS, or you need a
+custom aggregation), follow the \`elasticsearch-esql\` skill, then run the query with ${platformCoreTools.executeEsql}.
 
 ## Compliance Assessment Workflow
 
 1. **Discover available data** — call ${PCI_SCOPE_DISCOVERY_TOOL_ID} to identify indices and data coverage. Inspect \`scopeClaim\` in the response to verify which indices were evaluated.
 2. **Run checks or reports** — call ${PCI_COMPLIANCE_TOOL_ID}. Choose \`mode: "check"\` when the user wants per-requirement findings with evidence, or \`mode: "report"\` when they want a posture snapshot or executive summary.
-3. **Handle non-ECS data** — if scope discovery reports low ECS coverage, call ${PCI_FIELD_MAPPER_TOOL_ID} to discover field mappings, then use ${platformCoreTools.generateEsql} with those mappings.
+3. **Handle non-ECS data** — if scope discovery reports low ECS coverage, call ${PCI_FIELD_MAPPER_TOOL_ID} to discover field mappings, then follow the \`elasticsearch-esql\` skill to compose ES|QL using those mappings and run it with ${platformCoreTools.executeEsql}.
 
 ## Interpreting Results
 

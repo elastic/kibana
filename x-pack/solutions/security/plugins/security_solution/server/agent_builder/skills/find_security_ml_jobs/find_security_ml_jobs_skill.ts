@@ -79,17 +79,16 @@ After using this skill, you may want to use:
   - scoreThreshold: The anomaly score threshold to use when querying ML results (e.g. 75). The anomaly score must exceed this threshold to be considered a significant result.
 
 ### 2. Query ML job results
-- If the previous step returned activeJobIds, use the 'platform.core.generate_esql' tool to generate ESQL queries to find anomaly records that exceed the anomaly score threshold.
+- If the previous step returned activeJobIds, follow the 'elasticsearch-esql' skill to compose an ES|QL query that finds anomaly records exceeding the anomaly score threshold.
 - ONLY generate a query if activeJobIds.length > 0
-- Provide this context to the 'platform.core.generate_esql' tool:
-  "When generating ES|QL queries for machine learning jobs:
-  You **MUST ONLY** query the .ml-anomalies-* indices (e.g. FROM .ml-anomalies-*)
-  You **MUST ALWAYS** filter by activeJobIds using a WHERE clause (e.g. "WHERE job_id IN ({activeJobIds})") to ensure that you are only querying relevant and active ML jobs.
-  You **MUST ONLY** return anomalies with a 'record_score' bigger than {scoreThreshold} (Anomaly threshold set in the UI settings). Use this filter: "| WHERE record_score > {scoreThreshold}".
-  You **MUST ONLY** return anomalies with a 'result_type' of type 'record'. Use this filter: "WHERE result_type == \"record\"".
-  You **MUST ALWAYS** return required fields. Use this command: "KEEP ${getAnomalyKeepFields(
+- The query you compose **MUST** follow these rules:
+  * **MUST ONLY** query the .ml-anomalies-* indices (e.g. FROM .ml-anomalies-*)
+  * **MUST ALWAYS** filter by activeJobIds using a WHERE clause (e.g. "WHERE job_id IN ({activeJobIds})") to ensure that you are only querying relevant and active ML jobs.
+  * **MUST ONLY** return anomalies with a 'record_score' bigger than {scoreThreshold} (Anomaly threshold set in the UI settings). Use this filter: "| WHERE record_score > {scoreThreshold}".
+  * **MUST ONLY** return anomalies with a 'result_type' of type 'record'. Use this filter: "WHERE result_type == \"record\"".
+  * **MUST ALWAYS** return required fields. Use this command: "KEEP ${getAnomalyKeepFields(
     ctx.isEntityStoreV2Enabled
-  ).join(', ')}"."
+  ).join(', ')}".
 
   Fields that you MUST use to answer the question:
     * record_score: The anomaly score.
@@ -106,7 +105,7 @@ After using this skill, you may want to use:
 - When recommending jobs to enable, ALWAYS provide the full job title
 
 ### 4. Execute query to find anomalies
-- If the 'platform.core.generate_esql' tool returns a query, use the 'platform.core.execute_esql' tool to execute the query and get anomaly results
+- Run the composed ES|QL query with the 'platform.core.execute_esql' tool to get anomaly results.
 
 ${
   ctx.isEntityStoreV2Enabled
@@ -142,8 +141,8 @@ User query: Show users who downloaded unusually large data
 Steps:
 1. Use the 'find.security.ml.jobs' tool to find relevant ML jobs related to data download behavior for users.
 2. The tool returns 3 activeJobIds = ["high_sent_bytes_destination_ip", "high_bytes_written_to_external_device", "high_count_remote_file_transfer"]
-3. Use the 'platform.core.generate_esql' tool to generate the ES|QL query with the context provided above, including filtering by activeJobIds and anomaly score threshold.
-4. Execute the generated ES|QL query using the 'platform.core.execute_esql' tool to get anomaly results.
+3. Following the 'elasticsearch-esql' skill, compose an ES|QL query that filters by activeJobIds and the anomaly score threshold.
+4. Execute the composed ES|QL query using the 'platform.core.execute_esql' tool to get anomaly results.
 ${
   ctx.isEntityStoreV2Enabled
     ? `
@@ -157,7 +156,7 @@ ${
 
 `,
     getRegistryTools: () => {
-      const tools = ['platform.core.execute_esql', 'platform.core.generate_esql'];
+      const tools = ['platform.core.execute_esql'];
       if (ctx.isEntityStoreV2Enabled) {
         tools.push(SECURITY_GET_ENTITY_TOOL_ID);
       }

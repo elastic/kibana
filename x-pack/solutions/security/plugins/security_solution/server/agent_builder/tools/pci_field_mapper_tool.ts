@@ -272,7 +272,7 @@ export const pciFieldMapperTool = (
               sampleFieldNames: sampleFields.slice(0, 30),
               guidance:
                 mappings.length > 0
-                  ? 'Use the generateEsql tool to create adapted queries using the suggested field mappings above. ' +
+                  ? 'Follow the elasticsearch-esql skill to compose ES|QL using the suggested field mappings above, then run it with platform.core.execute_esql. ' +
                     'For example, if "username" maps to "user.name", use RENAME or reference the source field directly.'
                   : 'No automatic mappings found. Inspect the sample field names and create manual field mappings.',
               scopeClaim,

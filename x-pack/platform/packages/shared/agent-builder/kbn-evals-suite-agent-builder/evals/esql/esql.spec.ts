@@ -7,6 +7,7 @@
 
 import type { EvaluationDataset, EvalsExecutorClient, Example, ExperimentTask } from '@kbn/evals';
 import { createEsqlEquivalenceEvaluator } from '@kbn/evals';
+import type { TaskOutput } from '@kbn/evals';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { platformCoreTools } from '@kbn/agent-builder-common';
@@ -29,16 +30,31 @@ type DatasetExample = Example<
   }
 >;
 
-interface ToolResult {
-  data?: { esql?: string };
-  type?: string;
-}
-
-interface ToolTaskOutput {
-  results: unknown[];
+interface EsqlTaskOutput {
   errors: unknown[];
+  messages: Array<{ message: string }>;
+  steps: ToolCallStep[];
   esql: string;
 }
+
+interface ToolCallStep {
+  type?: string;
+  tool_id?: string;
+  params?: { query?: unknown };
+}
+
+const extractFirstExecuteEsqlQuery = (output: TaskOutput): string => {
+  const steps = (output as { steps?: ToolCallStep[] } | undefined)?.steps ?? ([] as ToolCallStep[]);
+  for (const step of steps) {
+    if (step.type !== 'tool_call') continue;
+    if (step.tool_id !== platformCoreTools.executeEsql) continue;
+    const query = step.params?.query;
+    if (typeof query === 'string' && query.length > 0) {
+      return query;
+    }
+  }
+  return '';
+};
 
 function createEvaluateEsqlDataset({
   executorClient,
@@ -54,36 +70,39 @@ function createEvaluateEsqlDataset({
   return async function evaluateDataset({ dataset: { name, description, examples } }) {
     const dataset = { name, description, examples } satisfies EvaluationDataset;
 
-    const executeToolTask: ExperimentTask<DatasetExample, ToolTaskOutput> = async ({ input }) => {
-      const response = await chatClient.executeTool({
-        toolId: platformCoreTools.generateEsql,
-        toolParams: { query: input!.question },
+    // The new ES|QL flow has the agent generate ES|QL itself by following the
+    // `elasticsearch-esql` skill, then run the query via `platform.core.execute_esql`.
+    // The eval drives the converse API end-to-end and extracts the ES|QL the agent
+    // submitted to `platform.core.execute_esql` for equivalence comparison against
+    // the ground truth query.
+    const executeAgentTask: ExperimentTask<DatasetExample, EsqlTaskOutput> = async ({ input }) => {
+      const response = await chatClient.converse({
+        messages: [{ message: input!.question }],
       });
 
-      const esql = (response.results as ToolResult[])
-        .filter((r) => r.type === 'query')
-        .map((r) => r.data?.esql)
-        .filter(Boolean)
-        .join('\n');
-
-      return {
-        results: response.results,
+      const steps = (response.steps ?? []) as ToolCallStep[];
+      const messages = response.messages.map(({ message }) => ({ message }));
+      const taskOutput: EsqlTaskOutput = {
         errors: response.errors,
-        esql,
+        messages,
+        steps,
+        esql: extractFirstExecuteEsqlQuery({ steps } as TaskOutput),
       };
+
+      return taskOutput;
     };
 
     const esqlEquivalenceEvaluator = createEsqlEquivalenceEvaluator({
       inferenceClient,
       log,
-      predictionExtractor: (output) => (output as ToolTaskOutput).esql ?? '',
+      predictionExtractor: (output) => (output as EsqlTaskOutput).esql ?? '',
       groundTruthExtractor: (expected) => (expected as { query?: string } | undefined)?.query ?? '',
     });
 
     await executorClient.runExperiment(
       {
         dataset,
-        task: executeToolTask,
+        task: executeAgentTask,
       },
       [esqlEquivalenceEvaluator]
     );

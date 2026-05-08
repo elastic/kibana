@@ -18,12 +18,11 @@ const platformCoreTool = <TName extends string>(
  * Ids of built-in agentBuilder tools
  */
 export const platformCoreTools = {
-  indexExplorer: platformCoreTool('index_explorer'),
   search: platformCoreTool('search'),
   listIndices: platformCoreTool('list_indices'),
   getIndexMapping: platformCoreTool('get_index_mapping'),
   getDocumentById: platformCoreTool('get_document_by_id'),
-  generateEsql: platformCoreTool('generate_esql'),
+  testEsql: platformCoreTool('test_esql'),
   executeEsql: platformCoreTool('execute_esql'),
   createVisualization: platformCoreTool('create_visualization'),
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),

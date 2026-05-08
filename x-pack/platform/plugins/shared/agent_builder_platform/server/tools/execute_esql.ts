@@ -50,15 +50,14 @@ export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolS
 
 ## Usage
 
-**IMPORTANT**: This tool only **runs** queries; it does not write them.
-Think of this as the final step after a query has been prepared.
+This tool runs an ES|QL query against Elasticsearch and returns the columns and values as a structured result.
 
-You **must** get the query from one of two sources before calling this tool:
-1.  The output of the \`${platformCoreTools.generateEsql}\` tool (if the tool is available).
-2.  A verbatim query provided directly by the user.
+To compose a correct ES|QL query, follow the \`elasticsearch-esql\` skill: it documents how to detect cluster
+features (\`${platformCoreTools.testEsql}\`), discover indices and field mappings (\`${platformCoreTools.listIndices}\`,
+\`${platformCoreTools.getIndexMapping}\`), pick the right ES|QL command for the task, and assemble the simplest
+correct query.
 
-Under no circumstances should you invent, guess, or modify a query yourself for this tool.
-If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.
+If the user provides a verbatim ES|QL query, you may pass it through to this tool unchanged.
 
 ### Using a limit
 

@@ -106,6 +106,7 @@ export const isAllowedBuiltinAgent = (agentName: string) => {
 export const AGENT_BUILDER_BUILTIN_SKILLS = [
   // Platform
   'data-exploration',
+  'elasticsearch-esql',
   'visualization-creation',
   'graph-creation',
 

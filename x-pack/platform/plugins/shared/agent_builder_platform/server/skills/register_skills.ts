@@ -6,10 +6,12 @@
  */
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import { elasticsearchEsqlSkill } from './elasticsearch_esql';
 import { graphCreationSkill } from './graph_creation_skill';
 import { visualizationCreationSkill } from './visualization_creation_skill';
 
 export const registerSkills = (agentBuilder: AgentBuilderPluginSetup) => {
+  agentBuilder.skills.register(elasticsearchEsqlSkill);
   agentBuilder.skills.register(visualizationCreationSkill);
   agentBuilder.skills.register(graphCreationSkill);
 };
