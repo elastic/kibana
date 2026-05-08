@@ -67,8 +67,8 @@ const fields = [
 const fieldsMap = Object.fromEntries(fields.map((field) => [field.name, field.spec]));
 
 const helpers = {
-  editField: (_fieldName: string) => {},
-  deleteField: (_fieldName: string[]) => {},
+  editField: jest.fn(),
+  deleteField: jest.fn(),
   // getFieldInfo handles non rollups as well
   getFieldInfo,
 };
@@ -144,9 +144,7 @@ const renderIndexedFieldsTable = (
       compositeRuntimeFields={{}}
       fieldFilter=""
       fields={fields}
-      fieldWildcardMatcher={() => {
-        return () => false;
-      }}
+      fieldWildcardMatcher={jest.fn(() => () => false)}
       helpers={helpers}
       indexedFieldTypeFilter={[]}
       indexPattern={indexPattern}

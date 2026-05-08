@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import { ScriptingDisabledCallOut } from './disabled_call_out';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { ScriptingDisabledCallOut } from './disabled_call_out';
 import { screen } from '@testing-library/react';
 
 describe('ScriptingDisabledCallOut', () => {
@@ -28,11 +28,5 @@ describe('ScriptingDisabledCallOut', () => {
     const { container } = renderWithI18n(<ScriptingDisabledCallOut />);
 
     expect(container).toBeEmptyDOMElement();
-    expect(screen.queryByText('Scripting disabled')).not.toBeInTheDocument();
-    expect(
-      screen.queryByText(
-        'All inline scripting has been disabled in Elasticsearch. You must enable inline scripting for at least one language in order to use scripted fields in Kibana.'
-      )
-    ).not.toBeInTheDocument();
   });
 });

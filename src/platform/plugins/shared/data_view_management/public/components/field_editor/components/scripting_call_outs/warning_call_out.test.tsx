@@ -44,11 +44,5 @@ describe('ScriptingWarningCallOut', () => {
     );
 
     expect(container).toBeEmptyDOMElement();
-    expect(screen.queryByText('Scripted fields are deprecated')).not.toBeInTheDocument();
-    expect(
-      screen.queryByText('For greater flexibility and Painless script support, use', {
-        exact: false,
-      })
-    ).not.toBeInTheDocument();
   });
 });

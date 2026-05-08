@@ -37,6 +37,5 @@ describe('CallOuts', () => {
     );
 
     expect(container).toBeEmptyDOMElement();
-    expect(screen.queryByText('Deprecated languages in use')).not.toBeInTheDocument();
   });
 });

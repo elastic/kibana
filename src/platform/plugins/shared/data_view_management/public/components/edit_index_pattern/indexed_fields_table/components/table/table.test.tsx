@@ -232,16 +232,16 @@ describe('Table', () => {
     expect(screen.queryByTestId('deleteField')).not.toBeInTheDocument();
   });
 
-  it('render name', async () => {
+  it('renders mapped field name', async () => {
     const mappedField = createIndexedField({ name: 'customer' });
 
-    const { unmount } = renderWithI18n(renderFieldName(mappedField));
+    renderWithI18n(renderFieldName(mappedField));
 
     expect(await screen.findByText('String')).toBeVisible();
     expect(screen.getByTestId('field-name-customer')).toHaveTextContent('customer');
+  });
 
-    unmount();
-
+  it('renders runtime field name with runtime info', async () => {
     const runtimeField = createIndexedField({
       hasRuntime: true,
       isMapped: false,
