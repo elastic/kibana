@@ -26,7 +26,7 @@ const getExpected = (config: ScoutTestConfig) => {
       count: 17,
     };
   }
-  
+
   if (config.projectType === 'security') {
     return {
       groups: [
