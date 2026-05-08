@@ -42,12 +42,9 @@ describe('generateWorkflowTool', () => {
       spaceId: 'default',
       attachments: {
         get: overrides.get ?? jest.fn(),
-        add:
-          overrides.add ??
-          jest.fn().mockResolvedValue({ id: 'new-att', current_version: 1 }),
+        add: overrides.add ?? jest.fn().mockResolvedValue({ id: 'new-att', current_version: 1 }),
         update:
-          overrides.update ??
-          jest.fn().mockResolvedValue({ id: 'src-att', current_version: 2 }),
+          overrides.update ?? jest.fn().mockResolvedValue({ id: 'src-att', current_version: 2 }),
       },
     } as any);
 
@@ -119,9 +116,7 @@ describe('generateWorkflowTool', () => {
       },
     };
     const get = jest.fn().mockReturnValue(sourceAttachment);
-    const update = jest
-      .fn()
-      .mockResolvedValue({ id: 'src-att', current_version: 2 });
+    const update = jest.fn().mockResolvedValue({ id: 'src-att', current_version: 2 });
     const context = buildContext({ get, update });
 
     const tool = generateWorkflowTool({ workflowsManagement });
@@ -156,15 +151,13 @@ describe('generateWorkflowTool', () => {
     expect((out as { results: Array<{ type: string; data: any }> }).results[0].type).toBe(
       ToolResultType.error
     );
-    expect((out as { results: Array<{ type: string; data: any }> }).results[0].data.message).toMatch(
-      /not found/i
-    );
+    expect(
+      (out as { results: Array<{ type: string; data: any }> }).results[0].data.message
+    ).toMatch(/not found/i);
   });
 
   it('returns an errorResult when the source attachment is the wrong type', async () => {
-    const get = jest
-      .fn()
-      .mockReturnValue({ id: 'x', type: 'something_else', data: { data: {} } });
+    const get = jest.fn().mockReturnValue({ id: 'x', type: 'something_else', data: { data: {} } });
     const context = buildContext({ get });
     const tool = generateWorkflowTool({ workflowsManagement });
 

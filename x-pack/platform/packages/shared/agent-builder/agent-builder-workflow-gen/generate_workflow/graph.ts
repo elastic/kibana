@@ -31,12 +31,7 @@ export interface CreateGraphArgs {
   logger: Logger;
 }
 
-export const createGenerateWorkflowGraph = ({
-  model,
-  api,
-  request,
-  spaceId,
-}: CreateGraphArgs) => {
+export const createGenerateWorkflowGraph = ({ model, api, request, spaceId }: CreateGraphArgs) => {
   const tools = buildBoundTools();
   const modelWithTools = model.chatModel.bindTools!(tools);
   const dispatchDeps = { api, spaceId, request };

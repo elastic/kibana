@@ -73,9 +73,7 @@ export const lookupStepDefinitions = async (
   const builtInIds = new Set(builtInStepDefinitions.map((s) => s.id));
   const builtIns = builtInStepDefinitions.map(formatBuiltInStep);
 
-  const allConnectors = getAllConnectors().filter(
-    (c) => !builtInIds.has(c.type) && !c.deprecation
-  );
+  const allConnectors = getAllConnectors().filter((c) => !builtInIds.has(c.type) && !c.deprecation);
   const allConnectorEntries = allConnectors.map(formatConnectorStep);
 
   const knownIds = new Set<string>(builtInIds);

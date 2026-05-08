@@ -14,11 +14,7 @@ import {
   formatStepDefinitionsBlock,
   formatTriggersBlock,
 } from './format_prefetched';
-import type {
-  ConnectorSummary,
-  StepDefinitionSummary,
-  TriggerDefinitionSummary,
-} from '../types';
+import type { ConnectorSummary, StepDefinitionSummary, TriggerDefinitionSummary } from '../types';
 
 describe('groupConnectorsByActionType', () => {
   it('groups instances and collapses identical stepTypes per actionTypeId', () => {
@@ -63,9 +59,7 @@ describe('groupConnectorsByActionType', () => {
 
 describe('formatConnectorsBlock', () => {
   it('returns the empty-state string when no connectors are configured', () => {
-    expect(formatConnectorsBlock([])).toBe(
-      'No connectors are configured in the user environment.'
-    );
+    expect(formatConnectorsBlock([])).toBe('No connectors are configured in the user environment.');
   });
 
   it('renders one section per actionTypeId with shared step types and bulleted instances', () => {
@@ -117,8 +111,9 @@ const step = (over: Partial<StepDefinitionSummary> = {}): StepDefinitionSummary 
 
 describe('formatStepEntry', () => {
   it('drops the label when it is a Title-cased version of the id', () => {
-    expect(formatStepEntry(step({ id: 'console', label: 'Console', description: 'Log a message' })))
-      .toBe('- console — Log a message');
+    expect(
+      formatStepEntry(step({ id: 'console', label: 'Console', description: 'Log a message' }))
+    ).toBe('- console — Log a message');
   });
 
   it('keeps the label when it differs from the id', () => {
@@ -133,20 +128,20 @@ describe('formatStepEntry', () => {
     // Label "Send Slack" differs from id "slack.send" (different words → label is kept).
     // Description "Send Slack" equals the label, so the description is dropped.
     expect(
-      formatStepEntry(
-        step({ id: 'slack.send', label: 'Send Slack', description: 'Send Slack' })
-      )
+      formatStepEntry(step({ id: 'slack.send', label: 'Send Slack', description: 'Send Slack' }))
     ).toBe('- slack.send (Send Slack)');
   });
 
   it('renders id-only when label is redundant and description is missing', () => {
-    expect(formatStepEntry(step({ id: 'email', label: 'Email', description: undefined })))
-      .toBe('- email');
+    expect(formatStepEntry(step({ id: 'email', label: 'Email', description: undefined }))).toBe(
+      '- email'
+    );
   });
 
   it('handles the slack_api edge case (id with underscore vs label "Slack API")', () => {
-    expect(formatStepEntry(step({ id: 'slack_api', label: 'Slack API', description: undefined })))
-      .toBe('- slack_api');
+    expect(
+      formatStepEntry(step({ id: 'slack_api', label: 'Slack API', description: undefined }))
+    ).toBe('- slack_api');
   });
 
   it('drops a label that is a substring of the id (e.g. "Break" inside "loop.break")', () => {
@@ -181,17 +176,13 @@ describe('formatStepEntry', () => {
 
   it('keeps a label that adds context beyond the id (id is contained in the label)', () => {
     expect(
-      formatStepEntry(
-        step({ id: 'teams', label: 'Microsoft Teams', description: undefined })
-      )
+      formatStepEntry(step({ id: 'teams', label: 'Microsoft Teams', description: undefined }))
     ).toBe('- teams (Microsoft Teams)');
   });
 
   it('keeps a label like "ServiceNow ITSM" when only the id is contained in it', () => {
     expect(
-      formatStepEntry(
-        step({ id: 'servicenow', label: 'ServiceNow ITSM', description: undefined })
-      )
+      formatStepEntry(step({ id: 'servicenow', label: 'ServiceNow ITSM', description: undefined }))
     ).toBe('- servicenow (ServiceNow ITSM)');
   });
 });
@@ -238,7 +229,12 @@ describe('bucketStepsBySection', () => {
     { id: 'foreach', label: 'Loop', description: 'Loop', category: 'flowControl' },
     { id: 'data.set', label: 'Set Variables', description: 'Set vars', category: 'data' },
     { id: 'ai.prompt', label: 'AI Prompt', description: 'Prompt', category: 'ai' },
-    { id: 'cases.createCase', label: 'Create case', description: 'Create', category: 'kibana.cases' },
+    {
+      id: 'cases.createCase',
+      label: 'Create case',
+      description: 'Create',
+      category: 'kibana.cases',
+    },
     { id: 'console', label: 'Console', description: 'Log', category: 'kibana' },
     { id: 'slack', label: 'Slack', description: 'Slack', category: 'external' },
     { id: 'github.foo', label: 'GitHub', description: 'GH', category: 'external' },
