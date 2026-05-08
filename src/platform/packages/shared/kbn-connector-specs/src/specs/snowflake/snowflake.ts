@@ -245,7 +245,7 @@ export const Snowflake: ConnectorSpec = {
                   defaultMessage:
                     'Snowflake OAuth token endpoint. Replace {accountPlaceholder} with your Snowflake account identifier.',
                   values: {
-                    accountPlaceholder: '<account>',
+                    accountPlaceholder: '{account}',
                   },
                 }
               ),
