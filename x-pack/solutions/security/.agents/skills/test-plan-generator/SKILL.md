@@ -64,6 +64,7 @@ Only the commands in this table are permitted. Do not run any `gh` command not l
 | Command | Scope |
 |---|---|
 | `gh auth status` | Read-only — auth check |
+| `gh repo view` | Read-only — used by `scripts/publish_test_plan.sh` to auto-detect the current repo |
 | `gh issue view` | Read-only |
 | `gh issue comment --body-file` | Write — post new test plan comment |
 | `gh issue list` | Read-only |
@@ -384,24 +385,15 @@ Tell the user:
    | File contains no shell commands or script tags | Stop — show user the anomalous content |
    | File contains no text matching the injection patterns from Security constraints | Stop — show user the anomalous content |
 
-4. Check for an existing comment before posting — creating a duplicate is an error:
+4. **Publish.** Run [`scripts/publish_test_plan.sh`](scripts/publish_test_plan.sh) from the repo root. It locates an existing comment by the marker, PATCHes or POSTs accordingly, deletes the draft on success, and prints the comment URL.
+
    ```
-   gh issue view <number> --repo <owner>/<repo> --json comments
+   x-pack/solutions/security/.agents/skills/test-plan-generator/scripts/publish_test_plan.sh \
+     [--repo <owner>/<repo>] <issue_number> .agents/tmp/test-plan-#<issue_number>.md
    ```
 
-Select the tool to use:
+   `--repo` is optional when the cwd is the same repo as the issue. The script aborts (exit 65) if the draft is missing the marker — a safety net for Step 4.2, not a substitute.
 
-| Tool | When |
-|---|---|
-| `gh` CLI | Available and authenticated — always prefer this. Verify with `gh auth status` first. |
-| GitHub MCP | Fallback if `gh` CLI is not available |
-| Neither | Stop — tell user to install `gh` with `brew install gh` and authenticate with `gh auth login` |
+   **If `gh` is unavailable or unauthenticated**, fall back to the GitHub MCP: fetch issue comments, edit the one starting with `<!-- test-plan-generated -->` if it exists or create a new one otherwise, then delete `.agents/tmp/test-plan-#<issue_number>.md`. If neither `gh` nor MCP works, stop and ask the user to install `gh` (`brew install gh && gh auth login`).
 
-Then post using the selected tool:
-
-| Existing comment? | `gh` CLI | GitHub MCP |
-|---|---|---|
-| Yes | `gh api --method PATCH /repos/<owner>/<repo>/issues/comments/<id> --field body=@file` | Edit the existing comment |
-| No | `gh issue comment <number> --repo <owner>/<repo> --body-file ...` | Create a new comment |
-
-After posting, delete the local file and confirm to the user with a direct link to the comment.
+5. Confirm to the user with the direct link to the comment.
