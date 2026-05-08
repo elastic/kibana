@@ -1898,10 +1898,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColorPicker.selectedColorLabel': i18n.translate('core.euiColorPicker.selectedColorLabel', {
       defaultMessage: 'Selected color',
     }),
-    'euiContextMenuPanelTitle.ariaLabel': ({ title }: EuiValues) =>
-      i18n.translate('core.euiContextMenuPanelTitle.ariaLabel', {
-        defaultMessage: 'Close current panel for: {title}',
-        values: { title },
-      }),
+    'euiContextMenuPanelTitle.ariaLabel': i18n.translate(
+      'core.euiContextMenuPanelTitle.ariaLabel',
+      {
+        defaultMessage: 'Close current panel:',
+      }
+    ),
   };
 };
