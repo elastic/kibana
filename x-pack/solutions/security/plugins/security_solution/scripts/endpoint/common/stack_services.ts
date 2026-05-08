@@ -334,15 +334,9 @@ export const createKbnClient = ({
  */
 export const buildUrlWithSpaceId = (url: string, spaceId: string): string => {
   const newUrl = new URL(url);
-  let requestPath = newUrl.pathname;
-  const currentUrlSpace = getSpaceIdFromPath(requestPath); // NOTE: we are not currently supporting a Kibana base path prefix
+  const { pathname } = getSpaceIdFromPath(newUrl.pathname);
 
-  if (currentUrlSpace.pathHasExplicitSpaceIdentifier) {
-    // Get the request path (if any) from the url
-    requestPath = requestPath.substring(`/s/${currentUrlSpace.spaceId}`.length) || '/';
-  }
-
-  newUrl.pathname = addSpaceIdToPath('/', spaceId, requestPath);
+  newUrl.pathname = addSpaceIdToPath('/', spaceId, pathname);
 
   return newUrl.href;
 };

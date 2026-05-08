@@ -53,7 +53,7 @@ import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monito
 import type { Env } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { type Attributes, metrics, ValueType } from '@opentelemetry/api';
-import { getSpaceUrlPrefix, getSpaceIdFromPath } from '@kbn/core-spaces-common';
+import { getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import type { HttpConfig } from './http_config';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
@@ -632,11 +632,9 @@ export class HttpServer {
       const parentContext = executionContext?.getParentContextFrom(request.headers);
       const originalUrl = request.url;
 
-      const { spaceId, pathHasExplicitSpaceIdentifier } = getSpaceIdFromPath(request.url.pathname);
-      if (pathHasExplicitSpaceIdentifier) {
-        const spacePrefix = getSpaceUrlPrefix(spaceId);
-        const newPathname = request.url.pathname.slice(spacePrefix.length) || '/';
-        request.setUrl(`${newPathname}${request.url.search}`);
+      const { spaceId, pathname } = getSpaceIdFromPath(request.url.pathname);
+      if (pathname !== request.url.pathname) {
+        request.setUrl(`${pathname}${request.url.search}`);
       }
 
       const app: KibanaRequestState = request.app as KibanaRequestState;

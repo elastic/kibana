@@ -12,77 +12,75 @@ import { DEFAULT_SPACE_ID } from './space_id';
 
 describe('getSpaceIdFromPath', () => {
   describe('without a serverBasePath defined', () => {
-    test('it identifies the space url context', () => {
-      const basePath = `/s/my-awesome-space-lives-here`;
-      expect(getSpaceIdFromPath(basePath)).toEqual({
-        spaceId: 'my-awesome-space-lives-here',
-        pathHasExplicitSpaceIdentifier: true,
+    test('extracts spaceId and strips the space prefix from the path', () => {
+      expect(getSpaceIdFromPath('/s/my-space/app/foo')).toEqual({
+        spaceId: 'my-space',
+        pathname: '/app/foo',
       });
     });
 
-    test('ignores space identifiers in the middle of the path', () => {
-      const basePath = `/this/is/a/crazy/path/s/my-awesome-space-lives-here`;
-      expect(getSpaceIdFromPath(basePath)).toEqual({
+    test('returns DEFAULT_SPACE_ID and unchanged path when no /s/ prefix', () => {
+      expect(getSpaceIdFromPath('/app/foo')).toEqual({
         spaceId: DEFAULT_SPACE_ID,
-        pathHasExplicitSpaceIdentifier: false,
+        pathname: '/app/foo',
       });
     });
 
-    test('it handles base url without a space url context', () => {
-      const basePath = `/this/is/a/crazy/path/s`;
-      expect(getSpaceIdFromPath(basePath)).toEqual({
+    test('ignores /s/<id> in the middle of the path', () => {
+      expect(getSpaceIdFromPath('/this/is/a/crazy/path/s/my-space')).toEqual({
         spaceId: DEFAULT_SPACE_ID,
-        pathHasExplicitSpaceIdentifier: false,
+        pathname: '/this/is/a/crazy/path/s/my-space',
       });
     });
 
-    test('it identifies the space url context with the default space', () => {
-      const basePath = `/s/${DEFAULT_SPACE_ID}`;
-      expect(getSpaceIdFromPath(basePath)).toEqual({
+    test('handles path ending in /s without a space id', () => {
+      expect(getSpaceIdFromPath('/this/is/a/crazy/path/s')).toEqual({
         spaceId: DEFAULT_SPACE_ID,
-        pathHasExplicitSpaceIdentifier: true,
+        pathname: '/this/is/a/crazy/path/s',
+      });
+    });
+
+    test('returns "/" pathname when path is only the space prefix', () => {
+      expect(getSpaceIdFromPath('/s/my-space')).toEqual({
+        spaceId: 'my-space',
+        pathname: '/',
+      });
+    });
+
+    test('handles the default space explicitly', () => {
+      expect(getSpaceIdFromPath(`/s/${DEFAULT_SPACE_ID}`)).toEqual({
+        spaceId: DEFAULT_SPACE_ID,
+        pathname: '/',
       });
     });
   });
 
   describe('with a serverBasePath defined', () => {
-    test('it identifies the space url context', () => {
-      const basePath = `/s/my-awesome-space-lives-here`;
-      expect(getSpaceIdFromPath(basePath, '/')).toEqual({
-        spaceId: 'my-awesome-space-lives-here',
-        pathHasExplicitSpaceIdentifier: true,
+    test('strips serverBasePath before extracting spaceId', () => {
+      expect(getSpaceIdFromPath('/server/s/my-space/app/foo', '/server')).toEqual({
+        spaceId: 'my-space',
+        pathname: '/app/foo',
       });
     });
 
-    test('it identifies the space url context following the server base path', () => {
-      const basePath = `/server-base-path-here/s/my-awesome-space-lives-here`;
-      expect(getSpaceIdFromPath(basePath, '/server-base-path-here')).toEqual({
-        spaceId: 'my-awesome-space-lives-here',
-        pathHasExplicitSpaceIdentifier: true,
-      });
-    });
-
-    test('ignores space identifiers in the middle of the path', () => {
-      const basePath = `/this/is/a/crazy/path/s/my-awesome-space-lives-here`;
-      expect(getSpaceIdFromPath(basePath, '/this/is/a')).toEqual({
+    test('returns DEFAULT_SPACE_ID when no space prefix after serverBasePath', () => {
+      expect(getSpaceIdFromPath('/server/app/foo', '/server')).toEqual({
         spaceId: DEFAULT_SPACE_ID,
-        pathHasExplicitSpaceIdentifier: false,
+        pathname: '/app/foo',
       });
     });
 
-    test('it identifies the space url context with the default space following the server base path', () => {
-      const basePath = `/server-base-path-here/s/${DEFAULT_SPACE_ID}`;
-      expect(getSpaceIdFromPath(basePath, '/server-base-path-here')).toEqual({
+    test('ignores /s/<id> in the middle after serverBasePath strip', () => {
+      expect(getSpaceIdFromPath('/this/is/a/crazy/path/s/my-space', '/this/is/a')).toEqual({
         spaceId: DEFAULT_SPACE_ID,
-        pathHasExplicitSpaceIdentifier: true,
+        pathname: '/crazy/path/s/my-space',
       });
     });
 
-    test('it handles base url without a space url context', () => {
-      const basePath = `/this/is/a/crazy/path/s`;
-      expect(getSpaceIdFromPath(basePath, basePath)).toEqual({
+    test('handles path equal to serverBasePath', () => {
+      expect(getSpaceIdFromPath('/this/is/a/crazy/path/s', '/this/is/a/crazy/path/s')).toEqual({
         spaceId: DEFAULT_SPACE_ID,
-        pathHasExplicitSpaceIdentifier: false,
+        pathname: '',
       });
     });
   });
