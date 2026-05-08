@@ -364,6 +364,12 @@ await taskManager.ensureScheduled({
 
 Even on first scheduling, the empty `state` you pass MUST be valid input to `stateSchemaByVersion[1].schema`. Schedule with `state: {}` only when the v1 schema accepts an empty object.
 
+## 10. CI gate — update the registered task types assertion
+
+**Rule:** Adding a new task type breaks the FTR test at `x-pack/platform/test/plugin_api_integration/test_suites/task_manager/check_registered_task_types.ts` by design. Add the new task type id to the assertion array in the same PR.
+
+The assertion is a hard-coded sorted list of every registered task type, not a snapshot — there is no `-u` / `--updateSnapshot` flag. Edit the array by hand and keep it sorted. The test's existing comment captures the intent: the failure exists to force Response Ops review when the set of registered task types changes.
+
 ## Quick rule reference
 
 | Field / API | Rule | Default if omitted | When wrong |
@@ -415,6 +421,9 @@ When registering a new task type:
    - [ ] One-shot tasks use `schedule` / `bulkSchedule`
    - [ ] If schedule may be user-configurable, the existing task is read first and its schedule preserved
    - [ ] Initial `state` matches `stateSchemaByVersion[1].schema`
+
+6. **CI gate**
+   - [ ] New task type id added (in sorted order) to the assertion in `x-pack/platform/test/plugin_api_integration/test_suites/task_manager/check_registered_task_types.ts` — the test fails by design until you do
 
 ## Reviewer checklist
 
