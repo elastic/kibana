@@ -3055,7 +3055,7 @@
                   "TParams"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-                "lineNumber": 75,
+                "lineNumber": 76,
                 "columnNumber": 6,
                 "deprecated": false,
                 "docsReferencedTypeName": "TParams",
@@ -3078,7 +3078,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-                "lineNumber": 75,
+                "lineNumber": 76,
                 "columnNumber": 21,
                 "deprecated": false,
                 "docsReferencedTypeName": "ToolHandlerContext",
@@ -7334,7 +7334,7 @@
             "signature": [
               "(skill: ",
               "SkillDefinition",
-              "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/alerting\" | \"skills/platform/workflows\" | \"skills/platform/discover\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">) => void"
+              "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/security/compliance\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/alerting\" | \"skills/platform/workflows\" | \"skills/platform/discover\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">) => void"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
             "lineNumber": 63,
@@ -7351,7 +7351,7 @@
                 "description": [],
                 "signature": [
                   "SkillDefinition",
-                  "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/alerting\" | \"skills/platform/workflows\" | \"skills/platform/discover\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">"
+                  "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/security/compliance\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/alerting\" | \"skills/platform/workflows\" | \"skills/platform/discover\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
                 "lineNumber": 67,
@@ -7457,7 +7457,7 @@
             "signature": [
               "(skill: ",
               "SkillDefinition",
-              "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/alerting\" | \"skills/platform/workflows\" | \"skills/platform/discover\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">) => Promise<void>"
+              "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/security/compliance\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/alerting\" | \"skills/platform/workflows\" | \"skills/platform/discover\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">) => Promise<void>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
             "lineNumber": 79,
@@ -7474,7 +7474,7 @@
                 "description": [],
                 "signature": [
                   "SkillDefinition",
-                  "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/alerting\" | \"skills/platform/workflows\" | \"skills/platform/discover\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">"
+                  "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/security/compliance\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/alerting\" | \"skills/platform/workflows\" | \"skills/platform/discover\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugin_contract.ts",
                 "lineNumber": 83,
@@ -8318,11 +8318,29 @@
           "\nScoped context which can be used during tool execution to access\na panel of built-in services, such as a pre-scoped elasticsearch client."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-        "lineNumber": 77,
+        "lineNumber": 84,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/agent-builder-server",
+            "id": "def-common.ToolHandlerContext.callContext",
+            "type": "Object",
+            "tags": [],
+            "label": "callContext",
+            "description": [
+              "\nInformation about the tool call"
+            ],
+            "signature": [
+              "ToolHandlerCallContext"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
+            "lineNumber": 89,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/agent-builder-server",
             "id": "def-common.ToolHandlerContext.request",
@@ -8337,7 +8355,7 @@
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 82,
+            "lineNumber": 93,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8352,7 +8370,7 @@
               "\nId of the space associated with the request"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 87,
+            "lineNumber": 98,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8370,7 +8388,7 @@
               "IScopedClusterClient"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 91,
+            "lineNumber": 102,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8388,7 +8406,7 @@
               "SavedObjectsClientContract"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 96,
+            "lineNumber": 107,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8412,7 +8430,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 100,
+            "lineNumber": 111,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8436,7 +8454,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 105,
+            "lineNumber": 116,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8460,7 +8478,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 109,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8484,7 +8502,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 113,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8508,7 +8526,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 117,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8532,7 +8550,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 121,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8556,7 +8574,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 125,
+            "lineNumber": 136,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8580,7 +8598,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 129,
+            "lineNumber": 140,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8598,7 +8616,7 @@
               "AttachmentStateManager"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 133,
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8616,7 +8634,7 @@
               "IFileStore"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 138,
+            "lineNumber": 149,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8634,7 +8652,7 @@
               "SkillsService"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 142,
+            "lineNumber": 153,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8652,7 +8670,7 @@
               "ToolManager"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 146,
+            "lineNumber": 157,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8676,7 +8694,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 150,
+            "lineNumber": 161,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -8701,7 +8719,7 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 154,
+            "lineNumber": 165,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -10788,7 +10806,7 @@
           },
           " | undefined; skills?: ",
           "SkillDefinition",
-          "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/alerting\" | \"skills/platform/workflows\" | \"skills/platform/discover\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">[] | undefined; }"
+          "<string, \"skills/search\" | \"skills/security\" | \"skills/security/ml\" | \"skills/security/rules\" | \"skills/security/alerts\" | \"skills/security/alerts/rules\" | \"skills/security/endpoint\" | \"skills/security/entities\" | \"skills/security/compliance\" | \"skills/observability\" | \"skills/platform\" | \"skills/platform/streams\" | \"skills/platform/alerting\" | \"skills/platform/workflows\" | \"skills/platform/discover\" | \"skills/platform/dashboard\" | \"skills/platform/visualization\">[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/plugins/builtin_definition.ts",
         "lineNumber": 11,
@@ -12009,7 +12027,7 @@
           "<TResult>>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-        "lineNumber": 69,
+        "lineNumber": 70,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12026,7 +12044,7 @@
               "TParams"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 75,
+            "lineNumber": 76,
             "columnNumber": 6,
             "deprecated": false,
             "docsReferencedTypeName": "TParams",
@@ -12049,7 +12067,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-            "lineNumber": 75,
+            "lineNumber": 76,
             "columnNumber": 21,
             "deprecated": false,
             "docsReferencedTypeName": "ToolHandlerContext",
@@ -12071,7 +12089,7 @@
           "Omit<TResult, \"tool_result_id\"> & { tool_result_id?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-        "lineNumber": 31,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -12108,7 +12126,7 @@
           "<TResult>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-server/tools/handler.ts",
-        "lineNumber": 50,
+        "lineNumber": 51,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
