@@ -118,6 +118,7 @@ describe('AttachmentService getter', () => {
                 eventId: 'event-1',
                 index: 'index-1',
                 owner: 'securitySolution',
+                caseId: 'case-1',
                 created_at: '2019-11-25T21:55:00.177Z',
                 created_by: {
                   full_name: 'elastic',

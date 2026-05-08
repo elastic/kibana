@@ -73,6 +73,7 @@ describe('CaseCommentModel', () => {
           Array [
             Object {
               "attributes": Object {
+                "caseId": "mock-id-1",
                 "comment": "a comment",
                 "created_at": "2023-04-07T12:18:36.941Z",
                 "created_by": Object {
@@ -118,6 +119,7 @@ describe('CaseCommentModel', () => {
                 "alertId": Array [
                   "alert-id-1",
                 ],
+                "caseId": "mock-id-1",
                 "created_at": "2023-04-07T12:18:36.941Z",
                 "created_by": Object {
                   "email": "damaged_raccoon@elastic.co",
@@ -170,6 +172,7 @@ describe('CaseCommentModel', () => {
                   "test-id-3",
                   "test-id-5",
                 ],
+                "caseId": "mock-id-1",
                 "created_at": "2023-04-07T12:18:36.941Z",
                 "created_by": Object {
                   "email": "damaged_raccoon@elastic.co",
@@ -226,6 +229,7 @@ describe('CaseCommentModel', () => {
                 "alertId": Array [
                   "test-id-4",
                 ],
+                "caseId": "mock-id-1",
                 "created_at": "2023-04-07T12:18:36.941Z",
                 "created_by": Object {
                   "email": "damaged_raccoon@elastic.co",

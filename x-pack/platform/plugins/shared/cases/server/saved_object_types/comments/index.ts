@@ -11,6 +11,7 @@ import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 import type { CreateCommentsMigrationsDeps } from '../migrations';
 import { createCommentsMigrations } from '../migrations';
 import { modelVersion1 } from './model_versions/model_version_1';
+import { modelVersion2 } from './model_versions/model_version_2';
 
 /**
  * The comments in the mapping indicate the additional properties that are stored in Elasticsearch but are not indexed.
@@ -32,6 +33,9 @@ export const createCaseCommentSavedObjectType = ({
     properties: {
       comment: {
         type: 'text',
+      },
+      caseId: {
+        type: 'keyword',
       },
       owner: {
         type: 'keyword',
@@ -169,6 +173,7 @@ export const createCaseCommentSavedObjectType = ({
   migrations: () => createCommentsMigrations(migrationDeps),
   modelVersions: {
     1: modelVersion1,
+    2: modelVersion2,
   },
   management: {
     importableAndExportable: true,

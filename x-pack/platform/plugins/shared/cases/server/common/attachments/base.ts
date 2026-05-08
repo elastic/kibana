@@ -98,6 +98,7 @@ export function extractCommonAttributes(attributes: AttachmentAttributesV2): Com
       email: createdBy.email,
       profile_uid: createdBy.profile_uid,
     },
+    caseId: attributes.caseId,
     pushed_at: attributes.pushed_at ?? null,
     pushed_by: pushedBy
       ? {

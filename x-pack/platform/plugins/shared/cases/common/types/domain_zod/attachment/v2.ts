@@ -33,9 +33,13 @@ export const UnifiedAttachmentPayloadSchema = z.union([
   UnifiedValueAttachmentPayloadSchema,
 ]);
 
+/**
+ * V2 makes `caseId` required (V1 keeps it optional for legacy read tolerance).
+ * Stamped at write time by `transformNewComment`; defense-in-depth at the codec.
+ */
 export const UnifiedAttachmentAttributesSchema = UnifiedAttachmentPayloadSchema.and(
   AttachmentAttributesBasicSchema
-);
+).and(z.object({ caseId: z.string() }));
 
 export const UnifiedAttachmentSchema = UnifiedAttachmentAttributesSchema.and(
   z.object({ id: z.string(), version: z.string() })

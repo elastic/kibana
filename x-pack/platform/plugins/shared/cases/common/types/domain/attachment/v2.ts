@@ -12,6 +12,7 @@ import {
   AlertAttachmentAttributesRt,
   EventAttachmentAttributesRt,
   AttachmentAttributesBasicRt,
+  AttachmentAttributesBasicProps,
   AttachmentAttributesRt,
   AttachmentPatchAttributesRt,
   AttachmentRt,
@@ -64,11 +65,14 @@ export const UnifiedAttachmentPayloadRt = rt.union([
 
 /**
  * Saved Object attributes for Unified Attachments
- * Contains the payload and the basic attributes
+ *
+ * V2 makes `caseId` required (V1 keeps it optional for legacy read tolerance).
+ * Stamped at write time by `transformNewComment`; defense-in-depth at the codec.
  */
 export const UnifiedAttachmentAttributesRt = rt.intersection([
   UnifiedAttachmentPayloadRt,
   AttachmentAttributesBasicRt,
+  rt.strict({ caseId: rt.string }),
 ]);
 
 /**
@@ -109,7 +113,7 @@ const UnifiedValueAttachmentPayloadPartialRt = rt.exact(
 
 export const UnifiedAttachmentPatchAttributesRt = rt.intersection([
   rt.union([UnifiedReferenceAttachmentPayloadPartialRt, UnifiedValueAttachmentPayloadPartialRt]),
-  rt.exact(rt.partial(AttachmentAttributesBasicRt.type.props)),
+  rt.exact(rt.partial(AttachmentAttributesBasicProps)),
 ]);
 
 export type UnifiedReferenceAttachmentPayload = rt.TypeOf<

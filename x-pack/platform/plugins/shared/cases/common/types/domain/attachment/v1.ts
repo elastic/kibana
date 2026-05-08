@@ -27,7 +27,11 @@ export const FileAttachmentMetadataRt = rt.strict({
 
 export type FileAttachmentMetadata = rt.TypeOf<typeof FileAttachmentMetadataRt>;
 
-export const AttachmentAttributesBasicRt = rt.strict({
+// `caseId` is server-stamped at write time so aggregations/Discover can target
+// attachments by case id directly. Optional here for V1 read tolerance — the
+// model-version data_backfill is the source of truth for legacy docs;
+// `UnifiedAttachmentAttributesRt` (V2) makes it required.
+const AttachmentAttributesBasicRequiredProps = {
   created_at: rt.string,
   created_by: UserRt,
   owner: rt.string,
@@ -35,7 +39,21 @@ export const AttachmentAttributesBasicRt = rt.strict({
   pushed_by: rt.union([UserRt, rt.null]),
   updated_at: rt.union([rt.string, rt.null]),
   updated_by: rt.union([UserRt, rt.null]),
-});
+};
+
+const AttachmentAttributesBasicOptionalProps = {
+  caseId: rt.string,
+};
+
+export const AttachmentAttributesBasicRt = rt.intersection([
+  rt.strict(AttachmentAttributesBasicRequiredProps),
+  rt.exact(rt.partial(AttachmentAttributesBasicOptionalProps)),
+]);
+
+export const AttachmentAttributesBasicProps = {
+  ...AttachmentAttributesBasicRequiredProps,
+  ...AttachmentAttributesBasicOptionalProps,
+};
 
 export const FileAttachmentMetadataPayloadRt = rt.strict({
   mimeType: mimeTypeString,
@@ -393,7 +411,7 @@ export const AttachmentPatchAttributesRt = rt.intersection([
     rt.exact(rt.partial(ExternalReferenceSOAttachmentPayloadRt.type.props)),
     rt.exact(rt.partial(PersistableStateAttachmentPayloadRt.type.props)),
   ]),
-  rt.exact(rt.partial(AttachmentAttributesBasicRt.type.props)),
+  rt.exact(rt.partial(AttachmentAttributesBasicProps)),
 ]);
 
 export type AttachmentAttributes = rt.TypeOf<typeof AttachmentAttributesRt>;

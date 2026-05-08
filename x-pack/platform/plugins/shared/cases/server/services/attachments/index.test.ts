@@ -243,6 +243,7 @@ describe('AttachmentService', () => {
         type: 'comment',
         data: { content: 'hello' },
         owner: SECURITY_SOLUTION_OWNER,
+        caseId: 'case-1',
         created_at: '2024-01-01T00:00:00.000Z',
         created_by: { username: 'u', full_name: null, email: null },
         pushed_at: null,
@@ -326,6 +327,113 @@ describe('AttachmentService', () => {
       );
     });
 
+    describe('caseId top-level passthrough', () => {
+      // The service does not derive `caseId`; the caller (CaseCommentModel via
+      // transformNewComment) stamps it onto the attributes alongside
+      // created_by/created_at. These tests guarantee the service does not
+      // strip or mutate the field on either write path.
+      const unifiedAttrs = {
+        type: 'comment',
+        data: { content: 'hello' },
+        owner: SECURITY_SOLUTION_OWNER,
+        caseId: 'case-1',
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'u', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      };
+
+      it('create passes caseId through to the unified SO write', async () => {
+        const serviceWithFlagOn = new AttachmentService({
+          log: mockLogger,
+          persistableStateAttachmentTypeRegistry,
+          unsecuredSavedObjectsClient,
+          config: createAttachmentServiceConfig(true),
+        });
+        unsecuredSavedObjectsClient.create.mockResolvedValue({
+          id: '1',
+          type: CASE_ATTACHMENT_SAVED_OBJECT,
+          attributes: unifiedAttrs,
+          references: [],
+        });
+
+        await serviceWithFlagOn.create({
+          attributes: unifiedAttrs,
+          references: [],
+          id: '1',
+        });
+
+        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+          CASE_ATTACHMENT_SAVED_OBJECT,
+          expect.objectContaining({ caseId: 'case-1' }),
+          expect.any(Object)
+        );
+      });
+
+      it('bulkCreate passes caseId through per-attachment to the unified SO write', async () => {
+        const serviceWithFlagOn = new AttachmentService({
+          log: mockLogger,
+          persistableStateAttachmentTypeRegistry,
+          unsecuredSavedObjectsClient,
+          config: createAttachmentServiceConfig(true),
+        });
+        const second = { ...unifiedAttrs, caseId: 'case-2' };
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [
+            {
+              id: '1',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              attributes: unifiedAttrs,
+              references: [],
+            },
+            {
+              id: '2',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+              attributes: second,
+              references: [],
+            },
+          ],
+        });
+
+        await serviceWithFlagOn.bulkCreate({
+          attachments: [
+            { attributes: unifiedAttrs, references: [], id: '1' },
+            { attributes: second, references: [], id: '2' },
+          ],
+          refresh: false,
+        });
+
+        const calls = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0];
+        expect(calls[0].attributes).toMatchObject({ caseId: 'case-1' });
+        expect(calls[1].attributes).toMatchObject({ caseId: 'case-2' });
+      });
+
+      it('create passes caseId through to the legacy SO write', async () => {
+        const legacyAttrs = {
+          ...createUserAttachment().attributes,
+          caseId: 'case-legacy',
+        };
+        unsecuredSavedObjectsClient.create.mockResolvedValue({
+          ...createUserAttachment(),
+          attributes: legacyAttrs,
+        });
+
+        await service.create({
+          attributes: legacyAttrs,
+          references: [],
+          id: '1',
+        });
+
+        expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+          CASE_COMMENT_SAVED_OBJECT,
+          expect.objectContaining({ caseId: 'case-legacy' }),
+          expect.any(Object)
+        );
+      });
+    });
+
     it('when enabled, bulkUpdate accepts partial attributes for push metadata only', async () => {
       const serviceWithFlagOn = new AttachmentService({
         log: mockLogger,
@@ -337,6 +445,7 @@ describe('AttachmentService', () => {
         type: 'comment',
         data: { content: 'hello' },
         owner: SECURITY_SOLUTION_OWNER,
+        caseId: 'case-1',
         created_at: '2024-01-01T00:00:00.000Z',
         created_by: { username: 'u', full_name: null, email: null },
         pushed_at: null,

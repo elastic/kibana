@@ -33,6 +33,8 @@ export const AttachmentAttributesBasicSchema = z.object({
   created_at: z.string(),
   created_by: UserSchema,
   owner: z.string(),
+  /** See io-ts v1: optional for V1 read tolerance, required in V2. */
+  caseId: z.string().optional(),
   pushed_at: z.string().nullable(),
   pushed_by: UserSchema.nullable(),
   updated_at: z.string().nullable(),

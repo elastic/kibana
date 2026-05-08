@@ -77,6 +77,7 @@ function createCommentFindResponse(
           attributes: transformNewComment({
             ...comment,
             createdDate: '',
+            caseId: '',
           }) as AttachmentAttributes,
         });
       }
@@ -1087,6 +1088,7 @@ describe('common utils', () => {
         comment: 'A comment',
         type: AttachmentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
+        caseId: 'case-1',
         email: 'elastic@elastic.co',
         full_name: 'Elastic',
         username: 'elastic',
@@ -1096,6 +1098,7 @@ describe('common utils', () => {
       const res = transformNewComment(comment);
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "caseId": "case-1",
           "comment": "A comment",
           "created_at": "2020-04-09T09:43:51.778Z",
           "created_by": Object {
@@ -1119,6 +1122,7 @@ describe('common utils', () => {
         comment: 'A comment',
         type: AttachmentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
+        caseId: 'case-1',
         owner: SECURITY_SOLUTION_OWNER,
       };
 
@@ -1126,6 +1130,7 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "caseId": "case-1",
           "comment": "A comment",
           "created_at": "2020-04-09T09:43:51.778Z",
           "created_by": Object {
@@ -1149,6 +1154,7 @@ describe('common utils', () => {
         comment: 'A comment',
         type: AttachmentType.user as const,
         createdDate: '2020-04-09T09:43:51.778Z',
+        caseId: 'case-1',
         email: null,
         full_name: null,
         username: null,
@@ -1159,6 +1165,7 @@ describe('common utils', () => {
 
       expect(res).toMatchInlineSnapshot(`
         Object {
+          "caseId": "case-1",
           "comment": "A comment",
           "created_at": "2020-04-09T09:43:51.778Z",
           "created_by": Object {
