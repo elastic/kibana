@@ -6,18 +6,35 @@
  */
 
 export type ComposeDiscoverMode = 'create' | 'edit';
-export type RecoveryMode = 'default' | 'custom';
+// 'no-recovery' is a prototype-only placeholder — not yet wired to the API
+export type RecoveryType = 'default' | 'no-recovery' | 'custom';
 export type QueryTab = 'base' | 'alert' | 'recovery';
 export type DelayMode = 'immediate' | 'breaches' | 'duration';
+// PROTOTYPE: opt1 = separated alert/recovery steps; opt2 = combined query step
+export type LayoutOption = 'opt1' | 'opt2';
+
+/**
+ * Describes which tabs the Discover Sandbox should show.
+ * Computed from state by getSandboxTabConfig().
+ */
+export type SandboxTabConfig =
+  | { type: 'single' } // no tracking, no tabs — single editor
+  | { type: 'base-alert' } // opt1 alert step, tracking on
+  | { type: 'base-recovery' } // opt1 recovery step, custom recovery selected
+  | { type: 'all-three' }; // opt2, yaml mode, or any all-queries view
 
 export interface ComposeDiscoverState {
   mode: ComposeDiscoverMode;
+  // PROTOTYPE: layout option toggle
+  option: LayoutOption;
+  step: number;
   tracking: boolean;
   fullQuery: string;
   baseQuery: string;
   alertBlock: string;
   recoveryBlock: string;
-  recoveryMode: RecoveryMode;
+  recoveryType: RecoveryType;
+  notificationsEnabled: boolean;
   name: string;
   tags: string[];
   schedule: string;
@@ -41,7 +58,7 @@ export type ComposeDiscoverAction =
   | { type: 'SET_BASE_QUERY'; query: string }
   | { type: 'SET_ALERT_BLOCK'; block: string }
   | { type: 'SET_RECOVERY_BLOCK'; block: string }
-  | { type: 'SET_RECOVERY_MODE'; mode: RecoveryMode }
+  | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType }
   | { type: 'ENABLE_TRACKING'; base: string; alertBlock: string }
   | { type: 'DISABLE_TRACKING' }
   | { type: 'SET_TAB'; tab: QueryTab }
@@ -54,7 +71,13 @@ export type ComposeDiscoverAction =
   | { type: 'SET_RECOVERY_DELAY_MODE'; mode: DelayMode }
   | { type: 'SET_RECOVERY_DELAY_VALUE'; value: number }
   | { type: 'SET_YAML_MODE'; enabled: boolean }
+  | { type: 'SET_OPTION'; option: LayoutOption }
+  | { type: 'SET_STEP'; step: number }
+  | { type: 'GO_NEXT' }
+  | { type: 'GO_BACK' }
+  | { type: 'SET_NOTIFICATIONS_ENABLED'; enabled: boolean }
   | { type: 'OPEN_CHILD' }
+  | { type: 'OPEN_CHILD_FOR_STEP'; step: number }
   | { type: 'CLOSE_CHILD' }
   | { type: 'COMMIT_CHILD_QUERY'; fullQuery: string }
   | {
