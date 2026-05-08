@@ -5,79 +5,22 @@ description: >-
   Reacts to issues labeled `backlog-groom`, determines if the issue is stale or still valid,
   and either recommends closing or implements a fix with a linked pull request.
 on:
-  workflow_dispatch:
-    inputs:
-      issue_number:
-        description: "Issue number to process"
-        required: true
-        type: string
   issues:
-    types: [opened, labeled]
+    types: [labeled]
   status-comment: true
   permissions:
     contents: read
     issues: write
     pull-requests: read
   steps:
-    - name: Qualify trigger event
-      id: qualify_trigger
-      uses: actions/github-script@v9
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          'use strict';
-          const FACTORY_LABEL = 'backlog-groom';
-          const eventName = context.eventName;
-          const eventAction = context.payload.action;
-          const labelName = context.payload.label?.name ?? '';
-          const issueLabels = (context.payload.issue?.labels ?? []).map(l => l.name);
-
-          let eligible = false;
-          let reason = '';
-
-          if (eventName === 'workflow_dispatch') {
-            const inputNumber = context.payload.inputs?.issue_number ?? '';
-            if (!inputNumber || !/^\d+$/.test(inputNumber)) {
-              eligible = false;
-              reason = `workflow_dispatch requires a valid issue_number input; got '${inputNumber}'.`;
-            } else {
-              eligible = true;
-              reason = `Manual workflow_dispatch for issue #${inputNumber}.`;
-            }
-          } else if (eventName !== 'issues') {
-            reason = `Unsupported event '${eventName}'; expected 'issues' or 'workflow_dispatch'.`;
-          } else if (eventAction === 'labeled' && labelName === FACTORY_LABEL) {
-            eligible = true;
-            reason = `Issue labeled with ${FACTORY_LABEL}.`;
-          } else if (eventAction === 'opened' && issueLabels.includes(FACTORY_LABEL)) {
-            eligible = true;
-            reason = `Issue opened with ${FACTORY_LABEL} label.`;
-          } else {
-            reason = `Event does not qualify: action='${eventAction}', label='${labelName}'.`;
-          }
-
-          core.setOutput('event_eligible', eligible ? 'true' : 'false');
-          core.setOutput('event_eligible_reason', reason);
-          if (eligible) core.info(`Eligible: ${reason}`);
-          else core.info(`Not eligible: ${reason}`);
 
     - name: Capture issue context
       id: capture_issue_context
-      if: steps.qualify_trigger.outputs.event_eligible == 'true'
       uses: actions/github-script@v9
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
-          let issue = context.payload.issue;
-          if (!issue && context.eventName === 'workflow_dispatch') {
-            const num = parseInt(context.payload.inputs?.issue_number, 10);
-            const { data } = await github.rest.issues.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: num,
-            });
-            issue = data;
-          }
+          const issue = context.payload.issue;
           core.setOutput('issue_number', String(issue?.number ?? ''));
           core.setOutput('issue_title', issue?.title ?? '');
           core.setOutput('issue_body', issue?.body ?? '');
@@ -85,7 +28,6 @@ on:
 
     - name: Check actor trust
       id: check_actor_trust
-      if: steps.qualify_trigger.outputs.event_eligible == 'true'
       uses: actions/github-script@v9
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -137,9 +79,7 @@ on:
 
     - name: Check duplicate PR
       id: check_duplicate_pr
-      if: >-
-        steps.qualify_trigger.outputs.event_eligible == 'true' &&
-        steps.check_actor_trust.outputs.actor_trusted == 'true'
+      if: steps.check_actor_trust.outputs.actor_trusted == 'true'
       uses: actions/github-script@v9
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -168,7 +108,7 @@ on:
           else core.info('No duplicate PR found.');
 
 if: >-
-  needs.pre_activation.outputs.event_eligible == 'true' &&
+  github.event.label.name == 'backlog-groom' &&
   needs.pre_activation.outputs.actor_trusted == 'true' &&
   needs.pre_activation.outputs.duplicate_pr_found != 'true'
 steps:
@@ -187,8 +127,6 @@ permissions:
 jobs:
   pre-activation:
     outputs:
-      event_eligible: ${{ steps.qualify_trigger.outputs.event_eligible }}
-      event_eligible_reason: ${{ steps.qualify_trigger.outputs.event_eligible_reason }}
       issue_number: ${{ steps.capture_issue_context.outputs.issue_number }}
       issue_title: ${{ steps.capture_issue_context.outputs.issue_title }}
       issue_body: ${{ steps.capture_issue_context.outputs.issue_body }}
