@@ -6,7 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { EuiThemeComputed } from '@elastic/eui-theme-common';
+
 import type { ComponentHealth } from '../../../../common/types';
+
+import { COMPONENT_TYPE_VIS_COLORS, type OTelComponentType } from './constants';
 
 export type ComponentHealthStatus = 'healthy' | 'unhealthy' | 'unknown';
 
@@ -52,4 +56,49 @@ export const HEALTH_STATUS_COLORS: Record<ComponentHealthStatus, string> = {
   healthy: 'success',
   unhealthy: 'warning',
   unknown: 'subdued',
+};
+
+export const getHealthStatusColor = (
+  status: ComponentHealthStatus,
+  euiTheme: EuiThemeComputed<{}>
+): string => {
+  switch (status) {
+    case 'healthy':
+      return euiTheme.colors.backgroundFilledSuccess;
+    case 'unhealthy':
+      return euiTheme.colors.backgroundFilledWarning;
+    case 'unknown':
+    default:
+      return euiTheme.colors.lightShade;
+  }
+};
+
+export const nanosToMs = (nanos: number): number => nanos / 1_000_000;
+
+export const getComponentAccentColor = (
+  componentType: OTelComponentType,
+  euiTheme: EuiThemeComputed<{}>
+): string =>
+  euiTheme.colors.vis[COMPONENT_TYPE_VIS_COLORS[componentType]] ?? euiTheme.colors.mediumShade;
+
+export const findComponentHealth = (
+  health: ComponentHealth | undefined,
+  componentType: OTelComponentType,
+  componentId: string
+): ComponentHealth | undefined => {
+  const key = `${componentType}:${componentId}`;
+  const map = health?.component_health_map;
+  if (!map) {
+    return undefined;
+  }
+  if (map[key]) {
+    return map[key];
+  }
+  for (const entry of Object.values(map)) {
+    const found = findComponentHealth(entry, componentType, componentId);
+    if (found) {
+      return found;
+    }
+  }
+  return undefined;
 };
