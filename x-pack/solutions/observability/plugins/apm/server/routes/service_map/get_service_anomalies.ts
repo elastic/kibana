@@ -10,9 +10,9 @@ import { sortBy, uniqBy } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
 import { rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import type { ServiceAnomaliesResponse } from '@kbn/apm-types';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
-import type { ServiceHealthStatus } from '../../../common/service_health_status';
 import { getServiceHealthStatus } from '../../../common/service_health_status';
 import { defaultTransactionTypes } from '../../../common/transaction_types';
 import { withApmSpan } from '../../utils/with_apm_span';
@@ -26,18 +26,7 @@ import {
   ML_SERVICE_NAME_FIELD,
   ML_TRANSACTION_TYPE_FIELD,
 } from '../../lib/anomaly_detection/anomaly_search';
-
-export interface ServiceAnomaliesResponse {
-  mlJobIds: string[];
-  serviceAnomalies: Array<{
-    serviceName: string;
-    jobId: string;
-    transactionType: string;
-    actualValue: number;
-    anomalyScore: number;
-    healthStatus: ServiceHealthStatus;
-  }>;
-}
+export type { ServiceAnomaliesResponse } from '@kbn/apm-types';
 
 export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
   mlJobIds: [],

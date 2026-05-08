@@ -36,3 +36,6 @@ export * from './src/annotations';
 export * from './src/instances';
 export * from './src/anomaly_detector_type';
 export type * from './src/service_anomaly_timeseries';
+export type * from './src/service_anomalies';
+export type * from './src/service_anomaly_stats';
+export type * from './src/service_map';

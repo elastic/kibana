@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import type { ServiceAlertsResponse } from '@kbn/apm-api-shared';
+import type { ServiceMapServiceBadgesResponse } from '@kbn/apm-api-shared';
 import { MAX_NUMBER_OF_SERVICES } from '../services/get_services/get_services_items';
 import { getServicesAlerts } from '../services/get_services/get_service_alerts';
-import type { ServiceSloStatsResponse } from '../services/get_services/get_services_slo_stats';
 import { getServicesSloStats } from '../services/get_services/get_services_slo_stats';
 import type { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import type { ApmSloClient } from '../../lib/helpers/get_apm_slo_client';
-
-export interface ServiceMapServiceBadgesResponse {
-  alerts: ServiceAlertsResponse;
-  slos: ServiceSloStatsResponse;
-}
 
 export async function getServiceMapServiceBadges({
   serviceNames,

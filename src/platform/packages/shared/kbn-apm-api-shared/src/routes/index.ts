@@ -20,6 +20,7 @@ import { customDashboardsRouteDefinitions } from './custom_dashboards';
 import { dependenciesRouteDefinitions } from './dependencies';
 import { transactionsRouteDefinitions } from './transactions';
 import { servicesRouteDefinitions } from './services';
+import { serviceMapRouteDefinitions } from './service_map';
 import type { BuildGroupedRepository } from './types';
 
 export const routeDefinitions = {
@@ -37,6 +38,7 @@ export const routeDefinitions = {
   dependencies: dependenciesRouteDefinitions,
   transactions: transactionsRouteDefinitions,
   services: servicesRouteDefinitions,
+  serviceMap: serviceMapRouteDefinitions,
 };
 
 export type SharedAPMRouteRepository = BuildGroupedRepository<typeof routeDefinitions>;

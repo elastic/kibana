@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { MergedServiceStat, ServiceAlertsResponse } from '@kbn/apm-api-shared';
+import type {
+  MergedServiceStat,
+  ServiceAlertsResponse,
+  ServiceSloStatsResponse,
+} from '@kbn/apm-api-shared';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import type { ServiceAnomalyScoresResponse } from './get_service_anomaly_scores';
-import type { ServiceSloStatsResponse } from './get_services_slo_stats';
 import type { ServiceTransactionStatsResponse } from './get_service_transaction_stats';
 
 export function mergeServiceStats({
