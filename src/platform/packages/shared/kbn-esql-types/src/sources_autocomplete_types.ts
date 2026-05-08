@@ -50,3 +50,13 @@ export interface EsqlView {
 export interface EsqlViewsResult {
   views: EsqlView[];
 }
+
+export interface EsqlDataset {
+  dataset_id: string;
+  datasource: string;
+  resource: string;
+}
+
+export interface EsqlDatasetsResult {
+  datasets: EsqlDataset[];
+}
