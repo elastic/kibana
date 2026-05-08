@@ -29,7 +29,7 @@ const historySnapshotSchema = schema.object({
   ),
 });
 
-const logExtractionSchema = schema.object({
+const logExtractionSchemaV1 = schema.object({
   filter: schema.maybe(schema.string()),
   // large max size to avoid unbounded array validation
   additionalIndexPatterns: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
@@ -45,7 +45,7 @@ const logExtractionSchema = schema.object({
 
 const globalStateSchemaV1 = schema.object({
   historySnapshot: historySnapshotSchema,
-  logsExtraction: logExtractionSchema,
+  logsExtraction: logExtractionSchemaV1,
 });
 
 const version1: SavedObjectsFullModelVersion = {
@@ -56,11 +56,38 @@ const version1: SavedObjectsFullModelVersion = {
   },
 };
 
+const logExtractionSchemaV2 = logExtractionSchemaV1.extends({
+  excludedIndexPatterns: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
+});
+
+const globalStateSchemaV2 = globalStateSchemaV1.extends({
+  logsExtraction: logExtractionSchemaV2,
+});
+
+const version2: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'data_backfill',
+      backfillFn: () => ({
+        attributes: {
+          logsExtraction: {
+            excludedIndexPatterns: [],
+          },
+        },
+      }),
+    },
+  ],
+  schemas: {
+    create: globalStateSchemaV2,
+    forwardCompatibility: globalStateSchemaV2.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EntityStoreGlobalStateType: SavedObjectsType = {
   name: EntityStoreGlobalStateTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EntityStoreGlobalStateTypeMappings,
-  modelVersions: { 1: version1 },
+  modelVersions: { 1: version1, 2: version2 },
   hiddenFromHttpApis: true,
 };
