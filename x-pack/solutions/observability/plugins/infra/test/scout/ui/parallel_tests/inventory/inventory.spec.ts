@@ -215,6 +215,7 @@ test.describe(
     test('OTel (semconv): loads OpenTelemetry schema, waffle map, and node metrics', async ({
       pageObjects: { inventoryPage },
     }) => {
+      await inventoryPage.waitForNodesToLoad();
       await inventoryPage.goToTime(DATE_WITH_SEMCONV_DATA);
       await expect(inventoryPage.datePickerInput).toHaveValue(DATE_WITH_SEMCONV_DATA);
 
@@ -223,6 +224,7 @@ test.describe(
       });
 
       await test.step('waffle map shows each semconv host with a metric value', async () => {
+        await inventoryPage.waitForNodesToLoad();
         await expect(inventoryPage.mapViewButton).toHaveAttribute('aria-pressed', 'true');
         await expect(inventoryPage.waffleMap).toBeVisible();
 
@@ -239,6 +241,10 @@ test.describe(
       pageObjects: { inventoryPage },
     }) => {
       await inventoryPage.goToTime(DATE_WITH_SEMCONV_DATA);
+      await expect(inventoryPage.schemaSelect).toContainText('OpenTelemetry', {
+        timeout: EXTENDED_TIMEOUT,
+      });
+      await inventoryPage.waitForNodesToLoad();
       await inventoryPage.switchToTableView();
       await expect(inventoryPage.tableViewButton).toHaveAttribute('aria-pressed', 'true');
       await expect(inventoryPage.nodesOverviewTable).toBeVisible();
@@ -255,8 +261,12 @@ test.describe(
     test('OTel (semconv): filters waffle nodes by query bar', async ({
       pageObjects: { inventoryPage },
     }) => {
-      await inventoryPage.noDataPrompt.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+      await inventoryPage.waitForNodesToLoad();
       await inventoryPage.goToTime(DATE_WITH_SEMCONV_DATA);
+      await expect(inventoryPage.schemaSelect).toContainText('OpenTelemetry', {
+        timeout: EXTENDED_TIMEOUT,
+      });
+      await inventoryPage.waitForNodesToLoad();
       await expect(inventoryPage.waffleMap.getByTestId('nodeContainer')).toHaveCount(
         SEMCONV_HOSTS.length
       );
