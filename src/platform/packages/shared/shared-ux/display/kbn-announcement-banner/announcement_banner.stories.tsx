@@ -47,7 +47,7 @@ const IllustrationSmall = () => (
  * Controls panel can toggle the optional slots without exposing their inner
  * shape.
  */
-type StoryArgs = Omit<AnnouncementBannerProps, 'actionProps' | 'onDismiss'> & {
+type StoryArgs = Omit<AnnouncementBannerProps, 'onDismiss'> & {
   primaryAction: boolean;
   secondaryAction: boolean;
   onDismiss: boolean;
