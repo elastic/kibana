@@ -23,7 +23,12 @@ import {
   postParsePipelineDefinitionSchema,
   suggestProcessingPipeline,
 } from '@kbn/streams-ai';
-import { addDeterministicCustomIdentifiers } from '@kbn/streamlang';
+import {
+  addDeterministicCustomIdentifiers,
+  isActionBlock,
+  isConditionBlock,
+  type StreamlangStep,
+} from '@kbn/streamlang';
 import {
   PRIORITIZED_CONTENT_FIELDS,
   extractMessagesFromField,
@@ -50,6 +55,7 @@ import {
   extractSimulationErrors,
   injectIgnoreFailure,
   resolveSamples,
+  type FieldChange,
   type NlToStreamlangResult,
   type SamplesConfig,
   type SimulationMode,
@@ -399,6 +405,8 @@ export const runExtractFieldsFlow = async (
           `An existing step already extracts from field "${fieldName}" (${conflictingAction}). The new extraction may duplicate work — confirm with the user before applying.`
         );
       }
+      const overwriteWarning = buildOverwriteWarning(existingSteps, fieldChanges);
+      if (overwriteWarning) warnings.push(overwriteWarning);
     }
     if (shouldSimulatePartial) {
       const baseNote =
@@ -484,24 +492,207 @@ export const isExtractionStepOnField = (step: unknown, fieldName: string): boole
 };
 
 /**
- * Detect whether an existing pipeline step would mutate or drop the seed
+ * Detect whether an existing pipeline step could mutate or remove the seed
  * source field before the new extraction runs. Used by the merge step to
  * decide whether existing steps can keep their position (safe) or must be
- * pushed after the new extraction (because they would otherwise alter the
- * source the heuristic needs to read).
+ * pushed after the new extraction.
  *
- * Conservative — checks the common direct-modification cases. Condition
- * blocks are intentionally not recursed: false positives there would push
- * new extraction in front unnecessarily, which is never a correctness
- * problem (it just reverts to the pre-fix layout).
+ * Exhaustive over the full `StreamlangProcessorDefinition` discriminated
+ * union — adding a new streamlang action without updating this switch is a
+ * compile error (the `assertNever` branch). False negatives are unsafe
+ * (they let an existing step clobber the seed source before extraction
+ * reads it); false positives are merely suboptimal placement.
+ *
+ * Condition blocks recurse into their nested `steps` and `else` branches:
+ * a `set body.text` hidden inside a `where` block must still force
+ * defensive prepending.
  */
-export const stepWritesOrRemovesField = (step: unknown, fieldName: string): boolean => {
-  if (typeof step !== 'object' || step === null) return false;
-  const obj = step as { action?: unknown; from?: unknown; to?: unknown };
-  if (obj.to === fieldName) return true;
-  if (obj.action === 'remove' && obj.from === fieldName) return true;
-  if (obj.action === 'rename' && obj.from === fieldName) return true;
-  return false;
+export const stepWritesOrRemovesField = (step: StreamlangStep, fieldName: string): boolean => {
+  if (isConditionBlock(step)) {
+    const inner = step.condition.steps ?? [];
+    const elseInner = step.condition.else ?? [];
+    return [...inner, ...elseInner].some((s) => stepWritesOrRemovesField(s, fieldName));
+  }
+  if (!isActionBlock(step)) return false;
+
+  switch (step.action) {
+    case 'set':
+    case 'append':
+    case 'math':
+    case 'concat':
+    case 'enrich':
+    case 'join':
+      // Always have a required `to` and never mutate a `from`-shaped field.
+      return step.to === fieldName;
+    case 'rename':
+      return step.from === fieldName || step.to === fieldName;
+    case 'remove':
+      return step.from === fieldName;
+    case 'remove_by_prefix':
+      return fieldName === step.from || fieldName.startsWith(`${step.from}.`);
+    case 'convert':
+    case 'date':
+    case 'uppercase':
+    case 'lowercase':
+    case 'trim':
+    case 'sort':
+    case 'split':
+    case 'replace':
+      // Optional `to` — when omitted, write happens in-place on `from`.
+      return step.to === fieldName || (step.to == null && step.from === fieldName);
+    case 'redact':
+      // No `to` field — always rewrites `from` in-place.
+      return step.from === fieldName;
+    case 'network_direction':
+      // Default `target_field` in ES is "network.direction" but the
+      // streamlang type leaves it optional. If unset we cannot know the
+      // resolved field, so be conservative.
+      return step.target_field === fieldName || step.target_field == null;
+    case 'json_extract':
+      return step.extractions.some((extraction) => extraction.target_field === fieldName);
+    case 'grok': {
+      // Grok READS `from` and writes to whatever names appear in
+      // `%{PATTERN:fieldName}` capture syntax. String scan is sufficient —
+      // full pattern parsing isn't justified for this conservative check.
+      const needle = `:${fieldName}}`;
+      return step.patterns.some((pattern) => pattern.includes(needle));
+    }
+    case 'dissect':
+      // Dissect READS `from` and writes to `%{fieldName}` captures (the bare
+      // form — modifiers like `%{?ignored}`, `%{+continued}` don't write).
+      return step.pattern.includes(`%{${fieldName}}`);
+    case 'drop_document':
+      // Drops the whole doc, not a specific field — orthogonal to placement.
+      return false;
+    case 'manual_ingest_pipeline':
+      // Opaque — raw ES processors can do anything. Prepend defensively.
+      return true;
+    default:
+      return assertNever(step);
+  }
+};
+
+/**
+ * Enumerate the fields a step is known to write to. Used by the overwrite
+ * warning to detect when an existing step's output would clobber a field
+ * the new extraction is about to produce.
+ *
+ * Exhaustive over `StreamlangProcessorDefinition` — adding a new action
+ * without updating this switch is a compile error. Returns `[]` for
+ * read-only / doc-level / opaque actions: a missing target means "we don't
+ * know what this writes, so we cannot specifically warn". The placement
+ * decision still protects against silent clobbering of the seed source
+ * (see {@link stepWritesOrRemovesField}).
+ *
+ * Condition blocks union their inner branches' write targets — a nested
+ * `set my.field` should still surface in the overwrite warning.
+ */
+export const getStepWriteTargets = (step: StreamlangStep): string[] => {
+  if (isConditionBlock(step)) {
+    const inner = step.condition.steps ?? [];
+    const elseInner = step.condition.else ?? [];
+    return [...new Set([...inner, ...elseInner].flatMap(getStepWriteTargets))];
+  }
+  if (!isActionBlock(step)) return [];
+
+  switch (step.action) {
+    case 'set':
+    case 'append':
+    case 'math':
+    case 'concat':
+    case 'enrich':
+    case 'join':
+      return [step.to];
+    case 'rename':
+      return [step.to];
+    case 'convert':
+    case 'date':
+    case 'uppercase':
+    case 'lowercase':
+    case 'trim':
+    case 'sort':
+    case 'split':
+    case 'replace':
+      return [step.to ?? step.from];
+    case 'redact':
+      return [step.from];
+    case 'network_direction':
+      return step.target_field ? [step.target_field] : [];
+    case 'json_extract':
+      return [...new Set(step.extractions.map((extraction) => extraction.target_field))];
+    case 'grok': {
+      // Capture syntax: `%{PATTERN_NAME:field.name}` (with optional
+      // `:type` qualifier). The field name is whatever sits between `:`
+      // and the closing `}`.
+      const targets = new Set<string>();
+      const re = /%\{[^:}]+:([^:}]+)(?::[^}]+)?\}/g;
+      for (const pattern of step.patterns) {
+        let match: RegExpExecArray | null;
+        while ((match = re.exec(pattern)) !== null) targets.add(match[1]);
+      }
+      return [...targets];
+    }
+    case 'dissect': {
+      // Capture syntax: bare `%{field.name}` — modifiers (`+`, `?`, `&`,
+      // `*`) don't create a field of that name.
+      const targets = new Set<string>();
+      const re = /%\{([^?+&*}][^}]*)\}/g;
+      let match: RegExpExecArray | null;
+      while ((match = re.exec(step.pattern)) !== null) targets.add(match[1]);
+      return [...targets];
+    }
+    case 'remove':
+    case 'remove_by_prefix':
+    case 'drop_document':
+    case 'manual_ingest_pipeline':
+      // Removes / drops / opaque — no enumerable write target.
+      return [];
+    default:
+      return assertNever(step);
+  }
+};
+
+/**
+ * Compile-time exhaustiveness guard. The `default` branch of the switches
+ * above must call this so adding a new streamlang processor type without
+ * updating both helpers fails the type check.
+ */
+const assertNever = (step: never): never => {
+  throw new Error(`Unhandled streamlang step: ${JSON.stringify(step)}`);
+};
+
+/**
+ * Compose the "may overwrite extracted field" warning when an existing
+ * step writes to a field the new extraction is creating. Returns `null`
+ * when there is no overlap so the caller can omit the warning entirely.
+ *
+ * Surfaced regardless of placement order: in either order, the agent and
+ * user need to decide whether the existing step is now redundant or
+ * should retain precedence.
+ */
+export const buildOverwriteWarning = (
+  existingSteps: StreamlangStep[],
+  fieldChanges: FieldChange[]
+): string | null => {
+  const createdFields = new Set(
+    fieldChanges.filter((c) => c.change === 'created').map((c) => c.field)
+  );
+  if (createdFields.size === 0) return null;
+
+  const overlaps = new Set<string>();
+  for (const step of existingSteps) {
+    for (const target of getStepWriteTargets(step)) {
+      if (createdFields.has(target)) overlaps.add(target);
+    }
+  }
+  if (overlaps.size === 0) return null;
+
+  const fieldList = [...overlaps].map((f) => `"${f}"`).join(', ');
+  return (
+    `Existing step(s) write to field(s) ${fieldList} that the new extraction also produces. ` +
+    `Depending on the step order one will overwrite the other — confirm whether the existing step ` +
+    `should be kept, removed, or reordered before applying.`
+  );
 };
 
 /**

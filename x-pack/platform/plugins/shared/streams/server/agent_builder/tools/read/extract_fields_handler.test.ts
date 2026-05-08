@@ -50,6 +50,8 @@ beforeAll(() => {
 
 import {
   buildKeyValueHints,
+  buildOverwriteWarning,
+  getStepWriteTargets,
   isExtractionStepOnField,
   runExtractFieldsFlow,
   stepWritesOrRemovesField,
@@ -145,23 +147,30 @@ describe('stepWritesOrRemovesField', () => {
   // body.text is the canonical seed source; anything that mutates it must
   // run AFTER the new extraction reads it, never before.
   const sourceField = 'body.text';
+  // Test inputs are typed via `as unknown as StreamlangStep` so each case
+  // can express the minimal shape it cares about — the helpers exhaustively
+  // discriminate on `step.action`, so missing optional fields are fine.
+  const step = (s: object) => s as unknown as StreamlangStep;
 
   it('detects a `set` writing to the source field', () => {
     expect(
-      stepWritesOrRemovesField({ action: 'set', to: sourceField, value: 'redacted' }, sourceField)
+      stepWritesOrRemovesField(
+        step({ action: 'set', to: sourceField, value: 'redacted' }),
+        sourceField
+      )
     ).toBe(true);
   });
 
   it('detects `remove` against the source field', () => {
-    expect(stepWritesOrRemovesField({ action: 'remove', from: sourceField }, sourceField)).toBe(
-      true
-    );
+    expect(
+      stepWritesOrRemovesField(step({ action: 'remove', from: sourceField }), sourceField)
+    ).toBe(true);
   });
 
   it('detects `rename` away from the source field', () => {
     expect(
       stepWritesOrRemovesField(
-        { action: 'rename', from: sourceField, to: 'attributes.original_message' },
+        step({ action: 'rename', from: sourceField, to: 'attributes.original_message' }),
         sourceField
       )
     ).toBe(true);
@@ -170,7 +179,7 @@ describe('stepWritesOrRemovesField', () => {
   it('detects `convert` writing back into the source field via `to`', () => {
     expect(
       stepWritesOrRemovesField(
-        { action: 'convert', from: 'attributes.raw', to: sourceField, type: 'string' },
+        step({ action: 'convert', from: 'attributes.raw', to: sourceField, type: 'string' }),
         sourceField
       )
     ).toBe(true);
@@ -179,21 +188,431 @@ describe('stepWritesOrRemovesField', () => {
   it('returns false for an unrelated `set`', () => {
     expect(
       stepWritesOrRemovesField(
-        { action: 'set', to: 'attributes.environment', value: 'prod' },
+        step({ action: 'set', to: 'attributes.environment', value: 'prod' }),
         sourceField
       )
     ).toBe(false);
   });
 
-  it('returns false for grok reading the source field (read-only, safe to keep before)', () => {
+  it('returns false for grok reading the source field with no capture into it (read-only, safe to keep before)', () => {
     expect(
-      stepWritesOrRemovesField({ action: 'grok', from: sourceField, patterns: ['x'] }, sourceField)
+      stepWritesOrRemovesField(
+        step({ action: 'grok', from: sourceField, patterns: ['%{IP:client.ip}'] }),
+        sourceField
+      )
     ).toBe(false);
   });
 
-  it('returns false for non-objects', () => {
-    expect(stepWritesOrRemovesField(null, sourceField)).toBe(false);
-    expect(stepWritesOrRemovesField('grok', sourceField)).toBe(false);
+  it('detects `convert` writing back into the source field via implicit `to` (defaults to `from`)', () => {
+    expect(
+      stepWritesOrRemovesField(
+        step({ action: 'convert', from: sourceField, type: 'string' }),
+        sourceField
+      )
+    ).toBe(true);
+  });
+
+  it('detects `date` writing back into the source field via implicit `to` (defaults to `from`)', () => {
+    expect(
+      stepWritesOrRemovesField(
+        step({ action: 'date', from: sourceField, formats: ['ISO8601'] }),
+        sourceField
+      )
+    ).toBe(true);
+  });
+
+  it('detects `remove_by_prefix` covering the source field exactly', () => {
+    expect(
+      stepWritesOrRemovesField(step({ action: 'remove_by_prefix', from: sourceField }), sourceField)
+    ).toBe(true);
+  });
+
+  it('detects `remove_by_prefix` covering the source field as a nested prefix', () => {
+    expect(
+      stepWritesOrRemovesField(step({ action: 'remove_by_prefix', from: 'body' }), sourceField)
+    ).toBe(true);
+  });
+
+  it('detects `dissect` capturing back into the source field via `%{body.text}` syntax', () => {
+    expect(
+      stepWritesOrRemovesField(
+        step({ action: 'dissect', from: 'attributes.raw', pattern: '%{a} %{body.text}' }),
+        sourceField
+      )
+    ).toBe(true);
+  });
+
+  it('detects `grok` capturing back into the source field via `:body.text}` syntax', () => {
+    expect(
+      stepWritesOrRemovesField(
+        step({ action: 'grok', from: 'attributes.raw', patterns: ['%{GREEDYDATA:body.text}'] }),
+        sourceField
+      )
+    ).toBe(true);
+  });
+
+  it('detects in-place text actions (`uppercase` / `lowercase` / `trim` / `replace`) writing the source field via implicit `to`', () => {
+    for (const action of ['uppercase', 'lowercase', 'trim', 'replace'] as const) {
+      const extras =
+        action === 'replace'
+          ? { pattern: '\\s+', replacement: ' ' }
+          : ({} as Record<string, unknown>);
+      expect(
+        stepWritesOrRemovesField(step({ action, from: sourceField, ...extras }), sourceField)
+      ).toBe(true);
+    }
+  });
+
+  it('detects `redact` rewriting the source field in place', () => {
+    expect(
+      stepWritesOrRemovesField(
+        step({ action: 'redact', from: sourceField, patterns: ['%{IP:ip}'] }),
+        sourceField
+      )
+    ).toBe(true);
+  });
+
+  it('detects `json_extract` writing one of its `extractions` into the source field', () => {
+    expect(
+      stepWritesOrRemovesField(
+        step({
+          action: 'json_extract',
+          field: 'attributes.json',
+          extractions: [
+            { selector: '$.user', target_field: 'user.name' },
+            { selector: '$.body', target_field: sourceField },
+          ],
+        }),
+        sourceField
+      )
+    ).toBe(true);
+  });
+
+  it('detects `network_direction` writing to its `target_field` (and assumes worst-case when target_field is unset)', () => {
+    expect(
+      stepWritesOrRemovesField(
+        step({
+          action: 'network_direction',
+          source_ip: 'attributes.src',
+          destination_ip: 'attributes.dst',
+          target_field: sourceField,
+          internal_networks: ['private'],
+        }),
+        sourceField
+      )
+    ).toBe(true);
+    expect(
+      stepWritesOrRemovesField(
+        step({
+          action: 'network_direction',
+          source_ip: 'attributes.src',
+          destination_ip: 'attributes.dst',
+          internal_networks: ['private'],
+        }),
+        sourceField
+      )
+    ).toBe(true);
+  });
+
+  it('returns true for `manual_ingest_pipeline` (raw ES processors are opaque, must prepend defensively)', () => {
+    expect(
+      stepWritesOrRemovesField(
+        step({
+          action: 'manual_ingest_pipeline',
+          processors: [{ set: { field: 'x', value: 1 } }],
+        }),
+        sourceField
+      )
+    ).toBe(true);
+  });
+
+  it('returns false for `drop_document` (drops the doc entirely, orthogonal to placement)', () => {
+    expect(stepWritesOrRemovesField(step({ action: 'drop_document' }), sourceField)).toBe(false);
+  });
+
+  it('recurses into condition blocks — detects a nested `set` writing the source field', () => {
+    expect(
+      stepWritesOrRemovesField(
+        step({
+          condition: {
+            field: 'attributes.kind',
+            eq: 'pii',
+            steps: [{ action: 'set', to: sourceField, value: 'redacted' }],
+          },
+        }),
+        sourceField
+      )
+    ).toBe(true);
+  });
+
+  it('recurses into condition blocks — detects a write inside the `else` branch', () => {
+    expect(
+      stepWritesOrRemovesField(
+        step({
+          condition: {
+            field: 'attributes.kind',
+            eq: 'safe',
+            steps: [{ action: 'set', to: 'attributes.unrelated', value: 'x' }],
+            else: [{ action: 'remove', from: sourceField }],
+          },
+        }),
+        sourceField
+      )
+    ).toBe(true);
+  });
+
+  it('returns false for a condition block whose nested steps do not touch the source field', () => {
+    expect(
+      stepWritesOrRemovesField(
+        step({
+          condition: {
+            field: 'attributes.kind',
+            eq: 'safe',
+            steps: [{ action: 'set', to: 'attributes.flag', value: true }],
+          },
+        }),
+        sourceField
+      )
+    ).toBe(false);
+  });
+});
+
+describe('getStepWriteTargets', () => {
+  const step = (s: object) => s as unknown as StreamlangStep;
+
+  it('returns the `to` field for `set` / `append`', () => {
+    expect(
+      getStepWriteTargets(step({ action: 'set', to: 'attributes.env', value: 'prod' }))
+    ).toEqual(['attributes.env']);
+    expect(
+      getStepWriteTargets(step({ action: 'append', to: 'attributes.tags', value: ['x'] }))
+    ).toEqual(['attributes.tags']);
+  });
+
+  it('returns the `to` field for `rename` (the destination, not the source)', () => {
+    expect(
+      getStepWriteTargets(step({ action: 'rename', from: 'attributes.a', to: 'attributes.b' }))
+    ).toEqual(['attributes.b']);
+  });
+
+  it('returns the explicit `to` for `convert` / `date` when provided', () => {
+    expect(
+      getStepWriteTargets(
+        step({
+          action: 'convert',
+          from: 'attributes.raw',
+          to: 'attributes.converted',
+          type: 'integer',
+        })
+      )
+    ).toEqual(['attributes.converted']);
+    expect(
+      getStepWriteTargets(
+        step({
+          action: 'date',
+          from: 'attributes.ts_str',
+          to: '@timestamp',
+          formats: ['ISO8601'],
+        })
+      )
+    ).toEqual(['@timestamp']);
+  });
+
+  it('falls back to `from` for `convert` / `date` when `to` is omitted (in-place write)', () => {
+    expect(
+      getStepWriteTargets(step({ action: 'convert', from: 'attributes.raw', type: 'integer' }))
+    ).toEqual(['attributes.raw']);
+    expect(
+      getStepWriteTargets(step({ action: 'date', from: '@timestamp', formats: ['ISO8601'] }))
+    ).toEqual(['@timestamp']);
+  });
+
+  it('extracts named grok captures from a single pattern', () => {
+    expect(
+      getStepWriteTargets(
+        step({
+          action: 'grok',
+          from: 'body.text',
+          patterns: ['%{TIMESTAMP_ISO8601:@timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message}'],
+        })
+      )
+    ).toEqual(['@timestamp', 'log.level', 'message']);
+  });
+
+  it('handles grok captures with type qualifiers (e.g. `%{NUMBER:port:int}`)', () => {
+    expect(
+      getStepWriteTargets(
+        step({
+          action: 'grok',
+          from: 'body.text',
+          patterns: ['%{NUMBER:port:int} %{IP:client.ip}'],
+        })
+      )
+    ).toEqual(['port', 'client.ip']);
+  });
+
+  it('deduplicates targets across multiple grok patterns', () => {
+    expect(
+      getStepWriteTargets(
+        step({
+          action: 'grok',
+          from: 'body.text',
+          patterns: ['%{IP:client.ip}', '%{IP:client.ip} %{NUMBER:port}'],
+        })
+      )
+    ).toEqual(['client.ip', 'port']);
+  });
+
+  it('extracts dissect captures and ignores modifier captures (`+`, `?`, `&`, `*`)', () => {
+    expect(
+      getStepWriteTargets(
+        step({
+          action: 'dissect',
+          from: 'body.text',
+          // `%{?ignored}` and `%{+continued}` produce no field of those names.
+          pattern: '%{ts} %{?ignored} %{+continued} %{body}',
+        })
+      )
+    ).toEqual(['ts', 'body']);
+  });
+
+  it('returns each `extractions[].target_field` for `json_extract`', () => {
+    expect(
+      getStepWriteTargets(
+        step({
+          action: 'json_extract',
+          field: 'attributes.json',
+          extractions: [
+            { selector: '$.user', target_field: 'user.name' },
+            { selector: '$.body', target_field: 'body.text' },
+          ],
+        })
+      )
+    ).toEqual(['user.name', 'body.text']);
+  });
+
+  it('returns the `target_field` for `network_direction`, or `[]` when omitted', () => {
+    expect(
+      getStepWriteTargets(
+        step({
+          action: 'network_direction',
+          source_ip: 'a',
+          destination_ip: 'b',
+          target_field: 'network.direction',
+          internal_networks: ['private'],
+        })
+      )
+    ).toEqual(['network.direction']);
+    expect(
+      getStepWriteTargets(
+        step({
+          action: 'network_direction',
+          source_ip: 'a',
+          destination_ip: 'b',
+          internal_networks: ['private'],
+        })
+      )
+    ).toEqual([]);
+  });
+
+  it('returns `from` for in-place text actions (`uppercase` / `lowercase` / `trim` / `redact`) when `to` is omitted', () => {
+    expect(getStepWriteTargets(step({ action: 'uppercase', from: 'attributes.x' }))).toEqual([
+      'attributes.x',
+    ]);
+    expect(
+      getStepWriteTargets(step({ action: 'redact', from: 'message', patterns: ['%{IP:ip}'] }))
+    ).toEqual(['message']);
+  });
+
+  it('returns `[]` for read-only / doc-level / opaque actions', () => {
+    expect(getStepWriteTargets(step({ action: 'remove', from: 'x' }))).toEqual([]);
+    expect(getStepWriteTargets(step({ action: 'remove_by_prefix', from: 'x' }))).toEqual([]);
+    expect(getStepWriteTargets(step({ action: 'drop_document' }))).toEqual([]);
+    expect(getStepWriteTargets(step({ action: 'manual_ingest_pipeline', processors: [] }))).toEqual(
+      []
+    );
+  });
+
+  it("unions write targets from a condition block's nested steps and `else` branch", () => {
+    expect(
+      getStepWriteTargets(
+        step({
+          condition: {
+            field: 'attributes.kind',
+            eq: 'pii',
+            steps: [{ action: 'set', to: 'attributes.redacted', value: true }],
+            else: [{ action: 'set', to: 'attributes.kept', value: true }],
+          },
+        })
+      ).sort()
+    ).toEqual(['attributes.kept', 'attributes.redacted']);
+  });
+});
+
+describe('buildOverwriteWarning', () => {
+  const stepList = (steps: object[]) => steps as unknown as StreamlangStep[];
+
+  it('returns null when no fields were created', () => {
+    expect(
+      buildOverwriteWarning(stepList([{ action: 'set', to: 'attributes.env', value: 'prod' }]), [
+        { field: 'foo', change: 'modified' },
+      ])
+    ).toBeNull();
+  });
+
+  it('returns null when no existing step writes to a created field', () => {
+    expect(
+      buildOverwriteWarning(stepList([{ action: 'set', to: 'attributes.env', value: 'prod' }]), [
+        { field: 'attributes.timestamp', change: 'created' },
+      ])
+    ).toBeNull();
+  });
+
+  it('warns when a `set` overlaps a created field', () => {
+    const warning = buildOverwriteWarning(
+      stepList([{ action: 'set', to: 'attributes.timestamp', value: '2020-01-01' }]),
+      [{ field: 'attributes.timestamp', change: 'created' }]
+    );
+    expect(warning).not.toBeNull();
+    expect(warning).toContain('"attributes.timestamp"');
+    expect(warning).toContain('overwrite the other');
+  });
+
+  it('warns when an existing grok captures into a field the new extraction also creates', () => {
+    const warning = buildOverwriteWarning(
+      stepList([
+        {
+          action: 'grok',
+          from: 'attributes.raw',
+          patterns: ['%{IP:client.ip}'],
+        },
+      ]),
+      [
+        { field: 'client.ip', change: 'created' },
+        { field: 'log.level', change: 'created' },
+      ]
+    );
+    expect(warning).not.toBeNull();
+    expect(warning).toContain('"client.ip"');
+    expect(warning).not.toContain('"log.level"');
+  });
+
+  it('lists all overlapping fields when multiple existing steps clash', () => {
+    const warning = buildOverwriteWarning(
+      stepList([
+        { action: 'set', to: 'attributes.env', value: 'prod' },
+        { action: 'rename', from: 'attributes.x', to: 'attributes.host' },
+      ]),
+      [
+        { field: 'attributes.env', change: 'created' },
+        { field: 'attributes.host', change: 'created' },
+        { field: 'attributes.unrelated', change: 'created' },
+      ]
+    );
+    expect(warning).not.toBeNull();
+    expect(warning).toContain('"attributes.env"');
+    expect(warning).toContain('"attributes.host"');
+    expect(warning).not.toContain('"attributes.unrelated"');
   });
 });
 
@@ -845,6 +1264,52 @@ describe('runExtractFieldsFlow', () => {
           ])
         );
       }
+    });
+
+    it('warns when an existing step writes to a field the new extraction also creates', async () => {
+      // The seed grok captures `attributes.source.ip` (see
+      // `grokCandidateProcessor` + `succeededSimulation` `detected_fields`).
+      // An existing `set` writes a constant to the same field — depending on
+      // step order one will silently overwrite the other. The agent must
+      // surface this so the user decides which step takes precedence.
+      const existingSet = {
+        action: 'set',
+        to: 'attributes.source.ip',
+        value: '0.0.0.0',
+        ignore_failure: true,
+      } as unknown as StreamlangStep;
+
+      const deps = buildDeps();
+      arrangeStreamWithSamples(deps, [existingSet]);
+
+      mockProcessGrokPatterns.mockResolvedValue({
+        type: 'grok',
+        processor: grokCandidateProcessor,
+        parsedRate: 1,
+      });
+      mockProcessDissectPattern.mockResolvedValue(null);
+      mockExtractParsedSampleDocuments.mockResolvedValue({
+        parsedDocuments: [{ 'body.text': '...' } as FlattenRecord],
+        definitionError: false,
+      });
+      mockSuggestProcessingPipeline.mockResolvedValue({
+        pipeline: { steps: [] },
+        metadata: { stepsUsed: 1, maxSteps: 6 },
+      });
+      mockSimulateProcessing.mockResolvedValue(succeededSimulation());
+
+      const outcome = await runExtractFieldsFlow({ streamName: ingestStreamName }, deps);
+
+      expect(outcome.kind).toBe('success');
+      if (outcome.kind !== 'success') return;
+
+      expect(outcome.result.warnings).toEqual(
+        expect.arrayContaining([
+          expect.stringMatching(
+            /Existing step\(s\) write to field\(s\) "attributes\.source\.ip" that the new extraction also produces/
+          ),
+        ])
+      );
     });
 
     it('surfaces simulation errors as a warning with the success rate prefix', async () => {
