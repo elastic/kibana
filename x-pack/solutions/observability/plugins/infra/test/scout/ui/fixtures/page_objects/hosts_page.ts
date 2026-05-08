@@ -6,18 +6,11 @@
  */
 
 import type { KibanaUrl, Locator, ScoutPage } from '@kbn/scout-oblt';
-import { EXTENDED_TIMEOUT } from '../constants';
+import { EXTENDED_TIMEOUT, KPI_METRICS } from '../constants';
 
 type PreferredSchema = 'ecs' | 'semconv' | null;
 
 export class HostsPage {
-  private static readonly KPI_METRICS = [
-    'cpuUsage',
-    'normalizedLoad1m',
-    'memoryUsage',
-    'diskUsage',
-  ] as const;
-
   public readonly tableLoaded: Locator;
   public readonly tableLoading: Locator;
   public readonly tableRows: Locator;
@@ -361,7 +354,7 @@ export class HostsPage {
   public async getKPIValuesSnapshot(timeout?: number): Promise<Record<string, string | null>> {
     await this.waitForKPILoadingToFinish(timeout);
     const snapshot: Record<string, string | null> = {};
-    for (const metric of HostsPage.KPI_METRICS) {
+    for (const metric of KPI_METRICS) {
       const locator = this.getHostKPIChartValueLocator(metric);
       const count = await locator.count();
       snapshot[metric] = count > 0 ? await locator.getAttribute('title') : null;

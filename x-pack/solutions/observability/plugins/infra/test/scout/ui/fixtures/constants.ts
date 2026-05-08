@@ -130,6 +130,8 @@ export const EXTENDED_TIMEOUT = 45000; // 45 seconds
  */
 export const KPI_RENDER_TIMEOUT = 90000;
 
+export const KPI_METRICS = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'] as const;
+
 export const KUBERNETES_TOUR_STORAGE_KEY = 'isKubernetesTourSeen';
 export const KUBERNETES_CARD_DISMISSED_STORAGE_KEY = 'infra.inventory.k8sCardDismissed';
 

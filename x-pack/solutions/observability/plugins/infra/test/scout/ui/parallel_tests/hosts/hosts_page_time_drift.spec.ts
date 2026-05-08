@@ -8,9 +8,12 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
-import { HOSTS, DATE_WITH_HOSTS_DATA_MIDPOINT, KPI_RENDER_TIMEOUT } from '../../fixtures/constants';
-
-const KPI_METRICS = ['cpuUsage', 'normalizedLoad1m', 'memoryUsage', 'diskUsage'] as const;
+import {
+  HOSTS,
+  DATE_WITH_HOSTS_DATA_MIDPOINT,
+  KPI_RENDER_TIMEOUT,
+  KPI_METRICS,
+} from '../../fixtures/constants';
 
 test.describe(
   'Hosts Page - Time Drift',
