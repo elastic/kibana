@@ -20,6 +20,11 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import styled from '@emotion/styled';
 import { ALERT_SEVERITY, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import type { EntityType } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import { useUiSetting } from '../../../../common/lib/kibana';
+import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_investigate_in_timeline';
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
@@ -55,7 +60,6 @@ import { Legend } from '../../../../common/components/charts/legend';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { LinkButton, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import type { Filter } from '../hooks/use_navigate_to_timeline';
-import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visualization_data';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from './types';
@@ -77,6 +81,8 @@ interface AlertsByStatusProps {
   applyGlobalQueriesAndFilters?: boolean;
   identityFields?: Record<string, string>;
   entityFilter?: Filter;
+  entityType?: string;
+  entityRecord?: EntityStoreRecord | null;
   signalIndexName: string | null;
 }
 
@@ -101,14 +107,43 @@ export const AlertsByStatus = ({
   signalIndexName,
   identityFields,
   entityFilter,
+  entityType,
+  entityRecord,
 }: AlertsByStatusProps) => {
   const { euiTheme } = useEuiTheme();
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const euidApi = useEntityStoreEuidApi();
   const entityIdentifiersResolved = useMemo(
     () => resolveEntityIdentifiers(identityFields, entityFilter),
     [identityFields, entityFilter]
   );
+
+  const euidEntityKqlFilter = useMemo((): string => {
+    let kqlFilter: string | null | undefined = '';
+    if (!entityStoreV2Enabled || !euidApi?.euid || !entityRecord || !entityType) {
+      kqlFilter = entityIdentifiersResolved
+        ? Object.entries(entityIdentifiersResolved)
+            .map(([field, value]) => `${field}: "${value}"`)
+            .join(' AND ')
+        : null;
+    } else {
+      kqlFilter = euidApi.euid.kql.getEuidFilterBasedOnDocument(
+        entityType as EntityType,
+        entityRecord
+      );
+    }
+    return kqlFilter && kqlFilter.length > 0 ? `(${kqlFilter}) AND event.kind: "signal"` : '';
+  }, [euidApi?.euid, entityType, entityRecord, entityIdentifiersResolved, entityStoreV2Enabled]);
+
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_ALERTS_BY_STATUS_ID);
-  const { openTimelineWithFilters } = useNavigateToTimeline();
+  const { investigateInTimeline } = useInvestigateInTimeline();
+
+  const openTimelineCallback = useCallback(async () => {
+    investigateInTimeline({
+      keepDataView: true,
+      query: { language: 'kuery', query: euidEntityKqlFilter },
+    });
+  }, [euidEntityKqlFilter, investigateInTimeline]);
   const navigateToAlerts = useNavigateToAlertsPageWithFilters();
   const {
     timelinePrivileges: { read: canAccessTimelines },
@@ -122,27 +157,20 @@ export const AlertsByStatus = ({
   const isLargerBreakpoint = useIsWithinMinBreakpoint('xl');
   const isSmallBreakpoint = useIsWithinMaxBreakpoint('s');
   const donutHeight = isSmallBreakpoint || isLargerBreakpoint ? 120 : 90;
+  const shouldInvestigateInTimeline: boolean =
+    canAccessTimelines && euidEntityKqlFilter?.length > 0;
 
   const detailsButtonOptions = useMemo(
     () => ({
-      name: canAccessTimelines && entityIdentifiersResolved ? INVESTIGATE_IN_TIMELINE : VIEW_ALERTS,
-      href: canAccessTimelines && entityIdentifiersResolved ? undefined : href,
-      onClick:
-        canAccessTimelines && entityIdentifiersResolved
-          ? async () => {
-              const entityFilters = Object.entries(entityIdentifiersResolved).map(
-                ([field, value]) => ({
-                  field,
-                  value,
-                })
-              );
-              await openTimelineWithFilters([
-                [...entityFilters, { field: 'event.kind', value: 'signal' }],
-              ]);
-            }
-          : goToAlerts,
+      name: shouldInvestigateInTimeline ? INVESTIGATE_IN_TIMELINE : VIEW_ALERTS,
+      href: shouldInvestigateInTimeline ? undefined : href,
+      onClick: shouldInvestigateInTimeline
+        ? async () => {
+            await openTimelineCallback();
+          }
+        : goToAlerts,
     }),
-    [entityIdentifiersResolved, href, goToAlerts, openTimelineWithFilters, canAccessTimelines]
+    [shouldInvestigateInTimeline, href, goToAlerts, openTimelineCallback]
   );
 
   const {
@@ -157,6 +185,8 @@ export const AlertsByStatus = ({
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
     to,
     from,
+    entityType,
+    entityRecord,
   });
   const legendItems: LegendItem[] = useMemo(() => getChartConfigs(euiTheme), [euiTheme]);
 

@@ -16,6 +16,7 @@ import {
   EuiTab,
   EuiTabs,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -25,10 +26,14 @@ import type {
   ComponentHealth,
 } from '../../../../../common/types';
 
-import type { OTelComponentType } from '../graph_view/constants';
-import { COMPONENT_TYPE_LABELS } from '../graph_view/constants';
-import { findComponentHealth } from '../graph_view/enrich_nodes_with_health';
-import { getComponentHealthStatus, getHealthStatusLabel, HEALTH_STATUS_COLORS } from '../utils';
+import type { OTelComponentType } from '../constants';
+import { COMPONENT_TYPE_LABELS } from '../constants';
+import {
+  findComponentHealth,
+  getComponentHealthStatus,
+  getHealthStatusColor,
+  getHealthStatusLabel,
+} from '../utils';
 
 import { ComponentConfigTab } from './component_config_tab';
 import { ComponentHealthTab } from './component_health_tab';
@@ -56,12 +61,6 @@ type ComponentDetailTabId = 'config' | 'health' | 'metrics';
 
 const COMPONENT_DETAIL_TABS: Array<{ id: ComponentDetailTabId; name: string }> = [
   {
-    id: 'config',
-    name: i18n.translate('xpack.fleet.otelUi.componentDetail.tab.config', {
-      defaultMessage: 'Config',
-    }),
-  },
-  {
     id: 'health',
     name: i18n.translate('xpack.fleet.otelUi.componentDetail.tab.health', {
       defaultMessage: 'Health',
@@ -73,11 +72,18 @@ const COMPONENT_DETAIL_TABS: Array<{ id: ComponentDetailTabId; name: string }> =
       defaultMessage: 'Metrics',
     }),
   },
+  {
+    id: 'config',
+    name: i18n.translate('xpack.fleet.otelUi.componentDetail.tab.config', {
+      defaultMessage: 'Config',
+    }),
+  },
 ];
 
 interface OTelComponentDetailProps {
   componentId: string;
   componentType: OTelComponentType;
+  pipelineId?: string;
   config: OTelCollectorConfig;
   health?: ComponentHealth;
   onClose: () => void;
@@ -86,11 +92,13 @@ interface OTelComponentDetailProps {
 export const OTelComponentDetail: React.FunctionComponent<OTelComponentDetailProps> = ({
   componentId,
   componentType,
+  pipelineId,
   config,
   health,
   onClose,
 }) => {
-  const [selectedTabId, setSelectedTabId] = useState<ComponentDetailTabId>('config');
+  const { euiTheme } = useEuiTheme();
+  const [selectedTabId, setSelectedTabId] = useState<ComponentDetailTabId>('health');
   const visibleTabs = useMemo(
     () =>
       COMPONENT_DETAIL_TABS.filter(
@@ -100,16 +108,22 @@ export const OTelComponentDetail: React.FunctionComponent<OTelComponentDetailPro
   );
   const section = getComponentSection(config, componentType);
   const componentConfig = section?.[componentId];
-  const componentHealth = useMemo(
-    () => findComponentHealth(health, componentType, componentId),
-    [health, componentType, componentId]
-  );
+  const componentHealth = useMemo(() => {
+    if (pipelineId) {
+      const pipelineHealth = findComponentHealth(health, 'pipeline', pipelineId);
+      return (
+        findComponentHealth(pipelineHealth, componentType, componentId) ??
+        findComponentHealth(health, componentType, componentId)
+      );
+    }
+    return findComponentHealth(health, componentType, componentId);
+  }, [health, componentType, componentId, pipelineId]);
 
   const healthStatus = getComponentHealthStatus(componentHealth);
   const healhtLabel = (
     <EuiFlexItem grow={false}>
       <EuiHealth
-        color={HEALTH_STATUS_COLORS[healthStatus]}
+        color={getHealthStatusColor(healthStatus, euiTheme)}
         data-test-subj="otelComponentHealthStatus"
       >
         {getHealthStatusLabel(healthStatus)}

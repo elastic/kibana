@@ -6,6 +6,12 @@
  */
 
 import type { Filter } from '@kbn/es-query';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+
+export const euidDslFilterToPageFilters = (dsl: QueryDslQueryContainer | undefined): Filter[] => {
+  if (dsl == null) return [];
+  return [{ meta: { alias: null, negate: false, disabled: false }, query: dsl }];
+};
 
 export { userNameExistsFilter } from '../../../../common/components/visualization_actions/utils';
 
