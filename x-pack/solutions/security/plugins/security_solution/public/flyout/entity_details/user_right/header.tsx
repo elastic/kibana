@@ -158,16 +158,16 @@ export const UserPanelHeader = ({
                   data-test-subj="user-panel-header-observed-badge"
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {isManaged && (
+              {isManaged && (
+                <EuiFlexItem grow={false}>
                   <EuiBadge data-test-subj="user-panel-header-managed-badge" color="hollow">
                     <FormattedMessage
                       id="xpack.securitySolution.flyout.entityDetails.user.managedBadge"
                       defaultMessage="Managed"
                     />
                   </EuiBadge>
-                )}
-              </EuiFlexItem>
+                </EuiFlexItem>
+              )}
               {isEntityInStore && riskLevel && (
                 <EuiFlexItem grow={false}>
                   <RiskLevelBadge riskLevel={riskLevel} />

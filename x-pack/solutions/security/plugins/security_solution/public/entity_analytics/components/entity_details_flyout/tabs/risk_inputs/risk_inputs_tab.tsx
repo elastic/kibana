@@ -12,6 +12,8 @@ import {
   EuiButtonGroup,
   EuiButtonIcon,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiSpacer,
   EuiTitle,
@@ -50,7 +52,9 @@ import { buildEntityNameFilter } from '../../../../../../common/search_strategy'
 import { AssetCriticalityBadge } from '../../../asset_criticality';
 import { RiskInputsUtilityBar } from '../../components/utility_bar';
 import { ActionColumn } from '../../components/action_column';
-import { AskAiAssistant } from './ask_ai_assistant';
+import { AiAssistantButton } from '../../../ai_assistant_button/ai_assistant_button';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { useAgentBuilderAvailability } from '../../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useResolutionGroup } from '../../../entity_resolution/hooks/use_resolution_group';
 import { getEntityId, getEntityField, getEntityName } from '../../../entity_resolution/helpers';
 import { useStableExpandableFlyoutState } from '../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
@@ -281,6 +285,9 @@ const RiskInputsTabContent = <T extends EntityType>({
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
   const [userSelectedView, setUserSelectedView] = useState(subTab);
+  const isAssistantToolDisabled = useIsExperimentalFeatureEnabled('riskScoreAssistantToolDisabled');
+  const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const showAiAssistantButton = !isAssistantToolDisabled || isAgentBuilderEnabled;
 
   const defaultView =
     !loadingRiskScore && !entityRiskScore && hasResolutionScore
@@ -522,7 +529,28 @@ const RiskInputsTabContent = <T extends EntityType>({
       />
       <EuiSpacer size="m" />
       {riskInputsAlertSection}
-      <AskAiAssistant entityType={entityType} entityName={entityName} />
+      {showAiAssistantButton && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <AiAssistantButton
+                entityType={entityType}
+                entityName={entityName}
+                aiAssistantProps={{
+                  title: `Explain ${entityType} '${entityName}' Risk Score`,
+                  description: `Entity: ${entityName}`,
+                  suggestedPrompt: `Explain how inputs contributed to the risk score, including any risk modifiers such as asset criticality or privileged user monitoring status. Additionally, outline the recommended next steps for investigating or mitigating the risk if the entity is deemed risky.\nTo answer risk score questions, fetch the risk score information and take into consideration both the risk score inputs and any modifiers that adjusted the final score.`,
+                }}
+                telemetry={{
+                  pathway: 'entity_risk_contribution',
+                  attachments: ['entity'],
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </>
   );
 };
@@ -650,6 +678,7 @@ const ContextsSection = <T extends EntityType>({
         <AssetCriticalityBadge
           criticalityLevel={criticality.level}
           dataTestSubj="risk-inputs-asset-criticality-badge"
+          textSize="xs"
         />
       ),
       contribution: formatContribution(criticality.contribution),
