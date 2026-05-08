@@ -15,7 +15,7 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'http') {
       return { basePath: { prepend: (p: string) => p } };
     }
-    return {};
+    throw new Error(`Unexpected service token in test: ${String(token)}`);
   },
   CoreStart: (key: string) => key,
 }));
@@ -50,11 +50,12 @@ describe('CreateRulePanel', () => {
     expect(card).toHaveAttribute('href', '/app/management/alertingV2/rules/create');
   });
 
-  it('renders the "Create with AI Agent" card as disabled', () => {
+  it('renders the "Create with AI Agent" card as disabled and non-interactive', () => {
     renderPanel();
 
     expect(screen.getByText('Create with AI Agent')).toBeInTheDocument();
     expect(screen.getByText('Coming soon')).toBeInTheDocument();
+    expect(screen.getByText('Create with AI Agent').closest('a, button')).toBeNull();
   });
 
   it('renders the "Threshold Alert" card with correct href', () => {

@@ -11,6 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { RulesListPage, SEARCH_DEBOUNCE_MS } from './rules_list_page';
+import { paths } from '../../constants';
 
 const mockNavigateToUrl = jest.fn();
 const mockGetUrlForApp = jest.fn((appId: string, options?: { path?: string }) => {
@@ -34,7 +35,7 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'http') {
       return { basePath: { prepend: (p: string) => p } };
     }
-    return {};
+    throw new Error(`Unexpected service token in test: ${String(token)}`);
   },
   CoreStart: (key: string) => key,
 }));
@@ -630,10 +631,7 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    expect(screen.getByTestId('createRuleButton')).toHaveAttribute(
-      'href',
-      '/app/management/alertingV2/rules/method_selector'
-    );
+    expect(screen.getByTestId('createRuleButton')).toHaveAttribute('href', paths.ruleSelector);
   });
 
   it('shows delete confirmation modal when delete action is clicked', async () => {

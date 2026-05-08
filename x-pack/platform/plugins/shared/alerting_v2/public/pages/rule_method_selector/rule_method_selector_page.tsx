@@ -12,13 +12,16 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { CreateRulePanel } from '../rules_list_page/create_rule_panel';
 
 export const RuleMethodSelectorPage = () => {
-  useBreadcrumbs('rules_list');
+  useBreadcrumbs('rule_method_selector');
 
   return (
     <div>
       <EuiPageHeader
         pageTitle={
-          <FormattedMessage id="xpack.alertingV2.rulesList.pageTitle" defaultMessage="Rules" />
+          <FormattedMessage
+            id="xpack.alertingV2.ruleMethodSelector.pageTitle"
+            defaultMessage="Rules"
+          />
         }
       />
       <EuiSpacer size="m" />

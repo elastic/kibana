@@ -22,7 +22,7 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'chrome') {
       return { docTitle: { change: jest.fn() } };
     }
-    return {};
+    throw new Error(`Unexpected service token in test: ${String(token)}`);
   },
   CoreStart: (key: string) => key,
 }));

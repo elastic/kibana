@@ -51,7 +51,7 @@ const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
 
 export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
-  const basePath = useService(CoreStart('http')).basePath;
+  const { basePath } = useService(CoreStart('http'));
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -108,10 +108,10 @@ export const RulesListPage = () => {
   };
 
   const availableTagOptions = allTags ?? [];
-  const hasActiveFilters = Boolean(filter);
+  const hasActiveFilters = Boolean(filter) || Boolean(searchInput.trim());
   const isInitialLoad = isLoading && data === undefined;
   const hasRules = (data?.total ?? 0) > 0;
-  const showEmptyState = !isInitialLoad && !isError && !hasRules;
+  const showEmptyState = !isInitialLoad && !isError && !hasRules && !hasActiveFilters;
 
   return (
     <div>
@@ -120,7 +120,7 @@ export const RulesListPage = () => {
           <FormattedMessage id="xpack.alertingV2.rulesList.pageTitle" defaultMessage="Rules" />
         }
         rightSideItems={
-          hasRules
+          hasRules || hasActiveFilters
             ? [
                 <EuiButton
                   key="create-rule"
@@ -165,7 +165,7 @@ export const RulesListPage = () => {
         </>
       ) : null}
       {showEmptyState ? <CreateRulePanel /> : null}
-      {hasRules ? (
+      {hasRules || hasActiveFilters ? (
         <>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
