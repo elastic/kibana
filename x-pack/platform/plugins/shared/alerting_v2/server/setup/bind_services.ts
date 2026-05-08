@@ -7,6 +7,7 @@
 
 import { PluginSetup, PluginStart } from '@kbn/core-di';
 import { CoreStart, Request, SavedObjectsClientFactory } from '@kbn/core-di-server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AlertActionsClient } from '../lib/alert_actions_client';
 import { DirectorService } from '../lib/director/director';
@@ -23,6 +24,7 @@ import { ALERTING_V2_DISPATCHER_ENABLED_SETTING_ID } from '../../common/advanced
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
 import { RulesClient } from '../lib/rules_client';
+import { RulesClientSpaceIdToken } from '../lib/rules_client/tokens';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
 import { EventLogService } from '../lib/services/event_log_service/event_log_service';
@@ -59,7 +61,10 @@ import {
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import { UserService } from '../lib/services/user_service/user_service';
 import { WorkflowExtensionsService } from '../lib/services/workflow_extensions_service/workflow_extensions_service';
-import { WorkflowExtensionsServiceToken } from '../lib/services/workflow_extensions_service/tokens';
+import {
+  WorkflowExtensionsServiceToken,
+  WorkflowsClientToken,
+} from '../lib/services/workflow_extensions_service/tokens';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
@@ -81,7 +86,28 @@ import type { AlertingServerSetupDependencies, AlertingServerStartDependencies }
 
 export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(AlertActionsClient).toSelf().inRequestScope();
-  bind(RulesClient).toSelf().inRequestScope();
+  bind(RulesClient)
+    .toDynamicValue(({ get }) => {
+      return new RulesClient({
+        services: {
+          request: get(Request),
+          rulesSavedObjectService: get(RulesSavedObjectServiceScopedToken),
+          taskManager: get(PluginStart<TaskManagerStartContract>('taskManager')),
+          userService: get(UserService),
+        },
+        options: {
+          spaceId: get(RulesClientSpaceIdToken),
+        },
+      });
+    })
+    .inRequestScope();
+  bind(RulesClientSpaceIdToken)
+    .toDynamicValue(({ get }) => {
+      const request = get(Request);
+      const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
+      return spaces.spacesService.getSpaceId(request);
+    })
+    .inRequestScope();
   bind(ActionPolicyNamespaceToken)
     .toDynamicValue(({ get }) => {
       const request = get(Request);
@@ -110,18 +136,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(LoggerServiceToken).toService(LoggerService);
   bind(EventLogService).toSelf().inSingletonScope();
   bind(EventLogServiceToken).toService(EventLogService);
-  bind(WorkflowExtensionsService)
-    .toDynamicValue(({ get }) => {
-      const workflowsExtensionsSetup = get(
-        PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')
-      );
-      const getWorkflowsExtensionsStart = () =>
-        get(
-          PluginStart<AlertingServerStartDependencies['workflowsExtensions']>('workflowsExtensions')
-        );
-      return new WorkflowExtensionsService(workflowsExtensionsSetup, getWorkflowsExtensionsStart);
-    })
-    .inSingletonScope();
+  bind(WorkflowsClientToken)
+    .toResolvedValue(
+      async (workflowsExtensionsStart, request) => workflowsExtensionsStart.getClient(request),
+      [
+        PluginStart<AlertingServerStartDependencies['workflowsExtensions']>('workflowsExtensions'),
+        Request,
+      ]
+    )
+    .inRequestScope();
+  bind(WorkflowExtensionsService).toSelf().inRequestScope();
   bind(WorkflowExtensionsServiceToken).toService(WorkflowExtensionsService);
   bind(ResourceManager).toSelf().inSingletonScope();
 
