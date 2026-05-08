@@ -1,0 +1,52 @@
+{
+  "10.1.0": [
+    {
+      "kind": "alert",
+      "metadata": {
+        "name": "test rule",
+        "description": "A test rule",
+        "tags": ["test"]
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "evaluation": {
+        "query": {
+          "base": "FROM logs-* | STATS count = COUNT(*) | WHERE count > 100"
+        }
+      },
+      "enabled": true,
+      "createdBy": "elastic",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedBy": "elastic",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ],
+  "10.2.0": [
+    {
+      "kind": "alert",
+      "metadata": {
+        "name": "test rule",
+        "description": "A test rule",
+        "tags": ["test"]
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "evaluation": {
+        "query": {
+          "base": "FROM logs-* | STATS count = COUNT(*) | WHERE count > 100"
+        }
+      },
+      "enabled": true,
+      "createdBy": "elastic",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedBy": "elastic",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ]
+}
