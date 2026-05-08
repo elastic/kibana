@@ -222,7 +222,7 @@
           "({ router, config, metrics, status, incrementUsageCounter, }: Deps) => void"
         ],
         "path": "src/core/packages/status/server-internal/src/routes/status.ts",
-        "lineNumber": 58,
+        "lineNumber": 59,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -238,7 +238,7 @@
               "Deps"
             ],
             "path": "src/core/packages/status/server-internal/src/routes/status.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 37,
             "deprecated": false,
             "docsReferencedTypeName": "Deps",

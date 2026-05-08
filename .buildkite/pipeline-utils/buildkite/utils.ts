@@ -11,8 +11,13 @@ import { execFileSync } from 'child_process';
 import fs from 'fs';
 import { parse as loadYaml } from 'yaml';
 
-export function emitPipeline(pipelineSteps: string[]) {
+export function emitPipeline(pipelineSteps: string[], debug = false) {
   const pipelineStr = [...new Set(pipelineSteps)].join('\n');
+
+  if (debug) {
+    console.warn('Emitting pipeline:\n', pipelineStr);
+  }
+
   console.log(pipelineStr);
 }
 

@@ -129,7 +129,6 @@ const patchTimeline = async ({
     if (timeline.savedSearchId && savedSearch) {
       const { savedSearch: savedSearchService } = KibanaServices.get();
       await savedSearchService.save(savedSearch, {
-        onTitleDuplicate: () => ({}),
         copyOnSave: false,
       });
     }
@@ -172,7 +171,6 @@ export const copyTimeline = async ({
       // delete the id and change the title to make sure we can copy the saved search
       delete savedSearchCopy.id;
       newSavedSearchId = await savedSearchService.save(savedSearchCopy, {
-        onTitleDuplicate: () => ({}),
         copyOnSave: false,
       });
     }
