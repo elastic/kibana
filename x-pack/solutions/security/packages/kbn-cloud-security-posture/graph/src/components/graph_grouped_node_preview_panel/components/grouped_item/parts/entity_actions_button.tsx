@@ -29,6 +29,7 @@ import {
 } from '../../../../filters/filter_store';
 import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../../../common/constants';
 import { useOpenEntityPreviewPanel } from '../../../hooks/use_open_entity_preview_panel';
+import { useGroupedNodePreviewActions } from '../../../actions_context';
 
 const actionsButtonAriaLabel = i18n.translate(
   'securitySolutionPackages.csp.graph.groupedItem.actionsButton.ariaLabel',
@@ -57,6 +58,7 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
 
   const openEntityPreviewPanel = useOpenEntityPreviewPanel();
+  const { onShowItemDetails } = useGroupedNodePreviewActions();
   const sourceFields = (item.entity.sourceFields ?? {}) as Record<string, string | string[]>;
   const engineType = item.entity.engine_type;
 
@@ -135,7 +137,13 @@ export const EntityActionsButton = ({ item, scopeId }: EntityActionsButtonProps)
   const items = getEntityExpandItems({
     nodeId: item.id,
     entityFilterActions,
-    onShowEntityDetails: () => openEntityPreviewPanel(item.id, scopeId, item.entity),
+    onShowEntityDetails: () => {
+      if (onShowItemDetails) {
+        onShowItemDetails(item);
+        return;
+      }
+      openEntityPreviewPanel(item.id, scopeId, item.entity);
+    },
     onClose: closePopover,
     shouldRender: {
       showEntityRelationships: true,

@@ -15,7 +15,7 @@ import {
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { getField, getFieldArray } from '../../../flyout/document_details/shared/utils';
-import { useShouldShowGraph } from '../../../flyout/shared/hooks/use_should_show_graph';
+import { useShouldShowGraph } from '../../graph/hooks/use_should_show_graph';
 import { EventKind } from '../constants/event_kinds';
 
 export interface UseGraphPreviewResult {

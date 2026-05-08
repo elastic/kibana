@@ -23,6 +23,7 @@ import {
   ALERT_PREVIEW_BANNER,
   EVENT_PREVIEW_BANNER,
 } from '../../../constants';
+import { useGroupedNodePreviewActions } from '../../../actions_context';
 
 const actionsButtonAriaLabel = i18n.translate(
   'securitySolutionPackages.csp.graph.groupedItem.actionsButton.ariaLabel',
@@ -48,11 +49,16 @@ export interface EventActionsButtonProps {
 export const EventActionsButton = ({ item, scopeId }: EventActionsButtonProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { openPreviewPanel } = useExpandableFlyoutApi();
+  const { onShowItemDetails } = useGroupedNodePreviewActions();
 
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
 
   const handleShowEventDetails = useCallback(() => {
+    if (onShowItemDetails) {
+      onShowItemDetails(item);
+      return;
+    }
     openPreviewPanel({
       id: DocumentDetailsPreviewPanelKey,
       params: {
@@ -63,7 +69,7 @@ export const EventActionsButton = ({ item, scopeId }: EventActionsButtonProps) =
         isPreviewMode: true,
       },
     });
-  }, [item, openPreviewPanel, scopeId]);
+  }, [item, onShowItemDetails, openPreviewPanel, scopeId]);
 
   // Generate items fresh on each render to reflect current filter state
   const items = getLabelExpandItems({

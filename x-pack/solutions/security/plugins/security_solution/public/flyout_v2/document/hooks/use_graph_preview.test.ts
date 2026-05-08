@@ -8,11 +8,11 @@
 import { renderHook } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { useShouldShowGraph } from '../../../flyout/shared/hooks/use_should_show_graph';
+import { useShouldShowGraph } from '../../graph/hooks/use_should_show_graph';
 import { useGraphPreview } from './use_graph_preview';
 
 jest.mock('@kbn/entity-store/public');
-jest.mock('../../../flyout/shared/hooks/use_should_show_graph');
+jest.mock('../../graph/hooks/use_should_show_graph');
 
 const mockEuidApi = {
   euid: {

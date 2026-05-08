@@ -10,12 +10,12 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { FLYOUT_STORAGE_KEYS } from '../../../../../flyout_v2/document/constants/local_storage';
 import { useExpandSection } from '../../../../../flyout_v2/shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../../../flyout_v2/shared/components/expandable_section';
-import { GraphPreviewContainer } from '../../../../shared/components/graph_preview_container';
+import { GraphPreviewContainer } from '../../../../../flyout_v2/document/components/graph_preview_container';
 import {
   VISUALIZATION_SECTION_TEST_ID,
   VISUALIZATION_SECTION_TITLE,
 } from '../../../../../flyout_v2/document/components/visualizations_section';
-import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
+import { useShouldShowGraph } from '../../../../../flyout_v2/graph/hooks/use_should_show_graph';
 import { EntityDetailsLeftPanelTab, type EntityDetailsPath } from '../left_panel/left_panel_header';
 
 const KEY = 'visualizations';
@@ -42,6 +42,7 @@ export const VisualizationsSection = memo(
     });
     // Decide whether to show the graph preview or not
     const shouldShowGraph = useShouldShowGraph();
+    const isRulePreview = scopeId === TableId.rulePreview;
     const handleOpenGraphViewTab = useCallback(() => {
       openDetailsPanel?.({ tab: EntityDetailsLeftPanelTab.GRAPH_VIEW });
     }, [openDetailsPanel]);
@@ -59,9 +60,9 @@ export const VisualizationsSection = memo(
             <GraphPreviewContainer
               mode="entity"
               entityId={entityId}
-              isPreviewMode={isPreviewMode}
-              isRulePreview={scopeId === TableId.rulePreview}
-              onExpandGraph={handleOpenGraphViewTab}
+              showIcon={!isPreviewMode && !isRulePreview}
+              disableNavigation={isPreviewMode || isRulePreview}
+              onShowGraph={handleOpenGraphViewTab}
             />
           </ExpandableSection>
         )}

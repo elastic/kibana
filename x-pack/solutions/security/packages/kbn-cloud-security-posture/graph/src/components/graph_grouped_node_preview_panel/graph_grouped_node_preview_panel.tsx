@@ -15,6 +15,7 @@ import { LoadingBody } from './components/loading_body';
 import { EmptyBody } from './components/empty_body';
 import { ContentBody } from './components/content_body';
 import { i18nNamespaceKey } from './constants';
+import { GroupedNodePreviewActionsProvider } from './actions_context';
 
 const hosts = i18n.translate(`${i18nNamespaceKey}.types.hosts`, {
   defaultMessage: 'Hosts',
@@ -58,6 +59,14 @@ export interface GraphGroupedNodePreviewPanelProps {
   documentIds: string[];
   // entities data reused from graph
   entityItems: EntityItem[];
+  /**
+   * Optional handler invoked when the user requests the details preview for a grouped item
+   * (event, alert, or entity). When provided, leaf components route the preview through this
+   * callback instead of dispatching `openPreviewPanel` via the legacy expandable-flyout API.
+   * Hosts that still rely on the expandable-flyout (V1 left panel) can omit this prop and the
+   * existing dispatch behavior is preserved.
+   */
+  onShowItemDetails?: (item: EntityOrEventItem) => void;
 }
 
 interface PaginatedData {
@@ -127,7 +136,7 @@ const useContentMetadata = (
  * Panel to be displayed in the document details expandable flyout on top of right section
  */
 export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps> = memo(
-  ({ docMode, scopeId, dataViewId, documentIds, entityItems }) => {
+  ({ docMode, scopeId, dataViewId, documentIds, entityItems, onShowItemDetails }) => {
     // Initialize pagination state with localStorage persistence
     // - For 'grouped-entities': Pass entityItems.length to enable client-side pagination validation
     // - For 'grouped-events': Pass 0 since events use server-side pagination (handled by useFetchDocumentDetails)
@@ -155,14 +164,16 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
     }
 
     return (
-      <ContentBody
-        items={items}
-        totalHits={totalHits}
-        icon={icon}
-        groupedItemsType={groupedItemsType}
-        pagination={pagination}
-        scopeId={scopeId}
-      />
+      <GroupedNodePreviewActionsProvider onShowItemDetails={onShowItemDetails}>
+        <ContentBody
+          items={items}
+          totalHits={totalHits}
+          icon={icon}
+          groupedItemsType={groupedItemsType}
+          pagination={pagination}
+          scopeId={scopeId}
+        />
+      </GroupedNodePreviewActionsProvider>
     );
   }
 );

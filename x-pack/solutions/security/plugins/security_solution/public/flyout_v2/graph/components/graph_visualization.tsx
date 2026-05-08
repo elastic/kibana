@@ -19,12 +19,15 @@ import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import {
   getNodeDocumentMode,
   getSingleDocumentData,
-  GraphGroupedNodePreviewPanelKey,
-  GROUP_PREVIEW_BANNER,
+  type EntityOrEventItem,
   type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
-import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import {
+  DOCUMENT_TYPE_ENTITY,
+  DOCUMENT_TYPE_EVENT,
+  DOCUMENT_TYPE_ALERT,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { isEntityNodeEnriched } from '@kbn/cloud-security-posture-graph/src/components/utils';
 import { useFlyoutBodyAvailableHeight } from './use_flyout_body_available_height';
 import { PageScope } from '../../../data_view_manager/constants';
@@ -46,10 +49,8 @@ import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { DocumentFlyoutWrapper } from '../../document/document_flyout_wrapper';
 import { Network } from '../../network_details';
-import {
-  defaultToolsFlyoutProperties,
-  useDefaultDocumentFlyoutProperties,
-} from '../../shared/hooks/use_default_flyout_properties';
+import { GroupedNodePreview } from './grouped_node_preview';
+import { useDefaultDocumentFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
 import {
   noopCellActionRenderer,
@@ -155,13 +156,109 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
           children: <Network ip={ip} flowTarget={FlowTargetSourceDest.source} />,
         }),
         {
-          ...defaultToolsFlyoutProperties,
+          ...defaultDocumentFlyoutProperties,
           historyKey,
           session: 'inherit',
         }
       );
     },
-    [overlays, services, store, history, historyKey]
+    [overlays, services, store, history, historyKey, defaultDocumentFlyoutProperties]
+  );
+
+  const showEventOrAlertPreview = useCallback(
+    (documentId: string, indexName?: string) => {
+      overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: (
+            <DocumentFlyoutWrapper
+              documentId={documentId}
+              indexName={indexName}
+              renderCellActions={renderCellActions}
+              onAlertUpdated={onAlertUpdated}
+            />
+          ),
+        }),
+        {
+          ...defaultDocumentFlyoutProperties,
+          historyKey,
+          session: 'inherit',
+        }
+      );
+    },
+    [
+      overlays,
+      services,
+      store,
+      history,
+      renderCellActions,
+      onAlertUpdated,
+      defaultDocumentFlyoutProperties,
+      historyKey,
+    ]
+  );
+
+  // TODO: V2 entity preview panels haven't been migrated yet — entity previews still dispatch
+  // through the legacy expandable-flyout API. This works in the V1 left-panel host but is a
+  // silent no-op inside the Flyout v2 tools flyout. Switch to `overlays.openSystemFlyout` once
+  // a V2 entity panel exists.
+  const showEntityPreview = useCallback(
+    (item: { id: string; entity?: NodeDocumentDataModel['entity'] }) => {
+      const engineType = item.entity?.engine_type;
+      const panelId =
+        engineType && engineType in EntityPanelKeyByType
+          ? EntityPanelKeyByType[engineType as keyof typeof EntityPanelKeyByType] ??
+            GenericEntityPanelKey
+          : GenericEntityPanelKey;
+
+      if (!panelId) {
+        toasts.addDanger({
+          title: i18n.translate(
+            'xpack.securitySolution.flyout.graph.visualization.errorInvalidEntityPanel',
+            { defaultMessage: 'Unable to open entity preview' }
+          ),
+        });
+        return;
+      }
+
+      const params =
+        engineType === 'host'
+          ? { hostName: item.entity?.name }
+          : engineType === 'user'
+          ? { userName: item.entity?.name }
+          : engineType === 'service'
+          ? { serviceName: item.entity?.name }
+          : {};
+
+      openPreviewPanel({
+        id: panelId,
+        params: {
+          entityId: item.id,
+          scopeId,
+          isPreviewMode: true,
+          banner: GENERIC_ENTITY_PREVIEW_BANNER,
+          isEngineMetadataExist: !!item.entity,
+          ...params,
+        },
+      });
+    },
+    [openPreviewPanel, scopeId, toasts]
+  );
+
+  const onShowGroupedItemDetails = useCallback(
+    (item: EntityOrEventItem) => {
+      if (item.itemType === DOCUMENT_TYPE_ENTITY) {
+        showEntityPreview({ id: item.id, entity: item.entity });
+        return;
+      }
+      if (item.itemType === DOCUMENT_TYPE_EVENT || item.itemType === DOCUMENT_TYPE_ALERT) {
+        if (!item.docId) return;
+        showEventOrAlertPreview(item.docId, item.index);
+      }
+    },
+    [showEntityPreview, showEventOrAlertPreview]
   );
 
   const onOpenEventPreview = useCallback(
@@ -170,63 +267,38 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
       const docMode = getNodeDocumentMode(node);
       const documentsData = (node.documentsData ?? []) as NodeDocumentDataModel[];
 
-      const showEntityPreview = (item: {
-        id: string;
-        entity?: NodeDocumentDataModel['entity'];
-      }) => {
-        const engineType = item.entity?.engine_type;
-        const panelId =
-          engineType && engineType in EntityPanelKeyByType
-            ? EntityPanelKeyByType[engineType as keyof typeof EntityPanelKeyByType] ??
-              GenericEntityPanelKey
-            : GenericEntityPanelKey;
-
-        if (!panelId) {
-          toasts.addDanger({
-            title: i18n.translate(
-              'xpack.securitySolution.flyout.graph.visualization.errorInvalidEntityPanel',
-              {
-                defaultMessage: 'Unable to open entity preview',
-              }
-            ),
-          });
-          return;
-        }
-
-        const params =
-          engineType === 'host'
-            ? { hostName: item.entity?.name }
-            : engineType === 'user'
-            ? { userName: item.entity?.name }
-            : engineType === 'service'
-            ? { serviceName: item.entity?.name }
-            : {};
-
-        openPreviewPanel({
-          id: panelId,
-          params: {
-            entityId: item.id,
-            scopeId,
-            isPreviewMode: true,
-            banner: GENERIC_ENTITY_PREVIEW_BANNER,
-            isEngineMetadataExist: !!item.entity,
-            ...params,
-          },
-        });
-      };
-
-      const showEventOrAlertPreview = (item: { id: string }, index?: string) => {
+      if ((docMode === 'single-event' || docMode === 'single-alert') && singleDocumentData) {
+        showEventOrAlertPreview(singleDocumentData.id, singleDocumentData.index);
+      } else if (docMode === 'single-entity' && singleDocumentData && isEntityNodeEnriched(node)) {
+        showEntityPreview(singleDocumentData);
+      } else if (docMode === 'grouped-entities' && documentsData.length > 0) {
+        const entityItems = (node.documentsData as NodeDocumentDataModel[])
+          .slice(0, MAX_DOCUMENTS_TO_LOAD)
+          .flatMap((doc) =>
+            doc.entity
+              ? [
+                  {
+                    itemType: DOCUMENT_TYPE_ENTITY as typeof DOCUMENT_TYPE_ENTITY,
+                    entity: doc.entity,
+                    id: doc.id,
+                    icon: node.icon,
+                  },
+                ]
+              : []
+          );
         overlays.openSystemFlyout(
           flyoutProviders({
             services,
             store,
             history,
             children: (
-              <DocumentFlyoutWrapper
-                documentId={item.id}
-                indexName={index}
-                renderCellActions={renderCellActions}
-                onAlertUpdated={onAlertUpdated}
+              <GroupedNodePreview
+                docMode="grouped-entities"
+                scopeId={scopeId}
+                dataViewId={dataViewIndexPattern}
+                documentIds={[]}
+                entityItems={entityItems}
+                onShowItemDetails={onShowGroupedItemDetails}
               />
             ),
           }),
@@ -236,46 +308,33 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
             session: 'inherit',
           }
         );
-      };
-
-      if ((docMode === 'single-event' || docMode === 'single-alert') && singleDocumentData) {
-        showEventOrAlertPreview(singleDocumentData, singleDocumentData.index);
-      } else if (docMode === 'single-entity' && singleDocumentData && isEntityNodeEnriched(node)) {
-        showEntityPreview(singleDocumentData);
-      } else if (docMode === 'grouped-entities' && documentsData.length > 0) {
-        openPreviewPanel({
-          id: GraphGroupedNodePreviewPanelKey,
-          params: {
-            id: node.id,
-            scopeId,
-            isPreviewMode: true,
-            banner: GROUP_PREVIEW_BANNER,
-            docMode,
-            entityItems: (node.documentsData as NodeDocumentDataModel[])
-              .slice(0, MAX_DOCUMENTS_TO_LOAD)
-              .map((doc) => ({
-                itemType: DOCUMENT_TYPE_ENTITY,
-                entity: doc.entity,
-                id: doc.id,
-                icon: node.icon,
-              })),
-          },
-        });
       } else if (docMode === 'grouped-events' && documentsData.length > 0) {
-        openPreviewPanel({
-          id: GraphGroupedNodePreviewPanelKey,
-          params: {
-            id: node.id,
-            scopeId,
-            isPreviewMode: true,
-            banner: GROUP_PREVIEW_BANNER,
-            docMode,
-            dataViewId: dataViewIndexPattern,
-            documentIds: (node.documentsData as NodeDocumentDataModel[])
-              .slice(0, MAX_DOCUMENTS_TO_LOAD)
-              .map((doc) => doc.event?.id),
-          },
-        });
+        const documentIds = (node.documentsData as NodeDocumentDataModel[])
+          .slice(0, MAX_DOCUMENTS_TO_LOAD)
+          .map((doc) => doc.event?.id)
+          .filter((id): id is string => Boolean(id));
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: (
+              <GroupedNodePreview
+                docMode="grouped-events"
+                scopeId={scopeId}
+                dataViewId={dataViewIndexPattern}
+                documentIds={documentIds}
+                entityItems={[]}
+                onShowItemDetails={onShowGroupedItemDetails}
+              />
+            ),
+          }),
+          {
+            ...defaultDocumentFlyoutProperties,
+            historyKey,
+            session: 'inherit',
+          }
+        );
       } else {
         toasts.addDanger({
           title: i18n.translate(
@@ -289,17 +348,17 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
     },
     [
       toasts,
-      openPreviewPanel,
       overlays,
       services,
       store,
       history,
       historyKey,
       defaultDocumentFlyoutProperties,
-      renderCellActions,
-      onAlertUpdated,
       scopeId,
       dataViewIndexPattern,
+      showEventOrAlertPreview,
+      showEntityPreview,
+      onShowGroupedItemDetails,
     ]
   );
 

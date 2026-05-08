@@ -39,6 +39,7 @@ import {
   EVENT_PREVIEW_BANNER,
 } from '../../../constants';
 import { useOpenEntityPreviewPanel } from '../../../hooks/use_open_entity_preview_panel';
+import { useGroupedNodePreviewActions } from '../../../actions_context';
 
 const entityUnavailableTooltip = i18n.translate(
   'securitySolutionPackages.csp.graph.groupedItem.entityUnavailable.tooltip',
@@ -59,6 +60,7 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
   const { euiTheme } = useEuiTheme();
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const openEntityPreviewPanel = useOpenEntityPreviewPanel();
+  const { onShowItemDetails } = useGroupedNodePreviewActions();
 
   const title = useMemo(() => {
     switch (item.itemType) {
@@ -75,6 +77,11 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
   const handlePreviewClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>) => {
       e.preventDefault();
+
+      if (onShowItemDetails) {
+        onShowItemDetails(item);
+        return;
+      }
 
       if (item.itemType === DOCUMENT_TYPE_ENTITY) {
         const entityItem = item as EntityItem;
@@ -95,7 +102,7 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
         });
       }
     },
-    [item, openPreviewPanel, openEntityPreviewPanel, scopeId]
+    [item, onShowItemDetails, openPreviewPanel, openEntityPreviewPanel, scopeId]
   );
 
   const isClickable =

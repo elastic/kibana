@@ -25,7 +25,7 @@ import { mockDataFormattedForFieldBrowser } from '../../../../document_details/s
 import { DocumentDetailsContext } from '../../../../document_details/shared/context';
 import { TestProviders } from '../../../../../common/mock';
 import { useExpandSection } from '../../../../../flyout_v2/shared/hooks/use_expand_section';
-import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
+import { useShouldShowGraph } from '../../../../../flyout_v2/graph/hooks/use_should_show_graph';
 
 jest.mock('../../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
@@ -40,7 +40,7 @@ jest.mock('react-redux', () => {
   };
 });
 
-jest.mock('../../../../shared/hooks/use_should_show_graph');
+jest.mock('../../../../../flyout_v2/graph/hooks/use_should_show_graph');
 
 const mockUseShouldShowGraph = useShouldShowGraph as jest.Mock;
 
