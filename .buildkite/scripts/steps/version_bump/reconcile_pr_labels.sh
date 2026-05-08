@@ -15,11 +15,15 @@ trap 'rm -rf "$TEMP_DIR"' EXIT
 echo "Cloning elastic/kibana-operations..."
 git clone --depth 1 https://github.com/elastic/kibana-operations.git "$TEMP_DIR/kibana-operations"
 
+DRY_RUN_FLAG=""
+if [[ "${DRY_RUN:-false}" == "true" ]]; then
+  DRY_RUN_FLAG="--dry-run"
+fi
+
 echo "Running label-reconcile..."
 node "$TEMP_DIR/kibana-operations/triage/label-reconcile.js" \
-  --from "v${OLD_VERSION}" \
-  --to "v${NEW_VERSION}" \
-  --old-label "v${OLD_VERSION}" \
-  --new-label "v${NEW_VERSION}"
+  --shipped "v${OLD_VERSION}" \
+  --upcoming "v${NEW_VERSION}" \
+  ${DRY_RUN_FLAG}
 
 echo "PR label reconciliation complete"

@@ -42,6 +42,10 @@ if (!BUMP_TYPE) {
       // Step 4: Update the labels for PRs and the color of the label itself
       pipeline.push('  - wait # before update label color');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/update_label_color.yml'));
+
+      // Step 5: Reconcile labels
+      pipeline.push('  - wait # before reconcile labels');
+      pipeline.push(getPipeline('.buildkite/pipelines/version_bump/reconcile_labels.yml'));
     }
 
     if (BUMP_TYPE === 'minor') {
@@ -85,7 +89,7 @@ if (!BUMP_TYPE) {
         getPipeline('.buildkite/pipelines/version_bump/trigger_dra_snapshot_on_main.yml')
       );
 
-      // Step 8: Wait, then ensure the version label exists for the new version and reconcile labels
+      // Step 8: Wait, then ensure the version label exists for the new version.
       pipeline.push('  - wait # before ensure version label');
       pipeline.push(getPipeline('.buildkite/pipelines/version_bump/ensure_version_label.yml'));
     }
