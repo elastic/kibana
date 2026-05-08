@@ -14,17 +14,37 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import imageUrl from './background.svg';
+import imageUrl from './landing_background.png';
+
+const BACKGROUND_IMAGE_WIDTH = '296px';
+const BACKGROUND_IMAGE_BOTTOM_OFFSET = '-60px';
+const HEADER_CONTENT_MIN_HEIGHT = '140px';
 
 export const LandingHeader = (): JSX.Element => {
+  const { euiTheme } = useEuiTheme();
+
   return (
-    <EuiPageTemplate.Section paddingSize="xl" grow={false} restrictWidth>
-      <EuiFlexGroup alignItems="center">
-        <EuiFlexItem>
-          <EuiTitle size="l" data-test-subj="obltOnboardingHomeTitle">
+    <EuiPageTemplate.Header
+      paddingSize="none"
+      restrictWidth
+      css={css`
+        padding: ${euiTheme.size.l} ${euiTheme.size.xl} 0;
+      `}
+    >
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        css={css`
+          min-height: ${HEADER_CONTENT_MIN_HEIGHT};
+        `}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="l">
             <h1>
               <FormattedMessage
                 id="xpack.observability_onboarding.experimentalOnboardingFlow.addObservabilityDataTitleLabel"
@@ -40,12 +60,22 @@ export const LandingHeader = (): JSX.Element => {
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiHideFor sizes={['xs', 's']}>
-          <EuiFlexItem grow={false}>
-            <EuiImage src={imageUrl} alt="" size="l" />
+        <EuiHideFor sizes={['xs', 's', 'm']}>
+          <EuiFlexItem
+            css={css`
+              margin-bottom: ${BACKGROUND_IMAGE_BOTTOM_OFFSET};
+            `}
+          >
+            <EuiImage
+              src={imageUrl}
+              alt=""
+              css={css`
+                width: ${BACKGROUND_IMAGE_WIDTH};
+              `}
+            />
           </EuiFlexItem>
         </EuiHideFor>
       </EuiFlexGroup>
-    </EuiPageTemplate.Section>
+    </EuiPageTemplate.Header>
   );
 };

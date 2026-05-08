@@ -42,7 +42,7 @@ export const IntegrationsGrid = () => {
       </EuiText>
       <EuiSpacer size="l" />
       <EuiPanel color="subdued" hasShadow={false} paddingSize="l">
-        <EuiFlexGroup direction="column" gutterSize="l">
+        <EuiFlexGroup direction="column" gutterSize="xl">
           {INTEGRATION_CATEGORIES.map((category) => (
             <EuiFlexItem key={category.id} grow={false}>
               <IntegrationsCategory category={category} />

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCard, useEuiTheme } from '@elastic/eui';
+import { EuiCard, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { LogoIcon } from '../shared/logo_icon';
 import type { IntegrationTileDefinition } from './tiles_config';
 
@@ -34,7 +34,8 @@ export const IntegrationTile = ({ tile }: Props) => {
         />
       }
       title={tile.title}
-      description={tile.description}
+      description={<EuiTextColor color="subdued">{tile.description}</EuiTextColor>}
+      onClick={() => {}}
     />
   );
 };
