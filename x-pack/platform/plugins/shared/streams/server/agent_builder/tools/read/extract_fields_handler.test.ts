@@ -905,6 +905,174 @@ describe('runExtractFieldsFlow', () => {
       }
     });
 
+    // ---------------------------------------------------------------------
+    // Simulation strategy
+    //
+    // When the user already has a pipeline AND the sample documents reflect
+    // its output (the default for samples.source === 'stream', or inline
+    // samples explicitly tagged status === 'processed'), re-running the
+    // existing steps on top of already-processed data would mis-classify
+    // already-typed values as processor failures. The handler must mirror
+    // `nl_to_streamlang.ts::determineSimulationStrategy` and simulate only
+    // the newly-added prefix in that case.
+    // ---------------------------------------------------------------------
+    describe('simulation strategy', () => {
+      const arrangeWinningCandidate = (deps: RunExtractFieldsDeps) => {
+        mockProcessGrokPatterns.mockResolvedValue({
+          type: 'grok',
+          processor: grokCandidateProcessor,
+          parsedRate: 1,
+        });
+        mockProcessDissectPattern.mockResolvedValue(null);
+        mockExtractParsedSampleDocuments.mockResolvedValue({
+          parsedDocuments: [{ 'body.text': '...' } as FlattenRecord],
+          definitionError: false,
+        });
+        // Sub-agent contributes one extra step so we can verify both the
+        // seed and the sub-agent step are part of the simulated subset.
+        mockSuggestProcessingPipeline.mockResolvedValue({
+          pipeline: {
+            steps: [
+              {
+                action: 'date',
+                from: 'attributes.timestamp',
+                to: '@timestamp',
+                formats: ['ISO8601'],
+              } as unknown as StreamlangStep,
+            ],
+          },
+          metadata: { stepsUsed: 2, maxSteps: 6 },
+        });
+        mockSimulateProcessing.mockResolvedValue(succeededSimulation());
+      };
+
+      it('uses partial mode and simulates only the newly-added steps when an existing pipeline is preserved (stream samples are processed)', async () => {
+        const harmlessExistingStep = {
+          action: 'set',
+          to: 'attributes.environment',
+          value: 'prod',
+          ignore_failure: true,
+        } as unknown as StreamlangStep;
+
+        const deps = buildDeps();
+        arrangeStreamWithSamples(deps, [harmlessExistingStep]);
+        arrangeWinningCandidate(deps);
+
+        const outcome = await runExtractFieldsFlow({ streamName: ingestStreamName }, deps);
+
+        expect(outcome.kind).toBe('success');
+        if (outcome.kind !== 'success') return;
+
+        expect(outcome.result.simulation.mode).toBe('partial');
+
+        // Final simulator call must NOT include the existing `set` step —
+        // that would re-run it on already-processed docs and produce
+        // misleading failures.
+        const simCalls = mockSimulateProcessing.mock.calls;
+        const finalCall = simCalls[simCalls.length - 1][0];
+        const simulatedActions = (
+          finalCall.params.body.processing.steps as Array<{ action?: string }>
+        ).map((s) => s.action);
+        expect(simulatedActions).not.toContain('set');
+        expect(simulatedActions).toEqual(expect.arrayContaining(['grok', 'date']));
+
+        // A user-visible warning explains the partial nature of the result.
+        expect(outcome.result.warnings).toEqual(
+          expect.arrayContaining([expect.stringContaining('Simulation is partial')])
+        );
+      });
+
+      it('uses complete mode and simulates the full proposed pipeline when there are no existing steps', async () => {
+        const deps = buildDeps();
+        arrangeStreamWithSamples(deps, []);
+        arrangeWinningCandidate(deps);
+
+        const outcome = await runExtractFieldsFlow({ streamName: ingestStreamName }, deps);
+
+        expect(outcome.kind).toBe('success');
+        if (outcome.kind !== 'success') return;
+
+        expect(outcome.result.simulation.mode).toBe('complete');
+        expect(outcome.result.warnings ?? []).not.toEqual(
+          expect.arrayContaining([expect.stringContaining('Simulation is partial')])
+        );
+      });
+
+      it('uses complete mode and simulates the full pipeline for inline `unprocessed` samples even with existing steps', async () => {
+        // Unprocessed inline samples are raw inputs, so re-running the full
+        // pipeline (existing + new) is the accurate simulation.
+        const harmlessExistingStep = {
+          action: 'set',
+          to: 'attributes.environment',
+          value: 'prod',
+          ignore_failure: true,
+        } as unknown as StreamlangStep;
+
+        const deps = buildDeps();
+        (deps.streamsClient.getStream as jest.Mock).mockResolvedValue(
+          buildIngestStreamDef([harmlessExistingStep])
+        );
+        arrangeWinningCandidate(deps);
+
+        const outcome = await runExtractFieldsFlow(
+          {
+            streamName: ingestStreamName,
+            samples: {
+              source: 'inline',
+              status: 'unprocessed',
+              documents: [
+                { 'body.text': '192.168.1.1 GET / 200', 'service.name': 'web' },
+                { 'body.text': '10.0.0.1 POST /login 401', 'service.name': 'web' },
+              ],
+            },
+          },
+          deps
+        );
+
+        expect(outcome.kind).toBe('success');
+        if (outcome.kind !== 'success') return;
+
+        expect(outcome.result.simulation.mode).toBe('complete');
+
+        // Full merged pipeline (existing `set` + new `grok` + sub-agent `date`)
+        // must reach the simulator since the docs are raw.
+        const simCalls = mockSimulateProcessing.mock.calls;
+        const finalCall = simCalls[simCalls.length - 1][0];
+        const simulatedActions = (
+          finalCall.params.body.processing.steps as Array<{ action?: string }>
+        ).map((s) => s.action);
+        expect(simulatedActions).toEqual(expect.arrayContaining(['set', 'grok', 'date']));
+      });
+
+      it('emits a stronger partial-simulation warning when an existing step writes to or removes the source field', async () => {
+        // Prepend case: the cached samples were captured AFTER the existing
+        // step mutated the source, so partial simulation will under-report
+        // success. The warning makes that explicit.
+        const writesBodyText = {
+          action: 'set',
+          to: 'body.text',
+          value: 'redacted',
+          ignore_failure: true,
+        } as unknown as StreamlangStep;
+
+        const deps = buildDeps();
+        arrangeStreamWithSamples(deps, [writesBodyText]);
+        arrangeWinningCandidate(deps);
+
+        const outcome = await runExtractFieldsFlow({ streamName: ingestStreamName }, deps);
+
+        expect(outcome.kind).toBe('success');
+        if (outcome.kind !== 'success') return;
+
+        expect(outcome.result.simulation.mode).toBe('partial');
+        expect(outcome.result.warnings).toEqual(
+          expect.arrayContaining([
+            expect.stringContaining('cached samples may have already been mutated'),
+          ])
+        );
+      });
+    });
+
     it('emits a warning when the post-parse sub-agent contributes no additional steps', async () => {
       const deps = buildDeps();
       arrangeStreamWithSamples(deps);

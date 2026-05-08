@@ -52,6 +52,7 @@ import {
   resolveSamples,
   type NlToStreamlangResult,
   type SamplesConfig,
+  type SimulationMode,
 } from './nl_to_streamlang';
 import { buildDropWarnings, computePipelineDiff } from './pipeline_diff';
 
@@ -157,7 +158,7 @@ export const runExtractFieldsFlow = async (
 
   const existingSteps = definition.ingest.processing.steps;
 
-  const { documents, samplesInfo } = await resolveSamples(
+  const { documents, documentStatus, samplesInfo } = await resolveSamples(
     params.samples,
     streamName,
     scopedClusterClient.asCurrentUser
@@ -349,13 +350,16 @@ export const runExtractFieldsFlow = async (
         : [...existingSteps, ...newlyAdded.steps],
     });
 
-    // Run a final simulation against the original raw documents so we can
-    // produce the same `field_changes` / `success_rate` / errors shape the
-    // `extract_fields: false` path returns.
+    const shouldSimulatePartial = existingSteps.length > 0 && documentStatus === 'processed';
+    const stepsForFinalSimulation = shouldSimulatePartial
+      ? addDeterministicCustomIdentifiers({ steps: newlyAdded.steps }).steps
+      : merged.steps;
+    const simulationMode: SimulationMode = shouldSimulatePartial ? 'partial' : 'complete';
+
     const finalSimulation = await simulateProcessing({
       params: {
         path: { name: streamName },
-        body: { processing: merged, documents: flattenedDocs },
+        body: { processing: { steps: stepsForFinalSimulation }, documents: flattenedDocs },
       },
       esClient: scopedClusterClient.asCurrentUser,
       streamsClient,
@@ -396,6 +400,15 @@ export const runExtractFieldsFlow = async (
         );
       }
     }
+    if (shouldSimulatePartial) {
+      const baseNote =
+        'Simulation is partial — only the newly-added extraction steps were simulated, since the sample documents already reflect the existing pipeline output. Existing steps will continue to run as-is at ingest.';
+      warnings.push(
+        sourceFieldUsedByExisting
+          ? `${baseNote} Because an existing step writes to or removes the source field "${fieldName}", the cached samples may have already been mutated; simulation may under-report the success rate that ingest would actually produce.`
+          : baseNote
+      );
+    }
     if (simErrors.length > 0) {
       const rateLabel =
         successRate !== null ? `${successRate}% success rate with` : 'Simulation failed with';
@@ -427,7 +440,7 @@ export const runExtractFieldsFlow = async (
           success_rate: successRate,
           ...(simErrors.length > 0 && { errors: simErrors }),
           sample_count: flattenedDocs.length,
-          mode: 'complete',
+          mode: simulationMode,
         },
         ...(warnings.length + dropWarnings.length > 0 && {
           warnings: [...warnings, ...dropWarnings],
