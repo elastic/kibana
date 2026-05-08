@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_SPACE_ID } from './space_id';
+import { type SpaceId, asSpaceId, DEFAULT_SPACE_ID } from './space_id';
 
 const spaceContextRegex = /^\/s\/([a-z0-9_\-]+)/;
 
@@ -16,39 +16,20 @@ const spaceContextRegex = /^\/s\/([a-z0-9_\-]+)/;
  *
  * @param requestBasePath The base path of the current request.
  * @param serverBasePath The server's base path.
- * @returns the space id.
- *
- * @internal
+ * @returns the space id and whether the path had an explicit space identifier.
  */
 export function getSpaceIdFromPath(
-  requestBasePath?: string | null,
-  serverBasePath?: string | null
-): { spaceId: string; pathHasExplicitSpaceIdentifier: boolean } {
-  if (requestBasePath == null) requestBasePath = '/';
-  if (serverBasePath == null) serverBasePath = '/';
-  const pathToCheck: string = stripServerBasePath(requestBasePath, serverBasePath);
+  requestBasePath: string = '/',
+  serverBasePath: string = '/'
+): { spaceId: SpaceId; pathHasExplicitSpaceIdentifier: boolean } {
+  const pathToCheck = stripServerBasePath(requestBasePath, serverBasePath);
+  const match = pathToCheck.match(spaceContextRegex);
 
-  // Look for `/s/space-url-context` in the base path
-  const matchResult = pathToCheck.match(spaceContextRegex);
-
-  if (!matchResult || matchResult.length === 0) {
-    return {
-      spaceId: DEFAULT_SPACE_ID,
-      pathHasExplicitSpaceIdentifier: false,
-    };
+  if (!match) {
+    return { spaceId: DEFAULT_SPACE_ID, pathHasExplicitSpaceIdentifier: false };
   }
 
-  // Ignoring first result, we only want the capture group result at index 1
-  const [, spaceId] = matchResult;
-
-  if (!spaceId) {
-    throw new Error(`Unable to determine Space ID from request path: ${requestBasePath}`);
-  }
-
-  return {
-    spaceId,
-    pathHasExplicitSpaceIdentifier: true,
-  };
+  return { spaceId: asSpaceId(match[1]), pathHasExplicitSpaceIdentifier: true };
 }
 
 /**
@@ -77,9 +58,9 @@ export function addSpaceIdToPath(
   return `${normalizedBasePath}${requestedPath}` || '/';
 }
 
-function stripServerBasePath(requestBasePath: string, serverBasePath: string) {
+function stripServerBasePath(requestBasePath: string, serverBasePath: string): string {
   if (serverBasePath && serverBasePath !== '/' && requestBasePath.startsWith(serverBasePath)) {
-    return requestBasePath.substr(serverBasePath.length);
+    return requestBasePath.slice(serverBasePath.length);
   }
   return requestBasePath;
 }

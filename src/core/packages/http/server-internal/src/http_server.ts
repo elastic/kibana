@@ -53,9 +53,8 @@ import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monito
 import type { Env } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { type Attributes, metrics, ValueType } from '@opentelemetry/api';
-import { getSpaceUrlPrefix } from '@kbn/core-spaces-common';
+import { getSpaceUrlPrefix, getSpaceIdFromPath } from '@kbn/core-spaces-common';
 import type { HttpConfig } from './http_config';
-import { getSpaceIdFromPath } from './spaces_url_parser';
 import { adoptToHapiAuthFormat } from './lifecycle/auth';
 import { adoptToHapiOnPreAuth } from './lifecycle/on_pre_auth';
 import { adoptToHapiOnPostAuthFormat } from './lifecycle/on_post_auth';
