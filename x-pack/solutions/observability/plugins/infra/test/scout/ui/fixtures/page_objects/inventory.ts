@@ -229,8 +229,10 @@ export class InventoryPage {
   }
 
   public async goToTime(time: string) {
+    await this.datePickerInput.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await this.datePickerInput.fill(time);
-    await this.datePickerInput.press('Escape');
+    await this.datePickerInput.press('Enter', { delay: 50 });
+    await this.datePickerInput.press('Escape', { delay: 50 });
     await this.waitForNodesToLoad();
   }
 

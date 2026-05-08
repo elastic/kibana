@@ -15,6 +15,7 @@ import {
   DATE_WITH_POD_DATA,
   DATE_WITH_SEMCONV_DATA,
   DATE_WITHOUT_DATA,
+  EXTENDED_TIMEOUT,
   HOST1_NAME,
   HOST2_NAME,
   HOST3_NAME,
@@ -254,6 +255,7 @@ test.describe(
     test('OTel (semconv): filters waffle nodes by query bar', async ({
       pageObjects: { inventoryPage },
     }) => {
+      await inventoryPage.noDataPrompt.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
       await inventoryPage.goToTime(DATE_WITH_SEMCONV_DATA);
       await expect(inventoryPage.waffleMap.getByTestId('nodeContainer')).toHaveCount(
         SEMCONV_HOSTS.length
