@@ -791,6 +791,9 @@ export const mockCasesContract = (): CasesServerStart => ({
         enabled: true,
       },
     },
+    analyticsV2: {
+      enabled: false,
+    },
     incrementalId: {
       enabled: true,
       taskIntervalMinutes: 10,

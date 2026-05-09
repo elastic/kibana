@@ -22,6 +22,15 @@ export const ConfigSchema = schema.object({
       }),
     }),
   }),
+  /**
+   * Cases-as-data v2 — cluster-level analytics indices populated by real-time
+   * saved-object hooks (see `server/cases_analytics_v2`). Off by default; v1
+   * (`analytics.index.enabled`) is the primary path until v2 has been validated
+   * in production. Enabling v2 has no effect on v1 — they coexist independently.
+   */
+  analyticsV2: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
   attachments: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
   }),

@@ -17,6 +17,9 @@ describe('config validation', () => {
               "enabled": false,
             },
           },
+          "analyticsV2": Object {
+            "enabled": false,
+          },
           "attachments": Object {
             "enabled": false,
           },

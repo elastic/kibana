@@ -56,6 +56,7 @@ import type { ServerlessProjectType } from '../common/constants/types';
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
+import { CasesAnalyticsV2Service } from './cases_analytics_v2';
 import { CasesEventBus } from './events/event_bus';
 import { registerCaseWorkflowSteps } from './workflows';
 import { registerCaseWorkflowTriggers } from './workflows/triggers';
@@ -86,6 +87,7 @@ export class CasePlugin
   private readonly isServerless: boolean;
   private casesEventBus?: CasesEventBus;
   private readonly closeReasonValidators: Map<string, CloseReasonValidator> = new Map();
+  private casesAnalyticsV2Service?: CasesAnalyticsV2Service;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -119,6 +121,13 @@ export class CasePlugin
       logger: this.logger,
       core,
       analyticsConfig: this.caseConfig.analytics,
+    });
+
+    // Cases-as-data v2 — independent of v1, gated by its own feature flag. The
+    // service is a no-op until `xpack.cases.analyticsV2.enabled` is true.
+    this.casesAnalyticsV2Service = new CasesAnalyticsV2Service({
+      logger: this.logger,
+      enabled: this.caseConfig.analyticsV2.enabled,
     });
 
     this.securityPluginSetup = plugins.security;
@@ -267,6 +276,10 @@ export class CasePlugin
       }
     }
 
+    // Cases-as-data v2. Internally a no-op when the feature flag is off, so safe
+    // to call unconditionally.
+    this.casesAnalyticsV2Service?.start();
+
     this.userProfileService.initialize({
       spaces: plugins.spaces,
       // securityPluginSetup will be set to a defined value in the setup() function
@@ -332,6 +345,7 @@ export class CasePlugin
 
   public stop() {
     this.logger.debug(`Stopping Case Workflow`);
+    this.casesAnalyticsV2Service?.stop();
   }
 
   private createRouteHandlerContext = ({

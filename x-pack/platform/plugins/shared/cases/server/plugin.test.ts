@@ -32,6 +32,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     stack: { enabled: true },
     incrementalId: { enabled: true, taskIntervalMinutes: 10, taskStartDelayMinutes: 10 },
     analytics: { index: { enabled: true } },
+    analyticsV2: { enabled: false },
     templates: { enabled: true },
     attachments: { enabled: true },
     ...overrides,
@@ -171,6 +172,9 @@ describe('Cases Plugin', () => {
               "index": Object {
                 "enabled": true,
               },
+            },
+            "analyticsV2": Object {
+              "enabled": false,
             },
             "attachments": Object {
               "enabled": true,
