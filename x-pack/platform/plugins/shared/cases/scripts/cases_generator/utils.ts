@@ -6,7 +6,10 @@
  */
 
 import { logger } from './logger';
-import type { TemplateFieldUserType } from './types';
+import { rng } from './seeded_random';
+import { TEMPLATE_FIELD_USER_TYPES, type TemplateFieldUserType } from './types';
+
+export { rng, installSeededRandom } from './seeded_random';
 
 export const AUTO_GENERATED_TAG = 'auto-generated';
 
@@ -22,17 +25,6 @@ export const USER_TYPE_TO_SCHEMA_TYPE: Record<TemplateFieldUserType, string> = {
   checkbox: 'keyword',
   user: 'keyword',
 };
-
-// The RNG that every randomness-using helper in this script reads from. Defaults
-// to Math.random; installSeededRandom swaps it for a deterministic generator.
-let scriptRandom: () => number = Math.random;
-
-// Returns a random number in [0, 1) using whichever RNG is currently installed.
-// All script randomness goes through this so installSeededRandom can make runs
-// reproducible.
-export function rng(): number {
-  return scriptRandom();
-}
 
 // Returns a short alphanumeric token of (up to) `length` characters. Used to
 // build the per-run reqId that gets stamped into case titles/descriptions so
@@ -276,59 +268,24 @@ export function parseNonNegativeInteger(value: string, fallback: number): number
   return parsed;
 }
 
-// cyrb128 / sfc32: textbook seedable PRNG primitives. Bitwise ops and parameter
-// reassignment are inherent to the algorithm, hence the scoped lint disables.
-/* eslint-disable no-bitwise, no-param-reassign */
-// Hashes a seed string into a 4-tuple of 32-bit ints used to initialize sfc32.
-// Internal helper for installSeededRandom.
-function cyrb128(str: string): [number, number, number, number] {
-  let h1 = 1_779_033_703;
-  let h2 = 3_144_134_277;
-  let h3 = 1_013_904_242;
-  let h4 = 2_773_480_762;
-  for (let i = 0; i < str.length; i++) {
-    const k = str.charCodeAt(i);
-    h1 = h2 ^ Math.imul(h1 ^ k, 597_399_067);
-    h2 = h3 ^ Math.imul(h2 ^ k, 2_869_860_233);
-    h3 = h4 ^ Math.imul(h3 ^ k, 951_274_213);
-    h4 = h1 ^ Math.imul(h4 ^ k, 2_716_044_179);
+// Parses a comma-separated list of template field types (e.g. "text,number,date")
+// into the typed array createTemplates expects, warning on unknown values.
+// Used by both the CLI (--templateFieldTypes) and the interactive wizard.
+export function parseTemplateFieldTypes(input: string): TemplateFieldUserType[] {
+  if (!input) return [];
+  const valid = new Set<string>(TEMPLATE_FIELD_USER_TYPES);
+  const result: TemplateFieldUserType[] = [];
+  for (const raw of parseList(input)) {
+    const normalized = raw.toLowerCase();
+    if (valid.has(normalized)) {
+      result.push(normalized as TemplateFieldUserType);
+    } else {
+      logger.warning(
+        `Skipping unknown template field type "${raw}". Valid types: ${TEMPLATE_FIELD_USER_TYPES.join(
+          ', '
+        )}`
+      );
+    }
   }
-  h1 = Math.imul(h3 ^ (h1 >>> 18), 597_399_067);
-  h2 = Math.imul(h4 ^ (h2 >>> 22), 2_869_860_233);
-  h3 = Math.imul(h1 ^ (h3 >>> 17), 951_274_213);
-  h4 = Math.imul(h2 ^ (h4 >>> 19), 2_716_044_179);
-  return [(h1 ^ h2 ^ h3 ^ h4) >>> 0, (h2 ^ h1) >>> 0, (h3 ^ h1) >>> 0, (h4 ^ h1) >>> 0];
-}
-
-// Builds a deterministic 32-bit RNG closure from the four state words produced
-// by cyrb128. Internal helper for installSeededRandom.
-function sfc32(a: number, b: number, c: number, d: number) {
-  return () => {
-    a >>>= 0;
-    b >>>= 0;
-    c >>>= 0;
-    d >>>= 0;
-    let t = (a + b) | 0;
-    a = b ^ (b >>> 9);
-    b = (c + (c << 3)) | 0;
-    c = (c << 21) | (c >>> 11);
-    d = (d + 1) | 0;
-    t = (t + d) | 0;
-    c = (c + t) | 0;
-    return (t >>> 0) / 4_294_967_296;
-  };
-}
-/* eslint-enable no-bitwise, no-param-reassign */
-
-// Replaces the script-wide RNG with a deterministic stream derived from
-// `seed`. Returns a function that restores the previous RNG. Used when
-// --seed is supplied so a run produces the same plan, owner picks,
-// severities, and tag selections every time.
-export function installSeededRandom(seed: string): () => void {
-  const previous = scriptRandom;
-  const [a, b, c, d] = cyrb128(seed);
-  scriptRandom = sfc32(a, b, c, d);
-  return () => {
-    scriptRandom = previous;
-  };
+  return result;
 }
