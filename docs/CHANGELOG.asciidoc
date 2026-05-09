@@ -173,6 +173,7 @@ The 8.19.14 release includes the following known issues and fixes.
 [float]
 [[known-issues-8.19.14]]
 === Known issues
+
 include::CHANGELOG.asciidoc[tag=known-issue-1168]
 
 [float]
@@ -214,7 +215,7 @@ IMPORTANT: This release contains fixes for potential security vulnerabilities. C
 Some Stack and Observability alerts send recovery notifications (for example, Slack, email, or webhook) but remain `active` in {kib} instead of transitioning to `recovered`.
 
 *Workaround* +
-Manually untrack stale alerts or upgrade to a later {stack} version that contains the fix.
+Manually untrack stale alerts or upgrade to 8.19.15, 9.3.4, or 9.4.0.
 
 *Resolved* + 
 This issue is resolved in 8.19.15, 9.3.4, and 9.4.0.
