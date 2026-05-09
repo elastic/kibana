@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
@@ -43,8 +43,8 @@ import { generateId } from '../../../id_generator';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
 import { LensDocumentService } from '../../../persistence';
-import { DOC_TYPE } from '../../../../common/constants';
 import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor_frame_service_context';
+import { ESQLEditorContext } from '../../../editor_frame_service/editor_frame/config_panel/esql_editor_context';
 
 export type EditLensConfigurationProps = Omit<
   EditConfigPanelProps,
@@ -183,6 +183,8 @@ const EditLensConfiguration: FC<
   const [currentAttributes, setCurrentAttributes] =
     useState<TypedLensSerializedState['attributes']>(attributes);
 
+  const editorHeightRef = useRef<number | undefined>(undefined);
+
   /**
    * During inline editing of a by reference panel, the panel is converted to a by value one.
    * When the user applies the changes we save them to the Lens SO
@@ -193,7 +195,6 @@ const EditLensConfiguration: FC<
       await lensDocumentService.save({
         ...attrs,
         savedObjectId,
-        type: DOC_TYPE,
       });
     },
     [lensServices.http, savedObjectId]
@@ -277,22 +278,24 @@ const EditLensConfiguration: FC<
 
   return (
     <MaybeWrapper wrapInFlyout={wrapInFlyout} closeFlyout={closeFlyout}>
-      <Provider store={lensStore}>
-        <KibanaRenderContextProvider {...coreStart}>
-          <KibanaContextProvider services={lensServices}>
-            <EditorFrameServiceProvider
-              datasourceMap={datasourceMap}
-              visualizationMap={visualizationMap}
-            >
-              <RootDragDropProvider>
-                {coreStart.rendering.addContext(
-                  <LensEditConfigurationFlyout {...configPanelProps} />
-                )}
-              </RootDragDropProvider>
-            </EditorFrameServiceProvider>
-          </KibanaContextProvider>
-        </KibanaRenderContextProvider>
-      </Provider>
+      <ESQLEditorContext.Provider value={{ editorHeightRef }}>
+        <Provider store={lensStore}>
+          <KibanaRenderContextProvider {...coreStart}>
+            <KibanaContextProvider services={lensServices}>
+              <EditorFrameServiceProvider
+                datasourceMap={datasourceMap}
+                visualizationMap={visualizationMap}
+              >
+                <RootDragDropProvider>
+                  {coreStart.rendering.addContext(
+                    <LensEditConfigurationFlyout {...configPanelProps} />
+                  )}
+                </RootDragDropProvider>
+              </EditorFrameServiceProvider>
+            </KibanaContextProvider>
+          </KibanaRenderContextProvider>
+        </Provider>
+      </ESQLEditorContext.Provider>
     </MaybeWrapper>
   );
 };

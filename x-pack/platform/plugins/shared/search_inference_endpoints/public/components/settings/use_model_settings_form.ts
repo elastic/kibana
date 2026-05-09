@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { useInferenceSettings, useSaveInferenceSettings } from '../../hooks/use_inference_settings';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import type { InferenceFeatureResponse } from '../../../common/types';
@@ -21,21 +22,30 @@ export interface ModelSettingsForm {
   isSaving: boolean;
   isDirty: boolean;
   assignments: Assignments;
+  effectiveRecommendedEndpoints: Record<string, string[]>;
   sections: FeatureSection[];
+  invalidEndpointIds: Set<string>;
+  hasSavedObject: Record<string, boolean>;
+  dirtyFeatureIds: ReadonlySet<string>;
   updateEndpoints: (featureId: string, endpointIds: string[]) => void;
-  save: () => void;
-  resetSection: (sectionId: string) => void;
+  save: () => Promise<void>;
 }
 
 const getEffectiveEndpoints = (
   feature: { recommendedEndpoints: string[]; parentFeatureId?: string },
   recommendedEndpointsById: Map<string, string[]>
-): string[] =>
-  feature.recommendedEndpoints.length > 0
-    ? feature.recommendedEndpoints
-    : feature.parentFeatureId
-    ? recommendedEndpointsById.get(feature.parentFeatureId) ?? []
-    : [];
+): string[] => {
+  if (feature.recommendedEndpoints.length > 0) {
+    return feature.recommendedEndpoints;
+  }
+  if (feature.parentFeatureId) {
+    const parentEndpoints = recommendedEndpointsById.get(feature.parentFeatureId) ?? [];
+    if (parentEndpoints.length > 0) {
+      return parentEndpoints;
+    }
+  }
+  return [defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION];
+};
 
 const toApiFormat = (assignments: Assignments) =>
   Object.entries(assignments).map(([featureId, ids]) => ({
@@ -43,10 +53,31 @@ const toApiFormat = (assignments: Assignments) =>
     endpoints: ids.map((id) => ({ id })),
   }));
 
+const arraysEqual = (a: string[], b: string[]) =>
+  a.length === b.length && a.every((v, i) => v === b[i]);
+
+// Returns only the assignments that differ from recommended, so the server-side fallback
+// chain (recommendedEndpoints → parent) stays in effect for unchanged features.
+const getChangedAssignments = (
+  assignments: Assignments,
+  registeredFeatures: InferenceFeatureResponse[],
+  recommendedEndpointsById: Map<string, string[]>
+): Assignments => {
+  const featureById = new Map(registeredFeatures.map((f) => [f.featureId, f]));
+  return Object.fromEntries(
+    Object.entries(assignments).filter(([featureId, ids]) => {
+      const feature = featureById.get(featureId);
+      if (!feature) return true;
+      const defaults = getEffectiveEndpoints(feature, recommendedEndpointsById);
+      return !arraysEqual(ids, defaults);
+    })
+  );
+};
+
 export const useModelSettingsForm = (): ModelSettingsForm => {
   const { features: registeredFeatures, isLoading: isFeaturesLoading } = useRegisteredFeatures();
   const { data: settingsData, isLoading: isSettingsLoading } = useInferenceSettings();
-  const { mutate: saveSettings, isLoading: isSaving } = useSaveInferenceSettings();
+  const { mutateAsync: saveSettings, isLoading: isSaving } = useSaveInferenceSettings();
 
   const isLoading = isFeaturesLoading || isSettingsLoading;
 
@@ -81,13 +112,40 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     [registeredFeatures]
   );
 
-  const defaultAssignments = useMemo((): Assignments => {
-    const savedMap = new Map<string, string[]>(
-      (settingsData?.data?.features ?? [])
-        .map((f): [string, string[]] => [f.feature_id, (f.endpoints ?? []).map((e) => e.id)])
-        .filter(([, ids]) => ids.length > 0)
-    );
+  const effectiveRecommendedEndpoints = useMemo<Record<string, string[]>>(
+    () =>
+      Object.fromEntries(
+        sections.flatMap(({ children }) =>
+          children.map((f): [string, string[]] => [
+            f.featureId,
+            [...getEffectiveEndpoints(f, recommendedEndpointsById)],
+          ])
+        )
+      ),
+    [sections, recommendedEndpointsById]
+  );
 
+  const savedMap = useMemo(
+    () =>
+      new Map<string, string[]>(
+        (settingsData?.data?.features ?? [])
+          .map((f): [string, string[]] => [f.feature_id, (f.endpoints ?? []).map((e) => e.id)])
+          .filter(([, ids]) => ids.length > 0)
+      ),
+    [settingsData]
+  );
+
+  const hasSavedObject = useMemo(
+    () =>
+      Object.fromEntries(
+        sections.flatMap(({ children }) =>
+          children.map((f): [string, boolean] => [f.featureId, savedMap.has(f.featureId)])
+        )
+      ),
+    [sections, savedMap]
+  );
+
+  const defaultAssignments = useMemo((): Assignments => {
     return Object.fromEntries(
       sections.flatMap(({ children }) =>
         children.map((f): [string, string[]] => [
@@ -96,7 +154,7 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
         ])
       )
     );
-  }, [settingsData, sections, recommendedEndpointsById]);
+  }, [savedMap, sections, recommendedEndpointsById]);
 
   const [assignments, setAssignments] = useState<Assignments>(defaultAssignments);
 
@@ -104,45 +162,48 @@ export const useModelSettingsForm = (): ModelSettingsForm => {
     setAssignments(defaultAssignments);
   }, [defaultAssignments]);
 
-  const isDirty = useMemo(
-    () => JSON.stringify(assignments) !== JSON.stringify(defaultAssignments),
-    [assignments, defaultAssignments]
+  const invalidEndpointIds = useMemo(
+    () => new Set<string>(settingsData?.invalidEndpoints ?? []),
+    [settingsData]
   );
+
+  const dirtyFeatureIds = useMemo<ReadonlySet<string>>(() => {
+    const ids = new Set<string>();
+    for (const [featureId, currentIds] of Object.entries(assignments)) {
+      const defaults = defaultAssignments[featureId];
+      if (!defaults || !arraysEqual(currentIds, defaults)) {
+        ids.add(featureId);
+      }
+    }
+    return ids;
+  }, [assignments, defaultAssignments]);
+
+  const isDirty = dirtyFeatureIds.size > 0;
 
   const updateEndpoints = useCallback((featureId: string, endpointIds: string[]) => {
     setAssignments((prev) => ({ ...prev, [featureId]: endpointIds }));
   }, []);
 
-  const save = useCallback(() => {
-    saveSettings({ features: toApiFormat(assignments) });
-  }, [saveSettings, assignments]);
-
-  const resetSection = useCallback(
-    (sectionId: string) => {
-      const section = sections.find((s) => s.featureId === sectionId);
-      if (!section) return;
-
-      const resetEntries = Object.fromEntries(
-        section.children.map((f) => [
-          f.featureId,
-          [...getEffectiveEndpoints(f, recommendedEndpointsById)],
-        ])
-      );
-      const updated = { ...assignments, ...resetEntries };
-      setAssignments(updated);
-      saveSettings({ features: toApiFormat(updated) });
-    },
-    [assignments, sections, saveSettings, recommendedEndpointsById]
-  );
+  const save = useCallback(async () => {
+    const changed = getChangedAssignments(
+      assignments,
+      registeredFeatures,
+      recommendedEndpointsById
+    );
+    await saveSettings({ features: toApiFormat(changed) });
+  }, [saveSettings, assignments, registeredFeatures, recommendedEndpointsById]);
 
   return {
     isLoading,
     isSaving,
     isDirty,
     assignments,
+    effectiveRecommendedEndpoints,
     sections,
+    invalidEndpointIds,
+    hasSavedObject,
+    dirtyFeatureIds,
     updateEndpoints,
     save,
-    resetSection,
   };
 };

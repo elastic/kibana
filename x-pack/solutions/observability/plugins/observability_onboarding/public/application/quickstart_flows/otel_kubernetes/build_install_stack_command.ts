@@ -16,6 +16,7 @@ export function buildInstallStackCommand({
   apiKeyEncoded,
   agentVersion,
   useWiredStreams = false,
+  onboardingId,
 }: {
   isMetricsOnboardingEnabled: boolean;
   isManagedOtlpServiceAvailable: boolean;
@@ -24,6 +25,7 @@ export function buildInstallStackCommand({
   apiKeyEncoded: string;
   agentVersion: string;
   useWiredStreams?: boolean;
+  onboardingId: string;
 }): string {
   const ingestEndpointUrl = isManagedOtlpServiceAvailable
     ? managedOtlpEndpointUrl
@@ -37,22 +39,33 @@ export function buildInstallStackCommand({
     agentVersion,
   });
 
+  // The base kube-stack Helm values file defines processors[0..7] for the
+  // logs/node and metrics/node/otel pipelines. Custom processors
+  // (onboarding_id, wired_streams) are appended starting at index 8.
+  let nextLogProcessorIndex = 8;
+  let nextMetricProcessorIndex = 8;
+
+  const onboardingIdConfig = (() => {
+    let config = ` \\
+  --set 'collectors.daemon.config.processors.resource\\/onboarding_id.attributes[0].action=upsert' \\
+  --set 'collectors.daemon.config.processors.resource\\/onboarding_id.attributes[0].key=onboarding.id' \\
+  --set 'collectors.daemon.config.processors.resource\\/onboarding_id.attributes[0].value=${onboardingId}' \\
+  --set 'collectors.daemon.config.service.pipelines.logs\\/node.processors[${nextLogProcessorIndex++}]=resource/onboarding_id'`;
+    if (isMetricsOnboardingEnabled) {
+      config += ` \\
+  --set 'collectors.daemon.config.service.pipelines.metrics\\/node\\/otel.processors[${nextMetricProcessorIndex++}]=resource/onboarding_id'`;
+    }
+    return config;
+  })();
+
   const wiredStreamsConfig = (() => {
     if (!useWiredStreams) return '';
 
-    // Route container logs to wired streams by injecting the
-    // resource/wired_streams processor on the daemon collector's node pipeline.
-    // APM logs are intentionally excluded — wired streams support for APM is
-    // tracked separately and not yet ready.
-    // K8s event logs (from the cluster collector) are unaffected and keep
-    // their classic routing (e.g. logs-k8sobjectsreceiver.otel-default).
-    // The elasticsearch.index resource attribute works for both direct ES
-    // (elasticsearch exporter) and managed OTLP (otlp/ingest exporter).
     return ` \\
   --set 'collectors.daemon.config.processors.resource\\/wired_streams.attributes[0].action=upsert' \\
   --set 'collectors.daemon.config.processors.resource\\/wired_streams.attributes[0].key=elasticsearch.index' \\
   --set 'collectors.daemon.config.processors.resource\\/wired_streams.attributes[0].value=logs.otel' \\
-  --set 'collectors.daemon.config.service.pipelines.logs\\/node.processors[8]=resource/wired_streams'`;
+  --set 'collectors.daemon.config.service.pipelines.logs\\/node.processors[${nextLogProcessorIndex++}]=resource/wired_streams'`;
   })();
 
   return `kubectl create namespace ${OTEL_STACK_NAMESPACE}
@@ -63,5 +76,5 @@ kubectl create secret generic elastic-secret-otel \\
 helm upgrade --install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${OTEL_STACK_NAMESPACE} \\
   --values '${otelKubeStackValuesFileUrl}' \\
-  --version '${OTEL_KUBE_STACK_VERSION}'${wiredStreamsConfig}`;
+  --version '${OTEL_KUBE_STACK_VERSION}'${onboardingIdConfig}${wiredStreamsConfig}`;
 }

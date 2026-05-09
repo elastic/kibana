@@ -192,21 +192,26 @@ export function DataTableDocumentToolbarBtn({
     return [
       // Custom bulk actions
       ...(customBulkActions
-        ? customBulkActions.map((bulkAction) => {
-            return (
-              <EuiContextMenuItem
-                data-test-subj={bulkAction['data-test-subj']}
-                key={bulkAction.key}
-                icon={bulkAction.icon}
-                onClick={() => {
-                  closePopover();
-                  bulkAction.onClick({ selectedDocIds: docIdsInSelectionOrder });
-                }}
-              >
-                {bulkAction.label}
-              </EuiContextMenuItem>
-            );
-          })
+        ? customBulkActions
+            .filter(
+              (bulkAction) =>
+                bulkAction.isAvailable?.({ selectedDocIds: docIdsInSelectionOrder }) ?? true
+            )
+            .map((bulkAction) => {
+              return (
+                <EuiContextMenuItem
+                  data-test-subj={bulkAction['data-test-subj']}
+                  key={bulkAction.key}
+                  icon={bulkAction.icon}
+                  onClick={() => {
+                    closePopover();
+                    bulkAction.onClick({ selectedDocIds: docIdsInSelectionOrder });
+                  }}
+                >
+                  {bulkAction.label}
+                </EuiContextMenuItem>
+              );
+            })
         : []),
       // Compare selected documents
       ...(enableComparisonMode && selectedDocsCount > 1
@@ -333,7 +338,7 @@ export function DataTableDocumentToolbarBtn({
       button={
         <EuiDataGridToolbarControl
           iconSide="left"
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           onClick={toggleSelectionToolbar}
           data-selected-documents={selectedDocsCount}
           data-test-subj="unifiedDataTableSelectionBtn"
@@ -436,7 +441,7 @@ export const DataTableCompareToolbarBtn = ({
     <EuiContextMenuItem
       data-test-subj="unifiedDataTableCompareSelectedDocuments"
       disabled={isDisabled}
-      icon="diff"
+      icon="compare"
       onClick={() => {
         setIsCompareActive(true);
       }}

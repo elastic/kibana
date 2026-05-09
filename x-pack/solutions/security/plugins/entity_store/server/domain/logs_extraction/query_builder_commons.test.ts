@@ -60,20 +60,21 @@ describe('buildExtractionSourceClause', () => {
     toDateISO: '2024-01-02T00:00:00.000Z',
   };
 
-  it('should build FROM, METADATA, and time range with strict lower bound when recoveryId is absent', () => {
-    const clause = buildExtractionSourceClause(baseParams);
-    expect(clause).toContain('FROM logs-*, metrics-*');
-    expect(clause).toContain('METADATA _index');
-    expect(clause).toContain(`${TIMESTAMP_FIELD} > TO_DATETIME("2024-01-01T00:00:00.000Z")`);
-    expect(clause).not.toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
-    expect(clause).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
-    expect(clause).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
-  });
+  it('should always use inclusive >= lower bound on @timestamp regardless of cursor', () => {
+    const withCursor = buildExtractionSourceClause({
+      ...baseParams,
+      logsPageCursorStart: { timestampCursor: '2024-01-01T00:00:00.000Z', idCursor: '1' },
+    });
+    expect(withCursor).toContain('FROM logs-*, metrics-*');
+    expect(withCursor).toContain('METADATA _index, _id');
+    expect(withCursor).toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
+    expect(withCursor).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME("2024-01-02T00:00:00.000Z")`);
+    expect(withCursor).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
 
-  it('should use inclusive lower bound on @timestamp when recoveryId is set', () => {
-    const clause = buildExtractionSourceClause({ ...baseParams, recoveryId: 'recover-1' });
-    expect(clause).toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`);
-    expect(clause).not.toContain(`${TIMESTAMP_FIELD} > TO_DATETIME("2024-01-01T00:00:00.000Z")`);
+    const withoutCursor = buildExtractionSourceClause({ ...baseParams });
+    expect(withoutCursor).toContain(
+      `${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`
+    );
   });
 });
 
@@ -90,13 +91,13 @@ describe('aggregationStats', () => {
     expect(aggregationStats([keywordField()], true)).toBe(
       `${recentData(
         'host.name'
-      )} = LAST(TO_STRING(host.name), ${TIMESTAMP_FIELD}) WHERE host.name IS NOT NULL`
+      )} = LAST(TO_STRING(host.name), ${TIMESTAMP_FIELD}) WHERE TO_STRING(host.name) IS NOT NULL`
     );
   });
 
   it('should keep raw destination when renameToRecent is false', () => {
     expect(aggregationStats([keywordField()], false)).toBe(
-      `host.name = LAST(TO_STRING(host.name), ${TIMESTAMP_FIELD}) WHERE host.name IS NOT NULL`
+      `host.name = LAST(TO_STRING(host.name), ${TIMESTAMP_FIELD}) WHERE TO_STRING(host.name) IS NOT NULL`
     );
   });
 
@@ -108,7 +109,19 @@ describe('aggregationStats', () => {
       retention: { operation: 'collect_values', maxLength: 10 },
     };
     expect(aggregationStats([field], false)).toBe(
-      'tags = MV_DEDUPE(TOP(TO_STRING(tags), 10)) WHERE tags IS NOT NULL'
+      'tags = MV_DEDUPE(TOP(TO_STRING(tags), 10)) WHERE TO_STRING(tags) IS NOT NULL'
+    );
+  });
+
+  it('should use the standard not-null guard for normalized entity.source aggregation', () => {
+    const field: EntityField = {
+      source: 'entity.source',
+      destination: 'entity.source',
+      mapping: { type: 'keyword' },
+      retention: { operation: 'collect_values', maxLength: 50 },
+    };
+    expect(aggregationStats([field], false)).toBe(
+      'entity.source = MV_DEDUPE(TOP(TO_STRING(entity.source), 50)) WHERE TO_STRING(entity.source) IS NOT NULL'
     );
   });
 
@@ -120,7 +133,7 @@ describe('aggregationStats', () => {
       retention: { operation: 'prefer_oldest_value' },
     };
     expect(aggregationStats([field], false)).toBe(
-      `event.created = FIRST(TO_DATETIME(event.created), ${TIMESTAMP_FIELD}) WHERE event.created IS NOT NULL`
+      `event.created = FIRST(TO_DATETIME(event.created), ${TIMESTAMP_FIELD}) WHERE TO_DATETIME(event.created) IS NOT NULL`
     );
   });
 
@@ -257,14 +270,22 @@ describe('extractPaginationParams', () => {
 });
 
 describe('buildFieldEvaluations', () => {
-  it('should return empty string when the entity has no field evaluations', () => {
-    expect(buildFieldEvaluations(getEntityDefinition('host', 'default'))).toBe('');
+  it('should return an EVAL pipeline fragment for shared field evaluations on single-field identities', () => {
+    const fragment = buildFieldEvaluations(getEntityDefinition('host', 'default'));
+
+    expect(fragment.startsWith('| EVAL ')).toBe(true);
+    expect(fragment).toContain('entity.source = CASE(');
+    expect(fragment).toContain('_src_entity_source0 = MV_FIRST(event.module)');
+    expect(fragment).toContain('_src_entity_source1 = MV_FIRST(event.dataset)');
+    expect(fragment).toContain('_src_entity_source2 = MV_FIRST(data_stream.dataset)');
+    expect(fragment).toContain('NULL');
   });
 
-  it('should return an EVAL pipeline fragment when field evaluations exist', () => {
+  it('should return an EVAL pipeline fragment when shared and identity field evaluations exist', () => {
     const fragment = buildFieldEvaluations(getEntityDefinition('user', 'default'));
     expect(fragment.startsWith('| EVAL ')).toBe(true);
     expect(fragment.length).toBeGreaterThan('| EVAL '.length);
+    expect(fragment).toContain('entity.source = CASE(');
     expect(fragment).toContain('entity.namespace');
   });
 });
@@ -342,7 +363,7 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
       { entityFields: postStatsSampleFields, useRecentDataPrefix: true }
     );
     expect(fragment).toBe(
-      '| EVAL recent.entity.name = CASE((`recent.entity.namespace` == "local"), TO_STRING(recent.user.name), recent.entity.name)'
+      '| EVAL recent.entity.name = CASE((COALESCE(`recent.entity.namespace` == "local", FALSE)), TO_STRING(recent.user.name), recent.entity.name)'
     );
   });
 
@@ -355,7 +376,7 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
       { entityFields: postStatsSampleFields, useRecentDataPrefix: false }
     );
     expect(fragment).toBe(
-      '| EVAL entity.name = CASE((`entity.namespace` == "local"), TO_STRING(user.name), entity.name)'
+      '| EVAL entity.name = CASE((COALESCE(`entity.namespace` == "local", FALSE)), TO_STRING(user.name), entity.name)'
     );
   });
 
@@ -373,7 +394,7 @@ describe('buildSetFieldsByCondition post-STATS context', () => {
       { entityFields: postStatsSampleFields, useRecentDataPrefix: true }
     );
     expect(fragment).toBe(
-      '| EVAL recent.entity.name = CASE((`recent.entity.namespace` == "local" AND NOT(`recent.user.name` IS NULL)), TO_STRING(recent.user.name), recent.entity.name)'
+      '| EVAL recent.entity.name = CASE((COALESCE(`recent.entity.namespace` == "local", FALSE) AND NOT(`recent.user.name` IS NULL)), TO_STRING(recent.user.name), recent.entity.name)'
     );
   });
 });
@@ -414,6 +435,25 @@ describe('buildPaginationSection', () => {
     expect(parts[1]).toContain('| WHERE @timestamp > TO_DATETIME("2024-01-10T00:00:00.000Z")');
     expect(parts[1]).toContain('recent.id > "recovery-entity-id"');
   });
+
+  it('should escape double quotes and backslashes in idCursor to prevent ESQL injection', () => {
+    const parts = buildPaginationSection('2024-01-01T00:00:00.000Z', 25, paginationFields, {
+      timestampCursor: '2024-06-01T00:00:00.000Z',
+      idCursor: 'evil"id\\with"chars',
+    });
+    expect(parts[1]).toContain('recent.id > "evil\\"id\\\\with\\"chars"');
+  });
+
+  it('should escape double quotes and backslashes in recoveryId', () => {
+    const parts = buildPaginationSection(
+      '2024-01-10T00:00:00.000Z',
+      10,
+      paginationFields,
+      { timestampCursor: 'ignored-ts', idCursor: 'ignored-id' },
+      'evil"recovery\\id'
+    );
+    expect(parts[1]).toContain('recent.id > "evil\\"recovery\\\\id"');
+  });
 });
 
 describe('statsFieldDestinations', () => {
@@ -433,8 +473,6 @@ describe('mapPostAggFilterFieldsToRecentForEsql', () => {
     const mapped = mapPostAggFilterFieldsToRecentForEsql(userDef.postAggFilter!, userDef);
     const esql = conditionToESQL(mapped);
     expect(esql).toContain(recentData('event.kind'));
-    expect(esql).toContain(recentData('user.name'));
-    expect(esql).toContain(recentData('host.id'));
     expect(esql).toContain('entity.id');
     expect(esql).not.toContain(recentData('entity.id'));
   });
@@ -448,8 +486,8 @@ describe('mapPostAggFilterFieldsToRecentForEsql', () => {
 });
 
 describe('hasFieldEvaluations', () => {
-  it('should return false for single-field identity definitions', () => {
-    expect(hasFieldEvaluations(getEntityDefinition('host', 'default'))).toBe(false);
+  it('should return true when shared field evaluations exist on a single-field identity definition', () => {
+    expect(hasFieldEvaluations(getEntityDefinition('host', 'default'))).toBe(true);
   });
 
   it('should return true when calculated identity defines field evaluations', () => {

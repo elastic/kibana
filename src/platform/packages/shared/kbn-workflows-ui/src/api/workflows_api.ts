@@ -34,6 +34,7 @@ import type {
   BulkCreateWorkflowsParams,
   BulkCreateWorkflowsResponse,
   ExportWorkflowsParams,
+  ExportWorkflowsResponse,
   GetAggsParams,
   GetExecutionLogsParams,
   GetExecutionParams,
@@ -144,7 +145,7 @@ export class WorkflowApi {
     });
   }
 
-  async exportWorkflows({ ids }: ExportWorkflowsParams): Promise<Blob> {
+  async exportWorkflows({ ids }: ExportWorkflowsParams): Promise<ExportWorkflowsResponse> {
     return this.http.post(`${BASE}/export`, {
       body: JSON.stringify({ ids }),
       version: API_VERSION,
@@ -237,6 +238,12 @@ export class WorkflowApi {
 
   async cancelExecution(executionId: string): Promise<void> {
     return this.http.post(`${BASE}/executions/${encodeURIComponent(executionId)}/cancel`, {
+      version: API_VERSION,
+    });
+  }
+
+  async cancelAllWorkflowExecutions(workflowId: string): Promise<void> {
+    return this.http.post(`${BASE}/workflow/${encodeURIComponent(workflowId)}/executions/cancel`, {
       version: API_VERSION,
     });
   }

@@ -131,7 +131,7 @@ export function EdgeContents({
           <EuiFlexItem>
             <OpenInDiscover
               dataTestSubj="apmEdgeContentsOpenInDiscoverButton"
-              variant="outlinedButton"
+              variant="button"
               indexType="traces"
               label={i18n.translate('xpack.apm.serviceMap.edgeContents.openInDiscover', {
                 defaultMessage: 'Explore traces',

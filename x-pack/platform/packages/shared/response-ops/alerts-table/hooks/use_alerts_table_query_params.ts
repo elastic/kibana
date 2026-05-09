@@ -18,6 +18,7 @@ export interface UseAlertsTableQueryParamsOptions
       AlertsTableProps,
       | 'ruleTypeIds'
       | 'consumers'
+      | 'projectRouting'
       | 'query'
       | 'sort'
       | 'runtimeMappings'
@@ -43,6 +44,7 @@ export interface UseAlertsTableQueryParamsOptions
 export const useAlertsTableQueryParams = ({
   ruleTypeIds,
   consumers,
+  projectRouting,
   fields,
   query,
   sort,
@@ -57,6 +59,7 @@ export const useAlertsTableQueryParams = ({
   const [queryParams, setQueryParams] = useState({
     ruleTypeIds,
     consumers,
+    projectRouting,
     fields,
     query,
     sort,
@@ -76,6 +79,7 @@ export const useAlertsTableQueryParams = ({
         {
           ruleTypeIds: prevQueryParams.ruleTypeIds,
           consumers: prevQueryParams.consumers,
+          projectRouting: prevQueryParams.projectRouting,
           fields: prevQueryParams.fields,
           query: prevQueryParams.query,
           sort: prevQueryParams.sort,
@@ -86,6 +90,7 @@ export const useAlertsTableQueryParams = ({
         {
           ruleTypeIds,
           consumers,
+          projectRouting,
           fields,
           query,
           sort,
@@ -105,6 +110,7 @@ export const useAlertsTableQueryParams = ({
       return {
         ruleTypeIds,
         consumers,
+        projectRouting,
         fields,
         query,
         sort,
@@ -123,6 +129,7 @@ export const useAlertsTableQueryParams = ({
     runtimeMappings,
     sort,
     consumers,
+    projectRouting,
     minScore,
     trackScores,
     pageSize,

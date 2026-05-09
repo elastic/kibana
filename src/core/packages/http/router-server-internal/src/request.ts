@@ -34,6 +34,7 @@ import type {
   HttpProtocol,
   RouteSecurityGetter,
   RouteSecurity,
+  RequestTiming,
 } from '@kbn/core-http-server';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
@@ -43,6 +44,7 @@ import { RouteValidator } from './validator';
 import { isSafeMethod } from './route';
 import { KibanaSocket } from './socket';
 import { patchRequest } from './patch_requests';
+import { RequestTimingImpl } from './timing';
 
 // patching at module load
 patchRequest();
@@ -150,6 +152,8 @@ export class CoreKibanaRequest<
   public readonly protocol: HttpProtocol;
   /** {@inheritDoc KibanaRequest.authzResult} */
   public readonly authzResult?: Record<string, boolean>;
+  /** {@inheritDoc KibanaRequest.timing} */
+  public readonly serverTiming: RequestTiming;
 
   /** @internal */
   protected readonly [requestSymbol]!: Request;
@@ -169,14 +173,22 @@ export class CoreKibanaRequest<
     const appState = request.app as KibanaRequestState | undefined;
     const isRealReq = isRealRawRequest(request);
 
+    // Initialize timing state if not present
+    if (appState && !appState.timingState) {
+      appState.timingState = { events: [] };
+    }
+
     this.id = appState?.requestId ?? uuidv4();
     this.uuid = appState?.requestUuid ?? uuidv4();
     this.rewrittenUrl = appState?.rewrittenUrl;
     this.authzResult = appState?.authzResult;
+    this.serverTiming = new RequestTimingImpl(appState?.timingState ?? { events: [] });
     this.injectHostInfo(request);
 
     this.url = request.url ?? new URL('https://fake-request/url');
-    this.headers = isRealReq ? deepFreeze({ ...request.headers }) : request.headers;
+    this.headers = isRealReq
+      ? (deepFreeze({ ...request.headers }) as unknown as Headers)
+      : (request.headers as unknown as Headers);
     this.isSystemRequest = this.headers['kbn-system-request'] === 'true';
     this.isFakeRequest = !isRealReq;
     // set to false if elasticInternalOrigin is explicitly set to false

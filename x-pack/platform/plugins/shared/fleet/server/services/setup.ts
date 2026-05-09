@@ -100,7 +100,11 @@ export async function setupFleet(
 ): Promise<SetupStatus> {
   return withActiveSpan(
     'fleet-setup',
-    { attributes: { 'transaction.type': 'fleet' } },
+    {
+      attributes: { 'transaction.type': 'fleet' },
+      // Make sure that this is a parent transaction (not a child of any other ongoing transaction)
+      root: true,
+    },
     async () => {
       const t = apm.startTransaction('fleet-setup', 'fleet');
       try {

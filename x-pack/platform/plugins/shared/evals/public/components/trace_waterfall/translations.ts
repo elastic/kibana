@@ -128,3 +128,40 @@ export const getCopyAttributeAriaLabel = (key: string) =>
     defaultMessage: 'Copy {key}',
     values: { key },
   });
+
+export const IO_TAB_LABEL = i18n.translate('xpack.evals.traceWaterfall.ioTabLabel', {
+  defaultMessage: 'Input / Output',
+});
+
+export const ATTRIBUTES_TAB_LABEL = i18n.translate(
+  'xpack.evals.traceWaterfall.attributesTabLabel',
+  {
+    defaultMessage: 'Attributes',
+  }
+);
+
+export const NO_IO_DATA = i18n.translate('xpack.evals.traceWaterfall.noIoData', {
+  defaultMessage: 'No input/output data available for this span.',
+});
+
+export const PROMPT_ID_LABEL = i18n.translate('xpack.evals.traceWaterfall.promptIdLabel', {
+  defaultMessage: 'Prompt:',
+});
+
+export const MODEL_LABEL = i18n.translate('xpack.evals.traceWaterfall.modelLabel', {
+  defaultMessage: 'Model:',
+});
+
+export const PROMPT_TEMPLATE_HEADING = i18n.translate(
+  'xpack.evals.traceWaterfall.promptTemplateHeading',
+  { defaultMessage: 'Prompt Template' }
+);
+
+export const PROMPT_VARIABLES_HEADING = i18n.translate(
+  'xpack.evals.traceWaterfall.promptVariablesHeading',
+  { defaultMessage: 'Prompt Variables' }
+);
+
+export const SPAN_LIST_ARIA_LABEL = i18n.translate('xpack.evals.traceWaterfall.spanListAriaLabel', {
+  defaultMessage: 'Trace spans',
+});

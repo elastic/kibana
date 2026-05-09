@@ -133,7 +133,7 @@ export const POLICY_ARTIFACT_TRUSTED_DEVICES_LABELS: Omit<
   ),
   emptyUnexistingImportButtonTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.trustedDevices.empty.unexisting.importAction',
-    { defaultMessage: 'Import trusted device list' }
+    { defaultMessage: 'Import trusted devices' }
   ),
   listTotalItemCountMessage: (totalItemsCount: number): string =>
     i18n.translate('xpack.securitySolution.endpoint.policy.trustedDevices.list.totalItemCount', {

@@ -28,9 +28,9 @@ import { MESSAGE_REQUIRED, STATUS_REQUIRED } from './translations';
 
 const ObsAIAssistantParamsFields: React.FunctionComponent<
   ActionParamsProps<ObsAIAssistantActionParams> & { service: ObservabilityAIAssistantService }
-> = ({ errors, index, messageVariables, editAction, actionParams, service }) => {
+> = ({ errors, index, messageVariables, editAction, actionParams }) => {
   const { connectors, loading, selectConnector, selectedConnector } =
-    useGenAIConnectorsWithoutContext(service);
+    useGenAIConnectorsWithoutContext();
 
   useEffect(() => {
     if (selectedConnector !== actionParams.connector) {

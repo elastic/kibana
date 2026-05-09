@@ -34,10 +34,10 @@ export interface IDataCascadeProviderProps<G extends GroupNode> {
   data: G[];
   initialGroupColumn?: string[];
   /**
-   * Properties to set the initial table state on mount.
-   * Only expanded and rowSelection properties are supported for now.
+   * Persisted restorable state used to seed the table on mount.
+   * Only expanded and rowSelection are consumed by the provider.
    */
-  initialTableState?: Pick<Partial<TableState>, 'expanded' | 'rowSelection'>;
+  initialState?: { expanded?: Record<string, boolean>; rowSelection?: Record<string, boolean> };
 }
 
 interface IStoreContext<G extends GroupNode, L extends LeafNode> {
@@ -91,7 +91,7 @@ export function useCascadeLeafNode<G extends GroupNode, L extends LeafNode>(cach
 export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
   cascadeGroups,
   initialGroupColumn,
-  initialTableState,
+  initialState,
   data: initialGroupNodes,
   children,
 }: PropsWithChildren<IDataCascadeProviderProps<G>>) {
@@ -103,11 +103,20 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
     return initialGroupColumn.filter((col) => cascadeGroups.includes(col));
   }, [initialGroupColumn, cascadeGroups]);
 
-  const initialState = useMemo<IStoreState<G, L>>(
+  const initialTableState = useMemo(
+    () =>
+      ({
+        expanded: initialState?.expanded ?? {},
+        rowSelection: initialState?.rowSelection ?? {},
+      } as TableState),
+    [initialState?.expanded, initialState?.rowSelection]
+  );
+
+  const initialStoreState = useMemo<IStoreState<G, L>>(
     () => ({
-      table: (initialTableState ?? {}) as TableState,
+      table: initialTableState,
       groupNodes: initialGroupNodes,
-      leafNodes: new Map<string, L[]>(), // TODO: consider externalizing this so the consumer might provide their own external cache
+      leafNodes: new Map<string, L[]>(),
       groupByColumns: cascadeGroups,
       currentGroupByColumns: validatedInitialGroupColumn.length ? validatedInitialGroupColumn : [],
     }),
@@ -115,7 +124,7 @@ export function DataCascadeProvider<G extends GroupNode, L extends LeafNode>({
   );
 
   const { state, actions } = useCreateStore({
-    initialState,
+    initialState: initialStoreState,
     reducers: storeReducers,
   });
 

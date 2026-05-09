@@ -8,14 +8,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { ColorMappingType, StaticColorType } from '../color';
+import type { AutoColorType, ColorMappingType, StaticColorType } from '../color';
 import { groupIsNotCollapsed } from '../../utils';
-
-export const legendVisibilitySchema = schema.maybe(
-  schema.oneOf([schema.literal('auto'), schema.literal('visible'), schema.literal('hidden')], {
-    meta: { description: 'Legend visibility' },
-  })
-);
 
 export const valueDisplaySchema = schema.maybe(
   schema.object(
@@ -61,7 +55,7 @@ export const legendNestedSchema = schema.maybe(
 export type PartitionMetric =
   | {}
   | {
-      color?: StaticColorType;
+      color?: StaticColorType | AutoColorType;
     };
 export interface PartitionGroupBy {
   collapse_by?: string;

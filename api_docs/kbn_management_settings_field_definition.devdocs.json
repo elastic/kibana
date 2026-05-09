@@ -10,7 +10,23 @@
         "tags": [],
         "label": "getFieldDefinition",
         "description": [
-          "\nCreate a {@link FieldDefinition} from a {@link UiSettingMetadata} object for use\nin the UI.\n"
+          "\nCreate a ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " from a ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.UiSettingMetadata",
+            "text": "UiSettingMetadata"
+          },
+          " object for use\nin the UI.\n"
         ],
         "signature": [
           "<T extends ",
@@ -55,6 +71,7 @@
             "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "GetDefinitionParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -69,7 +86,15 @@
         "tags": [],
         "label": "getFieldDefinitions",
         "description": [
-          "\nConvenience function to convert settings taken from a UiSettingsClient into\n{@link FieldDefinition} objects.\n"
+          "\nConvenience function to convert settings taken from a UiSettingsClient into\n",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " objects.\n"
         ],
         "signature": [
           "(settings: Record<string, ",
@@ -126,6 +151,7 @@
             "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -145,12 +171,21 @@
             "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SettingsClient",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [
-          "An array of {@link FieldDefinition } objects."
+          "An array of ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " objects."
         ],
         "initialIsOpen": false
       },
@@ -161,7 +196,23 @@
         "tags": [],
         "label": "isArrayFieldDefinition",
         "description": [
-          "\nReturns `true` if the given {@link FieldDefinition} is an {@link ArrayFieldDefinition},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.ArrayFieldDefinition",
+            "text": "ArrayFieldDefinition"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(d: Definition) => d is ",
@@ -195,6 +246,7 @@
             "lineNumber": 42,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "Definition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -209,7 +261,23 @@
         "tags": [],
         "label": "isArrayFieldUnsavedChange",
         "description": [
-          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link ArrayUnsavedFieldChange},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldUnsavedChange",
+            "text": "FieldUnsavedChange"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.ArrayUnsavedFieldChange",
+            "text": "ArrayUnsavedFieldChange"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(c?: Change | undefined) => c is ",
@@ -243,6 +311,7 @@
             "lineNumber": 42,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "Change",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -257,7 +326,23 @@
         "tags": [],
         "label": "isBooleanFieldDefinition",
         "description": [
-          "\nReturns `true` if the given {@link FieldDefinition} is an {@link BooleanFieldDefinition},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.BooleanFieldDefinition",
+            "text": "BooleanFieldDefinition"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(d: Definition) => d is ",
@@ -291,6 +376,7 @@
             "lineNumber": 50,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "Definition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -305,7 +391,23 @@
         "tags": [],
         "label": "isBooleanFieldUnsavedChange",
         "description": [
-          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link BooleanUnsavedFieldChange},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldUnsavedChange",
+            "text": "FieldUnsavedChange"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.BooleanUnsavedFieldChange",
+            "text": "BooleanUnsavedFieldChange"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(c?: Change | undefined) => c is ",
@@ -339,6 +441,7 @@
             "lineNumber": 50,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "Change",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -353,7 +456,23 @@
         "tags": [],
         "label": "isColorFieldDefinition",
         "description": [
-          "\nReturns `true` if the given {@link FieldDefinition} is an {@link ColorFieldDefinition},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.ColorFieldDefinition",
+            "text": "ColorFieldDefinition"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(d: Definition) => d is ",
@@ -387,6 +506,7 @@
             "lineNumber": 58,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "Definition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -401,7 +521,23 @@
         "tags": [],
         "label": "isColorFieldUnsavedChange",
         "description": [
-          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link ColorUnsavedFieldChange},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldUnsavedChange",
+            "text": "FieldUnsavedChange"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.ColorUnsavedFieldChange",
+            "text": "ColorUnsavedFieldChange"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(c?: Change | undefined) => c is ",
@@ -435,6 +571,7 @@
             "lineNumber": 58,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "Change",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -449,7 +586,23 @@
         "tags": [],
         "label": "isImageFieldDefinition",
         "description": [
-          "\nReturns `true` if the given {@link FieldDefinition} is an {@link ImageFieldDefinition},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.ImageFieldDefinition",
+            "text": "ImageFieldDefinition"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(d: Definition) => d is ",
@@ -483,6 +636,7 @@
             "lineNumber": 66,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "Definition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -497,7 +651,23 @@
         "tags": [],
         "label": "isImageFieldUnsavedChange",
         "description": [
-          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link ImageUnsavedFieldChange},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldUnsavedChange",
+            "text": "FieldUnsavedChange"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.ImageUnsavedFieldChange",
+            "text": "ImageUnsavedFieldChange"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(c?: Change | undefined) => c is ",
@@ -531,6 +701,7 @@
             "lineNumber": 66,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "Change",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -545,7 +716,23 @@
         "tags": [],
         "label": "isJsonFieldDefinition",
         "description": [
-          "\nReturns `true` if the given {@link FieldDefinition} is an {@link JsonFieldDefinition},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.JsonFieldDefinition",
+            "text": "JsonFieldDefinition"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(d: Definition) => d is ",
@@ -579,6 +766,7 @@
             "lineNumber": 74,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "Definition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -593,7 +781,23 @@
         "tags": [],
         "label": "isJsonFieldUnsavedChange",
         "description": [
-          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link JsonUnsavedFieldChange},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldUnsavedChange",
+            "text": "FieldUnsavedChange"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.JsonUnsavedFieldChange",
+            "text": "JsonUnsavedFieldChange"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(c?: Change | undefined) => c is ",
@@ -627,6 +831,7 @@
             "lineNumber": 74,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "Change",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -641,7 +846,23 @@
         "tags": [],
         "label": "isMarkdownFieldDefinition",
         "description": [
-          "\nReturns `true` if the given {@link FieldDefinition} is an {@link MarkdownFieldDefinition},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.MarkdownFieldDefinition",
+            "text": "MarkdownFieldDefinition"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(d: Definition) => d is ",
@@ -675,6 +896,7 @@
             "lineNumber": 81,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "Definition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -689,7 +911,23 @@
         "tags": [],
         "label": "isMarkdownFieldUnsavedChange",
         "description": [
-          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link MarkdownUnsavedFieldChange},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldUnsavedChange",
+            "text": "FieldUnsavedChange"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.MarkdownUnsavedFieldChange",
+            "text": "MarkdownUnsavedFieldChange"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(c?: Change | undefined) => c is ",
@@ -723,6 +961,7 @@
             "lineNumber": 82,
             "columnNumber": 46,
             "deprecated": false,
+            "docsReferencedTypeName": "Change",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -737,7 +976,23 @@
         "tags": [],
         "label": "isNumberFieldDefinition",
         "description": [
-          "\nReturns `true` if the given {@link FieldDefinition} is an {@link NumberFieldDefinition},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.NumberFieldDefinition",
+            "text": "NumberFieldDefinition"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(d: Definition) => d is ",
@@ -771,6 +1026,7 @@
             "lineNumber": 89,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "Definition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -785,7 +1041,23 @@
         "tags": [],
         "label": "isNumberFieldUnsavedChange",
         "description": [
-          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link NumberUnsavedFieldChange},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldUnsavedChange",
+            "text": "FieldUnsavedChange"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.NumberUnsavedFieldChange",
+            "text": "NumberUnsavedFieldChange"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(c?: Change | undefined) => c is ",
@@ -819,6 +1091,7 @@
             "lineNumber": 90,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "Change",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -833,7 +1106,23 @@
         "tags": [],
         "label": "isSelectFieldDefinition",
         "description": [
-          "\nReturns `true` if the given {@link FieldDefinition} is an {@link SelectFieldDefinition},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.SelectFieldDefinition",
+            "text": "SelectFieldDefinition"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(d: Definition) => d is ",
@@ -867,6 +1156,7 @@
             "lineNumber": 97,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "Definition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -881,7 +1171,23 @@
         "tags": [],
         "label": "isSelectFieldUnsavedChange",
         "description": [
-          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link SelectUnsavedFieldChange},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldUnsavedChange",
+            "text": "FieldUnsavedChange"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.SelectUnsavedFieldChange",
+            "text": "SelectUnsavedFieldChange"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(c?: Change | undefined) => c is ",
@@ -915,6 +1221,7 @@
             "lineNumber": 98,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "Change",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -929,7 +1236,23 @@
         "tags": [],
         "label": "isStringFieldDefinition",
         "description": [
-          "\nReturns `true` if the given {@link FieldDefinition} is an {@link StringFieldDefinition},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.StringFieldDefinition",
+            "text": "StringFieldDefinition"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(d: Definition) => d is ",
@@ -963,6 +1286,7 @@
             "lineNumber": 105,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "Definition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -977,7 +1301,23 @@
         "tags": [],
         "label": "isStringFieldUnsavedChange",
         "description": [
-          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link StringUnsavedFieldChange},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldUnsavedChange",
+            "text": "FieldUnsavedChange"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.StringUnsavedFieldChange",
+            "text": "StringUnsavedFieldChange"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(c?: Change | undefined) => c is ",
@@ -1011,6 +1351,7 @@
             "lineNumber": 106,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "Change",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1025,7 +1366,23 @@
         "tags": [],
         "label": "isUndefinedFieldDefinition",
         "description": [
-          "\nReturns `true` if the given {@link FieldDefinition} is an {@link UndefinedFieldDefinition},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.UndefinedFieldDefinition",
+            "text": "UndefinedFieldDefinition"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(d: Definition) => d is ",
@@ -1059,6 +1416,7 @@
             "lineNumber": 113,
             "columnNumber": 44,
             "deprecated": false,
+            "docsReferencedTypeName": "Definition",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1073,7 +1431,23 @@
         "tags": [],
         "label": "isUndefinedFieldUnsavedChange",
         "description": [
-          "\nReturns `true` if the given {@link FieldUnsavedChange} is an {@link UndefinedUnsavedFieldChange},\n`false` otherwise."
+          "\nReturns `true` if the given ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.FieldUnsavedChange",
+            "text": "FieldUnsavedChange"
+          },
+          " is an ",
+          {
+            "pluginId": "@kbn/management-settings-field-definition",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsFieldDefinitionPluginApi",
+            "section": "def-public.UndefinedUnsavedFieldChange",
+            "text": "UndefinedUnsavedFieldChange"
+          },
+          ",\n`false` otherwise."
         ],
         "signature": [
           "(c?: Change | undefined) => c is ",
@@ -1107,6 +1481,7 @@
             "lineNumber": 114,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "Change",
             "trackAdoption": false,
             "isRequired": false
           }

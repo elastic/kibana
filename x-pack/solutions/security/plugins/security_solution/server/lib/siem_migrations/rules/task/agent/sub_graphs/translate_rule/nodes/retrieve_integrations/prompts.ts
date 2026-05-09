@@ -34,12 +34,30 @@ Here is the Elastic integrations context for you to reference for your task, rea
 - Carefully analyze the given Detection Rule data provided by the user.
 - Match the data source in the rule to the most relevant Elastic Integration from the list provided above.
 - Focus on data source only and avoid guessing based on other factors.
+- Take decision clinically on the data provided. Do not use your knowledge to take decision.
+- Some integrations are related to certain type of logs or vendors such as Snort, Nginx, AWS, etc. You need to give important to these entity names and match an integration only and only if you see a clear reference to them in the rule description.
 - If there are multiple integrations in the list that match, prioritize the most specific of them, as long as it is compatible with the rule:
   - For example, if the rule is related to "Linux Sysmon" then the "Sysmon for Linux" integration is more specific than any other "Linux" integration.
   - Operating System needs to be compatible, so if the rule is related to "Windows Sysmon", then the "Linux Sysmon" integration is not compatible, so we should assign the "Windows" integration.
-- If not completely sure about the best match, and there is an integration with "Elastic" in the name, you can safely respond with that one, they are general purpose security integrations created by Elastic.
+- If not completely sure about the best match, there are some general purpose integrations which can be great matches.
+  - endpoint : Elastic Defend is one such example which is a cross platform integration that can be used for a wide range of SIEM and detection use cases such as prevention, detection, and response capabilities with deep visibility for EPP, EDR, SIEM, and Security Analytics use cases across Windows, macOS, and Linux operating systems running on both traditional endpoints and public cloud environments. Use Elastic Defend to:
+    - Prevent complex attacks - Prevent malware (Windows, macOS, Linux) and ransomware (Windows) from executing, and stop advanced threats with malicious behavior (Windows, macOS, Linux), memory threat (Windows, macOS, Linux), and credential hardening (Windows) protections. All powered by Elastic Labs(external, opens in a new tab or window) and our global community.
+    - Alert in high fidelity - Bolster team efficacy by detecting threats centrally and minimizing false positives via extensive corroboration.
+    - Detect threats in high fidelity - Elastic Defend facilitates deep visibility by instrumenting the process, file, and network data in your environments with minimal data collection overhead.
+    - Triage and respond rapidly - Quickly analyze detailed data from across your hosts. Examine host-based activity with interactive visualizations. Invoke remote response actions across distributed endpoints. Extend investigation capabilities even further with the Osquery integration, fully integrated into Elastic Security workflows.
+    - Secure your cloud workloads - Stop threats targeting cloud workloads and cloud-native applications. Gain real-time visibility and control with a lightweight user-space agent, powered by eBPF. Automate the identification of cloud threats with detection rules and machine learning (ML). Achieve rapid time-to-value with MITRE ATT&CK-aligned detections honed by Elastic Security Labs.
+    - View terminal sessions - Give your security team a unique and powerful investigative tool for digital forensics and incident response (DFIR), reducing the mean time to respond (MTTR). Session view provides a time-ordered series of process executions in your Linux workloads in the form of a terminal shell, as well as the ability to replay the terminal session.
+  - network_traffic : (Network Traffic Capture) is a great match for rules related to network activity, traffic monitoring, and similar use cases. Many complex use cases to analyze network flow can be achieved by this integration. Only avoid if rule specificaly points to data related to some other vendors. This integration may be perfect if rule just analyzes network flow generally.
+    - Monitoring your network traffic is critical to gaining observability and securing your environment — ensuring high levels of performance and security. The Network Packet Capture integration captures the network traffic between your application servers, decodes common application layer protocols and records the interesting fields for each transaction.
+    - Network Flows
+      - Overall flow information about the network connections on a host.
+      - You can configure Network Packet Capture to collect and report statistics on network flows. A flow is a group of packets sent over the same time period that share common properties, such as the same source and destination address and protocol. You can use this feature to analyze network traffic over specific protocols on your network.
+      - For each flow, Network Packet Capture reports the number of packets and the total number of bytes sent from the source to the destination. Each flow event also contains information about the source and destination hosts, such as their IP address. For bi-directional flows, Network Packet Capture reports statistics for the reverse flow.
+      - Network Packet Capture collects and reports statistics up to and including the transport layer.
+
+
 - If no related integration is found, reply with an empty string.
-- Provide a concise reasoning summary for your decision, explaining why the selected integration is the best fit or why no suitable match was found.
+- Provide a readable and clear reasoning for your decision, explaining why the selected integration is the best fit or why no suitable match was found.
 </guidelines>
 
 <expected_output>

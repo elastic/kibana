@@ -5,6 +5,63 @@
     "functions": [
       {
         "parentPluginId": "@kbn/core-http-browser",
+        "id": "def-public.buildPath",
+        "type": "Function",
+        "tags": [],
+        "label": "buildPath",
+        "description": [
+          "\nBuilds a URL path from a route template by URI-encoding path params.\n"
+        ],
+        "signature": [
+          "(path: string, params: HttpPathParams) => string"
+        ],
+        "path": "src/core/packages/http/browser/src/utils.ts",
+        "lineNumber": 55,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-public.buildPath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/core/packages/http/browser/src/utils.ts",
+            "lineNumber": 68,
+            "columnNumber": 27,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-http-browser",
+            "id": "def-public.buildPath.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "HttpPathParams"
+            ],
+            "path": "src/core/packages/http/browser/src/utils.ts",
+            "lineNumber": 68,
+            "columnNumber": 41,
+            "deprecated": false,
+            "docsReferencedTypeName": "HttpPathParams",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-browser",
         "id": "def-public.isHttpFetchError",
         "type": "Function",
         "tags": [],
@@ -52,7 +109,15 @@
         "tags": [],
         "label": "HttpFetchOptions",
         "description": [
-          "\nAll options that may be used with a {@link HttpHandler}."
+          "\nAll options that may be used with a ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-public.HttpHandler",
+            "text": "HttpHandler"
+          },
+          "."
         ],
         "signature": [
           "HttpFetchOptions",
@@ -72,7 +137,15 @@
             "tags": [],
             "label": "query",
             "description": [
-              "\nThe query string for an HTTP request. See {@link HttpFetchQuery}."
+              "\nThe query string for an HTTP request. See ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpFetchQuery",
+                "text": "HttpFetchQuery"
+              },
+              "."
             ],
             "signature": [
               "HttpFetchQuery",
@@ -109,7 +182,15 @@
             "tags": [],
             "label": "headers",
             "description": [
-              "\nHeaders to send with the request. See {@link HttpHeadersInit}."
+              "\nHeaders to send with the request. See ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpHeadersInit",
+                "text": "HttpHeadersInit"
+              },
+              "."
             ],
             "signature": [
               "HttpHeadersInit",
@@ -146,7 +227,23 @@
             "tags": [],
             "label": "asResponse",
             "description": [
-              "\nWhen `true` the return type of {@link HttpHandler} will be an {@link HttpResponse} with detailed request and\nresponse information. When `false`, the return type will just be the parsed response body. Defaults to `false`."
+              "\nWhen `true` the return type of ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpHandler",
+                "text": "HttpHandler"
+              },
+              " will be an ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpResponse",
+                "text": "HttpResponse"
+              },
+              " with detailed request and\nresponse information. When `false`, the return type will just be the parsed response body. Defaults to `false`."
             ],
             "signature": [
               "boolean | undefined"
@@ -220,7 +317,15 @@
         "tags": [],
         "label": "HttpFetchOptionsWithPath",
         "description": [
-          "\nSimilar to {@link HttpFetchOptions} but with the URL path included."
+          "\nSimilar to ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-public.HttpFetchOptions",
+            "text": "HttpFetchOptions"
+          },
+          " but with the URL path included."
         ],
         "signature": [
           "HttpFetchOptionsWithPath",
@@ -290,7 +395,23 @@
         "tags": [],
         "label": "HttpHandler",
         "description": [
-          "\nA function for making an HTTP requests to Kibana's backend. See {@link HttpFetchOptions} for options and\n{@link HttpResponse} for the response.\n"
+          "\nA function for making an HTTP requests to Kibana's backend. See ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-public.HttpFetchOptions",
+            "text": "HttpFetchOptions"
+          },
+          " for options and\n",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-public.HttpResponse",
+            "text": "HttpResponse"
+          },
+          " for the response.\n"
         ],
         "path": "src/core/packages/http/browser/src/types.ts",
         "lineNumber": 343,
@@ -437,6 +558,7 @@
                 "lineNumber": 362,
                 "columnNumber": 43,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpFetchOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -473,6 +595,7 @@
                 "lineNumber": 364,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpFetchOptionsWithPath",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -489,7 +612,15 @@
         "tags": [],
         "label": "HttpHeadersInit",
         "description": [
-          "\nHeaders to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause\n{@link HttpHandler} to throw an error.\nIncludes the required Header that validates internal requests to internal APIs"
+          "\nHeaders to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause\n",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-public.HttpHandler",
+            "text": "HttpHandler"
+          },
+          " to throw an error.\nIncludes the required Header that validates internal requests to internal APIs"
         ],
         "path": "src/core/packages/http/browser/src/types.ts",
         "lineNumber": 181,
@@ -523,7 +654,15 @@
         "tags": [],
         "label": "HttpInterceptor",
         "description": [
-          "\nAn object that may define global interceptor functions for different parts of the request and response lifecycle.\nSee {@link IHttpInterceptController}.\n"
+          "\nAn object that may define global interceptor functions for different parts of the request and response lifecycle.\nSee ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-public.IHttpInterceptController",
+            "text": "IHttpInterceptController"
+          },
+          ".\n"
         ],
         "path": "src/core/packages/http/browser/src/types.ts",
         "lineNumber": 417,
@@ -579,6 +718,7 @@
                 "lineNumber": 430,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Readonly",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -598,6 +738,7 @@
                 "lineNumber": 431,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IHttpInterceptController",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -652,6 +793,7 @@
                 "lineNumber": 440,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpInterceptorRequestError",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -671,6 +813,7 @@
                 "lineNumber": 441,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IHttpInterceptController",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -746,6 +889,7 @@
                 "lineNumber": 452,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Readonly",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -765,6 +909,7 @@
                 "lineNumber": 453,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IHttpInterceptController",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -820,6 +965,7 @@
                 "lineNumber": 462,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpResponse",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -839,6 +985,7 @@
                 "lineNumber": 463,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IHttpInterceptController",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -893,6 +1040,7 @@
                 "lineNumber": 472,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpInterceptorResponseError",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -912,6 +1060,7 @@
                 "lineNumber": 473,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IHttpInterceptController",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1038,7 +1187,15 @@
         "tags": [],
         "label": "HttpRequestInit",
         "description": [
-          "\nFetch API options available to {@link HttpHandler}s.\n"
+          "\nFetch API options available to ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-public.HttpHandler",
+            "text": "HttpHandler"
+          },
+          "s.\n"
         ],
         "path": "src/core/packages/http/browser/src/types.ts",
         "lineNumber": 191,
@@ -1107,7 +1264,13 @@
             "tags": [],
             "label": "headers",
             "description": [
-              "{@link HttpHeadersInit}"
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpHeadersInit",
+                "text": "HttpHeadersInit"
+              }
             ],
             "signature": [
               "HttpHeadersInit",
@@ -1308,7 +1471,15 @@
             "tags": [],
             "label": "fetchOptions",
             "description": [
-              "The original {@link HttpFetchOptionsWithPath} used to send this request."
+              "The original ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpFetchOptionsWithPath",
+                "text": "HttpFetchOptionsWithPath"
+              },
+              " used to send this request."
             ],
             "signature": [
               "{ readonly path: string; readonly query?: ",
@@ -1402,7 +1573,14 @@
             "tags": [],
             "label": "basePath",
             "description": [
-              "\nAPIs for manipulating the basePath on URL segments.\nSee {@link IBasePath}"
+              "\nAPIs for manipulating the basePath on URL segments.\nSee ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.IBasePath",
+                "text": "IBasePath"
+              }
             ],
             "signature": [
               "IBasePath"
@@ -1420,7 +1598,14 @@
             "tags": [],
             "label": "staticAssets",
             "description": [
-              "\nAPIs for creating hrefs to static assets.\nSee {@link IStaticAssets}"
+              "\nAPIs for creating hrefs to static assets.\nSee ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.IStaticAssets",
+                "text": "IStaticAssets"
+              }
             ],
             "signature": [
               "IStaticAssets"
@@ -1472,7 +1657,15 @@
             "tags": [],
             "label": "intercept",
             "description": [
-              "\nAdds a new {@link HttpInterceptor} to the global HTTP client."
+              "\nAdds a new ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpInterceptor",
+                "text": "HttpInterceptor"
+              },
+              " to the global HTTP client."
             ],
             "signature": [
               "(interceptor: ",
@@ -1501,6 +1694,7 @@
                 "lineNumber": 41,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpInterceptor",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1516,7 +1710,15 @@
             "tags": [],
             "label": "fetch",
             "description": [
-              "Makes an HTTP request. Defaults to a GET request unless overridden. See {@link HttpHandler} for options."
+              "Makes an HTTP request. Defaults to a GET request unless overridden. See ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpHandler",
+                "text": "HttpHandler"
+              },
+              " for options."
             ],
             "signature": [
               "HttpHandler"
@@ -1567,7 +1769,15 @@
             "tags": [],
             "label": "delete",
             "description": [
-              "Makes an HTTP request with the DELETE method. See {@link HttpHandler} for options."
+              "Makes an HTTP request with the DELETE method. See ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpHandler",
+                "text": "HttpHandler"
+              },
+              " for options."
             ],
             "signature": [
               "HttpHandler"
@@ -1618,7 +1828,15 @@
             "tags": [],
             "label": "get",
             "description": [
-              "Makes an HTTP request with the GET method. See {@link HttpHandler} for options."
+              "Makes an HTTP request with the GET method. See ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpHandler",
+                "text": "HttpHandler"
+              },
+              " for options."
             ],
             "signature": [
               "HttpHandler"
@@ -1669,7 +1887,15 @@
             "tags": [],
             "label": "head",
             "description": [
-              "Makes an HTTP request with the HEAD method. See {@link HttpHandler} for options."
+              "Makes an HTTP request with the HEAD method. See ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpHandler",
+                "text": "HttpHandler"
+              },
+              " for options."
             ],
             "signature": [
               "HttpHandler"
@@ -1720,7 +1946,15 @@
             "tags": [],
             "label": "options",
             "description": [
-              "Makes an HTTP request with the OPTIONS method. See {@link HttpHandler} for options."
+              "Makes an HTTP request with the OPTIONS method. See ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpHandler",
+                "text": "HttpHandler"
+              },
+              " for options."
             ],
             "signature": [
               "HttpHandler"
@@ -1771,7 +2005,15 @@
             "tags": [],
             "label": "patch",
             "description": [
-              "Makes an HTTP request with the PATCH method. See {@link HttpHandler} for options."
+              "Makes an HTTP request with the PATCH method. See ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpHandler",
+                "text": "HttpHandler"
+              },
+              " for options."
             ],
             "signature": [
               "HttpHandler"
@@ -1822,7 +2064,15 @@
             "tags": [],
             "label": "post",
             "description": [
-              "Makes an HTTP request with the POST method. See {@link HttpHandler} for options."
+              "Makes an HTTP request with the POST method. See ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpHandler",
+                "text": "HttpHandler"
+              },
+              " for options."
             ],
             "signature": [
               "HttpHandler"
@@ -1873,7 +2123,15 @@
             "tags": [],
             "label": "put",
             "description": [
-              "Makes an HTTP request with the PUT method. See {@link HttpHandler} for options."
+              "Makes an HTTP request with the PUT method. See ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.HttpHandler",
+                "text": "HttpHandler"
+              },
+              " for options."
             ],
             "signature": [
               "HttpHandler"
@@ -1954,6 +2212,7 @@
                 "lineNumber": 65,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "Observable",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2197,7 +2456,15 @@
             "tags": [],
             "label": "serverBasePath",
             "description": [
-              "\nReturns the server's root basePath as configured, without any namespace prefix.\n\nSee {@link BasePath.get} for getting the basePath value for a specific request"
+              "\nReturns the server's root basePath as configured, without any namespace prefix.\n\nSee ",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.BasePath.get",
+                "text": "BasePath.get"
+              },
+              " for getting the basePath value for a specific request"
             ],
             "path": "src/core/packages/http/browser/src/types.ts",
             "lineNumber": 99,
@@ -2227,7 +2494,15 @@
             "tags": [],
             "label": "publicBaseUrl",
             "description": [
-              "\nThe server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the\n{@link IBasePath.serverBasePath}.\n"
+              "\nThe server's publicly exposed base URL, if configured. Includes protocol, host, port (optional) and the\n",
+              {
+                "pluginId": "@kbn/core-http-browser",
+                "scope": "public",
+                "docId": "kibKbnCoreHttpBrowserPluginApi",
+                "section": "def-public.IBasePath.serverBasePath",
+                "text": "IBasePath.serverBasePath"
+              },
+              ".\n"
             ],
             "signature": [
               "string | undefined"
@@ -2423,7 +2698,15 @@
         "tags": [],
         "label": "IHttpInterceptController",
         "description": [
-          "\nUsed to halt a request Promise chain in a {@link HttpInterceptor}."
+          "\nUsed to halt a request Promise chain in a ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-public.HttpInterceptor",
+            "text": "HttpInterceptor"
+          },
+          "."
         ],
         "path": "src/core/packages/http/browser/src/types.ts",
         "lineNumber": 477,
@@ -2651,7 +2934,14 @@
         "tags": [],
         "label": "HttpStart",
         "description": [
-          "\nSee {@link HttpSetup}"
+          "\nSee ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "public",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-public.HttpSetup",
+            "text": "HttpSetup"
+          }
         ],
         "signature": [
           "HttpSetup"

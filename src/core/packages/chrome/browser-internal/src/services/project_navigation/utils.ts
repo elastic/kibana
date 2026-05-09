@@ -187,7 +187,8 @@ function getNodeStatus(
       // Invalid cloudLinkId or link url has not been set in kibana.yml
       return 'remove';
     }
-    // TODO: Add cloud link permission check once Cloud provides an API
+    // Cloud link permission checks are handled by the Cloud plugin's `getPrivilegedUrls()` method,
+    // which gates URLs based on user privileges before they are set via `setCloudUrls()`.
   }
 
   return sideNavStatus ?? 'visible';

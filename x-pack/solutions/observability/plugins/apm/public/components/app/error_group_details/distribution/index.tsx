@@ -16,10 +16,12 @@ import {
   Tooltip,
   LegendValue,
 } from '@elastic/charts';
-import { EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
+import type { ESQLQueryParams } from '../../../shared/links/discover_links/get_esql_query';
+import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -32,13 +34,21 @@ import { getTimeZone } from '../../../shared/charts/helper/timezone';
 type ErrorDistributionAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/distribution'>;
 
+interface DiscoverParams {
+  label: string;
+  rangeFrom: string;
+  rangeTo: string;
+  queryParams: ESQLQueryParams;
+}
+
 interface Props {
   fetchStatus: FETCH_STATUS;
   distribution?: ErrorDistributionAPIResponse;
   title: React.ReactNode;
+  discoverParams?: DiscoverParams;
 }
 
-export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
+export function ErrorDistribution({ distribution, title, fetchStatus, discoverParams }: Props) {
   const { core } = useApmPluginContext();
   const baseTheme = useElasticChartsTheme();
 
@@ -79,9 +89,26 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
 
   return (
     <>
-      <EuiTitle size="xs">
-        <span>{title}</span>
-      </EuiTitle>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <span>{title}</span>
+          </EuiTitle>
+        </EuiFlexItem>
+        {discoverParams && (
+          <EuiFlexItem grow={false}>
+            <OpenInDiscover
+              dataTestSubj="errorGroupDetailsOpenErrorInDiscoverButton"
+              label={discoverParams.label}
+              variant="iconButton"
+              indexType="error"
+              rangeFrom={discoverParams.rangeFrom}
+              rangeTo={discoverParams.rangeTo}
+              queryParams={discoverParams.queryParams}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       <ChartContainer
         hasData={!!distribution}
         height={256}

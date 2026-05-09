@@ -10,7 +10,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { MemoryRouter } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
-import type { TabId } from './entity_analytics_management_page';
 import { EntityAnalyticsManagementPage } from './entity_analytics_management_page';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ENTITY_ANALYTICS_MANAGEMENT_PATH } from '../../../common/constants';
@@ -19,6 +18,7 @@ import {
   ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID,
   RISK_SCORE_TAB_TEST_ID,
   ASSET_CRITICALITY_TAB_TEST_ID,
+  WATCHLISTS_TAB_TEST_ID,
   ENGINE_STATUS_TAB_TEST_ID,
   ENTITY_STORE_FEATURE_FLAG_CALLOUT_TEST_ID,
 } from '../test_ids';
@@ -78,6 +78,7 @@ jest.mock('../../common/lib/kibana', () => ({
       },
     },
   }),
+  useUiSetting$: () => [false],
 }));
 
 jest.mock('../../helper_hooks', () => ({
@@ -114,6 +115,10 @@ jest.mock('../components/entity_store/hooks/use_entity_engine_privileges', () =>
 
 jest.mock('../components/entity_store/components/engines_status', () => ({
   EngineStatus: () => <span data-test-subj="mock-engine-status">{'Mocked Engine Status Tab'}</span>,
+}));
+
+jest.mock('../components/watchlists/watchlists_tab', () => ({
+  WatchlistsTab: () => <span data-test-subj="mock-watchlists-tab">{'Mocked Watchlists Tab'}</span>,
 }));
 
 jest.mock('../components/entity_store/components/entity_store_missing_privileges_callout', () => ({
@@ -236,7 +241,7 @@ describe('EntityAnalyticsManagementPage', () => {
     });
   });
 
-  const pageComponent = (initialTab?: TabId) => {
+  const pageComponent = (initialTab?: string) => {
     const initialPath = initialTab
       ? `${ENTITY_ANALYTICS_MANAGEMENT_PATH}/${initialTab}`
       : ENTITY_ANALYTICS_MANAGEMENT_PATH;
@@ -374,5 +379,27 @@ describe('EntityAnalyticsManagementPage', () => {
   it('does not show the Clear Entity Data button when entity store is not installed', () => {
     render(pageComponent());
     expect(screen.queryByTestId('clear-entity-data-button')).not.toBeInTheDocument();
+  });
+
+  it('shows the Watchlists tab when the feature flag is enabled', () => {
+    mockUseIsExperimentalFeatureEnabled.mockImplementation(
+      (flag: string) => flag === 'entityAnalyticsWatchlistEnabled'
+    );
+    render(pageComponent());
+    expect(screen.getByTestId(WATCHLISTS_TAB_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('does not show the Watchlists tab when the feature flag is disabled', () => {
+    render(pageComponent());
+    expect(screen.queryByTestId(WATCHLISTS_TAB_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('switches to Watchlists tab when clicked', () => {
+    mockUseIsExperimentalFeatureEnabled.mockImplementation(
+      (flag: string) => flag === 'entityAnalyticsWatchlistEnabled'
+    );
+    render(pageComponent());
+    fireEvent.click(screen.getByTestId(WATCHLISTS_TAB_TEST_ID));
+    expect(screen.getByTestId('mock-watchlists-tab')).toBeInTheDocument();
   });
 });

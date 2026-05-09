@@ -96,6 +96,7 @@
                 "lineNumber": 57,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "VersionedRouterArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -153,6 +154,7 @@
                 "lineNumber": 87,
                 "columnNumber": 6,
                 "deprecated": false,
+                "docsReferencedTypeName": "VersionedRouteConfig",
                 "trackAdoption": false
               }
             ]
@@ -208,6 +210,7 @@
                 "lineNumber": 87,
                 "columnNumber": 6,
                 "deprecated": false,
+                "docsReferencedTypeName": "VersionedRouteConfig",
                 "trackAdoption": false
               }
             ]
@@ -263,6 +266,7 @@
                 "lineNumber": 87,
                 "columnNumber": 6,
                 "deprecated": false,
+                "docsReferencedTypeName": "VersionedRouteConfig",
                 "trackAdoption": false
               }
             ]
@@ -318,6 +322,7 @@
                 "lineNumber": 87,
                 "columnNumber": 6,
                 "deprecated": false,
+                "docsReferencedTypeName": "VersionedRouteConfig",
                 "trackAdoption": false
               }
             ]
@@ -373,6 +378,7 @@
                 "lineNumber": 87,
                 "columnNumber": 6,
                 "deprecated": false,
+                "docsReferencedTypeName": "VersionedRouteConfig",
                 "trackAdoption": false
               }
             ]
@@ -443,6 +449,7 @@
                 "lineNumber": 45,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "HapiResponseToolkit",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -540,6 +547,7 @@
                 "lineNumber": 64,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaResponse",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -584,6 +592,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Headers",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -657,6 +666,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteDeprecationInfo",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -713,6 +723,7 @@
             "lineNumber": 46,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteMethod",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -857,6 +868,7 @@
                 "lineNumber": 135,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "CustomHttpResponseOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }

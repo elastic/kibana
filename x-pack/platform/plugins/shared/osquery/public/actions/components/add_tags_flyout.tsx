@@ -19,6 +19,7 @@ import {
   EuiFormRow,
   EuiComboBox,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -68,6 +69,7 @@ const AddTagsFlyoutComponent: React.FC<AddTagsFlyoutProps> = ({
   onClose,
   onSave,
 }) => {
+  const flyoutTitleId = useGeneratedHtmlId();
   const [localTags, setLocalTags] = useState<string[]>(currentTags);
   const { tags: availableTags } = useHistoryTags();
   const { mutate: updateTags, isLoading: isSaving } = useUpdateActionTags();
@@ -125,10 +127,10 @@ const AddTagsFlyoutComponent: React.FC<AddTagsFlyoutProps> = ({
   }, [actionId, localTags, updateTags, onSave, onClose]);
 
   return (
-    <EuiFlyout onClose={onClose} size="s" ownFocus>
+    <EuiFlyout onClose={onClose} size="s" ownFocus aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2>{FLYOUT_TITLE}</h2>
+          <h2 id={flyoutTitleId}>{FLYOUT_TITLE}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>

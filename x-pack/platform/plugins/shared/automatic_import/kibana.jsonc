@@ -20,9 +20,17 @@
       "actions",
       "stackConnectors",
       "inference",
+      "security",
+      "features",
+      "taskManager",
+      "kibanaUtils",
+      "fieldsMetadata"
+    ],
+    "optionalPlugins": [
+      "searchInferenceEndpoints"
     ],
     "requiredBundles": [
-      "kibanaUtils"
+      "esUiShared"
     ]
   }
 }

@@ -112,6 +112,7 @@ export const RuleAlertActionsCell: GetAlertsTableProp<'renderActionsCell'> = (pr
       <EuiFlexItem>
         <EuiPopover
           anchorPosition="downLeft"
+          aria-label={MORE_ACTIONS}
           button={
             <EuiToolTip content={MORE_ACTIONS} disableScreenReaderOutput>
               <EuiButtonIcon

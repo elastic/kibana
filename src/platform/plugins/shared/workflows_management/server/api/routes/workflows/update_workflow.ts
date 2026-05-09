@@ -14,9 +14,10 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_UPDATE_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerUpdateWorkflowRoute({ router, api, spaces }: RouteDependencies) {
+export function registerUpdateWorkflowRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .put({
       path: '/api/workflows/workflow/{id}',
@@ -43,13 +44,18 @@ export function registerUpdateWorkflowRoute({ router, api, spaces }: RouteDepend
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { id } = request.params;
           const spaceId = spaces.getSpaceId(request);
           const updated = await api.updateWorkflow(id, request.body, spaceId, request);
+          audit.logWorkflowUpdated(request, { id });
           return response.ok({ body: updated });
         } catch (error) {
+          audit.logWorkflowUpdated(request, {
+            id: request.params.id,
+            error,
+          });
           return handleRouteError(response, error);
         }
       })

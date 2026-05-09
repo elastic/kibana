@@ -41,15 +41,18 @@ import { useAbortableAsync, useBoolean } from '@kbn/react-hooks';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { useKibana } from '../../hooks/use_kibana';
-import type { SchemaEditorField, SchemaField } from '../data_management/schema_editor/types';
+import type {
+  SchemaEditorField,
+  SchemaField,
+} from '../stream_management/data_management/schema_editor/types';
 import { getFormattedError } from '../../util/errors';
 import {
   EMPTY_CONTENT,
   FIELD_TYPE_MAP,
   TABLE_COLUMNS,
-} from '../data_management/schema_editor/constants';
-import { FieldType } from '../data_management/schema_editor/field_type';
-import type { TableColumnName } from '../data_management/schema_editor/constants';
+} from '../stream_management/data_management/schema_editor/constants';
+import { FieldType } from '../stream_management/data_management/schema_editor/field_type';
+import type { TableColumnName } from '../stream_management/data_management/schema_editor/constants';
 
 interface QueryStreamSchemaEditorProps {
   definition: Streams.QueryStream.GetResponse;

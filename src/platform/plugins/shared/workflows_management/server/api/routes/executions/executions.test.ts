@@ -9,9 +9,13 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
+import {
+  WorkflowExecutionNotFoundError,
+  WorkflowNotFoundError,
+} from '@kbn/workflows/common/errors';
 import { registerExecutionRoutes } from '.';
 import type { RouteDependencies } from '../types';
+import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 
 describe('Execution Routes', () => {
   let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
@@ -19,12 +23,27 @@ describe('Execution Routes', () => {
   let mockSpaces: { getSpaceId: jest.Mock };
 
   const mockContext = {
+    workflows: Promise.resolve({
+      isWorkflowsAvailable: true,
+      emitEvent: jest.fn(),
+    }),
     licensing: Promise.resolve({
       license: {
         isAvailable: true,
         isActive: true,
         hasAtLeast: jest.fn().mockReturnValue(true),
         type: 'enterprise',
+      },
+    }),
+    core: Promise.resolve({
+      security: {
+        audit: {
+          logger: {
+            enabled: false,
+            log: jest.fn(),
+            includeSavedObjectNames: false,
+          },
+        },
       },
     }),
   };
@@ -61,6 +80,7 @@ describe('Execution Routes', () => {
       getWorkflowExecution: jest.fn(),
       getWorkflowExecutionLogs: jest.fn(),
       cancelWorkflowExecution: jest.fn(),
+      cancelAllActiveWorkflowExecutions: jest.fn(),
       getStepExecution: jest.fn(),
       resumeWorkflowExecution: jest.fn(),
       getChildWorkflowExecutions: jest.fn(),
@@ -105,6 +125,7 @@ describe('Execution Routes', () => {
       api: mockApi as any,
       logger: loggingSystemMock.createLogger(),
       spaces: mockSpaces as any,
+      audit: createWorkflowManagementAuditLogMock(),
     } as unknown as RouteDependencies);
   });
 
@@ -258,7 +279,7 @@ describe('Execution Routes', () => {
       expect(handler('POST', path)).toBeDefined();
     });
 
-    it('should call api.testStep with yaml, ids, context, space, and request', async () => {
+    it('should call api.testStep with yaml, ids, executionContext, contextOverride, space, and request', async () => {
       mockApi.testStep.mockResolvedValue('step-exec-1');
       const h = handler('POST', path)!;
       const request = {
@@ -266,6 +287,7 @@ describe('Execution Routes', () => {
           stepId: 'step-1',
           workflowId: 'wf-1',
           workflowYaml: 'steps: []',
+          executionContext: { inputs: { foo: 'bar' }, event: { type: 'test' } },
           contextOverride: { x: 1 },
         },
       };
@@ -276,6 +298,7 @@ describe('Execution Routes', () => {
         'steps: []',
         'step-1',
         'wf-1',
+        { inputs: { foo: 'bar' }, event: { type: 'test' } },
         { x: 1 },
         'default',
         request
@@ -424,6 +447,49 @@ describe('Execution Routes', () => {
 
       expect(mockResponse.notFound).toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'notFound' });
+    });
+  });
+
+  describe('POST /api/workflows/workflow/{workflowId}/executions/cancel (cancel_workflow_executions)', () => {
+    const path = '/api/workflows/workflow/{workflowId}/executions/cancel';
+
+    it('should register the route handler', () => {
+      expect(handler('POST', path)).toBeDefined();
+    });
+
+    it('should call api.cancelAllActiveWorkflowExecutions with workflow id and space id', async () => {
+      mockApi.cancelAllActiveWorkflowExecutions.mockResolvedValue(undefined);
+      const h = handler('POST', path)!;
+      const request = { params: { workflowId: 'wf-1' } };
+
+      await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockApi.cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith('wf-1', 'default');
+      expect(mockResponse.ok).toHaveBeenCalled();
+    });
+
+    it('should return not found when cancelAllActiveWorkflowExecutions throws WorkflowNotFoundError', async () => {
+      mockApi.cancelAllActiveWorkflowExecutions.mockRejectedValue(
+        new WorkflowNotFoundError('wf-missing')
+      );
+      const h = handler('POST', path)!;
+      const request = { params: { workflowId: 'wf-missing' } };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.notFound).toHaveBeenCalled();
+      expect(result).toMatchObject({ type: 'notFound' });
+    });
+
+    it('should return custom error when cancelAllActiveWorkflowExecutions throws a generic error', async () => {
+      mockApi.cancelAllActiveWorkflowExecutions.mockRejectedValue(new Error('engine failed'));
+      const h = handler('POST', path)!;
+      const request = { params: { workflowId: 'wf-1' } };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.customError).toHaveBeenCalled();
+      expect(result).toMatchObject({ type: 'customError', body: expect.objectContaining({}) });
     });
   });
 

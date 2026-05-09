@@ -287,8 +287,25 @@ const assertIndex = (namespace: string) => {
                   id_value: {
                     type: 'keyword',
                   },
+                  calculation_run_id: {
+                    type: 'keyword',
+                  },
+                  score_type: {
+                    type: 'keyword',
+                  },
                   notes: {
                     type: 'keyword',
+                  },
+                  related_entities: {
+                    type: 'object',
+                    properties: {
+                      entity_id: {
+                        type: 'keyword',
+                      },
+                      relationship_type: {
+                        type: 'keyword',
+                      },
+                    },
                   },
                   inputs: {
                     properties: {
@@ -366,6 +383,12 @@ const assertIndex = (namespace: string) => {
                   id_value: {
                     type: 'keyword',
                   },
+                  calculation_run_id: {
+                    type: 'keyword',
+                  },
+                  score_type: {
+                    type: 'keyword',
+                  },
                   inputs: {
                     properties: {
                       category: {
@@ -391,6 +414,17 @@ const assertIndex = (namespace: string) => {
                   },
                   notes: {
                     type: 'keyword',
+                  },
+                  related_entities: {
+                    type: 'object',
+                    properties: {
+                      entity_id: {
+                        type: 'keyword',
+                      },
+                      relationship_type: {
+                        type: 'keyword',
+                      },
+                    },
                   },
                 },
                 type: 'object',
@@ -445,8 +479,25 @@ const assertIndex = (namespace: string) => {
                   id_value: {
                     type: 'keyword',
                   },
+                  calculation_run_id: {
+                    type: 'keyword',
+                  },
+                  score_type: {
+                    type: 'keyword',
+                  },
                   notes: {
                     type: 'keyword',
+                  },
+                  related_entities: {
+                    type: 'object',
+                    properties: {
+                      entity_id: {
+                        type: 'keyword',
+                      },
+                      relationship_type: {
+                        type: 'keyword',
+                      },
+                    },
                   },
                   inputs: {
                     properties: {

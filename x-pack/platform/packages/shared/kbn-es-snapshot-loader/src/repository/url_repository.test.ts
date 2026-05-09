@@ -48,14 +48,19 @@ describe('createUrlRepository', () => {
 
     await repository.register({ esClient, log, repoName: 'test-repo' });
 
-    expect(createRepository).toHaveBeenCalledWith({
-      name: 'test-repo',
-      body: {
-        type: 'url',
-        settings: {
-          url: 'file:///tmp/repo',
+    expect(createRepository).toHaveBeenCalledWith(
+      {
+        name: 'test-repo',
+        master_timeout: '2m',
+        timeout: '2m',
+        body: {
+          type: 'url',
+          settings: {
+            url: 'file:///tmp/repo',
+          },
         },
       },
-    });
+      expect.objectContaining({ requestTimeout: expect.any(Number) })
+    );
   });
 });

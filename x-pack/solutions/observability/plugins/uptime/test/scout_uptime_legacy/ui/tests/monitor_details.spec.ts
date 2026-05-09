@@ -12,8 +12,7 @@ const dateRangeStart = '2019-09-10T12:40:08.078Z';
 const dateRangeEnd = '2019-09-11T19:40:08.078Z';
 const monitorId = '0000-intermittent';
 
-// Failing: See https://github.com/elastic/kibana/issues/255642
-test.describe.skip('MonitorDetails', { tag: '@local-stateful-classic' }, () => {
+test.describe('MonitorDetails', { tag: '@local-stateful-classic' }, () => {
   test('navigates to monitor details and displays ping data', async ({
     pageObjects,
     browserAuth,

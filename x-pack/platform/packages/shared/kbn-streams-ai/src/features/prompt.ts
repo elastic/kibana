@@ -168,6 +168,7 @@ export function createIdentifyFeaturesPrompt({ systemPrompt }: { systemPrompt: s
     name: 'identify_features',
     input: z.object({
       sample_documents: z.string(),
+      previously_identified_features: z.string(),
       excluded_features: z.string(),
     }),
   })

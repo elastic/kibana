@@ -270,6 +270,9 @@ function QueryBarMenuComponent({
       anchorPosition="downLeft"
       repositionOnScroll
       data-test-subj="queryBarMenuPopover"
+      aria-label={i18n.translate('unifiedSearch.queryBarMenu.popoverAriaLabel', {
+        defaultMessage: 'Query bar menu',
+      })}
     >
       {renderComponent()}
     </EuiPopover>

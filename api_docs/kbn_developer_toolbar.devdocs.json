@@ -22,7 +22,7 @@
           ") => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
-        "lineNumber": 66,
+        "lineNumber": 229,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -44,7 +44,7 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
-            "lineNumber": 66,
+            "lineNumber": 229,
             "columnNumber": 67,
             "deprecated": false,
             "trackAdoption": false,
@@ -184,7 +184,7 @@
         "label": "DeveloperToolbarProps",
         "description": [],
         "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
-        "lineNumber": 36,
+        "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -201,7 +201,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
-            "lineNumber": 37,
+            "lineNumber": 45,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -217,7 +217,7 @@
               "((height: number) => void) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
-            "lineNumber": 38,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -233,7 +233,7 @@
                   "number"
                 ],
                 "path": "src/platform/packages/shared/kbn-developer-toolbar/src/components/developer_toolbar.tsx",
-                "lineNumber": 38,
+                "lineNumber": 46,
                 "columnNumber": 21,
                 "deprecated": false,
                 "trackAdoption": false,

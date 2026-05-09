@@ -135,7 +135,7 @@ export const CustomMetricForm = withEuiTheme(
           <EuiPopoverTitle>
             <EuiButtonEmpty
               data-test-subj="infraCustomMetricFormButton"
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               onClick={onCancel}
               color="text"
               size="xs"

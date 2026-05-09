@@ -14,6 +14,7 @@ import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { getSolutionViewSwitchCalloutComponent } from './solution_view_switch_callout';
+import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../../common';
 import type { PluginsStart } from '../../plugin';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX } from '../constants';
@@ -42,11 +43,18 @@ jest.mock('./modal', () => ({
 
 describe('SolutionViewSwitchCallout', () => {
   const originalLocation = window.location;
+  let hrefSpy: jest.Mock;
 
   beforeEach(() => {
+    hrefSpy = jest.fn();
     Object.defineProperty(window, 'location', {
       configurable: true,
+      writable: true,
       value: { ...originalLocation, reload: jest.fn() },
+    });
+    Object.defineProperty(window.location, 'href', {
+      configurable: true,
+      set: hrefSpy,
     });
   });
 
@@ -55,6 +63,7 @@ describe('SolutionViewSwitchCallout', () => {
       configurable: true,
       value: originalLocation,
     });
+    localStorage.clear();
     jest.restoreAllMocks();
   });
 
@@ -96,7 +105,7 @@ describe('SolutionViewSwitchCallout', () => {
     return { user, coreStart, spacesManager, setItemSpy, getUrlForAppSpy };
   };
 
-  test('updates space, sets localStorage and reloads page on success', async () => {
+  test('updates space, sets localStorage and navigates to space home page on success', async () => {
     const { user, spacesManager, setItemSpy, getUrlForAppSpy } = await setup();
 
     expect(getUrlForAppSpy).toHaveBeenCalledWith('management', { path: 'kibana/spaces' });
@@ -118,7 +127,7 @@ describe('SolutionViewSwitchCallout', () => {
       `${SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX}:default`,
       'true'
     );
-    expect(window.location.reload).toHaveBeenCalled();
+    expect(hrefSpy).toHaveBeenCalledWith(addSpaceIdToPath('', 'default', ENTER_SPACE_PATH));
   });
 
   test('shows error toast on update failure', async () => {
@@ -136,5 +145,37 @@ describe('SolutionViewSwitchCallout', () => {
         })
       );
     });
+  });
+
+  test('does not render when previously dismissed', async () => {
+    jest
+      .spyOn(Storage.prototype, 'getItem')
+      .mockImplementation((key) =>
+        key === `${SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX}.dismissed` ? 'true' : null
+      );
+
+    await setup();
+
+    expect(screen.queryByTestId('solutionViewSwitchCalloutDismissButton')).not.toBeInTheDocument();
+  });
+
+  test('renders when not previously dismissed', async () => {
+    await setup();
+
+    expect(screen.getByTestId('solutionViewSwitchCalloutDismissButton')).toBeInTheDocument();
+  });
+
+  test('dismiss button hides callout and sets localStorage flag', async () => {
+    const { user, setItemSpy } = await setup();
+
+    expect(screen.getByTestId('solutionViewSwitchCalloutDismissButton')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('solutionViewSwitchCalloutDismissButton'));
+
+    expect(screen.queryByTestId('solutionViewSwitchCalloutDismissButton')).not.toBeInTheDocument();
+    expect(setItemSpy).toHaveBeenCalledWith(
+      `${SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX}.dismissed`,
+      'true'
+    );
   });
 });

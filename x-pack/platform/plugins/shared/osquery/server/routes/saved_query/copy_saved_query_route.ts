@@ -16,6 +16,7 @@ import type { ReadSavedQueryRequestParamsSchema } from '../../../common/api/save
 import { readSavedQueryRequestParamsSchema } from '../../../common/api/saved_query/read_saved_query_route';
 import { prepareSavedObjectCopy } from '../utils/copy_saved_object';
 import type { CopySavedQueryResponseData } from './types';
+import { copySavedQueryResponseSchema } from './response_schemas';
 
 export const copySavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -37,6 +38,11 @@ export const copySavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAppC
               typeof readSavedQueryRequestParamsSchema,
               ReadSavedQueryRequestParamsSchema
             >(readSavedQueryRequestParamsSchema),
+          },
+          response: {
+            200: {
+              body: () => copySavedQueryResponseSchema,
+            },
           },
         },
       },

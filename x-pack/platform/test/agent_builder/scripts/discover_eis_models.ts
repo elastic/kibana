@@ -88,11 +88,21 @@ interface EisInferenceEndpoint {
   service_settings?: {
     model_id?: string;
   };
+  metadata?: {
+    heuristics?: {
+      properties?: string[];
+    };
+  };
 }
 
 interface DiscoveredModel {
   inferenceId: string;
   modelId: string;
+  metadata?: {
+    heuristics?: {
+      properties?: string[];
+    };
+  };
 }
 
 run(
@@ -150,6 +160,9 @@ run(
           .map((ep) => ({
             inferenceId: ep.inference_id,
             modelId: ep.service_settings?.model_id || 'unknown',
+            metadata: ep.metadata
+              ? { heuristics: { properties: ep.metadata.heuristics?.properties } }
+              : undefined,
           }));
 
         if (models.length > 0) {

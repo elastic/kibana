@@ -13,9 +13,10 @@ import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTION_CANCEL_SECURITY } from '../utils/route_security';
 import { executionIdParamSchema } from '../utils/schemas';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerCancelExecutionRoute({ router, api, spaces }: RouteDependencies) {
+export function registerCancelExecutionRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/executions/{executionId}/cancel',
@@ -40,13 +41,18 @@ export function registerCancelExecutionRoute({ router, api, spaces }: RouteDepen
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { executionId } = request.params;
           const spaceId = spaces.getSpaceId(request);
           await api.cancelWorkflowExecution(executionId, spaceId);
+          audit.logExecutionCanceled(request, { executionId });
           return response.ok();
         } catch (error) {
+          audit.logExecutionCanceled(request, {
+            executionId: request.params.executionId,
+            error,
+          });
           return handleRouteError(response, error, { checkNotFound: true });
         }
       })

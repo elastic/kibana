@@ -143,6 +143,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567890,
           isServerless: false,
+          isSecurityEnabled: true,
         })
       ).rejects.toThrow(badRequest('Data Stream name cannot be empty. Received value ""'));
     });
@@ -155,6 +156,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567890,
           isServerless: false,
+          isSecurityEnabled: true,
         })
       ).rejects.toThrow(badRequest('Data Stream name cannot be empty. Received value "undefined"'));
     });
@@ -167,6 +169,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: false,
+          isSecurityEnabled: true,
         });
 
         expect(result).toEqual(detailsObject);
@@ -174,7 +177,8 @@ describe('getDataStreamDetails', () => {
         expect(mockDatasetQualityPrivileges.getHasIndexPrivileges).toHaveBeenCalledWith(
           esClient.asCurrentUser,
           ['logs-test-default'],
-          ['monitor', 'read_failure_store', 'manage_failure_store']
+          ['monitor', 'read_failure_store', 'manage_failure_store'],
+          true
         );
       });
 
@@ -193,6 +197,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: false,
+          isSecurityEnabled: true,
         });
 
         expect(mockGetDataStreams).not.toHaveBeenCalled();
@@ -207,6 +212,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: true,
+          isSecurityEnabled: true,
         });
 
         expect(mockGetDataStreamsMeteringStats).toHaveBeenCalledWith({
@@ -223,6 +229,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: false,
+          isSecurityEnabled: true,
         });
 
         expect(mockESClient.indices.stats).toHaveBeenCalledWith({
@@ -246,6 +253,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: false,
+          isSecurityEnabled: true,
         });
 
         expect(result.docsCount).toBe(0);
@@ -273,6 +281,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: false,
+          isSecurityEnabled: true,
         });
 
         expect(result).toEqual({});
@@ -299,6 +308,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: false,
+          isSecurityEnabled: true,
         });
 
         expect(result).toEqual({});
@@ -324,6 +334,7 @@ describe('getDataStreamDetails', () => {
             start: 1234567890,
             end: 1234567900,
             isServerless: false,
+            isSecurityEnabled: true,
           })
         ).rejects.toThrow('Internal Server Error');
       });
@@ -344,6 +355,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: true,
+          isSecurityEnabled: true,
         });
 
         // avgDocSizeInBytes = 30 / 20 = 1.5
@@ -367,6 +379,7 @@ describe('getDataStreamDetails', () => {
           start: 1234567890,
           end: 1234567900,
           isServerless: false,
+          isSecurityEnabled: true,
         });
 
         // avgDocSizeInBytes = 30 / 20 = 1.5

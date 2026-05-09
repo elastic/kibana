@@ -10,18 +10,21 @@ import { expect } from '@kbn/scout-security/api';
 import type { EsClient } from '@kbn/scout-security';
 import { get } from 'lodash';
 import {
-  COMMON_HEADERS,
+  PUBLIC_HEADERS,
+  INTERNAL_HEADERS,
   ENTITY_STORE_ROUTES,
   ENTITY_STORE_TAGS,
-  LATEST_INDEX,
+  LATEST_ALIAS,
 } from '../fixtures/constants';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
+import { clearEntityStoreIndices } from '../fixtures/helpers';
 
 const DOCS_LIMIT = 2;
 const CCS_TEST_LOGS_INDEX = 'ccs-test-logs';
 const FROM_DATE = '2026-02-25T10:00:00Z';
 const TO_DATE = '2026-02-25T12:00:00Z';
-const MAX_DATE_OF_UPDATES = '2026-02-25T12:10:01Z';
+// CCS writes entities with @timestamp = now + Nms; use a future date so local extraction picks them up
+const MAX_DATE_OF_UPDATES = new Date(Date.now() + 5 * 60_000).toISOString();
 
 async function createCcsTestLogsIndex(esClient: EsClient) {
   await esClient.indices.delete({ index: CCS_TEST_LOGS_INDEX }, { ignore: [404] });
@@ -99,19 +102,24 @@ apiTest.describe(
   { tag: ENTITY_STORE_TAGS },
   () => {
     let defaultHeaders: Record<string, string>;
+    let internalHeaders: Record<string, string>;
 
     apiTest.beforeAll(async ({ samlAuth, apiClient, kbnClient }) => {
       const credentials = await samlAuth.asInteractiveUser('admin');
       defaultHeaders = {
         ...credentials.cookieHeader,
-        ...COMMON_HEADERS,
+        ...PUBLIC_HEADERS,
+      };
+      internalHeaders = {
+        ...credentials.cookieHeader,
+        ...INTERNAL_HEADERS,
       };
 
       await kbnClient.uiSettings.update({
         [FF_ENABLE_ENTITY_STORE_V2]: true,
       });
 
-      await apiClient.post(ENTITY_STORE_ROUTES.INSTALL, {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {
@@ -125,7 +133,7 @@ apiTest.describe(
     apiTest.afterAll(async ({ apiClient, esClient }) => {
       await esClient.indices.delete({ index: CCS_TEST_LOGS_INDEX }, { ignore: [404] });
 
-      await apiClient.post(ENTITY_STORE_ROUTES.UNINSTALL, {
+      await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
         headers: defaultHeaders,
         responseType: 'json',
         body: {
@@ -134,6 +142,7 @@ apiTest.describe(
           },
         },
       });
+      await clearEntityStoreIndices(esClient);
     });
 
     apiTest(
@@ -167,9 +176,9 @@ apiTest.describe(
         });
 
         const extractResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_CCS_EXTRACT_TO_UPDATES('host'),
+          ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES('host'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               indexPatterns: [CCS_TEST_LOGS_INDEX],
@@ -183,9 +192,9 @@ apiTest.describe(
         expect(extractResponse.body).toMatchObject({ count: 4, pages: 2 });
 
         const logExtractionResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('host'),
+          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               fromDateISO: TO_DATE,
@@ -196,10 +205,10 @@ apiTest.describe(
         expect(logExtractionResponse.statusCode).toBe(200);
         expect(logExtractionResponse.body.success).toBe(true);
 
-        await esClient.indices.refresh({ index: LATEST_INDEX });
+        await esClient.indices.refresh({ index: LATEST_ALIAS });
 
         const latestSearchResponse = await esClient.search({
-          index: LATEST_INDEX,
+          index: LATEST_ALIAS,
           size: 100,
           query: {
             bool: {
@@ -306,9 +315,9 @@ apiTest.describe(
         });
 
         const extractResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_CCS_EXTRACT_TO_UPDATES('user'),
+          ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES('user'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               indexPatterns: [CCS_TEST_LOGS_INDEX],
@@ -322,9 +331,9 @@ apiTest.describe(
         expect(extractResponse.body).toMatchObject({ count: 5, pages: 3 });
 
         const logExtractionResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('user'),
+          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('user'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               fromDateISO: TO_DATE,
@@ -335,10 +344,10 @@ apiTest.describe(
         expect(logExtractionResponse.statusCode).toBe(200);
         expect(logExtractionResponse.body.success).toBe(true);
 
-        await esClient.indices.refresh({ index: LATEST_INDEX });
+        await esClient.indices.refresh({ index: LATEST_ALIAS });
 
         const latestSearchResponse = await esClient.search({
-          index: LATEST_INDEX,
+          index: LATEST_ALIAS,
           size: 100,
           query: {
             bool: {
@@ -418,9 +427,9 @@ apiTest.describe(
         });
 
         const extractResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_CCS_EXTRACT_TO_UPDATES('service'),
+          ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES('service'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               indexPatterns: [CCS_TEST_LOGS_INDEX],
@@ -434,9 +443,9 @@ apiTest.describe(
         expect(extractResponse.body).toMatchObject({ count: 2, pages: 1 });
 
         const logExtractionResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('service'),
+          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('service'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               fromDateISO: TO_DATE,
@@ -447,10 +456,10 @@ apiTest.describe(
         expect(logExtractionResponse.statusCode).toBe(200);
         expect(logExtractionResponse.body.success).toBe(true);
 
-        await esClient.indices.refresh({ index: LATEST_INDEX });
+        await esClient.indices.refresh({ index: LATEST_ALIAS });
 
         const latestSearchResponse = await esClient.search({
-          index: LATEST_INDEX,
+          index: LATEST_ALIAS,
           size: 100,
           query: {
             bool: {
@@ -493,9 +502,9 @@ apiTest.describe(
         });
 
         const extractResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_CCS_EXTRACT_TO_UPDATES('generic'),
+          ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES('generic'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               indexPatterns: [CCS_TEST_LOGS_INDEX],
@@ -509,9 +518,9 @@ apiTest.describe(
         expect(extractResponse.body).toMatchObject({ count: 2, pages: 1 });
 
         const logExtractionResponse = await apiClient.post(
-          ENTITY_STORE_ROUTES.FORCE_LOG_EXTRACTION('generic'),
+          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('generic'),
           {
-            headers: defaultHeaders,
+            headers: internalHeaders,
             responseType: 'json',
             body: {
               fromDateISO: TO_DATE,
@@ -522,10 +531,10 @@ apiTest.describe(
         expect(logExtractionResponse.statusCode).toBe(200);
         expect(logExtractionResponse.body.success).toBe(true);
 
-        await esClient.indices.refresh({ index: LATEST_INDEX });
+        await esClient.indices.refresh({ index: LATEST_ALIAS });
 
         const latestSearchResponse = await esClient.search({
-          index: LATEST_INDEX,
+          index: LATEST_ALIAS,
           size: 100,
           query: {
             bool: {
@@ -539,6 +548,7 @@ apiTest.describe(
               ],
             },
           },
+          sort: 'entity.id:asc',
         });
 
         expect(latestSearchResponse.hits.hits).toHaveLength(2);
@@ -548,6 +558,112 @@ apiTest.describe(
 
         expect(get(hits[1], ['_source', 'entity', 'id'])).toBe('gen-2');
         expect(get(hits[1], ['_source', 'entity', 'name'])).toBe('Generic Two');
+      }
+    );
+
+    apiTest(
+      'Should paginate correctly across outer log-slice loop and inner entity-page loop',
+      async ({ apiClient, esClient }) => {
+        await createCcsTestLogsIndex(esClient);
+
+        // 6 distinct hosts: one doc each. With maxLogsPerPage=3 and docsLimit=2:
+        // - Outer loop: 2 slices (3 raw docs each)
+        // - Inner loop: 2 entity pages per slice (2 + 1 entities each)
+        // Total: count=6, pages=4
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
+          '@timestamp': '2026-02-25T10:00:00Z',
+          host: { name: 'pagination-host-1' },
+        });
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
+          '@timestamp': '2026-02-25T10:01:00Z',
+          host: { name: 'pagination-host-2' },
+        });
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
+          '@timestamp': '2026-02-25T10:02:00Z',
+          host: { name: 'pagination-host-3' },
+        });
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
+          '@timestamp': '2026-02-25T10:03:00Z',
+          host: { name: 'pagination-host-4' },
+        });
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
+          '@timestamp': '2026-02-25T10:04:00Z',
+          host: { name: 'pagination-host-5' },
+        });
+        await ingestDoc(esClient, CCS_TEST_LOGS_INDEX, {
+          '@timestamp': '2026-02-25T10:05:00Z',
+          host: { name: 'pagination-host-6' },
+        });
+
+        const extractResponse = await apiClient.post(
+          ENTITY_STORE_ROUTES.internal.FORCE_CCS_EXTRACT_TO_UPDATES('host'),
+          {
+            headers: internalHeaders,
+            responseType: 'json',
+            body: {
+              indexPatterns: [CCS_TEST_LOGS_INDEX],
+              fromDateISO: FROM_DATE,
+              toDateISO: TO_DATE,
+              docsLimit: DOCS_LIMIT,
+              maxLogsPerPage: 3,
+            },
+          }
+        );
+        expect(extractResponse.statusCode).toBe(200);
+        expect(extractResponse.body).toMatchObject({ count: 6, pages: 4 });
+
+        const logExtractionResponse = await apiClient.post(
+          ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION('host'),
+          {
+            headers: internalHeaders,
+            responseType: 'json',
+            body: {
+              fromDateISO: TO_DATE,
+              toDateISO: MAX_DATE_OF_UPDATES,
+            },
+          }
+        );
+        expect(logExtractionResponse.statusCode).toBe(200);
+        expect(logExtractionResponse.body.success).toBe(true);
+
+        await esClient.indices.refresh({ index: LATEST_ALIAS });
+
+        const latestSearchResponse = await esClient.search({
+          index: LATEST_ALIAS,
+          size: 100,
+          query: {
+            bool: {
+              filter: [
+                { term: { 'entity.EngineMetadata.Type': 'host' } },
+                {
+                  terms: {
+                    'entity.id': [
+                      'host:pagination-host-1',
+                      'host:pagination-host-2',
+                      'host:pagination-host-3',
+                      'host:pagination-host-4',
+                      'host:pagination-host-5',
+                      'host:pagination-host-6',
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        });
+
+        expect(latestSearchResponse.hits.hits).toHaveLength(6);
+        const entityIds = latestSearchResponse.hits.hits.map((h) =>
+          get(h._source, ['entity', 'id'])
+        );
+        expect(entityIds.sort()).toStrictEqual([
+          'host:pagination-host-1',
+          'host:pagination-host-2',
+          'host:pagination-host-3',
+          'host:pagination-host-4',
+          'host:pagination-host-5',
+          'host:pagination-host-6',
+        ]);
       }
     );
   }

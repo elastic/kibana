@@ -22,7 +22,7 @@ import { getField } from '../../shared/utils';
 import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 import { LeftPanelInsightsTab } from '../../left';
-import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
+import { THREAT_INTELLIGENCE_TAB_ID } from '../../../../flyout_v2/threat_intelligence';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
 

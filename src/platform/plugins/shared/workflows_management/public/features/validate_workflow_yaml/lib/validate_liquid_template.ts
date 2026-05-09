@@ -8,7 +8,7 @@
  */
 
 import type { Document } from 'yaml';
-import { validateLiquidTemplate as validateLiquidTemplateCommon } from '../../../../common/lib/validate_liquid_template';
+import { validateLiquidTemplate as validateLiquidTemplateCommon } from '@kbn/workflows-yaml';
 import type { YamlValidationResult } from '../model/types';
 
 export function validateLiquidTemplate(

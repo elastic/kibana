@@ -13,9 +13,11 @@ import {
   EuiFlexItem,
   EuiIconTip,
   EuiInMemoryTable,
+  EuiLink,
   EuiSkeletonText,
   EuiText,
   useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
@@ -26,7 +28,6 @@ import { useNavigation } from '../../hooks/use_navigation';
 import { useUiPrivileges } from '../../hooks/use_ui_privileges';
 import { appPaths } from '../../utils/app_paths';
 import { labels } from '../../utils/i18n';
-import { createSkillIdColumn, createSkillTypeColumn } from './skills_columns';
 import { SkillContextMenu } from './skills_table_context_menu';
 
 export const AgentBuilderSkillsTable = memo(() => {
@@ -42,7 +43,16 @@ export const AgentBuilderSkillsTable = memo(() => {
     deleteSkill,
     confirmDelete,
     cancelDelete,
+    usedByAgents,
+    isForceConfirmModalOpen,
+    confirmForceDelete,
+    cancelForceDelete,
   } = useDeleteSkill();
+
+  const deleteSkillTitleId = useGeneratedHtmlId({ prefix: 'deleteSkillTitle' });
+  const deleteSkillUsedByAgentsTitleId = useGeneratedHtmlId({
+    prefix: 'deleteSkillUsedByMultipleAgentsTitle',
+  });
 
   const columns = useSkillsTableColumns({ onDelete: deleteSkill });
 
@@ -125,6 +135,8 @@ export const AgentBuilderSkillsTable = memo(() => {
       {isDeleteModalOpen && deleteSkillId && (
         <EuiConfirmModal
           title={labels.skills.deleteSkillTitle(deleteSkillId)}
+          aria-labelledby={deleteSkillTitleId}
+          titleProps={{ id: deleteSkillTitleId }}
           onCancel={cancelDelete}
           onConfirm={confirmDelete}
           cancelButtonText={labels.skills.deleteSkillCancelButton}
@@ -133,6 +145,31 @@ export const AgentBuilderSkillsTable = memo(() => {
           isLoading={isDeleting}
         >
           <p>{labels.skills.deleteSkillConfirmationText}</p>
+        </EuiConfirmModal>
+      )}
+      {isForceConfirmModalOpen && usedByAgents && (
+        <EuiConfirmModal
+          title={labels.skills.deleteSkillUsedByAgentsTitle(usedByAgents.skillId)}
+          aria-labelledby={deleteSkillUsedByAgentsTitleId}
+          titleProps={{ id: deleteSkillUsedByAgentsTitleId }}
+          onCancel={cancelForceDelete}
+          onConfirm={confirmForceDelete}
+          isLoading={isDeleting}
+          cancelButtonText={labels.skills.deleteSkillUsedByAgentsCancelButton}
+          confirmButtonText={labels.skills.deleteSkillUsedByAgentsConfirmButton}
+          buttonColor="danger"
+        >
+          <EuiText>
+            <p>{labels.skills.deleteSkillUsedByAgentsDescription}</p>
+            {usedByAgents.agents.length > 0 && (
+              <p>
+                <strong>{labels.skills.deleteSkillUsedByAgentsAgentListLabel}:</strong>{' '}
+                {labels.skills.deleteSkillUsedByAgentsAgentList(
+                  usedByAgents.agents.map((a) => a.name ?? a.id)
+                )}
+              </p>
+            )}
+          </EuiText>
         </EuiConfirmModal>
       )}
     </>
@@ -165,12 +202,38 @@ const useSkillsTableColumns = ({
           return null;
         },
       },
-      createSkillIdColumn({ onClick: handleSkillClick }),
+      {
+        field: 'id',
+        name: labels.skills.skillIdLabel,
+        sortable: true,
+        width: '25%',
+        render: (_id: string, skill: PublicSkillSummary) => (
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem>
+              <EuiLink
+                onClick={() => handleSkillClick(skill.id)}
+                data-test-subj={`agentBuilderSkillLink-${skill.id}`}
+              >
+                <EuiText size="s">
+                  <strong>{skill.id}</strong>
+                </EuiText>
+              </EuiLink>
+            </EuiFlexItem>
+            {skill.name !== skill.id && (
+              <EuiFlexItem>
+                <EuiText size="xs" color="subdued">
+                  {skill.name}
+                </EuiText>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        ),
+      },
       {
         field: 'description',
         name: labels.skills.descriptionLabel,
         truncateText: true,
-        width: '40%',
+        width: 'auto',
         render: (description: string, skill: PublicSkillSummary) => (
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
             {skill.experimental && (
@@ -186,11 +249,20 @@ const useSkillsTableColumns = ({
           </EuiFlexGroup>
         ),
       },
-      createSkillTypeColumn(),
+      {
+        field: 'readonly',
+        name: labels.skills.typeLabel,
+        width: '100px',
+        render: (readonly: boolean) => (
+          <EuiBadge color={readonly ? 'hollow' : 'primary'}>
+            {readonly ? labels.skills.builtinLabel : labels.skills.customLabel}
+          </EuiBadge>
+        ),
+      },
       {
         field: 'tool_ids',
         name: labels.skills.toolsLabel,
-        width: '80px',
+        width: '70px',
         render: (toolIds: string[] | undefined) => (
           <EuiText size="xs" color="subdued">
             {toolIds?.length ?? 0}
@@ -200,7 +272,7 @@ const useSkillsTableColumns = ({
       {
         field: 'referenced_content_count',
         name: labels.skills.referencedContentLabel,
-        width: '80px',
+        width: '70px',
         render: (count: number) => (
           <EuiText size="xs" color="subdued">
             {count}
@@ -208,7 +280,7 @@ const useSkillsTableColumns = ({
         ),
       },
       {
-        width: '60px',
+        width: '50px',
         align: 'right' as const,
         render: (skill: PublicSkillSummary) => (
           <SkillContextMenu skill={skill} onDelete={onDelete} canManage={manageSkills} />

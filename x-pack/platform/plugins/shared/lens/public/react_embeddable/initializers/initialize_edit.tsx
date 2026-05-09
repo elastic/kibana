@@ -28,6 +28,12 @@ import type {
   LensInternalApi,
   LensRuntimeState,
 } from '@kbn/lens-common';
+import {
+  ON_APPLY_FILTER,
+  ON_CLICK_VALUE,
+  ON_OPEN_PANEL_MENU,
+  ON_SELECT_RANGE,
+} from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { APP_ID, getEditPath } from '../../../common/constants';
 import type { LensEmbeddableStartServices } from '../types';
 import {
@@ -49,12 +55,33 @@ function getSupportedTriggers(
   visualizationMap: LensEmbeddableStartServices['visualizationMap']
 ) {
   return () => {
+    const panelTriggers = [ON_OPEN_PANEL_MENU];
     const currentState = getState();
     if (currentState.attributes?.visualizationType) {
-      return visualizationMap[currentState.attributes.visualizationType]?.triggers || [];
+      return ensureNestedTriggers([
+        ...panelTriggers,
+        ...(visualizationMap[currentState.attributes.visualizationType]?.triggers ?? []),
+      ]);
     }
-    return [];
+    return panelTriggers;
   };
+}
+
+/**
+ * ON_CLICK_VALUE and ON_SELECT_RANGE also trigger ON_APPLY_FILTER.
+ * This function appends ON_APPLY_FILTER to the list of triggers if either ON_CLICK_VALUE
+ * or ON_SELECT_RANGE is supported.
+ * @param triggers
+ */
+function ensureNestedTriggers(triggers: string[]): string[] {
+  if (
+    !triggers.includes(ON_APPLY_FILTER) &&
+    (triggers.includes(ON_CLICK_VALUE) || triggers.includes(ON_SELECT_RANGE))
+  ) {
+    return [...triggers, ON_APPLY_FILTER];
+  }
+
+  return triggers;
 }
 
 function isReadOnly(viewMode$: PublishingSubject<ViewMode>) {
@@ -105,11 +132,6 @@ export function initializeEditApi(
         disabledActionIds$: new BehaviorSubject<string[] | undefined>(undefined),
         setDisabledActionIds: noop,
       };
-
-  if (isTextBasedLanguage(initialState)) {
-    // do not expose the drilldown action for ES|QL
-    setDisabledActionIds(disabledActionIds$?.getValue()?.concat(['OPEN_FLYOUT_ADD_DRILLDOWN']));
-  }
 
   /**
    * Inline editing section

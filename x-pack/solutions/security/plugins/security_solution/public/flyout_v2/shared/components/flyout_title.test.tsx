@@ -62,7 +62,7 @@ describe('<FlyoutTitle />', () => {
     expect(getByTestId(TITLE_HEADER_TEXT_TEST_ID(TEST_ID))).toHaveTextContent(title);
     expect(getByTestId(TITLE_LINK_ICON_TEST_ID(TEST_ID))).toHaveAttribute(
       'data-icon-type',
-      'popout'
+      'external'
     );
   });
 
@@ -77,7 +77,7 @@ describe('<FlyoutTitle />', () => {
     );
     expect(getByTestId(TITLE_LINK_ICON_TEST_ID(TEST_ID))).toHaveAttribute(
       'data-icon-type',
-      'popout'
+      'external'
     );
   });
 

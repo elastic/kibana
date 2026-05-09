@@ -10,8 +10,10 @@ import {
   canChangeAgentVisibility,
   hasAgentReadAccess,
   hasAgentWriteAccess,
+  canCurrentUserEditAgent,
 } from './access_control';
-import { agentBuilderDefaultAgentId } from './definition';
+import type { AgentConfiguration, AgentDefinition } from './definition';
+import { agentBuilderDefaultAgentId, AgentType } from './definition';
 import { AgentVisibility } from './visibility';
 import type { UserIdAndName } from '../base/users';
 
@@ -259,6 +261,108 @@ describe('hasAgentWriteAccess', () => {
         owner,
         currentUser: otherUser,
         isAdmin: false,
+      })
+    ).toBe(true);
+  });
+});
+
+describe('canCurrentUserEditAgent', () => {
+  const publicAgent: AgentDefinition = {
+    readonly: false,
+    visibility: AgentVisibility.Public,
+    created_by: owner,
+    id: 'test-agent-id',
+    type: AgentType.chat,
+    name: 'test agent',
+    description: 'test agent description',
+    configuration: {} as AgentConfiguration,
+  };
+
+  test('returns false when agent is readonly', () => {
+    expect(
+      canCurrentUserEditAgent({
+        agent: { ...publicAgent, readonly: true },
+        manageAgents: true,
+        currentUser: otherUser,
+        isAdmin: false,
+      })
+    ).toBe(false);
+  });
+
+  test('returns false when manageAgents is false', () => {
+    expect(
+      canCurrentUserEditAgent({
+        agent: publicAgent,
+        manageAgents: false,
+        currentUser: otherUser,
+        isAdmin: false,
+      })
+    ).toBe(false);
+  });
+
+  test('returns false when isCurrentUserLoading is true', () => {
+    expect(
+      canCurrentUserEditAgent({
+        agent: publicAgent,
+        manageAgents: true,
+        currentUser: otherUser,
+        isAdmin: false,
+        isCurrentUserLoading: true,
+      })
+    ).toBe(false);
+  });
+
+  test('returns true for public non-readonly agent when user has manageAgents and write access', () => {
+    expect(
+      canCurrentUserEditAgent({
+        agent: publicAgent,
+        manageAgents: true,
+        currentUser: otherUser,
+        isAdmin: false,
+      })
+    ).toBe(true);
+  });
+
+  test('returns false for private agent when user is not owner', () => {
+    expect(
+      canCurrentUserEditAgent({
+        agent: { ...publicAgent, visibility: AgentVisibility.Private },
+        manageAgents: true,
+        currentUser: otherUser,
+        isAdmin: false,
+      })
+    ).toBe(false);
+  });
+
+  test('returns false for shared agent when user is not owner', () => {
+    expect(
+      canCurrentUserEditAgent({
+        agent: { ...publicAgent, visibility: AgentVisibility.Shared },
+        manageAgents: true,
+        currentUser: otherUser,
+        isAdmin: false,
+      })
+    ).toBe(false);
+  });
+
+  test('returns true for private agent when current user is owner', () => {
+    expect(
+      canCurrentUserEditAgent({
+        agent: { ...publicAgent, visibility: AgentVisibility.Private },
+        manageAgents: true,
+        currentUser,
+        isAdmin: false,
+      })
+    ).toBe(true);
+  });
+
+  test('returns true for private agent when isAdmin even if not owner', () => {
+    expect(
+      canCurrentUserEditAgent({
+        agent: { ...publicAgent, visibility: AgentVisibility.Private },
+        manageAgents: true,
+        currentUser: otherUser,
+        isAdmin: true,
       })
     ).toBe(true);
   });

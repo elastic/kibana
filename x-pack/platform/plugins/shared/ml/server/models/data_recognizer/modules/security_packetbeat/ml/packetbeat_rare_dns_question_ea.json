@@ -16,7 +16,8 @@
     ],
     "influencers": [
       "host.name",
-      "host.id"
+      "host.id",
+      "dns.question.name"
     ]
   },
   "allow_lazy_open": true,

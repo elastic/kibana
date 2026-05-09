@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -289,7 +288,7 @@ const SavedQueriesPageComponent = () => {
       <EuiButton
         fill
         {...newQueryLinkProps}
-        iconType="plusInCircle"
+        iconType="plusCircle"
         isDisabled={!permissions.writeSavedQueries}
       >
         <FormattedMessage
@@ -304,7 +303,6 @@ const SavedQueriesPageComponent = () => {
   if (queryHistoryRework) {
     return (
       <div css={fullWidthContentCss}>
-        <EuiSpacer size="l" />
         <SavedQueriesTable />
       </div>
     );

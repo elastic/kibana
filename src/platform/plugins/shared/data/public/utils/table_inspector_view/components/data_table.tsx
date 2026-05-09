@@ -88,7 +88,7 @@ class DataTableFormatClass extends Component<
                 }
               >
                 <EuiButtonIcon
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   color="text"
                   aria-label={i18n.translate('data.inspector.table.filterForValueButtonAriaLabel', {
                     defaultMessage: 'Filter for value',
@@ -118,7 +118,7 @@ class DataTableFormatClass extends Component<
                   }
                 >
                   <EuiButtonIcon
-                    iconType="minusInCircle"
+                    iconType="minusCircle"
                     color="text"
                     aria-label={i18n.translate(
                       'data.inspector.table.filterOutValueButtonAriaLabel',

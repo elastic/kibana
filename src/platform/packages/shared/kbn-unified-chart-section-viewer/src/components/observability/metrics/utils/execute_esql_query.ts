@@ -19,6 +19,7 @@ import {
   MetricsExecutionContextAction,
   MetricsExecutionContextName,
 } from './execution_context_enums';
+import { EsqlResponseError, extractEsqlEmbeddedError } from './esql_response_error';
 import { esqlResultToPlainObjects } from './esql_result_to_plain_objects';
 import { getMetricsExecutionContext } from './execution_context';
 
@@ -33,8 +34,27 @@ export interface ExecuteEsqlParams {
   uiSettings: IUiSettingsClient;
 }
 
+export const fetchEsqlResponseOrThrow = async (
+  params: Parameters<typeof getESQLResults>[0]
+): Promise<Awaited<ReturnType<typeof getESQLResults>>> => {
+  const result = await getESQLResults(params);
+  const embedded = extractEsqlEmbeddedError(result.response as object);
+  if (embedded) {
+    throw new EsqlResponseError(embedded.cause, { status: embedded.status });
+  }
+
+  return result;
+};
+
+export interface ExecuteEsqlResult<TDocument> {
+  documents: TDocument[];
+  rawResponse: object;
+  requestParams: { query: string; filter?: object };
+}
+
 /**
  * Executes an ES|QL query using the data plugin's search service.
+ * Rejects when Elasticsearch returns a response body that contains an `error` object.
  */
 export async function executeEsqlQuery<TDocument extends object = Record<string, unknown>>({
   esqlQuery,
@@ -45,7 +65,7 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
   filters = [],
   variables,
   uiSettings,
-}: ExecuteEsqlParams): Promise<TDocument[]> {
+}: ExecuteEsqlParams): Promise<ExecuteEsqlResult<TDocument>> {
   const esQueryConfig = getEsQueryConfig(uiSettings);
   const timeFilter =
     timeRange && dataView?.timeFieldName
@@ -57,7 +77,7 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
       ? buildEsQuery(undefined, [], filtersWithTime, esQueryConfig)
       : undefined;
 
-  const { response } = await getESQLResults({
+  const { response, params } = await fetchEsqlResponseOrThrow({
     esqlQuery,
     search,
     signal,
@@ -70,7 +90,9 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
     ),
   });
 
-  const plainObjects = esqlResultToPlainObjects<TDocument>(response);
-
-  return plainObjects;
+  return {
+    documents: esqlResultToPlainObjects<TDocument>(response),
+    rawResponse: { ...response, requestParams: params },
+    requestParams: { query: esqlQuery, ...(filter ? { filter } : {}) },
+  };
 }

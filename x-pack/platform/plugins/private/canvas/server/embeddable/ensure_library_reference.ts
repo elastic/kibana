@@ -6,13 +6,15 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { VISUALIZE_EMBEDDABLE_TYPE, VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
 
 const BY_REF_LIBRARY_TYPES = ['search', 'visualization', 'lens', 'map'];
 
 export function ensureLibraryReference(
   references: SavedObjectReference[],
-  // pre-translated embeddable type. i.e. "search" not translated version "discover_session"
-  storedEmbeddableType: string,
+  embeddableType: string,
   panelRefName: string
 ) {
   let libraryRef: SavedObjectReference | undefined;
@@ -36,12 +38,26 @@ export function ensureLibraryReference(
   if (!libraryRef) {
     libraryRef = {
       id: panelRefName,
-      // No mapping between embeddable type and library type is needed
-      // stored embeddable types are identical to respective library types
-      type: storedEmbeddableType, // happenstance that storedEmbeddableType is the library type
+      type: getLibraryType(embeddableType),
       name: 'savedObjectRef',
     };
   }
 
   return [libraryRef, ...restOfRefs];
+}
+
+function getLibraryType(embeddableType: string) {
+  if (embeddableType === LENS_EMBEDDABLE_TYPE) {
+    return 'lens';
+  }
+
+  if (embeddableType === VISUALIZE_EMBEDDABLE_TYPE) {
+    return VISUALIZE_SAVED_OBJECT_TYPE;
+  }
+
+  if (embeddableType === SEARCH_EMBEDDABLE_TYPE) {
+    return 'search';
+  }
+
+  return embeddableType;
 }

@@ -17,6 +17,7 @@ import type { Duration } from 'moment';
 import type { Observable, Subscription } from 'rxjs';
 import { firstValueFrom, pairwise, take } from 'rxjs';
 import apm from 'elastic-apm-node';
+import { addSpanLabels, addTransactionLabels } from '@kbn/apm-utils';
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
@@ -43,6 +44,7 @@ import type {
   RouterDeprecatedApiDetails,
   RouterRoute,
   SessionStorageCookieOptions,
+  TimingEvent,
   VersionedRouterRoute,
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
@@ -75,7 +77,7 @@ function startEluMeasurement<T>(
   path: string,
   log: Logger,
   eluMonitorOptions: IHttpEluMonitorConfig | undefined
-): (httpSpan?: OTelSpan) => void {
+): () => void {
   if (!eluMonitorOptions?.enabled) {
     return identity;
   }
@@ -83,20 +85,22 @@ function startEluMeasurement<T>(
   const startUtilization = performance.eventLoopUtilization();
   const start = performance.now();
 
-  return function stopEluMeasurement(httpSpan?: OTelSpan) {
+  return function stopEluMeasurement() {
     const { active, utilization } = performance.eventLoopUtilization(startUtilization);
 
-    apm.currentTransaction?.addLabels(
+    addTransactionLabels(
       {
         event_loop_utilization: utilization,
         event_loop_active: active,
       },
-      false
+      {
+        isString: false,
+        otelAttributes: {
+          'nodejs.eventloop.utilization': utilization,
+          'nodejs.eventloop.active': active,
+        },
+      }
     );
-    httpSpan?.setAttributes({
-      'nodejs.eventloop.utilization': utilization,
-      'nodejs.eventloop.active': active,
-    });
 
     const duration = performance.now() - start;
 
@@ -544,6 +548,31 @@ export class HttpServer {
     this.server.events.on('response', this.handleServerResponseEvent);
   }
 
+  private formatServerTimingHeader(
+    totalTime: number,
+    customEvents: readonly TimingEvent[]
+  ): string {
+    const timingMetrics = [
+      `app-total;dur=${totalTime.toFixed(2)};desc="Application Server Processing Time (Total)"`,
+    ];
+
+    // Limit to 20 events, sanitize names, escape descriptions
+    for (const event of customEvents.slice(0, 20)) {
+      const safeName = event.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+      let metric = `${safeName};dur=${event.duration.toFixed(2)}`;
+      if (event.description) {
+        const safeDesc = event.description
+          .replace(/\\/g, '\\\\')
+          .replace(/"/g, '\\"')
+          .slice(0, 100);
+        metric += `;desc="${safeDesc}"`;
+      }
+      timingMetrics.push(metric);
+    }
+
+    return timingMetrics.join(', ');
+  }
+
   private setupRequestStateAssignment(
     config: HttpConfig,
     executionContext?: InternalExecutionContextSetup,
@@ -559,12 +588,27 @@ export class HttpServer {
         return responseToolkit.continue;
       }
 
+      // Only add Server-Timing header if enabled in config (dev mode by default)
+      if (this.config?.serverTiming) {
+        const appState = request.app as KibanaRequestState;
+        const startTime = appState.startTime;
+        const totalTime = performance.now() - startTime;
+        const customEvents = appState.timingState?.events ?? [];
+        const serverTimingValue = this.formatServerTimingHeader(totalTime, customEvents);
+
+        if (isBoom(request.response)) {
+          request.response.output.headers['Server-Timing'] = serverTimingValue;
+        } else {
+          request.response.header('Server-Timing', serverTimingValue);
+        }
+      }
+
       if (isBoom(request.response)) {
-        stop(app.httpSpan);
+        stop();
         app.otelSubSpan?.end();
       } else {
         request.response.events.once('finish', () => {
-          stop(app.httpSpan);
+          stop();
           app.otelSubSpan?.end();
         });
       }
@@ -594,18 +638,17 @@ export class HttpServer {
       if (executionContext && parentContext) {
         executionContext.set(parentContext);
         const labels = executionContext.getAsLabels();
-        apm.addLabels(labels);
         const { name, id, page } = labels;
-        trace.getActiveSpan()?.setAttributes(
-          omitBy(
+        addSpanLabels(labels, {
+          otelAttributes: omitBy(
             {
               'kibana.execution_context.name': name,
               'kibana.execution_context.id': id,
               'kibana.execution_context.page': page,
             },
             isNil
-          ) as Record<string, string>
-        );
+          ) as Record<string, string>,
+        });
       }
 
       executionContext?.setRequestId(requestId);
@@ -617,7 +660,7 @@ export class HttpServer {
       app.measureElu = stop;
       // Kibana stores trace.id until https://github.com/elastic/apm-agent-nodejs/issues/2353 is resolved
       // The current implementation of the APM agent ends a request transaction before "response" log is emitted.
-      app.traceId = apm.currentTraceIds['trace.id'];
+      app.traceId = apm.currentTraceIds['trace.id'] ?? trace.getActiveSpan()?.spanContext().traceId;
       app.span = apm.startSpan('pre-route handler middlewares');
       app.httpSpan = trace.getActiveSpan();
       app.otelSubSpan = this.createSubspan('pre-route handler middlewares');

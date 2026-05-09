@@ -24,6 +24,7 @@ import { useSelector } from 'react-redux';
 import { CodeEditor, monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import { WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
 import { InputValidationCallout } from './input_validation_callout';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
@@ -33,7 +34,6 @@ import { formatDuration } from '../../../shared/lib/format_duration';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 import { buildContextOverrideFromExecution } from '../../../shared/utils/build_step_context_override/build_step_context_override';
-import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 import { useStepExecution } from '../../workflow_execution_detail/model/use_step_execution';
 
 export const NOT_READY_SENTINEL = '__step_historical_not_ready__';
@@ -42,6 +42,8 @@ const SCHEMA_URI = `inmemory://schemas/test-step-json-historical-editor-schema`;
 export interface StepExecuteHistoricalFormProps {
   value: string;
   setValue: (value: string) => void;
+  /** Callback to set the execution context when an execution is selected */
+  setExecutionContext: (executionContext: Record<string, unknown> | undefined) => void;
   warnings: string | null;
   errors: string | null;
   setErrors: (errors: string | null) => void;
@@ -61,6 +63,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
   ({
     value,
     setValue,
+    setExecutionContext,
     errors,
     setErrors,
     warnings,
@@ -104,6 +107,9 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         includeOutput: true,
       }
     );
+    useEffect(() => {
+      setExecutionContext(workflowExecution?.context);
+    }, [setExecutionContext, workflowExecution?.context]);
 
     const executionOptions: EuiComboBoxOptionOption<string>[] = useMemo(() => {
       const results = stepExecutionsList?.results ?? [];
@@ -133,7 +139,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
           const loopIndex = loopStepRunIdsIndex.get(workflowRunId) ?? 0;
           loopStepRunIdsIndex.set(workflowRunId, loopIndex - 1); // decrement the index for the next loop iteration (time descending order)
           append.push(
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem key={`${id}-loop-indicator`} grow={false}>
               <EuiIconTip
                 type="refresh"
                 aria-hidden={true}
@@ -144,7 +150,7 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         }
         if (isTestRun) {
           append.push(
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem key={`${id}-test-run`} grow={false}>
               <EuiIconTip type="flask" aria-hidden={true} content={translations.testRun} />
             </EuiFlexItem>
           );
@@ -169,12 +175,6 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         };
       });
     }, [stepExecutionsList?.results, getFormattedDateTime, euiTheme]);
-
-    useEffect(() => {
-      if (initialStepExecutionId != null) {
-        setSelectedStepExecutionId(initialStepExecutionId);
-      }
-    }, [initialStepExecutionId]);
 
     useEffect(() => {
       if (!selectedStepExecutionId || isLoadingStepExecution || isLoadingWorkflowExecution) {
@@ -227,7 +227,13 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
     );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="m"
+        css={css`
+          min-height: 0;
+        `}
+      >
         <EuiFlexItem grow={false}>
           <EuiFormRow label={translations.selectStepExecutionLabel} fullWidth>
             <EuiComboBox
@@ -249,23 +255,49 @@ export const StepExecuteHistoricalForm = React.memo<StepExecuteHistoricalFormPro
         </EuiFlexItem>
 
         {selectedStepExecution && (
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem
+            css={css`
+              overflow: hidden;
+            `}
+          >
+            <EuiFlexGroup
+              direction="column"
+              gutterSize="s"
+              css={css`
+                min-height: 0;
+              `}
+            >
               {((errors && errors !== NOT_READY_SENTINEL) || warnings) && (
                 <EuiFlexItem grow={false}>
                   <InputValidationCallout errors={errors} warnings={warnings} />
                 </EuiFlexItem>
               )}
-              <EuiFlexItem>
-                <EuiFormRow label={translations.contextOverrideLabel} fullWidth>
+              <EuiFlexItem
+                css={css`
+                  overflow: hidden;
+                `}
+              >
+                <EuiFormRow
+                  label={translations.contextOverrideLabel}
+                  fullWidth
+                  css={css`
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    min-height: 0;
+                    .euiFormRow__fieldWrapper {
+                      flex: 1;
+                      min-height: 0;
+                      display: flex;
+                      flex-direction: column;
+                    }
+                  `}
+                >
                   <CodeEditor
                     languageId="json"
                     value={value}
-                    fitToContent={{
-                      minLines: 5,
-                      maxLines: 15,
-                    }}
                     width="100%"
+                    height="100%"
                     onChange={setValue}
                     editorDidMount={handleMount}
                     dataTestSubj="workflow-test-step-historical-json-editor"

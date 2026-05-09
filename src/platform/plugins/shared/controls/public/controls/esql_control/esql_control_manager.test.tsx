@@ -106,7 +106,6 @@ describe('initializeESQLControlManager', () => {
             "option2",
           ],
           "control_type": "STATIC_VALUES",
-          "esql_query": "",
           "selected_options": Array [
             "option1",
           ],

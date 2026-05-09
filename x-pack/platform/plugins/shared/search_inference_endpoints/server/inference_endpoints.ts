@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import type { InferenceConnector } from '@kbn/inference-common';
+import { type InferenceConnector, defaultInferenceEndpoints } from '@kbn/inference-common';
 import { INFERENCE_SETTINGS_SO_TYPE, INFERENCE_SETTINGS_ID } from '../common/constants';
 import type { InferenceSettingsAttributes } from '../common/types';
 import type { InferenceFeatureRegistry } from './inference_feature_registry';
@@ -27,7 +27,7 @@ import type { ResolvedInferenceEndpoints } from './types';
  */
 export const getForFeature = async (
   registry: InferenceFeatureRegistry,
-  soClient: ISavedObjectsRepository,
+  soClient: SavedObjectsClientContract,
   getConnectorById: (id: string) => Promise<InferenceConnector>,
   featureId: string,
   logger: Logger
@@ -83,12 +83,23 @@ interface ResolvedEndpointIds {
   soEntryFound: boolean;
 }
 
-const resolveEndpointIds = async (
+/**
+ * Pure resolution logic that walks the fallback chain for a feature using
+ * pre-fetched data. Exported so the settings route can reuse it without
+ * re-reading the saved object.
+ *
+ * Fallback order:
+ * 1. Admin-configured SO override for the feature itself
+ * 2. Walk parentFeatureId chain, checking SO overrides at each level
+ * 3. First non-empty recommendedEndpoints found in the chain
+ * 4. Kibana default chat-completion endpoint
+ */
+export const resolveFeatureEndpointIds = (
   registry: InferenceFeatureRegistry,
-  soClient: ISavedObjectsRepository,
+  soFeaturesMap: Map<string, InferenceSettingsAttributes['features'][number]>,
   featureId: string,
   logger: Logger
-): Promise<ResolvedEndpointIds> => {
+): ResolvedEndpointIds => {
   let current = registry.get(featureId);
   if (!current) {
     logger.warn(
@@ -102,8 +113,6 @@ const resolveEndpointIds = async (
   let recEntry = current.recommendedEndpoints?.length
     ? { featureId: current.featureId, recommendedEndpoints: current.recommendedEndpoints }
     : undefined;
-  const soFeatures = await readSettingsFeatures(soClient, logger);
-  const soFeaturesMap = new Map(soFeatures.map((f) => [f.feature_id, f]));
 
   // Walk the fallback chain for the feature:
   // 1. Check for an admin-configured SO override for the current feature
@@ -177,14 +186,27 @@ const resolveEndpointIds = async (
   }
 
   return {
-    ids: recEntry?.recommendedEndpoints ?? [],
+    ids: recEntry?.recommendedEndpoints ?? [
+      defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION,
+    ],
     warnings: [],
     soEntryFound: false,
   };
 };
 
+const resolveEndpointIds = async (
+  registry: InferenceFeatureRegistry,
+  soClient: SavedObjectsClientContract,
+  featureId: string,
+  logger: Logger
+): Promise<ResolvedEndpointIds> => {
+  const soFeatures = await readSettingsFeatures(soClient, logger);
+  const soFeaturesMap = new Map(soFeatures.map((f) => [f.feature_id, f]));
+  return resolveFeatureEndpointIds(registry, soFeaturesMap, featureId, logger);
+};
+
 const readSettingsFeatures = async (
-  soClient: ISavedObjectsRepository,
+  soClient: SavedObjectsClientContract,
   logger: Logger
 ): Promise<InferenceSettingsAttributes['features']> => {
   try {

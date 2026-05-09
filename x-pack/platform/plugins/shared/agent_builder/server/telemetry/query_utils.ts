@@ -7,6 +7,8 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
+import { skillIndexName } from '../services/skills/persisted/client/storage';
+import { pluginIndexName } from '../services/plugins/client/storage';
 
 export const isIndexNotFoundError = (error: unknown): boolean => {
   if (!error || typeof error !== 'object') {
@@ -59,6 +61,16 @@ export interface UsageCounterData {
  * - Custom tools and agents from Elasticsearch
  */
 export class QueryUtils {
+  private readonly defaultTimingMetrics = {
+    p50: 0,
+    p75: 0,
+    p90: 0,
+    p95: 0,
+    p99: 0,
+    mean: 0,
+    total_samples: 0,
+  };
+
   constructor(
     private readonly esClient: ElasticsearchClient,
     private readonly soClient: SavedObjectsClientContract,
@@ -194,6 +206,75 @@ export class QueryUtils {
       // Suppress warning for missing index - expected when no agents have been created yet
       if (!isIndexNotFoundError(error)) {
         this.logger.warn(`Failed to fetch custom agents count: ${error.message}`);
+      }
+      return 0;
+    }
+  }
+
+  /**
+   * Get counts of persisted skills from Elasticsearch, broken down by origin.
+   * Skills with a `plugin_id` field are plugin-bundled; the rest are custom.
+   * Built-in skills are not persisted, so we get that count separately.
+   */
+  async getSkillsMetrics(): Promise<{
+    total: number;
+    custom: number;
+    plugin: number;
+  }> {
+    try {
+      const response = await this.esClient.search({
+        index: skillIndexName,
+        size: 0,
+        track_total_hits: true,
+        aggs: {
+          custom: {
+            filter: {
+              bool: {
+                must_not: { exists: { field: 'plugin_id' } },
+              },
+            },
+          },
+          plugin: {
+            filter: {
+              exists: { field: 'plugin_id' },
+            },
+          },
+        },
+      });
+
+      const total =
+        typeof response.hits.total === 'number'
+          ? response.hits.total
+          : response.hits.total?.value || 0;
+      const customCount = (response.aggregations?.custom as { doc_count?: number })?.doc_count ?? 0;
+      const pluginCount = (response.aggregations?.plugin as { doc_count?: number })?.doc_count ?? 0;
+
+      return {
+        total,
+        custom: customCount,
+        plugin: pluginCount,
+      };
+    } catch (error) {
+      if (!isIndexNotFoundError(error)) {
+        this.logger.warn(`Failed to fetch skills metrics: ${(error as Error).message}`);
+      }
+      return { total: 0, custom: 0, plugin: 0 };
+    }
+  }
+
+  /**
+   * Get total count of installed plugins from Elasticsearch.
+   */
+  async getPluginsCount(): Promise<number> {
+    try {
+      const response = await this.esClient.count({
+        index: pluginIndexName,
+      });
+
+      return response.count || 0;
+    } catch (error) {
+      if (!isIndexNotFoundError(error)) {
+        this.logger.warn(`Failed to fetch plugins count: ${(error as Error).message}`);
       }
       return 0;
     }
@@ -339,281 +420,49 @@ export class QueryUtils {
     }
   }
 
-  /**
-   * TTFT/TTLT percentile metrics structure
-   */
-  private readonly defaultTimingMetrics = {
-    p50: 0,
-    p75: 0,
-    p90: 0,
-    p95: 0,
-    p99: 0,
-    mean: 0,
-    total_samples: 0,
-  };
+  // ── Combined round metrics (single ES query) ────────────────────────
 
   /**
-   * Get Time-to-First-Token (TTFT) metrics from conversation rounds
-   * Queries the conversations index and aggregates TTFT data
+   * Single ES query that collects all round-level metrics: TTFT, TTLT,
+   * tokens / TTLT / tool-calls grouped by model, and TTLT grouped by agent.
+   * Flat TTLT is derived from the union of all per-model TTLT lists.
    */
-  async getTTFTMetrics(): Promise<{
-    p50: number;
-    p75: number;
-    p90: number;
-    p95: number;
-    p99: number;
-    mean: number;
-    total_samples: number;
-  }> {
-    try {
-      const conversationIndexName = chatSystemIndex('conversations');
-      const response = await this.esClient.search({
-        index: conversationIndexName,
-        size: 0,
-        aggs: {
-          all_rounds: {
-            nested: {
-              path: 'conversation_rounds',
-            },
-            aggs: {
-              ttft_percentiles: {
-                percentiles: {
-                  field: 'conversation_rounds.time_to_first_token',
-                  percents: [50, 75, 90, 95, 99],
-                },
-              },
-              ttft_avg: {
-                avg: {
-                  field: 'conversation_rounds.time_to_first_token',
-                },
-              },
-              ttft_count: {
-                value_count: {
-                  field: 'conversation_rounds.time_to_first_token',
-                },
-              },
-            },
-          },
-        },
-      });
-
-      const aggs = response.aggregations?.all_rounds as any;
-      if (!aggs) {
-        return { ...this.defaultTimingMetrics };
-      }
-
-      const percentiles = aggs.ttft_percentiles?.values || {};
-      return {
-        p50: Math.round(percentiles['50.0'] || 0),
-        p75: Math.round(percentiles['75.0'] || 0),
-        p90: Math.round(percentiles['90.0'] || 0),
-        p95: Math.round(percentiles['95.0'] || 0),
-        p99: Math.round(percentiles['99.0'] || 0),
-        mean: Math.round(aggs.ttft_avg?.value || 0),
-        total_samples: aggs.ttft_count?.value || 0,
-      };
-    } catch (error) {
-      if (!isIndexNotFoundError(error)) {
-        this.logger.warn(`Failed to fetch TTFT metrics: ${error.message}`);
-      }
-      return { ...this.defaultTimingMetrics };
-    }
-  }
-
-  /**
-   * Get Time-to-Last-Token (TTLT) metrics from conversation rounds
-   * Queries the conversations index and aggregates TTLT data
-   */
-  async getTTLTMetrics(): Promise<{
-    p50: number;
-    p75: number;
-    p90: number;
-    p95: number;
-    p99: number;
-    mean: number;
-    total_samples: number;
-  }> {
-    try {
-      const conversationIndexName = chatSystemIndex('conversations');
-      const response = await this.esClient.search({
-        index: conversationIndexName,
-        size: 0,
-        aggs: {
-          all_rounds: {
-            nested: {
-              path: 'conversation_rounds',
-            },
-            aggs: {
-              ttlt_percentiles: {
-                percentiles: {
-                  field: 'conversation_rounds.time_to_last_token',
-                  percents: [50, 75, 90, 95, 99],
-                },
-              },
-              ttlt_avg: {
-                avg: {
-                  field: 'conversation_rounds.time_to_last_token',
-                },
-              },
-              ttlt_count: {
-                value_count: {
-                  field: 'conversation_rounds.time_to_last_token',
-                },
-              },
-            },
-          },
-        },
-      });
-
-      const aggs = response.aggregations?.all_rounds as any;
-      if (!aggs) {
-        return { ...this.defaultTimingMetrics };
-      }
-
-      const percentiles = aggs.ttlt_percentiles?.values || {};
-      return {
-        p50: Math.round(percentiles['50.0'] || 0),
-        p75: Math.round(percentiles['75.0'] || 0),
-        p90: Math.round(percentiles['90.0'] || 0),
-        p95: Math.round(percentiles['95.0'] || 0),
-        p99: Math.round(percentiles['99.0'] || 0),
-        mean: Math.round(aggs.ttlt_avg?.value || 0),
-        total_samples: aggs.ttlt_count?.value || 0,
-      };
-    } catch (error) {
-      if (!isIndexNotFoundError(error)) {
-        this.logger.warn(`Failed to fetch TTLT metrics: ${error.message}`);
-      }
-      return { ...this.defaultTimingMetrics };
-    }
-  }
-
-  /**
-   * Get latency breakdown by model
-   * Returns TTFT and TTLT p50/p95 for each model
-   * Uses stored model info from conversation rounds
-   */
-  async getLatencyByModel(): Promise<
-    Array<{
+  async getAllRoundMetrics(dateFilter?: { gte: string }): Promise<{
+    ttft: {
+      p50: number;
+      p75: number;
+      p90: number;
+      p95: number;
+      p99: number;
+      mean: number;
+      total_samples: number;
+    };
+    ttlt: {
+      p50: number;
+      p75: number;
+      p90: number;
+      p95: number;
+      p99: number;
+      mean: number;
+      total_samples: number;
+    };
+    byModel: Array<{
       model: string;
-      ttft_p50: number;
-      ttft_p95: number;
       ttlt_p50: number;
+      ttlt_p75: number;
+      ttlt_p90: number;
       ttlt_p95: number;
-      sample_count: number;
-    }>
-  > {
-    try {
-      const conversationIndexName = chatSystemIndex('conversations');
-      const response = await this.esClient.search({
-        index: conversationIndexName,
-        size: 0,
-        aggs: {
-          all_rounds: {
-            nested: {
-              path: 'conversation_rounds',
-            },
-            aggs: {
-              by_model: {
-                terms: {
-                  field: 'conversation_rounds.model_usage.model',
-                  size: 50,
-                },
-                aggs: {
-                  ttft_percentiles: {
-                    percentiles: {
-                      field: 'conversation_rounds.time_to_first_token',
-                      percents: [50, 95],
-                    },
-                  },
-                  ttlt_percentiles: {
-                    percentiles: {
-                      field: 'conversation_rounds.time_to_last_token',
-                      percents: [50, 95],
-                    },
-                  },
-                },
-              },
-              by_connector: {
-                terms: {
-                  field: 'conversation_rounds.model_usage.connector_id',
-                  size: 50,
-                },
-                aggs: {
-                  ttft_percentiles: {
-                    percentiles: {
-                      field: 'conversation_rounds.time_to_first_token',
-                      percents: [50, 95],
-                    },
-                  },
-                  ttlt_percentiles: {
-                    percentiles: {
-                      field: 'conversation_rounds.time_to_last_token',
-                      percents: [50, 95],
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      const aggs = response.aggregations?.all_rounds as any;
-      const modelBuckets = aggs?.by_model?.buckets || [];
-
-      if (modelBuckets.length === 0) {
-        return [];
-      }
-
-      const results: Array<{
-        model: string;
-        ttft_p50: number;
-        ttft_p95: number;
-        ttlt_p50: number;
-        ttlt_p95: number;
-        sample_count: number;
-      }> = [];
-
-      // Process rounds grouped by stored model field
-      for (const bucket of modelBuckets) {
-        const model = bucket.key as string;
-        const ttftp50 = bucket.ttft_percentiles?.values?.['50.0'] || 0;
-        const ttftp95 = bucket.ttft_percentiles?.values?.['95.0'] || 0;
-        const ttltp50 = bucket.ttlt_percentiles?.values?.['50.0'] || 0;
-        const ttltp95 = bucket.ttlt_percentiles?.values?.['95.0'] || 0;
-        const sampleCount = bucket.doc_count || 0;
-
-        if (sampleCount === 0) continue;
-
-        results.push({
-          model,
-          ttft_p50: Math.round(ttftp50),
-          ttft_p95: Math.round(ttftp95),
-          ttlt_p50: Math.round(ttltp50),
-          ttlt_p95: Math.round(ttltp95),
-          sample_count: sampleCount,
-        });
-      }
-
-      // Sort by sample count descending
-      results.sort((a, b) => b.sample_count - a.sample_count);
-
-      return results;
-    } catch (error) {
-      if (!isIndexNotFoundError(error)) {
-        this.logger.warn(`Failed to fetch latency by model: ${error.message}`);
-      }
-      return [];
-    }
-  }
-
-  /**
-   * Get query-to-result time (TTLT) grouped by agent
-   * Returns TTLT percentiles/mean for each agent_id
-   */
-  async getQueryToResultTimeByAgentType(): Promise<
-    Array<{
+      ttlt_p99: number;
+      ttlt_mean: number;
+      ttlt_samples: number;
+      input_tokens: number;
+      output_tokens: number;
+      total_tokens: number;
+      rounds: number;
+      avg_tokens_per_round: number;
+      tool_calls: number;
+    }>;
+    byAgent: Array<{
       agent_id: string;
       p50: number;
       p75: number;
@@ -622,325 +471,261 @@ export class QueryUtils {
       p99: number;
       mean: number;
       total_samples: number;
-      sample_count: number;
-    }>
-  > {
+    }>;
+  }> {
+    const empty = {
+      ttft: { ...this.defaultTimingMetrics },
+      ttlt: { ...this.defaultTimingMetrics },
+      byModel: [],
+      byAgent: [],
+    };
+
     try {
       const conversationIndexName = chatSystemIndex('conversations');
+      const query: Record<string, any> = dateFilter
+        ? { bool: { filter: [{ range: { created_at: { gte: dateFilter.gte } } }] } }
+        : { match_all: {} };
 
-      // Get TTLT metrics grouped by agent_id
       const response = await this.esClient.search({
         index: conversationIndexName,
         size: 0,
+        query,
         aggs: {
-          by_agent: {
-            terms: {
-              field: 'agent_id',
-              size: 50,
-            },
-            aggs: {
-              all_rounds: {
-                nested: {
-                  path: 'conversation_rounds',
-                },
-                aggs: {
-                  ttl_percentiles: {
-                    percentiles: {
-                      field: 'conversation_rounds.time_to_last_token',
-                      percents: [50, 75, 90, 95, 99],
-                    },
-                  },
-                  ttl_avg: { avg: { field: 'conversation_rounds.time_to_last_token' } },
-                  ttl_count: { value_count: { field: 'conversation_rounds.time_to_last_token' } },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      const buckets = (response.aggregations?.by_agent as any)?.buckets || [];
-
-      return buckets.map((bucket: any) => {
-        const roundsAggs = bucket.all_rounds;
-        const percentiles = roundsAggs?.ttl_percentiles?.values || {};
-        const totalSamples = roundsAggs?.ttl_count?.value || 0;
-        return {
-          agent_id: bucket.key,
-          p50: Math.round(percentiles['50.0'] || 0),
-          p75: Math.round(percentiles['75.0'] || 0),
-          p90: Math.round(percentiles['90.0'] || 0),
-          p95: Math.round(percentiles['95.0'] || 0),
-          p99: Math.round(percentiles['99.0'] || 0),
-          mean: Math.round(roundsAggs?.ttl_avg?.value || 0),
-          total_samples: totalSamples,
-          sample_count: totalSamples,
-        };
-      });
-    } catch (error) {
-      if (!isIndexNotFoundError(error)) {
-        this.logger.warn(`Failed to fetch query-to-result time by agent: ${error.message}`);
-      }
-      return [];
-    }
-  }
-
-  /**
-   * Get token consumption grouped by model
-   */
-  async getTokensByModel(): Promise<
-    Array<{
-      model: string;
-      total_tokens: number;
-      avg_tokens_per_round: number;
-      sample_count: number;
-    }>
-  > {
-    try {
-      const conversationIndexName = chatSystemIndex('conversations');
-      const response = await this.esClient.search({
-        index: conversationIndexName,
-        size: 0,
-        aggs: {
-          all_rounds: {
-            nested: {
-              path: 'conversation_rounds',
-            },
-            aggs: {
-              by_model: {
-                terms: {
-                  field: 'conversation_rounds.model_usage.model',
-                  size: 50,
-                  missing: 'unknown',
-                },
-                aggs: {
-                  input_tokens: {
-                    sum: {
-                      field: 'conversation_rounds.model_usage.input_tokens',
-                    },
-                  },
-                  output_tokens: {
-                    sum: {
-                      field: 'conversation_rounds.model_usage.output_tokens',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      const buckets = (response.aggregations?.all_rounds as any)?.by_model?.buckets || [];
-
-      const results: Array<{
-        model: string;
-        total_tokens: number;
-        avg_tokens_per_round: number;
-        sample_count: number;
-      }> = [];
-
-      for (const bucket of buckets) {
-        const inputTokens = bucket.input_tokens?.value || 0;
-        const outputTokens = bucket.output_tokens?.value || 0;
-        const totalTokens = inputTokens + outputTokens;
-        const sampleCount = bucket.doc_count || 0;
-        const avgTokensPerRound =
-          sampleCount > 0 ? Math.round((totalTokens / sampleCount) * 100) / 100 : 0;
-
-        results.push({
-          model: bucket.key as string,
-          total_tokens: Math.round(totalTokens),
-          avg_tokens_per_round: avgTokensPerRound,
-          sample_count: sampleCount,
-        });
-      }
-
-      results.sort((a, b) => b.total_tokens - a.total_tokens);
-
-      return results;
-    } catch (error) {
-      if (!isIndexNotFoundError(error)) {
-        this.logger.warn(`Failed to fetch tokens by model: ${error.message}`);
-      }
-      return [];
-    }
-  }
-
-  /**
-   * Get query-to-result time (TTLT) grouped by model
-   */
-  async getQueryToResultTimeByModel(): Promise<
-    Array<{
-      model: string;
-      p50: number;
-      p75: number;
-      p90: number;
-      p95: number;
-      p99: number;
-      mean: number;
-      total_samples: number;
-      sample_count: number;
-    }>
-  > {
-    try {
-      const conversationIndexName = chatSystemIndex('conversations');
-      const response = await this.esClient.search({
-        index: conversationIndexName,
-        size: 0,
-        aggs: {
-          all_rounds: {
-            nested: {
-              path: 'conversation_rounds',
-            },
-            aggs: {
-              by_model: {
-                terms: {
-                  field: 'conversation_rounds.model_usage.model',
-                  size: 50,
-                  missing: 'unknown',
-                },
-                aggs: {
-                  ttl_percentiles: {
-                    percentiles: {
-                      field: 'conversation_rounds.time_to_last_token',
-                      percents: [50, 75, 90, 95, 99],
-                    },
-                  },
-                  ttl_avg: {
-                    avg: {
-                      field: 'conversation_rounds.time_to_last_token',
-                    },
-                  },
-                  ttl_count: {
-                    value_count: {
-                      field: 'conversation_rounds.time_to_last_token',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      const buckets = (response.aggregations?.all_rounds as any)?.by_model?.buckets || [];
-
-      const results: Array<{
-        model: string;
-        p50: number;
-        p75: number;
-        p90: number;
-        p95: number;
-        p99: number;
-        mean: number;
-        total_samples: number;
-        sample_count: number;
-      }> = [];
-
-      for (const bucket of buckets) {
-        const percentiles = bucket.ttl_percentiles?.values || {};
-        results.push({
-          model: bucket.key as string,
-          p50: Math.round(percentiles['50.0'] || 0),
-          p75: Math.round(percentiles['75.0'] || 0),
-          p90: Math.round(percentiles['90.0'] || 0),
-          p95: Math.round(percentiles['95.0'] || 0),
-          p99: Math.round(percentiles['99.0'] || 0),
-          mean: Math.round(bucket.ttl_avg?.value || 0),
-          total_samples: bucket.ttl_count?.value || 0,
-          sample_count: bucket.doc_count || 0,
-        });
-      }
-
-      results.sort((a, b) => b.sample_count - a.sample_count);
-
-      return results;
-    } catch (error) {
-      if (!isIndexNotFoundError(error)) {
-        this.logger.warn(`Failed to fetch query-to-result time by model: ${error.message}`);
-      }
-      return [];
-    }
-  }
-
-  /**
-   * Get tool call counts grouped by model based on round steps
-   */
-  async getToolCallsByModel(): Promise<
-    Array<{
-      model: string;
-      count: number;
-    }>
-  > {
-    try {
-      const conversationIndexName = chatSystemIndex('conversations');
-      const response = await this.esClient.search({
-        index: conversationIndexName,
-        size: 0,
-        aggs: {
-          tool_calls_by_model: {
+          round_metrics: {
             scripted_metric: {
-              init_script: 'state.modelCalls = new HashMap();',
+              init_script: `
+                state.ttft = new ArrayList();
+                state.byModel = new HashMap();
+                state.byAgent = new HashMap();
+              `,
               map_script: `
+                def agentId = params._source.agent_id;
+                if (agentId == null) agentId = 'unknown';
                 def rounds = params._source.conversation_rounds;
+                if (rounds == null) { rounds = params._source.rounds; }
                 if (rounds == null) return;
+
+                if (!state.byAgent.containsKey(agentId)) {
+                  state.byAgent.put(agentId, new ArrayList());
+                }
+                def agentTtlt = state.byAgent.get(agentId);
+
                 for (def round : rounds) {
-                  def modelUsage = round.model_usage;
-                  def model = (modelUsage != null && modelUsage.model != null) ? modelUsage.model : 'unknown';
-                  def steps = round.steps;
-                  if (steps == null) continue;
-                  int callCount = 0;
-                  for (def step : steps) {
-                    if (step.type != null && step.type == 'tool_call') {
-                      callCount += 1;
-                    }
+                  def ttft = round.time_to_first_token;
+                  if (ttft != null && ttft > 0) { state.ttft.add(ttft); }
+
+                  def ttlt = round.time_to_last_token;
+                  if (ttlt != null && ttlt > 0) { agentTtlt.add(ttlt); }
+
+                  def model = 'unknown';
+                  if (round.model_usage != null && round.model_usage.model != null) {
+                    model = round.model_usage.model;
                   }
-                  if (callCount == 0) continue;
-                  def current = state.modelCalls.get(model);
-                  if (current == null) {
-                    state.modelCalls.put(model, callCount);
-                  } else {
-                    state.modelCalls.put(model, current + callCount);
+                  if (!state.byModel.containsKey(model)) {
+                    state.byModel.put(model, ['ttlt': new ArrayList(), 'input': 0L, 'output': 0L, 'rounds': 0, 'toolCalls': 0]);
+                  }
+                  def m = state.byModel.get(model);
+                  if (ttlt != null && ttlt > 0) { m.ttlt.add(ttlt); }
+                  if (round.model_usage != null) {
+                    m.input += round.model_usage.input_tokens != null ? round.model_usage.input_tokens : 0;
+                    m.output += round.model_usage.output_tokens != null ? round.model_usage.output_tokens : 0;
+                  }
+                  m.rounds += 1;
+
+                  def steps = round.steps;
+                  if (steps != null) {
+                    for (def step : steps) {
+                      if (step.type != null && step.type == 'tool_call') { m.toolCalls += 1; }
+                    }
                   }
                 }
               `,
-              combine_script: 'return state.modelCalls;',
+              combine_script: 'return state;',
               reduce_script: `
-                Map combined = new HashMap();
-                for (state in states) {
-                  for (entry in state.entrySet()) {
-                    def model = entry.getKey();
-                    def value = entry.getValue();
-                    if (combined.containsKey(model)) {
-                      combined.put(model, combined.get(model) + value);
-                    } else {
-                      combined.put(model, value);
+                // ── merge shard states ──
+                List allTtft = new ArrayList();
+                Map modelMap = new HashMap();
+                Map agentMap = new HashMap();
+
+                for (def s : states) {
+                  if (s == null) continue;
+                  allTtft.addAll(s.ttft);
+
+                  for (def e : s.byModel.entrySet()) {
+                    def k = e.getKey();
+                    def d = e.getValue();
+                    if (!modelMap.containsKey(k)) {
+                      modelMap.put(k, ['ttlt': new ArrayList(), 'input': 0L, 'output': 0L, 'rounds': 0, 'toolCalls': 0]);
                     }
+                    def c = modelMap.get(k);
+                    c.ttlt.addAll(d.ttlt);
+                    c.input += d.input;
+                    c.output += d.output;
+                    c.rounds += d.rounds;
+                    c.toolCalls += d.toolCalls;
+                  }
+
+                  for (def e : s.byAgent.entrySet()) {
+                    def k = e.getKey();
+                    if (!agentMap.containsKey(k)) {
+                      agentMap.put(k, new ArrayList());
+                    }
+                    agentMap.get(k).addAll(e.getValue());
                   }
                 }
-                return combined;
+
+                // ── flat TTLT = union of all per-model TTLT lists ──
+                List allTtlt = new ArrayList();
+                for (def me : modelMap.values()) {
+                  allTtlt.addAll(me.ttlt);
+                }
+
+                // ── compute percentiles for a list into a map ──
+                // Collected into a List of [label, sourceList] pairs so we
+                // can loop instead of duplicating the math 4+ times.
+                def percentileSets = new ArrayList();
+                percentileSets.add(['ttft', allTtft]);
+                percentileSets.add(['ttlt', allTtlt]);
+                Map pcResults = new HashMap();
+                for (def pair : percentileSets) {
+                  def label = pair[0];
+                  List vals = pair[1];
+                  Collections.sort(vals);
+                  int n = vals.size();
+                  def r = new HashMap();
+                  if (n == 0) {
+                    for (def p : [50,75,90,95,99]) { r.put('p'+String.valueOf(p), 0); }
+                    r.put('mean', 0.0);
+                    r.put('total_samples', 0);
+                  } else {
+                    double sum = 0;
+                    for (def v : vals) { sum += v; }
+                    for (def p : [50,75,90,95,99]) {
+                      int idx = (int) Math.ceil((double)p / 100.0 * n) - 1;
+                      if (idx < 0) idx = 0;
+                      if (idx >= n) idx = n - 1;
+                      r.put('p'+String.valueOf(p), vals.get(idx));
+                    }
+                    r.put('mean', sum / n);
+                    r.put('total_samples', n);
+                  }
+                  pcResults.put(label, r);
+                }
+
+                // ── per-model results ──
+                def byModelResults = new ArrayList();
+                for (def e : modelMap.entrySet()) {
+                  def d = e.getValue();
+                  List vals = d.ttlt;
+                  Collections.sort(vals);
+                  int n = vals.size();
+                  def r = new HashMap();
+                  r.put('model', e.getKey());
+                  if (n > 0) {
+                    double sum = 0;
+                    for (def v : vals) { sum += v; }
+                    for (def p : [50,75,90,95,99]) {
+                      int idx = (int) Math.ceil((double)p / 100.0 * n) - 1;
+                      if (idx < 0) idx = 0;
+                      if (idx >= n) idx = n - 1;
+                      r.put('ttlt_p'+String.valueOf(p), vals.get(idx));
+                    }
+                    r.put('ttlt_mean', sum / n);
+                  } else {
+                    for (def p : [50,75,90,95,99]) { r.put('ttlt_p'+String.valueOf(p), 0); }
+                    r.put('ttlt_mean', 0.0);
+                  }
+                  r.put('ttlt_samples', n);
+                  r.put('input_tokens', d.input);
+                  r.put('output_tokens', d.output);
+                  long total = d.input + d.output;
+                  r.put('total_tokens', total);
+                  r.put('rounds', d.rounds);
+                  r.put('avg_tokens_per_round', d.rounds > 0 ? (double)total / d.rounds : 0.0);
+                  r.put('tool_calls', d.toolCalls);
+                  byModelResults.add(r);
+                }
+
+                // ── per-agent results ──
+                def byAgentResults = new ArrayList();
+                for (def e : agentMap.entrySet()) {
+                  List vals = e.getValue();
+                  Collections.sort(vals);
+                  int n = vals.size();
+                  def r = new HashMap();
+                  r.put('agent_id', e.getKey());
+                  if (n > 0) {
+                    double sum = 0;
+                    for (def v : vals) { sum += v; }
+                    for (def p : [50,75,90,95,99]) {
+                      int idx = (int) Math.ceil((double)p / 100.0 * n) - 1;
+                      if (idx < 0) idx = 0;
+                      if (idx >= n) idx = n - 1;
+                      r.put('p'+String.valueOf(p), vals.get(idx));
+                    }
+                    r.put('mean', sum / n);
+                  } else {
+                    for (def p : [50,75,90,95,99]) { r.put('p'+String.valueOf(p), 0); }
+                    r.put('mean', 0.0);
+                  }
+                  r.put('total_samples', n);
+                  byAgentResults.add(r);
+                }
+
+                return [
+                  'ttft': pcResults.get('ttft'),
+                  'ttlt': pcResults.get('ttlt'),
+                  'byModel': byModelResults,
+                  'byAgent': byAgentResults
+                ];
               `,
             },
           },
         },
       });
 
-      const aggregated = (response.aggregations as any)?.tool_calls_by_model?.value || {};
-      const results: Array<{ model: string; count: number }> = [];
+      const v = (response.aggregations?.round_metrics as any)?.value;
+      if (!v) return empty;
 
-      for (const [model, count] of Object.entries(aggregated)) {
-        results.push({ model, count: Number(count) });
-      }
+      const parsePercentiles = (raw: any) => ({
+        p50: Math.round(raw?.p50 || 0),
+        p75: Math.round(raw?.p75 || 0),
+        p90: Math.round(raw?.p90 || 0),
+        p95: Math.round(raw?.p95 || 0),
+        p99: Math.round(raw?.p99 || 0),
+        mean: Math.round(raw?.mean || 0),
+        total_samples: raw?.total_samples || 0,
+      });
 
-      results.sort((a, b) => b.count - a.count);
-
-      return results;
+      return {
+        ttft: parsePercentiles(v.ttft),
+        ttlt: parsePercentiles(v.ttlt),
+        byModel: (v.byModel || []).map((m: any) => ({
+          model: m.model || 'unknown',
+          ttlt_p50: Math.round(m.ttlt_p50 || 0),
+          ttlt_p75: Math.round(m.ttlt_p75 || 0),
+          ttlt_p90: Math.round(m.ttlt_p90 || 0),
+          ttlt_p95: Math.round(m.ttlt_p95 || 0),
+          ttlt_p99: Math.round(m.ttlt_p99 || 0),
+          ttlt_mean: Math.round(m.ttlt_mean || 0),
+          ttlt_samples: m.ttlt_samples || 0,
+          input_tokens: Math.round(m.input_tokens || 0),
+          output_tokens: Math.round(m.output_tokens || 0),
+          total_tokens: Math.round(m.total_tokens || 0),
+          rounds: m.rounds || 0,
+          avg_tokens_per_round: Math.round((m.avg_tokens_per_round || 0) * 100) / 100,
+          tool_calls: m.tool_calls || 0,
+        })),
+        byAgent: (v.byAgent || []).map((a: any) => ({
+          agent_id: a.agent_id || 'unknown',
+          ...parsePercentiles(a),
+        })),
+      };
     } catch (error) {
       if (!isIndexNotFoundError(error)) {
-        this.logger.warn(`Failed to fetch tool calls by model: ${error.message}`);
+        this.logger.warn(`Failed to fetch round metrics: ${(error as Error).message}`);
       }
-      return [];
+      return empty;
     }
   }
 

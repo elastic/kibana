@@ -548,7 +548,7 @@ describe('CaseUserActionService', () => {
                 ...commonArgs,
                 type: UserActionTypes.comment,
                 action,
-                attachmentId: 'test-id',
+                savedObjectId: 'test-id',
                 payload: { attachment: comment },
               },
             });
@@ -592,7 +592,7 @@ describe('CaseUserActionService', () => {
                 ...commonArgs,
                 type: UserActionTypes.comment,
                 action,
-                attachmentId: 'test-id',
+                savedObjectId: 'test-id',
                 payload: { attachment: comment },
               },
             });

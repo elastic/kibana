@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "1",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -18,9 +18,9 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "user"
         },
-        "id": "admin@example.com",
+        "id": "user:admin@example.com@gcp",
         "name": "AdminExample",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_aws_iam_user-entities-space-2025.07.16-000005",
         "sub_type": "AWS IAM User",
@@ -41,7 +41,7 @@
   "type": "doc",
   "value": {
     "id": "2",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -57,9 +57,9 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "user"
         },
-        "id": "entity-user@example.com",
+        "id": "user:entity-user@example.com@gcp",
         "name": "EntityTestUser",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_iam_user-entities-space-2025.07.16-000005",
         "sub_type": "GCP IAM User",
@@ -80,7 +80,7 @@
   "type": "doc",
   "value": {
     "id": "3",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -115,7 +115,7 @@
   "type": "doc",
   "value": {
     "id": "4",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -131,9 +131,9 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "service"
         },
-        "id": "service-account-123@project.iam.gserviceaccount.com",
+        "id": "service:ServiceAccount123",
         "name": "ServiceAccount123",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-entities-space-2025.07.16-000005",
         "sub_type": "GCP Service Account",
@@ -154,7 +154,7 @@
   "type": "doc",
   "value": {
     "id": "5",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -170,9 +170,9 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "host"
         },
-        "id": "host-instance-1",
+        "id": "host:host-instance-1",
         "name": "HostInstance1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-entities-space-2025.07.16-000005",
         "sub_type": "GCP Compute Instance",
@@ -193,7 +193,7 @@
   "type": "doc",
   "value": {
     "id": "6",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -209,9 +209,9 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "host"
         },
-        "id": "host-instance-2",
+        "id": "host:host-instance-2",
         "name": "HostInstance2",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-entities-space-2025.07.16-000005",
         "sub_type": "GCP Compute Instance",
@@ -232,7 +232,7 @@
   "type": "doc",
   "value": {
     "id": "7",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -248,9 +248,9 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "user"
         },
-        "id": "multi-target-user@example.com",
+        "id": "user:multi-target-user@example.com@gcp",
         "name": "MultiTargetUser",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_iam_user-entities-space-2025.07.16-000005",
         "sub_type": "GCP IAM User",
@@ -271,7 +271,7 @@
   "type": "doc",
   "value": {
     "id": "8",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -306,7 +306,7 @@
   "type": "doc",
   "value": {
     "id": "9",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -341,7 +341,7 @@
   "type": "doc",
   "value": {
     "id": "10",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -376,7 +376,7 @@
   "type": "doc",
   "value": {
     "id": "11",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -392,9 +392,9 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "service"
         },
-        "id": "projects/multi-target-project-id/serviceAccounts/target-sa-different@multi-target-project-id.iam.gserviceaccount.com",
+        "id": "service:TargetServiceDifferent",
         "name": "TargetServiceDifferent",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-entities-space-2025.07.16-000005",
         "sub_type": "GCP Service Account",
@@ -415,7 +415,7 @@
   "type": "doc",
   "value": {
     "id": "12",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -431,9 +431,9 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "user"
         },
-        "id": "partial-user@example.com",
+        "id": "user:partial-user@example.com@gcp",
         "name": "PartialUserNameOnly",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_iam_user-entities-space-2025.07.16-000005"
       },
@@ -452,7 +452,7 @@
   "type": "doc",
   "value": {
     "id": "13",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -468,9 +468,9 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "host"
         },
-        "id": "partial-host-instance-1",
+        "id": "host:partial-host-instance-1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-entities-space-2025.07.16-000005",
         "sub_type": "GCP Compute Instance",
         "type": "Container"
@@ -489,7 +489,7 @@
   "type": "doc",
   "value": {
     "id": "14",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -505,15 +505,20 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "user"
         },
-        "id": "relationships-test-user",
+        "id": "user:relationships-test-user@gcp",
         "name": "Relationships Test User",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_aws_iam_user-entities-space-2025.07.16-000005",
         "sub_type": "AWS IAM User",
         "type": "Identity",
         "relationships": {
-          "Owns": ["relationships-target-host-1", "relationships-target-host-2"]
+          "owns": {
+            "ids": [
+              "host:relationships-target-host-1",
+              "host:relationships-target-host-2"
+            ]
+          }
         }
       },
       "event": {
@@ -531,7 +536,7 @@
   "type": "doc",
   "value": {
     "id": "15",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -547,9 +552,9 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "host"
         },
-        "id": "relationships-target-host-1",
+        "id": "host:relationships-target-host-1",
         "name": "Relationships Target Host 1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2-entities-space-2025.07.16-000005",
         "sub_type": "AWS EC2 Instance",
@@ -570,7 +575,7 @@
   "type": "doc",
   "value": {
     "id": "16",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -586,9 +591,9 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "host"
         },
-        "id": "relationships-target-host-2",
+        "id": "host:relationships-target-host-2",
         "name": "Relationships Target Host 2",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2-entities-space-2025.07.16-000005",
         "sub_type": "AWS EC2 Instance",
@@ -609,7 +614,7 @@
   "type": "doc",
   "value": {
     "id": "17",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -625,9 +630,9 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "service"
         },
-        "id": "relationships-target-service",
+        "id": "service:Relationships Target Service",
         "name": "Relationships Target Service",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2-entities-space-2025.07.16-000005",
         "sub_type": "AWS Lambda",
@@ -648,7 +653,7 @@
   "type": "doc",
   "value": {
     "id": "18",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -668,16 +673,26 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "user"
         },
-        "id": "data-pipeline@my-gcp-project.iam.gserviceaccount.com",
+        "id": "user:data-pipeline@my-gcp-project.iam.gserviceaccount.com@gcp",
         "name": "data-pipeline Service Account",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-entities-space-2025.07.16-000005",
         "sub_type": "GCP Service Account",
         "type": "Service Account",
         "relationships": {
-          "Owns": ["projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1", "projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"],
-          "Communicates_with": ["projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1", "projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"]
+          "owns": {
+            "ids": [
+              "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
+              "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"
+            ]
+          },
+          "communicates_with": {
+            "ids": [
+              "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
+              "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"
+            ]
+          }
         }
       },
       "event": {
@@ -695,7 +710,7 @@
   "type": "doc",
   "value": {
     "id": "19",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -715,9 +730,9 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "host"
         },
-        "id": "projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
+        "id": "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
         "name": "web-server-prod-1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-entities-space-2025.07.16-000005",
         "sub_type": "GCP Compute Instance",
@@ -738,7 +753,7 @@
   "type": "doc",
   "value": {
     "id": "20",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -758,9 +773,9 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "host"
         },
-        "id": "projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1",
+        "id": "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1",
         "name": "api-gateway-prod-1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-entities-space-2025.07.16-000005",
         "sub_type": "GCP Compute Instance",
@@ -781,7 +796,7 @@
   "type": "doc",
   "value": {
     "id": "21",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -801,9 +816,9 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "user"
         },
-        "id": "gcp-admin-user@my-gcp-project.iam.gserviceaccount.com",
+        "id": "user:gcp-admin-user@my-gcp-project.iam.gserviceaccount.com@gcp",
         "name": "GCP Admin User",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_service_account-entities-space-2025.07.16-000005",
         "sub_type": "GCP Service Account",
@@ -824,7 +839,7 @@
   "type": "doc",
   "value": {
     "id": "22",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -844,15 +859,20 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "host"
         },
-        "id": "projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1",
+        "id": "host:projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1",
         "name": "database-server-prod-1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_gcp_compute_instance-entities-space-2025.07.16-000005",
         "sub_type": "GCP Compute Instance",
         "type": "Host",
         "relationships": {
-          "Communicates_with": ["projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1", "projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"]
+          "communicates_with": {
+            "ids": [
+              "host:projects/my-gcp-project/zones/us-central1-a/instances/web-server-prod-1",
+              "host:projects/my-gcp-project/zones/us-east1-b/instances/api-gateway-prod-1"
+            ]
+          }
         }
       },
       "event": {
@@ -870,7 +890,7 @@
   "type": "doc",
   "value": {
     "id": "23",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -890,9 +910,9 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "user"
         },
-        "id": "gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com",
+        "id": "user:gcp-compute-operator@my-gcp-project.iam.gserviceaccount.com@gcp",
         "name": "GCP Compute Operator",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_gcp_iam_user-entities-space-2025.07.16-000005",
         "sub_type": "GCP IAM User",
@@ -913,7 +933,7 @@
   "type": "doc",
   "value": {
     "id": "24",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -929,15 +949,21 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "user"
         },
-        "id": "rel-hierarchy-root-user",
+        "id": "user:rel-hierarchy-root-user@gcp",
         "name": "Hierarchy Root User",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_aws_iam_user-entities-space-2025.07.16-000005",
         "sub_type": "AWS IAM User",
         "type": "Identity",
         "relationships": {
-          "Owns": ["rel-hierarchy-host-1", "rel-hierarchy-service-1", "rel-hierarchy-identity-1"]
+          "owns": {
+            "ids": [
+              "host:rel-hierarchy-host-1",
+              "service:Hierarchy Service 1",
+              "user:rel-hierarchy-identity-1@gcp"
+            ]
+          }
         }
       },
       "event": {
@@ -955,7 +981,7 @@
   "type": "doc",
   "value": {
     "id": "25",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -971,15 +997,20 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "host"
         },
-        "id": "rel-hierarchy-host-1",
+        "id": "host:rel-hierarchy-host-1",
         "name": "Hierarchy Host 1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2_instance-entities-space-2025.07.16-000005",
         "sub_type": "AWS EC2 Instance",
         "type": "Host",
         "relationships": {
-          "Communicates_with": ["rel-hierarchy-storage-1", "rel-hierarchy-storage-2"]
+          "communicates_with": {
+            "ids": [
+              "rel-hierarchy-storage-1",
+              "rel-hierarchy-storage-2"
+            ]
+          }
         }
       },
       "event": {
@@ -998,7 +1029,7 @@
   "type": "doc",
   "value": {
     "id": "26",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1014,15 +1045,20 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "service"
         },
-        "id": "rel-hierarchy-service-1",
+        "id": "service:Hierarchy Service 1",
         "name": "Hierarchy Service 1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-service_aws_lambda-entities-space-2025.07.16-000005",
         "sub_type": "AWS Lambda Function",
         "type": "Service",
         "relationships": {
-          "Communicates_with": ["rel-hierarchy-database-1", "rel-hierarchy-database-2"]
+          "communicates_with": {
+            "ids": [
+              "rel-hierarchy-database-1",
+              "rel-hierarchy-database-2"
+            ]
+          }
         }
       },
       "event": {
@@ -1040,7 +1076,7 @@
   "type": "doc",
   "value": {
     "id": "27",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1056,17 +1092,30 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "user"
         },
-        "id": "rel-hierarchy-identity-1",
+        "id": "user:rel-hierarchy-identity-1@gcp",
         "name": "Hierarchy Identity 1",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_aws_iam_role-entities-space-2025.07.16-000005",
         "sub_type": "AWS IAM Role",
         "type": "Identity",
         "relationships": {
-          "Communicates_with": ["rel-hierarchy-network-1", "rel-hierarchy-network-2"],
-          "Supervises": ["rel-hierarchy-delegate-1"],
-          "Depends_on": ["rel-hierarchy-delegate-1"]
+          "communicates_with": {
+            "ids": [
+              "rel-hierarchy-network-1",
+              "rel-hierarchy-network-2"
+            ]
+          },
+          "supervises": {
+            "ids": [
+              "user:rel-hierarchy-delegate-1@gcp"
+            ]
+          },
+          "depends_on": {
+            "ids": [
+              "user:rel-hierarchy-delegate-1@gcp"
+            ]
+          }
         }
       },
       "event": {
@@ -1084,7 +1133,7 @@
   "type": "doc",
   "value": {
     "id": "28",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1119,7 +1168,7 @@
   "type": "doc",
   "value": {
     "id": "29",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1154,7 +1203,7 @@
   "type": "doc",
   "value": {
     "id": "30",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1189,7 +1238,7 @@
   "type": "doc",
   "value": {
     "id": "31",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1224,7 +1273,7 @@
   "type": "doc",
   "value": {
     "id": "32",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1262,7 +1311,7 @@
   "type": "doc",
   "value": {
     "id": "33",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1300,7 +1349,7 @@
   "type": "doc",
   "value": {
     "id": "34",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1316,9 +1365,9 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "user"
         },
-        "id": "rel-hierarchy-delegate-1",
+        "id": "user:rel-hierarchy-delegate-1@gcp",
         "name": "Hierarchy Delegate Agent",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-identity_aws_organizations_admin-entities-space-2025.07.16-000005",
         "sub_type": "AWS Organizations Admin",
@@ -1339,7 +1388,7 @@
   "type": "doc",
   "value": {
     "id": "rel-hierarchy-external-caller",
-    "index": ".entities.v2.latest.security_entities-space",
+    "index": ".entities.v2.latest.security_entities-space-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1355,15 +1404,19 @@
       },
       "entity": {
         "EngineMetadata": {
-          "Type": "generic"
+          "Type": "service"
         },
-        "id": "rel-hierarchy-external-caller",
+        "id": "service:Hierarchy External Caller",
         "name": "Hierarchy External Caller",
         "source": ".ds-logs-cloud_asset_inventory.asset_inventory-service_aws_lambda-entities-space-2025.07.16-000005",
         "sub_type": "AWS Lambda Function",
         "type": "Service",
         "relationships": {
-          "Communicates_with": ["rel-hierarchy-identity-1"]
+          "communicates_with": {
+            "ids": [
+              "user:rel-hierarchy-identity-1@gcp"
+            ]
+          }
         }
       },
       "event": {
@@ -1372,6 +1425,212 @@
       "service": {
         "id": "rel-hierarchy-external-caller",
         "name": "Hierarchy External Caller"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "35",
+    "index": ".entities.v2.latest.security_entities-space-00001",
+    "source": {
+      "@timestamp": "2025-07-20T17:26:09.361Z",
+      "cloud": {
+        "account": {
+          "id": "rel-hierarchy-account",
+          "name": "Relationship Hierarchy Test"
+        },
+        "provider": "aws",
+        "region": "us-east-1",
+        "service": {
+          "name": "AWS EC2"
+        }
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "host"
+        },
+        "id": "host:host-with-multiple-ips",
+        "name": "Host with multiple ips",
+        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2_instance-entities-space-2025.07.16-000005",
+        "sub_type": "AWS EC2 Instance",
+        "type": "Host"
+      },
+      "event": {
+        "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "host": {
+        "id": "host-with-multiple-ips",
+        "ip": ["10.0.1.100", "::1", "127.0.0.1"],
+        "name": "Host with multiple ips"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "36",
+    "index": ".entities.v2.latest.security_entities-space-00001",
+    "source": {
+      "@timestamp": "2025-07-20T17:26:09.361Z",
+      "cloud": {
+        "account": {
+          "id": "rel-hierarchy-account",
+          "name": "Relationship Hierarchy Test"
+        },
+        "provider": "aws",
+        "region": "us-east-1",
+        "service": {
+          "name": "AWS EC2"
+        }
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "host"
+        },
+        "id": "host:host-with-single-ip",
+        "name": "Host with single ip",
+        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2_instance-entities-space-2025.07.16-000005",
+        "sub_type": "AWS EC2 Instance",
+        "type": "Host"
+      },
+      "event": {
+        "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "host": {
+        "id": "host-with-single-ip",
+        "ip": "10.0.1.100",
+        "name": "Host with single ip"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "37",
+    "index": ".entities.v2.latest.security_entities-space-00001",
+    "source": {
+      "@timestamp": "2025-07-20T17:26:09.361Z",
+      "cloud": {
+        "account": {
+          "id": "rel-hierarchy-account",
+          "name": "Relationship Hierarchy Test"
+        },
+        "provider": "aws",
+        "region": "us-east-1",
+        "service": {
+          "name": "AWS EC2"
+        }
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "host"
+        },
+        "id": "host:host-with-no-ip",
+        "name": "Host with no ip",
+        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2_instance-entities-space-2025.07.16-000005",
+        "sub_type": "AWS EC2 Instance",
+        "type": "Host"
+      },
+      "event": {
+        "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "host": {
+        "id": "host-with-no-ip",
+        "name": "Host with no ip"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "38",
+    "index": ".entities.v2.latest.security_entities-space-00001",
+    "source": {
+      "@timestamp": "2025-07-20T17:26:09.361Z",
+      "cloud": {
+        "account": {
+          "id": "rel-hierarchy-account",
+          "name": "Relationship Hierarchy Test"
+        },
+        "provider": "aws",
+        "region": "us-east-1",
+        "service": {
+          "name": "AWS EC2"
+        }
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "host"
+        },
+        "id": "host:host-with-multiple-ips-actor",
+        "name": "Actor Host with multiple ips",
+        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2_instance-entities-space-2025.07.16-000005",
+        "sub_type": "AWS EC2 Instance",
+        "type": "Host",
+        "relationships": {
+          "owns": {
+            "ids": [
+              "host:host-with-multiple-ips-target"
+            ]
+          }
+        }
+      },
+      "event": {
+        "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "host": {
+        "id": "host:host-with-multiple-ips-actor",
+        "ip": ["10.0.1.100", "::1", "127.0.0.1"],
+        "name": "Actor Host with multiple ips"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "39",
+    "index": ".entities.v2.latest.security_entities-space-00001",
+    "source": {
+      "@timestamp": "2025-07-20T17:26:09.361Z",
+      "cloud": {
+        "account": {
+          "id": "rel-hierarchy-account",
+          "name": "Relationship Hierarchy Test"
+        },
+        "provider": "aws",
+        "region": "us-east-1",
+        "service": {
+          "name": "AWS EC2"
+        }
+      },
+      "entity": {
+        "EngineMetadata": {
+          "Type": "host"
+        },
+        "id": "host:host-with-multiple-ips-target",
+        "name": "Target Host with multiple ips",
+        "source": ".ds-logs-cloud_asset_inventory.asset_inventory-compute_aws_ec2_instance-entities-space-2025.07.16-000005",
+        "sub_type": "AWS EC2 Instance",
+        "type": "Host"
+      },
+      "event": {
+        "ingested": "2025-07-20T17:27:13.583Z"
+      },
+      "host": {
+        "id": "host:host-with-multiple-ips-target",
+        "ip": ["10.0.1.100", "::1", "127.0.0.1"],
+        "name": "Target Host with multiple ips"
       }
     }
   }

@@ -45,6 +45,7 @@ import type {
   CloudProvider,
   CloudConnectorVars,
   AccountType,
+  VerificationStatus,
 } from '../../common/types/models/cloud_connector';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
@@ -80,6 +81,7 @@ export interface AgentPolicySOAttributes {
   agentless?: AgentlessPolicy;
   version?: string;
   has_agent_version_conditions?: boolean;
+  is_verifier?: boolean;
   min_agent_version?: string | null;
   package_agent_version_conditions?: AgentPolicyAgentVersionCondition[] | null;
 }
@@ -101,7 +103,7 @@ export interface AgentSOAttributes {
   policy_id?: string;
   policy_revision?: number | null;
   last_checkin?: string;
-  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating' | 'disconnected';
   last_checkin_message?: string;
   tags?: string[];
   components?: FleetServerAgentComponent[];
@@ -181,6 +183,8 @@ export interface OutputSoBaseAttributes {
   is_internal?: boolean;
   is_preconfigured?: boolean;
   config_yaml?: string | null;
+  otel_exporter_config_yaml?: string | null;
+  otel_disable_beatsauth?: boolean | null;
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
   allow_edit?: string[];
@@ -329,4 +333,7 @@ export interface CloudConnectorSOAttributes {
   vars: CloudConnectorVars;
   created_at: string;
   updated_at: string;
+  verification_status?: VerificationStatus;
+  verification_started_at?: string;
+  verification_failed_at?: string;
 }

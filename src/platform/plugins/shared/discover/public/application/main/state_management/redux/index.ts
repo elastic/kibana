@@ -29,7 +29,7 @@ export {
   TabsBarVisibility,
 } from './types';
 
-export { DEFAULT_TAB_STATE } from './constants';
+export { DEFAULT_EXPANDED_DOC_OWNER, DEFAULT_TAB_STATE } from './constants';
 
 export {
   type InternalStateStore,
@@ -42,6 +42,7 @@ export const internalStateActions = {
   ...omit(
     internalStateSlice.actions,
     'setTabs',
+    'disconnectTab',
     'setDefaultProfileAdHocDataViewIds',
     'setAppState',
     'syncProfileStateSnapshot'
@@ -54,6 +55,7 @@ export {
   InternalStateProvider,
   useInternalStateDispatch,
   useInternalStateGetState,
+  useInternalStateSubscribe,
   useInternalStateSelector,
   CurrentTabProvider,
   useCurrentTabSelector,
@@ -66,6 +68,8 @@ export {
 export {
   selectAllTabs,
   selectRecentlyClosedTabs,
+  selectPersistedDiscoverSession,
+  selectSavedDataViews,
   selectTab,
   selectTabAppState,
   selectTabCombinedFilters,
@@ -73,6 +77,7 @@ export {
   selectHasUnsavedChanges,
   searchSourceComparator,
   selectTabSavedSearch,
+  selectTabSavedSearchByValueAttributes,
 } from './selectors';
 
 export {

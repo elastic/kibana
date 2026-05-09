@@ -14,5 +14,6 @@
     "@kbn/apm-types-shared",
     "@kbn/data-views-plugin",
     "@kbn/slo-schema",
+    "@kbn/unified-doc-viewer",
   ]
 }

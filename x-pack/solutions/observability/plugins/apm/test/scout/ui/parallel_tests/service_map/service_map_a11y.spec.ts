@@ -46,16 +46,31 @@ test.describe(
         await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
         const node = serviceMapPage.getServiceNode(SERVICE_OPBEANS_JAVA);
         await node.focus();
-        const isFocused = await page.evaluate((name: string) => {
-          const focused = document.activeElement;
-          return (
-            focused?.getAttribute('aria-label')?.toLowerCase().includes(name.toLowerCase()) ?? false
-          );
-        }, SERVICE_OPBEANS_JAVA);
-        expect(isFocused).toBe(true);
+        await expect(node).toBeFocused();
+      });
+
+      await test.step('find-in-page: highlight frame while focused, Enter centers match', async () => {
+        await serviceMapPage.focusBodyForMapShortcuts();
+        await serviceMapPage.openFindInPageWithKeyboardShortcut();
+        // Fill the real input (#serviceMapFindInPageInput) so EuiFieldSearch onFocus runs and
+        // highlight context updates (filling by layout test-subj alone can leave isFocused false).
+        await serviceMapPage.serviceMapFindInPageNativeInput.fill(SERVICE_OPBEANS_JAVA);
+        await expect(serviceMapPage.serviceMapFindMatchSummary).toHaveText(/[1-9]/);
+
+        // Highlights are driven only while the find field is focused; centering the map after Enter
+        // can move focus and clear highlights, so assert the frame before Enter.
+        const highlightFrame =
+          serviceMapPage.getActiveFindMatchHighlightFrame(SERVICE_OPBEANS_JAVA);
+        await expect(highlightFrame).toBeVisible();
+        await expect(highlightFrame).toHaveAttribute('data-search-active-match');
+
+        await serviceMapPage.serviceMapFindInPageNativeInput.press('Enter');
+        await serviceMapPage.settleServiceMapLayout();
+        await expect(serviceMapPage.serviceMapFindMatchSummary).toHaveText(/[1-9]/);
       });
 
       await test.step('zoom controls are keyboard accessible', async () => {
+        await serviceMapPage.clickFitView();
         await expect(serviceMapPage.zoomInBtnControl).toBeVisible();
         await expect(serviceMapPage.zoomOutBtnControl).toBeVisible();
         await expect(serviceMapPage.fitViewBtn).toBeVisible();
@@ -86,10 +101,14 @@ test.describe(
         );
       });
 
-      await test.step('screen reader announcement region exists within service map', async () => {
+      await test.step('polite live regions exist for keyboard announcements and find-in-page', async () => {
         const serviceMapContainer = page.testSubj.locator('serviceMapGraph');
-        const liveRegion = serviceMapContainer.locator('[aria-live="polite"]');
-        await expect(liveRegion).toHaveCount(1);
+        await expect(page.testSubj.locator('serviceMapControlsSearch')).toBeVisible();
+        const politeLiveRegions = serviceMapContainer.locator('[aria-live="polite"]');
+        await expect(politeLiveRegions).toHaveCount(2);
+        await expect(
+          serviceMapContainer.locator('[data-test-subj="serviceMapFindMatchSummary"]')
+        ).toHaveAttribute('aria-live', 'polite');
       });
     });
   }

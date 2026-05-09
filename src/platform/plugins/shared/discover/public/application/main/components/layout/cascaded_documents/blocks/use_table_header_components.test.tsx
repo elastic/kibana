@@ -127,9 +127,7 @@ describe('useTableHeaderComponents', () => {
 
     await waitForEuiToolTipVisible();
 
-    expect(screen.getByText('Cascade experience (Technical preview)')).toBeInTheDocument();
-    expect(
-      screen.getByText('This functionality is in technical preview and is subject to change.')
-    ).toBeInTheDocument();
+    expect(screen.getByText('Grouped results (technical preview)')).toBeInTheDocument();
+    expect(screen.getByText('Results are grouped when running a Stats BY')).toBeInTheDocument();
   });
 });

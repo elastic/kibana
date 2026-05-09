@@ -149,13 +149,21 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; available_options?: string[] | undefined; } & { selected_options: string[]; single_select: boolean; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; control_type: \"STATIC_VALUES\" | \"VALUES_FROM_QUERY\"; }>> & ",
+          "<State extends { control_type: \"STATIC_VALUES\"; } ? Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"STATIC_VALUES\"; available_options: string[]; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; }> : Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { selected_options: string[]; single_select: boolean; control_type: \"VALUES_FROM_QUERY\"; variable_name: string; variable_type: \"values\" | \"fields\" | \"functions\" | \"time_literal\" | \"multi_values\"; esql_query: string; }>> & ",
           {
             "pluginId": "@kbn/esql-types",
             "scope": "common",
             "docId": "kibKbnEsqlTypesPluginApi",
             "section": "def-common.PublishesESQLVariable",
             "text": "PublishesESQLVariable"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
           },
           " & ",
           {
@@ -208,7 +216,7 @@
           "<string>; }"
         ],
         "path": "src/platform/plugins/shared/controls/public/controls/esql_control/types.ts",
-        "lineNumber": 27,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -229,15 +237,7 @@
             "section": "def-public.DefaultEmbeddableApi",
             "text": "DefaultEmbeddableApi"
           },
-          "<",
-          {
-            "pluginId": "@kbn/controls-schemas",
-            "scope": "server",
-            "docId": "kibKbnControlsSchemasPluginApi",
-            "section": "def-server.OptionsListControlState",
-            "text": "OptionsListControlState"
-          },
-          "> & ",
+          "<Readonly<{ title?: string | undefined; display_settings?: Readonly<{ placeholder?: string | undefined; hide_action_bar?: boolean | undefined; hide_exclude?: boolean | undefined; hide_exists?: boolean | undefined; hide_sort?: boolean | undefined; } & {}> | undefined; } & { sort: Readonly<{} & { direction: \"asc\" | \"desc\"; by: \"_key\" | \"_count\"; }>; field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; exclude: boolean; exists_selected: boolean; run_past_timeout: boolean; search_technique: \"prefix\" | \"wildcard\" | \"exact\"; selected_options: (string | number)[]; single_select: boolean; }>> & ",
           "SettersOf",
           "<Omit<Readonly<{ title?: string | undefined; } & { field_name: string; data_view_id: string; use_global_filters: boolean; ignore_validations: boolean; }>, \"title\">> & ",
           "SubjectsOf",
@@ -349,7 +349,15 @@
             "section": "def-common.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string>; } & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; } & { setSelectedOptions: (options: (string | number)[]) => void; clearSelections: () => void; hasSelections$: ",
+          "<string>; } & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; } & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
+          },
+          " & { setSelectedOptions: (options: (string | number)[]) => void; clearSelections: () => void; hasSelections$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -360,7 +368,7 @@
           "<boolean | undefined>; }"
         ],
         "path": "src/platform/plugins/shared/controls/public/controls/data_controls/options_list_control/types.ts",
-        "lineNumber": 27,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -493,7 +501,15 @@
             "section": "def-common.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string>; } & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; } & { clearSelections: () => void; hasSelections$: ",
+          "<string>; } & { setDataLoading: (loading: boolean) => void; setBlockingError: (error: Error | undefined) => void; } & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
+          },
+          " & { clearSelections: () => void; hasSelections$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",

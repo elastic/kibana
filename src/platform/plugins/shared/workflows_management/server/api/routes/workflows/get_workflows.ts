@@ -9,6 +9,7 @@
 
 import path from 'path';
 import { schema, type TypeOf } from '@kbn/config-schema';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import type { GetWorkflowsParams } from '../../workflows_management_api';
 import type { RouteDependencies } from '../types';
 import {
@@ -19,8 +20,8 @@ import {
   OAS_TAG,
 } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY } from '../utils/route_security';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 const querySchema = schema.object({
   query: schema.maybe(schema.string({ meta: { description: 'Free-text search query.' } })),
@@ -52,7 +53,7 @@ export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependen
     .get({
       path: '/api/workflows',
       access: 'public',
-      security: WORKFLOW_READ_SECURITY,
+      security: WORKFLOW_READ_OR_READ_EXECUTIONS_SECURITY,
       summary: 'Get workflows',
       description: 'Retrieve a paginated list of workflows with optional filtering.',
       options: {
@@ -68,12 +69,17 @@ export function registerGetWorkflowsRoute({ router, api, spaces }: RouteDependen
         },
         validate: { request: { query: querySchema } },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
+          if (request.authzResult?.[WorkflowsManagementApiActions.read] !== true) {
+            return response.forbidden();
+          }
           const params = prepareParams(request.query);
           const spaceId = spaces.getSpaceId(request);
+          const includeExecutionHistory =
+            request.authzResult?.[WorkflowsManagementApiActions.readExecution] === true;
           return response.ok({
-            body: await api.getWorkflows(params, spaceId),
+            body: await api.getWorkflows(params, spaceId, { includeExecutionHistory }),
           });
         } catch (error) {
           return handleRouteError(response, error);

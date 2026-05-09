@@ -28,8 +28,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [{ tags: ['charlie', 'alpha', 'bravo'] }];
         await testBed.ingest('ingest-sort-asc', docs, processors);
@@ -56,8 +56,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ tags: ['charlie', 'alpha', 'bravo'] }];
       await testBed.ingest('ingest-sort-desc', docs, processors);
@@ -84,8 +84,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ tags: ['charlie', 'alpha', 'bravo'] }];
       await testBed.ingest('ingest-sort-target', docs, processors);
@@ -120,8 +120,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ numbers: [3, 1, 4, 1, 5, 9, 2, 6] }];
       await testBed.ingest('ingest-sort-numeric', docs, processors);
@@ -146,8 +146,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [{ tags: ['single'] }];
       await testBed.ingest('ingest-sort-single', docs, processors);
@@ -184,8 +184,8 @@ apiTest.describe(
         ],
       };
 
-      const { processors } = transpileIngestPipeline(streamlangDSL);
-      const { query } = transpileEsql(streamlangDSL);
+      const { processors } = await transpileIngestPipeline(streamlangDSL);
+      const { query } = await transpileEsql(streamlangDSL);
 
       const docs = [
         { tags: ['charlie', 'alpha', 'bravo'], should_sort: 'yes' },
@@ -234,8 +234,8 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpileIngestPipeline(streamlangDSL);
-        const { query } = transpileEsql(streamlangDSL);
+        const { processors } = await transpileIngestPipeline(streamlangDSL);
+        const { query } = await transpileEsql(streamlangDSL);
 
         const docs = [
           { tags: ['charlie', 'alpha', 'bravo'], status: 'has_tags' },
@@ -301,10 +301,10 @@ apiTest.describe(
           };
 
           // Both transpilers should reject Mustache template syntax
-          expect(() => transpileIngestPipeline(streamlangDSL)).toThrow(
+          await expect(transpileIngestPipeline(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
           );
-          expect(() => transpileEsql(streamlangDSL)).toThrow(
+          await expect(transpileEsql(streamlangDSL)).rejects.toThrow(
             'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
           );
         }

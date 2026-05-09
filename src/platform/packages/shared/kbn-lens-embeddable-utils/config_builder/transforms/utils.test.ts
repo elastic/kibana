@@ -10,13 +10,14 @@
 import {
   buildDatasourceStates,
   buildReferences,
-  getDatasetIndex,
+  getDataSourceIndex,
   addLayerColumn,
   getDefaultReferences,
   operationFromColumn,
-  buildDatasetState,
+  buildDataSourceState,
   isSingleLayer,
   generateLayer,
+  generateApiLayer,
   filtersAndQueryToLensState,
   filtersAndQueryToApiFormat,
 } from './utils';
@@ -27,7 +28,8 @@ import type {
   ReferenceBasedIndexPatternColumn,
 } from '@kbn/lens-common';
 import type { TextBasedLayer } from '@kbn/lens-common';
-import type { LensApiState, MetricState } from '../schema';
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import type { LensApiConfig, MetricConfig } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { LensAttributes } from '../types';
 
@@ -56,9 +58,9 @@ test('build references correctly builds references', () => {
 
 describe('getDatasetIndex', () => {
   test('returns index if provided', () => {
-    const result = getDatasetIndex({
-      type: 'index',
-      index: 'test',
+    const result = getDataSourceIndex({
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'test',
       time_field: '@timestamp',
     });
     expect(result).toMatchInlineSnapshot(`
@@ -70,7 +72,7 @@ describe('getDatasetIndex', () => {
   });
 
   test('extracts index from esql query', () => {
-    const result = getDatasetIndex({
+    const result = getDataSourceIndex({
       type: 'esql',
       query: 'from test_index | limit 10',
     });
@@ -81,17 +83,6 @@ describe('getDatasetIndex', () => {
         "timeFieldName": undefined,
       }
     `);
-  });
-
-  test('returns undefined if no query or iundex provided', () => {
-    const result = getDatasetIndex({
-      type: 'table',
-      table: {
-        columns: [],
-        rows: [],
-      },
-    });
-    expect(result).toMatchInlineSnapshot(`undefined`);
   });
 });
 
@@ -236,22 +227,24 @@ describe('buildDatasourceStates', () => {
       {
         type: 'metric',
         title: 'test',
-        dataset: {
+        data_source: {
           type: 'esql',
           query: 'from test | limit 10',
         },
         metrics: [
           {
             type: 'primary',
-            operation: 'value',
             label: 'test',
             column: 'test',
-            fit: false,
-            alignments: { labels: 'left', value: 'left' },
           },
         ],
+        styling: {
+          primary: {
+            value: { sizing: 'auto' },
+          },
+        },
         sampling: 1,
-        ignore_global_filters: false,
+        ignore_global_filters: true,
       },
       undefined as any,
       () => [{ columnId: 'test', fieldName: 'test' }]
@@ -268,6 +261,7 @@ describe('buildDatasourceStates', () => {
                     "fieldName": "test",
                   },
                 ],
+                "ignoreGlobalFilters": true,
                 "index": "test-ef03ee470d96c0a475dca463e351acd1ad966fa7997b95884750639034d53f21",
                 "query": Object {
                   "esql": "from test | limit 10",
@@ -288,6 +282,22 @@ describe('buildDatasourceStates', () => {
         },
       }
     `);
+  });
+});
+
+describe('generateApiLayer', () => {
+  test('returns text based ignore_global_filters from layer state', () => {
+    const result = generateApiLayer({
+      index: 'test-index',
+      query: { esql: 'FROM test-index' },
+      columns: [],
+      ignoreGlobalFilters: true,
+    });
+
+    expect(result).toEqual({
+      sampling: 1,
+      ignore_global_filters: true,
+    });
   });
 });
 
@@ -359,8 +369,8 @@ describe('operationFromColumn', () => {
   });
 });
 
-describe('buildDatasetState', () => {
-  test('builds esql dataset state', () => {
+describe('buildDataSourceState', () => {
+  test('builds esql data_source state', () => {
     const textBasedLayer = {
       index: 'my-index',
       query: { esql: 'from my-index | limit 10' },
@@ -368,7 +378,7 @@ describe('buildDatasetState', () => {
       allColumns: [],
     } as TextBasedLayer;
 
-    const result = buildDatasetState(
+    const result = buildDataSourceState(
       textBasedLayer,
       'layer_0',
       {},
@@ -389,30 +399,30 @@ describe('buildDatasetState', () => {
     `);
   });
 
-  test('builds dataView dataset state', () => {
+  test('builds dataView data_source state', () => {
     const formBasedLayer = {
       indexPatternId: 'my-dataview-id',
       columns: {},
       columnOrder: [],
     } as FormBasedLayer;
 
-    const result = buildDatasetState(formBasedLayer, 'layer_0', {}, [], []);
+    const result = buildDataSourceState(formBasedLayer, 'layer_0', {}, [], []);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "id": "my-dataview-id",
-        "type": "dataView",
+        "ref_id": "my-dataview-id",
+        "type": "data_view_reference",
       }
     `);
   });
 
-  test('builds index dataset state', () => {
+  test('builds index data_source state', () => {
     const formBasedLayer = {
       indexPatternId: 'my-adhoc-dataview-id',
       columns: {},
       columnOrder: [],
     } as FormBasedLayer;
 
-    const result = buildDatasetState(
+    const result = buildDataSourceState(
       formBasedLayer,
       'layer_1',
       {
@@ -433,9 +443,9 @@ describe('buildDatasetState', () => {
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "index": "my-adhoc-dataview-id",
+        "index_pattern": "my-adhoc-dataview-id",
         "time_field": "@timestamp",
-        "type": "index",
+        "type": "data_view_spec",
       }
     `);
   });
@@ -468,7 +478,7 @@ describe('generateLayer', () => {
       type: 'metric',
       sampling: 0.5,
       ignore_global_filters: true,
-    } as MetricState;
+    } as MetricConfig;
 
     const result = generateLayer('layer_1', options);
 
@@ -487,7 +497,7 @@ describe('generateLayer', () => {
   test('generates layer with default values', () => {
     const options = {
       type: 'metric',
-    } as MetricState;
+    } as MetricConfig;
 
     const result = generateLayer('layer_0', options);
 
@@ -506,23 +516,25 @@ describe('generateLayer', () => {
 
 describe('filtersAndQueryToLensState', () => {
   test('converts API filters and query to Lens state format', () => {
-    const apiState: LensApiState = {
+    const apiState: LensApiConfig = {
       type: 'metric',
       title: 'test metric',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'from test | limit 10',
       },
       metrics: [
         {
           type: 'primary',
-          operation: 'value',
           label: 'test',
           column: 'test',
-          fit: false,
-          alignments: { labels: 'left', value: 'left' },
         },
       ],
+      styling: {
+        primary: {
+          value: { sizing: 'auto' },
+        },
+      },
       sampling: 1,
       ignore_global_filters: false,
       filters: [
@@ -557,23 +569,26 @@ describe('filtersAndQueryToLensState', () => {
   });
 
   test('handles missing filters and query gracefully', () => {
-    const apiState: LensApiState = {
+    const apiState: LensApiConfig = {
       type: 'metric',
       title: 'test metric',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'from test | limit 10',
       },
       metrics: [
         {
           type: 'primary',
-          operation: 'value',
           label: 'test',
           column: 'test',
-          fit: false,
-          alignments: { labels: 'left', value: 'left' },
         },
       ],
+      styling: {
+        primary: {
+          value: { sizing: 'auto', alignment: 'left' },
+          labels: { alignment: 'left' },
+        },
+      },
       sampling: 1,
       ignore_global_filters: false,
     };
@@ -586,21 +601,24 @@ describe('filtersAndQueryToLensState', () => {
   });
 
   test('extracts filter data view references when applicable', () => {
-    const apiState: LensApiState = {
+    const apiState: LensApiConfig = {
       type: 'metric',
       title: 'test metric',
-      dataset: {
+      data_source: {
         type: 'esql',
         query: 'from test | limit 10',
+      },
+      styling: {
+        primary: {
+          value: { sizing: 'auto' },
+          labels: { alignment: 'left' },
+        },
       },
       metrics: [
         {
           type: 'primary',
-          operation: 'value',
           label: 'test',
           column: 'test',
-          fit: false,
-          alignments: { labels: 'left', value: 'left' },
         },
       ],
       sampling: 1,
@@ -687,8 +705,8 @@ describe('filtersAndQueryToApiFormat', () => {
           },
         ],
         "query": Object {
-          "language": "kuery",
-          "query": "brand: \\"apple\\"",
+          "expression": "brand: \\"apple\\"",
+          "language": "kql",
         },
       }
     `);

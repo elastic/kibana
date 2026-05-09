@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { buildPath } from '@kbn/core-http-browser';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 
-import type { MarkdownSearchRequestQuery, MarkdownSearchResponseBody } from '../../server/api';
+import type {
+  MarkdownSearchRequestQuery,
+  MarkdownSearchResponseBody,
+  MarkdownUpdateRequestBody,
+} from '../../server/api';
 import {
   MARKDOWN_API_PATH,
   MARKDOWN_API_VERSION,
@@ -22,23 +27,23 @@ import type {
   MarkdownUpdateResponseBody,
 } from '../../server';
 import { coreServices } from '../services/kibana_services';
-import type { MarkdownAttributes } from '../../server/markdown_saved_object';
+import type { MarkdownCreateRequestBody } from '../../server';
 
 export const markdownClient = {
-  create: async (markdownState: MarkdownAttributes) => {
+  create: async (markdownState: MarkdownCreateRequestBody) => {
     return coreServices.http.post<MarkdownCreateResponseBody>(MARKDOWN_API_PATH, {
       version: MARKDOWN_API_VERSION,
       body: JSON.stringify(markdownState),
     });
   },
   delete: async (id: string): Promise<DeleteResult> => {
-    return coreServices.http.delete(`${MARKDOWN_API_PATH}/${encodeURIComponent(id)}`, {
+    return coreServices.http.delete(buildPath(`${MARKDOWN_API_PATH}/{id}`, { id }), {
       version: MARKDOWN_API_VERSION,
     });
   },
   get: async (id: string): Promise<MarkdownReadResponseBody> => {
-    const result = await coreServices.http
-      .get<MarkdownReadResponseBody>(`${MARKDOWN_API_PATH}/${encodeURIComponent(id)}`, {
+    return await coreServices.http
+      .get<MarkdownReadResponseBody>(buildPath(`${MARKDOWN_API_PATH}/{id}`, { id }), {
         version: MARKDOWN_API_VERSION,
       })
       .catch((e) => {
@@ -48,11 +53,10 @@ export const markdownClient = {
         const message = (e.body as { message?: string })?.message ?? e.message;
         throw new Error(message);
       });
-    return result;
   },
   search: async (searchQuery: MarkdownSearchRequestQuery) => {
     const { query, ...params } = searchQuery;
-    return await coreServices.http.post<MarkdownSearchResponseBody>(`${MARKDOWN_API_PATH}`, {
+    return await coreServices.http.post<MarkdownSearchResponseBody>(MARKDOWN_API_PATH, {
       version: MARKDOWN_API_VERSION,
       query: {
         ...params,
@@ -60,9 +64,9 @@ export const markdownClient = {
       },
     });
   },
-  update: async (id: string, markdownState: MarkdownAttributes) => {
+  update: async (id: string, markdownState: MarkdownUpdateRequestBody) => {
     const updateResponse = await coreServices.http.put<MarkdownUpdateResponseBody>(
-      `${MARKDOWN_API_PATH}/${encodeURIComponent(id)}`,
+      buildPath(`${MARKDOWN_API_PATH}/{id}`, { id }),
       {
         version: MARKDOWN_API_VERSION,
         body: JSON.stringify(markdownState),

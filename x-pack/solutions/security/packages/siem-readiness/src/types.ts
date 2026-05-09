@@ -96,6 +96,8 @@ export interface PipelineStats {
   indices: string[];
   docsCount: number;
   failedDocsCount: number;
+  /** False when the server cannot provide ingestion stats (e.g. serverless mode). */
+  statsAvailable: boolean;
 }
 export interface CasesSearchResponse {
   total: number;

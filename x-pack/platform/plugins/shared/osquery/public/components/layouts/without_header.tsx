@@ -20,6 +20,7 @@ export const pageCss = ({ euiTheme }: UseEuiTheme) => ({
 
 export const contentCss = {
   height: '100%',
+  paddingBottom: '24px',
 };
 
 interface Props {

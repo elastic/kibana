@@ -14,10 +14,6 @@ steps:
           diskSizeGb: 120
         timeout_in_minutes: 300
         parallelism: 5
-        retry:
-          automatic:
-            - exit_status: "*"
-              limit: 1
 
   - group: "Osquery MKI - Defend Workflows"
     key: cypress_test_osquery_defend_workflows
@@ -34,10 +30,6 @@ steps:
           diskSizeGb: 120
         timeout_in_minutes: 300
         parallelism: 3
-        retry:
-          automatic:
-            - exit_status: "*"
-              limit: 1
 
   - group: "API MKI - Defend Workflows"
     key: api_test_defend_workflows

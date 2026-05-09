@@ -74,7 +74,6 @@
     "@kbn/rison",
     "@kbn/dataset-quality-plugin",
     "@kbn/metrics-data-access-plugin",
-    "@kbn/observability-onboarding-plugin",
     "@kbn/slo-plugin",
     "@kbn/slo-schema",
     "@kbn/cases-plugin",
@@ -96,6 +95,8 @@
     "@kbn/aiops-log-rate-analysis",
     "@kbn/observability-agent-builder-plugin",
     "@kbn/maintenance-windows-plugin",
-    "@kbn/product-doc-common"
+    "@kbn/product-doc-common",
+    "@kbn/kbn-client",
+    "@kbn/spaces-plugin"
   ]
 }

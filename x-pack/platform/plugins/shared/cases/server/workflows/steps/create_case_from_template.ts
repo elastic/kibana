@@ -15,7 +15,11 @@ import {
 } from '../../../common/workflows/steps/create_case_from_template';
 import type { Configurations, TemplateConfiguration } from '../../../common/types/domain';
 import type { CasesClient } from '../../client';
-import { createCasesStepHandler, normalizeCaseStepUpdatesForBulkPatch } from './utils';
+import {
+  createCasesStepHandler,
+  normalizeCaseStepUpdatesForBulkPatch,
+  safeParseCaseForWorkflowOutput,
+} from './utils';
 import {
   getInitialCaseValue,
   type GetInitialCaseValueArgs,
@@ -59,10 +63,13 @@ export const createCaseFromTemplateStepDefinition = (
       const mergedCreatePayload = getInitialCaseValue({
         owner: WORKFLOW_CASE_OWNER,
         ...(template.caseFields ?? {}),
-        ...(normalizedOverwrites as Partial<GetInitialCaseValueArgs>),
+        ...normalizedOverwrites,
       } as GetInitialCaseValueArgs);
 
       const createdCase = await casesClient.cases.create(mergedCreatePayload);
-      return createCaseFromTemplateStepCommonDefinition.outputSchema.shape.case.parse(createdCase);
+      return safeParseCaseForWorkflowOutput(
+        createCaseFromTemplateStepCommonDefinition.outputSchema.shape.case,
+        createdCase
+      );
     }),
   });

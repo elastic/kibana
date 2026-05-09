@@ -15,6 +15,10 @@ export class LensApp {
   private readonly chartSwitchPopover;
   private readonly chartSwitchList;
   private readonly saveAndReturnButton;
+  private readonly saveButton;
+  private readonly saveModal;
+  private readonly savedObjectTitleInput;
+  private readonly confirmSaveButton;
   private readonly closeDimensionEditorButton;
   public readonly applyChangesButton;
   private readonly dimensionFieldComboBox;
@@ -24,6 +28,10 @@ export class LensApp {
     this.chartSwitchPopover = this.page.testSubj.locator('lnsChartSwitchPopover');
     this.chartSwitchList = this.page.testSubj.locator('lnsChartSwitchList');
     this.saveAndReturnButton = this.page.testSubj.locator('lnsApp_saveAndReturnButton');
+    this.saveButton = this.page.testSubj.locator('lnsApp_saveButton');
+    this.saveModal = this.page.testSubj.locator('savedObjectSaveModal');
+    this.savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
+    this.confirmSaveButton = this.page.testSubj.locator('confirmSaveSavedObjectButton');
     this.closeDimensionEditorButton = this.page.testSubj.locator(
       'lns-indexPattern-dimensionContainerClose'
     );
@@ -54,6 +62,44 @@ export class LensApp {
     await this.saveAndReturnButton.click();
     await expect(this.lensApp).toBeHidden();
     await expect(this.page.testSubj.locator('dshDashboardViewport')).toBeVisible();
+  }
+
+  /**
+   * Opens the Lens save modal, fills in the title, optionally selects
+   * a dashboard target, and confirms.
+   */
+  async save(
+    title: string,
+    options?:
+      | {
+          addToDashboard: 'existing';
+          dashboardTitle: string;
+        }
+      | {
+          addToDashboard: 'new';
+        }
+      | {
+          addToDashboard: 'none';
+        }
+  ) {
+    await this.saveButton.click();
+    await expect(this.saveModal).toBeVisible();
+    await this.savedObjectTitleInput.fill(title);
+
+    if (options?.addToDashboard === 'existing') {
+      await this.page.locator('label[for="existing-dashboard-option"]').click();
+      await this.page.testSubj.locator('open-dashboard-picker').click();
+      await this.page.testSubj
+        .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
+        .click();
+    } else if (options?.addToDashboard === 'new') {
+      await this.page.locator('label[for="new-dashboard-option"]').click();
+    } else if (options?.addToDashboard === 'none') {
+      await this.page.locator('label[for="add-to-library-option"]').click();
+    }
+
+    await this.confirmSaveButton.click();
+    await expect(this.saveModal).toBeHidden();
   }
 
   async configureXYDimensions(options?: {

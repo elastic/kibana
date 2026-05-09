@@ -10,6 +10,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { addSpanLabels } from '@kbn/apm-utils';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { ActionScheduler, type RunResult } from './action_scheduler';
@@ -46,6 +47,7 @@ import type {
   RuleTypeState,
 } from '../../common';
 import { RuleLastRunOutcomeOrderMap } from '../../common';
+import type { RuleMonitoringLastRunMetrics, GapReason } from '../../common';
 import type { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import type { InMemoryMetrics } from '../monitoring';
 import { IN_MEMORY_METRICS } from '../monitoring';
@@ -277,14 +279,15 @@ export class TaskRunner<
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
-      apm.currentTransaction.addLabels({
-        alerting_rule_consumer: rule.consumer,
-        alerting_rule_name: rule.name,
-        alerting_rule_tags: rule.tags.join(', '),
-        alerting_rule_type_id: rule.alertTypeId,
-        alerting_rule_params: JSON.stringify(rule.params),
-      });
     }
+
+    addSpanLabels({
+      alerting_rule_consumer: rule.consumer,
+      alerting_rule_name: rule.name,
+      alerting_rule_tags: rule.tags.join(', '),
+      alerting_rule_type_id: rule.alertTypeId,
+      alerting_rule_params: JSON.stringify(rule.params),
+    });
 
     const {
       params: { alertId: ruleId, spaceId },
@@ -525,12 +528,13 @@ export class TaskRunner<
 
       if (apm.currentTransaction) {
         apm.currentTransaction.name = `Execute Alerting Rule`;
-        apm.currentTransaction.addLabels({
-          alerting_rule_space_id: spaceId,
-          alerting_rule_id: ruleId,
-          plugins: 'alerting',
-        });
       }
+
+      addSpanLabels({
+        alerting_rule_space_id: spaceId,
+        alerting_rule_id: ruleId,
+        plugins: 'alerting',
+      });
 
       this.ruleRunning.start(ruleId, this.context.spaceIdToNamespace(spaceId));
 
@@ -584,9 +588,9 @@ export class TaskRunner<
       // Set rule monitoring data
       this.ruleMonitoring.setMonitoring(runRuleParams.rule.monitoring);
 
-      // Clear gap range that was persisted in the rule SO
+      // Clear gap data that was persisted in the rule SO from previous run
       if (this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range) {
-        this.ruleMonitoring.getSetters().clearGapRange();
+        this.ruleMonitoring.getSetters().clearGap();
       }
       (async () => {
         try {
@@ -671,10 +675,13 @@ export class TaskRunner<
         });
       }
 
-      const gap = this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range;
-      if (gap) {
+      const { gap_range: gapRange, gap_reason: gapReasonValue } =
+        (this.ruleMonitoring.getMonitoring()?.run?.last_run
+          ?.metrics as RuleMonitoringLastRunMetrics) ?? {};
+      if (gapRange) {
         this.alertingEventLogger.reportGap({
-          gap,
+          gap: gapRange,
+          reason: (gapReasonValue as GapReason) ?? undefined,
         });
       }
 

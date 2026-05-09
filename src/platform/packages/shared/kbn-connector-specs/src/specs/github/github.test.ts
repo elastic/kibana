@@ -15,7 +15,7 @@ import { GithubConnector } from './github';
 const mockCallTool = jest.fn();
 const mockListTools = jest.fn();
 
-jest.mock('../../lib/mcp', () => ({
+jest.mock('../../lib/mcp/with_mcp_client', () => ({
   withMcpClient: jest.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
     return fn({ callTool: mockCallTool, listTools: mockListTools });
   }),
@@ -42,6 +42,27 @@ describe('GithubConnector', () => {
     jest.clearAllMocks();
     mockCallTool.mockResolvedValue({ content: mockContent });
     mockListTools.mockResolvedValue({ tools: [{ name: 'get_me' }, { name: 'search_code' }] });
+  });
+
+  describe('auth', () => {
+    it('supports bearer auth', () => {
+      expect(GithubConnector.auth?.types).toContain('bearer');
+    });
+
+    it('supports oauth_authorization_code with correct GitHub defaults', () => {
+      const oauthType = GithubConnector.auth?.types.find(
+        (t) => typeof t === 'object' && t.type === 'oauth_authorization_code'
+      );
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://github.com/login/oauth/authorize',
+          tokenUrl: 'https://github.com/login/oauth/access_token',
+          scope: 'repo',
+        },
+      });
+    });
   });
 
   describe('getMe action', () => {
@@ -434,7 +455,7 @@ describe('GithubConnector', () => {
     });
 
     it('propagates errors thrown by withMcpClient', async () => {
-      const { withMcpClient } = jest.requireMock('../../lib/mcp');
+      const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
 
       if (!GithubConnector.test) {

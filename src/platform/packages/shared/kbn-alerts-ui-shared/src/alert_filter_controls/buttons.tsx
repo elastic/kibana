@@ -59,6 +59,7 @@ export const SaveControls: FC<SaveControlsProps> = ({ onClick }) => {
 
   return (
     <EuiPopover
+      aria-label={PENDING_CHANGES_REMINDER}
       button={
         <EuiButtonIcon
           aria-label={SAVE_CHANGES}

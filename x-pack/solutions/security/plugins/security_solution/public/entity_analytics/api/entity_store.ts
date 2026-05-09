@@ -20,20 +20,42 @@ import type {
   StopEntityEngineResponse,
 } from '../../../common/api/entity_analytics';
 import { API_VERSIONS } from '../../../common/entity_analytics/constants';
+import { WATCHLISTS_PREBUILT_INSTALL_URL } from '../../../common/entity_analytics/watchlists/constants';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
+import * as entityAnalyticsI18n from '../translations';
 
-const ENTITY_STORE_V2_QUERY = { apiVersion: '2' } as const;
+const WATCHLIST_TOAST_LIFETIME_MS = 8000;
 
 export const useEntityStoreRoutes = () => {
-  const { http, uiSettings } = useKibana().services;
+  const { http, uiSettings, notifications } = useKibana().services;
   const isV2Enabled = uiSettings.get<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
 
   return useMemo(() => {
+    const installPrebuiltWatchlists = async () =>
+      http.fetch<{ acknowledged: boolean }>(WATCHLISTS_PREBUILT_INSTALL_URL, {
+        method: 'POST',
+        version: API_VERSIONS.public.v1,
+      });
+
+    // This is here while waiting for unified installs https://github.com/elastic/security-team/issues/16607
+    const tryInstallPrebuiltWatchlistsWithToast = async () => {
+      try {
+        await installPrebuiltWatchlists();
+      } catch {
+        notifications?.toasts?.addWarning({
+          title: entityAnalyticsI18n.ENTITY_STORE_PREBUILT_WATCHLISTS_WARNING_TITLE,
+          text: entityAnalyticsI18n.ENTITY_STORE_PREBUILT_WATCHLISTS_WARNING_TEXT,
+          toastLifeTimeMs: WATCHLIST_TOAST_LIFETIME_MS,
+        });
+      }
+    };
+
     const getEntityStoreStatus = async (withComponents = false) => {
       if (isV2Enabled) {
-        return http.fetch<GetEntityStoreStatusResponse>(ENTITY_STORE_ROUTES.STATUS, {
+        return http.fetch<GetEntityStoreStatusResponse>(ENTITY_STORE_ROUTES.public.STATUS, {
           method: 'GET',
-          query: { ...ENTITY_STORE_V2_QUERY, include_components: withComponents },
+          version: API_VERSIONS.public.v1,
+          query: { include_components: withComponents },
         });
       }
       return http.fetch<GetEntityStoreStatusResponse>('/api/entity_store/status', {
@@ -45,9 +67,10 @@ export const useEntityStoreRoutes = () => {
 
     const installEntityStore = async (options?: InitEntityStoreRequestBodyInput) => {
       if (isV2Enabled) {
-        return http.fetch<InitEntityStoreResponse>(ENTITY_STORE_ROUTES.INSTALL, {
+        await tryInstallPrebuiltWatchlistsWithToast();
+        return http.fetch<InitEntityStoreResponse>(ENTITY_STORE_ROUTES.public.INSTALL, {
           method: 'POST',
-          query: ENTITY_STORE_V2_QUERY,
+          version: API_VERSIONS.public.v1,
           body: JSON.stringify({}),
         });
       }
@@ -60,9 +83,10 @@ export const useEntityStoreRoutes = () => {
 
     const startEntityStore = async (entityTypes?: EntityType[]) => {
       if (isV2Enabled) {
-        return http.fetch<StartEntityEngineResponse>(ENTITY_STORE_ROUTES.START, {
+        await tryInstallPrebuiltWatchlistsWithToast();
+        return http.fetch<StartEntityEngineResponse>(ENTITY_STORE_ROUTES.public.START, {
           method: 'PUT',
-          query: ENTITY_STORE_V2_QUERY,
+          version: API_VERSIONS.public.v1,
           body: JSON.stringify({}),
         });
       }
@@ -83,9 +107,9 @@ export const useEntityStoreRoutes = () => {
 
     const stopEntityStore = async (entityTypes?: EntityType[]) => {
       if (isV2Enabled) {
-        return http.fetch<StopEntityEngineResponse>(ENTITY_STORE_ROUTES.STOP, {
+        return http.fetch<StopEntityEngineResponse>(ENTITY_STORE_ROUTES.public.STOP, {
           method: 'PUT',
-          query: ENTITY_STORE_V2_QUERY,
+          version: API_VERSIONS.public.v1,
           body: JSON.stringify({}),
         });
       }
@@ -106,9 +130,9 @@ export const useEntityStoreRoutes = () => {
 
     const deleteEntityStore = async (entityTypes?: EntityType[], deleteData = true) => {
       if (isV2Enabled) {
-        return http.fetch(ENTITY_STORE_ROUTES.UNINSTALL, {
+        return http.fetch(ENTITY_STORE_ROUTES.public.UNINSTALL, {
           method: 'POST',
-          query: ENTITY_STORE_V2_QUERY,
+          version: API_VERSIONS.public.v1,
           body: JSON.stringify({}),
         });
       }
@@ -151,5 +175,5 @@ export const useEntityStoreRoutes = () => {
       initEntityEngine,
       listEntityEngines,
     };
-  }, [http, isV2Enabled]);
+  }, [http, isV2Enabled, notifications]);
 };

@@ -48,6 +48,7 @@ interface RunBucket {
   git_commit_sha?: TermsBucket;
   total_repetitions?: { value?: number };
   build_url?: TermsBucket;
+  pull_request?: TermsBucket;
 }
 
 interface RunsListingAggregations {
@@ -67,7 +68,7 @@ export interface RunsListingResult {
     git_branch: string | null;
     git_commit_sha: string | null;
     total_repetitions: number;
-    ci: { build_url: string | undefined };
+    ci: { build_url: string | undefined; pull_request: string | undefined };
   }>;
   total: number;
 }
@@ -159,9 +160,12 @@ export const SCORES_SORT_ORDER: SortField[] = [
 // Runs listing query, aggregation, and response parser
 // ---------------------------------------------------------------------------
 
+const PREFLIGHT_RUN_ID = 'kbn-evals-preflight';
+
 /**
  * Builds the filter query for the runs listing endpoint.
  * Supports optional suite, model, and branch filters.
+ * Always excludes preflight check runs.
  */
 export const buildRunsListingFilterQuery = (
   options?: RunsListingFilterOptions
@@ -175,7 +179,11 @@ export const buildRunsListingFilterQuery = (
     filters.push({ term: { 'task.model.id': options.modelId } });
   }
   if (options?.branch) {
-    filters.push({ term: { 'run_metadata.git_branch': options.branch } });
+    filters.push({
+      wildcard: {
+        'run_metadata.git_branch': { value: `*${options.branch}*`, case_insensitive: true },
+      },
+    });
   }
   if (options?.datasetId) {
     filters.push({ term: { 'example.dataset.id': options.datasetId } });
@@ -183,7 +191,12 @@ export const buildRunsListingFilterQuery = (
   if (options?.datasetName) {
     filters.push({ term: { 'example.dataset.name': options.datasetName } });
   }
-  return filters.length > 0 ? { bool: { filter: filters } } : { match_all: {} };
+  return {
+    bool: {
+      must_not: [{ term: { run_id: PREFLIGHT_RUN_ID } }],
+      ...(filters.length > 0 ? { filter: filters } : {}),
+    },
+  };
 };
 
 /**
@@ -220,6 +233,7 @@ export const buildRunsListingAggregation = ({ page, perPage }: RunsListingPagina
       git_commit_sha: { terms: { field: 'run_metadata.git_commit_sha', size: 1 } },
       total_repetitions: { max: { field: 'run_metadata.total_repetitions' } },
       build_url: { terms: { field: 'ci.buildkite.build_url', size: 1 } },
+      pull_request: { terms: { field: 'ci.buildkite.pull_request', size: 1 } },
     },
   },
 });
@@ -270,6 +284,7 @@ export const parseRunsListingResponse = (
       total_repetitions: bucket.total_repetitions?.value ?? 1,
       ci: {
         build_url: firstBucket(bucket.build_url),
+        pull_request: firstBucket(bucket.pull_request),
       },
     };
   });

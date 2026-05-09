@@ -165,6 +165,11 @@ export const attacksFeaturePromotionCalloutActionEvent: AttacksTelemetryEvent = 
   },
 };
 
+export const attacksWorkflowRunTriggeredEvent: AttacksTelemetryEvent = {
+  eventType: AttacksEventTypes.WorkflowRunTriggered,
+  schema: actionSourceSchema,
+};
+
 export const attacksTelemetryEvents = [
   attacksTableSortChangedEvent,
   attacksViewOptionChangedEvent,
@@ -179,4 +184,5 @@ export const attacksTelemetryEvents = [
   attacksExpandedViewTabClickedEvent,
   attacksScheduleFlyoutOpenedEvent,
   attacksFeaturePromotionCalloutActionEvent,
+  attacksWorkflowRunTriggeredEvent,
 ];

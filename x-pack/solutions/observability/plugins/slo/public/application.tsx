@@ -22,6 +22,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { ExperimentalFeatures } from '../common/config';
 import { PluginContext } from './context/plugin_context';
+import { usePluginContext } from './hooks/use_plugin_context';
 import { getRoutes } from './routes/routes';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from './types';
 import type { ISloTelemetryClient } from './services/telemetry';
@@ -144,7 +145,8 @@ export const renderApp = ({
 };
 
 function App() {
-  const routes = getRoutes();
+  const { experimentalFeatures } = usePluginContext();
+  const routes = getRoutes(experimentalFeatures);
 
   return (
     <Routes enableExecutionContextTracking={true}>

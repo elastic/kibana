@@ -41,6 +41,7 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/unsaved-changes-prompt'
   - '@kbn/shared-ux-table-persist'
+  - '@kbn/data-lifecycle-phases'
   - '@kbn/index-lifecycle-management-common-shared'
   - '@kbn/licensing-types'
   - '@kbn/test-eui-helpers'
@@ -58,26 +59,6 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

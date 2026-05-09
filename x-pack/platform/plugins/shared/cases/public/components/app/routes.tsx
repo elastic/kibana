@@ -55,7 +55,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
   refreshRef,
   timelineIntegration,
   renderAlertsTable,
-  renderEventsTable,
 }) => {
   const { basePath, permissions } = useCasesContext();
   const { navigateToAllCases } = useAllCasesNavigation();
@@ -92,16 +91,25 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
 
         {isTemplatesEnabled && (
           <Route exact path={getCasesConfigureCreateTemplatePath(basePath)}>
-            <Suspense fallback={<EuiLoadingSpinner />}>
-              <CreateTemplateLazy />
-            </Suspense>
+            {permissions.manageTemplates ? (
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <CreateTemplateLazy />
+              </Suspense>
+            ) : (
+              <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
+            )}
           </Route>
         )}
+
         {isTemplatesEnabled && (
           <Route exact path={getCasesConfigureEditTemplatePath(basePath)}>
-            <Suspense fallback={<EuiLoadingSpinner />}>
-              <EditTemplateLazy />
-            </Suspense>
+            {permissions.manageTemplates ? (
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <EditTemplateLazy />
+              </Suspense>
+            ) : (
+              <NoPrivilegesPage pageName={i18n.TEMPLATES_PAGE_NAME} />
+            )}
           </Route>
         )}
 
@@ -125,7 +133,6 @@ const CasesRoutesComponent: React.FC<CasesRoutesProps> = ({
               refreshRef={refreshRef}
               timelineIntegration={timelineIntegration}
               renderAlertsTable={renderAlertsTable}
-              renderEventsTable={renderEventsTable}
             />
           </Suspense>
         </Route>

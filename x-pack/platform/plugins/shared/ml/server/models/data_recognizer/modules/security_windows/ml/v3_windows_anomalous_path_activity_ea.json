@@ -20,7 +20,8 @@
       "process.name",
       "user.name",
       "user.id",
-      "event.module"
+      "event.module",
+      "process.working_directory"
     ]
   },
   "allow_lazy_open": true,

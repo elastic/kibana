@@ -7,7 +7,7 @@
 import type { DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiFlexGroup, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { rulesLocatorID, type RulesLocatorParams } from '@kbn/deeplinks-observability';
+import { rulesLocatorID, type RulesLocatorParams } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { useQueryClient } from '@kbn/react-query';
@@ -105,7 +105,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       <>
         {actionName}
         <EuiIcon
-          type="popout"
+          type="external"
           size="s"
           css={{
             marginLeft: '10px',

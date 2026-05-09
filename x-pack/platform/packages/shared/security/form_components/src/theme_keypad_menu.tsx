@@ -76,7 +76,7 @@ export const ThemeKeyPadMenu: FunctionComponent<ThemeKeyPadMenuProps> = ({
         label: i18n.translate('xpack.security.formComponents.themeKeyPadMenu.systemLabel', {
           defaultMessage: 'System',
         }),
-        icon: 'desktop',
+        icon: 'display',
       })}
       {themeItem({
         id: 'light',

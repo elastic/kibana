@@ -8,6 +8,7 @@
  */
 
 export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adhoc_dataview';
+export { getESQLTimeFieldFromQuery } from './utils/get_esql_time_field_from_query';
 export { getInitialESQLQuery } from './utils/get_initial_esql_query';
 export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
 export {
@@ -23,6 +24,7 @@ export {
   getESQLQueryVariables,
   fixESQLQueryWithVariables,
   getCategorizeColumns,
+  getSparklineColumns,
   getArgsFromRenameFunction,
   getCategorizeField,
   getKqlSearchQueries,
@@ -72,7 +74,10 @@ export {
 } from './utils/cascaded_documents_helpers/utils';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
 export { isComputedColumn, getQuerySummary } from './utils/get_query_summary';
-export { getEsqlControls } from './utils/get_esql_controls';
+export { getAllEsqlControls, getEsqlControls } from './utils/get_esql_controls';
+export { convertFiltersToESQLExpression } from './utils/convert_filters_to_esql';
+export { convertQueryToESQLExpression } from './utils/convert_query_to_esql';
+export { injectWhereClauseAfterSourceCommand } from './utils/inject_where_after_source';
 
 // Callback functions
 export * from './utils/callbacks';

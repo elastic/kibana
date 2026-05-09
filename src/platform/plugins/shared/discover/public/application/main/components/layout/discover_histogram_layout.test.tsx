@@ -32,8 +32,10 @@ const mockSearchSessionId = '123';
 
 const setup = async ({
   noSearchSessionId,
+  hideTable = false,
 }: {
   noSearchSessionId?: boolean;
+  hideTable?: boolean;
 } = {}) => {
   const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
   const services = createDiscoverServicesMock();
@@ -52,6 +54,7 @@ const setup = async ({
       tabId: toolkit.getCurrentTab().id,
       appState: {
         dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
+        hideTable,
         query: { query: '', language: 'kuery' },
       },
     })
@@ -134,6 +137,13 @@ describe('Discover histogram layout component', () => {
       await user.click(screen.getByTestId('dscHideHistogramButton'));
       expect(screen.queryByTestId('dscPanelsToggleInHistogram')).not.toBeInTheDocument();
       expect(screen.queryByTestId('dscPanelsToggleInPage')).toBeInTheDocument();
+    });
+
+    it('should hide the main panel when the table is collapsed and chart is available', async () => {
+      await setup({ hideTable: true });
+      expect(screen.queryByTestId('unifiedHistogramRendered')).toBeInTheDocument();
+      expect(screen.queryByTestId('discoverDocumentsTable')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('dscShowTableButton')).toBeInTheDocument();
     });
   });
 });

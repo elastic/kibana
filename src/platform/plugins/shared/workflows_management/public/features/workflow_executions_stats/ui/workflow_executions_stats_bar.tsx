@@ -37,7 +37,7 @@ export function WorkflowExecutionStatsBar({ height }: WorkflowExecutionStatsBarP
     return <EuiPageTemplate offset={0} />;
   }
 
-  if (data.executions.length === 0) {
+  if (!data.executions?.length) {
     return null;
   }
 

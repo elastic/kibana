@@ -6,14 +6,22 @@
  */
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import { PrivateLocationTestService } from './services/private_location_test_service';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   describe('Synthetics API Tests', () => {
+    // Run Fleet setup + synthetics package install exactly once for the whole
+    // suite. The underlying helper is idempotent, so every per-file
+    // `installSyntheticsPackage()` call (if any remain) becomes a cheap GET.
+    // This removes ~7 redundant uninstall/reinstall cycles per CI run, which
+    // were a source of 502 / "backend closed connection" flakes against Fleet.
     before(async () => {
       await esDeleteAllIndices('heartbeat*');
       await esDeleteAllIndices('synthetics*');
+      const privateLocationService = new PrivateLocationTestService(getService);
+      await privateLocationService.installSyntheticsPackage();
     });
 
     loadTestFile(require.resolve('./synthetics_api_security'));

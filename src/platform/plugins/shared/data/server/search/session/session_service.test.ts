@@ -26,6 +26,24 @@ const MAX_UPDATE_RETRIES = 3;
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
+const mockMinimalAuthUser = new Proxy(
+  {
+    username: 'my_username',
+    enabled: true,
+    authentication_provider: { type: 'basic', name: 'basic1' },
+  } as any,
+  {
+    get(target, prop) {
+      if (prop === 'authentication_realm') {
+        throw new Error(
+          `Property "${String(prop)}" is not available for minimally authenticated users.`
+        );
+      }
+      return Reflect.get(target, prop);
+    },
+  }
+);
+
 describe('SearchSessionService', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let asCurrentUserElasticsearchClient: ElasticsearchClientMock;
@@ -838,6 +856,64 @@ describe('SearchSessionService', () => {
           },
         });
       });
+
+      describe('minimal auth user', () => {
+        it('throws by default', async () => {
+          const requestHash = faker.string.alpha(64);
+          const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
+
+          const mockUpdateSavedObject = {
+            ...mockSavedObject,
+            attributes: {},
+          };
+          savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
+          savedObjectsClient.get.mockResolvedValue(mockSavedObject);
+
+          await expect(
+            service.trackId({ savedObjectsClient }, mockMinimalAuthUser, searchId, {
+              sessionId,
+              strategy: MOCK_STRATEGY,
+              requestHash,
+            })
+          ).rejects.toThrow();
+
+          expect(savedObjectsClient.update).not.toHaveBeenCalled();
+          expect(mockLogger.debug).not.toHaveBeenCalledWith(
+            expect.stringContaining('Skipping realm check')
+          );
+        });
+
+        it('works when auth realm check is skipped', async () => {
+          const requestHash = faker.string.alpha(64);
+          const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
+
+          const mockUpdateSavedObject = {
+            ...mockSavedObject,
+            attributes: {},
+          };
+          savedObjectsClient.update.mockResolvedValue(mockUpdateSavedObject);
+          savedObjectsClient.get.mockResolvedValue(mockSavedObject);
+
+          await expect(
+            service.trackId(
+              { savedObjectsClient },
+              mockMinimalAuthUser,
+              searchId,
+              {
+                sessionId,
+                strategy: MOCK_STRATEGY,
+                requestHash,
+              },
+              true // skipRealmCheck
+            )
+          ).resolves.not.toThrow();
+
+          expect(savedObjectsClient.update).toHaveBeenCalled();
+          expect(mockLogger.debug).toHaveBeenCalledWith(
+            expect.stringContaining('Skipping realm check')
+          );
+        });
+      });
     });
 
     describe('getId', () => {
@@ -901,6 +977,84 @@ describe('SearchSessionService', () => {
         });
 
         expect(id).toBe(searchId);
+      });
+
+      describe('minimal auth user', () => {
+        it('throws by default', async () => {
+          const searchRequest = { params: {} };
+          const requestHash = faker.string.alpha(64);
+          const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
+          const mockSession = {
+            ...mockSavedObject,
+            attributes: {
+              ...mockSavedObject.attributes,
+              idMapping: {
+                [requestHash]: {
+                  id: searchId,
+                },
+              },
+            },
+          };
+          savedObjectsClient.get.mockResolvedValue(mockSession);
+
+          const getIdPromise = service.getId(
+            { savedObjectsClient },
+            mockMinimalAuthUser,
+            searchRequest,
+            {
+              sessionId,
+              isStored: true,
+              isRestore: true,
+              requestHash,
+            }
+          );
+
+          await expect(getIdPromise).rejects.toThrow();
+
+          expect(savedObjectsClient.update).not.toHaveBeenCalled();
+          expect(mockLogger.debug).not.toHaveBeenCalledWith(
+            expect.stringContaining('Skipping realm check')
+          );
+        });
+
+        it('works with minimal auth user (no authentication_realm access)', async () => {
+          const searchRequest = { params: {} };
+          const requestHash = faker.string.alpha(64);
+          const searchId = 'FnpFYlBpeXdCUTMyZXhCLTc1TWFKX0EbdDFDTzJzTE1Sck9PVTBIcW1iU05CZzo4MDA0';
+          const mockSession = {
+            ...mockSavedObject,
+            attributes: {
+              ...mockSavedObject.attributes,
+              idMapping: {
+                [requestHash]: {
+                  id: searchId,
+                },
+              },
+            },
+          };
+          savedObjectsClient.get.mockResolvedValue(mockSession);
+
+          const getIdPromise = service.getId(
+            { savedObjectsClient },
+            mockMinimalAuthUser,
+            searchRequest,
+            {
+              sessionId,
+              isStored: true,
+              isRestore: true,
+              requestHash,
+            },
+            true
+          );
+
+          await expect(getIdPromise).resolves.not.toThrow();
+
+          const id = await getIdPromise;
+          expect(id).toBe(searchId);
+          expect(mockLogger.debug).toHaveBeenCalledWith(
+            expect.stringContaining('Skipping realm check')
+          );
+        });
       });
     });
 

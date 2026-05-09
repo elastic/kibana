@@ -9,17 +9,22 @@ import { v4 as uuidv4 } from 'uuid';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentPanel, DashboardAttachmentData } from '@kbn/dashboard-agent-common';
-import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/dashboard-agent-common';
+import { DASHBOARD_ATTACHMENT_TYPE, isDashboardAttachment } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-common/attachments';
-import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
 import { z } from '@kbn/zod/v4';
+import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import type { DashboardOperation } from './operations';
+import {
+  DASHBOARD_OPERATION_FAILURE_TYPES,
+  type DashboardOperationFailureType,
+} from './failure_types';
 
 /**
  * Failure record for tracking visualization errors.
  */
 export interface VisualizationFailure {
-  type: string;
+  type: DashboardOperationFailureType;
   identifier: string;
   error: string;
 }
@@ -31,46 +36,45 @@ export const getErrorMessage = (error: unknown): string => {
   return error instanceof Error ? error.message : String(error);
 };
 
+const hasNonEmptyValue = (value: string | undefined): value is string =>
+  value !== undefined && value.trim().length > 0;
+
+const hasRequiredCreateTitleOperation = (operations: DashboardOperation[]): boolean =>
+  operations.some(
+    (operation) => operation.operation === 'set_metadata' && hasNonEmptyValue(operation.title)
+  );
+
+const hasBlankTitleUpdate = (operations: DashboardOperation[]): boolean =>
+  operations.some((operation) => {
+    if (operation.operation !== 'set_metadata') {
+      return false;
+    }
+
+    return operation.title !== undefined && !hasNonEmptyValue(operation.title);
+  });
+
+export const hasValidCreateMetadataOperations = (operations: DashboardOperation[]): boolean =>
+  hasRequiredCreateTitleOperation(operations) && !hasBlankTitleUpdate(operations);
+
 const visualizationAttachmentDataSchema = z.object({
   visualization: z.record(z.string(), z.unknown()),
 });
 
-type ResolvedPanelWithoutGrid = Omit<AttachmentPanel, 'grid'>;
-
-const resolvePanelsFromVisualizationAttachment = (
-  data: unknown,
-  attachmentId: string
-): ResolvedPanelWithoutGrid[] => {
-  const parseResult = visualizationAttachmentDataSchema.safeParse(data);
-  if (!parseResult.success) {
-    throw new Error('Visualization attachment does not contain a valid visualization payload.');
-  }
-
-  const { visualization } = parseResult.data;
-  const lensApiState = visualization as LensApiSchemaType & { title?: string };
-
-  // Extract title to config level, keep rest in attributes to align with expected Lens API format for by-value panels.
-  const { title, ...attributes } = lensApiState;
-  return [
-    {
-      type: 'lens',
-      uid: uuidv4(),
-      config: {
-        ...(title ? { title } : {}),
-        attributes,
-      },
-      sourceAttachmentId: attachmentId,
-    },
-  ];
-};
-
 const resolvePanelsFromAttachment = (
   type: string,
-  data: unknown,
-  attachmentId: string
-): ResolvedPanelWithoutGrid[] => {
+  data: unknown
+): Pick<AttachmentPanel, 'type' | 'config'>[] => {
   if (type === AttachmentType.visualization) {
-    return resolvePanelsFromVisualizationAttachment(data, attachmentId);
+    const parseResult = visualizationAttachmentDataSchema.safeParse(data);
+    if (!parseResult.success) {
+      throw new Error('Visualization attachment does not contain a valid visualization payload.');
+    }
+    return [
+      {
+        type: LENS_EMBEDDABLE_TYPE,
+        config: parseResult.data.visualization,
+      },
+    ];
   }
 
   throw new Error(
@@ -110,19 +114,15 @@ export const resolvePanelsFromAttachments = ({
         throw new Error(`Attachment "${attachmentId}" does not have a readable version.`);
       }
 
-      const resolvedPanels = resolvePanelsFromAttachment(
-        attachmentRecord.type,
-        latestVersion.data,
-        attachmentId
-      );
-      panels.push(...resolvedPanels.map((panel) => ({ ...panel, grid })));
+      const resolvedPanels = resolvePanelsFromAttachment(attachmentRecord.type, latestVersion.data);
+      panels.push(...resolvedPanels.map((visContent) => ({ id: uuidv4(), ...visContent, grid })));
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       logger.error(
         `Error resolving dashboard panels from attachment "${attachmentId}": ${errorMessage}`
       );
       failures.push({
-        type: 'attachment_panels',
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.attachmentPanels,
         identifier: attachmentId,
         error: errorMessage,
       });
@@ -152,7 +152,7 @@ export const getRemovedPanels = (
   const panelsToKeep: AttachmentPanel[] = [];
 
   for (const panel of panels) {
-    if (removeSet.has(panel.uid)) {
+    if (removeSet.has(panel.id)) {
       panelsToRemove.push(panel);
     } else {
       panelsToKeep.push(panel);
@@ -181,15 +181,13 @@ export const retrieveLatestVersion = (
     throw new Error(`Dashboard attachment "${attachmentId}" not found.`);
   }
 
-  if (attachment.type !== DASHBOARD_ATTACHMENT_TYPE) {
+  if (!isDashboardAttachment(attachment)) {
     throw new Error(
       `Attachment "${attachmentId}" is not a ${DASHBOARD_ATTACHMENT_TYPE} attachment.`
     );
   }
 
-  const latestVersion = getLatestVersion(
-    attachment
-  ) as unknown as AttachmentVersion<DashboardAttachmentData>;
+  const latestVersion = getLatestVersion(attachment);
   if (!latestVersion) {
     throw new Error(`Could not retrieve latest version of dashboard attachment "${attachmentId}".`);
   }

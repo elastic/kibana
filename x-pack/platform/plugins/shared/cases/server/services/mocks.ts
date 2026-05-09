@@ -105,6 +105,7 @@ const createUserActionPersisterServiceMock = (): CaseUserActionPersisterServiceM
     bulkAuditLogCaseDeletion: jest.fn(),
     bulkCreateUpdateCase: jest.fn(),
     buildUserActions: jest.fn(),
+    addSyncedAlertsCountToUserActions: jest.fn(),
     bulkCreateAttachmentDeletion: jest.fn(),
     bulkCreateAttachmentCreation: jest.fn(),
     createUserAction: jest.fn(),
@@ -229,6 +230,7 @@ export const createTemplatesServiceMock = (): TemplatesServiceMock => {
     deleteTemplate: jest.fn(),
     getTags: jest.fn(),
     getAuthors: jest.fn(),
+    getTemplateVersionsForExtendedFieldSearch: jest.fn(),
   });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error

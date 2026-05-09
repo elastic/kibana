@@ -12,17 +12,20 @@ import { APIRoutes } from '../../common/types';
 import { ROUTE_VERSIONS } from '../../common/constants';
 import type { ResolvedInferenceEndpoints } from '../types';
 import { errorHandler } from '../utils/error_handler';
+import { resolveModelsForFeature } from '../lib/resolve_models_for_feature';
 
 export const defineInferenceConnectorsRoute = ({
   logger,
   router,
   getForFeature,
   getConnectorList,
+  getConnectorById,
 }: {
   logger: Logger;
   router: IRouter;
   getForFeature: (featureId: string, request: KibanaRequest) => Promise<ResolvedInferenceEndpoints>;
   getConnectorList: (request: KibanaRequest) => Promise<InferenceConnector[]>;
+  getConnectorById: (id: string, request: KibanaRequest) => Promise<InferenceConnector>;
 }) => {
   router.versioned
     .get({
@@ -52,25 +55,23 @@ export const defineInferenceConnectorsRoute = ({
         },
         version: ROUTE_VERSIONS.v1,
       },
-      errorHandler(logger)(async (_context, request, response) => {
+      errorHandler(logger)(async (context, request, response) => {
         const { featureId } = request.query;
+        const uiSettingsClient = (await context.core).uiSettings.client;
 
-        const [featureResult, allConnectors] = await Promise.all([
-          getForFeature(featureId, request).catch((e): ResolvedInferenceEndpoints => {
-            logger.error(`Failed to resolve endpoints for feature "${featureId}": ${e.message}`);
-            return { endpoints: [], warnings: [], soEntryFound: false };
-          }),
-          getConnectorList(request).catch((e): InferenceConnector[] => {
-            logger.error(`Failed to load connector list: ${e.message}`);
-            return [];
-          }),
-        ]);
+        const result = await resolveModelsForFeature({
+          getForFeature: (fId) => getForFeature(fId, request),
+          getConnectorList: () => getConnectorList(request),
+          getConnectorById: (id) => getConnectorById(id, request),
+          uiSettingsClient,
+          featureId,
+          logger,
+        });
 
         return response.ok({
           body: {
-            connectors: featureResult.endpoints,
-            allConnectors,
-            soEntryFound: featureResult.soEntryFound,
+            connectors: result.connectors,
+            soEntryFound: result.soEntryFound,
           },
         });
       })

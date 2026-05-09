@@ -6,16 +6,16 @@
  */
 
 import type { Indices } from '@elastic/elasticsearch/lib/api/types';
-import type { KibanaRequest, KibanaResponseFactory, AuthenticatedUser } from '@kbn/core/server';
+import type { AuthenticatedUser, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
+  ALERT_WORKFLOW_REASON,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
   ALERT_WORKFLOW_USER,
-  ALERT_WORKFLOW_REASON,
 } from '@kbn/rule-data-utils';
 
-import { DEFAULT_ALERT_CLOSE_REASONS_KEY } from '../../../../../common/constants';
+import { DEFAULT_DETECTIONS_CLOSE_REASONS_KEY } from '../../../../../common/constants';
 import { AlertStatusEnum } from '../../../../../common/api/model';
 import type { SecuritySolutionRequestHandlerContext } from '../../../../types';
 import type {
@@ -52,7 +52,7 @@ export const setWorkflowStatusHandler = async ({
 
   if (status === AlertStatusEnum.closed) {
     const customReasons =
-      (await core.uiSettings.client.get<Reason[]>(DEFAULT_ALERT_CLOSE_REASONS_KEY)) ?? [];
+      (await core.uiSettings.client.get<Reason[]>(DEFAULT_DETECTIONS_CLOSE_REASONS_KEY)) ?? [];
     const validReasons = new Set([...DefaultClosingReasonSchema.options, ...customReasons]);
     if (body.reason === undefined || validReasons.has(body.reason)) {
       reason = body.reason;

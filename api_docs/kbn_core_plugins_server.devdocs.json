@@ -64,6 +64,7 @@
                 "lineNumber": 297,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -81,6 +82,7 @@
                 "lineNumber": 297,
                 "columnNumber": 49,
                 "deprecated": false,
+                "docsReferencedTypeName": "TPluginsSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -119,6 +121,7 @@
                 "lineNumber": 299,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -136,6 +139,7 @@
                 "lineNumber": 299,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "TPluginsStart",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -197,7 +201,15 @@
             "tags": [],
             "label": "deprecations",
             "description": [
-              "\nProvider for the {@link ConfigDeprecation} to apply to the plugin configuration."
+              "\nProvider for the ",
+              {
+                "pluginId": "@kbn/core-plugins-server",
+                "scope": "server",
+                "docId": "kibKbnCorePluginsServerPluginApi",
+                "section": "def-server.ConfigDeprecation",
+                "text": "ConfigDeprecation"
+              },
+              " to apply to the plugin configuration."
             ],
             "signature": [
               {
@@ -260,7 +272,14 @@
             "tags": [],
             "label": "schema",
             "description": [
-              "\nSchema to use to validate the plugin configuration.\n\n{@link PluginConfigSchema}"
+              "\nSchema to use to validate the plugin configuration.\n\n",
+              {
+                "pluginId": "@kbn/core-plugins-server",
+                "scope": "server",
+                "docId": "kibKbnCorePluginsServerPluginApi",
+                "section": "def-server.PluginConfigSchema",
+                "text": "PluginConfigSchema"
+              }
             ],
             "signature": [
               {
@@ -285,7 +304,14 @@
             "tags": [],
             "label": "exposeToUsage",
             "description": [
-              "\nExpose non-default configs to usage collection to be sent via telemetry.\nset a config to `true` to report the actual changed config value.\nset a config to `false` to report the changed config value as [redacted].\n\nAll changed configs except booleans and numbers will be reported\nas [redacted] unless otherwise specified.\n\n{@link MakeUsageFromSchema}"
+              "\nExpose non-default configs to usage collection to be sent via telemetry.\nset a config to `true` to report the actual changed config value.\nset a config to `false` to report the changed config value as [redacted].\n\nAll changed configs except booleans and numbers will be reported\nas [redacted] unless otherwise specified.\n\n",
+              {
+                "pluginId": "@kbn/core-plugins-server",
+                "scope": "server",
+                "docId": "kibKbnCorePluginsServerPluginApi",
+                "section": "def-server.MakeUsageFromSchema",
+                "text": "MakeUsageFromSchema"
+              }
             ],
             "signature": [
               "MakeUsageFromSchema",
@@ -392,7 +418,15 @@
             "tags": [],
             "label": "logger",
             "description": [
-              "\n{@link LoggerFactory | logger factory} instance already bound to the plugin's logging context\n"
+              "\n",
+              {
+                "pluginId": "@kbn/core-plugins-server",
+                "scope": "server",
+                "docId": "kibKbnCorePluginsServerPluginApi",
+                "section": "def-server.LoggerFactory",
+                "text": "logger factory"
+              },
+              " instance already bound to the plugin's logging context\n"
             ],
             "signature": [
               {
@@ -571,7 +605,15 @@
             "tags": [],
             "label": "configPath",
             "description": [
-              "\nRoot {@link ConfigPath | configuration path} used by the plugin, defaults\nto \"id\" in snake_case format.\n"
+              "\nRoot ",
+              {
+                "pluginId": "@kbn/core-plugins-server",
+                "scope": "server",
+                "docId": "kibKbnCorePluginsServerPluginApi",
+                "section": "def-server.ConfigPath",
+                "text": "configuration path"
+              },
+              " used by the plugin, defaults\nto \"id\" in snake_case format.\n"
             ],
             "signature": [
               "string | string[]"
@@ -854,6 +896,7 @@
                 "lineNumber": 281,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "CorePreboot",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -871,6 +914,7 @@
                 "lineNumber": 281,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "TPluginsSetup",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1030,6 +1074,7 @@
             "lineNumber": 460,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "PluginInitializerContext",
             "trackAdoption": false
           }
         ],

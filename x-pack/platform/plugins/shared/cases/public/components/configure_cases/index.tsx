@@ -65,6 +65,7 @@ import { ObservableTypes } from '../observable_types';
 import { ObservableTypesForm } from '../observable_types/form';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { SettingsTabs } from './settings_tabs';
+import { NoPrivilegesPage } from '../no_privileges';
 
 const AllCasesTemplatesLazy = lazy(() => import('../templates_v2/pages/all_templates_page'));
 
@@ -665,9 +666,15 @@ export const ConfigureCases: React.FC = React.memo(() => {
       )}
       <EuiPageBody restrictWidth={false}>
         {isTemplatesTab ? (
-          <Suspense fallback={<EuiLoadingSpinner />}>
-            <AllCasesTemplatesLazy />
-          </Suspense>
+          <>
+            {permissions.manageTemplates ? (
+              <Suspense fallback={<EuiLoadingSpinner />}>
+                <AllCasesTemplatesLazy />
+              </Suspense>
+            ) : (
+              <NoPrivilegesPage pageName={i18n.SETTINGS_TAB_TEMPLATES} />
+            )}
+          </>
         ) : (
           <div css={getFormWrapperCss(euiTheme)}>
             {hasMinimumLicensePermissions && (

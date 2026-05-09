@@ -22,6 +22,7 @@ import { convertShardsToObject } from '../utils';
 import type { ReadPackResponseData } from './types';
 import { readPacksRequestParamsSchema } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { readPackResponseSchema } from './response_schemas';
 
 export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -43,6 +44,11 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
               typeof readPacksRequestParamsSchema,
               ReadPacksRequestParamsSchema
             >(readPacksRequestParamsSchema),
+          },
+          response: {
+            200: {
+              body: () => readPackResponseSchema,
+            },
           },
         },
       },
@@ -74,7 +80,8 @@ export const readPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
           filter(references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
           'id'
         );
-        const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset']);
+        const osqueryPackAssetReference = !!filter(references, ['type', 'osquery-pack-asset'])
+          .length;
 
         const data: ReadPackResponseData = {
           type: rest.type,

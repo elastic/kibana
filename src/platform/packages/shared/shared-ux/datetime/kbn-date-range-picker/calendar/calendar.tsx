@@ -302,7 +302,7 @@ export function Calendar({ range, onRangeChange, firstDayOfWeek }: CalendarProps
         css={styles.scroller}
         role="group"
         aria-label={calendarTexts.scrollerAriaLabel}
-        data-test-subj="calendar-scroller"
+        data-test-subj="dateRangePickerCalendarScroller"
         data-calendar-scroller
         onKeyDownCapture={onScrollerKeyDown}
         onScroll={handleScroll}
@@ -328,6 +328,7 @@ export function Calendar({ range, onRangeChange, firstDayOfWeek }: CalendarProps
           size="s"
           iconType={getScrollDirectionIcon(scrollDirection)}
           onClick={scrollToToday}
+          data-test-subj="dateRangePickerCalendarTodayButton"
         >
           {calendarTexts.todayButton}
         </EuiButtonEmpty>

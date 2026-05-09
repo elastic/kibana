@@ -36,7 +36,7 @@ Array [
   Object {
     "isOnline": true,
     "name": "hello01",
-    "nodeTypeClass": "starFilled",
+    "nodeTypeClass": "starFill",
     "nodeTypeLabel": "Master Node",
     "node_cgroup_quota": Object {
       "metric": Object {
@@ -304,7 +304,7 @@ Array [
   Object {
     "isOnline": true,
     "name": "hello01",
-    "nodeTypeClass": "starFilled",
+    "nodeTypeClass": "starFill",
     "nodeTypeLabel": "Master Node",
     "node_cgroup_quota": null,
     "node_cgroup_throttled": null,
@@ -345,7 +345,7 @@ Array [
   Object {
     "isOnline": true,
     "name": "hello01",
-    "nodeTypeClass": "starFilled",
+    "nodeTypeClass": "starFill",
     "nodeTypeLabel": "Master Node",
     "node_cgroup_quota": Object {
       "metric": Object {

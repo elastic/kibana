@@ -8,7 +8,6 @@
  */
 
 import {
-  EuiBadge,
   EuiText,
   EuiSpacer,
   EuiListGroup,
@@ -18,16 +17,18 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FieldNameWithIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useWindowSize from 'react-use/lib/useWindowSize';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { getUnitLabel } from '../../../common/utils';
-import { TabTitleAndDescription, MetricTypeBadge, BadgeGroup } from '../components';
+import { isNonLocalIndexName } from '@kbn/es-query';
+import { TabTitleAndDescription } from '../components';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from '../utils';
 import type { Dimension, ParsedMetricItem } from '../../../types';
+import { OverviewTabMetadata } from './overview_tab_metadata';
+import { METRIC_SOURCE_KIND, useMetricSourceKind } from '../hooks/use_metric_source_kind';
+import { useStreamsFieldRenderer } from '../hooks/use_streams_field_renderer';
 
 interface OverviewTabProps {
   metricItem: ParsedMetricItem;
@@ -41,6 +42,31 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+  const localIndexName = isNonLocalIndexName(metricItem.dataStream)
+    ? undefined
+    : metricItem.dataStream;
+
+  const { kind: sourceKind } = useMetricSourceKind({
+    name: localIndexName,
+    fallback: METRIC_SOURCE_KIND.DATA_STREAM,
+  });
+  const renderStreamField = useStreamsFieldRenderer();
+
+  const streamSection =
+    localIndexName && sourceKind === METRIC_SOURCE_KIND.DATA_STREAM && renderStreamField
+      ? renderStreamField({ streamName: localIndexName })
+      : null;
+
+  const staticIndexName = useMemo(() => {
+    if (streamSection || !metricItem.dataStream) {
+      return undefined;
+    }
+
+    return {
+      indexName: metricItem.dataStream,
+      kind: sourceKind,
+    };
+  }, [metricItem.dataStream, sourceKind, streamSection]);
 
   // Sort dimensions alphabetically by name
   const sortedDimensions = useMemo(() => {
@@ -58,85 +84,6 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     (activePage + 1) * pageSize
   );
 
-  // Helper function to create description list items
-  const createDescriptionListItem = useCallback(
-    (title: string, value: React.ReactNode, dataTestSubj?: string) => ({
-      label: (
-        <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj={dataTestSubj}>
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              min-width: ${euiTheme.base * 11.25}px;
-            `}
-          >
-            <EuiText size="xs">
-              <strong>{title}</strong>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{value}</EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    }),
-    [euiTheme.base]
-  );
-
-  // Create description list items
-  const descriptionListItems = useMemo(
-    () => [
-      createDescriptionListItem(
-        i18n.translate('metricsExperience.overviewTab.strong.dataStreamLabel', {
-          defaultMessage: 'Data stream',
-        }),
-        <EuiText color="primary" size="s">
-          {metricItem.dataStream ?? ''}
-        </EuiText>
-      ),
-      createDescriptionListItem(
-        i18n.translate('metricsExperience.overviewTab.strong.fieldTypeLabel', {
-          defaultMessage: 'Field type',
-        }),
-        <BadgeGroup
-          items={metricItem.fieldTypes}
-          isNoValue={(fieldType) => fieldType === ES_FIELD_TYPES.NULL}
-          renderItem={(fieldType, index) => (
-            <EuiBadge key={`${fieldType}-${index}`}>{fieldType}</EuiBadge>
-          )}
-        />
-      ),
-      createDescriptionListItem(
-        i18n.translate('metricsExperience.overviewTab.strong.metricUnitLabel', {
-          defaultMessage: 'Metric unit',
-        }),
-        <BadgeGroup
-          items={metricItem.units}
-          renderItem={(unit, index) => (
-            <EuiBadge key={`${unit}-${index}`}>{getUnitLabel({ unit })}</EuiBadge>
-          )}
-        />,
-        'metricsExperienceFlyoutOverviewTabMetricUnitLabel'
-      ),
-      createDescriptionListItem(
-        i18n.translate('metricsExperience.overviewTab.strong.metricTypeLabel', {
-          defaultMessage: 'Metric type',
-        }),
-        <BadgeGroup
-          items={metricItem.metricTypes}
-          renderItem={(metricType, index) => (
-            <MetricTypeBadge key={`${metricType}-${index}`} instrument={metricType} />
-          )}
-        />,
-        'metricsExperienceFlyoutOverviewTabMetricTypeLabel'
-      ),
-    ],
-    [
-      metricItem.dataStream,
-      metricItem.fieldTypes,
-      metricItem.metricTypes,
-      metricItem.units,
-      createDescriptionListItem,
-    ]
-  );
-
   useWindowSize(); // trigger re-render on window resize to recalculate the container height
 
   const containerHeight = containerRef
@@ -149,7 +96,11 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
       paginatedDimensions.map((dimension: Dimension) => {
         return {
           'data-test-subj': `metricsExperienceFlyoutOverviewTabDimensionItem-${dimension.name}`,
-          label: <FieldNameWithIcon name={dimension.name} type={dimension.type} />,
+          label: (
+            <EuiText size="s">
+              <FieldNameWithIcon name={dimension.name} type={dimension.type} />
+            </EuiText>
+          ),
         };
       }),
     [paginatedDimensions]
@@ -159,30 +110,10 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     <div data-test-subj="metricsExperienceFlyoutOverviewTabContent">
       <TabTitleAndDescription metricItem={metricItem} description={description} />
 
-      <EuiPanel
-        hasShadow={false}
-        hasBorder
-        css={css`
-          padding: ${euiTheme.size.xs} ${euiTheme.size.m};
-        `}
-      >
-        <EuiListGroup
-          data-test-subj="metricsExperienceFlyoutOverviewTabDescriptionList"
-          listItems={descriptionListItems}
-          flush
-          gutterSize="none"
-          wrapText={false}
-          maxWidth={false}
-          css={css`
-            .euiListGroupItem:not(:last-child) {
-              border-bottom: ${euiTheme.border.thin};
-            }
-            .euiListGroupItem__text {
-              padding: ${euiTheme.size.s} ${euiTheme.size.xs};
-            }
-          `}
-        />
-      </EuiPanel>
+      {streamSection}
+
+      <OverviewTabMetadata metricItem={metricItem} staticIndexName={staticIndexName} />
+
       {metricItem.dimensionFields && metricItem.dimensionFields.length > 0 && (
         <>
           <EuiSpacer size="m" />

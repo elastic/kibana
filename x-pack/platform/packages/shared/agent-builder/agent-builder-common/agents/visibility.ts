@@ -24,5 +24,5 @@ export const VISIBILITY_ICON: Record<AgentVisibility, EuiIconType> = {
 export const VISIBILITY_BADGE_COLOR: Record<AgentVisibility, EuiBadgeProps['color']> = {
   [AgentVisibility.Private]: 'hollow',
   [AgentVisibility.Shared]: 'primary',
-  [AgentVisibility.Public]: 'default',
+  [AgentVisibility.Public]: 'success',
 };

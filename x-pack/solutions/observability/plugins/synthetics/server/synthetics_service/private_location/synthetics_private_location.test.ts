@@ -71,8 +71,9 @@ describe('SyntheticsPrivateLocation', () => {
         get: jest.fn().mockReturnValue({}),
         buildPackagePolicyFromPackage: mockBuildPackagePolicy,
         bulkCreate: jest.fn(),
-        getByIDs: jest.fn(),
+        getByIDs: jest.fn().mockReturnValue([{ policy_ids: ['policyId'] }]),
       },
+      agentPolicyService: { getByIds: jest.fn().mockReturnValue([]) },
       runWithCache: async (cb: any) => await cb(),
     },
     spaces: {

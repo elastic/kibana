@@ -15,10 +15,7 @@ export function useKubernetesFlow(
   onboardingFlowType: 'kubernetes_otel' | 'kubernetes' = 'kubernetes'
 ) {
   const {
-    services: {
-      analytics,
-      context: { cloudServiceProvider },
-    },
+    services: { analytics },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const { data, status, error, refetch } = useFetcher(
     (callApi) => {
@@ -42,7 +39,7 @@ export function useKubernetesFlow(
         step: 'in_progress',
       });
     }
-  }, [onboardingFlowType, analytics, cloudServiceProvider, data?.onboardingId]);
+  }, [onboardingFlowType, analytics, data?.onboardingId]);
 
   return { data, status, error, refetch } as const;
 }

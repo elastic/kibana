@@ -16,7 +16,8 @@
       "user.email",
       "source.ip",
       "source.geo.city_name",
-      "event.module"
+      "event.module",
+      "event.action"
     ]
   },
   "allow_lazy_open": true,

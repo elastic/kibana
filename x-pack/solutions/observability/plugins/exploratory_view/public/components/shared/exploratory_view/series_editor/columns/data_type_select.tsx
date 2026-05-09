@@ -66,7 +66,7 @@ export function DataTypesSelect({ seriesId, series }: Props) {
           button={
             <EuiButton
               data-test-subj="o11yDataTypesSelectButton"
-              iconType="plusInCircle"
+              iconType="plusCircle"
               onClick={() => setShowOptions((prevState) => !prevState)}
               fill
               size="s"

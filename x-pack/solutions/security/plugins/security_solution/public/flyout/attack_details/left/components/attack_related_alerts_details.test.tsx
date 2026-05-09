@@ -20,10 +20,13 @@ const mockCorrelationsDetailsAlertsTable = jest.fn((props: { 'data-test-subj'?: 
 jest.mock('../../context');
 jest.mock('../../hooks/use_original_alert_ids');
 
-jest.mock('../../../document_details/left/components/correlations_details_alerts_table', () => ({
-  CorrelationsDetailsAlertsTable: (props: { [key: string]: unknown }) =>
-    mockCorrelationsDetailsAlertsTable(props),
-}));
+jest.mock(
+  '../../../../flyout_v2/correlations/components/correlations_details_alerts_table',
+  () => ({
+    CorrelationsDetailsAlertsTable: (props: { [key: string]: unknown }) =>
+      mockCorrelationsDetailsAlertsTable(props),
+  })
+);
 
 const mockUseAttackDetailsContext = useAttackDetailsContext as jest.Mock;
 const mockUseOriginalAlertIds = useOriginalAlertIds as jest.Mock;

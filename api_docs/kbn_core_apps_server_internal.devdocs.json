@@ -50,6 +50,7 @@
             "lineNumber": 16,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "IRouter",
             "trackAdoption": false,
             "isRequired": true
           },

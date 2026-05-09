@@ -33,7 +33,7 @@ type AttachmentSavedObjectWithErrors = Array<SOWithErrors<AttachmentAttributes>>
  * Retrieves multiple attachments by id.
  */
 export async function bulkGet(
-  { attachmentIDs, caseID, mode = 'legacy' }: BulkGetArgs,
+  { savedObjectIds, caseID, mode = 'legacy' }: BulkGetArgs,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<BulkGetAttachmentsResponseV2> {
@@ -44,7 +44,7 @@ export async function bulkGet(
   } = clientArgs;
 
   try {
-    const request = decodeWithExcessOrThrow(BulkGetAttachmentsRequestRt)({ ids: attachmentIDs });
+    const request = decodeWithExcessOrThrow(BulkGetAttachmentsRequestRt)({ ids: savedObjectIds });
 
     // perform an authorization check for the case
     await casesClient.cases.resolve({ id: caseID });
@@ -127,7 +127,7 @@ const constructErrors = ({
   const errors: BulkGetAttachmentsResponse['errors'] = [];
 
   for (const soError of soBulkGetErrors) {
-    errors.push({ ...generateCaseErrorResponse(soError.error), attachmentId: soError.id });
+    errors.push({ ...generateCaseErrorResponse(soError.error), savedObjectId: soError.id });
   }
 
   for (const attachment of associationErrors) {
@@ -135,7 +135,7 @@ const constructErrors = ({
       error: 'Bad Request',
       message: `Attachment is not attached to case id=${caseId}`,
       status: 400,
-      attachmentId: attachment.id,
+      savedObjectId: attachment.id,
     });
   }
 
@@ -144,7 +144,7 @@ const constructErrors = ({
       error: 'Forbidden',
       message: `Unauthorized to access attachment with owner: "${unauthorizedAttachment.attributes.owner}"`,
       status: 403,
-      attachmentId: unauthorizedAttachment.id,
+      savedObjectId: unauthorizedAttachment.id,
     });
   }
 

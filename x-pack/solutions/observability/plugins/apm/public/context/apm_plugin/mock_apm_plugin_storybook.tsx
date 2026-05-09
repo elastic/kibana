@@ -19,6 +19,7 @@ import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable, of } from 'rxjs';
 import { apmRouter } from '../../components/routing/apm_route_config';
+import type { ITelemetryClient } from '../../services/telemetry/types';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
 import type { APMServiceContextValue } from '../apm_service/apm_service_context';
 import { APMServiceContext } from '../apm_service/apm_service_context';
@@ -76,6 +77,9 @@ const mockPlugin = {
       },
     },
   },
+  observability: {
+    useRulesLink: () => ({ href: '/app/rules', onClick: jest.fn() }),
+  },
 };
 
 const mockCore = {
@@ -83,6 +87,7 @@ const mockCore = {
     capabilities: {
       apm: {},
       ml: {},
+      slo: { read: true },
       savedObjectsManagement: {},
     },
     currentAppId$: new Observable(),
@@ -151,6 +156,16 @@ const mockCore = {
   },
 };
 
+/** Satisfies `useKibana` consumers (e.g. service map) that read `services.telemetry`. */
+const storybookTelemetry: ITelemetryClient = {
+  reportSearchQuerySubmitted: () => {},
+  reportSloOverviewFlyoutViewed: () => {},
+  reportSloOverviewFlyoutSearchQueried: () => {},
+  reportSloOverviewFlyoutStatusFiltered: () => {},
+  reportSloInfoShown: () => {},
+  reportServiceMapDagreLayoutFallback: () => {},
+};
+
 const mockUnifiedSearchBar = {
   ui: {
     SearchBar: () => <div />,
@@ -187,7 +202,13 @@ export function MockApmPluginStorybook({
   const contextMock = merge({}, mockApmPluginContext, apmContext);
   createCallApmApi(contextMock.core);
   const KibanaReactContext = createKibanaReactContext(
-    contextMock.core as unknown as Partial<CoreStart>
+    merge({}, contextMock.core, {
+      telemetry: storybookTelemetry,
+      triggersActionsUi: {
+        ruleTypeRegistry: { has: () => false, get: () => null, list: () => [] },
+        actionTypeRegistry: { has: () => false, get: () => null, list: () => [] },
+      },
+    }) as unknown as Partial<CoreStart>
   );
 
   const history = createMemoryHistory({

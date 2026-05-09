@@ -160,6 +160,7 @@
             "lineNumber": 11,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "DatasetSampleType",
             "trackAdoption": false,
             "isRequired": true
           }

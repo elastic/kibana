@@ -195,6 +195,12 @@ const AttackDiscoveryPageComponent: React.FC = () => {
           size,
           start,
           overrideConnectorId: overrideOptions?.overrideConnectorId,
+          overrideConnectorName: overrideOptions?.overrideConnectorId
+            ? getConnectorNameFromId({
+                aiConnectors,
+                connectorId: overrideOptions.overrideConnectorId,
+              })
+            : undefined,
           overrideEnd: overrideOptions?.overrideEnd,
           overrideFilter: overrideOptions?.overrideFilter,
           overrideSize: overrideOptions?.overrideSize,
@@ -205,6 +211,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
       }
     },
     [
+      aiConnectors,
       end,
       fetchAttackDiscoveries,
       filterQuery,

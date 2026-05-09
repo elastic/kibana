@@ -83,6 +83,10 @@ export async function syncAgentlessDeployments(
           }
           const agentPolicy = agentPolicies.find((ap) => ap.id === deployment.policy_id);
 
+          if (agentPolicy?.is_verifier) {
+            return;
+          }
+
           if (!agentPolicy) {
             logger.info(
               `[Agentless Deployment Sync]${dryRunTag(opts?.dryRun)} Deleting deployment ${
@@ -157,8 +161,9 @@ export async function syncAgentlessDeployments(
         'global_data_tags',
         'fleet_server_host_id',
         'agentless',
+        'is_verifier',
       ],
-      kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
+      kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true AND NOT ${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_verifier:true`,
       spaceId: '*',
     });
 

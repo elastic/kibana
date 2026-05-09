@@ -9,6 +9,7 @@ import React, { useMemo, useEffect, useCallback, useState, useRef } from 'react'
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type {
   EmbeddableConversationInternalProps,
@@ -19,9 +20,9 @@ import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import { AgentBuilderServicesContext } from '../agent_builder_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
 import { useConversationActions } from './use_conversation_actions';
+import { ConversationChangeNotifier } from './conversation_change_notifier';
 import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
 import { AppLeaveContext } from '../app_leave_context';
-import { AgentBuilderTourProvider } from '../agent_builder_tour_context';
 
 const noopOnAppLeave = () => {};
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
@@ -122,13 +123,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     validateAndSetConversationId,
   ]);
 
-  const onConversationCreated = useCallback(
-    ({ conversationId: id }: { conversationId: string }) => {
-      setConversationId(id);
-    },
-    [setConversationId]
-  );
-
   const onDeleteConversation = useCallback(() => {
     setConversationId(undefined);
   }, [setConversationId]);
@@ -146,7 +140,6 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     conversationId,
     queryClient,
     conversationsService: services.conversationsService,
-    onConversationCreated,
     onDeleteConversation,
   });
 
@@ -181,18 +174,23 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
     }));
   }, []);
 
+  const setAgentId = useCallback((id: string) => {
+    setCurrentProps((prev) => ({ ...prev, agentId: id, newConversation: true }));
+  }, []);
+
   const conversationContextValue = useMemo(
     () => ({
       conversationId,
       shouldStickToBottom: true,
       isEmbeddedContext: true,
       sessionTag: currentProps.sessionTag,
-      agentId: currentProps.agentId,
+      agentId: currentProps.agentId ?? agentBuilderDefaultAgentId,
       initialMessage: currentProps.initialMessage,
       autoSendInitialMessage: currentProps.autoSendInitialMessage ?? false,
       resetInitialMessage,
       browserApiTools: currentProps.browserApiTools,
       setConversationId,
+      setAgentId,
       attachments: currentProps.attachments,
       upsertAttachments,
       resetAttachments,
@@ -210,6 +208,7 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
       upsertAttachments,
       resetInitialMessage,
       setConversationId,
+      setAgentId,
       resetAttachments,
       removeAttachment,
       conversationActions,
@@ -222,11 +221,12 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
         <QueryClientProvider client={queryClient}>
           <AgentBuilderServicesContext.Provider value={services}>
             <AppLeaveContext.Provider value={noopOnAppLeave}>
-              <ConversationContext.Provider value={conversationContextValue}>
-                <AgentBuilderTourProvider>
-                  <SendMessageProvider>{children}</SendMessageProvider>
-                </AgentBuilderTourProvider>
-              </ConversationContext.Provider>
+              <SendMessageProvider>
+                <ConversationContext.Provider value={conversationContextValue}>
+                  <ConversationChangeNotifier />
+                  {children}
+                </ConversationContext.Provider>
+              </SendMessageProvider>
             </AppLeaveContext.Provider>
           </AgentBuilderServicesContext.Provider>
         </QueryClientProvider>

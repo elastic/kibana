@@ -13,3 +13,7 @@ export type PersistedAgentDefinition = Omit<AgentDefinition, 'readonly'>;
 export interface AgentsUsingToolsResult {
   agents: AgentRef[];
 }
+
+export interface AgentsUsingSkillsResult {
+  agents: AgentRef[];
+}

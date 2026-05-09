@@ -19,6 +19,9 @@ post:
       application/json:
         schema:
           $ref: '../components/schemas/create_annotation_object.yaml'
+        examples:
+          createAnnotationRequest1:
+            $ref: '../components/examples/annotation_object_post_request1.yaml'
   responses:
     '200':
       description: Annotation created successfully

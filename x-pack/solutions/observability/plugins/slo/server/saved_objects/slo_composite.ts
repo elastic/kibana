@@ -22,13 +22,14 @@ export const sloComposite: SavedObjectsType = {
           type: 'mappings_addition',
           addedMappings: {
             id: { type: 'keyword' },
-            name: { type: 'text' },
+            name: { type: 'text', fields: { keyword: { type: 'keyword' } } },
             description: { type: 'text' },
             compositeMethod: { type: 'keyword' },
             budgetingMethod: { type: 'keyword' },
             enabled: { type: 'boolean' },
             tags: { type: 'keyword' },
-            version: { type: 'long' },
+            createdAt: { type: 'date' },
+            updatedAt: { type: 'date' },
             members: {
               properties: {
                 sloId: { type: 'keyword' },
@@ -45,7 +46,7 @@ export const sloComposite: SavedObjectsType = {
     dynamic: false,
     properties: {
       id: { type: 'keyword' },
-      name: { type: 'text' },
+      name: { type: 'text', fields: { keyword: { type: 'keyword' } } },
       description: { type: 'text' },
       members: {
         properties: {
@@ -58,7 +59,8 @@ export const sloComposite: SavedObjectsType = {
       budgetingMethod: { type: 'keyword' },
       enabled: { type: 'boolean' },
       tags: { type: 'keyword' },
-      version: { type: 'long' },
+      createdAt: { type: 'date' },
+      updatedAt: { type: 'date' },
     },
   },
   management: {

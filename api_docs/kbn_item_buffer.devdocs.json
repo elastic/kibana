@@ -80,6 +80,7 @@
                 "lineNumber": 33,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ItemBufferParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -133,6 +134,7 @@
                 "lineNumber": 45,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "Item",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -270,6 +272,7 @@
                 "lineNumber": 24,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "TimedItemBufferParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -306,6 +309,7 @@
                 "lineNumber": 28,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "Item",
                 "trackAdoption": false,
                 "isRequired": true
               }

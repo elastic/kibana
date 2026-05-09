@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
+import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../../common';
 import type { PluginsStart } from '../../plugin';
 import type { SpacesManager } from '../../spaces_manager';
 import { SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX } from '../constants';
@@ -17,6 +18,24 @@ import type {
   SolutionViewSwitchCalloutInternalProps,
   SolutionViewSwitchCalloutProps,
 } from '../types';
+
+const SOLUTION_VIEW_SWITCH_STORAGE_KEY_DISMISSED = `${SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX}.dismissed`;
+
+const getIsDismissed = () => {
+  try {
+    return localStorage.getItem(SOLUTION_VIEW_SWITCH_STORAGE_KEY_DISMISSED) === 'true';
+  } catch {
+    return false;
+  }
+};
+
+const setIsDismissed = () => {
+  try {
+    localStorage.setItem(SOLUTION_VIEW_SWITCH_STORAGE_KEY_DISMISSED, 'true');
+  } catch {
+    // Ignore storage errors
+  }
+};
 
 export interface GetSolutionViewSwitchCalloutOptions {
   spacesManager: SpacesManager;
@@ -27,7 +46,7 @@ export const getSolutionViewSwitchCalloutComponent = async ({
   spacesManager,
   getStartServices,
 }: GetSolutionViewSwitchCalloutOptions): Promise<React.FC<SolutionViewSwitchCalloutProps>> => {
-  const [{ application, notifications }] = await getStartServices();
+  const [{ application, http, notifications }] = await getStartServices();
   const manageSpacesUrl = application.getUrlForApp('management', { path: 'kibana/spaces' });
 
   const showError: SolutionViewSwitchCalloutInternalProps['showError'] = (error) => {
@@ -54,7 +73,12 @@ export const getSolutionViewSwitchCalloutComponent = async ({
     } catch {
       // Ignore storage errors
     }
-    window.location.reload();
+
+    window.location.href = addSpaceIdToPath(
+      http.basePath.serverBasePath,
+      spaceId,
+      ENTER_SPACE_PATH
+    );
   };
 
   const { SolutionViewSwitchCalloutInternal } = await import(
@@ -62,12 +86,22 @@ export const getSolutionViewSwitchCalloutComponent = async ({
   );
 
   return (props: SolutionViewSwitchCalloutProps) => {
+    const [shouldShow, setShouldShow] = useState<boolean>(() => !getIsDismissed());
+
+    const onDismiss: SolutionViewSwitchCalloutInternalProps['onDismiss'] = () => {
+      setIsDismissed();
+      setShouldShow(false);
+    };
+
+    if (!shouldShow) return null;
+
     return (
       <SolutionViewSwitchCalloutInternal
         {...props}
         manageSpacesUrl={manageSpacesUrl}
         updateSpace={updateSpace}
         showError={showError}
+        onDismiss={onDismiss}
       />
     );
   };

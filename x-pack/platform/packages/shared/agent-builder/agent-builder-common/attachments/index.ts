@@ -8,7 +8,6 @@
 export type {
   Attachment,
   UnknownAttachment,
-  AttachmentInput,
   TextAttachment,
   ScreenContextAttachment,
   EsqlAttachment,
@@ -30,7 +29,6 @@ export {
   screenContextAttachmentDataSchema,
   visualizationAttachmentDataSchema,
   connectorAttachmentDataSchema,
-  connectorAttachmentToolSchema,
   CONNECTOR_TAG_PREFIX,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
@@ -49,7 +47,7 @@ export type {
   AttachmentRefOperation,
   AttachmentRefActor,
   AttachmentDiff,
-  VersionedAttachmentInput,
+  AttachmentInput,
   UpdateOriginResponse,
 } from './versioned_attachment';
 export {
@@ -60,7 +58,7 @@ export {
   attachmentVersionRefSchema,
   attachmentRefOperationSchema,
   attachmentRefActorSchema,
-  versionedAttachmentInputSchema,
+  attachmentInputSchema,
   attachmentDiffSchema,
   getLatestVersion,
   getVersion,
@@ -71,4 +69,5 @@ export {
   isVersionedAttachmentWithOrigin,
   hashContent,
   estimateTokens,
+  getContentKey,
 } from './versioned_attachment';

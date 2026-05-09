@@ -597,6 +597,7 @@
                 "lineNumber": 96,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "Params",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -654,6 +655,7 @@
                 "lineNumber": 108,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Params",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -713,6 +715,7 @@
             "lineNumber": 36,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -775,6 +778,7 @@
             "lineNumber": 20,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "Partial",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -796,7 +800,7 @@
           "\nStorybook parameters provided from the controls addon."
         ],
         "signature": [
-          "{ description: any; \"data-test-subj\": any; title: any; href: any; docsLink: any; canAccessFleet: any; buttonText: any; disabledButtonTooltipText: any; }"
+          "{ description: any; title: any; \"data-test-subj\": any; href: any; docsLink: any; canAccessFleet: any; buttonText: any; disabledButtonTooltipText: any; }"
         ],
         "path": "src/platform/packages/shared/shared-ux/card/no_data/mocks/src/storybook.ts",
         "lineNumber": 28,

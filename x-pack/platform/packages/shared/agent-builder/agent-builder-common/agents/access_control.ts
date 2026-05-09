@@ -6,6 +6,7 @@
  */
 
 import type { UserIdAndName } from '../base/users';
+import type { AgentDefinition } from './definition';
 import { agentBuilderDefaultAgentId } from './definition';
 import { AgentVisibility } from './visibility';
 
@@ -80,4 +81,37 @@ export const hasAgentWriteAccess = ({
     isAgentOwner({ owner, currentUser }) ||
     effectiveVisibility === AgentVisibility.Public
   );
+};
+
+/**
+ * Whether the current user may edit agent settings, attach skills/tools, etc.
+ */
+export const canCurrentUserEditAgent = ({
+  agent,
+  manageAgents,
+  currentUser,
+  isAdmin,
+  isCurrentUserLoading = false,
+}: {
+  agent: AgentDefinition;
+  manageAgents: boolean;
+  currentUser?: UserIdAndName | null;
+  isAdmin: boolean;
+  /** When true deny edit to avoid flashing incorrect actions. */
+  isCurrentUserLoading?: boolean;
+}): boolean => {
+  if (agent.readonly || !manageAgents) {
+    return false;
+  }
+
+  if (isCurrentUserLoading) {
+    return false;
+  }
+
+  return hasAgentWriteAccess({
+    visibility: agent.visibility,
+    owner: agent.created_by,
+    currentUser,
+    isAdmin,
+  });
 };

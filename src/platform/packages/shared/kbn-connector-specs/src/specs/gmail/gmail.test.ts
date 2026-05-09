@@ -34,6 +34,51 @@ describe('GmailConnector', () => {
     });
   });
 
+  describe('auth', () => {
+    it('supports bearer auth', () => {
+      expect(GmailConnector.auth?.types).toContain('bearer');
+    });
+
+    it('supports oauth_authorization_code with correct Google defaults', () => {
+      const oauthType = GmailConnector.auth?.types.find(
+        (t) => typeof t === 'object' && t.type === 'oauth_authorization_code'
+      );
+      expect(oauthType).toBeDefined();
+      expect(oauthType).toMatchObject({
+        type: 'oauth_authorization_code',
+        defaults: {
+          authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
+          tokenUrl: 'https://oauth2.googleapis.com/token',
+          scope: 'https://www.googleapis.com/auth/gmail.readonly',
+        },
+      });
+    });
+
+    it('supports ears auth type with correct Google defaults and overrides', () => {
+      const types = GmailConnector.auth?.types as Array<
+        | string
+        | {
+            type: string;
+            defaults?: Record<string, unknown>;
+            overrides?: Record<string, unknown>;
+          }
+      >;
+      expect(types.map((t) => (typeof t === 'string' ? t : t.type))).toContain('ears');
+
+      const earsType = types.find((t) => typeof t === 'object' && t.type === 'ears');
+      expect(earsType).toMatchObject({
+        type: 'ears',
+        defaults: {
+          provider: 'google',
+          scope: 'https://www.googleapis.com/auth/gmail.readonly',
+        },
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+      });
+    });
+  });
+
   describe('actions', () => {
     it('exposes searchMessages, getMessage, getAttachment, listMessages actions', () => {
       expect(GmailConnector.actions.searchMessages).toBeDefined();

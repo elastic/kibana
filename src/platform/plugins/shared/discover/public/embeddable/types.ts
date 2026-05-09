@@ -38,8 +38,17 @@ import type { PublishesWritableDataViews } from '@kbn/presentation-publishing/in
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type {
   NonPersistedDisplayOptions,
-  SearchEmbeddableState,
+  SearchEmbeddablePanelApiState,
 } from '../../common/embeddable/types';
+
+export type { SearchEmbeddablePanelApiState };
+
+/**
+ * Input state accepted by the search embeddable factory.
+ */
+export type SearchEmbeddableInputState = SearchEmbeddablePanelApiState & {
+  nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
+};
 
 export type SearchEmbeddablePublicState = Pick<
   SerializableSavedSearch,
@@ -83,7 +92,7 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     tabs?: DiscoverSessionTab[];
   };
 
-export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableState> &
+export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddablePanelApiState> &
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &

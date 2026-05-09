@@ -283,6 +283,49 @@ describe('WorkflowExecutionTelemetryClient', () => {
         parentWorkflowInvocation: 'sync',
       });
     });
+
+    it('should normalize event-driven trigger id to triggerType event and eventTriggerId', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        triggeredBy: 'cases.caseCreated',
+        startedAt: '2024-01-01T00:00:01.000Z',
+        context: {
+          event: { eventChainDepth: 1 },
+          metadata: {
+            eventDispatchTimestamp: '2024-01-01T00:00:00.000Z',
+          },
+        },
+      });
+
+      client.reportWorkflowExecutionCompleted({
+        workflowExecution,
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({
+        triggerType: 'event',
+        eventTriggerId: 'cases.caseCreated',
+        eventChainDepth: 1,
+        emitToStartMs: 1000,
+      });
+    });
+
+    it('should default to manual when triggeredBy is undefined', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        triggeredBy: undefined,
+      });
+
+      client.reportWorkflowExecutionCompleted({
+        workflowExecution,
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({
+        triggerType: 'manual',
+      });
+      expect(eventData).not.toHaveProperty('eventTriggerId');
+    });
   });
 
   describe('reportWorkflowExecutionFailed', () => {
@@ -409,6 +452,64 @@ describe('WorkflowExecutionTelemetryClient', () => {
         parentWorkflowInvocation: 'async',
         errorMessage: 'Child failed',
       });
+    });
+  });
+
+  describe('reportEventDrivenExecutionSuppressed', () => {
+    it('should report suppression with event trigger fields', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        triggeredBy: 'cases.updated',
+        status: ExecutionStatus.SKIPPED,
+        context: {
+          event: {
+            timestamp: '2025-01-01T00:00:00.000Z',
+            spaceId: 'default',
+            eventChainDepth: 2,
+          },
+        },
+      });
+
+      client.reportEventDrivenExecutionSuppressed({
+        workflowExecution,
+        logTriggerEventsEnabled: true,
+      });
+
+      expect(telemetry.reportEvent).toHaveBeenCalledTimes(1);
+      const [eventType, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventType).toBe(WorkflowExecutionTelemetryEventTypes.EventDrivenExecutionSuppressed);
+      expect(eventData).toMatchObject({
+        workflowExecutionId: 'test-execution-id',
+        workflowId: 'test-workflow-id',
+        spaceId: 'default',
+        triggerType: 'event',
+        eventTriggerId: 'cases.updated',
+        eventChainDepth: 2,
+        isTestRun: false,
+        logTriggerEventsEnabled: true,
+      });
+    });
+
+    it('should omit sub-workflow composition fields from event-driven suppression telemetry', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        triggeredBy: 'cases.updated',
+        status: ExecutionStatus.SKIPPED,
+        context: {
+          event: { timestamp: '2025-01-01T00:00:00.000Z', spaceId: 'default' },
+          parentDepth: 0,
+          parentWorkflowId: 'parent-wf-id',
+          parentWorkflowInvocation: 'sync',
+        },
+      });
+
+      client.reportEventDrivenExecutionSuppressed({
+        workflowExecution,
+        logTriggerEventsEnabled: false,
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).not.toHaveProperty('compositionDepth');
+      expect(eventData).not.toHaveProperty('parentWorkflowId');
+      expect(eventData).not.toHaveProperty('parentWorkflowInvocation');
     });
   });
 

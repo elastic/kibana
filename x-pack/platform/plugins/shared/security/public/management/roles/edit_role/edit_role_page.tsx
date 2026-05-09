@@ -621,7 +621,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
     return (
       <EuiButton
         {...reactRouterNavigate(history, '')}
-        iconType="arrowLeft"
+        iconType="chevronSingleLeft"
         data-test-subj="roleFormReturnButton"
       >
         <FormattedMessage

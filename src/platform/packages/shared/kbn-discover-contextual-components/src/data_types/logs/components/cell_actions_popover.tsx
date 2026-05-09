@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
-import React from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
   type EuiBadgeProps,
@@ -28,7 +28,6 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { escapeAndPreserveHighlightTags } from '@kbn/discover-utils';
 import {
   actionFilterForText,
   actionFilterOutText,
@@ -39,19 +38,21 @@ import {
   filterOutText,
   openCellActionPopoverAriaText,
 } from './translations';
-import { truncateAndPreserveHighlightTags, extractTextAndMarkTags } from './utils';
+import { truncateReactNode } from './utils';
 
 interface CellActionsPopoverProps {
   onFilter?: DocViewFilterFn;
   /** ECS mapping for the key */
   property?: DataViewField;
   name: string;
-  /** Formatted value from the mapping, which will be displayed */
-  value: string;
+  /** Formatted value from field formatter (React node) */
+  formattedValue: ReactNode;
+  /** Plain text version of the value for copying to clipboard */
+  textValue: string;
   /** The raw value from the mapping, can be an object */
   rawValue: unknown;
-  /** Optional callback to render the formatted value */
-  renderValue?: (value: string) => React.ReactNode;
+  /** Optional callback to customize rendering of the formatted value */
+  renderFormattedValue?: (formattedValue: ReactNode) => ReactNode;
   /** Props to forward to the trigger Badge */
   renderPopoverTrigger: (props: {
     popoverTriggerProps: {
@@ -66,9 +67,10 @@ export function CellActionsPopover({
   onFilter,
   property,
   name,
-  value,
+  formattedValue,
+  textValue,
   rawValue,
-  renderValue,
+  renderFormattedValue,
   renderPopoverTrigger,
 }: CellActionsPopoverProps) {
   const { euiTheme } = useEuiTheme();
@@ -109,17 +111,12 @@ export function CellActionsPopover({
             `}
           >
             <strong>{name}</strong>{' '}
-            {typeof renderValue === 'function' ? (
-              <>{renderValue(escapeAndPreserveHighlightTags(value))}</>
+            {typeof renderFormattedValue === 'function' ? (
+              <>{renderFormattedValue(formattedValue)}</>
             ) : rawValue != null && typeof rawValue !== 'object' ? (
-              <>{rawValue as React.ReactNode}</>
+              <>{rawValue as ReactNode}</>
             ) : (
-              <span
-                // eslint-disable-next-line react/no-danger
-                dangerouslySetInnerHTML={{
-                  __html: escapeAndPreserveHighlightTags(value),
-                }}
-              />
+              <span>{formattedValue}</span>
             )}
           </EuiText>
         </EuiFlexItem>
@@ -140,8 +137,8 @@ export function CellActionsPopover({
             <EuiButtonEmpty
               key="addToFilterAction"
               size="s"
-              iconType="plusInCircle"
-              aria-label={actionFilterForText(value)}
+              iconType="plusCircle"
+              aria-label={actionFilterForText(textValue)}
               onClick={makeFilterHandlerByOperator('+')}
               data-test-subj={`dataTableCellAction_addToFilterAction_${name}`}
             >
@@ -150,8 +147,8 @@ export function CellActionsPopover({
             <EuiButtonEmpty
               key="removeFromFilterAction"
               size="s"
-              iconType="minusInCircle"
-              aria-label={actionFilterOutText(value)}
+              iconType="minusCircle"
+              aria-label={actionFilterOutText(textValue)}
               onClick={makeFilterHandlerByOperator('-')}
               data-test-subj={`dataTableCellAction_removeFromFilterAction_${name}`}
             >
@@ -161,12 +158,12 @@ export function CellActionsPopover({
         </EuiPopoverFooter>
       ) : null}
       <EuiPopoverFooter>
-        <EuiCopy textToCopy={value}>
+        <EuiCopy textToCopy={textValue}>
           {(copy) => (
             <EuiButtonEmpty
               key="copyToClipboardAction"
               size="s"
-              iconType="copyClipboard"
+              iconType="copy"
               aria-label={copyValueAriaText(name)}
               onClick={copy}
               data-test-subj={`dataTableCellAction_copyToClipboardAction_${name}`}
@@ -183,7 +180,13 @@ export function CellActionsPopover({
 export interface FieldBadgeWithActionsProps
   extends Pick<
     CellActionsPopoverProps,
-    'onFilter' | 'name' | 'property' | 'value' | 'rawValue' | 'renderValue'
+    | 'onFilter'
+    | 'name'
+    | 'property'
+    | 'formattedValue'
+    | 'textValue'
+    | 'rawValue'
+    | 'renderFormattedValue'
   > {
   icon?: EuiBadgeProps['iconType'];
   color?: string;
@@ -203,39 +206,39 @@ export function FieldBadgeWithActions({
   onFilter,
   name,
   property,
-  renderValue,
-  value,
+  renderFormattedValue,
+  formattedValue,
+  textValue,
   rawValue,
   color = 'hollow',
   truncateTitle = false,
 }: FieldBadgeWithActionsPropsAndDependencies) {
   const MAX_LENGTH = 20;
 
-  const displayValue = truncateTitle ? truncateAndPreserveHighlightTags(value, MAX_LENGTH) : value;
-  const titleText = extractTextAndMarkTags(value).cleanText;
+  const displayValue = useMemo(
+    () =>
+      truncateTitle ? truncateReactNode(formattedValue, MAX_LENGTH, textValue) : formattedValue,
+    [truncateTitle, formattedValue, textValue]
+  );
 
   return (
     <CellActionsPopover
       onFilter={onFilter}
       name={name}
       property={property}
-      value={value}
+      formattedValue={formattedValue}
+      textValue={textValue}
       rawValue={rawValue}
-      renderValue={renderValue}
+      renderFormattedValue={renderFormattedValue}
       renderPopoverTrigger={({ popoverTriggerProps }) => (
         <EuiBadge
           {...popoverTriggerProps}
           color={color}
           iconType={icon}
           iconSide="left"
-          title={titleText}
+          title={textValue}
         >
-          <span
-            // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{
-              __html: escapeAndPreserveHighlightTags(displayValue),
-            }}
-          />
+          <span>{displayValue}</span>
         </EuiBadge>
       )}
     />

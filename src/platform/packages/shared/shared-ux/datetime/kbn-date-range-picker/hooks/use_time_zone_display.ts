@@ -20,22 +20,30 @@ import { useMemo } from 'react';
  */
 export const useTimeZoneDisplay = (
   timeZone: string | undefined,
-  date?: Date | null
+  date?: Date | null,
+  abbreviated?: boolean
 ): string | null => {
   return useMemo(() => {
     if (!timeZone) return null;
     try {
       const refDate = date ?? new Date();
 
+      // Kibana uses "Browser" as a special value meaning "use the local time zone".
+      // Resolve it to the actual IANA name so Intl.DateTimeFormat can use it.
+      const resolvedTimeZone =
+        timeZone === 'Browser' ? Intl.DateTimeFormat().resolvedOptions().timeZone : timeZone;
+
       const offsetParts = new Intl.DateTimeFormat('en', {
-        timeZone,
+        timeZone: resolvedTimeZone,
         timeZoneName: 'longOffset',
       }).formatToParts(refDate);
       const offset = offsetParts.find((p) => p.type === 'timeZoneName')?.value ?? null;
       if (!offset) return null;
 
+      if (abbreviated) return offset;
+
       const abbrParts = new Intl.DateTimeFormat('en', {
-        timeZone,
+        timeZone: resolvedTimeZone,
         timeZoneName: 'short',
       }).formatToParts(refDate);
       const abbr = abbrParts.find((p) => p.type === 'timeZoneName')?.value ?? null;
@@ -45,10 +53,10 @@ export const useTimeZoneDisplay = (
       const isAbbrDifferent = offset.substring(0, 3) !== abbr?.substring(0, 3);
 
       return isAbbrAlphabetic && isAbbrDifferent
-        ? `${offset} \u2013 ${timeZone} (${abbr})`
-        : `${offset} \u2013 ${timeZone}`;
+        ? `${offset} \u2013 ${resolvedTimeZone} (${abbr})`
+        : `${offset} \u2013 ${resolvedTimeZone}`;
     } catch {
       return null;
     }
-  }, [timeZone, date]);
+  }, [timeZone, date, abbreviated]);
 };

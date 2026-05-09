@@ -16,6 +16,7 @@ import { getPlaywrightGrepTag } from '../playwright/utils';
 import { getConfigRootDir, loadServersConfig } from './configs';
 import type { StartServerOptions } from './flags';
 import { preCreateSecurityIndexesViaSamlAuth } from './pre_create_security_indexes';
+import { ensureDefaultSpaceNPRE } from './ensure_default_space_npre';
 import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
 
@@ -39,8 +40,11 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       config,
       log,
       esFrom: options.esFrom,
+      preserveEsData: options.preserveEsData,
       logsDir: options.logsDir,
     });
+
+    await ensureDefaultSpaceNPRE(config, log);
 
     await runKibanaServer({
       procs,

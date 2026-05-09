@@ -13,7 +13,8 @@
       "spaces",
       "taskManager",
       "dataViews",
-      "security"
+      "security",
+      "licensing"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects"

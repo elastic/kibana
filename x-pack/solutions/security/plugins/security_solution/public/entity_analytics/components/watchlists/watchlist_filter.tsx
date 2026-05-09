@@ -9,7 +9,6 @@ import React, { useMemo, useCallback, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiIcon, EuiComboBox, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { getWatchlistName } from '../../../../common/entity_analytics/watchlists/constants';
 import {
   WATCHLIST_FILTER_LABEL,
   WATCHLIST_FILTER_PLACEHOLDER,
@@ -22,7 +21,7 @@ import type { WatchlistItem, WatchlistOption } from './types';
 import { useGetWatchlists } from '../../api/hooks/use_get_watchlists';
 
 interface WatchlistFilterProps {
-  onChangeSelectedId?: (id: string | undefined) => void;
+  onChangeSelectedId?: (id: string | undefined, name: string | undefined) => void;
   selectedId?: string;
 }
 
@@ -70,8 +69,8 @@ export const WatchlistFilter = ({
 
     watchlists.forEach((watchlist) => {
       const option: WatchlistItem = {
-        id: watchlist.name, // Changed to match by name
-        label: getWatchlistName(watchlist.name),
+        id: watchlist.id ?? watchlist.name,
+        label: watchlist.name,
       };
 
       if (watchlist.managed) {
@@ -109,8 +108,9 @@ export const WatchlistFilter = ({
         | undefined;
 
       const newId = newlySelected?.id;
+      const newName = newlySelected?.label;
       setInternalSelectedId(newId);
-      onChangeSelectedId?.(newId);
+      onChangeSelectedId?.(newId, newName);
     },
     [onChangeSelectedId]
   );

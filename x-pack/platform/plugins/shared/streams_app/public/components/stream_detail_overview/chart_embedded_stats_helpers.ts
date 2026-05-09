@@ -6,12 +6,13 @@
  */
 
 import { formatNumber } from '@elastic/eui';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { AsyncState } from 'react-use/lib/useAsync';
 
-import { formatBytes } from '../data_management/stream_detail_lifecycle/helpers/format_bytes';
+import { formatBytes } from '../stream_management/data_management/stream_detail_lifecycle/helpers/format_bytes';
 import { executeEsqlQuery } from '../../hooks/use_execute_esql_query';
 import { buildDataQualityTotalDocCountEsql } from '../../util/stream_overview_esql';
 
@@ -70,12 +71,14 @@ export function chartEmbeddedEstimatedStorageLabel(): string {
 export async function fetchEsqlTotalDocCount(
   esqlSource: string,
   search: ISearchGeneric,
-  signal: AbortSignal
+  signal: AbortSignal,
+  uiSettings: IUiSettingsClient
 ): Promise<number> {
   const response = await executeEsqlQuery({
     query: buildDataQualityTotalDocCountEsql(esqlSource),
     search,
     signal,
+    uiSettings,
   });
   const colIdx = response.columns.findIndex((c) => c.name === 'doc_count');
   return colIdx !== -1 ? (response.values[0]?.[colIdx] as number) ?? 0 : 0;

@@ -146,7 +146,7 @@ export function ServiceGroupTemplate({
                       <EuiIcon
                         aria-label={returnToServiceGroupsBreadcrumbLabel}
                         size="s"
-                        type="arrowLeft"
+                        type="chevronSingleLeft"
                       />{' '}
                       {returnToServiceGroupsBreadcrumbLabel}
                     </>

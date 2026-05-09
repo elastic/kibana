@@ -18,6 +18,7 @@ import {
   EuiTabs,
   EuiTitle,
   useGeneratedHtmlId,
+  type EuiFlyoutProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -74,14 +75,16 @@ const FlyoutTabs = ({ onClick, selectedTabId }: FlyoutTabsProps) => {
 
 export interface Props {
   title: string;
-  onCloseFlyout: () => void;
+  onCloseFlyout: EuiFlyoutProps['onClose'];
   hit: DataTableRecord | null;
   loading: boolean;
   dataView: DocViewRenderProps['dataView'];
   dataTestSubj?: string;
+  hasAnimation?: boolean;
   flyoutContentId: FlyoutContentId;
   children: React.ReactNode;
   skipNextEventReport?: boolean;
+  size?: EuiFlyoutProps['size'];
 }
 
 export function WaterfallFlyout({
@@ -92,8 +95,10 @@ export function WaterfallFlyout({
   children,
   title,
   dataTestSubj,
+  hasAnimation,
   flyoutContentId,
   skipNextEventReport,
+  size = 's',
 }: Props) {
   const { analytics } = getUnifiedDocViewerServices();
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
@@ -111,11 +116,12 @@ export function WaterfallFlyout({
   return (
     <EuiFlyout
       data-test-subj={dataTestSubj}
-      size="s"
+      size={size}
       includeFixedHeadersInFocusTrap={false}
       onClose={onCloseFlyout}
       aria-labelledby={flyoutTitleId}
       id={flyoutId}
+      hasAnimation={hasAnimation}
     >
       <EuiFlyoutHeader>
         <EuiSkeletonTitle isLoading={loading}>

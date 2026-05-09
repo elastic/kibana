@@ -170,7 +170,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
                   data-test-subj="add-query-button"
                   fill
                   onClick={handleShowAddFlyout}
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                 >
                   <FormattedMessage
                     id="xpack.osquery.pack.queriesForm.addQueryButtonLabel"

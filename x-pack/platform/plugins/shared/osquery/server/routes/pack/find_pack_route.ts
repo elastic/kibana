@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, map, omit } from 'lodash';
+import { filter, map } from 'lodash';
 
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { IRouter } from '@kbn/core/server';
@@ -21,6 +21,7 @@ import type { PackSavedObject } from '../../common/types';
 import type { PackResponseData } from './types';
 import { findPacksRequestQuerySchema } from '../../../common/api';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
+import { findPackResponseSchema } from './response_schemas';
 
 export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.versioned
@@ -42,6 +43,11 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
               typeof findPacksRequestQuerySchema,
               FindPacksRequestQuerySchema
             >(findPacksRequestQuerySchema),
+          },
+          response: {
+            200: {
+              body: () => findPackResponseSchema,
+            },
           },
         },
       },
@@ -84,6 +90,10 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             filter(pack.references, ['type', LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE]),
             'id'
           );
+          const osqueryPackAssetReference = !!filter(pack.references, [
+            'type',
+            'osquery-pack-asset',
+          ]).length;
 
           const { attributes } = pack;
 
@@ -101,12 +111,15 @@ export const findPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext
             updated_by_profile_uid: attributes.updated_by_profile_uid,
             saved_object_id: pack.id,
             policy_ids: policyIds,
+            read_only: attributes.version !== undefined && osqueryPackAssetReference,
           };
         });
 
         return response.ok({
           body: {
-            ...omit(soClientResponse, 'saved_objects'),
+            page: soClientResponse.page,
+            per_page: soClientResponse.per_page,
+            total: soClientResponse.total,
             data: packSavedObjects,
           },
         });

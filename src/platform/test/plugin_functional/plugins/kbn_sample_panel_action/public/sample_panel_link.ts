@@ -9,8 +9,7 @@
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
-
-export const SAMPLE_PANEL_LINK = 'samplePanelLink';
+import { SAMPLE_PANEL_LINK } from './constants';
 
 export const createSamplePanelLink = (): Action =>
   createAction({

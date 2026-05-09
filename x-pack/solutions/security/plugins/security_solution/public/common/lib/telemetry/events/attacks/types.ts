@@ -21,6 +21,7 @@ export enum AttacksEventTypes {
   ExpandedViewTabClicked = 'Attacks Expanded View Tab Clicked',
   ScheduleFlyoutOpened = 'Attacks Schedule Flyout Opened',
   FeaturePromotionCalloutAction = 'Attacks Feature Promotion Callout Action',
+  WorkflowRunTriggered = 'Attacks Workflow Run Triggered',
 }
 
 interface AttacksTableSortChangedParams {
@@ -97,6 +98,7 @@ export interface AttacksTelemetryEventsMap {
   [AttacksEventTypes.ExpandedViewTabClicked]: AttacksExpandedViewTabClickedParams;
   [AttacksEventTypes.ScheduleFlyoutOpened]: AttacksScheduleFlyoutOpenedParams;
   [AttacksEventTypes.FeaturePromotionCalloutAction]: AttacksFeaturePromotionCalloutActionParams;
+  [AttacksEventTypes.WorkflowRunTriggered]: AttacksActionBaseParams;
 }
 
 export interface AttacksTelemetryEvent {

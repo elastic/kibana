@@ -10,6 +10,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { IS_OPERATOR } from '@kbn/timelines-plugin/common';
+import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
 import {
   getDataProvider,
   getDataProviderAnd,
@@ -30,6 +31,7 @@ import {
 import { FormattedCount } from '../../../common/components/formatted_number';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { InvestigateInTimelineButton } from '../../../common/components/event_details/investigate_in_timeline_button';
+import type { ChildLinkRenderer } from '../../document/components/highlighted_fields_cell';
 
 /**
  * Component that renders a grey box to indicate the user doesn't have proper license to view the actual data
@@ -65,6 +67,14 @@ export interface PrevalenceDetailsRow extends PrevalenceData {
    * True if user have the correct timeline read privilege
    */
   canUseTimeline: boolean;
+  /**
+   * Host entity identifiers from the current document (for EUID / entity store).
+   */
+  documentHostEntityIdentifiers?: IdentityFields | null;
+  /**
+   * User entity identifiers from the current document (for EUID / entity store).
+   */
+  documentUserEntityIdentifiers?: IdentityFields | null;
 }
 
 export const fieldColumn: EuiBasicTableColumn<PrevalenceDetailsRow> = {
@@ -305,7 +315,11 @@ export const getColumns = (
   /**
    * Scope id for cell actions
    */
-  scopeId: string
+  scopeId: string,
+  /**
+   * Optional component to render preview links for supported field types (e.g. IP fields)
+   */
+  RenderChildLink?: ChildLinkRenderer
 ): Array<EuiBasicTableColumn<PrevalenceDetailsRow>> => [
   fieldColumn,
   {
@@ -316,24 +330,36 @@ export const getColumns = (
       />
     ),
     'data-test-subj': PREVALENCE_DETAILS_TABLE_VALUE_CELL_TEST_ID,
-    render: (data: PrevalenceDetailsRow) => (
-      <EuiFlexGroup direction="column" gutterSize="none">
-        {data.values.map((value) => (
-          <EuiFlexItem key={value}>
-            {renderCellActions ? (
-              renderCellActions({
-                field: data.field,
-                value,
-                scopeId,
-                children: <EuiText size="xs">{value}</EuiText>,
-              })
-            ) : (
-              <EuiText size="xs">{value}</EuiText>
-            )}
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    ),
+    render: (data: PrevalenceDetailsRow) => {
+      const renderValue = (value: string) => {
+        const text = <EuiText size="xs">{value}</EuiText>;
+        if (RenderChildLink) {
+          return (
+            <RenderChildLink field={data.field} value={value}>
+              {text}
+            </RenderChildLink>
+          );
+        }
+        return text;
+      };
+
+      return (
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {data.values.map((value) => (
+            <EuiFlexItem key={value}>
+              {renderCellActions
+                ? renderCellActions({
+                    field: data.field,
+                    value,
+                    scopeId,
+                    children: renderValue(value),
+                  })
+                : renderValue(value)}
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      );
+    },
     width: '20%',
   },
   alertCountColumn(isInSecurityApp),

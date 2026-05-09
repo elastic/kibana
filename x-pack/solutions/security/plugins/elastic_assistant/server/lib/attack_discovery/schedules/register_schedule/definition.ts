@@ -16,14 +16,17 @@ import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { ATTACK_DISCOVERY_ALERTS_AAD_CONFIG } from '../constants';
 import type { AttackDiscoveryExecutorOptions, AttackDiscoveryScheduleType } from '../types';
 import { attackDiscoveryScheduleExecutor } from './executor';
+import type { ElasticAssistantPluginCoreSetupDependencies } from '../../../../types';
 
 export interface GetAttackDiscoveryScheduleParams {
+  core: ElasticAssistantPluginCoreSetupDependencies;
   logger: Logger;
   publicBaseUrl: string | undefined;
   telemetry: AnalyticsServiceSetup;
 }
 
 export const getAttackDiscoveryScheduleType = ({
+  core,
   logger,
   publicBaseUrl,
   telemetry,
@@ -59,7 +62,9 @@ export const getAttackDiscoveryScheduleType = ({
     autoRecoverAlerts: false,
     alerts: ATTACK_DISCOVERY_ALERTS_AAD_CONFIG,
     executor: async (options: AttackDiscoveryExecutorOptions) => {
+      const [, startDeps] = await core.getStartServices();
       return attackDiscoveryScheduleExecutor({
+        inference: startDeps.inference,
         options,
         logger,
         publicBaseUrl,

@@ -119,6 +119,7 @@ export default function searchSolutionNavigation({
           'dev_tools',
           'data_management',
           'stack_management',
+          'workflows',
         ],
         { checkOrder: false }
       );

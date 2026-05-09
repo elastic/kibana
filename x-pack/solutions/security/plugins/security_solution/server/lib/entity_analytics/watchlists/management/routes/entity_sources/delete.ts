@@ -18,6 +18,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../../../types';
 import { withMinimumLicense } from '../../../../utils/with_minimum_license';
 import { WatchlistConfigClient } from '../../watchlist_config';
 import { getRequestSavedObjectClient } from '../../../shared/utils';
+import { WatchlistEntitySourceClient } from '../../../entity_sources/infra';
 
 export const deleteEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -48,7 +49,10 @@ export const deleteEntitySourceRoute = (
         try {
           const secSol = await context.securitySolution;
           const core = await context.core;
-          const client = secSol.getMonitoringEntitySourceDataClient();
+          const client = new WatchlistEntitySourceClient({
+            soClient: getRequestSavedObjectClient(core),
+            namespace: secSol.getSpaceId(),
+          });
 
           // Get the source first so we can pass it for validation
           const source = await client.get(request.params.id);

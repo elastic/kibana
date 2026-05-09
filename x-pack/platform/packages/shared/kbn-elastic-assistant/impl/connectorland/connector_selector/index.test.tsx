@@ -249,4 +249,28 @@ describe('Connector selector', () => {
       i18n.INLINE_CONNECTOR_PLACEHOLDER
     );
   });
+
+  it('passes loadConnectorFeatureId to useLoadConnectors when defined', () => {
+    render(
+      <TestProviders>
+        <ConnectorSelector {...defaultProps} loadConnectorFeatureId="test-feature-id" />
+      </TestProviders>
+    );
+
+    expect(useLoadConnectors).toHaveBeenCalledWith(
+      expect.objectContaining({ featureId: 'test-feature-id' })
+    );
+  });
+
+  it('defaults loadConnectorFeatureId to elastic_assistant when not defined', () => {
+    render(
+      <TestProviders>
+        <ConnectorSelector {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(useLoadConnectors).toHaveBeenCalledWith(
+      expect.objectContaining({ featureId: 'elastic_assistant' })
+    );
+  });
 });

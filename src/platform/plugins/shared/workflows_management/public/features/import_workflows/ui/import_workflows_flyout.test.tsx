@@ -137,6 +137,7 @@ const createPreflightResult = (
 
   const rawWorkflows = (overrides.workflows ?? []).map((w) => ({
     id: w.id,
+    originalId: w.id,
     yaml: 'yaml' in w && w.yaml && typeof w.yaml === 'string' ? w.yaml : `name: ${w.name ?? w.id}`,
   }));
 
@@ -358,7 +359,7 @@ describe('ImportWorkflowsFlyout', () => {
             valid: false,
           }),
         ],
-        rawWorkflows: [{ id: 'fallback-id', yaml: 'bad yaml' }],
+        rawWorkflows: [{ id: 'fallback-id', originalId: 'fallback-id', yaml: 'bad yaml' }],
       });
       clientResult.workflows[0].name = null;
       mockParseImportFile.mockResolvedValue(clientResult);
@@ -591,8 +592,8 @@ describe('ImportWorkflowsFlyout', () => {
       await waitFor(() => {
         const [{ workflows }] = mockBulkCreateWorkflows.mock.calls[0];
         expect(workflows).toHaveLength(1);
-        expect(workflows[0].id).not.toBe('w-1');
-        expect(workflows[0].id).toMatch(/^workflow-/);
+        // The original ID 'w-1' conflicts, so a numeric postfix is appended
+        expect(workflows[0].id).toBe('w-1-1');
       });
     });
   });
@@ -770,6 +771,83 @@ describe('ImportWorkflowsFlyout', () => {
       fireEvent.click(screen.getByTestId('import-workflows-cancel'));
 
       expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  describe('parse errors', () => {
+    it('should show parse errors callout when preflight returns parseErrors', async () => {
+      const clientResult = createPreflightResult({
+        format: 'zip',
+        workflows: [createWorkflowPreview({ id: 'w-1', name: 'Valid' })],
+        parseErrors: [
+          'Entry readme.txt is not a .yml file',
+          'Unexpected nested entry subdir/w.yml',
+        ],
+      });
+      mockParseImportFile.mockResolvedValue(clientResult);
+      mockMgetWorkflows.mockResolvedValue([]);
+
+      renderFlyout();
+
+      const input = getFileInput();
+      fireEvent.change(input, {
+        target: { files: [createSmallFile('test.zip', 'zip-content')] },
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/2 lines were skipped due to parse errors/)).toBeInTheDocument();
+      });
+    });
+
+    it('should display both conflict and parse error callouts simultaneously', async () => {
+      const clientResult = createPreflightResult({
+        format: 'zip',
+        workflows: [createWorkflowPreview({ id: 'w-1', name: 'Existing' })],
+        parseErrors: ['Entry readme.txt is not a .yml file'],
+      });
+      mockParseImportFile.mockResolvedValue(clientResult);
+      mockMgetWorkflows.mockResolvedValue([{ id: 'w-1', name: 'Existing' }]);
+
+      renderFlyout();
+
+      const input = getFileInput();
+      fireEvent.change(input, {
+        target: { files: [createSmallFile('test.zip', 'zip-content')] },
+      });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('import-workflows-conflicts')).toBeInTheDocument();
+        expect(screen.getByText(/1 line was skipped due to parse errors/)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('import error handling', () => {
+    it('should show error toast when import API call fails', async () => {
+      const clientResult = createPreflightResult({
+        workflows: [createWorkflowPreview({ id: 'test', name: 'Test' })],
+      });
+      mockParseImportFile.mockResolvedValue(clientResult);
+      mockMgetWorkflows.mockResolvedValueOnce([]);
+      mockBulkCreateWorkflows.mockRejectedValueOnce(new Error('Server error'));
+
+      renderFlyout();
+
+      const input = getFileInput();
+      fireEvent.change(input, { target: { files: [createSmallFile('test.yml', 'name: Test')] } });
+
+      await waitFor(() => {
+        expect(screen.getByTestId('import-workflows-confirm')).not.toBeDisabled();
+      });
+
+      fireEvent.click(screen.getByTestId('import-workflows-confirm'));
+
+      await waitFor(() => {
+        expect(mockToasts.addError).toHaveBeenCalledWith(
+          expect.any(Error),
+          expect.objectContaining({ title: 'Failed to import workflows' })
+        );
+      });
     });
   });
 });

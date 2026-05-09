@@ -45,6 +45,13 @@ const queryClient = new QueryClient({
 
 const sloClient = createRepositoryClient<SLORouteRepository, DefaultClientOptions>(core);
 
+export const pluginContextDefaultValue = {
+  appMountParameters,
+  observabilityRuleTypeRegistry,
+  ObservabilityPageTemplate: KibanaPageTemplate,
+  sloClient,
+};
+
 export const render = (component: React.ReactNode) => {
   return testLibRender(
     // @ts-ignore
@@ -68,14 +75,7 @@ export const render = (component: React.ReactNode) => {
             },
           }}
         >
-          <PluginContext.Provider
-            value={{
-              appMountParameters,
-              observabilityRuleTypeRegistry,
-              ObservabilityPageTemplate: KibanaPageTemplate,
-              sloClient,
-            }}
-          >
+          <PluginContext.Provider value={pluginContextDefaultValue}>
             <QueryClientProvider client={queryClient}>{component}</QueryClientProvider>
           </PluginContext.Provider>
         </KibanaContextProvider>

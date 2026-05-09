@@ -36,7 +36,8 @@
       "discover"
     ],
     "optionalPlugins": [
-      "cloud"
+      "cloud",
+      "searchInferenceEndpoints"
     ],
     "requiredBundles": [
       "kibanaReact",

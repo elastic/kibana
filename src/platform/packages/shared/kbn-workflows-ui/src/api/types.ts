@@ -44,6 +44,11 @@ export interface ExportWorkflowsParams {
   ids: string[];
 }
 
+export interface ExportWorkflowsResponse {
+  entries: Array<{ id: string; yaml: string }>;
+  manifest: { exportedCount: number; exportedAt: string; version: string };
+}
+
 export interface GetAggsParams {
   fields: string[];
 }

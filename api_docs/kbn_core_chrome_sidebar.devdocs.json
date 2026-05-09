@@ -29,7 +29,11 @@
           "\nCreate a sidebar store configuration with schema and actions.\nThe store is instantiated lazily when the app is first accessed.\n"
         ],
         "signature": [
-          "(config: { schema: z.ZodType<TState>; actions: (set: ",
+          "(config: { schema: ",
+          "ZodType",
+          "<TState, unknown, ",
+          "node_modules/zod/v4/core/schemas",
+          "$ZodTypeInternals<TState, unknown>>; actions: (set: ",
           "SetState",
           "<TState>, get: ",
           "GetState",
@@ -61,12 +65,15 @@
               {
                 "parentPluginId": "@kbn/core-chrome-sidebar",
                 "id": "def-common.createSidebarStore.$1.schema",
-                "type": "Any",
+                "type": "Object",
                 "tags": [],
                 "label": "schema",
                 "description": [],
                 "signature": [
-                  "z.ZodType<TState>"
+                  "ZodType",
+                  "<TState, unknown, ",
+                  "node_modules/zod/v4/core/schemas",
+                  "$ZodTypeInternals<TState, unknown>>"
                 ],
                 "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
                 "lineNumber": 54,
@@ -111,6 +118,7 @@
                     "lineNumber": 55,
                     "columnNumber": 13,
                     "deprecated": false,
+                    "docsReferencedTypeName": "SetState",
                     "trackAdoption": false,
                     "isRequired": true
                   },
@@ -129,6 +137,7 @@
                     "lineNumber": 55,
                     "columnNumber": 36,
                     "deprecated": false,
+                    "docsReferencedTypeName": "GetState",
                     "trackAdoption": false,
                     "isRequired": true
                   },
@@ -146,6 +155,7 @@
                     "lineNumber": 55,
                     "columnNumber": 59,
                     "deprecated": false,
+                    "docsReferencedTypeName": "SidebarContext",
                     "trackAdoption": false,
                     "isRequired": true
                   }
@@ -650,6 +660,7 @@
                 "lineNumber": 115,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SidebarAppConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -896,6 +907,7 @@
                 "lineNumber": 160,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "SidebarAppId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -938,6 +950,7 @@
                 "lineNumber": 163,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SidebarAppId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -980,6 +993,7 @@
                 "lineNumber": 166,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "SidebarAppId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1011,12 +1025,15 @@
           {
             "parentPluginId": "@kbn/core-chrome-sidebar",
             "id": "def-common.SidebarStoreConfig.schema",
-            "type": "Any",
+            "type": "Object",
             "tags": [],
             "label": "schema",
             "description": [],
             "signature": [
-              "z.ZodType<TState>"
+              "ZodType",
+              "<TState, unknown, ",
+              "node_modules/zod/v4/core/schemas",
+              "$ZodTypeInternals<TState, unknown>>"
             ],
             "path": "src/core/packages/chrome/sidebar/sidebar/src/create_sidebar_store.ts",
             "lineNumber": 32,
@@ -1061,6 +1078,7 @@
                 "lineNumber": 33,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "SetState",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1079,6 +1097,7 @@
                 "lineNumber": 33,
                 "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetState",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1096,6 +1115,7 @@
                 "lineNumber": 33,
                 "columnNumber": 59,
                 "deprecated": false,
+                "docsReferencedTypeName": "SidebarContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1255,7 +1275,7 @@
           "Status of a sidebar app."
         ],
         "signature": [
-          "\"pending\" | \"available\" | \"unavailable\""
+          "\"pending\" | \"unavailable\" | \"available\""
         ],
         "path": "src/core/packages/chrome/sidebar/sidebar/index.ts",
         "lineNumber": 69,
@@ -1299,6 +1319,7 @@
             "lineNumber": 109,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "SidebarAppUpdate",
             "trackAdoption": false
           }
         ],

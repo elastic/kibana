@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
+import { TestProviders } from '../../../common/mock';
 import {
   CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID,
   SUMMARY_ROW_BUTTON_TEST_ID,
@@ -16,13 +16,16 @@ import {
 } from './test_ids';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
 import { useFetchRelatedAlertsByAncestry } from '../hooks/use_fetch_related_alerts_by_ancestry';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { useSecurityDefaultPatterns } from '../../../data_view_manager/hooks/use_security_default_patterns';
 
 jest.mock('../hooks/use_fetch_related_alerts_by_ancestry');
+jest.mock('../../../common/hooks/use_experimental_features');
+jest.mock('../../../data_view_manager/hooks/use_security_default_patterns');
 
 const mockOnShowCorrelationsDetails = jest.fn();
 
 const documentId = 'documentId';
-const indices = ['indices'];
 
 const TEXT_TEST_ID = SUMMARY_ROW_TEXT_TEST_ID(CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID);
 const BUTTON_TEST_ID = SUMMARY_ROW_BUTTON_TEST_ID(CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID);
@@ -32,18 +35,19 @@ const LOADING_TEST_ID = SUMMARY_ROW_LOADING_TEST_ID(
 
 const renderRelatedAlertsByAncestry = () =>
   render(
-    <IntlProvider locale="en">
+    <TestProviders>
       <RelatedAlertsByAncestry
         documentId={documentId}
-        indices={indices}
         onShowCorrelationsDetails={mockOnShowCorrelationsDetails}
       />
-    </IntlProvider>
+    </TestProviders>
   );
 
 describe('<RelatedAlertsByAncestry />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    (useSecurityDefaultPatterns as jest.Mock).mockReturnValue({ indexPatterns: ['index'] });
   });
 
   it('should render single related alert correctly', () => {

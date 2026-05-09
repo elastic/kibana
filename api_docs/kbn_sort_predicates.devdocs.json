@@ -97,6 +97,7 @@
             "lineNumber": 248,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldFormat",
             "trackAdoption": false,
             "isRequired": true
           }

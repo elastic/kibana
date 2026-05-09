@@ -8,6 +8,12 @@ requestBody:
             input: "Hello"
             agent_id: "elastic-ai-agent"
             conversation_id: "c250305b-1929-4248-b568-b9e3f065fda5"
+        converseAsyncRequestInferenceExample:
+          description: "Example using inference_id (mutually exclusive with connector_id)"
+          value:
+            input: "Hello"
+            agent_id: "elastic-ai-agent"
+            inference_id: "my-inference-endpoint-id"
 responses:
   200:
     description: "Indicates a successful response"

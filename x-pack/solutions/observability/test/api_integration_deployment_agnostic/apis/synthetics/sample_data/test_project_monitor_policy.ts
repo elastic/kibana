@@ -30,6 +30,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
     projectId = 'test-suite',
     locationName = 'Fleet Managed',
     namespace,
+    kibanaUrl,
   }: {
     name?: string;
     inputs: Record<string, { value: string | boolean; type: string }>;
@@ -39,6 +40,7 @@ export const getTestProjectSyntheticsPolicyLightweight = (
     locationId: string;
     locationName?: string;
     namespace?: string;
+    kibanaUrl?: string;
   } = {
     name: 'My Monitor 3',
     inputs: {},
@@ -166,7 +168,9 @@ export const getTestProjectSyntheticsPolicyLightweight = (
                       config_id: configId,
                       'monitor.project.name': projectId,
                       'monitor.project.id': projectId,
+                      'monitor.interval': 3600,
                       meta: { space_id: 'default' },
+                      ...(kibanaUrl ? { kibanaUrl } : {}),
                     },
                     target: '',
                   },
@@ -287,11 +291,13 @@ export const getTestProjectSyntheticsPolicyLightweight = (
               {
                 add_fields: {
                   fields: {
-                    config_id: configId,
                     'monitor.fleet_managed': true,
-                    'monitor.project.id': projectId,
+                    config_id: configId,
                     'monitor.project.name': projectId,
+                    'monitor.project.id': projectId,
+                    'monitor.interval': 3600,
                     meta: { space_id: 'default' },
+                    ...(kibanaUrl ? { kibanaUrl } : {}),
                   },
                   target: '',
                 },

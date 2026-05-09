@@ -14,6 +14,7 @@ steps:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
       machineType: n2-standard-8
+      diskSizeGb: 105
     timeout_in_minutes: 50
     retry:
       automatic:

@@ -6,16 +6,16 @@
  */
 
 import type {
-  AttachmentInput,
   Attachment,
   VersionedAttachment,
+  AttachmentInput,
   AttachmentVersionRef,
 } from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_REF_ACTOR,
   ATTACHMENT_REF_OPERATION,
   getLatestVersion,
-  hashContent,
+  getContentKey,
 } from '@kbn/agent-builder-common/attachments';
 
 export const buildOptimisticAttachments = ({
@@ -55,18 +55,18 @@ export const buildOptimisticAttachments = ({
       return;
     }
 
-    const contentHash = hashContent(input.data);
-    const contentKey = `${input.type}:${contentHash}`;
+    const createdId = inputId ?? `pending-attachment-${index}`;
+    const contentKey = getContentKey(input, createdId);
     if (existingByContentKey.has(contentKey)) {
       return;
     }
 
-    const createdId = inputId ?? `pending-attachment-${index}`;
     fallbackAttachments.push({
       id: createdId,
       type: input.type,
-      data: input.data,
-      ...(input.hidden !== undefined ? { hidden: input.hidden } : {}),
+      data: (input.data ?? {}) as Record<string, unknown>,
+      origin: input.origin,
+      hidden: input.hidden,
     });
     attachmentRefs.push({
       attachment_id: createdId,

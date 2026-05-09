@@ -82,12 +82,13 @@ describe('OpenInDiscover', () => {
     jest.clearAllMocks();
   });
 
-  describe('button variant', () => {
+  describe('emptyButton variant', () => {
     it('should render a button with correct props', () => {
       const { getByTestId } = render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -103,7 +104,7 @@ describe('OpenInDiscover', () => {
     it('should render a button with custom label when provided', () => {
       const { getByTestId } = render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
           indexType="traces"
           rangeFrom="now-15m"
@@ -121,8 +122,9 @@ describe('OpenInDiscover', () => {
     it('should generate correct ESQL query and pass it to the locator', () => {
       render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -150,8 +152,9 @@ describe('OpenInDiscover', () => {
 
       const { getByTestId } = render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -176,8 +179,9 @@ describe('OpenInDiscover', () => {
 
       const { getByTestId } = render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -190,11 +194,11 @@ describe('OpenInDiscover', () => {
     });
   });
 
-  describe('outlinedButton variant', () => {
+  describe('button variant', () => {
     it('should render an outlined button with custom label', () => {
       const { getByTestId } = render(
         <OpenInDiscover
-          variant="outlinedButton"
+          variant="button"
           dataTestSubj="testOutlinedButton"
           indexType="traces"
           rangeFrom="now-15m"
@@ -223,8 +227,9 @@ describe('OpenInDiscover', () => {
 
       const { getByTestId } = render(
         <OpenInDiscover
-          variant="outlinedButton"
+          variant="button"
           dataTestSubj="testOutlinedButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -243,6 +248,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="link"
           dataTestSubj="testLink"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -266,6 +272,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="link"
           dataTestSubj="testLink"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -293,6 +300,7 @@ describe('OpenInDiscover', () => {
         <OpenInDiscover
           variant="link"
           dataTestSubj="testLink"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -310,8 +318,9 @@ describe('OpenInDiscover', () => {
     it('should generate traces ESQL query with service name and transaction type', () => {
       render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -328,8 +337,9 @@ describe('OpenInDiscover', () => {
     it('should generate traces ESQL query with transaction name filter', () => {
       render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -344,8 +354,9 @@ describe('OpenInDiscover', () => {
     it('should generate error ESQL query with error index', () => {
       render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="error"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -361,8 +372,9 @@ describe('OpenInDiscover', () => {
     it('should generate ESQL query with span ID for span view', () => {
       render(
         <OpenInDiscover
-          variant="button"
+          variant="emptyButton"
           dataTestSubj="testButton"
+          label="Open in Discover"
           indexType="traces"
           rangeFrom="now-15m"
           rangeTo="now"
@@ -380,7 +392,7 @@ describe('OpenInDiscover', () => {
       it('should generate correct query with only traceId and sort by @timestamp ASC', () => {
         render(
           <OpenInDiscover
-            variant="button"
+            variant="emptyButton"
             dataTestSubj="apmWaterfallOpenInDiscoverButton"
             indexType="traces"
             rangeFrom="now-15m"
@@ -411,7 +423,7 @@ describe('OpenInDiscover', () => {
       it('should generate query without traceId filter when traceId is not provided', () => {
         render(
           <OpenInDiscover
-            variant="button"
+            variant="emptyButton"
             dataTestSubj="apmWaterfallOpenInDiscoverButton"
             indexType="traces"
             rangeFrom="now-15m"
@@ -431,8 +443,9 @@ describe('OpenInDiscover', () => {
       it('should generate correct query with dependency-specific params', () => {
         render(
           <OpenInDiscover
-            variant="button"
+            variant="emptyButton"
             dataTestSubj="apmWaterfallOpenInDiscoverButton"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-24h"
             rangeTo="now"
@@ -467,8 +480,9 @@ describe('OpenInDiscover', () => {
       it('should generate minimal query with only kuery and environment', () => {
         render(
           <OpenInDiscover
-            variant="button"
+            variant="emptyButton"
             dataTestSubj="apmWaterfallOpenInDiscoverButton"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-1h"
             rangeTo="now"
@@ -498,6 +512,7 @@ describe('OpenInDiscover', () => {
           <OpenInDiscover
             variant="link"
             dataTestSubj="apmLatencyChartOpenInDiscover"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -528,6 +543,7 @@ describe('OpenInDiscover', () => {
           <OpenInDiscover
             variant="link"
             dataTestSubj="apmServiceOverviewThroughputChartOpenInDiscover"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -553,8 +569,9 @@ describe('OpenInDiscover', () => {
       it('should generate correct query with sample range for correlations', () => {
         render(
           <OpenInDiscover
-            variant="button"
+            variant="emptyButton"
             dataTestSubj="apmLatencyCorrelationsOpenInDiscoverButton"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -583,8 +600,9 @@ describe('OpenInDiscover', () => {
       it('should generate correct query without sample range when chart is not brushed', () => {
         render(
           <OpenInDiscover
-            variant="button"
+            variant="emptyButton"
             dataTestSubj="apmFailedCorrelationsViewInDiscoverButton"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -611,8 +629,9 @@ describe('OpenInDiscover', () => {
       it('should generate correct query with error index and error group ID', () => {
         render(
           <OpenInDiscover
-            variant="button"
+            variant="emptyButton"
             dataTestSubj="errorGroupDetailsOpenErrorInDiscoverButton"
+            label="Open in Discover"
             indexType="error"
             rangeFrom="now-15m"
             rangeTo="now"
@@ -638,8 +657,9 @@ describe('OpenInDiscover', () => {
       it('should generate correct query with span ID', () => {
         render(
           <OpenInDiscover
-            variant="button"
+            variant="emptyButton"
             dataTestSubj="spanFlyoutViewSpanInDiscoverLink"
+            label="Open in Discover"
             indexType="traces"
             rangeFrom="now-15m"
             rangeTo="now"

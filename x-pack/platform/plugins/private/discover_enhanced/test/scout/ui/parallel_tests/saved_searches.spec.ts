@@ -32,7 +32,7 @@ spaceTest.describe(
     tag: [
       ...tags.stateful.classic,
       ...tags.serverless.search,
-      ...tags.serverless.observability.complete,
+      ...tags.serverless.observability.all,
     ],
   },
   () => {

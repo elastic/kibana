@@ -17,7 +17,8 @@
       "host.name",
       "host.id",
       "destination.ip",
-      "source.ip"
+      "source.ip",
+      "server.domain"
     ]
   },
   "allow_lazy_open": true,

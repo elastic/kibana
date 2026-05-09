@@ -13,6 +13,7 @@ import { useCallback, useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import { useBulkClosingReasonItems } from '@kbn/response-ops-detections-close-reason';
 import type { AlertClosingReason } from '../../../../common/types';
 import { APM_USER_INTERACTIONS } from '../../../common/lib/apm/constants';
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
@@ -24,7 +25,6 @@ import * as i18n from '../translations';
 import { buildTimeRangeFilter } from '../../components/alerts_table/helpers';
 import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/use_alerts_privileges';
 import { useAlertCloseInfoModal } from '../use_alert_close_info_modal';
-import { useBulkAlertClosingReasonItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_closing_reason_items';
 
 export interface UseBulkAlertActionItemsArgs {
   /* Table ID for which this hook is being used */
@@ -171,7 +171,8 @@ export const useBulkAlertActionItems = ({
   );
 
   const { item: alertClosingReasonItem, panels: alertClosingReasonPanels } =
-    useBulkAlertClosingReasonItems({
+    useBulkClosingReasonItems({
+      isEnabled: hasAlertsUpdate ?? false,
       onSubmitCloseReason({
         reason,
         alertItems,

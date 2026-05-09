@@ -277,7 +277,7 @@ const SuggestionPreview = ({
             />
           ) : (
             <span css={suggestionStyles.icon(euiThemeContext)}>
-              <EuiIcon size="xxl" type={preview.icon} />
+              <EuiIcon size="xxl" type={preview.icon} aria-hidden={true} />
             </span>
           )}
           {showTitleAsLabel && (
@@ -521,7 +521,7 @@ export function SuggestionPanel({
       </EuiText>
 
       <EuiButtonEmpty
-        iconType="checkInCircleFilled"
+        iconType="checkCircleFill"
         size="s"
         className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
         onClick={() => dispatchLens(applyChanges())}

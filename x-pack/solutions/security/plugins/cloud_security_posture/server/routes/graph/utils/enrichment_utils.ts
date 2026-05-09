@@ -6,41 +6,10 @@
  */
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
-import {
-  getEnrichPolicyId,
-  getEntitiesLatestIndexName,
-} from '@kbn/cloud-security-posture-common/utils/helpers';
-
-/**
- * Checks if enrich policy exists for the given space.
- * This is the deprecated fallback method for entity enrichment.
- */
-export const checkEnrichPolicyExists = async (
-  esClient: IScopedClusterClient,
-  logger: Logger,
-  spaceId: string
-): Promise<boolean> => {
-  try {
-    const { policies } = await esClient.asInternalUser.enrich.getPolicy({
-      name: getEnrichPolicyId(spaceId),
-    });
-
-    logger.debug(
-      `Enrich policy check for [${getEnrichPolicyId(spaceId)}]: found ${
-        policies?.length
-      } policies, policies: ${JSON.stringify(policies?.map((p) => p.config.match?.name))}`
-    );
-    return policies.some((policy) => policy.config.match?.name === getEnrichPolicyId(spaceId));
-  } catch (error) {
-    logger.error(`Error fetching enrich policy ${error.message}`);
-    logger.error(error);
-    return false;
-  }
-};
+import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 
 /**
  * Checks if the entities latest index exists and is configured in lookup mode.
- * This is the preferred method for entity enrichment (replaces deprecated ENRICH policy).
  */
 export const checkIfEntitiesIndexLookupMode = async (
   esClient: IScopedClusterClient,
@@ -75,34 +44,4 @@ export const checkIfEntitiesIndexLookupMode = async (
     logger.error(`Error checking entities index ${indexName}: ${error.message}`);
     return false;
   }
-};
-
-/**
- * Interface for enrichment availability status.
- */
-export interface EnrichmentAvailability {
-  isLookupIndexAvailable: boolean;
-  isEnrichPolicyExists: boolean;
-}
-
-/**
- * Checks entity enrichment availability for the given space.
- * Returns status for both LOOKUP JOIN (preferred) and ENRICH policy (deprecated fallback).
- */
-export const checkEnrichmentAvailability = async (
-  esClient: IScopedClusterClient,
-  logger: Logger,
-  spaceId: string
-): Promise<EnrichmentAvailability> => {
-  const isLookupIndexAvailable = await checkIfEntitiesIndexLookupMode(esClient, logger, spaceId);
-
-  // Only check for enrich policy if lookup index is not available
-  const isEnrichPolicyExists = isLookupIndexAvailable
-    ? false
-    : await checkEnrichPolicyExists(esClient, logger, spaceId);
-
-  return {
-    isLookupIndexAvailable,
-    isEnrichPolicyExists,
-  };
 };

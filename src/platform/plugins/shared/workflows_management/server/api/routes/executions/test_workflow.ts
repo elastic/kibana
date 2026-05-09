@@ -14,9 +14,10 @@ import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-export function registerTestWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
+export function registerTestWorkflowRoute(deps: RouteDependencies) {
+  const { router, api, logger, spaces, audit } = deps;
   router.versioned
     .post({
       path: '/api/workflows/test',
@@ -52,7 +53,7 @@ export function registerTestWorkflowRoute({ router, api, logger, spaces }: Route
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { workflowId, workflowYaml, inputs: rawInputs } = request.body;
 
@@ -84,8 +85,18 @@ export function registerTestWorkflowRoute({ router, api, logger, spaces }: Route
             request,
           });
 
+          audit.logWorkflowTest(request, {
+            workflowExecutionId,
+            workflowId,
+          });
+
           return response.ok({ body: { workflowExecutionId } });
         } catch (error) {
+          audit.logWorkflowTest(request, {
+            workflowExecutionId: '',
+            workflowId: request.body.workflowId,
+            error,
+          });
           return handleRouteError(response, error);
         }
       })

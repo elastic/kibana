@@ -15,7 +15,10 @@ import { render } from '@testing-library/react';
 import { coreMock, httpServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import type { ILicense, LicenseType } from '@kbn/licensing-types';
+import type { CombinedState, PreloadedState } from 'redux';
 import { licenseManagementStore } from '../../public/application/store/store';
+import type { ThunkServices, LicenseManagementState } from '../../public/application/store/types';
 import { AppContextProvider, type AppDependencies } from '../../public/application/app_context';
 import { BreadcrumbService } from '../../public/application/breadcrumbs';
 
@@ -23,21 +26,13 @@ const highExpirationMillis = new Date('October 13, 2099 00:00:00Z').getTime();
 
 type History = ReturnType<typeof scopedHistoryMock.create>;
 
-interface Toasts {
-  addDanger: jest.MockedFunction<(message: string) => void>;
-}
-
-interface ThunkServices {
-  http: ReturnType<typeof httpServiceMock.createSetupContract>;
-  history: History;
-  licensing: ReturnType<typeof licensingMock.createSetup>;
-  toasts: Toasts;
-}
+type HttpMock = ReturnType<typeof httpServiceMock.createSetupContract>;
 
 export interface GetComponentResult {
   renderResult: RenderResult;
   history: History;
   services: ThunkServices;
+  http: HttpMock;
   store: ReturnType<typeof licenseManagementStore>;
 }
 
@@ -50,10 +45,12 @@ const createHistory = (): History => {
 };
 
 export const createMockLicense = (
-  type: string,
+  type: LicenseType,
   expiryDateInMillis: number = highExpirationMillis
-) => {
+): ILicense => {
+  const baseMock = licensingMock.createLicenseMock();
   return {
+    ...baseMock,
     type,
     expiryDateInMillis,
     isActive: new Date().getTime() < expiryDateInMillis,
@@ -61,7 +58,7 @@ export const createMockLicense = (
 };
 
 export const getComponent = (
-  initialState: Record<string, unknown>,
+  initialState: PreloadedState<CombinedState<LicenseManagementState>>,
   Component: React.ComponentType<{}>
 ): GetComponentResult => {
   const history = createHistory();
@@ -71,21 +68,23 @@ export const getComponent = (
 
   const licensing = licensingMock.createSetup();
 
+  const http = httpServiceMock.createSetupContract();
   const services: ThunkServices = {
-    http: httpServiceMock.createSetupContract(),
+    http,
     history,
     licensing,
-    toasts: {
-      addDanger: jest.fn(),
-    },
+    toasts: core.notifications.toasts,
+    breadcrumbService,
   };
 
-  // StartTrial dispatches loadTrialStatus on mount, which calls http.get(). Make this deterministic
-  // for tests that use initialState.trialStatus.
+  const trialStatus = initialState.trialStatus;
   const canStartTrial = Boolean(
-    (initialState.trialStatus as { canStartTrial?: unknown } | undefined)?.canStartTrial
+    typeof trialStatus === 'object' &&
+      trialStatus !== null &&
+      'canStartTrial' in trialStatus &&
+      trialStatus.canStartTrial
   );
-  services.http.get.mockResolvedValue(canStartTrial);
+  http.get.mockResolvedValue(canStartTrial);
 
   const store = licenseManagementStore(initialState, services);
 
@@ -119,5 +118,5 @@ export const getComponent = (
     </I18nProvider>
   );
 
-  return { renderResult, history, services, store };
+  return { renderResult, history, services, http, store };
 };

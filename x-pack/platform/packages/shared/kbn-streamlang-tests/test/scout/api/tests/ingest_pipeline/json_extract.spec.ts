@@ -40,7 +40,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [{ message: 'not valid json' }];
         const { errors } = await testBed.ingest(indexName, docs, processors);
@@ -64,7 +64,7 @@ apiTest.describe(
           ],
         };
 
-        const { processors } = transpile(streamlangDSL);
+        const { processors } = await transpile(streamlangDSL);
 
         const docs = [{ message: 'some_value' }];
         await testBed.ingest(indexName, docs, processors);

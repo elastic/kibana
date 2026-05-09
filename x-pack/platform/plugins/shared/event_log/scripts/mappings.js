@@ -23,6 +23,10 @@ exports.EcsCustomPropertyMappings = {
           id: {
             type: 'keyword',
           },
+          type: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
           scheduled: {
             type: 'date',
           },
@@ -150,6 +154,14 @@ exports.EcsCustomPropertyMappings = {
                   failed_auto_fill_attempts: {
                     type: 'long',
                   },
+                  reason: {
+                    properties: {
+                      type: {
+                        type: 'keyword',
+                        ignore_above: 1024,
+                      },
+                    },
+                  },
                 },
               },
               execution: {
@@ -222,6 +234,17 @@ exports.EcsCustomPropertyMappings = {
                       gap_range: {
                         type: 'date_range',
                         format: 'strict_date_optional_time||epoch_millis',
+                      },
+                      gap_reason: {
+                        properties: {
+                          type: {
+                            type: 'keyword',
+                            ignore_above: 1024,
+                          },
+                        },
+                      },
+                      matched_indices_count: {
+                        type: 'long',
                       },
                       frozen_indices_queried_count: {
                         type: 'long',
@@ -436,6 +459,51 @@ exports.EcsCustomPropertyMappings = {
           },
         },
       },
+      alerting_v2: {
+        properties: {
+          dispatcher: {
+            properties: {
+              episode_count: {
+                type: 'long',
+              },
+              episode_ids: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+              rule_count: {
+                type: 'long',
+              },
+              rule_ids: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+              action_group_count: {
+                type: 'long',
+              },
+              action_group_ids: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+              workflow_ids: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+              workflow_execution_ids: {
+                type: 'keyword',
+                ignore_above: 1024,
+              },
+              execution: {
+                properties: {
+                  uuid: {
+                    type: 'keyword',
+                    ignore_above: 1024,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
   },
 };
@@ -473,4 +541,9 @@ exports.EcsEventLogMultiValuedProperties = [
   'kibana.alert.rule.gap.filled_intervals',
   'kibana.alert.rule.gap.unfilled_intervals',
   'kibana.gap_auto_fill.execution.rule_ids',
+  'kibana.alerting_v2.dispatcher.episode_ids',
+  'kibana.alerting_v2.dispatcher.rule_ids',
+  'kibana.alerting_v2.dispatcher.action_group_ids',
+  'kibana.alerting_v2.dispatcher.workflow_ids',
+  'kibana.alerting_v2.dispatcher.workflow_execution_ids',
 ];

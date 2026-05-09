@@ -49,7 +49,7 @@ export class CommentUserActionBuilder extends UserActionBuilder {
     const verb = getPastTenseVerb(action);
 
     const getMessage = (id?: string) =>
-      `User ${verb} comment id: ${commentId(args.attachmentId)} for case id: ${
+      `User ${verb} comment id: ${commentId(args.savedObjectId)} for case id: ${
         args.caseId
       } - user action id: ${id}`;
 
@@ -57,7 +57,7 @@ export class CommentUserActionBuilder extends UserActionBuilder {
       getMessage,
       action,
       descriptiveAction: `case_user_action_${action}_comment`,
-      savedObjectId: args.attachmentId ?? args.caseId,
+      savedObjectId: args.savedObjectId ?? args.caseId,
       savedObjectType: CASE_COMMENT_SAVED_OBJECT,
     };
 

@@ -277,7 +277,7 @@ export function UnifiedSearchBar({
         appName={i18n.translate('xpack.apm.appName', {
           defaultMessage: 'APM',
         })}
-        iconType="search"
+        iconType="magnify"
         placeholder={searchbarPlaceholder}
         useDefaultBehaviors={true}
         indexPatterns={dataView ? [dataView] : undefined}

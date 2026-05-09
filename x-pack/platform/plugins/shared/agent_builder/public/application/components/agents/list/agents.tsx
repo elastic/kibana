@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiButton, EuiButtonEmpty, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiLink, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
@@ -17,24 +17,10 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { DeleteAgentProvider } from '../../../context/delete_agent_context';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
-import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
-
-const manageToolsLabel = i18n.translate('xpack.agentBuilder.agents.manageToolsLabel', {
-  defaultMessage: 'Manage tools',
-});
-
-const manageSkillsLabel = i18n.translate('xpack.agentBuilder.agents.manageSkillsLabel', {
-  defaultMessage: 'Manage skills',
-});
-
-const managePluginsLabel = i18n.translate('xpack.agentBuilder.agents.managePluginsLabel', {
-  defaultMessage: 'Manage plugins',
-});
 
 export const AgentBuilderAgents = () => {
   const { euiTheme } = useEuiTheme();
   const { manageAgents } = useUiPrivileges();
-  const isExperimentalFeaturesEnabled = useExperimentalFeatures();
   const { docLinksService } = useAgentBuilderServices();
   const headerStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
@@ -56,25 +42,6 @@ export const AgentBuilderAgents = () => {
         })}
       </EuiButton>
     ),
-    <EuiButtonEmpty aria-label={manageToolsLabel} href={createAgentBuilderUrl(appPaths.tools.list)}>
-      <EuiText size="s">{manageToolsLabel}</EuiText>
-    </EuiButtonEmpty>,
-    ...(isExperimentalFeaturesEnabled
-      ? [
-          <EuiButtonEmpty
-            aria-label={manageSkillsLabel}
-            href={createAgentBuilderUrl(appPaths.skills.list)}
-          >
-            <EuiText size="s">{manageSkillsLabel}</EuiText>
-          </EuiButtonEmpty>,
-          <EuiButtonEmpty
-            aria-label={managePluginsLabel}
-            href={createAgentBuilderUrl(appPaths.plugins.list)}
-          >
-            <EuiText size="s">{managePluginsLabel}</EuiText>
-          </EuiButtonEmpty>,
-        ]
-      : []),
   ];
   return (
     <DeleteAgentProvider>

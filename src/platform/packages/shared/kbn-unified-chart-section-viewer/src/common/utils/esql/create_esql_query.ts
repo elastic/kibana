@@ -44,15 +44,24 @@ export function createESQLQuery({
 }: CreateESQLQueryParams) {
   const { metricName, metricTypes, fieldTypes, dataStream } = metricItem;
   const index = dataStream;
-  const type = firstNonNullable(fieldTypes);
   const instrument = firstNonNullable(metricTypes);
-  const query = esql.ts(index);
+
+  if (fieldTypes.length === 0 || !instrument) {
+    return '';
+  }
+
   const metricAggregation = createMetricAggregation({
-    type,
+    types: fieldTypes,
     instrument,
     metricName,
     placeholderName: 'metricName',
   });
+
+  if (!metricAggregation) {
+    return '';
+  }
+
+  const query = esql.ts(index);
   const timeBucketAggregation = createTimeBucketAggregation({});
   const splitAccessorsClause =
     splitAccessors.length > 0

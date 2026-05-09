@@ -30,11 +30,7 @@ dependsOn:
   - '@kbn/es-errors'
   - '@kbn/i18n'
   - '@kbn/std'
-  - '@kbn/esql'
-  - '@kbn/lens-embeddable-utils'
-  - '@kbn/utility-types'
-  - '@kbn/workflows-management-plugin'
-  - '@kbn/workflows'
+  - '@kbn/esql-server-utils'
   - '@kbn/esql-language'
   - '@kbn/datemath'
   - '@kbn/es-query'
@@ -49,26 +45,6 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-tasks:
-  jest:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
-  jestCI:
-    command: node
-    args:
-      - '--no-experimental-require-module'
-      - $workspaceRoot/scripts/jest
-      - '--config'
-      - $projectRoot/jest.config.js
-    options:
-      runFromWorkspaceRoot: true
-    inputs:
-      - '@group(src)'
+  jest-config:
+    - jest.config.js
+tasks: {}

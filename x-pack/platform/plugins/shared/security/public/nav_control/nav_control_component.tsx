@@ -163,7 +163,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
         defaultMessage="Log out"
       />
     ),
-    icon: <EuiIcon type="exit" size="m" />,
+    icon: <EuiIcon type="logOut" size="m" />,
     href: logoutUrl,
     'data-test-subj': 'logoutLink',
   });
@@ -178,6 +178,9 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
       closePopover={() => setIsPopoverOpen(false)}
       panelPaddingSize="none"
       buffer={0}
+      aria-label={i18n.translate('xpack.security.navControlComponent.popoverAriaLabel', {
+        defaultMessage: 'Account menu',
+      })}
     >
       <EuiContextMenu
         className="chrNavControl__userMenu"

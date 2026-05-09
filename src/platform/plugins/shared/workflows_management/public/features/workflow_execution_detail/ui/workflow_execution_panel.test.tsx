@@ -12,10 +12,10 @@ import React from 'react';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import { setYamlString } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
-import { mockWorkflowsManagementCapabilities } from '../../../hooks/__mocks__/use_workflows_capabilities';
 import { TestWrapper } from '../../../shared/test_utils';
 
 jest.mock('@kbn/workflows-ui', () => ({
@@ -112,9 +112,7 @@ describe('WorkflowExecutionPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockStore = undefined;
-    jest
-      .mocked(useWorkflowsCapabilities)
-      .mockReturnValue({ ...mockWorkflowsManagementCapabilities });
+    jest.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
   });
 
   const renderComponent = (props = {}, store?: any) => {
@@ -378,7 +376,7 @@ describe('WorkflowExecutionPanel', () => {
 
     it('should disable replay button when user lacks execute capability', () => {
       jest.mocked(useWorkflowsCapabilities).mockReturnValue({
-        ...mockWorkflowsManagementCapabilities,
+        ...createMockWorkflowsCapabilities(),
         canExecuteWorkflow: false,
       });
 

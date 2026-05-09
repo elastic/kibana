@@ -8,26 +8,42 @@
  */
 
 import * as Fs from 'fs';
-import os from 'os';
 
 import * as globby from 'globby';
 import minimatch from 'minimatch';
 
-import { load as loadYaml } from 'js-yaml';
+import { parse as loadYaml } from 'yaml';
 
 import type { BuildkiteStep } from '../buildkite';
 import { BuildkiteClient } from '../buildkite';
 import type { TestGroupRunOrderResponse } from './client';
 import { CiStatsClient } from './client';
+import { getTrackedBranch } from '../utils';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
 import SHARDED_JEST_CONFIGS from '../../sharded_jest_configs.json';
 import { serverless, stateful } from '../../ftr_configs_manifests.json';
 import { filterEmptyJestConfigs } from './get_tests_from_config';
+import {
+  getAffectedPackages,
+  listChangedFiles,
+  filterFilesByPackages,
+  PREVENT_SELECTIVE_TESTS_LABEL,
+  CRITICAL_FILES_JEST_UNIT_TESTS,
+  touchedCriticalFiles,
+  CRITICAL_FILES_JEST_INTEGRATION_TESTS,
+} from '../affected-packages';
 import { collectEnvFromLabels, expandAgentQueue, getRequiredEnv } from '#pipeline-utils';
 
-const SHARD_ANNOTATION_SEP = '||shard=';
+const prLabels =
+  process.env.GITHUB_PR_LABELS?.split(',')
+    .map((l) => l.trim())
+    .filter(Boolean) ?? [];
+const isPrBuild = Boolean(process.env.GITHUB_PR_NUMBER);
+const preventSelectiveTesting = prLabels.includes(PREVENT_SELECTIVE_TESTS_LABEL);
+const USE_SELECTIVE_TESTING = isPrBuild && !preventSelectiveTesting;
 
+const SHARD_ANNOTATION_SEP = '||shard=';
 /**
  * Expands configs that appear in the shard map into N shard-annotated entries.
  * For example, if `fleet/jest.integration.config.js` has 2 shards, it becomes:
@@ -80,7 +96,7 @@ export async function pickTestGroupRunOrder() {
 
   const JEST_INTEGRATION_MAX_MINUTES = process.env.JEST_INTEGRATION_MAX_MINUTES
     ? parseFloat(process.env.JEST_INTEGRATION_MAX_MINUTES)
-    : 35;
+    : 30;
   if (Number.isNaN(JEST_INTEGRATION_MAX_MINUTES)) {
     throw new Error(
       `invalid JEST_INTEGRATION_MAX_MINUTES: ${process.env.JEST_INTEGRATION_MAX_MINUTES}`
@@ -119,7 +135,7 @@ export async function pickTestGroupRunOrder() {
         .filter(Boolean)
     : undefined;
   if (LIMIT_SOLUTIONS) {
-    const validSolutions = ['observability', 'search', 'security', 'workplaceai'];
+    const validSolutions = ['observability', 'search', 'security', 'workplaceai', 'vectordb'];
     const invalidSolutions = LIMIT_SOLUTIONS.filter((s) => !validSolutions.includes(s));
     if (invalidSolutions.length) throw new Error('Unsupported LIMIT_SOLUTIONS value');
   }
@@ -208,12 +224,9 @@ export async function pickTestGroupRunOrder() {
         ignore: [...DISABLED_JEST_CONFIGS, '**/node_modules/**'],
       })
     : [];
-  const jestUnitConfigsFiltered = await filterEmptyJestConfigs(
-    jestUnitConfigsWithEmpties,
-    os.availableParallelism()
-  );
+  const jestUnitConfigsFiltered = filterEmptyJestConfigs(jestUnitConfigsWithEmpties);
   // Expand sharded unit configs (e.g. cases/jest.config.js) into shard-annotated entries
-  const jestUnitConfigs = expandShardedJestConfigs(jestUnitConfigsFiltered);
+  let jestUnitConfigs = expandShardedJestConfigs(jestUnitConfigsFiltered);
 
   const jestIntegrationConfigsRaw = LIMIT_CONFIG_TYPE.includes('integration')
     ? globby.sync(getJestConfigGlobs(['**/jest.integration.config.js', '!**/__fixtures__/**']), {
@@ -223,7 +236,14 @@ export async function pickTestGroupRunOrder() {
       })
     : [];
   // Expand sharded integration configs into shard-annotated entries
-  const jestIntegrationConfigs = expandShardedJestConfigs(jestIntegrationConfigsRaw);
+  let jestIntegrationConfigs = expandShardedJestConfigs(jestIntegrationConfigsRaw);
+
+  if (USE_SELECTIVE_TESTING && process.env.GITHUB_PR_MERGE_BASE) {
+    const { filteredJestUnitConfigs, filteredJestIntegrationConfigs } =
+      await filterConfigsByAffectedPackages(jestUnitConfigs, jestIntegrationConfigs);
+    jestUnitConfigs = filteredJestUnitConfigs;
+    jestIntegrationConfigs = filteredJestIntegrationConfigs;
+  }
 
   if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
     throw new Error('unable to find any unit, integration, or FTR configs');
@@ -297,11 +317,11 @@ export async function pickTestGroupRunOrder() {
       },
       {
         type: INTEGRATION_TYPE,
-        defaultMin: 60,
+        defaultMin: 15,
         maxMin: JEST_INTEGRATION_MAX_MINUTES,
         tooLongMin: JEST_INTEGRATION_TOO_LONG_MINUTES,
         overheadMin: 0.2,
-        warmupMin: 2,
+        warmupMin: 5,
         concurrency: 1,
         names: jestIntegrationConfigs,
       },
@@ -393,6 +413,7 @@ export async function pickTestGroupRunOrder() {
           timeout_in_minutes: 50,
           key: 'jest',
           agents: expandAgentQueue('n2-4-spot', 110),
+          env: envFromlabels,
           depends_on: JEST_CONFIGS_DEPS,
           retry: {
             automatic: [
@@ -413,6 +434,7 @@ export async function pickTestGroupRunOrder() {
           timeout_in_minutes: 50,
           key: 'jest-integration',
           agents: expandAgentQueue('n2-4-spot', 105),
+          env: envFromlabels,
           depends_on: JEST_CONFIGS_DEPS,
           retry: {
             automatic: [
@@ -470,17 +492,13 @@ export async function pickTestGroupRunOrder() {
 
   // Register cancelable child keys before uploading so a concurrent gate failure
   // can discover and short-circuit these jobs immediately.
-  if (unit.count > 0) {
-    bk.setMetadata('cancel_on_gate_failure:jest', 'true');
-  }
-  if (integration.count > 0) {
-    bk.setMetadata('cancel_on_gate_failure:jest-integration', 'true');
-  }
-  // Register child step keys (not the group key) because `buildkite-agent step cancel`
+  // Child step keys (not group keys) are registered because `buildkite-agent step cancel`
   // does not work on group keys.
-  for (const fg of functionalGroups) {
-    bk.setMetadata(`cancel_on_gate_failure:${fg.key}`, 'true');
-  }
+  const cancelKeys: string[] = [];
+  if (unit.count > 0) cancelKeys.push('jest');
+  if (integration.count > 0) cancelKeys.push('jest-integration');
+  for (const fg of functionalGroups) cancelKeys.push(fg.key);
+  bk.setMetadata('cancel_on_gate_failure_batch:test_groups', JSON.stringify(cancelKeys));
 
   // upload the step definitions to Buildkite
   bk.uploadSteps(steps);
@@ -554,23 +572,6 @@ function getRunGroup(bk: BuildkiteClient, allTypes: RunGroup[], typeName: string
     throw new Error(`expected to find exactly 1 "${typeName}" run group`);
   }
   return groups[0];
-}
-
-function getTrackedBranch(): string {
-  let pkg;
-  try {
-    pkg = JSON.parse(Fs.readFileSync('package.json', 'utf8'));
-  } catch (_) {
-    const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
-    throw new Error(`unable to read kibana's package.json file: ${error.message}`);
-  }
-
-  const branch = pkg.branch;
-  if (typeof branch !== 'string') {
-    throw new Error('missing `branch` field from package.json file');
-  }
-
-  return branch;
 }
 
 function isObj(x: unknown): x is Record<string, unknown> {
@@ -665,4 +666,56 @@ function getEnabledFtrConfigs(patterns?: string[], solutions?: string[]) {
     const error = _ instanceof Error ? _ : new Error(`${_} thrown`);
     throw new Error(`unable to collect enabled FTR configs: ${error.message}`);
   }
+}
+
+async function filterConfigsByAffectedPackages(
+  jestUnitConfigs: string[],
+  jestIntegrationConfigs: string[]
+) {
+  const mergeBase = process.env.GITHUB_PR_MERGE_BASE!;
+  const affectedPackages = await getAffectedPackages(mergeBase, {
+    strategy: 'git',
+    includeDownstream: true,
+    ignorePatterns: [], // might want to exclude metadata/text changes in the future
+    ignoreUncategorizedChanges: true,
+  }).catch((error) => {
+    console.error('Error getting affected packages', error);
+    return null;
+  });
+
+  const shouldFilterByAffected = Boolean(affectedPackages);
+  if (!shouldFilterByAffected) {
+    console.log('Not filtering Jest unit/integration tests because no affected packages found');
+    return {
+      filteredJestUnitConfigs: jestUnitConfigs,
+      filteredJestIntegrationConfigs: jestIntegrationConfigs,
+    };
+  }
+
+  const prChangedFiles = listChangedFiles({ mergeBase, commit: 'HEAD' });
+  console.log('Filtering Jest unit/integration tests for affected packages:', affectedPackages);
+
+  let filteredJestUnitConfigs = jestUnitConfigs;
+  let filteredJestIntegrationConfigs = jestIntegrationConfigs;
+  if (!touchedCriticalFiles(prChangedFiles, CRITICAL_FILES_JEST_UNIT_TESTS)) {
+    filteredJestUnitConfigs = filterFilesByPackages(jestUnitConfigs, affectedPackages);
+    console.log(
+      `Filtering Jest unit tests: ${jestUnitConfigs.length} -> ${filteredJestUnitConfigs.length}`
+    );
+  } else {
+    console.log('Not filtering Jest unit tests because critical files changed');
+  }
+
+  if (!touchedCriticalFiles(prChangedFiles, CRITICAL_FILES_JEST_INTEGRATION_TESTS)) {
+    filteredJestIntegrationConfigs = filterFilesByPackages(
+      jestIntegrationConfigs,
+      affectedPackages
+    );
+    console.log(
+      `Filtering Jest integration tests: ${jestIntegrationConfigs.length} -> ${filteredJestIntegrationConfigs.length}`
+    );
+  } else {
+    console.log('Not filtering Jest integration tests because critical files changed');
+  }
+  return { filteredJestUnitConfigs, filteredJestIntegrationConfigs };
 }

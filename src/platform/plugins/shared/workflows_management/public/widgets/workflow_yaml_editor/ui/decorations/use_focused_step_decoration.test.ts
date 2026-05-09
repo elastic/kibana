@@ -20,6 +20,7 @@ import {
 } from '../../../../entities/workflows/store/workflow_detail/slice';
 import type { ComputedData } from '../../../../entities/workflows/store/workflow_detail/types';
 import type { StepInfo } from '../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
+import { createStepInfo } from '../../../../shared/test_utils';
 
 jest.mock('@kbn/monaco', () => {
   const actualMonaco = jest.requireActual('@kbn/monaco');
@@ -58,16 +59,6 @@ jest.mock('@elastic/eui', () => {
 jest.mock('@emotion/css', () => ({
   css: jest.fn(() => 'mock-block-class-name'),
 }));
-
-const createStepInfo = (overrides: Partial<StepInfo> = {}): StepInfo => ({
-  stepId: 'step-1',
-  stepType: 'action',
-  stepYamlNode: {} as any,
-  lineStart: 5,
-  lineEnd: 10,
-  propInfos: {},
-  ...overrides,
-});
 
 const createMockEditor = () => {
   const decorationsCollection = {

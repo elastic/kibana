@@ -68,7 +68,7 @@ const PackDetailsPageComponent = () => {
 
   const backLink = useMemo(
     () => (
-      <EuiButtonEmpty iconType="arrowLeft" {...packsListProps} flush="left" size="xs">
+      <EuiButtonEmpty iconType="chevronSingleLeft" {...packsListProps} flush="left" size="xs">
         <FormattedMessage
           id="xpack.osquery.packDetails.viewAllPackListTitle"
           defaultMessage="View all packs"

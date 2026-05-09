@@ -14,7 +14,8 @@ import { z } from '@kbn/zod/v4';
 import type { StepExecuteModalProps } from './step_execute_modal';
 import { StepExecuteModal } from './step_execute_modal';
 
-jest.mock('../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme', () => ({
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsMonacoTheme: jest.fn(),
   WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
 }));
@@ -52,7 +53,14 @@ jest.mock('./step_execute_manual_form', () => ({
 
 jest.mock('./step_execute_historical_form', () => ({
   NOT_READY_SENTINEL: '__step_historical_not_ready__',
-  StepExecuteHistoricalForm: ({ value, setValue, errors, setErrors, stepId, warnings }: any) => (
+  StepExecuteHistoricalForm: ({
+    value,
+    setValue,
+    setErrors,
+    setExecutionContext,
+    stepId,
+    warnings,
+  }: any) => (
     <div data-test-subj="mockHistoricalForm">
       <span data-test-subj="historicalFormValue">{value}</span>
       <span data-test-subj="historicalFormStepId">{stepId}</span>
@@ -77,6 +85,13 @@ jest.mock('./step_execute_historical_form', () => ({
         type="button"
       >
         {'set error'}
+      </button>
+      <button
+        data-test-subj="historicalFormSetExecutionContext"
+        onClick={() => setExecutionContext({ key: 'value' })}
+        type="button"
+      >
+        {'set execution context'}
       </button>
     </div>
   ),
@@ -146,16 +161,6 @@ describe('StepExecuteModal', () => {
       expect(screen.getByTestId('mockHistoricalForm')).toBeInTheDocument();
       expect(screen.queryByTestId('mockManualForm')).not.toBeInTheDocument();
     });
-
-    it('should respect initialTab prop over initialStepExecutionId', () => {
-      renderWithProviders({
-        ...defaultProps,
-        initialStepExecutionId: 'exec-1',
-        initialTab: 'manual',
-      });
-      expect(screen.getByTestId('mockManualForm')).toBeInTheDocument();
-      expect(screen.queryByTestId('mockHistoricalForm')).not.toBeInTheDocument();
-    });
   });
 
   describe('tab switching', () => {
@@ -193,11 +198,27 @@ describe('StepExecuteModal', () => {
   });
 
   describe('submit behavior', () => {
-    it('should call onSubmit with step inputs when Run is clicked', () => {
+    it('should call onSubmit with parameters when Run is clicked', () => {
       renderWithProviders(defaultProps);
       fireEvent.click(screen.getByTestId('workflowSubmitStepRun'));
       expect(defaultProps.onSubmit).toHaveBeenCalledWith({
         stepInputs: { inputs: { key: 'value' } },
+        executionContext: undefined,
+        triggerTab: 'manual',
+      });
+    });
+
+    it('should call onSubmit with parameters when Run is clicked with executionContext', () => {
+      renderWithProviders({
+        ...defaultProps,
+        initialStepExecutionId: 'exec-1',
+      });
+      fireEvent.click(screen.getByTestId('historicalFormSetExecutionContext'));
+      fireEvent.click(screen.getByTestId('workflowSubmitStepRun'));
+      expect(defaultProps.onSubmit).toHaveBeenCalledWith({
+        stepInputs: { inputs: { key: 'value' } },
+        executionContext: { key: 'value' },
+        triggerTab: 'historical',
       });
     });
 

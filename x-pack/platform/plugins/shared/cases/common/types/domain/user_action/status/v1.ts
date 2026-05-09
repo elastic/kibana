@@ -6,10 +6,15 @@
  */
 
 import * as rt from 'io-ts';
-import { CaseStatusRt } from '../../case/v1';
+import { CaseStatusRt, CaseCloseReasonRt } from '../../case/v1';
 import { UserActionTypes } from '../action/v1';
 
-export const StatusUserActionPayloadRt = rt.strict({ status: CaseStatusRt });
+export const StatusUserActionPayloadRt = rt.exact(
+  rt.intersection([
+    rt.type({ status: CaseStatusRt }),
+    rt.partial({ closeReason: CaseCloseReasonRt, syncedAlertCount: rt.number }),
+  ])
+);
 
 export const StatusUserActionRt = rt.strict({
   type: rt.literal(UserActionTypes.status),

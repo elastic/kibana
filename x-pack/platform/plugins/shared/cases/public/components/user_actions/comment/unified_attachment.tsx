@@ -50,20 +50,28 @@ export const createUnifiedAttachmentUserActionBuilder = ({
     caseData,
     handleDeleteComment,
     isLoading,
-    getId: () => toUnifiedAttachmentType(attachment.type),
-    getAttachmentViewProps: () => ({
-      data: attachment.data,
-      metadata: attachment.metadata,
-      createdBy: attachment.createdBy,
-      version: attachment.version,
-      caseData: { id: caseData.id, title: caseData.title },
-      rowContext: {
-        manageMarkdownEditIds,
-        selectedOutlineCommentId,
-        loadingCommentIds,
-        appId,
-        euiTheme,
-      },
-    }),
+    getId: () =>
+      toUnifiedAttachmentType(
+        attachment.type,
+        Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner
+      ),
+    getAttachmentViewProps: () => {
+      const attachmentId = 'attachmentId' in attachment ? attachment.attachmentId : null;
+      return {
+        attachmentId,
+        data: attachment.data,
+        metadata: attachment.metadata,
+        createdBy: attachment.createdBy,
+        version: attachment.version,
+        caseData: { id: caseData.id, title: caseData.title },
+        rowContext: {
+          manageMarkdownEditIds,
+          selectedOutlineCommentId,
+          loadingCommentIds,
+          appId,
+          euiTheme,
+        },
+      };
+    },
   });
 };

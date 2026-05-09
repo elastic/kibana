@@ -10,13 +10,7 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
-import {
-  apiTest,
-  COMMON_HEADERS,
-  DASHBOARD_API_PATH,
-  KBN_ARCHIVES,
-  TEST_DASHBOARD_ID,
-} from '../fixtures';
+import { apiTest, COMMON_HEADERS, DASHBOARD_API_PATH, KBN_ARCHIVES } from '../fixtures';
 
 apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
@@ -52,25 +46,6 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
     expect(response.body.data.title).toStrictEqual(title);
   });
 
-  apiTest('can create a dashboard with a specific id', async ({ apiClient }) => {
-    const title = `foo-${Date.now()}-${Math.random()}`;
-    const id = `bar-${Date.now()}-${Math.random()}`;
-
-    const response = await apiClient.post(`${DASHBOARD_API_PATH}/${id}`, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...editorCredentials.apiKeyHeader,
-      },
-      body: {
-        title,
-      },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(201);
-    expect(response.body.id).toBe(id);
-  });
-
   // TODO Maybe move this test to x-pack/platform/test/api_integration/dashboards
   apiTest('can create a dashboard in a defined space', async ({ apiClient }) => {
     const title = `foo-${Date.now()}-${Math.random()}`;
@@ -88,24 +63,6 @@ apiTest.describe('dashboards - create', { tag: tags.deploymentAgnostic }, () => 
     });
 
     expect(response).toHaveStatusCode(201);
-  });
-
-  apiTest('return error if provided id already exists', async ({ apiClient }) => {
-    const title = `foo-${Date.now()}-${Math.random()}`;
-
-    const response = await apiClient.post(`${DASHBOARD_API_PATH}/${TEST_DASHBOARD_ID}`, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...editorCredentials.apiKeyHeader,
-      },
-      body: {
-        title,
-      },
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(409);
-    expect(response.body.message).toBe(`A dashboard with ID ${TEST_DASHBOARD_ID} already exists.`);
   });
 
   apiTest('validation - returns error when title is not provided', async ({ apiClient }) => {

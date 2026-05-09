@@ -51,13 +51,13 @@ export const getAlertsTableEmbeddableFactory = (
     const initialTableConfig = initialState.tableConfig;
     const tableConfig$ = new BehaviorSubject<EmbeddableAlertsTableConfig>(initialTableConfig);
 
-    const serializeState = () => ({
+    const serializeState = (): EmbeddableAlertsTableSerializedState => ({
       ...titleManager.getLatestState(),
       ...timeRangeManager.getLatestState(),
       tableConfig: tableConfig$.getValue(),
     });
 
-    const unsavedChangesApi = initializeUnsavedChanges({
+    const unsavedChangesApi = initializeUnsavedChanges<EmbeddableAlertsTableSerializedState>({
       uuid,
       parentApi,
       anyStateChange$: merge(
@@ -74,6 +74,9 @@ export const getAlertsTableEmbeddableFactory = (
       onReset: (lastSaved) => {
         titleManager.reinitializeState(lastSaved);
         timeRangeManager.reinitializeState(lastSaved);
+        if (lastSaved?.tableConfig) {
+          tableConfig$.next(lastSaved.tableConfig);
+        }
       },
     });
 

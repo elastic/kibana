@@ -141,7 +141,7 @@ export const IndexHeader: FC<PropsWithChildren<IndexHeaderProps>> = ({
         defaultIndex !== indexPattern.id && setDefault && canSave && indexPattern.isPersisted() && (
           <EuiButtonEmpty
             onClick={setDefault}
-            iconType="starEmpty"
+            iconType="star"
             aria-label={setDefaultAriaLabel}
             data-test-subj="setDefaultIndexPatternButton"
             color="text"

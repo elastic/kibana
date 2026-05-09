@@ -12,19 +12,25 @@ import { render, screen } from '@testing-library/react';
 import { FormattedValue } from './formatted_value';
 
 describe('FormattedValue', () => {
-  it('renders the value as HTML inside EuiText', () => {
-    render(<FormattedValue value="<mark>Inner HTML Value</mark>" />);
-    const markElement = screen.getByText('Inner HTML Value');
+  it('renders React nodes directly', () => {
+    render(<FormattedValue value={<mark>React Node Value</mark>} />);
+    const markElement = screen.getByText('React Node Value');
     expect(markElement.tagName.toLowerCase()).toBe('mark');
   });
 
-  it('renders plain text if value is not HTML', () => {
+  it('renders plain text if value is a string', () => {
     render(<FormattedValue value="Just text" />);
     expect(screen.getByText('Just text')).toBeInTheDocument();
   });
 
   it('renders empty if value is empty string', () => {
     render(<FormattedValue value="" />);
+    const euiText = screen.getByTestId('ContentFrameworkTableFormattedValue');
+    expect(euiText.textContent).toBe('');
+  });
+
+  it('renders null/undefined as empty', () => {
+    render(<FormattedValue value={null} />);
     const euiText = screen.getByTestId('ContentFrameworkTableFormattedValue');
     expect(euiText.textContent).toBe('');
   });

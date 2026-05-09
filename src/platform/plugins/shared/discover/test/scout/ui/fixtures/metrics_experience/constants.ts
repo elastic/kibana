@@ -11,6 +11,7 @@ import { tags } from '@kbn/scout';
 import type { KibanaRole } from '@kbn/scout';
 
 export const METRICS_TEST_INDEX_NAME = 'test-metrics-experience';
+export const METRICS_TEST_INDEX_NAME_OTHER = 'test-metrics-experience-other';
 export const METRICS_TEST_INDEX_PATTERN = 'test-metrics-*';
 
 // The Security serverless viewer role only grants read access to `metrics-endpoint.metadata_current_*`.
@@ -37,6 +38,7 @@ export const METRICS_FLYOUT_DIMENSION_ITEM_DATA_TEST_SUBJ =
 
 export const ESQL_QUERIES = {
   TS: `TS ${METRICS_TEST_INDEX_NAME}`,
+  TS_OTHER: `TS ${METRICS_TEST_INDEX_NAME_OTHER}`,
   TS_WILDCARD: `TS ${METRICS_TEST_INDEX_PATTERN}`,
   FROM: `FROM ${METRICS_TEST_INDEX_NAME}`,
 };
@@ -47,6 +49,8 @@ export const RECOMMENDED_QUERY_LABELS = {
 
 export const METRICS_DIMENSION_FIELDS = {
   DEFAULT_BREAKDOWN: 'dimension_0',
+  /** Dimension emitted by `DEFAULT_CONFIG` but not by `DIMENSIONS_WIPE_CONFIG`. */
+  ONLY_IN_A: 'dimension_1',
 } as const;
 
 export const DATA_VIEW_NAME = METRICS_TEST_INDEX_NAME;
@@ -56,8 +60,12 @@ export const KBN_ARCHIVE =
 
 export const METRICS_EXPERIENCE_TAGS = [
   ...tags.stateful.all,
-  ...tags.serverless.observability.complete,
-  ...tags.serverless.security.complete,
+  // TODO: We are experiencing issues with serverless tags. They trigger the appex-qa-main pipeline and generate a lot of false positives.
+  // This will be addressed in: https://github.com/elastic/kibana/issues/261529
+  // ...tags.serverless.observability.complete,
+  // ...tags.serverless.security.complete,
+  '@local-serverless-security_complete',
+  '@local-serverless-observability_complete',
 ];
 
 export const RECOMMENDED_QUERY_TAGS = [

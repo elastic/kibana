@@ -15,6 +15,10 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { LinkToLogsPage } from '../pages/link_to/link_to_logs';
 import { LogsPage } from '../pages/logs';
+import {
+  OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT,
+  OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
+} from '../../common/cps_feature_flag';
 import type { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { CommonInfraProviders, CoreProviders } from './common_providers';
 import { prepareMountElement } from './common_styles';
@@ -70,9 +74,19 @@ const LogsApp: React.FC<{
   isLogsExplorerAccessible,
 }) => {
   const { logs } = core.application.capabilities;
+  const infraCPSEnabled = core.featureFlags.getBooleanValue(
+    OBSERVABILITY_INFRA_CPS_ENABLED_FEATURE_FLAG,
+    OBSERVABILITY_INFRA_CPS_ENABLED_DEFAULT
+  );
 
   return (
-    <CoreProviders core={core} pluginStart={pluginStart} plugins={plugins} theme$={theme$}>
+    <CoreProviders
+      core={core}
+      pluginStart={pluginStart}
+      plugins={plugins}
+      theme$={theme$}
+      infraCPSEnabled={infraCPSEnabled}
+    >
       <CommonInfraProviders
         appName="Logs UI"
         setHeaderActionMenu={setHeaderActionMenu}

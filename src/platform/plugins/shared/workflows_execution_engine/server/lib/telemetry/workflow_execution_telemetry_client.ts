@@ -8,13 +8,23 @@
  */
 
 import type { AnalyticsServiceSetup, AnalyticsServiceStart, Logger } from '@kbn/core/server';
-import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import type {
+  EsWorkflowExecution,
+  EsWorkflowStepExecution,
+  WellKnownWorkflowTriggerSource,
+} from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  isEventDrivenWorkflowTriggerSource,
+  isWellKnownWorkflowTriggerSource,
+} from '@kbn/workflows';
 import {
   workflowExecutionEventNames,
   workflowExecutionEventSchemas,
 } from './events/workflows_execution';
 import {
+  type EventDrivenExecutionSuppressedParams,
+  type TriggerEventDispatchedParams,
   type WorkflowExecutionCancelledParams,
   type WorkflowExecutionCompletedParams,
   type WorkflowExecutionFailedParams,
@@ -26,6 +36,26 @@ import {
   type WorkflowExecutionTelemetryMetadata,
 } from './utils/extract_execution_metadata';
 import { extractWorkflowMetadata } from './utils/extract_workflow_metadata';
+import type { EventTriggersConfig } from '../../config';
+import type { EventChainContext } from '../../trigger_events/event_context/event_chain_context';
+import type {
+  TriggerEventScheduleStats,
+  TriggerResolutionStats,
+} from '../../trigger_events/trigger_event_stats';
+
+function resolveExecutionTriggerTelemetry(triggeredBy: string | undefined): {
+  triggerType: WellKnownWorkflowTriggerSource | 'event';
+  eventTriggerId?: string;
+} {
+  if (isWellKnownWorkflowTriggerSource(triggeredBy)) {
+    return { triggerType: triggeredBy };
+  }
+  if (isEventDrivenWorkflowTriggerSource(triggeredBy)) {
+    return { triggerType: 'event', eventTriggerId: triggeredBy };
+  }
+
+  return { triggerType: 'manual' };
+}
 
 /**
  * Shared base fields for all workflow execution telemetry events (IDs, trigger, alert rule, composition).
@@ -34,13 +64,15 @@ function buildBaseExecutionTelemetryFields(
   workflowExecution: EsWorkflowExecution,
   executionMetadata: WorkflowExecutionTelemetryMetadata
 ) {
+  const { triggerType, eventTriggerId } = resolveExecutionTriggerTelemetry(
+    workflowExecution.triggeredBy
+  );
   return {
     workflowExecutionId: workflowExecution.id,
     workflowId: workflowExecution.workflowId,
     spaceId: workflowExecution.spaceId,
-    triggerType:
-      (workflowExecution.triggeredBy as 'manual' | 'scheduled' | 'alert' | 'workflow-step') ||
-      'manual',
+    triggerType,
+    ...(eventTriggerId !== undefined ? { eventTriggerId } : {}),
     isTestRun: workflowExecution.isTestRun || false,
     ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
     ...(executionMetadata.compositionDepth !== undefined && {
@@ -51,6 +83,9 @@ function buildBaseExecutionTelemetryFields(
     }),
     ...(executionMetadata.parentWorkflowInvocation && {
       parentWorkflowInvocation: executionMetadata.parentWorkflowInvocation,
+    }),
+    ...(executionMetadata.eventChainDepth !== undefined && {
+      eventChainDepth: executionMetadata.eventChainDepth,
     }),
   };
 }
@@ -176,6 +211,9 @@ export class WorkflowExecutionTelemetryClient {
       ...(executionMetadata.queueDelayMs !== undefined && {
         queueDelayMs: executionMetadata.queueDelayMs,
       }),
+      ...(executionMetadata.emitToStartMs !== undefined && {
+        emitToStartMs: executionMetadata.emitToStartMs,
+      }),
       timedOut: executionMetadata.timedOut,
       ...(executionMetadata.timeoutMs !== undefined && { timeoutMs: executionMetadata.timeoutMs }),
       ...(executionMetadata.timeoutExceededByMs !== undefined && {
@@ -253,6 +291,9 @@ export class WorkflowExecutionTelemetryClient {
       ...(executionMetadata.queueDelayMs !== undefined && {
         queueDelayMs: executionMetadata.queueDelayMs,
       }),
+      ...(executionMetadata.emitToStartMs !== undefined && {
+        emitToStartMs: executionMetadata.emitToStartMs,
+      }),
       timedOut: executionMetadata.timedOut,
       ...(executionMetadata.timeoutMs !== undefined && { timeoutMs: executionMetadata.timeoutMs }),
       ...(executionMetadata.timeoutExceededByMs !== undefined && {
@@ -322,6 +363,9 @@ export class WorkflowExecutionTelemetryClient {
       ...(executionMetadata.queueDelayMs !== undefined && {
         queueDelayMs: executionMetadata.queueDelayMs,
       }),
+      ...(executionMetadata.emitToStartMs !== undefined && {
+        emitToStartMs: executionMetadata.emitToStartMs,
+      }),
       timedOut: executionMetadata.timedOut,
       ...(executionMetadata.timeoutMs !== undefined && { timeoutMs: executionMetadata.timeoutMs }),
       ...(executionMetadata.timeoutExceededByMs !== undefined && {
@@ -338,5 +382,72 @@ export class WorkflowExecutionTelemetryClient {
     };
 
     this.reportEvent(WorkflowExecutionTelemetryEventTypes.WorkflowExecutionCancelled, eventData);
+  }
+
+  /**
+   * Reports when an event-driven workflow task is skipped at runtime because the operator
+   * disabled event-driven execution after the run was scheduled (distinct from handler early exit).
+   */
+  reportEventDrivenExecutionSuppressed(params: {
+    workflowExecution: EsWorkflowExecution;
+    logTriggerEventsEnabled: boolean;
+  }): void {
+    const { workflowExecution, logTriggerEventsEnabled } = params;
+    const executionMetadata = extractExecutionMetadata(workflowExecution, []);
+    const { triggerType, eventTriggerId } = resolveExecutionTriggerTelemetry(
+      workflowExecution.triggeredBy
+    );
+
+    const eventData: EventDrivenExecutionSuppressedParams = {
+      eventName:
+        workflowExecutionEventNames[
+          WorkflowExecutionTelemetryEventTypes.EventDrivenExecutionSuppressed
+        ],
+      workflowExecutionId: workflowExecution.id,
+      workflowId: workflowExecution.workflowId,
+      spaceId: workflowExecution.spaceId,
+      triggerType,
+      ...(eventTriggerId !== undefined ? { eventTriggerId } : {}),
+      isTestRun: workflowExecution.isTestRun || false,
+      ...(executionMetadata.ruleId && { ruleId: executionMetadata.ruleId }),
+      ...(executionMetadata.eventChainDepth !== undefined && {
+        eventChainDepth: executionMetadata.eventChainDepth,
+      }),
+      logTriggerEventsEnabled,
+    };
+
+    this.reportEvent(
+      WorkflowExecutionTelemetryEventTypes.EventDrivenExecutionSuppressed,
+      eventData
+    );
+  }
+
+  reportTriggerEventDispatched(params: {
+    triggerId: string;
+    config: EventTriggersConfig;
+    eventChainContext?: EventChainContext;
+    eventId: string;
+    subscriberResolutionMs: number;
+    resolutionStats: TriggerResolutionStats;
+    scheduleStats: TriggerEventScheduleStats;
+  }): void {
+    const eventData: TriggerEventDispatchedParams = {
+      eventName:
+        workflowExecutionEventNames[WorkflowExecutionTelemetryEventTypes.TriggerEventDispatched],
+      triggerId: params.triggerId,
+      eventId: params.eventId,
+      executionEnabled: params.config.enabled,
+      logEventsEnabled: params.config.logEvents,
+      auditOnly: !params.config.enabled && params.config.logEvents,
+      eventChainDepth: params.eventChainContext?.depth ?? 0,
+      subscriberResolutionMs: params.subscriberResolutionMs,
+      ...(params.eventChainContext?.sourceExecutionId && {
+        sourceExecutionId: params.eventChainContext.sourceExecutionId,
+      }),
+      ...params.resolutionStats,
+      ...params.scheduleStats,
+    };
+
+    this.reportEvent(WorkflowExecutionTelemetryEventTypes.TriggerEventDispatched, eventData);
   }
 }

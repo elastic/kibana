@@ -13,6 +13,7 @@ import type { FtrProviderContextWithSpaces } from '../../../../ftr_provider_cont
 import { createBasicTimeline } from '../../utils/timelines';
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
+  const MAX_TIMELINE_DELETE_IDS = 100;
   const utils = getService('securitySolutionUtils');
   let supertest: TestAgent;
 
@@ -373,6 +374,41 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
           .set('kbn-xsrf', 'true')
           .send({
             savedObjectIds: [savedObjectId1, savedObjectId2],
+          });
+
+        expect(responseToTest.status).to.be(200);
+      });
+
+      it('accepts an empty delete request body', async () => {
+        const responseToTest = await supertest.delete(TIMELINE_URL).set('kbn-xsrf', 'true').send({
+          savedObjectIds: [],
+        });
+
+        expect(responseToTest.status).to.be(200);
+      });
+
+      it('rejects delete requests above the max bulk size', async () => {
+        const oversizeSavedObjectIds = Array.from(
+          { length: MAX_TIMELINE_DELETE_IDS + 1 },
+          (_, index) => `non-existent-timeline-${index}`
+        );
+        const responseToTest = await supertest.delete(TIMELINE_URL).set('kbn-xsrf', 'true').send({
+          savedObjectIds: oversizeSavedObjectIds,
+        });
+
+        expect(responseToTest.status).to.be(400);
+      });
+
+      it('accepts duplicate ids without repeated delete failures', async () => {
+        const titleToSaved = 'hello title';
+        const response = await createBasicTimeline(supertest, titleToSaved);
+        const { savedObjectId } = response.body;
+
+        const responseToTest = await supertest
+          .delete(TIMELINE_URL)
+          .set('kbn-xsrf', 'true')
+          .send({
+            savedObjectIds: [savedObjectId, savedObjectId],
           });
 
         expect(responseToTest.status).to.be(200);

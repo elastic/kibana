@@ -10,7 +10,7 @@ import { runtimeMappingsSchema } from './runtime_mappings_schema';
 import { indicesOptionsSchema } from './datafeeds_schema';
 
 const indexPatternSchema = {
-  index: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
+  index: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 10000 })], {
     meta: { description: 'Index or indexes for which to return the time range.' },
   }),
 };
@@ -31,6 +31,7 @@ export const getCardinalityOfFieldsSchema = schema.object({
   ...indexPatternSchema,
   fieldNames: schema.maybe(
     schema.arrayOf(schema.string(), {
+      maxSize: 10000,
       meta: { description: 'Name(s) of the field(s) to return cardinality information.' },
     })
   ),

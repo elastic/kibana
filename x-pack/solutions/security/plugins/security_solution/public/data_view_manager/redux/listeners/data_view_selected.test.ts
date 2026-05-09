@@ -14,6 +14,7 @@ import type { RootState } from '../reducer';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../../constants';
 import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../../common/constants';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 
 const mockDataViewsService = {
@@ -87,6 +88,9 @@ const mockLogger = loggingSystemMock.createLogger();
 
 const mockDispatch = jest.fn();
 const mockGetState = jest.fn(() => mockedState);
+const mockSpaces = {
+  getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+} as unknown as SpacesPluginStart;
 const mockStorage = {
   set: jest.fn(),
   get: jest.fn(),
@@ -116,6 +120,7 @@ describe('createDataViewSelectedListener', () => {
       } as unknown as CoreStart['notifications'],
       logger: mockLogger,
       scope: PageScope.default,
+      spaces: mockSpaces,
       storage: mockStorage,
     });
   });
@@ -198,6 +203,7 @@ describe('createDataViewSelectedListener', () => {
           },
         } as unknown as CoreStart['notifications'],
         scope: PageScope.analyzer,
+        spaces: mockSpaces,
         logger: mockLogger,
         storage: mockStorage,
       });
@@ -208,7 +214,7 @@ describe('createDataViewSelectedListener', () => {
       );
 
       expect(mockStorage.set).toHaveBeenCalledWith(
-        'securitySolution.dataViewManager.selectedDataView.analyzer',
+        'securitySolution.dataViewManager.selectedDataView.default.analyzer',
         'adhoc_test-*'
       );
     });
@@ -231,6 +237,7 @@ describe('createDataViewSelectedListener', () => {
           },
         } as unknown as CoreStart['notifications'],
         scope: PageScope.analyzer,
+        spaces: mockSpaces,
         logger: mockLogger,
         storage: mockStorage,
       });
@@ -241,7 +248,7 @@ describe('createDataViewSelectedListener', () => {
       );
 
       expect(mockStorage.set).toHaveBeenCalledWith(
-        'securitySolution.dataViewManager.selectedDataView.analyzer',
+        'securitySolution.dataViewManager.selectedDataView.default.analyzer',
         'persisted_test-*'
       );
     });
@@ -277,6 +284,7 @@ describe('createDataViewSelectedListener', () => {
         },
       } as unknown as CoreStart['notifications'],
       scope: PageScope.analyzer,
+      spaces: mockSpaces,
       logger: mockLogger,
       storage: mockStorage,
     });
@@ -288,7 +296,7 @@ describe('createDataViewSelectedListener', () => {
     );
 
     expect(mockStorage.remove).toHaveBeenCalledWith(
-      'securitySolution.dataViewManager.selectedDataView.analyzer'
+      'securitySolution.dataViewManager.selectedDataView.default.analyzer'
     );
   });
 });

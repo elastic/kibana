@@ -5,7 +5,86 @@
  * 2.0.
  */
 
-import { getEuidFromObject } from './memory';
+import { getEuidFromObject, getEntityIdentifiersFromDocument } from './memory';
+
+describe('getEntityIdentifiersFromDocument', () => {
+  it('returns undefined when doc is null or undefined', () => {
+    expect(getEntityIdentifiersFromDocument('host', null)).toBeUndefined();
+    expect(getEntityIdentifiersFromDocument('host', undefined)).toBeUndefined();
+  });
+
+  it('returns host.id entry when nested host.id is present', () => {
+    expect(getEntityIdentifiersFromDocument('host', { host: { id: 'h1' } })).toEqual({
+      'host.id': 'h1',
+    });
+  });
+
+  it('returns host.name when host.id is absent', () => {
+    expect(getEntityIdentifiersFromDocument('host', { host: { name: 'server1' } })).toEqual({
+      'host.name': 'server1',
+    });
+  });
+
+  it('unwraps _source like getEuidFromObject', () => {
+    expect(
+      getEntityIdentifiersFromDocument('generic', { _source: { entity: { id: 'e-123' } } })
+    ).toEqual({ 'entity.id': 'e-123' });
+  });
+
+  it('returns service.name for single-field service identity', () => {
+    expect(
+      getEntityIdentifiersFromDocument('service', { service: { name: 'api-gateway' } })
+    ).toEqual({ 'service.name': 'api-gateway' });
+  });
+
+  it('returns undefined for service when service.name is missing', () => {
+    expect(getEntityIdentifiersFromDocument('service', { service: {} })).toBeUndefined();
+  });
+
+  it('returns user.email and evaluated entity.namespace for IDP email path', () => {
+    expect(
+      getEntityIdentifiersFromDocument('user', {
+        user: { email: 'alice@example.com' },
+        event: { kind: 'asset', module: 'okta' },
+      })
+    ).toEqual({
+      'user.email': 'alice@example.com',
+      'entity.namespace': 'okta',
+    });
+  });
+
+  it('returns user.name, host.id, and entity.namespace for non-IDP local path', () => {
+    expect(
+      getEntityIdentifiersFromDocument('user', {
+        user: { name: 'alice' },
+        host: { id: 'host-1' },
+      })
+    ).toEqual({
+      'user.name': 'alice',
+      'host.id': 'host-1',
+      'entity.namespace': 'local',
+    });
+  });
+
+  it('returns undefined when user document fails pipeline gate (e.g. wrong IDP module)', () => {
+    expect(
+      getEntityIdentifiersFromDocument('user', {
+        user: { email: 'a@b.com' },
+        event: { module: 'azure' },
+      })
+    ).toBeUndefined();
+  });
+
+  it('prefers host.id over host.name for host identifiers', () => {
+    expect(
+      getEntityIdentifiersFromDocument('host', {
+        host: { id: 'h1', name: 'server1', hostname: 'node-1' },
+      })
+    ).toEqual({
+      'host.id': 'h1',
+    });
+  });
+});
 
 describe('getEuidFromObject', () => {
   it('returns empty string when obj is null or undefined', () => {

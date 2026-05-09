@@ -10,7 +10,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryStreamFieldDescriptionFlyout } from './query_stream_schema_editor';
-import type { SchemaEditorField } from '../data_management/schema_editor/types';
+import type { SchemaEditorField } from '../stream_management/data_management/schema_editor/types';
 
 const user = userEvent.setup({ pointerEventsCheck: 0 });
 
