@@ -9,7 +9,8 @@ import { render } from '@testing-library/react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { TestProviders } from '../../../common/mock';
-import { HostEntityOverview } from './host_entity_overview';
+import { HostEntityOverview, HOST_PREVIEW_BANNER } from './host_entity_overview';
+import { HostPreviewPanelKey } from '../../../flyout/entity_details/host_right';
 import { useHostDetails } from '../../../explore/hosts/containers/hosts/details';
 import { useFirstLastSeen } from '../../../common/containers/use_first_last_seen';
 import {
@@ -203,24 +204,22 @@ describe('<HostEntityContent />', () => {
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID)).toHaveTextContent('—');
     });
 
-    it('renders the host name as plain text when no onShowDetails is provided', () => {
+    it('renders the host name as plain text by default (Flyout v2 / Discover)', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
-      const { getByTestId, queryByRole } = renderHostEntityContent();
+      const { getByTestId } = renderHostEntityContent();
 
       const container = getByTestId(ENTITIES_HOST_OVERVIEW_LINK_TEST_ID);
       expect(container).toHaveTextContent(hostName);
       expect(container.querySelector('a, button')).toBeNull();
-      expect(queryByRole('link', { name: hostName })).toBeNull();
       container.click();
       expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
     });
 
-    it('renders the host name as a link when onShowDetails is provided', () => {
+    it('opens host preview when clicking on title with enableEntityLinks', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
-      const onShowDetails = jest.fn();
 
       const { getByTestId } = render(
         <TestProviders>
@@ -228,16 +227,22 @@ describe('<HostEntityContent />', () => {
             hostName={hostName}
             identityFields={identityFields}
             scopeId={panelContextValue.scopeId}
-            onShowDetails={onShowDetails}
+            enableEntityLinks
           />
         </TestProviders>
       );
 
-      const container = getByTestId(ENTITIES_HOST_OVERVIEW_LINK_TEST_ID);
-      const link = container.querySelector('a, button');
-      expect(link).not.toBeNull();
-      link?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      expect(onShowDetails).toHaveBeenCalledTimes(1);
+      getByTestId(ENTITIES_HOST_OVERVIEW_LINK_TEST_ID).click();
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+        id: HostPreviewPanelKey,
+        params: {
+          contextID: panelContextValue.scopeId,
+          hostName,
+          scopeId: panelContextValue.scopeId,
+          banner: HOST_PREVIEW_BANNER,
+          entityId: undefined,
+        },
+      });
     });
   });
 

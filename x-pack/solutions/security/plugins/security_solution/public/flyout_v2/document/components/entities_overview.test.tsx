@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import {
   ENTITIES_HOST_OVERVIEW_TEST_ID,
-  ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
   ENTITIES_USER_OVERVIEW_TEST_ID,
   INSIGHTS_ENTITIES_TEST_ID,
 } from './test_ids';
@@ -39,6 +38,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     useUiSetting: jest.fn(),
   };
 });
+
+jest.mock('../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
 
 jest.mock('@kbn/entity-store/public', () => {
   const actual = jest.requireActual('@kbn/entity-store/public');
@@ -98,7 +101,6 @@ const renderEntitiesOverview = (props: {
   hit: DataTableRecord;
   dataAsNestedObject?: Ecs | null;
   onShowEntitiesDetails?: () => void;
-  onShowUserDetails?: (params: { userName: string; entityId?: string }) => void;
   showIcon?: boolean;
 }) =>
   render(
@@ -253,7 +255,6 @@ describe('<EntitiesOverview />', () => {
   });
 
   it('should use user.name as entity-store fallback when EUID identifiers are unavailable', () => {
-    const onShowUserDetails = jest.fn();
     const userEntityRecord = {
       entity: { id: 'user:store-id', name: 'user1' },
       user: { name: ['user1'] },
@@ -295,11 +296,7 @@ describe('<EntitiesOverview />', () => {
     } as unknown as Ecs;
     const hit = buildHit({ user: { name: 'user1' } });
 
-    const { getByTestId } = renderEntitiesOverview({
-      hit,
-      dataAsNestedObject,
-      onShowUserDetails,
-    });
+    const { getByTestId } = renderEntitiesOverview({ hit, dataAsNestedObject });
 
     expect(mockUseEntityFromStore).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -308,11 +305,6 @@ describe('<EntitiesOverview />', () => {
       })
     );
 
-    fireEvent.click(getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID));
-
-    expect(onShowUserDetails).toHaveBeenCalledWith({
-      userName: 'user1',
-      entityId: 'user:store-id',
-    });
+    expect(getByTestId(ENTITIES_USER_OVERVIEW_TEST_ID)).toHaveTextContent('user1');
   });
 });

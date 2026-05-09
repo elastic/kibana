@@ -17,8 +17,6 @@ import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
-import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { CspInsightLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
 import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { useEventDetails } from '../../../flyout/document_details/shared/hooks/use_event_details';
@@ -54,38 +52,11 @@ export interface EntitiesOverviewProps {
    */
   onShowEntitiesDetails?: () => void;
   /**
-   * Callback invoked when the user name is clicked or an alert/misconfiguration link is followed.
-   * Required in flyout_v2; without it the sub-overviews fall back to expandable-flyout actions
-   * which are no-ops outside the legacy flyout.
+   * When true, host/user names render as preview links and the alert/misconfig/vuln chips
+   * become clickable. The legacy expandable flyout sets this; Flyout v2 and Discover leave
+   * it off so everything renders as plain text.
    */
-  onShowUserDetails?: (params: { userName: string; entityId?: string }) => void;
-  /**
-   * Same as `onShowUserDetails` but for host entities.
-   */
-  onShowHostDetails?: (params: { hostName: string; entityId?: string }) => void;
-  /**
-   * Callback invoked when the user clicks the alerts insight chip on the user card.
-   * When omitted, the click falls back to `onShowUserDetails`.
-   */
-  onShowUserAlertsDetails?: (params: { userName: string; entityId?: string }) => void;
-  /**
-   * Same as `onShowUserAlertsDetails` but for host entities.
-   */
-  onShowHostAlertsDetails?: (params: { hostName: string; entityId?: string }) => void;
-  /**
-   * Callback invoked when the user clicks the misconfigurations insight chip on the user card.
-   * When omitted, the click falls back to `onShowUserDetails`.
-   */
-  onShowUserMisconfigurationsDetails?: (params: { userName: string; entityId?: string }) => void;
-  /**
-   * Same as `onShowUserMisconfigurationsDetails` but for host entities.
-   */
-  onShowHostMisconfigurationsDetails?: (params: { hostName: string; entityId?: string }) => void;
-  /**
-   * Callback invoked when the user clicks the vulnerabilities insight chip on the host card.
-   * When omitted, the click falls back to `onShowHostDetails`. Vulnerabilities are host-only.
-   */
-  onShowHostVulnerabilitiesDetails?: (params: { hostName: string; entityId?: string }) => void;
+  enableEntityLinks?: boolean;
 }
 
 const HEADER_TITLE = (
@@ -107,56 +78,6 @@ const NO_DATA = (
   />
 );
 
-type ShowUserHandler = NonNullable<EntitiesOverviewProps['onShowUserDetails']>;
-type ShowHostHandler = NonNullable<EntitiesOverviewProps['onShowHostDetails']>;
-
-const buildShowUserDetailsHandler = (
-  userName: string,
-  entityId: string | undefined,
-  onShowDetails: ShowUserHandler | undefined,
-  onShowAlerts: ShowUserHandler | undefined,
-  onShowMisconfigurations: ShowUserHandler | undefined
-) => {
-  if (!onShowDetails || !userName) return undefined;
-  return (path?: EntityDetailsPath) => {
-    if (path?.subTab === CspInsightLeftPanelSubTab.ALERTS && onShowAlerts) {
-      onShowAlerts({ userName, entityId });
-      return;
-    }
-    if (path?.subTab === CspInsightLeftPanelSubTab.MISCONFIGURATIONS && onShowMisconfigurations) {
-      onShowMisconfigurations({ userName, entityId });
-      return;
-    }
-    onShowDetails({ userName, entityId });
-  };
-};
-
-const buildShowHostDetailsHandler = (
-  hostName: string,
-  entityId: string | undefined,
-  onShowDetails: ShowHostHandler | undefined,
-  onShowAlerts: ShowHostHandler | undefined,
-  onShowMisconfigurations: ShowHostHandler | undefined,
-  onShowVulnerabilities: ShowHostHandler | undefined
-) => {
-  if (!onShowDetails || !hostName) return undefined;
-  return (path?: EntityDetailsPath) => {
-    if (path?.subTab === CspInsightLeftPanelSubTab.ALERTS && onShowAlerts) {
-      onShowAlerts({ hostName, entityId });
-      return;
-    }
-    if (path?.subTab === CspInsightLeftPanelSubTab.MISCONFIGURATIONS && onShowMisconfigurations) {
-      onShowMisconfigurations({ hostName, entityId });
-      return;
-    }
-    if (path?.subTab === CspInsightLeftPanelSubTab.VULNERABILITIES && onShowVulnerabilities) {
-      onShowVulnerabilities({ hostName, entityId });
-      return;
-    }
-    onShowDetails({ hostName, entityId });
-  };
-};
-
 /**
  * Entities section under Insights section, overview tab. It contains a preview of host and user information.
  */
@@ -168,13 +89,7 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
     scopeId = '',
     renderCellActions = noopCellActionRenderer,
     onShowEntitiesDetails,
-    onShowUserDetails,
-    onShowHostDetails,
-    onShowUserAlertsDetails,
-    onShowHostAlertsDetails,
-    onShowUserMisconfigurationsDetails,
-    onShowHostMisconfigurationsDetails,
-    onShowHostVulnerabilitiesDetails,
+    enableEntityLinks = false,
   }) => {
     const hostName = getFieldValue(hit, 'host.name') as string | null;
     const userName = getFieldValue(hit, 'user.name') as string | null;
@@ -253,49 +168,6 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
       [onShowEntitiesDetails]
     );
 
-    // The chip insights call back with a `{ tab: CSP_INSIGHTS, subTab }` path; route each subTab
-    // to its dedicated flyout. When the corresponding handler is omitted, the click falls back
-    // to the entity details flyout — keeping the v2 chrome single-body per surface.
-    const userEntityRecordId = userEntityRecord?.entity?.id;
-    const handleShowUserDetails = useMemo(
-      () =>
-        buildShowUserDetailsHandler(
-          resolvedUserName,
-          userEntityRecordId,
-          onShowUserDetails,
-          onShowUserAlertsDetails,
-          onShowUserMisconfigurationsDetails
-        ),
-      [
-        onShowUserDetails,
-        onShowUserAlertsDetails,
-        onShowUserMisconfigurationsDetails,
-        resolvedUserName,
-        userEntityRecordId,
-      ]
-    );
-
-    const hostEntityRecordId = hostEntityRecord?.entity?.id;
-    const handleShowHostDetails = useMemo(
-      () =>
-        buildShowHostDetailsHandler(
-          resolvedHostName,
-          hostEntityRecordId,
-          onShowHostDetails,
-          onShowHostAlertsDetails,
-          onShowHostMisconfigurationsDetails,
-          onShowHostVulnerabilitiesDetails
-        ),
-      [
-        onShowHostDetails,
-        onShowHostAlertsDetails,
-        onShowHostMisconfigurationsDetails,
-        onShowHostVulnerabilitiesDetails,
-        resolvedHostName,
-        hostEntityRecordId,
-      ]
-    );
-
     return (
       <ExpandablePanel
         header={{
@@ -316,7 +188,7 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
                     entityRecord={entityStoreV2Enabled ? userEntityRecord : undefined}
                     scopeId={scopeId}
                     renderCellActions={renderCellActions}
-                    onShowDetails={handleShowUserDetails}
+                    enableEntityLinks={enableEntityLinks}
                   />
                 </EuiFlexItem>
                 <EuiSpacer size="s" />
@@ -330,7 +202,7 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
                   entityRecord={entityStoreV2Enabled ? hostEntityRecord : undefined}
                   scopeId={scopeId}
                   renderCellActions={renderCellActions}
-                  onShowDetails={handleShowHostDetails}
+                  enableEntityLinks={enableEntityLinks}
                 />
               </EuiFlexItem>
             )}

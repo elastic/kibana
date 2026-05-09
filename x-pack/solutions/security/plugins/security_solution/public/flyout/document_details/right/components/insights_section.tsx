@@ -102,6 +102,7 @@ export const InsightsSection = memo(() => {
         showIcon={!isPreviewMode}
         renderCellActions={renderCellActions}
         onShowEntitiesDetails={goToEntitiesTab}
+        enableEntityLinks
       />
       {eventKind === EventKind.signal && (
         <>

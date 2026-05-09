@@ -9,7 +9,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { UserEntityOverview } from './user_entity_overview';
+import { UserEntityOverview, USER_PREVIEW_BANNER } from './user_entity_overview';
+import { UserPreviewPanelKey } from '../../../flyout/entity_details/user_right';
 import { useFirstLastSeen } from '../../../common/containers/use_first_last_seen';
 import {
   ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID,
@@ -27,6 +28,7 @@ import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { mockFlyoutApi } from '../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import { useAlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 
 const userName = 'user';
 const identityFields = { 'user.name': userName };
@@ -47,7 +49,18 @@ const panelContextValue = {
 jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 
-jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
+
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...originalModule,
+    useKibana: () => ({ services: { telemetry: mockedTelemetry } }),
+  };
+});
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
@@ -194,32 +207,22 @@ describe('<UserEntityOverview />', () => {
       expect(queryByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).not.toBeInTheDocument();
     });
 
-    it('renders the user name as plain text when no onShowDetails is provided', () => {
+    it('renders the user name as plain text by default (Flyout v2 / Discover)', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
-      const { getByTestId, queryByRole } = render(
-        <TestProviders>
-          <UserEntityOverview
-            userName={userName}
-            identityFields={identityFields}
-            scopeId={panelContextValue.scopeId}
-          />
-        </TestProviders>
-      );
+      const { getByTestId } = renderUserEntityOverview();
 
       const container = getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID);
       expect(container).toHaveTextContent(userName);
       expect(container.querySelector('a, button')).toBeNull();
-      expect(queryByRole('link', { name: userName })).toBeNull();
       container.click();
       expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
     });
 
-    it('renders the user name as a link when onShowDetails is provided', () => {
+    it('opens user preview when clicking on title with enableEntityLinks', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
-      const onShowDetails = jest.fn();
 
       const { getByTestId } = render(
         <TestProviders>
@@ -227,16 +230,22 @@ describe('<UserEntityOverview />', () => {
             userName={userName}
             identityFields={identityFields}
             scopeId={panelContextValue.scopeId}
-            onShowDetails={onShowDetails}
+            enableEntityLinks
           />
         </TestProviders>
       );
 
-      const container = getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID);
-      const link = container.querySelector('a, button');
-      expect(link).not.toBeNull();
-      link?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      expect(onShowDetails).toHaveBeenCalledTimes(1);
+      getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID).click();
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
+        id: UserPreviewPanelKey,
+        params: {
+          contextID: panelContextValue.scopeId,
+          userName,
+          scopeId: panelContextValue.scopeId,
+          banner: USER_PREVIEW_BANNER,
+          entityId: undefined,
+        },
+      });
     });
   });
 

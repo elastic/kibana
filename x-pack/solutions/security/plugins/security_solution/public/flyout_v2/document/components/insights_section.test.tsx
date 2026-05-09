@@ -74,39 +74,7 @@ jest.mock('./threat_intelligence_overview', () => ({
   ThreatIntelligenceOverview: () => <div data-test-subj="threatIntelligenceOverviewMock" />,
 }));
 jest.mock('./entities_overview', () => ({
-  EntitiesOverview: ({
-    onShowEntitiesDetails,
-    onShowUserDetails,
-    onShowHostDetails,
-  }: {
-    onShowEntitiesDetails?: () => void;
-    onShowUserDetails?: (params: { userName: string; entityId?: string }) => void;
-    onShowHostDetails?: (params: { hostName: string; entityId?: string }) => void;
-  }) => (
-    <div data-test-subj="entitiesOverviewMock">
-      <button
-        type="button"
-        data-test-subj="entitiesOverviewMockDetailsButton"
-        onClick={onShowEntitiesDetails}
-      >
-        {'Show entities'}
-      </button>
-      <button
-        type="button"
-        data-test-subj="entitiesOverviewMockUserButton"
-        onClick={() => onShowUserDetails?.({ userName: 'test-user', entityId: 'user:1' })}
-      >
-        {'Show user'}
-      </button>
-      <button
-        type="button"
-        data-test-subj="entitiesOverviewMockHostButton"
-        onClick={() => onShowHostDetails?.({ hostName: 'test-host', entityId: 'host:1' })}
-      >
-        {'Show host'}
-      </button>
-    </div>
-  ),
+  EntitiesOverview: () => <div data-test-subj="entitiesOverviewMock" />,
 }));
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -252,16 +220,6 @@ describe('InsightsSection', () => {
       expect.any(Function)
     );
     expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not open a flyout when clicking the entities overview links', () => {
-    const { getByTestId } = renderInsightsSection();
-
-    fireEvent.click(getByTestId('entitiesOverviewMockDetailsButton'));
-    fireEvent.click(getByTestId('entitiesOverviewMockUserButton'));
-    fireEvent.click(getByTestId('entitiesOverviewMockHostButton'));
-
-    expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
   });
 
   it('disables timeline interactions when not in Security Solution', () => {
