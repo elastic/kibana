@@ -8,13 +8,13 @@
  */
 
 import { DASHBOARD_GRID_COLUMN_COUNT } from '@kbn/dashboard-plugin/public';
-import { PanelPlacementStrategy } from '@kbn/presentation-util-plugin/public';
+import { PlacementStrategy } from '@kbn/embeddable-plugin/public';
 import { LINKS_HORIZONTAL_LAYOUT } from '../../common/content_management';
 import type { LinksEmbeddableState } from '../../common';
 import type { LinksState } from '../../server';
 import { loadFromLibrary } from '../content_management/load_from_library';
 
-export async function getDisplaySettings(serializedState?: LinksEmbeddableState) {
+export async function getPlacementHints(serializedState?: LinksEmbeddableState) {
   if (!serializedState) return {};
 
   let layout = LINKS_HORIZONTAL_LAYOUT;
@@ -31,6 +31,6 @@ export async function getDisplaySettings(serializedState?: LinksEmbeddableState)
   const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
   const height = isHorizontal ? 2 : numLinks * 3 + 4;
   return {
-    placementSettings: { width, height, strategy: PanelPlacementStrategy.placeAtTop }
+    width, height, strategy: PlacementStrategy.placeAtTop
   };
 }

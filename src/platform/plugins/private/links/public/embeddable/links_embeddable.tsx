@@ -43,14 +43,14 @@ import { resolveLinks, serializeResolvedLinks } from '../lib/resolve_links';
 import { isParentApiCompatible } from '../actions/add_links_panel_action';
 import { coreServices } from '../services/kibana_services';
 import { loadFromLibrary } from '../content_management/load_from_library';
-import { getDisplaySettings } from './get_display_settings';
+import { getPlacementHints } from './get_placement_hints';
 
 export const LinksContext = createContext<LinksApi | null>(null);
 
 export const getLinksEmbeddableFactory = () => {
   const linksEmbeddableFactory: EmbeddablePublicDefinition<LinksEmbeddableState, LinksApi> = {
     type: LINKS_EMBEDDABLE_TYPE,
-    getDisplaySettings,
+    getPlacementHints,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const refId = (initialState as LinksByReferenceState).ref_id;
       const intialLinksState = refId ? await loadFromLibrary(refId) : (initialState as LinksState);
