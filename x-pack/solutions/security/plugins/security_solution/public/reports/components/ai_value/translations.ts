@@ -72,7 +72,7 @@ export const ATTACK_DISCOVERY_COUNT = i18n.translate(
 );
 
 export const EXPORT_REPORT = i18n.translate('xpack.securitySolution.reports.aiValue.exportReport', {
-  defaultMessage: 'Export report',
+  defaultMessage: 'Export PDF',
 });
 
 export const FILTERING_RATE = i18n.translate(
@@ -378,5 +378,20 @@ export const ATTACK_DISCOVERY_LINK = i18n.translate(
   'xpack.securitySolution.reports.aiValue.attackDiscoveryLink',
   {
     defaultMessage: 'Go to Attack discovery',
+  }
+);
+
+export const NO_RESULTS_TITLE = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.noResultsEmptyStateTitle',
+  {
+    defaultMessage: 'No results for the selected time range',
+  }
+);
+
+export const NO_RESULTS_BODY = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.noResultsEmptyStateBody',
+  {
+    defaultMessage:
+      'Adjust the time range in the top bar to see available results for the Value Report.',
   }
 );

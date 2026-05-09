@@ -11,24 +11,36 @@ import {
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
   SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
 } from '@kbn/management-settings-ids';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiImage,
+  EuiEmptyPrompt,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiPanel,
+  EuiBadge,
+  EuiTitle,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
+import analyticsSpeedAcceleration from './analytics_speed_acceleration.svg';
 import { AIValueReportLayout } from './ai_value_report_layout';
-import { SampleAttackDiscoveryCta } from './sample_attack_discovery_cta';
 import { useValueMetrics } from '../../hooks/use_value_metrics';
+import { useHasEverUsedAttackDiscovery } from '../../hooks/use_has_ever_used_attack_discovery';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 import { PageLoader } from '../../../common/components/page_loader';
 import * as i18n from './translations';
+import { SampleAttackDiscoveryCta } from './sample_attack_discovery_cta';
 
 interface Props {
-  setHasAttackDiscoveries: React.Dispatch<boolean>;
+  setHasReportData: React.Dispatch<boolean>;
+  isSourcererLoading: boolean;
   from: string;
   to: string;
 }
 
 export const AIValueReport: React.FC<Props> = (props) => {
-  const { setHasAttackDiscoveries } = props;
+  const { setHasReportData, isSourcererLoading } = props;
   const { uiSettings } = useKibana().services;
   const exportContext = useAIValueExportContext();
   const setReportInputForExportContext = exportContext?.setReportInput;
@@ -67,13 +79,19 @@ export const AIValueReport: React.FC<Props> = (props) => {
     analystHourlyRate,
   });
 
+  const { hasEverUsedAttackDiscovery, isLoading: isLoadingHasEverUsedAttackDiscovery } =
+    useHasEverUsedAttackDiscovery();
+
+  // Only show the sample/onboarding state when the user has never used the
+  // feature. If they used it before but produced no discoveries in the
+  // selected range, render the real (empty) report instead.
   const renderSample = useMemo(
-    () => valueMetrics.attackDiscoveryCount === 0,
-    [valueMetrics.attackDiscoveryCount]
+    () => valueMetrics.attackDiscoveryCount === 0 && !hasEverUsedAttackDiscovery,
+    [valueMetrics.attackDiscoveryCount, hasEverUsedAttackDiscovery]
   );
 
   useEffect(() => {
-    if (isLoading || !setReportInputForExportContext) {
+    if (isLoading || !setReportInputForExportContext || isSourcererLoading) {
       return;
     }
     setReportInputForExportContext({
@@ -91,13 +109,14 @@ export const AIValueReport: React.FC<Props> = (props) => {
     analystHourlyRate,
     minutesPerAlert,
     setReportInputForExportContext,
+    isSourcererLoading,
   ]);
 
   useEffect(() => {
-    setHasAttackDiscoveries(!renderSample);
-  }, [renderSample, setHasAttackDiscoveries]);
+    setHasReportData(!renderSample && valueMetrics.attackDiscoveryCount > 0);
+  }, [renderSample, valueMetrics, setHasReportData]);
 
-  if (isLoading) {
+  if (isLoading || isLoadingHasEverUsedAttackDiscovery || isSourcererLoading) {
     return <PageLoader />;
   }
 
@@ -115,6 +134,7 @@ export const AIValueReport: React.FC<Props> = (props) => {
   if (renderSample) {
     // render sample report with default values if there are no attack discoveries
     // to show the full report layout and provide an example of how the metrics are calculated
+    // @ts-ignore
     return (
       <>
         {/*
@@ -150,6 +170,27 @@ export const AIValueReport: React.FC<Props> = (props) => {
           <AIValueReportLayout renderSample={renderSample} />
         </EuiPanel>
       </>
+    );
+  }
+
+  if (!hasEverUsedAttackDiscovery) {
+    // @ts-ignore
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem
+          css={css`
+            min-height: 50vh;
+          `}
+        >
+          <EuiEmptyPrompt
+            icon={<EuiImage size="s" src={analyticsSpeedAcceleration} alt="" />}
+            title={<h2>{i18n.NO_RESULTS_TITLE}</h2>}
+            titleSize="s"
+            body={<p>{i18n.NO_RESULTS_BODY}</p>}
+            hasBorder={false}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 

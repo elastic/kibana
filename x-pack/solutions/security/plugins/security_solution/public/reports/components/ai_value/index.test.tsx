@@ -14,6 +14,7 @@ import {
 import { AIValueReport } from '.';
 import { useKibana } from '../../../common/lib/kibana';
 import { useValueMetrics } from '../../hooks/use_value_metrics';
+import { useHasEverUsedAttackDiscovery } from '../../hooks/use_has_ever_used_attack_discovery';
 import { ExecutiveSummary } from './executive_summary';
 import { AlertProcessing } from './alert_processing';
 import { CostSavingsTrend } from './cost_savings_trend';
@@ -28,6 +29,10 @@ jest.mock('../../../common/lib/kibana', () => ({
 
 jest.mock('../../hooks/use_value_metrics', () => ({
   useValueMetrics: jest.fn(),
+}));
+
+jest.mock('../../hooks/use_has_ever_used_attack_discovery', () => ({
+  useHasEverUsedAttackDiscovery: jest.fn(),
 }));
 
 jest.mock('./executive_summary', () => ({
@@ -52,6 +57,9 @@ jest.mock('../../providers/ai_value/export_provider', () => ({
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseValueMetrics = useValueMetrics as jest.MockedFunction<typeof useValueMetrics>;
+const mockUseHasEverUsedAttackDiscovery = useHasEverUsedAttackDiscovery as jest.MockedFunction<
+  typeof useHasEverUsedAttackDiscovery
+>;
 const useAIValueExportContextMock = useAIValueExportContext as jest.Mock;
 
 const defaultProps = {
@@ -105,6 +113,11 @@ describe('AIValueReport', () => {
       isLoading: false,
       valueMetrics: mockValueMetrics,
       valueMetricsCompare: mockValueMetricsCompare,
+    });
+
+    mockUseHasEverUsedAttackDiscovery.mockReturnValue({
+      hasEverUsedAttackDiscovery: false,
+      isLoading: false,
     });
   });
 
@@ -190,6 +203,30 @@ describe('AIValueReport', () => {
     expect(defaultProps.setHasAttackDiscoveries).toHaveBeenCalledWith(false);
     expect(AlertProcessing).not.toHaveBeenCalled();
     expect(CostSavingsTrend).not.toHaveBeenCalled();
+  });
+
+  it('renders the real report when the window has no discoveries but the feature was used before', () => {
+    mockUseValueMetrics.mockReturnValue({
+      attackAlertIds: [],
+      isLoading: false,
+      valueMetrics: {
+        ...mockValueMetrics,
+        attackDiscoveryCount: 0,
+      },
+      valueMetricsCompare: mockValueMetricsCompare,
+    });
+    mockUseHasEverUsedAttackDiscovery.mockReturnValue({
+      hasEverUsedAttackDiscovery: true,
+      isLoading: false,
+    });
+
+    render(<AIValueReport {...defaultProps} />);
+
+    expect(defaultProps.setHasAttackDiscoveries).toHaveBeenCalledWith(true);
+    expect(ExecutiveSummary).toHaveBeenCalledWith(
+      expect.objectContaining({ renderSample: false }),
+      {}
+    );
   });
 
   it('passes correct parameters to useValueMetrics hook', () => {

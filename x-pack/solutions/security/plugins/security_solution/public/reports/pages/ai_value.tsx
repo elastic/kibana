@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState, useRef, useMemo } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { css } from '@emotion/css';
 import { useSyncTimerangeUrlParam } from '../../common/hooks/search_bar/use_sync_timerange_url_param';
@@ -22,7 +22,6 @@ import { HeaderPage } from '../../common/components/header_page';
 import * as i18n from './translations';
 import { NoPrivileges } from '../../common/components/no_privileges';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
-import { PageLoader } from '../../common/components/page_loader';
 import { inputsSelectors } from '../../common/store';
 import { useHasSecurityCapability } from '../../helper_hooks';
 import { useKibana } from '../../common/lib/kibana';
@@ -56,11 +55,12 @@ const BaseComponent = () => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const { status } = useDataView();
 
+  // covers pristine and loading states
   const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
 
   const hasSocManagementCapability = useHasSecurityCapability('socManagement');
 
-  const [hasAttackDiscoveries, setHasAttackDiscoveries] = useState(false);
+  const [hasReportData, setHasReportData] = useState(false);
   const exportPDFRef = useRef<(() => void) | null>(null);
 
   const { serverless } = useKibana().services;
@@ -87,6 +87,7 @@ const BaseComponent = () => {
           onClick={() => exportPDFRef.current?.()}
           size="s"
           aria-label={EXPORT_REPORT}
+          isDisabled={!hasReportData}
         >
           {EXPORT_REPORT}
         </EuiButtonEmpty>
@@ -99,19 +100,16 @@ const BaseComponent = () => {
           aria-label={EXPORT_REPORT}
           onClick={toggleContextMenu}
           isLoading={!isExportEnabled}
+          isDisabled={!hasReportData}
         >
           {EXPORT_REPORT}
         </EuiButtonEmpty>
       ),
-    [isServerless, isExportEnabled, toggleContextMenu]
+    [isServerless, isExportEnabled, hasReportData, toggleContextMenu]
   );
 
   if (!hasSocManagementCapability) {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
-  }
-
-  if (newDataViewPickerEnabled && status === 'pristine') {
-    return <PageLoader />;
   }
 
   return (
@@ -130,38 +128,35 @@ const BaseComponent = () => {
         <HeaderPage
           title={i18n.AI_VALUE_DASHBOARD}
           rightSideItems={[
+            exportButton,
             <SuperDatePicker
               id={InputsModelId.valueReport}
               showUpdateButton="iconOnly"
               width="auto"
               compressed
             />,
-            ...(hasAttackDiscoveries ? [exportButton] : []),
           ]}
         />
       )}
-      {isSourcererLoading ? (
-        <EuiLoadingSpinner size="l" data-test-subj="aiValueLoader" />
-      ) : (
-        <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
-          <EuiFlexItem>
-            <ValueReportExporter>
-              {(exportPDF) => {
-                // Store the export function in the ref
-                exportPDFRef.current = exportPDF;
+      <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
+        <EuiFlexItem>
+          <ValueReportExporter>
+            {(exportPDF) => {
+              // Store the export function in the ref
+              exportPDFRef.current = exportPDF;
 
-                return (
-                  <AIValueReport
-                    from={from}
-                    to={to}
-                    setHasAttackDiscoveries={setHasAttackDiscoveries}
-                  />
-                );
-              }}
-            </ValueReportExporter>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+              return (
+                <AIValueReport
+                  from={from}
+                  to={to}
+                  setHasReportData={setHasReportData}
+                  isSourcererLoading={isSourcererLoading}
+                />
+              );
+            }}
+          </ValueReportExporter>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </SecuritySolutionPageWrapper>
   );
 };
