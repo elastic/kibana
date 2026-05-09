@@ -11,7 +11,6 @@ import type { IRouter } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { registerKbnClientSoRoutes } from './kbn_client_so';
 import { registerTaskManagerRoutes } from './task_manager';
-import { registerUiSettingsRoutes } from './ui_settings';
 
 export const registerRoutes = (
   router: IRouter,
@@ -19,5 +18,4 @@ export const registerRoutes = (
 ) => {
   registerKbnClientSoRoutes(router);
   registerTaskManagerRoutes(router, getTaskManager);
-  registerUiSettingsRoutes(router);
 };

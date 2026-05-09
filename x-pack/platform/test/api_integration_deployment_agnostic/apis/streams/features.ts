@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import type { BaseFeature, Streams } from '@kbn/streams-schema';
 import { emptyAssets } from '@kbn/streams-schema';
+import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -21,7 +22,6 @@ import {
   deleteFeature,
   putStream,
 } from './helpers/requests';
-import { updateSignificantEventsSettingAndWait } from './helpers/ui_settings';
 
 const STREAM_NAME = 'logs.otel';
 const SECOND_STREAM_NAME = 'logs.otel.features-cross-stream-test';
@@ -63,20 +63,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
-      await updateSignificantEventsSettingAndWait({
-        kibanaServer,
-        apiClient,
-        enabled: true,
+      await kibanaServer.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
       });
     });
 
     after(async () => {
-      await updateSignificantEventsSettingAndWait({
-        kibanaServer,
-        apiClient,
-        enabled: false,
-      });
       await disableStreams(apiClient);
+      await kibanaServer.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
+      });
     });
 
     describe('Exclude and restore', () => {

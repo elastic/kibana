@@ -5,6 +5,5 @@ This plugin exposes a set of APIs used internally during functional tests by the
 The APIs currently exposed are:
 1. APIs used by the `KbnClientSavedObjects` (SO service of the FTR)
 2. APIs used by Task Manager
-3. APIs used by the `KbnClientUiSettings` helper
 
 **Remark: these APIs shouldn't be called directly for any reason**  

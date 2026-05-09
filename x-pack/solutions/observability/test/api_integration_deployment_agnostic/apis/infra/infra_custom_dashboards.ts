@@ -18,9 +18,12 @@ const getCustomDashboardsUrl = (assetType: string, dashboardSavedObjectId?: stri
     ? `/api/infra/${assetType}/custom-dashboards/${dashboardSavedObjectId}`
     : `/api/infra/${assetType}/custom-dashboards`;
 
+const CUSTOM_DASHBOARDS_SETTING_PROPAGATION_TIMEOUT_MS = 20_000;
+
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
 
   describe('Infra Custom Dashboards API', () => {
     let supertestWithAdminScope: SupertestWithRoleScopeType;
@@ -41,6 +44,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         types: [INFRA_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE],
       });
     });
+
+    // Stateful cloud requests can hit a different Kibana node before the shared
+    // advanced settings cache has expired.
+    const waitForEnabledCustomDashboardsSetting = async () => {
+      await retry.tryForTime(CUSTOM_DASHBOARDS_SETTING_PROPAGATION_TIMEOUT_MS, async () => {
+        const response = await supertestWithAdminScope.get(getCustomDashboardsUrl('host'));
+
+        expect(response.status).to.be(200);
+      });
+    };
 
     describe('when custom dashboards are disabled', () => {
       describe('GET endpoint for fetching custom dashboard', () => {
@@ -92,33 +105,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('when custom dashboards are enabled', () => {
       before(async () => {
-        await kibanaServer.uiSettings.updateAndWait(
-          {
-            [enableInfrastructureAssetCustomDashboards]: true,
-          },
-          {
-            description: 'custom dashboards uiSettings propagation',
-            probe: async () => {
-              const response = await supertestWithAdminScope.get(getCustomDashboardsUrl('host'));
-
-              expect(response.status).to.be(200);
-            },
-          }
-        );
+        await kibanaServer.uiSettings.update({
+          [enableInfrastructureAssetCustomDashboards]: true,
+        });
+        await waitForEnabledCustomDashboardsSetting();
       });
 
       after(async () => {
-        await kibanaServer.uiSettings.updateAndWait(
-          {
-            [enableInfrastructureAssetCustomDashboards]: false,
-          },
-          {
-            description: 'custom dashboards uiSettings cleanup',
-            probe: async () => {
-              await supertestWithAdminScope.get(getCustomDashboardsUrl('host')).expect(403);
-            },
-          }
-        );
+        await kibanaServer.uiSettings.update({
+          [enableInfrastructureAssetCustomDashboards]: false,
+        });
       });
 
       describe('GET endpoint for fetching custom dashboard', () => {
