@@ -8,6 +8,7 @@
 import {
   createActionPolicyDataSchema,
   actionPolicyResponseSchema,
+  ID_MAX_LENGTH,
   type CreateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
@@ -24,6 +25,8 @@ import { buildRouteValidationWithZod } from '../route_validation';
 const createActionPolicyParamsSchema = z.object({
   id: z
     .string()
+    .min(1)
+    .max(ID_MAX_LENGTH)
     .optional()
     .describe('An optional custom identifier. If omitted, an ID is generated automatically.'),
 });
