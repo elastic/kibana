@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback } from 'react';
 import { css } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
 import { useEuiSizeLookup } from '../../hooks';
 import type { SpacingLine } from '../../lib/dom/calculate_spacing';
+import { clampToViewport } from '../../lib/dom/clamp_to_viewport';
 import { ENDPOINT_SIZE } from '../../lib/constants';
 
 interface Props {
@@ -25,6 +26,21 @@ interface Props {
 export const SpacingMeasurement = ({ lines }: Props) => {
   const { euiTheme } = useEuiTheme();
   const sizeLookup = useEuiSizeLookup();
+  const lineZIndex = Number(euiTheme.levels.toast) + 3;
+  const labelZIndex = Number(euiTheme.levels.toast) + 4;
+
+  const clampLabel = useCallback(
+    (el: HTMLElement | null, midpoint: { x: number; y: number }, horizontal: boolean) => {
+      if (!el) return;
+      const { width, height } = el.getBoundingClientRect();
+      const desiredLeft = horizontal ? midpoint.x - width / 2 : midpoint.x + 6;
+      const desiredTop = horizontal ? midpoint.y - height - 4 : midpoint.y - height / 2;
+      const clamped = clampToViewport(desiredLeft, desiredTop, width, height);
+      el.style.left = `${clamped.left}px`;
+      el.style.top = `${clamped.top}px`;
+    },
+    []
+  );
 
   if (lines.length === 0) return null;
 
@@ -44,7 +60,7 @@ export const SpacingMeasurement = ({ lines }: Props) => {
           position: 'fixed',
           backgroundColor: measureColor,
           pointerEvents: 'none',
-          zIndex: 1,
+          zIndex: lineZIndex,
           ...(isHorizontal
             ? {
                 left: `${Math.min(line.x1, line.x2)}px`,
@@ -65,7 +81,7 @@ export const SpacingMeasurement = ({ lines }: Props) => {
           position: 'fixed',
           backgroundColor: measureColor,
           pointerEvents: 'none',
-          zIndex: 1,
+          zIndex: lineZIndex,
           ...(isHorizontal
             ? {
                 left: `${line.x1}px`,
@@ -86,7 +102,7 @@ export const SpacingMeasurement = ({ lines }: Props) => {
           position: 'fixed',
           backgroundColor: measureColor,
           pointerEvents: 'none',
-          zIndex: 1,
+          zIndex: lineZIndex,
           ...(isHorizontal
             ? {
                 left: `${line.x2}px`,
@@ -105,11 +121,6 @@ export const SpacingMeasurement = ({ lines }: Props) => {
         const labelCss = css({
           label: `label-${index}`,
           position: 'fixed',
-          left: `${midX}px`,
-          top: `${midY}px`,
-          transform: isHorizontal
-            ? 'translate(-50%, -100%) translateY(-4px)'
-            : 'translate(6px, -50%)',
           backgroundColor: measureColor,
           color: '#fff',
           fontFamily: euiTheme.font.familyCode,
@@ -120,15 +131,22 @@ export const SpacingMeasurement = ({ lines }: Props) => {
           borderRadius: '3px',
           pointerEvents: 'none',
           whiteSpace: 'nowrap',
-          zIndex: 2,
+          zIndex: labelZIndex,
         });
+
+        // Estimate label dimensions for initial positioning before ref callback clamps
+        const labelMidpoint = { x: midX, y: midY };
 
         return (
           <Fragment key={index}>
             <div className={lineCss} data-test-subj="spacingMeasurementLine" />
             <div className={startCapCss} data-test-subj="spacingMeasurementStartCap" />
             <div className={endCapCss} data-test-subj="spacingMeasurementEndCap" />
-            <div className={labelCss} data-test-subj="spacingMeasurementLabel">
+            <div
+              ref={(el) => clampLabel(el, labelMidpoint, isHorizontal)}
+              className={labelCss}
+              data-test-subj="spacingMeasurementLabel"
+            >
               {euiSizeKey ? `${line.distance}px (${euiSizeKey})` : `${line.distance}px`}
             </div>
           </Fragment>

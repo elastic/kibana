@@ -11,16 +11,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react';
 import { css } from '@emotion/css';
 import { EuiPortal, useEuiTheme } from '@elastic/eui';
-import { MEASURE_OVERLAY_ID } from '../../lib/constants';
-import { isIgnoredElement } from '../../lib/dom/is_ignored_element';
-
-interface ElementOffset {
-  el: HTMLElement;
-  clone: HTMLElement | null;
-  dx: number;
-  dy: number;
-  originalTransform: string;
-}
+import { DEVTOOL_CLONE_ATTR, MEASURE_OVERLAY_ID } from '../../lib/constants';
+import { cloneElement } from '../../lib/dom/clone_element';
+import { getElementUnder } from '../../lib/dom/get_element_under';
+import type { ElementOffset } from '../../lib/dom/get_element_under';
+import { useCursorOverride } from '../../hooks/use_cursor_override';
 
 interface DragState {
   el: HTMLElement;
@@ -51,6 +46,7 @@ export const MoveOverlay = ({ setIsMoveMode }: Props) => {
     for (const entry of movedElements.current) {
       entry.el.style.transform = entry.originalTransform;
       entry.el.style.visibility = '';
+      entry.el.style.pointerEvents = '';
       entry.clone?.remove();
     }
     movedElements.current = [];
@@ -60,22 +56,7 @@ export const MoveOverlay = ({ setIsMoveMode }: Props) => {
     }
   }, []);
 
-  const cursorStyleEl = useRef<HTMLStyleElement | null>(null);
-
-  const setCursor = useCallback((cursor: string) => {
-    if (!cursorStyleEl.current) {
-      cursorStyleEl.current = document.createElement('style');
-      document.head.appendChild(cursorStyleEl.current);
-    }
-    cursorStyleEl.current.textContent = cursor ? `* { cursor: ${cursor} !important; }` : '';
-  }, []);
-
-  const removeCursorStyle = useCallback(() => {
-    if (cursorStyleEl.current) {
-      cursorStyleEl.current.remove();
-      cursorStyleEl.current = null;
-    }
-  }, []);
+  const { setCursor, removeCursor } = useCursorOverride();
 
   const outlineCss = useMemo(() => {
     const accentColor = euiTheme.colors.primary;
@@ -88,27 +69,10 @@ export const MoveOverlay = ({ setIsMoveMode }: Props) => {
     });
   }, [euiTheme.colors.primary, euiTheme.levels.toast]);
 
-  const getElementUnder = useCallback((x: number, y: number): HTMLElement | null => {
-    const elements = document.elementsFromPoint(x, y);
-    for (const el of elements) {
-      // Clones (or their children) are valid targets — return the clone so it can be re-grabbed
-      if (el instanceof HTMLElement && el.hasAttribute('data-devtool-clone')) return el;
-      const cloneAncestor = (el as HTMLElement).closest?.(
-        '[data-devtool-clone]'
-      ) as HTMLElement | null;
-      if (cloneAncestor) return cloneAncestor;
-      // If the topmost non-clone element is ignored (toolbar, popover, overlay),
-      // return null so the event passes through to it naturally.
-      if (isIgnoredElement(el)) return null;
-      if (el instanceof HTMLElement) {
-        // Skip hidden originals that have a living clone
-        const entry = movedElements.current.find((e) => e.el === el && e.clone);
-        if (entry) continue;
-        return el;
-      }
-    }
-    return null;
-  }, []);
+  const findElement = useCallback(
+    (x: number, y: number) => getElementUnder(x, y, movedElements.current),
+    []
+  );
 
   const handlePointerMove = useCallback(
     (event: PointerEvent) => {
@@ -127,17 +91,17 @@ export const MoveOverlay = ({ setIsMoveMode }: Props) => {
           existing.dy = dy;
         }
       } else {
-        const target = getElementUnder(event.clientX, event.clientY);
+        const target = findElement(event.clientX, event.clientY);
         setHoverTarget(target);
         setCursor(target ? 'grab' : '');
       }
     },
-    [getElementUnder, setCursor]
+    [findElement, setCursor]
   );
 
   const handlePointerDown = useCallback(
     (event: PointerEvent) => {
-      const target = getElementUnder(event.clientX, event.clientY);
+      const target = findElement(event.clientX, event.clientY);
 
       // No valid target — let the event reach whatever is underneath (toolbar, etc.)
       if (!target) return;
@@ -146,7 +110,7 @@ export const MoveOverlay = ({ setIsMoveMode }: Props) => {
       event.stopPropagation();
 
       // Check if we're re-grabbing an existing clone
-      const existingByClone = target.hasAttribute('data-devtool-clone')
+      const existingByClone = target.hasAttribute(DEVTOOL_CLONE_ATTR)
         ? movedElements.current.find((e) => e.clone === target)
         : null;
 
@@ -183,22 +147,14 @@ export const MoveOverlay = ({ setIsMoveMode }: Props) => {
         }
 
         // Create a visual clone on document.body — always on top, no stacking context issues
-        const rect = target.getBoundingClientRect();
-        const clone = target.cloneNode(true) as HTMLElement;
-        clone.style.position = 'fixed';
-        clone.style.left = `${rect.left}px`;
-        clone.style.top = `${rect.top}px`;
-        clone.style.width = `${rect.width}px`;
-        clone.style.height = `${rect.height}px`;
-        clone.style.margin = '0';
-        clone.style.zIndex = String(Number(euiTheme.levels.toast) + 1);
-        clone.style.pointerEvents = 'none';
-        clone.style.transform = '';
-        clone.setAttribute('data-devtool-clone', '');
+        const cloneZIndex = Number(euiTheme.levels.toast) + 1;
+        const { clone, rect } = cloneElement(target, cloneZIndex);
         document.body.appendChild(clone);
 
-        // Hide the original (preserve layout space)
+        // Hide the original (preserve layout space) and block pointer events
+        // so it doesn't trigger hover effects or the move overlay outline.
         target.style.visibility = 'hidden';
+        target.style.pointerEvents = 'none';
 
         dragging.current = {
           el: target,
@@ -214,7 +170,7 @@ export const MoveOverlay = ({ setIsMoveMode }: Props) => {
       setHoverTarget(null);
       setCursor('grabbing');
     },
-    [getElementUnder, setCursor, euiTheme.levels.toast]
+    [findElement, setCursor, euiTheme.levels.toast]
   );
 
   const handlePointerUp = useCallback(
@@ -256,12 +212,12 @@ export const MoveOverlay = ({ setIsMoveMode }: Props) => {
 
   const handleClick = useCallback(
     (event: MouseEvent) => {
-      const target = getElementUnder(event.clientX, event.clientY);
+      const target = findElement(event.clientX, event.clientY);
       if (!target) return;
       event.preventDefault();
       event.stopPropagation();
     },
-    [getElementUnder]
+    [findElement]
   );
 
   useEffect(() => {
@@ -271,7 +227,8 @@ export const MoveOverlay = ({ setIsMoveMode }: Props) => {
     document.addEventListener('click', handleClick, true);
     document.addEventListener('keydown', handleKeydown, true);
     return () => {
-      removeCursorStyle();
+      resetAll();
+      removeCursor();
       document.removeEventListener('pointermove', handlePointerMove, true);
       document.removeEventListener('pointerdown', handlePointerDown, true);
       document.removeEventListener('pointerup', handlePointerUp, true);
@@ -284,7 +241,8 @@ export const MoveOverlay = ({ setIsMoveMode }: Props) => {
     handlePointerUp,
     handleClick,
     handleKeydown,
-    removeCursorStyle,
+    resetAll,
+    removeCursor,
   ]);
 
   const hoverOutline = useMemo(() => {
@@ -304,5 +262,5 @@ export const MoveOverlay = ({ setIsMoveMode }: Props) => {
     );
   }, [hoverTarget, outlineCss]);
 
-  return <EuiPortal>{hoverOutline}</EuiPortal>;
+  return hoverOutline ? <EuiPortal>{hoverOutline}</EuiPortal> : null;
 };

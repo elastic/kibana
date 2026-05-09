@@ -10,16 +10,16 @@
 import React from 'react';
 import { EuiFormRow, EuiColorPicker } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GridConfig } from '../../../lib/grid';
+import type { LayoutConfig } from '../../../lib';
 
 interface Props {
   color: string;
-  onChange: (partial: Partial<GridConfig>) => void;
+  onChange: (partial: Partial<LayoutConfig>) => void;
 }
 
 export const ColorSetting = ({ color, onChange }: Props) => (
   <EuiFormRow
-    label={i18n.translate('kbnMeasureComponent.gridSettings.color', {
+    label={i18n.translate('kbnDesignTools.layoutSettings.color', {
       defaultMessage: 'Color',
     })}
   >
@@ -28,6 +28,7 @@ export const ColorSetting = ({ color, onChange }: Props) => (
       onChange={(newColor) => onChange({ color: newColor })}
       showAlpha
       compressed
+      swatches={[]}
     />
   </EuiFormRow>
 );

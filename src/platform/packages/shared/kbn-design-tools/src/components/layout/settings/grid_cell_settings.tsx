@@ -10,11 +10,11 @@
 import React from 'react';
 import { EuiFormRow, EuiFieldNumber, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GridConfig } from '../../../lib/grid';
+import type { LayoutConfig } from '../../../lib/layout';
 
 interface Props {
-  config: GridConfig;
-  onChange: (partial: Partial<GridConfig>) => void;
+  config: LayoutConfig;
+  onChange: (partial: Partial<LayoutConfig>) => void;
 }
 
 export const GridCellSettings = ({ config, onChange }: Props) => {
@@ -22,7 +22,7 @@ export const GridCellSettings = ({ config, onChange }: Props) => {
 
   return (
     <EuiFormRow
-      label={i18n.translate('kbnMeasureComponent.gridSettings.cellSize', {
+      label={i18n.translate('kbnDesignTools.layoutSettings.cellSize', {
         defaultMessage: 'Size',
       })}
     >

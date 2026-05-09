@@ -9,7 +9,11 @@
 
 export const MEASURE_OVERLAY_ID = 'measureOverlay';
 export const MOVE_OVERLAY_ID = 'moveOverlay';
-export const GRID_OVERLAY_ID = 'gridOverlayContainer';
-export const GRID_SETTINGS_FLYOUT_ID = 'gridSettingsFlyout';
+export const LAYOUT_OVERLAY_ID = 'layoutOverlayContainer';
+export const LAYOUT_SETTINGS_FLYOUT_ID = 'layoutSettingsFlyout';
 export const DEVELOPER_TOOLBAR_ID = 'developerToolbar';
 export const ENDPOINT_SIZE = 5;
+export const LABEL_PADDING = 4;
+
+export const DEVTOOL_CLONE_ATTR = 'data-devtool-clone';
+export const DEVTOOL_IGNORE_ATTR = 'data-devtool-ignore';

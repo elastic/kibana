@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type GridLayoutType = 'columns' | 'rows' | 'grid';
-export type GridAlignType = 'stretch' | 'center' | 'left' | 'right';
-export type GridRowAlignType = 'stretch' | 'center' | 'top' | 'bottom';
+export type LayoutType = 'columns' | 'rows' | 'grid';
+export type LayoutAlignType = 'stretch' | 'center' | 'left' | 'right';
+export type LayoutRowAlignType = 'stretch' | 'center' | 'top' | 'bottom';
 
-export interface GridConfig {
-  layoutType: GridLayoutType;
+export interface LayoutConfig {
+  layoutType: LayoutType;
   count: number;
-  alignType: GridAlignType;
-  rowAlignType: GridRowAlignType;
+  alignType: LayoutAlignType;
+  rowAlignType: LayoutRowAlignType;
   cellSize: number;
   width: number;
   height: number;
@@ -24,7 +24,7 @@ export interface GridConfig {
   color: string;
 }
 
-export const getDefaultGridConfig = (baseSize: number): GridConfig => ({
+export const getDefaultLayoutConfig = (baseSize: number): LayoutConfig => ({
   layoutType: 'columns',
   count: 12,
   alignType: 'stretch',

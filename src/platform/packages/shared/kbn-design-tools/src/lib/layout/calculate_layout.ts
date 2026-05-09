@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GridConfig } from './grid_config';
+import type { LayoutConfig } from './layout_config';
 
 export interface ColumnLayout {
   offsetLeft: number;
@@ -19,7 +19,10 @@ export interface RowLayout {
   rowHeight: number;
 }
 
-export const calculateColumnLayout = (config: GridConfig, viewportWidth: number): ColumnLayout => {
+export const calculateColumnLayout = (
+  config: LayoutConfig,
+  viewportWidth: number
+): ColumnLayout => {
   if (config.alignType === 'stretch') {
     const availableWidth = viewportWidth - 2 * config.marginSize;
     const totalGutterWidth = config.gutterSize * (config.count - 1);
@@ -44,7 +47,7 @@ export const calculateColumnLayout = (config: GridConfig, viewportWidth: number)
   return { columnWidth, offsetLeft };
 };
 
-export const calculateRowLayout = (config: GridConfig, viewportHeight: number): RowLayout => {
+export const calculateRowLayout = (config: LayoutConfig, viewportHeight: number): RowLayout => {
   if (config.rowAlignType === 'stretch') {
     const available = viewportHeight - 2 * config.marginSize;
     const totalGutter = config.gutterSize * (config.count - 1);

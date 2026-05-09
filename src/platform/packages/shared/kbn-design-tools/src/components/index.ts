@@ -8,15 +8,15 @@
  */
 
 export {
-  GridButton,
-  GridOverlay,
+  LayoutButton,
+  LayoutOverlay,
   MoveOverlay,
-  GridSettingsPanel,
+  LayoutSettingsPanel,
   LayoutTypeSelector,
   ColumnSettings,
   RowSettings,
   GridCellSettings,
   ColorSetting,
-} from './grid';
+} from './layout';
 
 export { MeasureButton, MeasureOverlay, SpacingMeasurement } from './measure';

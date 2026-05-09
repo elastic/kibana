@@ -11,13 +11,13 @@ import React from 'react';
 import { screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { GridSettingsPanel } from './grid_settings_panel';
-import { getDefaultGridConfig } from '../../lib/grid';
-import type { GridConfig } from '../../lib/grid';
+import { LayoutSettingsPanel } from './layout_settings_panel';
+import { getDefaultLayoutConfig } from '../../lib/layout';
+import type { LayoutConfig } from '../../lib/layout';
 
-describe('GridSettingsPanel', () => {
-  const defaultConfig = getDefaultGridConfig(16);
-  let config: GridConfig;
+describe('LayoutSettingsPanel', () => {
+  const defaultConfig = getDefaultLayoutConfig(16);
+  let config: LayoutConfig;
   let setConfig: jest.Mock;
 
   beforeEach(() => {
@@ -31,7 +31,7 @@ describe('GridSettingsPanel', () => {
 
   it('should render all form fields for columns layout', () => {
     renderWithI18n(
-      <GridSettingsPanel config={config} defaultConfig={defaultConfig} setConfig={setConfig} />
+      <LayoutSettingsPanel config={config} defaultConfig={defaultConfig} setConfig={setConfig} />
     );
 
     expect(screen.getByText('Layout')).toBeInTheDocument();
@@ -44,7 +44,7 @@ describe('GridSettingsPanel', () => {
 
   it('should display current count value', () => {
     renderWithI18n(
-      <GridSettingsPanel
+      <LayoutSettingsPanel
         config={{ ...config, count: 8 }}
         defaultConfig={defaultConfig}
         setConfig={setConfig}
@@ -57,7 +57,7 @@ describe('GridSettingsPanel', () => {
 
   it('should call setConfig when count changes', async () => {
     renderWithI18n(
-      <GridSettingsPanel config={config} defaultConfig={defaultConfig} setConfig={setConfig} />
+      <LayoutSettingsPanel config={config} defaultConfig={defaultConfig} setConfig={setConfig} />
     );
 
     const countInput = screen.getByDisplayValue('12');
@@ -69,7 +69,7 @@ describe('GridSettingsPanel', () => {
 
   it('should show Width field only when columns layout with non-stretch align', () => {
     renderWithI18n(
-      <GridSettingsPanel
+      <LayoutSettingsPanel
         config={{ ...config, layoutType: 'columns', alignType: 'center' }}
         defaultConfig={defaultConfig}
         setConfig={setConfig}
@@ -81,7 +81,7 @@ describe('GridSettingsPanel', () => {
 
   it('should hide Width field when columns layout with stretch align', () => {
     renderWithI18n(
-      <GridSettingsPanel
+      <LayoutSettingsPanel
         config={{ ...config, layoutType: 'columns', alignType: 'stretch' }}
         defaultConfig={defaultConfig}
         setConfig={setConfig}
@@ -93,7 +93,7 @@ describe('GridSettingsPanel', () => {
 
   it('should show Size field for grid layout and hide count/align/gutter/margin', () => {
     renderWithI18n(
-      <GridSettingsPanel
+      <LayoutSettingsPanel
         config={{ ...config, layoutType: 'grid' }}
         defaultConfig={defaultConfig}
         setConfig={setConfig}
@@ -109,7 +109,7 @@ describe('GridSettingsPanel', () => {
 
   it('should show Height field for rows layout with non-stretch align', () => {
     renderWithI18n(
-      <GridSettingsPanel
+      <LayoutSettingsPanel
         config={{ ...config, layoutType: 'rows', rowAlignType: 'center' }}
         defaultConfig={defaultConfig}
         setConfig={setConfig}

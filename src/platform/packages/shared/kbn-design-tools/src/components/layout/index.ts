@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { GridButton } from './grid_button';
-export { GridOverlay } from './grid_overlay';
+export { LayoutButton } from './layout_button';
+export { LayoutOverlay } from './layout_overlay';
 export { MoveOverlay } from './move_overlay';
 
-export { GridSettingsPanel } from './grid_settings_panel';
+export { LayoutSettingsPanel } from './layout_settings_panel';
 
 export {
   LayoutTypeSelector,

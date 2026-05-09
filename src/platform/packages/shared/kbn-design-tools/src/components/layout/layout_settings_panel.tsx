@@ -11,7 +11,7 @@ import React, { useCallback } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { EuiButton, EuiForm, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GridConfig } from '../../lib/grid';
+import type { LayoutConfig } from '../../lib/layout';
 import {
   LayoutTypeSelector,
   ColumnSettings,
@@ -21,14 +21,14 @@ import {
 } from './settings';
 
 interface Props {
-  config: GridConfig;
-  defaultConfig: GridConfig;
-  setConfig: Dispatch<SetStateAction<GridConfig>>;
+  config: LayoutConfig;
+  defaultConfig: LayoutConfig;
+  setConfig: Dispatch<SetStateAction<LayoutConfig>>;
 }
 
-export const GridSettingsPanel = ({ config, defaultConfig, setConfig }: Props) => {
+export const LayoutSettingsPanel = ({ config, defaultConfig, setConfig }: Props) => {
   const updateConfig = useCallback(
-    (partial: Partial<GridConfig>) => {
+    (partial: Partial<LayoutConfig>) => {
       setConfig((prev) => ({ ...prev, ...partial }));
     },
     [setConfig]
@@ -76,8 +76,8 @@ export const GridSettingsPanel = ({ config, defaultConfig, setConfig }: Props) =
       {config.layoutType === 'rows' && <RowSettings config={config} onChange={updateConfig} />}
       <ColorSetting color={config.color} onChange={updateConfig} />
       <EuiSpacer size="m" />
-      <EuiButton size="s" onClick={resetLayoutDefaults} data-test-subj="gridSettingsResetButton">
-        {i18n.translate('kbnMeasureComponent.gridSettings.reset', {
+      <EuiButton size="s" onClick={resetLayoutDefaults} data-test-subj="layoutSettingsResetButton">
+        {i18n.translate('kbnDesignTools.layoutSettings.reset', {
           defaultMessage: 'Reset to default',
         })}
       </EuiButton>

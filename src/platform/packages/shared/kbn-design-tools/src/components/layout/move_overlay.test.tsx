@@ -11,7 +11,7 @@ import React from 'react';
 import { cleanup, act } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { MoveOverlay } from './move_overlay';
-import { DEVELOPER_TOOLBAR_ID, MEASURE_OVERLAY_ID } from '../../lib/constants';
+import { DEVELOPER_TOOLBAR_ID, DEVTOOL_CLONE_ATTR, MEASURE_OVERLAY_ID } from '../../lib/constants';
 
 // jsdom doesn't provide PointerEvent — polyfill with MouseEvent
 class PointerEventPolyfill extends MouseEvent {
@@ -89,11 +89,15 @@ describe('MoveOverlay', () => {
     cleanup();
     document.elementsFromPoint = originalElementsFromPoint;
     target.remove();
+    // Clean up any clones
+    document.querySelectorAll(`[${DEVTOOL_CLONE_ATTR}]`).forEach((el) => el.remove());
     // Clean up any injected style elements
     document.querySelectorAll('style').forEach((s) => {
       if (s.textContent?.includes('cursor:')) s.remove();
     });
   });
+
+  const getClone = () => document.querySelector(`[${DEVTOOL_CLONE_ATTR}]`) as HTMLElement | null;
 
   it('should register and clean up event listeners', () => {
     const addSpy = jest.spyOn(document, 'addEventListener');
@@ -168,7 +172,7 @@ describe('MoveOverlay', () => {
     panel.remove();
   });
 
-  it('should apply transform when dragging an element', () => {
+  it('should create a clone and hide original when dragging an element', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
     renderWithI18n(<MoveOverlay setIsMoveMode={setIsMoveMode} />);
@@ -177,11 +181,18 @@ describe('MoveOverlay', () => {
       firePointerDown(75, 60);
     });
 
+    // Original should be hidden, clone should exist
+    expect(target.style.visibility).toBe('hidden');
+    const clone = getClone();
+    expect(clone).toBeInTheDocument();
+
     act(() => {
       firePointerMove(95, 80);
     });
 
-    expect(target.style.transform).toBe('translate(20px, 20px)');
+    // Clone should be repositioned
+    expect(clone!.style.left).toBe('70px'); // 50 + (95-75)
+    expect(clone!.style.top).toBe('70px'); // 50 + (80-60)
   });
 
   it('should preserve original transform for reset', () => {
@@ -198,7 +209,9 @@ describe('MoveOverlay', () => {
       firePointerMove(95, 80);
     });
 
-    expect(target.style.transform).toBe('translate(20px, 20px)');
+    // Original hidden, clone visible
+    expect(target.style.visibility).toBe('hidden');
+    expect(getClone()).toBeInTheDocument();
 
     act(() => {
       firePointerUp(95, 80);
@@ -208,7 +221,10 @@ describe('MoveOverlay', () => {
       fireKeydown('Escape');
     });
 
+    // After reset, original transform is restored and clone is removed
     expect(target.style.transform).toBe('rotate(45deg)');
+    expect(target.style.visibility).toBe('');
+    expect(getClone()).not.toBeInTheDocument();
   });
 
   it('should stop dragging on pointer up', () => {
@@ -224,18 +240,22 @@ describe('MoveOverlay', () => {
       firePointerMove(85, 70);
     });
 
-    expect(target.style.transform).toBe('translate(10px, 10px)');
+    const clone = getClone();
+    expect(clone).toBeInTheDocument();
+    expect(clone!.style.left).toBe('60px'); // 50 + 10
+    expect(clone!.style.top).toBe('60px'); // 50 + 10
 
     act(() => {
       firePointerUp(85, 70);
     });
 
-    // Moving after release should not change the element's transform
+    // Moving after release should not change the clone's position
     act(() => {
       firePointerMove(200, 200);
     });
 
-    expect(target.style.transform).toBe('translate(10px, 10px)');
+    expect(clone!.style.left).toBe('60px');
+    expect(clone!.style.top).toBe('60px');
   });
 
   it('should allow re-dragging a previously moved element', () => {
@@ -254,9 +274,29 @@ describe('MoveOverlay', () => {
       firePointerUp(85, 70);
     });
 
-    expect(target.style.transform).toBe('translate(10px, 10px)');
+    const clone = getClone();
+    expect(clone).toBeInTheDocument();
+    expect(clone!.style.left).toBe('60px');
+    expect(clone!.style.top).toBe('60px');
 
-    // Second drag: continue from previous offset
+    // Mock the clone's bounding rect for the re-grab (jsdom returns 0,0 by default)
+    clone!.getBoundingClientRect = () =>
+      ({
+        top: 60,
+        left: 60,
+        width: 100,
+        height: 40,
+        right: 160,
+        bottom: 100,
+        x: 60,
+        y: 60,
+        toJSON: () => {},
+      } as DOMRect);
+
+    // Second drag: re-grab the clone
+    // Mock elementsFromPoint to return the clone this time
+    document.elementsFromPoint = jest.fn().mockReturnValue([clone]);
+
     act(() => {
       firePointerDown(85, 70);
     });
@@ -264,7 +304,8 @@ describe('MoveOverlay', () => {
       firePointerMove(105, 90);
     });
 
-    expect(target.style.transform).toBe('translate(30px, 30px)');
+    expect(clone!.style.left).toBe('80px'); // 60 + (105-85)
+    expect(clone!.style.top).toBe('80px'); // 60 + (90-70)
   });
 
   it('should exit move mode and reset transforms on Escape', () => {
@@ -282,13 +323,17 @@ describe('MoveOverlay', () => {
       firePointerUp(95, 80);
     });
 
-    expect(target.style.transform).toBe('translate(20px, 20px)');
+    expect(target.style.visibility).toBe('hidden');
+    expect(getClone()).toBeInTheDocument();
 
     act(() => {
       fireKeydown('Escape');
     });
 
+    // Original restored, clone removed
+    expect(target.style.visibility).toBe('');
     expect(target.style.transform).toBe('');
+    expect(getClone()).not.toBeInTheDocument();
     expect(setIsMoveMode).toHaveBeenCalledWith(false);
   });
 
@@ -317,7 +362,9 @@ describe('MoveOverlay', () => {
 
     // Should NOT exit move mode — measure overlay takes priority
     expect(setIsMoveMode).not.toHaveBeenCalled();
-    expect(target.style.transform).toBe('translate(20px, 20px)');
+    // Clone should still exist, original still hidden
+    expect(target.style.visibility).toBe('hidden');
+    expect(getClone()).toBeInTheDocument();
 
     measureOverlay.remove();
   });

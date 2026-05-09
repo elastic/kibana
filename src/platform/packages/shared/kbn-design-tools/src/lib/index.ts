@@ -10,29 +10,35 @@
 export {
   MEASURE_OVERLAY_ID,
   MOVE_OVERLAY_ID,
-  GRID_OVERLAY_ID,
-  GRID_SETTINGS_FLYOUT_ID,
+  LAYOUT_OVERLAY_ID,
+  LAYOUT_SETTINGS_FLYOUT_ID,
   DEVELOPER_TOOLBAR_ID,
+  DEVTOOL_CLONE_ATTR,
+  DEVTOOL_IGNORE_ATTR,
   ENDPOINT_SIZE,
+  LABEL_PADDING,
 } from './constants';
 export { isEscapeKey, isMeasureShortcut } from './keyboard_shortcut';
 
 export {
   isIgnoredElement,
   calculateSpacingLines,
+  clampToViewport,
+  cloneElement,
   getElementFromPoint,
+  getElementUnder,
   handleEventPropagation,
 } from './dom';
 
-export type { SpacingLine } from './dom';
+export type { SpacingLine, ElementOffset } from './dom';
 
-export { getDefaultGridConfig, calculateColumnLayout, calculateRowLayout } from './grid';
+export { getDefaultLayoutConfig, calculateColumnLayout, calculateRowLayout } from './layout';
 
 export type {
-  GridConfig,
-  GridLayoutType,
-  GridAlignType,
-  GridRowAlignType,
+  LayoutConfig,
+  LayoutType,
+  LayoutAlignType,
+  LayoutRowAlignType,
   ColumnLayout,
   RowLayout,
-} from './grid';
+} from './layout';

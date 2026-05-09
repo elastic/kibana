@@ -7,8 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getDefaultGridConfig } from './grid_config';
-export { calculateColumnLayout, calculateRowLayout } from './calculate_grid';
+export { getDefaultLayoutConfig } from './layout_config';
+export { calculateColumnLayout, calculateRowLayout } from './calculate_layout';
 
-export type { GridConfig, GridLayoutType, GridAlignType, GridRowAlignType } from './grid_config';
-export type { ColumnLayout, RowLayout } from './calculate_grid';
+export type {
+  LayoutConfig,
+  LayoutType,
+  LayoutAlignType,
+  LayoutRowAlignType,
+} from './layout_config';
+export type { ColumnLayout, RowLayout } from './calculate_layout';

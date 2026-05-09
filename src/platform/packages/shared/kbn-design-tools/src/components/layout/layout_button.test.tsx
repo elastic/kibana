@@ -11,63 +11,63 @@ import React from 'react';
 import { screen, fireEvent, cleanup, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { GridButton } from './grid_button';
+import { LayoutButton } from './layout_button';
 
-describe('GridButton', () => {
+describe('LayoutButton', () => {
   afterEach(() => {
     cleanup();
   });
 
   it('should render the button', () => {
-    renderWithI18n(<GridButton />);
+    renderWithI18n(<LayoutButton />);
 
-    expect(screen.getByTestId('gridOverlayButton')).toBeInTheDocument();
+    expect(screen.getByTestId('layoutOverlayButton')).toBeInTheDocument();
   });
 
   it('should open context menu when clicked', async () => {
-    renderWithI18n(<GridButton />);
+    renderWithI18n(<LayoutButton />);
 
-    await userEvent.click(screen.getByTestId('gridOverlayButton'));
+    await userEvent.click(screen.getByTestId('layoutOverlayButton'));
 
-    expect(screen.getByText('Toggle grid')).toBeInTheDocument();
-    expect(screen.getByText('Grid settings')).toBeInTheDocument();
+    expect(screen.getByText('Toggle layout')).toBeInTheDocument();
+    expect(screen.getByText('Layout settings')).toBeInTheDocument();
   });
 
-  it('should toggle grid visibility when Toggle grid is clicked', async () => {
-    renderWithI18n(<GridButton />);
+  it('should toggle layout visibility when Toggle layout is clicked', async () => {
+    renderWithI18n(<LayoutButton />);
 
-    await userEvent.click(screen.getByTestId('gridOverlayButton'));
+    await userEvent.click(screen.getByTestId('layoutOverlayButton'));
     await act(async () => {
-      fireEvent.click(screen.getByText('Toggle grid'));
+      fireEvent.click(screen.getByText('Toggle layout'));
     });
 
-    expect(screen.getByTestId('gridOverlayContainer')).toBeInTheDocument();
+    expect(screen.getByTestId('layoutOverlayContainer')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('gridOverlayButton'));
+    await userEvent.click(screen.getByTestId('layoutOverlayButton'));
     await act(async () => {
-      fireEvent.click(screen.getByText('Toggle grid'));
+      fireEvent.click(screen.getByText('Toggle layout'));
     });
 
-    expect(screen.queryByTestId('gridOverlayContainer')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('layoutOverlayContainer')).not.toBeInTheDocument();
   });
 
-  it('should open flyout when Grid settings is clicked', async () => {
-    renderWithI18n(<GridButton />);
+  it('should open flyout when Layout settings is clicked', async () => {
+    renderWithI18n(<LayoutButton />);
 
-    await userEvent.click(screen.getByTestId('gridOverlayButton'));
+    await userEvent.click(screen.getByTestId('layoutOverlayButton'));
     await act(async () => {
-      fireEvent.click(screen.getByText('Grid settings'));
+      fireEvent.click(screen.getByText('Layout settings'));
     });
 
     expect(screen.getByText('Count')).toBeInTheDocument();
   });
 
   it('should close flyout via the flyout close button', async () => {
-    renderWithI18n(<GridButton />);
+    renderWithI18n(<LayoutButton />);
 
-    await userEvent.click(screen.getByTestId('gridOverlayButton'));
+    await userEvent.click(screen.getByTestId('layoutOverlayButton'));
     await act(async () => {
-      fireEvent.click(screen.getByText('Grid settings'));
+      fireEvent.click(screen.getByText('Layout settings'));
     });
 
     expect(screen.getByText('Count')).toBeInTheDocument();
@@ -78,9 +78,9 @@ describe('GridButton', () => {
   });
 
   it('should prevent target from losing focus on mouse down', () => {
-    renderWithI18n(<GridButton />);
+    renderWithI18n(<LayoutButton />);
 
-    const button = screen.getByTestId('gridOverlayButton');
+    const button = screen.getByTestId('layoutOverlayButton');
     const mouseDownEvent = new MouseEvent('mousedown', { bubbles: true });
     const preventDefaultSpy = jest.spyOn(mouseDownEvent, 'preventDefault');
 

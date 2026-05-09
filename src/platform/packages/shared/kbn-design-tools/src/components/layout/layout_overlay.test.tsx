@@ -10,24 +10,24 @@
 import React from 'react';
 import { screen, cleanup } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { GridOverlay } from './grid_overlay';
-import { getDefaultGridConfig } from '../../lib/grid';
+import { LayoutOverlay } from './layout_overlay';
+import { getDefaultLayoutConfig } from '../../lib/layout';
 
-describe('GridOverlay', () => {
+describe('LayoutOverlay', () => {
   afterEach(() => {
     cleanup();
   });
 
   it('should render the overlay container', () => {
-    const config = getDefaultGridConfig(16);
-    renderWithI18n(<GridOverlay config={config} />);
+    const config = getDefaultLayoutConfig(16);
+    renderWithI18n(<LayoutOverlay config={config} />);
 
-    expect(screen.getByTestId('gridOverlayContainer')).toBeInTheDocument();
+    expect(screen.getByTestId('layoutOverlayContainer')).toBeInTheDocument();
   });
 
   it('should render the correct number of columns', () => {
-    const config = { ...getDefaultGridConfig(16), count: 6 };
-    renderWithI18n(<GridOverlay config={config} />);
+    const config = { ...getDefaultLayoutConfig(16), count: 6 };
+    renderWithI18n(<LayoutOverlay config={config} />);
 
     for (let i = 0; i < 6; i++) {
       expect(screen.getByTestId(`gridColumn-${i}`)).toBeInTheDocument();
@@ -36,8 +36,8 @@ describe('GridOverlay', () => {
   });
 
   it('should render 12 columns by default', () => {
-    const config = getDefaultGridConfig(16);
-    renderWithI18n(<GridOverlay config={config} />);
+    const config = getDefaultLayoutConfig(16);
+    renderWithI18n(<LayoutOverlay config={config} />);
 
     for (let i = 0; i < 12; i++) {
       expect(screen.getByTestId(`gridColumn-${i}`)).toBeInTheDocument();
@@ -46,8 +46,8 @@ describe('GridOverlay', () => {
   });
 
   it('should render rows when layoutType is rows', () => {
-    const config = { ...getDefaultGridConfig(16), layoutType: 'rows' as const, count: 4 };
-    renderWithI18n(<GridOverlay config={config} />);
+    const config = { ...getDefaultLayoutConfig(16), layoutType: 'rows' as const, count: 4 };
+    renderWithI18n(<LayoutOverlay config={config} />);
 
     for (let i = 0; i < 4; i++) {
       expect(screen.getByTestId(`gridRow-${i}`)).toBeInTheDocument();
@@ -56,8 +56,8 @@ describe('GridOverlay', () => {
   });
 
   it('should render grid pattern when layoutType is grid', () => {
-    const config = { ...getDefaultGridConfig(16), layoutType: 'grid' as const, cellSize: 100 };
-    renderWithI18n(<GridOverlay config={config} />);
+    const config = { ...getDefaultLayoutConfig(16), layoutType: 'grid' as const, cellSize: 100 };
+    renderWithI18n(<LayoutOverlay config={config} />);
 
     // Uses a single CSS background pattern div instead of individual cells
     expect(screen.getByTestId('gridPattern')).toBeInTheDocument();
@@ -66,9 +66,9 @@ describe('GridOverlay', () => {
   });
 });
 
-describe('getDefaultGridConfig', () => {
+describe('getDefaultLayoutConfig', () => {
   it('should return correct defaults', () => {
-    const config = getDefaultGridConfig(16);
+    const config = getDefaultLayoutConfig(16);
 
     expect(config).toEqual({
       layoutType: 'columns',
@@ -85,7 +85,7 @@ describe('getDefaultGridConfig', () => {
   });
 
   it('should use baseSize for gutter and margin', () => {
-    const config = getDefaultGridConfig(24);
+    const config = getDefaultLayoutConfig(24);
 
     expect(config.gutterSize).toBe(24);
     expect(config.marginSize).toBe(24);

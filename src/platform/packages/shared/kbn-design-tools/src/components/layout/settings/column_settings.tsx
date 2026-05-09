@@ -10,31 +10,31 @@
 import React from 'react';
 import { EuiFormRow, EuiFieldNumber, EuiSelect, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GridConfig, GridRowAlignType } from '../../../lib/grid';
+import type { LayoutConfig, LayoutAlignType } from '../../../lib/layout';
 
-const alignOptions: Array<{ value: GridRowAlignType; text: string }> = [
+const alignOptions: Array<{ value: LayoutAlignType; text: string }> = [
   { value: 'stretch', text: 'Stretch' },
   { value: 'center', text: 'Center' },
-  { value: 'top', text: 'Top' },
-  { value: 'bottom', text: 'Bottom' },
+  { value: 'left', text: 'Left' },
+  { value: 'right', text: 'Right' },
 ];
 
 interface Props {
-  config: GridConfig;
-  onChange: (partial: Partial<GridConfig>) => void;
+  config: LayoutConfig;
+  onChange: (partial: Partial<LayoutConfig>) => void;
 }
 
-export const RowSettings = ({ config, onChange }: Props) => {
-  const countId = useGeneratedHtmlId({ prefix: 'gridCount' });
-  const alignTypeId = useGeneratedHtmlId({ prefix: 'gridRowAlignType' });
-  const heightId = useGeneratedHtmlId({ prefix: 'gridHeight' });
-  const gutterId = useGeneratedHtmlId({ prefix: 'gridGutter' });
-  const marginId = useGeneratedHtmlId({ prefix: 'gridMargin' });
+export const ColumnSettings = ({ config, onChange }: Props) => {
+  const countId = useGeneratedHtmlId({ prefix: 'layoutCount' });
+  const alignTypeId = useGeneratedHtmlId({ prefix: 'layoutAlignType' });
+  const widthId = useGeneratedHtmlId({ prefix: 'layoutWidth' });
+  const gutterId = useGeneratedHtmlId({ prefix: 'layoutGutter' });
+  const marginId = useGeneratedHtmlId({ prefix: 'layoutMargin' });
 
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('kbnMeasureComponent.gridSettings.count', {
+        label={i18n.translate('kbnDesignTools.layoutSettings.count', {
           defaultMessage: 'Count',
         })}
       >
@@ -48,29 +48,29 @@ export const RowSettings = ({ config, onChange }: Props) => {
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('kbnMeasureComponent.gridSettings.alignType', {
+        label={i18n.translate('kbnDesignTools.layoutSettings.alignType', {
           defaultMessage: 'Align',
         })}
       >
         <EuiSelect
           id={alignTypeId}
           options={alignOptions}
-          value={config.rowAlignType}
-          onChange={(e) => onChange({ rowAlignType: e.target.value as GridRowAlignType })}
+          value={config.alignType}
+          onChange={(e) => onChange({ alignType: e.target.value as LayoutAlignType })}
           compressed
         />
       </EuiFormRow>
-      {config.rowAlignType !== 'stretch' && (
+      {config.alignType !== 'stretch' && (
         <EuiFormRow
-          label={i18n.translate('kbnMeasureComponent.gridSettings.height', {
-            defaultMessage: 'Height',
+          label={i18n.translate('kbnDesignTools.layoutSettings.width', {
+            defaultMessage: 'Width',
           })}
         >
           <EuiFieldNumber
-            id={heightId}
-            value={config.height || ''}
+            id={widthId}
+            value={config.width || ''}
             placeholder="Auto"
-            onChange={(e) => onChange({ height: Math.max(0, Number(e.target.value) || 0) })}
+            onChange={(e) => onChange({ width: Math.max(0, Number(e.target.value) || 0) })}
             min={0}
             append="px"
             compressed
@@ -78,7 +78,7 @@ export const RowSettings = ({ config, onChange }: Props) => {
         </EuiFormRow>
       )}
       <EuiFormRow
-        label={i18n.translate('kbnMeasureComponent.gridSettings.gutter', {
+        label={i18n.translate('kbnDesignTools.layoutSettings.gutter', {
           defaultMessage: 'Gutter',
         })}
       >
@@ -92,7 +92,7 @@ export const RowSettings = ({ config, onChange }: Props) => {
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate('kbnMeasureComponent.gridSettings.margin', {
+        label={i18n.translate('kbnDesignTools.layoutSettings.margin', {
           defaultMessage: 'Margin',
         })}
       >

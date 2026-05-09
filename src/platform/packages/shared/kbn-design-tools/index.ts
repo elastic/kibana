@@ -8,4 +8,4 @@
  */
 
 export { MeasureButton } from './src/components';
-export { GridButton } from './src/components';
+export { LayoutButton } from './src/components';

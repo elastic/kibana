@@ -8,8 +8,12 @@
  */
 
 export { calculateSpacingLines } from './calculate_spacing';
+export { clampToViewport } from './clamp_to_viewport';
+export { cloneElement } from './clone_element';
 export { getElementFromPoint } from './get_element_from_point';
+export { getElementUnder } from './get_element_under';
 export { handleEventPropagation } from './handle_event_propagation';
 export { isIgnoredElement } from './is_ignored_element';
 
 export type { SpacingLine } from './calculate_spacing';
+export type { ElementOffset } from './get_element_under';

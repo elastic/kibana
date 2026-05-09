@@ -10,25 +10,25 @@
 import React from 'react';
 import { EuiFormRow, EuiSelect, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GridConfig, GridLayoutType } from '../../../lib/grid';
+import type { LayoutConfig, LayoutType } from '../../../lib/layout';
 
-const layoutTypeOptions: Array<{ value: GridLayoutType; text: string }> = [
+const layoutTypeOptions: Array<{ value: LayoutType; text: string }> = [
   { value: 'columns', text: 'Columns' },
   { value: 'rows', text: 'Rows' },
   { value: 'grid', text: 'Grid' },
 ];
 
 interface Props {
-  layoutType: GridLayoutType;
-  onChange: (partial: Partial<GridConfig>) => void;
+  layoutType: LayoutType;
+  onChange: (partial: Partial<LayoutConfig>) => void;
 }
 
 export const LayoutTypeSelector = ({ layoutType, onChange }: Props) => {
-  const layoutTypeId = useGeneratedHtmlId({ prefix: 'gridLayoutType' });
+  const layoutTypeId = useGeneratedHtmlId({ prefix: 'layoutType' });
 
   return (
     <EuiFormRow
-      label={i18n.translate('kbnMeasureComponent.gridSettings.layoutType', {
+      label={i18n.translate('kbnDesignTools.layoutSettings.layoutType', {
         defaultMessage: 'Layout',
       })}
     >
@@ -36,9 +36,9 @@ export const LayoutTypeSelector = ({ layoutType, onChange }: Props) => {
         id={layoutTypeId}
         options={layoutTypeOptions}
         value={layoutType}
-        onChange={(e) => onChange({ layoutType: e.target.value as GridLayoutType })}
+        onChange={(e) => onChange({ layoutType: e.target.value as LayoutType })}
         compressed
-        data-test-subj="gridLayoutTypeSelect"
+        data-test-subj="layoutTypeSelect"
       />
     </EuiFormRow>
   );

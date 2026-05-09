@@ -39,7 +39,7 @@ export const MeasureButton = () => {
         content={
           isMeasuring
             ? ''
-            : i18n.translate('kbnMeasureComponent.measureButton.tooltip', {
+            : i18n.translate('kbnDesignTools.measureButton.tooltip', {
                 values: { keyboardShortcut: isMac ? '⌘ .' : 'Ctrl .' },
                 defaultMessage: 'Measure spacing {keyboardShortcut}',
               })
@@ -52,7 +52,7 @@ export const MeasureButton = () => {
           iconType="editorItemAlignCenter"
           isSelected={isMeasuring}
           aria-pressed={isMeasuring}
-          aria-label={i18n.translate('kbnMeasureComponent.measureButton.ariaLabel', {
+          aria-label={i18n.translate('kbnDesignTools.measureButton.ariaLabel', {
             defaultMessage: 'Measure spacing',
           })}
           color="text"

@@ -20,6 +20,7 @@ export const getElementFromPoint = (event: MouseEvent): HTMLElement | null => {
     if (isIgnoredElement(el)) continue;
 
     if (el instanceof HTMLElement) {
+      if (getComputedStyle(el).visibility === 'hidden') continue;
       return el;
     }
 

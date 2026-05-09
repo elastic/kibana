@@ -7,27 +7,46 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/css';
 import { EuiPortal, useEuiTheme, useResizeObserver } from '@elastic/eui';
-import { GRID_OVERLAY_ID } from '../../lib/constants';
-import { calculateColumnLayout, calculateRowLayout } from '../../lib/grid/calculate_grid';
-import type { GridConfig } from '../../lib/grid';
+import type { LayoutConfig } from '../../lib/layout/layout_config';
+import { DEVELOPER_TOOLBAR_ID, LAYOUT_OVERLAY_ID } from '../../lib/constants';
+import { calculateColumnLayout, calculateRowLayout } from '../../lib/layout/calculate_layout';
 
 interface Props {
-  config: GridConfig;
+  config: LayoutConfig;
 }
 
-export const GridOverlay = ({ config }: Props) => {
+export const LayoutOverlay = ({ config }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null);
   const containerRef = useCallback((node: HTMLDivElement | null) => setContainerEl(node), []);
   const { width: viewportWidth, height: viewportHeight } = useResizeObserver(containerEl);
 
+  // Measure the developer toolbar height so stripes don't overlap it
+  const [toolbarHeight, setToolbarHeight] = useState(0);
+  useEffect(() => {
+    const toolbar = document.getElementById(DEVELOPER_TOOLBAR_ID);
+    if (!toolbar) return;
+
+    const update = () => setToolbarHeight(toolbar.getBoundingClientRect().height);
+    update();
+
+    const observer = new ResizeObserver(update);
+    observer.observe(toolbar);
+    return () => observer.disconnect();
+  }, []);
+
+  const availableHeight = viewportHeight - toolbarHeight;
+
   const { containerCss, cellElements } = useMemo(() => {
     const container = css({
       position: 'fixed',
-      inset: 0,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: toolbarHeight,
       pointerEvents: 'none',
       zIndex: Number(euiTheme.levels.toast) + 2,
     });
@@ -40,12 +59,12 @@ export const GridOverlay = ({ config }: Props) => {
         <div
           key="grid-pattern"
           className={css({
-            position: 'fixed',
+            position: 'absolute',
             inset: 0,
             pointerEvents: 'none',
             backgroundImage: `
-              linear-gradient(to right, ${config.color} 0.5px, transparent 0.5px),
-              linear-gradient(to bottom, ${config.color} 0.5px, transparent 0.5px)
+              linear-gradient(to right, ${config.color} 1px, transparent 1px),
+              linear-gradient(to bottom, ${config.color} 1px, transparent 1px)
             `,
             backgroundSize: `${size}px ${size}px`,
           })}
@@ -53,7 +72,7 @@ export const GridOverlay = ({ config }: Props) => {
         />,
       ];
     } else if (config.layoutType === 'rows') {
-      const { offsetTop, rowHeight } = calculateRowLayout(config, viewportHeight);
+      const { offsetTop, rowHeight } = calculateRowLayout(config, availableHeight);
 
       elements = Array.from({ length: config.count }, (_, i) => (
         <div
@@ -77,7 +96,7 @@ export const GridOverlay = ({ config }: Props) => {
         <div
           key={i}
           className={css({
-            position: 'fixed',
+            position: 'absolute',
             top: 0,
             bottom: 0,
             left: `${offsetLeft + i * (columnWidth + config.gutterSize)}px`,
@@ -91,15 +110,15 @@ export const GridOverlay = ({ config }: Props) => {
     }
 
     return { containerCss: container, cellElements: elements };
-  }, [viewportWidth, viewportHeight, config, euiTheme.levels.toast]);
+  }, [viewportWidth, availableHeight, toolbarHeight, config, euiTheme.levels.toast]);
 
   return (
     <EuiPortal>
       <div
         ref={containerRef}
-        id={GRID_OVERLAY_ID}
+        id={LAYOUT_OVERLAY_ID}
         className={containerCss}
-        data-test-subj="gridOverlayContainer"
+        data-test-subj="layoutOverlayContainer"
       >
         {cellElements}
       </div>

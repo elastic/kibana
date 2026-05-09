@@ -11,7 +11,7 @@ import { getElementFromPoint } from './get_element_from_point';
 import {
   MEASURE_OVERLAY_ID,
   MOVE_OVERLAY_ID,
-  GRID_OVERLAY_ID,
+  LAYOUT_OVERLAY_ID,
   DEVELOPER_TOOLBAR_ID,
 } from '../constants';
 
@@ -56,9 +56,9 @@ describe('getElementFromPoint', () => {
     expect(getElementFromPoint(mockEvent)).toBe(target);
   });
 
-  it('should skip the grid overlay', () => {
+  it('should skip the layout overlay', () => {
     const overlay = document.createElement('div');
-    overlay.id = GRID_OVERLAY_ID;
+    overlay.id = LAYOUT_OVERLAY_ID;
     const target = document.createElement('div');
 
     document.elementsFromPoint = jest.fn().mockReturnValue([overlay, target]);
