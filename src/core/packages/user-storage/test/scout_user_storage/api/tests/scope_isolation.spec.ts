@@ -10,7 +10,8 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
-import { ALL_KEYS, createHelpers } from './helpers';
+import { ALL_KEYS } from '../../shared/test_keys';
+import { createHelpers } from './helpers';
 
 const TEST_SPACE = 'test-user-storage';
 

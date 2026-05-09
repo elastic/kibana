@@ -10,7 +10,8 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
-import { ALL_KEYS, DEFAULT_VALUES, createHelpers } from './helpers';
+import { ALL_KEYS, DEFAULT_VALUES } from '../../shared/test_keys';
+import { createHelpers } from './helpers';
 
 apiTest.describe('User Storage - CRUD', { tag: [...tags.stateful.classic] }, () => {
   let cookieHeader: Record<string, string>;

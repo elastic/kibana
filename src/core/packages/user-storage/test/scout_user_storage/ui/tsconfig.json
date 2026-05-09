@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["**/*"],
+  "include": ["**/*", "../shared/**/*"],
   "kbn_references": [
     "@kbn/scout"
   ],

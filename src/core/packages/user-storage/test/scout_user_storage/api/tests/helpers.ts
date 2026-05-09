@@ -9,26 +9,6 @@
 
 import { INTERNAL_HEADERS } from '../fixtures';
 
-export const ALL_KEYS = [
-  'test:string_key',
-  'test:number_key',
-  'test:object_key',
-  'test:boolean_key',
-  'test:array_key',
-];
-
-export const DEFAULT_VALUES: Record<string, unknown> = {
-  'test:string_key': 'default_value',
-  'test:number_key': 42,
-  'test:object_key': {
-    theme: 'light',
-    sidebar: { collapsed: false, width: 250 },
-    pinnedItems: [],
-  },
-  'test:boolean_key': false,
-  'test:array_key': [],
-};
-
 interface ApiClientOptions {
   headers?: Record<string, string>;
   body?: unknown;

@@ -9,6 +9,7 @@
 
 import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { DEFAULT_VALUES } from '../../shared/test_keys';
 
 test.describe('User Storage - first paint', { tag: [...tags.stateful.classic] }, () => {
   test.beforeEach(async ({ browserAuth, page }) => {
@@ -18,7 +19,7 @@ test.describe('User Storage - first paint', { tag: [...tags.stateful.classic] },
 
   test('renders the registered default for test:string_key on first paint', async ({ page }) => {
     await expect(page.testSubj.locator('userStorageTest:string-key-value')).toHaveText(
-      'default_value'
+      DEFAULT_VALUES['test:string_key'] as string
     );
   });
 });
