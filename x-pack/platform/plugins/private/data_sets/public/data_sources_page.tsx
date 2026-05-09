@@ -26,6 +26,9 @@ import { HttpDataSourcesClient } from './http_data_sources_client';
 import { CreateDataSourceFlyout } from './create_data_source_flyout';
 import { getDataSourceTypeLabel } from './get_data_source_type_label';
 
+/** Data set row in the table; `type` is resolved from the linked data source. */
+type DataSetListRow = DataSetWithName & { type?: DataSource['type'] };
+
 export interface DataSourcesPageProps {
   pageTitle: string;
   httpClient: HttpSetup;
@@ -39,7 +42,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
   const dataSetsClient = useMemo(() => new HttpDataSetsClient(httpClient), [httpClient]);
   const [items, setItems] = useState<DataSource[]>([]);
   const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
-  const [dataSetItems, setDataSetItems] = useState<DataSetWithName[]>([]);
+  const [dataSetsRaw, setDataSetsRaw] = useState<DataSetWithName[]>([]);
   const [isCreateFlyoutOpen, setCreateFlyoutOpen] = useState(false);
   const [isCreateDatasetFlyoutOpen, setCreateDatasetFlyoutOpen] = useState(false);
 
@@ -62,11 +65,11 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
       try {
         const nextItems = await dataSetsClient.get();
         if (!cancelled) {
-          setDataSetItems(nextItems);
+          setDataSetsRaw(nextItems);
         }
       } catch {
         if (!cancelled) {
-          setDataSetItems([]);
+          setDataSetsRaw([]);
         }
       }
     })();
@@ -74,6 +77,14 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
       cancelled = true;
     };
   }, [dataSetsClient]);
+
+  const dataSetItems: DataSetListRow[] = useMemo(() => {
+    const sourceByName = new Map(items.map((ds) => [ds.name, ds] as const));
+    return dataSetsRaw.map((ds) => ({
+      ...ds,
+      type: sourceByName.get(ds.data_source)?.type,
+    }));
+  }, [dataSetsRaw, items]);
 
   const handleCreateDataSourceSave = useCallback(
     async (dataSource: DataSourceWithSecrets): Promise<string | null> => {
@@ -93,7 +104,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
     async (dataSet: DataSetWithName): Promise<string | null> => {
       try {
         await dataSetsClient.add(dataSet);
-        setDataSetItems(await dataSetsClient.get());
+        setDataSetsRaw(await dataSetsClient.get());
         setCreateDatasetFlyoutOpen(false);
         return null;
       } catch (e) {
@@ -137,7 +148,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
     []
   );
 
-  const dataSetColumns = useMemo<Array<EuiBasicTableColumn<DataSetWithName>>>(
+  const dataSetColumns = useMemo<Array<EuiBasicTableColumn<DataSetListRow>>>(
     () => [
       {
         field: 'name',
@@ -156,6 +167,21 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         sortable: true,
         width: '18%',
         'data-test-subj': 'dataSetsSetsColDataSourceId',
+      },
+      {
+        field: 'type',
+        name: i18n.translate('dataSets.setsTable.columnDataSourceType', {
+          defaultMessage: 'Data source type',
+        }),
+        render: (type: DataSetListRow['type']) =>
+          type
+            ? getDataSourceTypeLabel(type)
+            : i18n.translate('dataSets.setsTable.dataSourceTypeMissing', {
+                defaultMessage: 'Unknown',
+              }),
+        sortable: true,
+        width: '18%',
+        'data-test-subj': 'dataSetsSetsColDataSourceType',
       },
       {
         field: 'resource',
@@ -190,7 +216,7 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
         content: (
           <>
             <EuiSpacer size="m" />
-            <EuiInMemoryTable<DataSetWithName>
+            <EuiInMemoryTable<DataSetListRow>
               items={dataSetItems}
               itemId="name"
               columns={dataSetColumns}
@@ -204,7 +230,8 @@ export const DataSourcesPage: FunctionComponent<DataSourcesPageProps> = ({
                   schema: {
                     fields: {
                       name: { type: 'string' },
-                      dataSourceId: { type: 'string' },
+                      data_source: { type: 'string' },
+                      type: { type: 'string' },
                       resource: { type: 'string' },
                       description: { type: 'string' },
                     },
