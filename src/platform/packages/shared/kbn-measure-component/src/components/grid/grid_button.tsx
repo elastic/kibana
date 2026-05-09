@@ -24,6 +24,8 @@ import { i18n } from '@kbn/i18n';
 import { GridOverlay, getDefaultGridConfig } from './grid_overlay';
 import type { GridConfig } from './grid_overlay';
 import { GridSettingsPanel } from './grid_settings_panel';
+import { MoveOverlay } from './move_overlay';
+import { GRID_SETTINGS_FLYOUT_ID } from '../../lib/constants';
 
 /**
  * Toggles a column grid overlay and provides grid settings.
@@ -33,6 +35,7 @@ export const GridButton = () => {
   const [isGridVisible, setIsGridVisible] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [isMoveMode, setIsMoveMode] = useState(false);
   const [gridConfig, setGridConfig] = useState<GridConfig>(() =>
     getDefaultGridConfig(parseInt(euiTheme.size.base, 10))
   );
@@ -50,6 +53,11 @@ export const GridButton = () => {
   const handleOpenSettings = () => {
     setIsPopoverOpen(false);
     setIsFlyoutOpen(true);
+  };
+
+  const handleToggleMoveMode = () => {
+    setIsMoveMode((prev) => !prev);
+    setIsPopoverOpen(false);
   };
 
   const contextMenuPanels = [
@@ -71,6 +79,13 @@ export const GridButton = () => {
           icon: 'controlsHorizontal',
           onClick: handleOpenSettings,
         },
+        {
+          name: i18n.translate('kbnMeasureComponent.gridButton.moveModeLabel', {
+            defaultMessage: 'Move mode',
+          }),
+          icon: isMoveMode ? 'lock' : 'move',
+          onClick: handleToggleMoveMode,
+        },
       ],
     },
   ];
@@ -78,6 +93,7 @@ export const GridButton = () => {
   return (
     <>
       <EuiPopover
+        panelProps={{ 'data-devtool-ignore': true } as Record<string, unknown>}
         button={
           <EuiToolTip
             content={
@@ -115,6 +131,7 @@ export const GridButton = () => {
       </EuiPopover>
       {isFlyoutOpen && (
         <EuiFlyout
+          id={GRID_SETTINGS_FLYOUT_ID}
           onClose={() => setIsFlyoutOpen(false)}
           size="s"
           ownFocus={false}
@@ -139,6 +156,7 @@ export const GridButton = () => {
         </EuiFlyout>
       )}
       {isGridVisible && <GridOverlay config={gridConfig} />}
+      {isMoveMode && <MoveOverlay setIsMoveMode={setIsMoveMode} />}
     </>
   );
 };

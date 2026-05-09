@@ -10,7 +10,8 @@
 export { GridButton } from './grid/grid_button';
 export { GridOverlay, getDefaultGridConfig } from './grid/grid_overlay';
 export { GridSettingsPanel } from './grid/grid_settings_panel';
-export type { GridConfig } from './grid/grid_overlay';
+export { MoveOverlay } from './grid/move_overlay';
+export type { GridConfig, GridType } from './grid/grid_overlay';
 
 export { MeasureButton } from './measure/measure_button';
 export { MeasureOverlay } from './measure/measure_overlay';

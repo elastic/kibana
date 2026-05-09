@@ -8,7 +8,12 @@
  */
 
 import { getElementFromPoint } from './get_element_from_point';
-import { MEASURE_OVERLAY_ID } from '../constants';
+import {
+  MEASURE_OVERLAY_ID,
+  MOVE_OVERLAY_ID,
+  GRID_OVERLAY_ID,
+  DEVELOPER_TOOLBAR_ID,
+} from '../constants';
 
 describe('getElementFromPoint', () => {
   let originalElementsFromPoint: typeof document.elementsFromPoint;
@@ -39,6 +44,56 @@ describe('getElementFromPoint', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([overlay, target]);
 
     expect(getElementFromPoint(mockEvent)).toBe(target);
+  });
+
+  it('should skip the move overlay', () => {
+    const overlay = document.createElement('div');
+    overlay.id = MOVE_OVERLAY_ID;
+    const target = document.createElement('div');
+
+    document.elementsFromPoint = jest.fn().mockReturnValue([overlay, target]);
+
+    expect(getElementFromPoint(mockEvent)).toBe(target);
+  });
+
+  it('should skip the grid overlay', () => {
+    const overlay = document.createElement('div');
+    overlay.id = GRID_OVERLAY_ID;
+    const target = document.createElement('div');
+
+    document.elementsFromPoint = jest.fn().mockReturnValue([overlay, target]);
+
+    expect(getElementFromPoint(mockEvent)).toBe(target);
+  });
+
+  it('should skip elements inside the developer toolbar', () => {
+    const toolbar = document.createElement('div');
+    toolbar.id = DEVELOPER_TOOLBAR_ID;
+    const button = document.createElement('button');
+    toolbar.appendChild(button);
+    document.body.appendChild(toolbar);
+
+    const target = document.createElement('div');
+    document.elementsFromPoint = jest.fn().mockReturnValue([button, target]);
+
+    expect(getElementFromPoint(mockEvent)).toBe(target);
+
+    document.body.removeChild(toolbar);
+  });
+
+  it('should skip elements that contain the developer toolbar', () => {
+    const footer = document.createElement('footer');
+    const toolbar = document.createElement('div');
+    toolbar.id = DEVELOPER_TOOLBAR_ID;
+    footer.appendChild(toolbar);
+    document.body.appendChild(footer);
+
+    const target = document.createElement('div');
+    document.elementsFromPoint = jest.fn().mockReturnValue([footer, target]);
+
+    expect(getElementFromPoint(mockEvent)).toBe(target);
+
+    document.body.removeChild(footer);
   });
 
   it('should return closest svg element for SVG children', () => {

@@ -10,6 +10,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/css';
 import { EuiPortal, useEuiTheme, useResizeObserver } from '@elastic/eui';
+import { GRID_OVERLAY_ID } from '../../lib/constants';
 
 export type GridType = 'stretch' | 'center' | 'left' | 'right';
 
@@ -96,7 +97,7 @@ export const GridOverlay = ({ config }: Props) => {
 
   return (
     <EuiPortal>
-      <div ref={containerRef} className={containerCss} data-test-subj="gridOverlayContainer">
+      <div ref={containerRef} id={GRID_OVERLAY_ID} className={containerCss} data-test-subj="gridOverlayContainer">
         {columnElements}
       </div>
     </EuiPortal>

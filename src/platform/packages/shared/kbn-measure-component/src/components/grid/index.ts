@@ -10,4 +10,5 @@
 export { GridButton } from './grid_button';
 export { GridOverlay, getDefaultGridConfig } from './grid_overlay';
 export { GridSettingsPanel } from './grid_settings_panel';
+export { MoveOverlay } from './move_overlay';
 export type { GridConfig, GridType } from './grid_overlay';

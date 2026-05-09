@@ -12,12 +12,11 @@ import { css } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
 import { useEuiSizeLookup } from '../../hooks';
 import type { SpacingLine } from '../../lib/dom/calculate_spacing';
+import { ENDPOINT_SIZE } from '../../lib/constants';
 
 interface Props {
   lines: SpacingLine[];
 }
-
-const ENDPOINT_SIZE = 5;
 
 /**
  * SpacingMeasurement renders measurement lines between two elements,

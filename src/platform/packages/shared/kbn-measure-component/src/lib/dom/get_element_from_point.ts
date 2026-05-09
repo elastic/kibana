@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MEASURE_OVERLAY_ID } from '../constants';
+import { isIgnoredElement } from './is_ignored_element';
 
 /**
  * Get the deepest element at the given mouse event's coordinates.
@@ -17,9 +17,7 @@ export const getElementFromPoint = (event: MouseEvent): HTMLElement | null => {
   const elements = document.elementsFromPoint(event.clientX, event.clientY);
 
   for (const el of elements) {
-    const isOverlay = el.id === MEASURE_OVERLAY_ID;
-
-    if (isOverlay) continue;
+    if (isIgnoredElement(el)) continue;
 
     if (el instanceof HTMLElement) {
       return el;

@@ -8,3 +8,8 @@
  */
 
 export const MEASURE_OVERLAY_ID = 'measureOverlay';
+export const MOVE_OVERLAY_ID = 'moveOverlay';
+export const GRID_OVERLAY_ID = 'gridOverlayContainer';
+export const GRID_SETTINGS_FLYOUT_ID = 'gridSettingsFlyout';
+export const DEVELOPER_TOOLBAR_ID = 'developerToolbar';
+export const ENDPOINT_SIZE = 5;
