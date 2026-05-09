@@ -9,6 +9,7 @@
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { i18n } from '@kbn/i18n';
+import { asyncForEach } from '@kbn/std';
 import { dashboardClient } from '../../dashboard_client';
 import { getPlacementHints } from '../../panel_placement/get_placement_hints';
 import { getAccessControlClient } from '../../services/access_control_service';
@@ -41,11 +42,11 @@ export async function loadDashboardApi({
   // Determine sizes of incoming embeddables. Done here due to async fetching.
   // --------------------------------------------------------------------------------------
   const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
-  for (const embeddable of incomingEmbeddables ?? []) {
+  await asyncForEach(incomingEmbeddables ?? [], async (embeddable) => {
     if (!embeddable.size) {
       embeddable.size = await getPlacementHints(embeddable.type, embeddable.serializedState);
     }
-  }
+  });
 
   const [readResult, user, isAccessControlEnabled] = savedObjectId
     ? await Promise.all([
