@@ -63,6 +63,7 @@ import { EmailNotificationService } from '../services/notifications/email_notifi
 import type { ConfigType } from '../config';
 import type { CasesEventBus } from '../events/event_bus';
 import { getSavedObjectsTypes } from '../../common';
+import type { CasesAnalyticsV2WriterContract } from '../cases_analytics_v2';
 
 interface CasesClientFactoryArgs {
   securityPluginSetup: SecurityPluginSetup;
@@ -88,6 +89,12 @@ interface CasesClientFactoryArgs {
     owner: string,
     request: KibanaRequest
   ) => Promise<boolean>;
+  /**
+   * Stable proxy returned by `CasesAnalyticsV2Service.getWriter()`. Always
+   * resolvable — when v2 is disabled, the proxy delegates to a no-op writer
+   * and SO-service hooks compile down to nothing.
+   */
+  analyticsV2Writer: CasesAnalyticsV2WriterContract;
 }
 
 /**
@@ -248,6 +255,7 @@ export class CasesClientFactory {
       log: this.logger,
       unsecuredSavedObjectsClient,
       attachmentService,
+      analyticsV2Writer: this.options.analyticsV2Writer,
     });
 
     const licensingService = new LicensingService(

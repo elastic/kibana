@@ -55,6 +55,7 @@ import {
   transformESModelToCase,
 } from './transform';
 import type { AttachmentService } from '../attachments';
+import type { CasesAnalyticsV2WriterContract } from '../../cases_analytics_v2';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 import { createCaseError, isSOError } from '../../common/error';
 import type {
@@ -126,19 +127,29 @@ export class CasesService {
   private readonly log: Logger;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly attachmentService: AttachmentService;
+  /**
+   * Cases-as-data v2 writer. Fire-and-forget hook fired post-success on case
+   * create / patch / delete. When `xpack.cases.analyticsV2.enabled=false` this
+   * is `V2_NOOP_WRITER` and every call compiles down to nothing — the cases
+   * primary write path is unaffected.
+   */
+  private readonly analyticsV2Writer: CasesAnalyticsV2WriterContract;
 
   constructor({
     log,
     unsecuredSavedObjectsClient,
     attachmentService,
+    analyticsV2Writer,
   }: {
     log: Logger;
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     attachmentService: AttachmentService;
+    analyticsV2Writer: CasesAnalyticsV2WriterContract;
   }) {
     this.log = log;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.attachmentService = attachmentService;
+    this.analyticsV2Writer = analyticsV2Writer;
   }
 
   private buildCaseIdsAggs = (
@@ -437,6 +448,10 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to DELETE case ${caseId}`);
       await this.unsecuredSavedObjectsClient.delete(CASE_SAVED_OBJECT, caseId, { refresh });
+
+      // Cases-as-data v2: drop the analytics doc post-success. Fire-and-forget;
+      // the writer swallows 404s internally.
+      this.analyticsV2Writer.deleteCase(caseId);
     } catch (error) {
       this.log.error(`Error on DELETE case ${caseId}: ${error}`);
       throw error;
@@ -453,6 +468,15 @@ export class CasesService {
     try {
       this.log.debug(() => `Attempting to bulk delete case entities ${JSON.stringify(entities)}`);
       await this.unsecuredSavedObjectsClient.bulkDelete(entities, options);
+
+      // Cases-as-data v2: drop analytics docs for any case-typed entries in
+      // the batch. Comments / attachments / user-actions are tracked by their
+      // own surfaces (added in PR 2 and PR 3) so they're skipped here.
+      for (const entity of entities) {
+        if (entity.type === CASE_SAVED_OBJECT) {
+          this.analyticsV2Writer.deleteCase(entity.id);
+        }
+      }
     } catch (error) {
       this.log.error(`Error bulk deleting case entities ${JSON.stringify(entities)}: ${error}`);
     }
@@ -809,6 +833,9 @@ export class CasesService {
         { id, references: transformedAttributes.referenceHandler.build(), refresh }
       );
 
+      // Cases-as-data v2: fire-and-forget upsert. No-op when v2 is disabled.
+      this.analyticsV2Writer.upsertCase(createdCase);
+
       const res = transformSavedObjectToExternalModel(createdCase);
       const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(res.attributes);
 
@@ -857,6 +884,11 @@ export class CasesService {
           return theCase;
         }
 
+        // Cases-as-data v2: fire-and-forget upsert per successfully-created
+        // case. Errors on individual SOs (the `isSOError` branch above) are
+        // skipped — there's no doc to mirror.
+        this.analyticsV2Writer.upsertCase(theCase);
+
         const transformedCase = transformSavedObjectToExternalModel(theCase);
         const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(transformedCase.attributes);
 
@@ -896,6 +928,24 @@ export class CasesService {
         }
       );
 
+      // Cases-as-data v2: re-emit the full case doc post-patch. The SO
+      // `update` API returns a partial response (just the changed fields), so
+      // we synthesize the full post-update SO from `originalCase` + the patch
+      // attributes. This avoids an extra SO `get` round-trip per patch.
+      // The cast is safe: spreading `Partial<CasePersistedAttributes>` over a
+      // full `CasePersistedAttributes` yields a full attribute set; TS just
+      // can't carry that inference through the spread.
+      this.analyticsV2Writer.upsertCase({
+        ...originalCase,
+        attributes: {
+          ...originalCase.attributes,
+          ...transformedAttributes.attributes,
+        } as CasePersistedAttributes,
+        version: updatedCase.version ?? originalCase.version,
+        references:
+          transformedAttributes.referenceHandler.build(originalCase.references) ?? [],
+      });
+
       const res = transformUpdateResponseToExternalModel(updatedCase);
       const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(res.attributes);
 
@@ -916,30 +966,60 @@ export class CasesService {
     try {
       this.log.debug(`Attempting to UPDATE case ${cases.map((c) => c.caseId).join(', ')}`);
 
-      const bulkUpdate = cases.map(({ caseId, updatedAttributes, version, originalCase }) => {
+      // Keep the per-case originalCase + transformed-attributes pair around so
+      // we can synthesize a post-update SavedObject for the analytics writer
+      // after `bulkUpdate` succeeds. We can't read `bulkUpdate`'s response for
+      // this because it returns partial attributes, not the full merged state.
+      const perCaseUpdate = cases.map(({ caseId, updatedAttributes, version, originalCase }) => {
         const decodedAttributes = decodeOrThrow(PartialCaseTransformedAttributesRt)(
           updatedAttributes
         );
-
         const { attributes, referenceHandler } = transformAttributesToESModel(decodedAttributes);
+        const builtReferences = referenceHandler.build(originalCase.references);
         return {
-          type: CASE_SAVED_OBJECT,
-          id: caseId,
-          attributes,
-          references: referenceHandler.build(originalCase.references),
+          caseId,
           version,
+          originalCase,
+          esAttributes: attributes,
+          references: builtReferences,
         };
       });
+
+      const bulkUpdate = perCaseUpdate.map(({ caseId, version, esAttributes, references }) => ({
+        type: CASE_SAVED_OBJECT,
+        id: caseId,
+        attributes: esAttributes,
+        references,
+        version,
+      }));
 
       const updatedCases =
         await this.unsecuredSavedObjectsClient.bulkUpdate<CasePersistedAttributes>(bulkUpdate, {
           refresh,
         });
 
+      // Index of per-case context by id, for cheap lookup during the post-pass.
+      const updateContextById = new Map(perCaseUpdate.map((u) => [u.caseId, u]));
+
       const res = updatedCases.saved_objects.reduce((acc, theCase) => {
         if (isSOError(theCase)) {
           acc.push(theCase);
           return acc;
+        }
+
+        // Cases-as-data v2: re-emit each successfully-updated case as a full
+        // SavedObject. Same synthesize-from-originalCase pattern as patchCase.
+        const ctx = updateContextById.get(theCase.id);
+        if (ctx) {
+          this.analyticsV2Writer.upsertCase({
+            ...ctx.originalCase,
+            attributes: {
+              ...ctx.originalCase.attributes,
+              ...ctx.esAttributes,
+            } as CasePersistedAttributes,
+            version: theCase.version ?? ctx.originalCase.version,
+            references: ctx.references ?? [],
+          });
         }
 
         const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));

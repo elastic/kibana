@@ -61,6 +61,7 @@ import {
   createFieldDefinitionsServiceMock,
 } from '../services/mocks';
 import { ConfigSchema } from '../config';
+import { V2_NOOP_WRITER } from '../cases_analytics_v2/writer';
 import { CasesEventBus } from '../events/event_bus';
 
 const createCasesEventBusMock = (): CasesEventBus => {
@@ -315,6 +316,9 @@ export const createCasesClientFactoryMockArgs = () => {
     config: ConfigSchema.validate({}),
     unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
     casesEventBus: createCasesEventBusMock(),
+    // Tests don't drive analytics v2; the no-op writer keeps every hook
+    // invoked through the factory a tight no-op.
+    analyticsV2Writer: V2_NOOP_WRITER,
   };
 };
 

@@ -57,6 +57,7 @@ import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_
 import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from './cases_analytics';
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
 import { CasesAnalyticsV2Service } from './cases_analytics_v2';
+import { V2_NOOP_WRITER } from './cases_analytics_v2/writer';
 import { CasesEventBus } from './events/event_bus';
 import { registerCaseWorkflowSteps } from './workflows';
 import { registerCaseWorkflowTriggers } from './workflows/triggers';
@@ -334,6 +335,15 @@ export class CasePlugin
               return Promise.resolve(false);
             }
           : undefined,
+      // Stable proxy from the v2 service. Resolves to a no-op writer when v2
+      // is disabled, the real writer once `casesAnalyticsV2Service.start()`
+      // has run. The proxy is safe to capture before start.
+      //
+      // The fallback to `V2_NOOP_WRITER` is defensive — production always
+      // runs `setup()` before `start()`, so the service is never undefined
+      // here. But test harnesses that exercise `start()` in isolation get a
+      // no-op writer instead of a runtime crash.
+      analyticsV2Writer: this.casesAnalyticsV2Service?.getWriter() ?? V2_NOOP_WRITER,
     });
 
     return {
