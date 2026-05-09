@@ -18,7 +18,7 @@
         "label": "EsqlService",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
-        "lineNumber": 31,
+        "lineNumber": 32,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -34,7 +34,7 @@
               "any"
             ],
             "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -56,7 +56,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
-                "lineNumber": 32,
+                "lineNumber": 33,
                 "columnNumber": 15,
                 "deprecated": false,
                 "docsReferencedTypeName": "EsqlServiceOptions",
@@ -87,7 +87,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
-            "lineNumber": 34,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -105,7 +105,7 @@
                   "\"time_series\" | \"lookup\""
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
-                "lineNumber": 41,
+                "lineNumber": 42,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -124,7 +124,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
-                "lineNumber": 42,
+                "lineNumber": 43,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -156,7 +156,7 @@
               "[]>"
             ],
             "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
-            "lineNumber": 85,
+            "lineNumber": 86,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -174,7 +174,7 @@
                   "\"all\" | \"remote\" | \"local\""
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
-                "lineNumber": 94,
+                "lineNumber": 95,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -193,7 +193,7 @@
                   "string | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
-                "lineNumber": 95,
+                "lineNumber": 96,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -214,16 +214,54 @@
               "\nGet all ES|QL views from the cluster (GET _query/view)."
             ],
             "signature": [
-              "() => Promise<{ views: { name: string; query: string; }[]; }>"
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.EsqlViewsResult",
+                "text": "EsqlViewsResult"
+              },
+              ">"
             ],
             "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
-            "lineNumber": 195,
+            "lineNumber": 196,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
             "returnComment": [
               "A promise that resolves to the views response (list of view names and queries)."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/esql-server-utils",
+            "id": "def-server.EsqlService.getDatasets",
+            "type": "Function",
+            "tags": [],
+            "label": "getDatasets",
+            "description": [
+              "\nGet all ES|QL datasets from the cluster (GET _query/dataset)."
+            ],
+            "signature": [
+              "() => Promise<",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.EsqlDatasetsResult",
+                "text": "EsqlDatasetsResult"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
+            "lineNumber": 211,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "A promise that resolves to the datasets response."
             ]
           },
           {
@@ -247,7 +285,7 @@
               ">"
             ],
             "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
-            "lineNumber": 210,
+            "lineNumber": 224,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -265,7 +303,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
-                "lineNumber": 216,
+                "lineNumber": 230,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -289,7 +327,7 @@
               "() => Promise<{ name: string; sourceIndices: string[]; matchField: string; enrichFields: string[]; }[]>"
             ],
             "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
-            "lineNumber": 238,
+            "lineNumber": 252,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -319,7 +357,7 @@
               "[]>"
             ],
             "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
-            "lineNumber": 267,
+            "lineNumber": 281,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -337,7 +375,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
-                "lineNumber": 272,
+                "lineNumber": 286,
                 "columnNumber": 27,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1452,7 +1490,7 @@
         "label": "EsqlServiceOptions",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
-        "lineNumber": 27,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2456,7 +2494,7 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/kbn-esql-server-utils/esql_service.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
