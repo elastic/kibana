@@ -24,13 +24,13 @@ export type DeveloperToolbarSetup = DeveloperToolbarItemRegistry;
 export type DeveloperToolbarStart = DeveloperToolbarItemRegistry;
 
 const LazyMeasureButton = lazy(() =>
-  import('@kbn/measure-component').then(({ MeasureButton }) => ({
+  import('@kbn/design-tools').then(({ MeasureButton }) => ({
     default: MeasureButton,
   }))
 );
 
 const LazyGridButton = lazy(() =>
-  import('@kbn/measure-component').then(({ GridButton }) => ({
+  import('@kbn/design-tools').then(({ GridButton }) => ({
     default: GridButton,
   }))
 );

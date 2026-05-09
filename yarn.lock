@@ -6559,6 +6559,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/design-tools@link:src/platform/packages/shared/kbn-design-tools":
+  version "0.0.0"
+  uid ""
+
 "@kbn/detections-response-ftr-services@link:x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response":
   version "0.0.0"
   uid ""
@@ -7780,10 +7784,6 @@
   uid ""
 
 "@kbn/mcp-dev-server@link:src/platform/packages/shared/kbn-mcp-dev-server":
-  version "0.0.0"
-  uid ""
-
-"@kbn/measure-component@link:src/platform/packages/shared/kbn-measure-component":
   version "0.0.0"
   uid ""
 
