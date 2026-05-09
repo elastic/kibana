@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from 'zod/v4';
-export { isZod } from './util';
-export { lazySchema, setLazySchemaDisabled } from './lazy_schema';
-export type { ZodObjectType } from './types';
+import type { ZodType } from 'zod/v4';
+
+/**
+ * Some Zod object schema type
+ *
+ * This enforces only that the **output** of the schema is an object with unknown values,
+ * not that it is of the type `ZodObject`.
+ */
+export type ZodObjectType = ZodType<Record<string, unknown>>;
