@@ -17,8 +17,8 @@ import type React from 'react';
 import type { DefaultPresentationPanelApi } from './panel_component/types';
 import type { initializeDrilldownsManager } from '../drilldowns/drilldowns_manager';
 import type { SerializedDrilldowns } from '../../server';
-import { PlacementStrategy } from './constants';
-import { MaybePromise } from '@kbn/utility-types';
+import type { PlacementStrategy } from './constants';
+import type { MaybePromise } from '@kbn/utility-types';
 
 /**
  * The default embeddable API that all Embeddables must implement.
