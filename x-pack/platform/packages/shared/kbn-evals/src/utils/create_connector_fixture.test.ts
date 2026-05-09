@@ -196,7 +196,37 @@ describe('createConnectorFixture', () => {
     });
   });
 
-  it('throws non-409 errors on create', async () => {
+  it('handles 400 when inference endpoint already exists (parallel workers)', async () => {
+    const existsError = new AxiosError('Bad Request', '400', undefined, undefined, {
+      status: 400,
+      data: {
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Inference endpoint [dev-my-test-connector] already exists',
+      },
+      headers: {},
+      statusText: 'Bad Request',
+      config: {} as any,
+    });
+
+    mockFetch.mockResolvedValueOnce({ is_preconfigured: false }).mockRejectedValueOnce(existsError);
+
+    await expect(
+      createConnectorFixture({
+        predefinedConnector,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      })
+    ).resolves.toBeUndefined();
+
+    expect(mockUse).toHaveBeenCalledWith({
+      ...predefinedConnector,
+      id: expectedUuid,
+    });
+  });
+
+  it('throws non-conflict errors on create', async () => {
     const serverError = new AxiosError('Internal Server Error', '500', undefined, undefined, {
       status: 500,
       data: {},
@@ -218,6 +248,29 @@ describe('createConnectorFixture', () => {
     ).rejects.toThrow('Internal Server Error');
 
     // Should not proceed to use()
+    expect(mockUse).not.toHaveBeenCalled();
+  });
+
+  it('throws 400 when message is not an already-exists case', async () => {
+    const badRequest = new AxiosError('Bad Request', '400', undefined, undefined, {
+      status: 400,
+      data: { message: 'Invalid API key' },
+      headers: {},
+      statusText: 'Bad Request',
+      config: {} as any,
+    });
+
+    mockFetch.mockResolvedValueOnce({ is_preconfigured: false }).mockRejectedValueOnce(badRequest);
+
+    await expect(
+      createConnectorFixture({
+        predefinedConnector,
+        fetch: mockFetch,
+        log: mockLog,
+        use: mockUse,
+      })
+    ).rejects.toThrow();
+
     expect(mockUse).not.toHaveBeenCalled();
   });
 

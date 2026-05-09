@@ -138,6 +138,7 @@ export const ProjectPicker = ({
         </EuiPopoverTitle>
         {isReadonly && (
           <EuiCallOut
+            announceOnMount={false}
             size="s"
             css={styles.callout}
             title={strings.getProjectPickerReadonlyCallout()}

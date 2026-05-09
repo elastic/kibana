@@ -19,6 +19,7 @@ export const useDefaultDocumentFlyoutProperties = (): OverlaySystemFlyoutOpenOpt
     maxWidth: euiTheme.breakpoint.xl,
     minWidth: euiTheme.base * 24,
     ownFocus: false,
+    paddingSize: 'm',
     resizable: true,
     size: 's',
   };
@@ -29,6 +30,7 @@ export const useDefaultDocumentFlyoutProperties = (): OverlaySystemFlyoutOpenOpt
  */
 export const defaultToolsFlyoutProperties: OverlaySystemFlyoutOpenOptions = {
   ownFocus: false,
+  paddingSize: 'm',
   resizable: true,
   size: 'm',
 };

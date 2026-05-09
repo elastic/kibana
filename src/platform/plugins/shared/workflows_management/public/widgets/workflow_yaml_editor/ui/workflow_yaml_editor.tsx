@@ -15,9 +15,11 @@ import type { SchemasSettings } from 'monaco-yaml';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type YAML from 'yaml';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
+import { useWorkflowsMonacoTheme, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
 import {
@@ -27,9 +29,11 @@ import {
   useLineDifferencesDecorations,
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
+  useWorkflowEventsOnDecorations,
   useWorkflowIdDecorations,
 } from './decorations';
 import { DocumentationLink } from './documentation_link';
+import { EditorSettingsPopover } from './editor_settings_popover';
 import type { ExtraAction } from './extra_actions_bar';
 import { ExtraActionsBar } from './extra_actions_bar';
 import { useAgentBuilderIntegration } from './hooks/use_agent_builder_integration';
@@ -51,6 +55,7 @@ import {
 import {
   selectEditorWorkflowLookup,
   selectEditorYaml,
+  selectEditorYamlLineCounter,
   selectExecution,
   selectHasChanges,
   selectHighlightedStepId,
@@ -66,7 +71,11 @@ import {
   setIsTestModalOpen,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { ActionsMenuPopover } from '../../../features/actions_menu_popover';
-import type { ActionOptionData } from '../../../features/actions_menu_popover/types';
+import type {
+  ActionOptionData,
+  EditorCommand,
+  JumpToStepEntry,
+} from '../../../features/actions_menu_popover/types';
 import { useMonacoMarkersChangedInterceptor } from '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor';
 import { useYamlValidation } from '../../../features/validate_workflow_yaml/lib/use_yaml_validation';
 import type { YamlValidationResult } from '../../../features/validate_workflow_yaml/model/types';
@@ -103,10 +112,6 @@ import {
   EXECUTION_YAML_SNAPSHOT_CLASS,
   useWorkflowEditorStyles,
 } from '../styles/use_workflow_editor_styles';
-import {
-  useWorkflowsMonacoTheme,
-  WORKFLOWS_MONACO_EDITOR_THEME,
-} from '../styles/use_workflows_monaco_theme';
 
 const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   minimap: { enabled: false },
@@ -114,12 +119,16 @@ const editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
   lineNumbers: 'on',
   glyphMargin: true,
   scrollBeyondLastLine: false,
+  folding: true,
+  showFoldingControls: 'always',
   tabSize: 2,
   lineNumbersMinChars: 2,
   insertSpaces: true,
   fontSize: 14,
   lineHeight: 23, // default ~21px + 2px
   renderWhitespace: 'none',
+  roundedSelection: false,
+  guides: { indentation: true },
   wordWrap: 'on',
   wordWrapColumn: 80,
   wrappingIndent: 'indent',
@@ -218,6 +227,7 @@ export const WorkflowYAMLEditor = ({
   const workflowDefinition = useSelector(selectWorkflowDefinition);
   // The current yaml document in the editor (could be unsaved)
   const yamlDocument = useSelector(selectEditorYamlDocument);
+  const yamlLineCounter = useSelector(selectEditorYamlLineCounter);
   const yamlDocumentRef = useRef<YAML.Document | null>(yamlDocument ?? null);
   yamlDocumentRef.current = yamlDocument || null;
 
@@ -500,6 +510,14 @@ export const WorkflowYAMLEditor = ({
     readOnly: isExecutionYaml,
   });
 
+  useWorkflowEventsOnDecorations({
+    editor: editorRef.current,
+    yamlDocument: yamlDocument || null,
+    yamlLineCounter,
+    isEditorMounted,
+    readOnly: isExecutionYaml,
+  });
+
   useWorkflowIdDecorations({
     editor: editorRef.current,
     yamlDocument: yamlDocument || null,
@@ -595,6 +613,75 @@ export const WorkflowYAMLEditor = ({
     [closeActionsPopover]
   );
 
+  const editorCommands: EditorCommand[] = useMemo(
+    () => [
+      {
+        id: 'foldAll',
+        label: i18n.translate('workflows.yamlEditor.commands.collapseAll', {
+          defaultMessage: 'Collapse all',
+        }),
+        iconType: 'minusInCircle',
+      },
+      {
+        id: 'unfoldAll',
+        label: i18n.translate('workflows.yamlEditor.commands.expandAll', {
+          defaultMessage: 'Expand all',
+        }),
+        iconType: 'plusInCircle',
+      },
+      {
+        id: 'find',
+        label: i18n.translate('workflows.yamlEditor.commands.findReplace', {
+          defaultMessage: 'Find and Replace',
+        }),
+        iconType: 'search',
+      },
+    ],
+    []
+  );
+
+  const jumpToStepEntries: JumpToStepEntry[] = useMemo(() => {
+    if (!workflowLookup) return [];
+    return Object.entries(workflowLookup.steps).map(([stepId, stepInfo]) => ({
+      id: stepId,
+      label: `#${stepId}`,
+      lineStart: stepInfo.lineStart,
+    }));
+  }, [workflowLookup]);
+
+  const handleCommandSelected = useCallback(
+    (commandId: string) => {
+      const editor = editorRef.current;
+      if (!editor) return;
+      switch (commandId) {
+        case 'foldAll':
+          editor.trigger('actionsMenu', 'editor.foldAll', null);
+          break;
+        case 'unfoldAll':
+          editor.trigger('actionsMenu', 'editor.unfoldAll', null);
+          break;
+        case 'find':
+          editor.trigger('actionsMenu', 'editor.action.startFindReplaceAction', null);
+          break;
+      }
+      closeActionsPopover();
+      editor.focus();
+    },
+    [closeActionsPopover]
+  );
+
+  const handleJumpToStep = useCallback(
+    (lineNumber: number) => {
+      const editor = editorRef.current;
+      if (!editor) return;
+      editor.revealLineInCenter(lineNumber);
+      editor.setPosition({ lineNumber, column: 1 });
+      closeActionsPopover();
+      editor.focus();
+    },
+    [closeActionsPopover]
+  );
+
   const options = useMemo(() => {
     return { ...editorOptions, readOnly: isExecutionYaml };
   }, [isExecutionYaml]);
@@ -659,8 +746,13 @@ export const WorkflowYAMLEditor = ({
         content: <KeyboardShortcutsPopover />,
         showInReadOnly: true,
       },
+      {
+        id: 'editor-settings',
+        content: <EditorSettingsPopover editorRef={editorRef} />,
+        showInReadOnly: true,
+      },
     ],
-    [openActionsPopover]
+    [openActionsPopover, editorRef]
   );
 
   // These were triggering rerendering of the actions containers on every scroll, because they were
@@ -694,6 +786,10 @@ export const WorkflowYAMLEditor = ({
         onActionSelected={onActionSelected}
         isOpen={actionsPopoverOpen}
         panelProps={actionsMenuPanelProps.css}
+        commands={editorCommands}
+        jumpToStepEntries={jumpToStepEntries}
+        onCommandSelected={handleCommandSelected}
+        onJumpToStep={handleJumpToStep}
       />
       <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} shouldPromptOnNavigation={true} />
       {/* Floating Elasticsearch step actions */}

@@ -18,6 +18,8 @@ export function registerStopMaintainer(router: EntityStorePluginRouter) {
     .put({
       path: `${ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_STOP}`,
       access: 'internal',
+      summary: 'Stop entity maintainer',
+      description: 'Stop a running entity maintainer task by its identifier.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },

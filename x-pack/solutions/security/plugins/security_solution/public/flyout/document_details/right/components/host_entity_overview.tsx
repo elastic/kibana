@@ -169,10 +169,10 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
 
   const [isHostDetailsLoading, { hostDetails }] = useHostDetails({
     hostName,
+    entityId: entityStoreV2Enabled ? storeHostEntityId : undefined,
     indexNames: selectedPatterns,
     startDate: from,
     endDate: to,
-    skip: entityStoreV2Enabled,
   });
 
   const hostRiskData = useMemo(() => {
@@ -382,6 +382,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
         </EuiFlexItem>
       )}
       <AlertCountInsight
+        entityRecord={entityRecord}
         identityFields={identityFields}
         entityType={EntityType.host}
         queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${HOST_ENTITY_OVERVIEW_ID}`}

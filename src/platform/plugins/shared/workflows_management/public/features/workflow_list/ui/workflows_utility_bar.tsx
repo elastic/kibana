@@ -70,6 +70,7 @@ export const WorkflowsUtilityBar: React.FC<WorkflowsUtilityBarProps> = ({
         css={css`
           margin-top: ${euiTheme.size.l};
           padding-bottom: ${euiTheme.size.m};
+          height: ${euiTheme.size.l};
         `}
       >
         <EuiFlexItem grow={false}>

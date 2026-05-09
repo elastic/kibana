@@ -35,8 +35,6 @@ export class TaskClient<TaskType extends string> {
     id: string
   ): Promise<PersistedTask<TParams, TPayload>> {
     try {
-      this.logger.debug(`Getting task ${id}`);
-
       const response = await this.storageClient.get({
         id,
       });
@@ -185,8 +183,6 @@ export class TaskClient<TaskType extends string> {
   public async update<TParams extends {} = {}, TPayload extends {} = {}>(
     task: PersistedTask<TParams, TPayload>
   ) {
-    this.logger.debug(`Updating task ${task.id}`);
-
     await this.storageClient.index({
       id: task.id,
       document: task,

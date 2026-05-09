@@ -653,7 +653,7 @@ export const getPackageUsageStats = async ({
 
   const filter = normalizeKuery(
     packagePolicySavedObjectType,
-    `${packagePolicySavedObjectType}.package.name: ${pkgName}`
+    `${packagePolicySavedObjectType}.package.name: ${pkgName} AND NOT ${packagePolicySavedObjectType}.latest_revision: false`
   );
   const agentPolicyCount = new Set<string>();
   // using saved Objects client directly, instead of the `list()` method of `package_policy` service

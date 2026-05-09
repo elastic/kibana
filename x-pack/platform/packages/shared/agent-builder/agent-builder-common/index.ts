@@ -11,14 +11,17 @@ export {
   protectedNamespaces as toolReservedNamespaces,
   isInProtectedNamespace,
 } from './base/namespaces';
+export { DOT_INDEX_ALLOW_LIST_PATTERNS, isVisibleSearchSource } from './base/dot_index_allow_list';
 export {
   ToolType,
+  ToolOrigin,
   type ToolDefinition,
   type ToolDefinitionWithSchema,
   platformCoreTools,
   platformStreamsSigEventsTools,
   attachmentTools,
   filestoreTools,
+  internalTools,
   defaultAgentToolIds,
   editableToolTypes,
   isReservedToolId,
@@ -120,6 +123,14 @@ export {
   type AgentAnswerStepConfiguration,
   type AgentResearchStepConfiguration,
   agentIdRegexp,
+  AgentExecutionMode,
+  SubagentExecutionMode,
+  ExecutionStatus,
+  type SerializedExecutionError,
+  type AgentListOptions,
+  type AgentCreateRequest,
+  type AgentUpdateRequest,
+  type AgentDeleteRequest,
 } from './agents';
 export {
   type RoundInput,
@@ -144,6 +155,8 @@ export {
   isToolCallStep,
   isReasoningStep,
   isCompactionStep,
+  isBackgroundAgentCompleteStep,
+  type BackgroundAgentCompleteStep,
   ChatEventType,
   ConversationRoundStatus,
   type ChatEventBase,
@@ -196,6 +209,10 @@ export {
   type CompactionCompletedEventData,
   isCompactionStartedEvent,
   isCompactionCompletedEvent,
+  type BackgroundAgentCompleteEvent,
+  type BackgroundAgentCompleteEventData,
+  isBackgroundAgentCompleteEvent,
+  type ConversationListOptions,
 } from './chat';
 export {
   type PublicSkillDefinition,
@@ -237,3 +254,10 @@ export {
   type PluginManifestMetadata,
   type PluginDefinition,
 } from './plugins';
+export { EffortLevels, type EffortLevel } from './model_provider';
+export {
+  type OAuthClient,
+  type OAuthClientLogo,
+  type OAuthClientConnectionsSummary,
+  OAuthClientType,
+} from './oauth_clients';

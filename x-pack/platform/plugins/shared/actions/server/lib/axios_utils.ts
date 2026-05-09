@@ -166,7 +166,7 @@ export const throwIfResponseIsNotValid = ({
   requiredAttributesToBeInTheResponse?: string[];
 }) => {
   const requiredContentType = 'application/json';
-  const contentType = res.headers['content-type'] ?? 'undefined';
+  const contentType = (res.headers['content-type'] ?? 'undefined') as string;
   const data = res.data;
   const statusCode = res.status;
 

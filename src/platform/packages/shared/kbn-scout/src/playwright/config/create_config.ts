@@ -112,6 +112,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
       // video: 'retain-on-failure',
       // storageState: './output/reports/state.json', // Store session state (like cookies)
       timezoneId: 'GMT',
+      ignoreHTTPSErrors: true,
     },
 
     // Timeout for each test, includes test, hooks and fixtures

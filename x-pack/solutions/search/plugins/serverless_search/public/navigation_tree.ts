@@ -270,7 +270,7 @@ export function createNavigationTree({
                     { link: 'management:rules' as const, breadcrumbStatus: 'hidden' as const },
                     { link: 'management:episodes' as const, breadcrumbStatus: 'hidden' as const },
                     {
-                      link: 'management:notification_policies' as const,
+                      link: 'management:action_policies' as const,
                       breadcrumbStatus: 'hidden' as const,
                     },
                   ],
@@ -283,7 +283,7 @@ export function createNavigationTree({
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'management:triggersActionsAlerts', breadcrumbStatus: 'hidden' },
-              { link: 'management:triggersActions', breadcrumbStatus: 'hidden' },
+              { link: 'rules', breadcrumbStatus: 'hidden' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
             ],
           },

@@ -75,6 +75,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
               from: timeRange.from,
               to: timeRange.to,
+              schema: 'ecs',
             },
           });
 

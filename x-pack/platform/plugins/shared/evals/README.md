@@ -6,7 +6,7 @@ The **Evals plugin** provides an in-Kibana UI for browsing LLM evaluation run re
 
 The evaluation system spans three packages:
 
-- `@kbn/evals-common` — shared schemas (OpenAPI-generated Zod types), constants, and Elasticsearch query builders. Used by both the plugin server routes and the CLI tooling in `@kbn/evals`.
+- `@kbn/evals-common` — shared schemas (OpenAPI-generated Zod types), constants, and Elasticsearch query builders. Used by both the plugin server routes and the CLI tooling in `@kbn/evals`. Server routes adapt these Zod schemas to Kibana's route validation via `buildRouteValidationWithZod` from `@kbn/zod-helpers/v4`.
 - `@kbn/evals` — dev-only CLI tooling for running offline evaluation suites against LLM-based workflows. Writes evaluation score documents to the `kibana-evaluations` datastream and traces via OpenTelemetry.
 - `evals` plugin (this package) — Kibana server routes that read from those indices, plus a React UI for browsing results.
 
@@ -123,10 +123,4 @@ The Zod types in `@kbn/evals-common` are generated from OpenAPI `.schema.yaml` f
 ```bash
 cd x-pack/platform/packages/shared/kbn-evals-common
 yarn openapi:generate
-```
-
-After regenerating, you may need to fix unused imports added by the generator:
-
-```bash
-node scripts/eslint --fix x-pack/platform/packages/shared/kbn-evals-common/impl/schemas/**/*.gen.ts
 ```

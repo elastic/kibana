@@ -11,15 +11,19 @@ import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/serve
 import type { EsWorkflowExecution, WorkflowSettings } from '@kbn/workflows';
 import { WorkflowRepository } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
-import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 
 import { ConnectorExecutor } from '../connector_executor';
-import { extractEventChainDepthFromExecution } from '../lib/telemetry/utils/extract_execution_metadata';
+import {
+  extractEventChainDepthFromExecution,
+  extractEventChainVisitedWorkflowIdsFromExecution,
+  mergeEmitterWorkflowIntoEventChainVisited,
+} from '../lib/telemetry/utils/extract_execution_metadata';
 import { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
+import { setWorkflowEventChainContext } from '../trigger_events/event_context/event_chain_context';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
 import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
 import type { ContextDependencies } from '../workflow_context_manager/types';
@@ -42,7 +46,7 @@ export async function setupDependencies(
   fakeRequest?: KibanaRequest,
   workflowsExecutionEngine?: WorkflowsExecutionEnginePluginStart
 ) {
-  const { coreStart, actions, taskManager } = dependencies;
+  const { coreStart, actions, taskManager, workflowsExtensions } = dependencies;
 
   // Get ES client from core services (guaranteed to be available at task execution time)
   const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
@@ -53,6 +57,9 @@ export async function setupDependencies(
     esClient: internalEsClient,
     logger,
   });
+
+  // Wait for the workflows extensions registries to be ready
+  await workflowsExtensions.isReady();
 
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
     workflowRunId,
@@ -70,14 +77,21 @@ export async function setupDependencies(
     );
   }
 
-  const eventChainDepth = extractEventChainDepthFromExecution(workflowExecution);
-
-  if (eventChainDepth !== undefined) {
-    setWorkflowEventChainContext(fakeRequest, {
-      depth: eventChainDepth,
-      sourceExecutionId: workflowExecution.id,
-    });
-  }
+  const eventChainDepth = extractEventChainDepthFromExecution(workflowExecution) ?? -1;
+  const baseVisited = extractEventChainVisitedWorkflowIdsFromExecution(
+    workflowExecution,
+    config.eventDriven.maxChainDepth
+  );
+  const visitedWorkflowIds = mergeEmitterWorkflowIntoEventChainVisited(
+    baseVisited,
+    workflowExecution.workflowId,
+    config.eventDriven.maxChainDepth
+  );
+  setWorkflowEventChainContext(fakeRequest, {
+    depth: eventChainDepth,
+    sourceExecutionId: workflowExecution.id,
+    ...(visitedWorkflowIds.length > 0 ? { visitedWorkflowIds } : {}),
+  });
 
   let workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
     workflowExecution.workflowDefinition,

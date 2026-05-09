@@ -30,10 +30,12 @@ import {
 import { builderEnums } from '../enums';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
 import { objectUnion } from './utils/object_union';
+import { positionSchema } from '../alignments';
 
 const legendSchemaProps = {
   truncate_after_lines: legendTruncateAfterLinesSchema,
   visibility: baseLegendVisibilitySchema,
+  position: schema.maybe(positionSchema()),
   size: legendSizeSchema,
 };
 
@@ -55,7 +57,36 @@ const heatmapSortPredicateSchema = schema.oneOf([schema.literal('asc'), schema.l
   meta: { description: 'Axis sort order; omit or use undefined for no sorting' },
 });
 
-const heatmapSharedStateSchema = {
+const heatmapStylingSchema = schema.object(
+  {
+    cells: schema.maybe(
+      schema.object(
+        {
+          labels: schema.maybe(
+            schema.object({
+              visible: schema.maybe(
+                schema.boolean({
+                  defaultValue: false,
+                  meta: { description: 'Show cell labels' },
+                })
+              ),
+            })
+          ),
+        },
+        { meta: { id: 'heatmapCells', title: 'Cells', description: 'Cells configuration' } }
+      )
+    ),
+  },
+  {
+    meta: {
+      id: 'heatmapStyling',
+      title: 'Heatmap styling',
+      description: 'Visual chart styling options',
+    },
+  }
+);
+
+const heatmapSharedConfigSchema = {
   type: schema.literal('heatmap'),
   legend: schema.maybe(
     schema.object(legendSchemaProps, {
@@ -68,7 +99,7 @@ const heatmapSharedStateSchema = {
   ),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
-  axes: schema.maybe(
+  axis: schema.maybe(
     schema.object(
       {
         x: schema.maybe(
@@ -114,70 +145,77 @@ const heatmapSharedStateSchema = {
       }
     )
   ),
-  cells: schema.maybe(
-    schema.object(
-      {
-        labels: schema.maybe(
-          schema.object({
-            visible: schema.maybe(
-              schema.boolean({
-                defaultValue: false,
-                meta: { description: 'Show cell labels' },
-              })
-            ),
-          })
-        ),
-      },
-      { meta: { id: 'heatmapCells', title: 'Cells', description: 'Cells configuration' } }
-    )
-  ),
 };
 
-const heatmapAxesStateSchemaProps = {
+const heatmapAxesConfigSchemaProps = {
   x: bucketOperationDefinitionSchema,
   y: schema.maybe(bucketOperationDefinitionSchema),
 };
 
-const heatmapAxesStateESQLSchemaProps = {
+const heatmapAxesConfigESQLSchemaProps = {
   x: esqlColumnWithFormatSchema,
   y: schema.maybe(esqlColumnWithFormatSchema),
 };
 
-const heatmapStateMetricOptionsSchemaProps = {
+const heatmapConfigMetricOptionsSchemaProps = {
   color: schema.maybe(
     schema.oneOf([colorByValueSchema, autoColorSchema], {
+      meta: { description: 'Color scale configuration for the heatmap cells.' },
       defaultValue: AUTO_COLOR,
     })
   ),
 };
 
-export const heatmapStateSchemaNoESQL = schema.object(
+export const heatmapConfigSchemaNoESQL = schema.object(
   {
-    ...heatmapSharedStateSchema,
-    ...heatmapAxesStateSchemaProps,
+    ...heatmapSharedConfigSchema,
+    ...heatmapAxesConfigSchemaProps,
     ...dslOnlyPanelInfoSchema,
     ...dataSourceSchema,
+    styling: schema.maybe(heatmapStylingSchema),
     metric: mergeAllMetricsWithChartDimensionSchemaWithRefBasedOps(
-      heatmapStateMetricOptionsSchemaProps
+      heatmapConfigMetricOptionsSchemaProps,
+      'heatmapMetric'
     ),
   },
-  { meta: { id: 'heatmapNoESQL', title: 'Heatmap Chart (DSL)' } }
-);
-
-export const heatmapStateSchemaESQL = schema.object(
   {
-    ...heatmapSharedStateSchema,
-    ...heatmapAxesStateESQLSchemaProps,
-    ...dataSourceEsqlTableSchema,
-    metric: esqlColumnWithFormatSchema.extends(heatmapStateMetricOptionsSchemaProps),
-  },
-  { meta: { id: 'heatmapESQL', title: 'Heatmap Chart (ES|QL)' } }
+    meta: {
+      id: 'heatmapNoESQL',
+      title: 'Heatmap Chart (DSL)',
+      description: 'Heatmap configuration using a data view.',
+    },
+  }
 );
 
-export const heatmapStateSchema = objectUnion([heatmapStateSchemaNoESQL, heatmapStateSchemaESQL], {
-  meta: { id: 'heatmapChart', title: 'Heatmap Chart' },
-});
+export const heatmapConfigSchemaESQL = schema.object(
+  {
+    ...heatmapSharedConfigSchema,
+    ...heatmapAxesConfigESQLSchemaProps,
+    ...dataSourceEsqlTableSchema,
+    styling: schema.maybe(heatmapStylingSchema),
+    metric: esqlColumnWithFormatSchema.extends(heatmapConfigMetricOptionsSchemaProps),
+  },
+  {
+    meta: {
+      id: 'heatmapESQL',
+      title: 'Heatmap Chart (ES|QL)',
+      description: 'Heatmap configuration using an ES|QL query.',
+    },
+  }
+);
 
-export type HeatmapState = TypeOf<typeof heatmapStateSchema>;
-export type HeatmapStateNoESQL = TypeOf<typeof heatmapStateSchemaNoESQL>;
-export type HeatmapStateESQL = TypeOf<typeof heatmapStateSchemaESQL>;
+export const heatmapConfigSchema = objectUnion(
+  [heatmapConfigSchemaNoESQL, heatmapConfigSchemaESQL],
+  {
+    meta: {
+      id: 'heatmapChart',
+      title: 'Heatmap Chart',
+      description:
+        'A grid of colored cells where color intensity represents the metric value at each X/Y intersection.',
+    },
+  }
+);
+
+export type HeatmapConfig = TypeOf<typeof heatmapConfigSchema>;
+export type HeatmapConfigNoESQL = TypeOf<typeof heatmapConfigSchemaNoESQL>;
+export type HeatmapConfigESQL = TypeOf<typeof heatmapConfigSchemaESQL>;

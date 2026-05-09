@@ -133,6 +133,7 @@ export function initializeFetch({
   stateManager,
   discoverServices,
   scopedProfilesManager,
+  refreshTrigger$,
   setDataLoading,
   setBlockingError,
 }: {
@@ -140,13 +141,14 @@ export function initializeFetch({
   stateManager: SearchEmbeddableStateManager;
   discoverServices: DiscoverServices;
   scopedProfilesManager: ScopedProfilesManager;
+  refreshTrigger$: BehaviorSubject<void>;
   setDataLoading: (dataLoading: boolean | undefined) => void;
   setBlockingError: (error: Error | undefined) => void;
 }) {
   const inspectorAdapters = { requests: new RequestAdapter() };
   let abortController: AbortController | undefined;
 
-  const observables = [fetch$(api), api.savedSearch$, api.dataViews$] as const;
+  const observables = [fetch$(api), api.savedSearch$, api.dataViews$, refreshTrigger$] as const;
 
   const fetchSubscription = combineLatest(observables)
     .pipe(

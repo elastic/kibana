@@ -14,15 +14,17 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { TimelineType, PersistTimelineResponse } from '../model/components.gen';
 
+export const CleanDraftTimelinesRequestBody = lazySchema(() =>
+  z.object({
+    timelineType: TimelineType,
+  })
+);
 export type CleanDraftTimelinesRequestBody = z.infer<typeof CleanDraftTimelinesRequestBody>;
-export const CleanDraftTimelinesRequestBody = z.object({
-  timelineType: TimelineType,
-});
 export type CleanDraftTimelinesRequestBodyInput = z.input<typeof CleanDraftTimelinesRequestBody>;
 
+export const CleanDraftTimelinesResponse = lazySchema(() => PersistTimelineResponse);
 export type CleanDraftTimelinesResponse = z.infer<typeof CleanDraftTimelinesResponse>;
-export const CleanDraftTimelinesResponse = PersistTimelineResponse;

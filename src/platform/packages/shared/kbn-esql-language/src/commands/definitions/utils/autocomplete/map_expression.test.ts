@@ -8,6 +8,7 @@
  */
 import type { MapParameters } from './map_expression';
 import { getCommandMapExpressionSuggestions } from './map_expression';
+import { ReplacementRangeStrategyKind } from '../../../../language/autocomplete/utils/prefix_range';
 
 describe('getCommandMapExpressionSuggestions', () => {
   const availableParameters: MapParameters = {
@@ -41,6 +42,10 @@ describe('getCommandMapExpressionSuggestions', () => {
       const innerText = '{ "';
       const suggestions = getCommandMapExpressionSuggestions(innerText, availableParameters);
       expect(suggestions.map((s) => s.label)).toEqual(['param1', 'param2']);
+      expect(suggestions[0].replacementRangeStrategy).toEqual({
+        kind: ReplacementRangeStrategyKind.SCOPED_PREFIX,
+        scopeText: innerText,
+      });
     });
 
     it('should suggest remaining parameters names after a comma', () => {
@@ -114,6 +119,10 @@ describe('getCommandMapExpressionSuggestions', () => {
         { label: 'value1', text: '"value1"', kind: 'Constant', detail: 'value1' },
         { label: 'value2', text: '"value2"', kind: 'Constant', detail: 'value2' },
       ]);
+      expect(suggestions[0].replacementRangeStrategy).toEqual({
+        kind: ReplacementRangeStrategyKind.QUOTED_VALUE,
+        scopeText: innerText,
+      });
     });
 
     it('should suggest values for a parameter with whitespace before', () => {

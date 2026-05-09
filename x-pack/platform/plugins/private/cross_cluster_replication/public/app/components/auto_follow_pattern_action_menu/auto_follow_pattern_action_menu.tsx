@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 
 import { AutoFollowPatternDeleteProvider } from '../auto_follow_pattern_delete_provider';
 
-// @ts-ignore
 import { routing } from '../../services/routing';
 
 const actionsAriaLabel = i18n.translate(
@@ -121,7 +120,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
         closePopoverViaAction();
       },
     },
-  ].filter(Boolean);
+  ].filter((item): item is NonNullable<typeof item> => Boolean(item));
 
   const button = (
     <EuiButton
@@ -159,7 +158,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
                 defaultMessage: 'Pattern options',
               }
             ),
-            items: panelItems as any,
+            items: panelItems,
           },
         ]}
       />
@@ -167,7 +166,7 @@ const AutoFollowPatternActionMenuUI: FunctionComponent<Props> = ({
   );
 };
 
-export const AutoFollowPatternActionMenu = (props: Omit<Props, 'deleteAutoFollowPatterns'>) => (
+export const AutoFollowPatternActionMenu = (props: Omit<Props, 'deleteAutoFollowPattern'>) => (
   <AutoFollowPatternDeleteProvider>
     {(deleteAutoFollowPattern: (ids: string[]) => void) => (
       <AutoFollowPatternActionMenuUI {...props} deleteAutoFollowPattern={deleteAutoFollowPattern} />

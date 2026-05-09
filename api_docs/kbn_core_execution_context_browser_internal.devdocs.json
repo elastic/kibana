@@ -70,6 +70,7 @@
                 "lineNumber": 40,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Readonly",
                 "trackAdoption": false,
                 "isRequired": true
               }

@@ -26,6 +26,7 @@ interface AlertSuppressionEditProps {
   disabledText?: string;
   warningText?: string;
   fullWidth?: boolean;
+  isLoading?: boolean;
 }
 
 export const AlertSuppressionEdit = memo(function AlertSuppressionEdit({
@@ -37,6 +38,7 @@ export const AlertSuppressionEdit = memo(function AlertSuppressionEdit({
   disabledText,
   warningText,
   fullWidth,
+  isLoading,
 }: AlertSuppressionEditProps): JSX.Element {
   const [{ [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: suppressionFields }] = useFormData<{
     [ALERT_SUPPRESSION_FIELDS_FIELD_NAME]: string[];
@@ -51,6 +53,7 @@ export const AlertSuppressionEdit = memo(function AlertSuppressionEdit({
         labelAppend={labelAppend}
         disabled={disabled}
         fullWidth={fullWidth}
+        isLoading={isLoading}
       />
       {preDurationContent}
       {warningText && (

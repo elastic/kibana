@@ -420,6 +420,11 @@ export const CasesSearchRequestSearchFieldsRt = rt.keyof({
   'cases-comments.eventId': null,
 });
 
+const ExtendedFieldFilterRt = rt.strict({
+  label: rt.string,
+  value: rt.string,
+});
+
 export const CasesSearchRequestRt = rt.intersection([
   CasesFindRequestBaseFieldsRt,
   rt.exact(
@@ -442,6 +447,14 @@ export const CasesSearchRequestRt = rt.intersection([
         rt.array(CasesSearchRequestSearchFieldsRt),
         CasesSearchRequestSearchFieldsRt,
       ]),
+    })
+  ),
+  rt.exact(
+    rt.partial({
+      /**
+       * Extended field filters parsed from label:value syntax in the search bar.
+       */
+      extendedFieldFilters: rt.array(ExtendedFieldFilterRt),
     })
   ),
 ]);

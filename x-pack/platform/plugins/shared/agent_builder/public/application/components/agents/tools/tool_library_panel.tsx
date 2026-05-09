@@ -40,7 +40,6 @@ interface ToolLibraryPanelProps {
   allTools: ToolDefinition[];
   activeToolIdSet: Set<string>;
   onToggleTool: (tool: ToolDefinition, isActive: boolean) => void;
-  mutatingToolId: string | null;
   enableElasticCapabilities?: boolean;
   builtinToolIdSet?: Set<string>;
 }
@@ -50,7 +49,6 @@ export const ToolLibraryPanel: React.FC<ToolLibraryPanelProps> = ({
   allTools,
   activeToolIdSet,
   onToggleTool,
-  mutatingToolId,
   enableElasticCapabilities = false,
   builtinToolIdSet,
 }) => {
@@ -70,7 +68,6 @@ export const ToolLibraryPanel: React.FC<ToolLibraryPanelProps> = ({
       allItems={allTools}
       activeItemIdSet={activeToolIdSet}
       onToggleItem={onToggleTool}
-      mutatingItemId={mutatingToolId}
       flyoutTitleId="toolLibraryFlyoutTitle"
       libraryLabels={libraryLabels}
       manageLibraryPath={appPaths.tools.list}

@@ -12,7 +12,7 @@ import { ruleKeys } from './query_key_factory';
 
 const TAGS_STALE_TIME = 30_000;
 
-export const useFetchRuleTags = () => {
+export const useFetchRuleTags = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const rulesApi = useService(RulesApi);
 
   return useQuery({
@@ -21,6 +21,7 @@ export const useFetchRuleTags = () => {
       const { tags } = await rulesApi.listTags();
       return tags;
     },
+    enabled,
     staleTime: TAGS_STALE_TIME,
     retry: false,
     refetchOnWindowFocus: false,

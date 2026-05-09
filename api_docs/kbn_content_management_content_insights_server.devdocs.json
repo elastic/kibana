@@ -45,6 +45,7 @@
             "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentInsightsDependencies",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -62,6 +63,7 @@
             "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentInsightsConfig",
             "trackAdoption": false,
             "isRequired": true
           }

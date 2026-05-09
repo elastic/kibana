@@ -612,8 +612,8 @@ export class EvaluationScoreRepository {
    * Indexes a single evaluation score document to Elasticsearch immediately.
    * Used for incremental writes so results survive worker crashes.
    *
-   * Uses `refresh: false` to avoid the shard refresh penalty on every write;
-   * documents become queryable within the default 5s refresh interval.
+   * Uses `refresh: 'wait_for'` so scores are searchable immediately (e.g. for
+   * per-worker terminal summaries and other readers right after incremental write).
    * Deterministic IDs (via {@link computeScoreDocumentId}) make this idempotent —
    * the batch export at teardown will simply encounter 409 conflicts for
    * already-written documents.
@@ -634,7 +634,7 @@ export class EvaluationScoreRepository {
         index: EVALUATIONS_DATA_STREAM_ALIAS,
         id: docId,
         document: enrichedDoc,
-        refresh: false,
+        refresh: 'wait_for',
       });
     } catch (error: unknown) {
       if (this.getErrorStatusCode(error) === 409) {

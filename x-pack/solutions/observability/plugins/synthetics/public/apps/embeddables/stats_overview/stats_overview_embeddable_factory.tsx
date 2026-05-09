@@ -81,7 +81,7 @@ export const getStatsOverviewEmbeddableFactory = (
         ...(initialState?.filters || {}),
       });
 
-      const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+      const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
       function serializeState(): OverviewStatsEmbeddableState {
         return {

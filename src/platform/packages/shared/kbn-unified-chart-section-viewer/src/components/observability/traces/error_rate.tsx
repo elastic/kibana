@@ -7,24 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import type { LensYBoundsConfig } from '@kbn/lens-embeddable-utils/config_builder/types';
+import React, { useMemo } from 'react';
+import type { LensYBoundsConfig, LensSeriesLayer } from '@kbn/lens-embeddable-utils';
 import { useTraceMetricsContext } from './context/trace_metrics_context';
 import { Chart } from '../../chart';
-import { useChartLayersFromEsql } from '../../chart/hooks/use_chart_layers_from_esql';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { getErrorRateChart } from './trace_charts_definition';
+import { getLensMetricFormat } from '../../../common/utils';
+import type { MetricUnit } from '../../../types';
 
 const ERROR_RATE_Y_BOUNDS: LensYBoundsConfig = { mode: 'custom', lowerBound: 0, upperBound: 1 };
 
-type UseChartLayersFromEsqlArgs = Parameters<typeof useChartLayersFromEsql>[0];
-
-type ErrorRateChartContentProps = Pick<
-  UseChartLayersFromEsqlArgs,
-  'query' | 'seriesType' | 'unit' | 'color'
-> & {
+interface ErrorRateChartContentProps {
+  query: string;
+  seriesType: LensSeriesLayer['seriesType'];
+  unit: MetricUnit;
+  color: string;
   title: string;
-};
+}
 
 const ErrorRateChartContent = ({
   query,
@@ -33,27 +33,35 @@ const ErrorRateChartContent = ({
   color,
   title,
 }: ErrorRateChartContentProps) => {
-  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions } =
+  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions, profileId } =
     useTraceMetricsContext();
-  const { abortController, timeRange, esqlVariables } = fetchParams;
 
-  const {
-    layers: chartLayers,
-    loading: isLoadingColumns,
-    error: columnsError,
-  } = useChartLayersFromEsql({
-    query,
-    seriesType,
-    services,
-    timeRange,
-    unit,
-    color,
-    abortController,
-    variables: esqlVariables,
-  });
+  const chartLayers = useMemo<LensSeriesLayer[]>(
+    () => [
+      {
+        type: 'series',
+        seriesType,
+        xAxis: {
+          field: 'timestamp',
+          type: 'dateHistogram',
+        },
+        yAxis: [
+          {
+            value: 'error_rate',
+            label: 'error_rate',
+            compactValues: true,
+            seriesColor: color,
+            ...getLensMetricFormat(unit),
+          },
+        ],
+      },
+    ],
+    [seriesType, color, unit]
+  );
 
   return (
     <Chart
+      id="errorRate"
       esqlQuery={query}
       size="s"
       discoverFetch$={discoverFetch$}
@@ -67,9 +75,8 @@ const ErrorRateChartContent = ({
       syncCursor
       syncTooltips
       yBounds={ERROR_RATE_Y_BOUNDS}
-      isLoading={isLoadingColumns}
-      error={columnsError}
       extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
+      profileId={profileId}
     />
   );
 };

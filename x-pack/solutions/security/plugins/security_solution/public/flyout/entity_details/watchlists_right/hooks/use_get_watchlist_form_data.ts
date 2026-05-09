@@ -30,6 +30,7 @@ const toEntitySourceFormValues = (
   enabled: source.enabled,
   integrationName: source.integrationName,
   matchers: source.matchers,
+  range: source.range,
 });
 
 const toWatchlistFormValues = (

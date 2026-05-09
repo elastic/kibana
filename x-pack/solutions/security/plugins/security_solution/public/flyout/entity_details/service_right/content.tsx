@@ -70,6 +70,17 @@ export const ServicePanelContent = ({
           <EuiHorizontalRule />
         </>
       )}
+      {entityStoreEntityId && (
+        <>
+          <VisualizationsSection
+            entityId={entityStoreEntityId}
+            isPreviewMode={isPreviewMode}
+            scopeId={scopeId}
+            openDetailsPanel={openDetailsPanel}
+          />
+          <EuiHorizontalRule margin="m" />
+        </>
+      )}
       {entityStoreEntityId && hasEntityResolutionLicense && (
         <>
           <ResolutionSection
@@ -86,17 +97,6 @@ export const ServicePanelContent = ({
           entity={{ name: serviceName, type: EntityType.service }}
           onChange={onAssetCriticalityChange}
         />
-      )}
-      {entityStoreEntityId && (
-        <>
-          <VisualizationsSection
-            entityId={entityStoreEntityId}
-            isPreviewMode={isPreviewMode}
-            scopeId={scopeId}
-            openDetailsPanel={openDetailsPanel}
-          />
-          <EuiHorizontalRule margin="m" />
-        </>
       )}
       <ObservedEntity
         observedData={{ ...observedService, entityId: entityRecord?.entity.id }}

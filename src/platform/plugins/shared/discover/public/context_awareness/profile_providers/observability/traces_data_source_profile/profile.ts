@@ -19,7 +19,8 @@ import { getCellRenderers, getDefaultAppState, getChartSectionConfiguration } fr
 import { isValidNonTransformationalESQLQuery } from '../../../utils/is_valid_non_transformational_esql_query';
 import { DataSourceType } from '../../../../../common/data_sources';
 
-const OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID = 'observability-traces-data-source-profile';
+export const OBSERVABILITY_TRACES_DATA_SOURCE_PROFILE_ID =
+  'observability-traces-data-source-profile';
 
 export const createTracesDataSourceProfileProvider = ({
   apmContextService,

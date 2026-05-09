@@ -10,6 +10,7 @@ import type { AnyAction } from 'redux';
 import type { ThunkDispatch } from 'redux-thunk';
 import type { Error as EsUiError } from '@kbn/es-ui-shared-plugin/public';
 import type { Index } from '../../../common';
+import type { AppDependencies } from '../app_context';
 
 export interface HttpError {
   status?: number;
@@ -41,4 +42,8 @@ export interface IndexManagementState {
   tableState: TableState;
 }
 
-export type AppDispatch = ThunkDispatch<IndexManagementState, void, AnyAction>;
+export type AppDispatch = ThunkDispatch<
+  IndexManagementState,
+  AppDependencies['services'],
+  AnyAction
+>;

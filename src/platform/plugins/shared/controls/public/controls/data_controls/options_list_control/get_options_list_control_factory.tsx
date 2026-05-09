@@ -300,7 +300,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
 
       const componentApi: DSLOptionsListComponentApi = {
         ...api,
-        ...dataControlManager.api,
         ...editorStateManager.api,
         ...selectionsManager.api,
         ...temporaryStateManager.api,

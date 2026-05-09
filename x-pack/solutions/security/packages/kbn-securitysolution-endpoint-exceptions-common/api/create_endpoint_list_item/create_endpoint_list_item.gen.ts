@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ExceptionListItemHumanId,
@@ -29,21 +29,23 @@ import {
 import { ExceptionListItemEntryArray } from '@kbn/securitysolution-exceptions-common/api/model/exception_list_item_entry.gen';
 import { EndpointListItem } from '../model/endpoint_list_common.gen';
 
+export const CreateEndpointListItemRequestBody = lazySchema(() =>
+  z.object({
+    item_id: ExceptionListItemHumanId.optional(),
+    type: ExceptionListItemType,
+    name: ExceptionListItemName,
+    description: ExceptionListItemDescription,
+    entries: ExceptionListItemEntryArray,
+    os_types: ExceptionListItemOsTypeArray.optional().default([]),
+    tags: ExceptionListItemTags.optional().default([]),
+    meta: ExceptionListItemMeta.optional(),
+    comments: ExceptionListItemCommentArray.optional().default([]),
+  })
+);
 export type CreateEndpointListItemRequestBody = z.infer<typeof CreateEndpointListItemRequestBody>;
-export const CreateEndpointListItemRequestBody = z.object({
-  item_id: ExceptionListItemHumanId.optional(),
-  type: ExceptionListItemType,
-  name: ExceptionListItemName,
-  description: ExceptionListItemDescription,
-  entries: ExceptionListItemEntryArray,
-  os_types: ExceptionListItemOsTypeArray.optional().default([]),
-  tags: ExceptionListItemTags.optional().default([]),
-  meta: ExceptionListItemMeta.optional(),
-  comments: ExceptionListItemCommentArray.optional().default([]),
-});
 export type CreateEndpointListItemRequestBodyInput = z.input<
   typeof CreateEndpointListItemRequestBody
 >;
 
+export const CreateEndpointListItemResponse = lazySchema(() => EndpointListItem);
 export type CreateEndpointListItemResponse = z.infer<typeof CreateEndpointListItemResponse>;
-export const CreateEndpointListItemResponse = EndpointListItem;

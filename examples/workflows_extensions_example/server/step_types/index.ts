@@ -11,9 +11,17 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import { setVarStepDefinition } from './setvar_step';
 import { externalStepDefinition } from './external_step';
 
+const asyncFeatureFlagExample = () => Promise.resolve(true);
+
 export const registerStepDefinitions = (
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup
 ) => {
   workflowsExtensions.registerStepDefinition(setVarStepDefinition);
-  workflowsExtensions.registerStepDefinition(externalStepDefinition);
+  workflowsExtensions.registerStepDefinition(async () => {
+    const isFeatureFlagEnabled = await asyncFeatureFlagExample();
+    if (!isFeatureFlagEnabled) {
+      return undefined; // Skip step registration
+    }
+    return externalStepDefinition;
+  });
 };

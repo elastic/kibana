@@ -120,7 +120,7 @@ describe('executeEsqlQuery', () => {
       uiSettings: mockUiSettings,
     });
 
-    expect(result).toStrictEqual([
+    expect(result.documents).toStrictEqual([
       {
         metric_name: 'metric.name',
         data_stream: 'metrics-stream-1',
@@ -130,6 +130,10 @@ describe('executeEsqlQuery', () => {
         dimension_fields: 'host',
       },
     ]);
+    expect(result.requestParams).toStrictEqual({
+      query: 'TS metrics-* | METRICS_INFO',
+    });
+    expect(result.rawResponse).toBeDefined();
   });
 
   it('builds filter from time and filters when timeRange and dataView have timeFieldName', async () => {

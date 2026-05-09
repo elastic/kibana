@@ -51,6 +51,7 @@
             "lineNumber": 33,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "BrowserRouterProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -90,6 +91,7 @@
             "lineNumber": 27,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "HashRouterProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -129,6 +131,7 @@
             "lineNumber": 39,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "MemoryRouterProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -171,6 +174,7 @@
             "lineNumber": 27,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "RouteProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -210,6 +214,7 @@
             "lineNumber": 45,
             "columnNumber": 24,
             "deprecated": false,
+            "docsReferencedTypeName": "RouterProps",
             "trackAdoption": false,
             "isRequired": true
           }

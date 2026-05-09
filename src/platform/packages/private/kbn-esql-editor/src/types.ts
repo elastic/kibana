@@ -23,7 +23,9 @@ import type {
   ESQLControlsContext,
   ESQLCallbacks,
   ESQLTelemetryCallbacks,
+  ESQLSourceResult,
 } from '@kbn/esql-types';
+import type { ESQLDependencies } from '@kbn/monaco/src/languages/esql/language';
 
 export interface DataErrorsControl {
   enabled: boolean;
@@ -104,6 +106,7 @@ export interface EsqlPluginStartBase {
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
   isServerless: boolean;
+  enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
 }
 
 export interface ESQLEditorDeps {
@@ -123,4 +126,8 @@ export enum HistoryTabId {
   standardQueries = 'starred-queries-tab',
 }
 
-export type EsqlLanguageDeps = ESQLCallbacks & Partial<{ telemetry: ESQLTelemetryCallbacks }>;
+export type EsqlLanguageDeps = ESQLCallbacks &
+  Partial<{
+    telemetry: ESQLTelemetryCallbacks;
+    getEditorMessages: ESQLDependencies['getEditorMessages'];
+  }>;

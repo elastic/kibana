@@ -15,12 +15,13 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 
 import { UserName, MonitoredUserDoc } from './common.gen';
 
+export const CreatePrivMonUserRequestBody = lazySchema(() => UserName);
 export type CreatePrivMonUserRequestBody = z.infer<typeof CreatePrivMonUserRequestBody>;
-export const CreatePrivMonUserRequestBody = UserName;
 export type CreatePrivMonUserRequestBodyInput = z.input<typeof CreatePrivMonUserRequestBody>;
 
+export const CreatePrivMonUserResponse = lazySchema(() => MonitoredUserDoc);
 export type CreatePrivMonUserResponse = z.infer<typeof CreatePrivMonUserResponse>;
-export const CreatePrivMonUserResponse = MonitoredUserDoc;

@@ -14,7 +14,6 @@ import type {
   ESQLFieldWithMetadata,
   InferenceEndpointAutocompleteItem,
 } from '@kbn/esql-types';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { METADATA_FIELDS } from '../../..';
 
 export const metadataFields: ESQLFieldWithMetadata[] = METADATA_FIELDS.map((field) => ({
@@ -188,7 +187,9 @@ export function getCallbackMocks(): ESQLCallbacks {
       }
       return { recommendedQueries: [], recommendedFields: [] };
     }),
-    getInferenceEndpoints: jest.fn(async (taskType: InferenceTaskType) => ({ inferenceEndpoints })),
+    getInferenceEndpoints: jest.fn(async (taskType: string) => ({
+      inferenceEndpoints,
+    })),
   };
 }
 

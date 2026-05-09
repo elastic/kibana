@@ -272,8 +272,8 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onClose}>
-              {i18n.translate('xpack.queryActivity.flyout.cancelButton', {
-                defaultMessage: 'Cancel',
+              {i18n.translate('xpack.queryActivity.flyout.closeButton', {
+                defaultMessage: 'Close',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>

@@ -23,7 +23,6 @@ import type { LinkInfo } from '../../../links';
 import { APP_NAME } from '../../../../../common/constants';
 import { getTrailingBreadcrumbs } from './trailing_breadcrumbs';
 import { useParentLinks } from '../../../links/links_hooks';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 
 export const useBreadcrumbsNav = () => {
   const dispatch = useDispatch();
@@ -32,7 +31,6 @@ export const useBreadcrumbsNav = () => {
   const { navigateTo } = useNavigateTo();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
   const parentLinks = useParentLinks(routeProps.pageName);
-  const isClassicNavUpdateEnabled = useIsExperimentalFeatureEnabled('securityClassicNavUpdate');
 
   useEffect(() => {
     // cases manages its own breadcrumbs
@@ -40,37 +38,24 @@ export const useBreadcrumbsNav = () => {
       return;
     }
 
-    const leadingBreadcrumbs = getLeadingBreadcrumbs(
-      parentLinks,
-      getSecuritySolutionUrl,
-      isClassicNavUpdateEnabled
-    );
+    const leadingBreadcrumbs = getLeadingBreadcrumbs(parentLinks, getSecuritySolutionUrl);
     const trailingBreadcrumbs = getTrailingBreadcrumbs(routeProps, getSecuritySolutionUrl);
 
     updateBreadcrumbsNav({
       leading: addOnClicksHandlers(leadingBreadcrumbs, dispatch, navigateTo, telemetry),
       trailing: addOnClicksHandlers(trailingBreadcrumbs, dispatch, navigateTo, telemetry),
     });
-  }, [
-    routeProps,
-    parentLinks,
-    getSecuritySolutionUrl,
-    dispatch,
-    navigateTo,
-    telemetry,
-    isClassicNavUpdateEnabled,
-  ]);
+  }, [routeProps, parentLinks, getSecuritySolutionUrl, dispatch, navigateTo, telemetry]);
 };
 
 const getLeadingBreadcrumbs = (
   parentLinks: LinkInfo[],
-  getSecuritySolutionUrl: GetSecuritySolutionUrl,
-  isClassicNavUpdateEnabled: boolean
+  getSecuritySolutionUrl: GetSecuritySolutionUrl
 ): ChromeBreadcrumb[] => {
   const landingBreadcrumb: ChromeBreadcrumb = {
     text: APP_NAME,
     href: getSecuritySolutionUrl({
-      deepLinkId: isClassicNavUpdateEnabled ? SecurityPageName.launchpad : SecurityPageName.landing,
+      deepLinkId: SecurityPageName.launchpad,
     }),
   };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { merge, of, filter, tap, EMPTY } from 'rxjs';
+import { merge, of, filter, tap, catchError, throwError, EMPTY } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -19,9 +19,18 @@ import {
   isRoundCompleteEvent,
   isAgentBuilderError,
   AgentBuilderErrorCode,
+  AgentExecutionMode,
+  createInternalError,
 } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SerializedExecutionError } from '@kbn/agent-builder-common';
+import type {
+  AgentExecution,
+  ConversationAgentExecution,
+  StandaloneAgentExecution,
+} from '@kbn/agent-builder-server/execution';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
 import {
@@ -39,7 +48,6 @@ import { createConversationIdSetEvent } from './utils/events';
 import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { withConverseSpan } from '../../tracing';
 import type { MeteringService } from '../metering';
-import type { AgentExecution, SerializedExecutionError } from './types';
 import type { AgentExecutionClient } from './persistence';
 
 import { EVENT_BATCH_INTERVAL_MS } from './constants';
@@ -60,13 +68,12 @@ export interface AgentExecutionDeps {
   meteringService: MeteringService;
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 
 /**
- * Resolves services, gets the conversation, and builds the full agent event stream.
- * This is the core execution logic shared between local and TM execution.
- *
- * @returns An observable of ChatEvents (agent events + persistence events).
+ * Unified entry point for agent execution. Dispatches to the appropriate handler
+ * based on the execution mode.
  */
 export const handleAgentExecution = async ({
   execution,
@@ -75,6 +82,27 @@ export const handleAgentExecution = async ({
   abortSignal,
 }: {
   execution: AgentExecution;
+  deps: AgentExecutionDeps;
+  request: KibanaRequest;
+  abortSignal: AbortSignal;
+}): Promise<Observable<ChatEvent>> => {
+  if (execution.executionMode === AgentExecutionMode.standalone) {
+    return handleStandaloneExecution({ execution, deps, request, abortSignal });
+  }
+  return handleConversationExecution({ execution, deps, request, abortSignal });
+};
+
+/**
+ * Handles conversation-mode execution — resolves/creates conversation, generates title,
+ * persists round, reports metering and telemetry.
+ */
+const handleConversationExecution = async ({
+  execution,
+  deps,
+  request,
+  abortSignal,
+}: {
+  execution: ConversationAgentExecution;
   deps: AgentExecutionDeps;
   request: KibanaRequest;
   abortSignal: AbortSignal;
@@ -97,7 +125,7 @@ export const handleAgentExecution = async ({
   const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
 
   // Resolve scoped services
-  const { conversationClient, chatModel, selectedConnectorId } = await resolveServices({
+  const { conversationClient, modelProvider, selectedConnectorId } = await resolveServices({
     agentId,
     connectorId,
     request,
@@ -139,7 +167,11 @@ export const handleAgentExecution = async ({
   // Generate title (for CREATE) or use existing title (for UPDATE)
   const title$ =
     conversation.operation === 'CREATE'
-      ? generateTitle({ chatModel, conversation, nextInput })
+      ? generateTitle({
+          chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
+          conversation,
+          nextInput,
+        })
       : of(conversation.title);
 
   // Persist conversation (optional)
@@ -158,7 +190,9 @@ export const handleAgentExecution = async ({
   // Merge all event streams
   const effectiveConversationId =
     conversation.operation === 'CREATE' ? conversation.id : conversationId;
-  const modelProvider = getConnectorProvider(chatModel.getConnector());
+
+  const chatModel = (await modelProvider.getDefaultModel()).chatModel;
+  const connectorProvider = getConnectorProvider(chatModel.getConnector());
 
   return withConverseSpan({ agentId, conversationId: effectiveConversationId }, () =>
     merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
@@ -179,7 +213,7 @@ export const handleAgentExecution = async ({
                 roundCount: currentRoundCount,
                 agentId,
                 round: event.data.round,
-                modelProvider,
+                modelProvider: connectorProvider,
               })
               .catch((err) => {
                 logger.warn(`Failed to report execution metering: ${err}`);
@@ -197,7 +231,7 @@ export const handleAgentExecution = async ({
               roundCount: currentRoundCount,
               agentId,
               round: event.data.round,
-              modelProvider,
+              modelProvider: connectorProvider,
             });
           }
         } catch (error) {
@@ -209,7 +243,7 @@ export const handleAgentExecution = async ({
         logger,
         analyticsService,
         trackingService,
-        modelProvider,
+        modelProvider: connectorProvider,
         conversationId: effectiveConversationId,
         executionId: execution.executionId,
       })
@@ -292,14 +326,38 @@ export const collectAndWriteEvents = ({
 /**
  * Converts an unknown error to a {@link SerializedExecutionError} for persistence.
  * - If the error is already an AgentBuilderError, serializes it using toJSON().
- * - Otherwise, wraps it as an internalError.
+ * - Otherwise, wraps it as an internalError, preserving the HTTP status from
+ *   Boom-style errors (or any error carrying a numeric `statusCode`) in
+ *   `meta.statusCode` so the route layer can return the correct code.
  */
 export const serializeExecutionError = (error: unknown): SerializedExecutionError => {
   if (isAgentBuilderError(error)) {
     return { code: error.code as AgentBuilderErrorCode, message: error.message, meta: error.meta };
   }
   const message = error instanceof Error ? error.message : String(error);
-  return { code: AgentBuilderErrorCode.internalError, message };
+  const statusCode = getHttpStatusFromError(error);
+  return {
+    code: AgentBuilderErrorCode.internalError,
+    message,
+    ...(statusCode !== undefined ? { meta: { statusCode } } : {}),
+  };
+};
+
+const getHttpStatusFromError = (error: unknown): number | undefined => {
+  if (typeof error !== 'object' || error === null) return undefined;
+  const { output, statusCode } = error as {
+    output?: { statusCode?: unknown };
+    statusCode?: unknown;
+  };
+  const candidate =
+    typeof output?.statusCode === 'number'
+      ? output.statusCode
+      : typeof statusCode === 'number'
+      ? statusCode
+      : undefined;
+  return typeof candidate === 'number' && candidate >= 400 && candidate < 600
+    ? candidate
+    : undefined;
 };
 
 const buildPersistenceEvents = ({
@@ -338,4 +396,58 @@ const buildPersistenceEvents = ({
     roundCompletedEvents$,
     action,
   });
+};
+
+/**
+ * Handles a standalone agent execution — no conversation resolution, no title generation,
+ * no persistence events, and no metering/telemetry.
+ */
+const handleStandaloneExecution = async ({
+  execution,
+  deps,
+  request,
+  abortSignal,
+}: {
+  execution: StandaloneAgentExecution;
+  deps: AgentExecutionDeps;
+  request: KibanaRequest;
+  abortSignal: AbortSignal;
+}): Promise<Observable<ChatEvent>> => {
+  const agentId = execution.agentId;
+  const { logger, runAgent } = deps;
+
+  const { selectedConnectorId } = await resolveServices({
+    agentId,
+    connectorId: execution.agentParams.connectorId,
+    request,
+    ...deps,
+  });
+
+  const agentEvents$ = executeAgent$({
+    agentId,
+    executionId: execution.executionId,
+    request,
+    nextInput: execution.agentParams.nextInput,
+    capabilities: execution.agentParams.capabilities,
+    abortSignal,
+    conversation: undefined,
+    defaultConnectorId: selectedConnectorId,
+    runAgent,
+    executionMode: AgentExecutionMode.standalone,
+  });
+
+  return agentEvents$.pipe(
+    handleCancellation(abortSignal),
+    catchError((err) => {
+      logger.error(`Error executing standalone agent: ${err.stack ?? err.message}`);
+      return throwError(() => {
+        if (isAgentBuilderError(err)) {
+          return err;
+        }
+        return createInternalError(`Error executing standalone agent: ${err.message}`, {
+          statusCode: 500,
+        });
+      });
+    })
+  );
 };

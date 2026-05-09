@@ -328,6 +328,8 @@ describe('TakeAction', () => {
 
   describe('actions when multiple alerts are selected', () => {
     const alerts = getMockAttackDiscoveryAlerts(); // <-- multiple alerts
+    alerts[0].alertWorkflowStatus = 'open';
+    alerts[1].alertWorkflowStatus = 'closed';
     const testCases = [
       {
         testId: 'markAsAcknowledged',
@@ -573,7 +575,7 @@ describe('TakeAction', () => {
       });
     });
 
-    it('disables case actions when the user lacks permissions', () => {
+    it('does not render case actions when the user lacks permissions', () => {
       render(
         <TestProviders>
           <TakeAction {...defaultProps} />
@@ -582,11 +584,8 @@ describe('TakeAction', () => {
 
       openPopover();
 
-      const addToCaseButton = screen.getByTestId('addToCase');
-      const addToExistingCaseButton = screen.getByTestId('addToExistingCase');
-
-      expect(addToCaseButton).toBeDisabled();
-      expect(addToExistingCaseButton).toBeDisabled();
+      expect(screen.queryByTestId('addToCase')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('addToExistingCase')).not.toBeInTheDocument();
     });
   });
 

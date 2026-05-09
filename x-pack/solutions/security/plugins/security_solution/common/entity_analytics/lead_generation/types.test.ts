@@ -103,12 +103,18 @@ describe('Lead generation Zod schemas', () => {
   });
 
   describe('generateLeadsRequestSchema', () => {
-    it('accepts an empty body', () => {
-      expect(() => generateLeadsRequestSchema.parse({})).not.toThrow();
+    it('accepts a body with only connectorId', () => {
+      expect(() =>
+        generateLeadsRequestSchema.parse({ connectorId: 'test-connector' })
+      ).not.toThrow();
+    });
+
+    it('rejects an empty body (connectorId is required)', () => {
+      expect(() => generateLeadsRequestSchema.parse({})).toThrow();
     });
 
     it('rejects maxLeads above 50', () => {
-      expect(() => generateLeadsRequestSchema.parse({ maxLeads: 51 })).toThrow();
+      expect(() => generateLeadsRequestSchema.parse({ connectorId: 'c', maxLeads: 51 })).toThrow();
     });
   });
 

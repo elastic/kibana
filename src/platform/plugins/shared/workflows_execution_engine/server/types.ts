@@ -11,16 +11,18 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageApiSetup } from '@kbn/usage-api-plugin/server';
-import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { BulkScheduleWorkflowResult, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
+import type { EmitEvent } from './trigger_events/trigger_event_handler';
 import type { IWorkflowEventLoggerService } from './workflow_event_logger';
 
 export interface ExecuteWorkflowResponse {
@@ -35,6 +37,14 @@ export interface WorkflowsExecutionEnginePluginSetup {
   // No setup contract exposed yet. Extend this interface when other plugins need to configure the engine during setup.
   [key: string]: unknown;
 }
+
+export interface TriggerEventsContract {
+  emitEvent: EmitEvent;
+  isEnabled: boolean;
+  isLogEventsEnabled: boolean;
+  maxEventChainDepth: number;
+}
+
 export interface WorkflowsExecutionEnginePluginStart {
   executeWorkflow: ExecuteWorkflow;
   executeWorkflowStep: ExecuteWorkflowStep;
@@ -43,10 +53,8 @@ export interface WorkflowsExecutionEnginePluginStart {
   resumeWorkflowExecution: ResumeWorkflowExecution;
   workflowEventLoggerService: IWorkflowEventLoggerService;
   scheduleWorkflow: ScheduleWorkflow;
-  isEventDrivenExecutionEnabled: () => boolean;
-  isLogTriggerEventsEnabled: () => boolean;
-  getMaxEventChainDepth: () => number;
-  getMaxWorkflowDepth: () => number;
+  bulkScheduleWorkflow: BulkScheduleWorkflow;
+  triggerEvents: TriggerEventsContract;
 }
 
 export interface WorkflowsExecutionEnginePluginSetupDeps {
@@ -62,6 +70,7 @@ export interface WorkflowsExecutionEnginePluginStartDeps {
   cloud: CloudStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   licensing: LicensingPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export type ExecuteWorkflow = (
@@ -100,3 +109,8 @@ export type ScheduleWorkflow = (
   context: Record<string, unknown>,
   request: KibanaRequest
 ) => Promise<ExecuteWorkflowResponse>;
+
+export type BulkScheduleWorkflow = (
+  items: Array<{ workflow: WorkflowExecutionEngineModel; context: Record<string, unknown> }>,
+  request: KibanaRequest
+) => Promise<BulkScheduleWorkflowResult>;

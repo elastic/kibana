@@ -32,11 +32,6 @@ export const allowedExperimentalValues = Object.freeze({
   extendedRuleExecutionLoggingEnabled: false,
 
   /**
-   * Enables the SOC trends timerange and stats on D&R page
-   */
-  socTrendsEnabled: false,
-
-  /**
    * `runscript` response actions for SentinelOne hosts.
    *
    * Release: 9.2.0 (earlier for serverless)
@@ -53,19 +48,19 @@ export const allowedExperimentalValues = Object.freeze({
    * `runscript` response action for Elastic Defend Endpoint
    * Release: 9.4
    */
-  responseActionsEndpointRunScript: false,
+  responseActionsEndpointRunScript: true,
 
   /**
    * Support for Automated Endpoint `runscript` (from rules)
    * Release: 9.4
    */
-  responseActionsEndpointAutomatedRunScript: false,
+  responseActionsEndpointAutomatedRunScript: true,
 
   /**
    * Scripts library in support of `runscript`/upload-execute` new command for elastic defend
    * Release: 9.4
    */
-  responseActionsScriptLibraryManagement: false,
+  responseActionsScriptLibraryManagement: true,
 
   /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
@@ -86,12 +81,6 @@ export const allowedExperimentalValues = Object.freeze({
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,
-
-  /**
-   * Entity Analytics: Disables the Risk Score AI Assistant tool.
-   */
-  entityDetailsHighlightsEnabled: true,
-
   /**
    * Enables the new Entity Analytics home page experience.
    */
@@ -112,7 +101,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables gap reason display in the gaps table and reason-based filtering.
    */
-  gapReasonDetectionEnabled: false,
+  gapReasonDetectionEnabled: true,
 
   /**
    * Adds a new option to filter descendants of a process for Management / Trusted Apps
@@ -128,7 +117,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables AI rule creation feature
    */
-  aiRuleCreationEnabled: false,
+  aiRuleCreationEnabled: true,
 
   /**
    * Disables the siem migrations feature
@@ -142,8 +131,9 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
+   * Additionally: enables import/export for all Endpoint artifacts.
    */
-  endpointExceptionsMovedUnderManagement: false,
+  endpointExceptionsMovedUnderManagement: true,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
@@ -184,11 +174,15 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Protects all the work related to the attacks and alerts alignment effort
    */
-  enableAlertsAndAttacksAlignment: false,
+  enableAlertsAndAttacksAlignment: true,
   /**
    *  Enables the QRadar rules import feature
    */
   qradarRulesMigration: true,
+  /**
+   *  Enables the Microsoft Sentinel rules import feature
+   */
+  sentinelRulesMigration: false,
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
@@ -231,6 +225,12 @@ export const allowedExperimentalValues = Object.freeze({
   automaticTroubleshootingSkill: false,
 
   /**
+   * Enables the PCI DSS v4.0.1 Compliance Agent Builder skill and its backing tools.
+   * Gates skill + tool registration so the feature can ship dark and be enabled per environment.
+   */
+  pciComplianceAgentBuilder: true,
+
+  /**
    * Enables the new flyout using the EUI flyout system
    */
   newFlyoutSystemEnabled: false,
@@ -244,13 +244,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the deprecated prebuilt rules UI
    * Release: 9.4
    */
-  prebuiltRulesDeprecationUIEnabled: false,
-
-  /**
-   * Classic chrome only: refreshed Security side nav (Launchpad, Manage footer; unified row + panel behavior).
-   * Release: 9.4
-   */
-  securityClassicNavUpdate: true,
+  prebuiltRulesDeprecationUIEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

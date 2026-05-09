@@ -588,6 +588,7 @@
                 "lineNumber": 84,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ReportApiJSON",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -888,6 +889,7 @@
                 "lineNumber": 84,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HttpSetup",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -905,6 +907,7 @@
                 "lineNumber": 85,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "IUiSettingsClient",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -972,6 +975,7 @@
                 "lineNumber": 91,
                 "columnNumber": 27,
                 "deprecated": false,
+                "docsReferencedTypeName": "Job",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1431,6 +1435,7 @@
                 "lineNumber": 193,
                 "columnNumber": 56,
                 "deprecated": false,
+                "docsReferencedTypeName": "BaseParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1494,6 +1499,7 @@
                 "lineNumber": 200,
                 "columnNumber": 60,
                 "deprecated": false,
+                "docsReferencedTypeName": "BaseParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1559,6 +1565,7 @@
                 "lineNumber": 217,
                 "columnNumber": 55,
                 "deprecated": false,
+                "docsReferencedTypeName": "BaseParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1598,6 +1605,7 @@
                 "lineNumber": 241,
                 "columnNumber": 53,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1652,6 +1660,7 @@
                 "lineNumber": 258,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "JobId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1784,6 +1793,7 @@
             "lineNumber": 13,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "LicenseCheck",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1962,7 +1972,7 @@
         "label": "ClientConfigType",
         "description": [],
         "path": "src/platform/packages/private/kbn-reporting/public/types.ts",
-        "lineNumber": 26,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1978,7 +1988,7 @@
               "{ scroll: { duration: string; size: number; }; maxRows: number; }"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/types.ts",
-            "lineNumber": 27,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1994,7 +2004,7 @@
               "{ jobsRefresh: { interval: number; intervalErrorMultiplier: number; }; }"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/types.ts",
-            "lineNumber": 34,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2010,7 +2020,7 @@
               "{ pdf: { enabled: boolean; }; png: { enabled: boolean; }; csv: { enabled: boolean; }; }"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/types.ts",
-            "lineNumber": 40,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2026,7 +2036,7 @@
               "{ enabled: boolean; }"
             ],
             "path": "src/platform/packages/private/kbn-reporting/public/types.ts",
-            "lineNumber": 45,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2165,7 +2175,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => Promise<void>; getExportHandler: (options: Omit<",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>) => Promise<void>; getExportHandler: (options: Omit<",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -2173,7 +2191,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
               "IntlShape",
               ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
               {
@@ -2183,7 +2209,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",

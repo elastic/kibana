@@ -73,6 +73,7 @@
                 "lineNumber": 72,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "TimeBucketsConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -247,6 +248,7 @@
                 "lineNumber": 96,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "TimeRangeBounds",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -444,6 +446,7 @@
             "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeRangeBounds",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -469,6 +472,7 @@
             "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeBucketsInterval",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -540,6 +544,7 @@
             "lineNumber": 20,
             "columnNumber": 32,
             "deprecated": false,
+            "docsReferencedTypeName": "IUiSettingsClient",
             "trackAdoption": false,
             "isRequired": true
           }

@@ -21,6 +21,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
     label: 'Serverless Investigations - Security Solution Cypress Tests'
     key: security-serverless-investigations
+    if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
     agents:
       machineType: n2-standard-4
       diskSizeGb: 110

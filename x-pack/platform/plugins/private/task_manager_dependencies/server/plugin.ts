@@ -34,9 +34,15 @@ export class TaskManagerDependenciesPlugin {
   public setup(_: CoreSetup, plugin: TaskManagerDependenciesPluginSetup) {
     plugin.encryptedSavedObjects.registerType({
       type: 'task',
-      attributesToEncrypt: new Set(['apiKey']),
+      attributesToEncrypt: new Set(['apiKey', 'uiamApiKey']),
       attributesToIncludeInAAD: new Set(['id', 'taskType']),
       enforceRandomId: false,
+    });
+
+    plugin.encryptedSavedObjects.registerType({
+      type: 'api_key_to_invalidate',
+      attributesToEncrypt: new Set(['uiamApiKey']),
+      attributesToIncludeInAAD: new Set(['apiKeyId', 'createdAt']),
     });
 
     plugin.taskManager.registerCanEncryptedSavedObjects(plugin.encryptedSavedObjects.canEncrypt);
@@ -47,14 +53,15 @@ export class TaskManagerDependenciesPlugin {
     );
   }
 
-  public start(_: CoreStart, plugin: TaskManagerDependenciesPluginStart) {
+  public start(core: CoreStart, plugin: TaskManagerDependenciesPluginStart) {
     plugin.taskManager.registerEncryptedSavedObjectsClient(
       plugin.encryptedSavedObjects.getClient({
-        includedHiddenTypes: ['task'],
+        includedHiddenTypes: ['task', 'api_key_to_invalidate'],
       })
     );
     plugin.taskManager.registerApiKeyInvalidateFn(
       plugin.security?.authc.apiKeys.invalidateAsInternalUser
     );
+    plugin.taskManager.registerUiamApiKeyInvalidateFn(core.security.authc.apiKeys.uiam?.invalidate);
   }
 }

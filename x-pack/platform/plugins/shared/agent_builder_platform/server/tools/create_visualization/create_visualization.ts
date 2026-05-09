@@ -14,7 +14,7 @@ import {
   type VisualizationAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-genai-utils';
+import { buildVisualizationConfig, type VisualizationConfig } from '@kbn/agent-builder-tools-base';
 
 /** Attachment type for visualization configurations */
 const VISUALIZATION_ATTACHMENT_TYPE = 'visualization';

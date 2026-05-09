@@ -448,6 +448,7 @@
                 "lineNumber": 87,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "ExecOptions",
                 "trackAdoption": false
               }
             ]

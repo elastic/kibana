@@ -6,12 +6,9 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 
-import { TestProviders, renderWithTestingProviders } from '../../../common/mock';
-import { useKibana } from '../../../common/lib/kibana';
-import { MultipleAlertsCommentEvent, SingleAlertCommentEvent } from './alert_event';
+import { AlertCommentEvent } from './alert_event';
 
 const props = {
   actionId: 'action-id-1',
@@ -21,158 +18,111 @@ const props = {
   ruleName: 'Awesome rule',
 };
 
-jest.mock('../../../common/lib/kibana');
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-
 describe('Alert events', () => {
-  let navigateToApp: jest.Mock;
-
   beforeEach(() => {
     jest.clearAllMocks();
-    navigateToApp = jest.fn();
-    useKibanaMock().services.application.navigateToApp = navigateToApp;
   });
 
-  describe('SingleAlertCommentEvent', () => {
-    it('it renders', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <SingleAlertCommentEvent {...props} />
-        </TestProviders>
-      );
+  describe('single alert', () => {
+    it('it renders', () => {
+      render(<AlertCommentEvent {...props} totalAlerts={1} />);
 
-      expect(
-        wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
-      ).toBeTruthy();
-      expect(wrapper.text()).toBe('added an alert from Awesome rule');
+      expect(screen.getByTestId('alert-rule-link-action-id-1')).toBeInTheDocument();
+      expect(screen.getByTestId('alerts-user-action-action-id-1')).toHaveTextContent(
+        'added an alert from Awesome rule'
+      );
     });
 
-    it('renders the link when onClick is provided but href is not valid', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <SingleAlertCommentEvent {...props} getRuleDetailsHref={undefined} />
-        </TestProviders>
-      );
+    it('renders the link when onClick is provided but href is not valid', () => {
+      render(<AlertCommentEvent {...props} totalAlerts={1} getRuleDetailsHref={undefined} />);
 
-      expect(
-        wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
-      ).toBeTruthy();
+      expect(screen.getByTestId('alert-rule-link-action-id-1')).toBeInTheDocument();
     });
 
-    it('renders the link when href is valid but onClick is not available', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <SingleAlertCommentEvent {...props} onRuleDetailsClick={undefined} />
-        </TestProviders>
-      );
+    it('renders the link when href is valid but onClick is not available', () => {
+      render(<AlertCommentEvent {...props} totalAlerts={1} onRuleDetailsClick={undefined} />);
 
-      expect(
-        wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
-      ).toBeTruthy();
+      expect(screen.getByTestId('alert-rule-link-action-id-1')).toBeInTheDocument();
     });
 
-    it('does NOT render the link when the href and onclick are invalid but it shows the rule name', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <SingleAlertCommentEvent
-            {...props}
-            getRuleDetailsHref={undefined}
-            onRuleDetailsClick={undefined}
-          />
-        </TestProviders>
+    it('does NOT render the link when the href and onclick are invalid but it shows the rule name', () => {
+      render(
+        <AlertCommentEvent
+          totalAlerts={1}
+          {...props}
+          getRuleDetailsHref={undefined}
+          onRuleDetailsClick={undefined}
+        />
       );
 
-      expect(
-        wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
-      ).toBeFalsy();
-
-      expect(wrapper.text()).toBe('added an alert from Awesome rule');
-    });
-
-    it('does NOT render the link when the rule id is null', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <SingleAlertCommentEvent {...props} ruleId={null} />
-        </TestProviders>
+      expect(screen.queryByTestId('alert-rule-link-action-id-1')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alerts-user-action-action-id-1')).toHaveTextContent(
+        'added an alert from Awesome rule'
       );
-
-      expect(
-        wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
-      ).toBeFalsy();
-
-      expect(wrapper.text()).toBe('added an alert from Awesome rule');
     });
 
-    it('show Unknown rule if the rule name is invalid', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <SingleAlertCommentEvent {...props} ruleName={null} />
-        </TestProviders>
+    it('does NOT render the link when the rule id is null', () => {
+      render(<AlertCommentEvent {...props} totalAlerts={1} ruleId={null} />);
+
+      expect(screen.queryByTestId('alert-rule-link-action-id-1')).not.toBeInTheDocument();
+      expect(screen.getByTestId('alerts-user-action-action-id-1')).toHaveTextContent(
+        'added an alert from Awesome rule'
       );
-
-      expect(
-        wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).first().exists()
-      ).toBeTruthy();
-      expect(wrapper.text()).toBe('added an alert from Unknown rule');
     });
 
-    it('navigate to app on link click', async () => {
+    it('shows Unknown rule if the rule name is invalid', () => {
+      render(<AlertCommentEvent {...props} totalAlerts={1} ruleName={null} />);
+
+      expect(screen.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Unknown rule');
+      expect(screen.getByTestId('alerts-user-action-action-id-1')).toHaveTextContent(
+        'added an alert from Unknown rule'
+      );
+    });
+
+    it('calls onRuleDetailsClick on link click', () => {
       const onRuleDetailsClick = jest.fn();
-
-      const wrapper = mount(
-        <TestProviders>
-          <SingleAlertCommentEvent {...props} onRuleDetailsClick={onRuleDetailsClick} />
-        </TestProviders>
+      render(
+        <AlertCommentEvent {...props} totalAlerts={1} onRuleDetailsClick={onRuleDetailsClick} />
       );
 
-      wrapper.find(`[data-test-subj="alert-rule-link-action-id-1"]`).last().simulate('click');
-      expect(onRuleDetailsClick).toHaveBeenCalled();
+      fireEvent.click(screen.getByTestId('alert-rule-link-action-id-1'));
+      expect(onRuleDetailsClick).toHaveBeenCalledWith('rule-id-1', expect.any(Object));
     });
 
-    it('shows the loading spinner if the alerts data are loading', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <SingleAlertCommentEvent {...props} loadingAlertData={true} />
-        </TestProviders>
-      );
+    it('shows the loading spinner if the alerts data are loading', () => {
+      render(<AlertCommentEvent {...props} totalAlerts={1} loadingAlertData />);
 
-      expect(
-        wrapper.find(`[data-test-subj="alert-loading-spinner-action-id-1"]`).first().exists()
-      ).toBeTruthy();
+      expect(screen.getByTestId('user-action-link-loading')).toBeInTheDocument();
     });
   });
 
-  describe('MultipleAlertsCommentEvent', () => {
+  describe('multiple alerts', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
-    it('renders correctly', async () => {
-      renderWithTestingProviders(<MultipleAlertsCommentEvent {...props} totalAlerts={2} />);
+    it('renders correctly', () => {
+      render(<AlertCommentEvent {...props} totalAlerts={2} />);
 
-      expect(screen.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(
+      expect(screen.getByTestId('alerts-user-action-action-id-1')).toHaveTextContent(
         'added 2 alerts from Awesome rule'
       );
       expect(screen.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Awesome rule');
     });
 
-    it('renders the link when onClick is provided but href is not valid', async () => {
-      renderWithTestingProviders(
-        <MultipleAlertsCommentEvent {...props} totalAlerts={2} getRuleDetailsHref={undefined} />
-      );
+    it('renders the link when onClick is provided but href is not valid', () => {
+      render(<AlertCommentEvent {...props} totalAlerts={2} getRuleDetailsHref={undefined} />);
       expect(screen.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Awesome rule');
     });
 
-    it('renders the link when href is valid but onClick is not available', async () => {
-      renderWithTestingProviders(
-        <MultipleAlertsCommentEvent {...props} totalAlerts={2} onRuleDetailsClick={undefined} />
-      );
+    it('renders the link when href is valid but onClick is not available', () => {
+      render(<AlertCommentEvent {...props} totalAlerts={2} onRuleDetailsClick={undefined} />);
       expect(screen.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Awesome rule');
     });
 
-    it('does NOT render the link when the href and onclick are invalid but it shows the rule name', async () => {
-      renderWithTestingProviders(
-        <MultipleAlertsCommentEvent
+    it('does NOT render the link when the href and onclick are invalid but it shows the rule name', () => {
+      render(
+        <AlertCommentEvent
           {...props}
           totalAlerts={2}
           getRuleDetailsHref={undefined}
@@ -180,41 +130,34 @@ describe('Alert events', () => {
         />
       );
 
-      expect(screen.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(
+      expect(screen.getByTestId('alerts-user-action-action-id-1')).toHaveTextContent(
         'added 2 alerts from Awesome rule'
       );
-      expect(screen.queryByTestId('alert-rule-link-action-id-1')).toBeFalsy();
+      expect(screen.queryByTestId('alert-rule-link-action-id-1')).not.toBeInTheDocument();
     });
 
-    it('does NOT render the link when the rule id is null', async () => {
-      renderWithTestingProviders(
-        <MultipleAlertsCommentEvent {...props} totalAlerts={2} ruleId={null} />
-      );
+    it('does NOT render the link when the rule id is null', () => {
+      render(<AlertCommentEvent {...props} totalAlerts={2} ruleId={null} />);
 
-      expect(screen.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(
+      expect(screen.getByTestId('alerts-user-action-action-id-1')).toHaveTextContent(
         'added 2 alerts from Awesome rule'
       );
-      expect(screen.queryByTestId('alert-rule-link-action-id-1')).toBeFalsy();
+      expect(screen.queryByTestId('alert-rule-link-action-id-1')).not.toBeInTheDocument();
     });
 
-    it('show Unknown rule if the rule name is invalid', async () => {
-      renderWithTestingProviders(
-        <MultipleAlertsCommentEvent {...props} totalAlerts={2} ruleName={null} />
-      );
+    it('shows Unknown rule if the rule name is invalid', () => {
+      render(<AlertCommentEvent {...props} totalAlerts={2} ruleName={null} />);
 
-      expect(screen.getByTestId('multiple-alerts-user-action-action-id-1')).toHaveTextContent(
+      expect(screen.getByTestId('alerts-user-action-action-id-1')).toHaveTextContent(
         'added 2 alerts from Unknown rule'
       );
-
       expect(screen.getByTestId('alert-rule-link-action-id-1')).toHaveTextContent('Unknown rule');
     });
 
-    it('shows the loading spinner if the alerts data are loading', async () => {
-      renderWithTestingProviders(
-        <MultipleAlertsCommentEvent {...props} totalAlerts={2} loadingAlertData={true} />
-      );
+    it('shows the loading spinner if the alerts data are loading', () => {
+      render(<AlertCommentEvent {...props} totalAlerts={2} loadingAlertData />);
 
-      expect(screen.getByTestId('alert-loading-spinner-action-id-1')).toBeTruthy();
+      expect(screen.getByTestId('user-action-link-loading')).toBeInTheDocument();
     });
   });
 });
