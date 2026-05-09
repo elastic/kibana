@@ -7,7 +7,7 @@
 
 import { TaskStatus } from '@kbn/streams-schema';
 import { createKiIdentificationStatusTool } from './tool';
-import { createMockGetScopedClients, createMockToolContext } from '../test_helpers';
+import { createMockGetScopedClients, createMockToolContext } from '../../utils/test_helpers';
 
 describe('createKiIdentificationStatusTool', () => {
   const setup = () => {

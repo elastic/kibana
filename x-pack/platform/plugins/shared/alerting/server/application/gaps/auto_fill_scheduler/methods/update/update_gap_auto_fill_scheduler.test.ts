@@ -56,6 +56,7 @@ const rulesClientParamsBase: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn().mockResolvedValue('elastic'),
   createAPIKey: jest.fn(),
+  cloneAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get() as Logger,
   internalSavedObjectsRepository,
   encryptedSavedObjectsClient: encryptedSavedObjects,

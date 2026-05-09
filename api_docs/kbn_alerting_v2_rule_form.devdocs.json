@@ -260,7 +260,7 @@
         "label": "LazyRuleFormFlyout",
         "description": [],
         "signature": [
-          "React.LazyExoticComponent<({ push, onClose, isLoading, children, }: ",
+          "React.LazyExoticComponent<({ push, onClose, isLoading, isSaveDisabled, children, }: ",
           {
             "pluginId": "@kbn/alerting-v2-rule-form",
             "scope": "public",
@@ -360,7 +360,7 @@
             "section": "def-public.FormValues",
             "text": "FormValues"
           },
-          ") => { kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: any; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }"
+          ") => { kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
         "lineNumber": 211,
@@ -475,7 +475,7 @@
             "section": "def-public.FormValues",
             "text": "FormValues"
           },
-          ") => { metadata?: { name?: string | undefined; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; } | undefined; time_field?: string | undefined; schedule?: any; evaluation?: { query?: { base?: string | undefined; } | undefined; } | undefined; recovery_policy?: any; state_transition?: any; grouping?: any; no_data?: any; artifacts?: any; enabled?: boolean | undefined; }"
+          ") => { metadata?: { name?: string | undefined; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; } | undefined; time_field?: string | undefined; schedule?: { every?: string | undefined; lookback?: string | undefined; } | null | undefined; evaluation?: { query?: { base?: string | undefined; } | undefined; } | undefined; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | null | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | null | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | null | undefined; artifacts?: { id: string; type: string; value: string; }[] | null | undefined; enabled?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
         "lineNumber": 221,
@@ -521,7 +521,7 @@
           "\nMaps a `RuleResponse` (API shape, snake_case) to `Partial<FormValues>` (form shape, camelCase).\n\nOnly fields present in the response are included so the form defaults fill in the rest.\nUse this when populating the edit form with an existing rule's data."
         ],
         "signature": [
-          "(rule: Record<any, any>) => Partial<",
+          "(rule: { kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; id: string; enabled: boolean; createdBy: string | null; createdAt: string; updatedBy: string | null; updatedAt: string; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }) => Partial<",
           {
             "pluginId": "@kbn/alerting-v2-rule-form",
             "scope": "public",
@@ -545,7 +545,7 @@
             "label": "rule",
             "description": [],
             "signature": [
-              "Record<any, any>"
+              "{ kind: any; metadata: { name: string; description?: string | undefined; owner?: string | undefined; tags?: string[] | undefined; }; time_field: string; schedule: { every: string; lookback?: string | undefined; }; evaluation: { query: { base: string; }; }; id: string; enabled: boolean; createdBy: string | null; createdAt: string; updatedBy: string | null; updatedAt: string; recovery_policy?: { type: any; query?: { base?: string | undefined; } | undefined; } | undefined; state_transition?: { pending_operator: any; recovering_operator: any; pending_count?: number | undefined; pending_timeframe?: string | undefined; recovering_count?: number | undefined; recovering_timeframe?: string | undefined; } | null | undefined; grouping?: { fields: string[]; } | undefined; no_data?: { behavior: any; timeframe?: string | undefined; } | undefined; artifacts?: { id: string; type: string; value: string; }[] | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/utils/rule_request_mappers.ts",
             "lineNumber": 244,
@@ -822,7 +822,7 @@
         "label": "DynamicRuleFormFlyoutProps",
         "description": [],
         "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
-        "lineNumber": 16,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -840,7 +840,7 @@
               "boolean | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
-            "lineNumber": 17,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -858,7 +858,7 @@
               "(() => void) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
-            "lineNumber": 19,
+            "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -875,7 +875,7 @@
               "The query that drives form values - changes will sync to form state"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
-            "lineNumber": 21,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -899,7 +899,68 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
-            "lineNumber": 23,
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormFlyoutProps.includeYaml",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeYaml",
+            "description": [
+              "Whether to include the Form/YAML edit mode toggle (default: false)"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormFlyoutProps.esqlVariables",
+            "type": "Array",
+            "tags": [],
+            "label": "esqlVariables",
+            "description": [
+              "\nES|QL control variables from Discover. When provided (including `[]`),\nthe flyout inlines resolvable `?param` / `??param` tokens via Composer\nand blocks save for any that remain unresolved.\n\nWhen `undefined`, the flyout treats the query as-is — no placeholder\nscanning, no save gating — so non-ES|QL-control callers are unaffected."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.DynamicRuleFormFlyoutProps.validationErrors",
+            "type": "Array",
+            "tags": [],
+            "label": "validationErrors",
+            "description": [
+              "\nCaller-supplied validation errors (merged with any unresolved-variable\nerrors computed internally)."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/dynamic_rule_form_flyout.tsx",
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1440,6 +1501,22 @@
           },
           {
             "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.RuleFormFlyoutProps.isSaveDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isSaveDisabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/rule_form_flyout.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
             "id": "def-public.RuleFormFlyoutProps.children",
             "type": "CompoundType",
             "tags": [],
@@ -1449,7 +1526,7 @@
               "React.ReactNode"
             ],
             "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/flyout/rule_form_flyout.tsx",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

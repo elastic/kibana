@@ -1,5 +1,5 @@
 {
-  "sha1": "386d30471cafce2042e5d0c267dee917fd7376d0",
+  "sha1": "5a62b24bc49e97d8a15cb8e7bf17c0af33806174",
   "tests": [
     {
       "id": "5e91b4cbd08e25e-f2cd2d3cdc77643",
@@ -13,7 +13,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 26,
+        "line": 31,
         "column": 1
       }
     },
@@ -653,7 +653,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 44,
+        "line": 49,
         "column": 9
       }
     },
@@ -669,7 +669,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 52,
+        "line": 57,
         "column": 9
       }
     },
@@ -685,7 +685,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_inventory/service_inventory.spec.ts",
-        "line": 61,
+        "line": 68,
         "column": 9
       }
     },
@@ -733,7 +733,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_a11y.spec.ts",
-        "line": 66,
+        "line": 83,
         "column": 9
       }
     },
@@ -921,7 +921,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 20,
+        "line": 21,
         "column": 9
       }
     },
@@ -937,7 +937,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 32,
+        "line": 33,
         "column": 9
       }
     },
@@ -953,7 +953,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 45,
+        "line": 46,
         "column": 9
       }
     },
@@ -1050,6 +1050,326 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/header_filters.spec.ts",
         "line": 54,
+        "column": 9
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-0ab00f544989df5",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-apm-java",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-17e81ddfc1fc81e",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-apm-nodejs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-eb42082faf7f921",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-edot-java",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-2f1561cf77c2ce4",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-edot-nodejs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-5ed2d20b3456188",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-edot-dotnet (v9)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-703ea67da9b1846",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-edot-dotnet-lte-v8",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-91a78811f036116",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-otel_other-java",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-4111eb38f32ae9a",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-otel_other-nodejs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-b635f4d346de101",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-otel_other-dotnet",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-8c4725fb3f904a9",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for classic_apm-otel_other-go",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-8aca599734b641a",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-edot-java",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-dc22de484ac0e17",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-edot-nodejs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-7d9ef290b028adb",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-edot-python",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-fb52a243b4159c6",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-otel_other-java",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-a197d918d98d10d",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-otel_other-nodejs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-a3c8ce45cc39ff5",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-otel_other-python",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "1cf62d6f0470e43-b116340b7c905db",
+      "title": "Metrics Tab - Dashboard Catalog renders dashboard for otel_native-otel_other-go",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
+        "line": 64,
+        "column": 11
+      }
+    },
+    {
+      "id": "4242553c72842b7-83696829f0d91be",
+      "title": "Metrics Tab - Non-Dashboard Variations renders JVM metrics overview for JRuby agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_non_dashboard.spec.ts",
+        "line": 21,
+        "column": 9
+      }
+    },
+    {
+      "id": "4242553c72842b7-dbc59ad4d31842e",
+      "title": "Metrics Tab - Non-Dashboard Variations renders generic service metrics for Go agent (elastic agent without dashboard)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_non_dashboard.spec.ts",
+        "line": 42,
+        "column": 9
+      }
+    },
+    {
+      "id": "4242553c72842b7-7a8ae3773644c59",
+      "title": "Metrics Tab - Non-Dashboard Variations renders serverless metrics for AWS Lambda",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_non_dashboard.spec.ts",
+        "line": 66,
         "column": 9
       }
     },
@@ -1417,7 +1737,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 9
       }
     },
@@ -1433,7 +1753,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
-        "line": 65,
+        "line": 67,
         "column": 9
       }
     },
@@ -1449,7 +1769,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/service_overview_mobile.spec.ts",
-        "line": 88,
+        "line": 90,
         "column": 9
       }
     },
@@ -1920,8 +2240,8 @@
       }
     },
     {
-      "id": "b1d9732f2022f52-1d041dd11a76a98",
-      "title": "Custom links template validation Create custom link with template URL and filters",
+      "id": "b1d9732f2022f52-21e57a8269d0449",
+      "title": "Custom links template validation template URL with filters — create from settings, verify in transaction, delete",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1931,13 +2251,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 33,
+        "line": 29,
         "column": 9
       }
     },
     {
-      "id": "b1d9732f2022f52-244e245a602c0a7",
-      "title": "Custom links template validation Verify template variables are populated correctly in custom link URLs",
+      "id": "b1d9732f2022f52-4eb454b9f6d8aaf",
+      "title": "Custom links template validation default URL flow — create link from transaction details with prefilled filters, delete",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1947,55 +2267,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 64,
-        "column": 9
-      }
-    },
-    {
-      "id": "b1d9732f2022f52-8c63ceeb998a13d",
-      "title": "Custom links template validation Delete custom link with template URL",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 92,
-        "column": 9
-      }
-    },
-    {
-      "id": "b1d9732f2022f52-ac6bad5f389c557",
-      "title": "Custom links template validation Open transaction and validate the default url when creating a custom link",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 112,
-        "column": 9
-      }
-    },
-    {
-      "id": "b1d9732f2022f52-5f08fd317b97702",
-      "title": "Custom links template validation Delete custom link created from transaction details",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 186,
+        "line": 102,
         "column": 9
       }
     },
@@ -2272,6 +2544,54 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/span_stacktrace.spec.ts",
         "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "c7a7d2788c3dc1b-e9cb937ad8469a8",
+      "title": "Trace waterfall flyout Full trace flyout renders waterfall and opens child flyouts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
+        "line": 39,
+        "column": 9
+      }
+    },
+    {
+      "id": "c7a7d2788c3dc1b-ff7eb0f1f1af6e7",
+      "title": "Trace waterfall flyout \"Open in Discover\" opens Discover with trace filter and results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
+        "line": 81,
+        "column": 9
+      }
+    },
+    {
+      "id": "c7a7d2788c3dc1b-89205e72f80dbc5",
+      "title": "Trace waterfall flyout \"Open in APM\" navigates to the root transaction detail page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/transaction_details/trace_waterfall_flyout.spec.ts",
+        "line": 93,
         "column": 9
       }
     },

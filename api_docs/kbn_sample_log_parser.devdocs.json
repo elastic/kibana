@@ -517,7 +517,7 @@
           "\"source\" | \"uniform_interval\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-sample-parser/src/loghub/create_loghub_generator.ts",
-        "lineNumber": 14,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

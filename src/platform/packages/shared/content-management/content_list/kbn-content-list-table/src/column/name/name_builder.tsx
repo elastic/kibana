@@ -165,4 +165,14 @@ export const buildNameColumn = (
  * </ContentListTable>
  * ```
  */
-export const NameColumn = column.createPreset({ name: 'name', resolve: buildNameColumn });
+/** Default width when the consumer hasn't supplied one. */
+const DEFAULT_NAME_SKELETON_WIDTH = '40%';
+
+export const NameColumn = column.createPreset({
+  name: 'name',
+  resolve: buildNameColumn,
+  skeleton: (attributes) => ({
+    shape: 'text',
+    width: attributes.width ?? DEFAULT_NAME_SKELETON_WIDTH,
+  }),
+});

@@ -125,7 +125,7 @@ const handleConversationExecution = async ({
   const { logger, runAgent, trackingService, analyticsService, meteringService } = deps;
 
   // Resolve scoped services
-  const { conversationClient, chatModel, selectedConnectorId } = await resolveServices({
+  const { conversationClient, modelProvider, selectedConnectorId } = await resolveServices({
     agentId,
     connectorId,
     request,
@@ -167,7 +167,11 @@ const handleConversationExecution = async ({
   // Generate title (for CREATE) or use existing title (for UPDATE)
   const title$ =
     conversation.operation === 'CREATE'
-      ? generateTitle({ chatModel, conversation, nextInput })
+      ? generateTitle({
+          chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
+          conversation,
+          nextInput,
+        })
       : of(conversation.title);
 
   // Persist conversation (optional)
@@ -186,7 +190,9 @@ const handleConversationExecution = async ({
   // Merge all event streams
   const effectiveConversationId =
     conversation.operation === 'CREATE' ? conversation.id : conversationId;
-  const modelProvider = getConnectorProvider(chatModel.getConnector());
+
+  const chatModel = (await modelProvider.getDefaultModel()).chatModel;
+  const connectorProvider = getConnectorProvider(chatModel.getConnector());
 
   return withConverseSpan({ agentId, conversationId: effectiveConversationId }, () =>
     merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
@@ -207,7 +213,7 @@ const handleConversationExecution = async ({
                 roundCount: currentRoundCount,
                 agentId,
                 round: event.data.round,
-                modelProvider,
+                modelProvider: connectorProvider,
               })
               .catch((err) => {
                 logger.warn(`Failed to report execution metering: ${err}`);
@@ -225,7 +231,7 @@ const handleConversationExecution = async ({
               roundCount: currentRoundCount,
               agentId,
               round: event.data.round,
-              modelProvider,
+              modelProvider: connectorProvider,
             });
           }
         } catch (error) {
@@ -237,7 +243,7 @@ const handleConversationExecution = async ({
         logger,
         analyticsService,
         trackingService,
-        modelProvider,
+        modelProvider: connectorProvider,
         conversationId: effectiveConversationId,
         executionId: execution.executionId,
       })
@@ -320,14 +326,38 @@ export const collectAndWriteEvents = ({
 /**
  * Converts an unknown error to a {@link SerializedExecutionError} for persistence.
  * - If the error is already an AgentBuilderError, serializes it using toJSON().
- * - Otherwise, wraps it as an internalError.
+ * - Otherwise, wraps it as an internalError, preserving the HTTP status from
+ *   Boom-style errors (or any error carrying a numeric `statusCode`) in
+ *   `meta.statusCode` so the route layer can return the correct code.
  */
 export const serializeExecutionError = (error: unknown): SerializedExecutionError => {
   if (isAgentBuilderError(error)) {
     return { code: error.code as AgentBuilderErrorCode, message: error.message, meta: error.meta };
   }
   const message = error instanceof Error ? error.message : String(error);
-  return { code: AgentBuilderErrorCode.internalError, message };
+  const statusCode = getHttpStatusFromError(error);
+  return {
+    code: AgentBuilderErrorCode.internalError,
+    message,
+    ...(statusCode !== undefined ? { meta: { statusCode } } : {}),
+  };
+};
+
+const getHttpStatusFromError = (error: unknown): number | undefined => {
+  if (typeof error !== 'object' || error === null) return undefined;
+  const { output, statusCode } = error as {
+    output?: { statusCode?: unknown };
+    statusCode?: unknown;
+  };
+  const candidate =
+    typeof output?.statusCode === 'number'
+      ? output.statusCode
+      : typeof statusCode === 'number'
+      ? statusCode
+      : undefined;
+  return typeof candidate === 'number' && candidate >= 400 && candidate < 600
+    ? candidate
+    : undefined;
 };
 
 const buildPersistenceEvents = ({

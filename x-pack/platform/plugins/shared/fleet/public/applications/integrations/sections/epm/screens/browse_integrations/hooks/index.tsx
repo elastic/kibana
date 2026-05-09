@@ -31,7 +31,7 @@ export function useBrowseIntegrationHook({
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    filteredCards: originalFilteredCards,
+    allCards: originalFilteredCards,
   } = useAvailablePackages({ prereleaseIntegrationsEnabled });
 
   const urlFilters = useUrlFilters();
@@ -54,8 +54,6 @@ export function useBrowseIntegrationHook({
       // TODO implement recent-old and old-recent sorting when we have a date field
       return originalFilteredCards;
     }
-
-    return sortedCards;
   }, [originalFilteredCards, urlFilters.sort]);
 
   // Cards filtered by non-category filters (search, status, setup method, signal).

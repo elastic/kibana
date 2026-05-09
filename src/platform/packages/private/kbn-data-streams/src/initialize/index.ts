@@ -37,10 +37,15 @@ export async function initialize({
     throw new Error('Data stream name is required');
   }
 
-  const existingDataStream = await getExistingDataStream(elasticsearchClient, dataStream.name);
+  const existingDataStream = await getExistingDataStream(
+    elasticsearchClient,
+    dataStream.name,
+    logger
+  );
   const existingIndexTemplate = await getExistingIndexTemplate(
     elasticsearchClient,
-    dataStream.name
+    dataStream.name,
+    logger
   );
 
   // The index template is created and updated in all cases except if the data stream does not exist and we will not create it now.

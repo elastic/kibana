@@ -128,7 +128,7 @@ dependsOn:
   - '@kbn/presentation-publishing-schemas'
   - '@kbn/maintenance-windows-plugin'
   - '@kbn/observability-agent-builder-plugin'
-  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-browser'
   - '@kbn/scout-oblt'
   - '@kbn/core-saved-objects-utils-server'
 tags:

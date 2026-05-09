@@ -7,7 +7,9 @@
 
 export const MAX_ASSETS_TO_LOAD = 500;
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
-export const ASSET_INVENTORY_INDEX_PATTERN = 'entities-generic-latest';
+// Cross-space wildcard over the v2 unified entity store latest aliases (`entities-latest-{space}`).
+// Used by client-side searches that don't already resolve a per-space data view.
+export const ASSET_INVENTORY_INDEX_PATTERN = 'entities-latest-*';
 export const ASSET_INVENTORY_DATA_VIEW_ID_PREFIX = 'asset-inventory';
 
 export const QUERY_KEY_GRID_DATA = 'asset_inventory_grid_data';
@@ -35,6 +37,8 @@ export const TEST_SUBJ_ONBOARDING_NO_DATA_FOUND = 'asset-inventory-onboarding-no
 export const TEST_SUBJ_ONBOARDING_SUCCESS_CALLOUT = 'asset-inventory-onboarding-success-callout';
 export const TEST_SUBJ_ONBOARDING_PERMISSION_DENIED =
   'asset-inventory-onboarding-permission-denied';
+export const TEST_SUBJ_ONBOARDING_ENTITY_STORE_V2_DISABLED =
+  'asset-inventory-onboarding-entity-store-v2-disabled';
 export const TEST_SUBJ_GROUPING = 'asset-inventory-grouping';
 export const TEST_SUBJ_GROUPING_LOADING = 'asset-inventory-grouping-loading';
 export const TEST_SUBJ_GROUPING_COUNTER = 'asset-inventory-grouping-counter';

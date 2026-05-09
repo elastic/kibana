@@ -82,7 +82,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
     const legendCellValueActionPanelItems = allActions.map((action) => ({
       name: action.displayName,
       'data-test-subj': `legend-${label}-${action.id}`,
-      icon: <EuiIcon type={action.iconType} size="m" />,
+      icon: <EuiIcon type={action.iconType} size="m" aria-hidden={true} />,
       onClick: () => {
         action.execute();
         setPopoverOpen(false);
@@ -119,7 +119,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
         defaultMessage: 'Legend actions',
       })}
     >
-      <EuiIcon size="s" type="boxesVertical" />
+      <EuiIcon size="s" type="boxesVertical" aria-hidden={true} />
     </div>
   );
   return (

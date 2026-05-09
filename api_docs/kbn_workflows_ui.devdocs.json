@@ -1534,6 +1534,98 @@
     "functions": [
       {
         "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.getIndexSelectionHandler",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexSelectionHandler",
+        "description": [],
+        "signature": [
+          "(services: ",
+          {
+            "pluginId": "@kbn/workflows-ui",
+            "scope": "public",
+            "docId": "kibKbnWorkflowsUiPluginApi",
+            "section": "def-public.IndexSelectionHandlerServices",
+            "text": "IndexSelectionHandlerServices"
+          },
+          ", options?: ",
+          {
+            "pluginId": "@kbn/workflows-ui",
+            "scope": "public",
+            "docId": "kibKbnWorkflowsUiPluginApi",
+            "section": "def-public.IndexSelectionHandlerOptions",
+            "text": "IndexSelectionHandlerOptions"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/workflows",
+            "scope": "common",
+            "docId": "kibKbnWorkflowsPluginApi",
+            "section": "def-common.PropertySelectionHandler",
+            "text": "PropertySelectionHandler"
+          },
+          "<string, Record<string, unknown>, Record<string, unknown>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+        "lineNumber": 79,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.getIndexSelectionHandler.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.IndexSelectionHandlerServices",
+                "text": "IndexSelectionHandlerServices"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+            "lineNumber": 80,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "IndexSelectionHandlerServices",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.getIndexSelectionHandler.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/workflows-ui",
+                "scope": "public",
+                "docId": "kibKbnWorkflowsUiPluginApi",
+                "section": "def-public.IndexSelectionHandlerOptions",
+                "text": "IndexSelectionHandlerOptions"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+            "lineNumber": 81,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "IndexSelectionHandlerOptions",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
         "id": "def-public.getSelectedWorkflowDisabledError",
         "type": "Function",
         "tags": [],
@@ -1613,6 +1705,53 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.getWorkflowsCapabilities",
+        "type": "Function",
+        "tags": [],
+        "label": "getWorkflowsCapabilities",
+        "description": [],
+        "signature": [
+          "(capabilities: ",
+          "Capabilities",
+          ") => ",
+          {
+            "pluginId": "@kbn/workflows-ui",
+            "scope": "public",
+            "docId": "kibKbnWorkflowsUiPluginApi",
+            "section": "def-public.WorkflowsManagementCapabilities",
+            "text": "WorkflowsManagementCapabilities"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.getWorkflowsCapabilities.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "capabilities",
+            "description": [],
+            "signature": [
+              "Capabilities"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "Capabilities",
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1943,7 +2082,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
-        "lineNumber": 28,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2718,6 +2857,130 @@
             ],
             "path": "src/platform/packages/shared/kbn-workflows-ui/src/api/types.ts",
             "lineNumber": 85,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.IndexSelectionHandlerOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexSelectionHandlerOptions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+        "lineNumber": 19,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.IndexSelectionHandlerOptions.maxResults",
+            "type": "number",
+            "tags": [],
+            "label": "maxResults",
+            "description": [
+              "Maximum number of results to return from the search API. Defaults to 20."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.IndexSelectionHandlerOptions.allowWildcard",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowWildcard",
+            "description": [
+              "Whether to allow wildcard patterns in the index selection handler. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.IndexSelectionHandlerOptions.showAllIndices",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showAllIndices",
+            "description": [
+              "Whether to show all indices, including hidden and internal ones. Defaults to false."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.IndexSelectionHandlerServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexSelectionHandlerServices",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.IndexSelectionHandlerServices.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows-ui",
+            "id": "def-public.IndexSelectionHandlerServices.application",
+            "type": "Object",
+            "tags": [],
+            "label": "application",
+            "description": [],
+            "signature": [
+              "ApplicationStart"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows-ui/src/lib/steps/editor_handlers/index_selection_handler.ts",
+            "lineNumber": 17,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3834,7 +4097,7 @@
           "\"canCreateWorkflow\" | \"canReadWorkflow\" | \"canUpdateWorkflow\" | \"canDeleteWorkflow\" | \"canExecuteWorkflow\" | \"canReadWorkflowExecution\" | \"canCancelWorkflowExecution\""
         ],
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
-        "lineNumber": 25,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4127,7 +4390,7 @@
           "{ canCreateWorkflow: boolean; canReadWorkflow: boolean; canUpdateWorkflow: boolean; canDeleteWorkflow: boolean; canExecuteWorkflow: boolean; canReadWorkflowExecution: boolean; canCancelWorkflowExecution: boolean; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_capabilities.ts",
-        "lineNumber": 26,
+        "lineNumber": 28,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

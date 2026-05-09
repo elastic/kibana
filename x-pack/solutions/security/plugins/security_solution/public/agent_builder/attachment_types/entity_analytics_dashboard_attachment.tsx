@@ -30,7 +30,7 @@ import type {
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { APP_UI_ID, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { EMPTY_SEVERITY_COUNT, RiskSeverity } from '../../../common/search_strategy';
