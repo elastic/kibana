@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   areTriggersDisabled,
   initializeTimeRangeManager,
@@ -53,7 +53,7 @@ export function getControlledBy(id: string) {
   return `mapEmbeddablePanel${id}`;
 }
 
-export const mapEmbeddableFactory: EmbeddableFactory<MapEmbeddableState, MapApi> = {
+export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState, MapApi> = {
   type: MAP_SAVED_OBJECT_TYPE,
   buildEmbeddable: async ({
     initializeDrilldownsManager,

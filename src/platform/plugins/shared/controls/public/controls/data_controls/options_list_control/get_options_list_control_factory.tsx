@@ -23,7 +23,7 @@ import {
 
 import { OPTIONS_LIST_CONTROL, DEFAULT_DSL_OPTIONS_LIST_STATE } from '@kbn/controls-constants';
 import type { OptionsListSelection, OptionsListDSLControlState } from '@kbn/controls-schemas';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   apiHasPinnedPanels,
   apiHasSections,
@@ -59,13 +59,15 @@ import {
   makeSelection,
   selectAll,
 } from './utils/selection_utils';
+import { CONTROL_DISPLAY_SETTINGS } from '../../constants';
 
-export const getOptionsListControlFactory = (): EmbeddableFactory<
+export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
   OptionsListDSLControlState,
   OptionsListControlApi
 > => {
   return {
     type: OPTIONS_LIST_CONTROL,
+    getDisplaySettings: () => CONTROL_DISPLAY_SETTINGS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
 

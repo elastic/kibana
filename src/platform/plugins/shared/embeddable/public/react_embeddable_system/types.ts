@@ -17,6 +17,8 @@ import type React from 'react';
 import type { DefaultPresentationPanelApi } from './panel_component/types';
 import type { initializeDrilldownsManager } from '../drilldowns/drilldowns_manager';
 import type { SerializedDrilldowns } from '../../server';
+import { PlacementStrategy } from './constants';
+import { MaybePromise } from '@kbn/utility-types';
 
 /**
  * The default embeddable API that all Embeddables must implement.
@@ -78,7 +80,7 @@ export interface BuildEmbeddableProps<
  * Embeddables are React components that manage their own state, can be serialized and
  * deserialized, and return an API that can be used to interact with them imperatively.
  **/
-export interface EmbeddableFactory<
+export interface EmbeddablePublicDefinition<
   SerializedState extends object = object,
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
 > {
@@ -95,4 +97,25 @@ export interface EmbeddableFactory<
   buildEmbeddable: (
     props: BuildEmbeddableProps<SerializedState, Api>
   ) => Promise<{ Component: React.FC<{}>; api: Api }>;
+
+  /**
+   * Provide placement hints to customize initial placement
+   */
+  getPlacementHints?: (serializedState?: SerializedState) => MaybePromise<{
+    strategy?: PlacementStrategy;
+    height?: number;
+    width?: number;
+  }>;
+
+  /**
+   * Provide layout contraints to customize resize behavior
+   */
+  layoutConstraints?: LayoutConstraints
+}
+
+export type LayoutConstraints = {
+  minWidth?: number;
+  maxWidth?: number;
+  minHeight?: number;
+  maxHeight?: number;
 }

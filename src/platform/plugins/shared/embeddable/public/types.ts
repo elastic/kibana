@@ -16,7 +16,7 @@ import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-taggin
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { registerAddFromLibraryType } from './add_from_library/registry';
-import type { registerEmbeddablePublicDefinition } from './react_embeddable_system';
+import type { DefaultEmbeddableApi, EmbeddablePublicDefinition, registerEmbeddablePublicDefinition } from './react_embeddable_system';
 import type { EmbeddableStateTransfer } from './state_transfer';
 import type { DrilldownTransforms, EmbeddableTransforms } from '../common';
 import type {
@@ -93,6 +93,10 @@ export interface EmbeddableSetup {
 export interface EmbeddableStart {
   getAddFromLibraryComponent: () => Promise<React.FC<AddFromLibraryFormProps>>;
   getAddFromLibraryContentComponent: () => Promise<React.FC<AddFromLibraryContentProps>>;
+  getEmbeddableDefinition: <
+    SerializedState extends object = object,
+    Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+  > (type: string) => Promise<EmbeddablePublicDefinition<SerializedState, Api>>;
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
   getLegacyURLTransform: (
     type: string

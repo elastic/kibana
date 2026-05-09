@@ -26,8 +26,8 @@ import {
 import { v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, EmbeddablePackageState, LayoutConstraints } from '@kbn/embeddable-plugin/public';
+import { PanelNotFoundError, PlacementStrategy } from '@kbn/embeddable-plugin/public';
 import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
 import type { PinnedControlLayoutState as PinnedPanelLayoutState } from '@kbn/controls-schemas';
 import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
@@ -45,20 +45,16 @@ import {
 import { asyncForEach } from '@kbn/std';
 
 import type { PinnedControlLayoutState } from '@kbn/controls-schemas';
-import type { PanelResizeSettings } from '@kbn/presentation-util-plugin/public';
-import { PanelPlacementStrategy } from '@kbn/presentation-util-plugin/public';
 import type { DashboardState } from '../../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/constants';
 import type { DashboardPanel } from '../../../server';
 import { dashboardClonePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
 import {
-  getPanelSettings,
   placeClonePanel,
   runPanelPlacementStrategy,
 } from '../../panel_placement';
-import { DEFAULT_PANEL_PLACEMENT_SETTINGS } from '../../plugin_constants';
-import { coreServices, usageCollectionService } from '../../services/kibana_services';
+import { coreServices, embeddableService, usageCollectionService } from '../../services/kibana_services';
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
@@ -72,6 +68,7 @@ import {
   type DashboardLayoutPanel,
   type DashboardPinnablePanel,
 } from './types';
+import { getPlacementHints } from '../../panel_placement/get_placement_hints';
 
 export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
@@ -91,20 +88,21 @@ export function initializeLayoutManager(
 
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
-  const panelResizeSettings$: Observable<{ [panelType: string]: PanelResizeSettings }> =
+  const panelResizeSettings$: Observable<{ [panelType: string]: LayoutConstraints }> =
     layout$.pipe(
       map(({ panels }) => {
         return [...new Set(Object.values(panels).map((panel) => panel.type))];
       }),
       distinctUntilChanged(deepEqual),
       mergeMap(async (panelTypes: string[]) => {
-        const settingsByPanelType: { [panelType: string]: PanelResizeSettings } = {};
+        const resizeConstraints: { [panelType: string]: LayoutConstraints } = {};
         await asyncForEach(panelTypes, async (type) => {
-          const panelSettings = await getPanelSettings(type);
-          if (panelSettings?.resizeSettings)
-            settingsByPanelType[type] = panelSettings.resizeSettings;
+          const embeddableDefinition = await embeddableService.getEmbeddableDefinition(type); 
+          if (embeddableDefinition && embeddableDefinition.layoutConstraints) {
+            resizeConstraints[type] = embeddableDefinition.layoutConstraints;
+          }
         });
-        return settingsByPanelType;
+        return resizeConstraints;
       }),
       startWith({}) // do not block rendering by waiting for these settings
     );
@@ -192,17 +190,13 @@ export function initializeLayoutManager(
         },
       };
     }
-    const panelSettings = await getPanelSettings(type, serializedState);
-    const panelPlacementSettings = {
-      ...DEFAULT_PANEL_PLACEMENT_SETTINGS,
-      ...panelSettings?.placementSettings,
-    };
+    const placementHints = await getPlacementHints(type, serializedState);
     const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
-      panelPlacementSettings?.strategy,
+      placementHints.strategy,
       {
         currentPanels: layout$.value.panels,
-        height: panelPlacementSettings.height,
-        width: panelPlacementSettings.width,
+        height: placementHints.height,
+        width: placementHints.width,
         beside,
       }
     );
@@ -232,7 +226,7 @@ export function initializeLayoutManager(
 
       const grid = existingPanel
         ? existingPanel.grid
-        : runPanelPlacementStrategy(PanelPlacementStrategy.findTopLeftMostOpenSpace, {
+        : runPanelPlacementStrategy(PlacementStrategy.findTopLeftMostOpenSpace, {
             width: size?.width ?? DEFAULT_PANEL_WIDTH,
             height: size?.height ?? DEFAULT_PANEL_HEIGHT,
             currentPanels: layout$.value.panels,
@@ -617,7 +611,7 @@ export function initializeLayoutManager(
 
         // place the new control panel in the top left corner, bumping other panels down as necessary
         const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
-          PanelPlacementStrategy.placeAtTop,
+          PlacementStrategy.placeAtTop,
           {
             currentPanels: layout$.value.panels,
             height: 2,
@@ -718,7 +712,7 @@ function getClonedPanelTitle(panelTitles: string[], rawTitle: string) {
 
 const transformDashboardLayoutToGridLayout = (
   layout: DashboardLayout,
-  resizeSettings: { [panelType: string]: PanelResizeSettings }
+  resizeSettings: { [panelType: string]: LayoutConstraints }
 ) => {
   const newLayout: GridLayoutData = {};
   Object.keys(layout.sections).forEach((sectionId) => {

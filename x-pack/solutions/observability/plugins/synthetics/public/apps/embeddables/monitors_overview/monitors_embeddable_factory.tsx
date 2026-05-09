@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type {
   PublishesWritableTitle,
   PublishesTitle,
@@ -59,7 +59,7 @@ export type StatusOverviewApi = DefaultEmbeddableApi<OverviewMonitorsEmbeddableS
 export const getMonitorsEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
 ) => {
-  const factory: EmbeddableFactory<OverviewMonitorsEmbeddableState, StatusOverviewApi> = {
+  const factory: EmbeddablePublicDefinition<OverviewMonitorsEmbeddableState, StatusOverviewApi> = {
     type: SYNTHETICS_MONITORS_EMBEDDABLE,
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();

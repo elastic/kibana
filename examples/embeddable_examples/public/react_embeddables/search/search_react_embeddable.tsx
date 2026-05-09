@@ -10,7 +10,7 @@
 import { EuiBadge, EuiStat, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   fetch$,
@@ -26,7 +26,7 @@ import { getCount } from './get_count';
 import type { SearchApi, Services, SearchSerializedState } from './types';
 
 export const getSearchEmbeddableFactory = (services: Services) => {
-  const factory: EmbeddableFactory<SearchSerializedState, SearchApi> = {
+  const factory: EmbeddablePublicDefinition<SearchSerializedState, SearchApi> = {
     type: SEARCH_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const timeRangeManager = initializeTimeRangeManager(initialState);

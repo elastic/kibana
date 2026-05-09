@@ -10,8 +10,7 @@
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { i18n } from '@kbn/i18n';
 import { dashboardClient } from '../../dashboard_client';
-import { getPanelSettings } from '../../panel_placement/get_panel_placement_settings';
-import { DEFAULT_PANEL_PLACEMENT_SETTINGS } from '../../plugin_constants';
+import { getPlacementHints } from '../../panel_placement/get_placement_hints';
 import { getAccessControlClient } from '../../services/access_control_service';
 import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
@@ -43,14 +42,9 @@ export async function loadDashboardApi({
   // --------------------------------------------------------------------------------------
   const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
   for (const embeddable of incomingEmbeddables ?? []) {
-    if (embeddable.size) continue; // don't overwrite size if it was provided
-    // otherwise, use the panel settings to determine the size
-    const panelSettings = await getPanelSettings(embeddable.type, embeddable.serializedState);
-    const panelPlacementSettings = {
-      ...DEFAULT_PANEL_PLACEMENT_SETTINGS,
-      ...panelSettings?.placementSettings,
-    };
-    embeddable.size = panelPlacementSettings;
+    if (!embeddable.size) {
+      embeddable.size = await getPlacementHints(embeddable.type, embeddable.serializedState);
+    }
   }
 
   const [readResult, user, isAccessControlEnabled] = savedObjectId

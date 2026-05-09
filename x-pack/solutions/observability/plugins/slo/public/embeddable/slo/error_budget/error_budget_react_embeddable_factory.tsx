@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
@@ -44,7 +44,7 @@ export const getErrorBudgetEmbeddableFactory = ({
   pluginsStart: SLOPublicPluginsStart;
   sloClient: SLORepositoryClient;
 }) => {
-  const factory: EmbeddableFactory<ErrorBudgetEmbeddableState, ErrorBudgetApi> = {
+  const factory: EmbeddablePublicDefinition<ErrorBudgetEmbeddableState, ErrorBudgetApi> = {
     type: SLO_ERROR_BUDGET_ID,
     buildEmbeddable: async ({
       initializeDrilldownsManager,

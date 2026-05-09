@@ -33,6 +33,7 @@ import {
 } from './bwc/legacy_url_transform';
 import { registerDrilldown } from './drilldowns/registry';
 import { registerActions } from './ui_actions/register_actions';
+import { getEmbeddableDefinition } from './react_embeddable_system/react_embeddable_registry';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
@@ -74,6 +75,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
         );
         return AddFromLibraryContent;
       },
+      // @ts-ignore
+      getEmbeddableDefinition,
       getStateTransfer: (storage?: Storage) =>
         storage
           ? new EmbeddableStateTransfer(

@@ -26,7 +26,7 @@ interface on their `setup` contract and each item in the collection should imple
 
 Example: Embeddable plugin owns the registry of embeddable factories to which other plugins can register new embeddable factories. Dashboard plugin
 stores a bunch of embeddable panels input in its saved object and URL. Embeddable plugin setup contract implements `PersistableStateService`
-interface and each `EmbeddableFactory` needs to implement `PersistableStateDefinition` interface.
+interface and each `EmbeddablePublicDefinition` needs to implement `PersistableStateDefinition` interface.
 
 Embeddable plugin exposes this interfaces:
 

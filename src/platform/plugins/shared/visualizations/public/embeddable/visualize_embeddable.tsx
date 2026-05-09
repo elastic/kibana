@@ -10,7 +10,7 @@
 import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart, EuiText } from '@elastic/eui';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -57,7 +57,7 @@ import type { VisualizeApi } from './types';
 import { initializeEditApi } from './initialize_edit_api';
 import { hasLibraryItemWithTitle } from '../utils/saved_objects_utils';
 
-export const visualizeEmbeddableFactory: EmbeddableFactory<VisualizeEmbeddableState, VisualizeApi> =
+export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<VisualizeEmbeddableState, VisualizeApi> =
   {
     type: VISUALIZE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({

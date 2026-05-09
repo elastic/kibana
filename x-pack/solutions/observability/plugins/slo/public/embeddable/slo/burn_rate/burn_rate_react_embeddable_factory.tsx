@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
@@ -39,8 +39,11 @@ export const getBurnRateEmbeddableFactory = ({
   pluginsStart: SLOPublicPluginsStart;
   sloClient: SLORepositoryClient;
 }) => {
-  const factory: EmbeddableFactory<BurnRateEmbeddableState, BurnRateApi> = {
+  const factory: EmbeddablePublicDefinition<BurnRateEmbeddableState, BurnRateApi> = {
     type: SLO_BURN_RATE_EMBEDDABLE_ID,
+    getPlacementHints: () => {
+      return { width: 14, height: 7 };
+    },
     buildEmbeddable: async ({
       initialState,
       finalizeApi,

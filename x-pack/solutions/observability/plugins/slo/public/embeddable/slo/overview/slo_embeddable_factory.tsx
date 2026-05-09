@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -52,8 +52,17 @@ export const getOverviewEmbeddableFactory = ({
   coreStart: CoreStart;
   pluginsStart: SLOPublicPluginsStart;
   sloClient: SLORepositoryClient;
-}): EmbeddableFactory<OverviewEmbeddableState, SloOverviewApi> => ({
+}): EmbeddablePublicDefinition<OverviewEmbeddableState, SloOverviewApi> => ({
   type: SLO_OVERVIEW_EMBEDDABLE_ID,
+  getPlacementHints: (serializedState?: OverviewEmbeddableState) => {
+    if (
+      (serializedState as SingleOverviewCustomState)?.slo_instance_id === ALL_VALUE ||
+      (serializedState as GroupOverviewCustomState)?.group_filters
+    ) {
+      return { width: 24, height: 8 };
+    }
+    return { width: 12, height: 8 };
+  },
   buildEmbeddable: async ({
     initializeDrilldownsManager,
     initialState,

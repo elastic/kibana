@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   initializeTitleManager,
   titleComparators,
@@ -21,7 +21,7 @@ import { ApmEmbeddableContext } from '../../embeddable_context';
 import { APMAlertingFailedTransactionsChart } from './chart';
 
 export const getApmAlertingFailedTransactionsChartEmbeddableFactory = (deps: EmbeddableDeps) => {
-  const factory: EmbeddableFactory<
+  const factory: EmbeddablePublicDefinition<
     EmbeddableApmAlertingVizProps,
     DefaultEmbeddableApi<EmbeddableApmAlertingVizProps>
   > = {

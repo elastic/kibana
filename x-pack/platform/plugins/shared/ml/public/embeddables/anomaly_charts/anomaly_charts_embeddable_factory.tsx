@@ -23,7 +23,7 @@ import {
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { distinctUntilChanged } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
@@ -47,7 +47,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
   usageCollection?: UsageCollectionSetup
 ) => {
-  const factory: EmbeddableFactory<AnomalyChartsEmbeddableState, AnomalyChartsEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<AnomalyChartsEmbeddableState, AnomalyChartsEmbeddableApi> = {
     type: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       await checkPermissionAsync(getStartServices, 'canGetJobs', true);

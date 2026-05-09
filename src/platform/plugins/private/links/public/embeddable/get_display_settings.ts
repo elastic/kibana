@@ -14,7 +14,7 @@ import type { LinksEmbeddableState } from '../../common';
 import type { LinksState } from '../../server';
 import { loadFromLibrary } from '../content_management/load_from_library';
 
-export async function getPanelPlacement(serializedState?: LinksEmbeddableState) {
+export async function getDisplaySettings(serializedState?: LinksEmbeddableState) {
   if (!serializedState) return {};
 
   let layout = LINKS_HORIZONTAL_LAYOUT;
@@ -30,5 +30,7 @@ export async function getPanelPlacement(serializedState?: LinksEmbeddableState) 
   const isHorizontal = layout === LINKS_HORIZONTAL_LAYOUT;
   const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
   const height = isHorizontal ? 2 : numLinks * 3 + 4;
-  return { width, height, strategy: PanelPlacementStrategy.placeAtTop };
+  return {
+    placementSettings: { width, height, strategy: PanelPlacementStrategy.placeAtTop }
+  };
 }

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import type {
   DefaultEmbeddableApi,
-  EmbeddableFactory,
+  EmbeddablePublicDefinition,
   HasDrilldowns,
 } from '@kbn/embeddable-plugin/public';
 import type {
@@ -60,7 +60,7 @@ export type StatsOverviewApi = DefaultEmbeddableApi<OverviewStatsEmbeddableState
 export const getStatsOverviewEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
 ) => {
-  const factory: EmbeddableFactory<OverviewStatsEmbeddableState, StatsOverviewApi> = {
+  const factory: EmbeddablePublicDefinition<OverviewStatsEmbeddableState, StatsOverviewApi> = {
     type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
     buildEmbeddable: async ({
       initializeDrilldownsManager,

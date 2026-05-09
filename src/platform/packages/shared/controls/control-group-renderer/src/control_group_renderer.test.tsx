@@ -11,7 +11,7 @@ import React from 'react';
 
 import {
   registerEmbeddablePublicDefinition,
-  type EmbeddableFactory,
+  type EmbeddablePublicDefinition,
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
 import type { Filter } from '@kbn/es-query';
 import type { HasSerializableState } from '@kbn/presentation-publishing';
@@ -55,7 +55,7 @@ const getTestEmbeddableFactory = () =>
         },
       };
     },
-  } as EmbeddableFactory<{ selection?: string }>);
+  } as EmbeddablePublicDefinition<{ selection?: string }>);
 
 // defined in the outer scope so that its reference doesn't change on rerender
 const mockGetCreationOptions = jest

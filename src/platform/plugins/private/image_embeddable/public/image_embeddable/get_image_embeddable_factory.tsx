@@ -10,7 +10,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import {
@@ -27,7 +27,7 @@ import { IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS, IMAGE_EMBEDDABLE_TYPE } from '../.
 import type { ImageConfig, ImageEmbeddableApi } from '../types';
 
 export const getImageEmbeddableFactory = () => {
-  const imageEmbeddableFactory: EmbeddableFactory<ImageEmbeddableState, ImageEmbeddableApi> = {
+  const imageEmbeddableFactory: EmbeddablePublicDefinition<ImageEmbeddableState, ImageEmbeddableApi> = {
     type: IMAGE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({
       initializeDrilldownsManager,

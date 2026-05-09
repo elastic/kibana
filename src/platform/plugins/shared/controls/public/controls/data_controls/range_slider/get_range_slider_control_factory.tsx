@@ -19,7 +19,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { DEFAULT_RANGE_SLIDER_STATE, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type { RangeSliderControlState } from '@kbn/controls-schemas';
 
 import { isCompressed } from '../../../control_group/utils/is_compressed';
@@ -35,13 +35,15 @@ import { RangeSliderStrings } from './range_slider_strings';
 import type { RangeSliderControlApi } from './types';
 import { editorComparators, initializeEditorStateManager } from './editor_state_manager';
 import { buildFilter } from './utils/filter_utils';
+import { CONTROL_DISPLAY_SETTINGS } from '../../constants';
 
-export const getRangesliderControlFactory = (): EmbeddableFactory<
+export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
   RangeSliderControlState,
   RangeSliderControlApi
 > => {
   return {
     type: RANGE_SLIDER_CONTROL,
+    getDisplaySettings: () => CONTROL_DISPLAY_SETTINGS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);

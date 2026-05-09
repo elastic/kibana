@@ -8,7 +8,7 @@
 import { EMBEDDABLE_PATTERN_ANALYSIS_TYPE } from '@kbn/aiops-log-pattern-analysis/constants';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasExecutionContext,
@@ -37,7 +37,7 @@ export type EmbeddablePatternAnalysisType = typeof EMBEDDABLE_PATTERN_ANALYSIS_T
 export const getPatternAnalysisEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
-  const factory: EmbeddableFactory<PatternAnalysisEmbeddableState, PatternAnalysisEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<PatternAnalysisEmbeddableState, PatternAnalysisEmbeddableApi> = {
     type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();

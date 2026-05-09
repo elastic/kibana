@@ -152,16 +152,7 @@ export class LinksPlugin
         return addLinksPanelAction;
       }
     );
-
-    plugins.presentationUtil.registerPanelPlacementSettings(
-      LINKS_EMBEDDABLE_TYPE,
-      async (serializedState?: LinksEmbeddableState) => {
-        const { getPanelPlacement } = await import('./embeddable/embeddable_module');
-        const placementSettings = await getPanelPlacement(serializedState);
-        return { placementSettings };
-      }
-    );
-
+    
     return {};
   }
 

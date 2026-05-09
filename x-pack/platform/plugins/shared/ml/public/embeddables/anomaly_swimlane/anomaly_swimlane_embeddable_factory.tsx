@@ -9,7 +9,7 @@ import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { css } from '@emotion/react';
 import type { StartServicesAccessor } from '@kbn/core/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -88,7 +88,7 @@ export const getServices = async (
 export const getAnomalySwimLaneEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
 ) => {
-  const factory: EmbeddableFactory<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi> = {
     type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       await checkPermissionAsync(getStartServices, 'canGetJobs', true);

@@ -11,7 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { type DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   type WithAllKeys,
@@ -83,7 +83,7 @@ export const getFieldListFactory = (
   core: CoreStart,
   { dataViews, data, charts, fieldFormats }: Services
 ) => {
-  const fieldListEmbeddableFactory: EmbeddableFactory<FieldListSerializedState, FieldListApi> = {
+  const fieldListEmbeddableFactory: EmbeddablePublicDefinition<FieldListSerializedState, FieldListApi> = {
     type: FIELD_LIST_ID,
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const state = await deserializeState(dataViews, initialState);

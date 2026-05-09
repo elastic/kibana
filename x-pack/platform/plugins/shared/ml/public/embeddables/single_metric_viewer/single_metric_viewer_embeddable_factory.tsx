@@ -10,7 +10,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
@@ -42,7 +42,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
   usageCollection?: UsageCollectionSetup
 ) => {
-  const factory: EmbeddableFactory<
+  const factory: EmbeddablePublicDefinition<
     SingleMetricViewerEmbeddableState,
     SingleMetricViewerEmbeddableApi
   > = {

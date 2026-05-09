@@ -12,7 +12,7 @@ import { BehaviorSubject, firstValueFrom, map, merge, skip } from 'rxjs';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -62,7 +62,7 @@ export const getSearchEmbeddableFactory = ({
 }) => {
   const { save, hasLibraryItemWithTitle } = discoverServices.savedSearch;
 
-  const savedSearchEmbeddableFactory: EmbeddableFactory<
+  const savedSearchEmbeddableFactory: EmbeddablePublicDefinition<
     SearchEmbeddablePanelApiState,
     SearchEmbeddableApi
   > = {

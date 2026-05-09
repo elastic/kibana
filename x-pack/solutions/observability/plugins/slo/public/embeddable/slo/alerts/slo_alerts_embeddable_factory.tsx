@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -50,7 +50,7 @@ export function getAlertsEmbeddableFactory({
   sloClient: SLORepositoryClient;
   kibanaVersion: string;
 }) {
-  const factory: EmbeddableFactory<SloAlertsEmbeddableState, SloAlertsApi> = {
+  const factory: EmbeddablePublicDefinition<SloAlertsEmbeddableState, SloAlertsApi> = {
     type: SLO_ALERTS_EMBEDDABLE_ID,
     buildEmbeddable: async ({
       initializeDrilldownsManager,

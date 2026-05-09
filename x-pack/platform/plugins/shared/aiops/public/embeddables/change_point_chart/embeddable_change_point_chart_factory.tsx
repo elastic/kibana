@@ -9,7 +9,7 @@ import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-dete
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiHasExecutionContext,
@@ -42,7 +42,7 @@ export type EmbeddableChangePointChartType = typeof EMBEDDABLE_CHANGE_POINT_CHAR
 export const getChangePointChartEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
-  const factory: EmbeddableFactory<ChangePointEmbeddableState, ChangePointEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<ChangePointEmbeddableState, ChangePointEmbeddableApi> = {
     type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
