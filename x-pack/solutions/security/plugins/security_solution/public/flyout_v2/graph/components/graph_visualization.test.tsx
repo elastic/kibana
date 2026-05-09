@@ -89,8 +89,9 @@ jest.mock('../../../common/lib/kibana', () => ({
   },
 }));
 
+const mockUseIsInSecurityApp = jest.fn(() => true);
 jest.mock('../../../common/hooks/is_in_security_app', () => ({
-  useIsInSecurityApp: () => true,
+  useIsInSecurityApp: () => mockUseIsInSecurityApp(),
 }));
 
 jest.mock('../../shared/components/flyout_provider', () => ({
@@ -160,6 +161,7 @@ const renderGraphVisualization = (props: React.ComponentProps<typeof GraphVisual
 describe('GraphVisualization', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseIsInSecurityApp.mockReturnValue(true);
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
     (GraphInvestigation as unknown as jest.Mock).mockReturnValue(
       <div data-test-subj={GRAPH_INVESTIGATION_TEST_ID} />
@@ -271,6 +273,20 @@ describe('GraphVisualization', () => {
 
     it('passes showInvestigateInTimeline as false when user has no timeline read access', async () => {
       mockCapabilities.securitySolutionTimeline.read = false;
+      renderGraphVisualization(EVENT_PROPS);
+
+      await waitFor(() => {
+        expect(GraphInvestigation).toHaveBeenCalledTimes(1);
+      });
+
+      expect(jest.mocked(GraphInvestigation).mock.calls[0][0].showInvestigateInTimeline).toBe(
+        false
+      );
+    });
+
+    it('passes showInvestigateInTimeline as false when not in the Security Solution app', async () => {
+      mockCapabilities.securitySolutionTimeline.read = true;
+      mockUseIsInSecurityApp.mockReturnValue(false);
       renderGraphVisualization(EVENT_PROPS);
 
       await waitFor(() => {

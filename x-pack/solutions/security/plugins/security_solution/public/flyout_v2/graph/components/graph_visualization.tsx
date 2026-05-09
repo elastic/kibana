@@ -438,7 +438,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
                     },
                   }
             }
-            showInvestigateInTimeline={hasTimelineAccess}
+            showInvestigateInTimeline={hasTimelineAccess && isInSecurityApp}
             showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
             onOpenEventPreview={onOpenEventPreview}
