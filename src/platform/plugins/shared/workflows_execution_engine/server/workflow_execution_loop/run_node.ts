@@ -69,10 +69,9 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
   }
 
   try {
-    params.workflowRuntime.exitScope();
     stepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
       nodeId: node.id,
-      stackFrames: params.workflowRuntime.getCurrentNodeScope(),
+      stackFrames: params.workflowExecutionDriver.currentStackFrames,
     });
 
     /**
@@ -126,7 +125,6 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       }
     }
 
-    params.workflowRuntime.enterScope();
     nodeSpan?.setOutcome('success');
   } catch (error) {
     params.workflowRuntime.setWorkflowError(error);
@@ -141,7 +139,6 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     }
 
     const saveStateSpan = apm.startSpan('save state', 'workflow', 'persistence');
-    await params.workflowRuntime.saveState(); // Ensure state is updated after each step
     saveStateSpan?.end();
 
     nodeSpan?.end();

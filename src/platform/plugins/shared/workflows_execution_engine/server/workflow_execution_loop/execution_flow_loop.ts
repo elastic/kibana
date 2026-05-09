@@ -25,11 +25,13 @@ import type { WorkflowExecutionLoopParams } from './types';
  * Each iteration processes a single node execution.
  */
 export async function executionFlowLoop(params: WorkflowExecutionLoopParams) {
-  while (
-    params.workflowExecutionDriver.isExecuting &&
-    params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING
-  ) {
+  while (params.workflowExecutionDriver.isExecuting) {
+    params.workflowExecutionDriver.handleStartOfCycle();
     await runNode(params);
     params.workflowExecutionDriver.handleEndOfCycle();
+    await params.workflowRuntime.saveState();
+    if (!params.workflowExecutionDriver.currentNode) {
+      params.workflowExecutionDriver.stop();
+    }
   }
 }

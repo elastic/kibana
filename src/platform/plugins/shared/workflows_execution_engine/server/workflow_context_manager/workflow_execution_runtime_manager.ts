@@ -135,7 +135,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public getCurrentNodeScope(): StackFrame[] {
-    return [...this.workflowExecution.scopeStack];
+    return [...this.executionDriver.currentStackFrames];
   }
 
   /**
@@ -156,20 +156,21 @@ export class WorkflowExecutionRuntimeManager {
    * maintaining the integrity of the execution context hierarchy.
    */
   public enterScope(subScopeId?: string): void {
-    const currentNode = this.getCurrentNode();
+    this.workflowExecutionDriver.setCurrentScopeId(subScopeId);
+    // const currentNode = this.getCurrentNode();
 
-    if (!currentNode?.type.startsWith('enter-')) {
-      return;
-    }
+    // if (!currentNode?.type.startsWith('enter-')) {
+    //   return;
+    // }
 
-    this.workflowExecutionState.updateWorkflowExecution({
-      scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).enterScope({
-        nodeId: currentNode.id,
-        nodeType: currentNode.type,
-        stepId: currentNode.stepId,
-        scopeId: subScopeId,
-      }).stackFrames,
-    });
+    // this.workflowExecutionState.updateWorkflowExecution({
+    //   scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).enterScope({
+    //     nodeId: currentNode.id,
+    //     nodeType: currentNode.type,
+    //     stepId: currentNode.stepId,
+    //     scopeId: subScopeId,
+    //   }).stackFrames,
+    // });
   }
 
   /**
@@ -191,28 +192,29 @@ export class WorkflowExecutionRuntimeManager {
    * the integrity of the execution context.
    */
   public exitScope(): void {
-    const currentNode = this.getCurrentNode();
+    this.workflowExecutionDriver.exitScope();
+    // const currentNode = this.getCurrentNode();
 
-    if (!currentNode?.type.startsWith('exit-')) {
-      return;
-    }
+    // if (!currentNode?.type.startsWith('exit-')) {
+    //   return;
+    // }
 
-    const scopeStack = WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack);
+    // const scopeStack = WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack);
 
-    if (scopeStack.isEmpty()) {
-      return;
-    }
+    // if (scopeStack.isEmpty()) {
+    //   return;
+    // }
 
-    const entered = currentNode.type.replace(/^exit-/, 'enter-');
+    // const entered = currentNode.type.replace(/^exit-/, 'enter-');
 
-    if (entered !== scopeStack.getCurrentScope().nodeType) {
-      return;
-    }
+    // if (entered !== scopeStack.getCurrentScope().nodeType) {
+    //   return;
+    // }
 
-    this.workflowExecutionState.updateWorkflowExecution({
-      scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).exitScope()
-        .stackFrames,
-    });
+    // this.workflowExecutionState.updateWorkflowExecution({
+    //   scopeStack: WorkflowScopeStack.fromStackFrames(this.workflowExecution.scopeStack).exitScope()
+    //     .stackFrames,
+    // });
   }
 
   public setWorkflowOutputs(outputs: Record<string, unknown>): void {
@@ -240,6 +242,7 @@ export class WorkflowExecutionRuntimeManager {
       cancelledAt,
       cancelledBy: 'workflow',
     });
+    this.workflowExecutionDriver.stop();
   }
 
   /**
@@ -508,9 +511,9 @@ export class WorkflowExecutionRuntimeManager {
 
   public async saveState(): Promise<void> {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    const nextNodeId = this.workflowExecutionDriver.nextNode?.id ?? undefined;
     const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
-      currentNodeId: nextNodeId,
+      currentNodeId: this.workflowExecutionDriver.currentNode?.id,
+      scopeStack: this.workflowExecutionDriver.currentStackFrames,
     };
 
     if (isTerminalStatus(workflowExecution.status)) {
@@ -518,7 +521,7 @@ export class WorkflowExecutionRuntimeManager {
     } else if (workflowExecution.error) {
       workflowExecutionUpdate.status = ExecutionStatus.FAILED;
       workflowExecutionUpdate.error = workflowExecution.error;
-    } else if (!nextNodeId) {
+    } else if (!this.workflowExecutionDriver.currentNode) {
       workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
     }
 
