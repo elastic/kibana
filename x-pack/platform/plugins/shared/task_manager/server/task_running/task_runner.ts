@@ -1034,7 +1034,7 @@ export class TaskManagerRunner implements TaskRunner {
       const fakeRawRequest: FakeRawRequest = {
         headers: requestHeaders,
         path: '/',
-        app: { spaceId: asSpaceId(spaceId || 'default') },
+        spaceId: asSpaceId(spaceId || 'default'),
       };
 
       return kibanaRequestFactory(fakeRawRequest);

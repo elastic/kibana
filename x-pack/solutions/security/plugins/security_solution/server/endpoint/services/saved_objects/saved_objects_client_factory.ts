@@ -54,7 +54,7 @@ export class SavedObjectsClientFactory {
       route: { settings: {} },
       url: { href: {}, hash: '' } as URL,
       raw: { req: { url: '/' } } as any,
-      app: { spaceId: asSpaceId(spaceId) },
+      spaceId: asSpaceId(spaceId),
     });
   }
 

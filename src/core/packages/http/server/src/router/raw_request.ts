@@ -9,6 +9,7 @@
 
 import type { URL } from 'url';
 import type { Request, RouteOptionsPayload } from '@hapi/hapi';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { KibanaRouteOptions } from './request';
 import type { Headers } from './headers';
 
@@ -21,6 +22,8 @@ export interface FakeRawRequest {
   headers: Headers;
   /** The path of the request */
   path: string;
+  /** The space this request is scoped to. Defaults to the default space when omitted. */
+  spaceId?: SpaceId;
   method?: string;
   url?: URL;
   app?: Record<string, unknown>;

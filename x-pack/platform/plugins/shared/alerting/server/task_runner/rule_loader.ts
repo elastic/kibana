@@ -213,7 +213,7 @@ export function getFakeKibanaRequest(
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
     path: '/',
-    app: { spaceId: asSpaceId(spaceId) },
+    spaceId: asSpaceId(spaceId),
   };
 
   return kibanaRequestFactory(fakeRawRequest);

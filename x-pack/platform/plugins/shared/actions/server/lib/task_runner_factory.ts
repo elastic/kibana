@@ -222,7 +222,7 @@ function getFakeRequest(apiKey: string | undefined, spaceId: string) {
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
     path: '/',
-    app: { spaceId: asSpaceId(spaceId) },
+    spaceId: asSpaceId(spaceId),
   };
 
   return kibanaRequestFactory(fakeRawRequest);

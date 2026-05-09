@@ -20,7 +20,7 @@ export function getInternalSavedObjectsClientForSpaceId(coreStart: CoreStart, sp
     route: { settings: {} },
     url: { href: '', hash: '' } as URL,
     raw: { req: { url: '/' } } as any,
-    app: { spaceId: spaceId ? asSpaceId(spaceId) : undefined },
+    spaceId: spaceId ? asSpaceId(spaceId) : undefined,
   });
 
   // soClient as kibana internal users, be careful on how you use it, security is not enabled

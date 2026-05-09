@@ -173,7 +173,7 @@ export class AnonymousAccessService {
       // it should perform a privileges check or automatically disable all capabilities.
       auth: { isAuthenticated: authenticateRequest },
       path: '/',
-      app: { spaceId },
+      spaceId,
     };
     return kibanaRequestFactory(fakeRawRequest);
   }
