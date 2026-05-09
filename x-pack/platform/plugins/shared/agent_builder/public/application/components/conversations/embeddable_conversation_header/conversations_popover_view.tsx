@@ -19,7 +19,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useSendMessage } from '../../../context/send_message/send_message_context';
+import { useSendMessageContext } from '../../../context/send_message/send_message_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useAgentId } from '../../../hooks/use_conversation';
 import { AgentAvatar } from '../../common/agent_avatar';
@@ -56,14 +56,14 @@ export const ConversationsPopoverView: React.FC<ConversationsPopoverViewProps> =
 
   const { euiTheme } = useEuiTheme();
   const { setConversationId } = useConversationContext();
-  const { removeError } = useSendMessage();
+  const { removeAllErrors } = useSendMessageContext();
   const { agents } = useAgentBuilderAgents();
   const agentId = useAgentId();
 
   const currentAgent = agents.find((a) => a.id === agentId);
 
   const handleNewChat = () => {
-    removeError();
+    removeAllErrors();
     setConversationId?.(undefined);
     onClose();
   };

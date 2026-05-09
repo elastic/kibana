@@ -13,7 +13,6 @@ import type {
   AgentBuilderSetupDependencies,
   AgentBuilderStartDependencies,
 } from './types';
-import { AgentBuilderPlugin } from './plugin';
 
 export type {
   AgentBuilderPluginSetup,
@@ -24,7 +23,7 @@ export type {
   ReadOnlyConversationClient,
 } from './types';
 
-export type { ConversationListOptions } from './services/conversation/client/types';
+export type { ConversationListOptions } from '@kbn/agent-builder-common';
 
 export type {
   SmlTypeDefinition,
@@ -48,6 +47,7 @@ export const plugin: PluginInitializer<
   AgentBuilderSetupDependencies,
   AgentBuilderStartDependencies
 > = async (pluginInitializerContext: PluginInitializerContext<AgentBuilderConfig>) => {
+  const { AgentBuilderPlugin } = await import('./plugin');
   return new AgentBuilderPlugin(pluginInitializerContext);
 };
 

@@ -22,10 +22,13 @@ import { FieldNameWithIcon } from '@kbn/react-field';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import useWindowSize from 'react-use/lib/useWindowSize';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { TabTitleAndDescription } from '../components';
 import { calculateFlyoutContentHeight, DEFAULT_MARGIN_BOTTOM } from '../utils';
 import type { Dimension, ParsedMetricItem } from '../../../types';
 import { OverviewTabMetadata } from './overview_tab_metadata';
+import { METRIC_SOURCE_KIND, useMetricSourceKind } from '../hooks/use_metric_source_kind';
+import { useStreamsFieldRenderer } from '../hooks/use_streams_field_renderer';
 
 interface OverviewTabProps {
   metricItem: ParsedMetricItem;
@@ -39,6 +42,31 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
   const [activePage, setActivePage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_PAGINATION_SIZE);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+  const localIndexName = isNonLocalIndexName(metricItem.dataStream)
+    ? undefined
+    : metricItem.dataStream;
+
+  const { kind: sourceKind } = useMetricSourceKind({
+    name: localIndexName,
+    fallback: METRIC_SOURCE_KIND.DATA_STREAM,
+  });
+  const renderStreamField = useStreamsFieldRenderer();
+
+  const streamSection =
+    localIndexName && sourceKind === METRIC_SOURCE_KIND.DATA_STREAM && renderStreamField
+      ? renderStreamField({ streamName: localIndexName })
+      : null;
+
+  const staticIndexName = useMemo(() => {
+    if (streamSection || !metricItem.dataStream) {
+      return undefined;
+    }
+
+    return {
+      indexName: metricItem.dataStream,
+      kind: sourceKind,
+    };
+  }, [metricItem.dataStream, sourceKind, streamSection]);
 
   // Sort dimensions alphabetically by name
   const sortedDimensions = useMemo(() => {
@@ -82,7 +110,9 @@ export const OverviewTab = ({ metricItem, description }: OverviewTabProps) => {
     <div data-test-subj="metricsExperienceFlyoutOverviewTabContent">
       <TabTitleAndDescription metricItem={metricItem} description={description} />
 
-      <OverviewTabMetadata metricItem={metricItem} />
+      {streamSection}
+
+      <OverviewTabMetadata metricItem={metricItem} staticIndexName={staticIndexName} />
 
       {metricItem.dimensionFields && metricItem.dimensionFields.length > 0 && (
         <>

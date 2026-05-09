@@ -170,30 +170,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await searchSessionsManagement.goTo();
-
         let searchSessionList = await searchSessionsManagement.getList();
         let searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
         expect(searchSessionItem.searchesCount).to.be(1);
 
-        await new Promise((resolve) => setTimeout(resolve, 10_000));
-        await retry.waitFor('session should be in a completed status', async () => {
-          searchSessionList = await searchSessionsManagement.getList();
-          searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
-          return searchSessionItem.status === 'complete';
-        });
-
-        await searchSessionItem.view();
-
+        await searchSessions.openCompletedSearchFromToast();
         // Check that session is still loading
         await retry.waitFor('session restoration warnings related to other bucket', async () => {
-          return (await toasts.getCount()) === 1;
+          return await searchSessions.hasErrorsOrWarnings();
         });
         await toasts.dismissAll();
+        await dashboard.waitForRenderComplete();
 
         // check that other bucket requested add to a session
         await searchSessionsManagement.goTo();
 
-        await new Promise((resolve) => setTimeout(resolve, 10_000));
         await retry.waitFor('session should be in a completed status', async () => {
           searchSessionList = await searchSessionsManagement.getList();
           searchSessionItem = searchSessionList.find((session) => session.id === savedSessionId)!;
@@ -209,7 +200,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await searchSessionItem.view();
-        expect(await toasts.getCount()).to.be(0); // there should be no warnings
+        await searchSessions.expectNoErrorsOrWarnings();
         await dashboardExpect.noErrorEmbeddablesPresent();
       });
     });
