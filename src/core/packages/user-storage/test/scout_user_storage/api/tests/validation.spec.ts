@@ -10,8 +10,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest } from '../fixtures';
-import { ALL_KEYS } from '../../shared/test_keys';
-import { createHelpers } from './helpers';
+import { ALL_KEYS, createHelpers } from './helpers';
 
 apiTest.describe('User Storage - Schema Validation', { tag: [...tags.stateful.classic] }, () => {
   let cookieHeader: Record<string, string>;

@@ -9,6 +9,29 @@
 
 import { INTERNAL_HEADERS } from '../fixtures';
 
+// Mirrors the `register()` call in
+// `src/core/packages/user-storage/test/plugins/user_storage_test/server/plugin.ts`.
+// Keep both in sync when changing the test fixture.
+export const ALL_KEYS = [
+  'test:string_key',
+  'test:number_key',
+  'test:object_key',
+  'test:boolean_key',
+  'test:array_key',
+];
+
+export const DEFAULT_VALUES: Record<string, unknown> = {
+  'test:string_key': 'default_value',
+  'test:number_key': 42,
+  'test:object_key': {
+    theme: 'light',
+    sidebar: { collapsed: false, width: 250 },
+    pinnedItems: [],
+  },
+  'test:boolean_key': false,
+  'test:array_key': [],
+};
+
 interface ApiClientOptions {
   headers?: Record<string, string>;
   body?: unknown;
