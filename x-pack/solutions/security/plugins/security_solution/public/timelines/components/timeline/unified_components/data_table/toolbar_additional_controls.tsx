@@ -10,7 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
-  type EuiToolTipRef
+  type EuiToolTipRef,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
 
