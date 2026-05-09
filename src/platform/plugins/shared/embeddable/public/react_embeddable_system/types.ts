@@ -14,11 +14,11 @@ import type {
   PublishesPhaseEvents,
 } from '@kbn/presentation-publishing';
 import type React from 'react';
+import type { MaybePromise } from '@kbn/utility-types';
 import type { DefaultPresentationPanelApi } from './panel_component/types';
 import type { initializeDrilldownsManager } from '../drilldowns/drilldowns_manager';
 import type { SerializedDrilldowns } from '../../server';
 import type { PlacementStrategy } from './constants';
-import type { MaybePromise } from '@kbn/utility-types';
 
 /**
  * The default embeddable API that all Embeddables must implement.
@@ -110,7 +110,7 @@ export interface EmbeddablePublicDefinition<
   /**
    * Provide layout contraints to customize resize behavior
    */
-  layoutConstraints?: LayoutConstraints
+  layoutConstraints?: LayoutConstraints;
 }
 
 export type LayoutConstraints = {
@@ -118,4 +118,4 @@ export type LayoutConstraints = {
   maxWidth?: number;
   minHeight?: number;
   maxHeight?: number;
-}
+};

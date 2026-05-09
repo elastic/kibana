@@ -27,7 +27,10 @@ import { IMAGE_EMBEDDABLE_SUPPORTED_TRIGGERS, IMAGE_EMBEDDABLE_TYPE } from '../.
 import type { ImageConfig, ImageEmbeddableApi } from '../types';
 
 export const getImageEmbeddableFactory = () => {
-  const imageEmbeddableFactory: EmbeddablePublicDefinition<ImageEmbeddableState, ImageEmbeddableApi> = {
+  const imageEmbeddableFactory: EmbeddablePublicDefinition<
+    ImageEmbeddableState,
+    ImageEmbeddableApi
+  > = {
     type: IMAGE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({
       initializeDrilldownsManager,

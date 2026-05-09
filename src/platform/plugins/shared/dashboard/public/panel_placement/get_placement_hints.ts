@@ -11,17 +11,14 @@ import { PlacementStrategy } from '@kbn/embeddable-plugin/public';
 import { embeddableService } from '../services/kibana_services';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../common/constants';
 
-export async function getPlacementHints(
-  embeddableType: string,
-  serializedState?: object
-) {
+export async function getPlacementHints(embeddableType: string, serializedState?: object) {
   const hints = {
     strategy: PlacementStrategy.findTopLeftMostOpenSpace,
     height: DEFAULT_PANEL_HEIGHT,
     width: DEFAULT_PANEL_WIDTH,
-  }
+  };
   try {
-    const embeddableDefinition = await embeddableService.getEmbeddableDefinition(embeddableType); 
+    const embeddableDefinition = await embeddableService.getEmbeddableDefinition(embeddableType);
     if (embeddableDefinition && embeddableDefinition.getPlacementHints) {
       return {
         ...hints,

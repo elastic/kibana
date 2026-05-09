@@ -8,17 +8,12 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { firstValueFrom } from 'rxjs';
-import { ALL_VALUE } from '@kbn/slo-schema/src/constants';
 import type { AlertsEmbeddableState } from '../server/lib/embeddables/alerts_schema';
 import { SLO_ALERTS_EMBEDDABLE_ID } from '../common/embeddables/alerts/constants';
 import { SLO_BURN_RATE_EMBEDDABLE_ID } from './embeddable/slo/burn_rate/constants';
 import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../common/embeddables/overview/constants';
-import type {
-  GroupOverviewCustomState,
-  OverviewEmbeddableState,
-  SingleOverviewCustomState,
-} from '../common/embeddables/overview/types';
+import type { OverviewEmbeddableState } from '../common/embeddables/overview/types';
 import { registerSloUiActions } from './ui_actions/register_ui_actions';
 import type { SLOPublicPluginsSetup, SLOPublicPluginsStart, SLORepositoryClient } from './types';
 

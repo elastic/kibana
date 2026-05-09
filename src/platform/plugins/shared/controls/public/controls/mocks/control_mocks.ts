@@ -8,7 +8,10 @@
  */
 
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import type { DefaultEmbeddableApi, EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddablePublicDefinition,
+} from '@kbn/embeddable-plugin/public';
 import type { EmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
 
 export const getMockedFinalizeApi =

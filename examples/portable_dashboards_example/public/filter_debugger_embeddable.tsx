@@ -9,7 +9,10 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import type { DefaultEmbeddableApi, EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddablePublicDefinition,
+} from '@kbn/embeddable-plugin/public';
 import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { EuiCodeBlock, EuiPanel, EuiTitle } from '@elastic/eui';
@@ -23,7 +26,7 @@ export const factory: EmbeddablePublicDefinition<{}, Api> = {
     placementSettings: {
       width: 48,
       height: 12,
-    }
+    },
   }),
   buildEmbeddable: async ({ finalizeApi, parentApi }) => {
     const api = finalizeApi({

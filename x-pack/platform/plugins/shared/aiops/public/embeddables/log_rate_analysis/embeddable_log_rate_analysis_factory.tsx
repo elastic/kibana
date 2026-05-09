@@ -41,7 +41,10 @@ export type EmbeddableLogRateAnalysisType = typeof EMBEDDABLE_LOG_RATE_ANALYSIS_
 export const getLogRateAnalysisEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
-  const factory: EmbeddablePublicDefinition<LogRateAnalysisEmbeddableState, LogRateAnalysisEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<
+    LogRateAnalysisEmbeddableState,
+    LogRateAnalysisEmbeddableApi
+  > = {
     type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();

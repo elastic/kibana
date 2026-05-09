@@ -42,182 +42,183 @@ export type EmbeddableChangePointChartType = typeof EMBEDDABLE_CHANGE_POINT_CHAR
 export const getChangePointChartEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
-  const factory: EmbeddablePublicDefinition<ChangePointEmbeddableState, ChangePointEmbeddableApi> = {
-    type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
-    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      const [coreStart, pluginStart] = await getStartServices();
-      canUseAiops(coreStart, true);
+  const factory: EmbeddablePublicDefinition<ChangePointEmbeddableState, ChangePointEmbeddableApi> =
+    {
+      type: EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+      buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+        const [coreStart, pluginStart] = await getStartServices();
+        canUseAiops(coreStart, true);
 
-      const timeRangeManager = initializeTimeRangeManager(initialState);
-      const titleManager = initializeTitleManager(initialState);
+        const timeRangeManager = initializeTimeRangeManager(initialState);
+        const titleManager = initializeTitleManager(initialState);
 
-      const state = initialState;
+        const state = initialState;
 
-      const changePointManager = initializeChangePointControls(state);
+        const changePointManager = initializeChangePointControls(state);
 
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
-      const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+        const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+        const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
-        await pluginStart.data.dataViews.get(state.dataViewId),
-      ]);
+        const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
+          await pluginStart.data.dataViews.get(state.dataViewId),
+        ]);
 
-      const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
+        const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
 
-      function serializeState() {
-        return {
-          ...titleManager.getLatestState(),
-          ...timeRangeManager.getLatestState(),
-          ...changePointManager.getLatestState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<ChangePointEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
-        anyStateChange$: merge(
-          titleManager.anyStateChange$,
-          timeRangeManager.anyStateChange$,
-          changePointManager.anyStateChange$
-        ),
-        getComparators: () => {
+        function serializeState() {
           return {
-            ...titleComparators,
-            ...timeRangeComparators,
-            ...changePointComparators,
+            ...titleManager.getLatestState(),
+            ...timeRangeManager.getLatestState(),
+            ...changePointManager.getLatestState(),
           };
-        },
-        onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved);
-          titleManager.reinitializeState(lastSaved);
-          if (lastSaved) changePointManager.reinitializeState(lastSaved);
-        },
-      });
+        }
 
-      const api = finalizeApi({
-        ...timeRangeManager.api,
-        ...titleManager.api,
-        ...changePointManager.api,
-        ...unsavedChangesApi,
-        getTypeDisplayName: () =>
-          i18n.translate('xpack.aiops.changePointDetection.typeDisplayName', {
-            defaultMessage: 'change point charts',
-          }),
-        isEditingEnabled: () => true,
-        onEdit: async () => {
-          openLazyFlyout({
-            core: coreStart,
-            parentApi,
-            flyoutProps: {
-              'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
-              'aria-labelledby': 'changePointConfig',
-              focusedPanelId: uuid,
-            },
-            loadContent: async ({ closeFlyout }) => {
-              const { EmbeddableChangePointUserInput } = await import(
-                './change_point_config_input'
+        const unsavedChangesApi = initializeUnsavedChanges<ChangePointEmbeddableState>({
+          uuid,
+          parentApi,
+          serializeState,
+          anyStateChange$: merge(
+            titleManager.anyStateChange$,
+            timeRangeManager.anyStateChange$,
+            changePointManager.anyStateChange$
+          ),
+          getComparators: () => {
+            return {
+              ...titleComparators,
+              ...timeRangeComparators,
+              ...changePointComparators,
+            };
+          },
+          onReset: (lastSaved) => {
+            timeRangeManager.reinitializeState(lastSaved);
+            titleManager.reinitializeState(lastSaved);
+            if (lastSaved) changePointManager.reinitializeState(lastSaved);
+          },
+        });
+
+        const api = finalizeApi({
+          ...timeRangeManager.api,
+          ...titleManager.api,
+          ...changePointManager.api,
+          ...unsavedChangesApi,
+          getTypeDisplayName: () =>
+            i18n.translate('xpack.aiops.changePointDetection.typeDisplayName', {
+              defaultMessage: 'change point charts',
+            }),
+          isEditingEnabled: () => true,
+          onEdit: async () => {
+            openLazyFlyout({
+              core: coreStart,
+              parentApi,
+              flyoutProps: {
+                'data-test-subj': 'aiopsChangePointChartEmbeddableInitializer',
+                'aria-labelledby': 'changePointConfig',
+                focusedPanelId: uuid,
+              },
+              loadContent: async ({ closeFlyout }) => {
+                const { EmbeddableChangePointUserInput } = await import(
+                  './change_point_config_input'
+                );
+                return (
+                  <EmbeddableChangePointUserInput
+                    coreStart={coreStart}
+                    pluginStart={pluginStart}
+                    onConfirm={(result) => {
+                      changePointManager.api.updateUserInput(result);
+                      closeFlyout();
+                    }}
+                    onCancel={closeFlyout}
+                    input={changePointManager.getLatestState()}
+                  />
+                );
+              },
+            });
+          },
+          dataLoading$,
+          blockingError$,
+          dataViews$,
+          serializeState,
+        });
+
+        const ChangePointDetectionComponent = getChangePointDetectionComponent(
+          coreStart,
+          pluginStart
+        );
+
+        const onLoading = (v: boolean) => dataLoading$.next(v);
+        const onRenderComplete = () => dataLoading$.next(false);
+        const onError = (error: Error) => blockingError$.next(error);
+
+        return {
+          api,
+          Component: () => {
+            if (!apiHasExecutionContext(parentApi)) {
+              throw new Error('Parent API does not have execution context');
+            }
+
+            const [dataViewId, viewType, fn, metricField, splitField, maxSeriesToPlot, partitions] =
+              useBatchedPublishingSubjects(
+                api.dataViewId,
+                api.viewType,
+                api.fn,
+                api.metricField,
+                api.splitField,
+                api.maxSeriesToPlot,
+                api.partitions
               );
-              return (
-                <EmbeddableChangePointUserInput
-                  coreStart={coreStart}
-                  pluginStart={pluginStart}
-                  onConfirm={(result) => {
-                    changePointManager.api.updateUserInput(result);
-                    closeFlyout();
-                  }}
-                  onCancel={closeFlyout}
-                  input={changePointManager.getLatestState()}
-                />
-              );
-            },
-          });
-        },
-        dataLoading$,
-        blockingError$,
-        dataViews$,
-        serializeState,
-      });
 
-      const ChangePointDetectionComponent = getChangePointDetectionComponent(
-        coreStart,
-        pluginStart
-      );
-
-      const onLoading = (v: boolean) => dataLoading$.next(v);
-      const onRenderComplete = () => dataLoading$.next(false);
-      const onError = (error: Error) => blockingError$.next(error);
-
-      return {
-        api,
-        Component: () => {
-          if (!apiHasExecutionContext(parentApi)) {
-            throw new Error('Parent API does not have execution context');
-          }
-
-          const [dataViewId, viewType, fn, metricField, splitField, maxSeriesToPlot, partitions] =
-            useBatchedPublishingSubjects(
-              api.dataViewId,
-              api.viewType,
-              api.fn,
-              api.metricField,
-              api.splitField,
-              api.maxSeriesToPlot,
-              api.partitions
+            const reload$ = useMemo(
+              () =>
+                merge(
+                  fetch$(api).pipe(
+                    skipWhile((fetchContext) => !fetchContext.isReload),
+                    map(() => Date.now())
+                  ),
+                  (pluginStart.cps?.cpsManager?.getProjectRouting$() ?? EMPTY).pipe(
+                    map(() => Date.now())
+                  )
+                ),
+              []
             );
 
-          const reload$ = useMemo(
-            () =>
-              merge(
+            const timeRange$ = useMemo(
+              () =>
                 fetch$(api).pipe(
-                  skipWhile((fetchContext) => !fetchContext.isReload),
-                  map(() => Date.now())
+                  map((fetchContext) => fetchContext.timeRange),
+                  distinctUntilChanged(fastIsEqual)
                 ),
-                (pluginStart.cps?.cpsManager?.getProjectRouting$() ?? EMPTY).pipe(
-                  map(() => Date.now())
-                )
-              ),
-            []
-          );
+              []
+            );
 
-          const timeRange$ = useMemo(
-            () =>
-              fetch$(api).pipe(
-                map((fetchContext) => fetchContext.timeRange),
-                distinctUntilChanged(fastIsEqual)
-              ),
-            []
-          );
+            const lastReloadRequestTime = useObservable(reload$, Date.now());
+            const timeRange = useObservable(timeRange$, undefined);
 
-          const lastReloadRequestTime = useObservable(reload$, Date.now());
-          const timeRange = useObservable(timeRange$, undefined);
+            const embeddingOrigin = apiHasExecutionContext(parentApi)
+              ? parentApi.executionContext.type
+              : undefined;
 
-          const embeddingOrigin = apiHasExecutionContext(parentApi)
-            ? parentApi.executionContext.type
-            : undefined;
-
-          return (
-            <ChangePointDetectionComponent
-              filtersApi={filtersApi}
-              viewType={viewType}
-              timeRange={timeRange}
-              fn={fn}
-              metricField={metricField}
-              splitField={splitField}
-              maxSeriesToPlot={maxSeriesToPlot}
-              dataViewId={dataViewId}
-              partitions={partitions}
-              onLoading={onLoading}
-              onRenderComplete={onRenderComplete}
-              onError={onError}
-              embeddingOrigin={embeddingOrigin}
-              lastReloadRequestTime={lastReloadRequestTime}
-            />
-          );
-        },
-      };
-    },
-  };
+            return (
+              <ChangePointDetectionComponent
+                filtersApi={filtersApi}
+                viewType={viewType}
+                timeRange={timeRange}
+                fn={fn}
+                metricField={metricField}
+                splitField={splitField}
+                maxSeriesToPlot={maxSeriesToPlot}
+                dataViewId={dataViewId}
+                partitions={partitions}
+                onLoading={onLoading}
+                onRenderComplete={onRenderComplete}
+                onError={onError}
+                embeddingOrigin={embeddingOrigin}
+                lastReloadRequestTime={lastReloadRequestTime}
+              />
+            );
+          },
+        };
+      },
+    };
 
   return factory;
 };

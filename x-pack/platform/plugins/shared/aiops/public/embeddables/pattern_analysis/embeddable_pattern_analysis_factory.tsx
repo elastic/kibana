@@ -37,7 +37,10 @@ export type EmbeddablePatternAnalysisType = typeof EMBEDDABLE_PATTERN_ANALYSIS_T
 export const getPatternAnalysisEmbeddableFactory = (
   getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
 ) => {
-  const factory: EmbeddablePublicDefinition<PatternAnalysisEmbeddableState, PatternAnalysisEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<
+    PatternAnalysisEmbeddableState,
+    PatternAnalysisEmbeddableApi
+  > = {
     type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PlacementStrategy } from "@kbn/embeddable-plugin/public";
+import { PlacementStrategy } from '@kbn/embeddable-plugin/public';
 
 export const MIN_POPOVER_WIDTH = 300;
 

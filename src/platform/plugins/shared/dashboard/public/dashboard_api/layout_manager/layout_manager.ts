@@ -26,7 +26,11 @@ import {
 import { v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { DefaultEmbeddableApi, EmbeddablePackageState, LayoutConstraints } from '@kbn/embeddable-plugin/public';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddablePackageState,
+  LayoutConstraints,
+} from '@kbn/embeddable-plugin/public';
 import { PanelNotFoundError, PlacementStrategy } from '@kbn/embeddable-plugin/public';
 import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
 import type { PinnedControlLayoutState as PinnedPanelLayoutState } from '@kbn/controls-schemas';
@@ -50,11 +54,12 @@ import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/const
 import type { DashboardPanel } from '../../../server';
 import { dashboardClonePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
+import { placeClonePanel, runPanelPlacementStrategy } from '../../panel_placement';
 import {
-  placeClonePanel,
-  runPanelPlacementStrategy,
-} from '../../panel_placement';
-import { coreServices, embeddableService, usageCollectionService } from '../../services/kibana_services';
+  coreServices,
+  embeddableService,
+  usageCollectionService,
+} from '../../services/kibana_services';
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
@@ -88,24 +93,23 @@ export function initializeLayoutManager(
 
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
-  const panelResizeSettings$: Observable<{ [panelType: string]: LayoutConstraints }> =
-    layout$.pipe(
-      map(({ panels }) => {
-        return [...new Set(Object.values(panels).map((panel) => panel.type))];
-      }),
-      distinctUntilChanged(deepEqual),
-      mergeMap(async (panelTypes: string[]) => {
-        const resizeConstraints: { [panelType: string]: LayoutConstraints } = {};
-        await asyncForEach(panelTypes, async (type) => {
-          const embeddableDefinition = await embeddableService.getEmbeddableDefinition(type); 
-          if (embeddableDefinition && embeddableDefinition.layoutConstraints) {
-            resizeConstraints[type] = embeddableDefinition.layoutConstraints;
-          }
-        });
-        return resizeConstraints;
-      }),
-      startWith({}) // do not block rendering by waiting for these settings
-    );
+  const panelResizeSettings$: Observable<{ [panelType: string]: LayoutConstraints }> = layout$.pipe(
+    map(({ panels }) => {
+      return [...new Set(Object.values(panels).map((panel) => panel.type))];
+    }),
+    distinctUntilChanged(deepEqual),
+    mergeMap(async (panelTypes: string[]) => {
+      const resizeConstraints: { [panelType: string]: LayoutConstraints } = {};
+      await asyncForEach(panelTypes, async (type) => {
+        const embeddableDefinition = await embeddableService.getEmbeddableDefinition(type);
+        if (embeddableDefinition && embeddableDefinition.layoutConstraints) {
+          resizeConstraints[type] = embeddableDefinition.layoutConstraints;
+        }
+      });
+      return resizeConstraints;
+    }),
+    startWith({}) // do not block rendering by waiting for these settings
+  );
 
   /** Keep gridLayout$ in sync with layout$ + panelResizeSettings$ */
   const gridLayoutSubscription = combineLatest([layout$, panelResizeSettings$]).subscribe(
@@ -191,15 +195,12 @@ export function initializeLayoutManager(
       };
     }
     const placementHints = await getPlacementHints(type, serializedState);
-    const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
-      placementHints.strategy,
-      {
-        currentPanels: layout$.value.panels,
-        height: placementHints.height,
-        width: placementHints.width,
-        beside,
-      }
-    );
+    const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(placementHints.strategy, {
+      currentPanels: layout$.value.panels,
+      height: placementHints.height,
+      width: placementHints.width,
+      beside,
+    });
 
     return {
       ...layout$.value,

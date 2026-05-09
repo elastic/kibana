@@ -83,7 +83,10 @@ export const getFieldListFactory = (
   core: CoreStart,
   { dataViews, data, charts, fieldFormats }: Services
 ) => {
-  const fieldListEmbeddableFactory: EmbeddablePublicDefinition<FieldListSerializedState, FieldListApi> = {
+  const fieldListEmbeddableFactory: EmbeddablePublicDefinition<
+    FieldListSerializedState,
+    FieldListApi
+  > = {
     type: FIELD_LIST_ID,
     getPlacementHints: () => ({
       width: 12,

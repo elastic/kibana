@@ -88,7 +88,10 @@ export const getServices = async (
 export const getAnomalySwimLaneEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>
 ) => {
-  const factory: EmbeddablePublicDefinition<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<
+    AnomalySwimLaneEmbeddableState,
+    AnomalySwimLaneEmbeddableApi
+  > = {
     type: ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       await checkPermissionAsync(getStartServices, 'canGetJobs', true);

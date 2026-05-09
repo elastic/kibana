@@ -12,7 +12,11 @@ import { BehaviorSubject } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import type { HasPanelCapabilities, HasSerializedChildState } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
-import type { DefaultEmbeddableApi, EmbeddableApiRegistration, EmbeddablePublicDefinition } from './types';
+import type {
+  DefaultEmbeddableApi,
+  EmbeddableApiRegistration,
+  EmbeddablePublicDefinition,
+} from './types';
 import type { PhaseTracker } from './phase_tracker';
 import { initializeDrilldownsManager } from '../drilldowns/drilldowns_manager';
 

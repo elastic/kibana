@@ -47,7 +47,10 @@ export const getAnomalyChartsReactEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
   usageCollection?: UsageCollectionSetup
 ) => {
-  const factory: EmbeddablePublicDefinition<AnomalyChartsEmbeddableState, AnomalyChartsEmbeddableApi> = {
+  const factory: EmbeddablePublicDefinition<
+    AnomalyChartsEmbeddableState,
+    AnomalyChartsEmbeddableApi
+  > = {
     type: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       await checkPermissionAsync(getStartServices, 'canGetJobs', true);

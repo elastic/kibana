@@ -152,7 +152,7 @@ export class LinksPlugin
         return addLinksPanelAction;
       }
     );
-    
+
     return {};
   }
 

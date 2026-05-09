@@ -31,6 +31,8 @@ export async function getPlacementHints(serializedState?: LinksEmbeddableState) 
   const width = isHorizontal ? DASHBOARD_GRID_COLUMN_COUNT : 8;
   const height = isHorizontal ? 2 : numLinks * 3 + 4;
   return {
-    width, height, strategy: PlacementStrategy.placeAtTop
+    width,
+    height,
+    strategy: PlacementStrategy.placeAtTop,
   };
 }
