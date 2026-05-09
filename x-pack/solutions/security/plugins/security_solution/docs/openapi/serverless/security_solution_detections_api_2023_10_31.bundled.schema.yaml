@@ -4021,14 +4021,17 @@ components:
       description: Defines alert suppression configuration.
       type: object
       properties:
+        anyOf:
+          - group_by
+          - group_by_v2
         duration:
           $ref: '#/components/schemas/AlertSuppressionDuration'
         group_by:
           $ref: '#/components/schemas/AlertSuppressionGroupBy'
+        group_by_v2:
+          $ref: '#/components/schemas/AlertSuppressionGroupByV2'
         missing_fields_strategy:
           $ref: '#/components/schemas/AlertSuppressionMissingFieldsStrategy'
-      required:
-        - group_by
     AlertSuppressionDuration:
       type: object
       properties:
@@ -4050,6 +4053,31 @@ components:
     AlertSuppressionGroupBy:
       items:
         type: string
+      maxItems: 3
+      minItems: 1
+      type: array
+    AlertSuppressionGroupByFieldV2:
+      description: >-
+        Per-field suppression options. Reserved for field-specific duration
+        windows and sequence event targeting; executors may not honor all
+        properties until follow-up work lands.
+      type: object
+      properties:
+        duration:
+          $ref: '#/components/schemas/AlertSuppressionDuration'
+        field:
+          type: string
+        sequence_index:
+          description: >-
+            When using EQL sequence rules, identifies which sequence event this
+            field applies to.
+          minimum: 0
+          type: integer
+      required:
+        - field
+    AlertSuppressionGroupByV2:
+      items:
+        $ref: '#/components/schemas/AlertSuppressionGroupByFieldV2'
       maxItems: 3
       minItems: 1
       type: array
