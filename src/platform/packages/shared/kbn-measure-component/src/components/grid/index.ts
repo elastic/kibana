@@ -8,7 +8,15 @@
  */
 
 export { GridButton } from './grid_button';
-export { GridOverlay, getDefaultGridConfig } from './grid_overlay';
-export { GridSettingsPanel } from './grid_settings_panel';
+export { GridOverlay } from './grid_overlay';
 export { MoveOverlay } from './move_overlay';
-export type { GridConfig, GridType } from './grid_overlay';
+
+export { GridSettingsPanel } from './grid_settings_panel';
+
+export {
+  LayoutTypeSelector,
+  ColumnSettings,
+  RowSettings,
+  GridCellSettings,
+  ColorSetting,
+} from './settings';

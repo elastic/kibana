@@ -21,8 +21,9 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { GridOverlay, getDefaultGridConfig } from './grid_overlay';
-import type { GridConfig } from './grid_overlay';
+import { GridOverlay } from './grid_overlay';
+import { getDefaultGridConfig } from '../../lib/grid';
+import type { GridConfig } from '../../lib/grid';
 import { GridSettingsPanel } from './grid_settings_panel';
 import { MoveOverlay } from './move_overlay';
 import { GRID_SETTINGS_FLYOUT_ID } from '../../lib/constants';
@@ -100,7 +101,7 @@ export const GridButton = () => {
               isPopoverOpen
                 ? ''
                 : i18n.translate('kbnMeasureComponent.gridButton.tooltip', {
-                    defaultMessage: 'Column grid',
+                    defaultMessage: 'Grid overlay',
                   })
             }
             position="bottom"
@@ -112,7 +113,7 @@ export const GridButton = () => {
               isSelected={isGridVisible}
               aria-pressed={isGridVisible}
               aria-label={i18n.translate('kbnMeasureComponent.gridButton.ariaLabel', {
-                defaultMessage: 'Column grid',
+                defaultMessage: 'Grid overlay',
               })}
               color="text"
               data-test-subj="gridOverlayButton"

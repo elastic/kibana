@@ -11,26 +11,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/css';
 import { EuiPortal, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { GRID_OVERLAY_ID } from '../../lib/constants';
-
-export type GridType = 'stretch' | 'center' | 'left' | 'right';
-
-export interface GridConfig {
-  columns: number;
-  type: GridType;
-  width: number;
-  gutterSize: number;
-  marginSize: number;
-  color: string;
-}
-
-export const getDefaultGridConfig = (baseSize: number): GridConfig => ({
-  columns: 12,
-  type: 'stretch',
-  width: 0,
-  gutterSize: baseSize,
-  marginSize: baseSize,
-  color: '#FF00FF1A',
-});
+import { calculateColumnLayout, calculateRowLayout } from '../../lib/grid/calculate_grid';
+import type { GridConfig } from '../../lib/grid';
 
 interface Props {
   config: GridConfig;
@@ -40,35 +22,9 @@ export const GridOverlay = ({ config }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null);
   const containerRef = useCallback((node: HTMLDivElement | null) => setContainerEl(node), []);
-  const { width: viewportWidth } = useResizeObserver(containerEl);
+  const { width: viewportWidth, height: viewportHeight } = useResizeObserver(containerEl);
 
-  const { containerCss, columnElements } = useMemo(() => {
-    let columnWidth: number;
-    let offsetLeft: number;
-
-    if (config.type === 'stretch') {
-      const availableWidth = viewportWidth - 2 * config.marginSize;
-      const totalGutterWidth = config.gutterSize * (config.columns - 1);
-      columnWidth = (availableWidth - totalGutterWidth) / config.columns;
-      offsetLeft = config.marginSize;
-    } else {
-      columnWidth = config.width > 0 ? config.width : 100;
-      const totalWidth = config.columns * columnWidth + (config.columns - 1) * config.gutterSize;
-
-      if (config.type === 'center') {
-        offsetLeft = (viewportWidth - totalWidth) / 2;
-      } else if (config.type === 'left') {
-        offsetLeft = config.marginSize;
-      } else {
-        offsetLeft = viewportWidth - totalWidth - config.marginSize;
-      }
-    }
-
-    const cols = Array.from({ length: config.columns }, (_, i) => ({
-      left: offsetLeft + i * (columnWidth + config.gutterSize),
-      width: columnWidth,
-    }));
-
+  const { containerCss, cellElements } = useMemo(() => {
     const container = css({
       position: 'fixed',
       inset: 0,
@@ -76,29 +32,76 @@ export const GridOverlay = ({ config }: Props) => {
       zIndex: Number(euiTheme.levels.toast) + 2,
     });
 
-    const elements = cols.map((col, i) => (
-      <div
-        key={i}
-        className={css({
-          position: 'fixed',
-          top: 0,
-          bottom: 0,
-          left: `${col.left}px`,
-          width: `${col.width}px`,
-          backgroundColor: config.color,
-          pointerEvents: 'none',
-        })}
-        data-test-subj={`gridColumn-${i}`}
-      />
-    ));
+    let elements: React.ReactNode[];
 
-    return { containerCss: container, columnElements: elements };
-  }, [viewportWidth, config, euiTheme.levels.toast]);
+    if (config.layoutType === 'grid') {
+      const size = config.cellSize > 0 ? config.cellSize : 32;
+      elements = [
+        <div
+          key="grid-pattern"
+          className={css({
+            position: 'fixed',
+            inset: 0,
+            pointerEvents: 'none',
+            backgroundImage: `
+              linear-gradient(to right, ${config.color} 0.5px, transparent 0.5px),
+              linear-gradient(to bottom, ${config.color} 0.5px, transparent 0.5px)
+            `,
+            backgroundSize: `${size}px ${size}px`,
+          })}
+          data-test-subj="gridPattern"
+        />,
+      ];
+    } else if (config.layoutType === 'rows') {
+      const { offsetTop, rowHeight } = calculateRowLayout(config, viewportHeight);
+
+      elements = Array.from({ length: config.count }, (_, i) => (
+        <div
+          key={i}
+          className={css({
+            position: 'fixed',
+            top: `${offsetTop + i * (rowHeight + config.gutterSize)}px`,
+            left: 0,
+            right: 0,
+            height: `${rowHeight}px`,
+            backgroundColor: config.color,
+            pointerEvents: 'none',
+          })}
+          data-test-subj={`gridRow-${i}`}
+        />
+      ));
+    } else {
+      const { offsetLeft, columnWidth } = calculateColumnLayout(config, viewportWidth);
+
+      elements = Array.from({ length: config.count }, (_, i) => (
+        <div
+          key={i}
+          className={css({
+            position: 'fixed',
+            top: 0,
+            bottom: 0,
+            left: `${offsetLeft + i * (columnWidth + config.gutterSize)}px`,
+            width: `${columnWidth}px`,
+            backgroundColor: config.color,
+            pointerEvents: 'none',
+          })}
+          data-test-subj={`gridColumn-${i}`}
+        />
+      ));
+    }
+
+    return { containerCss: container, cellElements: elements };
+  }, [viewportWidth, viewportHeight, config, euiTheme.levels.toast]);
 
   return (
     <EuiPortal>
-      <div ref={containerRef} id={GRID_OVERLAY_ID} className={containerCss} data-test-subj="gridOverlayContainer">
-        {columnElements}
+      <div
+        ref={containerRef}
+        id={GRID_OVERLAY_ID}
+        className={containerCss}
+        data-test-subj="gridOverlayContainer"
+      >
+        {cellElements}
       </div>
     </EuiPortal>
   );

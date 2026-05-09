@@ -10,7 +10,8 @@
 import React from 'react';
 import { screen, cleanup } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { GridOverlay, getDefaultGridConfig } from './grid_overlay';
+import { GridOverlay } from './grid_overlay';
+import { getDefaultGridConfig } from '../../lib/grid';
 
 describe('GridOverlay', () => {
   afterEach(() => {
@@ -25,7 +26,7 @@ describe('GridOverlay', () => {
   });
 
   it('should render the correct number of columns', () => {
-    const config = { ...getDefaultGridConfig(16), columns: 6 };
+    const config = { ...getDefaultGridConfig(16), count: 6 };
     renderWithI18n(<GridOverlay config={config} />);
 
     for (let i = 0; i < 6; i++) {
@@ -43,6 +44,26 @@ describe('GridOverlay', () => {
     }
     expect(screen.queryByTestId('gridColumn-12')).not.toBeInTheDocument();
   });
+
+  it('should render rows when layoutType is rows', () => {
+    const config = { ...getDefaultGridConfig(16), layoutType: 'rows' as const, count: 4 };
+    renderWithI18n(<GridOverlay config={config} />);
+
+    for (let i = 0; i < 4; i++) {
+      expect(screen.getByTestId(`gridRow-${i}`)).toBeInTheDocument();
+    }
+    expect(screen.queryByTestId('gridRow-4')).not.toBeInTheDocument();
+  });
+
+  it('should render grid pattern when layoutType is grid', () => {
+    const config = { ...getDefaultGridConfig(16), layoutType: 'grid' as const, cellSize: 100 };
+    renderWithI18n(<GridOverlay config={config} />);
+
+    // Uses a single CSS background pattern div instead of individual cells
+    expect(screen.getByTestId('gridPattern')).toBeInTheDocument();
+    expect(screen.queryByTestId('gridColumn-0')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('gridRow-0')).not.toBeInTheDocument();
+  });
 });
 
 describe('getDefaultGridConfig', () => {
@@ -50,9 +71,13 @@ describe('getDefaultGridConfig', () => {
     const config = getDefaultGridConfig(16);
 
     expect(config).toEqual({
-      columns: 12,
-      type: 'stretch',
+      layoutType: 'columns',
+      count: 12,
+      alignType: 'stretch',
+      rowAlignType: 'stretch',
+      cellSize: 16,
       width: 0,
+      height: 0,
       gutterSize: 16,
       marginSize: 16,
       color: '#FF00FF1A',

@@ -12,8 +12,8 @@ import { screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { GridSettingsPanel } from './grid_settings_panel';
-import { getDefaultGridConfig } from './grid_overlay';
-import type { GridConfig } from './grid_overlay';
+import { getDefaultGridConfig } from '../../lib/grid';
+import type { GridConfig } from '../../lib/grid';
 
 describe('GridSettingsPanel', () => {
   const defaultConfig = getDefaultGridConfig(16);
@@ -29,64 +29,94 @@ describe('GridSettingsPanel', () => {
     cleanup();
   });
 
-  it('should render all form fields', () => {
+  it('should render all form fields for columns layout', () => {
     renderWithI18n(
       <GridSettingsPanel config={config} defaultConfig={defaultConfig} setConfig={setConfig} />
     );
 
-    expect(screen.getByText('Column count')).toBeInTheDocument();
-    expect(screen.getByText('Type')).toBeInTheDocument();
+    expect(screen.getByText('Layout')).toBeInTheDocument();
+    expect(screen.getByText('Count')).toBeInTheDocument();
+    expect(screen.getByText('Align')).toBeInTheDocument();
     expect(screen.getByText('Gutter')).toBeInTheDocument();
     expect(screen.getByText('Margin')).toBeInTheDocument();
     expect(screen.getByText('Color')).toBeInTheDocument();
   });
 
-  it('should display current column value', () => {
+  it('should display current count value', () => {
     renderWithI18n(
       <GridSettingsPanel
-        config={{ ...config, columns: 8 }}
+        config={{ ...config, count: 8 }}
         defaultConfig={defaultConfig}
         setConfig={setConfig}
       />
     );
 
-    const columnsInput = screen.getByDisplayValue('8');
-    expect(columnsInput).toBeInTheDocument();
+    const countInput = screen.getByDisplayValue('8');
+    expect(countInput).toBeInTheDocument();
   });
 
-  it('should call setConfig when columns change', async () => {
+  it('should call setConfig when count changes', async () => {
     renderWithI18n(
       <GridSettingsPanel config={config} defaultConfig={defaultConfig} setConfig={setConfig} />
     );
 
-    const columnsInput = screen.getByDisplayValue('12');
-    await userEvent.clear(columnsInput);
-    await userEvent.type(columnsInput, '6');
+    const countInput = screen.getByDisplayValue('12');
+    await userEvent.clear(countInput);
+    await userEvent.type(countInput, '6');
 
     expect(setConfig).toHaveBeenCalled();
   });
 
-  it('should show Width field only when type is not stretch', () => {
+  it('should show Width field only when columns layout with non-stretch align', () => {
     renderWithI18n(
       <GridSettingsPanel
-        config={{ ...config, type: 'center' }}
+        config={{ ...config, layoutType: 'columns', alignType: 'center' }}
         defaultConfig={defaultConfig}
         setConfig={setConfig}
       />
     );
 
-    expect(screen.getByText('Column width')).toBeInTheDocument();
+    expect(screen.getByText('Width')).toBeInTheDocument();
   });
 
-  it('should hide Width field when type is stretch', () => {
+  it('should hide Width field when columns layout with stretch align', () => {
     renderWithI18n(
       <GridSettingsPanel
-        config={{ ...config, type: 'stretch' }}
+        config={{ ...config, layoutType: 'columns', alignType: 'stretch' }}
         defaultConfig={defaultConfig}
         setConfig={setConfig}
       />
     );
 
+    expect(screen.queryByText('Width')).not.toBeInTheDocument();
+  });
+
+  it('should show Size field for grid layout and hide count/align/gutter/margin', () => {
+    renderWithI18n(
+      <GridSettingsPanel
+        config={{ ...config, layoutType: 'grid' }}
+        defaultConfig={defaultConfig}
+        setConfig={setConfig}
+      />
+    );
+
+    expect(screen.getByText('Size')).toBeInTheDocument();
+    expect(screen.queryByText('Count')).not.toBeInTheDocument();
+    expect(screen.queryByText('Align')).not.toBeInTheDocument();
+    expect(screen.queryByText('Gutter')).not.toBeInTheDocument();
+    expect(screen.queryByText('Margin')).not.toBeInTheDocument();
+  });
+
+  it('should show Height field for rows layout with non-stretch align', () => {
+    renderWithI18n(
+      <GridSettingsPanel
+        config={{ ...config, layoutType: 'rows', rowAlignType: 'center' }}
+        defaultConfig={defaultConfig}
+        setConfig={setConfig}
+      />
+    );
+
+    expect(screen.getByText('Height')).toBeInTheDocument();
     expect(screen.queryByText('Width')).not.toBeInTheDocument();
   });
 });

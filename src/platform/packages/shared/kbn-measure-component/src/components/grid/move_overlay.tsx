@@ -16,9 +16,20 @@ import { isIgnoredElement } from '../../lib/dom/is_ignored_element';
 
 interface ElementOffset {
   el: HTMLElement;
+  clone: HTMLElement | null;
   dx: number;
   dy: number;
   originalTransform: string;
+}
+
+interface DragState {
+  el: HTMLElement;
+  clone: HTMLElement;
+  startX: number;
+  startY: number;
+  baseOffsetX: number;
+  baseOffsetY: number;
+  originRect: DOMRect;
 }
 
 interface Props {
@@ -33,20 +44,20 @@ interface Props {
 export const MoveOverlay = ({ setIsMoveMode }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [hoverTarget, setHoverTarget] = useState<HTMLElement | null>(null);
-  const dragging = useRef<{
-    el: HTMLElement;
-    startX: number;
-    startY: number;
-    baseOffsetX: number;
-    baseOffsetY: number;
-  } | null>(null);
+  const dragging = useRef<DragState | null>(null);
   const movedElements = useRef<ElementOffset[]>([]);
 
   const resetAll = useCallback(() => {
     for (const entry of movedElements.current) {
       entry.el.style.transform = entry.originalTransform;
+      entry.el.style.visibility = '';
+      entry.clone?.remove();
     }
     movedElements.current = [];
+    if (dragging.current) {
+      dragging.current.clone.remove();
+      dragging.current = null;
+    }
   }, []);
 
   const cursorStyleEl = useRef<HTMLStyleElement | null>(null);
@@ -71,7 +82,7 @@ export const MoveOverlay = ({ setIsMoveMode }: Props) => {
     return css({
       position: 'fixed',
       pointerEvents: 'none',
-      zIndex: Number(euiTheme.levels.toast) + 4,
+      zIndex: Number(euiTheme.levels.toast) + 3,
       border: `2px solid ${accentColor}`,
       borderRadius: '2px',
     });
@@ -79,11 +90,22 @@ export const MoveOverlay = ({ setIsMoveMode }: Props) => {
 
   const getElementUnder = useCallback((x: number, y: number): HTMLElement | null => {
     const elements = document.elementsFromPoint(x, y);
-    // If the topmost element is ignored (toolbar, popover, overlay),
-    // return null so the event passes through to it naturally.
-    if (elements.length > 0 && isIgnoredElement(elements[0])) return null;
     for (const el of elements) {
-      if (el instanceof HTMLElement) return el;
+      // Clones (or their children) are valid targets — return the clone so it can be re-grabbed
+      if (el instanceof HTMLElement && el.hasAttribute('data-devtool-clone')) return el;
+      const cloneAncestor = (el as HTMLElement).closest?.(
+        '[data-devtool-clone]'
+      ) as HTMLElement | null;
+      if (cloneAncestor) return cloneAncestor;
+      // If the topmost non-clone element is ignored (toolbar, popover, overlay),
+      // return null so the event passes through to it naturally.
+      if (isIgnoredElement(el)) return null;
+      if (el instanceof HTMLElement) {
+        // Skip hidden originals that have a living clone
+        const entry = movedElements.current.find((e) => e.el === el && e.clone);
+        if (entry) continue;
+        return el;
+      }
     }
     return null;
   }, []);
@@ -91,12 +113,15 @@ export const MoveOverlay = ({ setIsMoveMode }: Props) => {
   const handlePointerMove = useCallback(
     (event: PointerEvent) => {
       if (dragging.current) {
-        const { el, startX, startY, baseOffsetX, baseOffsetY } = dragging.current;
-        const dx = baseOffsetX + event.clientX - startX;
-        const dy = baseOffsetY + event.clientY - startY;
-        el.style.transform = `translate(${dx}px, ${dy}px)`;
+        const { clone, startX, startY, baseOffsetX, baseOffsetY, originRect } = dragging.current;
+        const mouseDx = event.clientX - startX;
+        const mouseDy = event.clientY - startY;
+        const dx = baseOffsetX + mouseDx;
+        const dy = baseOffsetY + mouseDy;
+        clone.style.left = `${originRect.left + mouseDx}px`;
+        clone.style.top = `${originRect.top + mouseDy}px`;
 
-        const existing = movedElements.current.find((e) => e.el === el);
+        const existing = movedElements.current.find((e) => e.el === dragging.current!.el);
         if (existing) {
           existing.dx = dx;
           existing.dy = dy;
@@ -120,29 +145,76 @@ export const MoveOverlay = ({ setIsMoveMode }: Props) => {
       event.preventDefault();
       event.stopPropagation();
 
-      const existing = movedElements.current.find((e) => e.el === target);
+      // Check if we're re-grabbing an existing clone
+      const existingByClone = target.hasAttribute('data-devtool-clone')
+        ? movedElements.current.find((e) => e.clone === target)
+        : null;
 
-      if (!existing) {
-        movedElements.current.push({
+      if (existingByClone) {
+        // Reuse the existing clone — just start dragging it
+        const clone = existingByClone.clone!;
+        clone.style.pointerEvents = 'none';
+        const cloneRect = clone.getBoundingClientRect();
+
+        dragging.current = {
+          el: existingByClone.el,
+          clone,
+          startX: event.clientX,
+          startY: event.clientY,
+          baseOffsetX: existingByClone.dx,
+          baseOffsetY: existingByClone.dy,
+          originRect: cloneRect,
+        };
+      } else {
+        // First time grabbing this element
+        const existing = movedElements.current.find((e) => e.el === target);
+
+        if (!existing) {
+          movedElements.current.push({
+            el: target,
+            clone: null,
+            dx: 0,
+            dy: 0,
+            originalTransform: target.style.transform || '',
+          });
+        } else if (existing.clone) {
+          existing.clone.remove();
+          existing.clone = null;
+        }
+
+        // Create a visual clone on document.body — always on top, no stacking context issues
+        const rect = target.getBoundingClientRect();
+        const clone = target.cloneNode(true) as HTMLElement;
+        clone.style.position = 'fixed';
+        clone.style.left = `${rect.left}px`;
+        clone.style.top = `${rect.top}px`;
+        clone.style.width = `${rect.width}px`;
+        clone.style.height = `${rect.height}px`;
+        clone.style.margin = '0';
+        clone.style.zIndex = String(Number(euiTheme.levels.toast) + 1);
+        clone.style.pointerEvents = 'none';
+        clone.style.transform = '';
+        clone.setAttribute('data-devtool-clone', '');
+        document.body.appendChild(clone);
+
+        // Hide the original (preserve layout space)
+        target.style.visibility = 'hidden';
+
+        dragging.current = {
           el: target,
-          dx: 0,
-          dy: 0,
-          originalTransform: target.style.transform || '',
-        });
+          clone,
+          startX: event.clientX,
+          startY: event.clientY,
+          baseOffsetX: existing?.dx ?? 0,
+          baseOffsetY: existing?.dy ?? 0,
+          originRect: rect,
+        };
       }
-
-      dragging.current = {
-        el: target,
-        startX: event.clientX,
-        startY: event.clientY,
-        baseOffsetX: existing?.dx ?? 0,
-        baseOffsetY: existing?.dy ?? 0,
-      };
 
       setHoverTarget(null);
       setCursor('grabbing');
     },
-    [getElementUnder, setCursor]
+    [getElementUnder, setCursor, euiTheme.levels.toast]
   );
 
   const handlePointerUp = useCallback(
@@ -150,6 +222,18 @@ export const MoveOverlay = ({ setIsMoveMode }: Props) => {
       if (!dragging.current) return;
       event.preventDefault();
       event.stopPropagation();
+
+      const { el, clone } = dragging.current;
+      const existing = movedElements.current.find((e) => e.el === el);
+
+      // Keep clone visible and original hidden so the element stays on top.
+      // Clones are only cleaned up when exiting move mode (resetAll).
+      // Re-enable pointer events so elementsFromPoint can find the clone for re-grabbing.
+      if (existing) {
+        existing.clone = clone;
+        clone.style.pointerEvents = 'auto';
+      }
+
       dragging.current = null;
       setCursor('grab');
     },
@@ -170,19 +254,38 @@ export const MoveOverlay = ({ setIsMoveMode }: Props) => {
     [resetAll, setIsMoveMode]
   );
 
+  const handleClick = useCallback(
+    (event: MouseEvent) => {
+      const target = getElementUnder(event.clientX, event.clientY);
+      if (!target) return;
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    [getElementUnder]
+  );
+
   useEffect(() => {
     document.addEventListener('pointermove', handlePointerMove, true);
     document.addEventListener('pointerdown', handlePointerDown, true);
     document.addEventListener('pointerup', handlePointerUp, true);
+    document.addEventListener('click', handleClick, true);
     document.addEventListener('keydown', handleKeydown, true);
     return () => {
       removeCursorStyle();
       document.removeEventListener('pointermove', handlePointerMove, true);
       document.removeEventListener('pointerdown', handlePointerDown, true);
       document.removeEventListener('pointerup', handlePointerUp, true);
+      document.removeEventListener('click', handleClick, true);
       document.removeEventListener('keydown', handleKeydown, true);
     };
-  }, [handlePointerMove, handlePointerDown, handlePointerUp, handleKeydown, removeCursorStyle]);
+  }, [
+    handlePointerMove,
+    handlePointerDown,
+    handlePointerUp,
+    handleClick,
+    handleKeydown,
+    removeCursorStyle,
+  ]);
 
   const hoverOutline = useMemo(() => {
     if (!hoverTarget || dragging.current) return null;

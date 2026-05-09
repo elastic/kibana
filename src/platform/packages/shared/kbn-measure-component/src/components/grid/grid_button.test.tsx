@@ -59,7 +59,7 @@ describe('GridButton', () => {
       fireEvent.click(screen.getByText('Grid settings'));
     });
 
-    expect(screen.getByText('Column count')).toBeInTheDocument();
+    expect(screen.getByText('Count')).toBeInTheDocument();
   });
 
   it('should close flyout via the flyout close button', async () => {
@@ -70,11 +70,11 @@ describe('GridButton', () => {
       fireEvent.click(screen.getByText('Grid settings'));
     });
 
-    expect(screen.getByText('Column count')).toBeInTheDocument();
+    expect(screen.getByText('Count')).toBeInTheDocument();
 
     fireEvent.click(screen.getByLabelText('Close this dialog'));
 
-    expect(screen.queryByText('Column count')).not.toBeInTheDocument();
+    expect(screen.queryByText('Count')).not.toBeInTheDocument();
   });
 
   it('should prevent target from losing focus on mouse down', () => {

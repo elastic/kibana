@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  GridButton,
-  GridOverlay,
-  MoveOverlay,
-  GridSettingsPanel,
-  LayoutTypeSelector,
-  ColumnSettings,
-  RowSettings,
-  GridCellSettings,
-  ColorSetting,
-} from './grid';
+export { getDefaultGridConfig } from './grid_config';
+export { calculateColumnLayout, calculateRowLayout } from './calculate_grid';
 
-export { MeasureButton, MeasureOverlay, SpacingMeasurement } from './measure';
+export type { GridConfig, GridLayoutType, GridAlignType, GridRowAlignType } from './grid_config';
+export type { ColumnLayout, RowLayout } from './calculate_grid';

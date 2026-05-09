@@ -7,20 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
-import {
-  EuiButton,
-  EuiForm,
-  EuiFormRow,
-  EuiFieldNumber,
-  EuiSelect,
-  EuiColorPicker,
-  EuiSpacer,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiButton, EuiForm, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { GridConfig, GridType } from './grid_overlay';
+import type { GridConfig } from '../../lib/grid';
+import {
+  LayoutTypeSelector,
+  ColumnSettings,
+  RowSettings,
+  GridCellSettings,
+  ColorSetting,
+} from './settings';
 
 interface Props {
   config: GridConfig;
@@ -28,115 +26,57 @@ interface Props {
   setConfig: Dispatch<SetStateAction<GridConfig>>;
 }
 
-const typeOptions: Array<{ value: GridType; text: string }> = [
-  { value: 'stretch', text: 'Stretch' },
-  { value: 'center', text: 'Center' },
-  { value: 'left', text: 'Left' },
-  { value: 'right', text: 'Right' },
-];
-
 export const GridSettingsPanel = ({ config, defaultConfig, setConfig }: Props) => {
-  const columnsId = useGeneratedHtmlId({ prefix: 'gridColumns' });
-  const typeId = useGeneratedHtmlId({ prefix: 'gridType' });
-  const widthId = useGeneratedHtmlId({ prefix: 'gridWidth' });
-  const gutterId = useGeneratedHtmlId({ prefix: 'gridGutter' });
-  const marginId = useGeneratedHtmlId({ prefix: 'gridMargin' });
+  const updateConfig = useCallback(
+    (partial: Partial<GridConfig>) => {
+      setConfig((prev) => ({ ...prev, ...partial }));
+    },
+    [setConfig]
+  );
 
-  const updateConfig = (partial: Partial<GridConfig>) => {
-    setConfig((prev) => ({ ...prev, ...partial }));
-  };
+  const resetLayoutDefaults = useCallback(() => {
+    const { layoutType } = config;
+    if (layoutType === 'grid') {
+      setConfig((prev) => ({
+        ...prev,
+        cellSize: defaultConfig.cellSize,
+        color: defaultConfig.color,
+      }));
+    } else if (layoutType === 'rows') {
+      setConfig((prev) => ({
+        ...prev,
+        count: defaultConfig.count,
+        rowAlignType: defaultConfig.rowAlignType,
+        height: defaultConfig.height,
+        gutterSize: defaultConfig.gutterSize,
+        marginSize: defaultConfig.marginSize,
+        color: defaultConfig.color,
+      }));
+    } else {
+      setConfig((prev) => ({
+        ...prev,
+        count: defaultConfig.count,
+        alignType: defaultConfig.alignType,
+        width: defaultConfig.width,
+        gutterSize: defaultConfig.gutterSize,
+        marginSize: defaultConfig.marginSize,
+        color: defaultConfig.color,
+      }));
+    }
+  }, [config, defaultConfig, setConfig]);
 
   return (
     <EuiForm component="div">
-      <EuiFormRow
-        label={i18n.translate('kbnMeasureComponent.gridSettings.columns', {
-          defaultMessage: 'Column count',
-        })}
-      >
-        <EuiFieldNumber
-          id={columnsId}
-          value={config.columns}
-          onChange={(e) => updateConfig({ columns: Math.max(1, Number(e.target.value)) })}
-          min={1}
-          max={24}
-          compressed
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('kbnMeasureComponent.gridSettings.type', {
-          defaultMessage: 'Type',
-        })}
-      >
-        <EuiSelect
-          id={typeId}
-          options={typeOptions}
-          value={config.type}
-          onChange={(e) => updateConfig({ type: e.target.value as GridType })}
-          compressed
-        />
-      </EuiFormRow>
-      {config.type !== 'stretch' && (
-        <EuiFormRow
-          label={i18n.translate('kbnMeasureComponent.gridSettings.width', {
-            defaultMessage: 'Column width',
-          })}
-        >
-          <EuiFieldNumber
-            id={widthId}
-            value={config.width || ''}
-            placeholder="Auto"
-            onChange={(e) => updateConfig({ width: Math.max(0, Number(e.target.value) || 0) })}
-            min={0}
-            compressed
-          />
-        </EuiFormRow>
+      <LayoutTypeSelector layoutType={config.layoutType} onChange={updateConfig} />
+      <EuiHorizontalRule margin="s" />
+      {config.layoutType === 'grid' && <GridCellSettings config={config} onChange={updateConfig} />}
+      {config.layoutType === 'columns' && (
+        <ColumnSettings config={config} onChange={updateConfig} />
       )}
-      <EuiFormRow
-        label={i18n.translate('kbnMeasureComponent.gridSettings.gutter', {
-          defaultMessage: 'Gutter',
-        })}
-      >
-        <EuiFieldNumber
-          id={gutterId}
-          value={config.gutterSize}
-          onChange={(e) => updateConfig({ gutterSize: Math.max(0, Number(e.target.value)) })}
-          min={0}
-          append="px"
-          compressed
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('kbnMeasureComponent.gridSettings.margin', {
-          defaultMessage: 'Margin',
-        })}
-      >
-        <EuiFieldNumber
-          id={marginId}
-          value={config.marginSize}
-          onChange={(e) => updateConfig({ marginSize: Math.max(0, Number(e.target.value)) })}
-          min={0}
-          append="px"
-          compressed
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('kbnMeasureComponent.gridSettings.color', {
-          defaultMessage: 'Color',
-        })}
-      >
-        <EuiColorPicker
-          color={config.color}
-          onChange={(color) => updateConfig({ color })}
-          showAlpha
-          compressed
-        />
-      </EuiFormRow>
+      {config.layoutType === 'rows' && <RowSettings config={config} onChange={updateConfig} />}
+      <ColorSetting color={config.color} onChange={updateConfig} />
       <EuiSpacer size="m" />
-      <EuiButton
-        size="s"
-        onClick={() => setConfig(defaultConfig)}
-        data-test-subj="gridSettingsResetButton"
-      >
+      <EuiButton size="s" onClick={resetLayoutDefaults} data-test-subj="gridSettingsResetButton">
         {i18n.translate('kbnMeasureComponent.gridSettings.reset', {
           defaultMessage: 'Reset to default',
         })}

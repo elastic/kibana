@@ -15,10 +15,24 @@ export {
   DEVELOPER_TOOLBAR_ID,
   ENDPOINT_SIZE,
 } from './constants';
-export { isIgnoredElement } from './dom/is_ignored_element';
 export { isEscapeKey, isMeasureShortcut } from './keyboard_shortcut';
 
-export { calculateSpacingLines } from './dom';
+export {
+  isIgnoredElement,
+  calculateSpacingLines,
+  getElementFromPoint,
+  handleEventPropagation,
+} from './dom';
+
 export type { SpacingLine } from './dom';
-export { getElementFromPoint } from './dom';
-export { handleEventPropagation } from './dom';
+
+export { getDefaultGridConfig, calculateColumnLayout, calculateRowLayout } from './grid';
+
+export type {
+  GridConfig,
+  GridLayoutType,
+  GridAlignType,
+  GridRowAlignType,
+  ColumnLayout,
+  RowLayout,
+} from './grid';
