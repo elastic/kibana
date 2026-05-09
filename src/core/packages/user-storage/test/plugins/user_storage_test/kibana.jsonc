@@ -7,7 +7,7 @@
   "plugin": {
     "id": "userStorageTest",
     "server": true,
-    "browser": false,
+    "browser": true,
     "configPath": [
       "user_storage_test"
     ]
