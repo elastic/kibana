@@ -276,9 +276,12 @@ export class CasePlugin
       }
     }
 
-    // Cases-as-data v2. Internally a no-op when the feature flag is off, so safe
-    // to call unconditionally.
-    this.casesAnalyticsV2Service?.start();
+    // Cases-as-data v2. Internally a no-op when the feature flag is off, so
+    // safe to call unconditionally. Bootstrap errors are logged inside the
+    // service and never propagate; `void`-ing keeps plugin start non-blocking.
+    void this.casesAnalyticsV2Service?.start({
+      esClient: core.elasticsearch.client.asInternalUser,
+    });
 
     this.userProfileService.initialize({
       spaces: plugins.spaces,
