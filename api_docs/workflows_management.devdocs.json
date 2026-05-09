@@ -1,7 +1,2591 @@
 {
   "id": "workflowsManagement",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "workflowsManagement",
+        "id": "def-public.WorkflowsBaseTelemetry",
+        "type": "Class",
+        "tags": [],
+        "label": "WorkflowsBaseTelemetry",
+        "description": [],
+        "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+        "lineNumber": 42,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 46,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "telemetryService",
+                "description": [],
+                "signature": [
+                  "TelemetryServiceClient"
+                ],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 46,
+                "columnNumber": 15,
+                "deprecated": false,
+                "docsReferencedTypeName": "TelemetryServiceClient",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.getBaseResultParams",
+            "type": "Function",
+            "tags": [],
+            "label": "getBaseResultParams",
+            "description": [],
+            "signature": [
+              "(error: Error | undefined) => { result: \"success\" | \"failed\"; errorMessage?: string | undefined; }"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.getBaseResultParams.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "error",
+                "description": [],
+                "signature": [
+                  "Error | undefined"
+                ],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 49,
+                "columnNumber": 5,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCreated",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowCreated",
+            "description": [
+              "\nReports a workflow creation attempt.\n"
+            ],
+            "signature": [
+              "(params: { workflowId?: string | undefined; error?: Error | undefined; editorType?: ",
+              "WorkflowEditorType",
+              " | undefined; workflowDefinition?: any; origin?: ",
+              "WorkflowTelemetryOrigin",
+              " | undefined; aiAssisted?: boolean | undefined; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 57,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCreated.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 63,
+                "columnNumber": 36,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCreated.$1.workflowId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "workflowId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 64,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCreated.$1.error",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      "Error | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 65,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCreated.$1.editorType",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "editorType",
+                    "description": [],
+                    "signature": [
+                      "WorkflowEditorType",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 66,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCreated.$1.workflowDefinition",
+                    "type": "Any",
+                    "tags": [],
+                    "label": "workflowDefinition",
+                    "description": [
+                      "- Optional workflow definition to extract metadata from."
+                    ],
+                    "signature": [
+                      "any"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 67,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCreated.$1.origin",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "origin",
+                    "description": [],
+                    "signature": [
+                      "WorkflowTelemetryOrigin",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 68,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCreated.$1.aiAssisted",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "aiAssisted",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 69,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowUpdated",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowUpdated",
+            "description": [
+              "\nReports a workflow update attempt.\nThe telemetry service automatically determines the update type and publishes the appropriate event:\n- For enable/disable actions, publishes WorkflowEnabledStateChanged\n- For all other updates, publishes WorkflowUpdated"
+            ],
+            "signature": [
+              "(params: { workflowId: string; workflowUpdate: Partial<{ yaml?: string | undefined; enabled?: boolean | undefined; tags?: unknown; description?: string | undefined; name?: string | undefined; }>; workflowDefinition?: any; originalWorkflow?: any; hasValidationErrors: boolean; validationErrorCount: number; validationErrorTypes?: string[] | undefined; error?: Error | undefined; editorType?: ",
+              "WorkflowEditorType",
+              " | undefined; isBulkAction?: boolean | undefined; bulkActionCount?: number | undefined; origin?: ",
+              "WorkflowTelemetryOrigin",
+              " | undefined; aiAssisted?: boolean | undefined; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 102,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowUpdated.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 108,
+                "columnNumber": 36,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowUpdated.$1.workflowId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "workflowId",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 109,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowUpdated.$1.workflowUpdate",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "workflowUpdate",
+                    "description": [],
+                    "signature": [
+                      "{ yaml?: string | undefined; enabled?: boolean | undefined; tags?: unknown; description?: string | undefined; name?: string | undefined; }"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 110,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowUpdated.$1.workflowDefinition",
+                    "type": "Any",
+                    "tags": [],
+                    "label": "workflowDefinition",
+                    "description": [],
+                    "signature": [
+                      "any"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 117,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowUpdated.$1.originalWorkflow",
+                    "type": "Any",
+                    "tags": [],
+                    "label": "originalWorkflow",
+                    "description": [],
+                    "signature": [
+                      "any"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 118,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowUpdated.$1.hasValidationErrors",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "hasValidationErrors",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 119,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowUpdated.$1.validationErrorCount",
+                    "type": "number",
+                    "tags": [],
+                    "label": "validationErrorCount",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 120,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowUpdated.$1.validationErrorTypes",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "validationErrorTypes",
+                    "description": [],
+                    "signature": [
+                      "string[] | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 121,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowUpdated.$1.error",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      "Error | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 122,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowUpdated.$1.editorType",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "editorType",
+                    "description": [],
+                    "signature": [
+                      "WorkflowEditorType",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 123,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowUpdated.$1.isBulkAction",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "isBulkAction",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 124,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowUpdated.$1.bulkActionCount",
+                    "type": "number",
+                    "tags": [],
+                    "label": "bulkActionCount",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 125,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowUpdated.$1.origin",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "origin",
+                    "description": [],
+                    "signature": [
+                      "WorkflowTelemetryOrigin",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 126,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowUpdated.$1.aiAssisted",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "aiAssisted",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 127,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowDeleted",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowDeleted",
+            "description": [
+              "\nReports a workflow deletion attempt."
+            ],
+            "signature": [
+              "(params: { workflowIds: string[]; isBulkDelete: boolean; error?: Error | undefined; origin?: ",
+              "WorkflowTelemetryOrigin",
+              " | undefined; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 196,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowDeleted.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 199,
+                "columnNumber": 36,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowDeleted.$1.workflowIds",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "workflowIds",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 200,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowDeleted.$1.isBulkDelete",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "isBulkDelete",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 201,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowDeleted.$1.error",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      "Error | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 202,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowDeleted.$1.origin",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "origin",
+                    "description": [],
+                    "signature": [
+                      "WorkflowTelemetryOrigin",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 203,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCloned",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowCloned",
+            "description": [
+              "\nReports a workflow clone attempt."
+            ],
+            "signature": [
+              "(params: { sourceWorkflowId: string; newWorkflowId?: string | undefined; error?: Error | undefined; editorType?: ",
+              "WorkflowEditorType",
+              " | undefined; origin?: ",
+              "WorkflowTelemetryOrigin",
+              " | undefined; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 215,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCloned.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 218,
+                "columnNumber": 35,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCloned.$1.sourceWorkflowId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "sourceWorkflowId",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 219,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCloned.$1.newWorkflowId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "newWorkflowId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 220,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCloned.$1.error",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      "Error | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 221,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCloned.$1.editorType",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "editorType",
+                    "description": [],
+                    "signature": [
+                      "WorkflowEditorType",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 222,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCloned.$1.origin",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "origin",
+                    "description": [],
+                    "signature": [
+                      "WorkflowTelemetryOrigin",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 223,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowEnabledStateChanged",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowEnabledStateChanged",
+            "description": [
+              "\nReports a workflow enabled state change attempt (enable or disable)."
+            ],
+            "signature": [
+              "(params: { workflowId: string; enabled: boolean; isBulkAction: boolean; bulkActionCount?: number | undefined; error?: Error | undefined; editorType?: ",
+              "WorkflowEditorType",
+              " | undefined; origin?: ",
+              "WorkflowTelemetryOrigin",
+              " | undefined; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 236,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowEnabledStateChanged.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 239,
+                "columnNumber": 48,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowEnabledStateChanged.$1.workflowId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "workflowId",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 240,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowEnabledStateChanged.$1.enabled",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "enabled",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 241,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowEnabledStateChanged.$1.isBulkAction",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "isBulkAction",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 242,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowEnabledStateChanged.$1.bulkActionCount",
+                    "type": "number",
+                    "tags": [],
+                    "label": "bulkActionCount",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 243,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowEnabledStateChanged.$1.error",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      "Error | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 244,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowEnabledStateChanged.$1.editorType",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "editorType",
+                    "description": [],
+                    "signature": [
+                      "WorkflowEditorType",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 245,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowEnabledStateChanged.$1.origin",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "origin",
+                    "description": [],
+                    "signature": [
+                      "WorkflowTelemetryOrigin",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 246,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowValidationError",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowValidationError",
+            "description": [
+              "\nReports workflow validation errors.\nCall this when validation errors occur during workflow creation or update.\nAll errors are reported in a single event.\n"
+            ],
+            "signature": [
+              "(params: { workflowId?: string | undefined; validationResults: ",
+              "YamlValidationResult",
+              "[]; editorType?: ",
+              "WorkflowEditorType",
+              " | undefined; origin?: ",
+              "WorkflowTelemetryOrigin",
+              " | undefined; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 266,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowValidationError.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 274,
+                "columnNumber": 44,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowValidationError.$1.workflowId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "workflowId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 275,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowValidationError.$1.validationResults",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "validationResults",
+                    "description": [
+                      "- Array of all validation results."
+                    ],
+                    "signature": [
+                      "YamlValidationResult",
+                      "[]"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 276,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowValidationError.$1.editorType",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "editorType",
+                    "description": [],
+                    "signature": [
+                      "WorkflowEditorType",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 277,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowValidationError.$1.origin",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "origin",
+                    "description": [],
+                    "signature": [
+                      "WorkflowTelemetryOrigin",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 278,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowTestRunInitiated",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowTestRunInitiated",
+            "description": [
+              "\nReports a workflow test run initiation."
+            ],
+            "signature": [
+              "(params: { workflowId?: string | undefined; hasInputs: boolean; inputCount: number; error?: Error | undefined; editorType?: ",
+              "WorkflowEditorType",
+              " | undefined; origin?: ",
+              "WorkflowTelemetryOrigin",
+              " | undefined; triggerTab?: \"index\" | \"alert\" | \"manual\" | \"historical\" | undefined; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 340,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowTestRunInitiated.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 343,
+                "columnNumber": 45,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowTestRunInitiated.$1.workflowId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "workflowId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 344,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowTestRunInitiated.$1.hasInputs",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "hasInputs",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 345,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowTestRunInitiated.$1.inputCount",
+                    "type": "number",
+                    "tags": [],
+                    "label": "inputCount",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 346,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowTestRunInitiated.$1.error",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      "Error | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 347,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowTestRunInitiated.$1.editorType",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "editorType",
+                    "description": [],
+                    "signature": [
+                      "WorkflowEditorType",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 348,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowTestRunInitiated.$1.origin",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "origin",
+                    "description": [],
+                    "signature": [
+                      "WorkflowTelemetryOrigin",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 349,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowTestRunInitiated.$1.triggerTab",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "triggerTab",
+                    "description": [],
+                    "signature": [
+                      "\"index\" | \"alert\" | \"manual\" | \"historical\" | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 350,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowStepTestRunInitiated",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowStepTestRunInitiated",
+            "description": [
+              "\nReports a workflow step test run initiation.\n"
+            ],
+            "signature": [
+              "(params: { workflowYaml?: string | null | undefined; stepId: string; error?: Error | undefined; editorType?: ",
+              "WorkflowEditorType",
+              " | undefined; origin?: ",
+              "WorkflowTelemetryOrigin",
+              " | undefined; triggerTab?: \"manual\" | \"historical\" | undefined; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 365,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowStepTestRunInitiated.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 371,
+                "columnNumber": 49,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowStepTestRunInitiated.$1.workflowYaml",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "workflowYaml",
+                    "description": [
+                      "- The workflow YAML string to extract step information from"
+                    ],
+                    "signature": [
+                      "string | null | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 372,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowStepTestRunInitiated.$1.stepId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "stepId",
+                    "description": [
+                      "- The step ID (name) to find and report"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 373,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowStepTestRunInitiated.$1.error",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      "Error | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 374,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowStepTestRunInitiated.$1.editorType",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "editorType",
+                    "description": [],
+                    "signature": [
+                      "WorkflowEditorType",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 375,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowStepTestRunInitiated.$1.origin",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "origin",
+                    "description": [],
+                    "signature": [
+                      "WorkflowTelemetryOrigin",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 376,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowStepTestRunInitiated.$1.triggerTab",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "triggerTab",
+                    "description": [],
+                    "signature": [
+                      "\"manual\" | \"historical\" | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 377,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowRunInitiated",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowRunInitiated",
+            "description": [
+              "\nReports a workflow manual run initiation."
+            ],
+            "signature": [
+              "(params: { workflowId: string; hasInputs: boolean; inputCount: number; error?: Error | undefined; editorType?: ",
+              "WorkflowEditorType",
+              " | undefined; origin?: ",
+              "WorkflowTelemetryOrigin",
+              " | undefined; triggerTab?: \"index\" | \"alert\" | \"manual\" | \"historical\" | undefined; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 401,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowRunInitiated.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 404,
+                "columnNumber": 41,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowRunInitiated.$1.workflowId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "workflowId",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 405,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowRunInitiated.$1.hasInputs",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "hasInputs",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 406,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowRunInitiated.$1.inputCount",
+                    "type": "number",
+                    "tags": [],
+                    "label": "inputCount",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 407,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowRunInitiated.$1.error",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      "Error | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 408,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowRunInitiated.$1.editorType",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "editorType",
+                    "description": [],
+                    "signature": [
+                      "WorkflowEditorType",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 409,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowRunInitiated.$1.origin",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "origin",
+                    "description": [],
+                    "signature": [
+                      "WorkflowTelemetryOrigin",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 410,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowRunInitiated.$1.triggerTab",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "triggerTab",
+                    "description": [],
+                    "signature": [
+                      "\"index\" | \"alert\" | \"manual\" | \"historical\" | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 411,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowRunCancelled",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowRunCancelled",
+            "description": [
+              "\nReports a workflow run cancellation request."
+            ],
+            "signature": [
+              "(params: { workflowExecutionId: string; workflowId?: string | undefined; timeToCancellation?: number | undefined; error?: Error | undefined; origin?: ",
+              "WorkflowTelemetryOrigin",
+              " | undefined; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 426,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowRunCancelled.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 429,
+                "columnNumber": 41,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowRunCancelled.$1.workflowExecutionId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "workflowExecutionId",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 430,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowRunCancelled.$1.workflowId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "workflowId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 431,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowRunCancelled.$1.timeToCancellation",
+                    "type": "number",
+                    "tags": [],
+                    "label": "timeToCancellation",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 432,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowRunCancelled.$1.error",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      "Error | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 433,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowRunCancelled.$1.origin",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "origin",
+                    "description": [],
+                    "signature": [
+                      "WorkflowTelemetryOrigin",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 434,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowExecutionsCancelled",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowExecutionsCancelled",
+            "description": [
+              "\nReports a bulk cancellation request for all non-terminal executions of a workflow (current space).\nUse ",
+              {
+                "pluginId": "workflowsManagement",
+                "scope": "public",
+                "docId": "kibWorkflowsManagementPluginApi",
+                "section": "def-public.reportWorkflowRunCancelled",
+                "text": "reportWorkflowRunCancelled"
+              },
+              " when cancelling a single execution by id."
+            ],
+            "signature": [
+              "(params: { workflowId: string; error?: Error | undefined; origin?: ",
+              "WorkflowTelemetryOrigin",
+              " | undefined; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 447,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowExecutionsCancelled.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 451,
+                "columnNumber": 48,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowExecutionsCancelled.$1.workflowId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "workflowId",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 452,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowExecutionsCancelled.$1.error",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      "Error | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 453,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowExecutionsCancelled.$1.origin",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "origin",
+                    "description": [],
+                    "signature": [
+                      "WorkflowTelemetryOrigin",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 454,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowListViewed",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowListViewed",
+            "description": [
+              "\nReports a workflow list page view.\nThis event tracks list page views, pagination, and search/filter usage patterns."
+            ],
+            "signature": [
+              "(params: { workflowCount: number; pageNumber: number; search: { [key: string]: unknown; query?: string | undefined; }; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 467,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowListViewed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 471,
+                "columnNumber": 39,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowListViewed.$1.workflowCount",
+                    "type": "number",
+                    "tags": [],
+                    "label": "workflowCount",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 472,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowListViewed.$1.pageNumber",
+                    "type": "number",
+                    "tags": [],
+                    "label": "pageNumber",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 473,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowListViewed.$1.search",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "search",
+                    "description": [],
+                    "signature": [
+                      "{ [key: string]: unknown; query?: string | undefined; }"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 474,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowDetailViewed",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowDetailViewed",
+            "description": [
+              "\nReports a workflow detail page view."
+            ],
+            "signature": [
+              "(params: { workflowId: string; tab: ",
+              "WorkflowDetailTab",
+              "; editorType?: ",
+              "WorkflowEditorType",
+              " | undefined; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 502,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowDetailViewed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 505,
+                "columnNumber": 41,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowDetailViewed.$1.workflowId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "workflowId",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 506,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowDetailViewed.$1.tab",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "tab",
+                    "description": [],
+                    "signature": [
+                      "\"workflow\" | \"executions\""
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 507,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowDetailViewed.$1.editorType",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "editorType",
+                    "description": [],
+                    "signature": [
+                      "WorkflowEditorType",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 508,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCreateOpened",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowCreateOpened",
+            "description": [],
+            "signature": [
+              "(params: { editorType?: ",
+              "WorkflowEditorType",
+              " | undefined; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 519,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCreateOpened.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 519,
+                "columnNumber": 41,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowCreateOpened.$1.editorType",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "editorType",
+                    "description": [],
+                    "signature": [
+                      "WorkflowEditorType",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 519,
+                    "columnNumber": 43,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowAccessDeniedPrivileges",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowAccessDeniedPrivileges",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 526,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowAccessDeniedLicense",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowAccessDeniedLicense",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 532,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowAccessDeniedServerlessTier",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowAccessDeniedServerlessTier",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 538,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowExported",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowExported",
+            "description": [
+              "\nReports a workflow export attempt."
+            ],
+            "signature": [
+              "(params: { workflowCount: number; format: \"yaml\" | \"zip\"; referenceResolution: ",
+              "WorkflowExportReferenceResolution",
+              "; error?: Error | undefined; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 546,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowExported.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 549,
+                "columnNumber": 37,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowExported.$1.workflowCount",
+                    "type": "number",
+                    "tags": [],
+                    "label": "workflowCount",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 550,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowExported.$1.format",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "format",
+                    "description": [],
+                    "signature": [
+                      "\"yaml\" | \"zip\""
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 551,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowExported.$1.referenceResolution",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "referenceResolution",
+                    "description": [],
+                    "signature": [
+                      "\"none\" | \"ignore\" | \"add_direct\" | \"add_all\""
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 552,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowExported.$1.error",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      "Error | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 553,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowImported",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowImported",
+            "description": [
+              "\nReports a workflow import attempt."
+            ],
+            "signature": [
+              "(params: { workflowCount: number; format: \"yaml\" | \"zip\"; conflictResolution: \"overwrite\" | \"generateNewIds\"; hasConflicts: boolean; successCount: number; failedCount: number; minStepCount: number; maxStepCount: number; minTriggerCount: number; maxTriggerCount: number; error?: Error | undefined; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 565,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowImported.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 568,
+                "columnNumber": 37,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowImported.$1.workflowCount",
+                    "type": "number",
+                    "tags": [],
+                    "label": "workflowCount",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 569,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowImported.$1.format",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "format",
+                    "description": [],
+                    "signature": [
+                      "\"yaml\" | \"zip\""
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 570,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowImported.$1.conflictResolution",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "conflictResolution",
+                    "description": [],
+                    "signature": [
+                      "\"overwrite\" | \"generateNewIds\""
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 571,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowImported.$1.hasConflicts",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "hasConflicts",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 572,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowImported.$1.successCount",
+                    "type": "number",
+                    "tags": [],
+                    "label": "successCount",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 573,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowImported.$1.failedCount",
+                    "type": "number",
+                    "tags": [],
+                    "label": "failedCount",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 574,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowImported.$1.minStepCount",
+                    "type": "number",
+                    "tags": [],
+                    "label": "minStepCount",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 575,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowImported.$1.maxStepCount",
+                    "type": "number",
+                    "tags": [],
+                    "label": "maxStepCount",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 576,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowImported.$1.minTriggerCount",
+                    "type": "number",
+                    "tags": [],
+                    "label": "minTriggerCount",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 577,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowImported.$1.maxTriggerCount",
+                    "type": "number",
+                    "tags": [],
+                    "label": "maxTriggerCount",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 578,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowImported.$1.error",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "error",
+                    "description": [],
+                    "signature": [
+                      "Error | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 579,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowAiChatOpened",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowAiChatOpened",
+            "description": [],
+            "signature": [
+              "(params: { entryPoint: ",
+              "WorkflowAiChatEntryPoint",
+              "; sessionType: ",
+              "WorkflowAiSessionType",
+              "; workflowId?: string | undefined; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 612,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowAiChatOpened.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 612,
+                "columnNumber": 41,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowAiChatOpened.$1.entryPoint",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "entryPoint",
+                    "description": [],
+                    "signature": [
+                      "\"workflow_editor\" | \"header_on_editor_page\""
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 613,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowAiChatOpened.$1.sessionType",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "sessionType",
+                    "description": [],
+                    "signature": [
+                      "\"create\" | \"edit\""
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 614,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowAiChatOpened.$1.workflowId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "workflowId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 615,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportAiProposalReceived",
+            "type": "Function",
+            "tags": [],
+            "label": "reportAiProposalReceived",
+            "description": [],
+            "signature": [
+              "(params: { workflowId?: string | undefined; conversationId?: string | undefined; proposalId: string; toolId: string; sessionType: ",
+              "WorkflowAiSessionType",
+              "; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 625,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportAiProposalReceived.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 625,
+                "columnNumber": 39,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportAiProposalReceived.$1.workflowId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "workflowId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 626,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportAiProposalReceived.$1.conversationId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "conversationId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 627,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportAiProposalReceived.$1.proposalId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "proposalId",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 628,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportAiProposalReceived.$1.toolId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "toolId",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 629,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportAiProposalReceived.$1.sessionType",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "sessionType",
+                    "description": [],
+                    "signature": [
+                      "\"create\" | \"edit\""
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 630,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportAiProposalResolved",
+            "type": "Function",
+            "tags": [],
+            "label": "reportAiProposalResolved",
+            "description": [],
+            "signature": [
+              "(params: { workflowId?: string | undefined; conversationId?: string | undefined; proposalId: string; resolution: \"accepted\" | \"rejected\"; toolId: string; isBulkAction: boolean; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 642,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportAiProposalResolved.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 642,
+                "columnNumber": 39,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportAiProposalResolved.$1.workflowId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "workflowId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 643,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportAiProposalResolved.$1.conversationId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "conversationId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 644,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportAiProposalResolved.$1.proposalId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "proposalId",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 645,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportAiProposalResolved.$1.resolution",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "resolution",
+                    "description": [],
+                    "signature": [
+                      "\"accepted\" | \"rejected\""
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 646,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportAiProposalResolved.$1.toolId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "toolId",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 647,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportAiProposalResolved.$1.isBulkAction",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "isBulkAction",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 648,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "workflowsManagement",
+            "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowAiSessionCompleted",
+            "type": "Function",
+            "tags": [],
+            "label": "reportWorkflowAiSessionCompleted",
+            "description": [],
+            "signature": [
+              "(params: { sessionType: ",
+              "WorkflowAiSessionType",
+              "; workflowId?: string | undefined; conversationId?: string | undefined; proposalsAccepted: number; proposalsDeclined: number; proposalsPending: number; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+            "lineNumber": 661,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "workflowsManagement",
+                "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowAiSessionCompleted.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                "lineNumber": 661,
+                "columnNumber": 47,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowAiSessionCompleted.$1.sessionType",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "sessionType",
+                    "description": [],
+                    "signature": [
+                      "\"create\" | \"edit\""
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 662,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowAiSessionCompleted.$1.workflowId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "workflowId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 663,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowAiSessionCompleted.$1.conversationId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "conversationId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 664,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowAiSessionCompleted.$1.proposalsAccepted",
+                    "type": "number",
+                    "tags": [],
+                    "label": "proposalsAccepted",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 665,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowAiSessionCompleted.$1.proposalsDeclined",
+                    "type": "number",
+                    "tags": [],
+                    "label": "proposalsDeclined",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 666,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "workflowsManagement",
+                    "id": "def-public.WorkflowsBaseTelemetry.reportWorkflowAiSessionCompleted.$1.proposalsPending",
+                    "type": "number",
+                    "tags": [],
+                    "label": "proposalsPending",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/workflows_management/public/common/service/telemetry.ts",
+                    "lineNumber": 667,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [],
     "interfaces": [],
     "enums": [],
@@ -15,7 +2599,7 @@
       "label": "WorkflowsPublicPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
-      "lineNumber": 35,
+      "lineNumber": 37,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -31,7 +2615,7 @@
       "label": "WorkflowsPublicPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
-      "lineNumber": 41,
+      "lineNumber": 43,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -51,7 +2635,7 @@
             "; }) => void"
           ],
           "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
-          "lineNumber": 42,
+          "lineNumber": 44,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -64,7 +2648,7 @@
               "label": "options",
               "description": [],
               "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
-              "lineNumber": 48,
+              "lineNumber": 50,
               "columnNumber": 45,
               "deprecated": false,
               "trackAdoption": false,
@@ -80,7 +2664,7 @@
                     "string[]"
                   ],
                   "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
-                  "lineNumber": 49,
+                  "lineNumber": 51,
                   "columnNumber": 5,
                   "deprecated": false,
                   "trackAdoption": false
@@ -88,6 +2672,62 @@
               ]
             }
           ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "workflowsManagement",
+          "id": "def-public.WorkflowsPublicPluginStart.getTelemetry",
+          "type": "Function",
+          "tags": [],
+          "label": "getTelemetry",
+          "description": [
+            "\nLazily resolves the shared workflow-domain telemetry singleton. Sibling\nplugins that emit workflow-related EBT events should use this instance so\nevents are reported by a single owner. The factory is lazy so that the\nheavy telemetry module stays out of the page-load bundle."
+          ],
+          "signature": [
+            "() => Promise<",
+            {
+              "pluginId": "workflowsManagement",
+              "scope": "public",
+              "docId": "kibWorkflowsManagementPluginApi",
+              "section": "def-public.WorkflowsBaseTelemetry",
+              "text": "WorkflowsBaseTelemetry"
+            },
+            ">"
+          ],
+          "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
+          "lineNumber": 53,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "workflowsManagement",
+          "id": "def-public.WorkflowsPublicPluginStart.getQueryClient",
+          "type": "Function",
+          "tags": [],
+          "label": "getQueryClient",
+          "description": [
+            "\nLazily resolves the shared React Query client used by the workflows UI.\nSibling plugins that mutate workflows from outside the workflows app must\nuse this client so workflows_management's cached queries get invalidated.\nThe factory is lazy so that @kbn/react-query stays out of the page-load\nbundle."
+          ],
+          "signature": [
+            "() => Promise<",
+            {
+              "pluginId": "@kbn/react-query",
+              "scope": "common",
+              "docId": "kibKbnReactQueryPluginApi",
+              "section": "def-common.QueryClient",
+              "text": "QueryClient"
+            },
+            ">"
+          ],
+          "path": "src/platform/plugins/shared/workflows_management/public/types.ts",
+          "lineNumber": 60,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
           "returnComment": []
         }
       ],
@@ -214,7 +2854,7 @@
       "label": "WorkflowsServerPluginSetup",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 44,
+      "lineNumber": 41,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -230,7 +2870,7 @@
             "WorkflowsManagementApi"
           ],
           "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-          "lineNumber": 45,
+          "lineNumber": 42,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -247,7 +2887,7 @@
       "label": "WorkflowsServerPluginStart",
       "description": [],
       "path": "src/platform/plugins/shared/workflows_management/server/types.ts",
-      "lineNumber": 49,
+      "lineNumber": 46,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
