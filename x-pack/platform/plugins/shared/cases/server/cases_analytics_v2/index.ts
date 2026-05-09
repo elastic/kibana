@@ -6,3 +6,4 @@
  */
 
 export { CasesAnalyticsV2Service } from './service';
+export type { CasesAnalyticsV2WriterContract } from './writer';
