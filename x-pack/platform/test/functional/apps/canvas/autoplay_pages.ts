@@ -20,6 +20,9 @@ export default function canvasAutoplayPagesTest({
 
   describe('autoplay page cycling with page count changes', function () {
     before(async () => {
+      await kibanaServer.importExport.load(
+        'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/default'
+      );
       await canvas.goToListingPage();
     });
 
