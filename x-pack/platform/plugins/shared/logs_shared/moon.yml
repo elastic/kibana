@@ -56,8 +56,6 @@ dependsOn:
   - '@kbn/saved-search-plugin'
   - '@kbn/discover-plugin'
   - '@kbn/spaces-plugin'
-  - '@kbn/analytics'
-  - '@kbn/usage-collection-plugin'
   - '@kbn/discover-utils'
   - '@kbn/xstate-utils'
   - '@kbn/ml-plugin'
