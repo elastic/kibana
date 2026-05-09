@@ -21,7 +21,8 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
  *
  * This function orchestrates the execution of a workflow node by:
  * 1. Creating a context manager for the current step
- * 2. Checking in-memory workflow state to skip execution if already cancelled
+ * 2. Checking the execution driver and in-memory workflow state to skip execution when
+ *    the driver is stopped (`stop()`) or the workflow is no longer RUNNING
  * 3. Creating and running the node implementation
  * 4. Running monitoring in parallel to handle cancellation, timeouts, and other control flow
  * 5. Managing error handling and state persistence
@@ -32,6 +33,7 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
  *
  * @param params - The workflow execution loop parameters containing:
  *   - workflowRuntime: Runtime instance managing workflow state and navigation
+ *   - workflowExecutionDriver: Current node and execution-loop gate (`isExecuting`, `start` / `stop`)
  *   - workflowExecutionGraph: The workflow graph definition
  *   - workflowExecutionState: Current execution state
  *   - nodesFactory: Factory for creating node implementations
@@ -44,11 +46,15 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
  * @throws Will catch and handle errors through the workflow runtime's error handling mechanism
  */
 export async function runNode(params: WorkflowExecutionLoopParams): Promise<void> {
-  const node = params.workflowRuntime.getCurrentNode();
+  const node = params.workflowExecutionDriver.currentNode;
   let monitorAbortController: AbortController | undefined;
   let stepExecutionRuntime: StepExecutionRuntime | undefined;
 
   if (!node) {
+    return;
+  }
+
+  if (!params.workflowExecutionDriver.isExecuting) {
     return;
   }
 
@@ -75,7 +81,10 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
      * When cancelRequested is true, status is always updated to CANCELLED, so this check
      * covers both cancellation and other terminal states (COMPLETED, FAILED, etc.).
      */
-    if (params.workflowRuntime.getWorkflowExecution().status !== ExecutionStatus.RUNNING) {
+    if (
+      params.workflowRuntime.getWorkflowExecution().status !== ExecutionStatus.RUNNING ||
+      !params.workflowExecutionDriver.isExecuting
+    ) {
       nodeSpan?.setOutcome('unknown');
       nodeSpan?.end();
       return;

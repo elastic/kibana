@@ -24,6 +24,7 @@ import { ExecutionError } from '@kbn/workflows/server';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
 import type { ContextDependencies } from './types';
+import type { WorkflowExecutionDriver } from './workflow_execution_driver';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { ScopeData } from './workflow_scope_stack';
 import { WorkflowScopeStack } from './workflow_scope_stack';
@@ -34,6 +35,7 @@ interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
   workflowExecution: EsWorkflowExecution;
   workflowExecutionGraph: WorkflowGraph;
+  workflowExecutionDriver: WorkflowExecutionDriver;
   workflowLogger: IWorkflowEventLogger;
   coreStart?: CoreStart;
   dependencies?: ContextDependencies;
@@ -65,20 +67,18 @@ export class WorkflowExecutionRuntimeManager {
   private workflowLogger: IWorkflowEventLogger | null = null;
 
   private workflowExecutionState: WorkflowExecutionState;
+  private readonly workflowExecutionDriver: WorkflowExecutionDriver;
   private entryTransactionId?: string;
   private workflowTransaction?: agent.Transaction; // APM transaction instance
   private workflowGraph: WorkflowGraph;
-  private nextNodeId: string | undefined;
   private coreStart?: CoreStart;
   private dependencies?: ContextDependencies;
   private telemetryClient?: WorkflowExecutionTelemetryClient;
   private telemetryReported: boolean = false;
-  private get topologicalOrder(): string[] {
-    return this.workflowGraph.topologicalOrder;
-  }
 
   constructor(workflowExecutionRuntimeManagerInit: WorkflowExecutionRuntimeManagerInit) {
     this.workflowGraph = workflowExecutionRuntimeManagerInit.workflowExecutionGraph;
+    this.workflowExecutionDriver = workflowExecutionRuntimeManagerInit.workflowExecutionDriver;
 
     // Use workflow execution ID as traceId for APM compatibility
     this.workflowLogger = workflowExecutionRuntimeManagerInit.workflowLogger;
@@ -86,6 +86,10 @@ export class WorkflowExecutionRuntimeManager {
     this.coreStart = workflowExecutionRuntimeManagerInit.coreStart;
     this.dependencies = workflowExecutionRuntimeManagerInit.dependencies;
     this.telemetryClient = workflowExecutionRuntimeManagerInit.telemetryClient;
+  }
+
+  public get executionDriver(): WorkflowExecutionDriver {
+    return this.workflowExecutionDriver;
   }
 
   public get workflowExecution() {
@@ -115,36 +119,19 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public getCurrentNode(): GraphNodeUnion | null {
-    if (!this.workflowExecution.currentNodeId) {
-      return null;
-    }
-
-    return this.workflowGraph.getNode(this.workflowExecution.currentNodeId as string);
+    return this.workflowExecutionDriver.currentNode;
   }
 
   public navigateToNode(nodeId: string): void {
-    if (!this.workflowGraph.getNode(nodeId)) {
-      throw new Error(`Node with ID ${nodeId} is not part of the workflow graph`);
-    }
-
-    this.nextNodeId = nodeId;
+    this.workflowExecutionDriver.navigateToNode(nodeId);
   }
 
   public navigateToNextNode(): void {
-    const currentNodeId = this.workflowExecution.currentNodeId;
-    this.nextNodeId = this.nodeAfter(currentNodeId);
+    this.workflowExecutionDriver.navigateToNextNode();
   }
 
   public navigateToAfterNode(nodeId: string): void {
-    this.nextNodeId = this.nodeAfter(nodeId);
-  }
-
-  private nodeAfter(nodeId: string | undefined): string | undefined {
-    const index = this.topologicalOrder.findIndex((id) => id === nodeId);
-    if (index >= 0 && index < this.topologicalOrder.length - 1) {
-      return this.topologicalOrder[index + 1];
-    }
-    return undefined;
+    this.workflowExecutionDriver.navigateToAfterNode(nodeId);
   }
 
   public getCurrentNodeScope(): StackFrame[] {
@@ -464,9 +451,8 @@ export class WorkflowExecutionRuntimeManager {
       );
     }
 
-    this.nextNodeId = this.topologicalOrder[0];
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
-      currentNodeId: this.nextNodeId,
+      currentNodeId: this.workflowExecutionDriver.currentNode?.id,
       scopeStack: [],
       status: ExecutionStatus.RUNNING,
       startedAt: new Date().toISOString(),
@@ -479,7 +465,13 @@ export class WorkflowExecutionRuntimeManager {
   public async resume(): Promise<void> {
     await this.workflowExecutionState.load();
     this.evictCompletedLoopOutputs();
-    this.nextNodeId = this.workflowExecution.currentNodeId;
+
+    if (!this.workflowExecution.currentNodeId) {
+      throw new Error(
+        'Execution can`t be resummed because current node ID is not set in execution state'
+      );
+    }
+    this.workflowExecutionDriver.navigateToNode(this.workflowExecution.currentNodeId);
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       status: ExecutionStatus.RUNNING,
     };
@@ -516,8 +508,9 @@ export class WorkflowExecutionRuntimeManager {
 
   public async saveState(): Promise<void> {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
+    const nextNodeId = this.workflowExecutionDriver.nextNode?.id ?? undefined;
     const workflowExecutionUpdate: Partial<EsWorkflowExecution> = {
-      currentNodeId: this.nextNodeId,
+      currentNodeId: nextNodeId,
     };
 
     if (isTerminalStatus(workflowExecution.status)) {
@@ -525,7 +518,7 @@ export class WorkflowExecutionRuntimeManager {
     } else if (workflowExecution.error) {
       workflowExecutionUpdate.status = ExecutionStatus.FAILED;
       workflowExecutionUpdate.error = workflowExecution.error;
-    } else if (!this.nextNodeId) {
+    } else if (!nextNodeId) {
       workflowExecutionUpdate.status = ExecutionStatus.COMPLETED;
     }
 

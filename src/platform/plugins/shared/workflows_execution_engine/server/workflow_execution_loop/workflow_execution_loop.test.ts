@@ -27,20 +27,29 @@ jest.mock('./persistence_loop', () => ({
 }));
 
 describe('workflowExecutionLoop', () => {
-  const createParams = () => ({
-    workflowRuntime: {
-      saveState: jest.fn().mockResolvedValue(undefined),
-      setWorkflowError: jest.fn(),
-    },
-    workflowExecutionState: {
-      updateWorkflowExecution: jest.fn(),
-      flush: jest.fn().mockResolvedValue(undefined),
-    },
-    workflowLogger: {
-      flushEvents: jest.fn().mockResolvedValue(undefined),
-    },
-    taskAbortController: new AbortController(),
-  });
+  const createParams = () => {
+    const workflowExecutionDriver = {
+      start: jest.fn(),
+      stop: jest.fn(),
+      isExecuting: true,
+    };
+    return {
+      workflowRuntime: {
+        saveState: jest.fn().mockResolvedValue(undefined),
+        setWorkflowError: jest.fn(),
+        executionDriver: workflowExecutionDriver,
+      },
+      workflowExecutionDriver,
+      workflowExecutionState: {
+        updateWorkflowExecution: jest.fn(),
+        flush: jest.fn().mockResolvedValue(undefined),
+      },
+      workflowLogger: {
+        flushEvents: jest.fn().mockResolvedValue(undefined),
+      },
+      taskAbortController: new AbortController(),
+    };
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -58,6 +67,8 @@ describe('workflowExecutionLoop', () => {
     expect(executionFlowLoop).toHaveBeenCalledWith(params);
     expect(persistenceLoop).toHaveBeenCalled();
     expect(flushState).toHaveBeenCalled();
+    expect(params.workflowExecutionDriver.start).toHaveBeenCalled();
+    expect(params.workflowExecutionDriver.stop).toHaveBeenCalled();
     expect(params.workflowRuntime.saveState).toHaveBeenCalled();
     expect(params.workflowExecutionState.flush).toHaveBeenCalled();
     expect(params.workflowLogger.flushEvents).toHaveBeenCalled();
@@ -74,6 +85,7 @@ describe('workflowExecutionLoop', () => {
     await workflowExecutionLoop(params as any);
 
     expect(params.workflowRuntime.setWorkflowError).toHaveBeenCalledWith(testError);
+    expect(params.workflowExecutionDriver.stop).toHaveBeenCalled();
   });
 
   it('updates execution state when task abort is signaled during workflow execution', async () => {
@@ -88,5 +100,6 @@ describe('workflowExecutionLoop', () => {
         status: ExecutionStatus.CANCELLED,
       })
     );
+    expect(params.workflowExecutionDriver.stop).toHaveBeenCalled();
   });
 });

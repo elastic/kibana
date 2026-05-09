@@ -21,6 +21,7 @@ import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import { buildWorkflowContext } from '../build_workflow_context';
 import type { ContextDependencies } from '../types';
+import { WorkflowExecutionDriver } from '../workflow_execution_driver';
 import { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
 
@@ -34,6 +35,7 @@ const buildWorkflowContextMock = buildWorkflowContext as jest.MockedFunction<
 >;
 describe('WorkflowExecutionRuntimeManager', () => {
   let underTest: WorkflowExecutionRuntimeManager;
+  let workflowExecutionDriver: WorkflowExecutionDriver;
   let workflowExecution: EsWorkflowExecution;
   let workflowExecutionGraph: WorkflowGraph;
   let workflowLogger: IWorkflowEventLogger;
@@ -122,9 +124,15 @@ describe('WorkflowExecutionRuntimeManager', () => {
     fakeCoreStart = {} as unknown as jest.Mocked<CoreStart>;
     fakeContextDependencies = {} as unknown as jest.Mocked<ContextDependencies>;
 
+    workflowExecutionDriver = new WorkflowExecutionDriver({
+      workflowExecutionState,
+      workflowExecutionGraph,
+    });
+
     underTest = new WorkflowExecutionRuntimeManager({
       workflowExecution,
       workflowExecutionGraph,
+      workflowExecutionDriver,
       workflowLogger,
       workflowExecutionState,
       coreStart: fakeCoreStart as CoreStart,
@@ -437,8 +445,8 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should complete workflow execution if no nodes to process', async () => {
-      // Mock the WorkflowExecutionRuntimeManager to have no current node
-      (underTest as any).nextNodeId = undefined;
+      // Mock the execution driver to have no pending node
+      (underTest.executionDriver as any).nextNodeId = undefined;
       workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
         ...workflowExecution,
         currentNodeId: undefined,
@@ -456,8 +464,8 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should log workflow completion', async () => {
-      // Mock the WorkflowExecutionRuntimeManager to have no current node
-      (underTest as any).nextNodeId = undefined;
+      // Mock the execution driver to have no pending node
+      (underTest.executionDriver as any).nextNodeId = undefined;
       workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
         ...workflowExecution,
         nextNodeId: undefined,
@@ -828,7 +836,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         ...workflowExecution,
         currentNodeId: 'node3',
       });
-      (underTest as any).nextNodeId = undefined;
+      (underTest.executionDriver as any).nextNodeId = undefined;
       await underTest.saveState();
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({ currentNodeId: undefined })
@@ -990,7 +998,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         outcome: 'success',
         end: mockEnd,
       };
-      (underTest as any).nextNodeId = undefined;
+      (underTest.executionDriver as any).nextNodeId = undefined;
 
       await underTest.saveState();
 
@@ -1004,7 +1012,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
         outcome: 'success',
         end: mockEnd,
       };
-      (underTest as any).nextNodeId = undefined;
+      (underTest.executionDriver as any).nextNodeId = undefined;
 
       await underTest.saveState();
 
@@ -1017,7 +1025,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       const mockReport = jest.fn();
       const telemetryClient = { reportWorkflowExecutionTerminated: mockReport };
       (underTest as any).telemetryClient = telemetryClient;
-      (underTest as any).nextNodeId = undefined;
+      (underTest.executionDriver as any).nextNodeId = undefined;
 
       (workflowExecutionState as any).getAllStepExecutions = jest.fn().mockReturnValue([]);
 
@@ -1034,7 +1042,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       const mockReport = jest.fn();
       const telemetryClient = { reportWorkflowExecutionTerminated: mockReport };
       (underTest as any).telemetryClient = telemetryClient;
-      (underTest as any).nextNodeId = undefined;
+      (underTest.executionDriver as any).nextNodeId = undefined;
       (workflowExecutionState as any).getAllStepExecutions = jest.fn().mockReturnValue([]);
 
       await underTest.saveState();

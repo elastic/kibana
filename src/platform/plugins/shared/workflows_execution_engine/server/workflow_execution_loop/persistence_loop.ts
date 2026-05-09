@@ -44,7 +44,10 @@ export async function persistenceLoop(
   params: WorkflowExecutionLoopParams,
   persistenceAbortSignal?: AbortSignal
 ) {
-  while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
+  while (
+    params.workflowExecutionDriver.isExecuting &&
+    params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING
+  ) {
     if (persistenceAbortSignal?.aborted) {
       return;
     }

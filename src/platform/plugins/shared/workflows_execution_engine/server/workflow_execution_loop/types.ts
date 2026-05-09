@@ -12,6 +12,7 @@ import type { WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { NodesFactory } from '../step/nodes_factory';
 import type { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_execution_runtime_factory';
+import type { WorkflowExecutionDriver } from '../workflow_context_manager/workflow_execution_driver';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
@@ -20,6 +21,7 @@ import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task
 export interface WorkflowExecutionLoopParams {
   workflowExecutionGraph: WorkflowGraph;
   workflowRuntime: WorkflowExecutionRuntimeManager;
+  workflowExecutionDriver: WorkflowExecutionDriver;
   stepExecutionRuntimeFactory: StepExecutionRuntimeFactory;
   workflowExecutionState: WorkflowExecutionState;
   workflowLogger: IWorkflowEventLogger;

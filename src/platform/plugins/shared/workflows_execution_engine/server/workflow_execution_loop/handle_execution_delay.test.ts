@@ -29,6 +29,7 @@ const makeParams = (): jest.Mocked<WorkflowExecutionLoopParams> =>
     workflowRuntime: {
       getWorkflowExecution: jest.fn().mockReturnValue({ id: 'exec-1' }),
     },
+    workflowExecutionDriver: {} as WorkflowExecutionLoopParams['workflowExecutionDriver'],
     workflowExecutionState: {
       updateWorkflowExecution: jest.fn(),
     },

@@ -18,10 +18,13 @@ const makeParams = (
   }> = {}
 ): jest.Mocked<WorkflowExecutionLoopParams> => {
   const { status = ExecutionStatus.RUNNING, flushDelay = 0 } = overrides;
+  const workflowExecutionDriver = { isExecuting: true };
   return {
     workflowRuntime: {
+      executionDriver: workflowExecutionDriver,
       getWorkflowExecutionStatus: jest.fn().mockReturnValue(status),
     },
+    workflowExecutionDriver,
     workflowExecutionState: {
       flush: jest
         .fn()

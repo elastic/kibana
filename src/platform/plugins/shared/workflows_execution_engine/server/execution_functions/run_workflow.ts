@@ -129,6 +129,7 @@ export async function runWorkflow({
   try {
     await workflowExecutionLoop({
       workflowRuntime,
+      workflowExecutionDriver: workflowRuntime.executionDriver,
       stepExecutionRuntimeFactory,
       workflowExecutionState,
       workflowExecutionRepository,

@@ -62,6 +62,7 @@ export async function resumeWorkflow({
   try {
     await workflowExecutionLoop({
       workflowRuntime,
+      workflowExecutionDriver: workflowRuntime.executionDriver,
       stepExecutionRuntimeFactory,
       workflowExecutionState,
       workflowExecutionRepository,

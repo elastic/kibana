@@ -32,6 +32,7 @@ import type { WorkflowExecutionLoopParams } from './types';
  * - Workflow fails due to an error (ExecutionStatus.FAILED)
  * - Workflow is cancelled (ExecutionStatus.CANCELLED)
  * - Any other non-RUNNING status is reached
+ * - The execution driver's `stop()` is called while the workflow remains RUNNING
  */
 export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams) {
   // Create an abort controller to signal the persistence loop to exit immediately
@@ -47,9 +48,11 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
     });
     // Also abort persistence loop when task is aborted
     persistenceAbortController.abort();
+    params.workflowExecutionDriver.stop();
   });
 
   try {
+    params.workflowExecutionDriver.start();
     // Run execution and persistence loops in parallel
     // When execution finishes, signal persistence loop to exit immediately
     await Promise.all([
@@ -62,6 +65,7 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
   } catch (error) {
     params.workflowRuntime.setWorkflowError(error as Error);
   } finally {
+    params.workflowExecutionDriver.stop();
     const finalFlushSpan = apm.startSpan('final flush state', 'workflow', 'persistence');
     await flushState(params);
     finalFlushSpan?.end();

@@ -24,8 +24,11 @@ describe('executionFlowLoop', () => {
 
   it('calls runNode while status is RUNNING and stops when terminal', async () => {
     let callCount = 0;
+    const workflowExecutionDriver = { isExecuting: true };
     const params = {
+      workflowExecutionDriver,
       workflowRuntime: {
+        executionDriver: workflowExecutionDriver,
         getWorkflowExecutionStatus: jest.fn(() => {
           callCount++;
           return callCount <= 3 ? ExecutionStatus.RUNNING : ExecutionStatus.COMPLETED;
@@ -39,9 +42,27 @@ describe('executionFlowLoop', () => {
   });
 
   it('does not call runNode when status is not RUNNING', async () => {
+    const workflowExecutionDriver = { isExecuting: true };
     const params = {
+      workflowExecutionDriver,
       workflowRuntime: {
+        executionDriver: workflowExecutionDriver,
         getWorkflowExecutionStatus: jest.fn(() => ExecutionStatus.COMPLETED),
+      },
+    } as any;
+
+    await executionFlowLoop(params);
+
+    expect(runNode).not.toHaveBeenCalled();
+  });
+
+  it('does not call runNode when execution driver is not executing', async () => {
+    const workflowExecutionDriver = { isExecuting: false };
+    const params = {
+      workflowExecutionDriver,
+      workflowRuntime: {
+        executionDriver: workflowExecutionDriver,
+        getWorkflowExecutionStatus: jest.fn(() => ExecutionStatus.RUNNING),
       },
     } as any;
 

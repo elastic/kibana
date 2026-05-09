@@ -37,11 +37,23 @@ export const createFakeKibanaRequest = (): KibanaRequest => ({ headers: {} } as 
 export interface MockWorkflowRuntime {
   start: jest.Mock;
   resume: jest.Mock;
+  executionDriver: {
+    start: jest.Mock;
+    stop: jest.Mock;
+    isExecuting: boolean;
+    getCurrentNode: jest.Mock;
+  };
 }
 
 export const createMockWorkflowRuntime = (): MockWorkflowRuntime => ({
   start: jest.fn().mockResolvedValue(undefined),
   resume: jest.fn().mockResolvedValue(undefined),
+  executionDriver: {
+    start: jest.fn(),
+    stop: jest.fn(),
+    isExecuting: true,
+    getCurrentNode: jest.fn(),
+  },
 });
 
 export interface MockWorkflowExecutionRepository {
@@ -89,6 +101,7 @@ export const getExpectedWorkflowExecutionLoopCallArgs = (options: {
   taskAbortController: AbortController;
 }) => ({
   workflowRuntime: options.workflowRuntime,
+  workflowExecutionDriver: options.workflowRuntime.executionDriver,
   stepExecutionRuntimeFactory: {},
   workflowExecutionState: expect.any(Object),
   workflowExecutionRepository: options.workflowExecutionRepository,
