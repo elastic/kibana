@@ -628,7 +628,7 @@ export default ({ getService }: FtrProviderContext) => {
           it('short', async () => {
             await runValueListFilterCase({
               listType: 'short',
-              field: 'destination.port',
+              field: 'source.port',
               listLines: [sample.sourcePort.toString()],
               ruleQuery: `source.port: ${sample.sourcePort}`,
             });

@@ -1354,8 +1354,8 @@ describe('build_exceptions_filter', () => {
           minimum_should_match: 1,
           should: [
             {
-              terms: {
-                'host.name': ['127.0.0.1'],
+              term: {
+                'host.name': '127.0.0.1',
               },
             },
           ],
