@@ -224,14 +224,14 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'
       createRule(getNewRule({ name: 'Test rule', enabled: false })).then(({ body: rule }) => {
         cy.intercept('POST', `${INTERNAL_ALERTING_API_FIND_RULES_PATH}*`, {
           statusCode: 500,
-        }).as('findRules');
+        });
 
         visitRuleDetailsPage(rule.id);
       });
 
-      cy.wait('@findRules', { timeout: 60000 });
-
-      cy.get(DISABLED_SNOOZE_BADGE).realHover();
+      cy.get(DISABLED_SNOOZE_BADGE).find('[role="progressbar"]').should('not.exist');
+      cy.get(DISABLED_SNOOZE_BADGE).scrollIntoView();
+      cy.get(DISABLED_SNOOZE_BADGE).trigger('mouseover');
 
       cy.get(TOOLTIP).contains('Unable to fetch snooze settings');
     });
