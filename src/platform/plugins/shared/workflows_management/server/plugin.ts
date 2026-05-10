@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type {
-  AgentContextLayerPluginSetup,
-  AgentContextLayerPluginStart,
-} from '@kbn/agent-context-layer-plugin/server';
-import type {
   CoreSetup,
   CoreStart,
   Logger,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+<<<<<<< HEAD
 import {
   ENTITY_MONITOR_WORKFLOW_ID,
   WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID,
@@ -24,6 +21,8 @@ import {
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
 import { createWorkflowSmlType } from './agent_builder/sml_types/workflow';
+=======
+>>>>>>> 1dfe3071d23555e565a4f2905fab6550731d0ba1
 import { defineRoutes } from './api/routes';
 import { WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
@@ -38,9 +37,7 @@ import {
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
 import { WorkflowsManagementFeatureConfig } from './features';
-import { WorkflowsAiTelemetryClient } from './telemetry/workflows_ai_telemetry_client';
 import type {
-  AgentBuilderPluginSetup,
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
   WorkflowsServerPluginSetupDeps,
@@ -62,7 +59,6 @@ export class WorkflowsPlugin
     >
 {
   private readonly logger: Logger;
-  private aiTelemetryClient: WorkflowsAiTelemetryClient | null = null;
   private config: WorkflowsManagementConfig;
   private availabilityUpdater: AvailabilityUpdater | null = null;
   private api: WorkflowsManagementApi | null = null;
@@ -79,11 +75,8 @@ export class WorkflowsPlugin
   ) {
     this.logger.debug('Workflows Management: Setup');
 
-    this.aiTelemetryClient = new WorkflowsAiTelemetryClient(core.analytics, this.logger);
-
     registerUISettings(core, plugins);
 
-    // Register the workflows management feature and its privileges
     plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
 
     this.logger.debug('Workflows Management: Creating workflows service');
@@ -94,18 +87,14 @@ export class WorkflowsPlugin
     const api = new WorkflowsManagementApi(workflowsService, this.config.available);
     this.api = api;
 
-    // Register workflows connector if actions plugin is available
     if (plugins.actions) {
-      // Register the workflows connector
       plugins.actions.registerType(getWorkflowsConnectorType(api));
 
-      // Register connector adapter for alerting if available
       if (plugins.alerting) {
         plugins.alerting.registerConnectorAdapter(getWorkflowsConnectorAdapter());
       }
     }
 
-    // Register public workflows client provider to allow any external plugin use it via the workflowsExtensions plugin
     plugins.workflowsExtensions.registerWorkflowsClientProvider(
       createWorkflowsClientProvider(workflowsService, this.config, this.logger)
     );
@@ -118,8 +107,6 @@ export class WorkflowsPlugin
 
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
     defineRoutes(router, api, this.logger, spaces, workflowsService);
-
-    this.setupAiIntegration(core, api, this.aiTelemetryClient);
 
     return {
       management: api,
@@ -150,6 +137,7 @@ export class WorkflowsPlugin
     return {};
   }
 
+<<<<<<< HEAD
   private setupAiIntegration(
     core: CoreSetup<WorkflowsServerPluginStartDeps>,
     api: WorkflowsManagementApi,
@@ -261,6 +249,8 @@ export class WorkflowsPlugin
     }
   }
 
+=======
+>>>>>>> 1dfe3071d23555e565a4f2905fab6550731d0ba1
   public stop() {
     this.availabilityUpdater?.stop();
   }
