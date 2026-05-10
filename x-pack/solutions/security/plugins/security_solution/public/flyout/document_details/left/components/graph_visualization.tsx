@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
+import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
+import { useGraphPreview } from '../../../../flyout_v2/document/hooks/use_graph_preview';
 import { GraphVisualization as SharedGraphVisualization } from '../../../shared/components/graph_visualization';
 
 export { GRAPH_ID } from '../../../shared/components/graph_visualization';
@@ -17,13 +18,9 @@ export { GRAPH_ID } from '../../../shared/components/graph_visualization';
  * Reads event context from {@link useDocumentDetailsContext} and delegates rendering to the shared {@link SharedGraphVisualization}.
  */
 export const GraphVisualization: React.FC = memo(() => {
-  const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser, scopeId } =
-    useDocumentDetailsContext();
-  const { eventIds, timestamp, isAlert } = useGraphPreview({
-    getFieldsData,
-    ecsData: dataAsNestedObject,
-    dataFormattedForFieldBrowser,
-  });
+  const { searchHit, scopeId } = useDocumentDetailsContext();
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+  const { eventIds, timestamp, isAlert } = useGraphPreview({ hit });
 
   return (
     <SharedGraphVisualization

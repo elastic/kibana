@@ -15,12 +15,12 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
-  GRAPH_PREVIEW_TEST_ID,
   VISUALIZATIONS_SECTION_CONTENT_TEST_ID,
   VISUALIZATIONS_SECTION_HEADER_TEST_ID,
 } from './test_ids';
 import {
   ANALYZER_PREVIEW_TEST_ID,
+  GRAPH_PREVIEW_TEST_ID,
   SESSION_PREVIEW_TEST_ID,
 } from '../../../../flyout_v2/document/components/test_ids';
 import { VisualizationsSection } from './visualizations_section';
@@ -31,7 +31,8 @@ import { useAlertPrevalenceFromProcessTree } from '../../../../flyout_v2/documen
 import { TestProviders } from '../../../../common/mock';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
-import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
+import { useGraphPreview } from '../../../../flyout_v2/document/hooks/use_graph_preview';
+import { useNavigateToGraphVisualization } from '../../shared/hooks/use_navigate_to_graph_visualization';
 import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
@@ -48,6 +49,7 @@ const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree 
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../data_view_manager/hooks/use_selected_patterns');
 jest.mock('../../shared/hooks/use_navigate_to_session_view');
+jest.mock('../../shared/hooks/use_navigate_to_graph_visualization');
 
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
@@ -62,7 +64,7 @@ jest.mock(
 );
 jest.mock('../../../../detections/hooks/use_is_analyzer_enabled');
 
-jest.mock('../../shared/hooks/use_graph_preview');
+jest.mock('../../../../flyout_v2/document/hooks/use_graph_preview');
 jest.mock('../../../../common/hooks/use_upselling');
 
 const mockUseGraphPreview = useGraphPreview as jest.Mock;
@@ -104,6 +106,9 @@ describe('<VisualizationsSection />', () => {
   beforeEach(() => {
     (useNavigateToSessionView as jest.Mock).mockReturnValue({
       navigateToSessionView: jest.fn(),
+    });
+    (useNavigateToGraphVisualization as jest.Mock).mockReturnValue({
+      navigateToGraphVisualization: jest.fn(),
     });
     (useSelectedPatterns as jest.Mock).mockReturnValue(['index']);
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
