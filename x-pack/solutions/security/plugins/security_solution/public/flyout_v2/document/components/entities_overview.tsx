@@ -122,9 +122,16 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
           undefined) as IdentityFields | undefined,
       [euidApi?.euid, dataAsNestedObject]
     );
+    // Fall back to a `<entity>.name`-only identity when EUID can't extract identifiers from the
+    // document (e.g. alerts that carry just `host.name` / `user.name`), so the entity store still
+    // gets queried.
     const legacyUserIdentityForStore =
       userName != null && userName !== ''
         ? ({ 'user.name': userName } as IdentityFields)
+        : undefined;
+    const legacyHostIdentityForStore =
+      hostName != null && hostName !== ''
+        ? ({ 'host.name': hostName } as IdentityFields)
         : undefined;
     const hostEntityId = euidApi?.euid.getEuidFromObject('host', dataAsNestedObject);
     const userEntityId = euidApi?.euid.getEuidFromObject('user', dataAsNestedObject);
@@ -139,9 +146,11 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
     });
     const hostEntityFromStore = useEntityFromStore({
       entityId: hostEntityId,
-      identityFields: hostEntityIdentifiers ?? undefined,
+      identityFields: hostEntityIdentifiers ?? legacyHostIdentityForStore,
       entityType: 'host',
-      skip: !entityStoreV2Enabled,
+      skip:
+        !entityStoreV2Enabled ||
+        (hostEntityIdentifiers == null && legacyHostIdentityForStore == null),
     });
 
     const userEntityRecord = userEntityFromStore.entityRecord;

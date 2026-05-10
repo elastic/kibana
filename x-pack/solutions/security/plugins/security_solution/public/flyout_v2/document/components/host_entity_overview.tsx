@@ -36,7 +36,6 @@ import { buildHostNamesFilter } from '../../../../common/search_strategy';
 import { HOST_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { getRiskFromEntityRecord } from '../../../flyout/entity_details/shared/entity_store_risk_utils';
 import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
 import type { DescriptionList } from '../../../../common/utility_types';
@@ -134,7 +133,7 @@ export const HOST_PREVIEW_BANNER = {
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   hostName,
   identityFields,
-  entityRecord: entityRecordProp,
+  entityRecord,
   scopeId = '',
   renderCellActions = noopCellActionRenderer,
   enableEntityLinks = false,
@@ -174,14 +173,6 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   }, [entityStoreV2Enabled, hostName, identityFields]);
 
   const storeHostEntityId = hostIdentityFields['entity.id'];
-
-  const entityFromStore = useEntityFromStore({
-    entityId: storeHostEntityId,
-    identityFields: hostIdentityFields,
-    entityType: 'host',
-    skip: !entityStoreV2Enabled || entityRecordProp != null,
-  });
-  const entityRecord = entityRecordProp ?? entityFromStore.entityRecord;
 
   const riskFromEntityRecord = useMemo(
     () => (entityRecord != null ? getRiskFromEntityRecord(entityRecord) : null),
@@ -295,8 +286,10 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
         title: LAST_SEEN,
         description:
           hostName != null && hostName !== '' ? (
-            entityStoreV2Enabled && entityFromStore.lastSeen ? (
-              <PreferenceFormattedDateFromPrimitive value={entityFromStore.lastSeen} />
+            entityStoreV2Enabled && entityRecord?.entity?.lifecycle?.last_activity ? (
+              <PreferenceFormattedDateFromPrimitive
+                value={entityRecord.entity.lifecycle.last_activity}
+              />
             ) : !entityStoreV2Enabled ? (
               <FirstLastSeen
                 indexPatterns={selectedPatterns}
@@ -312,14 +305,19 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
           ),
       },
     ],
-    [hostName, selectedPatterns, entityStoreV2Enabled, entityFromStore.lastSeen]
+    [
+      hostName,
+      selectedPatterns,
+      entityStoreV2Enabled,
+      entityRecord?.entity?.lifecycle?.last_activity,
+    ]
   );
 
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
 
   const isLoading = entityStoreV2Enabled
-    ? entityFromStore.isLoading || (riskFromEntityRecord == null && isRiskScoreLoading)
+    ? riskFromEntityRecord == null && isRiskScoreLoading
     : isRiskScoreLoading || isHostDetailsLoading;
 
   const [hostRiskLevel] = useMemo(() => {
