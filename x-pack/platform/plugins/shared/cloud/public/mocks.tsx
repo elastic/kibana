@@ -43,6 +43,7 @@ function createSetupMock(): jest.Mocked<CloudSetup> {
     getUrls: jest.fn().mockReturnValue({}),
     getPrivilegedUrls: jest.fn().mockResolvedValue({}),
     isInTrial: jest.fn().mockReturnValue(false),
+    trialDaysLeft: jest.fn().mockReturnValue(0),
     ...mockCloudUrls,
   };
 }
@@ -64,6 +65,7 @@ const createStartMock = (): jest.Mocked<CloudStart> => ({
   getUrls: jest.fn().mockReturnValue({}),
   getPrivilegedUrls: jest.fn().mockResolvedValue({}),
   isInTrial: jest.fn().mockReturnValue(false),
+  trialDaysLeft: jest.fn().mockReturnValue(0),
   ...mockCloudUrls,
 });
 

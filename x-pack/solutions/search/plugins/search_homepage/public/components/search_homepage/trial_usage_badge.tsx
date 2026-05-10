@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { css } from '@emotion/react';
 import {
@@ -52,11 +52,7 @@ export const TrialUsageBadge: React.FC = () => {
       .catch(() => {});
   }, [cloud]);
 
-  const trialDaysLeft = useMemo(() => {
-    if (!cloud?.trialEndDate) return 0;
-    const diff = cloud.trialEndDate.getTime() - Date.now();
-    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-  }, [cloud?.trialEndDate]);
+  const trialDaysLeft = cloud?.trialDaysLeft() ?? 0;
   const daysUsed = TRIAL_TOTAL_DAYS - trialDaysLeft;
 
   const button = (

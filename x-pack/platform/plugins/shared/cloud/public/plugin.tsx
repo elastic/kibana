@@ -118,6 +118,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
       getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),
       isInTrial: this.isInTrial.bind(this),
+      trialDaysLeft: this.trialDaysLeft.bind(this),
     };
   }
 
@@ -168,6 +169,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
       getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),
       isInTrial: this.isInTrial.bind(this),
+      trialDaysLeft: this.trialDaysLeft.bind(this),
     };
   }
 
@@ -195,16 +197,21 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
     }
   }
 
-  private isInTrial(): boolean {
-    if (this.config.serverless?.in_trial) return true;
+  private trialDaysLeft(): number {
     if (this.config.trial_end_date) {
       const endDateMs = new Date(this.config.trial_end_date).getTime();
       if (!Number.isNaN(endDateMs)) {
-        return Date.now() <= endDateMs;
+        const diff = endDateMs - Date.now();
+        return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
       } else {
         this.logger.error('cloud.trial_end_date config value could not be parsed.');
       }
     }
-    return false;
+    return 0;
+  }
+
+  private isInTrial(): boolean {
+    if (this.config.serverless?.in_trial) return true;
+    return this.trialDaysLeft() > 0;
   }
 }
