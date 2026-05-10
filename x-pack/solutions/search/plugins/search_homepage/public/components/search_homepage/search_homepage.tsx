@@ -10,12 +10,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { KibanaVersionBadge, TrialUsageBadge } from '@kbn/search-shared-ui';
+import { KibanaVersionBadge } from '@kbn/search-shared-ui';
 import { useAuthenticatedUser } from '../../hooks/use_authenticated_user';
 import { useKibana } from '../../hooks/use_kibana';
 import { BasicMetricBadges } from './basic_metric_badges';
+import { CloudLinks } from './cloud_links';
+import { VerticalSeparatorStyle } from './cloud_links_styles';
 import { ConnectToElasticsearch } from './connect_to_elasticsearch';
 import { SearchHomepageBody } from './search_homepage_body';
+import { LicenseBadge } from './license_badge';
 import { docLinks } from '../../../common/doc_links';
 import { useTrialUsageData } from '../../hooks/api/use_trial_usage_data';
 
@@ -86,27 +89,20 @@ export const SearchHomepagePage = () => {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <TrialUsageBadge
-                  billingUrl={billingUrl}
-                  isServerless={cloud?.isServerlessEnabled}
-                  trialDaysLeft={trialUsageData?.trialDaysLeft}
-                  storageUsage={trialUsageData?.storageUsage}
-                  mlNodeCount={trialUsageData?.mlNodeCount}
-                  mlMemoryLimit={trialUsageData?.mlMemoryLimit}
-                  llmTotalTokens={trialUsageData?.llmTotalTokens}
-                  searchPowerMax={trialUsageData?.searchPowerMax}
-                  searchPowerMin={trialUsageData?.searchPowerMin}
-                  boostWindowHours={trialUsageData?.boostWindowHours}
-                />
+                <span css={VerticalSeparatorStyle} />
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <CloudLinks />
+              </EuiFlexItem>
+              {(!cloud?.isCloudEnabled || cloud?.isInTrial()) && (
+                <EuiFlexItem grow={false}>
+                  <LicenseBadge />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <ConnectToElasticsearch />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <ConnectToElasticsearch />
           </EuiFlexItem>
         </EuiFlexGroup>
 
