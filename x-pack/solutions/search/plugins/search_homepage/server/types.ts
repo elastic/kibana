@@ -12,7 +12,6 @@ export interface SearchHomepagePluginStart {}
 
 export interface RouterContextData {
   isServerless: boolean;
-  trialEndDate?: Date;
 }
 
 export interface StatsResponse {
@@ -20,15 +19,4 @@ export interface StatsResponse {
     size: string;
     documents: number;
   };
-}
-
-export interface TrialUsageResponse {
-  trialDaysLeft: number;
-  storageUsage: string;
-  mlNodeCount?: number;
-  mlMemoryLimit?: string;
-  llmTotalTokens?: number;
-  searchPowerMax?: number;
-  searchPowerMin?: number;
-  boostWindowHours?: number;
 }

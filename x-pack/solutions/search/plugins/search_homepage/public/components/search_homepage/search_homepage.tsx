@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -20,7 +20,6 @@ import { ConnectToElasticsearch } from './connect_to_elasticsearch';
 import { SearchHomepageBody } from './search_homepage_body';
 import { LicenseBadge } from './license_badge';
 import { docLinks } from '../../../common/doc_links';
-import { useTrialUsageData } from '../../hooks/api/use_trial_usage_data';
 
 export const SearchHomepagePage = () => {
   const {
@@ -28,19 +27,6 @@ export const SearchHomepagePage = () => {
   } = useKibana();
 
   const { user } = useAuthenticatedUser();
-  const { data: trialUsageData } = useTrialUsageData();
-
-  const [billingUrl, setBillingUrl] = useState<string>('');
-  useEffect(() => {
-    cloud
-      ?.getPrivilegedUrls()
-      .then((urls) => {
-        if (urls.billingUrl) {
-          setBillingUrl(urls.billingUrl);
-        }
-      })
-      .catch(() => {});
-  }, [cloud]);
 
   useEffect(() => {
     if (searchNavigation) {
@@ -89,16 +75,18 @@ export const SearchHomepagePage = () => {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
+                {(true || !cloud?.isCloudEnabled || cloud?.isInTrial()) && (
+                  <EuiFlexItem grow={false}>
+                    <LicenseBadge />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <span css={VerticalSeparatorStyle} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <CloudLinks />
               </EuiFlexItem>
-              {(!cloud?.isCloudEnabled || cloud?.isInTrial()) && (
-                <EuiFlexItem grow={false}>
-                  <LicenseBadge />
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

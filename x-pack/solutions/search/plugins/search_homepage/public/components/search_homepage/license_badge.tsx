@@ -12,10 +12,15 @@ import { i18n } from '@kbn/i18n';
 import type { LicenseType } from '@kbn/licensing-types/src/types';
 import { css } from '@emotion/react';
 import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
+import { TrialUsageBadge } from './trial_usage_badge';
 
 export const LicenseBadge = () => {
   const { isTrial, licenseType } = useGetLicenseInfo();
   const { euiTheme } = useEuiTheme();
+
+  if (isTrial) {
+    return <TrialUsageBadge />;
+  }
 
   const LICENSE_LABEL: Record<LicenseType, string> = {
     trial: i18n.translate('xpack.searchHomepage.licenseLabel.trial', {
@@ -44,7 +49,7 @@ export const LicenseBadge = () => {
           borderRadius: euiTheme.size.l,
           padding: `0 ${euiTheme.size.m}`,
         })}
-        color={isTrial ? 'primary' : 'hollow'}
+        color="hollow"
       >
         {LICENSE_LABEL[licenseType]}
       </EuiBadge>
