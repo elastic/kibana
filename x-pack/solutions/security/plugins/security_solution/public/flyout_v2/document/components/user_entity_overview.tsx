@@ -131,7 +131,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
 }) => {
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const euidApi = useEntityStoreEuidApi();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -343,13 +343,14 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
           <EuiFlexItem grow={false}>
             <EuiIcon type={USER_ICON} aria-hidden={true} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false} data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}>
+          <EuiFlexItem grow={false}>
             {enableEntityLinks ? (
               <PreviewLink
                 field="user.name"
                 value={displayName}
                 entityId={entityRecord?.entity?.id}
                 scopeId={scopeId}
+                data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
               >
                 <EuiText
                   css={css`
@@ -362,6 +363,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
               </PreviewLink>
             ) : (
               <EuiText
+                data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
                 css={css`
                   font-size: ${xsFontSize};
                   font-weight: ${euiTheme.font.weight.bold};

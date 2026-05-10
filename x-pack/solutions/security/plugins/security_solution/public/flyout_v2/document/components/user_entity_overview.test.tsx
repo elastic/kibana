@@ -62,14 +62,6 @@ jest.mock('../../../common/lib/kibana', () => {
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...actual,
-    useUiSetting: jest.fn().mockReturnValue(false),
-  };
-});
-
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };

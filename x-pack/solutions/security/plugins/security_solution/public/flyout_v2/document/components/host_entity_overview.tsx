@@ -362,13 +362,14 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
           <EuiFlexItem grow={false}>
             <EuiIcon type={HOST_ICON} aria-hidden={true} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false} data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}>
+          <EuiFlexItem grow={false}>
             {enableEntityLinks ? (
               <PreviewLink
                 field="host.name"
                 value={hostName}
                 entityId={entityRecord?.entity?.id}
                 scopeId={scopeId}
+                data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
               >
                 <EuiText
                   css={css`
@@ -381,6 +382,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
               </PreviewLink>
             ) : (
               <EuiText
+                data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
                 css={css`
                   font-size: ${xsFontSize};
                   font-weight: ${euiTheme.font.weight.bold};
