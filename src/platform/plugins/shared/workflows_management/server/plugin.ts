@@ -13,8 +13,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
-import { createWorkflowSmlType } from './agent_builder/sml_types/workflow';
+
 import { defineRoutes } from './api/routes';
 import { WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
@@ -124,75 +123,6 @@ export class WorkflowsPlugin
 
     this.logger.debug('Workflows Management: Started');
     return {};
-  }
-
-  private setupAiIntegration(
-    core: CoreSetup<WorkflowsServerPluginStartDeps>,
-    api: WorkflowsManagementApi,
-    aiTelemetryClient: WorkflowsAiTelemetryClient
-  ): void {
-    void core.plugins
-      .onSetup<{ agentBuilder: AgentBuilderPluginSetup }>('agentBuilder')
-      .then(({ agentBuilder }) => {
-        if (agentBuilder.found) {
-          this.logger.debug(
-            'Workflows Management: Agent Builder found, registering AI integration'
-          );
-          registerWorkflowAgentBuilderIntegration({
-            agentBuilder: agentBuilder.contract,
-            logger: this.logger,
-            api,
-            aiTelemetryClient,
-          });
-        }
-      })
-      .catch((err) => {
-        const message = err instanceof Error ? err.message : String(err);
-        this.logger.warn(
-          `Workflows Management: Failed to register AI integration with Agent Builder: ${message}`
-        );
-      });
-
-    void core.plugins
-      .onSetup<{
-        agentContextLayer: AgentContextLayerPluginSetup;
-      }>('agentContextLayer')
-      .then(({ agentContextLayer }) => {
-        if (agentContextLayer.found) {
-          agentContextLayer.contract.registerType(createWorkflowSmlType(api));
-          this.logger.debug(
-            'Workflows Management: Workflow SML type registered with Agent Context Layer'
-          );
-        } else {
-          this.logger.warn(
-            'Workflows Management: agentContextLayer not available — workflow SML type not registered'
-          );
-        }
-      })
-      .catch((err) => {
-        const message = err instanceof Error ? err.message : String(err);
-        this.logger.warn(`Workflows Management: Failed to register workflow SML type: ${message}`);
-      });
-
-    void core.plugins
-      .onStart<{ agentContextLayer: AgentContextLayerPluginStart }>('agentContextLayer')
-      .then(({ agentContextLayer }) => {
-        if (agentContextLayer.found) {
-          api.setSmlIndexAttachment(
-            agentContextLayer.contract.indexAttachment,
-            this.logger.get('sml')
-          );
-          this.logger.debug(
-            'Workflows Management: SML event-driven indexing wired to workflow CRUD'
-          );
-        }
-      })
-      .catch((err) => {
-        const message = err instanceof Error ? err.message : String(err);
-        this.logger.warn(
-          `Workflows Management: Failed to wire SML indexing with Agent Context Layer: ${message}`
-        );
-      });
   }
 
   private async runManagedWorkflowsStartupReconciliation(pluginIds: string[]): Promise<void> {
