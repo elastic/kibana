@@ -13,9 +13,8 @@ import type { EsWorkflowCreate, WorkflowYaml } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
-  type ManagedWorkflowId,
+  type ManagedWorkflowDefinition,
   type ManagedWorkflowTemplateValues,
-  type ResolvedManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type {
@@ -87,7 +86,7 @@ export class ManagedWorkflowsService {
   }
 
   public async installManagedWorkflow(
-    id: ManagedWorkflowId,
+    id: string,
     options: InstallManagedWorkflowOptions,
     registeredPluginId?: string
   ): Promise<void> {
@@ -155,7 +154,7 @@ export class ManagedWorkflowsService {
   }
 
   public async uninstallManagedWorkflow(
-    id: ManagedWorkflowId,
+    id: string,
     options: ManagedWorkflowOperationOptions,
     registeredPluginId?: string
   ): Promise<void> {
@@ -182,7 +181,7 @@ export class ManagedWorkflowsService {
   }
 
   public async executeManagedWorkflow(
-    id: ManagedWorkflowId,
+    id: string,
     request: KibanaRequest,
     options: ExecuteManagedWorkflowOptions,
     registeredPluginId?: string
@@ -240,7 +239,7 @@ export class ManagedWorkflowsService {
   }
 
   private buildManagedWorkflowDocument(params: {
-    definition: ResolvedManagedWorkflowDefinition;
+    definition: ManagedWorkflowDefinition;
     yaml: string;
     managedTemplateValues: ManagedWorkflowTemplateValues | null;
     spaceId: string;
@@ -288,7 +287,7 @@ export class ManagedWorkflowsService {
       managed: true,
       managedBy: definition.pluginId,
       definitionHash,
-      managedTemplateValues,
+      managedTemplateValues: managedTemplateValues as Record<string, unknown> | null,
       originSystemWorkflowId: definition.id,
       lifecycle: definition.management.lifecycle,
       deleted_at: null,
@@ -299,7 +298,7 @@ export class ManagedWorkflowsService {
   }
 
   private assertPluginRegistration(
-    definition: ResolvedManagedWorkflowDefinition,
+    definition: ManagedWorkflowDefinition,
     registeredPluginId?: string
   ): void {
     if (!registeredPluginId) {
@@ -313,10 +312,7 @@ export class ManagedWorkflowsService {
     }
   }
 
-  private resolveWorkflowDocumentId(
-    id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions
-  ): string {
+  private resolveWorkflowDocumentId(id: string, options: ManagedWorkflowOperationOptions): string {
     const customId = options.workflowId?.trim();
     const suffix = options.workflowIdSuffix?.trim();
 
@@ -353,9 +349,9 @@ export class ManagedWorkflowsService {
   }
 
   private resolveManagedWorkflowYaml(params: {
-    definition: ResolvedManagedWorkflowDefinition;
+    definition: ManagedWorkflowDefinition;
     values?: ManagedWorkflowTemplateValues;
-    existingTemplateValues?: Record<string, unknown> | null;
+    existingTemplateValues?: ManagedWorkflowTemplateValues | null;
   }): { yaml: string; managedTemplateValues: ManagedWorkflowTemplateValues | null } {
     const { definition, values, existingTemplateValues } = params;
 
@@ -385,7 +381,7 @@ export class ManagedWorkflowsService {
     };
   }
 
-  private computeManagedDefinitionHash(definition: ResolvedManagedWorkflowDefinition): string {
+  private computeManagedDefinitionHash(definition: ManagedWorkflowDefinition): string {
     if (definition.yamlTemplate) {
       return computeDefinitionHash(definition.yamlTemplate.toString());
     }
@@ -398,8 +394,8 @@ export class ManagedWorkflowsService {
   }
 
   private areTemplateValuesEqual(
-    existing: Record<string, unknown> | null | undefined,
-    next: Record<string, unknown> | null
+    existing: ManagedWorkflowTemplateValues | null | undefined,
+    next: ManagedWorkflowTemplateValues | null
   ): boolean {
     return JSON.stringify(existing ?? null) === JSON.stringify(next ?? null);
   }

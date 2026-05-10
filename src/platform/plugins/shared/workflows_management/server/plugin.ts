@@ -38,7 +38,6 @@ import type {
 import { registerUISettings } from './ui_settings';
 import { stepSchemas } from '../common/step_schemas';
 
-
 export class WorkflowsPlugin
   implements
     Plugin<

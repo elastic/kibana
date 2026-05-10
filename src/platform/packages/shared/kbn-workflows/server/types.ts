@@ -8,53 +8,76 @@
  */
 
 import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
-import type { ManagedWorkflowId } from '../managed';
+import type { ManagedWorkflowId, ManagedWorkflowTemplateValuesForId } from '../managed';
 
-export interface ManagedWorkflowOperationOptions {
+interface ManagedWorkflowOperationBaseOptions {
   spaceId: string;
   workflowId?: string;
   workflowIdSuffix?: string;
-  values?: Record<string, unknown>;
 }
 
-export interface ExecuteManagedWorkflowOptions extends ManagedWorkflowOperationOptions {
+type ManagedWorkflowValuesOption<TId extends ManagedWorkflowId> =
+  ManagedWorkflowTemplateValuesForId<TId> extends never
+    ? {
+        values?: never;
+      }
+    : {
+        values?: ManagedWorkflowTemplateValuesForId<TId>;
+      };
+
+export type ManagedWorkflowOperationOptions<TId extends ManagedWorkflowId = ManagedWorkflowId> =
+  ManagedWorkflowOperationBaseOptions & ManagedWorkflowValuesOption<TId>;
+
+export type ExecuteManagedWorkflowOptions<TId extends ManagedWorkflowId = ManagedWorkflowId> = Omit<
+  ManagedWorkflowOperationOptions<TId>,
+  'values'
+> & {
   inputs?: Record<string, unknown>;
   triggeredBy?: string;
   metadata?: Record<string, unknown>;
-}
+};
 
 export interface RegisteredManagedWorkflowsLifecycleApi {
-  install: (id: ManagedWorkflowId, options: ManagedWorkflowOperationOptions) => Promise<void>;
-  uninstall: (id: ManagedWorkflowId, options: ManagedWorkflowOperationOptions) => Promise<void>;
+  install: <TId extends ManagedWorkflowId>(
+    id: TId,
+    options: ManagedWorkflowOperationOptions<TId>
+  ) => Promise<void>;
+  uninstall: <TId extends ManagedWorkflowId>(
+    id: TId,
+    options: ManagedWorkflowOperationOptions<TId>
+  ) => Promise<void>;
 }
 
 export interface RegisteredManagedWorkflowsApi extends RegisteredManagedWorkflowsLifecycleApi {
-  execute: (id: ManagedWorkflowId, options: ExecuteManagedWorkflowOptions) => Promise<string>;
+  execute: <TId extends ManagedWorkflowId>(
+    id: TId,
+    options: ExecuteManagedWorkflowOptions<TId>
+  ) => Promise<string>;
 }
 
 export interface ManagedWorkflowsApi {
-  install: (
+  install: <TId extends ManagedWorkflowId>(
     pluginId: string,
-    id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions
+    id: TId,
+    options: ManagedWorkflowOperationOptions<TId>
   ) => Promise<void>;
-  uninstall: (
+  uninstall: <TId extends ManagedWorkflowId>(
     pluginId: string,
-    id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions
+    id: TId,
+    options: ManagedWorkflowOperationOptions<TId>
   ) => Promise<void>;
-  execute: (
+  execute: <TId extends ManagedWorkflowId>(
     pluginId: string,
-    id: ManagedWorkflowId,
-    options: ExecuteManagedWorkflowOptions
+    id: TId,
+    options: ExecuteManagedWorkflowOptions<TId>
   ) => Promise<string>;
 }
 
 export interface PluginScopedManagedWorkflowsApi extends RegisteredManagedWorkflowsLifecycleApi {
-  execute: (
+  execute: <TId extends ManagedWorkflowId>(
     request: KibanaRequest,
-    id: ManagedWorkflowId,
-    options: ExecuteManagedWorkflowOptions
+    id: TId,
+    options: ExecuteManagedWorkflowOptions<TId>
   ) => Promise<string>;
 }
 

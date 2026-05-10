@@ -67,9 +67,9 @@ const managed = await workflowsExtensions.initManagedWorkflowsClient(MY_PLUGIN_I
 
 Client surface:
 
-- `install(id, options?)` — no request required
-- `uninstall(id, options?)` — no request required
-- `execute(request, id, options?)` — **request required** (used for attribution and space context)
+- `install(id, options)` — no request required
+- `uninstall(id, options)` — no request required
+- `execute(request, id, options)` — **request required** (used for attribution and space context)
 
 ## 3) When to install
 
@@ -133,9 +133,9 @@ import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 await managed.install(MY_WORKFLOW_ID, { spaceId: GLOBAL_WORKFLOW_SPACE_ID });
 ```
 
-### Default
+### No default
 
-If `spaceId` is omitted in managed operations, the fallback is global (`'*'`). Pass `spaceId` explicitly anywhere it must be unambiguous.
+`spaceId` is required for managed operations. Omitted/empty `spaceId` is rejected. Use `GLOBAL_WORKFLOW_SPACE_ID` (`'*'`) explicitly when you want a global install.
 
 ## 5) Workflow identity
 
@@ -202,7 +202,7 @@ await managed.execute(request, MY_WORKFLOW_ID, {
 
 ## 6) Lifecycle policies (`management`)
 
-Every managed definition declares a policy:
+Every managed definition declares a policy (no default policy is injected at runtime):
 
 ```ts
 management: {
@@ -315,8 +315,14 @@ Use when some values are only known at install time (entity id, connector id, ru
 ```ts
 import type { ManagedWorkflowDefinition } from '@kbn/workflows/managed';
 
-export const MY_TEMPLATE_WORKFLOW: ManagedWorkflowDefinition = {
-  id: 'system-my-template',
+interface MyTemplateValues {
+  entityId: string;
+}
+
+export const MY_TEMPLATE_WORKFLOW_ID = 'system-my-template';
+
+export const MY_TEMPLATE_WORKFLOW = {
+  id: MY_TEMPLATE_WORKFLOW_ID,
   pluginId: 'myPlugin',
   yamlTemplate: ({ entityId }) => `name: Monitor ${entityId}
 enabled: true
@@ -334,15 +340,19 @@ steps:
     versionStrategy: 'auto',
     enablement: 'restorable',
   },
-};
+} as const satisfies ManagedWorkflowDefinition<MyTemplateValues>;
 
 // Install:
-await managed.install('system-my-template', {
+await managed.install(MY_TEMPLATE_WORKFLOW_ID, {
   workflowIdSuffix: 'host-42',
   values: { entityId: 'host-42' },
   spaceId: 'my-space',
 });
 ```
+
+**Why `satisfies` for templates?** `as const satisfies ManagedWorkflowDefinition<MyTemplateValues>` validates the object against the type while preserving the literal `id` and `yamlTemplate` signature for downstream type inference. This allows the platform to infer `TValues` at call sites — `values` is type-checked for this workflow id (`entityId` typo/wrong type fails at compile time).
+
+For `yaml`-based definitions (no template values), a direct annotation (`: ManagedWorkflowDefinition`) is sufficient since there is no `values` type to infer.
 
 ## 9) Executing managed workflows
 
@@ -350,7 +360,7 @@ Execution always runs in the context of a `KibanaRequest`:
 
 - the **request** is required for user attribution and authorization.
 - the **execution document's `spaceId`** is taken from `options.spaceId` — pass the requesting space explicitly so the execution and its results are scoped to that space (this is what makes per-space visibility work for global workflows).
-- if `options.spaceId` is omitted, the execution falls back to a default and the resulting document is not scoped to the requester's space — so for any user-initiated execute call, always pass `spaceId`.
+- `options.spaceId` is required. Omitting it rejects the managed operation.
 
 ```ts
 const executionId = await managed.execute(request, MY_WORKFLOW_ID, {

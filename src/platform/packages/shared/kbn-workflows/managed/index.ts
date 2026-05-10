@@ -11,52 +11,44 @@ import type {
   ManagedWorkflowDefinition,
   ManagedWorkflowManagement,
   ManagedWorkflowTemplateValues,
-  ResolvedManagedWorkflowDefinition,
 } from './types';
 import { EXAMPLE_MANAGED_WORKFLOW, EXAMPLE_MANAGED_WORKFLOW_ID } from './workflows';
 
-export type {
-  ManagedWorkflowDefinition,
-  ManagedWorkflowManagement,
-  ManagedWorkflowTemplateValues,
-  ResolvedManagedWorkflowDefinition,
-};
-
-const defaultManagementPolicy: Required<ManagedWorkflowManagement> = {
-  lifecycle: 'static',
-  versionStrategy: 'auto',
-  enablement: 'restorable',
-};
+export type { ManagedWorkflowDefinition, ManagedWorkflowManagement, ManagedWorkflowTemplateValues };
 
 export const managedWorkflowDefinitions = [EXAMPLE_MANAGED_WORKFLOW] as const;
 
-export type ManagedWorkflowId = (typeof managedWorkflowDefinitions)[number]['id'];
+type ManagedWorkflowDefinitionById = {
+  [TDefinition in (typeof managedWorkflowDefinitions)[number] as TDefinition['id']]: TDefinition;
+};
 
-export const getManagedWorkflowDefinition = (
-  id: string
-): ResolvedManagedWorkflowDefinition | undefined => {
-  const workflow = managedWorkflowDefinitions.find((definition) => definition.id === id);
+export type ManagedWorkflowId = keyof ManagedWorkflowDefinitionById;
+type ManagedWorkflowDefinitionEntry = ManagedWorkflowDefinitionById[ManagedWorkflowId];
+
+export type ManagedWorkflowTemplateValuesById = {
+  [TId in ManagedWorkflowId]: ManagedWorkflowDefinitionById[TId] extends {
+    yamlTemplate: (values: infer TValues) => string;
+  }
+    ? TValues
+    : never;
+};
+
+export type ManagedWorkflowTemplateValuesForId<TId extends ManagedWorkflowId> =
+  ManagedWorkflowTemplateValuesById[TId];
+
+export const getManagedWorkflowDefinition = (id: string): ManagedWorkflowDefinition | undefined => {
+  const workflow = managedWorkflowDefinitions.find(
+    (definition): definition is ManagedWorkflowDefinitionEntry => definition.id === id
+  );
   if (!workflow) {
     return undefined;
   }
 
-  return {
-    ...workflow,
-    management: {
-      ...defaultManagementPolicy,
-      ...workflow.management,
-    },
-  };
+  return workflow;
 };
 
-export const getManagedWorkflowDefinitions = (): ResolvedManagedWorkflowDefinition[] => {
-  return managedWorkflowDefinitions.map((workflow) => ({
-    ...workflow,
-    management: {
-      ...defaultManagementPolicy,
-      ...workflow.management,
-    },
-  }));
+export const getManagedWorkflowDefinitions = (): ManagedWorkflowDefinition[] => {
+  return [...managedWorkflowDefinitions];
 };
 
 export { EXAMPLE_MANAGED_WORKFLOW_ID };

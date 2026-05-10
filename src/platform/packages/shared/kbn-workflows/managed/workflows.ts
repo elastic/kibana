@@ -11,15 +11,17 @@ import type { ManagedWorkflowDefinition } from './types';
 
 export const EXAMPLE_MANAGED_WORKFLOW_ID = 'system-example-greeting';
 
-export const EXAMPLE_MANAGED_WORKFLOW: ManagedWorkflowDefinition = {
+export interface ExampleManagedWorkflowTemplateValues {
+  recipient: string;
+}
+
+export const EXAMPLE_MANAGED_WORKFLOW = {
   id: EXAMPLE_MANAGED_WORKFLOW_ID,
   pluginId: 'workflowsExtensionsExample',
   yamlTemplate: ({ recipient }) => `name: Example Greeting - ${recipient}
 enabled: true
 triggers:
-  - type: scheduled
-    with:
-      every: 30m
+  - type: manual
 steps:
   - name: greet
     type: console
@@ -31,4 +33,4 @@ steps:
     versionStrategy: 'auto',
     enablement: 'restorable',
   },
-};
+} as const satisfies ManagedWorkflowDefinition<ExampleManagedWorkflowTemplateValues>;
