@@ -2347,13 +2347,12 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@9.3.4":
-  version "9.3.4"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.3.4.tgz#b124f33ba8ddd98267798672dba5ad4aee9d6c89"
-  integrity sha512-Mp14fPEYx+WTfZdcvAaZ9WkLYGHQCbwMx6EP5VCucYdhv4cn/g2sbnMT5HzK+gX3XEpBnnkEK/+WysCKzxuo3A==
+"@elastic/elasticsearch@9.4.0":
+  version "9.4.0"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.4.0.tgz#3ae5e4ef9d4167cc36782c0658a6a0f783e51b4a"
+  integrity sha512-UbvHAtGAqiQdAsAmb3vfCMwOTIf6BoSf6MDpz7mw5UzpU3pRSl4KeFzaXRfrk4+PrgiudYx14socGCI6frgguQ==
   dependencies:
     "@elastic/transport" "^9.3.5"
-    apache-arrow "18.x - 21.x"
     tslib "^2.4.0"
 
 "@elastic/ems-client@8.7.0":
