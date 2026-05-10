@@ -152,6 +152,10 @@ export const schema = Joi.object()
         slow: Joi.number().default(30000),
         timeout: Joi.number().default(INSPECTING ? 360000 * 100 : 360000),
         ui: Joi.string().default('bdd'),
+        // Number of times mocha will retry a failed test (0 = no retry).
+        // Default of 1 means each test runs at least twice on failure. The final
+        // attempt is the one reported to lifecycle hooks, junit and ci-stats.
+        retries: Joi.number().integer().min(0).default(1),
         // Currently supporting beforeAll and afterAll.
         rootHooks: Joi.object()
           .keys({

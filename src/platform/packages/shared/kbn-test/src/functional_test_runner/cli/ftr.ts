@@ -40,12 +40,25 @@ export function runFtrCli() {
       }
 
       const esVersion = esVersionInput ? new EsVersion(esVersionInput) : EsVersion.getDefault();
+
+      const retriesFlag = flagsReader.string('retries');
+      let retriesOverride: number | undefined;
+      if (retriesFlag !== undefined) {
+        const parsed = Number(retriesFlag);
+        if (!Number.isInteger(parsed) || parsed < 0) {
+          throw createFlagError(`--retries must be a non-negative integer, got "${retriesFlag}"`);
+        }
+        retriesOverride = parsed;
+      }
+
       const settingOverrides = {
         mochaOpts: {
           bail: flagsReader.boolean('bail'),
           dryRun: flagsReader.boolean('dry-run'),
           grep: flagsReader.string('grep'),
           invert: flagsReader.boolean('invert'),
+          // Only override the schema default (1) when --retries is explicitly passed
+          ...(retriesOverride !== undefined ? { retries: retriesOverride } : {}),
         },
         kbnTestServer: {
           installDir: flagsReader.path('kibana-install-dir'),
@@ -141,6 +154,7 @@ export function runFtrCli() {
           'exclude-tag',
           'kibana-install-dir',
           'es-version',
+          'retries',
         ],
         boolean: [
           'bail',
@@ -179,6 +193,8 @@ export function runFtrCli() {
           --headless         run browser in headless mode
           --dry-run          report tests without executing them
           --pauseOnError     pause test runner on error
+          --retries=N        retry failed tests up to N times before reporting failure
+                               (default: 1, i.e. each test runs at least twice on failure)
         `,
       },
     }
