@@ -1,0 +1,5 @@
+# Local eval-result outputs from compare_variants.sh / build_comparison_html.mjs.
+# Each run drops Playwright/eval JSON artefacts into runs/<variant>/ for the
+# HTML builder to read. Don't commit them — comparison.html (the rendered
+# snapshot) is checked in instead.
+runs/

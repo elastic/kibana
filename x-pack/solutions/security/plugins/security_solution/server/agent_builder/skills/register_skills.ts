@@ -13,6 +13,7 @@ import { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting
 import { getDetectionRuleEditSkill } from './detection_rule_edit';
 import { getEntityAnalyticsSkill } from './entity_analytics';
 import { pciComplianceSkill } from './pci_compliance';
+import { pciComplianceAutonomousSkill } from './pci_compliance_autonomous';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
@@ -63,5 +64,9 @@ export const registerSkills = async ({
 
   if (experimentalFeatures.pciComplianceAgentBuilder) {
     agentBuilder.skills.register(pciComplianceSkill);
+  }
+
+  if (experimentalFeatures.pciComplianceAutonomousAgentBuilder) {
+    agentBuilder.skills.register(pciComplianceAutonomousSkill);
   }
 };

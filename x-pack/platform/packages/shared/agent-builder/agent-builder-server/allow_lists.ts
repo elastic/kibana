@@ -135,6 +135,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'detection-rule-edit',
   'threat-hunting',
   'pci-compliance',
+  'pci-compliance-autonomous',
 
   // O11Y
   'observability.rca',

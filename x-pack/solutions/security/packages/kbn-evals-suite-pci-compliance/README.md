@@ -99,3 +99,44 @@ Scenario-specific criteria layer on top of the baseline.
 - **Feature flag isolation**: The `pciComplianceAgentBuilder` flag is
   off-by-default in Kibana; the `evals_pci_compliance` config set isolates
   the suite from the rest of the eval runners.
+
+## Hand-written vs autonomous skill comparison (`EVAL_PCI_VARIANT`)
+
+This same suite can drive **either** of two PCI compliance skills registered
+in Kibana, selected by the `EVAL_PCI_VARIANT` env var:
+
+| Variant       | Skill ID                       | Feature flag                            | Scout config set                          | Buildkite step                                       |
+| ------------- | ------------------------------ | --------------------------------------- | ----------------------------------------- | ---------------------------------------------------- |
+| `handwritten` | `pci-compliance`               | `pciComplianceAgentBuilder`             | `evals_pci_compliance`                    | `kbn-evals-weekly-pci-compliance` (default)          |
+| `autonomous`  | `pci-compliance-autonomous`    | `pciComplianceAutonomousAgentBuilder`   | `evals_pci_compliance_autonomous`         | `kbn-evals-weekly-pci-compliance-autonomous`         |
+
+Both skills register **identical tool sets** (same `pci_scope_discovery`,
+`pci_compliance`, `pci_field_mapper`, `generate_esql`, `execute_esql`). The
+ONLY thing that varies between variants is the skill content itself —
+instructions, do-not-use boundaries, domain knowledge. This isolates skill
+content as the only experimental variable in a side-by-side comparison.
+
+To run BOTH back-to-back on a host with a configured AI connector and emit a
+side-by-side HTML report (`comparison.html` next to this README):
+
+```sh
+./scripts/compare_variants.sh
+open comparison.html
+```
+
+The script boots Kibana twice (once per variant), runs all 8 scenarios against
+each, then renders a side-by-side report with per-scenario LLM-judge scores,
+provenance, and reasoning. To preview the report layout WITHOUT a cluster:
+
+```sh
+EVAL_DRY_RUN=1 ./scripts/compare_variants.sh    # structural HTML only
+```
+
+The `comparison.html` report is also re-generated standalone whenever you
+have new results JSON to paste in:
+
+```sh
+node ./scripts/build_comparison_html.mjs \
+  --handwritten ./runs/handwritten \
+  --autonomous  ./runs/autonomous
+```
