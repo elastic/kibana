@@ -10,8 +10,11 @@
 import React from 'react';
 import { cleanup, act } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { MoveOverlay } from './move_overlay';
 import { DEVELOPER_TOOLBAR_ID, DEVTOOL_CLONE_ATTR, MEASURE_OVERLAY_ID } from '../../lib/constants';
+import { getDefaultLayoutConfig } from '../../lib/layout/layout_config';
+import { MoveOverlay } from './move_overlay';
+
+const defaultLayoutConfig = getDefaultLayoutConfig(16);
 
 // jsdom doesn't provide PointerEvent — polyfill with MouseEvent
 class PointerEventPolyfill extends MouseEvent {
@@ -26,10 +29,11 @@ if (typeof globalThis.PointerEvent === 'undefined') {
     PointerEventPolyfill as unknown as typeof PointerEvent;
 }
 
-const firePointerMove = (x: number, y: number) => {
+const firePointerMove = (x: number, y: number, shiftKey = true) => {
   const event = new PointerEvent('pointermove', {
     clientX: x,
     clientY: y,
+    shiftKey,
     bubbles: true,
   });
   document.dispatchEvent(event);
@@ -62,10 +66,17 @@ describe('MoveOverlay', () => {
   let setIsMoveMode: jest.Mock;
   let target: HTMLDivElement;
   let originalElementsFromPoint: typeof document.elementsFromPoint;
+  let originalRAF: typeof requestAnimationFrame;
 
   beforeEach(() => {
     setIsMoveMode = jest.fn();
     originalElementsFromPoint = document.elementsFromPoint;
+    originalRAF = window.requestAnimationFrame;
+    // Flush rAF synchronously so pointer-move assertions work immediately
+    window.requestAnimationFrame = (cb: FrameRequestCallback) => {
+      cb(0);
+      return 0;
+    };
 
     target = document.createElement('div');
     target.setAttribute('data-test-subj', 'movableTarget');
@@ -88,13 +99,10 @@ describe('MoveOverlay', () => {
   afterEach(() => {
     cleanup();
     document.elementsFromPoint = originalElementsFromPoint;
+    window.requestAnimationFrame = originalRAF;
     target.remove();
     // Clean up any clones
     document.querySelectorAll(`[${DEVTOOL_CLONE_ATTR}]`).forEach((el) => el.remove());
-    // Clean up any injected style elements
-    document.querySelectorAll('style').forEach((s) => {
-      if (s.textContent?.includes('cursor:')) s.remove();
-    });
   });
 
   const getClone = () => document.querySelector(`[${DEVTOOL_CLONE_ATTR}]`) as HTMLElement | null;
@@ -103,11 +111,18 @@ describe('MoveOverlay', () => {
     const addSpy = jest.spyOn(document, 'addEventListener');
     const removeSpy = jest.spyOn(document, 'removeEventListener');
 
-    const { unmount } = renderWithI18n(<MoveOverlay setIsMoveMode={setIsMoveMode} />);
+    const { unmount } = renderWithI18n(
+      <MoveOverlay
+        layoutConfig={defaultLayoutConfig}
+        isLayoutVisible={false}
+        setIsMoveMode={setIsMoveMode}
+      />
+    );
 
     expect(addSpy).toHaveBeenCalledWith('pointermove', expect.any(Function), true);
     expect(addSpy).toHaveBeenCalledWith('pointerdown', expect.any(Function), true);
     expect(addSpy).toHaveBeenCalledWith('pointerup', expect.any(Function), true);
+    expect(addSpy).toHaveBeenCalledWith('pointercancel', expect.any(Function), true);
     expect(addSpy).toHaveBeenCalledWith('keydown', expect.any(Function), true);
 
     unmount();
@@ -115,6 +130,7 @@ describe('MoveOverlay', () => {
     expect(removeSpy).toHaveBeenCalledWith('pointermove', expect.any(Function), true);
     expect(removeSpy).toHaveBeenCalledWith('pointerdown', expect.any(Function), true);
     expect(removeSpy).toHaveBeenCalledWith('pointerup', expect.any(Function), true);
+    expect(removeSpy).toHaveBeenCalledWith('pointercancel', expect.any(Function), true);
     expect(removeSpy).toHaveBeenCalledWith('keydown', expect.any(Function), true);
 
     addSpy.mockRestore();
@@ -124,7 +140,13 @@ describe('MoveOverlay', () => {
   it('should show hover outline when moving over a valid element', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
-    renderWithI18n(<MoveOverlay setIsMoveMode={setIsMoveMode} />);
+    renderWithI18n(
+      <MoveOverlay
+        layoutConfig={defaultLayoutConfig}
+        isLayoutVisible={false}
+        setIsMoveMode={setIsMoveMode}
+      />
+    );
 
     act(() => {
       firePointerMove(75, 60);
@@ -141,7 +163,13 @@ describe('MoveOverlay', () => {
 
     document.elementsFromPoint = jest.fn().mockReturnValue([toolbar, target]);
 
-    renderWithI18n(<MoveOverlay setIsMoveMode={setIsMoveMode} />);
+    renderWithI18n(
+      <MoveOverlay
+        layoutConfig={defaultLayoutConfig}
+        isLayoutVisible={false}
+        setIsMoveMode={setIsMoveMode}
+      />
+    );
 
     act(() => {
       firePointerMove(75, 60);
@@ -160,7 +188,13 @@ describe('MoveOverlay', () => {
 
     document.elementsFromPoint = jest.fn().mockReturnValue([panel, target]);
 
-    renderWithI18n(<MoveOverlay setIsMoveMode={setIsMoveMode} />);
+    renderWithI18n(
+      <MoveOverlay
+        layoutConfig={defaultLayoutConfig}
+        isLayoutVisible={false}
+        setIsMoveMode={setIsMoveMode}
+      />
+    );
 
     act(() => {
       firePointerMove(75, 60);
@@ -175,7 +209,13 @@ describe('MoveOverlay', () => {
   it('should create a clone and hide original when dragging an element', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
-    renderWithI18n(<MoveOverlay setIsMoveMode={setIsMoveMode} />);
+    renderWithI18n(
+      <MoveOverlay
+        layoutConfig={defaultLayoutConfig}
+        isLayoutVisible={false}
+        setIsMoveMode={setIsMoveMode}
+      />
+    );
 
     act(() => {
       firePointerDown(75, 60);
@@ -190,16 +230,21 @@ describe('MoveOverlay', () => {
       firePointerMove(95, 80);
     });
 
-    // Clone should be repositioned
-    expect(clone!.style.left).toBe('70px'); // 50 + (95-75)
-    expect(clone!.style.top).toBe('70px'); // 50 + (80-60)
+    // Clone should be repositioned via transform (base left/top stays at original rect)
+    expect(clone!.style.transform).toBe('translate(20px, 20px)');
   });
 
   it('should preserve original transform for reset', () => {
     target.style.transform = 'rotate(45deg)';
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
-    renderWithI18n(<MoveOverlay setIsMoveMode={setIsMoveMode} />);
+    renderWithI18n(
+      <MoveOverlay
+        layoutConfig={defaultLayoutConfig}
+        isLayoutVisible={false}
+        setIsMoveMode={setIsMoveMode}
+      />
+    );
 
     act(() => {
       firePointerDown(75, 60);
@@ -230,7 +275,13 @@ describe('MoveOverlay', () => {
   it('should stop dragging on pointer up', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
-    renderWithI18n(<MoveOverlay setIsMoveMode={setIsMoveMode} />);
+    renderWithI18n(
+      <MoveOverlay
+        layoutConfig={defaultLayoutConfig}
+        isLayoutVisible={false}
+        setIsMoveMode={setIsMoveMode}
+      />
+    );
 
     act(() => {
       firePointerDown(75, 60);
@@ -242,8 +293,7 @@ describe('MoveOverlay', () => {
 
     const clone = getClone();
     expect(clone).toBeInTheDocument();
-    expect(clone!.style.left).toBe('60px'); // 50 + 10
-    expect(clone!.style.top).toBe('60px'); // 50 + 10
+    expect(clone!.style.transform).toBe('translate(10px, 10px)');
 
     act(() => {
       firePointerUp(85, 70);
@@ -254,14 +304,19 @@ describe('MoveOverlay', () => {
       firePointerMove(200, 200);
     });
 
-    expect(clone!.style.left).toBe('60px');
-    expect(clone!.style.top).toBe('60px');
+    expect(clone!.style.transform).toBe('translate(10px, 10px)');
   });
 
   it('should allow re-dragging a previously moved element', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
-    renderWithI18n(<MoveOverlay setIsMoveMode={setIsMoveMode} />);
+    renderWithI18n(
+      <MoveOverlay
+        layoutConfig={defaultLayoutConfig}
+        isLayoutVisible={false}
+        setIsMoveMode={setIsMoveMode}
+      />
+    );
 
     // First drag: move 10,10
     act(() => {
@@ -276,8 +331,7 @@ describe('MoveOverlay', () => {
 
     const clone = getClone();
     expect(clone).toBeInTheDocument();
-    expect(clone!.style.left).toBe('60px');
-    expect(clone!.style.top).toBe('60px');
+    expect(clone!.style.transform).toBe('translate(10px, 10px)');
 
     // Mock the clone's bounding rect for the re-grab (jsdom returns 0,0 by default)
     clone!.getBoundingClientRect = () =>
@@ -304,14 +358,20 @@ describe('MoveOverlay', () => {
       firePointerMove(105, 90);
     });
 
-    expect(clone!.style.left).toBe('80px'); // 60 + (105-85)
-    expect(clone!.style.top).toBe('80px'); // 60 + (90-70)
+    // Total offset: base(10,10) + mouse delta(20,20) = (30,30)
+    expect(clone!.style.transform).toBe('translate(30px, 30px)');
   });
 
   it('should exit move mode and reset transforms on Escape', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
-    renderWithI18n(<MoveOverlay setIsMoveMode={setIsMoveMode} />);
+    renderWithI18n(
+      <MoveOverlay
+        layoutConfig={defaultLayoutConfig}
+        isLayoutVisible={false}
+        setIsMoveMode={setIsMoveMode}
+      />
+    );
 
     act(() => {
       firePointerDown(75, 60);
@@ -344,7 +404,13 @@ describe('MoveOverlay', () => {
 
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
-    renderWithI18n(<MoveOverlay setIsMoveMode={setIsMoveMode} />);
+    renderWithI18n(
+      <MoveOverlay
+        layoutConfig={defaultLayoutConfig}
+        isLayoutVisible={false}
+        setIsMoveMode={setIsMoveMode}
+      />
+    );
 
     act(() => {
       firePointerDown(75, 60);
@@ -376,7 +442,13 @@ describe('MoveOverlay', () => {
 
     document.elementsFromPoint = jest.fn().mockReturnValue([toolbar, target]);
 
-    renderWithI18n(<MoveOverlay setIsMoveMode={setIsMoveMode} />);
+    renderWithI18n(
+      <MoveOverlay
+        layoutConfig={defaultLayoutConfig}
+        isLayoutVisible={false}
+        setIsMoveMode={setIsMoveMode}
+      />
+    );
 
     const preventDefault = jest.fn();
     const event = new PointerEvent('pointerdown', {
@@ -394,28 +466,60 @@ describe('MoveOverlay', () => {
     toolbar.remove();
   });
 
-  it('should clean up cursor style on unmount', () => {
+  it('should abort drag on window blur', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
-    const { unmount } = renderWithI18n(<MoveOverlay setIsMoveMode={setIsMoveMode} />);
+    renderWithI18n(
+      <MoveOverlay
+        layoutConfig={defaultLayoutConfig}
+        isLayoutVisible={false}
+        setIsMoveMode={setIsMoveMode}
+      />
+    );
 
     act(() => {
-      firePointerMove(75, 60);
+      firePointerDown(75, 60);
     });
 
-    // Cursor style should be injected
-    const stylesBefore = document.querySelectorAll('style');
-    const cursorStyle = Array.from(stylesBefore).find((s) =>
-      s.textContent?.includes('cursor: grab')
-    );
-    expect(cursorStyle).toBeTruthy();
+    expect(target.style.visibility).toBe('hidden');
+    const clone = getClone();
+    expect(clone).toBeInTheDocument();
 
-    unmount();
+    // Simulate window blur (alt-tab, focus loss)
+    act(() => {
+      window.dispatchEvent(new Event('blur'));
+    });
 
-    // Cursor style should be removed after unmount
-    const stylesAfter = Array.from(document.querySelectorAll('style')).find((s) =>
-      s.textContent?.includes('cursor: grab')
+    // Drag should be aborted — clone stays in place with pointer events re-enabled
+    expect(clone!.style.pointerEvents).toBe('auto');
+  });
+
+  it('should abort drag on visibilitychange to hidden', () => {
+    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+
+    renderWithI18n(
+      <MoveOverlay
+        layoutConfig={defaultLayoutConfig}
+        isLayoutVisible={false}
+        setIsMoveMode={setIsMoveMode}
+      />
     );
-    expect(stylesAfter).toBeFalsy();
+
+    act(() => {
+      firePointerDown(75, 60);
+    });
+
+    const clone = getClone();
+    expect(clone).toBeInTheDocument();
+
+    // Simulate visibility change
+    Object.defineProperty(document, 'hidden', { value: true, configurable: true });
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    Object.defineProperty(document, 'hidden', { value: false, configurable: true });
+
+    // Drag should be aborted
+    expect(clone!.style.pointerEvents).toBe('auto');
   });
 });

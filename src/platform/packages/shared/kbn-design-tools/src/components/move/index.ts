@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LayoutTypeSelector } from './layout_type_selector';
-export { ColumnSettings } from './column_settings';
-export { RowSettings } from './row_settings';
-export { GridCellSettings } from './grid_cell_settings';
-export { ColorSetting } from './color_setting';
-export { LayoutSettingsPanel } from './layout_settings_panel';
+export { MoveOverlay } from './move_overlay';

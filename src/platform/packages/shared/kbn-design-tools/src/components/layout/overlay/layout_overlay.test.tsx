@@ -11,7 +11,7 @@ import React from 'react';
 import { screen, cleanup } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { LayoutOverlay } from './layout_overlay';
-import { getDefaultLayoutConfig } from '../../lib/layout';
+import { getDefaultLayoutConfig } from '../../../lib/layout';
 
 describe('LayoutOverlay', () => {
   afterEach(() => {
@@ -20,14 +20,14 @@ describe('LayoutOverlay', () => {
 
   it('should render the overlay container', () => {
     const config = getDefaultLayoutConfig(16);
-    renderWithI18n(<LayoutOverlay config={config} />);
+    renderWithI18n(<LayoutOverlay layoutConfig={config} />);
 
     expect(screen.getByTestId('layoutOverlayContainer')).toBeInTheDocument();
   });
 
   it('should render the correct number of columns', () => {
     const config = { ...getDefaultLayoutConfig(16), count: 6 };
-    renderWithI18n(<LayoutOverlay config={config} />);
+    renderWithI18n(<LayoutOverlay layoutConfig={config} />);
 
     for (let i = 0; i < 6; i++) {
       expect(screen.getByTestId(`gridColumn-${i}`)).toBeInTheDocument();
@@ -37,7 +37,7 @@ describe('LayoutOverlay', () => {
 
   it('should render 12 columns by default', () => {
     const config = getDefaultLayoutConfig(16);
-    renderWithI18n(<LayoutOverlay config={config} />);
+    renderWithI18n(<LayoutOverlay layoutConfig={config} />);
 
     for (let i = 0; i < 12; i++) {
       expect(screen.getByTestId(`gridColumn-${i}`)).toBeInTheDocument();
@@ -47,7 +47,7 @@ describe('LayoutOverlay', () => {
 
   it('should render rows when layoutType is rows', () => {
     const config = { ...getDefaultLayoutConfig(16), layoutType: 'rows' as const, count: 4 };
-    renderWithI18n(<LayoutOverlay config={config} />);
+    renderWithI18n(<LayoutOverlay layoutConfig={config} />);
 
     for (let i = 0; i < 4; i++) {
       expect(screen.getByTestId(`gridRow-${i}`)).toBeInTheDocument();
@@ -57,7 +57,7 @@ describe('LayoutOverlay', () => {
 
   it('should render grid pattern when layoutType is grid', () => {
     const config = { ...getDefaultLayoutConfig(16), layoutType: 'grid' as const, cellSize: 100 };
-    renderWithI18n(<LayoutOverlay config={config} />);
+    renderWithI18n(<LayoutOverlay layoutConfig={config} />);
 
     // Uses a single CSS background pattern div instead of individual cells
     expect(screen.getByTestId('gridPattern')).toBeInTheDocument();

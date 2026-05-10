@@ -12,8 +12,8 @@ import { screen, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { LayoutSettingsPanel } from './layout_settings_panel';
-import { getDefaultLayoutConfig } from '../../lib/layout';
-import type { LayoutConfig } from '../../lib/layout';
+import { getDefaultLayoutConfig } from '../../../lib/layout';
+import type { LayoutConfig } from '../../../lib/layout';
 
 describe('LayoutSettingsPanel', () => {
   const defaultConfig = getDefaultLayoutConfig(16);

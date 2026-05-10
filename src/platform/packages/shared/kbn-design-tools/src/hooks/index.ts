@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useCursorOverride } from './use_cursor_override';
 export { useEuiSizeLookup } from './use_eui_size_lookup';

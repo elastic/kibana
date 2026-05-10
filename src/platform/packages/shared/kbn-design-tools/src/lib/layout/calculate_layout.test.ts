@@ -70,6 +70,22 @@ describe('calculateColumnLayout', () => {
 
     expect(columnWidth).toBe(100);
   });
+
+  it('should clamp count to at least 1', () => {
+    const config = makeConfig({ alignType: 'stretch', count: 0, gutterSize: 8, marginSize: 16 });
+    const { columnWidth } = calculateColumnLayout(config, 1000);
+
+    // count clamped to 1: available = 968, gutter = 0, width = 968
+    expect(columnWidth).toBe(968);
+  });
+
+  it('should clamp column width to 0 when margins exceed viewport', () => {
+    const config = makeConfig({ alignType: 'stretch', count: 4, gutterSize: 8, marginSize: 600 });
+    const { columnWidth } = calculateColumnLayout(config, 1000);
+
+    // available = max(0, 1000 - 1200) = 0, width = max(0, (0 - 24)/4) = 0
+    expect(columnWidth).toBe(0);
+  });
 });
 
 describe('calculateRowLayout', () => {
@@ -130,5 +146,31 @@ describe('calculateRowLayout', () => {
     const { rowHeight } = calculateRowLayout(config, 400);
 
     expect(rowHeight).toBe(100);
+  });
+
+  it('should clamp count to at least 1', () => {
+    const config = makeConfig({
+      rowAlignType: 'stretch',
+      count: 0,
+      gutterSize: 10,
+      marginSize: 20,
+    });
+    const { rowHeight } = calculateRowLayout(config, 800);
+
+    // count clamped to 1: available = 760, gutter = 0, height = 760
+    expect(rowHeight).toBe(760);
+  });
+
+  it('should clamp row height to 0 when margins exceed viewport', () => {
+    const config = makeConfig({
+      rowAlignType: 'stretch',
+      count: 3,
+      gutterSize: 10,
+      marginSize: 500,
+    });
+    const { rowHeight } = calculateRowLayout(config, 800);
+
+    // available = max(0, 800 - 1000) = 0, height = max(0, (0 - 20)/3) = 0
+    expect(rowHeight).toBe(0);
   });
 });

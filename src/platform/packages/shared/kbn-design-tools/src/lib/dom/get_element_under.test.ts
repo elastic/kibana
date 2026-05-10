@@ -28,6 +28,17 @@ describe('getElementUnder', () => {
     dx: 0,
     dy: 0,
     originalTransform: '',
+    originalRect: {
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+      toJSON: () => ({}),
+    } as DOMRect,
   });
 
   it('should return a regular HTML element', () => {
@@ -51,7 +62,7 @@ describe('getElementUnder', () => {
     expect(getElementUnder(10, 10, [])).toBe(clone);
   });
 
-  it('should return a child inside a clone element', () => {
+  it('should return the clone root when clicking a child inside a clone', () => {
     const clone = document.createElement('div');
     clone.setAttribute(DEVTOOL_CLONE_ATTR, '');
     const child = document.createElement('span');
@@ -60,7 +71,7 @@ describe('getElementUnder', () => {
 
     document.elementsFromPoint = jest.fn().mockReturnValue([child]);
 
-    expect(getElementUnder(10, 10, [])).toBe(child);
+    expect(getElementUnder(10, 10, [])).toBe(clone);
 
     clone.remove();
   });

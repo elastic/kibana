@@ -28,9 +28,10 @@ export {
   getElementFromPoint,
   getElementUnder,
   handleEventPropagation,
+  snapToGrid,
 } from './dom';
 
-export type { SpacingLine, ElementOffset } from './dom';
+export type { SpacingLine, ElementOffset, SnapResult } from './dom';
 
 export { getDefaultLayoutConfig, calculateColumnLayout, calculateRowLayout } from './layout';
 

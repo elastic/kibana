@@ -8,12 +8,10 @@
  */
 
 export { LayoutButton } from './layout_button';
-export { LayoutOverlay } from './layout_overlay';
-export { MoveOverlay } from './move_overlay';
-
-export { LayoutSettingsPanel } from './layout_settings_panel';
+export { LayoutOverlay, GridPattern, RowPattern, ColumnPattern } from './overlay';
 
 export {
+  LayoutSettingsPanel,
   LayoutTypeSelector,
   ColumnSettings,
   RowSettings,

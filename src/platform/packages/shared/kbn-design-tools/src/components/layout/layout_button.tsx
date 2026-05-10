@@ -21,10 +21,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LayoutOverlay } from './layout_overlay';
+import { LayoutOverlay } from './overlay/layout_overlay';
 import { getDefaultLayoutConfig, type LayoutConfig } from '../../lib';
-import { LayoutSettingsPanel } from './layout_settings_panel';
-import { MoveOverlay } from './move_overlay';
+import { LayoutSettingsPanel } from './settings/layout_settings_panel';
+import { MoveOverlay } from '../move/move_overlay';
 import { DEVTOOL_IGNORE_ATTR, LAYOUT_SETTINGS_FLYOUT_ID } from '../../lib/constants';
 
 /**
@@ -108,6 +108,10 @@ export const LayoutButton = () => {
           }),
           icon: isMoveMode ? 'lock' : 'move',
           onClick: handleToggleMoveMode,
+          toolTipContent: i18n.translate('kbnDesignTools.layoutButton.moveModeTooltip', {
+            defaultMessage:
+              'Snapping is enabled while layout is active. Hold Shift to move freely.',
+          }),
         },
       ],
     },
@@ -181,8 +185,14 @@ export const LayoutButton = () => {
           </EuiFlyoutBody>
         </EuiFlyout>
       )}
-      {isLayoutVisible && <LayoutOverlay config={layoutConfig} />}
-      {isMoveMode && <MoveOverlay setIsMoveMode={setIsMoveMode} />}
+      {isLayoutVisible && <LayoutOverlay layoutConfig={layoutConfig} />}
+      {isMoveMode && (
+        <MoveOverlay
+          layoutConfig={layoutConfig}
+          isLayoutVisible={isLayoutVisible}
+          setIsMoveMode={setIsMoveMode}
+        />
+      )}
     </>
   );
 };

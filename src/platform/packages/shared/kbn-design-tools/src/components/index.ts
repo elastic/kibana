@@ -10,13 +10,17 @@
 export {
   LayoutButton,
   LayoutOverlay,
-  MoveOverlay,
   LayoutSettingsPanel,
   LayoutTypeSelector,
   ColumnSettings,
   RowSettings,
   GridCellSettings,
   ColorSetting,
+  GridPattern,
+  RowPattern,
+  ColumnPattern,
 } from './layout';
+
+export { MoveOverlay } from './move';
 
 export { MeasureButton, MeasureOverlay, SpacingMeasurement } from './measure';

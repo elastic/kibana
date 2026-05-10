@@ -23,17 +23,20 @@ export const calculateColumnLayout = (
   config: LayoutConfig,
   viewportWidth: number
 ): ColumnLayout => {
+  const count = Math.max(1, config.count);
+
   if (config.alignType === 'stretch') {
-    const availableWidth = viewportWidth - 2 * config.marginSize;
-    const totalGutterWidth = config.gutterSize * (config.count - 1);
+    const availableWidth = Math.max(0, viewportWidth - 2 * config.marginSize);
+    const totalGutterWidth = config.gutterSize * (count - 1);
+    const columnWidth = Math.max(0, (availableWidth - totalGutterWidth) / count);
     return {
-      columnWidth: (availableWidth - totalGutterWidth) / config.count,
+      columnWidth,
       offsetLeft: config.marginSize,
     };
   }
 
   const columnWidth = config.width > 0 ? config.width : 100;
-  const totalWidth = config.count * columnWidth + (config.count - 1) * config.gutterSize;
+  const totalWidth = count * columnWidth + (count - 1) * config.gutterSize;
 
   let offsetLeft: number;
   if (config.alignType === 'center') {
@@ -48,17 +51,20 @@ export const calculateColumnLayout = (
 };
 
 export const calculateRowLayout = (config: LayoutConfig, viewportHeight: number): RowLayout => {
+  const count = Math.max(1, config.count);
+
   if (config.rowAlignType === 'stretch') {
-    const available = viewportHeight - 2 * config.marginSize;
-    const totalGutter = config.gutterSize * (config.count - 1);
+    const available = Math.max(0, viewportHeight - 2 * config.marginSize);
+    const totalGutter = config.gutterSize * (count - 1);
+    const rowHeight = Math.max(0, (available - totalGutter) / count);
     return {
-      rowHeight: (available - totalGutter) / config.count,
+      rowHeight,
       offsetTop: config.marginSize,
     };
   }
 
   const rowHeight = config.height > 0 ? config.height : 100;
-  const totalHeight = config.count * rowHeight + (config.count - 1) * config.gutterSize;
+  const totalHeight = count * rowHeight + (count - 1) * config.gutterSize;
 
   let offsetTop: number;
   if (config.rowAlignType === 'center') {

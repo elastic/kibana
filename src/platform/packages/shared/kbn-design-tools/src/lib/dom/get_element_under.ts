@@ -16,6 +16,7 @@ export interface ElementOffset {
   dx: number;
   dy: number;
   originalTransform: string;
+  originalRect: DOMRect;
 }
 
 /**
@@ -43,10 +44,11 @@ export const getElementUnder = (
       // Inside a clone, just skip this element and try the next one
       continue;
     }
-    // Elements inside clones are valid targets — treat them like normal elements
+    // Elements inside clones are valid targets — return the clone root so callers
+    // can match it against movedElements entries.
     if (el.hasAttribute(DEVTOOL_CLONE_ATTR)) return el;
     const cloneAncestor = el.closest(`[${DEVTOOL_CLONE_ATTR}]`) as HTMLElement | null;
-    if (cloneAncestor) return el;
+    if (cloneAncestor) return cloneAncestor;
     if (el instanceof HTMLElement) {
       // Skip hidden elements (e.g. originals that have a visible clone)
       if (el.style.visibility === 'hidden') continue;
