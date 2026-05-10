@@ -32,9 +32,7 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('builds query payload and executes query', async () => {
-    mockHelpersEsqlArrowBatches(mockEsClient, [
-      { numRows: 1, rows: [{ 'host.name': 'host-a' }] },
-    ]);
+    mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
     const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
@@ -46,9 +44,7 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('passes correct parameters to ES client', async () => {
-    mockHelpersEsqlArrowBatches(mockEsClient, [
-      { numRows: 1, rows: [{ 'host.name': 'host-a' }] },
-    ]);
+    mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 1, rows: [{ 'host.name': 'host-a' }] }]);
 
     const rule = createRuleResponse();
     const abortController = new AbortController();

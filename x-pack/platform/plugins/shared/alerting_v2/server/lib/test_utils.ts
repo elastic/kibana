@@ -211,7 +211,7 @@ export function createMockArrowReader(batches: MockArrowBatch[]): MockArrowReade
     cancel: jest.fn().mockImplementation(async () => {
       reader.closed = true;
     }),
-    [Symbol.asyncIterator]: async function* () {
+    async *[Symbol.asyncIterator]() {
       for (const batch of batches) {
         yield {
           numRows: batch.numRows,

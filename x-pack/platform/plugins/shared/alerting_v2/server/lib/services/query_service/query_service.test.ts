@@ -374,7 +374,7 @@ describe('QueryService', () => {
       const reader: MockArrowReader = {
         closed: false,
         cancel: jest.fn().mockResolvedValue(undefined),
-        [Symbol.asyncIterator]: async function* () {
+        async *[Symbol.asyncIterator]() {
           throw new Error('Expected to read 1919230334 metadata bytes, but only read 8');
         },
       };
@@ -425,7 +425,7 @@ describe('QueryService', () => {
         cancel: jest.fn().mockImplementation(async function (this: MockArrowReader) {
           this.closed = true;
         }),
-        [Symbol.asyncIterator]: async function* () {
+        async *[Symbol.asyncIterator]() {
           throw new Error('mid-stream failure');
         },
       };
