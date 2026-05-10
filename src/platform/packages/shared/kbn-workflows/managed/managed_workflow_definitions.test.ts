@@ -9,6 +9,7 @@
 
 import { parse } from 'yaml';
 import { managedWorkflowDefinitions } from '.';
+import type { ManagedWorkflowTemplateValuesById } from '.';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { EXAMPLE_MANAGED_WORKFLOW_ID } from './workflows';
 import { WorkflowSchema } from '../spec/schema';
@@ -18,11 +19,16 @@ type TemplateManagedWorkflowDefinition = RegistryManagedWorkflowDefinition & {
   yamlTemplate: (values: ManagedWorkflowTemplateValues) => string;
 };
 
-const templateRepresentativeValuesById: Record<string, ManagedWorkflowTemplateValues> = {
+const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
   },
 };
+
+const templateValuesLookup = templateRepresentativeValuesById as Record<
+  string,
+  ManagedWorkflowTemplateValues | undefined
+>;
 
 const managedDefinitionsById: Array<[string, RegistryManagedWorkflowDefinition]> =
   managedWorkflowDefinitions.map((definition) => [definition.id, definition]);
@@ -44,7 +50,7 @@ function hasYaml(
   return typeof definition.yaml === 'string';
 }
 
-function renderWorkflowYaml(definition: RegistryManagedWorkflowDefinition): string {
+function renderWorkflowYaml(definition: ManagedWorkflowDefinition): string {
   if (hasYaml(definition)) {
     return definition.yaml;
   }
@@ -53,7 +59,7 @@ function renderWorkflowYaml(definition: RegistryManagedWorkflowDefinition): stri
     throw new Error(`Managed workflow '${definition.id}' must define either yaml or yamlTemplate`);
   }
 
-  const representativeValues = templateRepresentativeValuesById[definition.id];
+  const representativeValues = templateValuesLookup[definition.id];
   if (!representativeValues) {
     throw new Error(
       `Missing representative template values for managed workflow '${definition.id}'. Add an entry to templateRepresentativeValuesById.`
@@ -127,8 +133,8 @@ describe('managedWorkflowDefinitions', () => {
   it.each(managedTemplateDefinitionsById)(
     '%s yamlTemplate renders cleanly with representative values',
     (id, definition) => {
-      const representativeValues = templateRepresentativeValuesById[id];
-      const renderedYaml = definition.yamlTemplate(representativeValues);
+      const representativeValues = templateValuesLookup[id];
+      const renderedYaml = definition.yamlTemplate(representativeValues!);
 
       expect(typeof renderedYaml).toBe('string');
       expect(renderedYaml.trim()).not.toHaveLength(0);
