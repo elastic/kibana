@@ -201,6 +201,16 @@ export function decorateMochaUi(lifecycle, context, { rootTags }) {
     return wrapNonSuiteFunction(
       name,
       wrapRunnableArgs(fn, lifecycle, async (err, test) => {
+        // Mocha will retry tests when `retries > 0`. On non-final attempts we
+        // suppress the `testFailure` lifecycle event so that screenshot capture,
+        // snapshot updates, ES dumps and --pauseOnError only run for the
+        // *final* failure. Mocha exposes `_currentRetry` (0-indexed attempt
+        // number) and `_retries` (max additional attempts allowed) on the test.
+        const currentRetry = typeof test?._currentRetry === 'number' ? test._currentRetry : 0;
+        const maxRetries = typeof test?._retries === 'number' ? test._retries : 0;
+        if (currentRetry < maxRetries) {
+          return;
+        }
         await errorPauseHandler(err, test, async () => {
           await lifecycle.testFailure.trigger(err, test);
         });
