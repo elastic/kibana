@@ -9,6 +9,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { setupDependencies } from './setup_dependencies';
+import { maybeDrainConcurrencyQueueAfterTerminal } from '../concurrency/concurrency_queue_drainer';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import type { WorkflowsMeteringService } from '../metering';
@@ -84,6 +85,15 @@ export async function resumeWorkflow({
       workflowRunId,
     });
   }
+
+  await maybeDrainConcurrencyQueueAfterTerminal({
+    workflowExecutionRepository,
+    taskManager: dependencies.taskManager,
+    logger,
+    workflowRunId,
+    spaceId,
+    fakeRequest,
+  });
 
   // Report metering after execution completes and state is flushed.
   // This is fire-and-forget: the metering service handles retries and

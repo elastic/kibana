@@ -132,6 +132,7 @@ describe('types/utils', () => {
         ExecutionStatus.WAITING,
         ExecutionStatus.WAITING_FOR_INPUT,
         ExecutionStatus.PENDING,
+        ExecutionStatus.QUEUED,
       ]);
 
       it.each(allStatuses)('returns %s for status "%s"', (status) => {

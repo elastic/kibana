@@ -75,6 +75,7 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     const activeExecutions = workflowExecutions.results.some((execution) =>
       [
         ExecutionStatus.PENDING,
+        ExecutionStatus.QUEUED,
         ExecutionStatus.RUNNING,
         ExecutionStatus.WAITING_FOR_INPUT,
       ].includes(execution.status)

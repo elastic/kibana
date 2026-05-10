@@ -26,6 +26,8 @@ export enum ExecutionStatus {
   WAITING = 'waiting',
   WAITING_FOR_INPUT = 'waiting_for_input',
   RUNNING = 'running',
+  /** Persisted concurrency backlog — does not count toward concurrency max until promoted to pending + scheduled */
+  QUEUED = 'queued',
 
   // Done
   COMPLETED = 'completed',
@@ -46,6 +48,15 @@ export const TerminalExecutionStatuses: readonly ExecutionStatus[] = [
 ] as const;
 
 export const NonTerminalExecutionStatuses: readonly ExecutionStatus[] = [
+  ExecutionStatus.PENDING,
+  ExecutionStatus.WAITING,
+  ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.RUNNING,
+  ExecutionStatus.QUEUED,
+] as const;
+
+/** Workflow executions occupying a concurrency slot (excludes queued backlog). */
+export const ConcurrencySlotOccupyingExecutionStatuses: readonly ExecutionStatus[] = [
   ExecutionStatus.PENDING,
   ExecutionStatus.WAITING,
   ExecutionStatus.WAITING_FOR_INPUT,

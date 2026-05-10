@@ -89,7 +89,8 @@ export type ExecuteWorkflowStep = (
 
 export type CancelWorkflowExecution = (
   workflowExecutionId: string,
-  spaceId: string
+  spaceId: string,
+  request?: KibanaRequest
 ) => Promise<void>;
 
 export type CancelAllActiveWorkflowExecutions = (params: {

@@ -195,7 +195,11 @@ export async function resolveExhaustedWorkflowRunTask({
       workflowRunId,
       spaceId
     );
-    if (execution && !isTerminalStatus(execution.status)) {
+    if (
+      execution &&
+      !isTerminalStatus(execution.status) &&
+      execution.status !== ExecutionStatus.QUEUED
+    ) {
       const lastMessage = error instanceof Error ? error.message : String(error);
       await markExecutionFailedTaskRecovery(workflowExecutionRepository, workflowRunId, {
         type: 'TaskAttemptsExhaustedError',
@@ -216,5 +220,11 @@ export function shouldFailOnWorkflowRunRetry(execution: EsWorkflowExecution): bo
   if (isTerminalStatus(execution.status)) {
     return false;
   }
-  return execution.status !== ExecutionStatus.WAITING_FOR_INPUT;
+  if (
+    execution.status === ExecutionStatus.WAITING_FOR_INPUT ||
+    execution.status === ExecutionStatus.QUEUED
+  ) {
+    return false;
+  }
+  return true;
 }

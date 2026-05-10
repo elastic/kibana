@@ -85,6 +85,7 @@ export {
   ExecutionTypeValues,
   TerminalExecutionStatuses,
   NonTerminalExecutionStatuses,
+  ConcurrencySlotOccupyingExecutionStatuses,
   SearchWorkflowCommandSchema,
   UpdateWorkflowCommandSchema,
   // shared constants

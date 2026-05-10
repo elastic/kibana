@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus, NonTerminalExecutionStatuses } from '@kbn/workflows';
+import {
+  ConcurrencySlotOccupyingExecutionStatuses,
+  ExecutionStatus,
+  NonTerminalExecutionStatuses,
+} from '@kbn/workflows';
 import { WorkflowExecutionRepository } from './workflow_execution_repository';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
 
@@ -496,7 +500,7 @@ describe('WorkflowExecutionRepository', () => {
   });
 
   describe('getRunningExecutionsByConcurrencyGroup', () => {
-    it('should query for non-terminal execution IDs by concurrency group key', async () => {
+    it('should query for concurrency-slot execution IDs by concurrency group key', async () => {
       const mockExecutions = [
         {
           _id: 'exec-1',
@@ -527,14 +531,14 @@ describe('WorkflowExecutionRepository', () => {
               { term: { spaceId: 'default' } },
               {
                 terms: {
-                  status: NonTerminalExecutionStatuses,
+                  status: ConcurrencySlotOccupyingExecutionStatuses,
                 },
               },
             ],
           },
         },
         _source: ['id'],
-        sort: [{ createdAt: { order: 'asc' } }],
+        sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
         size: 5000,
       });
 
@@ -568,7 +572,7 @@ describe('WorkflowExecutionRepository', () => {
               { term: { spaceId: 'default' } },
               {
                 terms: {
-                  status: NonTerminalExecutionStatuses,
+                  status: ConcurrencySlotOccupyingExecutionStatuses,
                 },
               },
               {
@@ -580,7 +584,7 @@ describe('WorkflowExecutionRepository', () => {
           },
         },
         _source: ['id'],
-        sort: [{ createdAt: { order: 'asc' } }],
+        sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
         size: 5000,
       });
     });

@@ -29,6 +29,7 @@ import {
   WorkflowExecutionNotFoundError,
 } from '@kbn/workflows/common/errors';
 import { ConcurrencyManager } from './concurrency/concurrency_manager';
+import { drainConcurrencyQueueSlots } from './concurrency/concurrency_queue_drainer';
 import type { WorkflowsExecutionEngineConfig } from './config';
 import {
   checkAndSkipIfExistingScheduledExecution,
@@ -543,6 +544,31 @@ export class WorkflowsExecutionEnginePlugin
                 workflowExecution.concurrencyGroupKey = concurrencyGroupKey;
               }
 
+              const scheduledConcurrency = workflow.definition?.settings?.concurrency;
+              if (
+                scheduledConcurrency?.strategy === 'queue' &&
+                workflowExecution.concurrencyGroupKey &&
+                workflowExecution.spaceId
+              ) {
+                try {
+                  await drainConcurrencyQueueSlots({
+                    workflowExecutionRepository,
+                    taskManager: pluginsStart.taskManager,
+                    logger,
+                    spaceId: workflowExecution.spaceId,
+                    concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
+                    concurrencySettings: scheduledConcurrency,
+                    request: fakeRequest,
+                  });
+                } catch (drainErr) {
+                  logger.debug(
+                    `Scheduled workflow concurrency queue drain failed: ${
+                      drainErr instanceof Error ? drainErr.message : String(drainErr)
+                    }`
+                  );
+                }
+              }
+
               // Use refresh: 'wait_for' to ensure the execution is immediately searchable
               // for deduplication checks by subsequent scheduled tasks
               await workflowExecutionRepository.createWorkflowExecution(workflowExecution, {
@@ -606,6 +632,18 @@ export class WorkflowsExecutionEnginePlugin
       workflowTaskManager,
       workflowExecutionRepository
     );
+
+    const nudgeTaskManagerBestEffort = async (workflowExecutionId: string, context: string) => {
+      try {
+        await workflowTaskManager.forceRunIdleTasks(workflowExecutionId);
+      } catch (err) {
+        this.logger.debug(
+          `Task Manager nudge failed (${context}) for execution ${workflowExecutionId}: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      }
+    };
 
     const dependencies: ContextDependencies = {
       ...this.setupDependencies,
@@ -723,6 +761,31 @@ export class WorkflowsExecutionEnginePlugin
         authenticatedUser,
         now: new Date(),
       });
+
+      const prePersistConcurrency = workflow.definition?.settings?.concurrency;
+      if (
+        prePersistConcurrency?.strategy === 'queue' &&
+        workflowExecution.concurrencyGroupKey &&
+        workflowExecution.spaceId
+      ) {
+        try {
+          await drainConcurrencyQueueSlots({
+            workflowExecutionRepository,
+            taskManager: plugins.taskManager,
+            logger: this.logger,
+            spaceId: workflowExecution.spaceId,
+            concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
+            concurrencySettings: prePersistConcurrency,
+            request,
+          });
+        } catch (drainErr) {
+          this.logger.debug(
+            `Concurrency queue drain before enqueue failed: ${
+              drainErr instanceof Error ? drainErr.message : String(drainErr)
+            }`
+          );
+        }
+      }
 
       // Only pay the refresh cost when the concurrency check will actually run.
       // Without a concurrencyGroupKey there is no check, so refresh:false is fine.
@@ -1035,6 +1098,30 @@ export class WorkflowsExecutionEnginePlugin
         ...keylessItems.map(runCheck),
         ...Array.from(bucketsByGroup.values()).map(async (bucket) => {
           for (const p of bucket) {
+            const bulkConc = p.workflowExecution.workflowDefinition?.settings?.concurrency;
+            if (
+              bulkConc?.strategy === 'queue' &&
+              p.workflowExecution.concurrencyGroupKey &&
+              p.workflowExecution.spaceId
+            ) {
+              try {
+                await drainConcurrencyQueueSlots({
+                  workflowExecutionRepository,
+                  taskManager: plugins.taskManager,
+                  logger: this.logger,
+                  spaceId: p.workflowExecution.spaceId,
+                  concurrencyGroupKey: p.workflowExecution.concurrencyGroupKey,
+                  concurrencySettings: bulkConc,
+                  request,
+                });
+              } catch (drainErr) {
+                this.logger.debug(
+                  `Bulk concurrency queue drain failed: ${
+                    drainErr instanceof Error ? drainErr.message : String(drainErr)
+                  }`
+                );
+              }
+            }
             await runCheck(p);
           }
         }),
@@ -1127,7 +1214,8 @@ export class WorkflowsExecutionEnginePlugin
 
     const cancelWorkflowExecution: CancelWorkflowExecution = async (
       workflowExecutionId,
-      spaceId
+      spaceId,
+      cancelRequest
     ) => {
       await checkLicense(plugins.licensing);
 
@@ -1156,17 +1244,45 @@ export class WorkflowsExecutionEnginePlugin
         return;
       }
 
+      const freesConcurrencySlotImmediately =
+        workflowExecution.status === ExecutionStatus.PENDING ||
+        workflowExecution.status === ExecutionStatus.QUEUED;
+
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowExecution.id,
-        ...(workflowExecution.status === ExecutionStatus.PENDING
-          ? { status: ExecutionStatus.CANCELLED }
-          : {}),
+        ...(freesConcurrencySlotImmediately ? { status: ExecutionStatus.CANCELLED } : {}),
         cancelRequested: true,
         cancellationReason: 'Cancelled by user',
         cancelledAt: new Date().toISOString(),
         cancelledBy: 'system', // TODO: set user if available
       });
-      await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
+      await nudgeTaskManagerBestEffort(workflowExecution.id, 'persisting cancel intent');
+
+      const concAfterCancel = workflowExecution.workflowDefinition?.settings?.concurrency;
+      if (
+        freesConcurrencySlotImmediately &&
+        concAfterCancel?.strategy === 'queue' &&
+        workflowExecution.concurrencyGroupKey &&
+        cancelRequest
+      ) {
+        try {
+          await drainConcurrencyQueueSlots({
+            workflowExecutionRepository,
+            taskManager: plugins.taskManager,
+            logger: this.logger,
+            spaceId: workflowExecution.spaceId,
+            concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
+            concurrencySettings: concAfterCancel,
+            request: cancelRequest,
+          });
+        } catch (drainErr) {
+          this.logger.debug(
+            `Concurrency queue drain after cancel failed: ${
+              drainErr instanceof Error ? drainErr.message : String(drainErr)
+            }`
+          );
+        }
+      }
     };
 
     const cancelAllActiveWorkflowExecutions: CancelAllActiveWorkflowExecutions = async ({
@@ -1246,8 +1362,8 @@ export class WorkflowsExecutionEnginePlugin
         fakeRequest: request,
       });
 
-      // Same idea as cancel: nudge TM so the resume task runs as soon as possible
-      await workflowTaskManager.forceRunIdleTasks(executionId);
+      // Same idea as cancel: best-effort nudge TM so the resume task runs as soon as possible
+      await nudgeTaskManagerBestEffort(executionId, 'scheduling resume');
     };
 
     const workflowEventLoggerService = new WorkflowEventLoggerService(
@@ -1393,7 +1509,7 @@ export class WorkflowsExecutionEnginePlugin
 
       if (!canProceed) {
         this.logger.debug(
-          `Dropped workflow execution ${workflowExecution.id} (group: ${workflowExecution.concurrencyGroupKey}) due to concurrency limit`
+          `Workflow execution ${workflowExecution.id} (group: ${workflowExecution.concurrencyGroupKey}) deferred or skipped per concurrency settings`
         );
       }
 
