@@ -33,8 +33,14 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
+      // Explicitly enable ONLY the autonomous variant. The handwritten flag
+      // `pciComplianceAgentBuilder` defaults to `true` in
+      // `experimental_features.ts`, so we must override it back to `false` here
+      // (via the boolean-flag tuple syntax) to keep the agent router's PCI
+      // skill choice cleanly isolated to the autonomous variant.
       `--xpack.securitySolution.enableExperimental=${JSON.stringify([
         'pciComplianceAutonomousAgentBuilder',
+        'disable:pciComplianceAgentBuilder',
       ])}`,
     ],
   },

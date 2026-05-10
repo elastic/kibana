@@ -46,7 +46,7 @@ const REPO_ROOT = resolve(PKG_DIR, '../../../../..');
  * checkout.
  */
 function repoRelative(absPath) {
-  const root = REPO_ROOT.endsWith('/') ? REPO_ROOT : `${REPO_ROOT}/`;
+  const root = REPO_ROOT.endsWith('/') ? REPO_ROOT : REPO_ROOT + '/';
   return absPath.startsWith(root) ? absPath.slice(root.length) : absPath;
 }
 
@@ -161,19 +161,67 @@ function loadVariantResults(dir) {
 
 /**
  * Normalise diverse @kbn/evals output shapes into a flat array of:
- *   { scenario, score, criteria: [{name, score, rationale}], errors }
+ *   { scenario, score, criteria: [{name, score, rationale}], errors,
+ *     skill_invoked_label, tool_call_total, pci_skill_tool_calls }
  * Best-effort — unknown shapes pass through.
+ *
+ * The actual @kbn/evals framework exports per (run × scenario × evaluator)
+ * documents to the `kibana-evaluations` index in Elasticsearch. To populate the
+ * comparison from a live cluster, snapshot the index with `_search?size=200`
+ * straight into a results.json next to this script — this normaliser then
+ * folds the per-evaluator rows back into per-scenario rows so the HTML can show
+ * a single line per scenario with both a PCI-Criteria score and a Skill-Invoked
+ * verdict.
  */
 function normaliseScenarios(raw) {
   if (Array.isArray(raw)) return raw;
   if (raw && Array.isArray(raw.scenarios)) return raw.scenarios;
-  if (raw && Array.isArray(raw.experiments))
-    return raw.experiments.map((e) => ({
-      scenario: e.name,
-      score: e.score,
-      criteria: e.evaluators?.[0]?.criteria ?? [],
-      errors: e.errors ?? [],
-    }));
+  if (raw && Array.isArray(raw.experiments)) return raw.experiments.map((e) => ({
+    scenario: e.name,
+    score: e.score,
+    criteria: e.evaluators?.[0]?.criteria ?? [],
+    errors: e.errors ?? [],
+  }));
+  // ES `_search` shape: { hits: { hits: [{ _source: { evaluator, example, task, ... } }] } }
+  if (raw && raw.hits && Array.isArray(raw.hits.hits)) {
+    const byScenario = new Map();
+    for (const hit of raw.hits.hits) {
+      const src = hit._source ?? {};
+      const scn = src.example?.dataset?.name ?? src.example?.id ?? 'unknown';
+      const cur = byScenario.get(scn) ?? {
+        scenario: scn,
+        score: NaN,
+        skill_invoked_label: null,
+        tool_call_total: 0,
+        pci_skill_tool_calls: 0,
+        criteria: [],
+        errors: [],
+      };
+      const evName = src.evaluator?.name ?? '';
+      const evScore = src.evaluator?.score;
+      const evLabel = src.evaluator?.label;
+      // The PCI Criteria evaluator is the primary numeric score for this suite.
+      if (evName === 'PCI Criteria' && typeof evScore === 'number') {
+        cur.score = evScore;
+      }
+      // The "Skill Invoked (...)" evaluator gives a categorical verdict.
+      if (evName.startsWith('Skill Invoked')) {
+        cur.skill_invoked_label = evLabel ?? cur.skill_invoked_label;
+      }
+      // Walk the agent's recorded tool-call steps and tally pci-skill vs other.
+      const steps = src.task?.output?.steps ?? [];
+      for (const step of steps) {
+        if (step?.type === 'tool_call') {
+          cur.tool_call_total += 1;
+          if (typeof step.tool_id === 'string' && step.tool_id.startsWith('security.pci_')) {
+            cur.pci_skill_tool_calls += 1;
+          }
+        }
+      }
+      byScenario.set(scn, cur);
+    }
+    return [...byScenario.values()];
+  }
   return [{ scenario: 'unknown shape', raw }];
 }
 
@@ -215,6 +263,39 @@ function diffScenarios(handwritten, autonomous) {
 }
 
 const scenarioDiff = diffScenarios(handwrittenResults, autonomousResults);
+
+/**
+ * Aggregate routing-level signals (whether the agent router picked the PCI
+ * skill at all, vs falling back to generic platform tools). When both variants
+ * score 0 across the board this is the diagnostic that explains *why*: a small
+ * model can fail to engage either skill, in which case the comparison is
+ * apples-to-apples but uninformative about skill content.
+ */
+function aggregateRouting(variant) {
+  if (!variant.populated || !Array.isArray(variant.scenarios)) return null;
+  let scenarioCount = 0;
+  let scenariosWithPciToolCall = 0;
+  let totalToolCalls = 0;
+  let pciSkillToolCalls = 0;
+  let skillInvokedSuccess = 0;
+  for (const s of variant.scenarios) {
+    scenarioCount += 1;
+    totalToolCalls += s.tool_call_total ?? 0;
+    pciSkillToolCalls += s.pci_skill_tool_calls ?? 0;
+    if ((s.pci_skill_tool_calls ?? 0) > 0) scenariosWithPciToolCall += 1;
+    if (s.skill_invoked_label && s.skill_invoked_label !== 'error') skillInvokedSuccess += 1;
+  }
+  return {
+    scenarioCount,
+    scenariosWithPciToolCall,
+    totalToolCalls,
+    pciSkillToolCalls,
+    skillInvokedSuccess,
+  };
+}
+
+const handwrittenRouting = aggregateRouting(handwrittenResults);
+const autonomousRouting = aggregateRouting(autonomousResults);
 
 // ─── emit HTML ─────────────────────────────────────────────────────────────
 const generatedAt = new Date().toISOString();
@@ -302,23 +383,15 @@ The script boots Kibana twice (once per variant), runs all ${specScenarioCount} 
 <div class="kpi-grid">
   <div class="kpi"><div class="label">Hand-written content</div>
     <div class="value">${handwrittenMetrics.chars.toLocaleString()} chars</div>
-    <div class="footnote">${handwrittenMetrics.lines} lines · ${
-  handwrittenMetrics.sections
-} sections · ${handwrittenMetrics.bullets} bullets</div></div>
+    <div class="footnote">${handwrittenMetrics.lines} lines · ${handwrittenMetrics.sections} sections · ${handwrittenMetrics.bullets} bullets</div></div>
   <div class="kpi"><div class="label">Autonomous content</div>
     <div class="value">${autonomousMetrics.chars.toLocaleString()} chars</div>
-    <div class="footnote">${autonomousMetrics.lines} lines · ${
-  autonomousMetrics.sections
-} sections · ${autonomousMetrics.bullets} bullets</div></div>
+    <div class="footnote">${autonomousMetrics.lines} lines · ${autonomousMetrics.sections} sections · ${autonomousMetrics.bullets} bullets</div></div>
   <div class="kpi"><div class="label">v4.0.1 anchors</div>
-    <div class="value">HW: ${handwrittenMetrics.v401Mentions} / Auto: ${
-  autonomousMetrics.v401Mentions
-}</div>
+    <div class="value">HW: ${handwrittenMetrics.v401Mentions} / Auto: ${autonomousMetrics.v401Mentions}</div>
     <div class="footnote">Both pin to v4.0.1 (June 2024 limited revision).</div></div>
   <div class="kpi"><div class="label">Do-not-use boundaries</div>
-    <div class="value">HW: ${handwrittenMetrics.doNotUseBullets} / Auto: ${
-  autonomousMetrics.doNotUseBullets
-}</div>
+    <div class="value">HW: ${handwrittenMetrics.doNotUseBullets} / Auto: ${autonomousMetrics.doNotUseBullets}</div>
     <div class="footnote">More boundaries → less activation drift on adjacent topics.</div></div>
   <div class="kpi"><div class="label">Skill-contract tests</div>
     <div class="value">HW: ${handwrittenTestCount} / Auto: ${autonomousTestCount}</div>
@@ -378,39 +451,27 @@ The script boots Kibana twice (once per variant), runs all ${specScenarioCount} 
 <table>
   <thead><tr><th>Domain knowledge</th><th>HW present?</th><th>Auto present?</th><th>Source</th></tr></thead>
   <tbody>
-    <tr><td>SAQ taxonomy (A, A-EP, D-MER, D-SP, …)</td><td>${
-      /SAQ/.test(handwrittenContent) ? '✓' : '✗'
-    }</td><td>${
-  /SAQ/.test(autonomousContent) ? '✓' : '✗'
-}</td><td>model-knowledge (distinct)</td></tr>
-    <tr><td>v3.2.1 → v4.0.1 net-new requirements (3.4.1, 8.4.2, 11.4.1)</td><td>${
-      /3\.4\.1.*8\.4\.2|8\.4\.2.*3\.4\.1/s.test(handwrittenContent) ? '✓' : '✗'
-    }</td><td>${
-  /3\.4\.1.*8\.4\.2|8\.4\.2.*3\.4\.1/s.test(autonomousContent) ? '✓' : '✗'
-}</td><td>model-knowledge (distinct)</td></tr>
-    <tr><td>Scope-reduction levers (tokenisation, P2PE, segmentation)</td><td>${
-      /[Tt]okenisation|[Tt]okenization/.test(handwrittenContent) ? '✓' : '✗'
-    }</td><td>${
-  /[Tt]okenisation|[Tt]okenization/.test(autonomousContent) ? '✓' : '✗'
-}</td><td>model-knowledge (distinct)</td></tr>
-    <tr><td>Technical-vs-process requirement classification</td><td>${
-      /[Tt]echnical[\s\S]*?[Pp]rocess-based/.test(handwrittenContent) ? '✓' : '✗'
-    }</td><td>${
-  /[Tt]echnical[\s\S]*?[Pp]rocess-based/.test(autonomousContent) ? '✓' : '✗'
-}</td><td>model-knowledge (distinct)</td></tr>
-    <tr><td>Tiered remediation SLA per status (RED/AMBER/GREEN)</td><td>${
-      /Remediation SLA|remediation SLA|30 days/.test(handwrittenContent) ? '✓' : '✗'
-    }</td><td>${
-  /Remediation SLA|remediation SLA|30 days/.test(autonomousContent) ? '✓' : '✗'
-}</td><td>model-internal-corroborated (Splunk PCI dashboard)</td></tr>
+    <tr><td>SAQ taxonomy (A, A-EP, D-MER, D-SP, …)</td><td>${/SAQ/.test(handwrittenContent) ? '✓' : '✗'}</td><td>${/SAQ/.test(autonomousContent) ? '✓' : '✗'}</td><td>model-knowledge (distinct)</td></tr>
+    <tr><td>v3.2.1 → v4.0.1 net-new requirements (3.4.1, 8.4.2, 11.4.1)</td><td>${/3\.4\.1.*8\.4\.2|8\.4\.2.*3\.4\.1/s.test(handwrittenContent) ? '✓' : '✗'}</td><td>${/3\.4\.1.*8\.4\.2|8\.4\.2.*3\.4\.1/s.test(autonomousContent) ? '✓' : '✗'}</td><td>model-knowledge (distinct)</td></tr>
+    <tr><td>Scope-reduction levers (tokenisation, P2PE, segmentation)</td><td>${/[Tt]okenisation|[Tt]okenization/.test(handwrittenContent) ? '✓' : '✗'}</td><td>${/[Tt]okenisation|[Tt]okenization/.test(autonomousContent) ? '✓' : '✗'}</td><td>model-knowledge (distinct)</td></tr>
+    <tr><td>Technical-vs-process requirement classification</td><td>${/[Tt]echnical[\s\S]*?[Pp]rocess-based/.test(handwrittenContent) ? '✓' : '✗'}</td><td>${/[Tt]echnical[\s\S]*?[Pp]rocess-based/.test(autonomousContent) ? '✓' : '✗'}</td><td>model-knowledge (distinct)</td></tr>
+    <tr><td>Tiered remediation SLA per status (RED/AMBER/GREEN)</td><td>${/Remediation SLA|remediation SLA|30 days/.test(handwrittenContent) ? '✓' : '✗'}</td><td>${/Remediation SLA|remediation SLA|30 days/.test(autonomousContent) ? '✓' : '✗'}</td><td>model-internal-corroborated (Splunk PCI dashboard)</td></tr>
   </tbody>
 </table>
 
 <h2>4 · Live eval results (per-scenario, LLM-judge scored)</h2>
 ${
   liveResultsAvailable && scenarioDiff
-    ? `<table>
-<thead><tr><th>Scenario</th><th>HW score</th><th>Auto score</th><th>Δ</th></tr></thead>
+    ? `<p class="lead">
+  Both variants ran through the same 8-scenario suite back-to-back against the same
+  cluster, same dataset, same connector — the only difference is which PCI skill the
+  agent router had available. The <em>PCI Criteria</em> column is the numeric
+  LLM-judge score (0..1) on the response body; the <em>Routing</em> column reports
+  what the agent router actually did with the request — which is the upstream
+  signal that explains the score.
+</p>
+<table>
+<thead><tr><th>Scenario</th><th>HW score</th><th>Auto score</th><th>Δ</th><th>HW routing</th><th>Auto routing</th></tr></thead>
 <tbody>
 ${scenarioDiff
   .map((s) => {
@@ -418,22 +479,56 @@ ${scenarioDiff
     const auCell = Number.isFinite(s.autonomous) ? s.autonomous.toFixed(2) : '—';
     const deltaSign = s.delta > 0 ? '+' : '';
     const deltaCell = Number.isFinite(s.delta) ? `${deltaSign}${s.delta.toFixed(2)}` : '—';
-    return `<tr><td>${escapeHtml(
-      s.scenario
-    )}</td><td class="num">${hwCell}</td><td class="num">${auCell}</td><td class="num ${deltaClassFor(
-      s.delta
-    )}">${deltaCell}</td></tr>`;
+    const fmtRouting = (variant) => {
+      const scn = (variant === 'hw' ? handwrittenResults : autonomousResults).scenarios.find(
+        (x) => (x.scenario || x.name) === s.scenario
+      );
+      if (!scn) return '—';
+      const total = scn.tool_call_total ?? 0;
+      const pci = scn.pci_skill_tool_calls ?? 0;
+      if (total === 0) return '<em>no tool calls</em>';
+      return pci > 0
+        ? `<strong>${pci}/${total}</strong> pci skill`
+        : `0/${total} pci skill (<em>generic only</em>)`;
+    };
+    return `<tr><td>${escapeHtml(s.scenario)}</td><td class="num">${hwCell}</td><td class="num">${auCell}</td><td class="num ${deltaClassFor(s.delta)}">${deltaCell}</td><td>${fmtRouting('hw')}</td><td>${fmtRouting('au')}</td></tr>`;
   })
   .join('\n')}
 </tbody>
 </table>
+
+<h3>Routing aggregates</h3>
+<table>
+<thead><tr><th>Signal</th><th>Hand-written run</th><th>Autonomous run</th></tr></thead>
+<tbody>
+<tr><td>Scenarios completed</td><td class="num">${handwrittenRouting?.scenarioCount ?? '—'}</td><td class="num">${autonomousRouting?.scenarioCount ?? '—'}</td></tr>
+<tr><td>Total tool calls observed</td><td class="num">${handwrittenRouting?.totalToolCalls ?? '—'}</td><td class="num">${autonomousRouting?.totalToolCalls ?? '—'}</td></tr>
+<tr><td>PCI-skill tool calls (<code>security.pci_*</code>)</td><td class="num">${handwrittenRouting?.pciSkillToolCalls ?? '—'}</td><td class="num">${autonomousRouting?.pciSkillToolCalls ?? '—'}</td></tr>
+<tr><td>Scenarios with ≥1 PCI-skill call</td><td class="num">${handwrittenRouting?.scenariosWithPciToolCall ?? '—'}</td><td class="num">${autonomousRouting?.scenariosWithPciToolCall ?? '—'}</td></tr>
+</tbody>
+</table>
+
+${
+  handwrittenRouting?.pciSkillToolCalls === 0 && autonomousRouting?.pciSkillToolCalls === 0
+    ? `<div class="banner banner-warn">
+<strong>Honest read of this run:</strong> with the model used here
+(<code>llama3.1:8b</code> via local Ollama proxy), the agent router fell back to the
+generic <code>platform.core.search</code> tool on every scenario for both variants and
+never engaged either PCI skill. PCI-Criteria scores are therefore 0 across the board
+for both variants — they reflect the model's inability to discover and use the PCI
+tools at this scale, not the quality of either skill's content. The comparison is
+apples-to-apples (identical dataset, identical model, identical infra), it just lives
+on the floor. The <strong>structural / domain-coverage</strong> deltas in §2 and §3
+remain the meaningful signal until this is re-run with a stronger model
+(GPT-4-class, Claude 3.5+, Bedrock Claude 3.7) — at which point the same script
+re-renders this section with discriminating numbers.
+</div>`
+    : ''
+}
+
 <details><summary>Raw evaluator artefacts</summary>
-<pre>handwritten: ${escapeHtml(
-        handwrittenResults.file ? repoRelative(handwrittenResults.file) : '(none)'
-      )}
-autonomous : ${escapeHtml(
-        autonomousResults.file ? repoRelative(autonomousResults.file) : '(none)'
-      )}</pre>
+<pre>handwritten: ${escapeHtml(handwrittenResults.file ? repoRelative(handwrittenResults.file) : '(none)')}
+autonomous : ${escapeHtml(autonomousResults.file ? repoRelative(autonomousResults.file) : '(none)')}</pre>
 </details>`
     : `<div class="banner banner-info">
 <strong>Live eval data not yet attached</strong> — the framework is fully wired; only the cluster-with-AI-connector run is missing. Two ways to populate this section:
@@ -446,13 +541,7 @@ autonomous : ${escapeHtml(
     <pre>${escapeHtml(repoRelative(args.handwritten))}/results.json
 ${escapeHtml(repoRelative(args.autonomous))}/results.json</pre>
     then re-run:
-    <pre>node ${escapeHtml(
-      repoRelative(args.out).replace(/comparison\.html$/, 'scripts/build_comparison_html.mjs')
-    )} \\\n  --handwritten ${escapeHtml(
-        repoRelative(args.handwritten)
-      )} \\\n  --autonomous ${escapeHtml(repoRelative(args.autonomous))} \\\n  --out ${escapeHtml(
-        repoRelative(args.out)
-      )}</pre>
+    <pre>node ${escapeHtml(repoRelative(args.out).replace(/comparison\.html$/, 'scripts/build_comparison_html.mjs'))} \\\n  --handwritten ${escapeHtml(repoRelative(args.handwritten))} \\\n  --autonomous ${escapeHtml(repoRelative(args.autonomous))} \\\n  --out ${escapeHtml(repoRelative(args.out))}</pre>
   </li>
 </ol>
 The handwritten variant is the existing <code>kbn-evals-weekly-pci-compliance</code> Buildkite step (no change). The autonomous variant is the new <code>kbn-evals-weekly-pci-compliance-autonomous</code> step. Both run the SAME ${specScenarioCount}-scenario spec — the only thing different is which Kibana skill the agent router has available.
@@ -515,11 +604,7 @@ EVAL_PCI_VARIANT=autonomous node scripts/evals start --suite pci-compliance-auto
   <li>Hand-written skill source: <code>x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/pci_compliance/pci_compliance_skill.ts</code></li>
   <li>Autonomous skill source: <code>x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/pci_compliance_autonomous/pci_compliance_autonomous_skill.ts</code></li>
   <li>Eval spec: <code>x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/evals/pci_compliance/pci_compliance.spec.ts</code></li>
-  <li>Live results (when present): <code>${escapeHtml(
-    repoRelative(handwrittenResults.dir)
-  )}/results.json</code> &amp; <code>${escapeHtml(
-  repoRelative(autonomousResults.dir)
-)}/results.json</code></li>
+  <li>Live results (when present): <code>${escapeHtml(repoRelative(handwrittenResults.dir))}/results.json</code> &amp; <code>${escapeHtml(repoRelative(autonomousResults.dir))}/results.json</code></li>
 </ul>
 <p class="footnote">
   Per the <code>address-known-limitations</code> rule, this report does NOT include an "honest limitations" / "future work" section — the only known limitation is "live eval data not yet attached", and the discovery seam (the runner script + Buildkite step) ships in the same commit as this HTML. Run the script with cluster credentials to upgrade this report from "framework-validated" to "result-validated".
@@ -531,13 +616,5 @@ EVAL_PCI_VARIANT=autonomous node scripts/evals start --suite pci-compliance-auto
 
 writeFileSync(args.out, html, 'utf8');
 process.stdout.write(`Wrote ${args.out} (${html.length.toLocaleString()} bytes)\n`);
-process.stdout.write(
-  `  hand-written results: ${
-    handwrittenResults.populated ? 'present' : 'NOT YET — run script to populate'
-  }\n`
-);
-process.stdout.write(
-  `  autonomous results : ${
-    autonomousResults.populated ? 'present' : 'NOT YET — run script to populate'
-  }\n`
-);
+process.stdout.write(`  hand-written results: ${handwrittenResults.populated ? 'present' : 'NOT YET — run script to populate'}\n`);
+process.stdout.write(`  autonomous results : ${autonomousResults.populated ? 'present' : 'NOT YET — run script to populate'}\n`);

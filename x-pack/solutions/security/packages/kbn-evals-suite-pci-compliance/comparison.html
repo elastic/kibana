@@ -62,16 +62,13 @@
 </p>
 
 <div class="pillrow">
-  <span class="pill">generated: 2026-05-10T18:43:41.066Z</span>
+  <span class="pill">generated: 2026-05-10T20:47:17.221Z</span>
   <span class="pill">hand-written by: <strong>Smriti</strong> (PR #256060)</span>
   <span class="pill">autonomous by: <strong>skill.architect</strong> (cycle-17)</span>
   <span class="pill">eval suite: <code>@kbn/evals-suite-pci-compliance</code> (8 scenarios)</span>
 </div>
 
-<div class="banner banner-warn"><strong>Awaiting live eval run.</strong> The structural comparison below is complete and accurate. To populate the live LLM-judge scores, run on a Kibana host with a configured AI connector:
-<pre>cd kibana
-./x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/scripts/compare_variants.sh</pre>
-The script boots Kibana twice (once per variant), runs all 8 scenarios against each, then refreshes this HTML with live scores. No code changes needed — the seam is wired.</div>
+<div class="banner banner-success"><strong>Live eval data attached.</strong> Both variants ran through the same suite; per-scenario scores and judge rationales are populated below.</div>
 
 <h2>Headline KPIs</h2>
 <div class="kpi-grid">
@@ -143,25 +140,57 @@ The script boots Kibana twice (once per variant), runs all 8 scenarios against e
 </table>
 
 <h2>4 · Live eval results (per-scenario, LLM-judge scored)</h2>
-<div class="banner banner-info">
-<strong>Live eval data not yet attached</strong> — the framework is fully wired; only the cluster-with-AI-connector run is missing. Two ways to populate this section:
-<ol>
-  <li>Run the side-by-side script (recommended):
-    <pre>cd kibana
-./x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/scripts/compare_variants.sh</pre>
-  </li>
-  <li>Or trigger the two Buildkite steps independently and drop the resulting <code>results.json</code> files into:
-    <pre>x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/handwritten/results.json
-x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/autonomous/results.json</pre>
-    then re-run:
-    <pre>node x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/scripts/build_comparison_html.mjs \
-  --handwritten x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/handwritten \
-  --autonomous x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/autonomous \
-  --out x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/comparison.html</pre>
-  </li>
-</ol>
-The handwritten variant is the existing <code>kbn-evals-weekly-pci-compliance</code> Buildkite step (no change). The autonomous variant is the new <code>kbn-evals-weekly-pci-compliance-autonomous</code> step. Both run the SAME 8-scenario spec — the only thing different is which Kibana skill the agent router has available.
+<p class="lead">
+  Both variants ran through the same 8-scenario suite back-to-back against the same
+  cluster, same dataset, same connector — the only difference is which PCI skill the
+  agent router had available. The <em>PCI Criteria</em> column is the numeric
+  LLM-judge score (0..1) on the response body; the <em>Routing</em> column reports
+  what the agent router actually did with the request — which is the upstream
+  signal that explains the score.
+</p>
+<table>
+<thead><tr><th>Scenario</th><th>HW score</th><th>Auto score</th><th>Δ</th><th>HW routing</th><th>Auto routing</th></tr></thead>
+<tbody>
+<tr><td>pci-compliance: no matching data</td><td class="num">0.00</td><td class="num">0.00</td><td class="num ">0.00</td><td>0/2 pci skill (<em>generic only</em>)</td><td>0/2 pci skill (<em>generic only</em>)</td></tr>
+<tr><td>pci-compliance: field mapping</td><td class="num">0.00</td><td class="num">0.00</td><td class="num ">0.00</td><td><em>no tool calls</em></td><td><em>no tool calls</em></td></tr>
+<tr><td>pci-compliance: scope discovery</td><td class="num">0.00</td><td class="num">0.00</td><td class="num ">0.00</td><td>0/2 pci skill (<em>generic only</em>)</td><td>0/2 pci skill (<em>generic only</em>)</td></tr>
+<tr><td>pci-compliance: requirement 2.2.4 default accounts</td><td class="num">0.00</td><td class="num">0.00</td><td class="num ">0.00</td><td>0/2 pci skill (<em>generic only</em>)</td><td>0/2 pci skill (<em>generic only</em>)</td></tr>
+<tr><td>pci-compliance: requirement 4.1 weak TLS</td><td class="num">0.00</td><td class="num">0.00</td><td class="num ">0.00</td><td>0/2 pci skill (<em>generic only</em>)</td><td>0/2 pci skill (<em>generic only</em>)</td></tr>
+<tr><td>pci-compliance: requirement 8.3.4 brute force</td><td class="num">0.00</td><td class="num">—</td><td class="num ">—</td><td>0/2 pci skill (<em>generic only</em>)</td><td>—</td></tr>
+<tr><td>pci-compliance: full report</td><td class="num">0.00</td><td class="num">0.00</td><td class="num ">0.00</td><td>0/2 pci skill (<em>generic only</em>)</td><td>0/2 pci skill (<em>generic only</em>)</td></tr>
+<tr><td>pci-compliance: scoped to auth index</td><td class="num">—</td><td class="num">0.00</td><td class="num ">—</td><td>—</td><td>0/2 pci skill (<em>generic only</em>)</td></tr>
+</tbody>
+</table>
+
+<h3>Routing aggregates</h3>
+<table>
+<thead><tr><th>Signal</th><th>Hand-written run</th><th>Autonomous run</th></tr></thead>
+<tbody>
+<tr><td>Scenarios completed</td><td class="num">7</td><td class="num">7</td></tr>
+<tr><td>Total tool calls observed</td><td class="num">12</td><td class="num">12</td></tr>
+<tr><td>PCI-skill tool calls (<code>security.pci_*</code>)</td><td class="num">0</td><td class="num">0</td></tr>
+<tr><td>Scenarios with ≥1 PCI-skill call</td><td class="num">0</td><td class="num">0</td></tr>
+</tbody>
+</table>
+
+<div class="banner banner-warn">
+<strong>Honest read of this run:</strong> with the model used here
+(<code>llama3.1:8b</code> via local Ollama proxy), the agent router fell back to the
+generic <code>platform.core.search</code> tool on every scenario for both variants and
+never engaged either PCI skill. PCI-Criteria scores are therefore 0 across the board
+for both variants — they reflect the model's inability to discover and use the PCI
+tools at this scale, not the quality of either skill's content. The comparison is
+apples-to-apples (identical dataset, identical model, identical infra), it just lives
+on the floor. The <strong>structural / domain-coverage</strong> deltas in §2 and §3
+remain the meaningful signal until this is re-run with a stronger model
+(GPT-4-class, Claude 3.5+, Bedrock Claude 3.7) — at which point the same script
+re-renders this section with discriminating numbers.
 </div>
+
+<details><summary>Raw evaluator artefacts</summary>
+<pre>handwritten: x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/handwritten/results.json
+autonomous : x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/autonomous/results.json</pre>
+</details>
 
 <h2>5 · Reasoning — what each skill is optimised for</h2>
 <div class="twocol">
