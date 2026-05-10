@@ -87,7 +87,7 @@ await managed.install(MY_WORKFLOW_ID, { spaceId: 'default' });
 
 // On-demand: install a per-entity instance whenever it is needed.
 async function onEntityCreated(entityId: string, spaceId: string) {
-  await managed.install(ENTITY_MONITOR_WORKFLOW_ID, {
+  await managed.install(MY_WORKFLOW_ID, {
     workflowIdSuffix: entityId,
     values: { entityId },
     spaceId,
@@ -186,15 +186,15 @@ await managed.install(MY_WORKFLOW_ID, {
 });
 
 // Per-entity instance.
-await managed.install(ENTITY_MONITOR_WORKFLOW_ID, {
+await managed.install(MY_WORKFLOW_ID, {
   workflowIdSuffix: 'host-42',
   values: { entityId: 'host-42' },
   spaceId: 'my-space',
 });
 
 // Later, derive id and execute:
-const workflowId = `${ENTITY_MONITOR_WORKFLOW_ID}-host-42`;
-await managed.execute(request, ENTITY_MONITOR_WORKFLOW_ID, {
+const workflowId = `${MY_WORKFLOW_ID}-host-42`;
+await managed.execute(request, MY_WORKFLOW_ID, {
   workflowId,
   spaceId: 'my-space',
 });
@@ -363,9 +363,9 @@ const executionId = await managed.execute(request, MY_WORKFLOW_ID, {
 For a per-entity instance installed with a deterministic suffix, pass the resolved `workflowId`:
 
 ```ts
-const workflowId = `${ENTITY_MONITOR_WORKFLOW_ID}-host-42`;
+const workflowId = `${MY_WORKFLOW_ID}-host-42`;
 
-await managed.execute(request, ENTITY_MONITOR_WORKFLOW_ID, {
+await managed.execute(request, MY_WORKFLOW_ID, {
   workflowId,
   spaceId: 'my-space',
   inputs: { reason: 'periodic-check' },

@@ -13,16 +13,8 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-<<<<<<< HEAD
-import {
-  ENTITY_MONITOR_WORKFLOW_ID,
-  WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID,
-} from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { registerWorkflowAgentBuilderIntegration } from './agent_builder';
 import { createWorkflowSmlType } from './agent_builder/sml_types/workflow';
-=======
->>>>>>> 1dfe3071d23555e565a4f2905fab6550731d0ba1
 import { defineRoutes } from './api/routes';
 import { WorkflowsManagementApi } from './api/workflows_management_api';
 import { WorkflowsService } from './api/workflows_management_service';
@@ -47,7 +39,6 @@ import type {
 import { registerUISettings } from './ui_settings';
 import { stepSchemas } from '../common/step_schemas';
 
-const WORKFLOWS_MANAGEMENT_PLUGIN_ID = 'workflowsManagement';
 
 export class WorkflowsPlugin
   implements
@@ -101,7 +92,6 @@ export class WorkflowsPlugin
     plugins.workflowsExtensions.registerManagedWorkflowsSystemApiProvider(
       createManagedWorkflowsSystemApiProvider(workflowsService, this.config, this.logger)
     );
-    plugins.workflowsExtensions.registerManagedWorkflowOwner(WORKFLOWS_MANAGEMENT_PLUGIN_ID);
 
     const spaces = plugins.spaces.spacesService;
 
@@ -130,14 +120,12 @@ export class WorkflowsPlugin
     if (this.workflowsService) {
       const managedWorkflowPluginIds = plugins.workflowsExtensions.getManagedWorkflowPluginIds();
       void this.runManagedWorkflowsStartupReconciliation(managedWorkflowPluginIds);
-      void this.initializeManagedWorkflowsOnStart();
     }
 
     this.logger.debug('Workflows Management: Started');
     return {};
   }
 
-<<<<<<< HEAD
   private setupAiIntegration(
     core: CoreSetup<WorkflowsServerPluginStartDeps>,
     api: WorkflowsManagementApi,
@@ -207,34 +195,6 @@ export class WorkflowsPlugin
       });
   }
 
-  private async initializeManagedWorkflowsOnStart(): Promise<void> {
-    try {
-      await this.workflowsService?.installManagedWorkflow(
-        WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID,
-        {
-          isStartupReconcile: true,
-          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        },
-        WORKFLOWS_MANAGEMENT_PLUGIN_ID
-      );
-      await this.workflowsService?.installManagedWorkflow(
-        ENTITY_MONITOR_WORKFLOW_ID,
-        {
-          isStartupReconcile: true,
-          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-          values: {
-            entityId: 'default',
-          },
-        },
-        WORKFLOWS_MANAGEMENT_PLUGIN_ID
-      );
-    } catch (error) {
-      this.logger.warn('Workflows Management: Failed to initialize managed workflows on start', {
-        error,
-      });
-    }
-  }
-
   private async runManagedWorkflowsStartupReconciliation(pluginIds: string[]): Promise<void> {
     try {
       await this.workflowsService?.reconcileManagedWorkflowOrphans(pluginIds);
@@ -249,8 +209,6 @@ export class WorkflowsPlugin
     }
   }
 
-=======
->>>>>>> 1dfe3071d23555e565a4f2905fab6550731d0ba1
   public stop() {
     this.availabilityUpdater?.stop();
   }

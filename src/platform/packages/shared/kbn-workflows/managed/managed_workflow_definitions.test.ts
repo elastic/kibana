@@ -10,7 +10,7 @@
 import { parse } from 'yaml';
 import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
-import { ENTITY_MONITOR_WORKFLOW_ID } from './workflows';
+import { EXAMPLE_MANAGED_WORKFLOW_ID } from './workflows';
 import { WorkflowSchema } from '../spec/schema';
 
 type RegistryManagedWorkflowDefinition = (typeof managedWorkflowDefinitions)[number];
@@ -19,8 +19,8 @@ type TemplateManagedWorkflowDefinition = RegistryManagedWorkflowDefinition & {
 };
 
 const templateRepresentativeValuesById: Record<string, ManagedWorkflowTemplateValues> = {
-  [ENTITY_MONITOR_WORKFLOW_ID]: {
-    entityId: 'host-42',
+  [EXAMPLE_MANAGED_WORKFLOW_ID]: {
+    recipient: 'World',
   },
 };
 

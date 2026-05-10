@@ -13,12 +13,7 @@ import type {
   ManagedWorkflowTemplateValues,
   ResolvedManagedWorkflowDefinition,
 } from './types';
-import {
-  ENTITY_MONITOR_WORKFLOW_EXAMPLE,
-  ENTITY_MONITOR_WORKFLOW_ID,
-  WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW,
-  WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID,
-} from './workflows';
+import { EXAMPLE_MANAGED_WORKFLOW, EXAMPLE_MANAGED_WORKFLOW_ID } from './workflows';
 
 export type {
   ManagedWorkflowDefinition,
@@ -33,10 +28,7 @@ const defaultManagementPolicy: Required<ManagedWorkflowManagement> = {
   enablement: 'restorable',
 };
 
-export const managedWorkflowDefinitions = [
-  WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW,
-  ENTITY_MONITOR_WORKFLOW_EXAMPLE,
-] as const;
+export const managedWorkflowDefinitions = [EXAMPLE_MANAGED_WORKFLOW] as const;
 
 export type ManagedWorkflowId = (typeof managedWorkflowDefinitions)[number]['id'];
 
@@ -67,4 +59,4 @@ export const getManagedWorkflowDefinitions = (): ResolvedManagedWorkflowDefiniti
   }));
 };
 
-export { WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID, ENTITY_MONITOR_WORKFLOW_ID };
+export { EXAMPLE_MANAGED_WORKFLOW_ID };
