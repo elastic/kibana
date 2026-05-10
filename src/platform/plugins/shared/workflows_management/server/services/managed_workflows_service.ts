@@ -227,6 +227,10 @@ export class ManagedWorkflowsService {
         enabled: existing.enabled,
         definition: existing.definition,
         yaml: existing.yaml,
+        ...(existing.managed === true ? { managed: true } : {}),
+        ...(typeof existing.originSystemWorkflowId === 'string'
+          ? { originSystemWorkflowId: existing.originSystemWorkflowId }
+          : {}),
       },
       context,
       request

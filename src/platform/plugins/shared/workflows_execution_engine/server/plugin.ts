@@ -509,6 +509,7 @@ export class WorkflowsExecutionEnginePlugin
                 id: generateUuid(),
                 spaceId,
                 workflowId: workflow.id,
+                ...this.buildManagedWorkflowExecutionMetadata(workflow),
                 isTestRun: false,
                 workflowDefinition: workflow.definition,
                 yaml: workflow.yaml,
@@ -673,6 +674,7 @@ export class WorkflowsExecutionEnginePlugin
         id: generateUuid(),
         spaceId,
         workflowId: workflow.id,
+        ...this.buildManagedWorkflowExecutionMetadata(workflow),
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
@@ -1090,6 +1092,7 @@ export class WorkflowsExecutionEnginePlugin
         spaceId: workflow.spaceId,
         stepId,
         workflowId: workflow.id,
+        ...this.buildManagedWorkflowExecutionMetadata(workflow),
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
@@ -1355,6 +1358,24 @@ export class WorkflowsExecutionEnginePlugin
       concurrencySettings,
       buildWorkflowContext(normalizedWorkflowExecution, coreStart, dependencies)
     );
+  }
+
+  private buildManagedWorkflowExecutionMetadata(
+    workflow: Pick<WorkflowExecutionEngineModel, 'managed' | 'originSystemWorkflowId'>
+  ): Partial<Pick<EsWorkflowExecution, 'managed' | 'originSystemWorkflowId'>> {
+    const managedMetadata: Partial<
+      Pick<EsWorkflowExecution, 'managed' | 'originSystemWorkflowId'>
+    > = {};
+
+    if (workflow.managed === true) {
+      managedMetadata.managed = true;
+    }
+
+    if (typeof workflow.originSystemWorkflowId === 'string') {
+      managedMetadata.originSystemWorkflowId = workflow.originSystemWorkflowId;
+    }
+
+    return managedMetadata;
   }
 
   /**

@@ -56,6 +56,7 @@ describe('WorkflowRepository.areWorkflowsEnabled', () => {
               {
                 bool: {
                   must: [{ ids: { values: ['wf-a', 'wf-b'] } }, { term: { spaceId: 'default' } }],
+                  must_not: [],
                 },
               },
             ],
@@ -92,11 +93,13 @@ describe('WorkflowRepository.areWorkflowsEnabled', () => {
         {
           bool: {
             must: [{ ids: { values: ['wf-a'] } }, { term: { spaceId: 'space-1' } }],
+            must_not: [],
           },
         },
         {
           bool: {
             must: [{ ids: { values: ['wf-b'] } }, { term: { spaceId: 'space-2' } }],
+            must_not: [],
           },
         },
       ])
@@ -120,6 +123,40 @@ describe('WorkflowRepository.areWorkflowsEnabled', () => {
 
     expect(result.get('default:wf-a')).toBe(true);
     expect(result.get('default:wf-missing')).toBe(false);
+  });
+
+  it('applies managed filter when managedFilter is managed', async () => {
+    esClient.search.mockResolvedValue({
+      hits: {
+        hits: [],
+      },
+    });
+
+    await repository.areWorkflowsEnabled([{ workflowId: 'wf-a', spaceId: 'default' }], {
+      managedFilter: 'managed',
+    });
+
+    const callArg = esClient.search.mock.calls[0][0];
+    expect(callArg.query.bool.should[0].bool.must).toEqual(
+      expect.arrayContaining([{ term: { managed: true } }])
+    );
+  });
+
+  it('applies unmanaged filter when managedFilter is unmanaged', async () => {
+    esClient.search.mockResolvedValue({
+      hits: {
+        hits: [],
+      },
+    });
+
+    await repository.areWorkflowsEnabled([{ workflowId: 'wf-a', spaceId: 'default' }], {
+      managedFilter: 'unmanaged',
+    });
+
+    const callArg = esClient.search.mock.calls[0][0];
+    expect(callArg.query.bool.should[0].bool.must_not).toEqual(
+      expect.arrayContaining([{ term: { managed: true } }])
+    );
   });
 
   it('dedupes repeated refs so one ES search covers them all', async () => {
@@ -192,6 +229,96 @@ describe('WorkflowRepository.getWorkflow', () => {
     expect(wf).not.toBeNull();
     expect(wf!.createdAt.toISOString()).toBe('2024-01-02T03:04:05.000Z');
     expect(wf!.lastUpdatedAt.toISOString()).toBe('2024-06-07T08:09:10.000Z');
+  });
+
+  it('maps managed workflow metadata when present', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'system-workflow',
+              _source: {
+                ...baseSource,
+                managed: true,
+                originSystemWorkflowId: 'system-parent',
+                created_at: '2024-01-02T03:04:05.000Z',
+                updated_at: '2024-06-07T08:09:10.000Z',
+              },
+            },
+          ],
+        },
+      }),
+    };
+    const repository = new WorkflowRepository({
+      esClient: esClient as any,
+      logger: loggingSystemMock.create().get(),
+    });
+
+    const wf = await repository.getWorkflow('system-workflow', 'default');
+    expect(wf).not.toBeNull();
+    expect(wf).toMatchObject({
+      managed: true,
+      originSystemWorkflowId: 'system-parent',
+    });
+  });
+
+  it('applies managed filter in getWorkflow when managedFilter is managed', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: {
+                ...baseSource,
+                created_at: '2024-01-02T03:04:05.000Z',
+                updated_at: '2024-06-07T08:09:10.000Z',
+              },
+            },
+          ],
+        },
+      }),
+    };
+    const repository = new WorkflowRepository({
+      esClient: esClient as any,
+      logger: loggingSystemMock.create().get(),
+    });
+
+    await repository.getWorkflow('wf-1', 'default', { managedFilter: 'managed' });
+
+    const callArg = esClient.search.mock.calls[0][0];
+    expect(callArg.query.bool.must).toEqual(expect.arrayContaining([{ term: { managed: true } }]));
+  });
+
+  it('applies unmanaged filter in getWorkflow when managedFilter is unmanaged', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: {
+                ...baseSource,
+                created_at: '2024-01-02T03:04:05.000Z',
+                updated_at: '2024-06-07T08:09:10.000Z',
+              },
+            },
+          ],
+        },
+      }),
+    };
+    const repository = new WorkflowRepository({
+      esClient: esClient as any,
+      logger: loggingSystemMock.create().get(),
+    });
+
+    await repository.getWorkflow('wf-1', 'default', { managedFilter: 'unmanaged' });
+
+    const callArg = esClient.search.mock.calls[0][0];
+    expect(callArg.query.bool.must_not).toEqual(
+      expect.arrayContaining([{ term: { managed: true } }])
+    );
   });
 });
 
