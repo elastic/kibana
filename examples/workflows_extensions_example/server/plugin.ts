@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type {
   WorkflowsExtensionsRequestHandlerContext,
   WorkflowsExtensionsServerPluginSetup,
@@ -95,10 +101,9 @@ export class WorkflowsExtensionsExamplePlugin
 
       this.logger.info('Workflows Extensions Example: Managed workflow installed successfully');
     } catch (error) {
-      this.logger.warn(
-        'Workflows Extensions Example: Failed to install managed workflow',
-        { error }
-      );
+      this.logger.warn('Workflows Extensions Example: Failed to install managed workflow', {
+        error,
+      });
     }
   }
 }
