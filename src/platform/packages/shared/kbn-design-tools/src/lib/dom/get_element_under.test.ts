@@ -27,6 +27,8 @@ describe('getElementUnder', () => {
     clone,
     dx: 0,
     dy: 0,
+    dw: 0,
+    dh: 0,
     originalTransform: '',
     originalRect: {
       x: 0,

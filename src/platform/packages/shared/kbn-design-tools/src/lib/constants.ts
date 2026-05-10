@@ -17,3 +17,19 @@ export const LABEL_PADDING = 4;
 
 export const DEVTOOL_CLONE_ATTR = 'data-devtool-clone';
 export const DEVTOOL_IGNORE_ATTR = 'data-devtool-ignore';
+export const DEVTOOL_RESIZE_HANDLE_ATTR = 'data-devtool-resize-handle';
+
+export type ResizeHandle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w';
+export const RESIZE_HANDLE_SIZE = 8;
+
+/** Cursor for each resize handle. */
+export const HANDLE_CURSORS: Record<ResizeHandle, string> = {
+  nw: 'nwse-resize',
+  n: 'ns-resize',
+  ne: 'nesw-resize',
+  e: 'ew-resize',
+  se: 'nwse-resize',
+  s: 'ns-resize',
+  sw: 'nesw-resize',
+  w: 'ew-resize',
+};

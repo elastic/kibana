@@ -14,6 +14,7 @@ import {
   LAYOUT_SETTINGS_FLYOUT_ID,
   DEVELOPER_TOOLBAR_ID,
   DEVTOOL_IGNORE_ATTR,
+  DEVTOOL_RESIZE_HANDLE_ATTR,
 } from '../constants';
 
 const IGNORED_ELEMENT_IDS = new Set([
@@ -25,10 +26,12 @@ const IGNORED_ELEMENT_IDS = new Set([
 ]);
 
 const DEVTOOL_IGNORE_SELECTOR = `[${DEVTOOL_IGNORE_ATTR}]`;
+const DEVTOOL_RESIZE_SELECTOR = `[${DEVTOOL_RESIZE_HANDLE_ATTR}]`;
 
 const IGNORED_SELECTOR = [
   ...Array.from(IGNORED_ELEMENT_IDS).map((id) => `#${id}`),
   DEVTOOL_IGNORE_SELECTOR,
+  DEVTOOL_RESIZE_SELECTOR,
 ].join(',');
 
 // Emotion-generated class names that contain these labels are ignored.

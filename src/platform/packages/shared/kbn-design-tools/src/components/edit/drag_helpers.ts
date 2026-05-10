@@ -33,6 +33,7 @@ export const startDragFromClone = (
 ): DragState => {
   const clone = entry.clone!;
   clone.style.pointerEvents = 'none';
+  clone.style.willChange = 'transform';
 
   return {
     el: entry.el,
@@ -64,6 +65,8 @@ export const startDragFromElement = (
       clone: null,
       dx: 0,
       dy: 0,
+      dw: 0,
+      dh: 0,
       originalTransform: target.style.transform || '',
       originalRect: target.getBoundingClientRect(),
     });
@@ -74,6 +77,8 @@ export const startDragFromElement = (
 
   // Create a visual clone on document.body — always on top, no stacking context issues
   const { clone, rect } = cloneElement(target, cloneZIndex);
+  // Set transform-origin for consistent scale behavior during resize
+  clone.style.transformOrigin = '0 0';
   document.body.appendChild(clone);
 
   // Hide the original (preserve layout space) and block pointer events

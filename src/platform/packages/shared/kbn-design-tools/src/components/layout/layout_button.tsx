@@ -141,12 +141,6 @@ export const LayoutButton = () => {
           icon: 'undo',
           onClick: handleResetEdits,
           disabled: moveCount === 0,
-          toolTipContent:
-            moveCount === 0
-              ? i18n.translate('kbnDesignTools.layoutButton.editMode.resetButtonTooltip', {
-                  defaultMessage: 'No elements have been edited',
-                })
-              : undefined,
         },
       ],
     },

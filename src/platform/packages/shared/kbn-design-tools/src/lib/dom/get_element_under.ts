@@ -15,6 +15,10 @@ export interface ElementOffset {
   clone: HTMLElement | null;
   dx: number;
   dy: number;
+  /** Width delta from resize operations. */
+  dw: number;
+  /** Height delta from resize operations. */
+  dh: number;
   originalTransform: string;
   originalRect: DOMRect;
 }

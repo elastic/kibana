@@ -9,6 +9,14 @@
 
 export { EditOverlay } from './edit_overlay';
 export { startDragFromClone, startDragFromElement, findExistingClone } from './drag_helpers';
+export {
+  startResize,
+  calcResizeDeltas,
+  buildTransform,
+  findNearHandle,
+  getHandleMode,
+} from './resize_helpers';
 
+export type { ResizeState } from './resize_helpers';
 export type { DragState } from './drag_helpers';
 export type { EditOverlayHandle } from './edit_overlay';

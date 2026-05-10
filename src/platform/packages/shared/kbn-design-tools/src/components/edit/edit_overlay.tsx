@@ -20,13 +20,27 @@ import { css, Global } from '@emotion/react';
 import { css as emotionCss } from '@emotion/css';
 import { EuiPortal, useEuiTheme } from '@elastic/eui';
 import { useToolbarHeight } from '../../hooks';
-import { MEASURE_OVERLAY_ID } from '../../lib/constants';
+import {
+  DEVTOOL_RESIZE_HANDLE_ATTR,
+  HANDLE_CURSORS,
+  MEASURE_OVERLAY_ID,
+  RESIZE_HANDLE_SIZE,
+} from '../../lib/constants';
+import type { ResizeHandle } from '../../lib/constants';
 import { getElementUnder } from '../../lib/dom/get_element_under';
 import type { ElementOffset } from '../../lib/dom/get_element_under';
 import { snapToGrid } from '../../lib/dom/snap_to_grid';
 import type { LayoutConfig } from '../../lib/layout/layout_config';
 import { findExistingClone, startDragFromClone, startDragFromElement } from './drag_helpers';
 import type { DragState } from './drag_helpers';
+import {
+  buildTransform,
+  calcResizeDeltas,
+  findNearHandle,
+  getHandleMode,
+  startResize,
+} from './resize_helpers';
+import type { ResizeState } from './resize_helpers';
 
 export interface EditOverlayHandle {
   resetAll: () => void;
@@ -59,6 +73,8 @@ export const EditOverlay = ({
   const toolbarHeight = useToolbarHeight();
   const [cursor, setCursor] = useState('');
   const dragging = useRef<DragState | null>(null);
+  const resizing = useRef<ResizeState | null>(null);
+  const hoveredHandle = useRef<ResizeHandle | null>(null);
   const movedElements = useRef<ElementOffset[]>([]);
   const rafId = useRef<number>(0);
 
@@ -90,6 +106,19 @@ export const EditOverlay = ({
     });
   }, [euiTheme.colors.primary, euiTheme.levels.toast]);
 
+  const handleCss = useMemo(() => {
+    const accentColor = euiTheme.colors.primary;
+    return emotionCss({
+      position: 'absolute',
+      width: RESIZE_HANDLE_SIZE,
+      height: RESIZE_HANDLE_SIZE,
+      background: accentColor,
+      border: `1px solid ${accentColor}`,
+      borderRadius: '1px',
+      pointerEvents: 'auto',
+    });
+  }, [euiTheme.colors.primary]);
+
   const findElement = useCallback(
     (x: number, y: number) => getElementUnder(x, y, movedElements.current),
     []
@@ -99,7 +128,43 @@ export const EditOverlay = ({
     (event: PointerEvent) => {
       cancelAnimationFrame(rafId.current);
       rafId.current = requestAnimationFrame(() => {
-        if (dragging.current) {
+        if (resizing.current) {
+          const {
+            clone,
+            handle,
+            startX,
+            startY,
+            baseWidth,
+            baseHeight,
+            baseDx,
+            baseDy,
+            originalRect,
+          } = resizing.current;
+          const mouseDx = event.clientX - startX;
+          const mouseDy = event.clientY - startY;
+          const { dx, dy, width, height } = calcResizeDeltas(
+            handle,
+            mouseDx,
+            mouseDy,
+            baseWidth,
+            baseHeight,
+            baseDx,
+            baseDy
+          );
+
+          const scaleX = width / originalRect.width;
+          const scaleY = height / originalRect.height;
+          clone.style.transform = buildTransform(dx, dy, scaleX, scaleY);
+
+          const existing = movedElements.current.find((e) => e.el === resizing.current!.el);
+          if (existing) {
+            existing.dx = dx;
+            existing.dy = dy;
+            existing.dw = width - existing.originalRect.width;
+            existing.dh = height - existing.originalRect.height;
+          }
+          onChangeCount?.(movedElements.current.length);
+        } else if (dragging.current) {
           const { clone, startX, startY, baseOffsetX, baseOffsetY, originalRect } =
             dragging.current;
           const mouseDx = event.clientX - startX;
@@ -123,15 +188,40 @@ export const EditOverlay = ({
           }
 
           // Use transform instead of left/top — avoids layout recalc, enables GPU compositing
-          clone.style.transform = `translate(${dx}px, ${dy}px)`;
-
+          // Preserve scale from any prior resize operation
           const existing = movedElements.current.find((e) => e.el === dragging.current!.el);
+          const origW = dragging.current.originalRect.width;
+          const origH = dragging.current.originalRect.height;
+          const scaleX = existing ? (origW + existing.dw) / origW : 1;
+          const scaleY = existing ? (origH + existing.dh) / origH : 1;
+          clone.style.transform = buildTransform(dx, dy, scaleX, scaleY);
+
           if (existing) {
             existing.dx = dx;
             existing.dy = dy;
           }
           onChangeCount?.(movedElements.current.length);
         } else {
+          // Geometric hit test against handle positions — used for both cursor
+          // feedback and as the authoritative resize signal consumed by pointerdown.
+          if (hoverTarget) {
+            const nearHandle = findNearHandle(
+              event.clientX,
+              event.clientY,
+              hoverTarget.getBoundingClientRect()
+            );
+            if (nearHandle) {
+              hoveredHandle.current = nearHandle;
+              setCursor((prev) => {
+                const next = HANDLE_CURSORS[nearHandle];
+                return prev === next ? prev : next;
+              });
+              return;
+            }
+          }
+
+          hoveredHandle.current = null;
+
           const nextTarget = findElement(event.clientX, event.clientY);
           const nextCursor = nextTarget ? 'grab' : '';
           setHoverTarget((prev) => (prev === nextTarget ? prev : nextTarget));
@@ -139,11 +229,46 @@ export const EditOverlay = ({
         }
       });
     },
-    [findElement, layoutConfig, isLayoutVisible, toolbarHeight, onChangeCount]
+    [findElement, layoutConfig, isLayoutVisible, toolbarHeight, onChangeCount, hoverTarget]
   );
 
   const handlePointerDown = useCallback(
     (event: PointerEvent) => {
+      // Use the cached geometric handle from pointermove — this is the same
+      // signal that drove the cursor, so resize vs drag is always consistent.
+      if (hoveredHandle.current && hoverTarget) {
+        const corner = hoveredHandle.current;
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Ensure the element has a clone — create one if this is the first interaction.
+        // hoverTarget may be the original element OR an existing clone, so check both.
+        let entry = movedElements.current.find(
+          (e) => e.el === hoverTarget || e.clone === hoverTarget
+        );
+        if (!entry || !entry.clone) {
+          const target = entry?.el ?? hoverTarget;
+          const cloneZIndex = Number(euiTheme.levels.toast) + 1;
+          const dragState = startDragFromElement(
+            target,
+            movedElements.current,
+            cloneZIndex,
+            event.clientX,
+            event.clientY
+          );
+          entry = movedElements.current.find((e) => e.el === target)!;
+          // Assign the clone to the entry (normally done in handlePointerUp)
+          entry.clone = dragState.clone;
+          dragState.clone.style.pointerEvents = 'auto';
+        }
+
+        resizing.current = startResize(entry!, corner, event.clientX, event.clientY);
+        setHoverTarget(null);
+        setCursor(HANDLE_CURSORS[corner]);
+        onChangeCount?.(movedElements.current.length);
+        return;
+      }
+
       const target = findElement(event.clientX, event.clientY);
 
       // No valid target — let the event reach whatever is underneath (toolbar, etc.)
@@ -171,10 +296,23 @@ export const EditOverlay = ({
       setCursor('grabbing');
       onChangeCount?.(movedElements.current.length);
     },
-    [findElement, euiTheme.levels.toast, onChangeCount]
+    [findElement, euiTheme.levels.toast, onChangeCount, hoverTarget]
   );
 
   const handlePointerUp = useCallback((event: PointerEvent) => {
+    if (resizing.current) {
+      event.preventDefault();
+      event.stopPropagation();
+      const { el, clone } = resizing.current;
+      const existing = movedElements.current.find((e) => e.el === el);
+      if (existing) {
+        existing.clone = clone;
+        clone.style.pointerEvents = 'auto';
+      }
+      resizing.current = null;
+      setCursor((prev) => (prev === 'grab' ? prev : 'grab'));
+      return;
+    }
     if (!dragging.current) return;
     event.preventDefault();
     event.stopPropagation();
@@ -218,8 +356,19 @@ export const EditOverlay = ({
     [findElement]
   );
 
-  // Forcibly end drag on focus/visibility loss to prevent stuck state
+  // Forcibly end drag/resize on focus/visibility loss to prevent stuck state
   const abortDrag = useCallback(() => {
+    if (resizing.current) {
+      const { el, clone } = resizing.current;
+      const existing = movedElements.current.find((e) => e.el === el);
+      if (existing) {
+        existing.clone = clone;
+        clone.style.pointerEvents = 'auto';
+      }
+      resizing.current = null;
+      setCursor((prev) => (prev === 'grab' ? prev : 'grab'));
+      return;
+    }
     if (!dragging.current) return;
     const { el, clone } = dragging.current;
     const existing = movedElements.current.find((e) => e.el === el);
@@ -279,8 +428,28 @@ export const EditOverlay = ({
   ]);
 
   const hoverOutline = useMemo(() => {
-    if (!hoverTarget || dragging.current) return null;
+    if (!hoverTarget || dragging.current || resizing.current) return null;
     const rect = hoverTarget.getBoundingClientRect();
+    const half = RESIZE_HANDLE_SIZE / 2;
+    const mode = getHandleMode(rect);
+    const allHandles: ResizeHandle[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+    const visibleHandles =
+      mode === 'none'
+        ? []
+        : mode === 'corners'
+        ? allHandles.filter((h) => h.length === 2)
+        : allHandles;
+    const handlePositions: Record<ResizeHandle, { top: number; left: number }> = {
+      nw: { top: -half, left: -half },
+      n: { top: -half, left: rect.width / 2 - half },
+      ne: { top: -half, left: rect.width - half },
+      e: { top: rect.height / 2 - half, left: rect.width - half },
+      se: { top: rect.height - half, left: rect.width - half },
+      s: { top: rect.height - half, left: rect.width / 2 - half },
+      sw: { top: rect.height - half, left: -half },
+      w: { top: rect.height / 2 - half, left: -half },
+    };
+
     return (
       <div
         className={outlineCss}
@@ -291,9 +460,23 @@ export const EditOverlay = ({
           height: rect.height,
         }}
         data-test-subj="editOverlayOutline"
-      />
+      >
+        {visibleHandles.map((h) => (
+          <div
+            key={h}
+            className={handleCss}
+            style={{
+              top: handlePositions[h].top,
+              left: handlePositions[h].left,
+              cursor: HANDLE_CURSORS[h],
+            }}
+            {...{ [DEVTOOL_RESIZE_HANDLE_ATTR]: h }}
+            data-test-subj={`editOverlayResizeHandle-${h}`}
+          />
+        ))}
+      </div>
     );
-  }, [hoverTarget, outlineCss]);
+  }, [hoverTarget, outlineCss, handleCss]);
 
   return (
     <>

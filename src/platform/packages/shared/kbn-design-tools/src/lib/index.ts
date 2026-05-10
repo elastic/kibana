@@ -15,9 +15,13 @@ export {
   DEVELOPER_TOOLBAR_ID,
   DEVTOOL_CLONE_ATTR,
   DEVTOOL_IGNORE_ATTR,
+  DEVTOOL_RESIZE_HANDLE_ATTR,
   ENDPOINT_SIZE,
+  HANDLE_CURSORS,
   LABEL_PADDING,
+  RESIZE_HANDLE_SIZE,
 } from './constants';
+export type { ResizeHandle } from './constants';
 export { isEscapeKey, isMeasureShortcut } from './keyboard_shortcut';
 
 export {

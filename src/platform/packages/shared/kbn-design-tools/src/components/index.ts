@@ -21,7 +21,18 @@ export {
   ColumnPattern,
 } from './layout';
 
-export { EditOverlay, startDragFromClone, startDragFromElement, findExistingClone } from './edit';
-export type { EditOverlayHandle, DragState } from './edit';
+export {
+  EditOverlay,
+  startDragFromClone,
+  startDragFromElement,
+  findExistingClone,
+  startResize,
+  calcResizeDeltas,
+  buildTransform,
+  findNearHandle,
+  getHandleMode,
+} from './edit';
 
 export { MeasureButton, MeasureOverlay, SpacingMeasurement } from './measure';
+
+export type { EditOverlayHandle, DragState, ResizeState } from './edit';

@@ -20,13 +20,23 @@ const snap = (value: number, step: number, origin = 0): number =>
   Math.round((value - origin) / step) * step + origin;
 
 /**
+ * Snap a value but only if it falls within the layout extent.
+ * Returns the original value unchanged when outside the layout area.
+ */
+const snapWithinBounds = (value: number, step: number, origin: number, extent: number): number => {
+  const snapped = snap(value, step, origin);
+  if (snapped < origin || snapped > origin + extent) return value;
+  return snapped;
+};
+
+/**
  * Snaps a dragged element's position to the nearest grid line based on the active layout config.
  * Takes the element's original position and total drag delta, computes the resulting absolute
  * position, snaps it to the nearest grid line, and returns the adjusted delta.
  *
  * - **grid**: snaps both axes to `cellSize` increments (origin 0,0).
- * - **columns**: snaps X to column left edges (accounts for margin offset), Y unchanged.
- * - **rows**: snaps Y to row top edges (accounts for margin offset), X unchanged.
+ * - **columns**: snaps X to column left edges within the layout extent, Y unchanged.
+ * - **rows**: snaps Y to row top edges within the layout extent, X unchanged.
  */
 export const snapToGrid = (
   dx: number,
@@ -50,17 +60,21 @@ export const snapToGrid = (
 
   if (config.layoutType === 'columns') {
     const { columnWidth, offsetLeft } = calculateColumnLayout(config, viewportWidth);
+    const count = Math.max(1, config.count);
     const step = columnWidth + config.gutterSize;
+    const extent = count * columnWidth + (count - 1) * config.gutterSize;
     return {
-      dx: snap(absX, step, offsetLeft) - originX,
+      dx: snapWithinBounds(absX, step, offsetLeft, extent) - originX,
       dy,
     };
   }
 
   const { rowHeight, offsetTop } = calculateRowLayout(config, viewportHeight);
+  const count = Math.max(1, config.count);
   const step = rowHeight + config.gutterSize;
+  const extent = count * rowHeight + (count - 1) * config.gutterSize;
   return {
     dx,
-    dy: snap(absY, step, offsetTop) - originY,
+    dy: snapWithinBounds(absY, step, offsetTop, extent) - originY,
   };
 };

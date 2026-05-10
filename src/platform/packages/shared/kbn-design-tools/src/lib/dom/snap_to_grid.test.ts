@@ -107,4 +107,59 @@ describe('snapToGrid', () => {
       expect(result.dx).toBe(123.456);
     });
   });
+
+  describe('bounds constraints', () => {
+    it('does not snap columns X outside the layout extent (centered)', () => {
+      // 4 centered columns, width=100, gutter=20, viewport=1024
+      // totalWidth = 4*100 + 3*20 = 460
+      // offsetLeft = (1024 - 460) / 2 = 282
+      // extent = 460, so layout area is [282, 742]
+      // snap points within: 282, 402, 522, 642
+      const config = makeConfig({
+        layoutType: 'columns',
+        count: 4,
+        alignType: 'center',
+        width: 100,
+        gutterSize: 20,
+      });
+
+      // Drag to x=100, which is before the layout area → should NOT snap
+      const left = snapToGrid(100, 0, 0, 0, config, 1024, 768);
+      expect(left.dx).toBe(100);
+
+      // Drag to x=800, which is past the layout area → should NOT snap
+      const right = snapToGrid(800, 0, 0, 0, config, 1024, 768);
+      expect(right.dx).toBe(800);
+
+      // Drag to x=400, which is inside the layout area → SHOULD snap to 402
+      const inside = snapToGrid(400, 0, 0, 0, config, 1024, 768);
+      expect(inside.dx).toBe(402);
+    });
+
+    it('does not snap rows Y outside the layout extent (centered)', () => {
+      // 3 centered rows, height=80, gutter=10, viewport=768
+      // totalHeight = 3*80 + 2*10 = 260
+      // offsetTop = (768 - 260) / 2 = 254
+      // extent = 260, so layout area is [254, 514]
+      const config = makeConfig({
+        layoutType: 'rows',
+        count: 3,
+        rowAlignType: 'center',
+        height: 80,
+        gutterSize: 10,
+      });
+
+      // Drag to y=100, before the layout area → should NOT snap
+      const above = snapToGrid(0, 100, 0, 0, config, 1024, 768);
+      expect(above.dy).toBe(100);
+
+      // Drag to y=600, past the layout area → should NOT snap
+      const below = snapToGrid(0, 600, 0, 0, config, 1024, 768);
+      expect(below.dy).toBe(600);
+
+      // Drag to y=350, inside layout area → SHOULD snap to 344 (254 + 90)
+      const inside = snapToGrid(0, 350, 0, 0, config, 1024, 768);
+      expect(inside.dy).toBe(344);
+    });
+  });
 });

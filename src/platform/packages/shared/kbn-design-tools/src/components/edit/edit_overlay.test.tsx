@@ -537,4 +537,43 @@ describe('EditOverlay', () => {
     // Drag should be aborted
     expect(clone!.style.pointerEvents).toBe('auto');
   });
+
+  it('should render resize handles on the hover outline', () => {
+    document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+
+    // Use a large target so all 8 handles are visible (minDim >= 64)
+    target.getBoundingClientRect = () =>
+      ({
+        top: 50,
+        left: 50,
+        width: 200,
+        height: 100,
+        right: 250,
+        bottom: 150,
+        x: 50,
+        y: 50,
+        toJSON: () => {},
+      } as DOMRect);
+
+    renderWithI18n(
+      <EditOverlay
+        layoutConfig={defaultLayoutConfig}
+        isLayoutVisible={false}
+        isActive={true}
+        setIsEditMode={setIsEditMode}
+      />
+    );
+
+    // Trigger hover
+    act(() => {
+      firePointerMove(75, 60);
+    });
+
+    const handles = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+    for (const handle of handles) {
+      expect(
+        document.querySelector(`[data-test-subj="editOverlayResizeHandle-${handle}"]`)
+      ).toBeInTheDocument();
+    }
+  });
 });
