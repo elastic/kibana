@@ -8,3 +8,4 @@
  */
 
 export { useEuiSizeLookup } from './use_eui_size_lookup';
+export { useToolbarHeight } from './use_toolbar_height';

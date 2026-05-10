@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { createRef } from 'react';
 import { cleanup, act } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { DEVELOPER_TOOLBAR_ID, DEVTOOL_CLONE_ATTR, MEASURE_OVERLAY_ID } from '../../lib/constants';
 import { getDefaultLayoutConfig } from '../../lib/layout/layout_config';
-import { MoveOverlay } from './move_overlay';
+import { EditOverlay } from './edit_overlay';
+import type { EditOverlayHandle } from './edit_overlay';
 
 const defaultLayoutConfig = getDefaultLayoutConfig(16);
 
@@ -62,14 +63,14 @@ const fireKeydown = (key: string) => {
   document.dispatchEvent(event);
 };
 
-describe('MoveOverlay', () => {
-  let setIsMoveMode: jest.Mock;
+describe('EditOverlay', () => {
+  let setIsEditMode: jest.Mock;
   let target: HTMLDivElement;
   let originalElementsFromPoint: typeof document.elementsFromPoint;
   let originalRAF: typeof requestAnimationFrame;
 
   beforeEach(() => {
-    setIsMoveMode = jest.fn();
+    setIsEditMode = jest.fn();
     originalElementsFromPoint = document.elementsFromPoint;
     originalRAF = window.requestAnimationFrame;
     // Flush rAF synchronously so pointer-move assertions work immediately
@@ -112,10 +113,11 @@ describe('MoveOverlay', () => {
     const removeSpy = jest.spyOn(document, 'removeEventListener');
 
     const { unmount } = renderWithI18n(
-      <MoveOverlay
+      <EditOverlay
         layoutConfig={defaultLayoutConfig}
         isLayoutVisible={false}
-        setIsMoveMode={setIsMoveMode}
+        isActive={true}
+        setIsEditMode={setIsEditMode}
       />
     );
 
@@ -141,10 +143,11 @@ describe('MoveOverlay', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
     renderWithI18n(
-      <MoveOverlay
+      <EditOverlay
         layoutConfig={defaultLayoutConfig}
         isLayoutVisible={false}
-        setIsMoveMode={setIsMoveMode}
+        isActive={true}
+        setIsEditMode={setIsEditMode}
       />
     );
 
@@ -152,7 +155,7 @@ describe('MoveOverlay', () => {
       firePointerMove(75, 60);
     });
 
-    const outline = document.querySelector('[data-test-subj="moveOverlayOutline"]');
+    const outline = document.querySelector('[data-test-subj="editOverlayOutline"]');
     expect(outline).toBeInTheDocument();
   });
 
@@ -164,10 +167,11 @@ describe('MoveOverlay', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([toolbar, target]);
 
     renderWithI18n(
-      <MoveOverlay
+      <EditOverlay
         layoutConfig={defaultLayoutConfig}
         isLayoutVisible={false}
-        setIsMoveMode={setIsMoveMode}
+        isActive={true}
+        setIsEditMode={setIsEditMode}
       />
     );
 
@@ -175,7 +179,7 @@ describe('MoveOverlay', () => {
       firePointerMove(75, 60);
     });
 
-    const outline = document.querySelector('[data-test-subj="moveOverlayOutline"]');
+    const outline = document.querySelector('[data-test-subj="editOverlayOutline"]');
     expect(outline).not.toBeInTheDocument();
 
     toolbar.remove();
@@ -189,10 +193,11 @@ describe('MoveOverlay', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([panel, target]);
 
     renderWithI18n(
-      <MoveOverlay
+      <EditOverlay
         layoutConfig={defaultLayoutConfig}
         isLayoutVisible={false}
-        setIsMoveMode={setIsMoveMode}
+        isActive={true}
+        setIsEditMode={setIsEditMode}
       />
     );
 
@@ -200,7 +205,7 @@ describe('MoveOverlay', () => {
       firePointerMove(75, 60);
     });
 
-    const outline = document.querySelector('[data-test-subj="moveOverlayOutline"]');
+    const outline = document.querySelector('[data-test-subj="editOverlayOutline"]');
     expect(outline).not.toBeInTheDocument();
 
     panel.remove();
@@ -210,10 +215,11 @@ describe('MoveOverlay', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
     renderWithI18n(
-      <MoveOverlay
+      <EditOverlay
         layoutConfig={defaultLayoutConfig}
         isLayoutVisible={false}
-        setIsMoveMode={setIsMoveMode}
+        isActive={true}
+        setIsEditMode={setIsEditMode}
       />
     );
 
@@ -234,15 +240,18 @@ describe('MoveOverlay', () => {
     expect(clone!.style.transform).toBe('translate(20px, 20px)');
   });
 
-  it('should preserve original transform for reset', () => {
+  it('should preserve original transform and restore on resetAll', () => {
     target.style.transform = 'rotate(45deg)';
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
+    const handleRef = createRef<EditOverlayHandle>();
 
     renderWithI18n(
-      <MoveOverlay
+      <EditOverlay
         layoutConfig={defaultLayoutConfig}
         isLayoutVisible={false}
-        setIsMoveMode={setIsMoveMode}
+        isActive={true}
+        setIsEditMode={setIsEditMode}
+        handleRef={handleRef}
       />
     );
 
@@ -263,7 +272,7 @@ describe('MoveOverlay', () => {
     });
 
     act(() => {
-      fireKeydown('Escape');
+      handleRef.current!.resetAll();
     });
 
     // After reset, original transform is restored and clone is removed
@@ -276,10 +285,11 @@ describe('MoveOverlay', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
     renderWithI18n(
-      <MoveOverlay
+      <EditOverlay
         layoutConfig={defaultLayoutConfig}
         isLayoutVisible={false}
-        setIsMoveMode={setIsMoveMode}
+        isActive={true}
+        setIsEditMode={setIsEditMode}
       />
     );
 
@@ -307,14 +317,15 @@ describe('MoveOverlay', () => {
     expect(clone!.style.transform).toBe('translate(10px, 10px)');
   });
 
-  it('should allow re-dragging a previously moved element', () => {
+  it('should allow re-dragging a previously edited element', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
     renderWithI18n(
-      <MoveOverlay
+      <EditOverlay
         layoutConfig={defaultLayoutConfig}
         isLayoutVisible={false}
-        setIsMoveMode={setIsMoveMode}
+        isActive={true}
+        setIsEditMode={setIsEditMode}
       />
     );
 
@@ -362,14 +373,15 @@ describe('MoveOverlay', () => {
     expect(clone!.style.transform).toBe('translate(30px, 30px)');
   });
 
-  it('should exit move mode and reset transforms on Escape', () => {
+  it('should exit edit mode without resetting on Escape', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
     renderWithI18n(
-      <MoveOverlay
+      <EditOverlay
         layoutConfig={defaultLayoutConfig}
         isLayoutVisible={false}
-        setIsMoveMode={setIsMoveMode}
+        isActive={true}
+        setIsEditMode={setIsEditMode}
       />
     );
 
@@ -390,11 +402,10 @@ describe('MoveOverlay', () => {
       fireKeydown('Escape');
     });
 
-    // Original restored, clone removed
-    expect(target.style.visibility).toBe('');
-    expect(target.style.transform).toBe('');
-    expect(getClone()).not.toBeInTheDocument();
-    expect(setIsMoveMode).toHaveBeenCalledWith(false);
+    // Edit mode exited but changes persist — clone stays, original stays hidden
+    expect(setIsEditMode).toHaveBeenCalledWith(false);
+    expect(target.style.visibility).toBe('hidden');
+    expect(getClone()).toBeInTheDocument();
   });
 
   it('should not handle Escape when measure overlay is active', () => {
@@ -405,10 +416,11 @@ describe('MoveOverlay', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
     renderWithI18n(
-      <MoveOverlay
+      <EditOverlay
         layoutConfig={defaultLayoutConfig}
         isLayoutVisible={false}
-        setIsMoveMode={setIsMoveMode}
+        isActive={true}
+        setIsEditMode={setIsEditMode}
       />
     );
 
@@ -426,8 +438,8 @@ describe('MoveOverlay', () => {
       fireKeydown('Escape');
     });
 
-    // Should NOT exit move mode — measure overlay takes priority
-    expect(setIsMoveMode).not.toHaveBeenCalled();
+    // Should NOT exit edit mode — measure overlay takes priority
+    expect(setIsEditMode).not.toHaveBeenCalled();
     // Clone should still exist, original still hidden
     expect(target.style.visibility).toBe('hidden');
     expect(getClone()).toBeInTheDocument();
@@ -443,10 +455,11 @@ describe('MoveOverlay', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([toolbar, target]);
 
     renderWithI18n(
-      <MoveOverlay
+      <EditOverlay
         layoutConfig={defaultLayoutConfig}
         isLayoutVisible={false}
-        setIsMoveMode={setIsMoveMode}
+        isActive={true}
+        setIsEditMode={setIsEditMode}
       />
     );
 
@@ -470,10 +483,11 @@ describe('MoveOverlay', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
     renderWithI18n(
-      <MoveOverlay
+      <EditOverlay
         layoutConfig={defaultLayoutConfig}
         isLayoutVisible={false}
-        setIsMoveMode={setIsMoveMode}
+        isActive={true}
+        setIsEditMode={setIsEditMode}
       />
     );
 
@@ -498,10 +512,11 @@ describe('MoveOverlay', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([target]);
 
     renderWithI18n(
-      <MoveOverlay
+      <EditOverlay
         layoutConfig={defaultLayoutConfig}
         isLayoutVisible={false}
-        setIsMoveMode={setIsMoveMode}
+        isActive={true}
+        setIsEditMode={setIsEditMode}
       />
     );
 

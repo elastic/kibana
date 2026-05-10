@@ -29,7 +29,7 @@ describe('LayoutButton', () => {
 
     await userEvent.click(screen.getByTestId('layoutOverlayButton'));
 
-    expect(screen.getByText('Toggle layout')).toBeInTheDocument();
+    expect(screen.getByText('Show layout')).toBeInTheDocument();
     expect(screen.getByText('Layout settings')).toBeInTheDocument();
   });
 
@@ -38,14 +38,14 @@ describe('LayoutButton', () => {
 
     await userEvent.click(screen.getByTestId('layoutOverlayButton'));
     await act(async () => {
-      fireEvent.click(screen.getByText('Toggle layout'));
+      fireEvent.click(screen.getByText('Show layout'));
     });
 
     expect(screen.getByTestId('layoutOverlayContainer')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('layoutOverlayButton'));
     await act(async () => {
-      fireEvent.click(screen.getByText('Toggle layout'));
+      fireEvent.click(screen.getByText('Hide layout'));
     });
 
     expect(screen.queryByTestId('layoutOverlayContainer')).not.toBeInTheDocument();

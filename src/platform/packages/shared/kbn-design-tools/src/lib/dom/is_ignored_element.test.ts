@@ -11,7 +11,7 @@ import { isIgnoredElement } from './is_ignored_element';
 import {
   DEVELOPER_TOOLBAR_ID,
   MEASURE_OVERLAY_ID,
-  MOVE_OVERLAY_ID,
+  EDIT_OVERLAY_ID,
   LAYOUT_OVERLAY_ID,
   LAYOUT_SETTINGS_FLYOUT_ID,
   DEVTOOL_IGNORE_ATTR,
@@ -25,7 +25,7 @@ describe('isIgnoredElement', () => {
   it.each([
     DEVELOPER_TOOLBAR_ID,
     MEASURE_OVERLAY_ID,
-    MOVE_OVERLAY_ID,
+    EDIT_OVERLAY_ID,
     LAYOUT_OVERLAY_ID,
     LAYOUT_SETTINGS_FLYOUT_ID,
   ])('should ignore element with id "%s"', (id) => {

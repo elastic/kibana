@@ -7,60 +7,60 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { Dispatch, SetStateAction } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import type { Dispatch, Ref, SetStateAction } from 'react';
 import { css, Global } from '@emotion/react';
 import { css as emotionCss } from '@emotion/css';
 import { EuiPortal, useEuiTheme } from '@elastic/eui';
-import { DEVTOOL_CLONE_ATTR, DEVELOPER_TOOLBAR_ID, MEASURE_OVERLAY_ID } from '../../lib/constants';
-import { cloneElement } from '../../lib/dom/clone_element';
+import { useToolbarHeight } from '../../hooks';
+import { MEASURE_OVERLAY_ID } from '../../lib/constants';
 import { getElementUnder } from '../../lib/dom/get_element_under';
 import type { ElementOffset } from '../../lib/dom/get_element_under';
 import { snapToGrid } from '../../lib/dom/snap_to_grid';
 import type { LayoutConfig } from '../../lib/layout/layout_config';
+import { findExistingClone, startDragFromClone, startDragFromElement } from './drag_helpers';
+import type { DragState } from './drag_helpers';
 
-interface DragState {
-  el: HTMLElement;
-  clone: HTMLElement;
-  startX: number;
-  startY: number;
-  baseOffsetX: number;
-  baseOffsetY: number;
-  /** The original element's rect before any dragging — used for snap calculations. */
-  originalRect: DOMRect;
+export interface EditOverlayHandle {
+  resetAll: () => void;
 }
 
 interface Props {
   layoutConfig: LayoutConfig;
   isLayoutVisible: boolean;
-  setIsMoveMode: Dispatch<SetStateAction<boolean>>;
+  isActive: boolean;
+  setIsEditMode: Dispatch<SetStateAction<boolean>>;
+  onChangeCount?: (count: number) => void;
+  handleRef?: Ref<EditOverlayHandle>;
 }
 
 /**
  * Full-screen overlay that enables element dragging.
  * Click an element to grab it, drag to reposition via CSS transform, click again to release.
- * Press Escape to exit move mode and reset all moved elements.
+ * Press Escape to exit edit mode.
  */
-export const MoveOverlay = ({ layoutConfig, isLayoutVisible, setIsMoveMode }: Props) => {
+export const EditOverlay = ({
+  layoutConfig,
+  isLayoutVisible,
+  isActive,
+  setIsEditMode,
+  onChangeCount,
+  handleRef,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
   const [hoverTarget, setHoverTarget] = useState<HTMLElement | null>(null);
-  const [toolbarHeight, setToolbarHeight] = useState(0); // Measure toolbar height to match the layout overlay's available height for row snapping
+  const toolbarHeight = useToolbarHeight();
   const [cursor, setCursor] = useState('');
   const dragging = useRef<DragState | null>(null);
   const movedElements = useRef<ElementOffset[]>([]);
   const rafId = useRef<number>(0);
-
-  useEffect(() => {
-    const toolbar = document.getElementById(DEVELOPER_TOOLBAR_ID);
-    if (!toolbar) return;
-
-    const update = () => setToolbarHeight(toolbar.getBoundingClientRect().height);
-    update();
-
-    const observer = new ResizeObserver(update);
-    observer.observe(toolbar);
-    return () => observer.disconnect();
-  }, []);
 
   const resetAll = useCallback(() => {
     for (const entry of movedElements.current) {
@@ -74,7 +74,10 @@ export const MoveOverlay = ({ layoutConfig, isLayoutVisible, setIsMoveMode }: Pr
       dragging.current.clone.remove();
       dragging.current = null;
     }
-  }, []);
+    onChangeCount?.(0);
+  }, [onChangeCount]);
+
+  useImperativeHandle(handleRef, () => ({ resetAll }), [resetAll]);
 
   const outlineCss = useMemo(() => {
     const accentColor = euiTheme.colors.primary;
@@ -127,6 +130,7 @@ export const MoveOverlay = ({ layoutConfig, isLayoutVisible, setIsMoveMode }: Pr
             existing.dx = dx;
             existing.dy = dy;
           }
+          onChangeCount?.(movedElements.current.length);
         } else {
           const nextTarget = findElement(event.clientX, event.clientY);
           const nextCursor = nextTarget ? 'grab' : '';
@@ -135,7 +139,7 @@ export const MoveOverlay = ({ layoutConfig, isLayoutVisible, setIsMoveMode }: Pr
         }
       });
     },
-    [findElement, layoutConfig, isLayoutVisible, toolbarHeight]
+    [findElement, layoutConfig, isLayoutVisible, toolbarHeight, onChangeCount]
   );
 
   const handlePointerDown = useCallback(
@@ -148,74 +152,26 @@ export const MoveOverlay = ({ layoutConfig, isLayoutVisible, setIsMoveMode }: Pr
       event.preventDefault();
       event.stopPropagation();
 
-      // Check if we're re-grabbing an existing clone
-      const existingByClone = target.hasAttribute(DEVTOOL_CLONE_ATTR)
-        ? movedElements.current.find((e) => e.clone === target)
-        : null;
+      const existingByClone = findExistingClone(target, movedElements.current);
 
       if (existingByClone) {
-        // Reuse the existing clone — just start dragging it
-        const clone = existingByClone.clone!;
-        clone.style.pointerEvents = 'none';
-
-        dragging.current = {
-          el: existingByClone.el,
-          clone,
-          startX: event.clientX,
-          startY: event.clientY,
-          baseOffsetX: existingByClone.dx,
-          baseOffsetY: existingByClone.dy,
-          originalRect: existingByClone.originalRect,
-        };
+        dragging.current = startDragFromClone(existingByClone, event.clientX, event.clientY);
       } else {
-        // First time grabbing this element
-        const existing = movedElements.current.find((e) => e.el === target);
-
-        if (!existing) {
-          movedElements.current.push({
-            el: target,
-            clone: null,
-            dx: 0,
-            dy: 0,
-            originalTransform: target.style.transform || '',
-            originalRect: target.getBoundingClientRect(),
-          });
-        } else if (existing.clone) {
-          existing.clone.remove();
-          existing.clone = null;
-        }
-
-        // Create a visual clone on document.body — always on top, no stacking context issues
         const cloneZIndex = Number(euiTheme.levels.toast) + 1;
-        const { clone, rect } = cloneElement(target, cloneZIndex);
-        document.body.appendChild(clone);
-
-        // Hide the original (preserve layout space) and block pointer events
-        // so it doesn't trigger hover effects or the move overlay outline.
-        target.style.visibility = 'hidden';
-        target.style.pointerEvents = 'none';
-
-        // Store the original element rect for consistent snap calculations across re-grabs
-        const entry = movedElements.current.find((e) => e.el === target);
-        if (entry) {
-          entry.originalRect = rect;
-        }
-
-        dragging.current = {
-          el: target,
-          clone,
-          startX: event.clientX,
-          startY: event.clientY,
-          baseOffsetX: entry?.dx ?? 0,
-          baseOffsetY: entry?.dy ?? 0,
-          originalRect: rect,
-        };
+        dragging.current = startDragFromElement(
+          target,
+          movedElements.current,
+          cloneZIndex,
+          event.clientX,
+          event.clientY
+        );
       }
 
       setHoverTarget(null);
       setCursor('grabbing');
+      onChangeCount?.(movedElements.current.length);
     },
-    [findElement, euiTheme.levels.toast]
+    [findElement, euiTheme.levels.toast, onChangeCount]
   );
 
   const handlePointerUp = useCallback((event: PointerEvent) => {
@@ -227,7 +183,7 @@ export const MoveOverlay = ({ layoutConfig, isLayoutVisible, setIsMoveMode }: Pr
     const existing = movedElements.current.find((e) => e.el === el);
 
     // Keep clone visible and original hidden so the element stays on top.
-    // Clones are only cleaned up when exiting move mode (resetAll).
+    // Clones are only cleaned up when exiting edit mode (resetAll).
     // Re-enable pointer events so elementsFromPoint can find the clone for re-grabbing.
     if (existing) {
       existing.clone = clone;
@@ -245,11 +201,11 @@ export const MoveOverlay = ({ layoutConfig, isLayoutVisible, setIsMoveMode }: Pr
         if (document.getElementById(MEASURE_OVERLAY_ID)) return;
         event.preventDefault();
         event.stopImmediatePropagation();
-        resetAll();
-        setIsMoveMode(false);
+        // Exit edit mode without resetting — changes persist until explicitly reset
+        setIsEditMode(false);
       }
     },
-    [resetAll, setIsMoveMode]
+    [setIsEditMode]
   );
 
   const handleClick = useCallback(
@@ -275,7 +231,18 @@ export const MoveOverlay = ({ layoutConfig, isLayoutVisible, setIsMoveMode }: Pr
     setCursor((prev) => (prev === 'grab' ? prev : 'grab'));
   }, []);
 
+  // Reset hover/drag state when deactivated (e.g. Escape exits edit mode)
   useEffect(() => {
+    if (!isActive) {
+      setCursor('');
+      setHoverTarget(null);
+      abortDrag();
+    }
+  }, [isActive, abortDrag]);
+
+  useEffect(() => {
+    if (!isActive) return;
+
     const handleBlur = () => abortDrag();
     const handleVisibilityChange = () => {
       if (document.hidden) abortDrag();
@@ -291,7 +258,6 @@ export const MoveOverlay = ({ layoutConfig, isLayoutVisible, setIsMoveMode }: Pr
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
       cancelAnimationFrame(rafId.current);
-      resetAll();
       document.removeEventListener('pointermove', handlePointerMove, true);
       document.removeEventListener('pointerdown', handlePointerDown, true);
       document.removeEventListener('pointerup', handlePointerUp, true);
@@ -302,6 +268,7 @@ export const MoveOverlay = ({ layoutConfig, isLayoutVisible, setIsMoveMode }: Pr
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [
+    isActive,
     handlePointerMove,
     handlePointerDown,
     handlePointerUp,
@@ -323,7 +290,7 @@ export const MoveOverlay = ({ layoutConfig, isLayoutVisible, setIsMoveMode }: Pr
           width: rect.width,
           height: rect.height,
         }}
-        data-test-subj="moveOverlayOutline"
+        data-test-subj="editOverlayOutline"
       />
     );
   }, [hoverTarget, outlineCss]);

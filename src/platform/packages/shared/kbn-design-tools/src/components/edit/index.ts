@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { MoveOverlay } from './move_overlay';
+export { EditOverlay } from './edit_overlay';
+export { startDragFromClone, startDragFromElement, findExistingClone } from './drag_helpers';
+
+export type { DragState } from './drag_helpers';
+export type { EditOverlayHandle } from './edit_overlay';

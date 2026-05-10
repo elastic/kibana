@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { MouseEvent } from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -24,7 +25,8 @@ import { i18n } from '@kbn/i18n';
 import { LayoutOverlay } from './overlay/layout_overlay';
 import { getDefaultLayoutConfig, type LayoutConfig } from '../../lib';
 import { LayoutSettingsPanel } from './settings/layout_settings_panel';
-import { MoveOverlay } from '../move/move_overlay';
+import { EditOverlay } from '../edit/edit_overlay';
+import type { EditOverlayHandle } from '../edit/edit_overlay';
 import { DEVTOOL_IGNORE_ATTR, LAYOUT_SETTINGS_FLYOUT_ID } from '../../lib/constants';
 
 /**
@@ -35,10 +37,12 @@ export const LayoutButton = () => {
   const [isLayoutVisible, setIsLayoutVisible] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const [isMoveMode, setIsMoveMode] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [moveCount, setMoveCount] = useState(0);
   const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>(() =>
     getDefaultLayoutConfig(parseInt(euiTheme.size.base, 10))
   );
+  const editHandleRef = useRef<EditOverlayHandle>(null);
   const defaultLayoutConfig = getDefaultLayoutConfig(parseInt(euiTheme.size.base, 10));
 
   // Raise the flyout's EuiPortal z-index above the layout overlay (toast + 2)
@@ -78,40 +82,71 @@ export const LayoutButton = () => {
     setIsFlyoutOpen(true);
   };
 
-  const handleToggleMoveMode = () => {
-    setIsMoveMode((prev) => !prev);
+  const handleToggleEditMode = () => {
+    setIsEditMode((prev) => !prev);
     setIsPopoverOpen(false);
   };
 
-  const contextMenuPanels = [
+  const handleResetEdits = () => {
+    editHandleRef.current?.resetAll();
+    setMoveCount(0);
+    setIsPopoverOpen(false);
+  };
+
+  const contextMenuPanels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 0,
       width: 160,
       items: [
         {
-          name: i18n.translate('kbnDesignTools.layoutButton.toggleLabel', {
-            defaultMessage: 'Toggle layout',
-          }),
+          name: isLayoutVisible
+            ? i18n.translate('kbnDesignTools.layoutButton.layout.hideLabel', {
+                defaultMessage: 'Hide layout',
+              })
+            : i18n.translate('kbnDesignTools.layoutButton.layout.showLabel', {
+                defaultMessage: 'Show layout',
+              }),
           icon: isLayoutVisible ? 'eyeClosed' : 'eye',
           onClick: handleToggleLayout,
         },
         {
-          name: i18n.translate('kbnDesignTools.layoutButton.settingsLabel', {
+          name: i18n.translate('kbnDesignTools.layoutButton.layout.settingsLabel', {
             defaultMessage: 'Layout settings',
           }),
           icon: 'controlsHorizontal',
           onClick: handleOpenSettings,
         },
         {
-          name: i18n.translate('kbnDesignTools.layoutButton.moveElementsLabel', {
-            defaultMessage: 'Move elements',
-          }),
-          icon: isMoveMode ? 'lock' : 'move',
-          onClick: handleToggleMoveMode,
-          toolTipContent: i18n.translate('kbnDesignTools.layoutButton.moveModeTooltip', {
+          isSeparator: true,
+        },
+        {
+          name: isEditMode
+            ? i18n.translate('kbnDesignTools.layoutButton.editMode.exitLabel', {
+                defaultMessage: 'Exit edit',
+              })
+            : i18n.translate('kbnDesignTools.layoutButton.editMode.startLabel', {
+                defaultMessage: 'Edit',
+              }),
+          icon: isEditMode ? 'logOut' : 'pencil',
+          onClick: handleToggleEditMode,
+          toolTipContent: i18n.translate('kbnDesignTools.layoutButton.editMode.buttonTooltip', {
             defaultMessage:
               'Snapping is enabled while layout is active. Hold Shift to move freely.',
           }),
+        },
+        {
+          name: i18n.translate('kbnDesignTools.layoutButton.editMode.resetButtonLabel', {
+            defaultMessage: 'Reset edits',
+          }),
+          icon: 'undo',
+          onClick: handleResetEdits,
+          disabled: moveCount === 0,
+          toolTipContent:
+            moveCount === 0
+              ? i18n.translate('kbnDesignTools.layoutButton.editMode.resetButtonTooltip', {
+                  defaultMessage: 'No elements have been edited',
+                })
+              : undefined,
         },
       ],
     },
@@ -186,11 +221,14 @@ export const LayoutButton = () => {
         </EuiFlyout>
       )}
       {isLayoutVisible && <LayoutOverlay layoutConfig={layoutConfig} />}
-      {isMoveMode && (
-        <MoveOverlay
+      {(isEditMode || moveCount > 0) && (
+        <EditOverlay
           layoutConfig={layoutConfig}
           isLayoutVisible={isLayoutVisible}
-          setIsMoveMode={setIsMoveMode}
+          isActive={isEditMode}
+          setIsEditMode={setIsEditMode}
+          onChangeCount={setMoveCount}
+          handleRef={editHandleRef}
         />
       )}
     </>

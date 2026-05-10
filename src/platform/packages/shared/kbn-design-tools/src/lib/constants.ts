@@ -8,7 +8,7 @@
  */
 
 export const MEASURE_OVERLAY_ID = 'measureOverlay';
-export const MOVE_OVERLAY_ID = 'moveOverlay';
+export const EDIT_OVERLAY_ID = 'editOverlay';
 export const LAYOUT_OVERLAY_ID = 'layoutOverlayContainer';
 export const LAYOUT_SETTINGS_FLYOUT_ID = 'layoutSettingsFlyout';
 export const DEVELOPER_TOOLBAR_ID = 'developerToolbar';

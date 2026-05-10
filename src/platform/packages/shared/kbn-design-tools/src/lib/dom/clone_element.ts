@@ -38,7 +38,6 @@ const copyCanvasContent = (original: HTMLElement, clone: HTMLElement): void => {
 // is moved to document.body (away from its original parent context).
 const INHERITED_PROPS = [
   'color',
-  'cursor',
   'direction',
   'font',
   'font-family',

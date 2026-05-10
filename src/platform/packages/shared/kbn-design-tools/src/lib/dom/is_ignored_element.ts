@@ -9,7 +9,7 @@
 
 import {
   MEASURE_OVERLAY_ID,
-  MOVE_OVERLAY_ID,
+  EDIT_OVERLAY_ID,
   LAYOUT_OVERLAY_ID,
   LAYOUT_SETTINGS_FLYOUT_ID,
   DEVELOPER_TOOLBAR_ID,
@@ -18,7 +18,7 @@ import {
 
 const IGNORED_ELEMENT_IDS = new Set([
   MEASURE_OVERLAY_ID,
-  MOVE_OVERLAY_ID,
+  EDIT_OVERLAY_ID,
   LAYOUT_OVERLAY_ID,
   LAYOUT_SETTINGS_FLYOUT_ID,
   DEVELOPER_TOOLBAR_ID,
@@ -40,7 +40,7 @@ const IGNORED_CLASS_PREFIXES = ['kbnChromeLayout'];
 
 /**
  * Returns true if the element is, is inside, or contains a tool overlay
- * or the developer toolbar — i.e. it should be ignored by measure/move interactions.
+ * or the developer toolbar — i.e. it should be ignored by measure/edit interactions.
  *
  * Elements can also be ignored by adding the `data-devtool-ignore` attribute.
  */

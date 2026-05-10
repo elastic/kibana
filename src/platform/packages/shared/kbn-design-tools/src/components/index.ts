@@ -21,6 +21,7 @@ export {
   ColumnPattern,
 } from './layout';
 
-export { MoveOverlay } from './move';
+export { EditOverlay, startDragFromClone, startDragFromElement, findExistingClone } from './edit';
+export type { EditOverlayHandle, DragState } from './edit';
 
 export { MeasureButton, MeasureOverlay, SpacingMeasurement } from './measure';
