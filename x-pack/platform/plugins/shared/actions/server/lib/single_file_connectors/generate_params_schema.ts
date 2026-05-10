@@ -10,6 +10,12 @@ import { z as z4 } from '@kbn/zod/v4';
 
 import type { ActionTypeParams, ValidatorType } from '../../types';
 
+const fetcherSchema = z4
+  .object({
+    max_content_length: z4.number().positive().optional(),
+  })
+  .strict();
+
 export const generateParamsSchema = (
   actions: ConnectorSpec['actions']
 ): ValidatorType<ActionTypeParams> => {
@@ -22,6 +28,7 @@ export const generateParamsSchema = (
       .object({
         subAction: z4.literal(key),
         subActionParams: actions[key].input,
+        fetcher: fetcherSchema.optional(),
       })
       .strict()
   );

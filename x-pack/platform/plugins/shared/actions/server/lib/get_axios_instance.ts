@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { AxiosHeaderValue, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import type {
+  AxiosError,
+  AxiosHeaderValue,
+  AxiosInstance,
+  InternalAxiosRequestConfig,
+} from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import type { AuthMode, GetTokenOpts } from '@kbn/connector-specs';
@@ -43,6 +48,104 @@ interface GetAxiosInstanceOpts {
 
 type ValidatedSecrets = Record<string, unknown>;
 
+const MAX_CONTENT_LENGTH_ERROR_MESSAGE = 'maxContentLength';
+const SENSITIVE_HEADER_NAMES = new Set([
+  'authorization',
+  'cookie',
+  'proxy-authorization',
+  'set-cookie',
+]);
+
+const getHeaderValue = ({
+  headers,
+  headerName,
+}: {
+  headers: unknown;
+  headerName: string;
+}): unknown => {
+  if (!headers || typeof headers !== 'object') {
+    return undefined;
+  }
+
+  const normalizedHeaderName = headerName.toLowerCase();
+  const headersRecord = headers as Record<string, unknown>;
+  const matchingHeaderName = Object.keys(headersRecord).find(
+    (key) => key.toLowerCase() === normalizedHeaderName
+  );
+
+  return matchingHeaderName ? headersRecord[matchingHeaderName] : undefined;
+};
+
+const getHeaderKeys = (headers: unknown): string[] => {
+  if (!headers || typeof headers !== 'object') {
+    return [];
+  }
+
+  return Object.keys(headers as Record<string, unknown>);
+};
+
+const getSanitizedHeaders = (headers: unknown): Record<string, unknown> => {
+  if (!headers || typeof headers !== 'object') {
+    return {};
+  }
+
+  return Object.entries(headers as Record<string, unknown>).reduce<Record<string, unknown>>(
+    (acc, [key, value]) => {
+      acc[key] = SENSITIVE_HEADER_NAMES.has(key.toLowerCase()) ? '[REDACTED]' : value;
+      return acc;
+    },
+    {}
+  );
+};
+
+const logMaxContentLengthError = ({
+  connectorId,
+  error,
+  logger,
+  maxContentLength,
+}: {
+  connectorId: string;
+  error: unknown;
+  logger: Logger;
+  maxContentLength: number;
+}) => {
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  if (!errorMessage.includes(MAX_CONTENT_LENGTH_ERROR_MESSAGE)) {
+    return;
+  }
+
+  const axiosError = error as AxiosError & {
+    request?: {
+      res?: {
+        headers?: unknown;
+      };
+    };
+  };
+  const responseHeaders = axiosError.response?.headers;
+  const requestResponseHeaders = axiosError.request?.res?.headers;
+
+  logger.debug(
+    `Actions Axios request exceeded maxContentLength: ${errorMessage}; metadata: ${JSON.stringify({
+      connectorId,
+      configuredMaxContentLength: maxContentLength,
+      errorCode: axiosError.code,
+      responseStatus: axiosError.response?.status,
+      responseContentLength: getHeaderValue({
+        headers: responseHeaders,
+        headerName: 'content-length',
+      }),
+      requestResponseContentLength: getHeaderValue({
+        headers: requestResponseHeaders,
+        headerName: 'content-length',
+      }),
+      responseHeaderKeys: getHeaderKeys(responseHeaders),
+      requestResponseHeaderKeys: getHeaderKeys(requestResponseHeaders),
+      responseHeaders: getSanitizedHeaders(responseHeaders),
+      requestResponseHeaders: getSanitizedHeaders(requestResponseHeaders),
+    })}`
+  );
+};
+
 export interface GetAxiosInstanceWithAuthFnOpts {
   additionalHeaders?: Record<string, AxiosHeaderValue>;
   connectorId: string;
@@ -51,6 +154,7 @@ export interface GetAxiosInstanceWithAuthFnOpts {
   signal?: AbortSignal;
   authMode?: AuthMode;
   profileUid?: string;
+  maxContentLength?: number;
 }
 export type GetAxiosInstanceWithAuthFn = (
   opts: GetAxiosInstanceWithAuthFnOpts
@@ -69,6 +173,7 @@ export const getAxiosInstanceWithAuth = ({
     signal,
     authMode,
     profileUid,
+    maxContentLength: maxContentLengthOverride,
   }: GetAxiosInstanceWithAuthFnOpts) => {
     let authTypeId: string | undefined;
     try {
@@ -81,12 +186,13 @@ export const getAxiosInstanceWithAuth = ({
         configurationUtilities.getResponseSettings();
 
       const axiosInstance = axios.create({
-        maxContentLength,
+        maxContentLength: maxContentLengthOverride ?? maxContentLength,
         // should we allow a way for a connector type to specify a timeout override?
         timeout: settingsTimeout,
         beforeRedirect: getBeforeRedirectFn(configurationUtilities),
         signal,
       });
+      const configuredMaxContentLength = maxContentLengthOverride ?? maxContentLength;
 
       axiosInstance.defaults.headers.common['User-Agent'] = buildUserAgent(cloud);
 
@@ -138,7 +244,22 @@ export const getAxiosInstanceWithAuth = ({
       };
 
       // use the registered auth type to configure authentication for the axios instance
-      return await authType.configure(configureCtx, axiosInstance, secrets);
+      const configuredAxiosInstance = await authType.configure(
+        configureCtx,
+        axiosInstance,
+        secrets
+      );
+      configuredAxiosInstance.interceptors.response.use(undefined, (error: unknown) => {
+        logMaxContentLengthError({
+          connectorId,
+          error,
+          logger,
+          maxContentLength: configuredMaxContentLength,
+        });
+        return Promise.reject(error);
+      });
+
+      return configuredAxiosInstance;
     } catch (err) {
       logger.error(
         `Error getting configured axios instance configured for auth type "${

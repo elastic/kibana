@@ -15,7 +15,11 @@ export { EARS_AUTH_ID, EARS_PROVIDERS } from './src/auth_types/ears';
 export { OAUTH_AUTHORIZATION_CODE_AUTH_ID } from './src/auth_types/oauth_authorization_code';
 
 export { getConnectorSpec } from './src/get_connector_spec';
-export { isToolAction } from './src/connector_spec';
+export {
+  getConnectorActionErrorMeta,
+  isToolAction,
+  setConnectorActionErrorMeta,
+} from './src/connector_spec';
 export { normalizeAuthorizationHeaderValue } from './src/auth_types/oauth_authz_code_and_ears_helpers';
 
 export { ConnectorAuthorizationError, isConnectorAuthorizationError } from './src/errors';

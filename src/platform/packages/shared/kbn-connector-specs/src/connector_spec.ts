@@ -192,6 +192,62 @@ export interface ConnectorPolicies {
 // ACTIONS
 // ============================================================================
 
+export interface ConnectorActionErrorMeta {
+  /**
+   * Raw/provider-declared response size in bytes, for example `content-length`
+   * or a provider metadata field.
+   */
+  contentLengthBytes?: number;
+  /**
+   * Estimated size in bytes of the connector action output after transformation
+   * (for example, base64 expansion).
+   */
+  estimatedOutputBytes?: number;
+}
+
+const connectorActionErrorMeta = new WeakMap<object, ConnectorActionErrorMeta>();
+
+const getFinitePositiveNumber = (value: unknown): number | undefined => {
+  const numericValue = typeof value === 'string' ? Number(value) : value;
+  if (typeof numericValue !== 'number' || !Number.isFinite(numericValue) || numericValue < 0) {
+    return undefined;
+  }
+  return numericValue;
+};
+
+export const setConnectorActionErrorMeta = (
+  error: unknown,
+  meta: ConnectorActionErrorMeta
+): void => {
+  if (!error || typeof error !== 'object') {
+    return;
+  }
+
+  const sanitizedMeta = {
+    ...(getFinitePositiveNumber(meta.contentLengthBytes) !== undefined
+      ? { contentLengthBytes: getFinitePositiveNumber(meta.contentLengthBytes) }
+      : {}),
+    ...(getFinitePositiveNumber(meta.estimatedOutputBytes) !== undefined
+      ? { estimatedOutputBytes: getFinitePositiveNumber(meta.estimatedOutputBytes) }
+      : {}),
+  };
+
+  connectorActionErrorMeta.set(error, {
+    ...connectorActionErrorMeta.get(error),
+    ...sanitizedMeta,
+  });
+};
+
+export const getConnectorActionErrorMeta = (
+  error: unknown
+): ConnectorActionErrorMeta | undefined => {
+  if (!error || typeof error !== 'object') {
+    return undefined;
+  }
+
+  return connectorActionErrorMeta.get(error);
+};
+
 export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = unknown> {
   isTool?: boolean;
   input: z.ZodSchema<TInput>;
@@ -201,6 +257,12 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
   description?: string;
   actionGroup?: string;
   supportsStreaming?: boolean;
+  /**
+   * HTTP response header that advertises response size for this action.
+   * The generated executor reads this header from Axios errors when the Actions
+   * response-size limit is exceeded. Defaults to `content-length`.
+   */
+  responseSizeHeader?: string;
 }
 
 export interface ActionContext {

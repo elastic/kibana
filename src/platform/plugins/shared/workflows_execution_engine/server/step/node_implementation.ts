@@ -187,7 +187,9 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
             throw new ResponseSizeLimitError(maxBytes, this.step.name);
           }
           if (outputSize > maxBytes) {
-            throw new ResponseSizeLimitError(maxBytes, this.step.name);
+            throw new ResponseSizeLimitError(maxBytes, this.step.name, {
+              actualBytes: outputSize,
+            });
           }
           // Forward the already-computed size to finishStep so the IO service
           // can decide eviction without re-serialising. Zero-byte outputs are

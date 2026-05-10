@@ -8,6 +8,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
+import { setConnectorActionErrorMeta } from '../../connector_spec';
 import type { ConnectorSpec } from '../../connector_spec';
 // Google Drive API constants
 const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
@@ -18,6 +19,14 @@ const GOOGLE_WORKSPACE_MIME_PREFIX = 'application/vnd.google-apps.';
 const DEFAULT_EXPORT_MIME_TYPE = 'application/pdf';
 // XLSX preserves tabular structure better than PDF for spreadsheets
 const SHEETS_EXPORT_MIME_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES = 1024;
+
+interface GoogleDriveFileMetadata {
+  id: string;
+  name: string;
+  mimeType: string;
+  size?: string;
+}
 
 /**
  * Escapes special characters in a string for use in Google Drive query syntax.
@@ -28,6 +37,18 @@ function escapeQueryValue(value: string): string {
   // Escape backslashes first, then single quotes
   return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
+
+const getFinitePositiveNumber = (value: unknown): number | undefined => {
+  const numericValue = typeof value === 'string' ? Number(value) : value;
+  if (typeof numericValue !== 'number' || !Number.isFinite(numericValue) || numericValue < 0) {
+    return undefined;
+  }
+
+  return numericValue;
+};
+
+const getEstimatedBase64OutputBytes = (rawBytes: number): number =>
+  Math.ceil(rawBytes / 3) * 4 + ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES;
 
 /**
  * Extracts and throws a meaningful error from Google Drive API responses.
@@ -280,6 +301,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
         const typedInput = input as {
           fileId: string;
         };
+        let fileMetadataForError: GoogleDriveFileMetadata | undefined;
 
         try {
           // First, get file metadata to determine if it's a Google Workspace document
@@ -292,7 +314,8 @@ export const GoogleDriveConnector: ConnectorSpec = {
             }
           );
 
-          const fileMetadata = metadataResponse.data;
+          const fileMetadata = metadataResponse.data as GoogleDriveFileMetadata;
+          fileMetadataForError = fileMetadata;
           const isGoogleDoc = fileMetadata.mimeType?.startsWith(GOOGLE_WORKSPACE_MIME_PREFIX);
 
           let contentResponse;
@@ -340,6 +363,14 @@ export const GoogleDriveConnector: ConnectorSpec = {
             encoding: 'base64',
           };
         } catch (error: unknown) {
+          const rawFileSizeBytes = getFinitePositiveNumber(fileMetadataForError?.size);
+          if (rawFileSizeBytes !== undefined) {
+            setConnectorActionErrorMeta(error, {
+              contentLengthBytes: rawFileSizeBytes,
+              estimatedOutputBytes: getEstimatedBase64OutputBytes(rawFileSizeBytes),
+            });
+          }
+
           throwGoogleDriveError(error);
           throw error;
         }
