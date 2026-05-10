@@ -86,10 +86,20 @@ export class ScoutFTRReporter {
       end: this.onRunEnd,
       test: this.onTestStart,
       'test end': this.onTestEnd,
+      retry: this.onRetry,
     })) {
       runner.on(eventName, listener);
     }
   }
+
+  // Tracks tests that mocha is about to retry; used to skip emitting a
+  // TEST_END event for non-final attempts so the report only contains the
+  // final outcome of each test.
+  private willRetry = new WeakSet<Test>();
+
+  onRetry = (test: Test) => {
+    this.willRetry.add(test);
+  };
 
   private getFileOwners(filePath: string): string[] {
     return getOwningTeamsForPath(filePath, this.codeOwnersEntries);
@@ -168,8 +178,14 @@ export class ScoutFTRReporter {
 
   onTestEnd = (test: Test) => {
     /**
-     * Test execution ended
+     * Test execution ended. Skip non-final attempts so retried-then-passed
+     * tests appear only once in the report with their final status.
      */
+    if (this.willRetry.has(test)) {
+      this.willRetry.delete(test);
+      return;
+    }
+
     this.report.logEvent({
       ...datasources.environmentMetadata,
       reporter: {

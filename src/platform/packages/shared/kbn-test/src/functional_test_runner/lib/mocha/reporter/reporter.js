@@ -42,6 +42,7 @@ export function MochaReporterProvider({ getService }) {
       runner.on('pending', this.onPending);
       runner.on('pass', this.onPass);
       runner.on('fail', this.onFail);
+      runner.on('retry', this.onRetry);
       runner.on('test end', this.onTestEnd);
       runner.on('suite end', this.onSuiteEnd);
       runner.on('end', this.onEnd);
@@ -162,7 +163,28 @@ export function MochaReporterProvider({ getService }) {
       log.write(`- ${pass} ${time}`);
     };
 
+    onRetry = (test, err) => {
+      const attempt = (test._currentRetry ?? 0) + 1;
+      const total = (test._retries ?? 0) + 1;
+      log.write(
+        `- ${colors.fail(`${symbols.err} attempt ${attempt}/${total} failed, retrying`)}: ${
+          err && err.message ? err.message : err
+        }`
+      );
+    };
+
     onFail = (runnable) => {
+      // If mocha will retry this test, suppress the full failure block; the
+      // 'retry' handler above already logged a concise message. We only want
+      // the noisy multi-line failure output for the *final* attempt.
+      if (
+        runnable.type === 'test' &&
+        typeof runnable._currentRetry === 'number' &&
+        typeof runnable._retries === 'number' &&
+        runnable._currentRetry < runnable._retries
+      ) {
+        return;
+      }
       // NOTE: this is super gross
       //
       //  - I started by trying to extract the Base.list() logic from mocha

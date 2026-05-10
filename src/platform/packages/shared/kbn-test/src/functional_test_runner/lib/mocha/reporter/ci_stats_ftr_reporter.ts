@@ -94,15 +94,29 @@ export function setupCiStatsFtrTestGroupReporter({
     });
   }
 
+  // True while mocha is going to retry a runnable; set by the 'retry' event
+  // and cleared on the next 'test'/'hook'. Used to suppress fail accounting
+  // for non-final attempts so retried-then-passed tests aren't counted twice.
+  const willRetry = new WeakSet<Runnable>();
+  runner.on('retry', (runnable: Runnable) => {
+    willRetry.add(runnable);
+  });
+
+  const isFinalAttempt = (runnable: Runnable) => !willRetry.has(runnable);
+
   const errors = new Map<Runnable, Error>();
   runner.on('fail', (test: Runnable, error: Error) => {
+    if (!isFinalAttempt(test)) return;
     errors.set(test, error);
   });
 
   let passCount = 0;
   let failCount = 0;
   runner.on('pass', () => (passCount += 1));
-  runner.on('fail', () => (failCount += 1));
+  runner.on('fail', (test: Runnable) => {
+    if (!isFinalAttempt(test)) return;
+    failCount += 1;
+  });
 
   runner.on('hook end', (hook: Runnable) => {
     if (hook.isFailed()) {
@@ -119,6 +133,13 @@ export function setupCiStatsFtrTestGroupReporter({
   });
 
   runner.on('test end', (test: Runnable) => {
+    // Skip non-final attempts of a retried test: mocha will run this test
+    // again, and we'll record the final outcome on a later 'test end'.
+    if (!isFinalAttempt(test)) {
+      willRetry.delete(test);
+      return;
+    }
+
     const error = errors.get(test);
     if (test.isFailed() && !error) {
       throw new Error('no error recorded for failed test');
