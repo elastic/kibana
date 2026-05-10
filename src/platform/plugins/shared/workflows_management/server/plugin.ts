@@ -223,7 +223,10 @@ export class WorkflowsPlugin
     try {
       await this.workflowsService?.installManagedWorkflow(
         WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID,
-        { isStartupReconcile: true },
+        {
+          isStartupReconcile: true,
+          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        },
         WORKFLOWS_MANAGEMENT_PLUGIN_ID
       );
       await this.workflowsService?.installManagedWorkflow(

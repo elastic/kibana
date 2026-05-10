@@ -11,7 +11,7 @@ import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/serve
 import type { ManagedWorkflowId } from '../managed';
 
 export interface ManagedWorkflowOperationOptions {
-  spaceId?: string;
+  spaceId: string;
   workflowId?: string;
   workflowIdSuffix?: string;
   values?: Record<string, unknown>;
@@ -24,29 +24,29 @@ export interface ExecuteManagedWorkflowOptions extends ManagedWorkflowOperationO
 }
 
 export interface RegisteredManagedWorkflowsLifecycleApi {
-  install: (id: ManagedWorkflowId, options?: ManagedWorkflowOperationOptions) => Promise<void>;
-  uninstall: (id: ManagedWorkflowId, options?: ManagedWorkflowOperationOptions) => Promise<void>;
+  install: (id: ManagedWorkflowId, options: ManagedWorkflowOperationOptions) => Promise<void>;
+  uninstall: (id: ManagedWorkflowId, options: ManagedWorkflowOperationOptions) => Promise<void>;
 }
 
 export interface RegisteredManagedWorkflowsApi extends RegisteredManagedWorkflowsLifecycleApi {
-  execute: (id: ManagedWorkflowId, options?: ExecuteManagedWorkflowOptions) => Promise<string>;
+  execute: (id: ManagedWorkflowId, options: ExecuteManagedWorkflowOptions) => Promise<string>;
 }
 
 export interface ManagedWorkflowsApi {
   install: (
     pluginId: string,
     id: ManagedWorkflowId,
-    options?: ManagedWorkflowOperationOptions
+    options: ManagedWorkflowOperationOptions
   ) => Promise<void>;
   uninstall: (
     pluginId: string,
     id: ManagedWorkflowId,
-    options?: ManagedWorkflowOperationOptions
+    options: ManagedWorkflowOperationOptions
   ) => Promise<void>;
   execute: (
     pluginId: string,
     id: ManagedWorkflowId,
-    options?: ExecuteManagedWorkflowOptions
+    options: ExecuteManagedWorkflowOptions
   ) => Promise<string>;
 }
 
@@ -54,7 +54,7 @@ export interface PluginScopedManagedWorkflowsApi extends RegisteredManagedWorkfl
   execute: (
     request: KibanaRequest,
     id: ManagedWorkflowId,
-    options?: ExecuteManagedWorkflowOptions
+    options: ExecuteManagedWorkflowOptions
   ) => Promise<string>;
 }
 
