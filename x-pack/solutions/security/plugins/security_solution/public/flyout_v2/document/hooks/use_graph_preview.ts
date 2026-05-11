@@ -81,11 +81,7 @@ export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreview
   const isEntityStoreRunning = entityStoreStatus?.status === 'running';
 
   const hasGraphData =
-    Boolean(timestamp) &&
-    Boolean(action?.length) &&
-    eventIds.length > 0 &&
-    hasActor &&
-    hasTarget;
+    Boolean(timestamp) && Boolean(action?.length) && eventIds.length > 0 && hasActor && hasTarget;
 
   const shouldShowGraph = hasGraphData && hasRequiredLicense && isEntityStoreRunning;
 
