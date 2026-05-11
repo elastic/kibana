@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { BasicPrettyPrinter, Builder } from '@elastic/esql';
+import type { ESQLAstItem } from '@elastic/esql/types';
 import type { IngestStreamIndexMode } from '../models/ingest/base';
+import { isDraftStream } from '../models/ingest/wired';
 import { Streams } from '../models/streams';
 import { getIndexPatternsForStream } from './hierarchy_helpers';
+import { withUnmappedFieldsDirective } from './esql_helpers';
 import { getEsqlViewName } from '../models/query/view_name';
 
 export interface GetDiscoverEsqlQueryOptions {
@@ -68,6 +72,45 @@ export function getDiscoverEsqlQuery(options: GetDiscoverEsqlQueryOptions): stri
 
   if (useViews && Streams.WiredStream.Definition.is(definition)) {
     const metadataSuffix = includeMetadata ? ' METADATA _source' : '';
+    const isDraft = isDraftStream(definition);
+
+    if (isDraft) {
+      // Draft views may reference fields that are unmapped across some backing
+      // indices. SET unmapped_fields="LOAD" loads those as keyword instead of
+      // raising "Unknown column" errors. Partially mapped non-keyword fields
+      // are handled by explicit casts in the view definition itself.
+      const viewName = getEsqlViewName(definition.name);
+
+      const fromArgs: ESQLAstItem[] = [Builder.expression.source.index(viewName)];
+      if (includeMetadata) {
+        fromArgs.push(
+          Builder.option({
+            name: 'METADATA',
+            args: [Builder.expression.column({ args: [Builder.identifier({ name: '_source' })] })],
+          })
+        );
+      }
+
+      const commands = [
+        Builder.command({ name: 'from', args: fromArgs }),
+        Builder.command({
+          name: 'sort',
+          args: [
+            Builder.expression.order(Builder.expression.column('@timestamp'), {
+              order: 'DESC',
+              nulls: '',
+            }),
+          ],
+        }),
+      ];
+
+      const query = BasicPrettyPrinter.multiline(Builder.expression.query(commands), {
+        pipeTab: '',
+      });
+
+      return withUnmappedFieldsDirective(query);
+    }
+
     return `FROM ${getEsqlViewName(definition.name)}${metadataSuffix} | SORT @timestamp DESC`;
   }
 
