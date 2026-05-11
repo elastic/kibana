@@ -74,12 +74,12 @@ export function EditorSettingsPopover({ editorRef }: EditorSettingsPopoverProps)
       button={
         <EuiToolTip content={label} disableScreenReaderOutput>
           <EuiButtonIcon
-            size="xs"
             iconType="controlsHorizontal"
+            size="s"
             data-test-subj="workflowYamlEditorSettingsButton"
             onClick={() => setIsOpen(!isOpen)}
             aria-label={label}
-            color="primary"
+            color="text"
           />
         </EuiToolTip>
       }

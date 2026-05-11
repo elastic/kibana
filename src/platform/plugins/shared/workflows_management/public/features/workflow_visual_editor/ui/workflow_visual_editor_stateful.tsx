@@ -10,7 +10,7 @@
 import { EuiEmptyPrompt, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import type { ColorMode } from '@xyflow/react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { stringify as stringifyYaml } from 'yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { transformWorkflowToGraph, type WorkflowYaml } from '@kbn/workflows';
@@ -20,9 +20,20 @@ import {
   selectEditorWorkflowDefinition,
   selectEditorWorkflowLookup,
   selectEditorYaml,
+  selectHighlightedStepId,
   selectIsYamlSyntaxValid,
   selectStepExecutions,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
+import {
+  HIGHLIGHTED_STEP_TRIGGER,
+  setCursorPosition,
+  setHighlightedStepId,
+} from '../../../entities/workflows/store/workflow_detail/slice';
+import {
+  CopyDevToolsOption,
+  CopyWorkflowStepJsonOption,
+  CopyWorkflowStepOption,
+} from '../../../widgets/workflow_yaml_editor/ui/step_action_options';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
 interface WorkflowVisualEditorStatefulProps {
@@ -54,8 +65,10 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const isYamlValid = useSelector(selectIsYamlSyntaxValid) ?? true;
   const editorYaml = useSelector(selectEditorYaml) ?? '';
   const workflowLookup = useSelector(selectEditorWorkflowLookup);
+  const highlightedStepId = useSelector(selectHighlightedStepId);
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const { selectedStepId, setSelectedStep, setEditorView } = useWorkflowUrlState();
+  const dispatch = useDispatch();
 
   // POC pattern: cache the last valid WorkflowYaml so the canvas can stay
   // up while the user fixes a YAML syntax error.
@@ -127,8 +140,16 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   }, [onStepRun, flyoutTarget]);
 
   const handleOpenInYaml = useCallback(() => {
+    // Tell the YAML editor which step to reveal — it watches the
+    // `highlightedStepId` slice and calls `revealLineInCenter` on the
+    // matching line when it changes.
+    if (flyoutTarget?.kind === 'step') {
+      dispatch(setHighlightedStepId({ stepId: flyoutTarget.stepName }));
+    } else if (flyoutTarget?.kind === 'trigger') {
+      dispatch(setHighlightedStepId({ stepId: HIGHLIGHTED_STEP_TRIGGER }));
+    }
     setEditorView('yaml');
-  }, [setEditorView]);
+  }, [dispatch, flyoutTarget, setEditorView]);
 
   if (!workflow) {
     return (
@@ -147,7 +168,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   }
 
   return (
-    <div css={{ position: 'relative', width: '100%', height: '100%' }}>
+    <div css={{ position: 'relative', width: '100%', height: '100%', minHeight: 0 }}>
       <WorkflowGraphCanvas
         workflow={workflow}
         stepExecutions={stepExecutions}
@@ -155,17 +176,57 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         selectedStepId={selectedStepId}
         onStepSelect={(id) => setSelectedStep(id ?? null)}
         colorMode={colorMode.toLowerCase() as ColorMode}
+        focusStepId={highlightedStepId}
+        onStepRun={(stepName) => onStepRun?.({ stepId: stepName, actionType: 'run' })}
+        canRunSteps={Boolean(canExecuteWorkflow) && isYamlValid}
+        onOpenStepMenu={(stepName) => {
+          // Update the global focused-step state so the shared menu option
+          // components (which read `selectEditorFocusedStepInfo`) reflect
+          // this node's step.
+          const info = workflowLookup?.steps?.[stepName];
+          if (info?.lineStart != null) {
+            dispatch(setCursorPosition({ lineNumber: info.lineStart, column: 1 }));
+          }
+        }}
+        renderStepMenuItems={(close) => {
+          const stepInfo = workflowLookup?.steps?.[selectedStepId ?? ''];
+          const showDevTools =
+            stepInfo?.stepType?.startsWith('elasticsearch.') ||
+            stepInfo?.stepType?.startsWith('kibana.');
+          return (
+            <>
+              {showDevTools && <CopyDevToolsOption key="copy-as-console" onClick={close} />}
+              <CopyWorkflowStepOption key="copy-as-yaml" onClick={close} />
+              <CopyWorkflowStepJsonOption key="copy-as-json" onClick={close} />
+            </>
+          );
+        }}
       />
       {flyoutTarget && (
-        <WorkflowVisualEditorFlyout
-          target={flyoutTarget}
-          editorYaml={editorYaml}
-          canExecuteWorkflow={Boolean(canExecuteWorkflow)}
-          isYamlValid={isYamlValid}
-          onClose={() => setSelectedStep(null)}
-          onOpenInYaml={handleOpenInYaml}
-          onRunStep={handleRunStep}
-        />
+        <div
+          css={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            bottom: 8,
+            width: 420,
+            zIndex: 10,
+            boxShadow:
+              '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 4px 13px 0 rgba(43, 57, 79, 0.12), 0 8px 17px 0 rgba(43, 57, 79, 0.07)',
+            borderRadius: 8,
+            overflow: 'hidden',
+          }}
+        >
+          <WorkflowVisualEditorFlyout
+            target={flyoutTarget}
+            editorYaml={editorYaml}
+            canExecuteWorkflow={Boolean(canExecuteWorkflow)}
+            isYamlValid={isYamlValid}
+            onClose={() => setSelectedStep(null)}
+            onOpenInYaml={handleOpenInYaml}
+            onRunStep={handleRunStep}
+          />
+        </div>
       )}
     </div>
   );

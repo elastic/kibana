@@ -21,7 +21,14 @@ function applyDagre(
 ): { nodes: LayoutedNode[]; edges: GraphEdge[] } {
   const g = new graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: 'TB', nodesep: 40, ranksep: 60, edgesep: 40 });
+  g.setGraph({
+    rankdir: 'TB',
+    align: 'UL',
+    ranker: 'tight-tree',
+    nodesep: 50,
+    ranksep: 80,
+    edgesep: 40,
+  });
 
   for (const node of nodes) {
     g.setNode(node.id, { width: node.style.width, height: node.style.height });
@@ -47,7 +54,14 @@ function applyDagre(
     };
   });
 
-  return { nodes: layouted, edges };
+  const routedEdges: GraphEdge[] = edges.map((edge) => {
+    const dagreEdge = g.edge(edge.source, edge.target);
+    const points = dagreEdge?.points;
+    if (!points || points.length < 2) return edge;
+    return { ...edge, points: points.map((p) => ({ x: p.x, y: p.y })) };
+  });
+
+  return { nodes: layouted, edges: routedEdges };
 }
 
 interface ForeachGroupLayout {

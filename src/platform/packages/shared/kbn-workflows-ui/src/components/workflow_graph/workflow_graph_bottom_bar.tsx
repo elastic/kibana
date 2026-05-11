@@ -7,166 +7,245 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiListGroup,
-  EuiPanel,
-  EuiPopover,
-  useEuiTheme,
-} from '@elastic/eui';
-import { type Node, useReactFlow } from '@xyflow/react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import React, { type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 
-interface WorkflowGraphBottomBarProps {
-  searchTerm: string;
-  onSearchChange: (next: string) => void;
-  onSearchUsed?: () => void;
-  triggerNodeIds: string[];
-  leafNodeIds: string[];
-  onJumpTo: (nodeId: string) => void;
+export type WorkflowDetailBottomBarView = 'yaml' | 'graph';
+
+interface WorkflowDetailBottomBarProps {
+  editorView: WorkflowDetailBottomBarView;
+  onEditorViewChange: (next: WorkflowDetailBottomBarView) => void;
+  toolsSlot?: ReactNode;
+  testWorkflowButton?: ReactNode;
+  /**
+   * Extra space (in px) to add to the bar's `bottom` offset. Useful when an
+   * expandable panel below (e.g. validation errors) would otherwise overlap
+   * the bar.
+   */
+  bottomOffset?: number;
 }
 
-export function WorkflowGraphBottomBar({
-  searchTerm,
-  onSearchChange,
-  onSearchUsed,
-  triggerNodeIds,
-  leafNodeIds,
-  onJumpTo,
-}: WorkflowGraphBottomBarProps) {
-  const { euiTheme } = useEuiTheme();
-  const { zoomIn, zoomOut, fitView, getNodes, setCenter, getZoom } = useReactFlow();
-  const [refsOpen, setRefsOpen] = useState(false);
-  const cycleIdxRef = useRef(0);
+const PLACEHOLDER_HISTORY = [
+  { id: 'history-back', iconType: 'arrowLeft', label: 'Back' },
+  { id: 'history-forward', iconType: 'arrowRight', label: 'Forward' },
+];
 
-  const reportedSearchUsedRef = useRef(false);
-  useEffect(() => {
-    if (searchTerm.trim().length === 0) {
-      reportedSearchUsedRef.current = false;
-      return;
-    }
-    if (!reportedSearchUsedRef.current) {
-      reportedSearchUsedRef.current = true;
-      onSearchUsed?.();
-    }
-  }, [searchTerm, onSearchUsed]);
+const PLACEHOLDER_TOOLS = [
+  { id: 'tool-doc', iconType: 'documentation', label: 'Documentation' },
+  { id: 'tool-search', iconType: 'search', label: 'Search' },
+  { id: 'tool-add', iconType: 'plusInCircle', label: 'Add' },
+  { id: 'tool-settings', iconType: 'controlsHorizontal', label: 'Settings' },
+  { id: 'tool-more', iconType: 'boxesHorizontal', label: 'More' },
+];
 
-  const cycleSearch = useCallback(() => {
-    const term = searchTerm.trim().toLowerCase();
-    if (!term) return;
-    const matches = (getNodes() as Node[]).filter((n) => {
-      const data = n.data as Record<string, unknown>;
-      return (
-        typeof data.label === 'string' &&
-        ((data.label as string).toLowerCase().includes(term) ||
-          (typeof data.stepType === 'string' &&
-            (data.stepType as string).toLowerCase().includes(term)))
-      );
-    });
-    if (matches.length === 0) return;
-    cycleIdxRef.current = (cycleIdxRef.current + 1) % matches.length;
-    const target = matches[cycleIdxRef.current];
-    setCenter(target.position.x + 100, target.position.y + 30, {
-      zoom: getZoom(),
-      duration: 300,
-    });
-  }, [searchTerm, getNodes, setCenter, getZoom]);
+// Figma Shadow/X-large composite.
+const BAR_SHADOW =
+  '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 5px 16px 0 rgba(43, 57, 79, 0.14), 0 10px 20px 0 rgba(43, 57, 79, 0.08)';
+
+// Subtle shadow for the active view-toggle button (Figma Shadow/X-small).
+const TOGGLE_ACTIVE_SHADOW =
+  '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 1px 4px 0 rgba(43, 57, 79, 0.06), 0 2px 8px 0 rgba(43, 57, 79, 0.05)';
+
+const SEPARATOR_COLOR = '#e3e8f2';
+const TOGGLE_BG = '#f6f9fc';
+const ICON_COLOR = '#1d2a3e'; // Figma Text/Default
+
+const shortSeparator = (
+  <EuiFlexItem grow={false} css={{ width: 1, height: 32, background: SEPARATOR_COLOR }} />
+);
+const tallSeparator = (
+  <EuiFlexItem grow={false} css={{ width: 1, height: 54, background: SEPARATOR_COLOR }} />
+);
+
+const NOOP = () => {};
+
+function PlaceholderIconButton({
+  iconType,
+  label,
+  testId,
+}: {
+  iconType: string;
+  label: string;
+  testId: string;
+}) {
+  return (
+    <EuiButtonIcon
+      iconType={iconType}
+      aria-label={label}
+      color="text"
+      size="s"
+      onClick={NOOP}
+      data-test-subj={testId}
+    />
+  );
+}
+
+function ViewToggle({
+  editorView,
+  onEditorViewChange,
+}: {
+  editorView: WorkflowDetailBottomBarView;
+  onEditorViewChange: (next: WorkflowDetailBottomBarView) => void;
+}) {
+  const items: Array<{ id: WorkflowDetailBottomBarView; iconType: string; label: string }> = [
+    {
+      id: 'graph',
+      iconType: 'workflow',
+      label: i18n.translate('workflowsUi.bottomBar.editorViewGraph', { defaultMessage: 'Graph' }),
+    },
+    {
+      id: 'yaml',
+      iconType: 'editorCodeBlock',
+      label: i18n.translate('workflowsUi.bottomBar.editorViewYaml', { defaultMessage: 'YAML' }),
+    },
+  ];
 
   return (
-    <EuiPanel
-      paddingSize="s"
-      hasShadow
+    <div
+      role="group"
+      aria-label={i18n.translate('workflowsUi.bottomBar.editorViewLegend', {
+        defaultMessage: 'Editor view',
+      })}
+      css={{
+        background: TOGGLE_BG,
+        border: `1px solid ${SEPARATOR_COLOR}`,
+        borderRadius: 6,
+        padding: 3,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+      }}
+    >
+      {items.map(({ id, iconType, label }) => {
+        const active = id === editorView;
+        return (
+          <EuiToolTip key={id} content={label} disableScreenReaderOutput>
+            <button
+              type="button"
+              aria-label={label}
+              aria-pressed={active}
+              onClick={() => onEditorViewChange(id)}
+              data-test-subj={`workflowEditorViewToggle-${id}`}
+              css={{
+                width: 32,
+                height: 32,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: 'none',
+                cursor: 'pointer',
+                borderRadius: 4,
+                padding: 0,
+                background: active ? '#ffffff' : 'transparent',
+                boxShadow: active ? TOGGLE_ACTIVE_SHADOW : 'none',
+                color: ICON_COLOR,
+                transition: 'background 120ms ease, box-shadow 120ms ease',
+                '&:hover': {
+                  background: active ? '#ffffff' : 'rgba(29, 42, 62, 0.06)',
+                },
+                '&:focus-visible': {
+                  outline: '2px solid #006bb8',
+                  outlineOffset: 2,
+                },
+              }}
+            >
+              <EuiIcon type={iconType} size="m" color={ICON_COLOR} />
+            </button>
+          </EuiToolTip>
+        );
+      })}
+    </div>
+  );
+}
+
+export function WorkflowDetailBottomBar({
+  editorView,
+  onEditorViewChange,
+  toolsSlot,
+  testWorkflowButton,
+  bottomOffset = 0,
+}: WorkflowDetailBottomBarProps) {
+  return (
+    <div
       css={{
         position: 'absolute',
-        bottom: 12,
+        bottom: 26 + bottomOffset,
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 5,
-        background: euiTheme.colors.backgroundBasePlain,
-        border: `1px solid ${euiTheme.colors.borderBasePlain}`,
+        height: 54,
+        borderRadius: 10,
+        background: '#ffffff',
+        boxShadow: BAR_SHADOW,
+        display: 'flex',
+        alignItems: 'center',
+        transition: 'bottom 180ms ease',
+        // Force a uniform icon color for every icon-button rendered inside
+        // the bar, regardless of the EUI color prop each child uses.
+        '& .euiButtonIcon, & .euiButtonIcon svg': {
+          color: ICON_COLOR,
+        },
       }}
-      data-test-subj="workflowGraphBottomBar"
+      data-test-subj="workflowDetailBottomBar"
     >
-      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="minusInCircle"
-            aria-label={i18n.translate('workflowsUi.graph.zoomOut', { defaultMessage: 'Zoom out' })}
-            onClick={() => zoomOut({ duration: 200 })}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="plusInCircle"
-            aria-label={i18n.translate('workflowsUi.graph.zoomIn', { defaultMessage: 'Zoom in' })}
-            onClick={() => zoomIn({ duration: 200 })}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="fullScreen"
-            aria-label={i18n.translate('workflowsUi.graph.fit', { defaultMessage: 'Fit to view' })}
-            onClick={() => fitView({ padding: 0.2, duration: 250 })}
-          />
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="none"
+        responsive={false}
+        wrap={false}
+        css={{ height: '100%' }}
+      >
+        <EuiFlexItem grow={false} css={{ padding: '0 12px' }}>
+          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
+            {PLACEHOLDER_HISTORY.map((btn) => (
+              <EuiFlexItem grow={false} key={btn.id}>
+                <PlaceholderIconButton
+                  iconType={btn.iconType}
+                  label={btn.label}
+                  testId={`workflowBottomBar-${btn.id}`}
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false} css={{ width: 200 }}>
-          <EuiFieldSearch
-            compressed
-            placeholder={i18n.translate('workflowsUi.graph.searchPlaceholder', {
-              defaultMessage: 'Search steps…',
-            })}
-            value={searchTerm}
-            onChange={(e) => onSearchChange(e.target.value)}
-            onSearch={cycleSearch}
-            data-test-subj="workflowGraphSearch"
-          />
+        {shortSeparator}
+
+        <EuiFlexItem grow={false} css={{ padding: '0 12px' }}>
+          {toolsSlot ?? (
+            <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
+              {PLACEHOLDER_TOOLS.map((btn) => (
+                <EuiFlexItem grow={false} key={btn.id}>
+                  <PlaceholderIconButton
+                    iconType={btn.iconType}
+                    label={btn.label}
+                    testId={`workflowBottomBar-${btn.id}`}
+                  />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          )}
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            isOpen={refsOpen}
-            closePopover={() => setRefsOpen(false)}
-            button={
-              <EuiButtonEmpty
-                size="xs"
-                iconType="list"
-                onClick={() => setRefsOpen((v) => !v)}
-                data-test-subj="workflowGraphReferences"
-              >
-                {i18n.translate('workflowsUi.graph.references', { defaultMessage: 'References' })}
-              </EuiButtonEmpty>
-            }
-          >
-            <div css={{ minWidth: 220, maxHeight: 320, overflowY: 'auto' }}>
-              <EuiListGroup
-                size="s"
-                listItems={[
-                  ...triggerNodeIds.map((id) => ({
-                    label: `Trigger: ${id}`,
-                    onClick: () => {
-                      setRefsOpen(false);
-                      onJumpTo(id);
-                    },
-                  })),
-                  ...leafNodeIds.map((id) => ({
-                    label: `Leaf: ${id}`,
-                    onClick: () => {
-                      setRefsOpen(false);
-                      onJumpTo(id);
-                    },
-                  })),
-                ]}
-              />
-            </div>
-          </EuiPopover>
+        {shortSeparator}
+
+        <EuiFlexItem grow={false} css={{ padding: '0 8px' }}>
+          <ViewToggle editorView={editorView} onEditorViewChange={onEditorViewChange} />
         </EuiFlexItem>
+
+        {testWorkflowButton && (
+          <>
+            {tallSeparator}
+            <EuiFlexItem grow={false} css={{ padding: '7px 8px' }}>
+              {testWorkflowButton}
+            </EuiFlexItem>
+          </>
+        )}
       </EuiFlexGroup>
-    </EuiPanel>
+    </div>
   );
 }
+
+export const WorkflowGraphBottomBar = WorkflowDetailBottomBar;
+export type WorkflowGraphEditorView = WorkflowDetailBottomBarView;

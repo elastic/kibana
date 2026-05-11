@@ -88,12 +88,12 @@ export function KeyboardShortcutsPopover() {
       button={
         <EuiToolTip content={label} disableScreenReaderOutput>
           <EuiButtonIcon
-            size="xs"
             iconType="keyboard"
+            size="s"
             data-test-subj="workflowYamlEditorKeyboardShortcutsButton"
             onClick={() => setIsOpen(!isOpen)}
             aria-label={label}
-            color="primary"
+            color="text"
           />
         </EuiToolTip>
       }

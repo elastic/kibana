@@ -7,13 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiButtonGroupOptionProps, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonGroup,
-  EuiButtonIcon,
-  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeaderSection,
@@ -24,11 +21,10 @@ import {
   EuiSwitch,
   EuiTitle,
   EuiToolTip,
-  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useCallback, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
@@ -46,13 +42,12 @@ import {
   selectIsYamlSyntaxValid,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
-import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   useWorkflowUrlState,
   type WorkflowUrlStateTabType,
 } from '../../../hooks/use_workflow_url_state';
-import { getSaveWorkflowTooltipContent, getTestRunTooltipContent } from '../../../shared/ui';
+import { getSaveWorkflowTooltipContent } from '../../../shared/ui';
 import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
 
 const executionsTabReadExecutionDisabledTooltip = i18n.translate(
@@ -64,37 +59,10 @@ const executionsTabReadExecutionDisabledTooltip = i18n.translate(
 );
 
 const Translations = {
-  runWorkflow: i18n.translate('workflows.workflowDetailHeader.runWorkflow', {
-    defaultMessage: 'Run workflow',
-  }),
-  runWithUnsavedChangesQuestion: i18n.translate(
-    'workflows.workflowDetailHeader.runWithUnsavedChangesQuestion',
-    { defaultMessage: 'Run workflow with unsaved changes?' }
-  ),
-  runWorkflowCancel: i18n.translate('workflows.workflowDetailHeader.runWorkflowCancel', {
-    defaultMessage: 'Cancel',
-  }),
   backLink: i18n.translate('workflows.workflowDetailHeader.backLink', {
     defaultMessage: 'Back to Workflows',
   }),
 };
-
-const ButtonGroupOptions: EuiButtonGroupOptionProps[] = [
-  {
-    id: 'workflow',
-    label: i18n.translate('workflows.workflowDetailHeader.workflow', {
-      defaultMessage: 'Workflow',
-    }),
-    iconType: 'grid',
-  },
-  {
-    id: 'executions',
-    label: i18n.translate('workflows.workflowDetailHeader.executions', {
-      defaultMessage: 'Executions',
-    }),
-    iconType: 'play',
-  },
-];
 
 export interface WorkflowDetailHeaderProps {
   isLoading: boolean;
@@ -108,46 +76,10 @@ export const WorkflowDetailHeader = React.memo(
     const { id: workflowId } = useParams<{ id?: string }>();
     const { application } = useKibana().services;
     const styles = useMemoCss(componentStyles);
-    const dispatch = useDispatch();
-    const { canCreateWorkflow, canUpdateWorkflow, canExecuteWorkflow, canReadWorkflowExecution } =
+    const { canCreateWorkflow, canUpdateWorkflow, canReadWorkflowExecution } =
       useWorkflowsCapabilities();
 
-    const workflowDetailTabButtonOptions = useMemo(
-      () =>
-        ButtonGroupOptions.map((option) =>
-          option.id === 'executions' && !canReadWorkflowExecution
-            ? {
-                ...option,
-                isDisabled: true,
-                title: '',
-                toolTipContent: executionsTabReadExecutionDisabledTooltip,
-              }
-            : option
-        ),
-      [canReadWorkflowExecution]
-    );
-
-    const { activeTab, setActiveTab, editorView, setEditorView } = useWorkflowUrlState();
-    const isWideEnoughForGraphToggle = useIsWithinBreakpoints(['m', 'l', 'xl']);
-    const editorViewOptions = useMemo<EuiButtonGroupOptionProps[]>(
-      () => [
-        {
-          id: 'yaml',
-          iconType: 'editorCodeBlock',
-          label: i18n.translate('workflows.workflowDetailHeader.editorViewYaml', {
-            defaultMessage: 'YAML',
-          }),
-        },
-        {
-          id: 'graph',
-          iconType: 'workflow',
-          label: i18n.translate('workflows.workflowDetailHeader.editorViewGraph', {
-            defaultMessage: 'Graph',
-          }),
-        },
-      ],
-      []
-    );
+    const { setActiveTab } = useWorkflowUrlState();
 
     const workflow = useSelector(selectWorkflow);
     const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
@@ -176,24 +108,10 @@ export const WorkflowDetailHeader = React.memo(
       updateWorkflow({ workflow: { enabled: !isEnabled } });
     }, [updateWorkflow, isEnabled]);
 
-    const openTestModal = useCallback(() => {
-      dispatch(setIsTestModalOpen(true));
-    }, [dispatch]);
-
-    const [showRunConfirmation, setShowRunConfirmation] = useState(false);
-
     // Combined validity: syntax must parse AND no strict validation errors AND server considers it valid.
     // workflow?.valid !== false covers the initial page load before Monaco validates.
     const isSchemaValid =
       isSyntaxValid && !hasYamlSchemaValidationErrors && workflow?.valid !== false;
-
-    const runWorkflowTooltipContent = useMemo(() => {
-      return getTestRunTooltipContent({
-        isExecutionsTab,
-        isValid: isSyntaxValid,
-        canRunWorkflow: canExecuteWorkflow,
-      });
-    }, [isSyntaxValid, canExecuteWorkflow, isExecutionsTab]);
 
     const saveWorkflowTooltipContent = useMemo(() => {
       const isCreate = !workflowId;
@@ -207,23 +125,6 @@ export const WorkflowDetailHeader = React.memo(
     const canSaveWorkflow = useMemo(() => {
       return workflowId ? canUpdateWorkflow : canCreateWorkflow;
     }, [canUpdateWorkflow, canCreateWorkflow, workflowId]);
-
-    const handleRunClickWithUnsavedCheck = useCallback(() => {
-      if (hasUnsavedChanges) {
-        setShowRunConfirmation(true);
-      } else {
-        openTestModal();
-      }
-    }, [hasUnsavedChanges, openTestModal]);
-
-    const handleConfirmRun = useCallback(() => {
-      setShowRunConfirmation(false);
-      openTestModal();
-    }, [openTestModal]);
-
-    const handleCancelRun = useCallback(() => {
-      setShowRunConfirmation(false);
-    }, []);
 
     return (
       <>
@@ -281,28 +182,6 @@ export const WorkflowDetailHeader = React.memo(
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageHeaderSection>
-            {workflowId && (
-              <EuiPageHeaderSection
-                css={{
-                  flexBasis: '15%',
-                }}
-              >
-                <EuiFlexGroup justifyContent="center" gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonGroup
-                      buttonSize="compressed"
-                      color="primary"
-                      options={workflowDetailTabButtonOptions}
-                      idSelected={activeTab}
-                      legend="Switch between workflow and executions"
-                      type="single"
-                      hasAriaDisabled={!canReadWorkflowExecution}
-                      onChange={(id) => setActiveTab(id as WorkflowUrlStateTabType)}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPageHeaderSection>
-            )}
             <EuiPageHeaderSection
               css={{
                 flexBasis: '40%',
@@ -337,34 +216,34 @@ export const WorkflowDetailHeader = React.memo(
                     })}
                   />
                 </EuiToolTip>
-                <EuiFlexItem grow={false} css={styles.separator} />
-                {!isExecutionsTab && isWideEnoughForGraphToggle && (
-                  <EuiButtonGroup
-                    buttonSize="compressed"
-                    color="primary"
-                    isIconOnly
-                    legend={i18n.translate('workflows.workflowDetailHeader.editorViewLegend', {
-                      defaultMessage: 'Editor view',
-                    })}
-                    options={editorViewOptions}
-                    idSelected={editorView}
-                    onChange={(id) => setEditorView(id as 'yaml' | 'graph')}
-                    type="single"
-                    data-test-subj="workflowEditorViewToggle"
-                  />
+                {workflowId && (
+                  <EuiToolTip
+                    content={
+                      !canReadWorkflowExecution
+                        ? executionsTabReadExecutionDisabledTooltip
+                        : undefined
+                    }
+                  >
+                    <EuiButtonEmpty
+                      size="s"
+                      iconType="play"
+                      color="primary"
+                      isDisabled={!canReadWorkflowExecution}
+                      onClick={() =>
+                        setActiveTab(
+                          (isExecutionsTab ? 'workflow' : 'executions') as WorkflowUrlStateTabType
+                        )
+                      }
+                      data-test-subj="workflowExecutionsToggleButton"
+                    >
+                      <FormattedMessage
+                        id="workflows.workflowDetailHeader.executionsButton"
+                        defaultMessage="Executions"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiToolTip>
                 )}
-                <EuiToolTip content={runWorkflowTooltipContent}>
-                  <EuiButtonIcon
-                    color="success"
-                    display="base"
-                    iconType="play"
-                    size="s"
-                    onClick={handleRunClickWithUnsavedCheck}
-                    disabled={isExecutionsTab || !canExecuteWorkflow || isLoading || !isSyntaxValid}
-                    aria-label={Translations.runWorkflow}
-                    data-test-subj="runWorkflowHeaderButton"
-                  />
-                </EuiToolTip>
+                <EuiFlexItem grow={false} css={styles.separator} />
                 <EuiToolTip content={saveWorkflowTooltipContent}>
                   <EuiButton
                     fill
@@ -388,26 +267,6 @@ export const WorkflowDetailHeader = React.memo(
             </EuiPageHeaderSection>
           </EuiPageTemplate.Header>
         </EuiPageTemplate>
-        {showRunConfirmation && (
-          <EuiConfirmModal
-            data-test-subj="runWorkflowWithUnsavedChangesConfirmationModal"
-            title={Translations.runWithUnsavedChangesQuestion}
-            onCancel={handleCancelRun}
-            onConfirm={handleConfirmRun}
-            cancelButtonText={Translations.runWorkflowCancel}
-            confirmButtonText={Translations.runWorkflow}
-            buttonColor="success"
-            defaultFocusedButton="confirm"
-            aria-label={Translations.runWithUnsavedChangesQuestion}
-          >
-            <p>
-              <FormattedMessage
-                id="workflows.workflowDetailHeader.runWithUnsavedChanges.message"
-                defaultMessage="You have unsaved changes. Running the workflow will not save your changes. Are you sure you want to continue?"
-              />
-            </p>
-          </EuiConfirmModal>
-        )}
       </>
     );
   }

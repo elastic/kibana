@@ -8,3 +8,6 @@
  */
 
 export { WorkflowYAMLEditor } from './ui/workflow_yaml_editor';
+export { DocumentationLink } from './ui/documentation_link';
+export { KeyboardShortcutsPopover } from './ui/keyboard_shortcuts_popover';
+export { EditorSettingsPopover } from './ui/editor_settings_popover';

@@ -84,6 +84,12 @@ export interface GraphEdge {
   branchIndex?: number;
   /** Display label rendered on the edge (e.g. 'true' / 'false' / case value / 'for each item'). */
   label?: string;
+  /**
+   * Orthogonal waypoints computed by dagre — the renderer uses these to draw
+   * the edge around other nodes instead of cutting through them. Coordinates
+   * are in graph (layout) space, same as node `position`.
+   */
+  points?: Array<{ x: number; y: number }>;
 }
 
 export interface ForeachGroup {

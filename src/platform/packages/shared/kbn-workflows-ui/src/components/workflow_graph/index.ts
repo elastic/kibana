@@ -8,3 +8,7 @@
  */
 
 export { WorkflowGraphCanvas, type WorkflowGraphCanvasProps } from './workflow_graph_canvas';
+export {
+  WorkflowDetailBottomBar,
+  type WorkflowDetailBottomBarView,
+} from './workflow_graph_bottom_bar';

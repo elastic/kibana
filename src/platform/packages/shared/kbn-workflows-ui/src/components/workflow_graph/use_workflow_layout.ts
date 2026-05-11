@@ -154,6 +154,7 @@ export function useWorkflowLayout({
           label: e.label,
           traversed,
           traversedStatus,
+          points: e.points,
         },
       } as Edge;
     });
