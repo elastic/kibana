@@ -54,6 +54,10 @@ import type { ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_f
 
 import { useEditorFrameService } from '../../editor_frame_service_context';
 
+// POC: loose type for datasource state to allow accessing .layers[layerId].query
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DatasourceStateWithLayers = Record<string, any>;
+
 import { LayerHeader } from './layer_header';
 import type { LayerPanelProps } from './types';
 import { DimensionContainer } from './dimension_container';
@@ -108,8 +112,6 @@ export function LayerPanel(props: LayerPanelProps) {
   );
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
-
-  const isSaveable = useLensSelector((state) => state.lens.isSaveable);
 
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const canEditTextBasedQuery = useLensSelector(selectCanEditTextBasedQuery);
@@ -328,6 +330,7 @@ export function LayerPanel(props: LayerPanelProps) {
 
   const { dataViews } = props.framePublicAPI;
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
+  const layerState = layerDatasourceState as DatasourceStateWithLayers | undefined;
   const isTextBasedLanguage =
     datasource?.isTextBasedLanguage() ||
     isOfAggregateQueryType(editorProps.attributes?.state.query) ||
@@ -405,16 +408,14 @@ export function LayerPanel(props: LayerPanelProps) {
     [activeVisualization]
   );
 
-  const hasQuery = (layerDatasource) => {
-    if (!layerDatasource) return false;
-    if (!layerDatasource.layers[layerId]) return false;
-    if (!layerDatasource.layers[layerId].query) return false;
+  const layerHasQuery = (ds: DatasourceStateWithLayers | undefined): boolean => {
+    if (!ds) return false;
+    if (!ds.layers?.[layerId]) return false;
+    if (!ds.layers[layerId].query) return false;
     return true;
   };
 
-  const initialQuery = hasQuery(layerDatasourceState)
-    ? layerDatasourceState.layers[layerId].query
-    : { esql: '' };
+  const initialQuery = layerHasQuery(layerState) ? layerState!.layers[layerId].query : { esql: '' };
 
   const prevQuery = useRef<AggregateQuery | Query>(initialQuery);
 
@@ -422,41 +423,36 @@ export function LayerPanel(props: LayerPanelProps) {
 
   // Sync query state when layer is converted to ES|QL
   useEffect(() => {
-    if (hasQuery(layerDatasourceState)) {
-      const newQuery = layerDatasourceState.layers[layerId].query;
-      // eslint-disable-next-line no-console
-      console.log('[LayerPanel] Layer has ES|QL query, syncing:', {
-        layerId,
-        newQuery,
-        currentQuery: query,
-      });
+    if (layerHasQuery(layerState)) {
+      const newQuery = layerState!.layers[layerId].query;
       setQuery(newQuery);
     }
-  }, [layerDatasourceState, layerId, query]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [layerState, layerId, query]);
 
-  const [errors, setErrors] = useState<Error[] | undefined>();
+  const [errors, _setErrors] = useState<Error[] | undefined>();
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
-  const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
+  const [suggestsLimitedColumns, _setSuggestsLimitedColumns] = useState(false);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const [isESQLResultsAccordionOpen, setIsESQLResultsAccordionOpen] = useState(false);
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
-  const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
+  const [dataGridAttrs, _setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
 
   const hideTimeFilterInfo = false;
 
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController) => {
       updateDatasource(datasourceId, {
-        ...layerDatasourceState,
+        ...layerState,
         layers: {
-          ...layerDatasourceState.layers,
-          [layerId]: { ...layerDatasourceState.layers[layerId], query: q },
+          ...(layerState as DatasourceStateWithLayers)?.layers,
+          [layerId]: { ...(layerState as DatasourceStateWithLayers)?.layers?.[layerId], query: q },
         },
       });
       prevQuery.current = q;
       setIsVisualizationLoading(false);
     },
-    [updateDatasource, datasourceId, layerDatasourceState, layerId]
+    [updateDatasource, datasourceId, layerState, layerId]
   );
 
   return (
@@ -576,12 +572,11 @@ export function LayerPanel(props: LayerPanelProps) {
             {shouldRenderESQLEditor && (
               <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
                 <ESQLLangEditor
-                  query={query}
+                  query={query as AggregateQuery}
                   onTextLangQueryChange={(q) => {
                     setQuery(q);
                   }}
                   // detectedTimestamp={adHocDataViews?.[0]?.timeFieldName}
-                  hideTimeFilterInfo={hideTimeFilterInfo}
                   errors={errors}
                   warning={
                     suggestsLimitedColumns
@@ -592,7 +587,6 @@ export function LayerPanel(props: LayerPanelProps) {
                       : undefined
                   }
                   editorIsInline={true}
-                  hideRunQueryText
                   onTextLangQuerySubmit={async (q, a) => {
                     // do not run the suggestions if the query is the same as the previous one
                     if (q && !isEqual(q, prevQuery.current)) {
@@ -611,8 +605,8 @@ export function LayerPanel(props: LayerPanelProps) {
                 dataGridAttrs={dataGridAttrs}
                 isAccordionOpen={isESQLResultsAccordionOpen}
                 setIsAccordionOpen={setIsESQLResultsAccordionOpen}
-                query={query}
-                // isTableView={attributes.visualizationType !== 'lnsDatatable'}
+                query={query as AggregateQuery}
+                isTableView={true}
                 onAccordionToggleCb={(status) => {
                   if (status && isSuggestionsAccordionOpen) {
                     setIsSuggestionsAccordionOpen(!status);
