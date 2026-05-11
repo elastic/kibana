@@ -16,11 +16,11 @@ import type {
   DatasourceDimensionEditorProps,
   DataType,
 } from '@kbn/lens-common';
+import type { TextBasedLayer } from '@kbn/lens-common';
 import { mergeLayer, updateColumnLabel } from '../utils';
 import type { FormatSelectorProps } from '../../form_based/dimension_panel/format_selector';
 import { FormatSelector } from '../../form_based/dimension_panel/format_selector';
-import type { TemporaryState } from '../../form_based/dimension_panel/dimensions_editor_helpers';
-import { updateColumnParam } from '../../form_based/operations';
+
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import { isNotNumeric, isNumeric } from '../utils';
 import { fetchFieldsFromESQLExpression } from './fetch_fields_from_esql_expression';
@@ -102,28 +102,19 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     return layerColumns?.find((column) => column.columnId === props.columnId);
   }, [props.columnId, props.layerId, props.state.layers]);
 
-  const incompleteInfo = (props.state.layers[props.layerId].incompleteColumns ?? {})[
-    props.columnId
-  ];
-
-  const [temporaryState, setTemporaryState] = useState<TemporaryState>('none');
-
   const updateLayer = useCallback(
-    (newLayer: Partial<TextBasedPrivateState>) =>
+    (newLayer: Partial<TextBasedLayer>) =>
       setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
     [layerId, setState]
   );
 
   const onFormatChange = useCallback<FormatSelectorProps['onChange']>(
     (newFormat) => {
-      updateLayer(
-        updateColumnParam({
-          layer: state.layers[layerId],
-          columnId,
-          paramName: 'format',
-          value: newFormat,
-        })
+      const layer = state.layers[layerId];
+      const updatedColumns = layer.columns.map((col) =>
+        col.columnId === columnId ? { ...col, params: { ...col.params, format: newFormat } } : col
       );
+      updateLayer({ columns: updatedColumns });
     },
     [columnId, layerId, state.layers, updateLayer]
   );
