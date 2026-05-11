@@ -14,7 +14,10 @@ import type { LeaderKeyShortcut } from '@kbn/unified-shortcuts';
 import type { BehaviorSubject } from 'rxjs';
 import { usePanelsToggleActions } from '../../../../components/panels_toggle';
 import type { SidebarToggleState } from '../../../types';
+import { useDataState } from '../../hooks/use_data_state';
 import { useCurrentTabViewActions } from '../../hooks/use_current_tab_view_actions';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useCurrentTabDataStateContainer } from '../../state_management/redux';
 
 interface UseViewShortcutsParams {
   currentDataView: DataView | undefined;
@@ -25,10 +28,21 @@ export const useViewShortcuts = ({
   currentDataView,
   sidebarToggleState$,
 }: UseViewShortcutsParams) => {
-  const { canSwitchLanguageMode, isDataViewMode, openInspector, switchLanguageMode } =
-    useCurrentTabViewActions({
-      currentDataView,
-    });
+  const isEsqlMode = useIsEsqlMode();
+  const dataStateContainer = useCurrentTabDataStateContainer();
+  const { result } = useDataState(dataStateContainer.data$.documents$);
+  const {
+    canSwitchLanguageMode,
+    canToggleDocumentDetails,
+    isDataViewMode,
+    isDocumentDetailsOpen,
+    openInspector,
+    switchLanguageMode,
+    toggleDocumentDetails,
+  } = useCurrentTabViewActions({
+    currentDataView,
+    displayedRows: result,
+  });
   const { isChartHidden, isSidebarHidden, isTableHidden, toggleChart, toggleSidebar, toggleTable } =
     usePanelsToggleActions({
       sidebarToggleState$,
@@ -90,6 +104,29 @@ export const useViewShortcuts = ({
       },
     ];
 
+    if (canToggleDocumentDetails) {
+      shortcuts.push({
+        key: 'd',
+        label: 'd',
+        description: isDocumentDetailsOpen
+          ? isEsqlMode
+            ? i18n.translate('discover.viewShortcuts.hideResultDetails', {
+                defaultMessage: 'Collapse result',
+              })
+            : i18n.translate('discover.viewShortcuts.hideDocumentDetails', {
+                defaultMessage: 'Collapse document',
+              })
+          : isEsqlMode
+          ? i18n.translate('discover.viewShortcuts.showResultDetails', {
+              defaultMessage: 'Expand result',
+            })
+          : i18n.translate('discover.viewShortcuts.showDocumentDetails', {
+              defaultMessage: 'Expand document',
+            }),
+        onTrigger: toggleDocumentDetails,
+      });
+    }
+
     if (canSwitchLanguageMode) {
       shortcuts.splice(1, 0, {
         key: 'm',
@@ -110,13 +147,17 @@ export const useViewShortcuts = ({
     return shortcuts;
   }, [
     canSwitchLanguageMode,
+    canToggleDocumentDetails,
     isChartHidden,
     isDataViewMode,
+    isDocumentDetailsOpen,
+    isEsqlMode,
     isSidebarHidden,
     isTableHidden,
     openInspector,
     switchLanguageMode,
     toggleChart,
+    toggleDocumentDetails,
     toggleSidebar,
     toggleTable,
   ]);

@@ -141,10 +141,10 @@ export const useJumpShortcuts = ({ sidebarToggleState$ }: UseJumpShortcutsParams
         label: 'd',
         description: isEsqlMode
           ? i18n.translate('discover.jumpShortcuts.resultDetails', {
-              defaultMessage: 'Result details',
+              defaultMessage: 'Expanded result',
             })
           : i18n.translate('discover.jumpShortcuts.documentDetails', {
-              defaultMessage: 'Document details',
+              defaultMessage: 'Expanded document',
             }),
         onTrigger: () => {
           focusFirstFocusableElement(DOC_VIEWER_SECTION_SELECTOR);

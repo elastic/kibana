@@ -11,6 +11,7 @@ import { useCallback } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../common/constants';
 import { isDataViewSource } from '../../../../common/data_sources';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
@@ -25,9 +26,13 @@ import {
 
 interface UseCurrentTabViewActionsParams {
   currentDataView: DataView | undefined;
+  displayedRows?: DataTableRecord[];
 }
 
-export const useCurrentTabViewActions = ({ currentDataView }: UseCurrentTabViewActionsParams) => {
+export const useCurrentTabViewActions = ({
+  currentDataView,
+  displayedRows,
+}: UseCurrentTabViewActionsParams) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const currentTab = useCurrentTabSelector((tab) => tab);
@@ -41,11 +46,15 @@ export const useCurrentTabViewActions = ({ currentDataView }: UseCurrentTabViewA
   const transitionFromESQLToDataView = useCurrentTabAction(
     internalStateActions.transitionFromESQLToDataView
   );
+  const setExpandedDoc = useCurrentTabAction(internalStateActions.setExpandedDoc);
   const openInspector = useInspector({ inspector: services.inspector });
 
   const isEsqlEnabled = services.uiSettings.get(ENABLE_ESQL);
   const isDataViewMode = isDataViewSource(currentTab.appState.dataSource);
   const canSwitchLanguageMode = Boolean(currentDataView) && isEsqlEnabled;
+  const isDocumentDetailsOpen = Boolean(currentTab.expandedDoc);
+  const firstDisplayedRow = displayedRows?.[0];
+  const canToggleDocumentDetails = Boolean(currentTab.expandedDoc || firstDisplayedRow);
 
   const switchLanguageMode = useCallback(() => {
     if (!currentDataView || !isEsqlEnabled) {
@@ -68,10 +77,9 @@ export const useCurrentTabViewActions = ({ currentDataView }: UseCurrentTabViewA
       !services.storage.get(ESQL_TRANSITION_MODAL_KEY)
     ) {
       dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
-      return;
+    } else {
+      dispatch(transitionFromESQLToDataView({ dataViewId: currentDataView.id ?? '' }));
     }
-
-    dispatch(transitionFromESQLToDataView({ dataViewId: currentDataView.id ?? '' }));
   }, [
     currentDataView,
     currentTab.id,
@@ -85,10 +93,21 @@ export const useCurrentTabViewActions = ({ currentDataView }: UseCurrentTabViewA
     unsavedTabIds,
   ]);
 
+  const toggleDocumentDetails = useCallback(() => {
+    if (currentTab.expandedDoc) {
+      dispatch(setExpandedDoc({ expandedDoc: undefined }));
+    } else if (firstDisplayedRow) {
+      dispatch(setExpandedDoc({ expandedDoc: firstDisplayedRow }));
+    }
+  }, [currentTab.expandedDoc, dispatch, firstDisplayedRow, setExpandedDoc]);
+
   return {
+    canToggleDocumentDetails,
     canSwitchLanguageMode,
     isDataViewMode,
+    isDocumentDetailsOpen,
     openInspector,
     switchLanguageMode,
+    toggleDocumentDetails,
   };
 };
