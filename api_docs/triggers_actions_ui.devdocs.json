@@ -5904,7 +5904,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 112,
+                "lineNumber": 119,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false
@@ -5921,7 +5921,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 112,
+                "lineNumber": 119,
                 "columnNumber": 54,
                 "deprecated": false,
                 "docsReferencedTypeName": "ChromeSetBreadcrumbsParams",
