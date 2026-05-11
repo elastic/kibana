@@ -7,6 +7,7 @@
 - Kibana is organized into modules, each defined by a `kibana.jsonc`: core, packages, and plugin packages. Aside from tooling and testing, most code lives in these modules.
 - Packages are reusable units with explicit boundaries and a single public entry point (no subpath imports), usually with a focused purpose.
 - Plugins are a package type (`type: "plugin"`) that include a plugin class with setup/start/stop lifecycles, utilized by the core platform to enable applications.
+- **Server plugin entry (`server/index.ts`)** should not load `./plugin` until the plugin may run. Use `import type` (and `export type`) for types from `./plugin`, keep shared config in `config.ts` / `../common/config` (not re-exported runtime values from `./plugin` at the entry), and instantiate the implementation with `await import('./plugin')` inside the async `plugin` initializer. Static value imports, `export { … }` / `export *` of values, `import './plugin'`, and `require('./plugin')` in that entry force Node to parse and execute `plugin.ts` even when the plugin is disabled. `@kbn/eslint/no_sync_import_from_plugin` in `@kbn/eslint-config` enforces this on plugin `server/index.ts` files (see [PR #170856](https://github.com/elastic/kibana/pull/170856) and [issue #171080](https://github.com/elastic/kibana/issues/171080)).
 - Plugins that depend on other plugins rely on the contracts returned by those lifecycles, so circular dependencies must be avoided.
 - Module IDs (typically `@kbn/...`) live in `kibana.jsonc`; `package.json` names are derived where present.
 - Plugin IDs are additional camelCase IDs under `plugin.id` in `kibana.jsonc`, used by core platform and other plugins.
@@ -57,6 +58,7 @@ Follow existing patterns in the target area first; below are common defaults.
 ### Linting
 `node scripts/eslint --fix $(git diff --name-only)`
 - Never suppress linting errors with `eslint-disable`; fix the root cause.
+- Plugin `server/index.ts` files are checked by `@kbn/eslint/no_sync_import_from_plugin` (see plugin server entry note above).
 
 ### Formatting
 - Follow existing formatting in the file; do not reformat unrelated code.
