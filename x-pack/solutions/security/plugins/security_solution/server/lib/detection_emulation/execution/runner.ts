@@ -25,6 +25,28 @@ import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_c
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import type { NormalizedExternalConnectorClient } from '../../../endpoint/services/actions/clients/lib/normalized_external_connector_client';
 import { buildEmulationComment } from './audit_logger';
+import {
+  UnsupportedAgentTypeError,
+  UnsupportedCommandForAgentTypeError,
+  MissingConnectorActionsError,
+} from './errors';
+
+export {
+  UnsupportedAgentTypeError,
+  UnsupportedCommandForAgentTypeError,
+  MissingConnectorActionsError,
+};
+
+/**
+ * Lookup callback used by the runner to resolve `(emulationId) -> ruleId/ruleName`
+ * via the `emulation-rule-binding` saved object. Returning `undefined`
+ * means the emulation is not bound to a rule, in which case the
+ * dispatched action carries `ruleId: undefined`/`ruleName: undefined` —
+ * the same shape it had before this lookup was wired.
+ */
+export type EmulationRuleBindingLookup = (
+  emulationId: string
+) => Promise<{ ruleId: string; ruleName?: string } | undefined>;
 
 export interface EmulationRunnerOptions {
   endpointService: EndpointAppContextService;
@@ -33,8 +55,10 @@ export interface EmulationRunnerOptions {
   casesClient?: CasesClient;
   username: string;
   logger: Logger;
-  /** Required for non-endpoint agent types (sentinel_one, crowdstrike, microsoft_defender_endpoint) */
+  /** Required for non-endpoint agent types (sentinel_one, crowdstrike, microsoft_defender_endpoint). */
   connectorActions?: NormalizedExternalConnectorClient;
+  /** Optional: resolves `(emulationId) -> rule binding` so dispatched actions carry rule context. */
+  ruleBindingLookup?: EmulationRuleBindingLookup;
 }
 
 export interface RunEmulationResult {
@@ -47,15 +71,14 @@ export interface RunEmulationResult {
 }
 
 /**
- * Vendor-agnostic emulation runner that dispatches commands to the appropriate
- * ResponseActionsClient based on the agentType.
+ * Vendor-agnostic emulation runner.
  *
- * This is the core execution layer that:
- * - Validates agentType against RESPONSE_ACTION_AGENT_TYPE
- * - Checks command support for the given agentType
- * - Validates RBAC requirements via RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL
- * - Forwards the command to ResponseActionsClient with reason: 'emulation:<emulationId>'
- * - Leverages existing response_actions audit trail, RBAC model, and connector registry
+ * Validates `agentType`, looks up the rule binding (if any), instantiates
+ * the matching `ResponseActionsClient`, then dispatches the typed
+ * request via `dispatch()`. The `dispatch()` switch is exhaustive over
+ * the discriminated `RunEmulationCommandInput.command` union — a new
+ * value in `RESPONSE_ACTION_API_COMMANDS_NAMES` will fail the build
+ * here at the `_exhaustive: never` line until the case is added.
  */
 export class EmulationRunner {
   private readonly endpointService: EndpointAppContextService;
@@ -65,6 +88,7 @@ export class EmulationRunner {
   private readonly username: string;
   private readonly logger: Logger;
   private readonly connectorActions?: NormalizedExternalConnectorClient;
+  private readonly ruleBindingLookup?: EmulationRuleBindingLookup;
 
   constructor(options: EmulationRunnerOptions) {
     this.endpointService = options.endpointService;
@@ -74,61 +98,69 @@ export class EmulationRunner {
     this.username = options.username;
     this.logger = options.logger;
     this.connectorActions = options.connectorActions;
+    this.ruleBindingLookup = options.ruleBindingLookup;
   }
 
   /**
-   * Execute an emulation command against the specified endpoints.
+   * Execute a validated emulation command.
    *
-   * @param input - The validated emulation command input
-   * @returns Result containing action ID and dispatch status
-   * @throws Error if agentType is not supported or command is not available for the agent type
+   * Throws on inputs that should fail before any side effects:
+   *   - `UnsupportedAgentTypeError`: schema slipped through with a bad agentType.
+   *   - `UnsupportedCommandForAgentTypeError`: combination is rejected by `isActionSupportedByAgentType`.
+   *   - `MissingConnectorActionsError`: non-endpoint agent type but no `connectorActions` was wired.
+   *
+   * Returns `{ status: 'error' }` for failures originating *inside* the
+   * underlying response-actions client (Fleet down, connector
+   * unavailable, etc.). The route maps each error class to a status code.
    */
   async run(input: RunEmulationCommandInput): Promise<RunEmulationResult> {
-    const { emulationId, agentType, endpointIds, command, parameters } = input;
+    const { emulationId, agentType, endpointIds, command } = input;
 
     this.logger.debug(
       `Executing emulation command [${command}] for emulation [${emulationId}] on agent type [${agentType}] targeting [${endpointIds.length}] endpoints`
     );
 
-    // Validate agentType is supported
     if (!RESPONSE_ACTION_AGENT_TYPE.includes(agentType)) {
-      const error = `Agent type [${agentType}] is not supported. Supported types: ${RESPONSE_ACTION_AGENT_TYPE.join(
-        ', '
-      )}`;
-      this.logger.error(error);
-      throw new Error(error);
+      throw new UnsupportedAgentTypeError(agentType);
     }
 
-    // Check if the command is supported by this agent type (emulation commands are manual/interactive)
+    // Emulation commands are manual/interactive — never automated.
     const actionType = 'manual' as const;
     if (!isActionSupportedByAgentType(agentType, command, actionType)) {
-      const error = `Command [${command}] is not supported for agent type [${agentType}]`;
-      this.logger.error(error);
-      throw new Error(error);
+      throw new UnsupportedCommandForAgentTypeError(command, agentType);
     }
 
-    // Get the console command for RBAC validation
-    const consoleCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
-    const requiredRbac = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL[consoleCommand];
+    // Non-endpoint clients require a `connectorActions` instance.
+    // The current route does not resolve one, so reject here with a
+    // clear, typed error rather than handing `undefined` to the
+    // upstream client and crashing inside its constructor.
+    if (agentType !== 'endpoint' && !this.connectorActions) {
+      throw new MissingConnectorActionsError(agentType);
+    }
 
+    // Trace-only: the underlying ResponseActionsClient is the
+    // authoritative RBAC enforcer; we just log what privilege would be
+    // required for observability. The RBAC map does not cover every
+    // console command (e.g. `cancel` has no dedicated privilege today),
+    // so we treat a missing entry as "no extra privilege needed" rather
+    // than a hard error.
+    const consoleCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
+    const rbacMap = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL as Record<
+      string,
+      string | undefined
+    >;
+    const requiredRbac = rbacMap[consoleCommand];
     if (requiredRbac) {
       this.logger.debug(
         `Command [${command}] requires RBAC privilege [${requiredRbac}] (validation delegated to ResponseActionsClient)`
       );
     }
 
-    try {
-      // Create the response actions client for this agent type
-      const responseActionsClient = this.createResponseActionsClient(agentType);
+    const ruleBinding = await this.resolveRuleBinding(emulationId);
 
-      // Build the request and dispatch in a single typed call
-      const actionDetails = await this.dispatch(
-        responseActionsClient,
-        command,
-        endpointIds,
-        parameters,
-        emulationId
-      );
+    try {
+      const responseActionsClient = this.createResponseActionsClient(agentType);
+      const actionDetails = await this.dispatch(responseActionsClient, input, ruleBinding);
 
       this.logger.info(
         `Successfully dispatched emulation command [${command}] for emulation [${emulationId}], action ID: ${actionDetails.id}`
@@ -157,9 +189,27 @@ export class EmulationRunner {
     }
   }
 
-  /**
-   * Create a ResponseActionsClient instance for the given agent type.
-   */
+  private async resolveRuleBinding(
+    emulationId: string
+  ): Promise<{ ruleId?: string; ruleName?: string }> {
+    if (!this.ruleBindingLookup) {
+      return {};
+    }
+    try {
+      const binding = await this.ruleBindingLookup(emulationId);
+      return binding ?? {};
+    } catch (err) {
+      // A missing binding is fine. Log unexpected lookup errors but do
+      // not block dispatch — the action just lands without rule context.
+      this.logger.warn(
+        `Failed to look up rule binding for emulation [${emulationId}]: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+      return {};
+    }
+  }
+
   private createResponseActionsClient(agentType: ResponseActionAgentType): ResponseActionsClient {
     const constructorOptions = {
       endpointService: this.endpointService,
@@ -167,9 +217,9 @@ export class EmulationRunner {
       spaceId: this.spaceId,
       casesClient: this.casesClient,
       username: this.username,
-      isAutomated: false, // Emulation commands are manual/interactive
-      // connectorActions is required by non-endpoint clients (sentinel_one, crowdstrike, etc.)
-      // EndpointActionsClient ignores this field so the cast is safe for agentType === 'endpoint'
+      isAutomated: false,
+      // Safe: validated above — non-endpoint agent types require this.connectorActions and
+      // we throw `MissingConnectorActionsError` before reaching this point if it's missing.
       connectorActions: this.connectorActions as NormalizedExternalConnectorClient,
     } satisfies GetResponseActionsClientConstructorOptions;
 
@@ -177,26 +227,27 @@ export class EmulationRunner {
   }
 
   /**
-   * Build the typed request and dispatch to the appropriate ResponseActionsClient method.
-   * Collapses request construction and dispatch into a single switch so each case can
-   * use the exact type expected by the corresponding client method.
+   * Build the typed request and dispatch to the matching
+   * `ResponseActionsClient` method. The discriminated union on
+   * `RunEmulationCommandInput.command` lets each `case` access the
+   * exact `parameters` shape that command needs without `as` casts —
+   * a misnamed key is rejected at the schema layer.
    */
   private async dispatch(
     client: ResponseActionsClient,
-    command: string,
-    endpointIds: string[],
-    parameters: Record<string, unknown> | undefined,
-    emulationId: string
+    input: RunEmulationCommandInput,
+    ruleBinding: { ruleId?: string; ruleName?: string }
   ): Promise<ActionDetails> {
-    const comment = buildEmulationComment(
-      emulationId,
-      command,
-      parameters?.comment as string | undefined
-    );
+    const { emulationId, command, endpointIds } = input;
+    const userComment = input.parameters?.comment;
+    const comment = buildEmulationComment(emulationId, command, userComment);
     const base = { endpoint_ids: endpointIds, comment };
-    const options: CommonResponseActionMethodOptions = { ruleId: undefined, ruleName: undefined };
+    const options: CommonResponseActionMethodOptions = {
+      ruleId: ruleBinding.ruleId,
+      ruleName: ruleBinding.ruleName,
+    };
 
-    switch (command) {
+    switch (input.command) {
       case 'isolate':
         return client.isolate(base, options);
 
@@ -204,13 +255,14 @@ export class EmulationRunner {
         return client.release(base, options);
 
       case 'kill-process':
+        // Schema guarantees exactly one of `pid` or `entity_id` is present.
         return client.killProcess(
           {
             ...base,
-            parameters: {
-              pid: parameters?.pid as number | undefined,
-              entity_id: parameters?.entity_id as string | undefined,
-            },
+            parameters:
+              'pid' in input.parameters
+                ? { pid: input.parameters.pid }
+                : { entity_id: input.parameters.entity_id },
           },
           options
         );
@@ -219,10 +271,10 @@ export class EmulationRunner {
         return client.suspendProcess(
           {
             ...base,
-            parameters: {
-              pid: parameters?.pid as number | undefined,
-              entity_id: parameters?.entity_id as string | undefined,
-            },
+            parameters:
+              'pid' in input.parameters
+                ? { pid: input.parameters.pid }
+                : { entity_id: input.parameters.entity_id },
           },
           options
         );
@@ -231,18 +283,15 @@ export class EmulationRunner {
         return client.runningProcesses(base, options);
 
       case 'get-file':
-        return client.getFile(
-          { ...base, parameters: { path: (parameters?.path as string) ?? '' } },
-          options
-        );
+        return client.getFile({ ...base, parameters: { path: input.parameters.path } }, options);
 
       case 'execute':
         return client.execute(
           {
             ...base,
             parameters: {
-              command: (parameters?.command as string) ?? '',
-              timeout: parameters?.timeout as number | undefined,
+              command: input.parameters.command,
+              timeout: input.parameters.timeout,
             },
           },
           options
@@ -252,47 +301,59 @@ export class EmulationRunner {
         return client.upload(
           {
             ...base,
-            file: parameters?.file as Parameters<ResponseActionsClient['upload']>[0]['file'],
-            parameters: { overwrite: (parameters?.overwrite as boolean) ?? false },
+            file: input.parameters.file as Parameters<ResponseActionsClient['upload']>[0]['file'],
+            parameters: { overwrite: input.parameters.overwrite ?? false },
           },
           options
         );
 
       case 'scan':
-        return client.scan(
-          { ...base, parameters: { path: (parameters?.path as string) ?? '' } },
-          options
-        );
+        return client.scan({ ...base, parameters: { path: input.parameters.path } }, options);
 
       case 'runscript':
+        // Schema is constrained to the endpoint shape today (one wired agent
+        // type). The downstream client signature is broad (cross-EDR), so we
+        // narrow with a single cast at the boundary.
         return client.runscript(
           {
             ...base,
             parameters: {
-              script: (parameters?.script as string) ?? '',
-              timeout: parameters?.timeout as number | undefined,
+              scriptId: input.parameters.scriptId,
+              scriptInput: input.parameters.scriptInput,
+              timeout: input.parameters.timeout,
             },
-          },
+          } as Parameters<ResponseActionsClient['runscript']>[0],
           options
         );
 
       case 'cancel':
-        return client.cancel(base, options);
+        return client.cancel({ ...base, parameters: { id: input.parameters.id } }, options);
 
-      case 'memory-dump':
-        return client.memoryDump(
-          {
-            ...base,
-            parameters: {
-              pid: parameters?.pid as number | undefined,
-              entity_id: parameters?.entity_id as string | undefined,
-            },
-          },
-          options
+      case 'memory-dump': {
+        // Inner discriminated union: `kernel` carries no pid/entity_id; the two
+        // `process` variants carry exactly one of pid or entity_id.
+        const memoryParams =
+          input.parameters.type === 'kernel'
+            ? { type: 'kernel' as const }
+            : 'pid' in input.parameters
+            ? { type: 'process' as const, pid: input.parameters.pid }
+            : { type: 'process' as const, entity_id: input.parameters.entity_id };
+        return client.memoryDump({ ...base, parameters: memoryParams }, options);
+      }
+
+      default: {
+        // Exhaustiveness check: a new value in `RESPONSE_ACTION_API_COMMANDS_NAMES`
+        // (and a corresponding schema variant) must add a case above — the
+        // `satisfies never` makes the build fail when a variant goes
+        // unhandled. At runtime we throw a typed error so an unexpected
+        // value (e.g. forced via `as any` in tests) maps cleanly to a 400.
+        const exhaustiveCheck: never = input;
+        void exhaustiveCheck;
+        throw new UnsupportedCommandForAgentTypeError(
+          (input as RunEmulationCommandInput).command,
+          (input as RunEmulationCommandInput).agentType
         );
-
-      default:
-        throw new Error(`Unsupported command: ${command}`);
+      }
     }
   }
 }

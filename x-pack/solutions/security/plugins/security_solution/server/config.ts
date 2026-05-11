@@ -232,6 +232,45 @@ export const configSchema = schema.object({
       }),
     })
   ),
+
+  /**
+   * Detection-emulation runtime knobs (allowlist, rate limiter, idempotency cache).
+   *
+   * These are intentionally `maybe` — the feature ships dark, and operators only
+   * need to set them when they want to override the safe defaults baked into
+   * `createDefaultAllowlistConfig`, `createDefaultRateLimiterConfig`, and
+   * `createDefaultIdempotencyCacheConfig`.
+   */
+  detectionEmulation: schema.maybe(
+    schema.object({
+      allowlist: schema.maybe(
+        schema.object({
+          /**
+           * When true, every endpoint is allowed regardless of `endpointIds`.
+           * Useful for short-lived test deployments only — production should
+           * leave this `false` and populate `endpointIds`.
+           */
+          allowAll: schema.boolean({ defaultValue: false }),
+          /** Explicit list of endpoint IDs that may receive emulation actions. */
+          endpointIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        })
+      ),
+      rateLimiter: schema.maybe(
+        schema.object({
+          maxCommands: schema.number({ defaultValue: 100, min: 1 }),
+          windowMs: schema.number({ defaultValue: 60 * 60 * 1000, min: 1_000 }),
+          disabled: schema.boolean({ defaultValue: false }),
+        })
+      ),
+      idempotencyCache: schema.maybe(
+        schema.object({
+          ttlMs: schema.number({ defaultValue: 30_000, min: 0 }),
+          maxEntriesPerSpace: schema.number({ defaultValue: 256, min: 1 }),
+          disabled: schema.boolean({ defaultValue: false }),
+        })
+      ),
+    })
+  ),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

@@ -7,15 +7,22 @@
 
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { Subject } from 'rxjs';
 import { EmulationFilter, EMULATION_FILTER_BUTTON_TEST_ID } from './emulation_filter';
 import { useKibana } from '../../../common/lib/kibana';
 import type { FilterManager } from '@kbn/data-plugin/public';
 
 jest.mock('../../../common/lib/kibana');
 
+// I9: the component subscribes to `filterManager.getUpdates$()` so it can
+// re-derive its toggle state when filters are mutated by other callers.
+// The mock has to expose a real observable; an unobservable jest.fn would
+// blow up at `.subscribe(…)`.
+const filterUpdates$ = new Subject<void>();
 const mockFilterManager = {
   getFilters: jest.fn(() => []),
   setFilters: jest.fn(),
+  getUpdates$: jest.fn(() => filterUpdates$.asObservable()),
 } as unknown as FilterManager;
 
 const mockUseKibana = useKibana as jest.Mock;

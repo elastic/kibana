@@ -9,4 +9,5 @@ export * from './alert_tagging';
 export * from './execution';
 export * from './feature_flag';
 export * from './rule_binding';
+export { createSavedObjectRuleBindingLookup } from './rule_binding_lookup';
 export { registerDetectionEmulationRoutes } from './api/register_routes';

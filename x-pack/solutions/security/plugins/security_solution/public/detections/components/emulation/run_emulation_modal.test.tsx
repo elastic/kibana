@@ -10,6 +10,9 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { RunEmulationModal } from './run_emulation_modal';
 import type { CommandSuggestion } from './run_emulation_modal';
 
+const APPROVE_BTN = 'emulation-modal-approve-button';
+const REJECT_BTN = 'emulation-modal-reject-button';
+
 describe('RunEmulationModal', () => {
   const mockSuggestion: CommandSuggestion = {
     technique_id: 'T1059.001',
@@ -195,5 +198,164 @@ describe('RunEmulationModal', () => {
     );
 
     expect(screen.queryByText(/Agent Type:/)).not.toBeInTheDocument();
+  });
+
+  // ─── I10: state-reset on suggestion / requestId change ─────────────────
+
+  it('resets modify-mode and inputs when a new suggestion comes in (I10)', () => {
+    const { rerender } = render(
+      <RunEmulationModal
+        suggestion={mockSuggestion}
+        requestId="req-A"
+        onApprove={mockOnApprove}
+        onReject={mockOnReject}
+      />
+    );
+
+    // Toggle modify mode and edit the command — these are local state.
+    fireEvent.click(screen.getByLabelText('Modify command before executing'));
+    fireEvent.change(screen.getByDisplayValue('whoami'), { target: { value: 'pwd' } });
+    fireEvent.change(screen.getByDisplayValue('-v'), { target: { value: '-la' } });
+
+    // Now swap in a fresh suggestion — the modal must reset, otherwise the
+    // user's previous edits would silently apply to the new approval.
+    const nextSuggestion: CommandSuggestion = {
+      ...mockSuggestion,
+      command: 'ls',
+      args: ['-h'],
+      technique_id: 'T1057',
+    };
+    rerender(
+      <RunEmulationModal
+        suggestion={nextSuggestion}
+        requestId="req-B"
+        onApprove={mockOnApprove}
+        onReject={mockOnReject}
+      />
+    );
+
+    // Modify-mode is off again and the displayed command reflects the new
+    // suggestion, not the prior edits.
+    expect(screen.queryByDisplayValue('pwd')).not.toBeInTheDocument();
+    expect(screen.queryByDisplayValue('-la')).not.toBeInTheDocument();
+    expect(screen.getByText(/ls -h/)).toBeInTheDocument();
+  });
+
+  // ─── I11: in-flight submission guard ───────────────────────────────────
+
+  it('disables both buttons after Approve to prevent double-submission (I11)', () => {
+    render(
+      <RunEmulationModal
+        suggestion={mockSuggestion}
+        requestId="req-once"
+        onApprove={mockOnApprove}
+        onReject={mockOnReject}
+      />
+    );
+
+    const approveBtn = screen.getByTestId(APPROVE_BTN);
+    fireEvent.click(approveBtn);
+    // The second click must be a no-op (only one onApprove call).
+    fireEvent.click(approveBtn);
+
+    expect(mockOnApprove).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId(APPROVE_BTN)).toBeDisabled();
+    expect(screen.getByTestId(REJECT_BTN)).toBeDisabled();
+  });
+
+  it('disables both buttons after Reject to prevent double-submission (I11)', () => {
+    render(
+      <RunEmulationModal
+        suggestion={mockSuggestion}
+        requestId="req-once"
+        onApprove={mockOnApprove}
+        onReject={mockOnReject}
+      />
+    );
+
+    const rejectBtn = screen.getByTestId(REJECT_BTN);
+    fireEvent.click(rejectBtn);
+    fireEvent.click(rejectBtn);
+
+    expect(mockOnReject).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId(APPROVE_BTN)).toBeDisabled();
+    expect(screen.getByTestId(REJECT_BTN)).toBeDisabled();
+  });
+
+  // ─── I12: argv tokenization preserves quoted segments ──────────────────
+
+  it('parses modified args with quoted strings as a single argv element (I12)', () => {
+    render(
+      <RunEmulationModal
+        suggestion={mockSuggestion}
+        requestId="req-quote"
+        onApprove={mockOnApprove}
+        onReject={mockOnReject}
+      />
+    );
+
+    fireEvent.click(screen.getByLabelText('Modify command before executing'));
+    fireEvent.change(screen.getByDisplayValue('whoami'), { target: { value: 'echo' } });
+    // Quoted "hello world" must remain a single argv element — the legacy
+    // .split(' ') would have produced `['--message="hello`, `world"']`.
+    fireEvent.change(screen.getByDisplayValue('-v'), {
+      target: { value: '--message="hello world" --flag' },
+    });
+
+    fireEvent.click(screen.getByTestId(APPROVE_BTN));
+
+    expect(mockOnApprove).toHaveBeenCalledWith('req-quote', {
+      decision: 'modify',
+      modified_command: 'echo',
+      modified_args: ['--message=hello world', '--flag'],
+    });
+  });
+
+  it('parses modified args with backslash-escaped spaces (I12)', () => {
+    render(
+      <RunEmulationModal
+        suggestion={mockSuggestion}
+        requestId="req-escape"
+        onApprove={mockOnApprove}
+        onReject={mockOnReject}
+      />
+    );
+
+    fireEvent.click(screen.getByLabelText('Modify command before executing'));
+    fireEvent.change(screen.getByDisplayValue('whoami'), { target: { value: 'cat' } });
+    fireEvent.change(screen.getByDisplayValue('-v'), {
+      target: { value: '/Library/Application\\ Support/foo.txt' },
+    });
+
+    fireEvent.click(screen.getByTestId(APPROVE_BTN));
+
+    expect(mockOnApprove).toHaveBeenCalledWith('req-escape', {
+      decision: 'modify',
+      modified_command: 'cat',
+      modified_args: ['/Library/Application Support/foo.txt'],
+    });
+  });
+
+  it('omits modified_args when the modified args field is whitespace-only (I12)', () => {
+    render(
+      <RunEmulationModal
+        suggestion={mockSuggestion}
+        requestId="req-empty-args"
+        onApprove={mockOnApprove}
+        onReject={mockOnReject}
+      />
+    );
+
+    fireEvent.click(screen.getByLabelText('Modify command before executing'));
+    fireEvent.change(screen.getByDisplayValue('whoami'), { target: { value: 'date' } });
+    fireEvent.change(screen.getByDisplayValue('-v'), { target: { value: '   ' } });
+
+    fireEvent.click(screen.getByTestId(APPROVE_BTN));
+
+    expect(mockOnApprove).toHaveBeenCalledWith('req-empty-args', {
+      decision: 'modify',
+      modified_command: 'date',
+      modified_args: undefined,
+    });
   });
 });

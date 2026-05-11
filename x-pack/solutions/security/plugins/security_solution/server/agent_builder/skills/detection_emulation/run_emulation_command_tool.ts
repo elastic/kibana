@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
-import {
-  ToolType,
-  ToolResultType,
-} from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { z } from '@kbn/zod/v4';
+import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
   RESPONSE_ACTION_AGENT_TYPE,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
@@ -20,7 +17,12 @@ import {
 } from '../../../../common/endpoint/service/response_actions/constants';
 import type { ConfigType } from '../../../config';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
-import { EmulationRunner } from '../../../lib/detection_emulation/execution/runner';
+import {
+  EmulationRunner,
+  UnsupportedAgentTypeError,
+  UnsupportedCommandForAgentTypeError,
+  MissingConnectorActionsError,
+} from '../../../lib/detection_emulation/execution/runner';
 import {
   EmulationAllowlist,
   createDefaultAllowlistConfig,
@@ -33,32 +35,43 @@ import {
   getDetectionEmulationFeatureFlags,
   isRealExecutionEnabled,
 } from '../../../lib/detection_emulation/feature_flag';
+import { createSavedObjectRuleBindingLookup } from '../../../lib/detection_emulation/rule_binding_lookup';
+import { emulationRuleBindingTypeName } from '../../../lib/detection_emulation/rule_binding';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
+import { RunEmulationCommandInputSchema } from '../../../../common/detection_emulation/schemas/run_emulation_command_input';
 
 /**
- * Tool schema for running emulation commands with multi-EDR support.
- * Accepts any of the four supported EDR agent types and validates command.
+ * Schema exposed to the agent-builder framework.
+ *
+ * The framework requires `ZodObject` (not a discriminated union) at the
+ * tool boundary so it can derive a JSON Schema for the LLM. We keep the
+ * boundary permissive (a free-form `parameters` record) and re-validate
+ * with the strict {@link RunEmulationCommandInputSchema} discriminated
+ * union inside the handler. That way the LLM only sees one shape but
+ * any malformed parameters still fail fast before reaching the runner.
  */
 const runEmulationCommandSchema = z.object({
-  emulationId: z.string().describe('Unique identifier for the emulation'),
+  emulationId: z.string().min(1).describe('Unique identifier for the emulation run.'),
   agentType: z
     .enum(RESPONSE_ACTION_AGENT_TYPE)
     .describe(
-      'The EDR agent type - must be one of: endpoint, sentinel_one, crowdstrike, microsoft_defender_endpoint'
+      'EDR agent type. Only `endpoint` is wired through the route today; selecting another type will return 400 until external connectors are resolved.'
     ),
   endpointIds: z
-    .array(z.string())
+    .array(z.string().min(1))
     .min(1)
-    .describe('Array of endpoint agent IDs to target with the emulation command'),
+    .describe('Endpoint agent IDs to dispatch the action against (1+).'),
   command: z
     .enum(RESPONSE_ACTION_API_COMMANDS_NAMES)
     .describe(
-      'The response action command to execute - e.g., execute, runscript, kill-process, suspend-process, scan, get-file, memory-dump'
+      'Response-action command. Each command requires a specific `parameters` shape — see the skill content for the table.'
     ),
   parameters: z
     .record(z.string(), z.unknown())
     .optional()
-    .describe('Optional parameters specific to the command being executed'),
+    .describe(
+      'Command-specific parameters. Strictly validated server-side per command (e.g. `{ pid: number }` for kill-process, `{ path: string }` for get-file).'
+    ),
 });
 
 export interface RunEmulationCommandToolDeps {
@@ -77,7 +90,7 @@ export interface RunEmulationCommandToolDeps {
  */
 export const createRunEmulationCommandTool = (
   deps: RunEmulationCommandToolDeps
-): BuiltinToolDefinition<typeof runEmulationCommandSchema> => {
+): BuiltinSkillBoundedTool<typeof runEmulationCommandSchema> => {
   const { core, endpointService, config, logger } = deps;
 
   // Initialize allowlist and rate limiter with default configurations
@@ -115,13 +128,40 @@ commands through the appropriate EDR connector via ResponseActionsClient.
 
 Use this tool when validating detection rules through Real Execution mode, after the user
 has explicitly authorized the emulation and all required permissions are in place.`,
-    tags: ['security', 'emulation', 'response-actions'],
     schema: runEmulationCommandSchema,
-    handler: async (params, { esClient, spaceId, request }) => {
-      const { emulationId, command, endpointIds } = params;
+    handler: async (rawParams, { esClient, spaceId, request }) => {
+      const { emulationId, command, endpointIds } = rawParams;
 
       try {
-        const featureFlags = getDetectionEmulationFeatureFlags(config);
+        // Re-validate against the strict discriminated union — the boundary
+        // schema accepts a free-form `parameters` record so JSON Schema works
+        // for the LLM, but the runner needs the exact per-command shape.
+        const strictParseResult = RunEmulationCommandInputSchema.safeParse(rawParams);
+        if (!strictParseResult.success) {
+          logger.warn(
+            `Emulation command [${command}] for emulation [${emulationId}] rejected: invalid parameters for command (${strictParseResult.error.message})`
+          );
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  error_type: 'invalid_parameters',
+                  message: 'Invalid parameters for the requested command.',
+                  emulation_id: emulationId,
+                  agent_type: rawParams.agentType,
+                  command,
+                  status_code: 400,
+                  likely_cause:
+                    'The provided `parameters` do not match the expected shape for this command (see skill content for required fields).',
+                },
+              },
+            ],
+          };
+        }
+        const params = strictParseResult.data;
+
+        const featureFlags = getDetectionEmulationFeatureFlags(config.experimentalFeatures);
 
         // Gate 1: Feature flag check (wholesale enable/disable)
         if (!isRealExecutionEnabled(featureFlags)) {
@@ -146,14 +186,24 @@ has explicitly authorized the emulation and all required permissions are in plac
           };
         }
 
-        // Gate 2: Per-command RBAC check
+        // Gate 2: Per-command RBAC check.
+        // The RBAC map does not cover every console command (e.g. `cancel` has
+        // no dedicated privilege today); we treat a missing entry as "no extra
+        // privilege required" rather than as a hard error. The endpoint authz
+        // record uses well-known string keys so we narrow with a typed cast at
+        // the boundary.
         const consoleCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
-        const requiredRbacFeature =
-          RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL[consoleCommand];
+        const rbacMap = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL as Record<
+          string,
+          string | undefined
+        >;
+        const requiredRbacFeature = rbacMap[consoleCommand];
 
         if (requiredRbacFeature) {
           const endpointAuthz = await endpointService.getEndpointAuthz(request);
-          const hasPrivilege = endpointAuthz[requiredRbacFeature];
+          const hasPrivilege = (endpointAuthz as unknown as Record<string, boolean | undefined>)[
+            requiredRbacFeature
+          ];
 
           if (!hasPrivilege) {
             logger.warn(
@@ -207,11 +257,12 @@ has explicitly authorized the emulation and all required permissions are in plac
           };
         }
 
-        // Gate 4: Rate limit check
-        const rateLimitResult = rateLimiter.check(spaceId);
-        if (!rateLimitResult.allowed) {
+        // Gate 4: atomic rate-limit acquire (combines old check+record so concurrent
+        // calls cannot all sneak past the gate before any of them records).
+        const acquireResult = rateLimiter.acquire(spaceId, emulationId, command);
+        if (!acquireResult.allowed) {
           logger.warn(
-            `Emulation command [${command}] for emulation [${emulationId}] blocked by rate limiter: ${rateLimitResult.error}`
+            `Emulation command [${command}] for emulation [${emulationId}] blocked by rate limiter: ${acquireResult.error}`
           );
           return {
             results: [
@@ -219,10 +270,10 @@ has explicitly authorized the emulation and all required permissions are in plac
                 type: ToolResultType.error,
                 data: {
                   error_type: 'rate_limit_error',
-                  message: rateLimitResult.error ?? 'Rate limit exceeded',
-                  current_count: rateLimitResult.currentCount,
-                  max_commands: rateLimitResult.maxCommands,
-                  reset_ms: rateLimitResult.resetMs,
+                  message: acquireResult.error ?? 'Rate limit exceeded',
+                  current_count: acquireResult.currentCount,
+                  max_commands: acquireResult.maxCommands,
+                  reset_ms: acquireResult.resetMs,
                   emulation_id: emulationId,
                   agent_type: params.agentType,
                   command,
@@ -234,48 +285,102 @@ has explicitly authorized the emulation and all required permissions are in plac
           };
         }
 
-        // Get start services for cases client and username
+        // Get start services for cases client and username. N5: refuse to dispatch a
+        // destructive action without an authenticated caller — release the rate-limit
+        // slot we just acquired and return 401 in this branch as well.
+        //
+        // Cases is acquired through `endpointService.getCasesClient` rather than
+        // direct plugin access — security_solution's core start dependencies
+        // do not register the cases plugin. We swallow lookup failures because
+        // the cases client is optional for emulation dispatch.
         const [coreStart] = await core.getStartServices();
-        const casesClient = coreStart.plugins.cases
-          ? await coreStart.plugins.cases.getClient(request)
-          : undefined;
-        const username =
-          (await coreStart.security?.authc.getCurrentUser(request))?.username ?? 'unknown';
-
-        // All gates passed - execute the command via EmulationRunner
-        const runner = new EmulationRunner({
-          endpointService,
-          esClient: esClient.asCurrentUser,
-          spaceId,
-          casesClient,
-          username,
-          logger,
-        });
-
-        const result = await runner.run(params);
-
-        if (result.status === 'error') {
+        let casesClient;
+        try {
+          casesClient = await endpointService.getCasesClient(request);
+        } catch (casesErr) {
+          logger.debug(
+            `Cases client unavailable for emulation dispatch: ${
+              (casesErr as Error).message ?? casesErr
+            }`
+          );
+          casesClient = undefined;
+        }
+        const currentUser = await coreStart.security?.authc.getCurrentUser(request);
+        if (!currentUser?.username) {
+          rateLimiter.release(acquireResult.token);
+          logger.warn(
+            `Emulation command [${command}] for emulation [${emulationId}] blocked: no authenticated user`
+          );
           return {
             results: [
               {
                 type: ToolResultType.error,
                 data: {
-                  error_type: 'execution_error',
-                  message: result.error ?? 'Unknown error executing emulation command',
-                  action_id: result.actionId,
+                  error_type: 'authorization_error',
+                  message: 'Authentication is required to run an emulation command.',
                   emulation_id: emulationId,
                   agent_type: params.agentType,
                   command,
-                  status_code: 500,
-                  likely_cause: 'Internal error during command execution',
+                  status_code: 401,
+                  likely_cause: 'No current user attached to the request.',
                 },
               },
             ],
           };
         }
 
-        // Record successful execution in rate limiter
-        rateLimiter.record(spaceId, emulationId, command);
+        // All gates passed — execute the command via EmulationRunner.
+        //
+        // Rule-binding lookup (I7): the SO type is `hidden: true`, so we need
+        // the *internal* SO client — the request-scoped client cannot read
+        // hidden types. We pass the lookup factory rather than a fixed
+        // (ruleId, ruleName) pair so the runner only pays the lookup cost
+        // once per dispatch and tests can stub it.
+        const internalSoClient = coreStart.savedObjects.createInternalRepository([
+          emulationRuleBindingTypeName,
+        ]);
+        const ruleBindingLookup = createSavedObjectRuleBindingLookup(
+          // createInternalRepository returns an `ISavedObjectsRepository` which
+          // implements the `SavedObjectsClientContract` shape we need (find /
+          // search). Cast through `unknown` to avoid pulling the repository
+          // typing into our public surface.
+          internalSoClient as unknown as Parameters<typeof createSavedObjectRuleBindingLookup>[0],
+          logger
+        );
+
+        const runner = new EmulationRunner({
+          endpointService,
+          esClient: esClient.asCurrentUser,
+          spaceId,
+          casesClient,
+          username: currentUser.username,
+          logger,
+          ruleBindingLookup,
+        });
+
+        const result = await runner.run(params);
+
+        if (result.status === 'error') {
+          // Roll the rate-limit acquire back so retries are not penalised.
+          rateLimiter.release(acquireResult.token);
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  error_type: 'execution_error',
+                  message: 'Failed to dispatch the emulation command.',
+                  action_id: result.actionId,
+                  emulation_id: emulationId,
+                  agent_type: params.agentType,
+                  command,
+                  status_code: 502,
+                  likely_cause: 'Internal error during command execution',
+                },
+              },
+            ],
+          };
+        }
 
         return {
           results: [
@@ -295,9 +400,86 @@ has explicitly authorized the emulation and all required permissions are in plac
         };
       } catch (err) {
         const error = err as Error;
-        const errorMessage = error.message ?? 'Unknown error';
+        // We catch errors from anywhere in the handler, including before the
+        // strict-parse branch sets `params`. Use `rawParams` for the user-
+        // facing fields below so we always have a value to render.
+        const agentType = rawParams.agentType;
+        // Map typed runner errors → caller-facing classifications. We never echo
+        // raw error messages back to the LLM in the unknown case; that's
+        // logged server-side only (matches I3 in the REST route).
+        if (error instanceof UnsupportedAgentTypeError) {
+          logger.warn(
+            `Emulation command [${command}] for emulation [${emulationId}] rejected: ${error.message}`
+          );
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  error_type: 'unsupported_agent_type',
+                  message: error.message,
+                  emulation_id: emulationId,
+                  agent_type: agentType,
+                  command,
+                  status_code: 400,
+                  likely_cause: 'Selected agent type is not supported by this build.',
+                },
+              },
+            ],
+          };
+        }
 
-        logger.error(`Failed to execute emulation command: ${errorMessage}`, error);
+        if (error instanceof UnsupportedCommandForAgentTypeError) {
+          logger.warn(
+            `Emulation command [${command}] for emulation [${emulationId}] rejected: ${error.message}`
+          );
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  error_type: 'unsupported_command_for_agent_type',
+                  message: error.message,
+                  emulation_id: emulationId,
+                  agent_type: agentType,
+                  command,
+                  status_code: 400,
+                  likely_cause: 'This command is not supported for the selected agent type.',
+                },
+              },
+            ],
+          };
+        }
+
+        if (error instanceof MissingConnectorActionsError) {
+          logger.error(
+            `Emulation command [${command}] for emulation [${emulationId}] failed: ${error.message}`
+          );
+          return {
+            results: [
+              {
+                type: ToolResultType.error,
+                data: {
+                  error_type: 'missing_connector_actions',
+                  message:
+                    'Missing connector configuration required to dispatch this command. Please contact an administrator.',
+                  emulation_id: emulationId,
+                  agent_type: agentType,
+                  command,
+                  status_code: 500,
+                  likely_cause: 'Server-side wiring is incomplete for this agent type.',
+                },
+              },
+            ],
+          };
+        }
+
+        // logger.error's second arg must be a `LogMeta`-shaped record; pass
+        // the structured tag bag rather than the raw Error.
+        logger.error(
+          `Failed to execute emulation command [${command}] for emulation [${emulationId}]: ${error.message}`,
+          { tags: ['detection-emulation'], stack: error.stack } as Record<string, unknown>
+        );
 
         return {
           results: [
@@ -305,9 +487,10 @@ has explicitly authorized the emulation and all required permissions are in plac
               type: ToolResultType.error,
               data: {
                 error_type: 'execution_error',
-                message: `Failed to execute emulation command: ${errorMessage}`,
+                // Generic, sanitized message — internal details are server-side only.
+                message: 'Failed to execute the emulation command.',
                 emulation_id: emulationId,
-                agent_type: params.agentType,
+                agent_type: agentType,
                 command,
                 status_code: 500,
                 likely_cause: 'Internal error during command execution',

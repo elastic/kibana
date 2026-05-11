@@ -5,87 +5,50 @@
  * 2.0.
  */
 
-import type { ConfigType } from '../../config';
+import type { ExperimentalFeatures } from '../../../common/experimental_features';
 
 /**
  * Detection Emulation feature flags.
  *
- * These flags control the behavior of the detection emulation system:
- * - logInjection: When true, emulation commands are logged to the audit trail
- *   with full context (emulation ID, command, parameters) for compliance and debugging.
- *   When false, emulation commands are dispatched without detailed audit logging.
+ * Currently a single flag (`realExecution`) gates whether the
+ * `runEmulationCommand` route actually dispatches to the underlying
+ * `ResponseActionsClient`. When disabled the route returns 403 and is
+ * effectively a no-op.
  *
- * - realExecution: When true, emulation commands are actually executed against the
- *   target endpoints via ResponseActionsClient. When false, emulation commands are
- *   validated and logged but NOT executed (dry-run mode). This provides a safe
- *   testing/staging environment where emulation logic can be verified without
- *   affecting production endpoints.
+ * The flag is sourced from `xpack.securitySolution.enableExperimental`
+ * (see `common/experimental_features.ts`), the same mechanism every
+ * other gated security_solution feature uses. There is no separate
+ * `xpack.securitySolution.detectionEmulation` config namespace.
  */
 export interface DetectionEmulationFeatureFlags {
   /**
-   * Controls whether emulation commands are logged to the audit trail.
-   * Default: false (no injection)
-   */
-  logInjection: boolean;
-
-  /**
    * Controls whether emulation commands are actually executed.
-   * When false, commands are validated and logged but not executed (dry-run mode).
-   * Default: false (no real execution)
+   * When false, the route short-circuits with 403 before reaching the runner.
+   * Default: false (no real execution).
    */
   realExecution: boolean;
 }
 
 /**
- * Extracts detection emulation feature flags from Kibana config.
+ * Reads detection emulation feature flags from the security_solution
+ * `experimentalFeatures` block.
  *
- * Reads from config namespace: `xpack.securitySolution.detectionEmulation`
- * Falls back to safe defaults (both flags disabled) if config section is missing.
- *
- * @param config - Security Solution plugin config
- * @returns Feature flags with safe defaults
+ * @param experimentalFeatures - the parsed `experimentalFeatures` block
+ * @returns the resolved emulation feature flags
  */
 export function getDetectionEmulationFeatureFlags(
-  config: ConfigType
+  experimentalFeatures: ExperimentalFeatures
 ): DetectionEmulationFeatureFlags {
-  // Access the detectionEmulation config section if it exists
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const detectionEmulationConfig = (config as any).detectionEmulation;
-
-  // Safe defaults: both flags disabled
-  const defaults: DetectionEmulationFeatureFlags = {
-    logInjection: false,
-    realExecution: false,
-  };
-
-  if (!detectionEmulationConfig) {
-    return defaults;
-  }
-
   return {
-    logInjection: Boolean(detectionEmulationConfig.logInjection ?? defaults.logInjection),
-    realExecution: Boolean(detectionEmulationConfig.realExecution ?? defaults.realExecution),
+    realExecution: experimentalFeatures.detectionEmulationRealExecution,
   };
 }
 
 /**
- * Type guard to check if real execution is enabled.
- * Use this before dispatching emulation commands to ResponseActionsClient.
- *
- * @param flags - Detection emulation feature flags
- * @returns true if real execution is enabled
+ * Type guard used by the route to short-circuit dispatch when the
+ * feature is disabled. Kept as a named helper so future flags (e.g.
+ * per-tenant overrides) can be layered in without touching call sites.
  */
 export function isRealExecutionEnabled(flags: DetectionEmulationFeatureFlags): boolean {
   return flags.realExecution;
-}
-
-/**
- * Type guard to check if audit log injection is enabled.
- * Use this before writing emulation context to the response_actions audit trail.
- *
- * @param flags - Detection emulation feature flags
- * @returns true if log injection is enabled
- */
-export function isLogInjectionEnabled(flags: DetectionEmulationFeatureFlags): boolean {
-  return flags.logInjection;
 }

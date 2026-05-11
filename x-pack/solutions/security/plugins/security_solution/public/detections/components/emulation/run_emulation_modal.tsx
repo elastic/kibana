@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiModal,
@@ -144,6 +144,59 @@ export interface RunEmulationModalProps {
   onReject: (requestId: string) => void;
 }
 
+/**
+ * Tokenize a user-provided argv string into an argv array while preserving
+ * quoted segments. Splitting on a bare space (the previous implementation)
+ * silently corrupts arguments like `--message="hello world"` or paths with
+ * spaces (`/Library/Application Support/foo`) because the resulting argv
+ * splits the value across multiple positions (I12).
+ *
+ * Rules:
+ * - Whitespace separates tokens.
+ * - Single and double quotes group runs of characters into one token.
+ * - Backslash escapes the next character verbatim.
+ * - Unterminated quotes still emit the partial token (we keep what the user
+ *   typed and let the server validate downstream rather than throwing).
+ */
+function tokenizeArgs(input: string): string[] {
+  const tokens: string[] = [];
+  let current = '';
+  let quote: '"' | "'" | null = null;
+  let escaping = false;
+
+  for (let i = 0; i < input.length; i++) {
+    const ch = input[i];
+
+    if (escaping) {
+      current += ch;
+      escaping = false;
+    } else if (ch === '\\') {
+      escaping = true;
+    } else if (quote) {
+      if (ch === quote) {
+        quote = null;
+      } else {
+        current += ch;
+      }
+    } else if (ch === '"' || ch === "'") {
+      quote = ch;
+    } else if (/\s/.test(ch)) {
+      if (current.length > 0) {
+        tokens.push(current);
+        current = '';
+      }
+    } else {
+      current += ch;
+    }
+  }
+
+  if (current.length > 0) {
+    tokens.push(current);
+  }
+
+  return tokens;
+}
+
 export const RunEmulationModal: React.FC<RunEmulationModalProps> = ({
   suggestion,
   requestId,
@@ -155,28 +208,56 @@ export const RunEmulationModal: React.FC<RunEmulationModalProps> = ({
   const [modifiedArgs, setModifiedArgs] = useState(
     suggestion.args ? suggestion.args.join(' ') : ''
   );
+  // I11: track in-flight approve/reject calls so the buttons can disable
+  // themselves and prevent the user from double-submitting (which would
+  // result in two response-actions being dispatched).
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // I10: when the parent swaps in a new suggestion / requestId (e.g. the next
+  // pending approval in the queue), reset the local modify-state. Without
+  // this, the user's edits to the previous suggestion would silently bleed
+  // into the new one. We key off both `requestId` and `suggestion.command`
+  // because the requestId is the canonical "this is a different decision".
+  useEffect(() => {
+    setIsModifyMode(false);
+    setModifiedCommand(suggestion.command);
+    setModifiedArgs(suggestion.args ? suggestion.args.join(' ') : '');
+    setIsSubmitting(false);
+  }, [requestId, suggestion]);
+
+  const modifiedArgv = useMemo(() => tokenizeArgs(modifiedArgs), [modifiedArgs]);
 
   const handleApprove = useCallback(() => {
+    if (isSubmitting) {
+      return;
+    }
+    setIsSubmitting(true);
     const response: CommandApprovalResponse = {
       decision: isModifyMode ? 'modify' : 'approve',
       ...(isModifyMode && {
         modified_command: modifiedCommand,
-        modified_args: modifiedArgs ? modifiedArgs.split(' ') : undefined,
+        modified_args: modifiedArgv.length > 0 ? modifiedArgv : undefined,
       }),
     };
     onApprove(requestId, response);
-  }, [isModifyMode, modifiedCommand, modifiedArgs, onApprove, requestId]);
+  }, [isModifyMode, isSubmitting, modifiedCommand, modifiedArgv, onApprove, requestId]);
 
   const handleReject = useCallback(() => {
+    if (isSubmitting) {
+      return;
+    }
+    setIsSubmitting(true);
     onReject(requestId);
-  }, [onReject, requestId]);
+  }, [isSubmitting, onReject, requestId]);
 
   const fullCommand = suggestion.args
     ? `${suggestion.command} ${suggestion.args.join(' ')}`
     : suggestion.command;
 
+  // The display string mirrors the *tokenized* argv so the user sees the
+  // same shell-quoted result that will actually get dispatched.
   const modifiedFullCommand = isModifyMode
-    ? `${modifiedCommand} ${modifiedArgs}`.trim()
+    ? [modifiedCommand, ...modifiedArgv].join(' ').trim()
     : fullCommand;
 
   return (
@@ -292,12 +373,24 @@ export const RunEmulationModal: React.FC<RunEmulationModalProps> = ({
       <EuiModalFooter>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={handleReject} color="danger">
+            <EuiButtonEmpty
+              onClick={handleReject}
+              color="danger"
+              isDisabled={isSubmitting}
+              data-test-subj="emulation-modal-reject-button"
+            >
               {REJECT_BUTTON_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={handleApprove} fill color="primary">
+            <EuiButton
+              onClick={handleApprove}
+              fill
+              color="primary"
+              isLoading={isSubmitting}
+              isDisabled={isSubmitting}
+              data-test-subj="emulation-modal-approve-button"
+            >
               {isModifyMode ? APPROVE_MODIFIED_BUTTON_LABEL : APPROVE_BUTTON_LABEL}
             </EuiButton>
           </EuiFlexItem>

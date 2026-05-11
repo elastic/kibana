@@ -110,25 +110,28 @@ export async function tagAlertsWithEmulation(
   );
 
   try {
+    // Elasticsearch v8 client expects `query` / `script` at the top level of
+    // the params object — the legacy `body: { ... }` wrapper triggers the
+    // overload mismatch we saw under typecheck. Also note: `params` is the
+    // Painless script-params object (untyped JSON), so the values are
+    // serialised as-is by ES.
     const response = await esClient.updateByQuery({
       index: alertsIndex,
       refresh: true,
-      body: {
-        query: {
-          ids: {
-            values: alertIds,
-          },
+      query: {
+        ids: {
+          values: alertIds,
         },
-        script: {
-          source: `
-            ctx._source['${ALERT_EMULATION_ID}'] = params.emulationId;
-            ctx._source['${ALERT_EMULATION_MODE}'] = params.mode;
-          `,
-          lang: 'painless',
-          params: {
-            emulationId: metadata.emulationId,
-            mode: metadata.mode,
-          },
+      },
+      script: {
+        source: `
+          ctx._source['${ALERT_EMULATION_ID}'] = params.emulationId;
+          ctx._source['${ALERT_EMULATION_MODE}'] = params.mode;
+        `,
+        lang: 'painless',
+        params: {
+          emulationId: metadata.emulationId,
+          mode: metadata.mode,
         },
       },
     });
@@ -147,10 +150,11 @@ export async function tagAlertsWithEmulation(
     }
 
     if (response.failures && response.failures.length > 0) {
-      logger.error(
-        `Encountered ${response.failures.length} failures while tagging alerts:`,
-        response.failures
-      );
+      // Logger meta must be a `LogMeta` shape, not the bare failures array.
+      logger.error(`Encountered ${response.failures.length} failures while tagging alerts.`, {
+        tags: ['detection-emulation'],
+        failures: response.failures,
+      } as unknown as Record<string, unknown>);
     }
 
     return updatedCount;
