@@ -1,0 +1,46 @@
+# SML — Index crawl workflow.
+#
+# Discovers every open, non-hidden Elasticsearch index reachable to the user
+# running the workflow and triggers the `workflow-sml-index-augmentation`
+# workflow for each one. Hidden / system indices are excluded server-side via
+# `expand_wildcards=open` on the `_cat/indices` call.
+#
+# Iteration-level failures do not abort the crawl — each augmentation runs
+# independently so that one slow or broken index never blocks the rest.
+#
+# The crawl is potentially expensive (one LLM round-trip per index) and ships
+# disabled-by-default; operators can opt in by enabling the workflow or
+# triggering it manually from the workflows management UI.
+version: '1'
+name: 'SML — Index crawl'
+description: 'List every open Elasticsearch index visible to the caller and run the SML index augmentation workflow on each.'
+enabled: false
+tags:
+  - sml-system
+  - sml
+triggers:
+  - type: manual
+steps:
+  - name: list_indices
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: '/_cat/indices?expand_wildcards=open&h=index&format=json&s=index'
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: '5s'
+        strategy: exponential
+
+  - name: augment_each_index
+    type: foreach
+    foreach: '${{ steps.list_indices.output }}'
+    iteration-on-failure:
+      continue: true
+    steps:
+      - name: run_augmentation
+        type: workflow.execute
+        with:
+          workflow-id: 'workflow-sml-index-augmentation'
+          inputs:
+            indexPattern: '{{ foreach.item.index }}'

@@ -29,9 +29,16 @@ jest.mock('./sml_service', () => ({
 
 jest.mock('uuid', () => ({ v4: () => 'mock-uuid' }));
 
-const createMockEsClient = (): jest.Mocked<ElasticsearchClient> =>
+const createMockEsClient = (
+  overrides: Partial<{
+    deleteByQuery: jest.Mock;
+    count: jest.Mock;
+  }> = {}
+): jest.Mocked<ElasticsearchClient> =>
   ({
-    deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
+    deleteByQuery: overrides.deleteByQuery ?? jest.fn().mockResolvedValue({ deleted: 0 }),
+    // Default to "no direct chunks exist".
+    count: overrides.count ?? jest.fn().mockResolvedValue({ count: 0 }),
   } as unknown as jest.Mocked<ElasticsearchClient>);
 
 const createMockLogger = () => {
@@ -162,6 +169,7 @@ describe('createSmlIndexer', () => {
         updated_at: expect.any(String),
         spaces: ['default', 'space-2'],
         permissions: ['perm1'],
+        source: 'resolved',
       });
     });
 
@@ -404,6 +412,384 @@ describe('createSmlIndexer', () => {
 
       const bulkCall = bulkMock.mock.calls[0][0];
       expect(bulkCall.operations[0].index.document.permissions).toEqual([]);
+    });
+
+    describe('direct mode (caller-supplied chunks)', () => {
+      it('uses caller-supplied chunks and does NOT call getSmlData', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const getSmlData = jest.fn();
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment({
+          ...createIndexerParams({
+            originId: 'direct-1',
+            attachmentType: 'lens',
+            action: 'create',
+            spaces: ['s1'],
+            esClient,
+            logger,
+          }),
+          chunks: [
+            {
+              type: 'lens',
+              title: 'Direct title',
+              content: 'Direct content',
+              permissions: ['perm-x'],
+            },
+          ],
+        });
+
+        expect(getSmlData).not.toHaveBeenCalled();
+        expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+        expect(bulkMock).toHaveBeenCalledTimes(1);
+        const op = bulkMock.mock.calls[0][0].operations[0];
+        expect(op.index._id).toBe('lens:direct-1:mock-uuid');
+        expect(op.index.document).toEqual({
+          id: 'lens:direct-1:mock-uuid',
+          type: 'lens',
+          title: 'Direct title',
+          origin_id: 'direct-1',
+          content: 'Direct content',
+          created_at: expect.any(String),
+          updated_at: expect.any(String),
+          spaces: ['s1'],
+          permissions: ['perm-x'],
+          source: 'direct',
+        });
+      });
+
+      it('indexes direct chunks even when the type is NOT registered', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const registry = createMockRegistry(undefined);
+        registry.list.mockReturnValue([]);
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment({
+          ...createIndexerParams({
+            originId: 'direct-2',
+            attachmentType: 'unregistered',
+            action: 'create',
+            esClient,
+            logger,
+          }),
+          chunks: [{ type: 'unregistered', title: 't', content: 'c' }],
+        });
+
+        expect(registry.get).not.toHaveBeenCalled();
+        expect(logger.warn).not.toHaveBeenCalledWith(expect.stringContaining('type definition'));
+        expect(bulkMock).toHaveBeenCalledTimes(1);
+      });
+
+      it('treats an empty chunks array as a soft delete', async () => {
+        const bulkMock = jest.fn();
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const getSmlData = jest.fn();
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment({
+          ...createIndexerParams({
+            originId: 'direct-3',
+            attachmentType: 'lens',
+            action: 'update',
+            esClient,
+            logger,
+          }),
+          chunks: [],
+        });
+
+        expect(getSmlData).not.toHaveBeenCalled();
+        expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+        expect(bulkMock).not.toHaveBeenCalled();
+      });
+
+      it('ignores caller-supplied chunks for the delete action (always deletes)', async () => {
+        const bulkMock = jest.fn();
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const getSmlData = jest.fn();
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment({
+          ...createIndexerParams({
+            originId: 'direct-4',
+            attachmentType: 'lens',
+            action: 'delete',
+            esClient,
+            logger,
+          }),
+          chunks: [{ type: 'lens', title: 'ignored', content: 'ignored' }],
+        });
+
+        expect(getSmlData).not.toHaveBeenCalled();
+        expect(bulkMock).not.toHaveBeenCalled();
+        expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('source-based mutual exclusion (direct vs resolved)', () => {
+      it('resolved create: skips when direct chunks already exist for the origin', async () => {
+        const bulkMock = jest.fn();
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const getSmlData = jest.fn().mockResolvedValue({
+          chunks: [{ type: 'lens', title: 'crawler', content: 'c' }],
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+        );
+        const logger = createMockLogger();
+        // direct chunks exist for this origin
+        const esClient = createMockEsClient({
+          count: jest.fn().mockResolvedValue({ count: 2 }),
+        });
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'mixed-1',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+            logger,
+          })
+        );
+
+        expect(esClient.count).toHaveBeenCalledTimes(1);
+        const countCall = (esClient.count as jest.Mock).mock.calls[0][0];
+        expect(countCall.query.bool.filter).toEqual(
+          expect.arrayContaining([
+            { term: { origin_id: 'mixed-1' } },
+            { term: { source: 'direct' } },
+          ])
+        );
+        expect(getSmlData).not.toHaveBeenCalled();
+        expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+        expect(bulkMock).not.toHaveBeenCalled();
+        expect(logger.info).toHaveBeenCalledWith(
+          expect.stringContaining('skipping resolved-mode index')
+        );
+      });
+
+      it('resolved delete: skips when direct chunks already exist for the origin', async () => {
+        const getSmlData = jest.fn();
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient({
+          count: jest.fn().mockResolvedValue({ count: 1 }),
+        });
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'mixed-2',
+            attachmentType: 'lens',
+            action: 'delete',
+            esClient,
+            logger,
+          })
+        );
+
+        expect(esClient.count).toHaveBeenCalledTimes(1);
+        expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+        expect(logger.info).toHaveBeenCalledWith(
+          expect.stringContaining('skipping resolved-mode delete')
+        );
+      });
+
+      it("explicit source='resolved' is respected (skips when direct exists)", async () => {
+        const bulkMock = jest.fn();
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const getSmlData = jest.fn().mockResolvedValue({
+          chunks: [{ type: 'lens', title: 't', content: 'c' }],
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient({
+          count: jest.fn().mockResolvedValue({ count: 3 }),
+        });
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment({
+          ...createIndexerParams({
+            originId: 'mixed-3',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+            logger,
+          }),
+          source: 'resolved',
+        });
+
+        expect(getSmlData).not.toHaveBeenCalled();
+        expect(bulkMock).not.toHaveBeenCalled();
+      });
+
+      it('direct create: overrides existing resolved chunks without checking', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const getSmlData = jest.fn();
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+        );
+        const logger = createMockLogger();
+        // even with existing direct chunks (e.g. user re-indexing), direct should override
+        const esClient = createMockEsClient({
+          count: jest.fn().mockResolvedValue({ count: 5 }),
+        });
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment({
+          ...createIndexerParams({
+            originId: 'override-1',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+            logger,
+          }),
+          chunks: [{ type: 'lens', title: 'override', content: 'new' }],
+        });
+
+        // No precedence check needed in direct mode — direct always wins.
+        expect(esClient.count).not.toHaveBeenCalled();
+        expect(getSmlData).not.toHaveBeenCalled();
+        // deleteByQuery wipes everything for the origin (regardless of source).
+        expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+        expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: { term: { origin_id: 'override-1' } },
+          })
+        );
+        expect(bulkMock).toHaveBeenCalledTimes(1);
+        const op = bulkMock.mock.calls[0][0].operations[0];
+        expect(op.index.document.source).toBe('direct');
+      });
+
+      it('direct delete: wipes all chunks regardless of crawler state', async () => {
+        const esClient = createMockEsClient({
+          count: jest.fn().mockResolvedValue({ count: 0 }),
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData: jest.fn() })
+        );
+        const logger = createMockLogger();
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment({
+          ...createIndexerParams({
+            originId: 'override-2',
+            attachmentType: 'lens',
+            action: 'delete',
+            esClient,
+            logger,
+          }),
+          source: 'direct',
+        });
+
+        expect(esClient.count).not.toHaveBeenCalled();
+        expect(esClient.deleteByQuery).toHaveBeenCalledTimes(1);
+      });
+
+      it('resolved create: proceeds when no direct chunks exist', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const getSmlData = jest.fn().mockResolvedValue({
+          chunks: [{ type: 'lens', title: 't', content: 'c' }],
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient(); // count defaults to 0
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'resolved-only',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+            logger,
+          })
+        );
+
+        expect(esClient.count).toHaveBeenCalledTimes(1);
+        expect(getSmlData).toHaveBeenCalledTimes(1);
+        expect(bulkMock).toHaveBeenCalledTimes(1);
+        const op = bulkMock.mock.calls[0][0].operations[0];
+        expect(op.index.document.source).toBe('resolved');
+      });
+
+      it('resolved create: fails open when the precedence check throws non-404', async () => {
+        const bulkMock = jest.fn().mockResolvedValue({ errors: false, items: [] });
+        const getClientMock = jest.fn().mockReturnValue({ bulk: bulkMock });
+        (createSmlStorage as jest.Mock).mockReturnValue({ getClient: getClientMock });
+
+        const getSmlData = jest.fn().mockResolvedValue({
+          chunks: [{ type: 'lens', title: 't', content: 'c' }],
+        });
+        const registry = createMockRegistry(
+          createMockSmlTypeDefinition({ id: 'lens', getSmlData })
+        );
+        const logger = createMockLogger();
+        const esClient = createMockEsClient({
+          count: jest.fn().mockRejectedValue(new Error('cluster_block_exception')),
+        });
+        const indexer = createSmlIndexer({ registry, logger });
+
+        await indexer.indexAttachment(
+          createIndexerParams({
+            originId: 'fail-open-1',
+            attachmentType: 'lens',
+            action: 'create',
+            esClient,
+            logger,
+          })
+        );
+
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('failed to check for direct chunks')
+        );
+        // Failing open means the resolved write proceeds.
+        expect(getSmlData).toHaveBeenCalledTimes(1);
+        expect(bulkMock).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });

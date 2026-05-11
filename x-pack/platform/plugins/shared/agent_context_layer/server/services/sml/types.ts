@@ -112,6 +112,20 @@ export interface SmlTypeDefinition {
 }
 
 /**
+ * Where a chunk was produced.
+ *
+ * - `resolved`: produced by the crawler or any caller relying on the registered
+ *   type's `getSmlData(originId)` hook.
+ * - `direct`: produced by a caller that supplied chunks directly (HTTP API,
+ *   workflow step, ...).
+ *
+ * The two modes are mutually exclusive per `origin_id`: a `direct` write
+ * overrides any existing chunks, and a `resolved` write is skipped when
+ * `direct` chunks already exist.
+ */
+export type SmlDocumentSource = 'resolved' | 'direct';
+
+/**
  * An SML document as stored in the system index.
  */
 export interface SmlDocument {
@@ -139,6 +153,8 @@ export interface SmlDocument {
   spaces: string[];
   /** Permissions required to access the underlying element */
   permissions: string[];
+  /** How this chunk was produced. See {@link SmlDocumentSource}. */
+  source: SmlDocumentSource;
 }
 
 /**
@@ -223,7 +239,21 @@ export interface SmlService {
     request: KibanaRequest;
   }) => Promise<Map<string, boolean>>;
 
-  /** Index a single attachment (event-driven) */
+  /**
+   * Index a single attachment (event-driven).
+   *
+   * Behavior depends on the effective `source`:
+   * - `direct`: caller supplies `chunks`. The indexer wipes any pre-existing
+   *   chunks for `originId` (regardless of source) and writes the supplied
+   *   chunks tagged with `source: 'direct'`. For `action: 'delete'` it wipes
+   *   all chunks for the origin.
+   * - `resolved`: the indexer calls `getSmlData(originId)` via the registered
+   *   type. If chunks tagged `source: 'direct'` already exist for this origin,
+   *   the operation is **skipped** to preserve the user's override.
+   *
+   * `source` is inferred when not provided: `'direct'` if `chunks` is set,
+   * otherwise `'resolved'`.
+   */
   indexAttachment: (params: {
     originId: string;
     attachmentType: string;
@@ -232,6 +262,8 @@ export interface SmlService {
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract;
     logger: Logger;
+    chunks?: SmlChunk[];
+    source?: SmlDocumentSource;
   }) => Promise<void>;
 
   /** Fetch SML documents by their chunk IDs, scoped to a space */

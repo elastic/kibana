@@ -197,8 +197,12 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getWorkflowsSubscribedToTrigger(triggerId, spaceId);
   }
 
-  public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
-    return this.workflowsService.getWorkflow(id, spaceId);
+  public async getWorkflow(
+    id: string,
+    spaceId: string,
+    options?: { includeDeleted?: boolean }
+  ): Promise<WorkflowDetailDto | null> {
+    return this.workflowsService.getWorkflow(id, spaceId, options);
   }
 
   public async getWorkflowsByIds(ids: string[], spaceId: string): Promise<WorkflowDetailDto[]> {

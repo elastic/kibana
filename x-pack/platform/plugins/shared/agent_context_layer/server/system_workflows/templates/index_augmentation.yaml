@@ -1,0 +1,136 @@
+# SML — Index augmentation workflow.
+#
+# Given an Elasticsearch index name or pattern, this workflow:
+#   1. Loads the index mappings.
+#   2. Pulls 10 sample documents.
+#   3. Calls an Agent Builder agent with a structured-output schema and asks it
+#      to propose a small set of high-value KPIs for the index.
+#   4. Writes one SML chunk per KPI via the
+#      `agentContextLayer.smlIndexAttachment` step.
+#
+# Each KPI is stored as its own SML attachment so semantic search can surface
+# individual KPIs. Origin ids follow the convention
+# `<indexPattern>::<kpiName>` and use the registered `index_kpi` SML type.
+#
+# Triggered manually from the SML admin page or via the workflows management
+# UI. Also intended to be invoked by `workflow-sml-index-crawl` once per
+# discovered index.
+version: '1'
+name: 'SML — Index augmentation'
+description: 'Inspect an Elasticsearch index, ask an LLM to extract KPIs, and index those KPIs into the Semantic Metadata Layer.'
+enabled: true
+tags:
+  - sml-system
+  - sml
+inputs:
+  - name: indexPattern
+    type: string
+    required: true
+    description: 'Elasticsearch index name or pattern to augment (e.g. "kibana_sample_data_logs" or "logs-app-*").'
+triggers:
+  - type: manual
+steps:
+  - name: get_index_mappings
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: '/{{ inputs.indexPattern }}/_mapping'
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: '5s'
+        strategy: exponential
+
+  - name: get_sample_documents
+    type: elasticsearch.search
+    with:
+      index: '{{ inputs.indexPattern }}'
+      size: 10
+      query:
+        match_all: {}
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: '5s'
+        strategy: exponential
+
+  - name: extract_kpis
+    type: ai.agent
+    with:
+      message: |
+        You are an analytics expert. Inspect the Elasticsearch index "{{ inputs.indexPattern }}" and propose between 3 and 8 KPIs that downstream agents can use to summarize, monitor, or visualize this dataset.
+
+        Use the field types from the mappings and the values in the sample documents to decide which KPIs are realistic.
+
+        Index mappings:
+        {{ steps.get_index_mappings.output | json }}
+
+        Sample documents (up to 10):
+        {{ steps.get_sample_documents.output.hits.hits | json }}
+
+        Return a JSON object with a `kpis` array. For each KPI include: a snake_case `name`, a short human `title`, a 1-2 sentence `description`, the `aggregation_type` (count, sum, avg, max, min, cardinality, terms, date_histogram, ...), the `fields` it relies on, and an optional `sample_esql` snippet that computes it.
+      # NOTE: the workflows JSON-model schema (used by `ai.agent`'s `schema:`
+      # parameter) enforces `type: object` at the root, so the KPI list is
+      # wrapped in a top-level `kpis` array property. The foreach below
+      # iterates `steps.extract_kpis.output.structured_output.kpis`.
+      schema:
+        type: object
+        properties:
+          kpis:
+            type: array
+            description: 'Proposed KPIs for the index.'
+            items:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Snake_case identifier for the KPI.'
+                title:
+                  type: string
+                  description: 'Short, human-readable title.'
+                description:
+                  type: string
+                  description: 'One or two sentences explaining what the KPI measures.'
+                aggregation_type:
+                  type: string
+                  description: 'High-level aggregation kind (count, sum, avg, cardinality, terms, ...).'
+                fields:
+                  type: array
+                  items:
+                    type: string
+                  description: 'Field paths the KPI relies on.'
+                sample_esql:
+                  type: string
+                  description: 'Optional ES|QL snippet that computes the KPI.'
+              required:
+                - name
+                - title
+                - description
+                - aggregation_type
+                - fields
+        required:
+          - kpis
+
+  - name: index_each_kpi
+    type: foreach
+    foreach: '${{ steps.extract_kpis.output.structured_output.kpis }}'
+    iteration-on-failure:
+      continue: true
+    steps:
+      - name: index_kpi_chunk
+        type: agentContextLayer.smlIndexAttachment
+        with:
+          originId: '{{ inputs.indexPattern }}::{{ foreach.item.name }}'
+          attachmentType: 'index_kpi'
+          action: 'create'
+          chunks:
+            - type: 'index_kpi'
+              title: '{{ foreach.item.title }} — {{ inputs.indexPattern }}'
+              content: |
+                KPI: {{ foreach.item.title }}
+                Index: {{ inputs.indexPattern }}
+                Aggregation: {{ foreach.item.aggregation_type }}
+                Fields: {{ foreach.item.fields | join: ', ' }}
+                Sample ES|QL: {{ foreach.item.sample_esql }}
+                Description: {{ foreach.item.description }}
+              description: '{{ foreach.item.description }}'
