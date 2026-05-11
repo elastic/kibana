@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator, TestType } from '@playwright/test';
+import type { Locator } from '@playwright/test';
 import type { ScoutPage } from '..';
-import type {
-  ScoutParallelTestFixtures,
-  ScoutParallelWorkerFixtures,
-} from '../test/ui/parallel_run_fixtures';
-import { expect } from '../matchers/ui';
 
 /**
  * URL-state shape for a Content List listing page. Mirrors the keys handled by
@@ -80,7 +75,8 @@ export const buildContentListSearch = (params: ContentListUrlState): string => {
 /**
  * Builds a `RegExp` matching the URL of a Content List listing page anchored
  * at the given hash route. Useful with `expect(page).toHaveURL(...)` to assert
- * the `kbn-content-list-provider` URL contract (`history.push` vs `replace`).
+ * the `kbn-content-list-provider` URL contract — i.e. `q` and `sort` end up in
+ * the URL in the expected shape after the listing rewrites.
  *
  * @param hash - Hash route the listing is mounted at (e.g. `'#/home'`).
  * @param params - Expected URL state (`q`, `sort`).
@@ -158,7 +154,7 @@ export class ContentListWrapper {
   /**
    * Type characters into the toolbar search box one at a time. Mirrors
    * real-user input so `EuiSearchBar`'s controlled `onChange` fires
-   * incrementally — required to exercise the URL-sync `'typing'` source.
+   * incrementally.
    */
   async typeIntoSearch(text: string) {
     await this.searchBox.click();
@@ -200,180 +196,3 @@ export class ContentListWrapper {
     await this.deleteConfirmButton.click();
   }
 }
-
-/**
- * Inputs required to register the standard Content List URL-sync suite for a
- * consumer plugin. The caller owns saved-object seeding, login, and the
- * surrounding `describe` block; the suite only registers the URL-contract
- * tests inside it.
- */
-export interface ContentListUrlSyncSuiteOptions {
-  /**
-   * Hash route the listing is mounted at, including the `#` (e.g. `'#/home'`).
-   * Used to anchor URL assertions via {@link buildContentListUrlRegex}.
-   */
-  hash: string;
-  /** Navigate to the listing page with no URL params. */
-  goto: (page: ScoutPage) => Promise<unknown>;
-  /**
-   * Navigate directly to the listing page with the given URL search string
-   * (already including the leading `?`). Typically built with
-   * {@link buildContentListSearch}.
-   */
-  gotoWithSearch: (page: ScoutPage, search: string) => Promise<unknown>;
-  /**
-   * A search term that matches exactly one seeded item. Must be at least two
-   * characters long so the suite can verify that consecutive keystrokes
-   * `replace` history rather than `push`. Used to drive both direct-navigation
-   * hydration and incremental typing flows.
-   */
-  matchingTerm: string;
-  /** Regex matching the title of the seeded item that {@link matchingTerm} matches. */
-  matchingItemTitle: RegExp;
-  /**
-   * Optional describe-block title for the registered suite. Defaults to
-   * `'Content List URL sync'`.
-   */
-  describeTitle?: string;
-}
-
-/**
- * Test type accepted by {@link registerContentListUrlSyncTests}. Constrained
- * to (extensions of) `ScoutParallelTestFixtures` so callers can pass their
- * own extended `spaceTest` from their plugin's `test/scout/ui/fixtures` (or
- * `test/scout_<configSet>/ui/fixtures`) module.
- */
-export type ContentListUrlSyncSpaceTest<
-  TestArgs extends ScoutParallelTestFixtures = ScoutParallelTestFixtures,
-  WorkerArgs extends ScoutParallelWorkerFixtures = ScoutParallelWorkerFixtures
-> = TestType<TestArgs, WorkerArgs>;
-
-/**
- * Registers the standard Content List URL-sync test suite into the surrounding
- * `describe` block. The caller is responsible for seeding listing items
- * (`beforeAll`), authenticating (`beforeEach`), and cleaning up (`afterAll`)
- * so this single function is the only addition needed in each consumer's spec.
- *
- * Asserts the contract documented in `kbn-content-list-provider`:
- *
- * - Direct URL navigation hydrates `q`/`sort` into state.
- * - Typing pushes when query presence flips (empty <-> non-empty) and
- *   replaces between non-empty values.
- * - Filter commits (sort) push a new history entry.
- * - Browser back navigation walks every pushed entry in reverse.
- *
- * @example
- *   spaceTest.describe('Foo listing - URL sync', { tag: tags.stateful.classic }, () => {
- *     spaceTest.beforeAll(async ({ kbnClient, scoutSpace }) => { ... seed ... });
- *     spaceTest.beforeEach(async ({ browserAuth }) => browserAuth.loginAsPrivilegedUser());
- *     spaceTest.afterAll(async ({ scoutSpace }) => scoutSpace.savedObjects.cleanStandardList());
- *
- *     registerContentListUrlSyncTests(spaceTest, {
- *       hash: '#/home',
- *       goto: (page) => page.gotoApp('foo'),
- *       gotoWithSearch: (page, search) => page.gotoApp('foo', { hash: `/home${search}` }),
- *       matchingTerm: 'Alpha',
- *       matchingItemTitle: /Foo Alpha/,
- *     });
- *   });
- */
-export const registerContentListUrlSyncTests = <
-  TestArgs extends ScoutParallelTestFixtures,
-  WorkerArgs extends ScoutParallelWorkerFixtures
->(
-  test: ContentListUrlSyncSpaceTest<TestArgs, WorkerArgs>,
-  options: ContentListUrlSyncSuiteOptions
-): void => {
-  const {
-    hash,
-    goto,
-    gotoWithSearch,
-    matchingTerm,
-    matchingItemTitle,
-    describeTitle = 'Content List URL sync',
-  } = options;
-
-  if (matchingTerm.length < 2) {
-    throw new Error(
-      `registerContentListUrlSyncTests: matchingTerm must be at least 2 characters (received "${matchingTerm}").`
-    );
-  }
-
-  const firstChar = matchingTerm[0];
-  const remainder = matchingTerm.slice(1);
-
-  test.describe(describeTitle, () => {
-    test('hydrates state from query and sort params on direct navigation', async ({ page }) => {
-      const contentList = new ContentListWrapper(page);
-      await gotoWithSearch(page, buildContentListSearch({ q: matchingTerm, sort: 'title:desc' }));
-      await contentList.waitForReady();
-
-      await expect(contentList.searchBox).toHaveValue(matchingTerm);
-      await expect(contentList.itemLinks).toHaveCount(1);
-      await expect(contentList.itemLinks).toHaveText(matchingItemTitle);
-    });
-
-    test('replaces history while typing and pushes on query presence flips', async ({ page }) => {
-      const contentList = new ContentListWrapper(page);
-      await goto(page);
-      await contentList.waitForReady();
-      await expect(page).toHaveURL(buildContentListUrlRegex(hash, {}));
-
-      await test.step('typing from empty pushes a new entry', async () => {
-        await contentList.typeIntoSearch(firstChar);
-        await expect(page).toHaveURL(buildContentListUrlRegex(hash, { q: firstChar }));
-      });
-
-      await test.step('continued typing replaces the current entry', async () => {
-        await contentList.typeIntoSearch(remainder);
-        await expect(page).toHaveURL(buildContentListUrlRegex(hash, { q: matchingTerm }));
-      });
-
-      await test.step('back skips intermediate replaces and returns to the empty state', async () => {
-        await page.goBack();
-        await expect(page).toHaveURL(buildContentListUrlRegex(hash, {}));
-        await expect(contentList.searchBox).toHaveValue('');
-      });
-    });
-
-    test('pushes history when a filter is committed and back navigation restores prior states', async ({
-      page,
-    }) => {
-      const contentList = new ContentListWrapper(page);
-      await goto(page);
-      await contentList.waitForReady();
-      await expect(page).toHaveURL(buildContentListUrlRegex(hash, {}));
-
-      await test.step('typing pushes once on presence flip', async () => {
-        await contentList.typeIntoSearch(matchingTerm);
-        await expect(page).toHaveURL(buildContentListUrlRegex(hash, { q: matchingTerm }));
-      });
-
-      await test.step('selecting a sort option pushes a new entry', async () => {
-        await contentList.selectSortOption('Z-A');
-        await expect(page).toHaveURL(
-          buildContentListUrlRegex(hash, { q: matchingTerm, sort: 'title:desc' })
-        );
-      });
-
-      await test.step('clearing the search pushes the empty-query state', async () => {
-        await contentList.clearSearch();
-        await expect(page).toHaveURL(buildContentListUrlRegex(hash, { sort: 'title:desc' }));
-      });
-
-      await test.step('back navigation walks each pushed state in reverse', async () => {
-        await page.goBack();
-        await expect(page).toHaveURL(
-          buildContentListUrlRegex(hash, { q: matchingTerm, sort: 'title:desc' })
-        );
-
-        await page.goBack();
-        await expect(page).toHaveURL(buildContentListUrlRegex(hash, { q: matchingTerm }));
-
-        await page.goBack();
-        await expect(page).toHaveURL(buildContentListUrlRegex(hash, {}));
-        await expect(contentList.searchBox).toHaveValue('');
-      });
-    });
-  });
-};

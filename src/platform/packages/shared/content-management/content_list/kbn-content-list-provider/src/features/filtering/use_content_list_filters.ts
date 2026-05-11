@@ -38,7 +38,7 @@ export const useContentListFilters = (): UseContentListFiltersReturn => {
   const clearFilters = useCallback(() => {
     dispatch({
       type: CONTENT_LIST_ACTIONS.SET_QUERY,
-      payload: { queryText: searchRef.current, source: 'filter' },
+      payload: { queryText: searchRef.current },
     });
   }, [dispatch]);
 

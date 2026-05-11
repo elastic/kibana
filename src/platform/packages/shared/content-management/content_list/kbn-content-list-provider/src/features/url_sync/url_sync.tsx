@@ -74,7 +74,7 @@ const dispatchDecodedSlices = (
   if (decoded.queryText !== undefined && decoded.queryText !== current.queryText) {
     dispatch({
       type: CONTENT_LIST_ACTIONS.SET_QUERY,
-      payload: { queryText: decoded.queryText, source: 'url' },
+      payload: { queryText: decoded.queryText },
     });
   }
 
@@ -94,7 +94,7 @@ const dispatchAllSlices = (
   if (resolved.queryText !== current.queryText) {
     dispatch({
       type: CONTENT_LIST_ACTIONS.SET_QUERY,
-      payload: { queryText: resolved.queryText, source: 'url' },
+      payload: { queryText: resolved.queryText },
     });
   }
 
@@ -139,8 +139,6 @@ const ContentListUrlSyncInner = (): null => {
   );
   const [hydrated, setHydrated] = useState(false);
   const lastAppliedSearchRef = useRef<string | null>(null);
-  const previousSortRef = useRef(state.sort);
-  const previousQueryTextRef = useRef(state.queryText);
   const stateRef = useRef<ClientStateSlices>(state);
 
   useEffect(() => {
@@ -181,33 +179,14 @@ const ContentListUrlSyncInner = (): null => {
 
     const encoded = encodeUrlState({ queryText: state.queryText, sort: state.sort }, initialSort);
     const nextSearch = mergeAndStringify(history.location.search, encoded);
-    const sortChanged =
-      previousSortRef.current.field !== state.sort.field ||
-      previousSortRef.current.direction !== state.sort.direction;
-    const queryTextChanged = previousQueryTextRef.current !== state.queryText;
-    // Query presence in the URL tracks whether `queryText` is non-empty,
-    // because the encoder writes `?q=value` for non-empty text and removes
-    // `q` otherwise. Comparing current vs next text avoids a second
-    // `parseSearch` of `history.location.search` and `nextSearch`.
-    const queryPresenceChanged = (previousQueryTextRef.current !== '') !== (state.queryText !== '');
-    const filterChanged = queryTextChanged && state.queryChangeSource === 'filter';
-    // Refs are advanced before the early-return so the next effect
-    // invocation compares against the just-flushed state, even when this
-    // run no-ops because the URL already matches.
-    previousSortRef.current = state.sort;
-    previousQueryTextRef.current = state.queryText;
 
     if (nextSearch === history.location.search || nextSearch === lastAppliedSearchRef.current) {
       return;
     }
 
     lastAppliedSearchRef.current = nextSearch;
-    if (sortChanged || filterChanged || queryPresenceChanged) {
-      history.push({ search: nextSearch });
-    } else {
-      history.replace({ search: nextSearch });
-    }
-  }, [history, hydrated, initialSort, state.queryChangeSource, state.queryText, state.sort]);
+    history.replace({ search: nextSearch });
+  }, [history, hydrated, initialSort, state.queryText, state.sort]);
 
   useEffect(
     () =>

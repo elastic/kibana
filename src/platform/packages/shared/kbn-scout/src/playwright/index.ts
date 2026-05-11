@@ -73,10 +73,5 @@ export {
   ContentListWrapper,
   buildContentListSearch,
   buildContentListUrlRegex,
-  registerContentListUrlSyncTests,
 } from './page_objects';
-export type {
-  ContentListUrlState,
-  ContentListUrlSyncSuiteOptions,
-  ContentListUrlSyncSpaceTest,
-} from './page_objects';
+export type { ContentListUrlState } from './page_objects';

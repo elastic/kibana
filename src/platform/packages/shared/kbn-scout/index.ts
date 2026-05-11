@@ -40,13 +40,8 @@ export {
   ContentListWrapper,
   buildContentListSearch,
   buildContentListUrlRegex,
-  registerContentListUrlSyncTests,
 } from './src/playwright/page_objects';
-export type {
-  ContentListUrlState,
-  ContentListUrlSyncSuiteOptions,
-  ContentListUrlSyncSpaceTest,
-} from './src/playwright/page_objects';
+export type { ContentListUrlState } from './src/playwright/page_objects';
 
 // Scout core types
 export type {

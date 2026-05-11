@@ -29,22 +29,12 @@ import {
   ContentListWrapper,
   buildContentListSearch,
   buildContentListUrlRegex,
-  registerContentListUrlSyncTests,
 } from './content_list';
-import type {
-  ContentListUrlState,
-  ContentListUrlSyncSuiteOptions,
-  ContentListUrlSyncSpaceTest,
-} from './content_list';
+import type { ContentListUrlState } from './content_list';
 import type { KibanaUrl } from '../../common/services/kibana_url';
 
-export {
-  ContentListWrapper,
-  buildContentListSearch,
-  buildContentListUrlRegex,
-  registerContentListUrlSyncTests,
-};
-export type { ContentListUrlState, ContentListUrlSyncSuiteOptions, ContentListUrlSyncSpaceTest };
+export { ContentListWrapper, buildContentListSearch, buildContentListUrlRegex };
+export type { ContentListUrlState };
 
 export interface PageObjectsFixtures {
   page: ScoutPage;

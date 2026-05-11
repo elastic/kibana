@@ -189,7 +189,7 @@ describe('ContentListUrlSync', () => {
     expect(history.location.search).toBe('?sort=updatedAt:desc');
   });
 
-  it('pushes the first query entry, replaces query edits, and pushes sort changes', async () => {
+  it('writes query and sort changes to the URL via history.replace', async () => {
     const history = createMemoryHistory({ initialEntries: ['/app'] });
     const replaceSpy = jest.spyOn(history, 'replace');
     const pushSpy = jest.spyOn(history, 'push');
@@ -207,26 +207,14 @@ describe('ContentListUrlSync', () => {
     act(() => {
       result.current.dispatch({
         type: CONTENT_LIST_ACTIONS.SET_QUERY,
-        payload: { queryText: 'dashboard', source: 'typing' },
+        payload: { queryText: 'dashboard' },
       });
     });
 
     await waitFor(() => {
       expect(history.location.search).toBe('?q=dashboard');
     });
-    expect(pushSpy).toHaveBeenLastCalledWith({ search: '?q=dashboard' });
-
-    act(() => {
-      result.current.dispatch({
-        type: CONTENT_LIST_ACTIONS.SET_QUERY,
-        payload: { queryText: 'dashboard updated', source: 'typing' },
-      });
-    });
-
-    await waitFor(() => {
-      expect(history.location.search).toBe('?q=dashboard%20updated');
-    });
-    expect(replaceSpy).toHaveBeenLastCalledWith({ search: '?q=dashboard%20updated' });
+    expect(replaceSpy).toHaveBeenLastCalledWith({ search: '?q=dashboard' });
 
     act(() => {
       result.current.dispatch({
@@ -236,168 +224,16 @@ describe('ContentListUrlSync', () => {
     });
 
     await waitFor(() => {
-      expect(history.location.search).toBe('?q=dashboard%20updated&sort=updatedAt:desc');
-    });
-    expect(pushSpy).toHaveBeenLastCalledWith({
-      search: '?q=dashboard%20updated&sort=updatedAt:desc',
-    });
-  });
-
-  it('preserves a forward entry after backing out of a search-only URL state', async () => {
-    const history = createMemoryHistory({ initialEntries: ['/app'] });
-
-    const { result } = renderHook(() => useContentListState(), {
-      wrapper: createWrapper({ history }),
-    });
-
-    await waitFor(() => {
-      expect(result.current.state.queryText).toBe('');
-    });
-
-    act(() => {
-      result.current.dispatch({
-        type: CONTENT_LIST_ACTIONS.SET_QUERY,
-        payload: { queryText: 'dashboard', source: 'typing' },
-      });
-    });
-
-    await waitFor(() => {
-      expect(history.location.search).toBe('?q=dashboard');
-    });
-
-    act(() => {
-      history.goBack();
-    });
-
-    await waitFor(() => {
-      expect(history.location.search).toBe('');
-      expect(result.current.state.queryText).toBe('');
-    });
-
-    act(() => {
-      history.goForward();
-    });
-
-    await waitFor(() => {
-      expect(history.location.search).toBe('?q=dashboard');
-      expect(result.current.state.queryText).toBe('dashboard');
-    });
-  });
-
-  it('preserves sort and search history when typing after a sort change', async () => {
-    const history = createMemoryHistory({ initialEntries: ['/app'] });
-
-    const { result } = renderHook(() => useContentListState(), {
-      wrapper: createWrapper({ history }),
-    });
-
-    await waitFor(() => {
-      expect(result.current.state.queryText).toBe('');
-    });
-
-    act(() => {
-      result.current.dispatch({
-        type: CONTENT_LIST_ACTIONS.SET_SORT,
-        payload: { field: 'updatedAt', direction: 'desc' },
-      });
-    });
-
-    await waitFor(() => {
-      expect(history.location.search).toBe('?sort=updatedAt:desc');
-    });
-
-    act(() => {
-      result.current.dispatch({
-        type: CONTENT_LIST_ACTIONS.SET_QUERY,
-        payload: { queryText: 'dashboard', source: 'typing' },
-      });
-    });
-
-    await waitFor(() => {
       expect(history.location.search).toBe('?q=dashboard&sort=updatedAt:desc');
     });
-
-    act(() => {
-      history.goBack();
+    expect(replaceSpy).toHaveBeenLastCalledWith({
+      search: '?q=dashboard&sort=updatedAt:desc',
     });
 
-    await waitFor(() => {
-      expect(history.location.search).toBe('?sort=updatedAt:desc');
-      expect(result.current.state.queryText).toBe('');
-      expect(result.current.state.sort).toEqual({ field: 'updatedAt', direction: 'desc' });
-    });
-
-    act(() => {
-      history.goForward();
-    });
-
-    await waitFor(() => {
-      expect(history.location.search).toBe('?q=dashboard&sort=updatedAt:desc');
-      expect(result.current.state.queryText).toBe('dashboard');
-      expect(result.current.state.sort).toEqual({ field: 'updatedAt', direction: 'desc' });
-    });
+    expect(pushSpy).not.toHaveBeenCalled();
   });
 
-  it('pushes committed filter query changes even when query text is already present', async () => {
-    const history = createMemoryHistory({ initialEntries: ['/app'] });
-    const replaceSpy = jest.spyOn(history, 'replace');
-    const pushSpy = jest.spyOn(history, 'push');
-
-    const { result } = renderHook(() => useContentListState(), {
-      wrapper: createWrapper({ history }),
-    });
-
-    await waitFor(() => {
-      expect(result.current.state.queryText).toBe('');
-    });
-    replaceSpy.mockClear();
-    pushSpy.mockClear();
-
-    act(() => {
-      result.current.dispatch({
-        type: CONTENT_LIST_ACTIONS.SET_QUERY,
-        payload: { queryText: 'dashboard', source: 'typing' },
-      });
-    });
-
-    await waitFor(() => {
-      expect(history.location.search).toBe('?q=dashboard');
-    });
-
-    act(() => {
-      result.current.dispatch({
-        type: CONTENT_LIST_ACTIONS.SET_QUERY,
-        payload: { queryText: 'dashboard tag:production', source: 'filter' },
-      });
-    });
-
-    await waitFor(() => {
-      expect(history.location.search).toBe('?q=dashboard%20tag:production');
-    });
-    expect(pushSpy).toHaveBeenLastCalledWith({
-      search: '?q=dashboard%20tag:production',
-    });
-
-    act(() => {
-      history.goBack();
-    });
-
-    await waitFor(() => {
-      expect(history.location.search).toBe('?q=dashboard');
-      expect(result.current.state.queryText).toBe('dashboard');
-    });
-
-    act(() => {
-      history.goForward();
-    });
-
-    await waitFor(() => {
-      expect(history.location.search).toBe('?q=dashboard%20tag:production');
-      expect(result.current.state.queryText).toBe('dashboard tag:production');
-    });
-  });
-
-  it('resets omitted slices to initial values on popstate', async () => {
+  it('rehydrates state from popstate URL changes', async () => {
     const history = createMemoryHistory({ initialEntries: ['/app?q=dashboard'] });
 
     const { result } = renderHook(() => useContentListState(), {
@@ -409,14 +245,12 @@ describe('ContentListUrlSync', () => {
     });
 
     act(() => {
-      result.current.dispatch({
-        type: CONTENT_LIST_ACTIONS.SET_SORT,
-        payload: { field: 'updatedAt', direction: 'desc' },
-      });
+      history.push({ search: '?q=dashboard&sort=updatedAt:desc' });
     });
 
     await waitFor(() => {
-      expect(history.location.search).toBe('?q=dashboard&sort=updatedAt:desc');
+      expect(result.current.state.queryText).toBe('dashboard');
+      expect(result.current.state.sort).toEqual({ field: 'updatedAt', direction: 'desc' });
     });
 
     act(() => {

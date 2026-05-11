@@ -41,18 +41,6 @@ describe('state_reducer', () => {
       expect(newState.queryText).toBe('dashboard');
     });
 
-    it('records the query change source', () => {
-      const initialState = createInitialState();
-      const action: ContentListAction = {
-        type: CONTENT_LIST_ACTIONS.SET_QUERY,
-        payload: { queryText: 'tag:production', source: 'filter' },
-      };
-
-      const newState = reducer(initialState, action);
-
-      expect(newState.queryChangeSource).toBe('filter');
-    });
-
     it('resets page index to 0 when query changes', () => {
       const initialState = createInitialState({ page: { index: 5, size: 20 } });
       const action: ContentListAction = {

@@ -8,26 +8,16 @@
  */
 
 import React from 'react';
-import { renderHook, render, act, waitFor } from '@testing-library/react';
-import { Query, type SearchFilterConfig } from '@elastic/eui';
-
-// Local structural type for the props EUI passes to a `custom_component`
-// filter. Matches the shape `useFilters` declares internally so the test
-// stays decoupled from EUI internals.
-interface CustomFilterComponentProps {
-  query: Query;
-  onChange?: (query: Query) => void;
-}
+import { renderHook } from '@testing-library/react';
+import { type SearchFilterConfig } from '@elastic/eui';
 import {
   ContentListProvider,
   contentListQueryClient,
-  useContentListState,
   type FindItemsResult,
   type FindItemsParams,
 } from '@kbn/content-list-provider';
 import { Filters } from '../filters/filters';
 import { SortFilter } from '../filters/sort';
-import { filter } from '../filters/part';
 import { useFilters } from './use_filters';
 
 const mockFindItems = jest.fn(
@@ -70,91 +60,20 @@ describe('useFilters', () => {
     contentListQueryClient.clear();
   });
 
-  it('returns the same wrapper component identity across re-renders with new children', () => {
-    const Wrapper = createWrapper();
-    const sortChildren = (
-      <Filters>
-        <SortFilter />
-      </Filters>
-    );
-
-    const { result, rerender } = renderHook(
-      ({ children }: { children: React.ReactNode }) => useFilters(children),
-      {
-        wrapper: Wrapper,
-        initialProps: { children: sortChildren },
-      }
-    );
-
-    const firstSortFilter = findCustomComponentFilter(result.current);
-    expect(firstSortFilter).toBeDefined();
-    const firstComponent = firstSortFilter!.component;
-
-    // Re-render with a brand new JSX tree (different identity, same intent).
-    rerender({
-      children: (
-        <Filters>
-          <SortFilter />
-        </Filters>
-      ),
-    });
-
-    const secondSortFilter = findCustomComponentFilter(result.current);
-    expect(secondSortFilter!.component).toBe(firstComponent);
-  });
-
-  it('dispatches SET_QUERY with `source: "filter"` when a wrapped onChange fires', async () => {
+  it('resolves filter parts from `<Filters>` children', () => {
     const Wrapper = createWrapper();
 
-    // Capture the `onChange` prop EUI would pass through to the underlying
-    // component. The wrapper sets it to its `handleChange`, so invoking it
-    // exercises the dispatch path that filter components actually take at
-    // runtime.
-    let capturedOnChange: ((q: Query) => void) | undefined;
-    const CaptureFilterComponent: React.FC<CustomFilterComponentProps> = ({ onChange }) => {
-      capturedOnChange = onChange;
-      return null;
-    };
-    const FakeFilter = filter.createComponent<Record<string, never>>({
-      resolve: () => ({ type: 'custom_component', component: CaptureFilterComponent }),
-    });
-
-    const stateContainer = {
-      current: undefined as ReturnType<typeof useContentListState> | undefined,
-    };
-
-    const Probe = () => {
-      const filters = useFilters(
-        <Filters>
-          <FakeFilter />
-        </Filters>
-      );
-      stateContainer.current = useContentListState();
-
-      const wrapped = findCustomComponentFilter(filters);
-      const Wrapped = wrapped?.component;
-      return Wrapped ? <Wrapped query={Query.parse('')} onChange={() => undefined} /> : null;
-    };
-
-    render(
-      <Wrapper>
-        <Probe />
-      </Wrapper>
+    const { result } = renderHook(
+      () =>
+        useFilters(
+          <Filters>
+            <SortFilter />
+          </Filters>
+        ),
+      { wrapper: Wrapper }
     );
 
-    await waitFor(() => {
-      expect(stateContainer.current?.state.queryText).toBe('');
-      expect(capturedOnChange).toBeDefined();
-    });
-
-    act(() => {
-      capturedOnChange!(Query.parse('tag:Production'));
-    });
-
-    await waitFor(() => {
-      expect(stateContainer.current?.state.queryText).toBe('tag:Production');
-      expect(stateContainer.current?.state.queryChangeSource).toBe('filter');
-    });
+    expect(findCustomComponentFilter(result.current)).toBeDefined();
   });
 
   it('falls back to defaults when no children are provided', () => {
@@ -165,7 +84,7 @@ describe('useFilters', () => {
     });
 
     // Defaults include the sort preset, so we should see at least one
-    // custom_component filter wired through the wrapper.
+    // `custom_component` filter resolved from the defaults.
     expect(findCustomComponentFilter(result.current)).toBeDefined();
   });
 });

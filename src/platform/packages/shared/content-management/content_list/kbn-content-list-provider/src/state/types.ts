@@ -28,8 +28,6 @@ export const CONTENT_LIST_ACTIONS = {
   CLEAR_SELECTION: 'CLEAR_SELECTION',
 } as const;
 
-export type QueryChangeSource = 'typing' | 'filter' | 'url';
-
 /**
  * Client-controlled state managed by the reducer.
  *
@@ -46,17 +44,6 @@ export interface ContentListClientState {
    * `useQueryModel`.
    */
   queryText: string;
-  /**
-   * Source of the latest query text update.
-   *
-   * URL sync uses this to distinguish transient search typing from committed
-   * filter actions, because both are represented by `queryText`. Consumers
-   * should not branch on this value; it exists solely to drive `history.push`
-   * vs `history.replace` decisions inside `ContentListUrlSync`.
-   *
-   * @internal
-   */
-  queryChangeSource?: QueryChangeSource;
   /** Sort state. */
   sort: {
     /** Field name to sort by. */
@@ -150,7 +137,7 @@ export type ContentListState = ContentListClientState & ContentListQueryData;
 /** Set the query text. */
 interface SetQueryAction {
   type: typeof CONTENT_LIST_ACTIONS.SET_QUERY;
-  payload: { queryText: string; source?: QueryChangeSource };
+  payload: { queryText: string };
 }
 
 /** Hard-reset: clear all query text (search, filters, and flags). */

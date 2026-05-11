@@ -141,7 +141,7 @@ When `ContentListProvider` is rendered inside a React Router context, `queryText
 
 Empty query text removes `q`. The resolved initial sort removes `sort`, keeping default URLs compact. Unrelated host-app query params are preserved verbatim — values are written using an RFC 3986–friendly encoder, so Rison-style params (e.g. `_g`, `_a`) keep their readable form (parens, colons, commas, `!`, etc.) instead of being percent-encoded on every rewrite.
 
-The first search edit that adds or removes `q` uses `history.push`; additional typing edits while `q` remains present use `history.replace`. Committed filter changes and sort changes use `history.push`, so browser Back/Forward can move between filter/sort states without one entry per keystroke.
+Every URL write uses `history.replace`, so listing-page interactions (typing, filter toggles, sort changes) refine the current entry instead of adding to the back stack. Browser Back/Forward leaves the listing page.
 
 Legacy TableListView URLs using `s`, `title`, `sort`, `sortdir`, `created_by`, and `favorites` are decoded on first load and rewritten to the new `q` / `sort` shape. New-shape params win when both old and new params are present.
 
@@ -149,7 +149,7 @@ Use `features={{ urlSync: false }}` for embedded lists, modals, sidebars, or sec
 
 #### Implementation note: one source of truth
 
-`queryText` from state flows directly to `EuiSearchBar`'s `query` prop. There is no `displayText` mirror, no typing ref, and no internal sync hack — the search bar is fully controlled. Search-box typing dispatches `SET_QUERY` with `source: 'typing'`; `useFilters` wraps each `custom_component` filter so its `onChange` dispatches `SET_QUERY` with `source: 'filter'` directly (bypassing `EuiSearchBar.notifyControllingParent`). `ContentListUrlSync` reads the source on the next state transition to choose between `history.push` and `history.replace`. Filter resolvers must return `type: 'custom_component'` configs for this push/replace distinction to apply; other filter types fall through `EuiSearchBar` as `'typing'` and emit a dev-mode warning.
+`queryText` from state flows directly to `EuiSearchBar`'s `query` prop. There is no `displayText` mirror, no typing ref, and no internal sync hack — the search bar is fully controlled. Both search-box typing and committed filter changes dispatch `SET_QUERY` through the same path; `ContentListUrlSync` writes the resulting URL with `history.replace`.
 
 ## Architecture
 
