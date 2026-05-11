@@ -17,7 +17,7 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 
 const actionPolicyTagsQuerySchema = z.object({
-  search: z.string().optional(),
+  search: z.string().min(1).max(256).optional(),
 });
 
 @injectable()
