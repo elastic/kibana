@@ -63,7 +63,10 @@ groups:
       - setting: xpack.reporting.csv.scroll.duration
         description: |
           Amount of [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) allowed before {{kib}} cleans the scroll context during a CSV export. Valid option is either `auto` or [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units). Defaults to `120s`.
-        note: "If search latency in {{es}} is sufficiently high, such as if you are using {{ccs}}, you may either need to increase the time setting or set this config value to `auto`. When the config value is set to `auto` the scroll context will be preserved for as long as possible, before the report task is terminated due to the limits of `xpack.reporting.queue.timeout`."
+        note: |
+          The default value was increased from `30s` to `120s` in version 9.0.
+
+          If search latency in {{es}} is sufficiently high, such as if you are using {{ccs}}, you may either need to increase the time setting or set this config value to `auto`. When the config value is set to `auto` the scroll context will be preserved for as long as possible, before the report task is terminated due to the limits of `xpack.reporting.queue.timeout`.
         datatype: string
         default: 120s
         applies_to:
