@@ -17,7 +17,6 @@ import { LensPageProvider } from './lens_page';
 import { GisPageObject } from './gis_page';
 import { ReportingPageObject } from './reporting_page';
 import { WatcherPageObject } from './watcher_page';
-import { SearchProfilerPageProvider } from './search_profiler_page';
 import { UpgradeAssistantFlyoutObject } from './upgrade_assistant_page';
 import { UserProfilePageProvider } from './user_profile_page';
 import { SnapshotRestorePageProvider } from './snapshot_restore_page';
@@ -29,7 +28,6 @@ import { NavigationalSearchPageObject } from './navigational_search';
 import { TagManagementPageObject } from './tag_management_page';
 import { AgentBuilderPageObject } from './agent_builder_page';
 import { CrossClusterReplicationPageProvider } from './cross_cluster_replication_page';
-import { GrokDebuggerPageObject } from './grok_debugger_page';
 import { LicenseManagementPageProvider } from './license_management_page';
 import { ApiKeysPageProvider } from './api_keys_page';
 import { IndexManagementPageProvider } from './index_management_page';
@@ -58,7 +56,6 @@ export const pageObjects = {
   maps: GisPageObject,
   reporting: ReportingPageObject,
   watcher: WatcherPageObject,
-  searchProfiler: SearchProfilerPageProvider,
   searchSessionsManagement: SearchSessionsPageProvider,
   snapshotRestore: SnapshotRestorePageProvider,
   upgradeAssistant: UpgradeAssistantFlyoutObject,
@@ -69,7 +66,6 @@ export const pageObjects = {
   tagManagement: TagManagementPageObject,
   agentBuilder: AgentBuilderPageObject,
   crossClusterReplication: CrossClusterReplicationPageProvider,
-  grokDebugger: GrokDebuggerPageObject,
   licenseManagement: LicenseManagementPageProvider,
   apiKeys: ApiKeysPageProvider,
   indexManagement: IndexManagementPageProvider,
