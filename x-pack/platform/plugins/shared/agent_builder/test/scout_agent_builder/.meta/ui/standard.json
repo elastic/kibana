@@ -1,0 +1,419 @@
+{
+  "sha1": "09729eb8f2a583af6e307146956ad16978a1858c",
+  "tests": [
+    {
+      "id": "bc04b6d7b9795d6-a575d75181b677a",
+      "title": "Agent Builder — agents list agents list journeys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/agents_list.spec.ts",
+        "line": 54,
+        "column": 9
+      }
+    },
+    {
+      "id": "63f7d4b20f6a785-10cc1e9ef7f5e5c",
+      "title": "Agent Builder — conversation error handling shows error message when there is an error and allows user to retry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
+        "line": 30,
+        "column": 9
+      }
+    },
+    {
+      "id": "63f7d4b20f6a785-1c09897f0d0d210",
+      "title": "Agent Builder — conversation error handling shows a \"not found\" prompt when conversation ID does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
+        "line": 77,
+        "column": 9
+      }
+    },
+    {
+      "id": "63f7d4b20f6a785-696200e080e8eb9",
+      "title": "Agent Builder — conversation error handling can start a new conversation when there is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
+        "line": 103,
+        "column": 9
+      }
+    },
+    {
+      "id": "63f7d4b20f6a785-15821953d94cc79",
+      "title": "Agent Builder — conversation error handling an error does not persist across conversations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
+        "line": 153,
+        "column": 9
+      }
+    },
+    {
+      "id": "63f7d4b20f6a785-7f7342ab9798952",
+      "title": "Agent Builder — conversation error handling clears the error when the user sends a new message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
+        "line": 204,
+        "column": 9
+      }
+    },
+    {
+      "id": "63f7d4b20f6a785-57b276e8ba245ab",
+      "title": "Agent Builder — conversation error handling keeps the previous conversation rounds visible when there is an error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
+        "line": 251,
+        "column": 9
+      }
+    },
+    {
+      "id": "2ac00daf6f222b0-f625c245f4ed057",
+      "title": "Agent Builder — conversation flow navigates to new conversation page and shows initial state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_flow.spec.ts",
+        "line": 25,
+        "column": 9
+      }
+    },
+    {
+      "id": "2ac00daf6f222b0-63974fb06b8ac24",
+      "title": "Agent Builder — conversation flow sends a message with tool call and receives response with thinking",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_flow.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    },
+    {
+      "id": "07f2e2ec83f1465-1e606eb0875fa7e",
+      "title": "Agent Builder — conversation history conversation history flows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_history.spec.ts",
+        "line": 40,
+        "column": 7
+      }
+    },
+    {
+      "id": "cbc4bd7b3b5d369-9efba35e786335a",
+      "title": "Agent Builder — create agent creates an agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/create_agent.spec.ts",
+        "line": 35,
+        "column": 9
+      }
+    },
+    {
+      "id": "faf4b84f20a89db-302640bd590430c",
+      "title": "Agent Builder — create tool should create an esql tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/create_tool.spec.ts",
+        "line": 49,
+        "column": 9
+      }
+    },
+    {
+      "id": "faf4b84f20a89db-e093aa2f0cfe7b5",
+      "title": "Agent Builder — create tool should create an index search tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/create_tool.spec.ts",
+        "line": 69,
+        "column": 9
+      }
+    },
+    {
+      "id": "3cecc7b5bdec8e7-f93503c6f8b3a5a",
+      "title": "Agent Builder — edit agent edit and clone agent journeys",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/edit_agent.spec.ts",
+        "line": 48,
+        "column": 9
+      }
+    },
+    {
+      "id": "42b38fcc9bbc6fc-7c8092363cca966",
+      "title": "Agent Builder — tools landing page renders tools page and table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/landing_page.spec.ts",
+        "line": 30,
+        "column": 9
+      }
+    },
+    {
+      "id": "42b38fcc9bbc6fc-30bb73a4ec01951",
+      "title": "Agent Builder — tools landing page bulk deletes tools from the table",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/landing_page.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    },
+    {
+      "id": "40b287cd9afb492-0d47014c43ac2ba",
+      "title": "Agent Builder — manage tool edits a tool from the tool details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
+        "line": 30,
+        "column": 9
+      }
+    },
+    {
+      "id": "40b287cd9afb492-b0e786aeb3f6806",
+      "title": "Agent Builder — manage tool clones a tool from the tool details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
+        "line": 53,
+        "column": 9
+      }
+    },
+    {
+      "id": "40b287cd9afb492-3db321511f9acba",
+      "title": "Agent Builder — manage tool tests a tool from the tool details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
+        "line": 80,
+        "column": 9
+      }
+    },
+    {
+      "id": "40b287cd9afb492-e17b3d84160a134",
+      "title": "Agent Builder — manage tool deletes a tool from the tool details page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
+        "line": 99,
+        "column": 9
+      }
+    },
+    {
+      "id": "40b287cd9afb492-c9006daa6d43368",
+      "title": "Agent Builder — manage tool views built-in tool as read-only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
+        "line": 122,
+        "column": 9
+      }
+    },
+    {
+      "id": "307e134d6220ae6-c4c6f662ad3fa16",
+      "title": "Agent Builder — MCP tools MCP tool flows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_tools.spec.ts",
+        "line": 54,
+        "column": 9
+      }
+    },
+    {
+      "id": "70adb5c9da960df-f9e4705a5e88388",
+      "title": "Agent Builder — sidebar agent switch embeddable sidebar agent switch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_agent_switch.spec.ts",
+        "line": 52,
+        "column": 9
+      }
+    },
+    {
+      "id": "95554bbabdfb9b7-13af72ec4c5ef00",
+      "title": "Agent Builder — sidebar conversation flow embeddable sidebar conversation flow",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_conversation_flow.spec.ts",
+        "line": 26,
+        "column": 9
+      }
+    },
+    {
+      "id": "4f72c4b1347af9c-dccba25ad811936",
+      "title": "Agent Builder — sidebar conversation history embeddable sidebar conversation history",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_conversation_history.spec.ts",
+        "line": 38,
+        "column": 9
+      }
+    },
+    {
+      "id": "817ba19dd1cfe1c-593e50afbb3e170",
+      "title": "Agent Builder — sidebar error handling embeddable sidebar error handling",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_error_handling.spec.ts",
+        "line": 29,
+        "column": 9
+      }
+    }
+  ]
+}
