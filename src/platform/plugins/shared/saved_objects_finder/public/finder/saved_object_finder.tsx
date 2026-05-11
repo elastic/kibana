@@ -364,7 +364,6 @@ class SavedObjectFinderUiClass extends React.Component<
       ...(tagColumn ? [tagColumn] : []),
     ];
     const pagination = {
-      pageIndex: this.pageIndex,
       initialPageSize: !!this.props.fixedPageSize ? this.props.fixedPageSize : pageSize ?? 10,
       pageSize: !!this.props.fixedPageSize ? undefined : pageSize,
       pageSizeOptions: PAGE_SIZE_OPTIONS,
