@@ -10,7 +10,8 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
-import { JsonTab } from './tabs/json_tab';
+import { JsonTab } from '../shared/tabs/json_tab';
+import { PREFIX } from '../../flyout/shared/test_ids';
 import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
 import { JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './components/test_ids';
@@ -88,6 +89,8 @@ export const getTabsDisplayed = ({
         defaultMessage="JSON"
       />
     ),
-    content: <JsonTab hit={hit} />,
+    content: (
+      <JsonTab value={hit.raw as unknown as Record<string, unknown>} data-test-subj={PREFIX} />
+    ),
   },
 ];

@@ -10,7 +10,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Indicator } from '../../../common/threat_intelligence/types/indicator';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
-import { JsonTab } from './tabs/json_tab';
+import { JsonTab } from '../shared/tabs/json_tab';
 import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
 import {
@@ -90,6 +90,12 @@ export const getTabsDisplayed = ({
         defaultMessage="JSON"
       />
     ),
-    content: <JsonTab indicator={indicator} />,
+    content: (
+      <JsonTab
+        value={indicator as unknown as Record<string, unknown>}
+        data-test-subj="indicators-flyout"
+        isEmpty={Object.keys(indicator.fields).length === 0}
+      />
+    ),
   },
 ];
