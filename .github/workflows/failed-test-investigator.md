@@ -123,8 +123,7 @@ Beyond the root-cause `classification` above, decide whether this failure should
   - `classification` is `test`
   - `confidence` is `high` or `medium`
   - You can identify a concrete test file path that currently exists on the default branch
-  - Test type is **Scout** (issue carries `scout-playwright` label) or **FTR** (FTR-style failure, no `scout-playwright` label, has a Buildkite FTR config path)
-  - Failure happened on a non-Cloud Buildkite pipeline (typically `kibana-on-merge` or `kibana-pull-request`)
+  - Failure happened on the `kibana-on-merge` Buildkite pipeline
   - The proposed fix is small and test-side: timing/wait, selector, fixture, cleanup, intercept, retry, `data-test-subj`, `localStorage` sync, `.within()` → `.find()`, etc.
   - No open PR already targets the same test file with a `flaky-fix:` label (search PRs to verify)
   - The fix does **not** require deleting the test, migrating Cypress → Scout, changing test layer (E2E → API/unit), unskipping a test whose feature may have changed, or touching CI configs / lockfiles / `package.json` / secrets
@@ -139,19 +138,11 @@ Beyond the root-cause `classification` above, decide whether this failure should
   - `classification` is `code` with `confidence` `high` or `medium`
   - Evidence points to a recent product-code commit, a feature-flag-exposed race in app code, or a consistent reproducible failure
 
-- `env-issue` — external / infrastructure / Cloud cause; Auto-Fix cannot help:
+- `env-issue` — external / infrastructure cause; Auto-Fix cannot help:
   - `classification` is `external`, OR
-  - Failure reproduces only on Elastic Cloud / MKI (e.g., "primary shards not active", "no node found", credential rotation), OR
   - Stale failure: no new failures in the last 2–3 weeks and no PR in flight
 
 - `inconclusive` — none of the above apply with enough confidence; evidence is missing.
-
-When `fixability` is `auto-fixable`, also emit a `flaky-runner-config` value: the exact `/flaky` argument the Auto-Fix agent will need to validate the fix later. Format examples:
-
-- Scout: `scoutConfig:<path/to/playwright.config.ts>:30`
-- FTR: `ftrConfig:<path/to/ftr-config.ts>:30`
-
-If you cannot determine the right config path, downgrade `fixability` to `needs-human` and explain in the comment.
 
 ## Auto-fix label rule
 
@@ -225,15 +216,13 @@ After the human-readable sections above, append exactly this HTML-comment-wrappe
 - `fixability`: <auto-fixable|needs-human|not-a-flake|env-issue|inconclusive>
 - `test.type`: <scout|ftr|jest|unknown>
 - `test.file`: <repo-relative path or "unknown">
-- `flaky-runner-config`: <scoutConfig:...:30 | ftrConfig:...:30 | n/a>
 <!-- /flaky-fix:metadata -->
 ```
 
 Rules for the footer:
 
 - Always emit the block, even when `fixability` is `inconclusive` or `not-a-flake`.
-- `flaky-runner-config` must be `n/a` unless `fixability` is `auto-fixable`.
-- `test.type` is `scout` if the issue carries the `scout-playwright` label, otherwise `ftr` for an FTR issue, `jest` for a Jest issue, or `unknown` if you cannot tell.
+- `test.type` is `scout` if the issue carries the `scout-playwright` label, otherwise `ftr` for an FTR-style failure, `jest` for a Jest failure, or `unknown` if you cannot tell.
 - If `fixability` is `auto-fixable`, you must also apply the `needs-flaky-fix` label to the triggering issue via `add-labels`. Do not apply it in any other case.
 
 ## Constraints
