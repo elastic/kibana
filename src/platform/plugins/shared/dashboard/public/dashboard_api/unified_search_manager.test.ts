@@ -13,6 +13,44 @@ import type { DashboardState } from '../../common';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 
 describe('initializeUnifiedSearchManager', () => {
+  describe('anyStateChange$', () => {
+    test('should not emit on subscribe and emit when any state changes', (done) => {
+      const lastSavedState$ = new BehaviorSubject<DashboardState>(getSampleDashboardState());
+      const unifiedSearchManager = initializeUnifiedSearchManager(
+        lastSavedState$.value,
+        new BehaviorSubject<boolean>(true),
+        new Subject<void>(),
+        () => lastSavedState$.value,
+        {
+          useUnifiedSearchIntegration: false,
+        }
+      );
+      let emitCount = 0;
+      unifiedSearchManager.internalApi.anyStateChange$.subscribe(() => {
+        emitCount++;
+        if (emitCount === 1) {
+          try {
+            const { time_range } = unifiedSearchManager.internalApi.getState();
+            expect(time_range).toEqual({
+              to: 'now',
+              from: 'now-7m',
+            });
+          } catch (error) {
+            // time_range assertion fails when
+            //anyStateChange$ emits on subscribe
+            done(error);
+            return;
+          }
+          done();
+        }
+      });
+      unifiedSearchManager.api.setTimeRange({
+        to: 'now',
+        from: 'now-7m',
+      })
+    });
+  });
+
   describe('startComparing', () => {
     test('Should return no changes when there are no changes', (done) => {
       const lastSavedState$ = new BehaviorSubject<DashboardState>(

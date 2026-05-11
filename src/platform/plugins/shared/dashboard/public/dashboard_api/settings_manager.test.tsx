@@ -26,7 +26,7 @@ describe('initializeSettingsManager', () => {
             const { title } = settingsManager.internalApi.serializeSettings();
             expect(title).toBe('new title');
           } catch (error) {
-            // titleassertion fails when
+            // title assertion fails when
             //anyStateChange$ emits on subscribe
             done(error);
             return;

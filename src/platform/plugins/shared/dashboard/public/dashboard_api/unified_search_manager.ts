@@ -31,6 +31,8 @@ import {
   distinctUntilChanged,
   finalize,
   map,
+  skip,
+  startWith,
   switchMap,
   tap,
 } from 'rxjs';
@@ -295,7 +297,7 @@ export function initializeUnifiedSearchManager(
     refreshInterval$,
     timeRange$,
     timeRestore$,
-  ]);
+  ]).pipe(skip(1));
 
   return {
     api: {
@@ -316,13 +318,16 @@ export function initializeUnifiedSearchManager(
       unifiedSearchFilters$,
       startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return anyStateChange$.pipe(
+          // anyStateChange$ does not emit on subscribe
+          // use startWith to compare unsaved changes on subscribe
+          startWith(undefined),
           debounceTime(COMPARE_DEBOUNCE),
-          map(([filters, query, refresh_interval, time_range]) => {
+          map(() => {
             return {
-              filters,
-              query,
-              refresh_interval,
-              time_range,
+              filters: asCodeFilters$.getValue(),
+              query: asCodeQuery$.getValue(),
+              refresh_interval: refreshInterval$.getValue(),
+              time_range: timeRange$.getValue(),
             };
           }),
           combineLatestWith(lastSavedState$),
