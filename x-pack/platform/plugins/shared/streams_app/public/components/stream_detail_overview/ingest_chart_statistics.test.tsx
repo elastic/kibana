@@ -16,6 +16,8 @@ const mockUseStreamsAppFetch = jest.fn();
 
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
+    core: { uiSettings: {} },
+    isServerless: false,
     dependencies: {
       start: {
         data: { search: { search: jest.fn() } },
