@@ -171,6 +171,11 @@ export function MochaReporterProvider({ getService }) {
           err && err.message ? err.message : err
         }`
       );
+      // Mocha fires 'test' (=> onTestStart, +2 indent) at the start of every
+      // attempt but only fires 'test end' (=> onTestEnd, -2 indent) ONCE after
+      // the final attempt. Without unwinding here, each retried test leaks +2
+      // indent and subsequent tests appear progressively nested in the log.
+      log.indent(-2);
     };
 
     onFail = (runnable) => {
