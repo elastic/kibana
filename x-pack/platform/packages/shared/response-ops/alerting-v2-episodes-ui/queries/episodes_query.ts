@@ -60,6 +60,8 @@ export interface EpisodesFilterState {
   tags?: string[] | null;
   /** Assignee UID — episodes whose last assignee matches this user profile UID */
   assigneeUid?: string;
+  /** When true, include building block alert episodes (hidden by default). */
+  includeBuildingBlocks?: boolean;
 }
 
 export interface EpisodesSortState {
@@ -128,7 +130,10 @@ const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
  * `.alert-actions` (last tags / deactivate state per group_hash, last assignee per episode),
  * then narrows to episode rows and derives `effective_status`.
  */
-export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
+export const buildEpisodesBaseQuery = (
+  search?: string,
+  includeBuildingBlocks = false
+): ComposerQuery => {
   const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM]);
 
   const trimmedSearch = search?.trim();
@@ -145,6 +150,9 @@ export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
   addGroupHashActionStats(query);
   addEpisodeIdActionStats(query);
   query.where`type == "alert"`;
+  if (!includeBuildingBlocks) {
+    query.where`building_block IS NULL`;
+  }
   addEpisodeAggregation(query);
   // Derive effective status: overridden to "inactive" when the latest action is "deactivate"
   query.pipe`EVAL effective_status = CASE(last_deactivate_action == "deactivate", "inactive", \`episode.status\`)`;
@@ -167,7 +175,10 @@ export const buildEpisodesQuery = (
   const sortDir = sortState.sortDirection.toUpperCase() as 'ASC' | 'DESC';
   const pageSizeParam = esql.par(undefined, PAGE_SIZE_ESQL_VARIABLE);
 
-  const query = buildEpisodesBaseQuery(filterState?.queryString?.trim());
+  const query = buildEpisodesBaseQuery(
+    filterState?.queryString?.trim(),
+    filterState?.includeBuildingBlocks ?? false
+  );
 
   if (filterState?.status) {
     query.where`effective_status == ${filterState.status}`;

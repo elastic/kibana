@@ -82,6 +82,11 @@ export const BULK_UNRESOLVE = i18n.translate('xpack.alertingV2.episodes.bulkActi
   defaultMessage: 'Unresolve',
 });
 
+export const INCLUDE_BUILDING_BLOCKS_LABEL = i18n.translate(
+  'xpack.alertingV2.episodes.filterBar.includeBuildingBlocks',
+  { defaultMessage: 'Include building block alerts' }
+);
+
 export const BULK_EDIT_TAGS = i18n.translate('xpack.alertingV2.episodes.bulkActions.editTags', {
   defaultMessage: 'Edit tags',
 });

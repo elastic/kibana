@@ -17,7 +17,7 @@ import { schema } from '@kbn/config-schema';
  * denormalization) without breaking the public API.
  */
 export const ruleSavedObjectAttributesSchema = schema.object({
-  kind: schema.oneOf([schema.literal('alert'), schema.literal('signal')]),
+  kind: schema.oneOf([schema.literal('alert'), schema.literal('signal'), schema.literal('building_block')]),
 
   metadata: schema.object({
     name: schema.string(),
