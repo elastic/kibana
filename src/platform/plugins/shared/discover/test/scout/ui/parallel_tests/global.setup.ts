@@ -24,6 +24,14 @@ import {
 globalSetupHook(
   'Setup Discover tests data',
   async ({ esClient, esArchiver, apiServices, config, log, kbnUrl }) => {
+    // Turn "isEsqlDefault" off by default for all tests
+    log.debug('[setup:discover] turning off isEsqlDefault by default for all tests');
+    await apiServices.core.settings({
+      'feature_flags.overrides': {
+        'discover.isEsqlDefault': false,
+      },
+    });
+
     // Logstash data for flyout stability tests
     log.debug(
       '[setup:logstash] loading logstash_functional ES data (only if it does not exist)...'
