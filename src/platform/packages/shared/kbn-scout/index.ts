@@ -35,6 +35,19 @@ export * from './src/playwright/eui_components';
 // Kibana-wide components
 export * from './src/playwright/ui_components';
 
+// Page-object wrappers and helpers for shared Kibana surfaces.
+export {
+  ContentListWrapper,
+  buildContentListSearch,
+  buildContentListUrlRegex,
+  registerContentListUrlSyncTests,
+} from './src/playwright/page_objects';
+export type {
+  ContentListUrlState,
+  ContentListUrlSyncSuiteOptions,
+  ContentListUrlSyncSpaceTest,
+} from './src/playwright/page_objects';
+
 // Scout core types
 export type {
   ScoutPlaywrightOptions,

@@ -25,7 +25,26 @@ import { LensApp } from './lens_app';
 import { LoginPage } from './login_page';
 import { OverlaysPage } from './overlays';
 import { VisualizeApp } from './visualize_app';
+import {
+  ContentListWrapper,
+  buildContentListSearch,
+  buildContentListUrlRegex,
+  registerContentListUrlSyncTests,
+} from './content_list';
+import type {
+  ContentListUrlState,
+  ContentListUrlSyncSuiteOptions,
+  ContentListUrlSyncSpaceTest,
+} from './content_list';
 import type { KibanaUrl } from '../../common/services/kibana_url';
+
+export {
+  ContentListWrapper,
+  buildContentListSearch,
+  buildContentListUrlRegex,
+  registerContentListUrlSyncTests,
+};
+export type { ContentListUrlState, ContentListUrlSyncSuiteOptions, ContentListUrlSyncSpaceTest };
 
 export interface PageObjectsFixtures {
   page: ScoutPage;
