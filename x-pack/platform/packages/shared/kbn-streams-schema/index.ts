@@ -13,6 +13,7 @@ export {
   WiredStream,
   WiredIngestUpsertRequest,
   isDraftStream,
+  isDraftGetResponse,
   type DraftStreamDefinition,
 } from './src/models/ingest/wired';
 export {
@@ -59,6 +60,7 @@ export {
   keepFields,
   namespacePrefixes,
   otelReservedFields,
+  aliases as otelFieldAliases,
   isNamespacedEcsField,
   isOtelReservedField,
   getRegularEcsField,
@@ -68,6 +70,7 @@ export { getInheritedFieldsFromAncestors } from './src/helpers/get_inherited_fie
 export { getInheritedSettings } from './src/helpers/get_inherited_settings';
 export {
   buildMetadataOption,
+  withUnmappedFieldsDirective,
   deriveQueryType,
   ensureMetadata,
   extractBucketColumnName,
@@ -291,6 +294,9 @@ export type { OnboardingResult } from './src/onboarding';
 export { OnboardingStep } from './src/onboarding';
 export { streamsOasDefinitions } from './src/oas_definitions';
 export type { StreamsOasDefinitions } from './src/oas_definitions';
+
+export { stripOtelAliases } from './src/helpers/strip_otel_aliases';
+export { mergeSourceIntoDocuments } from './src/helpers/merge_esql_source';
 
 export { streamMatchesIndexPatterns } from './src/helpers/stream_matches_index_patterns';
 export { DEFAULT_INDEX_PATTERNS } from './src/helpers/default_index_patterns';
