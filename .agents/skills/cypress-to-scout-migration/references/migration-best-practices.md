@@ -112,10 +112,7 @@ For state that's shared **across spec files** (e.g., data ingested in `global.se
 ```typescript
 import { globalTeardownHook } from '@kbn/scout-security'; // or '@kbn/scout' / '@kbn/scout-oblt'
 
-globalTeardownHook('Reset shared state', async ({ esClient, kbnClient, apiServices, log }) => {
-  // Delete indices / data streams created or seeded by global.setup.ts
-  await esClient.indices.delete({ index: 'my-suite-data-*', ignore_unavailable: true });
-
+globalTeardownHook('Reset shared state', async ({ kbnClient, apiServices, log }) => {
   // Revert global uiSettings or feature flags toggled for the whole suite
   await kbnClient.uiSettings.unset('my:setting');
   await apiServices.core.settings({ 'feature_flags.overrides': { 'my.flag': 'false' } });
