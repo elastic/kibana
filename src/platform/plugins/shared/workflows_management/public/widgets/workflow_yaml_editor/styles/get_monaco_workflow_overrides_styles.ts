@@ -146,5 +146,13 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
       padding-right: ${euiTheme.size.s};
       margin: 0;
     }
+
+    /* Keep collapsed chevrons always visible so folded regions are obvious at a glance,
+       even when the gutter is not hovered (showFoldingControls: 'mouseover' otherwise
+       fades them out together with the expanded chevrons). */
+    .monaco-editor.monaco-editor .margin-view-overlays .codicon-folding-collapsed,
+    .monaco-editor.monaco-editor .margin-view-overlays .codicon-folding-manual-collapsed {
+      opacity: 1;
+    }
   `;
 };
