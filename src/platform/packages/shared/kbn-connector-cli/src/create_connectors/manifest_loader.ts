@@ -72,7 +72,7 @@ async function resolveSecretField(
   }
 
   throw new Error(
-    `Secret "${name}" in manifest "${manifestName}" must have either a "value", a "vault" + "field" pair, or a "template" + "vars" object.`
+    `Secret "${name}" in manifest "${manifestName}" must have either a "value" or a "vault" + "field" pair, or a "template" + "vars" object.`
   );
 }
 
