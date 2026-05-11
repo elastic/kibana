@@ -286,19 +286,19 @@ This setting is not available in versions 8.0.0 through 8.2.0. As such, this set
 ### All supported versions [ec_all_supported_versions_5]
 
 `xpack.alerting.defaultRuleTaskTimeout`
-:   Specifies the default timeout for the all rule types tasks. Defaults to `5m`. Deprecated in versions 8.2+ and removed in versions 9.0+.
+:   Specifies the default timeout for all rule type tasks. Defaults to `5m`. Removed in 8.2. Use `xpack.alerting.rules.run.timeout` instead.
 
 `xpack.actions.microsoftGraphApiUrl`
 :   Specifies the URL to the Microsoft Graph server when using the MS Exchange Server email service. Defaults to `https://graph.microsoft.com/v1.0`.
 
 `xpack.alerting.maxEphemeralActionsPerAlert`
-:   Sets the number of actions that will be executed ephemerally. Defaults to `10`.
+:   Sets the number of actions that will be executed ephemerally. Defaults to `10`. Deprecated and ignored since Kibana 9.0. Ephemeral tasks were removed in 9.0; this setting has no effect on Kibana 9.0 and later.
 
 `xpack.task_manager.ephemeral_tasks.enabled`
-:   Enables an experimental feature that executes a limited (and configurable) number of actions in the same task as the alert which triggered them. These action tasks reduce the latency of the time it takes an action to run after it’s triggered, but are not persisted as SavedObjects. These non-persisted action tasks have a risk that they won’t be run at all if the Kibana instance running them exits unexpectedly. Defaults to `false`.
+:   Enables an experimental feature that executes a limited (and configurable) number of actions in the same task as the alert which triggered them. These action tasks reduce the latency of the time it takes an action to run after it’s triggered, but are not persisted as SavedObjects. These non-persisted action tasks have a risk that they won’t be run at all if the Kibana instance running them exits unexpectedly. Deprecated in 8.8 and ignored since Kibana 9.0. This setting has no effect on Kibana 9.0 and later. Defaults to `false`.
 
 `xpack.task_manager.ephemeral_tasks.request_capacity`
-:   Sets the size of the ephemeral queue. Defaults to `10`.
+:   Sets the size of the ephemeral queue. Deprecated in 8.8 and ignored since Kibana 9.0. This setting has no effect on Kibana 9.0 and later. Defaults to `10`.
 
 `xpack.actions.customHostSettings`
 :   An array of objects, one per host, containing the SSL/TLS settings used when executing connectors which make HTTPS and SMTP connections to the host servers.  For details about using this setting, check [Alerting and action settings in Kibana](/reference/configuration-reference/alerting-settings.md).
@@ -397,7 +397,7 @@ This setting is not available in versions 8.0.0 through 8.2.0. As such, this set
 :   Sets the maximum duration, also known as "absolute timeout". After this duration, the session will expire even if it is not idle. To learn more, check [Security settings in Kibana](/reference/configuration-reference/security-settings.md).
 
 `xpack.maps.showMapVisualizationTypes`
-:   Set to `true` if you want to create new region map visualizations.
+:   Set to `true` if you want to create new region map visualizations. Deprecated in Kibana 7.15 and removed in 8.0. This setting has no effect on Kibana 8.0 and later.
 
 `xpack.actions.allowedHosts`
 :   Set to an array of host names which actions such as email, slack, pagerduty, and webhook can connect to.  An element of `*` indicates any host can be connected to.  An empty array indicates no hosts can be connected to.  Default: `[ * ]`
@@ -583,9 +583,9 @@ When the config value is set to `auto`, the scroll context will be preserved for
 :   Set to any text string. To provide your own encryption key for reports, use this setting.
 
 `xpack.reporting.roles.enabled`
-:   When `true`, grants users access to the {{report-features}} when they are assigned the `reporting_user` role. Granting access to users this way is deprecated. Set to `false` and use [Kibana privileges](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges.md) instead.
+:   When `true`, grants users access to the {{report-features}} when they are assigned the `reporting_user` role. Granting access to users this way is deprecated. Set to `false` and use [Kibana privileges](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-privileges.md) instead. Removed in Kibana 9.0; the deprecated role-based model is no longer supported.
 
-Defaults to `true`.
+Defaults to `true` in versions before 9.0.
 
 `xpack.reporting.csv.scroll.size`
 :   Sets the number of documents retrieved from {{es}} for each scroll iteration during Kibana CSV export. Defaults to `500`.
