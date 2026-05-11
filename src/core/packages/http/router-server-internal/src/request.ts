@@ -92,12 +92,6 @@ export class CoreKibanaRequest<
       const rawParts = sanitizeRequest(req);
       requestParts = CoreKibanaRequest.validate(rawParts, routeValidator);
     }
-    // Normalize FakeRawRequest's top-level spaceId into app.spaceId so the
-    // constructor has a single source of truth (real Hapi requests already
-    // carry spaceId on app, set by Core's onRequest handler).
-    if (isFakeRawRequest(req) && req.spaceId !== undefined) {
-      (req.app ??= {} as Record<string, unknown>).spaceId = req.spaceId;
-    }
     return new CoreKibanaRequest(
       req,
       requestParts.params,
@@ -189,7 +183,9 @@ export class CoreKibanaRequest<
 
     this.id = appState?.requestId ?? uuidv4();
     this.uuid = appState?.requestUuid ?? uuidv4();
-    this.spaceId = appState?.spaceId ?? DEFAULT_SPACE_ID;
+    // Real Hapi requests carry spaceId on app state (set by Core's onRequest handler).
+    // FakeRawRequests carry it as a top-level field.
+    this.spaceId = (request as FakeRawRequest).spaceId ?? appState?.spaceId ?? DEFAULT_SPACE_ID;
     this.rewrittenUrl = appState?.rewrittenUrl;
     this.authzResult = appState?.authzResult;
     this.serverTiming = new RequestTimingImpl(appState?.timingState ?? { events: [] });
