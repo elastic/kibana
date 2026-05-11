@@ -53,10 +53,12 @@ export const getCommandContext = async (
         recommendedFields: [],
       };
       const views = await callbacks?.getViews?.();
+      const datasets = await callbacks?.getDatasets?.();
       context = {
         sources: await getSources(),
         editorExtensions,
         views: views?.views ?? [],
+        datasets: datasets?.datasets ?? [],
       };
       break;
     case 'join':
