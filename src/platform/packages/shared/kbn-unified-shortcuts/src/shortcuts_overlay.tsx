@@ -84,11 +84,7 @@ const ShortcutsOverlayFlexItem = ({ children }: PropsWithChildren) => {
  */
 export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlayProps>(
   ({ items, screenReaderHint, screenReaderAnnouncement, shouldOpen, runAction }, ref) => {
-    const {
-      claimActiveLeaderKeyInstance,
-      hasOtherActiveLeaderKeyInstance,
-      releaseActiveLeaderKeyInstance,
-    } = useShortcutsContext();
+    const { tryAcquireShortcutsLock, releaseShortcutsLock } = useShortcutsContext();
     const { euiTheme } = useEuiTheme();
     const [isVisible, setIsVisible] = useState(false);
     const [instanceId] = useState(() => Symbol('shortcuts-overlay'));
@@ -100,29 +96,22 @@ export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlay
         return true;
       }
 
-      if (hasOtherActiveLeaderKeyInstance(instanceId)) {
-        return false;
+      const lockAcquired = tryAcquireShortcutsLock(instanceId);
+
+      if (lockAcquired) {
+        setLiveAnnouncement(screenReaderAnnouncement);
+        setIsVisible(true);
       }
 
-      claimActiveLeaderKeyInstance(instanceId);
-      setLiveAnnouncement(screenReaderAnnouncement);
-      setIsVisible(true);
-
-      return true;
-    }, [
-      claimActiveLeaderKeyInstance,
-      hasOtherActiveLeaderKeyInstance,
-      instanceId,
-      isVisible,
-      screenReaderAnnouncement,
-    ]);
+      return lockAcquired;
+    }, [instanceId, isVisible, screenReaderAnnouncement, tryAcquireShortcutsLock]);
     const close = useCallback(() => {
       if (isVisible) {
-        releaseActiveLeaderKeyInstance(instanceId);
+        releaseShortcutsLock(instanceId);
         setLiveAnnouncement(undefined);
         setIsVisible(false);
       }
-    }, [instanceId, isVisible, releaseActiveLeaderKeyInstance]);
+    }, [instanceId, isVisible, releaseShortcutsLock]);
 
     useImperativeHandle(ref, () => ({ open }), [open]);
 
@@ -135,7 +124,7 @@ export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlay
           if (event.key !== 'Escape') {
             runAction(event);
           }
-        } else if (!hasOtherActiveLeaderKeyInstance(instanceId) && shouldOpen(event) && open()) {
+        } else if (shouldOpen(event) && open()) {
           consumeKeyboardEvent(event);
         }
       };
@@ -153,18 +142,10 @@ export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlay
         document.removeEventListener('keydown', onKeyDown, true);
         document.removeEventListener('pointerdown', onPointerDown, true);
       };
-    }, [
-      close,
-      hasOtherActiveLeaderKeyInstance,
-      instanceId,
-      isVisible,
-      open,
-      runAction,
-      shouldOpen,
-    ]);
+    }, [close, isVisible, open, runAction, shouldOpen]);
 
     useUnmount(() => {
-      releaseActiveLeaderKeyInstance(instanceId);
+      releaseShortcutsLock(instanceId);
     });
 
     return (

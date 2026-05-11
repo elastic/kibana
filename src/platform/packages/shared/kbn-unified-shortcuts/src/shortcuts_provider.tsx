@@ -32,9 +32,8 @@ type LeaderKeyShortcutsRegistry = Record<
 >;
 
 interface ShortcutsContextValue {
-  claimActiveLeaderKeyInstance: (instanceId: symbol) => void;
-  releaseActiveLeaderKeyInstance: (instanceId: symbol) => void;
-  hasOtherActiveLeaderKeyInstance: (instanceId: symbol) => boolean;
+  tryAcquireShortcutsLock: (instanceId: symbol) => boolean;
+  releaseShortcutsLock: (instanceId: symbol) => void;
   registerLeaderKeyShortcut: (registration: LeaderKeyShortcutRegistration) => () => void;
   registeredLeaderKeyShortcuts: LeaderKeyShortcutRegistration[];
 }
@@ -52,23 +51,24 @@ const ShortcutsContext = createContext<ShortcutsContextValue | undefined>(undefi
  * Provides shared keyboard shortcut coordination state to shortcut primitives.
  */
 export const ShortcutsProvider = ({ children }: ShortcutsProviderProps) => {
-  const activeLeaderKeyInstanceRef = useRef<symbol>();
+  const shortcutsLockRef = useRef<symbol>();
   const [leaderKeyShortcuts, setLeaderKeyShortcuts] = useState<LeaderKeyShortcutsRegistry>({});
   const actions = useMemo<ShortcutsContextActions>(() => {
     return {
-      claimActiveLeaderKeyInstance: (instanceId) => {
-        activeLeaderKeyInstanceRef.current = instanceId;
-      },
-      releaseActiveLeaderKeyInstance: (instanceId) => {
-        if (activeLeaderKeyInstanceRef.current === instanceId) {
-          activeLeaderKeyInstanceRef.current = undefined;
+      tryAcquireShortcutsLock: (instanceId) => {
+        const lockAcquired =
+          shortcutsLockRef.current === undefined || shortcutsLockRef.current === instanceId;
+
+        if (lockAcquired) {
+          shortcutsLockRef.current = instanceId;
         }
+
+        return lockAcquired;
       },
-      hasOtherActiveLeaderKeyInstance: (instanceId) => {
-        return (
-          activeLeaderKeyInstanceRef.current !== undefined &&
-          activeLeaderKeyInstanceRef.current !== instanceId
-        );
+      releaseShortcutsLock: (instanceId) => {
+        if (shortcutsLockRef.current === instanceId) {
+          shortcutsLockRef.current = undefined;
+        }
       },
       registerLeaderKeyShortcut: (registration) => {
         const normalizedLeaderKey = normalizeShortcutKey(registration.leaderKey);
