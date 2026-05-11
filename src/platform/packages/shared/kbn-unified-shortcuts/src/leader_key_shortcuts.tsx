@@ -7,23 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import useUnmount from 'react-use/lib/useUnmount';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLiveAnnouncer } from '@elastic/eui';
-import {
-  consumeKeyboardEvent,
-  hasModifierKey,
-  isEditableTarget,
-  normalizeShortcutKey,
-} from './shortcut_utils';
+import { hasModifierKey, isEditableTarget, normalizeShortcutKey } from './shortcut_utils';
 import {
   ShortcutsOverlay,
   ShortcutsOverlayDivider,
   ShortcutsOverlayItem,
+  type ShortcutsOverlayRef,
 } from './shortcuts_overlay';
 import { useShortcutsContext } from './shortcuts_provider';
-import { useShortcutsOverlaySession } from './use_shortcuts_overlay_session';
 
 /**
  * Describes a single follow-up key that can be pressed after a leader key sequence is opened.
@@ -91,14 +85,8 @@ export const LeaderKeyShortcuts = ({
   leaderKeyDescription,
   shortcuts,
 }: LeaderKeyShortcutsProps) => {
-  const {
-    claimActiveLeaderKeyInstance,
-    registerLeaderKeyShortcut,
-    releaseActiveLeaderKeyInstance,
-    hasOtherActiveLeaderKeyInstance,
-  } = useShortcutsContext();
-  const [isVisible, setIsVisible] = useState(false);
-  const [instanceId] = useState(() => Symbol(`leader-key-shortcuts:${leaderKey}`));
+  const { registerLeaderKeyShortcut } = useShortcutsContext();
+  const overlayRef = useRef<ShortcutsOverlayRef | null>(null);
   const normalizedLeaderKey = normalizeShortcutKey(leaderKey);
   const shortcutsByKey = useMemo(
     () => new Map(shortcuts.map((shortcut) => [normalizeShortcutKey(shortcut.key), shortcut])),
@@ -144,15 +132,30 @@ export const LeaderKeyShortcuts = ({
     [leaderKey, leaderKeyDescription, shortcuts]
   );
   const openShortcuts = useCallback(() => {
-    claimActiveLeaderKeyInstance(instanceId);
+    overlayRef.current?.open();
+  }, []);
+  const shouldOpen = useCallback(
+    (event: KeyboardEvent) => {
+      return (
+        normalizeShortcutKey(event.key) === normalizedLeaderKey &&
+        !hasModifierKey(event) &&
+        !isEditableTarget(event.target)
+      );
+    },
+    [normalizedLeaderKey]
+  );
+  const runAction = useCallback(
+    (event: KeyboardEvent) => {
+      shortcutsByKey.get(normalizeShortcutKey(event.key))?.onTrigger();
+    },
+    [shortcutsByKey]
+  );
+  const handleOpen = useCallback(() => {
     setLiveAnnouncement(screenReaderAnnouncement);
-    setIsVisible(true);
-  }, [claimActiveLeaderKeyInstance, instanceId, screenReaderAnnouncement]);
-  const closeShortcuts = useCallback(() => {
-    releaseActiveLeaderKeyInstance(instanceId);
+  }, [screenReaderAnnouncement]);
+  const handleClose = useCallback(() => {
     setLiveAnnouncement(undefined);
-    setIsVisible(false);
-  }, [instanceId, releaseActiveLeaderKeyInstance]);
+  }, []);
 
   useEffect(() => {
     return registerLeaderKeyShortcut({
@@ -162,50 +165,17 @@ export const LeaderKeyShortcuts = ({
     });
   }, [leaderKey, leaderKeyDescription, openShortcuts, registerLeaderKeyShortcut]);
 
-  useShortcutsOverlaySession({
-    isVisible,
-    onHiddenKeyDown: (event) => {
-      if (hasOtherActiveLeaderKeyInstance(instanceId)) {
-        return;
-      }
-
-      if (
-        normalizeShortcutKey(event.key) === normalizedLeaderKey &&
-        !hasModifierKey(event) &&
-        !isEditableTarget(event.target)
-      ) {
-        consumeKeyboardEvent(event);
-        openShortcuts();
-      }
-    },
-    onVisibleKeyDown: (event) => {
-      if (hasModifierKey(event)) {
-        closeShortcuts();
-        return;
-      }
-
-      consumeKeyboardEvent(event);
-
-      if (event.key === 'Escape') {
-        closeShortcuts();
-        return;
-      }
-
-      const shortcut = shortcutsByKey.get(normalizeShortcutKey(event.key));
-      shortcut?.onTrigger();
-      closeShortcuts();
-    },
-    onVisiblePointerDown: closeShortcuts,
-  });
-
-  useUnmount(() => {
-    releaseActiveLeaderKeyInstance(instanceId);
-  });
-
   return (
     <>
       {liveAnnouncement ? <EuiLiveAnnouncer>{liveAnnouncement}</EuiLiveAnnouncer> : null}
-      <ShortcutsOverlay isVisible={isVisible} items={overlayItems} />
+      <ShortcutsOverlay
+        ref={overlayRef}
+        items={overlayItems}
+        shouldOpen={shouldOpen}
+        runAction={runAction}
+        onOpen={handleOpen}
+        onClose={handleClose}
+      />
     </>
   );
 };
