@@ -16,3 +16,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new WorkflowsPlugin(initializerContext);
 }
 export type { WorkflowsPublicPluginSetup, WorkflowsPublicPluginStart } from './types';
+export type { WorkflowsBaseTelemetry } from './common/service/telemetry';
