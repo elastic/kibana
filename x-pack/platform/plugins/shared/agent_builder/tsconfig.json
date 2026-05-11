@@ -3,7 +3,15 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["../../../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
+  "include": [
+    "../../../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "test/scout_agent_builder/**/*",
+    "test/scout_agent_builder_smoke/**/*",
+    "test/scout_agent_builder_shared/**/*"
+  ],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
     "@kbn/core",
@@ -115,6 +123,15 @@
     "@kbn/response-ops-oauth-hooks",
     "@kbn/connector-specs",
     "@kbn/core-user-profile-browser",
-    "@kbn/security-plugin-types-public"
+    "@kbn/security-plugin-types-public",
+    "@kbn/scout-synthtrace",
+    "@kbn/synthtrace-client",
+    "@kbn/ftr-llm-proxy",
+    "@kbn/kbn-client",
+    "@kbn/test-subj-selector",
+    "@kbn/gen-ai-functional-testing",
+    "@kbn/repo-info",
+    "@kbn/test",
+    "@kbn/test-es-server"
   ]
 }

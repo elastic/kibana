@@ -9,19 +9,20 @@
 
 import React from 'react';
 
-import { EuiIcon, type IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiHasAppContext } from '@kbn/presentation-publishing';
 
 import type { VegaPluginStartDependencies } from './plugin';
-import VegaLogoSVG from './vega_logo.svg';
 import { vegaVisType } from './vega_type';
+import { VegaIcon } from './vega_icon';
 
 export function getAddVegaPanelAction(deps: VegaPluginStartDependencies) {
   return {
     id: 'addVegaPanelAction',
-    getIconType: () => VegaIcon,
+    getIconType: () => VegaPanelIcon,
     order: 0,
     isCompatible: async () => true,
     execute: async ({ embeddable }: EmbeddableApiContext) => {
@@ -45,6 +46,6 @@ export function getAddVegaPanelAction(deps: VegaPluginStartDependencies) {
   };
 }
 
-export const VegaIcon: IconType = (props) => (
-  <EuiIcon type={VegaLogoSVG} title={vegaVisType.titleInWizard} size="m" {...props} />
+const VegaPanelIcon: IconType = (props) => (
+  <EuiIcon type={VegaIcon} title={vegaVisType.titleInWizard} size="m" {...props} />
 );

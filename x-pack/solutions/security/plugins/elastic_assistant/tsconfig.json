@@ -107,6 +107,7 @@
     "@kbn/search-inference-endpoints",
     "@kbn/controls-constants",
     "@kbn/core-spaces-common",
+    "@kbn/ai-assistant-common",
   ],
   "exclude": [
     "target/**/*",
