@@ -549,6 +549,12 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
                   data-test-subj="mlSplomExploreInCustomVisualizationLink"
                 >
                   <EuiIconTip
+                    aria-label={i18n.translate(
+                      'xpack.ml.splom.exploreInCustomVisualizationAriaLabel',
+                      {
+                        defaultMessage: 'Scatterplot charts',
+                      }
+                    )}
                     content={i18n.translate('xpack.ml.splom.exploreInCustomVisualizationLabel', {
                       defaultMessage:
                         'Explore scatterplot charts in Vega based custom visualization',
