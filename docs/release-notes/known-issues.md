@@ -16,9 +16,15 @@ Applies to: {{stack}} 9.4.0
 
 Some existing dashboards are failing to load when a pinned control has `"title": null` in the saved object. This manifests as an error like `Invalid response. [pinned_panels.0.config.title]: expected value of type [string] but got [null].` error on the dashboard app.
 
-**Workaround**
+**Action**
 
-We're working on a way to mitigate the issue and will update this page shortly.
+If you have existing dashboards with controls, do not upgrade to {{stack}} 9.4.0. Upgrade to {{stack}} 9.4.1 when it becomes available.
+
+If you already upgraded to {{stack}} 9.4.0 and dashboards fail to open with this error, contact Elastic Support for remediation guidance.
+
+**Fix**
+
+A fix is planned for {{stack}} 9.4.1.
 
 ::::
 
