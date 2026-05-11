@@ -114,7 +114,6 @@ export async function fetchSampleDocuments({
         end,
         sampleSize: entityFilteredSize,
         whereCondition,
-        loadUnmappedFields: true,
       }).catch((err) => {
         logger.warn(`Entity-filtered sampling query failed: ${parseError(err).message}`);
         return EMPTY_SAMPLE;
