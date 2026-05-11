@@ -126,10 +126,14 @@ export class CasePlugin
 
     // Cases-as-data v2 — independent of v1, gated by its own feature flag. The
     // service is a no-op until `xpack.cases.analyticsV2.enabled` is true.
+    // Setup registers Task Manager task types (must run before start). Start
+    // (further down) bootstraps indices, the writer, and schedules the
+    // reconciliation task.
     this.casesAnalyticsV2Service = new CasesAnalyticsV2Service({
       logger: this.logger,
       enabled: this.caseConfig.analyticsV2.enabled,
     });
+    this.casesAnalyticsV2Service.setup({ taskManager: plugins.taskManager });
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
@@ -280,9 +284,19 @@ export class CasePlugin
     // Cases-as-data v2. Internally a no-op when the feature flag is off, so
     // safe to call unconditionally. Bootstrap errors are logged inside the
     // service and never propagate; `void`-ing keeps plugin start non-blocking.
-    void this.casesAnalyticsV2Service?.start({
-      esClient: core.elasticsearch.client.asInternalUser,
-    });
+    //
+    // The internal SO client is constructed once here and handed to the
+    // service for use by the reconciliation runner (which scans cases on a
+    // timer, with no request context).
+    if (this.casesAnalyticsV2Service) {
+      const v2InternalRepository = core.savedObjects.createInternalRepository([CASE_SAVED_OBJECT]);
+      const v2InternalSavedObjectsClient = new SavedObjectsClient(v2InternalRepository);
+      void this.casesAnalyticsV2Service.start({
+        esClient: core.elasticsearch.client.asInternalUser,
+        taskManager: plugins.taskManager,
+        internalSavedObjectsClient: v2InternalSavedObjectsClient,
+      });
+    }
 
     this.userProfileService.initialize({
       spaces: plugins.spaces,

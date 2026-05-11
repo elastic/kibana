@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import { ensureCaseIndex } from './ensure_indices/case';
+import { registerReconciliationTask, scheduleReconciliationTask } from './reconciliation';
 import {
   CasesAnalyticsV2Writer,
   V2_NOOP_WRITER,
@@ -20,25 +25,34 @@ interface CasesAnalyticsV2ServiceDeps {
 }
 
 /**
- * Dependencies the service needs at `start()` time but not earlier. Kept as a
- * separate input from constructor deps so plugin `setup()` can build the
- * service without yet having access to ES / Task Manager / data views.
- *
- * Future commits in this PR will extend this with `taskManager`,
- * `savedObjectsClient`, `dataViewsService`.
+ * Dependencies the service needs at plugin `setup()` time. Setup runs before
+ * Kibana is accepting requests; only contracts available in setup are valid
+ * here (Task Manager setup, logger, etc.).
+ */
+interface CasesAnalyticsV2SetupDeps {
+  taskManager: TaskManagerSetupContract;
+}
+
+/**
+ * Dependencies the service needs at plugin `start()` time. Start runs once
+ * core has finished booting; we get real Elasticsearch + Task Manager start
+ * contracts and an internal SO client suitable for scheduled background work.
  */
 interface CasesAnalyticsV2StartDeps {
   esClient: ElasticsearchClient;
+  taskManager: TaskManagerStartContract;
+  /** Internal (no request) SO client used by the reconciliation runner. */
+  internalSavedObjectsClient: SavedObjectsClientContract;
 }
 
 /**
  * Top-level orchestrator for cases-analytics v2.
  *
  * Owns the lifecycle of the v2 analytics subsystem: index bootstrap, writer
- * construction, reconciliation task registration, data-view sync, and operator
- * route registration. Constructed once in plugin `setup()`; `start()` fires
- * from the plugin's `start()` hook (with the lifecycle deps it needs);
- * `stop()` fires on plugin teardown.
+ * construction, reconciliation task registration, data-view sync (added in a
+ * later commit), and operator route registration (later commit). Constructed
+ * once in plugin `setup()`; lifecycle hooks (`setup`, `start`, `stop`) fire
+ * from the plugin's matching lifecycle hooks.
  *
  * v2 is gated by the `xpack.cases.analyticsV2.enabled` config. When disabled
  * (the default) every method is a no-op — nothing is registered, nothing is
@@ -73,10 +87,51 @@ export class CasesAnalyticsV2Service {
     upsertCase: (so) => this.writer.upsertCase(so),
     deleteCase: (id) => this.writer.deleteCase(id),
   };
+  /**
+   * Internal SO client captured at start, used by the reconciliation task
+   * runner. The runner needs an SO client without a request context (it runs
+   * on a Task Manager timer, not a user request).
+   */
+  private internalSavedObjectsClient: SavedObjectsClientContract | undefined;
 
   constructor(deps: CasesAnalyticsV2ServiceDeps) {
     this.logger = deps.logger.get('cases.analyticsV2');
     this.enabled = deps.enabled;
+  }
+
+  /**
+   * Plugin setup hook. Registers the reconciliation TASK TYPE with Task
+   * Manager — Task Manager requires task definitions before any node is
+   * accepting requests, so this must run in plugin `setup()`, not `start()`.
+   *
+   * The task runner's deps (SO client + writer) aren't available yet — we
+   * wire them via the `getRunnerDeps` closure, which the task runner invokes
+   * at run time (well after `start()` has populated them).
+   */
+  public setup(deps: CasesAnalyticsV2SetupDeps): void {
+    if (!this.enabled) {
+      this.logger.debug(
+        'cases-analytics v2 disabled (xpack.cases.analyticsV2.enabled=false); skipping setup'
+      );
+      return;
+    }
+    registerReconciliationTask({
+      taskManager: deps.taskManager,
+      logger: this.logger,
+      getRunnerDeps: async () => {
+        // Resolved at task-run time. If reconciliation fires before `start()`
+        // has populated `internalSavedObjectsClient` (unlikely; Task Manager
+        // waits for start), throwing here gets logged + retried on the
+        // next tick.
+        if (this.internalSavedObjectsClient == null) {
+          throw new Error('cases-analyticsV2: reconciliation fired before service start completed');
+        }
+        return {
+          savedObjectsClient: this.internalSavedObjectsClient,
+          writer: this.writerProxy,
+        };
+      },
+    });
   }
 
   /**
@@ -85,9 +140,10 @@ export class CasesAnalyticsV2Service {
    * When the feature flag is off, returns immediately at debug log level so an
    * operator who turned the flag off can still confirm the wiring is in place.
    *
-   * When on, today: bootstraps the `.cases` index and constructs the writer.
-   * Future commits also register the reconciliation task, ensure managed data
-   * views, and wire operator routes.
+   * When on, today: bootstraps the `.cases` index, constructs the real
+   * writer, captures the internal SO client for the reconciliation task, and
+   * schedules the reconciliation task instance. Future commits add data-view
+   * sync and operator route registration.
    *
    * Failures during bootstrap are logged inside `ensureCaseIndex` and never
    * thrown — the cases plugin must keep starting even if analytics has trouble.
@@ -110,6 +166,14 @@ export class CasesAnalyticsV2Service {
       esClient: deps.esClient,
       logger: this.logger,
     });
+
+    // Capture the SO client for the reconciliation task — the runner uses it
+    // to walk cases since the last cursor.
+    this.internalSavedObjectsClient = deps.internalSavedObjectsClient;
+
+    // Schedule the singleton reconciliation task. Idempotent; safe under
+    // concurrent node starts (Task Manager dedupes by id).
+    await scheduleReconciliationTask({ taskManager: deps.taskManager, logger: this.logger });
   }
 
   /**
@@ -126,8 +190,6 @@ export class CasesAnalyticsV2Service {
    * Stable writer reference for the cases SO services. Returns the same
    * proxy on every call; delegates to `V2_NOOP_WRITER` until `start()` runs
    * (and forever if the feature flag is off).
-   *
-   * Wired into the cases SO services in commit 4.
    */
   public getWriter(): CasesAnalyticsV2WriterContract {
     return this.writerProxy;
