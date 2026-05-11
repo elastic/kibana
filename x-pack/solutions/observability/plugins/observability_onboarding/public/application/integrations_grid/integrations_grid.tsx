@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { IntegrationsCategory } from './integrations_category';
@@ -26,6 +27,7 @@ import { MORE_INTEGRATION_TILES } from './more_integrations/tiles_config';
 
 export const IntegrationsGrid = () => {
   const titleId = useGeneratedHtmlId({ prefix: 'integrationsGridTitle' });
+  const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
 
   return (
     <section aria-labelledby={titleId}>
@@ -69,13 +71,17 @@ export const IntegrationsGrid = () => {
                 { defaultMessage: 'More integrations' }
               )}
             >
-              <EuiFlexGroup gutterSize="m">
-                {MORE_INTEGRATION_TILES.map((tile) => (
-                  <EuiFlexItem key={tile.id} grow={1}>
-                    <MoreIntegrationTile tile={tile} />
-                  </EuiFlexItem>
-                ))}
-                <EuiFlexItem grow={2}>
+              <EuiFlexGroup direction={isMediumBreakpoint ? 'column' : 'row'} gutterSize="m">
+                <EuiFlexItem grow={isMediumBreakpoint ? false : 5}>
+                  <EuiFlexGroup gutterSize="m">
+                    {MORE_INTEGRATION_TILES.map((tile) => (
+                      <EuiFlexItem key={tile.id} grow={1}>
+                        <MoreIntegrationTile tile={tile} />
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                <EuiFlexItem grow={isMediumBreakpoint ? false : 2}>
                   <BrowseAllTile />
                 </EuiFlexItem>
               </EuiFlexGroup>
