@@ -157,12 +157,11 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
 
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
-      name: (i: DataFrameAnalyticsListRow) => (
-        <DeleteActionName
-          isDisabled={isDataFrameAnalyticsRunning(i.stats.state) || !canDeleteDataFrameAnalytics}
-          item={i}
-        />
-      ),
+      name: (i: DataFrameAnalyticsListRow) => {
+        const isDisabled =
+          isDataFrameAnalyticsRunning(i.stats.state) || !canDeleteDataFrameAnalytics;
+        return isDisabled ? <DeleteActionName isDisabled={isDisabled} item={i} /> : deleteActionNameText;
+      },
       enabled: (i: DataFrameAnalyticsListRow) =>
         !isDataFrameAnalyticsRunning(i.stats.state) && canDeleteDataFrameAnalytics,
       description: deleteActionNameText,
