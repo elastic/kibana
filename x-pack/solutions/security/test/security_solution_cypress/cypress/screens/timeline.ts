@@ -224,6 +224,8 @@ export const ALERT_TABLE_FILE_NAME_VALUES = `${ALERT_TABLE_FILE_NAME_HEADER}[dat
 
 export const ACTIVE_TIMELINE_BOTTOM_BAR = '[data-test-subj="timeline-bottom-bar-title-button"]';
 
+export const TIMELINE_EVENT_COUNT_BADGE = '[data-test-subj="timeline-event-count-badge"]';
+
 // timeline table grid cell
 export const GET_TIMELINE_GRID_CELL = (fieldName: string) =>
   `[data-test-subj="dataGridRowCell"][data-gridcell-column-id="${fieldName}"]`;

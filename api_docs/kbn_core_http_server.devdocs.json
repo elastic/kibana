@@ -5013,6 +5013,10 @@
               },
               {
                 "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_datasets.ts"
+              },
+              {
+                "plugin": "esql",
                 "path": "src/platform/plugins/shared/esql/server/routes/get_esql_extensions_route.ts"
               },
               {
@@ -6566,6 +6570,10 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/apps/server-internal/src/bundle_routes/bundle_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/i18n/server-internal/src/routes/translations.test.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -8613,6 +8621,10 @@
               {
                 "plugin": "cps",
                 "path": "src/platform/plugins/shared/cps/server/routes/lookup_index.ts"
+              },
+              {
+                "plugin": "cps",
+                "path": "src/platform/plugins/shared/cps/server/routes/lookup_index.test.ts"
               },
               {
                 "plugin": "@kbn/test-suites-src",
