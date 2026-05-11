@@ -48,16 +48,6 @@ export class DashboardMarkdownPlugin
       return markdownEmbeddableFactory;
     });
 
-    // Registering the markdown saved object type with content management
-    // to support "Add from library" flyout in dashboard
-    // Only 'mSearch' implemented to support markdown saved objects in 'api/content_management/rpc/mSearch' route
-    // CRUD content management routes not implemented and throw
-    contentManagement.registry.register({
-      id: MARKDOWN_SAVED_OBJECT_TYPE,
-      name: 'Markdown',
-      version: { latest: 1 },
-    });
-
     embeddable.registerAddFromLibraryType({
       onAdd: async (container, savedObject) => {
         container.addNewPanel<MarkdownEmbeddableState>(
@@ -76,7 +66,7 @@ export class DashboardMarkdownPlugin
       savedObjectName: APP_NAME,
       getIconForSavedObject: () => APP_ICON,
       getSavedObjects: async (searchRequest) => {
-        const { markdownClient } = await import('./markdown_client/markdown_client');
+        const { markdownClient } = await import('./async_services');
         const result = await markdownClient.search({ ...searchRequest });
         return result.markdowns.map(({ id, data, meta }) => {
           return {
