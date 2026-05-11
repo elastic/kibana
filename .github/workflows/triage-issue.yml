@@ -1,16 +1,32 @@
-name: "Triage Issue with AI"
+## Scheduled bulk triage of open "needs-team" issues.
+## This workflow is designed to run in the elastic/kibana repository.
+## It calls the reusable workflow in elastic/kibana-automated-triage,
+## so no checkout or extra tokens are needed.
+##
+## Required secret in elastic/kibana:
+##   - GEMINI_KEY_ISSUE_TRIAGE  (Gemini API key)
+
+name: "Bulk triage needs-team issues"
+
 on:
-  issues:
-    types: [labeled]
+  schedule:
+    - cron: "0 * * * *" # every hour
+  workflow_dispatch:
+    inputs:
+      max-issues:
+        description: "Maximum number of issues to triage per run"
+        type: number
+        default: 10
+      dry-run:
+        description: "If true, only classify without applying labels"
+        type: boolean
+        default: false
 
 jobs:
-  triage:
-    if: github.event.label.name == 'needs-team'
-    uses: elastic/kibana-automated-triage/.github/workflows/triage-issue-on-issue-update.yml@main
+  bulk-triage:
+    uses: elastic/kibana-automated-triage/.github/workflows/triage-bulk.yml@main
     with:
-      issue-number: ${{ github.event.issue.number }}
-      issue-title: ${{ github.event.issue.title }}
-      issue-body: ${{ github.event.issue.body }}
-      dry-run: true
+      max-issues: ${{ inputs.max-issues || 10 }}
+      dry-run: ${{ inputs.dry-run || false }}
     secrets:
-      GEMINI_API_KEY: ${{ secrets.GEMINI_KEY_ISSUE_TRIAGE }}
+      GEMINI_KEY_ISSUE_TRIAGE: ${{ secrets.GEMINI_KEY_ISSUE_TRIAGE }}
