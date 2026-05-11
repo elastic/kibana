@@ -1,6 +1,5 @@
 {
-  "lastModified": "2026-02-12T10:42:22.867Z",
-  "sha1": "6ae9f3e6a691d6b01c99e2c9e15e8ea0b015e473",
+  "sha1": "4bfab72882a030ec273492780808890b2b4e47bc",
   "tests": [
     {
       "id": "405beff6794306f-a54347ac1e57e7e",
@@ -40,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 28,
+        "line": 33,
         "column": 12
       }
     },
@@ -54,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 43,
+        "line": 48,
         "column": 12
       }
     },
@@ -68,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_data.spec.ts",
-        "line": 23,
+        "line": 32,
         "column": 10
       }
     },
@@ -82,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_data.spec.ts",
-        "line": 37,
+        "line": 46,
         "column": 10
       }
     },
