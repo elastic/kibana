@@ -104,6 +104,43 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-browser-components",
+        "id": "def-public.ChromeNextGlobalHeader",
+        "type": "Function",
+        "tags": [],
+        "label": "ChromeNextGlobalHeader",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<unknown> & { readonly type: () => React.JSX.Element; }"
+        ],
+        "path": "src/core/packages/chrome/browser-components/src/chrome_next/global_header/global_header.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser-components",
+            "id": "def-public.ChromeNextGlobalHeader.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "lineNumber": 630,
+            "columnNumber": 10,
+            "deprecated": false,
+            "docsReferencedTypeName": "P",
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser-components",
         "id": "def-public.ClassicHeader",
         "type": "Function",
         "tags": [],

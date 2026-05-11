@@ -7,10 +7,17 @@
 
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { copyToClipboard, EuiFieldText, EuiFormAppend, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  copyToClipboard,
+  EuiFieldText,
+  EuiFormAppend,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import {
   manualMitigationCustomPipelineCopyPipelineNameAriaText,
+  manualMitigationCustomPipelineCopyPipelineNameSuccessText,
   manualMitigationCustomPipelineCreateEditPipelineLink,
   otherMitigationsCustomIngestPipeline,
 } from '../../../../../../../common/translations';
@@ -25,6 +32,7 @@ export function CreateEditPipelineLink({
 }) {
   const {
     services: {
+      notifications,
       share: {
         url: { locators },
       },
@@ -45,8 +53,11 @@ export function CreateEditPipelineLink({
   );
 
   const onClickHandler = useCallback(() => {
-    copyToClipboard(pipelineName);
-  }, [pipelineName]);
+    const copied = copyToClipboard(pipelineName);
+    if (copied) {
+      notifications.toasts.addSuccess(manualMitigationCustomPipelineCopyPipelineNameSuccessText);
+    }
+  }, [notifications.toasts, pipelineName]);
 
   return (
     <MitigationAccordion
@@ -54,61 +65,53 @@ export function CreateEditPipelineLink({
       isLoading={false}
       dataTestSubjPrefix="datasetQualityManualMitigationsPipeline"
     >
-      <FormattedMessage
-        id="xpack.datasetQuality.details.degradedField.possibleMitigation.otherMitigationsCustomPipelineText1"
-        defaultMessage="{lineNumber} Copy the following pipeline name"
-        values={{
-          lineNumber: (
-            <strong>
-              {i18n.translate('xpack.datasetQuality.editPipeline.strong.Label', {
-                defaultMessage: '1.',
-              })}
-            </strong>
-          ),
-        }}
-      />
-      <EuiSpacer size="m" />
-      <EuiFieldText
-        append={
-          <EuiFormAppend
-            element="button"
-            iconLeft="copy"
-            onClick={onClickHandler}
-            aria-label={manualMitigationCustomPipelineCopyPipelineNameAriaText}
-            data-test-subj="datasetQualityManualMitigationsPipelineNameCopyButton"
-          />
-        }
-        readOnly={true}
-        aria-label={manualMitigationCustomPipelineCopyPipelineNameAriaText}
-        value={pipelineName}
-        data-test-subj="datasetQualityManualMitigationsPipelineName"
-        fullWidth
-      />
-      <EuiSpacer size="m" />
-      <FormattedMessage
-        id="xpack.datasetQuality.details.degradedField.possibleMitigation.otherMitigationsCustomPipelineText2"
-        defaultMessage="{lineNumber} Using the name you copied, {createEditPipelineLink}"
-        values={{
-          lineNumber: (
-            <strong>
-              {i18n.translate('xpack.datasetQuality.editPipeline.strong.Label', {
-                defaultMessage: '2.',
-              })}
-            </strong>
-          ),
-          createEditPipelineLink: (
-            <EuiLink
-              data-test-subj="datasetQualityManualMitigationsPipelineLink"
-              data-test-url={pipelineUrl}
-              href={pipelineUrl}
-              target="_blank"
-            >
-              {manualMitigationCustomPipelineCreateEditPipelineLink}
-            </EuiLink>
-          ),
-        }}
-      />
-      <EuiSpacer size="m" />
+      <EuiText size="s">
+        <ol>
+          <li>
+            <FormattedMessage
+              id="xpack.datasetQuality.details.degradedField.possibleMitigation.otherMitigationsCustomPipelineText1"
+              defaultMessage="Copy the following pipeline name"
+            />
+            <EuiSpacer size="m" />
+            <EuiFieldText
+              append={
+                <EuiFormAppend
+                  element="button"
+                  iconLeft="copy"
+                  onClick={onClickHandler}
+                  aria-label={manualMitigationCustomPipelineCopyPipelineNameAriaText}
+                  data-test-subj="datasetQualityManualMitigationsPipelineNameCopyButton"
+                />
+              }
+              readOnly
+              aria-label={manualMitigationCustomPipelineCopyPipelineNameAriaText}
+              value={pipelineName}
+              data-test-subj="datasetQualityManualMitigationsPipelineName"
+              fullWidth
+            />
+            <EuiSpacer size="m" />
+          </li>
+          <li>
+            <FormattedMessage
+              id="xpack.datasetQuality.details.degradedField.possibleMitigation.otherMitigationsCustomPipelineText2"
+              defaultMessage="Using the name you copied, {createEditPipelineLink}"
+              values={{
+                createEditPipelineLink: (
+                  <EuiLink
+                    data-test-subj="datasetQualityManualMitigationsPipelineLink"
+                    data-test-url={pipelineUrl}
+                    href={pipelineUrl}
+                    target="_blank"
+                  >
+                    {manualMitigationCustomPipelineCreateEditPipelineLink}
+                  </EuiLink>
+                ),
+              }}
+            />
+            <EuiSpacer size="m" />
+          </li>
+        </ol>
+      </EuiText>
     </MitigationAccordion>
   );
 }
