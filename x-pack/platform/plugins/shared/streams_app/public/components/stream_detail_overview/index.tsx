@@ -26,6 +26,7 @@ export function StreamOverview() {
   const isIngest = Streams.ingest.all.GetResponse.is(definition);
   /** Match EuiFlexGroup responsive `m` max-breakpoint so sidebar stacks above main when narrow. */
   const isStackedOverviewLayout = useIsWithinBreakpoints(['xs', 's', 'm']);
+  const isMobileOverviewLayout = useIsWithinBreakpoints(['xs', 's']);
 
   const mainColumnStyle = useMemo<CSSProperties | undefined>(
     () => (isStackedOverviewLayout ? { width: '100%' } : undefined),
@@ -40,16 +41,9 @@ export function StreamOverview() {
   const mainSections: OverviewSection[] = [
     { id: 'ingest-rate-chart', node: <IngestRateChart />, show: true },
     { id: 'dataset-quality', node: <DataQualityCard />, show: isIngest },
-    // Ticket 2
-    // { id: 'systems', node: <SystemsPanel />, show: isIngest },
-    // { id: 'attachments', node: <AttachmentList />, show: true },
   ];
 
-  const sidebarSections: OverviewSection[] = [
-    { id: 'about', node: <AboutPanel />, show: true },
-    // Ticket 2
-    // { id: 'suggestions', node: <SuggestionsPanel />, show: true },
-  ];
+  const sidebarSections: OverviewSection[] = [{ id: 'about', node: <AboutPanel />, show: true }];
 
   return (
     <EuiFlexGroup
@@ -68,6 +62,7 @@ export function StreamOverview() {
                 grow={isStackedOverviewLayout}
                 css={
                   isStackedOverviewLayout &&
+                  !isMobileOverviewLayout &&
                   css`
                     max-width: 50%;
                   `

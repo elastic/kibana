@@ -52,6 +52,7 @@ export function IngestChartStatistics({
   isQueryStream,
 }: IngestChartStatisticsProps) {
   const {
+    core: { uiSettings },
     dependencies: {
       start: {
         data,
@@ -78,8 +79,9 @@ export function IngestChartStatistics({
         signal,
         start: timeStart - WEEK_MS,
         end: timeEnd - WEEK_MS,
+        uiSettings,
       }),
-    [esqlSource, timeStart, timeEnd, data.search.search]
+    [esqlSource, timeStart, timeEnd, data.search.search, uiSettings]
   );
 
   const storeStatsFetch = useStreamsAppFetch(

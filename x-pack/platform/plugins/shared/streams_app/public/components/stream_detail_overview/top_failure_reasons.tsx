@@ -37,6 +37,7 @@ const BAR_COLORS = ['danger', 'warning', 'subdued', 'subdued', 'subdued'] as con
 
 export function TopFailureReasons({ streamName, canReadFailureStore }: TopFailureReasonsProps) {
   const {
+    core: { uiSettings },
     dependencies: {
       start: { data },
     },
@@ -54,6 +55,7 @@ export function TopFailureReasons({ streamName, canReadFailureStore }: TopFailur
           signal,
           start: ts.start,
           end: ts.end,
+          uiSettings,
         });
       } catch (error: unknown) {
         // The ::failures backing index is created lazily — treat "Unknown index" as no data.
@@ -81,7 +83,7 @@ export function TopFailureReasons({ streamName, canReadFailureStore }: TopFailur
           })
         );
     },
-    [streamName, canReadFailureStore, data.search.search],
+    [streamName, canReadFailureStore, data.search.search, uiSettings],
     { withTimeRange: true, withRefresh: true }
   );
 
