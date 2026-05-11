@@ -179,4 +179,3 @@ async function runEsqlCount({
 
   return typeof total === 'number' ? total : 0;
 }
-

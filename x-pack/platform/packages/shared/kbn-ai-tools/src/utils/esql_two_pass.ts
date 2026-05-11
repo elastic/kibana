@@ -56,8 +56,9 @@ export function buildPass1Query({
   samplingProbability: number;
   kql?: string;
 }): string {
-  let query = esql.from(indices, ['_index', '_id'])
-    .pipe`EVAL doc_key = CONCAT(${esql.col('_index')}, ":", ${esql.col('_id')})`;
+  let query = esql.from(indices, ['_index', '_id']).pipe`EVAL doc_key = CONCAT(${esql.col(
+    '_index'
+  )}, ":", ${esql.col('_id')})`;
 
   if (kql) {
     query = query.where`KQL(${esql.str(kql)})`;

@@ -583,4 +583,3 @@ function buildCountQuery({ index }: { index: string | string[] }): string {
     'basic'
   );
 }
-
