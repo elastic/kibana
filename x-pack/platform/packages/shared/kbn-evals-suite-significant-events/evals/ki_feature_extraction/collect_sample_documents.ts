@@ -16,7 +16,6 @@ import {
   type KIFeatureExtractionScenario,
 } from '../../src/datasets';
 
-
 const addUniqueHitsToSample = ({
   hits,
   docs,

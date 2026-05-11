@@ -11,7 +11,6 @@ import type {
   AggregationsDateHistogramAggregation,
   AggregationsMaxAggregation,
   AggregationsMinAggregation,
-  SearchHit,
   AggregationsTopHitsAggregation,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
