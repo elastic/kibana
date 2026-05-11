@@ -13,6 +13,7 @@ import type {
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { SmlSearchFilters } from '../../../common/http_api/sml';
 
 /**
  * A single SML chunk to be indexed.
@@ -211,6 +212,12 @@ export interface SmlCrawler {
 }
 
 /**
+ * Per-type filter parameters for SML search.
+ * Re-exported from the shared HTTP API types so server and client use a single definition.
+ */
+export type { SmlSearchFilters } from '../../../common/http_api/sml';
+
+/**
  * SML service interface — exposed on the plugin start contract.
  */
 export interface SmlService {
@@ -225,6 +232,8 @@ export interface SmlService {
     request: KibanaRequest;
     /** When true, Elasticsearch omits `content` from `_source` (smaller payloads for autocomplete). */
     skipContent?: boolean;
+    /** Per-type filters. See {@link SmlSearchFilters}. */
+    filters?: SmlSearchFilters;
   }) => Promise<{ results: SmlSearchResult[]; total: number }>;
 
   /**

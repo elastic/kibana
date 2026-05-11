@@ -11,7 +11,13 @@ import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { SmlService, SmlSearchResult, SmlDocument, SmlTypeDefinition } from './types';
+import type {
+  SmlService,
+  SmlSearchResult,
+  SmlDocument,
+  SmlTypeDefinition,
+  SmlSearchFilters,
+} from './types';
 import { createSmlTypeRegistry, type SmlTypeRegistry } from './sml_type_registry';
 import { createSmlIndexer, type SmlIndexer } from './sml_indexer';
 import { SmlCrawlerImpl } from './sml_crawler';
@@ -84,7 +90,7 @@ class SmlServiceImpl implements SmlServiceInstance {
 
     return {
       getCrawler: () => crawler,
-      search: async ({ query, size = 10, spaceId, esClient, request, skipContent }) => {
+      search: async ({ query, size = 10, spaceId, esClient, request, skipContent, filters }) => {
         const userId = this.getUserIdForRequest(request);
         const rawResults = await searchSml({
           query,
@@ -94,6 +100,7 @@ class SmlServiceImpl implements SmlServiceInstance {
           esClient,
           logger,
           skipContent,
+          filters,
         });
         return filterResultsByPermissions({
           searchResult: rawResults,
@@ -404,6 +411,63 @@ const buildSmlSearchQuery = (query: string): Record<string, unknown> => {
 };
 
 /**
+ * Build an ES filter clause from per-type SML search filters.
+ *
+ * For each type with an `ids` constraint, the filter returns documents that
+ * either (a) match the type AND have an origin_id in the list, or (b) are
+ * NOT of the constrained type. Types without filters are unaffected.
+ */
+export const buildTypeFilters = (
+  filters: SmlSearchFilters | undefined
+): Record<string, unknown> | undefined => {
+  if (!filters) {
+    return undefined;
+  }
+
+  const clauses: Array<Record<string, unknown>> = [];
+
+  for (const [typeId, criteria] of Object.entries(filters)) {
+    if (!criteria?.ids) {
+      continue;
+    }
+
+    if (criteria.ids.length === 0) {
+      // Explicitly empty → exclude all documents of this type
+      clauses.push({ bool: { must_not: [{ term: { type: typeId } }] } });
+    } else {
+      // Non-empty → allow matching documents of this type, pass through other types
+      clauses.push({
+        bool: {
+          should: [
+            {
+              bool: {
+                must: [{ term: { type: typeId } }, { terms: { origin_id: criteria.ids } }],
+              },
+            },
+            {
+              bool: {
+                must_not: [{ term: { type: typeId } }],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    }
+  }
+
+  if (clauses.length === 0) {
+    return undefined;
+  }
+
+  if (clauses.length === 1) {
+    return clauses[0];
+  }
+
+  return { bool: { must: clauses } };
+};
+
+/**
  * Search the SML index. When the index hasn't been created yet,
  * the function returns empty results silently.
  */
@@ -415,6 +479,7 @@ const searchSml = async ({
   esClient,
   logger,
   skipContent,
+  filters,
 }: {
   query: string;
   size: number;
@@ -423,6 +488,7 @@ const searchSml = async ({
   esClient: IScopedClusterClient;
   logger: Logger;
   skipContent?: boolean;
+  filters?: SmlSearchFilters;
 }): Promise<{ results: SmlSearchResult[]; total: number }> => {
   logger.debug(
     `SML search: query=${JSON.stringify(
@@ -433,6 +499,20 @@ const searchSml = async ({
   try {
     const smlQuery = buildSmlSearchQuery(query);
 
+    const typeFilter = buildTypeFilters(filters);
+    const filterClauses: Array<Record<string, unknown>> = [
+      {
+        bool: {
+          should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
+          minimum_should_match: 1,
+        },
+      },
+      buildUserScopeFilter(userId),
+    ];
+    if (typeFilter) {
+      filterClauses.push(typeFilter);
+    }
+
     const response = await esClient.asInternalUser.search<SmlDocument>({
       index: smlIndexName,
       size,
@@ -441,15 +521,7 @@ const searchSml = async ({
       query: {
         bool: {
           must: [smlQuery],
-          filter: [
-            {
-              bool: {
-                should: [{ term: { spaces: spaceId } }, { term: { spaces: '*' } }],
-                minimum_should_match: 1,
-              },
-            },
-            buildUserScopeFilter(userId),
-          ],
+          filter: filterClauses,
         },
       },
       _source: skipContent ? { excludes: ['content', 'description'] } : true,

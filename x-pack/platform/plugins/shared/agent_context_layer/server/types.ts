@@ -19,6 +19,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type {
   SmlTypeDefinition,
   SmlSearchResult,
+  SmlSearchFilters,
   SmlDocument,
   SmlIndexAction,
 } from './services/sml/types';
@@ -47,6 +48,7 @@ export interface AgentContextLayerPluginStart {
     esClient: IScopedClusterClient;
     request: KibanaRequest;
     skipContent?: boolean;
+    filters?: SmlSearchFilters;
   }) => Promise<{ results: SmlSearchResult[]; total: number }>;
 
   checkItemsAccess: (params: {

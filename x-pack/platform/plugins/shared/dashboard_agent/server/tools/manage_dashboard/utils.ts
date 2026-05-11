@@ -15,12 +15,16 @@ import { type AttachmentVersion, getLatestVersion } from '@kbn/agent-builder-com
 import { z } from '@kbn/zod/v4';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import type { DashboardOperation } from './operations';
+import {
+  DASHBOARD_OPERATION_FAILURE_TYPES,
+  type DashboardOperationFailureType,
+} from './failure_types';
 
 /**
  * Failure record for tracking visualization errors.
  */
 export interface VisualizationFailure {
-  type: string;
+  type: DashboardOperationFailureType;
   identifier: string;
   error: string;
 }
@@ -118,7 +122,7 @@ export const resolvePanelsFromAttachments = ({
         `Error resolving dashboard panels from attachment "${attachmentId}": ${errorMessage}`
       );
       failures.push({
-        type: 'attachment_panels',
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.attachmentPanels,
         identifier: attachmentId,
         error: errorMessage,
       });
