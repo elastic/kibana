@@ -14,6 +14,13 @@ export interface RuleForClassification {
   id: string;
   attributes: RawRule;
   version?: string;
+  /**
+   * Rule's space-scoped namespace string (e.g. 'default' or a custom space id).
+   * Required to target the correct space when updating the rule via the SOR,
+   * because the `alert` saved object type is `multiple-isolated` and our
+   * write client is scoped to the default space.
+   */
+  namespace?: string;
 }
 
 export interface FetchFirstBatchOptions {
@@ -51,6 +58,10 @@ export const fetchFirstBatchOfRulesToConvert = async (
       id: so.id,
       attributes: so.attributes,
       version: so.version,
+      // `alert` is a `multiple-isolated` SO type, so `namespaces` always contains
+      // exactly one entry: the space the rule lives in. Capture it so downstream
+      // bulkUpdate can target that space instead of the default one.
+      namespace: so.namespaces?.[0],
     }));
     return { rules, hasMore };
   } finally {

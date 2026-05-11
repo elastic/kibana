@@ -40,6 +40,11 @@ export interface ApiKeyToConvert {
   attributes: RawRule;
   /** Rule's primary namespace for rulesClient.bulkEdit (space-scoped) */
   version?: string;
+  /**
+   * Space the rule lives in. Threaded through to bulkUpdate so the SOR targets
+   * the correct namespace for `multiple-isolated` rules.
+   */
+  namespace?: string;
 }
 
 export interface UiamApiKeyByRuleId {
@@ -49,6 +54,11 @@ export interface UiamApiKeyByRuleId {
   attributes: RawRule;
   /** Rule's primary namespace for rulesClient.bulkEdit (space-scoped) */
   version?: string;
+  /**
+   * Space the rule lives in. Threaded through to bulkUpdate so the SOR targets
+   * the correct namespace for `multiple-isolated` rules.
+   */
+  namespace?: string;
 }
 
 export interface GetApiKeysToConvertResult {

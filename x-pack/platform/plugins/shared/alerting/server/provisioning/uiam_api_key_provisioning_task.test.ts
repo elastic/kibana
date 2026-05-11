@@ -102,6 +102,7 @@ function createRuleSavedObject(overrides: {
   id: string;
   attributes: { apiKey?: string; apiKeyCreatedByUser?: boolean; uiamApiKey?: string };
   version?: string;
+  namespaces?: string[];
 }) {
   return {
     id: overrides.id,
@@ -110,6 +111,7 @@ function createRuleSavedObject(overrides: {
     version: overrides.version,
     score: 1,
     references: [],
+    ...(overrides.namespaces ? { namespaces: overrides.namespaces } : {}),
   };
 }
 
@@ -732,6 +734,97 @@ describe('UiamApiKeyProvisioningTask', () => {
         'Wrote provisioning status: 3 total (0 skipped, 2 failed conversions, 1 completed, 0 failed updates).',
         { tags: TAGS }
       );
+    });
+
+    it('passes each rule\'s space as the bulkUpdate `namespace` so non-default-space rules are not "not found"', async () => {
+      const uiamConvert = jest.fn().mockResolvedValue({
+        results: [
+          createConvertSuccessResult({ key: 'uiam-key-default' }),
+          createConvertSuccessResult({ key: 'uiam-key-space-a', id: 'essu_1' }),
+          createConvertSuccessResult({ key: 'uiam-key-space-b', id: 'essu_2' }),
+        ],
+      } as ConvertUiamAPIKeysResponse);
+
+      const { coreSetup, savedObjectsClient, encryptedSavedObjectsClient } =
+        createMockCore(uiamConvert);
+
+      mockPitFinderRules(encryptedSavedObjectsClient, [
+        createRuleSavedObject({
+          id: 'rule-default',
+          attributes: { apiKey: 'es-default', apiKeyCreatedByUser: false },
+          version: '1',
+          namespaces: ['default'],
+        }),
+        createRuleSavedObject({
+          id: 'rule-space-a',
+          attributes: { apiKey: 'es-space-a', apiKeyCreatedByUser: false },
+          version: '1',
+          namespaces: ['space-a'],
+        }),
+        // Defensive: a rule with no namespaces field (shouldn't happen for
+        // multi-namespace types in practice) must not crash; omit `namespace`.
+        createRuleSavedObject({
+          id: 'rule-no-namespace',
+          attributes: { apiKey: 'es-space-b', apiKeyCreatedByUser: false },
+          version: '1',
+        }),
+      ]);
+
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'rule-default',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: '1',
+            error: undefined,
+          },
+          {
+            id: 'rule-space-a',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: '1',
+            error: undefined,
+          },
+          {
+            id: 'rule-no-namespace',
+            type: RULE_SAVED_OBJECT_TYPE,
+            attributes: {},
+            references: [],
+            version: '1',
+            error: undefined,
+          },
+        ],
+      });
+
+      const task = new UiamApiKeyProvisioningTask({ logger, isServerless: true, analytics });
+      const taskManager = { registerTaskDefinitions: jest.fn() };
+      task.register({
+        core: coreSetup as CoreSetup<AlertingPluginsStart>,
+        taskManager: taskManager as never,
+      });
+
+      const def =
+        taskManager.registerTaskDefinitions.mock.calls[0][0][API_KEY_PROVISIONING_TASK_TYPE];
+      const runner = def.createTaskRunner({
+        taskInstance: createTaskInstance({ runs: 0 }),
+      });
+      await runner.run();
+
+      const bulkUpdateCall = savedObjectsClient.bulkUpdate.mock.calls[0][0];
+      expect(bulkUpdateCall).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'rule-default', namespace: 'default' }),
+          expect.objectContaining({ id: 'rule-space-a', namespace: 'space-a' }),
+        ])
+      );
+      const ruleNoNs = bulkUpdateCall.find((o: { id: string }) => o.id === 'rule-no-namespace') as {
+        namespace?: string;
+      };
+      expect(ruleNoNs).toBeDefined();
+      expect(ruleNoNs.namespace).toBeUndefined();
     });
 
     it('skips rules with no apiKey and writes SKIPPED status', async () => {
