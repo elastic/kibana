@@ -208,6 +208,14 @@ export const runExtractFieldsFlow = async (
   }
 
   const existingSteps = definition.ingest.processing.steps;
+  // Resolve the OTel-naming flag once and forward it to both seed-parser
+  // branches (and later to the `suggestProcessingPipeline` call). Without
+  // this, `processGrokPatterns` and `processDissectPattern` each re-fetch
+  // the stream definition inside their LLM-review step purely to compute
+  // this boolean — three `streamsClient.getStream` round-trips total per
+  // `design_pipeline { extract_fields: true }` call. Hoisting saves the
+  // two redundant ones (~half a second of latency).
+  const isOtel = isOtelStream(definition);
 
   const { documents, documentStatus, samplesInfo } = await resolveSamples(
     params.samples,
@@ -281,6 +289,7 @@ export const runExtractFieldsFlow = async (
         scopedClusterClient,
         streamsClient,
         fieldsMetadataClient,
+        useOtelFieldNames: isOtel,
         signal: compositeAbort.signal,
         logger: log,
       }),
@@ -295,6 +304,7 @@ export const runExtractFieldsFlow = async (
         scopedClusterClient,
         streamsClient,
         fieldsMetadataClient,
+        useOtelFieldNames: isOtel,
         signal: compositeAbort.signal,
         logger: log,
       }),
@@ -358,7 +368,6 @@ export const runExtractFieldsFlow = async (
       };
     }
 
-    const isOtel = isOtelStream(definition);
     const mappedFields = await fetchMappedFieldsForStreamProcessingSuggestions(
       scopedClusterClient.asCurrentUser,
       streamName

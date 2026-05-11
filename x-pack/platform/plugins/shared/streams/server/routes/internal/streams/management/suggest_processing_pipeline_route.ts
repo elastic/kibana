@@ -119,6 +119,13 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           );
         }
 
+        // Resolve the OTel-naming flag once and forward it into both
+        // seed-parser branches so their inner LLM-review calls don't
+        // re-fetch the stream definition. Without this, the route ends
+        // up making three `streamsClient.getStream` round-trips per
+        // suggestion call (this one + one inside each review).
+        const useOtelFieldNames = isOtelStream(stream);
+
         // Get the request abort signal to respect client disconnections
         const requestAbortSignal = getRequestAbortSignal(request);
 
@@ -159,6 +166,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               scopedClusterClient,
               streamsClient,
               fieldsMetadataClient,
+              useOtelFieldNames,
               signal: timeoutAbortController.signal,
               logger: log,
             })
@@ -176,6 +184,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
               scopedClusterClient,
               streamsClient,
               fieldsMetadataClient,
+              useOtelFieldNames,
               signal: timeoutAbortController.signal,
               logger: log,
             })
@@ -224,7 +233,6 @@ export const suggestProcessingPipelineRoute = createServerRoute({
         let effectiveParsingProcessor: GrokProcessor | DissectProcessor | undefined =
           parsingProcessor;
 
-        const isOtel = isOtelStream(stream);
         const mappedFields = await fetchMappedFieldsForStreamProcessingSuggestions(
           scopedClusterClient.asCurrentUser,
           stream.name
@@ -264,7 +272,7 @@ export const suggestProcessingPipelineRoute = createServerRoute({
           await buildDocumentStructureOverviewForPipelinePrompt(
             documentsForAgent,
             fieldsMetadataClient,
-            isOtel,
+            useOtelFieldNames,
             mappedFields
           )
         );

@@ -2157,6 +2157,33 @@ describe('runExtractFieldsFlow', () => {
       });
     });
 
+    describe('getStream round-trip optimization (#7)', () => {
+      it('forwards the resolved useOtelFieldNames flag to both seed-parser branches', async () => {
+        const deps = buildDeps();
+        arrangeStreamWithSamples(deps);
+        mockProcessGrokPatterns.mockResolvedValue(null);
+        mockProcessDissectPattern.mockResolvedValue(null);
+
+        await runExtractFieldsFlow({ streamName: ingestStreamName }, deps);
+
+        // The flag must be present (not `undefined`) on both calls and
+        // identical between them so neither branch needs to re-fetch
+        // the stream definition just to compute it. The exact value
+        // depends on `isOtelStream(definition)` for the fixture and is
+        // intentionally not pinned here — the contract under test is
+        // that the resolved value is shared between the two branches.
+        expect(mockProcessGrokPatterns).toHaveBeenCalledWith(
+          expect.objectContaining({ useOtelFieldNames: expect.any(Boolean) })
+        );
+        expect(mockProcessDissectPattern).toHaveBeenCalledWith(
+          expect.objectContaining({ useOtelFieldNames: expect.any(Boolean) })
+        );
+        const grokFlag = mockProcessGrokPatterns.mock.calls[0][0].useOtelFieldNames;
+        const dissectFlag = mockProcessDissectPattern.mock.calls[0][0].useOtelFieldNames;
+        expect(grokFlag).toBe(dissectFlag);
+      });
+    });
+
     describe('source-field conflict observability', () => {
       it('exposes pickedSourceField + sourceFieldConflictDetected=false on success when no existing step touches the picked field', async () => {
         const deps = buildDeps();

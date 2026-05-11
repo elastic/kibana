@@ -59,6 +59,7 @@ interface CommonSeedParsingArgs {
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
   fieldsMetadataClient: IFieldsMetadataClient;
+  useOtelFieldNames: boolean;
   signal: AbortSignal;
   logger: Logger;
 }
@@ -97,6 +98,7 @@ export const processGrokPatterns = async ({
   scopedClusterClient,
   streamsClient,
   fieldsMetadataClient,
+  useOtelFieldNames,
   signal,
   logger,
 }: CommonSeedParsingArgs): Promise<SeedParsingCandidate | null> => {
@@ -133,7 +135,7 @@ export const processGrokPatterns = async ({
           sampleMessages: reviewMessages,
           reviewFields,
           inferenceClient,
-          streamsClient,
+          useOtelFieldNames,
           fieldsMetadataClient,
           signal,
         });
@@ -213,6 +215,7 @@ export const processDissectPattern = async ({
   scopedClusterClient,
   streamsClient,
   fieldsMetadataClient,
+  useOtelFieldNames,
   signal,
   logger,
 }: CommonSeedParsingArgs): Promise<SeedParsingCandidate | null> => {
@@ -254,7 +257,7 @@ export const processDissectPattern = async ({
       sampleMessages: largestGroupMessages.slice(0, MAX_REVIEW_MESSAGES),
       reviewFields,
       inferenceClient,
-      streamsClient,
+      useOtelFieldNames,
       fieldsMetadataClient,
       signal,
     });

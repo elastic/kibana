@@ -17,10 +17,10 @@ import type { InferenceClient, ToolOptionsOfPrompt } from '@kbn/inference-common
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { ToolCallsOfToolOptions } from '@kbn/inference-common/src/chat_complete/tools_of';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import { isOtelStream } from '@kbn/streams-schema';
 import type { StreamsClient } from '../../../../lib/streams/client';
 import type { IPatternExtractionService } from '../../../../lib/pattern_extraction/pattern_extraction_service';
 import {
-  determineOtelFieldNameUsage,
   callInferenceWithPrompt,
   fetchFieldMetadata,
   normalizeFieldName,
@@ -81,6 +81,12 @@ export const handleProcessingDissectSuggestions = async ({
     `Starting extraction (stream=${streamName} messages=${params.body.sample_messages.length} connectorId=${connectorId})`
   );
 
+  // Resolve the stream definition once at the top so the inner
+  // `reviewDissectFields` call doesn't re-fetch it (and so the
+  // agent-builder caller can pass its already-resolved value through).
+  const stream = await streamsClient.getStream(streamName);
+  const useOtelFieldNames = isOtelStream(stream);
+
   const { dissectPattern, largestGroupMessages } =
     await patternExtractionService.extractDissectPattern(params.body.sample_messages);
 
@@ -110,7 +116,7 @@ export const handleProcessingDissectSuggestions = async ({
     sampleMessages: largestGroupMessages.slice(0, MAX_REVIEW_MESSAGES),
     reviewFields,
     inferenceClient,
-    streamsClient,
+    useOtelFieldNames,
     fieldsMetadataClient,
     signal,
   });
@@ -156,7 +162,7 @@ export async function reviewDissectFields({
   sampleMessages,
   reviewFields,
   inferenceClient,
-  streamsClient,
+  useOtelFieldNames,
   fieldsMetadataClient,
   signal,
 }: {
@@ -166,13 +172,10 @@ export async function reviewDissectFields({
   sampleMessages: string[];
   reviewFields: Record<string, { example_values: string[]; position: number }>;
   inferenceClient: InferenceClient;
-  streamsClient: StreamsClient;
+  useOtelFieldNames: boolean;
   fieldsMetadataClient: IFieldsMetadataClient;
   signal: AbortSignal;
 }) {
-  // Determine if we should use OTEL field names
-  const useOtelFieldNames = await determineOtelFieldNameUsage(streamsClient, streamName);
-
   // Call LLM inference to review fields
   const reviewResult = await callInferenceWithPrompt(
     inferenceClient,
