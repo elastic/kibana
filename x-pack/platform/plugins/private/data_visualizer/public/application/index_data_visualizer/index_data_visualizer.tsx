@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { pick } from 'lodash';
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { parse, stringify } from 'query-string';
@@ -52,6 +52,7 @@ const localStorage = new Storage(window.localStorage);
 export interface DataVisualizerStateContextProviderProps {
   IndexDataVisualizerComponent: FC<IndexDataVisualizerViewProps>;
   getAdditionalLinks?: GetAdditionalLinks;
+  headerContent?: ReactNode;
 }
 export type IndexDataVisualizerSpec = typeof IndexDataVisualizer;
 
@@ -113,6 +114,7 @@ const DataVisualizerESQLStateContextProvider = () => {
 const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderProps> = ({
   IndexDataVisualizerComponent,
   getAdditionalLinks,
+  headerContent,
 }) => {
   const { services } = useDataVisualizerKibana();
   const {
@@ -209,6 +211,11 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
       if (typeof parsedQueryString?.index === 'string') {
         const dataView = await dataViews.get(parsedQueryString.index);
         setCurrentDataView(dataView);
+      } else if (typeof parsedQueryString?.savedSearchId !== 'string') {
+        const defaultDataView = await dataViews.getDefaultDataView().catch(() => null);
+        if (defaultDataView) {
+          setCurrentDataView(defaultDataView);
+        }
       }
     };
     getDataView();
@@ -284,8 +291,11 @@ const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderP
           currentSavedSearch={currentSavedSearch}
           currentSessionId={currentSessionId}
           getAdditionalLinks={getAdditionalLinks}
+          headerContent={headerContent}
         />
-      ) : null}
+      ) : (
+        headerContent ?? null
+      )}
     </UrlStateContextProvider>
   );
 };
@@ -294,12 +304,14 @@ export interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   showFrozenDataTierChoice?: boolean;
   esql?: boolean;
+  headerContent?: ReactNode;
 }
 
 export const IndexDataVisualizer: FC<Props> = ({
   getAdditionalLinks,
   showFrozenDataTierChoice = true,
   esql,
+  headerContent,
 }) => {
   const coreStart = getCoreStart();
   const {
@@ -352,6 +364,7 @@ export const IndexDataVisualizer: FC<Props> = ({
               <DataVisualizerStateContextProvider
                 IndexDataVisualizerComponent={IndexDataVisualizerView}
                 getAdditionalLinks={getAdditionalLinks}
+                headerContent={headerContent}
               />
             ) : (
               <DataVisualizerESQLStateContextProvider />

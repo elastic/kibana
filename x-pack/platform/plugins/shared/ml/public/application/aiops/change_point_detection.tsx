@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ChangePointDetection } from '@kbn/aiops-plugin/public';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
 import { useFieldStatsTrigger, FieldStatsFlyoutProvider } from '@kbn/ml-field-stats-flyout';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
@@ -58,39 +58,63 @@ export const ChangePointDetectionPage: FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </MlPageHeader>
-      <ChangePointDetection
-        dataView={dataView}
-        savedSearch={savedSearch}
-        showFrozenDataTierChoice={showNodeInfo}
-        headerContent={headerContent}
-        appContextValue={{
-          embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
-          ...pick(services, [
-            'analytics',
-            'application',
-            'cases',
-            'charts',
-            'data',
-            'embeddable',
-            'executionContext',
-            'fieldFormats',
-            'http',
-            'i18n',
-            'lens',
-            'notifications',
-            'share',
-            'storage',
-            'theme',
-            'uiActions',
-            'uiSettings',
-            'unifiedSearch',
-            'usageCollection',
-            'userProfile',
-            'cps',
-          ]),
-          fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
-        }}
-      />
+      {!dataView ? (
+        <>
+          {headerContent}
+          <EuiEmptyPrompt
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.changePointDetection.noDataViewTitle"
+                  defaultMessage="No data view selected"
+                />
+              </h2>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.ml.changePointDetection.noDataViewBody"
+                  defaultMessage="Select a data view or Discover session to get started."
+                />
+              </p>
+            }
+          />
+        </>
+      ) : (
+        <ChangePointDetection
+          dataView={dataView}
+          savedSearch={savedSearch}
+          showFrozenDataTierChoice={showNodeInfo}
+          headerContent={headerContent}
+          appContextValue={{
+            embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
+            ...pick(services, [
+              'analytics',
+              'application',
+              'cases',
+              'charts',
+              'data',
+              'embeddable',
+              'executionContext',
+              'fieldFormats',
+              'http',
+              'i18n',
+              'lens',
+              'notifications',
+              'share',
+              'storage',
+              'theme',
+              'uiActions',
+              'uiSettings',
+              'unifiedSearch',
+              'usageCollection',
+              'userProfile',
+              'cps',
+            ]),
+            fieldStats: { useFieldStatsTrigger, FieldStatsFlyoutProvider },
+          }}
+        />
+      )}
       <HelpMenu
         docLink={services.docLinks.links.aggs.change_point}
         appName={i18n.translate('xpack.ml.changePointDetection.pageHeader', {

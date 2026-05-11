@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import type { Required } from 'utility-types';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import {
-  useEuiBreakpoint,
   useIsWithinMaxBreakpoint,
   EuiFlexGroup,
   EuiFlexItem,
@@ -104,9 +102,13 @@ export interface IndexDataVisualizerViewProps {
   currentSavedSearch: SavedSearch | null;
   currentSessionId?: string;
   getAdditionalLinks?: GetAdditionalLinks;
+  headerContent?: ReactNode;
 }
 
-export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVisualizerProps) => {
+export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = ({
+  headerContent,
+  ...dataVisualizerProps
+}) => {
   const [savedRandomSamplerPreference, saveRandomSamplerPreference] = useStorage<
     DVKey,
     DVStorageMapped<typeof DV_RANDOM_SAMPLER_PREFERENCE>
@@ -458,12 +460,6 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
   );
 
   const isWithinLargeBreakpoint = useIsWithinMaxBreakpoint('l');
-  const dvPageHeader = css({
-    [useEuiBreakpoint(['xs', 's', 'm', 'l'])]: {
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-    },
-  });
 
   const queryNeedsUpdate = useMemo(
     () => (localQueryString !== dataVisualizerListState.searchString ? true : undefined),
@@ -519,40 +515,47 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
       paddingSize="none"
     >
       <EuiPageTemplate.Section>
-        <EuiPageTemplate.Header
-          data-test-subj="dataVisualizerPageHeader"
-          css={dvPageHeader}
-          pageTitle={
-            <>
-              {currentDataView.getName()}
-              {/* TODO: This management section shouldn't live inside the header */}
-              <DataVisualizerDataViewManagement currentDataView={currentDataView} />
-            </>
-          }
-          rightSideGroupProps={{
-            gutterSize: 's',
-            'data-test-subj': 'dataVisualizerTimeRangeSelectorSection',
-          }}
-          rightSideItems={[
-            <DatePickerWrapper
-              isAutoRefreshOnly={!hasValidTimeField}
-              showRefresh={!hasValidTimeField}
-              width="full"
-              needsUpdate={queryNeedsUpdate}
-              onRefresh={handleRefresh}
-            />,
-            hasValidTimeField && (
-              <FullTimeRangeSelector
-                frozenDataPreference={frozenDataPreference}
-                setFrozenDataPreference={setFrozenDataPreference}
-                dataView={currentDataView}
-                query={undefined}
-                disabled={false}
-                timefilter={timefilter}
-              />
-            ),
-          ]}
-        />
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="spaceBetween"
+          responsive={false}
+          data-test-subj="dataVisualizerTimeRangeSelectorSection"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>{headerContent ?? null}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <DataVisualizerDataViewManagement currentDataView={currentDataView} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              {hasValidTimeField && (
+                <EuiFlexItem grow={false}>
+                  <FullTimeRangeSelector
+                    frozenDataPreference={frozenDataPreference}
+                    setFrozenDataPreference={setFrozenDataPreference}
+                    dataView={currentDataView}
+                    query={undefined}
+                    disabled={false}
+                    timefilter={timefilter}
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <DatePickerWrapper
+                  isAutoRefreshOnly={!hasValidTimeField}
+                  showRefresh={!hasValidTimeField}
+                  width="full"
+                  needsUpdate={queryNeedsUpdate}
+                  onRefresh={handleRefresh}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
 
         <EuiFlexGroup gutterSize="m" direction={isWithinLargeBreakpoint ? 'column' : 'row'}>

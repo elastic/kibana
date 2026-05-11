@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IndexDataVisualizerSpec } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import useMountedState from 'react-use/lib/useMountedState';
 import type {
   GetAdditionalLinksParams,
@@ -202,7 +202,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
     <Fragment>
       {IndexDataVisualizer !== null ? (
         <>
-          <MlPageHeader rightSideItems={dataSourcePicker}>
+          <MlPageHeader>
             <EuiFlexGroup gutterSize="s" alignItems="center" direction="row">
               <PageTitle
                 title={
@@ -221,11 +221,36 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
               ) : null}
             </EuiFlexGroup>
           </MlPageHeader>
-          <IndexDataVisualizer
-            getAdditionalLinks={getAdditionalLinks}
-            showFrozenDataTierChoice={showNodeInfo}
-            esql={esql}
-          />
+          {!dataView && !esql ? (
+            <>
+              {dataSourcePicker}
+              <EuiEmptyPrompt
+                title={
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.ml.indexDataVisualizer.noDataViewTitle"
+                      defaultMessage="No data view selected"
+                    />
+                  </h2>
+                }
+                body={
+                  <p>
+                    <FormattedMessage
+                      id="xpack.ml.indexDataVisualizer.noDataViewBody"
+                      defaultMessage="Select a data view or Discover session to get started."
+                    />
+                  </p>
+                }
+              />
+            </>
+          ) : (
+            <IndexDataVisualizer
+              getAdditionalLinks={getAdditionalLinks}
+              showFrozenDataTierChoice={showNodeInfo}
+              esql={esql}
+              headerContent={dataSourcePicker}
+            />
+          )}
         </>
       ) : null}
       <HelpMenu docLink={docLinks.links.ml.guide} />

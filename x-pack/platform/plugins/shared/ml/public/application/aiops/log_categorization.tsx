@@ -12,6 +12,7 @@ import { pick } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LogCategorization } from '@kbn/aiops-plugin/public';
 import { AIOPS_EMBEDDABLE_ORIGIN } from '@kbn/aiops-common/constants';
+import { EuiEmptyPrompt } from '@elastic/eui';
 
 import { useDataSource } from '../contexts/ml/data_source_context';
 import { useMlKibana } from '../contexts/kibana';
@@ -47,37 +48,61 @@ export const LogCategorizationPage: FC = () => {
       <MlPageHeader>
         <PageTitle title={pageTitle} />
       </MlPageHeader>
-      <LogCategorization
-        dataView={dataView}
-        savedSearch={savedSearch}
-        showFrozenDataTierChoice={showNodeInfo}
-        headerContent={headerContent}
-        appContextValue={{
-          embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
-          ...pick(services, [
-            'analytics',
-            'application',
-            'charts',
-            'data',
-            'executionContext',
-            'fieldFormats',
-            'http',
-            'i18n',
-            'lens',
-            'notifications',
-            'share',
-            'storage',
-            'theme',
-            'uiActions',
-            'uiSettings',
-            'unifiedSearch',
-            'userProfile',
-            'embeddable',
-            'cases',
-            'cps',
-          ]),
-        }}
-      />
+      {!dataView ? (
+        <>
+          {headerContent}
+          <EuiEmptyPrompt
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.logCategorization.noDataViewTitle"
+                  defaultMessage="No data view selected"
+                />
+              </h2>
+            }
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.ml.logCategorization.noDataViewBody"
+                  defaultMessage="Select a data view or Discover session to get started."
+                />
+              </p>
+            }
+          />
+        </>
+      ) : (
+        <LogCategorization
+          dataView={dataView}
+          savedSearch={savedSearch}
+          showFrozenDataTierChoice={showNodeInfo}
+          headerContent={headerContent}
+          appContextValue={{
+            embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
+            ...pick(services, [
+              'analytics',
+              'application',
+              'charts',
+              'data',
+              'executionContext',
+              'fieldFormats',
+              'http',
+              'i18n',
+              'lens',
+              'notifications',
+              'share',
+              'storage',
+              'theme',
+              'uiActions',
+              'uiSettings',
+              'unifiedSearch',
+              'userProfile',
+              'embeddable',
+              'cases',
+              'cps',
+            ]),
+          }}
+        />
+      )}
       <HelpMenu docLink={services.docLinks.links.ml.guide} />
     </>
   );
