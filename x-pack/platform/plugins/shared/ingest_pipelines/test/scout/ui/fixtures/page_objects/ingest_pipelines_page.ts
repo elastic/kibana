@@ -21,6 +21,39 @@ export class IngestPipelinesPage {
   public readonly navigationBlockConfirmModal: Locator;
   public readonly geoipEmptyListPrompt: Locator;
   public readonly deleteManagedAssetsCallout: Locator;
+  private readonly createPipelineDropdown: Locator;
+  private readonly createNewPipelineButton: Locator;
+  private readonly createPipelineFromCsvButton: Locator;
+  private readonly nameFieldInput: Locator;
+  private readonly descriptionField: Locator;
+  private readonly versionToggle: Locator;
+  private readonly versionFieldInput: Locator;
+  private readonly submitButton: Locator;
+  private readonly fileInput: Locator;
+  private readonly processFileButton: Locator;
+  private readonly continueToCreateButton: Locator;
+  private readonly pipelineTableRows: Locator;
+  private readonly pipelineTableRowNames: Locator;
+  private readonly pipelineTableSearch: Locator;
+  private readonly flyoutCloseButton: Locator;
+  private readonly detailsPanelTitle: Locator;
+  private readonly tablePaginationPopoverButton: Locator;
+  private readonly tablePagination50Rows: Locator;
+  private readonly logo: Locator;
+  private readonly filtersDropdown: Locator;
+  private readonly managedFilter: Locator;
+  private readonly actionsPopoverButton: Locator;
+  private readonly deletePipelineButton: Locator;
+  private readonly manageProcessorsLink: Locator;
+  private readonly manageProcessorsTitle: Locator;
+  private readonly addGeoipDatabaseButton: Locator;
+  private readonly databaseTypeSelect: Locator;
+  private readonly databaseNameSelect: Locator;
+  private readonly maxmindField: Locator;
+  private readonly addGeoipDatabaseSubmitButton: Locator;
+  private readonly geoipDatabaseListRows: Locator;
+  private readonly geoipDatabaseConfirmation: Locator;
+  private readonly deleteGeoipDatabaseSubmitButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.appTitle = this.page.testSubj.locator('appTitle');
@@ -29,6 +62,39 @@ export class IngestPipelinesPage {
     this.navigationBlockConfirmModal = this.page.testSubj.locator('navigationBlockConfirmModal');
     this.geoipEmptyListPrompt = this.page.testSubj.locator('geoipEmptyListPrompt');
     this.deleteManagedAssetsCallout = this.page.testSubj.locator('deleteManagedAssetsCallout');
+    this.createPipelineDropdown = this.page.testSubj.locator('createPipelineDropdown');
+    this.createNewPipelineButton = this.page.testSubj.locator('createNewPipeline');
+    this.createPipelineFromCsvButton = this.page.testSubj.locator('createPipelineFromCsv');
+    this.nameFieldInput = this.page.testSubj.locator('nameField').locator('input');
+    this.descriptionField = this.page.testSubj.locator('descriptionField');
+    this.versionToggle = this.page.testSubj.locator('versionToggle');
+    this.versionFieldInput = this.page.testSubj.locator('versionField').locator('input');
+    this.submitButton = this.page.testSubj.locator('submitButton');
+    this.fileInput = this.page.locator('input[type="file"]');
+    this.processFileButton = this.page.testSubj.locator('processFileButton');
+    this.continueToCreateButton = this.page.testSubj.locator('continueToCreate');
+    this.pipelineTableRows = this.page.testSubj.locator('pipelineTableRow');
+    this.pipelineTableRowNames = this.page.testSubj.locator('pipelineTableRow-name');
+    this.pipelineTableSearch = this.page.testSubj.locator('pipelineTableSearch');
+    this.flyoutCloseButton = this.page.testSubj.locator('euiFlyoutCloseButton');
+    this.detailsPanelTitle = this.page.testSubj.locator('detailsPanelTitle');
+    this.tablePaginationPopoverButton = this.page.testSubj.locator('tablePaginationPopoverButton');
+    this.tablePagination50Rows = this.page.testSubj.locator('tablePagination-50-rows');
+    this.logo = this.page.testSubj.locator('logo');
+    this.filtersDropdown = this.page.testSubj.locator('filtersDropdown');
+    this.managedFilter = this.page.testSubj.locator('managedFilter');
+    this.actionsPopoverButton = this.page.testSubj.locator('actionsPopoverButton');
+    this.deletePipelineButton = this.page.testSubj.locator('deletePipelineButton');
+    this.manageProcessorsLink = this.page.testSubj.locator('manageProcessorsLink');
+    this.manageProcessorsTitle = this.page.testSubj.locator('manageProcessorsTitle');
+    this.addGeoipDatabaseButton = this.page.testSubj.locator('addGeoipDatabaseButton');
+    this.databaseTypeSelect = this.page.testSubj.locator('databaseTypeSelect');
+    this.databaseNameSelect = this.page.testSubj.locator('databaseNameSelect');
+    this.maxmindField = this.page.testSubj.locator('maxmindField');
+    this.addGeoipDatabaseSubmitButton = this.page.testSubj.locator('addGeoipDatabaseSubmit');
+    this.geoipDatabaseListRows = this.page.testSubj.locator('geoipDatabaseListRow');
+    this.geoipDatabaseConfirmation = this.page.testSubj.locator('geoipDatabaseConfirmation');
+    this.deleteGeoipDatabaseSubmitButton = this.page.testSubj.locator('deleteGeoipDatabaseSubmit');
   }
 
   async goto() {
@@ -41,43 +107,35 @@ export class IngestPipelinesPage {
   }
 
   async createNewPipeline({ name, description, version }: PipelineForm) {
-    await this.page.testSubj.locator('createPipelineDropdown').click();
-    await this.page.testSubj.locator('createNewPipeline').click();
-    await this.page.testSubj.locator('nameField').locator('input').fill(name);
-    const descriptionField = this.page.testSubj.locator('descriptionField');
-    const descriptionTextArea = descriptionField.locator('textarea');
-    if (await descriptionTextArea.count()) {
-      await descriptionTextArea.fill(description);
-    } else {
-      await descriptionField.locator('input').fill(description);
-    }
+    await this.createPipelineDropdown.click();
+    await this.createNewPipelineButton.click();
+    await this.nameFieldInput.fill(name);
+    await this.fillDescription(description);
 
     if (version) {
-      await this.page.testSubj.locator('versionToggle').click();
-      await this.page.testSubj.locator('versionField').locator('input').fill(version.toString());
+      await this.versionToggle.click();
+      await this.versionFieldInput.fill(version.toString());
     }
 
-    await this.page.testSubj.locator('submitButton').click();
+    await this.submitButton.click();
     await this.detailsFlyout.waitFor();
   }
 
   async createPipelineFromCsv({ name }: { name: string }) {
-    await this.page.testSubj.locator('createPipelineDropdown').click();
-    await this.page.testSubj.locator('createPipelineFromCsv').click();
+    await this.createPipelineDropdown.click();
+    await this.createPipelineFromCsvButton.click();
 
-    await this.page
-      .locator('input[type="file"]')
-      .setInputFiles(
-        path.join(
-          process.cwd(),
-          'x-pack/platform/test/functional/fixtures/ingest_pipeline_example_mapping.csv'
-        )
-      );
+    await this.fileInput.setInputFiles(
+      path.join(
+        process.cwd(),
+        'x-pack/platform/test/functional/fixtures/ingest_pipeline_example_mapping.csv'
+      )
+    );
 
-    await this.page.testSubj.locator('processFileButton').click();
-    await this.page.testSubj.locator('continueToCreate').click();
-    await this.page.testSubj.locator('nameField').locator('input').fill(name);
-    await this.page.testSubj.locator('submitButton').click();
+    await this.processFileButton.click();
+    await this.continueToCreateButton.click();
+    await this.nameFieldInput.fill(name);
+    await this.submitButton.click();
     await this.detailsFlyout.waitFor();
   }
 
@@ -86,39 +144,33 @@ export class IngestPipelinesPage {
       await this.searchPipelineList(options.searchFor);
     }
 
-    const pipelineNames = await this.page.testSubj
-      .locator('pipelineTableRow-name')
-      .allTextContents();
+    const pipelineNames = await this.pipelineTableRowNames.allTextContents();
     return pipelineNames.map((name) => name.replaceAll('↦', '').trim()).filter(Boolean);
   }
 
   async searchPipelineList(searchTerm: string) {
-    const input = this.page.testSubj.locator('pipelineTableSearch');
-    await input.fill(searchTerm);
-    await input.press('Enter');
+    await this.pipelineTableSearch.fill(searchTerm);
+    await this.pipelineTableSearch.press('Enter');
   }
 
   async openPipelineDetailsByName(pipelineName: string) {
     await this.searchPipelineList(pipelineName);
-    const row = this.page.testSubj.locator('pipelineTableRow').filter({ hasText: pipelineName });
+    const row = this.pipelineTableRows.filter({ hasText: pipelineName });
     await row.waitFor();
     await row.locator('[data-test-subj="pipelineDetailsLink"]').click();
     await this.waitForDetailsFlyoutTitle(pipelineName);
   }
 
   async closePipelineDetailsFlyout() {
-    await this.page.testSubj.locator('euiFlyoutCloseButton').click();
+    await this.flyoutCloseButton.click();
   }
 
   async getDetailsFlyoutTitle() {
-    return await this.page.testSubj.locator('detailsPanelTitle').textContent();
+    return await this.detailsPanelTitle.textContent();
   }
 
   async waitForDetailsFlyoutTitle(expectedTitle: string) {
-    await this.page.testSubj
-      .locator('detailsPanelTitle')
-      .filter({ hasText: expectedTitle })
-      .waitFor();
+    await this.detailsPanelTitle.filter({ hasText: expectedTitle }).waitFor();
   }
 
   treeNode(pipeline: string) {
@@ -130,69 +182,70 @@ export class IngestPipelinesPage {
   }
 
   async increasePipelineListPageSize() {
-    await this.page.testSubj.locator('tablePaginationPopoverButton').click();
-    await this.page.testSubj.locator('tablePagination-50-rows').click();
+    await this.tablePaginationPopoverButton.click();
+    await this.tablePagination50Rows.click();
   }
 
   async dirtyCreateFormAndClickLogo() {
-    await this.page.testSubj.locator('createPipelineDropdown').click();
-    await this.page.testSubj.locator('createNewPipeline').click();
-    await this.page.testSubj.locator('nameField').locator('input').fill('test_name');
-    const descriptionField = this.page.testSubj.locator('descriptionField');
-    const descriptionTextArea = descriptionField.locator('textarea');
-    if (await descriptionTextArea.count()) {
-      await descriptionTextArea.fill('test_description');
-    } else {
-      await descriptionField.locator('input').fill('test_description');
-    }
-    await this.page.testSubj.locator('logo').click();
+    await this.createPipelineDropdown.click();
+    await this.createNewPipelineButton.click();
+    await this.nameFieldInput.fill('test_name');
+    await this.fillDescription('test_description');
+    await this.logo.click();
   }
 
   async filterByManaged() {
-    await this.page.testSubj.locator('filtersDropdown').click();
-    await this.page.testSubj.locator('managedFilter').click();
+    await this.filtersDropdown.click();
+    await this.managedFilter.click();
   }
 
   async clickDeletePipelineAction() {
-    await this.page.testSubj.locator('actionsPopoverButton').click();
-    await this.page.testSubj.locator('deletePipelineButton').click();
+    await this.actionsPopoverButton.click();
+    await this.deletePipelineButton.click();
   }
 
   async navigateToManageProcessorsPage() {
-    await this.page.testSubj.locator('manageProcessorsLink').click();
-    await this.page.testSubj.locator('manageProcessorsTitle').waitFor();
+    await this.manageProcessorsLink.click();
+    await this.manageProcessorsTitle.waitFor();
   }
 
   async openCreateDatabaseModal() {
-    await this.page.testSubj.locator('addGeoipDatabaseButton').click();
+    await this.addGeoipDatabaseButton.click();
   }
 
   async fillAddDatabaseForm(databaseType: string, databaseName: string, maxmind?: string) {
-    await this.page.testSubj.locator('databaseTypeSelect').selectOption(databaseType);
-    await this.page.testSubj.locator('databaseNameSelect').waitFor();
+    await this.databaseTypeSelect.selectOption(databaseType);
+    await this.databaseNameSelect.waitFor();
 
     if (maxmind) {
-      await this.page.testSubj.fill('maxmindField', maxmind);
+      await this.maxmindField.fill(maxmind);
     }
 
-    await this.page.testSubj.locator('databaseNameSelect').selectOption(databaseName);
+    await this.databaseNameSelect.selectOption(databaseName);
   }
 
   async clickAddDatabaseButton() {
-    await this.page.testSubj.locator('addGeoipDatabaseSubmit').click();
+    await this.addGeoipDatabaseSubmitButton.click();
   }
 
   async getGeoipDatabases() {
-    return await this.page.testSubj.locator('geoipDatabaseListRow').allInnerTexts();
+    return await this.geoipDatabaseListRows.allInnerTexts();
   }
 
   async deleteDatabaseByName(databaseName: string) {
-    const row = this.page.testSubj
-      .locator('geoipDatabaseListRow')
-      .filter({ hasText: databaseName });
+    const row = this.geoipDatabaseListRows.filter({ hasText: databaseName });
     await row.waitFor();
     await row.locator('[data-test-subj="deleteGeoipDatabaseButton"]').click();
-    await this.page.testSubj.fill('geoipDatabaseConfirmation', 'delete');
-    await this.page.testSubj.locator('deleteGeoipDatabaseSubmit').click();
+    await this.geoipDatabaseConfirmation.fill('delete');
+    await this.deleteGeoipDatabaseSubmitButton.click();
+  }
+
+  private async fillDescription(description: string) {
+    const descriptionTextArea = this.descriptionField.locator('textarea');
+    if (await descriptionTextArea.count()) {
+      await descriptionTextArea.fill(description);
+    } else {
+      await this.descriptionField.locator('input').fill(description);
+    }
   }
 }
