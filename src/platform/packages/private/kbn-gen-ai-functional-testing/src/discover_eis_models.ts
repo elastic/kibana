@@ -29,6 +29,7 @@ import { createServer } from 'net';
 
 const EIS_CCM_API_KEY_ENV = 'KIBANA_EIS_CCM_API_KEY';
 const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
+// Store in repo root target/ directory (standard CI artifact location)
 const OUTPUT_PATH = resolve(REPO_ROOT, 'target/eis_models.json');
 
 const DEFAULT_TEST_ES_PORT = process.env.TEST_ES_PORT
@@ -121,6 +122,7 @@ run(
       return;
     }
 
+    // Start a temporary ES cluster with EIS URL configured
     log.info('Starting temporary Elasticsearch with EIS config...');
     const port = await getTestEsPort(log);
     const cluster = createTestEsCluster({
@@ -136,6 +138,7 @@ run(
 
       const es = cluster.getClient();
 
+      // Enable CCM
       log.info('Enabling Cloud Connected Mode...');
       await es.transport.request({
         method: 'PUT',
@@ -144,6 +147,7 @@ run(
       });
       log.info('✅ CCM enabled');
 
+      // Discover models with retry (EIS needs time to provision endpoints)
       log.info('Discovering EIS inference endpoints...');
       let models: DiscoveredModel[] = [];
       const maxRetries = Number(flags.retries) || 5;
@@ -180,15 +184,18 @@ run(
         throw new Error('No EIS chat completion models discovered after all retries');
       }
 
+      // Write output
       mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
       writeFileSync(OUTPUT_PATH, JSON.stringify({ models }, null, 2));
       log.info(`✅ Wrote ${models.length} models to ${OUTPUT_PATH}`);
 
+      // Log discovered models
       if (models.length > 0) {
         log.info('Discovered models:');
         models.forEach((m, i) => log.info(`  ${i + 1}. ${m.modelId} (${m.inferenceId})`));
       }
     } finally {
+      // Always stop ES
       log.info('Stopping Elasticsearch...');
       await cluster.cleanup();
       log.info('✅ Elasticsearch stopped');

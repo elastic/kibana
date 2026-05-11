@@ -81,6 +81,7 @@ export const enableCcm = async (es: Client, apiKey: string, log: ToolingLog): Pr
   });
   log.info('[EIS] ✅ CCM enabled');
 
+  // Wait for EIS to provision endpoints
   log.info('[EIS] Waiting for EIS endpoints to be provisioned...');
   const maxRetries = 5;
   const retryDelayMs = 3000;

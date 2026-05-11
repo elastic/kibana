@@ -6,8 +6,8 @@
  */
 
 /**
- * Scout-only copy of EIS smoke helpers. The shared version lives in
- * `@kbn/gen-ai-functional-testing` (src/platform/packages/private/kbn-gen-ai-functional-testing/src/eis_helpers.ts).
+ * Scout-specific EIS smoke helpers using stdout logging (Playwright has no ToolingLog).
+ * See `@kbn/gen-ai-functional-testing` for the shared ToolingLog-based version.
  */
 
 import { existsSync, readFileSync } from 'fs';
