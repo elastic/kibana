@@ -17,15 +17,19 @@ apiTest.describe(
   { tag: tags.deploymentAgnostic },
   () => {
     let adminApiCredentials: RoleApiCredentials;
+    const testSpaceId = `default-index-pattern-${Date.now()}-${Math.random()
+      .toString(36)
+      .slice(2)}`;
 
     const newId = () => `default-id-${Date.now()}-${Math.random()}`;
     const defaultPath = `${SERVICE_PATH_LEGACY}/default`;
     const serviceKeyId = `${SERVICE_KEY_LEGACY}_id`;
+    const scopedPath = (path: string) => `s/${testSpaceId}/${path}`;
 
     function expectDefaultIndexPattern(apiClient: ApiClientFixture, defaultId: string) {
       return expect
         .poll(async () => {
-          const getResponse = await apiClient.get(defaultPath, {
+          const getResponse = await apiClient.get(scopedPath(defaultPath), {
             headers: {
               ...COMMON_HEADERS,
               ...adminApiCredentials.apiKeyHeader,
@@ -37,12 +41,16 @@ apiTest.describe(
         .toBe(defaultId);
     }
 
-    apiTest.beforeAll(async ({ requestAuth }) => {
+    apiTest.beforeAll(async ({ apiServices, requestAuth }) => {
       adminApiCredentials = await requestAuth.getApiKey('admin');
+      await apiServices.spaces.create({
+        id: testSpaceId,
+        name: testSpaceId,
+      });
     });
 
     apiTest.afterEach(async ({ apiClient }) => {
-      await apiClient.post(defaultPath, {
+      await apiClient.post(scopedPath(defaultPath), {
         headers: {
           ...COMMON_HEADERS,
           ...adminApiCredentials.apiKeyHeader,
@@ -55,10 +63,14 @@ apiTest.describe(
       });
     });
 
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.spaces.delete(testSpaceId);
+    });
+
     apiTest('can set default index pattern', async ({ apiClient }) => {
       const defaultId = newId();
 
-      const setResponse = await apiClient.post(defaultPath, {
+      const setResponse = await apiClient.post(scopedPath(defaultPath), {
         headers: {
           ...COMMON_HEADERS,
           ...adminApiCredentials.apiKeyHeader,
@@ -80,7 +92,7 @@ apiTest.describe(
       const defaultId = newId();
 
       // Set a default index pattern
-      await apiClient.post(defaultPath, {
+      await apiClient.post(scopedPath(defaultPath), {
         headers: {
           ...COMMON_HEADERS,
           ...adminApiCredentials.apiKeyHeader,
@@ -94,7 +106,7 @@ apiTest.describe(
       await expectDefaultIndexPattern(apiClient, defaultId);
 
       // Try to override the default index pattern without the force flag
-      const overrideResponse = await apiClient.post(defaultPath, {
+      const overrideResponse = await apiClient.post(scopedPath(defaultPath), {
         headers: {
           ...COMMON_HEADERS,
           ...adminApiCredentials.apiKeyHeader,
@@ -114,7 +126,7 @@ apiTest.describe(
       const defaultId = newId();
 
       // Set a default index pattern
-      await apiClient.post(defaultPath, {
+      await apiClient.post(scopedPath(defaultPath), {
         headers: {
           ...COMMON_HEADERS,
           ...adminApiCredentials.apiKeyHeader,
@@ -128,7 +140,7 @@ apiTest.describe(
       await expectDefaultIndexPattern(apiClient, defaultId);
 
       // Clear the default index pattern
-      const clearResponse = await apiClient.post(defaultPath, {
+      const clearResponse = await apiClient.post(scopedPath(defaultPath), {
         headers: {
           ...COMMON_HEADERS,
           ...adminApiCredentials.apiKeyHeader,
