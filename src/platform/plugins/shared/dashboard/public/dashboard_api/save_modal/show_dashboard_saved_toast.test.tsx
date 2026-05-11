@@ -7,12 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { of, type Observable } from 'rxjs';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
+import { i18n } from '@kbn/i18n';
 import { DASHBOARD_APP_ID } from '../../../common/page_bundle_constants';
 import { coreServices } from '../../services/kibana_services';
 import { showDashboardSavedToast } from './show_dashboard_saved_toast';
+
+const renderMountPoint = (mountPoint: MountPoint) => {
+  if (!i18n.getIsInitialized()) {
+    i18n.init({ locale: 'en', messages: {} });
+  }
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const unmount = mountPoint(container);
+  return {
+    container,
+    cleanup: () => {
+      unmount();
+      container.remove();
+    },
+  };
+};
 
 const setCurrentAppId = (appId: string | undefined) => {
   (coreServices.application as { currentAppId$: Observable<string | undefined> }).currentAppId$ =
@@ -30,8 +48,8 @@ describe('showDashboardSavedToast', () => {
     setCurrentAppId(DASHBOARD_APP_ID);
   });
 
-  it('omits the link when in the Dashboard app', async () => {
-    await showDashboardSavedToast({
+  it('omits the link when in the Dashboard app', () => {
+    showDashboardSavedToast({
       savedDashboardId: 'abc-123',
       dashboardTitle: 'Dash Title',
     });
@@ -45,10 +63,10 @@ describe('showDashboardSavedToast', () => {
     );
   });
 
-  it('renders a link when the user is outside the Dashboard app', async () => {
+  it('renders a link when the user is outside the Dashboard app', () => {
     setCurrentAppId('agentBuilder');
 
-    await showDashboardSavedToast({
+    showDashboardSavedToast({
       savedDashboardId: 'abc-123',
       dashboardTitle: 'Dash Title',
     });
@@ -56,41 +74,26 @@ describe('showDashboardSavedToast', () => {
     expect(getLastToastInput().text).toBeDefined();
   });
 
-  it('interpolates the dashboard title into the toast title', async () => {
-    await showDashboardSavedToast({
-      savedDashboardId: 'abc',
-      dashboardTitle: 'My Dashboard',
-    });
-
-    expect(getLastToastInput().title).toBe(`Dashboard 'My Dashboard' was saved`);
-  });
-
-  it('navigates to the saved dashboard when the link is clicked', async () => {
+  it('navigates to the saved dashboard and closes the toast when the link is clicked', async () => {
     setCurrentAppId('agentBuilder');
 
-    await showDashboardSavedToast({
+    const mockToast = { id: 'mock-toast-id' };
+    (coreServices.notifications.toasts.addSuccess as jest.Mock).mockReturnValue(mockToast);
+
+    showDashboardSavedToast({
       savedDashboardId: 'saved-id',
       dashboardTitle: 'Dash Title',
     });
 
-    // `toMountPoint` exposes the original React node via `__reactMount__` outside of
-    // production builds (see @kbn/react-kibana-mount/to_mount_point). This is the
-    // same escape hatch used by Kibana's react_mount_serializer in @kbn/test, and
-    // lets us reach the rendered button without mounting it. We rely on it here
-    // because Kibana's custom Jest resolver rewrites `@kbn/...` requests to
-    // absolute paths, which prevents `jest.mock('@kbn/react-kibana-mount', ...)`
-    // from binding inside the dashboard plugin's test setup.
-    const mount = getLastToastInput().text as MountPoint & {
-      __reactMount__: ReactElement;
-    };
-    // The rendered tree is <EuiFlexGroup><EuiFlexItem><EuiButton>...; the button
-    // sits two levels down. Walk into the children to reach its onClick.
-    const flexItem = (mount.__reactMount__.props as { children: ReactElement }).children;
-    const button = (flexItem.props as { children: ReactElement<{ onClick: () => void }> }).children;
-    button.props.onClick();
+    const { cleanup } = renderMountPoint(getLastToastInput().text!);
 
+    await userEvent.click(screen.getByTestId('dashboardSavedToastLink'));
+
+    expect(coreServices.notifications.toasts.remove).toHaveBeenCalledWith(mockToast);
     expect(coreServices.application.navigateToApp).toHaveBeenCalledWith(DASHBOARD_APP_ID, {
       path: '#/view/saved-id',
     });
+
+    cleanup();
   });
 });

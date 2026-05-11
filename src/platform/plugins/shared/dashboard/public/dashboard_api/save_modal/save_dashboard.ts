@@ -30,7 +30,7 @@ export const saveDashboard = async ({
     const newId = result.id;
 
     if (newId) {
-      await showDashboardSavedToast({
+      showDashboardSavedToast({
         savedDashboardId: newId,
         dashboardTitle: dashboardState.title,
       });

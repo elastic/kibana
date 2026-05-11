@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { firstValueFrom } from 'rxjs';
+import { take } from 'rxjs';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -30,42 +30,44 @@ interface ShowDashboardSavedToastParams {
  * to the saved dashboard. Inside the Dashboard app the save flow already
  * places the user on the saved dashboard, so the button is omitted.
  */
-export const showDashboardSavedToast = async ({
+export const showDashboardSavedToast = ({
   savedDashboardId,
   dashboardTitle,
-}: ShowDashboardSavedToastParams): Promise<void> => {
-  const currentAppId = await firstValueFrom(coreServices.application.currentAppId$);
-  const showOpenLink = currentAppId !== DASHBOARD_APP_ID;
+}: ShowDashboardSavedToastParams): void => {
+  coreServices.application.currentAppId$.pipe(take(1)).subscribe((currentAppId) => {
+    const showOpenLink = currentAppId !== DASHBOARD_APP_ID;
 
-  coreServices.notifications.toasts.addSuccess({
-    title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
-      defaultMessage: `Dashboard ''{title}'' was saved`,
-      values: { title: dashboardTitle },
-    }),
-    text: showOpenLink
-      ? toMountPoint(
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                color="primary"
-                data-test-subj="dashboardSavedToastLink"
-                onClick={() =>
-                  coreServices.application.navigateToApp(DASHBOARD_APP_ID, {
-                    path: `#${createDashboardEditUrl(savedDashboardId)}`,
-                  })
-                }
-              >
-                {i18n.translate('dashboard.savedToast.goToDashboardLink', {
-                  defaultMessage: 'Go to dashboard',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>,
-          coreServices
-        )
-      : undefined,
-    className: 'eui-textBreakWord',
-    'data-test-subj': 'saveDashboardSuccess',
+    const toast = coreServices.notifications.toasts.addSuccess({
+      title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
+        defaultMessage: `Dashboard ''{title}'' was saved`,
+        values: { title: dashboardTitle },
+      }),
+      text: showOpenLink
+        ? toMountPoint(
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  color="primary"
+                  data-test-subj="dashboardSavedToastLink"
+                  onClick={() => {
+                    coreServices.notifications.toasts.remove(toast);
+                    coreServices.application.navigateToApp(DASHBOARD_APP_ID, {
+                      path: `#${createDashboardEditUrl(savedDashboardId)}`,
+                    });
+                  }}
+                >
+                  {i18n.translate('dashboard.savedToast.goToDashboardLink', {
+                    defaultMessage: 'Go to dashboard',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>,
+            coreServices
+          )
+        : undefined,
+      className: 'eui-textBreakWord',
+      'data-test-subj': 'saveDashboardSuccess',
+    });
   });
 };
