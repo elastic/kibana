@@ -58,8 +58,6 @@ const mockHit: DataTableRecord = {
   isAnchor: false,
 } as DataTableRecord;
 
-const mockOnShowAlert = jest.fn();
-
 const renderCorrelationsDetails = () =>
   render(
     <TestProviders>
@@ -67,7 +65,8 @@ const renderCorrelationsDetails = () =>
         hit={mockHit}
         scopeId="test-scope"
         isRulePreview={false}
-        onShowAlert={mockOnShowAlert}
+        renderCellActions={jest.fn()}
+        onAlertUpdated={jest.fn()}
       />
     </TestProviders>
   );

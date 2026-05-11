@@ -24,6 +24,7 @@ import { Footer } from './footer';
 import { Header } from './header';
 import { OverviewTab } from './tabs/overview_tab';
 import { NotesDetails } from '../notes';
+import { NOTES_TITLE } from '../shared/constants/flyout_titles';
 import { useKibana } from '../../common/lib/kibana';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
@@ -86,6 +87,7 @@ export const DocumentFlyout = memo(
         {
           ...defaultToolsFlyoutProperties,
           historyKey,
+          title: NOTES_TITLE,
         }
       );
     }, [history, historyKey, hit, overlays, services, store]);

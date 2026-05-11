@@ -11,11 +11,14 @@ import { ALERT_RULE_NAME, EVENT_KIND } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { startCase } from 'lodash';
 import { EventKind } from '../constants/event_kinds';
+import { DEFAULT_DOCUMENT_TITLE } from '../../shared/constants/flyout_titles';
 
-const DEFAULT_DOCUMENT_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.document.header.title',
-  { defaultMessage: 'Document details' }
-);
+/**
+ * Formats a flyout navigation title as "{canonicalName} - {value}" when a value is present,
+ * or just "{canonicalName}" when it is not.
+ */
+export const formatFlyoutTitle = (canonicalName: string, value?: string | null): string =>
+  value ? `${canonicalName} - ${value}` : canonicalName;
 
 const DEFAULT_EVENT_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.document.title.eventTitle',

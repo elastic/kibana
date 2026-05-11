@@ -14,10 +14,8 @@ import { FLYOUT_STORAGE_KEYS } from '../../../../flyout_v2/document/constants/lo
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../../flyout_v2/shared/components/expandable_section';
 import { HighlightedFields } from '../../../../flyout_v2/document/components/highlighted_fields';
-import {
-  INVESTIGATION_SECTION_TEST_ID,
-  INVESTIGATION_SECTION_TITLE,
-} from '../../../../flyout_v2/document/components/investigation_section';
+import { INVESTIGATION_SECTION_TEST_ID } from '../../../../flyout_v2/document/components/investigation_section';
+import { INVESTIGATION_SECTION_TITLE } from '../../../../flyout_v2/shared/constants/flyout_titles';
 import { InvestigationGuide } from '../../../../flyout_v2/document/components/investigation_guide';
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';

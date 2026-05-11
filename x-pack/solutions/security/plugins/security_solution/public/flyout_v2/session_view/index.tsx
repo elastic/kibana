@@ -9,7 +9,6 @@ import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { type DataTableRecord } from '@kbn/discover-utils';
 import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';
 import { useHistory } from 'react-router-dom';
@@ -24,13 +23,15 @@ import { useKibana } from '../../common/lib/kibana';
 import { useSessionViewConfig } from './hooks/use_session_view_config';
 import { flyoutProviders } from '../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
+import { useFlyoutNavTitle } from '../shared/hooks/use_flyout_nav_title';
 import { SessionViewDetails } from './components/session_view_details';
+import {
+  ALERT_DOCUMENT_FLYOUT_TITLE,
+  SESSION_VIEW_TITLE,
+  SESSION_VIEW_DETAILS_TITLE,
+} from '../shared/constants/flyout_titles';
 
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
-
-const TITLE = i18n.translate('xpack.securitySolution.flyout.sessionView.title', {
-  defaultMessage: 'Session view',
-});
 
 const EUI_HEADER_HEIGHT = 96;
 const EXPANDABLE_FLYOUT_LEFT_SECTION_HEADER_HEIGHT = 72;
@@ -73,6 +74,7 @@ export const SessionView: FC<SessionViewProps> = memo(
     const store = useStore();
     const history = useHistory();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+    const buildChildFlyoutTitle = useFlyoutNavTitle();
 
     const { canReadPolicyManagement } = useUserPrivileges().endpointPrivileges;
 
@@ -105,10 +107,12 @@ export const SessionView: FC<SessionViewProps> = memo(
           {
             ...defaultFlyoutProperties,
             session: 'inherit',
+            title: buildChildFlyoutTitle(ALERT_DOCUMENT_FLYOUT_TITLE),
           }
         ),
       [
         defaultFlyoutProperties,
+        buildChildFlyoutTitle,
         history,
         onAlertUpdated,
         overlays,
@@ -173,11 +177,13 @@ export const SessionView: FC<SessionViewProps> = memo(
           {
             ...defaultFlyoutProperties,
             session: 'inherit',
+            title: buildChildFlyoutTitle(SESSION_VIEW_DETAILS_TITLE),
           }
         );
       },
       [
         defaultFlyoutProperties,
+        buildChildFlyoutTitle,
         handleJumpToEvent,
         history,
         onAlertUpdated,
@@ -213,7 +219,7 @@ export const SessionView: FC<SessionViewProps> = memo(
         >
           <ToolsFlyoutHeader
             hit={hit}
-            title={TITLE}
+            title={SESSION_VIEW_TITLE}
             renderCellActions={renderCellActions}
             onAlertUpdated={onAlertUpdated}
           />

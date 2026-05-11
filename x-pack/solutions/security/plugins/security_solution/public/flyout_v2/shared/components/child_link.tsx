@@ -14,7 +14,8 @@ import { flyoutProviders } from './flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../hooks/use_default_flyout_properties';
 import { useKibana } from '../../../common/lib/kibana';
 import { CHILD_LINK_TEST_ID } from './test_ids';
-import { buildFlyoutContent } from '../utils/build_flyout_content';
+import { buildFlyoutContent, buildFlyoutTitleFromField } from '../utils/flyout_field_resolver';
+import { useFlyoutNavTitle } from '../hooks/use_flyout_nav_title';
 
 export interface ChildLinkProps {
   /**
@@ -56,9 +57,11 @@ export const ChildLink: FC<ChildLinkProps> = ({
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const flyoutContent = useMemo(() => buildFlyoutContent(field, value), [field, value]);
+  const buildChildFlyoutTitle = useFlyoutNavTitle();
 
   const onClick = useCallback(() => {
     if (flyoutContent) {
+      const entityTitle = buildFlyoutTitleFromField(field, value);
       overlays.openSystemFlyout(
         flyoutProviders({
           services,
@@ -69,10 +72,21 @@ export const ChildLink: FC<ChildLinkProps> = ({
         {
           ...defaultDocumentFlyoutProperties,
           session: 'inherit',
+          title: buildChildFlyoutTitle(entityTitle),
         }
       );
     }
-  }, [defaultDocumentFlyoutProperties, overlays, services, store, history, flyoutContent]);
+  }, [
+    buildChildFlyoutTitle,
+    defaultDocumentFlyoutProperties,
+    field,
+    flyoutContent,
+    history,
+    overlays,
+    services,
+    store,
+    value,
+  ]);
 
   if (!flyoutContent) {
     return <>{children}</>;

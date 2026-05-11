@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { buildFlyoutContent } from './build_flyout_content';
+import { buildFlyoutContent } from './flyout_field_resolver';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 
 jest.mock('../../../flyout/document_details/right/components/table_field_name_cell', () => ({
@@ -21,7 +21,7 @@ jest.mock('../../../flyout/document_details/right/components/table_field_name_ce
   },
 }));
 
-jest.mock('../../network_details', () => ({
+jest.mock('../../network', () => ({
   Network: ({ ip, flowTarget }: { ip: string; flowTarget: string }) => (
     <div data-test-subj="mockNetwork">{`${ip}-${flowTarget}`}</div>
   ),

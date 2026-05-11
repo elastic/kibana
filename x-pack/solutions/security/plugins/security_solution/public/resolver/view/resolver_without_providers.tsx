@@ -36,6 +36,11 @@ import { DocumentDetailsAnalyzerPanelKey } from '../../flyout/document_details/s
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { DocumentFlyoutWrapper } from '../../flyout_v2/document/document_flyout_wrapper';
 import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { useFlyoutNavTitle } from '../../flyout_v2/shared/hooks/use_flyout_nav_title';
+import {
+  ALERT_DOCUMENT_FLYOUT_TITLE,
+  ANALYZER_PANEL_TITLE,
+} from '../../flyout_v2/shared/constants/flyout_titles';
 
 export const ANALYZER_PREVIEW_BANNER = {
   title: i18n.translate(
@@ -74,6 +79,7 @@ export const ResolverWithoutProviders = React.memo(
     const store = useStore();
     const history = useHistory();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+    const buildChildFlyoutTitle = useFlyoutNavTitle();
     const { openPreviewPanel } = useExpandableFlyoutApi();
 
     useResolverQueryParamCleaner(resolverComponentInstanceID);
@@ -160,9 +166,11 @@ export const ResolverWithoutProviders = React.memo(
             {
               ...defaultFlyoutProperties,
               session: 'inherit',
+              title: buildChildFlyoutTitle(ALERT_DOCUMENT_FLYOUT_TITLE),
             }
           ),
       [
+        buildChildFlyoutTitle,
         defaultFlyoutProperties,
         handleAlertUpdated,
         history,
@@ -195,6 +203,7 @@ export const ResolverWithoutProviders = React.memo(
           {
             ...defaultFlyoutProperties,
             session: 'inherit',
+            title: buildChildFlyoutTitle(ANALYZER_PANEL_TITLE),
           }
         );
       } else {
@@ -207,6 +216,7 @@ export const ResolverWithoutProviders = React.memo(
         });
       }
     }, [
+      buildChildFlyoutTitle,
       defaultFlyoutProperties,
       history,
       onShowEvent,

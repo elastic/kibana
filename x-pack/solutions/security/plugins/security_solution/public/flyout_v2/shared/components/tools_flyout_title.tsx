@@ -21,6 +21,7 @@ import { noopCellActionRenderer } from './cell_actions';
 import { flyoutProviders } from './flyout_provider';
 import { DocumentFlyout } from '../../document';
 import { useDefaultDocumentFlyoutProperties } from '../hooks/use_default_flyout_properties';
+import { useFlyoutNavTitle } from '../hooks/use_flyout_nav_title';
 import { TOOLS_FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 
 const noop = () => {};
@@ -51,6 +52,7 @@ export const ToolsFlyoutTitle: FC<ToolsFlyoutTitleProps> = memo(
     const store = useStore();
     const history = useHistory();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+    const buildChildFlyoutTitle = useFlyoutNavTitle();
 
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -73,9 +75,19 @@ export const ToolsFlyoutTitle: FC<ToolsFlyoutTitleProps> = memo(
             />
           ),
         }),
-        { ...defaultFlyoutProperties, session: 'inherit' }
+        { ...defaultFlyoutProperties, session: 'inherit', title: buildChildFlyoutTitle(title) }
       );
-    }, [defaultFlyoutProperties, history, hit, onAlertUpdated, renderCellActions, services, store]);
+    }, [
+      buildChildFlyoutTitle,
+      defaultFlyoutProperties,
+      history,
+      hit,
+      onAlertUpdated,
+      renderCellActions,
+      services,
+      store,
+      title,
+    ]);
 
     return (
       <EuiButtonEmpty

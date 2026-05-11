@@ -15,6 +15,7 @@ import { useStore } from 'react-redux';
 import { documentFlyoutHistoryKey } from '../../../../flyout_v2/shared/constants/flyout_history';
 import { cellActionRenderer } from '../../../../flyout_v2/shared/components/cell_actions';
 import { DocumentFlyoutWrapper } from '../../../../flyout_v2/document/document_flyout_wrapper';
+import { getDocumentTitle } from '../../../../flyout_v2/document/utils/get_header_title';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
 import { useKibana } from '../../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
@@ -121,6 +122,7 @@ const RowActionComponent = ({
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
     if (newFlyoutSystemEnabled && hit) {
+      const docTitle = hit ? getDocumentTitle(hit) : undefined;
       overlays.openSystemFlyout(
         flyoutProviders({
           services,
@@ -139,6 +141,7 @@ const RowActionComponent = ({
           ...defaultFlyoutProperties,
           historyKey: documentFlyoutHistoryKey,
           session: 'start',
+          title: docTitle,
         }
       );
     } else {
