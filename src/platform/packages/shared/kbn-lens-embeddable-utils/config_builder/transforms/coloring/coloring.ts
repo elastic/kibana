@@ -263,8 +263,10 @@ function mapSerializedValueFromAPI(value: SerializableValueType): unknown {
   return value;
 }
 
-function fromRulesLensStateToAPI(rules: ColorMapping.ColorRule[]): SerializableValueType[] {
-  return rules
+function fromRulesLensStateToAPI(
+  rules: ColorMapping.ColorRule[] | undefined
+): SerializableValueType[] {
+  return (rules ?? [])
     .filter((rule): rule is Extract<ColorMapping.ColorRule, { type: 'raw' }> => rule.type === 'raw')
     .map((rule) => mapSerializedValueToAPI(rule.value));
 }

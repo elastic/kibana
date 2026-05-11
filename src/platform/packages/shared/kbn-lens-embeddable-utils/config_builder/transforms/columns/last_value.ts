@@ -37,7 +37,7 @@ export const fromLastValueLensStateToAPI = (
     operation: 'last_value',
     field: options.sourceField,
     time_field: options.params.sortField,
-    multi_value: options.params.showArrayValues,
+    multi_value: options.params.showArrayValues ?? true,
     ...getLensAPIMetricSharedProps(options),
     ...(options.params?.format ? { format: fromFormatLensStateToAPI(options.params.format) } : {}),
   };

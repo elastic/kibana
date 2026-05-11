@@ -121,7 +121,7 @@ export function isFormBasedLayer(
 export function isTextBasedLayer(
   layer: LensApiConfig | DataSourceStateLayer
 ): layer is TextBasedLayer {
-  return 'index' in layer && 'query' in layer;
+  return 'columns' in layer && Array.isArray(layer.columns);
 }
 
 function sha256Sync(str: string): string {
