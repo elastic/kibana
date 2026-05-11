@@ -11,6 +11,7 @@ import queryString from 'query-string';
 import type { ContentListFeatures } from '../types';
 import { isSearchConfig, isSortingConfig } from '../types';
 import { DEFAULT_INITIAL_SORT, DEFAULT_SORT_FIELDS } from '../sorting';
+import { encodeQueryValue } from './encode_query_value';
 import type { ParsedQuery, UrlStateSlices } from './types';
 
 /**
@@ -181,40 +182,6 @@ export const sortCodec = (
  */
 export const parseSearch = (search: string): ParsedQuery =>
   queryString.parse(search) as ParsedQuery;
-
-/**
- * Percent-encode a query value while leaving characters that RFC 3986 permits
- * unencoded in the query component as-is. Less aggressive than
- * `encodeURIComponent` (and than `query-string`'s default `strict: true`
- * mode), so Kibana URL conventions like Rison-encoded `_g` / `_a` values
- * round-trip without gratuitous percent-encoding.
- *
- * Per RFC 3986:
- *   `query      = *( pchar / "/" / "?" )`
- *   `pchar      = unreserved / pct-encoded / sub-delims / ":" / "@"`
- *   `sub-delims = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="`
- *
- * `&` and `=` stay encoded because they delimit key-value pairs, and `+`
- * stays encoded so a literal `+` is never misread as a space.
- *
- * TODO(https://github.com/elastic/kibana/issues/268689): replace this local
- * helper with the shared `encodeUriQuery` extracted from `kibana_utils` once
- * it is promoted to a shared package. The same applies to the duplicate
- * `encodeContentListValue` in `@kbn/scout`'s `page_objects/content_list.ts`.
- */
-const encodeQueryValue = (value: string): string =>
-  encodeURIComponent(value)
-    .replace(/%21/g, '!')
-    .replace(/%24/g, '$')
-    .replace(/%27/g, "'")
-    .replace(/%28/g, '(')
-    .replace(/%29/g, ')')
-    .replace(/%2A/g, '*')
-    .replace(/%2C/g, ',')
-    .replace(/%2F/g, '/')
-    .replace(/%3A/g, ':')
-    .replace(/%3B/g, ';')
-    .replace(/%40/g, '@');
 
 /**
  * Stringifies the search parameters into a URL search string. Uses an

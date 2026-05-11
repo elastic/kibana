@@ -35,7 +35,10 @@ export interface ContentListUrlState {
  * TODO(https://github.com/elastic/kibana/issues/268689): replace this local
  * helper with the shared `encodeUriQuery` extracted from `kibana_utils` once
  * it is promoted to a shared package. Kept in lockstep with `encodeQueryValue`
- * in `@kbn/content-list-provider`'s `url_sync/url_codec.ts`.
+ * in `@kbn/content-list-provider`'s `url_sync/encode_query_value.ts` —
+ * duplicated here only because `@kbn/scout` shouldn't pull the full
+ * `@kbn/content-list-provider` (and its React/EUI dep graph) just for an
+ * encoder.
  */
 const encodeContentListValue = (value: string): string =>
   encodeURIComponent(value)
