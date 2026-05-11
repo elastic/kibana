@@ -1363,7 +1363,7 @@
           "\nConfiguration object for the AppMenu component.\nThe maximum number of items that can be visible at once before overflowing into the \"More\"\npopover is determined by the APP_MENU_ITEM_LIMIT constant - currently 5 but it will\nbe reduced to 3 in a future release."
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-        "lineNumber": 264,
+        "lineNumber": 272,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1382,7 +1382,7 @@
               "[] | undefined"
             ],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-            "lineNumber": 271,
+            "lineNumber": 279,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1401,7 +1401,7 @@
               " | undefined"
             ],
             "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-            "lineNumber": 276,
+            "lineNumber": 284,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1542,7 +1542,7 @@
           " | undefined; labelBadgeText?: string | undefined; }"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-        "lineNumber": 232,
+        "lineNumber": 240,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1565,7 +1565,7 @@
           " | undefined; }"
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
-        "lineNumber": 250,
+        "lineNumber": 258,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1629,6 +1629,24 @@
         ],
         "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
         "lineNumber": 75,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-app-menu-components",
+        "id": "def-public.AppMenuStaticItem",
+        "type": "Type",
+        "tags": [],
+        "label": "AppMenuStaticItem",
+        "description": [],
+        "signature": [
+          "AppMenuItemType",
+          " & { global?: boolean | undefined; }"
+        ],
+        "path": "src/core/packages/chrome/app-menu/core-chrome-app-menu-components/src/types.ts",
+        "lineNumber": 232,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
