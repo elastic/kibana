@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
 import { runNode } from './run_node';
 import type { WorkflowExecutionLoopParams } from './types';
 
