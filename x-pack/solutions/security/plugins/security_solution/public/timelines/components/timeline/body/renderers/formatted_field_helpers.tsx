@@ -107,7 +107,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
           }),
           {
             ...defaultDocumentFlyoutProperties,
-            session: 'inherit',
+            session: 'start',
             title: ruleTitle,
           }
         );

@@ -14,7 +14,7 @@ import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { EventKind } from '../../document/constants/event_kinds';
-import { getDocumentTitle } from '../../document/utils/get_header_title';
+import { getDocumentTitle, getDocumentHistoryTitle } from '../../document/utils/get_header_title';
 import { useKibana } from '../../../common/lib/kibana';
 import type { CellActionRenderer } from './cell_actions';
 import { noopCellActionRenderer } from './cell_actions';
@@ -52,14 +52,15 @@ export const ToolsFlyoutTitle: FC<ToolsFlyoutTitleProps> = memo(
     const store = useStore();
     const history = useHistory();
     const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-    const buildChildFlyoutTitle = useFlyoutNavTitle();
 
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
     const title = useMemo(() => getDocumentTitle(hit), [hit]);
+    const sessionTitle = useMemo(() => getDocumentHistoryTitle(hit), [hit]);
     const iconType = isAlert ? 'warning' : 'analyzeEvent';
+    const buildChildFlyoutTitle = useFlyoutNavTitle();
 
     const onShowDocument = useCallback(() => {
       services.overlays?.openSystemFlyout(
@@ -75,7 +76,11 @@ export const ToolsFlyoutTitle: FC<ToolsFlyoutTitleProps> = memo(
             />
           ),
         }),
-        { ...defaultFlyoutProperties, session: 'inherit', title: buildChildFlyoutTitle(title) }
+        {
+          ...defaultFlyoutProperties,
+          session: 'inherit',
+          title: buildChildFlyoutTitle(sessionTitle),
+        }
       );
     }, [
       buildChildFlyoutTitle,
@@ -85,8 +90,8 @@ export const ToolsFlyoutTitle: FC<ToolsFlyoutTitleProps> = memo(
       onAlertUpdated,
       renderCellActions,
       services,
+      sessionTitle,
       store,
-      title,
     ]);
 
     return (

@@ -9,6 +9,16 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const alertFlyoutTitle = (ruleName: string | undefined) =>
+  ruleName
+    ? i18n.translate('discover.profile.security.flyout.alertFlyoutTitle', {
+        defaultMessage: 'Alert: {ruleName}',
+        values: { ruleName },
+      })
+    : i18n.translate('discover.profile.security.flyout.alertFlyoutTitleDefault', {
+        defaultMessage: 'Alert',
+      });
+
 export const overviewTabTitle = (isAlert: boolean) =>
   i18n.translate('discover.profile.security.flyout.overviewTabTitle', {
     values: { isAlert },

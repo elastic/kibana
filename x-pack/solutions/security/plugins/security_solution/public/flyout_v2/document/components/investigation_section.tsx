@@ -33,7 +33,7 @@ import {
   INVESTIGATION_GUIDE_TITLE,
   INVESTIGATION_SECTION_TITLE,
 } from '../../shared/constants/flyout_titles';
-import { buildToolSessionTitle, getDocumentTitle } from '../utils/get_header_title';
+import { formatFlyoutTitle, getDocumentTitle } from '../utils/get_header_title';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
 
@@ -107,7 +107,7 @@ export const InvestigationSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
-          title: buildToolSessionTitle(INVESTIGATION_GUIDE_TITLE, getDocumentTitle(hit)),
+          title: formatFlyoutTitle(INVESTIGATION_GUIDE_TITLE, getDocumentTitle(hit)),
         }
       );
     }, [history, historyKey, hit, overlays, services, store]);

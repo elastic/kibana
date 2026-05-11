@@ -11,21 +11,20 @@ import { ALERT_RULE_NAME, EVENT_KIND } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { startCase } from 'lodash';
 import { EventKind } from '../constants/event_kinds';
-import { DEFAULT_DOCUMENT_TITLE } from '../../shared/constants/flyout_titles';
 
 /**
  * Formats a flyout navigation title as "{canonicalName} - {value}" when a value is present,
- * or just "{canonicalName}" when it is not.
+ * or just "{canonicalName}" when it is not. canonicalName is most likely the name of the tool / document
  */
 export const formatFlyoutTitle = (canonicalName: string, value?: string | null): string =>
-  value ? `${canonicalName} - ${value}` : canonicalName;
+  value ? `${canonicalName}: ${value}` : canonicalName;
 
-/**
- * Formats a tool flyout session title as "{toolName} ({docTitle})", giving the tool
- * history entry context about the parent document it was launched from.
- */
-export const buildToolSessionTitle = (toolName: string, docTitle: string): string =>
-  `${toolName} (${docTitle})`;
+const DEFAULT_DOCUMENT_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.document.title.alert',
+  {
+    defaultMessage: 'Alert',
+  }
+);
 
 const DEFAULT_EVENT_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.document.title.eventTitle',
@@ -75,6 +74,18 @@ export const getAlertTitle = (ruleName?: string | null): string => {
 };
 
 /**
+ * Returns the history title for an alert in the form "Alert: <rule name>", or "Alert"
+ * when the rule name is unavailable. Used for flyout navigation history entries.
+ */
+export const getAlertHistoryTitle = (ruleName?: string | null): string =>
+  ruleName
+    ? i18n.translate('xpack.securitySolution.flyout.document.title.alertWithName', {
+        defaultMessage: 'Alert: {ruleName}',
+        values: { ruleName },
+      })
+    : DEFAULT_DOCUMENT_TITLE;
+
+/**
  * Returns a human-readable title for an event based on its event.kind and event.category fields.
  * Uses a generic field accessor to look up the mapped field value.
  */
@@ -122,4 +133,20 @@ export const getDocumentTitle = (hit: DataTableRecord): string => {
     eventCategory,
     (fieldName) => getFieldValue(hit, fieldName) as string | undefined
   );
+};
+
+/**
+ * Returns the flyout navigation history title for a document. For alerts this includes the
+ * "Alert:" prefix so history entries read "Alert: My Rule Name"; for other documents it falls
+ * back to the display title.
+ */
+export const getDocumentHistoryTitle = (hit: DataTableRecord): string => {
+  const eventKind = getFieldValue(hit, EVENT_KIND) as string | undefined;
+
+  if (eventKind === EventKind.signal) {
+    const ruleName = getFieldValue(hit, ALERT_RULE_NAME) as string | undefined;
+    return getAlertHistoryTitle(ruleName);
+  }
+
+  return getDocumentTitle(hit);
 };

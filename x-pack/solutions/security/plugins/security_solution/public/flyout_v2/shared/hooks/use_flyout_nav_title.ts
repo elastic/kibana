@@ -12,11 +12,11 @@ import { getFlyoutManagerStore } from '@elastic/eui';
  * Returns a function that builds the EUI history title for a child flyout
  * opened from the current session:
  *   - When a session is active: `"<session title> -> <childTitle>"`
- *   - When no session: `fallback ?? childTitle`
+ *   - When no session: `childTitle`
  *
  * Composition is always flat — callers never accumulate ancestry chains.
  */
-export const useFlyoutNavTitle = (): ((childTitle: string, fallback?: string) => string) => {
+export const useFlyoutNavTitle = (): ((childTitle: string) => string) => {
   const state = useSyncExternalStore(
     (listener) => getFlyoutManagerStore().subscribe(listener),
     () => getFlyoutManagerStore().getState()
@@ -27,8 +27,7 @@ export const useFlyoutNavTitle = (): ((childTitle: string, fallback?: string) =>
   const navTitle = currentSession?.title;
 
   return useCallback(
-    (childTitle: string, fallback?: string) =>
-      navTitle ? `${navTitle} -> ${childTitle}` : fallback ?? childTitle,
+    (childTitle: string) => (navTitle ? `${navTitle} -> ${childTitle}` : childTitle),
     [navTitle]
   );
 };

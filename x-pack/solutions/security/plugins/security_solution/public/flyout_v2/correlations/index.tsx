@@ -19,7 +19,8 @@ import { flyoutProviders } from '../shared/components/flyout_provider';
 import { DocumentFlyoutWrapper } from '../document/document_flyout_wrapper';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { useFlyoutNavTitle } from '../shared/hooks/use_flyout_nav_title';
-import { ALERT_DOCUMENT_FLYOUT_TITLE, CORRELATIONS_TITLE } from '../shared/constants/flyout_titles';
+import { CORRELATIONS_TITLE } from '../shared/constants/flyout_titles';
+import { getAlertHistoryTitle } from '../document/utils/get_header_title';
 
 export interface CorrelationsDetailsProps {
   /**
@@ -90,7 +91,7 @@ export const CorrelationsDetails = memo(
           {
             ...defaultFlyoutProperties,
             session: 'inherit',
-            title: buildChildFlyoutTitle(ALERT_DOCUMENT_FLYOUT_TITLE),
+            title: buildChildFlyoutTitle(getAlertHistoryTitle()),
           }
         ),
       [

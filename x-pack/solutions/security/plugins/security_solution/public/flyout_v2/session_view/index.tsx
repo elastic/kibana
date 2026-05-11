@@ -25,11 +25,8 @@ import { flyoutProviders } from '../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
 import { useFlyoutNavTitle } from '../shared/hooks/use_flyout_nav_title';
 import { SessionViewDetails } from './components/session_view_details';
-import {
-  ALERT_DOCUMENT_FLYOUT_TITLE,
-  SESSION_VIEW_TITLE,
-  SESSION_VIEW_DETAILS_TITLE,
-} from '../shared/constants/flyout_titles';
+import { SESSION_VIEW_TITLE, SESSION_VIEW_DETAILS_TITLE } from '../shared/constants/flyout_titles';
+import { formatFlyoutTitle, getDocumentHistoryTitle } from '../document/utils/get_header_title';
 
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
 
@@ -107,13 +104,14 @@ export const SessionView: FC<SessionViewProps> = memo(
           {
             ...defaultFlyoutProperties,
             session: 'inherit',
-            title: buildChildFlyoutTitle(ALERT_DOCUMENT_FLYOUT_TITLE),
+            title: buildChildFlyoutTitle(getDocumentHistoryTitle(hit)),
           }
         ),
       [
-        defaultFlyoutProperties,
         buildChildFlyoutTitle,
+        defaultFlyoutProperties,
         history,
+        hit,
         onAlertUpdated,
         overlays,
         renderCellActions,
@@ -156,6 +154,7 @@ export const SessionView: FC<SessionViewProps> = memo(
           return;
         }
 
+        const processName = selectedProcess.getDetails().process?.name;
         overlays.openSystemFlyout(
           flyoutProviders({
             services,
@@ -177,7 +176,9 @@ export const SessionView: FC<SessionViewProps> = memo(
           {
             ...defaultFlyoutProperties,
             session: 'inherit',
-            title: buildChildFlyoutTitle(SESSION_VIEW_DETAILS_TITLE),
+            title: buildChildFlyoutTitle(
+              formatFlyoutTitle(SESSION_VIEW_DETAILS_TITLE, processName)
+            ),
           }
         );
       },

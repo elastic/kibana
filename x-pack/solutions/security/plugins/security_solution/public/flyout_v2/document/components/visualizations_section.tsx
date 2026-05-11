@@ -30,7 +30,7 @@ import {
   SESSION_VIEW_TITLE,
   VISUALIZATION_SECTION_TITLE,
 } from '../../shared/constants/flyout_titles';
-import { buildToolSessionTitle, getDocumentTitle } from '../utils/get_header_title';
+import { formatFlyoutTitle, getDocumentTitle } from '../utils/get_header_title';
 
 export const VISUALIZATION_SECTION_TEST_ID = `${PREFIX}Visualizations` as const;
 
@@ -89,7 +89,7 @@ export const VisualizationsSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
-          title: buildToolSessionTitle(ANALYZER_TITLE, getDocumentTitle(hit)),
+          title: formatFlyoutTitle(ANALYZER_TITLE, getDocumentTitle(hit)),
         }
       );
     }, [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]);
@@ -114,7 +114,7 @@ export const VisualizationsSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
-          title: buildToolSessionTitle(SESSION_VIEW_TITLE, getDocumentTitle(hit)),
+          title: formatFlyoutTitle(SESSION_VIEW_TITLE, getDocumentTitle(hit)),
         }
       );
     }, [

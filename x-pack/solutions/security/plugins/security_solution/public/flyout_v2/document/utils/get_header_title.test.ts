@@ -7,7 +7,13 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 
-import { getDocumentTitle, getAlertTitle, getEventTitle } from './get_header_title';
+import {
+  getDocumentTitle,
+  getDocumentHistoryTitle,
+  getAlertTitle,
+  getAlertHistoryTitle,
+  getEventTitle,
+} from './get_header_title';
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -22,12 +28,26 @@ describe('getAlertTitle', () => {
     expect(getAlertTitle('test rule')).toBe('test rule');
   });
 
-  it('returns Document details when ruleName is undefined', () => {
-    expect(getAlertTitle(undefined)).toBe('Document details');
+  it('returns Alert when ruleName is undefined', () => {
+    expect(getAlertTitle(undefined)).toBe('Alert');
   });
 
-  it('returns Document details when ruleName is null', () => {
-    expect(getAlertTitle(null)).toBe('Document details');
+  it('returns Alert when ruleName is null', () => {
+    expect(getAlertTitle(null)).toBe('Alert');
+  });
+});
+
+describe('getAlertHistoryTitle', () => {
+  it('returns Alert: <rule name> when provided', () => {
+    expect(getAlertHistoryTitle('test rule')).toBe('Alert: test rule');
+  });
+
+  it('returns Alert when ruleName is undefined', () => {
+    expect(getAlertHistoryTitle(undefined)).toBe('Alert');
+  });
+
+  it('returns Alert when ruleName is null', () => {
+    expect(getAlertHistoryTitle(null)).toBe('Alert');
   });
 });
 
@@ -79,12 +99,12 @@ describe('getDocumentTitle', () => {
     expect(getDocumentTitle(hit)).toBe('Suspicious Process Rule');
   });
 
-  it('returns the default document title when a signal has no rule name', () => {
+  it('returns Alert when a signal has no rule name', () => {
     const hit = createMockHit({
       'event.kind': 'signal',
     });
 
-    expect(getDocumentTitle(hit)).toBe('Document details');
+    expect(getDocumentTitle(hit)).toBe('Alert');
   });
 
   it('returns the mapped field value for categorized events', () => {
@@ -143,5 +163,42 @@ describe('getDocumentTitle', () => {
     const hit = createMockHit({});
 
     expect(getDocumentTitle(hit)).toBe('Event details');
+  });
+});
+
+describe('getDocumentHistoryTitle', () => {
+  it('returns Alert: <rule name> for signals', () => {
+    const hit = createMockHit({
+      'event.kind': 'signal',
+      'kibana.alert.rule.name': 'Suspicious Process Rule',
+    });
+
+    expect(getDocumentHistoryTitle(hit)).toBe('Alert: Suspicious Process Rule');
+  });
+
+  it('returns Alert when a signal has no rule name', () => {
+    const hit = createMockHit({
+      'event.kind': 'signal',
+    });
+
+    expect(getDocumentHistoryTitle(hit)).toBe('Alert');
+  });
+
+  it('falls back to getDocumentTitle for non-signal events', () => {
+    const hit = createMockHit({
+      'event.kind': 'event',
+      'event.category': 'process',
+      'process.name': 'bash',
+    });
+
+    expect(getDocumentHistoryTitle(hit)).toBe('bash');
+  });
+
+  it('falls back to getDocumentTitle for events without category', () => {
+    const hit = createMockHit({
+      'event.kind': 'event',
+    });
+
+    expect(getDocumentHistoryTitle(hit)).toBe('Event details');
   });
 });

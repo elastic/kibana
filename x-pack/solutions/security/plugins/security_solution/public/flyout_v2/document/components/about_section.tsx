@@ -83,10 +83,7 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
       {
         ...defaultDocumentFlyoutProperties,
         session: 'inherit',
-        title: buildChildFlyoutTitle(
-          RULE_FLYOUT_TITLE,
-          formatFlyoutTitle(RULE_FLYOUT_TITLE, ruleName)
-        ),
+        title: buildChildFlyoutTitle(formatFlyoutTitle(RULE_FLYOUT_TITLE, ruleName)),
       }
     );
   }, [

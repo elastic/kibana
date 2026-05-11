@@ -66,11 +66,6 @@ export const ANALYZER_PANEL_TITLE = i18n.translate(
   { defaultMessage: 'Process details' }
 );
 
-export const ALERT_DOCUMENT_FLYOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.alertDocument.title',
-  { defaultMessage: 'Alert document' }
-);
-
 export const RULE_FLYOUT_TITLE = i18n.translate('xpack.securitySolution.flyout.rule.title', {
   defaultMessage: 'Rule',
 });

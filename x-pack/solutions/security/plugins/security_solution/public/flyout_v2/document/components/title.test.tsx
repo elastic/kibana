@@ -113,7 +113,7 @@ describe('<Title />', () => {
   it('should render default title when alert has no rule name', () => {
     const { getByTestId } = renderTitle({ hit: alertHitWithoutRuleName });
 
-    expect(getByTestId(TITLE_TEST_ID)).toHaveTextContent('Document details');
+    expect(getByTestId(TITLE_TEST_ID)).toHaveTextContent('Alert');
     expect(getByTestId(TITLE_TEST_ID)).toHaveAttribute('data-icon-type', 'warning');
   });
 

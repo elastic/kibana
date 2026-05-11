@@ -22,7 +22,7 @@ import { ProcessTab } from './process_tab';
 import { useKibana } from '../../../common/lib/kibana';
 import { useDefaultDocumentFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { useFlyoutNavTitle } from '../../shared/hooks/use_flyout_nav_title';
-import { ALERT_DOCUMENT_FLYOUT_TITLE } from '../../shared/constants/flyout_titles';
+import { getAlertHistoryTitle } from '../../document/utils/get_header_title';
 
 export const SESSION_VIEW_DETAILS_TEST_ID = `${PREFIX}SessionViewDetails` as const;
 
@@ -101,7 +101,7 @@ export const SessionViewDetails = memo(
           {
             ...defaultFlyoutProperties,
             session: 'inherit',
-            title: buildChildFlyoutTitle(ALERT_DOCUMENT_FLYOUT_TITLE),
+            title: buildChildFlyoutTitle(getAlertHistoryTitle()),
           }
         );
       },
