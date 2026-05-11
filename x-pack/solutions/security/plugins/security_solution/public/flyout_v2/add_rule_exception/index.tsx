@@ -12,6 +12,7 @@ import { ALERT_RULE_UUID, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { expandDottedObject } from '../../../common/utils/expand_dotted';
 import type { Status } from '../../../common/api/detection_engine';
 import { AddExceptionFlyoutContent } from '../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import {
@@ -49,11 +50,15 @@ export const AddRuleException: React.FC<AddRuleExceptionProps> = memo(
     const renderEndpointExceptionContent =
       isEndpointItem && isEndpointExceptionsMovedUnderManagement;
 
-    const alertData = useMemo<AlertData | undefined>(() => {
-      const { _id, _index, _source } = hit.raw;
-      if (!_source) return undefined;
-      return { ...(_source as object), _id, _index } as AlertData;
-    }, [hit]);
+    const alertData = useMemo<AlertData>(
+      () =>
+        ({
+          ...expandDottedObject(hit.flattened, true),
+          _id: hit.raw._id,
+          _index: hit.raw._index,
+        } as AlertData),
+      [hit]
+    );
 
     const alertStatus = useMemo<Status | undefined>(() => {
       const raw = getFieldValue(hit, ALERT_WORKFLOW_STATUS);
@@ -71,7 +76,7 @@ export const AddRuleException: React.FC<AddRuleExceptionProps> = memo(
         >
           <ToolsFlyoutHeader hit={hit} title={title} />
         </EuiFlyoutHeader>
-        {isRuleLoading || alertData == null ? (
+        {isRuleLoading ? (
           <EuiFlyoutBody data-test-subj={ADD_RULE_EXCEPTION_LOADING_TEST_ID}>
             <EuiSkeletonText lines={4} />
           </EuiFlyoutBody>
