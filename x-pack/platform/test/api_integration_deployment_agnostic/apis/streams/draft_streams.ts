@@ -25,6 +25,7 @@ import {
   forkStream,
   getEsqlView,
   getStream,
+  indexAndAssertTargetStream,
   indexDocument,
   indexTemplateExists,
   ingestPipelineExists,
@@ -785,6 +786,155 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .filter((p) => p && 'reroute' in p)
           .map((p) => p!.reroute!.destination);
         expect(destinations).to.not.contain(DRAFT_VIA_PUT);
+      });
+    });
+
+    // These tests assert that workarounds for https://github.com/elastic/elasticsearch/issues/141995 are functioning correctly.
+    // When https://github.com/elastic/elasticsearch/issues/141995 merges we *should* be able to remove this.
+    describe('Partially mapped fields do not break draft views', () => {
+      const PARTIAL_PARENT = `${ROOT}.partial-parent`;
+      const PARTIAL_DRAFT = `${PARTIAL_PARENT}.partial-draft`;
+      const SET_UNMAPPED_PARTIAL = 'SET unmapped_fields="LOAD";\n';
+
+      before(async () => {
+        // 1. Fork a materialized parent
+        await forkStream(apiClient, ROOT, {
+          stream: { name: PARTIAL_PARENT },
+          where: { field: 'attributes.test.partial', eq: 'true' },
+        });
+
+        // 2. Index a document WITH the typed field BEFORE the mapping exists.
+        await indexAndAssertTargetStream(esClient, PARTIAL_PARENT, {
+          '@timestamp': new Date().toISOString(),
+          message: 'doc-keyword-backing',
+          ['test.partial']: 'true',
+          ['http_status']: 200,
+        });
+
+        // 3. Add a non-keyword field definition to the parent
+        const parentDef = Streams.WiredStream.GetResponse.parse(
+          await getStream(apiClient, PARTIAL_PARENT)
+        );
+        const { updated_at: _, ...processing } = parentDef.stream.ingest.processing;
+        await putStream(apiClient, PARTIAL_PARENT, {
+          ...emptyAssets,
+          stream: {
+            type: parentDef.stream.type,
+            description: parentDef.stream.description,
+            ingest: {
+              ...parentDef.stream.ingest,
+              processing,
+              wired: {
+                ...parentDef.stream.ingest.wired,
+                fields: {
+                  ...parentDef.stream.ingest.wired.fields,
+                  'attributes.http_status': { type: 'long' },
+                },
+              },
+            },
+          },
+        });
+
+        // 4. Rollover so the new backing index gets the long mapping
+        await esClient.indices.rollover({ alias: PARTIAL_PARENT });
+
+        // 5. Index a document WITH the typed field (lands in new backing index with long mapping)
+        await indexAndAssertTargetStream(esClient, PARTIAL_PARENT, {
+          '@timestamp': new Date().toISOString(),
+          message: 'doc-long-backing',
+          ['test.partial']: 'true',
+          ['http_status']: 404,
+        });
+
+        // 6. Fork a draft child with a processing step that references the field
+        await forkStream(apiClient, PARTIAL_PARENT, {
+          stream: { name: PARTIAL_DRAFT },
+          where: { always: {} },
+          draft: true,
+        });
+
+        // Add a RENAME processing step on the partially mapped field
+        const draftDef = Streams.WiredStream.GetResponse.parse(
+          await getStream(apiClient, PARTIAL_DRAFT)
+        );
+        const { updated_at: _u, ...draftProcessing } = draftDef.stream.ingest.processing;
+        await putStream(apiClient, PARTIAL_DRAFT, {
+          ...emptyAssets,
+          stream: {
+            type: draftDef.stream.type,
+            description: draftDef.stream.description,
+            ingest: {
+              ...draftDef.stream.ingest,
+              processing: {
+                ...draftProcessing,
+                steps: [
+                  {
+                    action: 'rename',
+                    from: 'attributes.http_status',
+                    to: 'attributes.status_code',
+                  },
+                ],
+              },
+            },
+          },
+        });
+      });
+
+      after(async () => {
+        await deleteStream(apiClient, PARTIAL_DRAFT).catch(() => {});
+        await deleteStream(apiClient, PARTIAL_PARENT).catch(() => {});
+      });
+
+      it('queries the draft view without partially unmapped errors', async () => {
+        const viewName = getEsqlViewName(PARTIAL_DRAFT);
+        // Without inherited field casts this throws verification_exception:
+        // "partially unmapped non-KEYWORD field [attributes.http_status]"
+        const result = await executeEsql(
+          esClient,
+          `${SET_UNMAPPED_PARTIAL}FROM ${viewName} | KEEP \`body.text\` | SORT \`body.text\``
+        );
+        expect(result.values.length).to.eql(2);
+        const bodyCol = result.columns.findIndex((c) => c.name === 'body.text');
+        const texts = result.values.map((row) => row[bodyCol]);
+        expect(texts).to.contain('doc-keyword-backing');
+        expect(texts).to.contain('doc-long-backing');
+      });
+
+      it('inherited field casts are present in the view definition', async () => {
+        const view = await getEsqlView(esClient, getEsqlViewName(PARTIAL_DRAFT));
+        expect(view.query).to.contain('TO_LONG(`attributes.http_status`)');
+      });
+
+      it('regenerates the view when the parent schema changes', async () => {
+        // Add another non-keyword field to the parent
+        const parentDef = Streams.WiredStream.GetResponse.parse(
+          await getStream(apiClient, PARTIAL_PARENT)
+        );
+        const { updated_at: _, ...processing } = parentDef.stream.ingest.processing;
+        await putStream(apiClient, PARTIAL_PARENT, {
+          ...emptyAssets,
+          stream: {
+            type: parentDef.stream.type,
+            description: parentDef.stream.description,
+            ingest: {
+              ...parentDef.stream.ingest,
+              processing,
+              wired: {
+                ...parentDef.stream.ingest.wired,
+                fields: {
+                  ...parentDef.stream.ingest.wired.fields,
+                  'attributes.http_status': { type: 'long' },
+                  'attributes.response_time': { type: 'double' },
+                },
+              },
+            },
+          },
+        });
+
+        // The draft child's view should now include the new field cast
+        const view = await getEsqlView(esClient, getEsqlViewName(PARTIAL_DRAFT));
+        expect(view.query).to.contain('TO_LONG(`attributes.http_status`)');
+        expect(view.query).to.contain('TO_DOUBLE(`attributes.response_time`)');
       });
     });
 

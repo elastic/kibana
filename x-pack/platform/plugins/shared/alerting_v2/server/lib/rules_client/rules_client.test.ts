@@ -7,7 +7,7 @@
 
 import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
@@ -57,7 +57,6 @@ const baseSoAttrs = createRuleSoAttributes({
 
 describe('RulesClient', () => {
   const request: KibanaRequest = httpServerMock.createKibanaRequest();
-  const http = httpServiceMock.createStartContract();
   const taskManager = taskManagerMock.createStart();
   let userService: UserService;
   const { rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService();
@@ -69,8 +68,6 @@ describe('RulesClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Default space
-    http.basePath.get.mockReturnValue('/s/space-1');
     ({ userService } = createUserService());
     mockSavedObjectsClient.create.mockResolvedValue({
       id: 'rule-id-default',
@@ -107,7 +104,10 @@ describe('RulesClient', () => {
   });
 
   function createClient() {
-    return new RulesClient(request, http, rulesSavedObjectService, taskManager, userService);
+    return new RulesClient({
+      services: { request, rulesSavedObjectService, taskManager, userService },
+      options: { spaceId: 'space-1' },
+    });
   }
 
   describe('createRule', () => {

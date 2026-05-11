@@ -1878,7 +1878,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"register\" | \"init\"> & { deserialize: ",
+              ", \"init\" | \"register\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",
