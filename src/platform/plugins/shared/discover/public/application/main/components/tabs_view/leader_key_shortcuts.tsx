@@ -219,21 +219,19 @@ export const LeaderKeyShortcuts = ({
     };
   }, [isVisible, normalizedLeaderKey, shortcutsByKey]);
 
-  if (!isVisible) {
-    return (
-      <EuiScreenReaderOnly>
-        <p>{screenReaderHint}</p>
-      </EuiScreenReaderOnly>
-    );
-  }
-
   return (
     <>
-      <EuiScreenReaderOnly>
-        <p role="status" aria-live="polite" aria-atomic="true">
-          {screenReaderAnnouncement}
-        </p>
-      </EuiScreenReaderOnly>
+      {isVisible ? (
+        <EuiScreenReaderOnly>
+          <p role="status" aria-live="polite" aria-atomic="true">
+            {screenReaderAnnouncement}
+          </p>
+        </EuiScreenReaderOnly>
+      ) : (
+        <EuiScreenReaderOnly>
+          <p>{screenReaderHint}</p>
+        </EuiScreenReaderOnly>
+      )}
 
       <EuiPortal>
         <EuiPanel
@@ -246,6 +244,11 @@ export const LeaderKeyShortcuts = ({
             z-index: ${euiTheme.levels.toast};
             pointer-events: none;
             max-width: calc(100vw - ${euiTheme.size.l} * 2);
+            opacity: ${isVisible ? 1 : 0};
+            transform: translateY(${isVisible ? '0' : euiTheme.size.s});
+            transition: opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
+              transform ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
+            will-change: opacity, transform;
           `}
         >
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
