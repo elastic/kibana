@@ -16,15 +16,16 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import { findTodosStep } from '@kbn/agent-builder-common/chat/conversation';
 import { isConfirmationPrompt } from '@kbn/agent-builder-common/agents';
 import { RoundInput } from './round_input';
 import { RoundThinking } from './round_thinking/round_thinking';
 import { RoundResponse } from './round_response/round_response';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
-import { useIsAnyConversationStreaming } from '../../../hooks/use_is_any_conversation_streaming';
 import { RoundError } from './round_error/round_error';
 import { ConfirmationPrompt } from './round_prompt';
 import { RoundAttachmentReferences } from './round_attachment_references';
+import { TodosStepDisplay } from './round_thinking/steps/todos_step_display';
 
 interface RoundLayoutProps {
   isCurrentRound: boolean;
@@ -81,20 +82,23 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   const [hasBeenLoading, setHasBeenLoading] = useState(false);
   const [promptResponses, setPromptResponses] = useState<Record<string, { allow: boolean }>>({});
   const { steps, response, input, status, pending_prompts: pendingPrompts } = rawRound;
+  const todosStep = useMemo(() => findTodosStep(steps), [steps]);
 
   const {
     isResponseLoading,
+    isStreaming,
     error,
     retry: retrySendMessage,
     resumeRound,
     isResuming,
   } = useSendMessage();
-  // Approve / Cancel for HITL must be gated on global streaming state: while ANY other
-  // conversation is streaming, racing two mutations against the same single-stream
-  // backend would corrupt cache state. This becomes a per-conversation check in the
-  // concurrent-streams follow-up PR.
-  const isAnyStreaming = useIsAnyConversationStreaming();
-  const isHitlDisabled = isAnyStreaming && !isResuming;
+  // HITL Approve / Cancel is per-conversation: streamActions are closure-bound to
+  // vars.conversationId, so other in-flight conversations cannot corrupt this cache.
+  // Use `isStreaming` (not `isResponseLoading`) so the buttons stay disabled during the
+  // window where the send mutation has emitted `pending_prompt` (round is now
+  // `awaitingPrompt`) but `mutationFn` hasn't reached its `finally` yet — clicking
+  // Approve there would race the still-in-flight send mutation.
+  const isHitlDisabled = isStreaming && !isResuming;
 
   const isLoadingCurrentRound = isResponseLoading && isCurrentRound;
   const isErrorCurrentRound = Boolean(error) && isCurrentRound;
@@ -164,7 +168,7 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="m"
+      gutterSize="s"
       aria-label={labels.container}
       css={roundContainerStyles}
     >
@@ -190,6 +194,13 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
           />
         )}
       </EuiFlexItem>
+
+      {/* Todos */}
+      {todosStep && (
+        <EuiFlexItem grow={false}>
+          <TodosStepDisplay step={todosStep} />
+        </EuiFlexItem>
+      )}
 
       {/* Confirmation Prompts */}
       {isAwaitingPrompt &&

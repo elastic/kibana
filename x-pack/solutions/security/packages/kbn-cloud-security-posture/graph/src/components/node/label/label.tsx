@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiText, EuiTextTruncate, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '../styles';
+import { ENTITY_NODE_LABEL_WIDTH, NODE_LABEL_HEIGHT } from '../styles';
 
 export interface LabelProps {
   text?: string;
@@ -22,7 +22,7 @@ export const Label = ({ text = '' }: LabelProps) => {
         text={text}
         truncation="middle"
         truncationOffset={10}
-        width={NODE_LABEL_WIDTH}
+        width={ENTITY_NODE_LABEL_WIDTH}
         css={css`
           display: inline-flex;
           align-items: center;
