@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { flatten, isEqual } from 'lodash';
+import { flatten, isEqual, partition } from 'lodash';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -55,6 +55,7 @@ import type {
   DateRange,
   LastValueIndexPatternColumn,
   FormBasedLayer,
+  DatasourcePublicAPI,
 } from '@kbn/lens-common';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import { TextBasedDimensionTrigger } from '../text_based/components/dimension_trigger';
@@ -71,6 +72,7 @@ import {
 } from './loader';
 import { toExpression } from './to_expression';
 import { toExpression as toExpressionESQL } from '../text_based/to_expression';
+import { generateEsqlQuery, isEsqlQuerySuccess } from './generate_esql_query';
 import { FormBasedDimensionEditor, getDropProps, onDrop } from './dimension_panel';
 import { FormBasedDataPanel } from './datapanel';
 import {
@@ -117,6 +119,10 @@ import { filterAndSortUserMessages } from '../../app_plugin/get_application_user
 import { EDITOR_INVALID_DIMENSION } from '../../user_messages_ids';
 import { getLongMessage } from '../../user_messages_utils';
 export type { OperationType } from './operations';
+
+// POC: Extended FormBasedLayer type with query and errors for ES|QL support
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type FormBasedLayerWithQuery = FormBasedLayer & { query?: any; errors?: any[] };
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows
@@ -498,8 +504,11 @@ export function getFormBasedDatasource({
       searchSessionId,
       forceDSL
     ) => {
-      if (state.layers[layerId].query) {
-        return toExpressionESQL(state, layerId);
+      if ((state.layers[layerId] as FormBasedLayerWithQuery).query) {
+        return toExpressionESQL(
+          state as unknown as import('@kbn/lens-common').TextBasedPrivateState,
+          layerId
+        );
       }
       return toExpression(
         state,
@@ -513,22 +522,35 @@ export function getFormBasedDatasource({
       );
     },
 
-    toESQL: (state, layerId, indexPatterns, dateRange, nowInstant, searchSessionId) => {
-      return toExpression(
-        state,
-        layerId,
-        indexPatterns,
-        uiSettings,
-        featureFlags,
-        dateRange,
-        nowInstant,
-        searchSessionId,
-        true
+    toESQL: (state, layerId, indexPatterns, dateRange, nowInstant, _searchSessionId) => {
+      const layer = state.layers[layerId];
+      if (!layer) return null;
+      const indexPattern = indexPatterns[layer.indexPatternId];
+      if (!indexPattern) return null;
+
+      const { columnOrder, columns } = layer;
+      const columnEntries = columnOrder.map((colId) => [colId, columns[colId]] as const);
+      const [, esAggEntries] = partition(
+        columnEntries,
+        ([, col]: readonly [string, GenericIndexPatternColumn]) =>
+          operationDefinitionMap[col.operationType]?.input === 'fullReference' ||
+          operationDefinitionMap[col.operationType]?.input === 'managedReference'
       );
+
+      const result = generateEsqlQuery(
+        esAggEntries,
+        layer,
+        indexPattern,
+        uiSettings,
+        dateRange,
+        nowInstant
+      );
+
+      return isEsqlQuerySuccess(result) ? result.esql : null;
     },
 
     LayerSettingsComponent(props) {
-      if (props.layerId && props.state.layers[props.layerId].query) {
+      if (props.layerId && (props.state.layers[props.layerId] as FormBasedLayerWithQuery).query) {
         return null;
       }
       return <LayerSettingsPanel {...props} />;
@@ -562,9 +584,13 @@ export function getFormBasedDatasource({
           return;
         }
 
-        if (layer.query) {
+        if ((layer as FormBasedLayerWithQuery).query) {
           Object.values(layer.columns).forEach((column) => {
-            columnLabelMap[column.columnId] = uniqueLabelGenerator(column.fieldName);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            columnLabelMap[(column as any).columnId] = uniqueLabelGenerator(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (column as any).fieldName
+            );
           });
         } else {
           Object.entries(layer.columns).forEach(([columnId, column]) => {
@@ -589,10 +615,11 @@ export function getFormBasedDatasource({
       const uniqueLabel = columnLabelMap[props.columnId];
       const formattedLabel = wrapOnDot(uniqueLabel);
 
-      if (props.layerId && props.state.layers[props.layerId].query) {
+      if (props.layerId && (props.state.layers[props.layerId] as FormBasedLayerWithQuery).query) {
         return (
           <TextBasedDimensionTrigger
-            {...props}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            {...(props as any)}
             expressions={expressions}
             columnLabelMap={columnLabelMap}
           />
@@ -605,8 +632,9 @@ export function getFormBasedDatasource({
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<FormBasedPrivateState>) => {
       const columnLabelMap = formBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
 
-      if (props.layerId && props.state.layers[props.layerId].query) {
-        return <TextBasedDimensionEditor {...props} expressions={expressions} />;
+      if (props.layerId && (props.state.layers[props.layerId] as FormBasedLayerWithQuery).query) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return <TextBasedDimensionEditor {...(props as any)} expressions={expressions} />;
       }
 
       return (
@@ -628,7 +656,7 @@ export function getFormBasedDatasource({
 
     LayerPanelComponent: (props: DatasourceLayerPanelProps<FormBasedPrivateState>) => {
       // ES|QL layers don't show the layer panel (data view selector)
-      if (props.layerId && props.state.layers[props.layerId]?.query) {
+      if (props.layerId && (props.state.layers[props.layerId] as FormBasedLayerWithQuery)?.query) {
         return null;
       }
       const { onChangeIndexPattern, ...otherProps } = props;
@@ -772,9 +800,10 @@ export function getFormBasedDatasource({
         getTableSpec: () => {
           if (Array.isArray(layer.columns)) {
             return (
-              layer.columns.map((column) => ({
-                columnId: column.columnId,
-                fields: [column.fieldName],
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (layer.columns as any[]).map((column: any) => ({
+                columnId: column.columnId as string,
+                fields: [column.fieldName as string],
               })) || []
             );
           }
@@ -806,7 +835,8 @@ export function getFormBasedDatasource({
         },
         getOperationForColumnId: (columnId: string) => {
           if (layer && Array.isArray(layer.columns)) {
-            const column = layer.columns.find((c) => c.columnId === columnId);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const column = (layer.columns as any[]).find((c: any) => c.columnId === columnId);
             if (!column) {
               return null;
             }
@@ -850,7 +880,7 @@ export function getFormBasedDatasource({
           return null;
         },
         hasDefaultTimeField: () => Boolean(indexPatterns[layer.indexPatternId].timeFieldName),
-      };
+      } as DatasourcePublicAPI;
     },
     getDatasourceSuggestionsForField(state, draggedField, filterLayers, indexPatterns) {
       return isDraggedDataViewField(draggedField)
@@ -1038,7 +1068,7 @@ function blankLayer(
       sampling: 1,
       ignoreGlobalFilters: false,
       query: { esql: '' },
-    };
+    } as FormBasedLayer;
   }
   return {
     indexPatternId,
@@ -1062,26 +1092,28 @@ function getLayerErrorMessages(
   const layerErrors: UserMessage[][] = Object.entries(state.layers)
     .filter(([_, layer]) => !!indexPatterns[layer.indexPatternId])
     .map(([layerId, layer]) => {
-      const esqlErrors = [];
-      if (layer.query) {
-        Object.values(state.layers).forEach((layer) => {
-          if (layer.errors && layer.errors.length > 0) {
-            esqlErrors.push(...layer.errors);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const esqlErrors: any[] = [];
+      if ((layer as FormBasedLayerWithQuery).query) {
+        Object.values(state.layers).forEach((l) => {
+          const lw = l as FormBasedLayerWithQuery;
+          if (lw.errors && lw.errors.length > 0) {
+            esqlErrors.push(...lw.errors);
           }
         });
       }
-      return (
-        layer.query
-          ? esqlErrors
-          : getErrorMessages(
-              layer,
-              indexPatterns[layer.indexPatternId],
-              state,
-              layerId,
-              core,
-              data
-            ) ?? []
-      ).map((error) => {
+      const currentLayerErrors: Array<string | Error> = (layer as FormBasedLayerWithQuery).query
+        ? esqlErrors
+        : getErrorMessages(
+            layer,
+            indexPatterns[layer.indexPatternId],
+            state,
+            layerId,
+            core,
+            data
+          ) ?? [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return currentLayerErrors.map((error: any) => {
         const message: UserMessage = {
           uniqueId: typeof error === 'string' ? error : error.uniqueId,
           severity: 'error',
