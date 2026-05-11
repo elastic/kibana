@@ -16,10 +16,11 @@ import {
 } from '@kbn/synthtrace';
 import { METRICS_ENVIRONMENT } from '../constants';
 
-const METRIC_SERVICES = [
-  ...APM_METRICS_DASHBOARD_SERVICES,
-  ...APM_METRICS_NON_DASHBOARD_SERVICES.filter((s) => s.runtimeName === 'jruby'),
-];
+// We seed every dashboard service plus every non-dashboard service so that
+// both the dashboard-catalog tests and the non-dashboard variations
+// (JRuby JVM table, Go classic generic CPU chart, Ruby classic generic
+// metrics) have the underlying app-metric documents they need.
+const METRIC_SERVICES = [...APM_METRICS_DASHBOARD_SERVICES, ...APM_METRICS_NON_DASHBOARD_SERVICES];
 
 export function metricsServices({
   from,

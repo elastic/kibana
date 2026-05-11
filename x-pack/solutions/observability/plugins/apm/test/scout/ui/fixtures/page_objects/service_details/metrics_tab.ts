@@ -19,6 +19,7 @@ export class MetricsTab extends ServiceDetailsTab {
   public readonly noDashboardCallout: Locator;
   public readonly jvmMetricsTable: Locator;
   public readonly cpuUsageChart: Locator;
+  public readonly serverlessSummary: Locator;
   public readonly serverlessSummaryFeedbackLink: Locator;
 
   constructor(page: ScoutPage, kbnUrl: KibanaUrl, defaultServiceName: string) {
@@ -28,6 +29,7 @@ export class MetricsTab extends ServiceDetailsTab {
     this.noDashboardCallout = this.page.getByTestId('apmMetricsNoDashboardFound');
     this.jvmMetricsTable = this.page.getByTestId('apmJvmMetricsTable');
     this.cpuUsageChart = this.page.getByTestId('cpu_usage_chart');
+    this.serverlessSummary = this.page.getByTestId('apmServerlessSummary');
     this.serverlessSummaryFeedbackLink = this.page.getByTestId(
       'apmServerlessSummaryGiveFeedbackLink'
     );

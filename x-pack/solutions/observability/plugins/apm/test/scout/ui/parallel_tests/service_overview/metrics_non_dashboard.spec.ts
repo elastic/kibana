@@ -14,9 +14,11 @@ import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
 const JRUBY_INSTANCE_NAME = `${testData.APM_METRICS_SERVICE_NAMES.RUBY_JRUBY}-instance`;
 const EXPECTED_JRUBY_THREAD_COUNT = String(RUBY_JRUBY_METRICS['jvm.thread.count']);
 // Column order in `jvm_metrics_overview/index.tsx`: Name, Host name, CPU avg,
-// Heap memory avg, Non-heap memory avg, Thread count max. The thread-count
-// cell is therefore the 6th `td` in each row.
-const THREAD_COUNT_COLUMN_NTH_OF_TYPE = 6;
+// Heap memory avg, Non-heap memory avg, Thread count max. `ManagedTable`
+// defaults `rowHeader` to the first column, so EUI renders Name as `<th>`
+// and the remaining five columns as `<td>` — making the thread-count cell
+// the 5th `td` in each row.
+const THREAD_COUNT_COLUMN_NTH_OF_TYPE = 5;
 
 test.describe(
   'Metrics Tab - Non-Dashboard Variations',
@@ -67,7 +69,11 @@ test.describe(
       const { metricsTab } = serviceDetailsPage;
 
       await metricsTab.goToTab({
-        serviceName: testData.SERVICE_GO,
+        // `metrics-go-classic` is an elastic Go agent service that has no
+        // entry in the metrics dashboard catalog, so the page falls back to
+        // the generic agent-specific charts (CPU / memory) backed by the
+        // seeded `system.*.cpu.*` fields.
+        serviceName: testData.APM_METRICS_SERVICE_NAMES.GO_CLASSIC,
         rangeFrom: testData.START_DATE,
         rangeTo: testData.END_DATE,
       });
@@ -99,7 +105,6 @@ test.describe(
 
     test('renders serverless metrics for AWS Lambda', async ({
       pageObjects: { serviceDetailsPage },
-      page,
     }) => {
       const { metricsTab } = serviceDetailsPage;
 
@@ -119,12 +124,19 @@ test.describe(
         // The aws_lambda synth fixture only emits transactions, not the lambda
         // metric fields needed to populate KPI values; we therefore assert the
         // labels are present rather than the underlying numbers.
+        //
+        // We scope to the `apmServerlessSummary` panel because "Memory usage
+        // avg." also appears as a column header in the serverless functions
+        // table further down the page, which would otherwise trip Playwright's
+        // strict-mode check.
         for (const label of [
           'Function duration avg.',
           'Billed duration avg.',
           'Memory usage avg.',
         ]) {
-          await expect(page.getByText(label, { exact: true })).toBeVisible();
+          await expect(
+            metricsTab.serverlessSummary.getByText(label, { exact: true })
+          ).toBeVisible();
         }
       });
 
