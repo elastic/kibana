@@ -10,6 +10,7 @@ import type { RiskScoreDataClient } from '../../risk_score/risk_score_data_clien
 import type { LeadEntity, Observation, ObservationModule, ObservationSeverity } from '../types';
 import {
   entityToKey,
+  errorMessage,
   makeObservation,
   getEntityField,
   groupEntitiesByType,
@@ -252,7 +253,9 @@ const fetchTimeSeriesRiskScores = async (
         }
       } catch (error) {
         logger.warn(
-          `[${MODULE_ID}] Failed to fetch time-series risk scores for ${entityType}: ${error}`
+          `[${MODULE_ID}] Failed to fetch time-series risk scores for ${entityType}: ${errorMessage(
+            error
+          )}`
         );
       }
     }

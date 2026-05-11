@@ -52,3 +52,13 @@ export const groupEntitiesByType = (entities: LeadEntity[]): Map<string, LeadEnt
     map.set(e.type, [...existing, e]);
     return map;
   }, new Map<string, LeadEntity[]>());
+
+/**
+ * Extracts a printable message from an unknown thrown value. Use this in catch
+ * blocks instead of interpolating `${error}` directly: a plain object thrown
+ * by the ES client would render as `[object Object]` under template literals,
+ * and a real Error's `toString()` prefixes the message with `Error: ` which
+ * adds noise to log lines that already carry a module prefix.
+ */
+export const errorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);

@@ -11,6 +11,7 @@ import type { LeadEntity, Observation, ObservationModule, ObservationSeverity } 
 import {
   PRIVILEGED_USER_WATCHLIST_ID,
   entityToKey,
+  errorMessage,
   makeObservation,
   extractIsPrivileged,
   entityTypeLabel,
@@ -133,7 +134,11 @@ const fetchPrivilegeEscalations = async (
           }
         }
       } catch (error) {
-        logger.warn(`[${MODULE_ID}] Failed to query privilege history for ${entityType}: ${error}`);
+        logger.warn(
+          `[${MODULE_ID}] Failed to query privilege history for ${entityType}: ${errorMessage(
+            error
+          )}`
+        );
       }
     }
   }

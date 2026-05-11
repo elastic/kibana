@@ -9,10 +9,10 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import { entityRecordToLeadEntity, fetchCandidateEntities } from './entity_conversion';
 
-type Record = Parameters<typeof entityRecordToLeadEntity>[0];
+type EntityRecord = Parameters<typeof entityRecordToLeadEntity>[0];
 
-const buildRecord = (entity: Record['entity'] | undefined): Record =>
-  ({ entity } as unknown as Record);
+const buildRecord = (entity: EntityRecord['entity'] | undefined): EntityRecord =>
+  ({ entity } as unknown as EntityRecord);
 
 describe('entityRecordToLeadEntity', () => {
   it('returns a LeadEntity with id, type, and name when the record has an EUID', () => {
@@ -33,7 +33,7 @@ describe('entityRecordToLeadEntity', () => {
       id: 'host:server-01',
       EngineMetadata: { Type: 'host' },
       name: 'server-01',
-    } as Record['entity']);
+    } as EntityRecord['entity']);
 
     const lead = entityRecordToLeadEntity(record);
 

@@ -95,10 +95,11 @@ export class RiskScoreDataClient {
    * from the risk score time-series index. Suitable for trend / escalation analysis.
    *
    * Filters on `risk.id_field === 'entity.id'` so only V2-shaped documents
-   * (written by the entity-store risk-score maintainer) participate; legacy
-   * documents written by the pre-V2 scoring task with `risk.id_field === '${type}.name'`
-   * are excluded, which is what we want — their `risk.id_value` carries a raw
-   * name rather than an EUID and would silently distort the trend.
+   * (written by the entity-store risk-score maintainer) participate. Legacy
+   * documents written by the pre-V2 scoring task have `risk.id_field` set to
+   * `host.name` or `user.name`, and are excluded by this filter. That is the
+   * intended behaviour, since their `risk.id_value` carries a raw name rather
+   * than an EUID and would silently distort the trend.
    *
    * The returned map is keyed by EUID (e.g. `"host:InnoDB"`).
    */
