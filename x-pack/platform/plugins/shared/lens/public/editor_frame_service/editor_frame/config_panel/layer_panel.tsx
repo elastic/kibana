@@ -438,8 +438,6 @@ export function LayerPanel(props: LayerPanelProps) {
   const [isVisualizationLoading, setIsVisualizationLoading] = useState(false);
   const [dataGridAttrs, _setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
 
-  const hideTimeFilterInfo = false;
-
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController) => {
       updateDatasource(datasourceId, {

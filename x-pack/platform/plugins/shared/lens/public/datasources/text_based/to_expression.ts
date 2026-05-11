@@ -29,7 +29,7 @@ function getExpressionForLayer(
         id: col.columnId,
         label: col.customLabel ? col.label : col.fieldName,
         variable: col?.variable,
-      } as OriginalColumn);
+      } as unknown as OriginalColumn);
     } else {
       idMapper = {
         ...idMapper,
@@ -39,7 +39,7 @@ function getExpressionForLayer(
             id: col.columnId,
             label: col.customLabel ? col.label : col.fieldName,
             variable: col?.variable,
-          } as OriginalColumn,
+          } as unknown as OriginalColumn,
         ],
       };
     }
