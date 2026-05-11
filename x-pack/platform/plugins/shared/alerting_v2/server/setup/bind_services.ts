@@ -61,7 +61,10 @@ import {
 } from '../lib/services/task_run_scope_service/create_task_runner';
 import { UserService } from '../lib/services/user_service/user_service';
 import { WorkflowExtensionsService } from '../lib/services/workflow_extensions_service/workflow_extensions_service';
-import { WorkflowExtensionsServiceToken } from '../lib/services/workflow_extensions_service/tokens';
+import {
+  WorkflowExtensionsServiceToken,
+  WorkflowsClientToken,
+} from '../lib/services/workflow_extensions_service/tokens';
 import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_service/tokens';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
@@ -133,18 +136,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(LoggerServiceToken).toService(LoggerService);
   bind(EventLogService).toSelf().inSingletonScope();
   bind(EventLogServiceToken).toService(EventLogService);
-  bind(WorkflowExtensionsService)
-    .toDynamicValue(({ get }) => {
-      const workflowsExtensionsSetup = get(
-        PluginSetup<AlertingServerSetupDependencies['workflowsExtensions']>('workflowsExtensions')
-      );
-      const getWorkflowsExtensionsStart = () =>
-        get(
-          PluginStart<AlertingServerStartDependencies['workflowsExtensions']>('workflowsExtensions')
-        );
-      return new WorkflowExtensionsService(workflowsExtensionsSetup, getWorkflowsExtensionsStart);
-    })
-    .inSingletonScope();
+  bind(WorkflowsClientToken)
+    .toResolvedValue(
+      async (workflowsExtensionsStart, request) => workflowsExtensionsStart.getClient(request),
+      [
+        PluginStart<AlertingServerStartDependencies['workflowsExtensions']>('workflowsExtensions'),
+        Request,
+      ]
+    )
+    .inRequestScope();
+  bind(WorkflowExtensionsService).toSelf().inRequestScope();
   bind(WorkflowExtensionsServiceToken).toService(WorkflowExtensionsService);
   bind(ResourceManager).toSelf().inSingletonScope();
 
