@@ -10,6 +10,7 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import {
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
+  getGraphTargetEuidSourceFields,
 } from '@kbn/cloud-security-posture-common';
 import { ALL_ENTITY_TYPES, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
@@ -52,10 +53,10 @@ export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreview
   // it returns `null` until the lazy chunk loads. The `useMemo` recomputes once `euid` is available.
   const euid = useEntityStoreEuidApi()?.euid;
 
-  // Actor: v1 `*.entity.id` (entity-store v1 backfill, still emitted in v2) OR the v2 idiom
-  // used in `highlighted_fields.tsx` / `prevalence_details_view.tsx` (raw identity fields like
-  // `host.id` / `host.name`). Target: static v1 list — `*.target.*` is a Security graph
-  // convention with no entity-store equivalent.
+  // Actor and target detection covers both entity-store v1 (`*.entity.id` and `*.target.entity.id`,
+  // still emitted in v2 backfill) and v2 raw identity fields (`host.id`, `host.name`, …) — the same
+  // idiom used in `highlighted_fields.tsx` / `prevalence_details_view.tsx`. For targets, identity
+  // fields are checked in their `.target.` namespace (e.g. `user.id` → `user.target.id`).
   const hasV1Actor = GRAPH_ACTOR_ENTITY_FIELDS.some(
     (field) => getFieldArray(hit.flattened[field]).length > 0
   );
@@ -68,9 +69,18 @@ export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreview
     [euid, hit.flattened]
   );
   const hasActor = hasV1Actor || hasV2Actor;
-  const hasTarget = GRAPH_TARGET_ENTITY_FIELDS.some(
+
+  const hasV1Target = GRAPH_TARGET_ENTITY_FIELDS.some(
     (field) => getFieldArray(hit.flattened[field]).length > 0
   );
+  const hasV2Target = useMemo(() => {
+    if (euid == null) return false;
+    const targetFields = getGraphTargetEuidSourceFields(euid);
+    return ALL_ENTITY_TYPES.some((type) =>
+      targetFields[type].some((field) => getFieldArray(hit.flattened[field]).length > 0)
+    );
+  }, [euid, hit.flattened]);
+  const hasTarget = hasV1Target || hasV2Target;
 
   const actionField = getFieldsData('event.action');
   const action: string[] | undefined =

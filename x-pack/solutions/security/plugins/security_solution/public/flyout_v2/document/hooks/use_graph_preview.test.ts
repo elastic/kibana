@@ -26,8 +26,10 @@ const mockUseHasGraphVisualizationLicense = useHasGraphVisualizationLicense as j
 const mockUseEntityStoreStatus = useEntityStoreStatus as jest.Mock;
 const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as jest.Mock;
 
-// Minimal stand-in for the euid module's `getEntityIdentifiersFromDocument`: returns a
-// non-null object when any of the per-type source fields is present on the flattened doc.
+// Minimal stand-in for the euid module's `getEntityIdentifiersFromDocument` /
+// `getEuidSourceFields`: `getEntityIdentifiersFromDocument` returns a non-null object when any of
+// the per-type source fields is present on the flattened doc; `getEuidSourceFields` exposes those
+// per-type identity fields so the hook can derive `.target.`-namespaced equivalents.
 const IDENTITY_FIELDS_BY_TYPE: Record<string, string[]> = {
   user: ['user.id', 'user.name', 'user.email'],
   host: ['host.id', 'host.name', 'host.hostname'],
@@ -46,6 +48,9 @@ const mockEuid = {
     }
     return Object.keys(matches).length > 0 ? matches : undefined;
   },
+  getEuidSourceFields: (entityType: string) => ({
+    identitySourceFields: IDENTITY_FIELDS_BY_TYPE[entityType] ?? [],
+  }),
 };
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
@@ -142,10 +147,15 @@ describe('useGraphPreview', () => {
   });
 
   it.each([
+    // v1 targets (`*.target.entity.id`).
     ['user.id', 'user.target.entity.id'],
     ['host.name', 'host.target.entity.id'],
     ['service.name', 'service.target.entity.id'],
     ['entity.id', 'entity.target.id'],
+    // v2 targets — `.target.`-namespaced identity fields (e.g. `user.id` → `user.target.id`).
+    ['user.id', 'user.target.id'],
+    ['host.name', 'host.target.name'],
+    ['service.name', 'service.target.name'],
   ])('detects actor=%s and target=%s', (actorField, targetField) => {
     const { result } = renderHook(() =>
       useGraphPreview({
