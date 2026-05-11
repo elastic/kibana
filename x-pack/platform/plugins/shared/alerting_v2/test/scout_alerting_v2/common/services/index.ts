@@ -13,3 +13,9 @@ export { getDataStreamApiService } from './data_stream_api_service';
 
 export type { InsightsApiService, InsightSeed } from './insights_api_service';
 export { getInsightsApiService } from './insights_api_service';
+
+export type { RuleEventsApiService } from './rule_events_api_service';
+export { getRuleEventsApiService } from './rule_events_api_service';
+
+export type { TaskExecutionsApiService } from './task_executions_api_service';
+export { getTaskExecutionsApiService } from './task_executions_api_service';
