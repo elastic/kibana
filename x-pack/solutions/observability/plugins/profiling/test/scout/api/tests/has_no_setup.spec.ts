@@ -17,6 +17,7 @@ apiTest.describe(
   () => {
     let viewerApiCreditials: RoleApiCredentials;
     let adminApiCreditials: RoleApiCredentials;
+
     apiTest.beforeAll(async ({ profilingHelper, profilingSetup, requestAuth }) => {
       await profilingHelper.cleanupPolicies();
       await profilingHelper.installPolicies();
