@@ -7,13 +7,13 @@
 
 import { useMemo } from 'react';
 import { useAssistantContext } from '@kbn/elastic-assistant';
-import { useKibana } from '../../common/lib/kibana';
-import { useFindAttackDiscoveries } from '../../attack_discovery/pages/use_find_attack_discoveries';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
 import {
   ACKNOWLEDGED,
   CLOSED,
   OPEN,
-} from '../../attack_discovery/pages/results/history/search_and_filter/translations';
+} from '../../../../attack_discovery/pages/results/history/search_and_filter/translations';
 
 // Query a window wide enough to mean "ever" so the report can distinguish
 // "no discoveries in the selected range" from "the feature has never been used".

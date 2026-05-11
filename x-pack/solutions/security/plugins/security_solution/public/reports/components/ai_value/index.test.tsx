@@ -13,8 +13,8 @@ import {
 } from '@kbn/management-settings-ids';
 import { AIValueReport } from '.';
 import { useKibana } from '../../../common/lib/kibana';
-import { useValueMetrics } from '../../hooks/use_value_metrics';
-import { useHasEverUsedAttackDiscovery } from '../../hooks/use_has_ever_used_attack_discovery';
+import { useValueMetrics } from './hooks/use_value_metrics';
+import { useHasEverUsedAttackDiscovery } from './hooks/use_has_ever_used_attack_discovery';
 import { AIValueReportLayout } from './ai_value_report_layout';
 import {
   SAMPLE_ANALYST_HOURLY_RATE,
@@ -31,11 +31,11 @@ jest.mock('../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
 }));
 
-jest.mock('../../hooks/use_value_metrics', () => ({
+jest.mock('./hooks/use_value_metrics', () => ({
   useValueMetrics: jest.fn(),
 }));
 
-jest.mock('../../hooks/use_has_ever_used_attack_discovery', () => ({
+jest.mock('./hooks/use_has_ever_used_attack_discovery', () => ({
   useHasEverUsedAttackDiscovery: jest.fn(),
 }));
 

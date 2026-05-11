@@ -82,6 +82,13 @@ export const FILTERING_RATE = i18n.translate(
   }
 );
 
+export const FILTERING_RATE_INLINE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.filteringRateInlineDescription',
+  {
+    defaultMessage: 'alert filtering rate',
+  }
+);
+
 export const COMPARED = i18n.translate('xpack.securitySolution.reports.aiValue.compared', {
   defaultMessage: 'Compared to the previous period:',
 });
@@ -114,17 +121,17 @@ export const TIME_SAVED = i18n.translate('xpack.securitySolution.reports.aiValue
   defaultMessage: 'Analyst time saved',
 });
 
-export const TIME_SAVED_DESC = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.timeSavedTitle',
+export const TIME_SAVED_INLINE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.timeSavedInlineDescription',
   {
-    defaultMessage: 'Time saved in hours',
+    defaultMessage: 'time saved in hours',
   }
 );
 
-export const COST_SAVED_DESC = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.timeSavedTitle',
+export const COST_SAVED_INLINE_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.costSavedInlineDescription',
   {
-    defaultMessage: 'Cost saved in dollars',
+    defaultMessage: 'cost saved in dollars',
   }
 );
 

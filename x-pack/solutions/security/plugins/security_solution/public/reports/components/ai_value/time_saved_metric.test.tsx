@@ -287,6 +287,7 @@ describe('TimeSavedMetric', () => {
     it('renders the sample metric and skips the live Lens visualization', () => {
       render(<TimeSavedMetric {...defaultProps} isSample={true} />);
       expect(VisualizationEmbeddable).not.toHaveBeenCalled();
+      expect(screen.getByTestId('mock-sample-metric')).toBeInTheDocument();
       expect(screen.getByText(i18n.TIME_SAVED)).toBeInTheDocument();
     });
   });

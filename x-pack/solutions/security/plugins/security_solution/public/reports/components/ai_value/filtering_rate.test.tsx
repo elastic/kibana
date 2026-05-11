@@ -46,7 +46,7 @@ describe('FilteringRate', () => {
     mockGetTimeRangeAsDays.mockReturnValue('30');
   });
 
-  it('renders the component with correct structure', () => {
+  it('renders the live component with correct structure', () => {
     render(<FilteringRate {...defaultProps} />);
 
     expect(AlertFilteringMetric).toHaveBeenCalledWith(
@@ -65,7 +65,34 @@ describe('FilteringRate', () => {
         currentCount: defaultProps.filteredAlertsPerc,
         previousCount: defaultProps.filteredAlertsPercCompare,
         stat: '60.0%',
-        statType: 'Alert filtering rate',
+        statType: 'alert filtering rate',
+        timeRange: '30',
+      }),
+      {}
+    );
+  });
+
+  it('renders sample component with correct structure', () => {
+    render(<FilteringRate {...defaultProps} isSample={true} />);
+
+    expect(AlertFilteringMetric).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isSample: true,
+        attackAlertIds: defaultProps.attackAlertIds,
+        totalAlerts: defaultProps.totalAlerts,
+        from: defaultProps.from,
+        to: defaultProps.to,
+      }),
+      {}
+    );
+
+    expect(ComparePercentage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        positionForLens: true,
+        currentCount: defaultProps.filteredAlertsPerc,
+        previousCount: defaultProps.filteredAlertsPercCompare,
+        stat: '60.0%',
+        statType: 'alert filtering rate',
         timeRange: '30',
       }),
       {}

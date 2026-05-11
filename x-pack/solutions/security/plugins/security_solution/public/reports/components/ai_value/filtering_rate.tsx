@@ -49,7 +49,7 @@ export const FilteringRate: React.FC<Props> = ({
         currentCount={filteredAlertsPerc}
         previousCount={filteredAlertsPercCompare}
         stat={formatPercent(filteredAlertsPercCompare)}
-        statType={i18n.FILTERING_RATE}
+        statType={i18n.FILTERING_RATE_INLINE_DESCRIPTION}
         timeRange={getTimeRangeAsDays({ from, to })}
       />
     </span>

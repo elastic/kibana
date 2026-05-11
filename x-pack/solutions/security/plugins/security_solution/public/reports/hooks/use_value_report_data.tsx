@@ -15,8 +15,8 @@ import {
   SAMPLE_VALUE_METRICS,
   SAMPLE_VALUE_METRICS_COMPARE,
 } from '../components/ai_value/sample_data';
-import { useValueMetrics } from './use_value_metrics';
-import { useHasEverUsedAttackDiscovery } from './use_has_ever_used_attack_discovery';
+import { useValueMetrics } from '../components/ai_value/hooks/use_value_metrics';
+import { useHasEverUsedAttackDiscovery } from '../components/ai_value/hooks/use_has_ever_used_attack_discovery';
 
 interface Props {
   from: string;

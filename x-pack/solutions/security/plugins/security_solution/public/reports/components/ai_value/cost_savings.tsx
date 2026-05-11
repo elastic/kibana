@@ -60,7 +60,7 @@ export const CostSavings: React.FC<Props> = ({
         currentCount={costSavings}
         previousCount={costSavingsCompare}
         stat={formatDollars(costSavingsCompare)}
-        statType={i18n.COST_SAVED_DESC.toLowerCase()}
+        statType={i18n.COST_SAVED_INLINE_DESCRIPTION}
         timeRange={timerangeAsDays}
       />
     </EuiPanel>

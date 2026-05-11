@@ -201,6 +201,7 @@ describe('ThreatsDetectedMetric', () => {
     it('renders the sample metric and skips the live Lens visualization', () => {
       render(<ThreatsDetectedMetric {...defaultProps} isSample={true} />);
       expect(VisualizationEmbeddable).not.toHaveBeenCalled();
+      expect(screen.getByTestId('mock-sample-metric')).toBeInTheDocument();
       expect(screen.getByText(i18n.THREATS_DETECTED)).toBeInTheDocument();
     });
   });

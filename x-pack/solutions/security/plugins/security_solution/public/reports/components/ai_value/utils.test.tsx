@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+import { render } from '@testing-library/react';
 import { getExcludeAlertsFilters, getPercentInfo } from './utils';
 import { getPercChange } from './helpers';
 import type { EuiThemeComputed } from '@elastic/eui';
@@ -15,6 +17,7 @@ jest.mock('./helpers', () => ({
 }));
 
 const mockGetPercChange = getPercChange as jest.MockedFunction<typeof getPercChange>;
+const renderNote = (note: React.ReactNode) => render(<>{note}</>);
 
 describe('utils', () => {
   beforeEach(() => {
@@ -37,8 +40,11 @@ describe('utils', () => {
       expect(result).toEqual({
         percent: '+25.0%',
         color: 'success',
-        note: 'Your test stat is up by 25.0% from 80',
+        note: expect.any(Object),
       });
+      const renderedNote = renderNote(result.note);
+      expect(renderedNote.container.textContent).toBe('Your test stat is up by 25.0% from 80');
+      expect(renderedNote.container.querySelectorAll('strong')).toHaveLength(2);
     });
 
     it('returns correct percent info for negative change', () => {
@@ -49,8 +55,11 @@ describe('utils', () => {
       expect(result).toEqual({
         percent: '-20.0%',
         color: 'danger',
-        note: 'Your test stat is down by 20.0% from 80',
+        note: expect.any(Object),
       });
+      const renderedNote = renderNote(result.note);
+      expect(renderedNote.container.textContent).toBe('Your test stat is down by 20.0% from 80');
+      expect(renderedNote.container.querySelectorAll('strong')).toHaveLength(2);
     });
 
     it('returns correct percent info for zero change', () => {
@@ -155,7 +164,7 @@ describe('utils', () => {
           statType,
         });
 
-        expect(result.note).toBe(expectedNote);
+        expect(renderNote(result.note).container.textContent).toBe(expectedNote);
       });
     });
   });

@@ -43,7 +43,7 @@ export const TimeSaved: React.FC<Props> = ({
         currentCount={hoursSaved}
         previousCount={hoursSavedCompare}
         stat={formatThousands(hoursSavedCompare)}
-        statType={i18n.TIME_SAVED_DESC.toLowerCase()}
+        statType={i18n.TIME_SAVED_INLINE_DESCRIPTION}
         timeRange={timerangeAsDays}
       />
     </span>

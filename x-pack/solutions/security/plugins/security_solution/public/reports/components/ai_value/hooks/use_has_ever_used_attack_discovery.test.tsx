@@ -7,15 +7,15 @@
 
 import { renderHook } from '@testing-library/react';
 import { useHasEverUsedAttackDiscovery } from './use_has_ever_used_attack_discovery';
-import { useFindAttackDiscoveries } from '../../attack_discovery/pages/use_find_attack_discoveries';
-import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
+import { useFindAttackDiscoveries } from '../../../../attack_discovery/pages/use_find_attack_discoveries';
+import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 
 const mockedUseKibana = {
   ...mockUseKibana(),
 };
 
-jest.mock('../../attack_discovery/pages/use_find_attack_discoveries');
-jest.mock('../../common/lib/kibana', () => ({
+jest.mock('../../../../attack_discovery/pages/use_find_attack_discoveries');
+jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => mockedUseKibana,
 }));
 jest.mock('@kbn/elastic-assistant', () => ({
@@ -43,7 +43,7 @@ describe('useHasEverUsedAttackDiscovery', () => {
 
     expect(mockedUseFindAttackDiscoveries).toHaveBeenCalledWith(
       expect.objectContaining({
-        start: 'now-10y',
+        start: 'now-2y',
         end: 'now',
         perPage: 1,
         status: ['open', 'acknowledged', 'closed'],

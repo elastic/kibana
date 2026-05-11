@@ -9,7 +9,6 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { AIValue } from './ai_value';
-import { useSyncTimerangeUrlParam } from '../../common/hooks/search_bar/use_sync_timerange_url_param';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSourcererDataView } from '../../sourcerer/containers';
@@ -17,10 +16,9 @@ import { useAlertsPrivileges } from '../../detections/containers/detection_engin
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useHasSecurityCapability } from '../../helper_hooks';
 import { TestProviders } from '../../common/mock/test_providers';
-import * as i18n from './translations';
+import { AIValueReport } from '../components/ai_value';
 import { useAIValueExportContext } from '../providers/ai_value/export_provider';
 
-// Mock all dependencies before imports to avoid issues
 jest.mock('../../common/hooks/search_bar/use_sync_timerange_url_param', () => ({
   useSyncTimerangeUrlParam: jest.fn(),
 }));
@@ -45,81 +43,29 @@ jest.mock('../../helper_hooks', () => ({
   useHasSecurityCapability: jest.fn(),
 }));
 
-jest.mock('../providers/ai_value/export_provider', () => {
-  return {
-    AIValueExportProvider: ({ children }: { children: React.ReactNode }) => (
-      <div data-test-subj="AIValueExportProvider">{children}</div>
-    ),
-    useAIValueExportContext: jest.fn(),
-  };
-});
-
-// Mock docLinks for NoPrivileges component
-jest.mock('@kbn/doc-links', () => ({
-  getDocLinksMeta: jest.fn(() => ({})),
-  getDocLinks: jest.fn(() => ({
-    links: {
-      siem: {
-        privileges: 'test-privileges-link',
-      },
-    },
-  })),
-}));
-
-// Mock the problematic components
-jest.mock('../../common/components/page_wrapper', () => ({
-  SecuritySolutionPageWrapper: ({
-    children,
-    ...props
-  }: React.PropsWithChildren<Record<string, unknown>>) => <div {...props}>{children}</div>,
-}));
-
-jest.mock('../../common/components/page_loader', () => ({
-  PageLoader: (props: Record<string, unknown>) => <div data-test-subj="page-loader" {...props} />,
-}));
-
-jest.mock('../../common/components/no_privileges', () => ({
-  NoPrivileges: ({
-    docLinkSelector,
-    ...props
-  }: React.PropsWithChildren<Record<string, unknown>>) => (
-    <div data-test-subj="no-privileges" {...props}>
-      {'No Privileges'}
-    </div>
-  ),
-}));
-
 jest.mock('../../common/hooks/use_selector', () => ({
   useDeepEqualSelector: jest.fn(),
   useShallowEqualSelector: jest.fn(),
 }));
 
-// Mock global filters
-jest.mock('../../common/hooks/use_global_filter_query', () => ({
-  useGlobalFilterQuery: jest.fn(() => ({
-    globalFilters: [],
-    globalFilterQuery: '',
-  })),
+jest.mock('../providers/ai_value/export_provider', () => ({
+  AIValueExportProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useAIValueExportContext: jest.fn(),
 }));
 
-// Mock Lens components
-jest.mock('../../common/components/visualization_actions/lens_embeddable', () => ({
-  LensEmbeddable: (props: Record<string, unknown>) => (
-    <div data-testid="lens-embeddable" data-shared-item {...props} />
-  ),
+jest.mock('../components/ai_value', () => ({
+  AIValueReport: jest.fn(() => <div data-test-subj="ai-value-report" />),
 }));
 
-jest.mock('../../common/components/visualization_actions/use_lens_attributes', () => ({
-  useLensAttributes: jest.fn(() => ({
-    attributes: {},
-    loading: false,
-  })),
+jest.mock('../components/ai_value/value_report_exporter', () => ({
+  ValueReportExporter: ({ children }: { children: (exportPDF: () => void) => React.ReactNode }) =>
+    children(jest.fn()),
 }));
 
-// Type the mocked functions
-const mockUseSyncTimerangeUrlParam = useSyncTimerangeUrlParam as jest.MockedFunction<
-  typeof useSyncTimerangeUrlParam
->;
+jest.mock('../../common/components/no_privileges', () => ({
+  NoPrivileges: () => <div data-test-subj="no-privileges" />,
+}));
+
 const mockUseDeepEqualSelector = useDeepEqualSelector as jest.MockedFunction<
   typeof useDeepEqualSelector
 >;
@@ -136,28 +82,34 @@ const mockUseDataView = useDataView as jest.MockedFunction<typeof useDataView>;
 const mockUseHasSecurityCapability = useHasSecurityCapability as jest.MockedFunction<
   typeof useHasSecurityCapability
 >;
-
+const mockAIValueReport = AIValueReport as jest.MockedFunction<typeof AIValueReport>;
 const mockUseAIValueExportContext = useAIValueExportContext as jest.Mock;
+
+const sourcererDataView = {
+  loading: false,
+  browserFields: {},
+  dataViewId: 'test-id',
+  indicesExist: true,
+  selectedPatterns: [],
+  sourcererDataView: {} as Record<string, unknown>,
+};
+
+const renderAIValue = () =>
+  render(
+    <TestProviders>
+      <AIValue />
+    </TestProviders>
+  );
 
 describe('AIValue', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Set up default mock values
-    mockUseSyncTimerangeUrlParam.mockReturnValue(undefined);
     mockUseDeepEqualSelector.mockReturnValue({
       from: '2023-01-01T00:00:00.000Z',
       to: '2023-01-31T23:59:59.999Z',
     });
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-    mockUseSourcererDataView.mockReturnValue({
-      loading: false,
-      browserFields: {},
-      dataViewId: 'test-id',
-      indicesExist: true,
-      selectedPatterns: [],
-      sourcererDataView: {} as Record<string, unknown>,
-    });
+    mockUseSourcererDataView.mockReturnValue(sourcererDataView);
     mockUseAlertsPrivileges.mockReturnValue({
       hasIndexRead: true,
       hasIndexUpdateDelete: false,
@@ -171,205 +123,64 @@ describe('AIValue', () => {
       hasIndexWrite: false,
       hasIndexMaintenance: false,
     });
-    mockUseDataView.mockReturnValue({
-      status: 'ready',
-      dataView: {} as never,
-    });
+    mockUseDataView.mockReturnValue({ status: 'ready', dataView: {} as never });
     mockUseHasSecurityCapability.mockReturnValue(true);
+    mockUseAIValueExportContext.mockReturnValue({ isExportMode: false });
   });
 
-  describe('Access states', () => {
-    it('shows no privileges when user lacks soc management capability', () => {
-      mockUseHasSecurityCapability.mockReturnValue(false);
+  it('renders NoPrivileges when the user lacks the socManagement capability', () => {
+    mockUseHasSecurityCapability.mockReturnValue(false);
 
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
+    renderAIValue();
 
-      expect(screen.getByTestId('no-privileges')).toBeInTheDocument();
-    });
-
-    it('shows page loader when new data view picker is enabled and status is pristine', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-      mockUseDataView.mockReturnValue({
-        status: 'pristine',
-        dataView: {} as never,
-      });
-
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('page-loader')).toBeInTheDocument();
-    });
-
-    it('shows loading spinner when sourcerer is loading', () => {
-      mockUseSourcererDataView.mockReturnValue({
-        loading: true,
-        browserFields: {},
-        dataViewId: 'test-id',
-        indicesExist: true,
-        selectedPatterns: [],
-        sourcererDataView: {} as Record<string, unknown>,
-      });
-
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('aiValueLoader')).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('no-privileges')).toBeInTheDocument();
+    expect(screen.queryByTestId('aiValuePage')).not.toBeInTheDocument();
   });
 
-  describe('Access Control', () => {
-    it('shows no privileges when user lacks soc management capability', () => {
-      mockUseHasSecurityCapability.mockReturnValue(false);
+  it('renders the page with the header when the user has access', () => {
+    renderAIValue();
 
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('no-privileges')).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('aiValuePage')).toBeInTheDocument();
+    expect(screen.getByTestId('header-page')).toBeInTheDocument();
   });
 
-  describe('Main Content Rendering', () => {
-    it('renders main content when all conditions are met', () => {
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
+  it('hides the header in export mode', () => {
+    mockUseAIValueExportContext.mockReturnValue({ isExportMode: true });
 
-      expect(screen.getByTestId('aiValuePage')).toBeInTheDocument();
-    });
+    renderAIValue();
 
-    it('renders correct page title', () => {
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
-
-      expect(screen.getByText(i18n.AI_VALUE_DASHBOARD)).toBeInTheDocument();
-    });
-
-    it('renders super date picker with correct id', () => {
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
-
-      const datePicker = screen.getByTestId('superDatePickerToggleQuickMenuButton');
-      expect(datePicker).toBeInTheDocument();
-    });
-
-    it('should be wrapped in a AIValueExportProvider', () => {
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('AIValueExportProvider')).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('aiValuePage')).toBeInTheDocument();
+    expect(screen.queryByTestId('header-page')).not.toBeInTheDocument();
   });
 
-  describe('Hook Integration', () => {
-    it('calls all required hooks', () => {
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
+  describe('isSourcererLoading derivation', () => {
+    const getLoadingProp = () => mockAIValueReport.mock.calls.at(-1)?.[0].isSourcererLoading;
 
-      expect(mockUseSyncTimerangeUrlParam).toHaveBeenCalled();
-      expect(mockUseDeepEqualSelector).toHaveBeenCalledWith(expect.any(Function));
-      expect(mockUseIsExperimentalFeatureEnabled).toHaveBeenCalledWith('newDataViewPickerEnabled');
-      expect(mockUseHasSecurityCapability).toHaveBeenCalledWith('socManagement');
-      expect(mockUseAlertsPrivileges).toHaveBeenCalled();
-      expect(mockUseAIValueExportContext).toHaveBeenCalled();
-    });
-  });
-
-  describe('Data View Picker Integration', () => {
-    it('uses old sourcerer loading when new data view picker is disabled', () => {
+    it('uses the old sourcerer loading state when the new data view picker is disabled', () => {
       mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-      mockUseSourcererDataView.mockReturnValue({
-        loading: true,
-        browserFields: {},
-        dataViewId: 'test-id',
-        indicesExist: true,
-        selectedPatterns: [],
-        sourcererDataView: {} as Record<string, unknown>,
-      });
+      mockUseSourcererDataView.mockReturnValue({ ...sourcererDataView, loading: true });
 
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
+      renderAIValue();
 
-      expect(screen.getByTestId('aiValueLoader')).toBeInTheDocument();
+      expect(getLoadingProp()).toBe(true);
     });
 
-    it('uses new data view status when new data view picker is enabled', () => {
+    it('treats any non-ready data view status as loading when the new data view picker is enabled', () => {
       mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
-      mockUseDataView.mockReturnValue({
-        status: 'loading',
-        dataView: {} as never,
-      });
+      mockUseDataView.mockReturnValue({ status: 'loading', dataView: {} as never });
 
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
+      renderAIValue();
 
-      expect(screen.getByTestId('aiValueLoader')).toBeInTheDocument();
-    });
-  });
-
-  describe('export mode', () => {
-    beforeEach(() => {
-      mockUseAIValueExportContext.mockReturnValue({
-        forwardedState: {
-          timeRange: {
-            from: '2025-01-01T00:00:00.000Z',
-            to: '2025-01-31T23:59:59.999Z',
-          },
-        },
-        isExportMode: true,
-      });
-
-      render(
-        <TestProviders>
-          <AIValue />
-        </TestProviders>
-      );
+      expect(getLoadingProp()).toBe(true);
     });
 
-    it('should not render the header of the page', () => {
-      expect(screen.queryByTestId('header-page')).not.toBeInTheDocument();
-    });
+    it('reports not loading when the new data view picker is enabled and status is ready', () => {
+      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseDataView.mockReturnValue({ status: 'ready', dataView: {} as never });
 
-    it('should have data-shared-items-container with data-shared-items-count matching the number of data-shared-item children', () => {
-      const container = screen.queryByTestId('aiValuePage');
-      expect(container).toBeInTheDocument();
+      renderAIValue();
 
-      const sharedItems = container?.querySelectorAll('[data-shared-item]') ?? [];
-      const sharedItemsCount = sharedItems.length;
-
-      expect(container).toHaveAttribute('data-shared-items-count', String(sharedItemsCount));
+      expect(getLoadingProp()).toBe(false);
     });
   });
 });

@@ -206,4 +206,9 @@ describe('AlertFilteringMetric', () => {
 
     expect(mockGetExcludeAlertsFilters).toHaveBeenCalledWith(['new-alert-1', 'new-alert-2']);
   });
+
+  it('should not render VisualizationEmbeddable when isSample is true', () => {
+    const { queryByTestId } = render(<AlertFilteringMetric {...defaultProps} isSample={true} />);
+    expect(queryByTestId('mock-visualization-embeddable')).not.toBeInTheDocument();
+  });
 });
