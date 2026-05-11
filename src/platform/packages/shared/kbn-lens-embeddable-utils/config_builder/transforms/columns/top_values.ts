@@ -13,6 +13,7 @@ import {
   type PercentileIndexPatternColumn,
   type PercentileRanksIndexPatternColumn,
   type TermsIndexPatternColumn,
+  type CountIndexPatternColumn,
 } from '@kbn/lens-common';
 import type {
   LensApiTermsOperation,
@@ -37,8 +38,10 @@ function isPercentileRanksOrderAgg(
   return orderAgg.operationType === 'percentile_rank';
 }
 
-function isCountOperation(operation: string): operation is 'count' {
-  return operation === 'count';
+function isCountOrderAgg(
+  orderAgg: FieldBasedIndexPatternColumn
+): orderAgg is CountIndexPatternColumn {
+  return orderAgg.operationType === 'count';
 }
 
 function isBaseCustomOperation(
@@ -51,7 +54,6 @@ function isBaseCustomOperation(
     'median',
     'standard_deviation',
     'unique_count',
-    'count',
     'sum',
     'last_value',
   ];
@@ -166,13 +168,14 @@ function getCustomOrderAgg(
   }
 
   if (rankBy.operation === 'count') {
-    return {
+    const orderAgg: CountIndexPatternColumn = {
       operationType: rankBy.operation,
       sourceField: rankBy.field || LENS_DOCUMENT_FIELD_NAME,
       dataType: 'number',
       isBucketed: false,
       label: '',
     };
+    return orderAgg;
   }
 
   return {
@@ -211,16 +214,17 @@ function getCustomRankByFromOrderAgg(
     return rankBy;
   }
 
+  if (isCountOrderAgg(orderAgg)) {
+    const rankBy: TermOperationRankByCustomCountOperationType = {
+      type: 'custom',
+      operation: 'count',
+      direction: orderDirection,
+      ...(sourceField !== LENS_DOCUMENT_FIELD_NAME ? { field: sourceField } : {}),
+    };
+    return rankBy;
+  }
+
   if (isBaseCustomOperation(orderAgg.operationType)) {
-    if (isCountOperation(orderAgg.operationType)) {
-      const rankBy: TermOperationRankByCustomCountOperationType = {
-        type: 'custom',
-        operation: orderAgg.operationType,
-        direction: orderDirection,
-        ...(sourceField !== LENS_DOCUMENT_FIELD_NAME ? { field: sourceField } : {}),
-      };
-      return rankBy;
-    }
     const rankBy: TermOperationRankByCustomOperationType = {
       type: 'custom',
       operation: orderAgg.operationType,
