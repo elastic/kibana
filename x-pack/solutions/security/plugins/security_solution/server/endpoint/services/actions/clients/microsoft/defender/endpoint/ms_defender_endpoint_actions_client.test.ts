@@ -6,6 +6,7 @@
  */
 
 import { Readable } from 'stream';
+import pRetry from 'p-retry';
 import { MicrosoftDefenderEndpointActionsClient } from './ms_defender_endpoint_actions_client';
 import type { ProcessPendingActionsMethodOptions, ResponseActionsClient } from '../../../../..';
 import { getActionDetailsById as _getActionDetailsById } from '../../../../action_details_by_id';
@@ -46,7 +47,13 @@ jest.mock('../../../../action_details_by_id', () => {
   };
 });
 
+jest.mock('p-retry', () => {
+  const originalPRetry = jest.requireActual('p-retry');
+  return jest.fn().mockImplementation((fn, options) => originalPRetry(fn, options));
+});
+
 const getActionDetailsByIdMock = _getActionDetailsById as jest.Mock;
+const pRetryMock = jest.mocked(pRetry);
 
 describe('MS Defender response actions client', () => {
   let clientConstructorOptionsMock: MicrosoftDefenderActionsClientOptionsMock;
@@ -603,7 +610,6 @@ describe('MS Defender response actions client', () => {
         });
       });
 
-      // TODO: Fix this slow test
       it('should throw error when GET_ACTIONS returns no action details after retry', async () => {
         const underlyingClient = (
           connectorActionsMock as unknown as { connectorsClient: { execute: jest.Mock } }
@@ -630,6 +636,8 @@ describe('MS Defender response actions client', () => {
           }
         );
 
+        pRetryMock.mockImplementationOnce(async (fn) => fn(1));
+
         await expect(
           msClientMock.runscript(
             responseActionsClientMock.createRunScriptOptions({
@@ -642,7 +650,6 @@ describe('MS Defender response actions client', () => {
         });
       });
 
-      // TODO: Fix this slow test
       it('should throw error when GET_ACTIONS call fails', async () => {
         const underlyingClient = (
           connectorActionsMock as unknown as { connectorsClient: { execute: jest.Mock } }
@@ -663,6 +670,8 @@ describe('MS Defender response actions client', () => {
             return defaultMockImpl!(options);
           }
         );
+
+        pRetryMock.mockImplementationOnce(async (fn) => fn(1));
 
         await expect(
           msClientMock.runscript(
