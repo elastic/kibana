@@ -7,8 +7,15 @@
 
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
-import * as t from 'io-ts';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  routeDefinitions,
+  type HasApmPoliciesResponse,
+  type FleetAgentResponse,
+  type UnsupportedApmServerSchemaResponse,
+  type RunMigrationCheckResponse,
+  type CloudApmPackagePolicyResponse,
+  type JavaAgentVersionsResponse,
+} from '@kbn/apm-api-shared';
 import {
   APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
   APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
@@ -18,14 +25,11 @@ import { createInternalESClientWithResources } from '../../lib/helpers/create_es
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { createCloudApmPackgePolicy } from './create_cloud_apm_package_policy';
-import type { FleetAgentResponse } from './get_agents';
 import { getFleetAgents } from './get_agents';
 import { getApmPackagePolicies } from './get_apm_package_policies';
 import { getJavaAgentVersionsFromRegistry } from './get_java_agent_versions';
-import type { UnsupportedApmServerSchema } from './get_unsupported_apm_server_schema';
 import { getUnsupportedApmServerSchema } from './get_unsupported_apm_server_schema';
 import { isSuperuser } from './is_superuser';
-import type { RunMigrationCheckResponse } from './run_migration_check';
 import { runMigrationCheck } from './run_migration_check';
 
 function throwNotFoundIfFleetMigrationNotAvailable(featureFlags: ApmFeatureFlags): void {
@@ -35,7 +39,7 @@ function throwNotFoundIfFleetMigrationNotAvailable(featureFlags: ApmFeatureFlags
 }
 
 const hasFleetDataRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/fleet/has_apm_policies',
+  endpoint: routeDefinitions.fleet.hasApmPolicies.endpoint,
   security: {
     authz: {
       enabled: false,
@@ -43,7 +47,7 @@ const hasFleetDataRoute = createApmServerRoute({
         "It's being used in the tutorial page, so it needs to be available for users even if they don't have APM permissions.",
     },
   },
-  handler: async ({ core, plugins }): Promise<{ hasApmPolicies: boolean }> => {
+  handler: async ({ core, plugins }): Promise<HasApmPoliciesResponse> => {
     const fleetPluginStart = await plugins.fleet?.start();
     if (!fleetPluginStart) {
       return { hasApmPolicies: false };
@@ -58,7 +62,7 @@ const hasFleetDataRoute = createApmServerRoute({
 });
 
 const fleetAgentsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/fleet/agents',
+  endpoint: routeDefinitions.fleet.agents.endpoint,
   security: {
     authz: {
       enabled: false,
@@ -76,17 +80,13 @@ const fleetAgentsRoute = createApmServerRoute({
 });
 
 const saveApmServerSchemaRoute = createApmServerRoute({
-  endpoint: 'POST /api/apm/fleet/apm_server_schema 2023-10-31',
+  endpoint: routeDefinitions.fleet.saveSchema.endpoint,
+  params: routeDefinitions.fleet.saveSchema.params,
   security: {
     authz: {
       requiredPrivileges: ['apm', 'apm_write'],
     },
   },
-  params: t.type({
-    body: t.type({
-      schema: t.record(t.string, t.unknown),
-    }),
-  }),
   handler: async (resources): Promise<void> => {
     throwNotFoundIfFleetMigrationNotAvailable(resources.featureFlags);
     const { params, logger, core } = resources;
@@ -103,9 +103,9 @@ const saveApmServerSchemaRoute = createApmServerRoute({
 });
 
 const getUnsupportedApmServerSchemaRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/fleet/apm_server_schema/unsupported',
+  endpoint: routeDefinitions.fleet.unsupportedSchema.endpoint,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ unsupported: UnsupportedApmServerSchema }> => {
+  handler: async (resources): Promise<UnsupportedApmServerSchemaResponse> => {
     throwNotFoundIfFleetMigrationNotAvailable(resources.featureFlags);
     const { context } = resources;
     const savedObjectsClient = (await context.core).savedObjects.client;
@@ -116,7 +116,7 @@ const getUnsupportedApmServerSchemaRoute = createApmServerRoute({
 });
 
 const getMigrationCheckRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/fleet/migration_check',
+  endpoint: routeDefinitions.fleet.migrationCheck.endpoint,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<RunMigrationCheckResponse> => {
     const { core, plugins, context, config, request } = resources;
@@ -143,17 +143,13 @@ const getMigrationCheckRoute = createApmServerRoute({
 });
 
 const createCloudApmPackagePolicyRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/fleet/cloud_apm_package_policy',
+  endpoint: routeDefinitions.fleet.cloudApmPackagePolicy.endpoint,
   security: {
     authz: {
       requiredPrivileges: ['apm', 'apm_write'],
     },
   },
-  handler: async (
-    resources
-  ): Promise<{
-    cloudApmPackagePolicy: PackagePolicy;
-  }> => {
+  handler: async (resources): Promise<CloudApmPackagePolicyResponse> => {
     const { plugins, context, config, request, logger } = resources;
     const cloudApmMigrationEnabled = config.agent.migrations.enabled;
 
@@ -193,7 +189,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
 });
 
 const javaAgentVersions = createApmServerRoute({
-  endpoint: 'GET /internal/apm/fleet/java_agent_versions',
+  endpoint: routeDefinitions.fleet.javaAgentVersions.endpoint,
   security: {
     authz: {
       enabled: false,
@@ -201,7 +197,7 @@ const javaAgentVersions = createApmServerRoute({
         'It returns static information stored in a public file in https://repo1.maven.org/maven2/co/elastic/apm/elastic-apm-agent/maven-metadata.xml',
     },
   },
-  handler: async (): Promise<{ versions: string[] | undefined }> => {
+  handler: async (): Promise<JavaAgentVersionsResponse> => {
     const versions = await getJavaAgentVersionsFromRegistry();
     return {
       versions,

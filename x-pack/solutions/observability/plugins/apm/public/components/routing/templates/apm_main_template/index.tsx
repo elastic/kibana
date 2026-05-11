@@ -92,7 +92,8 @@ export function ApmMainTemplate({
         return callApmApi('GET /internal/apm/fleet/has_apm_policies');
       }
     },
-    [shouldBypassNoDataScreen, data?.hasData]
+    [shouldBypassNoDataScreen, data?.hasData],
+    { useCallApmApiV2: true }
   );
 
   const isLoading =
