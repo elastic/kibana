@@ -9,18 +9,20 @@
 
 import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { getMeta } from '@kbn/as-code-shared-schemas';
-import type { LinksAttributes } from '../types';
 import { linksSchema } from './schemas';
+import type { StoredLinksState } from '../content_management';
+import { transformOut } from '../../common/embeddable/transforms/transform_out';
 
 // CRU is Create, Read, Update
 export function getLinksCRUResponseBody(
-  savedObject: SavedObject<LinksAttributes> | SavedObjectsUpdateResponse<LinksAttributes>
+  savedObject: SavedObject<StoredLinksState> | SavedObjectsUpdateResponse<StoredLinksState>
 ) {
+  const state = transformOut(savedObject.attributes, savedObject.references);
   return {
     id: savedObject.id,
     // Route does not apply defaults to response
     // Instead, call validate to ensure defaults are applied to response
-    data: linksSchema.validate(savedObject.attributes),
+    data: linksSchema.validate(state),
     meta: getMeta(savedObject),
   };
 }

@@ -9,16 +9,16 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { LINKS_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { LinksAttributes } from '../../types';
 import { getLinksCRUResponseBody } from '../get_cru_response_body';
 import type { LinksReadResponseBody } from './types';
+import type { StoredLinksState } from '../../content_management';
 
 export async function read(
   requestCtx: RequestHandlerContext,
   id: string
 ): Promise<LinksReadResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
-  const { saved_object: savedObject } = await core.savedObjects.client.resolve<LinksAttributes>(
+  const { saved_object: savedObject } = await core.savedObjects.client.resolve<StoredLinksState>(
     LINKS_SAVED_OBJECT_TYPE,
     id
   );

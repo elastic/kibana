@@ -9,9 +9,10 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { LINKS_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { LinksAttributes } from '../../types';
 import { getLinksCRUResponseBody } from '../get_cru_response_body';
 import type { LinksCreateRequestBody, LinksCreateResponseBody } from './types';
+import { transformIn } from '../../../common';
+import type { StoredLinksState } from '../../content_management';
 
 export async function create(
   requestCtx: RequestHandlerContext,
@@ -19,9 +20,11 @@ export async function create(
 ): Promise<LinksCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
 
-  const savedObject = await core.savedObjects.client.create<LinksAttributes>(
+  const { state: soState, references } = transformIn(createBody);
+  const savedObject = await core.savedObjects.client.create<StoredLinksState>(
     LINKS_SAVED_OBJECT_TYPE,
-    createBody
+    soState,
+    { references }
   );
 
   return getLinksCRUResponseBody(savedObject);
