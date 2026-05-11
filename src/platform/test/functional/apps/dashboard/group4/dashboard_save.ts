@@ -102,10 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboard.switchToEditMode();
         await dashboard.expectExistsQuickSaveOption();
-        await dashboardAddPanel.clickTopNavAddMenu();
-        await testSubjects.existOrFail('dashboardAddCollapsibleSectionButton');
-        await testSubjects.scrollIntoView('dashboardAddCollapsibleSectionButton');
-        await testSubjects.click('dashboardAddCollapsibleSectionButton');
+        await dashboardAddPanel.clickAddCollapsibleSection();
         await dashboard.ensureHasUnsavedChangesNotification({ retry: true });
         await dashboard.clickQuickSave();
 

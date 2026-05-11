@@ -16,13 +16,16 @@ import { IndexConfiguration } from './index_configuration';
 import { DeleteStreamPanel } from './delete_stream';
 import { ImportExportPanel } from './import_export';
 import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
+import { DraftMaterializationCTA } from '../../draft_materialization_cta';
 
 export function WiredAdvancedView({
   definition,
   refreshDefinition,
+  isDraft = false,
 }: {
   definition: Streams.WiredStream.GetResponse;
   refreshDefinition: () => void;
+  isDraft?: boolean;
 }) {
   const {
     features: { contentPacks, significantEvents },
@@ -44,27 +47,35 @@ export function WiredAdvancedView({
 
   return (
     <>
+      {isDraft && (
+        <>
+          <DraftMaterializationCTA definition={definition} refreshDefinition={refreshDefinition} />
+          <EuiSpacer />
+        </>
+      )}
       {contentPacks.enabled && (
         <>
           <ImportExportPanel definition={definition} refreshDefinition={refreshDefinition} />
           <EuiSpacer />
         </>
       )}
-      <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
-        <EuiCallOut
-          announceOnMount={false}
-          iconType="warning"
-          color="primary"
-          title={i18n.translate(
-            'xpack.streams.streamDetailView.indexConfiguration.inheritSettingsTitle',
-            {
-              defaultMessage:
-                'Changes will be inherited by child streams unless they override them explicitly.',
-            }
-          )}
-        />
-        <EuiSpacer size="l" />
-      </IndexConfiguration>
+      {!isDraft && (
+        <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
+          <EuiCallOut
+            announceOnMount={false}
+            iconType="warning"
+            color="primary"
+            title={i18n.translate(
+              'xpack.streams.streamDetailView.indexConfiguration.inheritSettingsTitle',
+              {
+                defaultMessage:
+                  'Changes will be inherited by child streams unless they override them explicitly.',
+              }
+            )}
+          />
+          <EuiSpacer size="l" />
+        </IndexConfiguration>
+      )}
       {(!isRoot(definition.stream.name) || definition.stream.name === LOGS_ROOT_STREAM_NAME) && (
         <>
           <EuiSpacer />

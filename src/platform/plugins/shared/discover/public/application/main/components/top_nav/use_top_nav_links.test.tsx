@@ -269,7 +269,7 @@ describe('useTopNavLinks', () => {
         true
       );
       expect(
-        appMenuConfig.primaryActionItem?.splitButtonProps?.notifcationIndicatorTooltipContent
+        appMenuConfig.primaryActionItem?.splitButtonProps?.notificationIndicatorTooltipContent
       ).toBe('You have unsaved changes');
     });
 
@@ -282,7 +282,7 @@ describe('useTopNavLinks', () => {
         false
       );
       expect(
-        appMenuConfig.primaryActionItem?.splitButtonProps?.notifcationIndicatorTooltipContent
+        appMenuConfig.primaryActionItem?.splitButtonProps?.notificationIndicatorTooltipContent
       ).toBeUndefined();
     });
 
@@ -447,6 +447,130 @@ describe('useTopNavLinks', () => {
 
       expect(esqlConfig.items?.find((item) => item.id === AppMenuActionId.alerts)).toBeDefined();
       expect(classicConfig.items?.find((item) => item.id === AppMenuActionId.alerts)).toBeDefined();
+    });
+  });
+
+  describe('alerts menu when only alerting v2 capability is granted', () => {
+    /**
+     * Users with v2 access but no v1 rule-type authorization should still see
+     * the Alerts menu (containing only the v2 ES|QL rule entry) when in ES|QL
+     * mode. Verifies the parent gate considers v2 access independently.
+     */
+    const setupV2OnlyServices = (
+      overrides: { alertingVTwoEnabled?: boolean } = {}
+    ): DiscoverServices => {
+      const baseMock = createDiscoverServicesMock();
+      const { alertingVTwoEnabled = true } = overrides;
+      return createTestServices({
+        capabilities: {
+          ...baseMock.capabilities,
+          discover_v2: {
+            save: true,
+            storeSearchSession: true,
+          },
+          ...(alertingVTwoEnabled ? { alertingVTwo: {} } : {}),
+          // No v1 management.insightsAndAlerting.triggersActions capability.
+          management: {
+            ...baseMock.capabilities.management,
+            insightsAndAlerting: {},
+          },
+        },
+        triggersActionsUi: triggersActionsUiMock.createStart(),
+      });
+    };
+
+    beforeEach(() => {
+      jest.requireMock('@kbn/alerts-ui-shared').useGetRuleTypesPermissions.mockReturnValue({
+        authorizedRuleTypes: [],
+      });
+    });
+
+    afterEach(() => {
+      jest.requireMock('@kbn/alerts-ui-shared').useGetRuleTypesPermissions.mockReturnValue({
+        authorizedRuleTypes: [
+          {
+            id: '.es-query',
+            authorizedConsumers: {
+              discover: { all: true, read: true },
+            },
+          },
+        ],
+      });
+    });
+
+    it('should include the alerts menu in ES|QL mode when only alerting v2 is granted', async () => {
+      const services = setupV2OnlyServices();
+      const toolkit = getDiscoverInternalStateMock({ services });
+      await toolkit.initializeTabs();
+      await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
+      const appMenuConfig = renderHook(
+        () =>
+          useTopNavLinks({
+            dataView: dataViewMock,
+            services,
+            hasUnsavedChanges: false,
+            isEsqlMode: true,
+            adHocDataViews: [],
+            hasShareIntegration: false,
+            persistedDiscoverSession: undefined,
+            onOpenInspector: jest.fn(),
+            onOpenSaveModal: jest.fn(),
+            onOpenSaveAsModal: jest.fn(),
+          }),
+        {
+          wrapper: ({ children }) => (
+            <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+          ),
+        }
+      ).result.current;
+
+      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
+      expect(alertsItem).toBeDefined();
+
+      const v2Row = alertsItem?.items?.find((item) => item.id === 'create-esql-rule-v2');
+      expect(v2Row).toBeDefined();
+
+      // v1 entries must remain hidden because the user has no v1 capabilities.
+      const manageRow = alertsItem?.items?.find(
+        (item) => item.testId === 'discoverManageAlertsButton'
+      );
+      const createSearchThresholdRow = alertsItem?.items?.find(
+        (item) => item.testId === 'discoverCreateAlertButton'
+      );
+      expect(manageRow).toBeUndefined();
+      expect(createSearchThresholdRow).toBeUndefined();
+    });
+
+    it('should NOT include the alerts menu when neither v1 nor v2 access is granted', async () => {
+      const services = setupV2OnlyServices({ alertingVTwoEnabled: false });
+      const toolkit = getDiscoverInternalStateMock({ services });
+      await toolkit.initializeTabs();
+      await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
+
+      const appMenuConfig = renderHook(
+        () =>
+          useTopNavLinks({
+            dataView: dataViewMock,
+            services,
+            hasUnsavedChanges: false,
+            isEsqlMode: true,
+            adHocDataViews: [],
+            hasShareIntegration: false,
+            persistedDiscoverSession: undefined,
+            onOpenInspector: jest.fn(),
+            onOpenSaveModal: jest.fn(),
+            onOpenSaveAsModal: jest.fn(),
+          }),
+        {
+          wrapper: ({ children }) => (
+            <DiscoverToolkitTestProvider toolkit={toolkit}>{children}</DiscoverToolkitTestProvider>
+          ),
+        }
+      ).result.current;
+
+      const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
+      expect(alertsItem).toBeUndefined();
     });
   });
 });

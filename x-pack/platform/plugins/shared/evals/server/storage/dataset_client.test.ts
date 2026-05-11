@@ -17,9 +17,33 @@ import type {
 import { DatasetClient } from './dataset_client';
 import { DatasetAlreadyExistsError } from './dataset_already_exists_error';
 import { ExampleAlreadyExistsError } from './example_already_exists_error';
+import { ExampleNotFoundError } from './example_not_found_error';
 
 type DatasetStorageDocument = DatasetStorageProperties & { _id?: string };
 type DatasetExampleStorageDocument = DatasetExampleStorageProperties & { _id?: string };
+
+/**
+ * Mirrors how the real StorageIndexAdapter handles `_source` projections:
+ * `_source: false` is rejected at runtime (the adapter's `maybeMigrateSource`
+ * throws on a non-object source), and `_source: ['field', ...]` returns a
+ * partial document. Keeping the mock faithful means a regression to
+ * `_source: false` blows up unit tests, not just the adapter-contract suite.
+ */
+const projectSource = <TDoc extends object>(source: TDoc, sourceParam: unknown): Partial<TDoc> => {
+  if (sourceParam === false) {
+    throw new Error(`Source must be an object, got undefined`);
+  }
+  if (Array.isArray(sourceParam)) {
+    const projected: Record<string, unknown> = {};
+    for (const field of sourceParam) {
+      if (typeof field === 'string' && field in source) {
+        projected[field] = (source as Record<string, unknown>)[field];
+      }
+    }
+    return projected as Partial<TDoc>;
+  }
+  return source;
+};
 
 const createDatasetStorageClient = () => {
   const docs = new Map<string, DatasetStorageDocument>();
@@ -47,7 +71,10 @@ const createDatasetStorageClient = () => {
 
     const from = (params.from as number | undefined) ?? 0;
     const size = (params.size as number | undefined) ?? rows.length;
-    const paged = rows.slice(from, from + size);
+    const paged = rows.slice(from, from + size).map((row) => ({
+      _id: row._id,
+      _source: projectSource(row._source, params._source),
+    }));
 
     return {
       hits: {
@@ -116,7 +143,10 @@ const createExamplesStorageClient = () => {
     }
 
     const size = (params.size as number | undefined) ?? rows.length;
-    const hits = rows.slice(0, size);
+    const hits = rows.slice(0, size).map((row) => ({
+      _id: row._id,
+      _source: projectSource(row._source, params._source),
+    }));
 
     if ((params.aggs as { by_dataset_id?: unknown } | undefined)?.by_dataset_id) {
       const countsByDatasetId = new Map<string, number>();
@@ -290,6 +320,136 @@ describe('DatasetClient', () => {
     expect(fetched).toBeUndefined();
   });
 
+  it('returns true for datasetExists when the dataset exists', async () => {
+    const { client, datasetsStorage } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+
+    await expect(client.datasetExists(created.id)).resolves.toBe(true);
+    expect(datasetsStorage.client.search).toHaveBeenLastCalledWith(
+      expect.objectContaining({ _source: ['name'] })
+    );
+  });
+
+  it('returns false for datasetExists when the dataset does not exist', async () => {
+    const { client } = createClient();
+
+    await expect(client.datasetExists('non-existent-id')).resolves.toBe(false);
+  });
+
+  it('deletes a single example and preserves remaining examples', async () => {
+    const { client, examplesStorage } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA, baseExampleB]);
+    const exampleToDelete = created.examples[0];
+
+    await client.deleteExample(exampleToDelete.id, created.id);
+    const fetched = await client.get(created.id);
+
+    expect(fetched?.examples).toHaveLength(1);
+    expect(fetched?.examples[0].input).toEqual(baseExampleB.input);
+    expect(examplesStorage.client.search).toHaveBeenCalledWith(
+      expect.objectContaining({ _source: ['dataset_id'] })
+    );
+  });
+
+  it('throws ExampleNotFoundError when deleting a non-existent example', async () => {
+    const { client } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+
+    await expect(client.deleteExample('non-existent-example-id', created.id)).rejects.toThrow(
+      ExampleNotFoundError
+    );
+  });
+
+  it('deletes an example when expectedDatasetId matches', async () => {
+    const { client } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const exampleToDelete = created.examples[0];
+
+    await client.deleteExample(exampleToDelete.id, created.id);
+    const fetched = await client.get(created.id);
+
+    expect(fetched?.examples).toHaveLength(0);
+  });
+
+  it('throws ExampleNotFoundError when expectedDatasetId does not match', async () => {
+    const { client } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const exampleToDelete = created.examples[0];
+
+    await expect(client.deleteExample(exampleToDelete.id, 'wrong-dataset-id')).rejects.toThrow(
+      ExampleNotFoundError
+    );
+
+    const fetched = await client.get(created.id);
+    expect(fetched?.examples).toHaveLength(1);
+  });
+
+  it('updates an example when expectedDatasetId matches', async () => {
+    const { client } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const exampleToUpdate = created.examples[0];
+
+    const updated = await client.updateExample(
+      exampleToUpdate.id,
+      { output: { expected: 'updated' } },
+      created.id
+    );
+
+    expect(updated).toBeDefined();
+    expect(updated?.output).toEqual({ expected: 'updated' });
+  });
+
+  it('throws ExampleNotFoundError when updating with non-matching expectedDatasetId', async () => {
+    const { client } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA]);
+    const exampleToUpdate = created.examples[0];
+
+    await expect(
+      client.updateExample(
+        exampleToUpdate.id,
+        { output: { expected: 'updated' } },
+        'wrong-dataset-id'
+      )
+    ).rejects.toThrow(ExampleNotFoundError);
+
+    const fetched = await client.get(created.id);
+    expect(fetched?.examples[0].output).toEqual(baseExampleA.output);
+  });
+
+  it('deleteExamplesByDatasetId removes all examples for a dataset', async () => {
+    const { client, examplesStorage } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset', [baseExampleA, baseExampleB]);
+    const result = await client.deleteExamplesByDatasetId(created.id);
+
+    expect(result).toEqual({ deleted: 2 });
+
+    const fetched = await client.get(created.id);
+    expect(fetched?.examples).toHaveLength(0);
+    expect(examplesStorage.client.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _source: ['dataset_id'],
+        query: { term: { dataset_id: created.id } },
+      })
+    );
+  });
+
+  it('deleteExamplesByDatasetId returns zero when dataset has no examples', async () => {
+    const { client } = createClient();
+
+    const created = await client.create('dataset-1', 'A dataset');
+    const result = await client.deleteExamplesByDatasetId(created.id);
+
+    expect(result).toEqual({ deleted: 0 });
+  });
+
   it('throws DatasetAlreadyExistsError when creating a dataset with a duplicate name', async () => {
     const { client } = createClient();
 
@@ -330,11 +490,15 @@ describe('DatasetClient', () => {
     const exampleToUpdate = created.examples[0];
 
     await expect(
-      client.updateExample(exampleToUpdate.id, {
-        input: baseExampleB.input,
-        output: baseExampleB.output,
-        metadata: baseExampleB.metadata ?? undefined,
-      })
+      client.updateExample(
+        exampleToUpdate.id,
+        {
+          input: baseExampleB.input,
+          output: baseExampleB.output,
+          metadata: baseExampleB.metadata ?? undefined,
+        },
+        created.id
+      )
     ).rejects.toThrow(ExampleAlreadyExistsError);
 
     const dataset = await client.get(created.id);
