@@ -26,7 +26,9 @@ import type { FinderAttributes, SavedObjectCommon } from '@kbn/saved-objects-fin
 
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
 
-type SavedObject = SavedObjectCommon<FinderAttributes & { isTextBasedQuery?: boolean }>;
+type SavedObject = SavedObjectCommon<
+  FinderAttributes & { isTextBasedQuery?: boolean; timeFieldName?: string }
+>;
 
 const pickerPanelCss = css({ width: 600, maxHeight: '70vh', overflow: 'auto' });
 
@@ -40,6 +42,8 @@ export interface DataSourcePickerProps {
   onCreateDataView?: () => void;
   /** data-test-subj for the "Create a data view" button */
   createDataViewButtonTestSubj?: string;
+  /** When true, only data views with a time field are shown in the picker. */
+  requireTimeBased?: boolean;
 }
 
 export const DataSourcePicker: FC<DataSourcePickerProps> = ({
@@ -47,6 +51,7 @@ export const DataSourcePicker: FC<DataSourcePickerProps> = ({
   currentSavedSearch,
   onCreateDataView,
   createDataViewButtonTestSubj = 'mlDataSourcePickerCreateDataViewButton',
+  requireTimeBased = false,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const navigateToPath = useNavigateToPath();
@@ -164,6 +169,12 @@ export const DataSourcePicker: FC<DataSourcePickerProps> = ({
             name: i18n.translate('xpack.ml.dataSourcePicker.savedObjectType.dataView', {
               defaultMessage: 'Data view',
             }),
+            ...(requireTimeBased
+              ? {
+                  showSavedObject: (savedObject: SavedObject) =>
+                    !!savedObject.attributes.timeFieldName,
+                }
+              : {}),
           },
         ]}
         fixedPageSize={20}

@@ -26,8 +26,11 @@ import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
 import { useEnabledFeatures } from '../../contexts/ml';
+import { useDataSource } from '../../contexts/ml/data_source_context';
 import { useMlManagementLocator } from '../../contexts/kibana/use_create_url';
 import { PageTitle } from '../../components/page_title';
+import { DataSourcePicker } from '../../components/data_source_picker/data_source_picker';
+
 export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
@@ -44,6 +47,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
   } = useMlKibana();
   const mlApi = useMlApi();
   const { showNodeInfo } = useEnabledFeatures();
+  const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
   const mlLocator = useMlLocator()!;
   const mlManagementLocator = useMlManagementLocator();
   const mlFeaturesDisabled = !isFullLicense();
@@ -190,11 +194,15 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
     [mlLocator, mlFeaturesDisabled]
   );
 
+  const dataSourcePicker = !esql ? (
+    <DataSourcePicker currentDataView={dataView ?? null} currentSavedSearch={savedSearch ?? null} />
+  ) : undefined;
+
   return IndexDataVisualizer ? (
     <Fragment>
       {IndexDataVisualizer !== null ? (
         <>
-          <MlPageHeader>
+          <MlPageHeader rightSideItems={dataSourcePicker}>
             <EuiFlexGroup gutterSize="s" alignItems="center" direction="row">
               <PageTitle
                 title={

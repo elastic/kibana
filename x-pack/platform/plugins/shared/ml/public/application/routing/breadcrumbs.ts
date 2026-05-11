@@ -120,29 +120,6 @@ export const DATA_VISUALIZER_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   deepLinkId: 'ml:dataVisualizer',
 });
 
-// we need multiple AIOPS_BREADCRUMB breadcrumb items as they each need to link
-// to each of the AIOps pages.
-export const AIOPS_BREADCRUMB_LOG_RATE_ANALYSIS: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
-    defaultMessage: 'AIOps Labs',
-  }),
-  href: '/aiops/log_rate_analysis',
-});
-
-export const AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
-    defaultMessage: 'AIOps Labs',
-  }),
-  href: '/aiops/log_categorization',
-});
-
-export const AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
-    defaultMessage: 'AIOps Labs',
-  }),
-  href: '/aiops/change_point_detection',
-});
-
 export const LOG_RATE_ANALYSIS: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiops.logRateAnalysisBreadcrumbLabel', {
     defaultMessage: 'Log rate analysis',
@@ -231,9 +208,6 @@ const breadcrumbs = {
   DATA_DRIFT_INDEX_SELECT_BREADCRUMB,
   DATA_DRIFT_PAGE,
   DATA_VISUALIZER_BREADCRUMB,
-  AIOPS_BREADCRUMB_LOG_RATE_ANALYSIS,
-  AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS,
-  AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION,
   LOG_RATE_ANALYSIS,
   LOG_RATE_ANALYSIS_PAGE,
   LOG_PATTERN_ANALYSIS,

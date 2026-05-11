@@ -32,7 +32,11 @@ export const LogRateAnalysisPage: FC = () => {
   );
 
   const headerContent = (
-    <DataSourcePicker currentDataView={dataView ?? null} currentSavedSearch={savedSearch ?? null} />
+    <DataSourcePicker
+      currentDataView={dataView ?? null}
+      currentSavedSearch={savedSearch ?? null}
+      requireTimeBased
+    />
   );
 
   return (
