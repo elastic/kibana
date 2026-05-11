@@ -50,6 +50,8 @@ export type * from './src/routes/diagnostics';
 export type * from './src/routes/fleet';
 export type * from './src/routes/debug_telemetry';
 export type * from './src/routes/storage_explorer';
+export type * from './src/routes/source_maps';
+export { sourceMapRt } from './src/routes/source_maps';
 export { filterOptionsRt, payloadRt } from './src/routes/custom_links';
 export {
   rangeRt,
