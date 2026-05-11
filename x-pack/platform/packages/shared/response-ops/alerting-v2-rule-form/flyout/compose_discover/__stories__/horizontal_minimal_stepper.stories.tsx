@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { HorizontalMinimalStepper, type MinimalStep } from '../horizontal_minimal_stepper';
 
 const meta: Meta<typeof HorizontalMinimalStepper> = {
@@ -88,60 +88,6 @@ export const AllStates: Story = {
       ))}
     </div>
   ),
-};
-
-// ---------------------------------------------------------------------------
-// With a right-side icon slot (Form/YAML toggle alongside the stepper)
-// ---------------------------------------------------------------------------
-const TOGGLE_OPTIONS = [
-  { id: 'form', label: 'Form', iconType: 'tableDensityNormal' },
-  { id: 'yaml', label: 'YAML', iconType: 'editorCodeBlock' },
-];
-
-export const WithIconToggle: Story = {
-  render: () => {
-    const [currentStep, setCurrentStep] = useState(0);
-    const [mode, setMode] = useState<'form' | 'yaml'>('form');
-    const steps = makeSteps(RULE_STEPS, currentStep);
-
-    return (
-      <div style={{ maxWidth: 480, border: '1px solid #eee', borderRadius: 8, padding: 16 }}>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow>
-            <HorizontalMinimalStepper steps={steps} animated />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonGroup
-              legend="View mode"
-              options={TOGGLE_OPTIONS}
-              idSelected={mode}
-              onChange={(id) => setMode(id as 'form' | 'yaml')}
-              buttonSize="compressed"
-              isIconOnly
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButton size="s" disabled={currentStep === 0} onClick={() => setCurrentStep((s) => s - 1)}>
-              ← Back
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton size="s" fill disabled={currentStep === RULE_STEPS.length - 1} onClick={() => setCurrentStep((s) => s + 1)}>
-              Next →
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        <EuiText size="xs" color="subdued">
-          The Form/YAML toggle lives outside the stepper in a standard EuiFlexGroup — the stepper
-          itself has no slot API.
-        </EuiText>
-      </div>
-    );
-  },
 };
 
 // ---------------------------------------------------------------------------
