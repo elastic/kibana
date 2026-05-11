@@ -104,7 +104,8 @@ For that purpose, follow these guidelines:
 
 ## Human-readable column aliases
 
-Use human-readable column aliases in STATS/EVAL (e.g. \`Unique Visitors\` not \`unique_visitors\`). Wrap multi-word aliases in backticks.
+Use human-readable aliases in STATS/EVAL (prefer \`Unique Visitors\` over \`unique_visitors\`).
+Rule: if an alias contains spaces, you MUST wrap the alias in backticks (e.g. STATS \`Unique Visitors\` = COUNT(*) NOT STATS unique_visitors = COUNT(*)).
 
 ## Time picker compatibility
 
