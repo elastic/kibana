@@ -62,11 +62,16 @@ export const HorizontalMinimalStepper: React.FC<HorizontalMinimalStepperProps> =
   const currentTitle = currentIndex >= 0 ? steps[currentIndex].title : '';
   const total = steps.length;
 
-  const transition = animated
-    ? 'width 220ms cubic-bezier(0.34, 1.56, 0.64, 1), ' +
-      'border-radius 220ms cubic-bezier(0.34, 1.56, 0.64, 1), ' +
-      'background-color 150ms ease'
-    : undefined;
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+  const transition =
+    animated && !prefersReducedMotion
+      ? 'width 220ms cubic-bezier(0.34, 1.56, 0.64, 1), ' +
+        'border-radius 220ms cubic-bezier(0.34, 1.56, 0.64, 1), ' +
+        'background-color 150ms ease'
+      : undefined;
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
