@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -22,173 +21,197 @@ import {
 } from '@elastic/eui';
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
+import { RuleFormProvider } from '../../form/contexts/rule_form_context';
+import type { FormValues } from '../../form/types';
+import {
+  mapRuleResponseToFormValues,
+  mapFormValuesToCreateRequest,
+  mapFormValuesToUpdateRequest,
+} from '../../form/utils/rule_request_mappers';
 import type { ComposeDiscoverMode } from './types';
 import { useComposeDiscoverState, getStepTitles, getSandboxTabConfig } from './use_compose_discover_state';
 import { ComposeDiscoverForm } from './compose_discover_form';
 import { ComposeDiscoverChild } from './compose_discover_child';
 
+// These hooks live in the plugin, not the package — imported via the plugin's hook layer
+// when this flyout is rendered in the rules list page.
+// For now they are passed as props to keep the package boundary clean.
 export interface ComposeDiscoverFlyoutProps {
   historyKey: symbol;
   mode?: ComposeDiscoverMode;
-  initialQuery?: string;
+  /** The existing rule — provided when mode === 'edit'. Used to seed the RHF form. */
+  rule?: Parameters<typeof mapRuleResponseToFormValues>[0];
   onClose: () => void;
   services: RuleFormServices;
+  /** Called with the create payload when the user submits in create mode. */
+  onCreateRule: (payload: ReturnType<typeof mapFormValuesToCreateRequest>) => void;
+  /** Called with id + update payload when the user submits in edit mode. */
+  onUpdateRule?: (id: string, payload: ReturnType<typeof mapFormValuesToUpdateRequest>) => void;
+  /** True while a create/update mutation is in flight. */
+  isSaving?: boolean;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
 
-const YAML_TOGGLE_OPTIONS = [
-  { id: 'form', label: 'Form', iconType: 'tableDensityNormal' },
-  { id: 'yaml', label: 'YAML', iconType: 'editorCodeBlock' },
-];
-
+const EMPTY_FORM_VALUES: FormValues = {
+  kind: 'alert',
+  metadata: { name: '', enabled: true, description: '', tags: [] },
+  timeField: '@timestamp',
+  schedule: { every: '1m', lookback: '5m' },
+  evaluation: { query: { base: '' } },
+  grouping: undefined,
+  recoveryPolicy: { type: 'no_breach' },
+  stateTransition: undefined,
+  stateTransitionAlertDelayMode: 'immediate',
+  stateTransitionRecoveryDelayMode: 'immediate',
+  artifacts: [],
+};
 
 export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   historyKey,
   mode = 'create',
-  initialQuery,
+  rule,
   onClose,
   services,
+  onCreateRule,
+  onUpdateRule,
+  isSaving = false,
 }) => {
-  const [state, dispatch] = useComposeDiscoverState(mode);
+  // ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
+  const [uiState, dispatch] = useComposeDiscoverState(mode);
 
-  React.useEffect(() => {
-    if (initialQuery) {
-      dispatch({ type: 'SET_FULL_QUERY', query: initialQuery });
+  // ── Form values (submitted to the API) ──
+  const defaultValues = useMemo<FormValues>(() => {
+    if (rule) {
+      const mapped = mapRuleResponseToFormValues(rule);
+      return {
+        kind: mapped.kind ?? 'alert',
+        metadata: {
+          name: mapped.metadata?.name ?? '',
+          enabled: mapped.metadata?.enabled ?? true,
+          description: mapped.metadata?.description ?? '',
+          owner: mapped.metadata?.owner,
+          tags: mapped.metadata?.tags ?? [],
+        },
+        timeField: mapped.timeField ?? '@timestamp',
+        schedule: { every: mapped.schedule?.every ?? '1m', lookback: mapped.schedule?.lookback ?? '5m' },
+        evaluation: { query: { base: mapped.evaluation?.query?.base ?? '' } },
+        grouping: mapped.grouping,
+        recoveryPolicy: mapped.recoveryPolicy ?? { type: 'no_breach' },
+        stateTransition: mapped.stateTransition,
+        stateTransitionAlertDelayMode: mapped.stateTransitionAlertDelayMode ?? 'immediate',
+        stateTransitionRecoveryDelayMode: mapped.stateTransitionRecoveryDelayMode ?? 'immediate',
+        artifacts: mapped.artifacts ?? [],
+      };
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    return EMPTY_FORM_VALUES;
+  }, [rule]);
+
+  const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues });
 
   const isCreate = mode === 'create';
   const title = isCreate ? 'Create alert rule' : 'Edit alert rule';
 
-  const stepTitles = getStepTitles(state);
-  const isLastStep = state.step === stepTitles.length - 1;
-  const tabConfig = getSandboxTabConfig(state);
+  const stepTitles = getStepTitles({ tracking: uiState.tracking });
+  const isLastStep = uiState.step === stepTitles.length - 1;
+  const tabConfig = getSandboxTabConfig(uiState);
+
+  const handleSubmit = methods.handleSubmit((values) => {
+    if (isCreate) {
+      onCreateRule(mapFormValuesToCreateRequest(values));
+    } else if (rule && onUpdateRule) {
+      onUpdateRule((rule as { id: string }).id, mapFormValuesToUpdateRequest(values));
+    }
+  });
 
   return (
-    <EuiFlyout
-      type="overlay"
-      session="start"
-      historyKey={historyKey}
-      onClose={onClose}
-      aria-labelledby={FLYOUT_TITLE_ID}
-      size={480}
-    >
-        <EuiFlyoutHeader hasBorder>
-            {/* Title */}
+    <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
+      <FormProvider {...methods}>
+        <EuiFlyout
+          type="overlay"
+          session="start"
+          historyKey={historyKey}
+          onClose={onClose}
+          aria-labelledby={FLYOUT_TITLE_ID}
+          size={480}
+        >
+          <EuiFlyoutHeader hasBorder>
             <EuiTitle size="s" id={FLYOUT_TITLE_ID}>
               <h2>{title}</h2>
             </EuiTitle>
 
             <EuiSpacer size="s" />
 
-            {/* Stepper row — standard EuiFlexGroup handles layout alongside the toggle */}
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow>
-                {state.yamlMode ? (
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="warning">YAML MODE</EuiBadge>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ) : (
-                  <HorizontalMinimalStepper
-                    steps={stepTitles.map((title, i): MinimalStep => ({
-                      title,
-                      status: i < state.step ? 'complete' : i === state.step ? 'current' : 'incomplete',
-                    }))}
-                    animated
-                  />
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonGroup
-                  legend="Form or YAML view"
-                  options={YAML_TOGGLE_OPTIONS}
-                  idSelected={state.yamlMode ? 'yaml' : 'form'}
-                  onChange={(id) =>
-                    dispatch({ type: 'SET_YAML_MODE', enabled: id === 'yaml' })
-                  }
-                  buttonSize="compressed"
-                  isIconOnly
-                  data-test-subj="composeDiscoverYamlToggle"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <HorizontalMinimalStepper
+              steps={stepTitles.map((stepTitle, i): MinimalStep => ({
+                title: stepTitle,
+                status: i < uiState.step ? 'complete' : i === uiState.step ? 'current' : 'incomplete',
+              }))}
+            />
+            {/* YAML mode coming in follow-up PR */}
           </EuiFlyoutHeader>
 
           <EuiFlyoutBody>
-            <ComposeDiscoverForm state={state} dispatch={dispatch} services={services} />
+            <ComposeDiscoverForm state={uiState} dispatch={dispatch} services={services} />
           </EuiFlyoutBody>
 
           <EuiFlyoutFooter>
-            {state.yamlMode ? (
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    onClick={() => dispatch({ type: 'SET_YAML_MODE', enabled: false })}
-                  >
-                    Cancel YAML
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton fill data-test-subj="composeDiscoverYamlSave">
-                    Save
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="s" responsive={false}>
-                    {state.step > 0 && (
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          iconType="arrowLeft"
-                          onClick={() => dispatch({ type: 'GO_BACK' })}
-                          data-test-subj="composeDiscoverBack"
-                        >
-                          Back
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-                    )}
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty onClick={onClose}>Cancel</EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s" responsive={false}>
+                  {uiState.step > 0 && (
                     <EuiFlexItem grow={false}>
-                      {isLastStep ? (
-                        <EuiButton fill data-test-subj="composeDiscoverSubmit">
-                          {isCreate ? 'Create rule' : 'Save rule'}
-                        </EuiButton>
-                      ) : (
-                        <EuiButton
-                          fill
-                          iconType="arrowRight"
-                          iconSide="right"
-                          isDisabled={state.childOpen}
-                          onClick={() => dispatch({ type: 'GO_NEXT' })}
-                          data-test-subj="composeDiscoverNext"
-                        >
-                          Next
-                        </EuiButton>
-                      )}
+                      <EuiButtonEmpty
+                        iconType="arrowLeft"
+                        onClick={() => dispatch({ type: 'GO_BACK' })}
+                        data-test-subj="composeDiscoverBack"
+                      >
+                        Back
+                      </EuiButtonEmpty>
                     </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
+                  )}
+                  <EuiFlexItem grow={false}>
+                    {isLastStep ? (
+                      <EuiButton
+                        fill
+                        isLoading={isSaving}
+                        onClick={handleSubmit}
+                        data-test-subj="composeDiscoverSubmit"
+                      >
+                        {isCreate ? 'Create rule' : 'Save rule'}
+                      </EuiButton>
+                    ) : (
+                      <EuiButton
+                        fill
+                        iconType="arrowRight"
+                        iconSide="right"
+                        isDisabled={uiState.childOpen}
+                        onClick={() => dispatch({ type: 'GO_NEXT' })}
+                        data-test-subj="composeDiscoverNext"
+                      >
+                        Next
+                      </EuiButton>
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlyoutFooter>
-        {state.childOpen && (
-          <ComposeDiscoverChild
-            state={state}
-            dispatch={dispatch}
-            services={services}
-            tabConfig={tabConfig}
-            onClose={() => dispatch({ type: 'CLOSE_CHILD' })}
-          />
-        )}
-      </EuiFlyout>
+
+          {uiState.childOpen && (
+            <ComposeDiscoverChild
+              state={uiState}
+              dispatch={dispatch}
+              services={services}
+              tabConfig={tabConfig}
+              onClose={() => dispatch({ type: 'CLOSE_CHILD' })}
+            />
+          )}
+        </EuiFlyout>
+      </FormProvider>
+    </RuleFormProvider>
   );
 };
-
