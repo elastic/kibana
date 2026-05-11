@@ -64,22 +64,6 @@ jest.mock('../../../../common/hooks/use_has_entity_highlights_license', () => ({
   useHasEntityHighlightsLicense: () => mockUseHasEntityHighlightsLicense(),
 }));
 
-jest.mock('../tabs/risk_inputs/use_ask_ai_assistant', () => ({
-  useAskAiAssistant: () => ({
-    showAssistantOverlay: jest.fn(),
-  }),
-}));
-
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(() => false),
-}));
-
-jest.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => ({
-  useAgentBuilderAttachment: () => ({
-    openAgentBuilderFlyout: jest.fn(),
-  }),
-}));
-
 jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: () => mockUseLoadConnectors(),
 }));
