@@ -255,5 +255,29 @@ describe('EbtTelemetryClient', () => {
         }
       );
     });
+
+    it('forwards source-field conflict observability fields when supplied', () => {
+      client.trackProcessingPipelineSuggested({
+        duration_ms: 800,
+        steps_used: 4,
+        success: true,
+        stream_name: 'logs-test',
+        stream_type: 'wired',
+        source: 'agent',
+        flow: 'extract_fields',
+        source_field_conflict_detected: true,
+        source_field_explicitly_set: false,
+        source_field_picked: 'body.text',
+      });
+
+      expect(analyticsService.reportEvent).toHaveBeenCalledWith(
+        STREAMS_PROCESSING_PIPELINE_SUGGESTED_EVENT_TYPE,
+        expect.objectContaining({
+          source_field_conflict_detected: true,
+          source_field_explicitly_set: false,
+          source_field_picked: 'body.text',
+        })
+      );
+    });
   });
 });

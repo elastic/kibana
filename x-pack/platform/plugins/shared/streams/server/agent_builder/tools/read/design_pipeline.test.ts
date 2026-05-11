@@ -231,6 +231,67 @@ describe('createDesignPipelineTool', () => {
       expect(data.hints).toContain('llm hint');
     });
 
+    it('merges `outcome.extraHints` (inline-processed-no-text-field caveat) into the fallback hints', async () => {
+      const { tool, context } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      const fallback: RunExtractFieldsOutcome = {
+        kind: 'fallback',
+        reason: 'no_text_field',
+        streamType: 'wired',
+        extraHints: [
+          'The inline samples were marked status: "processed". The existing pipeline may have removed the canonical raw-text field (body.text / message).',
+        ],
+      };
+      mockRunExtractFieldsFlow.mockResolvedValue(fallback);
+      mockNlToStreamlang.mockResolvedValue(buildNlToStreamlangResult({ hints: ['llm hint'] }));
+
+      const result = await tool.handler(
+        { stream_name: 'logs.test', instruction: 'parse this stream', extract_fields: true },
+        context
+      );
+
+      if (!('results' in result)) throw new Error('Expected results return');
+      const data = result.results[0].data as { hints?: string[] };
+      expect(data.hints).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining('Heuristic field extraction did not yield a usable seed pattern'),
+          expect.stringContaining('inline samples were marked status: "processed"'),
+          'llm hint',
+        ])
+      );
+    });
+
+    it('threads `seed_source_field` into the runner so the user can steer the auto-pick', async () => {
+      const { tool, context } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      mockRunExtractFieldsFlow.mockResolvedValue({
+        kind: 'success',
+        streamType: 'wired',
+        stepsUsed: 1,
+        result: buildNlToStreamlangResult({ hints: [] }),
+      });
+
+      await tool.handler(
+        {
+          stream_name: 'logs.test',
+          instruction: 'parse this stream',
+          extract_fields: true,
+          seed_source_field: 'event.original',
+        },
+        context
+      );
+
+      expect(mockRunExtractFieldsFlow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          streamName: 'logs.test',
+          seedSourceField: 'event.original',
+        }),
+        expect.any(Object)
+      );
+    });
+
     it('falls back to LLM-only with a hint when patternExtractionService is not available', async () => {
       // Stateless / serverless environments may not have the heuristic
       // worker pool. The tool must degrade gracefully instead of throwing,
@@ -492,6 +553,141 @@ describe('createDesignPipelineTool', () => {
       expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
         expect.objectContaining({
           success: false,
+        })
+      );
+    });
+  });
+
+  describe('source-field conflict telemetry', () => {
+    it('threads pickedSourceField + sourceFieldConflictDetected from a success outcome into the telemetry event', async () => {
+      const { tool, context, telemetry } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      mockRunExtractFieldsFlow.mockResolvedValue({
+        kind: 'success',
+        streamType: 'wired',
+        stepsUsed: 3,
+        pickedSourceField: 'body.text',
+        sourceFieldConflictDetected: true,
+        result: buildNlToStreamlangResult(),
+      });
+
+      await tool.handler(
+        { stream_name: 'logs.test', instruction: 'parse this stream', extract_fields: true },
+        context
+      );
+
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          flow: 'extract_fields',
+          source_field_picked: 'body.text',
+          source_field_conflict_detected: true,
+          source_field_explicitly_set: false,
+        })
+      );
+    });
+
+    it('emits source_field_explicitly_set=true when the agent passes seed_source_field', async () => {
+      const { tool, context, telemetry } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      mockRunExtractFieldsFlow.mockResolvedValue({
+        kind: 'success',
+        streamType: 'wired',
+        stepsUsed: 1,
+        pickedSourceField: 'event.original',
+        sourceFieldConflictDetected: false,
+        result: buildNlToStreamlangResult(),
+      });
+
+      await tool.handler(
+        {
+          stream_name: 'logs.test',
+          instruction: 'parse from event.original',
+          extract_fields: true,
+          seed_source_field: 'event.original',
+        },
+        context
+      );
+
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          source_field_picked: 'event.original',
+          source_field_conflict_detected: false,
+          source_field_explicitly_set: true,
+        })
+      );
+    });
+
+    it('emits source_field_explicitly_set=true even when the heuristic path is unavailable (patternExtractionService missing)', async () => {
+      // The user steered with seed_source_field but the heuristic path
+      // could not run — we still want to capture that the user
+      // attempted to override, since "user intent to redirect" is
+      // independent of "heuristic produced anything".
+      const { tool, context, telemetry } = setup(); // no patternExtractionService
+      mockNlToStreamlang.mockResolvedValue(buildNlToStreamlangResult());
+
+      await tool.handler(
+        {
+          stream_name: 'logs.test',
+          instruction: 'parse from event.original',
+          extract_fields: true,
+          seed_source_field: 'event.original',
+        },
+        context
+      );
+
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          source_field_explicitly_set: true,
+        })
+      );
+      // No source field was actually picked — heuristic never ran.
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.not.objectContaining({ source_field_picked: expect.anything() })
+      );
+    });
+
+    it('omits all source_field_* fields on the LLM-only path (extract_fields omitted)', async () => {
+      const { tool, context, telemetry } = setup();
+      mockNlToStreamlang.mockResolvedValue(buildNlToStreamlangResult());
+
+      await tool.handler({ stream_name: 'logs.test', instruction: 'remove message' }, context);
+
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.not.objectContaining({
+          source_field_picked: expect.anything(),
+          source_field_conflict_detected: expect.anything(),
+          source_field_explicitly_set: expect.anything(),
+        })
+      );
+    });
+
+    it('threads the meta from a fallback outcome (extraction failed but a field was picked)', async () => {
+      const { tool, context, telemetry } = setup({
+        patternExtractionService: {} as IPatternExtractionService,
+      });
+      mockRunExtractFieldsFlow.mockResolvedValue({
+        kind: 'fallback',
+        reason: 'no_candidate',
+        streamType: 'wired',
+        pickedSourceField: 'body.text',
+        sourceFieldConflictDetected: true,
+      });
+      mockNlToStreamlang.mockResolvedValue(buildNlToStreamlangResult());
+
+      await tool.handler(
+        { stream_name: 'logs.test', instruction: 'parse this stream', extract_fields: true },
+        context
+      );
+
+      expect(telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
+        expect.objectContaining({
+          flow: 'nl_to_streamlang',
+          extract_fields_fallback_reason: 'no_candidate',
+          source_field_picked: 'body.text',
+          source_field_conflict_detected: true,
+          source_field_explicitly_set: false,
         })
       );
     });

@@ -79,6 +79,17 @@ const OPERATION_TIMEOUT_MS = 3 * 60 * 1000;
 export interface RunExtractFieldsParams {
   streamName: string;
   samples?: SamplesConfig;
+  /**
+   * Override the auto-picked seed source field. When provided, the seed
+   * parser reads this field instead of running `getDefaultTextField`
+   * against `PRIORITIZED_CONTENT_FIELDS`. Closes the capability gap
+   * where the user could not steer `extract_fields: true` to a
+   * non-default field without falling back to the LLM-only path. The
+   * existing post-fact warnings (duplication, overwrite, placement)
+   * remain the surface for resolving conflicts after a heuristic run
+   * completes.
+   */
+  seedSourceField?: string;
 }
 
 export interface RunExtractFieldsDeps {
@@ -106,13 +117,28 @@ export interface RunExtractFieldsDeps {
  * Stream-level metadata the outer handler needs for telemetry, regardless of
  * which outcome variant fires. `streamType` is `'unknown'` only when the
  * stream definition itself could not be classified.
+ *
+ * `pickedSourceField` and `sourceFieldConflictDetected` are for source-field
+ * conflict telemetry
  */
 export interface ExtractFieldsOutcomeMeta {
   streamType: StreamType;
+  pickedSourceField?: string;
+  sourceFieldConflictDetected?: boolean;
 }
 
 export type RunExtractFieldsOutcome =
-  | ({ kind: 'fallback'; reason: string } & ExtractFieldsOutcomeMeta)
+  | ({
+      kind: 'fallback';
+      reason: string;
+      /**
+       * Contextual hints the outer handler should surface to the agent
+       * alongside the generic "extraction did not yield a seed pattern"
+       * message. Currently populated the extraction failed because the
+       * field was removed by an existing step.
+       */
+      extraHints?: string[];
+    } & ExtractFieldsOutcomeMeta)
   | ({ kind: 'unsupported'; result: NlToStreamlangResult } & ExtractFieldsOutcomeMeta)
   | ({
       kind: 'success';
@@ -134,6 +160,12 @@ export type RunExtractFieldsOutcome =
  *   processor has been merged in; the result mirrors the
  *   {@link NlToStreamlangResult} shape so the tool returns a consistent
  *   payload regardless of which mode produced it.
+ *
+ * Conflicts between the (auto-picked or caller-supplied) seed source field
+ * and existing pipeline steps are surfaced via the post-fact warnings
+ * pipeline (duplication, overwrite, placement) on the success outcome.
+ * See `SOURCE_FIELD_CONFLICT_DECISION.md` for the upfront-gate alternative
+ * tracked against telemetry.
  */
 export const runExtractFieldsFlow = async (
   params: RunExtractFieldsParams,
@@ -188,17 +220,41 @@ export const runExtractFieldsFlow = async (
     return { kind: 'fallback', reason: 'no_samples', streamType };
   }
 
+  const inlineProcessedNoTextFieldHint: string[] | undefined =
+    samplesInfo.source === 'inline' && documentStatus === 'processed'
+      ? [
+          `The inline samples were marked status: "processed". The existing pipeline may have removed the canonical raw-text field (body.text / message). ` +
+            `If extraction should run against the original ingest data, re-run with status: "unprocessed" inline documents (or with samples.source: "stream" to use live data).`,
+        ]
+      : undefined;
+
   const flattenedDocs = documents as FlattenRecord[];
 
-  const fieldName = getDefaultTextField(flattenedDocs, PRIORITIZED_CONTENT_FIELDS);
-  const messages = fieldName ? extractMessagesFromField(flattenedDocs, fieldName) : [];
+  const pickedSourceField = params.seedSourceField
+    ? params.seedSourceField
+    : getDefaultTextField(flattenedDocs, PRIORITIZED_CONTENT_FIELDS);
+  const messages = pickedSourceField
+    ? extractMessagesFromField(flattenedDocs, pickedSourceField)
+    : [];
 
   if (messages.length === 0) {
     log.debug(
-      `No raw text messages found in samples (stream=${streamName} fieldName="${fieldName}"); falling back`
+      `No raw text messages found in samples (stream=${streamName} fieldName="${pickedSourceField}"); falling back`
     );
-    return { kind: 'fallback', reason: 'no_text_field', streamType };
+    return {
+      kind: 'fallback',
+      reason: 'no_text_field',
+      streamType,
+      ...(pickedSourceField && {
+        pickedSourceField,
+        sourceFieldConflictDetected: detectSourceFieldConflict(existingSteps, pickedSourceField),
+      }),
+      ...(inlineProcessedNoTextFieldHint && { extraHints: inlineProcessedNoTextFieldHint }),
+    };
   }
+
+  const fieldName = pickedSourceField;
+  const sourceFieldConflictDetected = detectSourceFieldConflict(existingSteps, fieldName);
 
   // Combine the caller-provided signal with a 3-minute operation timeout so
   // long heuristic runs cannot hang the agent.
@@ -264,7 +320,13 @@ export const runExtractFieldsFlow = async (
 
     if (candidates.length === 0) {
       log.debug(`No seed candidate produced (stream=${streamName}); falling back`);
-      return { kind: 'fallback', reason: 'no_candidate', streamType };
+      return {
+        kind: 'fallback',
+        reason: 'no_candidate',
+        streamType,
+        pickedSourceField: fieldName,
+        sourceFieldConflictDetected,
+      };
     }
 
     candidates.sort((a, b) => b.parsedRate - a.parsedRate);
@@ -287,7 +349,13 @@ export const runExtractFieldsFlow = async (
       log.debug(
         `Seed simulation produced no parsed docs (stream=${streamName} definitionError=${definitionError}); falling back`
       );
-      return { kind: 'fallback', reason: 'no_parsed_documents', streamType };
+      return {
+        kind: 'fallback',
+        reason: 'no_parsed_documents',
+        streamType,
+        pickedSourceField: fieldName,
+        sourceFieldConflictDetected,
+      };
     }
 
     const isOtel = isOtelStream(definition);
@@ -448,6 +516,8 @@ export const runExtractFieldsFlow = async (
     return {
       kind: 'success',
       streamType,
+      pickedSourceField: fieldName,
+      sourceFieldConflictDetected,
       stepsUsed,
       result: {
         steps: finalSteps,
@@ -479,6 +549,24 @@ export const runExtractFieldsFlow = async (
     timeoutSignal.removeEventListener('abort', cleanup);
   }
 };
+
+/**
+ * Pure-observer source-field conflict telemetry. Returns true when any
+ * existing step either extracts from, writes to, or removes the picked
+ * source field — i.e. the heuristic is about to run against a field
+ * another step has already touched. Does NOT alter pipeline behaviour;
+ * the post-fact warnings remain the user-visible surface for resolving
+ * conflicts. The signal feeds `source_field_conflict_detected` on the
+ * `design_pipeline` EBT event so we can size the conflict rate before
+ * deciding whether to ship the upfront-gate UX.
+ */
+export const detectSourceFieldConflict = (
+  existingSteps: StreamlangStep[],
+  fieldName: string
+): boolean =>
+  existingSteps.some(
+    (step) => isExtractionStepOnField(step, fieldName) || stepWritesOrRemovesField(step, fieldName)
+  );
 
 /**
  * Detect whether an existing pipeline step already performs grok or dissect

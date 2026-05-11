@@ -53,6 +53,31 @@ interface StreamsProcessingPipelineSuggestedProps {
   source: 'ui' | 'agent';
   flow?: 'extract_fields' | 'nl_to_streamlang' | 'refine_extracted_field';
   extract_fields_fallback_reason?: string;
+  /**
+   * Source-field conflict observability. Populated only when
+   * `source: 'agent'` and the extract_fields heuristic actually picked a
+   * raw-text source field (i.e. samples were available and a candidate
+   * field was found). Used to answer "how often does the auto-pick clash
+   * with an existing step?" without committing to the upfront-gate UX.
+   * See SOURCE_FIELD_CONFLICT_DECISION.md.
+   */
+  source_field_conflict_detected?: boolean;
+  /**
+   * Source-field conflict observability. Populated whenever the
+   * extract_fields path ran (regardless of whether heuristics succeeded).
+   * `true` when the agent passed `seed_source_field` to override the
+   * auto-pick — proxies for "user redirected after seeing a post-fact
+   * warning" once conversation-id linkage lands in Phase 2.
+   */
+  source_field_explicitly_set?: boolean;
+  /**
+   * Source-field conflict observability. The field the seed
+   * parser actually read from (whether auto-picked from
+   * PRIORITIZED_CONTENT_FIELDS or supplied via `seed_source_field`).
+   * Helps measure which prioritized field wins most often and whether
+   * the prioritization order matches real data shapes.
+   */
+  source_field_picked?: string;
 }
 
 interface StreamsFeaturesIdentifiedProps {

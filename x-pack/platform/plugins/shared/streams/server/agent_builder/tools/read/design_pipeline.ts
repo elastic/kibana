@@ -77,6 +77,17 @@ const designPipelineSchema = z.object({
         'Falls back to the regular path when no good seed pattern can be discovered.',
       ].join(' ')
     ),
+  seed_source_field: z
+    .string()
+    .optional()
+    .describe(
+      'When extract_fields: true, override the auto-picked raw-text field that the seed parser ' +
+        'reads. The default auto-pick walks PRIORITIZED_CONTENT_FIELDS (message, body.text, …) ' +
+        'and ignores the instruction text — pass this when the user names a different field to ' +
+        'parse from (e.g. "parse the error.message column instead"), or after reviewing a ' +
+        'proposal whose duplication/overwrite warning indicates a different source would be ' +
+        'cleaner. Has no effect when extract_fields is false or omitted.'
+    ),
 });
 
 export const createDesignPipelineTool = ({
@@ -129,6 +140,7 @@ export const createDesignPipelineTool = ({
       instruction: changeDescription,
       samples,
       extract_fields: extractFields,
+      seed_source_field: seedSourceField,
     },
     { request, modelProvider }
   ) => {
@@ -144,6 +156,10 @@ export const createDesignPipelineTool = ({
     // `'unknown'` is the safe default for the case where we throw before
     // resolving the stream definition (e.g. `getScopedClients` fails).
     let streamType: StreamType = 'unknown';
+    // source-field conflict observability
+    let sourceFieldConflictDetected: boolean | undefined;
+    let sourceFieldExplicitlySet: boolean | undefined;
+    let sourceFieldPicked: string | undefined;
 
     try {
       const { streamsClient, scopedClusterClient, fieldsMetadataClient, inferenceClient } =
@@ -156,6 +172,8 @@ export const createDesignPipelineTool = ({
       const fallbackHints: string[] = [];
 
       if (extractFields) {
+        sourceFieldExplicitlySet = seedSourceField !== undefined;
+
         if (!patternExtractionService) {
           extractFieldsFallbackReason = 'service_unavailable';
           fallbackHints.push(
@@ -163,7 +181,11 @@ export const createDesignPipelineTool = ({
           );
         } else {
           const outcome = await runExtractFieldsFlow(
-            { streamName, samples: typedSamples },
+            {
+              streamName,
+              samples: typedSamples,
+              seedSourceField,
+            },
             {
               streamsClient,
               scopedClusterClient,
@@ -178,6 +200,8 @@ export const createDesignPipelineTool = ({
           );
 
           streamType = outcome.streamType;
+          sourceFieldPicked = outcome.pickedSourceField;
+          sourceFieldConflictDetected = outcome.sourceFieldConflictDetected;
 
           if (outcome.kind === 'success' || outcome.kind === 'unsupported') {
             flow = 'extract_fields';
@@ -204,6 +228,9 @@ export const createDesignPipelineTool = ({
           fallbackHints.push(
             `Heuristic field extraction did not yield a usable seed pattern (${outcome.reason}). Falling back to LLM-only pipeline design.`
           );
+          if (outcome.extraHints && outcome.extraHints.length > 0) {
+            fallbackHints.push(...outcome.extraHints);
+          }
         }
       }
 
@@ -284,6 +311,13 @@ export const createDesignPipelineTool = ({
         ...(extractFieldsFallbackReason !== undefined && {
           extract_fields_fallback_reason: extractFieldsFallbackReason,
         }),
+        ...(sourceFieldConflictDetected !== undefined && {
+          source_field_conflict_detected: sourceFieldConflictDetected,
+        }),
+        ...(sourceFieldExplicitlySet !== undefined && {
+          source_field_explicitly_set: sourceFieldExplicitlySet,
+        }),
+        ...(sourceFieldPicked !== undefined && { source_field_picked: sourceFieldPicked }),
       });
     }
   },

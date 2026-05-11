@@ -58,6 +58,7 @@ import {
   runExtractFieldsFlow,
   stepWritesOrRemovesField,
   type RunExtractFieldsDeps,
+  type RunExtractFieldsParams,
 } from './extract_fields_handler';
 import {
   suggestProcessingPipeline,
@@ -1899,6 +1900,433 @@ describe('runExtractFieldsFlow', () => {
           ])
         );
       }
+    });
+
+    // ---------------------------------------------------------------------
+    // Inline-processed samples + no_text_field caveat
+    //
+    // Narrow caveat: when inline samples are flagged status: 'processed'
+    // AND the resolved samples don't have a parseable raw-text field, it's
+    // almost always because the existing pipeline removed it. Surface a
+    // hint pointing the user at status: 'unprocessed' / source: 'stream'.
+    // Other failure modes (no_candidate, no_parsed_documents) are covered
+    // covered by the post-fact duplication/overwrite warnings.
+    // ---------------------------------------------------------------------
+    describe('inline processed samples + no_text_field caveat', () => {
+      const inlineProcessedSamples = (
+        documents: Array<Record<string, unknown>>
+      ): RunExtractFieldsParams['samples'] => ({
+        source: 'inline',
+        status: 'processed',
+        documents,
+      });
+
+      const inlineUnprocessedSamples = (
+        documents: Array<Record<string, unknown>>
+      ): RunExtractFieldsParams['samples'] => ({
+        source: 'inline',
+        status: 'unprocessed',
+        documents,
+      });
+
+      const caveatMatcher = expect.stringContaining(
+        'inline samples were marked status: "processed"'
+      );
+
+      it('attaches the caveat to a `no_text_field` fallback when inline samples are processed and lack a parseable text field', async () => {
+        // Inline processed docs with no `body.text` / `message` field —
+        // mirrors the case where extraction already moved the raw text
+        // elsewhere and the seed parser has nothing to read.
+        const deps = buildDeps();
+        (deps.streamsClient.getStream as jest.Mock).mockResolvedValue(buildIngestStreamDef([]));
+
+        const outcome = await runExtractFieldsFlow(
+          {
+            streamName: ingestStreamName,
+            samples: inlineProcessedSamples([
+              { 'attributes.user.id': 'u-1', 'service.name': 'web' },
+              { 'attributes.user.id': 'u-2', 'service.name': 'api' },
+            ]),
+          },
+          deps
+        );
+
+        expect(outcome.kind).toBe('fallback');
+        if (outcome.kind !== 'fallback') return;
+
+        expect(outcome.reason).toBe('no_text_field');
+        expect(outcome.extraHints).toEqual(expect.arrayContaining([caveatMatcher]));
+      });
+
+      it('does NOT attach the caveat to a `no_candidate` fallback (post-fact warnings cover that path)', async () => {
+        const deps = buildDeps();
+        (deps.streamsClient.getStream as jest.Mock).mockResolvedValue(buildIngestStreamDef([]));
+        mockProcessGrokPatterns.mockResolvedValue(null);
+        mockProcessDissectPattern.mockResolvedValue(null);
+
+        const outcome = await runExtractFieldsFlow(
+          {
+            streamName: ingestStreamName,
+            samples: inlineProcessedSamples([
+              { 'body.text': 'some value', 'service.name': 'web' },
+              { 'body.text': 'another value', 'service.name': 'api' },
+            ]),
+          },
+          deps
+        );
+
+        expect(outcome.kind).toBe('fallback');
+        if (outcome.kind !== 'fallback') return;
+
+        expect(outcome.reason).toBe('no_candidate');
+        expect(outcome.extraHints).toBeUndefined();
+      });
+
+      it('does NOT push a caveat into `warnings` on the success path (success path is intentionally quiet)', async () => {
+        const deps = buildDeps();
+        (deps.streamsClient.getStream as jest.Mock).mockResolvedValue(buildIngestStreamDef([]));
+        mockProcessGrokPatterns.mockResolvedValue({
+          type: 'grok',
+          processor: grokCandidateProcessor,
+          parsedRate: 1,
+        });
+        mockProcessDissectPattern.mockResolvedValue(null);
+        mockExtractParsedSampleDocuments.mockResolvedValue({
+          parsedDocuments: [{ 'body.text': '...' } as FlattenRecord],
+          definitionError: false,
+        });
+        mockSuggestProcessingPipeline.mockResolvedValue({
+          pipeline: {
+            steps: [
+              {
+                action: 'date',
+                from: 'attributes.timestamp',
+                to: '@timestamp',
+                formats: ['ISO8601'],
+              } as unknown as StreamlangStep,
+            ],
+          },
+          metadata: { stepsUsed: 2, maxSteps: 6 },
+        });
+        mockSimulateProcessing.mockResolvedValue(succeededSimulation());
+
+        const outcome = await runExtractFieldsFlow(
+          {
+            streamName: ingestStreamName,
+            samples: inlineProcessedSamples([
+              { 'body.text': '192.168.1.1 GET / 200', 'service.name': 'web' },
+              { 'body.text': '10.0.0.1 POST /login 401', 'service.name': 'web' },
+            ]),
+          },
+          deps
+        );
+
+        expect(outcome.kind).toBe('success');
+        if (outcome.kind !== 'success') return;
+
+        expect(outcome.result.warnings ?? []).not.toEqual(expect.arrayContaining([caveatMatcher]));
+      });
+
+      it('does NOT attach the caveat for inline samples explicitly marked unprocessed', async () => {
+        // Inline unprocessed + no text field still falls back to
+        // `no_text_field`, but without the inline-processed hint — the
+        // user wasn't claiming the pipeline already ran, so the
+        // explanation "your pipeline removed body.text" doesn't apply.
+        const deps = buildDeps();
+        (deps.streamsClient.getStream as jest.Mock).mockResolvedValue(buildIngestStreamDef([]));
+
+        const outcome = await runExtractFieldsFlow(
+          {
+            streamName: ingestStreamName,
+            samples: inlineUnprocessedSamples([
+              { 'attributes.user.id': 'u-1' },
+              { 'attributes.user.id': 'u-2' },
+            ]),
+          },
+          deps
+        );
+
+        expect(outcome.kind).toBe('fallback');
+        if (outcome.kind !== 'fallback') return;
+
+        expect(outcome.reason).toBe('no_text_field');
+        expect(outcome.extraHints).toBeUndefined();
+      });
+
+      it('does NOT attach the caveat for stream-source samples', async () => {
+        // Stream samples are always processed, but the seed parser is
+        // designed to read `body.text` as raw ingest text — the caveat
+        // only fires for INLINE processed samples, where the user could
+        // have sent raw docs instead.
+        const deps = buildDeps();
+        arrangeStreamWithSamples(deps, []);
+        mockProcessGrokPatterns.mockResolvedValue(null);
+        mockProcessDissectPattern.mockResolvedValue(null);
+
+        const outcome = await runExtractFieldsFlow({ streamName: ingestStreamName }, deps);
+
+        expect(outcome.kind).toBe('fallback');
+        if (outcome.kind !== 'fallback') return;
+
+        expect(outcome.reason).toBe('no_candidate');
+        expect(outcome.extraHints).toBeUndefined();
+      });
+    });
+
+    // ---------------------------------------------------------------------
+    // Seed source field override
+    //
+    // The user (via the agent) can pass `seedSourceField` to bypass the
+    // default `getDefaultTextField` auto-pick. Closes the capability gap
+    // where extract_fields: true could not be steered to a non-default
+    // field except by falling back to LLM-only design. The conflict
+    // detection itself is intentionally NOT gated upfront — the
+    // post-fact warnings (duplication, overwrite, placement) remain the
+    // surface for resolving conflicts after a heuristic run completes.
+    // See SOURCE_FIELD_CONFLICT_DECISION.md for the upfront-gate
+    // alternative tracked against telemetry.
+    // ---------------------------------------------------------------------
+    describe('seedSourceField override', () => {
+      it('runs the seed parser against `seedSourceField` instead of the auto-pick when provided', async () => {
+        // Auto-pick would prefer `message` (lower index in
+        // PRIORITIZED_CONTENT_FIELDS); the override forces `body.text`.
+        const deps = buildDeps();
+        (deps.streamsClient.getStream as jest.Mock).mockResolvedValue(buildIngestStreamDef([]));
+        mockProcessGrokPatterns.mockResolvedValue({
+          type: 'grok',
+          processor: grokCandidateProcessor,
+          parsedRate: 1,
+        });
+        mockProcessDissectPattern.mockResolvedValue(null);
+        mockExtractParsedSampleDocuments.mockResolvedValue({
+          parsedDocuments: [{ 'body.text': '...' } as FlattenRecord],
+          definitionError: false,
+        });
+        mockSuggestProcessingPipeline.mockResolvedValue({
+          pipeline: null,
+          metadata: { stepsUsed: 0, maxSteps: 6 },
+        });
+        mockSimulateProcessing.mockResolvedValue(succeededSimulation());
+
+        const outcome = await runExtractFieldsFlow(
+          {
+            streamName: ingestStreamName,
+            seedSourceField: 'body.text',
+            samples: {
+              source: 'inline',
+              status: 'unprocessed',
+              documents: [
+                { 'body.text': '192.168.1.1 GET / 200', message: 'unused' },
+                { 'body.text': '10.0.0.1 POST /login 401', message: 'unused' },
+              ],
+            },
+          },
+          deps
+        );
+
+        expect(outcome.kind).toBe('success');
+        // Seed parser invoked with `fieldName: 'body.text'` — the
+        // override, not the auto-pick.
+        const grokCallArgs = mockProcessGrokPatterns.mock.calls[0][0];
+        expect(grokCallArgs.fieldName).toBe('body.text');
+      });
+
+      it('falls back with `no_text_field` when `seedSourceField` is not present in samples', async () => {
+        // User points at a field that doesn't exist in the samples —
+        // extraction has nothing to read. Falls back with the normal
+        // no_text_field reason, no special-casing.
+        const deps = buildDeps();
+        (deps.streamsClient.getStream as jest.Mock).mockResolvedValue(buildIngestStreamDef([]));
+
+        const outcome = await runExtractFieldsFlow(
+          {
+            streamName: ingestStreamName,
+            seedSourceField: 'attributes.does_not_exist',
+            samples: {
+              source: 'inline',
+              status: 'unprocessed',
+              documents: [{ 'body.text': '192.168.1.1 GET / 200' }],
+            },
+          },
+          deps
+        );
+
+        expect(outcome.kind).toBe('fallback');
+        if (outcome.kind !== 'fallback') return;
+        expect(outcome.reason).toBe('no_text_field');
+      });
+    });
+
+    describe('source-field conflict observability', () => {
+      it('exposes pickedSourceField + sourceFieldConflictDetected=false on success when no existing step touches the picked field', async () => {
+        const deps = buildDeps();
+        // Existing pipeline does NOT touch `body.text` — no conflict.
+        arrangeStreamWithSamples(deps, [
+          { action: 'set', to: 'attributes.constant', value: 'x' } as unknown as StreamlangStep,
+        ]);
+        mockProcessGrokPatterns.mockResolvedValue({
+          type: 'grok',
+          processor: grokCandidateProcessor,
+          parsedRate: 1,
+        });
+        mockProcessDissectPattern.mockResolvedValue(null);
+        mockExtractParsedSampleDocuments.mockResolvedValue({
+          parsedDocuments: [{ 'body.text': '...' } as FlattenRecord],
+          definitionError: false,
+        });
+        mockSuggestProcessingPipeline.mockResolvedValue({
+          pipeline: null,
+          metadata: { stepsUsed: 0, maxSteps: 6 },
+        });
+        mockSimulateProcessing.mockResolvedValue(succeededSimulation());
+
+        const outcome = await runExtractFieldsFlow({ streamName: ingestStreamName }, deps);
+
+        expect(outcome.kind).toBe('success');
+        if (outcome.kind !== 'success') return;
+        expect(outcome.pickedSourceField).toBe('body.text');
+        expect(outcome.sourceFieldConflictDetected).toBe(false);
+      });
+
+      it('flags sourceFieldConflictDetected=true when an existing step extracts from the picked field', async () => {
+        const deps = buildDeps();
+        // Existing grok already extracts FROM body.text — duplication
+        // conflict detected by the observer (and surfaced separately as
+        // a post-fact warning).
+        arrangeStreamWithSamples(deps, [
+          {
+            action: 'grok',
+            from: 'body.text',
+            patterns: ['%{IP:attributes.existing_ip}'],
+          } as unknown as StreamlangStep,
+        ]);
+        mockProcessGrokPatterns.mockResolvedValue({
+          type: 'grok',
+          processor: grokCandidateProcessor,
+          parsedRate: 1,
+        });
+        mockProcessDissectPattern.mockResolvedValue(null);
+        mockExtractParsedSampleDocuments.mockResolvedValue({
+          parsedDocuments: [{ 'body.text': '...' } as FlattenRecord],
+          definitionError: false,
+        });
+        mockSuggestProcessingPipeline.mockResolvedValue({
+          pipeline: null,
+          metadata: { stepsUsed: 0, maxSteps: 6 },
+        });
+        mockSimulateProcessing.mockResolvedValue(succeededSimulation());
+
+        const outcome = await runExtractFieldsFlow({ streamName: ingestStreamName }, deps);
+
+        expect(outcome.kind).toBe('success');
+        if (outcome.kind !== 'success') return;
+        expect(outcome.pickedSourceField).toBe('body.text');
+        expect(outcome.sourceFieldConflictDetected).toBe(true);
+      });
+
+      it('flags sourceFieldConflictDetected=true when an existing step writes to or removes the picked field', async () => {
+        const deps = buildDeps();
+        // `set body.text = ...` mutates the source field before
+        // extraction would read it — observer flags the conflict.
+        arrangeStreamWithSamples(deps, [
+          { action: 'set', to: 'body.text', value: 'x' } as unknown as StreamlangStep,
+        ]);
+        mockProcessGrokPatterns.mockResolvedValue({
+          type: 'grok',
+          processor: grokCandidateProcessor,
+          parsedRate: 1,
+        });
+        mockProcessDissectPattern.mockResolvedValue(null);
+        mockExtractParsedSampleDocuments.mockResolvedValue({
+          parsedDocuments: [{ 'body.text': '...' } as FlattenRecord],
+          definitionError: false,
+        });
+        mockSuggestProcessingPipeline.mockResolvedValue({
+          pipeline: null,
+          metadata: { stepsUsed: 0, maxSteps: 6 },
+        });
+        mockSimulateProcessing.mockResolvedValue(succeededSimulation());
+
+        const outcome = await runExtractFieldsFlow({ streamName: ingestStreamName }, deps);
+
+        expect(outcome.kind).toBe('success');
+        if (outcome.kind !== 'success') return;
+        expect(outcome.sourceFieldConflictDetected).toBe(true);
+      });
+
+      it('exposes the meta on `no_candidate` fallback (field was picked even though heuristics failed)', async () => {
+        const deps = buildDeps();
+        arrangeStreamWithSamples(deps, [
+          {
+            action: 'grok',
+            from: 'body.text',
+            patterns: ['%{IP:x}'],
+          } as unknown as StreamlangStep,
+        ]);
+        mockProcessGrokPatterns.mockResolvedValue(null);
+        mockProcessDissectPattern.mockResolvedValue(null);
+
+        const outcome = await runExtractFieldsFlow({ streamName: ingestStreamName }, deps);
+
+        expect(outcome.kind).toBe('fallback');
+        if (outcome.kind !== 'fallback') return;
+        expect(outcome.reason).toBe('no_candidate');
+        expect(outcome.pickedSourceField).toBe('body.text');
+        expect(outcome.sourceFieldConflictDetected).toBe(true);
+      });
+
+      it('omits the meta on `no_samples` fallback (no field was ever picked)', async () => {
+        const deps = buildDeps();
+        // No samples means we never reach field selection — the meta
+        // fields stay undefined so analytics can filter them out cleanly.
+        (deps.streamsClient.getStream as jest.Mock).mockResolvedValue(buildIngestStreamDef([]));
+        (deps.scopedClusterClient.asCurrentUser.search as jest.Mock).mockResolvedValue({
+          hits: { hits: [] },
+        });
+
+        const outcome = await runExtractFieldsFlow({ streamName: ingestStreamName }, deps);
+
+        expect(outcome.kind).toBe('fallback');
+        if (outcome.kind !== 'fallback') return;
+        expect(outcome.reason).toBe('no_samples');
+        expect(outcome.pickedSourceField).toBeUndefined();
+        expect(outcome.sourceFieldConflictDetected).toBeUndefined();
+      });
+
+      it('exposes the meta on `no_text_field` fallback when seedSourceField was passed', async () => {
+        const deps = buildDeps();
+        // User redirected with seedSourceField but the field is missing
+        // from samples. Conflict detection still runs against the
+        // explicit field name so we can see how often
+        // `seed_source_field` misfires.
+        (deps.streamsClient.getStream as jest.Mock).mockResolvedValue(
+          buildIngestStreamDef([
+            {
+              action: 'remove',
+              from: 'event.original',
+            } as unknown as StreamlangStep,
+          ])
+        );
+
+        const outcome = await runExtractFieldsFlow(
+          {
+            streamName: ingestStreamName,
+            seedSourceField: 'event.original',
+            samples: {
+              source: 'inline',
+              status: 'unprocessed',
+              documents: [{ 'body.text': '192.168.1.1 GET / 200' }],
+            },
+          },
+          deps
+        );
+
+        expect(outcome.kind).toBe('fallback');
+        if (outcome.kind !== 'fallback') return;
+        expect(outcome.reason).toBe('no_text_field');
+        expect(outcome.pickedSourceField).toBe('event.original');
+        expect(outcome.sourceFieldConflictDetected).toBe(true);
+      });
     });
   });
 });
