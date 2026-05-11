@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/notification-center-example-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "Example plugin demonstrating the persistent notification events API and a fully featured notification center built as a sidebar app",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "notificationCenterExample",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "developerExamples"
+    ]
+  }
+}

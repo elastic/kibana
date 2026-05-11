@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { EventsService } from './events_service';
+import { NotificationCenterExamplePlugin } from './plugin';
+
+export function plugin() {
+  return new NotificationCenterExamplePlugin();
+}

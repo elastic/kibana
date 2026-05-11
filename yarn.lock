@@ -5884,6 +5884,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-notifications-browser-components@link:src/core/packages/notifications/browser-components":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-notifications-browser-hooks@link:src/core/packages/notifications/browser-hooks":
   version "0.0.0"
   uid ""
@@ -7997,6 +8001,10 @@
   uid ""
 
 "@kbn/node-libs-browser-webpack-plugin@link:src/platform/packages/private/kbn-node-libs-browser-webpack-plugin":
+  version "0.0.0"
+  uid ""
+
+"@kbn/notification-center-example-plugin@link:examples/notification_center_example":
   version "0.0.0"
   uid ""
 
