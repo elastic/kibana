@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** Safety cap for pathological queries or accidental cycles in rename metadata. */
 const MAX_RENAME_HOPS = 256;
 
 /**
@@ -23,7 +22,7 @@ const MAX_RENAME_HOPS = 256;
  */
 export function resolveRenamedSourceField(
   outputColumnName: string,
-  renamedColumnsPairs?: Iterable<[string, string]> | undefined
+  renamedColumnsPairs?: Iterable<[string, string]>
 ): string {
   if (renamedColumnsPairs == null) {
     return outputColumnName;
@@ -38,11 +37,11 @@ export function resolveRenamedSourceField(
   const visited = new Set<string>();
 
   for (let hop = 0; hop < MAX_RENAME_HOPS; hop++) {
-    const previousName = renameLookup.get(name);
-    if (previousName === undefined) {
+    if (visited.has(name)) {
       return name;
     }
-    if (visited.has(name)) {
+    const previousName = renameLookup.get(name);
+    if (previousName === undefined) {
       return name;
     }
     visited.add(name);
