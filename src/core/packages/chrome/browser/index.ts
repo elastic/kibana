@@ -13,6 +13,7 @@ export type {
   ChromeBadge,
   ChromeBreadcrumbsBadge,
   ChromeBreadcrumb,
+  ChromeNext,
   ChromeSetBreadcrumbsParams,
   ChromeBreadcrumbsAppendExtension,
   ChromeDocTitle,

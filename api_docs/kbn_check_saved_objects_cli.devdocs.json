@@ -79,6 +79,44 @@
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/check-saved-objects-cli",
+        "id": "def-common.runSoMigrationCompareCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runSoMigrationCompareCli",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-check-saved-objects-cli/src/commands/run_so_migration_compare_cli.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/check-saved-objects-cli",
+        "id": "def-common.runSoMigrationSnapshotCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runSoMigrationSnapshotCli",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "packages/kbn-check-saved-objects-cli/src/commands/run_so_migration_snapshot_cli.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],
