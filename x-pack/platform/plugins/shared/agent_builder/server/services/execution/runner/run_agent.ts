@@ -135,8 +135,16 @@ export const runAgent = async ({
   const agentRegistry = await agentsService.getRegistry({ request });
   const agent = await agentRegistry.get(agentId);
 
+  // Single merge point for runtime overrides — consumed by both the agent handler
+  // (prompt construction, tool selection) and tool handlers (via ToolHandlerContext).
+  const effectiveConfiguration = {
+    ...agent.configuration,
+    ...(agentParams.configurationOverrides || {}),
+  };
+  manager.deps.agentConfiguration = effectiveConfiguration;
+
   const agentResult = await withAgentSpan({ agent }, async () => {
-    const agentHandler = createAgentHandler({ agent });
+    const agentHandler = createAgentHandler({ agent, effectiveConfiguration });
     const agentHandlerContext = await createAgentHandlerContext({ agentExecutionParams, manager });
     return await agentHandler(
       {
