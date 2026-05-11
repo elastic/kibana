@@ -8,6 +8,7 @@
 import type { KbnClient } from '@kbn/kbn-client';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import {
+  EVALS_DATASETS_URL,
   EVALS_RUN_SCORES_URL,
   EVALS_RUN_URL,
   EVALS_SCORES_URL,
@@ -20,7 +21,6 @@ import {
   type IngestScoresRequestBodyInput,
   type Model as EvalsModel,
 } from '@kbn/evals-common';
-import { checkEvaluationsPluginEnabled } from './evaluations_kbn_client';
 
 export interface EvaluatorStats {
   datasetId: string;
@@ -64,7 +64,7 @@ export interface IngestScoresError extends Error {
 }
 
 const EVALS_PLUGIN_DISABLED_MESSAGE =
-  'Evaluations plugin is not enabled on the target Kibana. Set EVALUATIONS_KBN_URL and ensure xpack.evals.enabled=true on the target Kibana.';
+  'Evaluations plugin is not enabled on the target Kibana. Ensure xpack.evals.enabled=true is set in the Kibana configuration.';
 
 const getResponseData = (response: unknown): unknown => {
   if (typeof response === 'object' && response !== null && 'data' in response) {
@@ -197,11 +197,14 @@ export class EvalsClient {
   }
 
   async assertPluginEnabled(): Promise<void> {
-    const isEnabled = await checkEvaluationsPluginEnabled({
-      kbnClient: this.kbnClient,
-      log: this.log,
-    });
-    if (!isEnabled) {
+    try {
+      await this.kbnClient.request({
+        path: EVALS_DATASETS_URL,
+        method: 'GET',
+        query: { page: 1, per_page: 1 },
+        retries: 0,
+      });
+    } catch {
       throw new Error(EVALS_PLUGIN_DISABLED_MESSAGE);
     }
   }

@@ -23,10 +23,7 @@ import { KibanaEvalsClient } from './kibana_evals_executor/client';
 import type { EvaluationTestOptions } from './config/create_playwright_eval_config';
 import { httpHandlerFromKbnClient } from './utils/http_handler_from_kbn_client';
 import { wrapKbnClientWithRetries } from './utils/kbn_client_with_retries';
-import {
-  getEvaluationsKbnClient,
-  checkEvaluationsPluginEnabled,
-} from './utils/evaluations_kbn_client';
+import { getEvaluationsKbnClient } from './utils/evaluations_kbn_client';
 import { createCriteriaEvaluator } from './evaluators/criteria';
 import { getGitMetadata } from './utils/git_metadata';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
@@ -108,18 +105,11 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     },
     { scope: 'worker' },
   ],
-  evaluationsPluginEnabled: [
+  evalsClient: [
     async ({ evaluationsKbnClient, log }, use) => {
       const evalsClient = new EvalsClient(evaluationsKbnClient, log);
-      const shouldRequirePlugin = Boolean(process.env.EVALUATIONS_KBN_URL || process.env.CI);
-
-      if (shouldRequirePlugin) {
-        await evalsClient.assertPluginEnabled();
-        await use(true);
-        return;
-      }
-
-      await use(await checkEvaluationsPluginEnabled({ kbnClient: evaluationsKbnClient, log }));
+      await evalsClient.assertPluginEnabled();
+      await use(evalsClient);
     },
     { scope: 'worker' },
   ],
@@ -244,7 +234,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       {
         log,
         evaluationsKbnClient,
-        evaluationsPluginEnabled,
+        evalsClient,
         connector,
         evaluationConnector,
         repetitions,
@@ -276,7 +266,6 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       const model = buildModelFromConnector(connector);
       const evaluatorModel = buildModelFromConnector(evaluationConnector);
-      const evalsClient = new EvalsClient(evaluationsKbnClient, log);
       const suiteId = process.env.EVAL_SUITE_ID;
       const buildkiteMetadata = getBuildkiteCiMetadataFromEnv();
 
@@ -285,44 +274,42 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         throw new Error('runId must be provided via TEST_RUN_ID environment variable');
       }
 
-      const upsertDataset = evaluationsPluginEnabled
-        ? async (dataset: EvaluationDataset) => {
-            await evaluationsKbnClient.request({
-              path: EVALS_DATASET_UPSERT_URL,
-              method: 'POST',
-              body: {
-                name: dataset.name,
-                description: dataset.description,
-                examples: dataset.examples.map(toDatasetRouteExample),
-              },
-              retries: 0,
-            });
-          }
-        : undefined;
+      const upsertDataset = async (dataset: EvaluationDataset) => {
+        await evaluationsKbnClient.request({
+          path: EVALS_DATASET_UPSERT_URL,
+          method: 'POST',
+          body: {
+            name: dataset.name,
+            description: dataset.description,
+            examples: dataset.examples.map(toDatasetRouteExample),
+          },
+          retries: 0,
+        });
+      };
 
-      const getDatasetByName = evaluationsPluginEnabled
-        ? async (datasetName: string): Promise<EvaluationDatasetWithId | null> => {
-            const datasetId = uuidv5(datasetName, DATASET_UUID_NAMESPACE);
-            const response = await evaluationsKbnClient.request({
-              path: EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId)),
-              method: 'GET',
-              retries: 0,
-            });
-            const datasetResponse = GetEvaluationDatasetResponse.parse(response.data);
+      const getDatasetByName = async (
+        datasetName: string
+      ): Promise<EvaluationDatasetWithId | null> => {
+        const datasetId = uuidv5(datasetName, DATASET_UUID_NAMESPACE);
+        const response = await evaluationsKbnClient.request({
+          path: EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId)),
+          method: 'GET',
+          retries: 0,
+        });
+        const datasetResponse = GetEvaluationDatasetResponse.parse(response.data);
 
-            return {
-              id: datasetResponse.id,
-              name: datasetResponse.name,
-              description: datasetResponse.description,
-              examples: datasetResponse.examples.map(({ id, input, output, metadata }) => ({
-                id,
-                input,
-                output,
-                metadata,
-              })),
-            };
-          }
-        : undefined;
+        return {
+          id: datasetResponse.id,
+          name: datasetResponse.name,
+          description: datasetResponse.description,
+          examples: datasetResponse.examples.map(({ id, input, output, metadata }) => ({
+            id,
+            input,
+            output,
+            metadata,
+          })),
+        };
+      };
 
       const gitMetadata = getGitMetadata();
       const hostName = osHostname();

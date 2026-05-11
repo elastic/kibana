@@ -17,11 +17,6 @@ import {
 } from '@kbn/evals-common';
 import type { IngestScoresError } from './evals_client';
 import { EvalsClient } from './evals_client';
-import { checkEvaluationsPluginEnabled } from './evaluations_kbn_client';
-
-jest.mock('./evaluations_kbn_client', () => ({
-  checkEvaluationsPluginEnabled: jest.fn(),
-}));
 
 const createMockKbnClient = (): jest.Mocked<KbnClient> =>
   ({
@@ -302,21 +297,28 @@ describe('EvalsClient', () => {
   it('assertPluginEnabled throws a clear actionable error when plugin is disabled', async () => {
     const kbnClient = createMockKbnClient();
     const log = createLog();
-    (checkEvaluationsPluginEnabled as jest.Mock).mockResolvedValue(false);
+    kbnClient.request.mockRejectedValue(new Error('Not Found'));
     const client = new EvalsClient(kbnClient, log);
 
     await expect(client.assertPluginEnabled()).rejects.toThrow(
-      'Set EVALUATIONS_KBN_URL and ensure xpack.evals.enabled=true on the target Kibana'
+      'Evaluations plugin is not enabled on the target Kibana. Ensure xpack.evals.enabled=true is set in the Kibana configuration.'
     );
   });
 
   it('assertPluginEnabled resolves when plugin is enabled', async () => {
     const kbnClient = createMockKbnClient();
     const log = createLog();
-    (checkEvaluationsPluginEnabled as jest.Mock).mockResolvedValue(true);
+    kbnClient.request.mockResolvedValue(asKbnResponse({ datasets: [], total: 0 }));
     const client = new EvalsClient(kbnClient, log);
 
     await expect(client.assertPluginEnabled()).resolves.toBeUndefined();
-    expect(checkEvaluationsPluginEnabled).toHaveBeenCalledWith({ kbnClient, log });
+    expect(kbnClient.request).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: '/internal/evals/datasets',
+        method: 'GET',
+        query: { page: 1, per_page: 1 },
+        retries: 0,
+      })
+    );
   });
 });
