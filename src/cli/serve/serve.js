@@ -635,7 +635,7 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
 
   if (_.get(rawConfig, 'server.basePath') !== MOCK_IDP_KIBANA_BASE_PATH) {
     const publicBaseUrl = _.get(rawConfig, 'server.publicBaseUrl');
-    const label = chalk.black.bgYellow(' saml-mock-idp-no-base-path ');
+    const label = chalk.black.bgYellow(' saml-mock-idp ');
     console.warn(label, '='.repeat(100));
     console.warn(
       label,
