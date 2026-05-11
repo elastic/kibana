@@ -32,6 +32,7 @@ import { profilingRouteDefinitions } from './profiling';
 import { serviceGroupsRouteDefinitions } from './service_groups';
 import { timeRangeMetadataRouteDefinitions } from './time_range_metadata';
 import { customLinksRouteDefinitions } from './custom_links';
+import { anomalyDetectionRouteDefinitions } from './anomaly_detection';
 import type { BuildGroupedRepository } from './types';
 
 export const routeDefinitions = {
@@ -61,6 +62,7 @@ export const routeDefinitions = {
   serviceGroups: serviceGroupsRouteDefinitions,
   timeRangeMetadata: timeRangeMetadataRouteDefinitions,
   customLinks: customLinksRouteDefinitions,
+  anomalyDetection: anomalyDetectionRouteDefinitions,
 };
 
 export type SharedAPMRouteRepository = BuildGroupedRepository<typeof routeDefinitions>;

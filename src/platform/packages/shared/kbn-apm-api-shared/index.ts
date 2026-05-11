@@ -41,6 +41,7 @@ export type * from './src/routes/profiling';
 export type * from './src/routes/service_groups';
 export type * from './src/routes/time_range_metadata';
 export type * from './src/routes/custom_links';
+export type * from './src/routes/anomaly_detection';
 export { filterOptionsRt, payloadRt } from './src/routes/custom_links';
 export {
   rangeRt,
