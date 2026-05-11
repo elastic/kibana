@@ -43,15 +43,7 @@ export const UserPanelFooter = ({
             <AiAssistantButton
               entityType={EntityType.user}
               entityName={userName}
-              aiAssistantProps={{
-                title: `Investigating ${EntityType.user} '${userName}'`,
-                description: `Entity: ${userName}`,
-                suggestedPrompt: `Investigate the entity and suggest next steps.`,
-              }}
-              telemetry={{
-                pathway: 'entity_flyout',
-                attachments: ['entity'],
-              }}
+              telemetryPathway="entity_flyout"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

@@ -23,16 +23,10 @@ import { useAskAiAssistant } from './use_ask_ai_assistant';
 import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
 import type { AgentBuilderAddToChatTelemetry } from '../../../agent_builder/hooks/use_report_add_to_chat';
 
-type AiAssistantProps = Pick<
-  Parameters<typeof useAskAiAssistant>[0],
-  'title' | 'description' | 'suggestedPrompt'
->;
-
 export interface AiAssistantButtonProps<T extends EntityType> {
   entityType: T;
   entityName: string;
-  aiAssistantProps: AiAssistantProps;
-  telemetry: AgentBuilderAddToChatTelemetry;
+  telemetryPathway: AgentBuilderAddToChatTelemetry['pathway'];
 }
 
 const CURRENT_REPLACEMENTS = {} as const;
@@ -40,8 +34,7 @@ const CURRENT_REPLACEMENTS = {} as const;
 export const AiAssistantButton = <T extends EntityType>({
   entityType,
   entityName,
-  aiAssistantProps,
-  telemetry,
+  telemetryPathway,
 }: AiAssistantButtonProps<T>) => {
   const entityField = EntityTypeToIdentifierField[entityType];
   const { data: anonymizationFields } = useFetchAnonymizationFields();
@@ -69,7 +62,9 @@ export const AiAssistantButton = <T extends EntityType>({
   );
 
   const { showAssistantOverlay, disabled: aiAssistantDisable } = useAskAiAssistant({
-    ...aiAssistantProps,
+    title: `Explain ${entityType} '${entityName}' Risk Score`,
+    description: `Entity: ${entityName}`,
+    suggestedPrompt: ENTITY_PROMPT,
     getPromptContext,
     replacements,
   });
@@ -93,7 +88,12 @@ export const AiAssistantButton = <T extends EntityType>({
   }
 
   if (isAgentChatExperienceEnabled) {
-    return <NewAgentBuilderAttachment onClick={openAgentBuilderFlyout} telemetry={telemetry} />;
+    return (
+      <NewAgentBuilderAttachment
+        onClick={openAgentBuilderFlyout}
+        telemetry={{ pathway: telemetryPathway, attachments: ['entity'] }}
+      />
+    );
   }
 
   return (

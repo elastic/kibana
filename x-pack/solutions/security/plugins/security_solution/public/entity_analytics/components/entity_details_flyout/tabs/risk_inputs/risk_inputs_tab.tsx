@@ -537,15 +537,7 @@ const RiskInputsTabContent = <T extends EntityType>({
               <AiAssistantButton
                 entityType={entityType}
                 entityName={entityName}
-                aiAssistantProps={{
-                  title: `Explain ${entityType} '${entityName}' Risk Score`,
-                  description: `Entity: ${entityName}`,
-                  suggestedPrompt: `Explain how inputs contributed to the risk score, including any risk modifiers such as asset criticality or privileged user monitoring status. Additionally, outline the recommended next steps for investigating or mitigating the risk if the entity is deemed risky.\nTo answer risk score questions, fetch the risk score information and take into consideration both the risk score inputs and any modifiers that adjusted the final score.`,
-                }}
-                telemetry={{
-                  pathway: 'entity_risk_contribution',
-                  attachments: ['entity'],
-                }}
+                telemetryPathway="entity_risk_contribution"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

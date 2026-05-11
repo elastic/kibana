@@ -11,6 +11,7 @@ import { AiAssistantButton } from './ai_assistant_button';
 import type { AiAssistantButtonProps } from './ai_assistant_button';
 import { TestProviders } from '../../../common/mock';
 import type { EntityType } from '../../../../common/search_strategy';
+import { ENTITY_PROMPT } from '../../../agent_builder/components/prompts';
 
 // Hard code the generated anonymized value for easier testing
 const ANONYMIZED_VALUE = 'anonymized-value';
@@ -52,17 +53,10 @@ jest.mock('../../../agent_builder/hooks/use_agent_builder_attachment', () => ({
 }));
 
 describe('AiAssistantButton', () => {
-  const aiAssistantProps = {
-    title: "Investigating user 'test-user'",
-    description: 'Entity: test-user',
-    suggestedPrompt: 'Investigate the entity and suggest next steps.',
-  };
-
   const defaultProps: AiAssistantButtonProps<EntityType> = {
     entityType: 'user' as EntityType,
     entityName: 'test-user',
-    aiAssistantProps,
-    telemetry: { pathway: 'entity_flyout', attachments: ['entity'] },
+    telemetryPathway: 'entity_flyout',
   };
 
   const mockShowAssistantOverlay = jest.fn();
@@ -158,11 +152,13 @@ describe('AiAssistantButton', () => {
     expect(mockOpenAgentBuilderFlyout).toHaveBeenCalledTimes(1);
   });
 
-  it('forwards aiAssistantProps to useAskAiAssistant alongside the derived prompt context and replacements', () => {
+  it('passes the derived title, description, suggested prompt, prompt context, and replacements to useAskAiAssistant', () => {
     render(<AiAssistantButton {...defaultProps} />, { wrapper: TestProviders });
 
     expect(mockUseAskInAiAssistant).toHaveBeenCalledWith({
-      ...aiAssistantProps,
+      title: "Explain user 'test-user' Risk Score",
+      description: 'Entity: test-user',
+      suggestedPrompt: ENTITY_PROMPT,
       getPromptContext: expect.any(Function),
       replacements: expect.any(Object),
     });
@@ -200,7 +196,7 @@ describe('AiAssistantButton', () => {
 
     expect(mockUseAskInAiAssistant).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: "Investigating user 'test-user'",
+        title: "Explain user 'test-user' Risk Score",
         description: 'Entity: test-user',
       })
     );

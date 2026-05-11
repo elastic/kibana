@@ -43,15 +43,7 @@ export const HostPanelFooter = ({
             <AiAssistantButton
               entityType={EntityType.host}
               entityName={hostName}
-              aiAssistantProps={{
-                title: `Investigating ${EntityType.host} '${hostName}'`,
-                description: `Entity: ${hostName}`,
-                suggestedPrompt: `Investigate the entity and suggest next steps.`,
-              }}
-              telemetry={{
-                pathway: 'entity_flyout',
-                attachments: ['entity'],
-              }}
+              telemetryPathway="entity_flyout"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
