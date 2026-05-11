@@ -13,12 +13,13 @@ import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 import { AiButton } from '@kbn/shared-ux-ai-components';
+import type { HotkeysStart } from '@kbn/core-hotkeys-browser';
 import { useAssistantContext } from '../..';
 
 const SHORTCUT_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistantContext.assistantNavLinkShortcutTooltip',
   {
-    values: { keyboardShortcut: isMac ? '⌘ ;' : 'Ctrl ;' },
+    values: { keyboardShortcut: isMac ? '⌘ ;' : 'Ctrl+;' },
     defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
   }
 );
@@ -39,7 +40,11 @@ const FULL_TOOLTIP_CONTENT = (
   </div>
 );
 
-export const AssistantNavLink: FC = () => {
+interface AssistantNavLinkProps {
+  hotkeys: HotkeysStart;
+}
+
+export const AssistantNavLink: FC<AssistantNavLinkProps> = ({ hotkeys }) => {
   const {
     showAssistantOverlay,
     assistantAvailability,
@@ -53,21 +58,42 @@ export const AssistantNavLink: FC = () => {
   const [tooltipVisible, setTooltipVisible] = useState(true);
 
   useEffect(() => {
-    const keyboardListener = (event: KeyboardEvent) => {
-      const hasModifier = isMac ? event.metaKey : event.ctrlKey;
-      if (hasModifier && (event.code === 'Semicolon' || event.key === ';')) {
+    const handle = hotkeys.register(
+      {
+        id: 'elasticAssistant:toggleOverlay',
+        keys: 'Mod+;',
+        scope: 'global',
+        label: i18n.translate(
+          'xpack.elasticAssistant.assistantContext.toggleOverlayShortcutLabel',
+          { defaultMessage: 'Open or close the AI Assistant' }
+        ),
+      },
+      (event) => {
         event.preventDefault();
         showAssistantOverlay({ showOverlay: !isOverlayOpen });
       }
-      if (event.key === 'Escape' && isOverlayOpen) {
+    );
+    return handle.unregister;
+  }, [hotkeys, showAssistantOverlay, isOverlayOpen]);
+
+  useEffect(() => {
+    if (!isOverlayOpen) return;
+    const handle = hotkeys.register(
+      {
+        id: 'elasticAssistant:closeOverlay',
+        keys: 'Escape',
+        scope: 'context',
+        label: i18n.translate('xpack.elasticAssistant.assistantContext.closeOverlayShortcutLabel', {
+          defaultMessage: 'Close the AI Assistant',
+        }),
+      },
+      () => {
         setTooltipVisible(true);
         buttonRef.current?.focus();
       }
-    };
-
-    window.addEventListener('keydown', keyboardListener);
-    return () => window.removeEventListener('keydown', keyboardListener);
-  }, [showAssistantOverlay, isOverlayOpen]);
+    );
+    return handle.unregister;
+  }, [hotkeys, isOverlayOpen]);
 
   useEffect(() => {
     if (!openChatTrigger$) return;

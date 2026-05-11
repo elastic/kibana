@@ -111,7 +111,7 @@ export class ElasticAssistantPublicPlugin
                     completeOpenChat={completeOpenChat}
                   >
                     <Suspense fallback={null}>
-                      <AssistantNavLink />
+                      <AssistantNavLink hotkeys={coreStart.hotkeys} />
                       <AssistantOverlay />
                     </Suspense>
                   </AssistantProvider>
