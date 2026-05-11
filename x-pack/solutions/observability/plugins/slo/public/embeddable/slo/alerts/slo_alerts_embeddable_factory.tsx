@@ -32,6 +32,7 @@ import {
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
 import type { AlertsCustomState, SloAlertsApi, SloAlertsEmbeddableState } from './types';
 import { openSloConfiguration } from './slo_alerts_open_configuration';
+import { ensureLicense } from '../ensure_license';
 const queryClient = new QueryClient();
 
 export const getAlertsPanelTitle = () =>
@@ -59,6 +60,7 @@ export function getAlertsEmbeddableFactory({
       uuid,
       parentApi,
     }) => {
+      await ensureLicense(pluginsStart.licensing);
       const deps = { ...coreStart, ...pluginsStart };
       const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
       async function onEdit() {
