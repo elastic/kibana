@@ -97,7 +97,11 @@ export class EvalsPublicPlugin
       })();
     };
 
-    const getAddToDatasetAction = (config: AddToDatasetActionConfig): AddToDatasetAction => {
+    const getAddToDatasetAction = (config: AddToDatasetActionConfig): AddToDatasetAction | null => {
+      if (!canAddToDataset) {
+        return null;
+      }
+
       const {
         label = DEFAULT_ADD_TO_DATASET_LABEL,
         ariaLabel = label,
@@ -112,9 +116,6 @@ export class EvalsPublicPlugin
         ariaLabel,
         iconType,
         onClick: (event) => {
-          if (!canAddToDataset) {
-            return;
-          }
           if (stopPropagation) event?.stopPropagation?.();
           onBeforeOpen?.();
           openAddToDatasetFlyout(options);

@@ -138,7 +138,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           selected: true,
         };
       }),
-    }).onClick();
+    })?.onClick();
   }, [completedRounds, conversation?.id, getAddToDatasetAction]);
 
   const showAddToDatasetItem =
