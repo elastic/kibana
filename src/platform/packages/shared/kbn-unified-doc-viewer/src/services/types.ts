@@ -9,7 +9,8 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
-import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataSource } from '@kbn/data-source';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
 import type { ReactElement } from 'react';
 import type { DocViewsRegistry } from './doc_views_registry';
@@ -62,10 +63,10 @@ export interface DocViewRenderProps {
   dataView: DataView;
   columns?: string[];
   /**
-   * If not provided, types will be derived by default from the dataView field types.
-   * For displaying text-based search results, define column types (which are available separately in the fetch request) here.
+   * Polymorphic data source. For DSL, wrap the DataView in `IndexPatternSource`;
+   * for ES|QL, pass the `EsqlSource` produced by the fetch.
    */
-  columnsMeta?: DataTableColumnsMeta;
+  dataSource?: DataSource;
   textBasedHits?: DataTableRecord[];
   hideActionsColumn?: boolean;
   filter?: DocViewFilterFn;

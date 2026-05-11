@@ -10,19 +10,21 @@
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getSortingCriteria, NonStringSortableFieldType } from '@kbn/sort-predicates';
-import type { DataSource } from '@kbn/data-source';
+import { type DataSource, IndexPatternSource } from '@kbn/data-source';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { useMemo } from 'react';
 import type { EuiDataGridColumnSortingConfig, EuiDataGridProps } from '@elastic/eui';
 import type { SortOrder } from '../components/data_table';
 import { kibanaJSON } from '../constants';
 import { SOURCE_COLUMN } from '../utils/columns';
 import { getFieldFromDataSource } from '../utils/get_field_from_data_source';
-import { getCompatDataView } from '../utils/get_compat_data_view';
 
 export const useSorting = ({
   rows,
   visibleColumns,
   dataSource,
+  fieldFormats,
   sort,
   isPlainRecord,
   isSortEnabled,
@@ -32,6 +34,7 @@ export const useSorting = ({
   rows: DataTableRecord[] | undefined;
   visibleColumns: string[];
   dataSource: DataSource | undefined;
+  fieldFormats: FieldFormatsStart;
   sort: SortOrder[];
   isPlainRecord: boolean;
   isSortEnabled: boolean;
@@ -48,10 +51,8 @@ export const useSorting = ({
     if (!isPlainRecord || !rows || !sortingColumns.length) {
       return;
     }
-    const dataView = getCompatDataView(dataSource);
-    if (!dataView) {
-      return;
-    }
+    const dataView =
+      dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
 
     return sortingColumns.reduce<Array<(a: DataTableRecord, b: DataTableRecord) => number>>(
       (acc, { id, direction }) => {
@@ -61,7 +62,10 @@ export const useSorting = ({
           return acc;
         }
 
-        const sortField = getSortingCriteria(field.type, id, dataView.getFormatterForField(field));
+        const formatter = dataView
+          ? dataView.getFormatterForField(field)
+          : fieldFormats.getDefaultInstance(field.type as KBN_FIELD_TYPES);
+        const sortField = getSortingCriteria(field.type, id, formatter);
 
         acc.push((a, b) => sortField(a.flattened, b.flattened, direction as 'asc' | 'desc'));
 
@@ -69,7 +73,7 @@ export const useSorting = ({
       },
       []
     );
-  }, [dataSource, isPlainRecord, rows, sortingColumns]);
+  }, [dataSource, fieldFormats, isPlainRecord, rows, sortingColumns]);
 
   const sortedRows = useMemo(() => {
     if (!rows || !comparators) {

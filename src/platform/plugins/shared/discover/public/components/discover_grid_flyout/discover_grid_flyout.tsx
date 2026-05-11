@@ -13,8 +13,7 @@ import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { type DataSource, EsqlSource } from '@kbn/data-source';
-import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
+import type { DataSource } from '@kbn/data-source';
 import type { DocViewerProps, DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
 import type { UnifiedDocViewerFlyoutProps } from '@kbn/unified-doc-viewer-plugin/public';
@@ -127,11 +126,7 @@ export function DiscoverGridFlyout({
       hits={hits}
       dataView={dataView}
       columns={columns}
-      columnsMeta={
-        dataSource instanceof EsqlSource
-          ? getTextBasedColumnsMeta(dataSource.resultColumns as never)
-          : undefined
-      }
+      dataSource={dataSource}
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
       onClose={onClose}

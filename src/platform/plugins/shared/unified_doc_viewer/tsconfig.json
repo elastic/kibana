@@ -60,6 +60,7 @@
     "@kbn/restorable-state",
     "@kbn/lens-common",
     "@kbn/ebt-click",
+    "@kbn/data-source",
   ],
   "exclude": ["target/**/*"]
 }

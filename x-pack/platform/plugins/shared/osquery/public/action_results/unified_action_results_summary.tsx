@@ -57,10 +57,6 @@ const COLUMN_DISPLAY_SETTINGS = {
   },
 };
 
-const STATUS_COLUMNS_META = {
-  'action_response.osquery.count': { type: 'number' as const },
-};
-
 let storageInstance: Storage;
 const getStorage = () => {
   if (!storageInstance) {
@@ -267,7 +263,6 @@ const UnifiedActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> 
               totalHits={totalItemCount}
               services={unifiedDataTableServices}
               consumer="osquery"
-              columnsMeta={STATUS_COLUMNS_META}
               showColumnTokens={false}
               settings={COLUMN_DISPLAY_SETTINGS}
               onSetColumns={noop}

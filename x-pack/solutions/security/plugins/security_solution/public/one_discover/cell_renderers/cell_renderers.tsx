@@ -74,10 +74,10 @@ export const getCellRendererForGivenRecord = (
             id: props.columnId,
             columnHeaderType: 'not-filtered' as ColumnHeaderType,
             type:
-              props.columnsMeta?.[props.columnId]?.type ??
-              props.dataView.getFieldByName(props.columnId)?.type,
+              props.dataSource?.getColumn(props.columnId)?.type ??
+              props.dataView?.getFieldByName(props.columnId)?.type,
           };
-        }, [props.columnId, props.dataView, props.columnsMeta]);
+        }, [props.columnId, props.dataView, props.dataSource]);
 
         return (
           <DefaultCellRenderer

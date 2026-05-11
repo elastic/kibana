@@ -11,13 +11,11 @@ import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import type {
   DataTableRecord,
   ShouldShowFieldInTableHandler,
   FormattedHit,
   EsHitRecord,
-  DataTableColumnsMeta,
 } from '../types';
 import { formatFieldValueReact } from './format_value';
 
@@ -37,20 +35,13 @@ const formattedHitCache = new WeakMap<
 
 /**
  * Returns a formatted document in form of key/value pairs where the value is a ReactNode
- * @param hit
- * @param dataView
- * @param shouldShowFieldHandler
- * @param maxEntries
- * @param fieldFormats
- * @param columnsMeta
  */
 export function formatHitReact(
   hit: DataTableRecord,
-  dataView: DataView,
+  dataView: DataView | undefined,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
-  fieldFormats: FieldFormatsStart,
-  columnsMeta: DataTableColumnsMeta | undefined
+  fieldFormats: FieldFormatsStart
 ): FormattedHit {
   const cached = formattedHitCache.get(hit.raw);
 
@@ -67,12 +58,7 @@ export function formatHitReact(
   // depending on whether the original hit had a highlight for it. That way we can ensure
   // highlighted fields are shown first in the document summary.
   for (const key of Object.keys(flattened)) {
-    // Retrieve the (display) name of the fields, if it's a mapped field on the data view
-    const field = getDataViewFieldOrCreateFromColumnMeta({
-      dataView,
-      fieldName: key,
-      columnMeta: columnsMeta?.[key],
-    });
+    const field = dataView?.fields.getByName(key);
     const displayKey = field?.displayName;
     const pairs = highlights[key] ? renderedPairs : otherPairs;
 
@@ -107,13 +93,7 @@ export function formatHitReact(
   // Now format only the values which will be shown to the user
   for (const pair of renderedPairs) {
     const key = pair[2]!;
-
-    // Format the raw value using the regular field formatters for that field
-    const field = getDataViewFieldOrCreateFromColumnMeta({
-      dataView,
-      fieldName: key,
-      columnMeta: columnsMeta?.[key],
-    });
+    const field = dataView?.fields.getByName(key);
 
     pair[1] = formatFieldValueReact({
       value: flattened[key],

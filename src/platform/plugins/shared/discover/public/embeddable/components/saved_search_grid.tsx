@@ -15,12 +15,12 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { MAX_DOC_FIELDS_DISPLAYED, SHOW_MULTIFIELDS } from '@kbn/discover-utils';
 import {
   type UnifiedDataTableProps,
-  type DataTableColumnsMeta,
   DataLoadingState as DiscoverGridLoadingState,
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
   getRowHeight,
 } from '@kbn/unified-data-table';
+import type { DataSource } from '@kbn/data-source';
 import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../components/discover_grid_flyout';
@@ -79,7 +79,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
       hit: DataTableRecord,
       displayedRows: DataTableRecord[],
       displayedColumns: string[],
-      customColumnsMeta?: DataTableColumnsMeta
+      customDataSource?: DataSource
     ) => (
       <DiscoverGridFlyout
         dataView={props.dataView}
@@ -87,7 +87,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
-        columnsMeta={customColumnsMeta}
+        dataSource={customDataSource}
         savedSearchId={props.savedSearchId}
         onFilter={props.onFilter}
         onRemoveColumn={props.onRemoveColumn}

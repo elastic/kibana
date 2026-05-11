@@ -44,7 +44,8 @@ export type ValueToStringConverter = (
 
 export type DataGridCellValueElementProps = EuiDataGridCellValueElementProps & {
   row: DataTableRecord;
-  dataView: DataView;
+  /** Present only for DSL paths. For ES|QL, narrow via `dataSource instanceof IndexPatternSource`. */
+  dataView?: DataView;
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;
   isCompressed?: boolean;
