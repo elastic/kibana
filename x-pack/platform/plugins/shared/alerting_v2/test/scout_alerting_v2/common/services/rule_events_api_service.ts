@@ -36,6 +36,12 @@ export interface RuleEventsApiService {
   getLatestEpisodeStates: (ruleId: string) => Promise<Map<string, AlertEvent>>;
   /** Polls `find(...)` until at least `min` matching events exist. */
   waitForAtLeast: (ruleId: string, min: number, filter?: RuleEventFilter) => Promise<void>;
+  /**
+   * Bulk-seed alert events directly into the `.rule-events` data stream.
+   * Used by dispatcher tests that drive the dispatcher with synthetic events
+   * instead of going through the rule executor.
+   */
+  seed: (events: AlertEvent[]) => Promise<void>;
   /** Removes every document from the `.rule-events` data stream. */
   cleanUp: () => Promise<void>;
 }
@@ -101,6 +107,18 @@ export const getRuleEventsApiService = ({
       })
       .toBeGreaterThanOrEqual(min);
 
+  const seed: RuleEventsApiService['seed'] = (events) =>
+    measurePerformanceAsync(log, 'ruleEvents.seed', async () => {
+      if (events.length === 0) return;
+      await esClient.bulk({
+        operations: events.flatMap((doc) => [
+          { create: { _index: ALERT_EVENTS_DATA_STREAM } },
+          doc,
+        ]),
+        refresh: true,
+      });
+    });
+
   const cleanUp: RuleEventsApiService['cleanUp'] = () =>
     measurePerformanceAsync(log, `dataStream[${ALERT_EVENTS_DATA_STREAM}].cleanUp`, async () => {
       await esClient.deleteByQuery(
@@ -115,5 +133,5 @@ export const getRuleEventsApiService = ({
       );
     });
 
-  return { find, getLatestEpisodeStates, waitForAtLeast, cleanUp };
+  return { find, getLatestEpisodeStates, waitForAtLeast, seed, cleanUp };
 };

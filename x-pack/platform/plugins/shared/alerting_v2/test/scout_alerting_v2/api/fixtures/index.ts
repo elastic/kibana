@@ -7,13 +7,14 @@
 
 import { apiTest as baseApiTest } from '@kbn/scout';
 import type { ApiServicesFixture, EsClient, KbnClient, ScoutLogger } from '@kbn/scout';
-import { ALERT_ACTIONS_DATA_STREAM } from '../../common/constants';
 import {
-  getDataStreamApiService,
+  getActionPoliciesApiService,
+  getAlertActionsApiService,
   getInsightsApiService,
   getRulesApiService,
   getTaskExecutionsApiService,
-  type DataStreamApiService,
+  type ActionPoliciesApiService,
+  type AlertActionsApiService,
   type InsightsApiService,
   type RulesApiService,
   type RuleEventsApiService,
@@ -26,7 +27,8 @@ import { getSourceIndexApiService } from '../../common/services/source_index_api
 export interface AlertingApiServices {
   rules: RulesApiService;
   ruleEvents: RuleEventsApiService;
-  alertActions: DataStreamApiService;
+  alertActions: AlertActionsApiService;
+  actionPolicies: ActionPoliciesApiService;
   insights: InsightsApiService;
   sourceIndex: SourceIndexApiService;
   taskExecutions: TaskExecutionsApiService;
@@ -52,11 +54,8 @@ export const buildAlertingApiServices = ({
 }): AlertingApiServices => ({
   rules: getRulesApiService({ kbnClient, log }),
   ruleEvents: getRuleEventsApiService({ esClient, log }),
-  alertActions: getDataStreamApiService({
-    esClient,
-    log,
-    dataStreamName: ALERT_ACTIONS_DATA_STREAM,
-  }),
+  alertActions: getAlertActionsApiService({ esClient, log }),
+  actionPolicies: getActionPoliciesApiService({ kbnClient, log }),
   insights: getInsightsApiService({ esClient, log }),
   sourceIndex: getSourceIndexApiService({ esClient, log }),
   taskExecutions: getTaskExecutionsApiService({ esClient, log }),
