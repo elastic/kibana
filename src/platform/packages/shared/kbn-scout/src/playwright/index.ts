@@ -50,6 +50,9 @@ export type {
   SamlAuth,
   RequestAuthFixture,
   SpaceSolutionView,
+  ApiClientFixture,
+  ApiClientOptions,
+  ApiClientResponse,
 } from './fixtures/scope/worker';
 
 // Tagging utility

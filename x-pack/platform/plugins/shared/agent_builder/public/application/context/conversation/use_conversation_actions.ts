@@ -16,13 +16,17 @@ import type {
   Conversation,
   CompactionStep,
   BackgroundAgentCompleteStep,
+  TodosStep,
 } from '@kbn/agent-builder-common';
 import {
   isToolCallStep,
   isCompactionStep,
+  findTodosStep,
   ConversationRoundStatus,
   ConversationRoundStepType,
+  carriedOverTodos,
 } from '@kbn/agent-builder-common';
+import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
@@ -41,7 +45,7 @@ export interface ConversationActions {
     userMessage: string;
     attachments?: AttachmentInput[];
     agentId: string;
-  }) => void;
+  }) => Promise<void>;
   removeOptimisticRound: () => void;
   clearLastRoundResponse: () => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
@@ -67,6 +71,7 @@ export interface ConversationActions {
   clearPendingPrompts: () => void;
   onConversationCreated: ({ title }: { title: string }) => void;
   addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => void;
+  addOrUpdateTodosStep: ({ todos }: { todos: TodoItem[] }) => void;
   addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => void;
   setCompactionStepComplete: ({
     tokenCountAfter,
@@ -109,10 +114,18 @@ export const createConversationActions = ({
 
   return {
     invalidateConversation: () => {
-      queryClient.invalidateQueries({ queryKey });
+      // Prefix-match: invalidates the per-conversation key AND the list queries so the
+      // sidebar (sorted by updated_at) reflects the bumped timestamp.
+
+      // Safe under concurrent streams because of the `enabled: false` gate in
+      // use_conversation.ts: while another conversation is streaming, its per-conversation
+      // query is inactive. The list query stays active and refetches - that's safe
+      // because the list payload is summaries only (no rounds/steps), so it can't clash with
+      // per-conversation streaming data.
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
     },
 
-    addOptimisticRound: ({
+    addOptimisticRound: async ({
       userMessage,
       attachments,
       agentId,
@@ -124,6 +137,14 @@ export const createConversationActions = ({
       if (!conversationId) {
         return;
       }
+      // Cancel any in-flight refetch on this conversation's query before mutating
+      // the cache. After a previous successful stream, the mutation's finally block
+      // calls invalidateConversation() + clearActiveStream(), which opens the
+      // useConversation gate and triggers a GET refetch. If that refetch is still
+      // in flight when we write the optimistic round, its response will overwrite
+      // our write — and the round will then be erroneously popped by
+      // removeOptimisticRound() if this stream errors.
+      await queryClient.cancelQueries({ queryKey });
       setConversation(
         produce((draft) => {
           const current = queryClient.getQueryData<Conversation>(queryKey);
@@ -132,9 +153,21 @@ export const createConversationActions = ({
             conversationAttachments: current?.attachments,
           });
 
+          const prevTodosStep = findTodosStep(draft?.rounds?.at(-1)?.steps);
+          const carryoverTodos = carriedOverTodos(prevTodosStep?.todos);
+
           const nextRound = createNewRound({
             userMessage,
             attachments: fallbackAttachments,
+            steps: carryoverTodos
+              ? [
+                  {
+                    type: ConversationRoundStepType.updateTodos,
+                    todos: carryoverTodos,
+                    carried_over: true,
+                  },
+                ]
+              : [],
           });
           if (attachmentRefs.length) {
             nextRound.input.attachment_refs = attachmentRefs;
@@ -202,6 +235,18 @@ export const createConversationActions = ({
     addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => {
       setCurrentRound((round) => {
         round.steps.push(step);
+      });
+    },
+    addOrUpdateTodosStep: ({ todos }: { todos: TodoItem[] }) => {
+      setCurrentRound((round) => {
+        const existing = findTodosStep(round.steps);
+        if (existing) {
+          existing.todos = todos;
+          existing.carried_over = false;
+        } else {
+          const step: TodosStep = { type: ConversationRoundStepType.updateTodos, todos };
+          round.steps.push(step);
+        }
       });
     },
     addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => {
