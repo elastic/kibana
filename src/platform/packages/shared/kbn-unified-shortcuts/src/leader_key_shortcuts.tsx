@@ -10,18 +10,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLiveAnnouncer,
-  EuiPanel,
-  EuiPortal,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiLiveAnnouncer } from '@elastic/eui';
 import { useShortcutsContext } from './shortcuts_provider';
+import {
+  ShortcutsOverlay,
+  ShortcutsOverlayDivider,
+  ShortcutsOverlayItem,
+} from './shortcuts_overlay';
 
 /**
  * Describes a single follow-up key that can be pressed after a leader key sequence is opened.
@@ -47,12 +42,6 @@ export interface LeaderKeyShortcutsProps {
   leaderKeyDescription: string;
   /** The follow-up shortcuts available after the leader key is pressed. */
   shortcuts: LeaderKeyShortcut[];
-}
-
-interface ShortcutDisplayProps {
-  badgeColor?: 'primary' | 'hollow';
-  badgeLabel: string;
-  description: string;
 }
 
 const editableTargetSelector = [
@@ -116,43 +105,6 @@ const getScreenReaderShortcutDescription = ({
   });
 };
 
-const LeaderKeyDivider = () => {
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    <div
-      css={css`
-        width: ${euiTheme.border.width.thin};
-        align-self: stretch;
-        background-color: ${euiTheme.colors.borderBasePlain};
-      `}
-    />
-  );
-};
-
-const ShortcutDisplay = ({
-  badgeColor = 'hollow',
-  badgeLabel,
-  description,
-}: ShortcutDisplayProps) => {
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
-      <EuiBadge color={badgeColor}>{badgeLabel}</EuiBadge>
-      <EuiText
-        size="xs"
-        css={css`
-          white-space: nowrap;
-          font-weight: ${euiTheme.font.weight.medium};
-        `}
-      >
-        {description}
-      </EuiText>
-    </EuiFlexGroup>
-  );
-};
-
 /**
  * Renders a leader-key shortcut overlay and handles the two-step key sequence used to trigger
  * the provided shortcuts.
@@ -172,7 +124,6 @@ export const LeaderKeyShortcuts = ({
   } = useShortcutsContext();
   const [isVisible, setIsVisible] = useState(false);
   const [instanceId] = useState(() => Symbol(`leader-key-shortcuts:${leaderKey}`));
-  const { euiTheme } = useEuiTheme();
   const normalizedLeaderKey = normalizeShortcutKey(leaderKey);
   const shortcutsByKey = useMemo(
     () => new Map(shortcuts.map((shortcut) => [normalizeShortcutKey(shortcut.key), shortcut])),
@@ -201,6 +152,21 @@ export const LeaderKeyShortcuts = ({
   }, [leaderKeyDescription, shortcuts]);
   const [liveAnnouncement, setLiveAnnouncement] = useState<string | undefined>(
     () => screenReaderHint
+  );
+  const overlayItems = useMemo(
+    () => [
+      <ShortcutsOverlayItem
+        key="leader"
+        badgeColor="primary"
+        badgeLabel={leaderKey.toUpperCase()}
+        description={leaderKeyDescription}
+      />,
+      <ShortcutsOverlayDivider key="leader-divider" />,
+      ...shortcuts.map(({ key, label, description }) => (
+        <ShortcutsOverlayItem key={key} badgeLabel={label} description={description} />
+      )),
+    ],
+    [leaderKey, leaderKeyDescription, shortcuts]
   );
   const openShortcuts = useCallback(() => {
     claimActiveLeaderKeyInstance(instanceId);
@@ -279,52 +245,7 @@ export const LeaderKeyShortcuts = ({
   return (
     <>
       {liveAnnouncement ? <EuiLiveAnnouncer>{liveAnnouncement}</EuiLiveAnnouncer> : null}
-
-      <EuiPortal>
-        <EuiPanel
-          aria-hidden="true"
-          paddingSize="m"
-          css={css`
-            position: fixed;
-            right: ${euiTheme.size.l};
-            bottom: ${euiTheme.size.l};
-            z-index: ${euiTheme.levels.toast};
-            pointer-events: none;
-            max-width: calc(100vw - ${euiTheme.size.l} * 2);
-            opacity: ${isVisible ? 1 : 0};
-            transform: translateY(${isVisible ? '0' : euiTheme.size.s});
-            transition: opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
-              transform ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
-            will-change: opacity, transform;
-          `}
-        >
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-            <EuiFlexItem grow={false}>
-              <ShortcutDisplay
-                badgeColor="primary"
-                badgeLabel={leaderKey.toUpperCase()}
-                description={leaderKeyDescription}
-              />
-            </EuiFlexItem>
-
-            <LeaderKeyDivider />
-
-            {shortcuts.map((shortcut) => (
-              <EuiFlexItem grow={false} key={shortcut.key}>
-                <ShortcutDisplay badgeLabel={shortcut.label} description={shortcut.description} />
-              </EuiFlexItem>
-            ))}
-
-            <LeaderKeyDivider />
-
-            <EuiBadge>
-              {i18n.translate('unifiedShortcuts.leaderKeyShortcuts.escapeLabel', {
-                defaultMessage: 'esc',
-              })}
-            </EuiBadge>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiPortal>
+      <ShortcutsOverlay isVisible={isVisible} items={overlayItems} />
     </>
   );
 };
