@@ -809,7 +809,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.registerAgentBuilderAttachmentsAndTools(plugins, core, this.logger);
 
     if (plugins.workflowsExtensions) {
-      registerWorkflowSteps(plugins.workflowsExtensions, core);
+      registerWorkflowSteps(plugins.workflowsExtensions, core, ruleDataClient);
     }
 
     setupAlertsCapabilitiesSwitcher({

@@ -43,4 +43,38 @@ export const registerWorkflowSteps = (
       (m) => m.buildAlertEntityGraphStepDefinition
     );
   });
+
+  workflowsExtensions.registerStepDefinition(async () => {
+    return import('./set_alert_status_step/set_alert_status_step').then(
+      (m) => m.setAlertStatusStepDefinition
+    );
+  });
+
+  workflowsExtensions.registerStepDefinition(async () => {
+    return import('./set_attack_status_step/set_attack_status_step').then(
+      (m) => m.setAttackStatusStepDefinition
+    );
+  });
+
+  workflowsExtensions.registerStepDefinition(async () => {
+    return import('./assign_alert_step/assign_alert_step').then((m) => m.assignAlertStepDefinition);
+  });
+
+  workflowsExtensions.registerStepDefinition(async () => {
+    return import('./assign_attack_step/assign_attack_step').then(
+      (m) => m.assignAttackStepDefinition
+    );
+  });
+
+  workflowsExtensions.registerStepDefinition(async () => {
+    return import('./set_alert_tags_step/set_alert_tags_step').then(
+      (m) => m.setAlertTagsStepDefinition
+    );
+  });
+
+  workflowsExtensions.registerStepDefinition(async () => {
+    return import('./set_attack_tags_step/set_attack_tags_step').then(
+      (m) => m.setAttackTagsStepDefinition
+    );
+  });
 };
