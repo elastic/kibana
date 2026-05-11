@@ -52,8 +52,8 @@ If you want to allow anonymous authentication in Kibana, these settings are supp
 
 #### Version 8.0+ [ec_vis_supported_versions_8_0_0]
 
-`vis_type_timelion.enable`
-:   For 8.0 version and later, set to `false` to disable Timelion vizualizations. **Default: `true`**
+`vis_type_timelion.enabled`
+:   For 8.0 version and later, set to `false` to disable Timelion visualizations. **Default: `true`**
 
 #### Supported versions before 8.0.0 [ec_vis_supported_versions_before_8_0_0]
 
@@ -65,8 +65,8 @@ If you want to allow anonymous authentication in Kibana, these settings are supp
 
 #### Version 7.7+ [ec_vis_supported_versions_7_7]
 
-`vis_type_vega.enable`
-:   For 7.7 version and later, set to `false` to disable Vega vizualizations. **Default: `true`**
+`vis_type_vega.enabled`
+:   For 7.7 version and later, set to `false` to disable Vega visualizations. **Default: `true`**
 
 #### Version 7.8+ [ec_vis_supported_versions_7_8]
 
@@ -103,14 +103,17 @@ stack: ga 9.4
 stack: ga 9.3
 ```
 
-`xpack.actions.email.maximum_body_length`
-:    The maximum length of an email body in bytes.  Values longer than this length will be truncated.  The default is 25MB, the maximum is 25MB.
-
-`xpack.fleet.integrationRollbackTTL`
-:   Configure the time-to-live (TTL) for integration rollback availability. This setting controls how long the rollback option remains available after an integration is upgraded. The value must be specified in a duration format (for example, `7d`, `14d`, `168h`, or `1w`). Defaults to `7d` (7 days). For more information, refer to [Roll back an integration](docs-content://reference/fleet/roll-back-integration.md).
-
 `xpack.reporting.csv.maxRows`
 :    The maximum number of rows in a CSV report. Reports longer than maximum limit will be truncated. The default is 10,000. The minimum is 1.
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.max_revisions`
+: The maximum number of revisions to maintain for a Fleet agent policy. Defaults to `10`.
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.interval`
+: The time interval for performing cleanups of Fleet agent policy revisions. The value must be specified in a duration format (for example, `30m`, `1h`, `1d`). Defaults to `1h` (1 hour).
+
+`xpack.fleet.fleetPolicyRevisionsCleanup.max_policies_per_run`
+: The maximum number of Fleet agent policies to clean up revisions from per interval. Defaults to `100`.
 
 ### Version 9.2+ [ec_version_9_2]
 ```{applies_to}
@@ -154,15 +157,6 @@ stack: ga 9.1
 
 `xpack.fleet.autoUpgrades.retryDelays`:
 :   Configure the retry delays of the automatic upgrade task for {{fleet}}-managed {{agents}}. The array's length indicates the maximum number of retries. Defaults to `['30m', '1h', '2h', '4h', '8h', '16h', '24h']`.
-
-`xpack.fleet.fleetPolicyRevisionsCleanup.max_revisions`
-: The maximum number of revisions to maintain for a Fleet agent policy. Defaults to `10`.
-
-`xpack.fleet.fleetPolicyRevisionsCleanup.interval`
-: The time interval for performing cleanups of Fleet agent policy revisions. The value must be specified in a duration format (for example, `30m`, `1h`, `1d`). Defaults to `1h` (1 hour).
-
-`xpack.fleet.fleetPolicyRevisionsCleanup.max_policies_per_run`
-: The maximum number of Fleet agent policies to clean up revisions from per interval. Defaults to `100`.
 
 ### Version 8.18+ [ec_version_8_18]
 
@@ -528,11 +522,12 @@ Each method has its own unique limitations which are important to understand.
 
 
 `xpack.reporting.csv.scroll.duration`
-:   Amount of [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) allowed before {{kib}} cleans the scroll context during a CSV export. Valid option is either `auto` or [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units), Defaults to `30s`.
+:   Amount of [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) allowed before {{kib}} cleans the scroll context during a CSV export. Valid option is either `auto` or [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units). Defaults to `120s`.
 
 ::::{note}
-Support for the The option `auto` was included here, when the config value is set to `auto` the scroll context will be preserved for as long as is possible, before the report task is terminated due to the limits of `xpack.reporting.queue.timeout`.
+The default value was increased from `30s` to `120s` in version 9.0.
 
+When the config value is set to `auto`, the scroll context will be preserved for as long as possible, before the report task is terminated due to the limits of `xpack.reporting.queue.timeout`.
 ::::
 
 
@@ -592,17 +587,6 @@ Support for the The option `auto` was included here, when the config value is se
 
 Defaults to `true`.
 
-`xpack.reporting.csv.scroll.duration`
-:   Amount of [time](elasticsearch://reference/elasticsearch/rest-apis/api-conventions.md#time-units) allowed before {{kib}} cleans the scroll context during a CSV export.
-
-Defaults to `30s` (30 seconds).
-
-::::{note}
-If search latency in {{es}} is sufficiently high, such as if you are using cross-cluster search or frozen tiers, you may need to increase the setting.
-
-::::
-
-
 `xpack.reporting.csv.scroll.size`
 :   Sets the number of documents retrieved from {{es}} for each scroll iteration during Kibana CSV export. Defaults to `500`.
 
@@ -610,7 +594,7 @@ If search latency in {{es}} is sufficiently high, such as if you are using cross
 :   Enables a check that warns you when there’s a potential formula included in the output (=, -, +, and @ chars). See OWASP: [https://www.owasp.org/index.php/CSV_Injection](https://www.owasp.org/index.php/CSV_Injection). Defaults to `true`.
 
 `xpack.reporting.csv.escapeFormulaValues`
-:   Escapes formula values in cells with a `'`. See OWASP: [https://www.owasp.org/index.php/CSV_Injection](https://www.owasp.org/index.php/CSV_Injection). Defaults to `true`.
+:   Escapes formula values in cells with a `'`. See OWASP: [https://www.owasp.org/index.php/CSV_Injection](https://www.owasp.org/index.php/CSV_Injection). Defaults to `false`.
 
 `xpack.reporting.csv.useByteOrderMarkEncoding`
 :   Adds a byte order mark (`\ufeff`) at the beginning of the CSV file. Defaults to `false`.
@@ -715,7 +699,7 @@ The following APM settings are supported in Kibana:
 :   Maximum number of unique transaction combinations sampled for generating service map focused on a specific service. Defaults to `100`.
 
 `xpack.apm.serviceMapFingerprintGlobalBucketSize`
-:   Maximum number of unique transaction combinations sampled for generating the global service map. Defaults to `100`.
+:   Maximum number of unique transaction combinations sampled for generating the global service map. Defaults to `1000`.
 
 `xpack.apm.serviceMapEnabled`
 :   Set to `false` to disable service maps. Defaults to `true`.
@@ -736,25 +720,25 @@ The following APM settings are supported in Kibana:
 :   Sets a `fixed_interval` for date histograms in metrics aggregations. Defaults to `30`.
 
 `xpack.apm.agent.migrations.enabled`
-:   Set to `false` to disable cloud APM migrations. Defaults to `true`.
+:   Set to `true` to enable cloud APM migrations. Defaults to `false`.
 
 `xpack.apm.indices.span`
-:   Matcher for indices containing span documents. Defaults to apm-*.
+:   Matcher for indices containing span documents. Defaults to `traces-apm*,apm-*,traces-*.otel-*`.
 
 `xpack.apm.indices.error`
-:   Matcher for indices containing error documents. Defaults to apm-*.
+:   Matcher for indices containing error documents. Defaults to `logs-apm*,apm-*,logs-*.otel-*`.
 
 `xpack.apm.indices.transaction`
-:   Matcher for indices containing transaction documents. Defaults to apm-*.
+:   Matcher for indices containing transaction documents. Defaults to `traces-apm*,apm-*,traces-*.otel-*`.
 
 `xpack.apm.indices.onboarding`
-:   Matcher for all onboarding indices. Defaults to apm-*.
+:   Matcher for all onboarding indices. Defaults to `apm-*`.
 
 `xpack.apm.indices.metric`
-:   Matcher for all metrics indices. Defaults to apm-*.
+:   Matcher for all metrics indices. Defaults to `metrics-apm*,apm-*,metrics-*.otel-*`.
 
 `xpack.apm.indices.sourcemap`
-:   Matcher for all source map indices. Defaults to apm-*.
+:   Matcher for all source map indices. Defaults to `apm-*`.
 
 `xpack.apm.maxSuggestions`
 :   Maximum number of suggestions fetched in autocomplete selection boxes. Defaults to `100`
@@ -765,7 +749,7 @@ The following APM settings are supported in Kibana:
 `xpack.apm.ui.maxTraceItems`
 :   Maximum number of child items displayed when viewing trace details.
 
-    Defaults to `1000`.  Any positive value is valid. To learn more, check [APM settings in Kibana](/reference/configuration-reference/apm-settings.md).
+    Defaults to `5000`.  Any positive value is valid. To learn more, check [APM settings in Kibana](/reference/configuration-reference/apm-settings.md).
 
 
 `xpack.apm.ui.enabled`
