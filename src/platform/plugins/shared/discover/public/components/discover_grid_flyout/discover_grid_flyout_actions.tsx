@@ -147,7 +147,7 @@ function FlyoutActions({
               />
             </EuiToolTip>
           ) : (
-            <EuiToolTip content={action.helpText} delay="long">
+            <EuiToolTip content={action.helpText}>
               {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiButtonEmpty
                 size="s"

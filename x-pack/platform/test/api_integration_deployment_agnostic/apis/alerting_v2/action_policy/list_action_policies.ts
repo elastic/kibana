@@ -223,12 +223,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(response.body.total).to.be(3);
         });
 
-        it('should filter by destination type with no matches', async () => {
+        it('should reject unknown destination type', async () => {
           const response = await listPolicies(roleAuthc, { destinationType: 'email' });
 
-          expect(response.status).to.be(200);
-          expect(response.body.total).to.be(0);
-          expect(response.body.items.length).to.be(0);
+          expect(response.status).to.be(400);
         });
 
         it('should filter by createdBy', async () => {
