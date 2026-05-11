@@ -286,6 +286,24 @@ describe('AlertFlyoutHeader', () => {
     );
   });
 
+  it('renders nothing while services or store are not yet resolved', () => {
+    const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
+    const history = createMemoryHistory({ initialEntries: ['/discover'] });
+
+    const { container } = render(
+      <Router history={history}>
+        <AlertFlyoutHeader
+          hit={hit}
+          servicesPromise={new Promise(() => {})}
+          storePromise={new Promise(() => {})}
+          onAlertUpdated={jest.fn()}
+        />
+      </Router>
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
   it('shows a callout when _id or _index are missing from hit.raw', async () => {
     const hit = { id: '1', raw: {}, flattened: {} } as unknown as DataTableRecord;
     const store = createStore(() => ({}));
@@ -335,6 +353,39 @@ describe('AlertFlyoutHeader', () => {
       expect(
         screen.getByText(
           'This event originates from a remote cluster. Some features may not be available.'
+        )
+      ).toBeInTheDocument();
+    });
+  });
+
+  it('shows linked project callout text for remote docs in serverless', async () => {
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'remote-cluster:logs-system-default' },
+      flattened: {},
+    } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+    const history = createMemoryHistory({ initialEntries: ['/discover'] });
+    const serverlessServicesMock = {
+      ...servicesMock,
+      cloud: { isServerlessEnabled: true },
+    } as unknown as StartServices;
+
+    render(
+      <Router history={history}>
+        <AlertFlyoutHeader
+          hit={hit}
+          servicesPromise={Promise.resolve(serverlessServicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
+        />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          'This event originates from a linked project. Some features may not be available.'
         )
       ).toBeInTheDocument();
     });
