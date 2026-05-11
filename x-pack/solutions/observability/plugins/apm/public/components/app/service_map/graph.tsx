@@ -51,8 +51,7 @@ import {
   DEFAULT_SERVICE_MAP_VIEW_FILTERS,
   type ServiceMapViewFilters,
 } from './apply_service_map_visibility';
-import { applyServiceMapRelayoutForFilteredView } from './relayout_service_map_for_filters';
-import { computeServiceMapFilterOptionCounts } from './service_map_filter_option_counts';
+import { useServiceMapFilterState } from './use_service_map_filter_state';
 import { focusServiceMapFindInput } from './service_map_find_in_page';
 import { ServiceMapSearchProvider } from '../../shared/service_map/service_map_search_context';
 import { ServiceMapOptionsPanel, type ServiceMapOrientation } from './service_map_options_panel';
@@ -169,22 +168,14 @@ function GraphInner({
     [initialNodes, initialEdges, mapOrientation, onDagreLayoutFailure]
   );
 
-  const filterOptionCounts = useMemo(
-    () => computeServiceMapFilterOptionCounts(initialNodes),
-    [initialNodes]
-  );
-
-  const { nodes: nodesAfterFilters, edges: edgesAfterFilters } = useMemo(
-    () =>
-      applyServiceMapRelayoutForFilteredView(
-        layoutedNodes,
-        initialEdges,
-        viewFilters,
-        mapOrientation,
-        onDagreLayoutFailure
-      ),
-    [layoutedNodes, initialEdges, viewFilters, mapOrientation, onDagreLayoutFailure]
-  );
+  const { filterOptionCounts, nodesAfterFilters, edgesAfterFilters } = useServiceMapFilterState({
+    layoutedNodes,
+    initialNodes,
+    initialEdges,
+    viewFilters,
+    mapOrientation,
+    onDagreLayoutFailure,
+  });
 
   const nodesWithContextHighlight = useMemo(
     () =>
@@ -535,6 +526,10 @@ function GraphInner({
               <ServiceMapOptionsPanel
                 nodes={nodesAfterFilters}
                 filterOptionCounts={filterOptionCounts}
+                connectionFilter={viewFilters.connectionFilter}
+                onConnectionFilterChange={(next) =>
+                  setViewFilters((prev) => ({ ...prev, connectionFilter: next }))
+                }
                 alertStatusFilter={viewFilters.alertStatusFilter}
                 onAlertStatusFilterChange={(next) =>
                   setViewFilters((prev) => ({ ...prev, alertStatusFilter: next }))

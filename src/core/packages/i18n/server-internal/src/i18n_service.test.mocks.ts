@@ -8,8 +8,12 @@
  */
 
 export const getAllKibanaTranslationFilesMock = jest.fn();
+export const groupFilesByLocaleMock = jest.fn().mockReturnValue({});
+export const computeLocaleFileHashMock = jest.fn().mockResolvedValue('mock-file-hash');
 jest.doMock('./get_kibana_translation_files', () => ({
   getAllKibanaTranslationFiles: getAllKibanaTranslationFilesMock,
+  groupFilesByLocale: groupFilesByLocaleMock,
+  computeLocaleFileHash: computeLocaleFileHashMock,
 }));
 
 export const initTranslationsMock = jest.fn();
