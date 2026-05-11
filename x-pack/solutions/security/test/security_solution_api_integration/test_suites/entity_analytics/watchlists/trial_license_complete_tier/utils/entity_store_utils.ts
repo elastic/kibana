@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/common';
 import expect from 'expect';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -14,13 +15,42 @@ export const EntityStoreUtils = (getService: FtrProviderContext['getService']) =
   const retry = getService('retry');
   const es = getService('es');
 
+  /**
+   * UI settings are persisted via saved objects with refresh: false. Under load, a follow-up
+   * API request can read Kibana config before Elasticsearch makes the write visible, so the
+   * entity store middleware still sees V2 disabled (403). Wait until the setting is observable.
+   */
+  const waitUntilV2SettingVisible = async () => {
+    await retry.waitForWithTimeout(
+      `${FF_ENABLE_ENTITY_STORE_V2} visible in ui settings`,
+      30_000,
+      async () => {
+        const res = await supertest
+          .get('/internal/kibana/settings')
+          .set('kbn-xsrf', 'true')
+          .set('x-elastic-internal-origin', 'Kibana')
+          .expect(200);
+
+        const userValue = res.body?.settings?.[FF_ENABLE_ENTITY_STORE_V2]?.userValue;
+        if (userValue !== true) {
+          throw new Error(
+            `Expected ${FF_ENABLE_ENTITY_STORE_V2} userValue true, got ${JSON.stringify(userValue)}`
+          );
+        }
+        return true;
+      }
+    );
+  };
+
   const enableV2Setting = async () => {
     await supertest
       .post('/internal/kibana/settings')
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
-      .send({ changes: { 'securitySolution:entityStoreEnableV2': true } })
+      .send({ changes: { [FF_ENABLE_ENTITY_STORE_V2]: true } })
       .expect(200);
+
+    await waitUntilV2SettingVisible();
   };
 
   const disableV2Setting = async () => {
@@ -28,7 +58,7 @@ export const EntityStoreUtils = (getService: FtrProviderContext['getService']) =
       .post('/internal/kibana/settings')
       .set('kbn-xsrf', 'true')
       .set('x-elastic-internal-origin', 'Kibana')
-      .send({ changes: { 'securitySolution:entityStoreEnableV2': null } })
+      .send({ changes: { [FF_ENABLE_ENTITY_STORE_V2]: null } })
       .expect(200);
   };
 
