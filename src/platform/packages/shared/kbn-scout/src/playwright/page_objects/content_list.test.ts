@@ -18,18 +18,27 @@ describe('buildContentListSearch', () => {
     expect(buildContentListSearch({ q: 'Alpha' })).toBe('?q=Alpha');
   });
 
-  it('serializes the sort param with URL-encoded `:`', () => {
-    expect(buildContentListSearch({ sort: 'title:desc' })).toBe('?sort=title%3Adesc');
+  it('keeps `:` in the sort param unencoded to mirror the provider URL shape', () => {
+    expect(buildContentListSearch({ sort: 'title:desc' })).toBe('?sort=title:desc');
   });
 
   it('serializes both `q` and `sort` in a stable order', () => {
     expect(buildContentListSearch({ q: 'Alpha', sort: 'title:desc' })).toBe(
-      '?q=Alpha&sort=title%3Adesc'
+      '?q=Alpha&sort=title:desc'
     );
   });
 
   it('preserves an explicitly empty `q` value', () => {
     expect(buildContentListSearch({ q: '' })).toBe('?q=');
+  });
+
+  it('encodes spaces in `q` as `%20`', () => {
+    expect(buildContentListSearch({ q: 'hello world' })).toBe('?q=hello%20world');
+  });
+
+  it('keeps RFC 3986 sub-delims in `q` readable', () => {
+    // The Content List provider preserves these characters; the regex must too.
+    expect(buildContentListSearch({ q: 'foo,bar(baz)!' })).toBe('?q=foo,bar(baz)!');
   });
 });
 
@@ -47,7 +56,7 @@ describe('buildContentListUrlRegex', () => {
 
   it('matches a hash route with both `q` and `sort` params', () => {
     const regex = buildContentListUrlRegex('#/home', { q: 'Alpha', sort: 'title:desc' });
-    expect('http://localhost:5601/app/graph#/home?q=Alpha&sort=title%3Adesc').toMatch(regex);
+    expect('http://localhost:5601/app/graph#/home?q=Alpha&sort=title:desc').toMatch(regex);
     expect('http://localhost:5601/app/graph#/home?q=Alpha').not.toMatch(regex);
   });
 

@@ -100,7 +100,7 @@ describe('url_codec', () => {
           q: 'new',
           sort: 'updatedAt:desc',
         })
-      ).toBe('?q=new&sort=updatedAt%3Adesc&z=last');
+      ).toBe('?q=new&sort=updatedAt:desc&z=last');
     });
 
     it('removes consumed legacy params', () => {
@@ -111,6 +111,27 @@ describe('url_codec', () => {
           ['s', 'sort', 'sortdir']
         )
       ).toBe('?q=dashboard&space=default');
+    });
+
+    it('preserves the readable form of Rison-style unrelated params', () => {
+      // Mirrors the global state (`_g`) value found on dashboard URLs;
+      // re-encoding should leave parens, colons, commas, slashes, and `!`
+      // intact rather than percent-encoding them.
+      const rison =
+        '(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-7d/d,to:now))';
+      expect(mergeAndStringify(`?_g=${rison}`, { q: 'dashboard' })).toBe(
+        `?_g=${rison}&q=dashboard`
+      );
+    });
+
+    it('encodes characters that delimit query syntax even in unrelated params', () => {
+      // `&`, `=`, `+`, `#`, and `?` would break the resulting URL if left
+      // unencoded inside a value — keep them percent-encoded.
+      expect(mergeAndStringify('', { foo: 'a&b=c+d#e?f' })).toBe('?foo=a%26b%3Dc%2Bd%23e%3Ff');
+    });
+
+    it('keeps spaces percent-encoded as %20 in `q`', () => {
+      expect(mergeAndStringify('', { q: 'hello world' })).toBe('?q=hello%20world');
     });
 
     it('derives stable sorting config from a primitive key', () => {

@@ -76,7 +76,7 @@ describe('ContentListUrlSync', () => {
       expect(result.current.state.sort).toEqual({ field: 'updatedAt', direction: 'desc' });
     });
 
-    expect(history.location.search).toBe('?q=dashboard&sort=updatedAt%3Adesc');
+    expect(history.location.search).toBe('?q=dashboard&sort=updatedAt:desc');
   });
 
   it('does not overwrite URL params with defaults before hydration state flushes', async () => {
@@ -95,7 +95,7 @@ describe('ContentListUrlSync', () => {
       expect(result.current.state.sort).toEqual({ field: 'updatedAt', direction: 'desc' });
     });
 
-    expect(history.location.search).toBe('?q=dashboard&sort=updatedAt%3Adesc');
+    expect(history.location.search).toBe('?q=dashboard&sort=updatedAt:desc');
     expect(replaceSpy).not.toHaveBeenCalledWith({ search: '' });
     expect(pushSpy).not.toHaveBeenCalled();
   });
@@ -186,7 +186,7 @@ describe('ContentListUrlSync', () => {
       expect(result.current.state.sort).toEqual({ field: 'updatedAt', direction: 'desc' });
     });
 
-    expect(history.location.search).toBe('?sort=updatedAt%3Adesc');
+    expect(history.location.search).toBe('?sort=updatedAt:desc');
   });
 
   it('pushes the first query entry, replaces query edits, and pushes sort changes', async () => {
@@ -236,10 +236,10 @@ describe('ContentListUrlSync', () => {
     });
 
     await waitFor(() => {
-      expect(history.location.search).toBe('?q=dashboard%20updated&sort=updatedAt%3Adesc');
+      expect(history.location.search).toBe('?q=dashboard%20updated&sort=updatedAt:desc');
     });
     expect(pushSpy).toHaveBeenLastCalledWith({
-      search: '?q=dashboard%20updated&sort=updatedAt%3Adesc',
+      search: '?q=dashboard%20updated&sort=updatedAt:desc',
     });
   });
 
@@ -303,7 +303,7 @@ describe('ContentListUrlSync', () => {
     });
 
     await waitFor(() => {
-      expect(history.location.search).toBe('?sort=updatedAt%3Adesc');
+      expect(history.location.search).toBe('?sort=updatedAt:desc');
     });
 
     act(() => {
@@ -314,7 +314,7 @@ describe('ContentListUrlSync', () => {
     });
 
     await waitFor(() => {
-      expect(history.location.search).toBe('?q=dashboard&sort=updatedAt%3Adesc');
+      expect(history.location.search).toBe('?q=dashboard&sort=updatedAt:desc');
     });
 
     act(() => {
@@ -322,7 +322,7 @@ describe('ContentListUrlSync', () => {
     });
 
     await waitFor(() => {
-      expect(history.location.search).toBe('?sort=updatedAt%3Adesc');
+      expect(history.location.search).toBe('?sort=updatedAt:desc');
       expect(result.current.state.queryText).toBe('');
       expect(result.current.state.sort).toEqual({ field: 'updatedAt', direction: 'desc' });
     });
@@ -332,7 +332,7 @@ describe('ContentListUrlSync', () => {
     });
 
     await waitFor(() => {
-      expect(history.location.search).toBe('?q=dashboard&sort=updatedAt%3Adesc');
+      expect(history.location.search).toBe('?q=dashboard&sort=updatedAt:desc');
       expect(result.current.state.queryText).toBe('dashboard');
       expect(result.current.state.sort).toEqual({ field: 'updatedAt', direction: 'desc' });
     });
@@ -372,10 +372,10 @@ describe('ContentListUrlSync', () => {
     });
 
     await waitFor(() => {
-      expect(history.location.search).toBe('?q=dashboard%20tag%3Aproduction');
+      expect(history.location.search).toBe('?q=dashboard%20tag:production');
     });
     expect(pushSpy).toHaveBeenLastCalledWith({
-      search: '?q=dashboard%20tag%3Aproduction',
+      search: '?q=dashboard%20tag:production',
     });
 
     act(() => {
@@ -392,7 +392,7 @@ describe('ContentListUrlSync', () => {
     });
 
     await waitFor(() => {
-      expect(history.location.search).toBe('?q=dashboard%20tag%3Aproduction');
+      expect(history.location.search).toBe('?q=dashboard%20tag:production');
       expect(result.current.state.queryText).toBe('dashboard tag:production');
     });
   });
@@ -416,7 +416,7 @@ describe('ContentListUrlSync', () => {
     });
 
     await waitFor(() => {
-      expect(history.location.search).toBe('?q=dashboard&sort=updatedAt%3Adesc');
+      expect(history.location.search).toBe('?q=dashboard&sort=updatedAt:desc');
     });
 
     act(() => {

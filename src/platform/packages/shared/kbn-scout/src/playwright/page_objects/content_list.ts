@@ -27,24 +27,46 @@ export interface ContentListUrlState {
 }
 
 /**
+ * RFC 3986–friendly encoder used to mirror the form `kbn-content-list-provider`
+ * writes to the URL — `:`, `,`, `(`, `)`, etc. stay readable so the regex built
+ * by {@link buildContentListUrlRegex} matches what the provider actually
+ * produces.
+ */
+const encodeContentListValue = (value: string): string =>
+  encodeURIComponent(value)
+    .replace(/%21/g, '!')
+    .replace(/%24/g, '$')
+    .replace(/%27/g, "'")
+    .replace(/%28/g, '(')
+    .replace(/%29/g, ')')
+    .replace(/%2A/g, '*')
+    .replace(/%2C/g, ',')
+    .replace(/%2F/g, '/')
+    .replace(/%3A/g, ':')
+    .replace(/%3B/g, ';')
+    .replace(/%40/g, '@');
+
+/**
  * Builds the URL search string (including a leading `?`) for a Content List
  * page given a partial `ContentListUrlState`. Returns an empty string when no
  * params are set, so it can be appended unconditionally to a hash route.
  *
+ * Mirrors `kbn-content-list-provider`'s RFC 3986–friendly encoding so colons,
+ * commas, parens, etc. stay readable.
+ *
  * @example
  *   buildContentListSearch({ q: 'Alpha', sort: 'title:desc' })
- *   // => '?q=Alpha&sort=title%3Adesc'
+ *   // => '?q=Alpha&sort=title:desc'
  */
 export const buildContentListSearch = (params: ContentListUrlState): string => {
-  const search = new URLSearchParams();
+  const parts: string[] = [];
   if (params.q !== undefined) {
-    search.set('q', params.q);
+    parts.push(`q=${encodeContentListValue(params.q)}`);
   }
   if (params.sort !== undefined) {
-    search.set('sort', params.sort);
+    parts.push(`sort=${encodeContentListValue(params.sort)}`);
   }
-  const serialized = search.toString();
-  return serialized ? `?${serialized}` : '';
+  return parts.length ? `?${parts.join('&')}` : '';
 };
 
 /**

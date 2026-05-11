@@ -183,14 +183,61 @@ export const parseSearch = (search: string): ParsedQuery =>
   queryString.parse(search) as ParsedQuery;
 
 /**
- * Stringifies the search parameters into a URL search string.
+ * Percent-encode a query value while leaving characters that RFC 3986 permits
+ * unencoded in the query component as-is. Less aggressive than
+ * `encodeURIComponent` (and than `query-string`'s default `strict: true`
+ * mode), so Kibana URL conventions like Rison-encoded `_g` / `_a` values
+ * round-trip without gratuitous percent-encoding.
+ *
+ * Per RFC 3986:
+ *   `query      = *( pchar / "/" / "?" )`
+ *   `pchar      = unreserved / pct-encoded / sub-delims / ":" / "@"`
+ *   `sub-delims = "!" / "$" / "&" / "'" / "(" / ")" / "*" / "+" / "," / ";" / "="`
+ *
+ * `&` and `=` stay encoded because they delimit key-value pairs, and `+`
+ * stays encoded so a literal `+` is never misread as a space.
+ */
+const encodeQueryValue = (value: string): string =>
+  encodeURIComponent(value)
+    .replace(/%21/g, '!')
+    .replace(/%24/g, '$')
+    .replace(/%27/g, "'")
+    .replace(/%28/g, '(')
+    .replace(/%29/g, ')')
+    .replace(/%2A/g, '*')
+    .replace(/%2C/g, ',')
+    .replace(/%2F/g, '/')
+    .replace(/%3A/g, ':')
+    .replace(/%3B/g, ';')
+    .replace(/%40/g, '@');
+
+/**
+ * Stringifies the search parameters into a URL search string. Uses an
+ * RFC 3986–friendly encoder (see {@link encodeQueryValue}) so unrelated
+ * params we pass through verbatim (e.g. Rison-encoded `_g` / `_a`) keep
+ * their readable form after a URL rewrite.
  *
  * @param params - The search parameters.
  * @returns The URL search string.
  */
 export const stringifySearch = (params: ParsedQuery): string => {
-  const search = queryString.stringify(params, {
+  const encoded: Record<string, string | string[] | null> = {};
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined) {
+      continue;
+    }
+    if (value === null) {
+      encoded[key] = null;
+      continue;
+    }
+    encoded[key] = Array.isArray(value)
+      ? value.map((entry) => (entry === null ? '' : encodeQueryValue(entry)))
+      : encodeQueryValue(value);
+  }
+
+  const search = queryString.stringify(encoded, {
     sort: (left, right) => left.localeCompare(right),
+    encode: false,
   });
   return search ? `?${search}` : '';
 };

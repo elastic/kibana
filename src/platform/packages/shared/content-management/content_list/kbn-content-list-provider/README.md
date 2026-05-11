@@ -136,10 +136,10 @@ When `ContentListProvider` is rendered inside a React Router context, `queryText
 
 | State | Param | Shape | Example |
 |-------|-------|-------|---------|
-| `queryText` | `q` | full query string | `?q=createdBy%3Ajane%20is%3Astarred%20dashboard` |
-| `sort` | `sort` | `field:direction` | `?sort=updatedAt%3Adesc` |
+| `queryText` | `q` | full query string | `?q=createdBy:jane%20is:starred%20dashboard` |
+| `sort` | `sort` | `field:direction` | `?sort=updatedAt:desc` |
 
-Empty query text removes `q`. The resolved initial sort removes `sort`, keeping default URLs compact. Unrelated host-app query params are preserved.
+Empty query text removes `q`. The resolved initial sort removes `sort`, keeping default URLs compact. Unrelated host-app query params are preserved verbatim — values are written using an RFC 3986–friendly encoder, so Rison-style params (e.g. `_g`, `_a`) keep their readable form (parens, colons, commas, `!`, etc.) instead of being percent-encoded on every rewrite.
 
 The first search edit that adds or removes `q` uses `history.push`; additional typing edits while `q` remains present use `history.replace`. Committed filter changes and sort changes use `history.push`, so browser Back/Forward can move between filter/sort states without one entry per keystroke.
 
