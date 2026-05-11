@@ -17,7 +17,6 @@
     "@kbn/es-query",
     "@kbn/i18n-react",
     "@kbn/cps-common",
-    "@kbn/core-spaces-common",
     "@kbn/core-security-server",
   ],
   "exclude": [
