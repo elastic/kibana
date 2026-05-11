@@ -50,7 +50,6 @@ export class SavedObjectsClientFactory {
   protected createFakeHttpRequest(spaceId: string = DEFAULT_SPACE_ID): KibanaRequest {
     return kibanaRequestFactory({
       headers: {},
-      path: '/',
       route: { settings: {} },
       url: { href: {}, hash: '' } as URL,
       raw: { req: { url: '/' } } as any,

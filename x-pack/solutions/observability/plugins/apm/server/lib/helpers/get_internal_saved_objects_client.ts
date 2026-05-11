@@ -16,7 +16,6 @@ export async function getInternalSavedObjectsClient(coreStart: CoreStart) {
 export function getInternalSavedObjectsClientForSpaceId(coreStart: CoreStart, spaceId?: string) {
   const request = kibanaRequestFactory({
     headers: {},
-    path: '/',
     route: { settings: {} },
     url: { href: '', hash: '' } as URL,
     raw: { req: { url: '/' } } as any,

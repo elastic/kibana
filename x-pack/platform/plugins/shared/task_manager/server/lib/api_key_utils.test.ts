@@ -122,7 +122,6 @@ describe('api_key_utils', () => {
         headers: {
           authorization: `ApiKey ${mockApiKey}`,
         },
-        path: '/',
       };
 
       const fakeRequest = kibanaRequestFactory(fakeRawRequest);
@@ -185,7 +184,6 @@ describe('api_key_utils', () => {
         headers: {
           bad_authorization: `ApiKey ${mockApiKey}`,
         },
-        path: '/',
       };
 
       const fakeRequest = kibanaRequestFactory(fakeRawRequest);
@@ -317,7 +315,6 @@ describe('api_key_utils', () => {
         headers: {
           authorization: `ApiKey ${mockApiKey}`,
         },
-        path: '/',
       };
       const fakeRequest = kibanaRequestFactory(fakeRawRequest);
 

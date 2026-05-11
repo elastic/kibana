@@ -1033,7 +1033,6 @@ export class TaskManagerRunner implements TaskRunner {
 
       const fakeRawRequest: FakeRawRequest = {
         headers: requestHeaders,
-        path: '/',
         spaceId: asSpaceId(spaceId || 'default'),
       };
 

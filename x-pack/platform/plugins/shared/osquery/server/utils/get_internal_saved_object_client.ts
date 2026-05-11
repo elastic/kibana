@@ -22,7 +22,6 @@ export function getInternalSavedObjectsClientForSpaceId(
 ): SavedObjectsClient {
   const request = kibanaRequestFactory({
     headers: {},
-    path: '/',
     route: { settings: {} },
     url: { href: '', hash: '' } as URL,
     raw: { req: { url: '/' } } as any,

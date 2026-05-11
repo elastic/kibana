@@ -360,7 +360,6 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     }
     const rawRequest: FakeRawRequest = {
       headers,
-      path: '/',
       spaceId: spaceId ? asSpaceId(spaceId) : undefined,
     };
     return kibanaRequestFactory(rawRequest);

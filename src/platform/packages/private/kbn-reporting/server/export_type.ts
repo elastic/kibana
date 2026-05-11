@@ -151,7 +151,6 @@ export abstract class ExportType<
     }
     const rawRequest: FakeRawRequest = {
       headers,
-      path: '/',
       spaceId: spaceId ? asSpaceId(spaceId) : undefined,
     };
     return kibanaRequestFactory(rawRequest);

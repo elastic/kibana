@@ -20,8 +20,8 @@ import type { Headers } from './headers';
 export interface FakeRawRequest {
   /** The headers associated with the request. */
   headers: Headers;
-  /** The path of the request */
-  path: string;
+  /** The path of the request. Defaults to `/` when omitted. */
+  path?: string;
   /** The space this request is scoped to. Defaults to the default space when omitted. */
   spaceId?: SpaceId;
   method?: string;

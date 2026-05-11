@@ -37,7 +37,6 @@ export const buildFakeScopedRequest = ({
 }): KibanaRequest => {
   return kibanaRequestFactory({
     headers: {},
-    path: '/',
     spaceId: asSpaceId(namespace),
   });
 };

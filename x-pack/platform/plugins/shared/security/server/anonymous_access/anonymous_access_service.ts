@@ -172,7 +172,6 @@ export class AnonymousAccessService {
       // This flag is essential for the security capability switcher that relies on it to decide if
       // it should perform a privileges check or automatically disable all capabilities.
       auth: { isAuthenticated: authenticateRequest },
-      path: '/',
       spaceId,
     };
     return kibanaRequestFactory(fakeRawRequest);

@@ -221,7 +221,6 @@ function getFakeRequest(apiKey: string | undefined, spaceId: string) {
 
   const fakeRawRequest: FakeRawRequest = {
     headers: requestHeaders,
-    path: '/',
     spaceId: asSpaceId(spaceId),
   };
 

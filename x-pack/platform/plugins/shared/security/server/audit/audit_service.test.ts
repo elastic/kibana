@@ -236,7 +236,6 @@ describe('#asScoped', () => {
 
     const fakeRawRequest: FakeRawRequest = {
       headers: {},
-      path: '/',
     };
     const request = kibanaRequestFactory(fakeRawRequest);
 
