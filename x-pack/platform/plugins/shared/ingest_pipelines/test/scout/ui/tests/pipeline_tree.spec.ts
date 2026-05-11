@@ -33,7 +33,7 @@ test.describe('Ingest pipelines tree details', { tag: tags.stateful.classic }, (
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(testData.INGEST_PIPELINES_USER_ROLE);
+    await browserAuth.loginAsIngestPipelinesUser();
     await pageObjects.ingestPipelines.goto();
   });
 

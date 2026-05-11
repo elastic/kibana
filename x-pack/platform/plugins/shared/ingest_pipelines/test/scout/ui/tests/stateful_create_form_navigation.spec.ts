@@ -7,14 +7,14 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, testData } from '../fixtures';
+import { test } from '../fixtures';
 
 test.describe(
   'Ingest pipelines stateful create form navigation',
   { tag: tags.stateful.classic },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
-      await browserAuth.loginWithCustomRole(testData.INGEST_PIPELINES_USER_ROLE);
+      await browserAuth.loginAsIngestPipelinesUser();
       await pageObjects.ingestPipelines.goto();
     });
 

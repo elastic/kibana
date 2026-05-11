@@ -11,7 +11,7 @@ import { test, testData } from '../fixtures';
 
 test.describe('Ingest pipelines Manage Processors', { tag: tags.stateful.classic }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(testData.MANAGE_PROCESSORS_USER_ROLE);
+    await browserAuth.loginAsManageProcessorsUser();
     await pageObjects.ingestPipelines.goto();
     await pageObjects.ingestPipelines.navigateToManageProcessorsPage();
   });

@@ -29,7 +29,7 @@ const deletePipeline = async ({
 
 test.describe('Ingest pipelines create flows', { tag: sharedDeploymentTags }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginWithCustomRole(testData.INGEST_PIPELINES_USER_ROLE);
+    await browserAuth.loginAsIngestPipelinesUser();
     await pageObjects.ingestPipelines.goto();
   });
 

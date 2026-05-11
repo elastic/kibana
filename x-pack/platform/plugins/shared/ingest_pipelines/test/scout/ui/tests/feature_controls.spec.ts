@@ -8,7 +8,7 @@
 import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { test, testData } from '../fixtures';
+import { test } from '../fixtures';
 
 test.describe('Ingest pipelines feature controls', { tag: tags.stateful.classic }, () => {
   const managementLanding = (page: ScoutPage) =>
@@ -23,16 +23,7 @@ test.describe('Ingest pipelines feature controls', { tag: tags.stateful.classic 
     pageObjects,
     kbnUrl,
   }) => {
-    await browserAuth.loginWithCustomRole({
-      elasticsearch: { cluster: [] },
-      kibana: [
-        {
-          base: ['all'],
-          feature: {},
-          spaces: ['*'],
-        },
-      ],
-    });
+    await browserAuth.loginAsKibanaAdminWithoutIngest();
     await page.goto(kbnUrl.app('management'));
 
     await expect(managementLanding(page)).toBeVisible();
@@ -49,9 +40,7 @@ test.describe('Ingest pipelines feature controls', { tag: tags.stateful.classic 
     pageObjects,
     kbnUrl,
   }) => {
-    await browserAuth.loginWithCustomRole(
-      testData.GLOBAL_DASHBOARD_READ_WITH_INGEST_PIPELINES_ROLE
-    );
+    await browserAuth.loginAsDashboardReadWithIngest();
     await page.goto(kbnUrl.app('management'));
 
     await expect(managementLanding(page)).toBeVisible();
@@ -67,7 +56,7 @@ test.describe('Ingest pipelines feature controls', { tag: tags.stateful.classic 
     page,
     pageObjects,
   }) => {
-    await browserAuth.loginWithCustomRole(testData.GLOBAL_DEVTOOLS_READ_WITH_INGEST_PIPELINES_ROLE);
+    await browserAuth.loginAsDevToolsReadWithIngest();
     await pageObjects.ingestPipelines.goto();
 
     const controlBar = page.testSubj.locator('consoleEmbeddedControlBar');
