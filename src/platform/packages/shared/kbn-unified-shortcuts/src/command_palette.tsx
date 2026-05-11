@@ -12,6 +12,7 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiOutsideClickDetector,
   EuiOverlayMask,
   EuiPanel,
@@ -44,7 +45,35 @@ const renderOption: NonNullable<EuiSelectableProps<CommandPaletteOption>['render
         <EuiText size="s">{option.label}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">{option.shortcutLabel}</EuiBadge>
+        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+          {option.shortcutLabels.map((shortcutLabel, index) => (
+            <React.Fragment key={index}>
+              {index > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiIcon
+                    type="chevronSingleRight"
+                    size="s"
+                    color="subdued"
+                    aria-label={i18n.translate(
+                      'unifiedShortcuts.commandPalette.shortcutSequenceSeparatorLabel',
+                      {
+                        defaultMessage: 'then',
+                      }
+                    )}
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>
+                <EuiBadge
+                  color="hollow"
+                  css={{ minWidth: '32px', '.euiBadge__content': { justifyContent: 'center' } }}
+                >
+                  {shortcutLabel}
+                </EuiBadge>
+              </EuiFlexItem>
+            </React.Fragment>
+          ))}
+        </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -61,7 +90,7 @@ export const CommandPalette = () => {
         return shortcuts.map(({ key, label, description, onTrigger }) => ({
           key: `${leaderKey}:${key}:${description}`,
           label: `${leaderKeyDescription} > ${description}`,
-          shortcutLabel: label,
+          shortcutLabels: [leaderKey.toUpperCase(), label],
           keywords: [leaderKey, leaderKeyDescription, key, label, description],
           run: onTrigger,
         }));

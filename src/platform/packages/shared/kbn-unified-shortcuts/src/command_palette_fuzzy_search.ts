@@ -12,7 +12,7 @@ import { distance } from 'fastest-levenshtein';
 
 export type CommandPaletteOption = EuiSelectableOption<{
   keywords: string[];
-  shortcutLabel: string;
+  shortcutLabels: string[];
   run: () => void;
 }>;
 
