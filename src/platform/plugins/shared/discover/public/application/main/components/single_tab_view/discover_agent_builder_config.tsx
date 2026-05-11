@@ -99,6 +99,21 @@ export const buildScreenContext = (
   },
 });
 
+export const shouldSeedEsqlPrompt = (
+  isEsqlMode: boolean,
+  activeConversation: ActiveConversation | null | undefined,
+  hasSeeded: boolean
+): boolean => {
+  if (!isEsqlMode || hasSeeded) return false;
+  // Pre-first-emission: don't seed — the sidebar might already be open with an
+  // existing conversation we shouldn't disrupt.
+  if (activeConversation === undefined) return false;
+  // Keep the seed in config while sidebar is closed (null) or open without a
+  // conversation id yet. Dropping it during that window would wipe `initialMessage`
+  // before `use_initial_message` auto-sends.
+  return !activeConversation?.id;
+};
+
 export const buildEsqlResultsAttachment = (
   esqlQuery: string,
   esqlQueryColumns: Array<{ name: string; meta?: { type?: string } }>,
@@ -216,25 +231,15 @@ export const DiscoverAgentBuilderConfig = () => {
     [isEsqlMode, runQueryTool]
   );
 
-  // Keep the seed in config while sidebar is closed (null) or open without a
-  // conversation id yet ({ id: undefined }). Dropping the seed during that window
-  // would wipe `initialMessage` from the freshly-opened sidebar before
-  // `use_initial_message` auto-sends it. `undefined` is the pre-first-emission gap —
-  // can't safely seed there because the sidebar might already be open with an
-  // existing conversation we shouldn't disrupt.
-  const shouldSeedEsqlPrompt =
-    isEsqlMode &&
-    !hasSeededEsqlPromptRef.current &&
-    activeConversation !== undefined &&
-    !activeConversation?.id;
+  const seedEsqlPrompt = shouldSeedEsqlPrompt(
+    isEsqlMode,
+    activeConversation,
+    hasSeededEsqlPromptRef.current
+  );
 
   useEffect(() => {
     if (!agentBuilder) {
       return;
-    }
-
-    if (!isEsqlMode) {
-      hasSeededEsqlPromptRef.current = false;
     }
 
     const normalizedTimeRange = timeRange ? { from: timeRange.from, to: timeRange.to } : undefined;
@@ -266,7 +271,7 @@ export const DiscoverAgentBuilderConfig = () => {
       sessionTag: SESSION_TAG,
       attachments,
       browserApiTools,
-      ...(shouldSeedEsqlPrompt
+      ...(seedEsqlPrompt
         ? {
             newConversation: true,
             initialMessage: ESQL_INITIAL_MESSAGE,
@@ -289,14 +294,12 @@ export const DiscoverAgentBuilderConfig = () => {
     hasEsqlResults,
     isEsqlMode,
     query,
-    shouldSeedEsqlPrompt,
+    seedEsqlPrompt,
     timeRange,
     totalHits,
   ]);
 
-  // Mark the prompt as seeded once a real conversation id exists. From that point,
-  // dropping the seed from subsequent setChatConfig calls is safe — the auto-send
-  // has already fired and submitMessage has assigned the id synchronously.
+  // Mark the prompt as seeded once a real conversation id exists.
   useEffect(() => {
     if (isEsqlMode && activeConversation?.id) {
       hasSeededEsqlPromptRef.current = true;
