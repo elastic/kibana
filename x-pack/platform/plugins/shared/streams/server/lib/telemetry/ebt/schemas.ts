@@ -241,6 +241,22 @@ const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipe
           'Where the suggestion was triggered from: "ui" for the streams management UI, "agent" for an agent_builder tool invocation',
       },
     },
+    flow: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Which engine produced the result (agent source only): "extract_fields" for the heuristic + reasoning agent, "nl_to_streamlang" for the direct LLM completion path',
+        optional: true,
+      },
+    },
+    extract_fields_fallback_reason: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'When extract_fields was requested but produced no usable seed pattern, the reason it gave up (e.g. "no_candidate", "no_samples", "unsupported"). Set together with flow === "nl_to_streamlang" to identify fallback runs.',
+        optional: true,
+      },
+    },
   };
 
 const streamsFeaturesIdentifiedSchema: RootSchema<StreamsFeaturesIdentifiedProps> = {

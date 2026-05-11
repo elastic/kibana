@@ -742,9 +742,6 @@ describe('runExtractFieldsFlow', () => {
       connectorId: 'test-connector',
       fieldsMetadataClient: {} as RunExtractFieldsDeps['fieldsMetadataClient'],
       patternExtractionService: {} as RunExtractFieldsDeps['patternExtractionService'],
-      telemetry: {
-        trackProcessingPipelineSuggested: jest.fn(),
-      } as unknown as RunExtractFieldsDeps['telemetry'],
       logger: noopLogger,
       ...overrides,
     };
@@ -770,8 +767,10 @@ describe('runExtractFieldsFlow', () => {
         expect.stringContaining('extract_fields is only supported for ingest streams')
       );
       expect(outcome.result.simulation.success_rate).toBeNull();
+      // streamType is surfaced on every outcome so the outer `design_pipeline`
+      // handler can emit telemetry without a second `getStream` round-trip.
+      expect(outcome.streamType).toBe('query');
     }
-    expect(deps.telemetry.trackProcessingPipelineSuggested).not.toHaveBeenCalled();
   });
 
   it('returns `fallback` with reason `no_samples` when sample resolution yields no documents', async () => {
@@ -964,12 +963,10 @@ describe('runExtractFieldsFlow', () => {
       expect(outcome.kind).toBe('fallback');
       if (outcome.kind === 'fallback') {
         expect(outcome.reason).toBe('no_candidate');
+        // streamType is forwarded so the outer handler can emit telemetry
+        // with the right `stream_type` even on the fallback path.
+        expect(outcome.streamType).toBe('wired');
       }
-      // Tracked even on fallback so we can measure how often heuristics
-      // give up — but with `success: false`.
-      expect(deps.telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
-        expect.objectContaining({ success: false, source: 'agent', stream_name: ingestStreamName })
-      );
     });
 
     it('returns `fallback` with reason `no_parsed_documents` when seed simulation produces no parsed docs', async () => {
@@ -1114,16 +1111,12 @@ describe('runExtractFieldsFlow', () => {
         expect(outcome.result.warnings).toEqual(
           expect.arrayContaining([expect.stringContaining('kept their original position')])
         );
+        // Telemetry-relevant metadata is exposed on the outcome so the
+        // outer `design_pipeline` handler can emit a single event covering
+        // both this flow and the LLM-only fallback path.
+        expect(outcome.streamType).toBe('wired');
+        expect(outcome.stepsUsed).toBe(3);
       }
-
-      expect(deps.telemetry.trackProcessingPipelineSuggested).toHaveBeenCalledWith(
-        expect.objectContaining({
-          success: true,
-          source: 'agent',
-          stream_name: ingestStreamName,
-          steps_used: 3,
-        })
-      );
     });
 
     it('preserves an existing step with `ignore_failure: false` end-to-end without flipping it to true', async () => {

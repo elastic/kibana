@@ -14,6 +14,7 @@ import {
   type FlattenRecord,
   getStreamTypeFromDefinition,
   isOtelStream,
+  type StreamType,
 } from '@kbn/streams-schema';
 import {
   buildDocumentStructureOverviewForPipelinePrompt,
@@ -36,7 +37,6 @@ import {
 } from '../../../../common/pattern_extraction_helpers';
 import type { StreamsClient } from '../../../lib/streams/client';
 import type { IPatternExtractionService } from '../../../lib/pattern_extraction/pattern_extraction_service';
-import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import { simulateProcessing } from '../../../routes/internal/streams/processing/simulation_handler';
 import { isNoLLMSuggestionsError } from '../../../routes/internal/streams/processing/no_llm_suggestions_error';
 import {
@@ -97,16 +97,28 @@ export interface RunExtractFieldsDeps {
   connectorId: string;
   fieldsMetadataClient: IFieldsMetadataClient;
   patternExtractionService: IPatternExtractionService;
-  telemetry: EbtTelemetryClient;
   logger: Logger;
   /** Caller-provided abort signal (e.g. the agent request). */
   signal?: AbortSignal;
 }
 
+/**
+ * Stream-level metadata the outer handler needs for telemetry, regardless of
+ * which outcome variant fires. `streamType` is `'unknown'` only when the
+ * stream definition itself could not be classified.
+ */
+export interface ExtractFieldsOutcomeMeta {
+  streamType: StreamType;
+}
+
 export type RunExtractFieldsOutcome =
-  | { kind: 'fallback'; reason: string }
-  | { kind: 'unsupported'; result: NlToStreamlangResult }
-  | { kind: 'success'; result: NlToStreamlangResult };
+  | ({ kind: 'fallback'; reason: string } & ExtractFieldsOutcomeMeta)
+  | ({ kind: 'unsupported'; result: NlToStreamlangResult } & ExtractFieldsOutcomeMeta)
+  | ({
+      kind: 'success';
+      result: NlToStreamlangResult;
+      stepsUsed: number;
+    } & ExtractFieldsOutcomeMeta);
 
 /**
  * Run the `extract_fields: true` flow.
@@ -136,7 +148,6 @@ export const runExtractFieldsFlow = async (
     connectorId,
     fieldsMetadataClient,
     patternExtractionService,
-    telemetry,
     logger,
     signal,
   } = deps;
@@ -144,9 +155,11 @@ export const runExtractFieldsFlow = async (
   const log = logger.get('extract_fields');
 
   const definition = await streamsClient.getStream(streamName);
+  const streamType = getStreamTypeFromDefinition(definition);
   if (!Streams.ingest.all.Definition.is(definition)) {
     return {
       kind: 'unsupported',
+      streamType,
       result: {
         steps: [],
         existing_steps: [],
@@ -172,7 +185,7 @@ export const runExtractFieldsFlow = async (
 
   if (documents.length === 0) {
     log.debug(`No sample documents available (stream=${streamName}); falling back`);
-    return { kind: 'fallback', reason: 'no_samples' };
+    return { kind: 'fallback', reason: 'no_samples', streamType };
   }
 
   const flattenedDocs = documents as FlattenRecord[];
@@ -184,7 +197,7 @@ export const runExtractFieldsFlow = async (
     log.debug(
       `No raw text messages found in samples (stream=${streamName} fieldName="${fieldName}"); falling back`
     );
-    return { kind: 'fallback', reason: 'no_text_field' };
+    return { kind: 'fallback', reason: 'no_text_field', streamType };
   }
 
   // Combine the caller-provided signal with a 3-minute operation timeout so
@@ -194,10 +207,6 @@ export const runExtractFieldsFlow = async (
   const cleanup = () => compositeAbort.abort();
   signal?.addEventListener('abort', cleanup);
   timeoutSignal.addEventListener('abort', cleanup);
-
-  const startTime = Date.now();
-  let success = false;
-  let stepsUsed = 0;
 
   try {
     log.debug(
@@ -255,7 +264,7 @@ export const runExtractFieldsFlow = async (
 
     if (candidates.length === 0) {
       log.debug(`No seed candidate produced (stream=${streamName}); falling back`);
-      return { kind: 'fallback', reason: 'no_candidate' };
+      return { kind: 'fallback', reason: 'no_candidate', streamType };
     }
 
     candidates.sort((a, b) => b.parsedRate - a.parsedRate);
@@ -278,7 +287,7 @@ export const runExtractFieldsFlow = async (
       log.debug(
         `Seed simulation produced no parsed docs (stream=${streamName} definitionError=${definitionError}); falling back`
       );
-      return { kind: 'fallback', reason: 'no_parsed_documents' };
+      return { kind: 'fallback', reason: 'no_parsed_documents', streamType };
     }
 
     const isOtel = isOtelStream(definition);
@@ -323,7 +332,7 @@ export const runExtractFieldsFlow = async (
         }),
     });
 
-    stepsUsed = suggestion.metadata.stepsUsed;
+    const stepsUsed = suggestion.metadata.stepsUsed;
 
     const newlyAdded = suggestion.pipeline
       ? mergeSeedParsingProcessorIntoSuggestedPipeline(winning.processor, suggestion.pipeline)
@@ -434,10 +443,10 @@ export const runExtractFieldsFlow = async (
     const diff = computePipelineDiff(existingSteps, finalSteps);
     const dropWarnings = buildDropWarnings(diff);
 
-    success = true;
-
     return {
       kind: 'success',
+      streamType,
+      stepsUsed,
       result: {
         steps: finalSteps,
         existing_steps: existingSteps,
@@ -463,15 +472,6 @@ export const runExtractFieldsFlow = async (
   } finally {
     signal?.removeEventListener('abort', cleanup);
     timeoutSignal.removeEventListener('abort', cleanup);
-
-    telemetry.trackProcessingPipelineSuggested({
-      duration_ms: Date.now() - startTime,
-      steps_used: stepsUsed,
-      success,
-      stream_name: streamName,
-      stream_type: getStreamTypeFromDefinition(definition),
-      source: 'agent',
-    });
   }
 };
 

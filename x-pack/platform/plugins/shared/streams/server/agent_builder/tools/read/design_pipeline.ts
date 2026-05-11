@@ -11,7 +11,11 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import dedent from 'dedent';
 import type { Logger } from '@kbn/core/server';
-import type { FlattenRecord } from '@kbn/streams-schema';
+import {
+  getStreamTypeFromDefinition,
+  type FlattenRecord,
+  type StreamType,
+} from '@kbn/streams-schema';
 import type { GetScopedClients } from '../../../routes/types';
 import type { IPatternExtractionService } from '../../../lib/pattern_extraction/pattern_extraction_service';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
@@ -128,6 +132,19 @@ export const createDesignPipelineTool = ({
     },
     { request, modelProvider }
   ) => {
+    // Telemetry is emitted exactly once at the end of the handler so that
+    // every `design_pipeline` invocation produces a single event regardless
+    // of which engine ran (or whether either ran at all). The fields below
+    // are mutated in-place by the branches and read in `finally`.
+    const startTime = Date.now();
+    let success = false;
+    let stepsUsed = 0;
+    let flow: 'extract_fields' | 'nl_to_streamlang' = 'nl_to_streamlang';
+    let extractFieldsFallbackReason: string | undefined;
+    // `'unknown'` is the safe default for the case where we throw before
+    // resolving the stream definition (e.g. `getScopedClients` fails).
+    let streamType: StreamType = 'unknown';
+
     try {
       const { streamsClient, scopedClusterClient, fieldsMetadataClient, inferenceClient } =
         await getScopedClients({ request });
@@ -140,6 +157,7 @@ export const createDesignPipelineTool = ({
 
       if (extractFields) {
         if (!patternExtractionService) {
+          extractFieldsFallbackReason = 'service_unavailable';
           fallbackHints.push(
             'extract_fields was requested but heuristic pattern extraction is not available in this environment. Falling back to LLM-only design.'
           );
@@ -154,13 +172,17 @@ export const createDesignPipelineTool = ({
               connectorId: model.connector.connectorId,
               fieldsMetadataClient,
               patternExtractionService,
-              telemetry,
               logger,
               signal: abortSignalFromRequest(request),
             }
           );
 
+          streamType = outcome.streamType;
+
           if (outcome.kind === 'success' || outcome.kind === 'unsupported') {
+            flow = 'extract_fields';
+            success = true;
+            if (outcome.kind === 'success') stepsUsed = outcome.stepsUsed;
             return {
               results: [
                 {
@@ -178,6 +200,7 @@ export const createDesignPipelineTool = ({
 
           // outcome.kind === 'fallback' — heuristics produced no usable seed.
           // Fall through to nlToStreamlang so the LLM still gets a chance.
+          extractFieldsFallbackReason = outcome.reason;
           fallbackHints.push(
             `Heuristic field extraction did not yield a usable seed pattern (${outcome.reason}). Falling back to LLM-only pipeline design.`
           );
@@ -207,6 +230,17 @@ export const createDesignPipelineTool = ({
         }
       );
 
+      // The LLM path doesn't surface a stream type — fetch the definition
+      // separately ONLY when we haven't already resolved one via the
+      // heuristic outcome. Cheap (cached upstream) and means telemetry
+      // always reports the right type for analytics filtering.
+      if (streamType === 'unknown') {
+        const definition = await streamsClient.getStream(streamName);
+        streamType = getStreamTypeFromDefinition(definition);
+      }
+
+      flow = 'nl_to_streamlang';
+      success = true;
       const mergedHints = [...fallbackHints, ...(result.hints ?? [])];
 
       return {
@@ -238,6 +272,19 @@ export const createDesignPipelineTool = ({
           },
         ],
       };
+    } finally {
+      telemetry.trackProcessingPipelineSuggested({
+        duration_ms: Date.now() - startTime,
+        steps_used: stepsUsed,
+        success,
+        stream_name: streamName,
+        stream_type: streamType,
+        source: 'agent',
+        flow,
+        ...(extractFieldsFallbackReason !== undefined && {
+          extract_fields_fallback_reason: extractFieldsFallbackReason,
+        }),
+      });
     }
   },
 });
