@@ -26,10 +26,10 @@ const setupServices = () => {
         },
       },
       http: {
+        spaceId: 'space-a',
         basePath: {
           get: jest.fn().mockReturnValue('/s/space-a/app/management'),
           serverBasePath: '/s/space-a',
-          spaceId: 'space-a',
         },
         fetch,
         post,
@@ -71,7 +71,7 @@ describe('useAnonymizationProfilesSectionState', () => {
 
   it('uses http.spaceId and hidden capabilities when capability shape is invalid', () => {
     const { services } = setupServices();
-    (services.http.basePath as Record<string, unknown>).spaceId = 'default';
+    (services.http as Record<string, unknown>).spaceId = 'default';
     services.application.capabilities.anonymization = {} as never;
 
     const { result } = renderHook(() =>
