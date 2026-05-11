@@ -490,7 +490,7 @@ describe('WorkflowExecutionDetail - resume input resolution', () => {
   } as const;
 
   // Polling returns lightweight steps without input (includeInput: false).
-  // Resume copy is loaded via useStepExecution(pausedStepId) — not from workflowDefinition.
+  // Resume copy is loaded via useStepExecution(waitingStepExecutionId) — not from workflowDefinition.
   // We still embed nested `if` / `foreach` shapes below so regressions in flat stepExecutions
   // detection do not go unnoticed when YAML nesting matches real workflows.
   const makeWaitingExecution = (options?: {

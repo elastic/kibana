@@ -12,6 +12,176 @@
     "classes": [
       {
         "parentPluginId": "@kbn/tracing",
+        "id": "def-server.ElasticsearchOtlpExporter",
+        "type": "Class",
+        "tags": [],
+        "label": "ElasticsearchOtlpExporter",
+        "description": [
+          "\nA ",
+          {
+            "pluginId": "@kbn/tracing",
+            "scope": "server",
+            "docId": "kibKbnTracingPluginApi",
+            "section": "def-server.tracing.SpanExporter",
+            "text": "tracing.SpanExporter"
+          },
+          " that ships OTLP-protobuf encoded spans\nto Elasticsearch's native `/_otlp/v1/traces` endpoint via the\nES client transport. This reuses the same connection, auth, and TLS\nsettings that Kibana already has for talking to Elasticsearch."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/tracing",
+            "scope": "server",
+            "docId": "kibKbnTracingPluginApi",
+            "section": "def-server.ElasticsearchOtlpExporter",
+            "text": "ElasticsearchOtlpExporter"
+          },
+          " implements ",
+          "SpanExporter"
+        ],
+        "path": "src/platform/packages/shared/kbn-tracing/src/elasticsearch_otlp_exporter.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tracing",
+            "id": "def-server.ElasticsearchOtlpExporter.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing/src/elasticsearch_otlp_exporter.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.ElasticsearchOtlpExporter.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "client",
+                "description": [],
+                "signature": [
+                  "ElasticsearchClient"
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/elasticsearch_otlp_exporter.ts",
+                "lineNumber": 28,
+                "columnNumber": 15,
+                "deprecated": false,
+                "docsReferencedTypeName": "ElasticsearchClient",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tracing",
+            "id": "def-server.ElasticsearchOtlpExporter.export",
+            "type": "Function",
+            "tags": [],
+            "label": "export",
+            "description": [],
+            "signature": [
+              "(spans: ",
+              "ReadableSpan",
+              "[], resultCallback: (result: ",
+              "ExportResult",
+              ") => void) => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing/src/elasticsearch_otlp_exporter.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.ElasticsearchOtlpExporter.export.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "spans",
+                "description": [],
+                "signature": [
+                  "ReadableSpan",
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/elasticsearch_otlp_exporter.ts",
+                "lineNumber": 30,
+                "columnNumber": 10,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/tracing",
+                "id": "def-server.ElasticsearchOtlpExporter.export.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "resultCallback",
+                "description": [],
+                "signature": [
+                  "(result: ",
+                  "ExportResult",
+                  ") => void"
+                ],
+                "path": "src/platform/packages/shared/kbn-tracing/src/elasticsearch_otlp_exporter.ts",
+                "lineNumber": 30,
+                "columnNumber": 41,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tracing",
+            "id": "def-server.ElasticsearchOtlpExporter.forceFlush",
+            "type": "Function",
+            "tags": [],
+            "label": "forceFlush",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing/src/elasticsearch_otlp_exporter.ts",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/tracing",
+            "id": "def-server.ElasticsearchOtlpExporter.shutdown",
+            "type": "Function",
+            "tags": [],
+            "label": "shutdown",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing/src/elasticsearch_otlp_exporter.ts",
+            "lineNumber": 71,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tracing",
         "id": "def-server.LateBindingSpanProcessor",
         "type": "Class",
         "tags": [],
@@ -424,7 +594,7 @@
           "; }) => void"
         ],
         "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -437,7 +607,7 @@
             "label": "{\n  resource,\n  tracingConfig,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
-            "lineNumber": 34,
+            "lineNumber": 35,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -453,7 +623,7 @@
                   "Resource"
                 ],
                 "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
-                "lineNumber": 35,
+                "lineNumber": 36,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -475,7 +645,7 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/kbn-tracing/src/init_tracing.ts",
-                "lineNumber": 36,
+                "lineNumber": 37,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false

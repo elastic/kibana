@@ -13,6 +13,7 @@ import {
   FetchSuppressionsStep,
   ApplySuppressionStep,
   FetchRulesStep,
+  ApplyMaintenanceWindowStep,
   FetchPoliciesStep,
   EvaluateMatchersStep,
   BuildGroupsStep,
@@ -31,6 +32,7 @@ export const bindDispatcherExecutionServices = ({ bind }: ContainerModuleLoadOpt
   bind(DispatcherExecutionStepsToken).to(FetchSuppressionsStep).inSingletonScope();
   bind(DispatcherExecutionStepsToken).to(ApplySuppressionStep).inSingletonScope();
   bind(DispatcherExecutionStepsToken).to(FetchRulesStep).inSingletonScope();
+  bind(DispatcherExecutionStepsToken).to(ApplyMaintenanceWindowStep).inSingletonScope();
   bind(DispatcherExecutionStepsToken).to(FetchPoliciesStep).inSingletonScope();
   bind(DispatcherExecutionStepsToken).to(EvaluateMatchersStep).inSingletonScope();
   bind(DispatcherExecutionStepsToken).to(BuildGroupsStep).inSingletonScope();

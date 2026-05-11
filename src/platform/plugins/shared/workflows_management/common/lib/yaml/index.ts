@@ -22,3 +22,14 @@ export { getTriggerOnChainOptionPairs } from './get_trigger_on_chain_option_pair
 export { getTriggerNodesWithType } from './get_trigger_nodes_with_type';
 export { correctYamlSyntax } from './correct_yaml_syntax';
 export { affectsYamlMetadata, updateWorkflowYamlFields } from './update_workflow_yaml_fields';
+export {
+  buildWorkflowLookup,
+  inspectStep,
+  getValueFromValueNode,
+  NESTED_STEP_KEYS,
+  isNestedStepKey,
+  type NestedStepKey,
+  type StepInfo,
+  type StepPropInfo,
+  type WorkflowLookup,
+} from '@kbn/workflows-yaml';

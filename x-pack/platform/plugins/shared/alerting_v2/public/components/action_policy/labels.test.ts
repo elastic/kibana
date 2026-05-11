@@ -7,8 +7,7 @@
 
 import { getGroupingModeLabel, getThrottleStrategyLabel } from './labels';
 
-// Failing: See https://github.com/elastic/kibana/issues/266708
-describe.skip('getGroupingModeLabel', () => {
+describe('getGroupingModeLabel', () => {
   it('returns the Episode label for per_episode', () => {
     expect(getGroupingModeLabel('per_episode')).toBe('Episode');
   });
@@ -27,8 +26,7 @@ describe.skip('getGroupingModeLabel', () => {
   });
 });
 
-// Failing: See https://github.com/elastic/kibana/issues/266707
-describe.skip('getThrottleStrategyLabel', () => {
+describe('getThrottleStrategyLabel', () => {
   it('returns the per-episode label for on_status_change when mode is per_episode', () => {
     expect(getThrottleStrategyLabel('on_status_change', 'per_episode')).toBe('On status change');
   });
@@ -48,15 +46,11 @@ describe.skip('getThrottleStrategyLabel', () => {
   });
 
   it('returns the per-episode every-time label when mode is per_episode', () => {
-    expect(getThrottleStrategyLabel('every_time', 'per_episode')).toBe(
-      'Every evaluation (per episode, no throttle)'
-    );
+    expect(getThrottleStrategyLabel('every_time', 'per_episode')).toBe('Every evaluation');
   });
 
   it('returns the aggregate every-time label when mode is all', () => {
-    expect(getThrottleStrategyLabel('every_time', 'all')).toBe(
-      'Every evaluation (per group, no throttle)'
-    );
+    expect(getThrottleStrategyLabel('every_time', 'all')).toBe('Every evaluation');
   });
 
   it('returns the fallback for null or undefined strategy', () => {

@@ -43,7 +43,7 @@ const LayerChartSwitchLabel = function ({ label, icon }: { label: string; icon?:
     <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
       {icon && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type={icon} />
+          <EuiIcon type={icon} aria-hidden={true} />
         </EuiFlexItem>
       )}
 
