@@ -44,3 +44,6 @@ export const CHILD_LINK_TEST_ID = `${PREFIX}ChildLink` as const;
 
 export const FLYOUT_LOADING_TEST_ID = `${PREFIX}Loading` as const;
 export const FLYOUT_ERROR_TEST_ID = `${PREFIX}Error` as const;
+
+export const GRAPH_PREVIEW_TEST_ID = `${PREFIX}GraphPreview` as const;
+export const GRAPH_PREVIEW_LOADING_TEST_ID = `${GRAPH_PREVIEW_TEST_ID}Loading` as const;

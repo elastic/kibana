@@ -16,8 +16,8 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { Maybe } from '@kbn/timelines-plugin/common/search_strategy/common';
-import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
-import { GraphPreview } from './graph_preview';
+import { GRAPH_PREVIEW_TEST_ID } from '../../../flyout_v2/shared/components/test_ids';
+import { GraphPreview } from '../../../flyout_v2/shared/components/graph_preview';
 import { ExpandablePanel } from '../../../flyout_v2/shared/components/expandable_panel';
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
 import { useShouldShowGraph } from '../hooks/use_should_show_graph';

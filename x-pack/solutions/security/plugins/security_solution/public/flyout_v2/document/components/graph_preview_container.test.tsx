@@ -70,8 +70,6 @@ const renderContainer = (
 const previewAvailable = {
   timestamp: new Date().toISOString(),
   eventIds: ['eventId'],
-  actorIds: ['actor'],
-  targetIds: ['target'],
   action: ['action'],
   shouldShowGraph: true,
   hasGraphData: true,

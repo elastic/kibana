@@ -16,8 +16,8 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { TestProviders } from '../../../common/mock';
 import { mockContextValue } from '../../document_details/shared/mocks/mock_context';
 import { GraphPreviewContainer } from './graph_preview_container';
-import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
 import {
+  GRAPH_PREVIEW_TEST_ID,
   EXPANDABLE_PANEL_CONTENT_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
