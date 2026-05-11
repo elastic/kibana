@@ -8,7 +8,7 @@
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { SmlSearchResult } from '../services/sml/types';
 import { registerSearchRoute } from './search';
 
@@ -24,7 +24,7 @@ const createMockSmlService = () => ({
 
 const createMockUiSettingsClient = (enabled = true) => ({
   get: jest.fn().mockImplementation(async (key: string) => {
-    if (key === AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID) return enabled;
+    if (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) return enabled;
     return undefined;
   }),
 });

@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
-import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { apiPrivileges } from '../../common/features';
 import type { SmlSearchHttpResponse } from '../../common/http_api/sml';
 import { SML_HTTP_SEARCH_QUERY_MAX_LENGTH, SmlSearchFilterType } from '../../common/http_api/sml';
@@ -60,7 +60,7 @@ export const registerSearchRoute = ({
         const uiSettingsClient = coreContext.uiSettings.client;
 
         const isEnabled = await uiSettingsClient.get<boolean>(
-          AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
         );
         if (!isEnabled) {
           return response.notFound();
