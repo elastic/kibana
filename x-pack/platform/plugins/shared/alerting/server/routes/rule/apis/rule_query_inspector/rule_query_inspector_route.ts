@@ -14,10 +14,9 @@ import {
 } from '@kbn/rule-data-utils';
 import type { GetAlertIndicesAlias, ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import type { AlertingRequestHandlerContext } from '../../../../types';
+import type { AlertingRequestHandlerContext, RuleTypeRegistry } from '../../../../types';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
-import type { RuleQueryInspectorRegistry } from '../../../../rule_query_inspector/registry';
 import type { RuleQueryInspectorTimeRange } from '../../../../rule_query_inspector/types';
 import type { AlertingPluginsStart } from '../../../../plugin';
 import type {
@@ -34,7 +33,7 @@ import {
 export const ruleQueryInspectorRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState,
-  ruleQueryInspectorRegistry: RuleQueryInspectorRegistry,
+  ruleTypeRegistry: RuleTypeRegistry,
   getAlertIndicesAlias: GetAlertIndicesAlias,
   core: CoreSetup<AlertingPluginsStart, unknown>
 ) => {
@@ -79,7 +78,8 @@ export const ruleQueryInspectorRoute = (
 
         const rule = await rulesClient.get({ id: ruleId });
 
-        const handler = ruleQueryInspectorRegistry.get(rule.alertTypeId);
+        const ruleType = ruleTypeRegistry.get(rule.alertTypeId);
+        const handler = ruleType.queryInspector;
         if (!handler) {
           return res.badRequest({
             body: {

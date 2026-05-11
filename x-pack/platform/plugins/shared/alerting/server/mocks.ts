@@ -38,7 +38,6 @@ const createSetupMock = () => {
     }),
     getDataStreamAdapter: jest.fn(),
     registerConnectorAdapter: jest.fn(),
-    registerRuleQueryInspector: jest.fn(),
   });
 
   return mock;

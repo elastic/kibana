@@ -43,7 +43,6 @@ import type {
 } from './lib/annotations/bootstrap_annotations';
 import { bootstrapAnnotations } from './lib/annotations/bootstrap_annotations';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
-import { createCustomThresholdRuleQueryInspectorHandler } from './lib/rules/custom_threshold/rule_query_inspector_handler';
 import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { registerRoutes } from './routes/register_routes';
 import { threshold } from './saved_objects/threshold';
@@ -118,25 +117,10 @@ export class ObservabilityPlugin
 
     core.savedObjects.registerType(threshold);
 
-    registerRuleTypes(plugins.alerting, core.http.basePath, config, this.logger, {
+    registerRuleTypes(plugins.alerting, core, core.http.basePath, config, this.logger, {
       alertsLocator,
       logsLocator,
     });
-
-    plugins.alerting.registerRuleQueryInspector(
-      'observability.rules.custom_threshold',
-      createCustomThresholdRuleQueryInspectorHandler(
-        () =>
-          core.getStartServices().then(([coreStart, pluginStart]) => [
-            coreStart,
-            {
-              dataViews: pluginStart.dataViews,
-              data: pluginStart.data,
-            },
-          ]),
-        { compositeSize: config.customThresholdRule.groupByPageSize }
-      )
-    );
 
     void core.getStartServices().then(([coreStart, pluginStart]) => {
       const isCompleteOverviewEnabled = coreStart.pricing.isFeatureAvailable(

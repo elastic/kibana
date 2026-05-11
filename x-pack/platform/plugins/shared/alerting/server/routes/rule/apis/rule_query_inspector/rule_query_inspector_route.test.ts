@@ -16,8 +16,8 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
-import type { RuleQueryInspectorRegistry } from '../../../../rule_query_inspector/registry';
 import type { RuleQueryInspectorHandler } from '../../../../rule_query_inspector/types';
+import type { RuleTypeRegistry } from '../../../../types';
 
 const rulesClient = rulesClientMock.create();
 
@@ -49,13 +49,13 @@ const mockInspectorResponse = {
   ],
 };
 
-const createMockRegistry = (
+const createMockRuleTypeRegistry = (
   handler?: RuleQueryInspectorHandler
-): jest.Mocked<RuleQueryInspectorRegistry> =>
+): jest.Mocked<RuleTypeRegistry> =>
   ({
-    register: jest.fn(),
-    get: jest.fn().mockReturnValue(handler),
-  } as unknown as jest.Mocked<RuleQueryInspectorRegistry>);
+    get: jest.fn().mockReturnValue({ queryInspector: handler }),
+    has: jest.fn().mockReturnValue(true),
+  } as unknown as jest.Mocked<RuleTypeRegistry>);
 
 const mockGetAlertIndicesAlias = jest
   .fn()
@@ -93,10 +93,16 @@ describe('ruleQueryInspectorRoute', () => {
   it('registers the route at the correct path', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    const registry = createMockRegistry();
+    const ruleTypeRegistry = createMockRuleTypeRegistry();
     const { coreSetup } = createMockCoreSetup();
 
-    ruleQueryInspectorRoute(router, licenseState, registry, mockGetAlertIndicesAlias, coreSetup);
+    ruleQueryInspectorRoute(
+      router,
+      licenseState,
+      ruleTypeRegistry,
+      mockGetAlertIndicesAlias,
+      coreSetup
+    );
 
     expect(router.get.mock.calls[0][0].path).toMatchInlineSnapshot(
       `"/api/alerting/rule/{id}/query_inspector"`
@@ -107,10 +113,16 @@ describe('ruleQueryInspectorRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     const mockHandler = jest.fn().mockResolvedValue(mockInspectorResponse);
-    const registry = createMockRegistry(mockHandler);
+    const ruleTypeRegistry = createMockRuleTypeRegistry(mockHandler);
     const { coreSetup } = createMockCoreSetup();
 
-    ruleQueryInspectorRoute(router, licenseState, registry, mockGetAlertIndicesAlias, coreSetup);
+    ruleQueryInspectorRoute(
+      router,
+      licenseState,
+      ruleTypeRegistry,
+      mockGetAlertIndicesAlias,
+      coreSetup
+    );
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -123,7 +135,7 @@ describe('ruleQueryInspectorRoute', () => {
     const result = await handler(context, req, res);
 
     expect(rulesClient.get).toHaveBeenCalledWith({ id: 'rule-123' });
-    expect(registry.get).toHaveBeenCalledWith('observability.rules.custom_threshold');
+    expect(ruleTypeRegistry.get).toHaveBeenCalledWith('observability.rules.custom_threshold');
     expect(mockHandler).toHaveBeenCalledWith(req, mockRule.params, 'build', undefined);
     expect(result).toEqual({ body: mockInspectorResponse });
   });
@@ -131,10 +143,16 @@ describe('ruleQueryInspectorRoute', () => {
   it('returns badRequest when rule type is not supported', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
-    const registry = createMockRegistry(undefined);
+    const ruleTypeRegistry = createMockRuleTypeRegistry(undefined);
     const { coreSetup } = createMockCoreSetup();
 
-    ruleQueryInspectorRoute(router, licenseState, registry, mockGetAlertIndicesAlias, coreSetup);
+    ruleQueryInspectorRoute(
+      router,
+      licenseState,
+      ruleTypeRegistry,
+      mockGetAlertIndicesAlias,
+      coreSetup
+    );
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -157,10 +175,16 @@ describe('ruleQueryInspectorRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     const mockHandler = jest.fn().mockResolvedValue(mockInspectorResponse);
-    const registry = createMockRegistry(mockHandler);
+    const ruleTypeRegistry = createMockRuleTypeRegistry(mockHandler);
     const { coreSetup } = createMockCoreSetup(mockAlertDoc);
 
-    ruleQueryInspectorRoute(router, licenseState, registry, mockGetAlertIndicesAlias, coreSetup);
+    ruleQueryInspectorRoute(
+      router,
+      licenseState,
+      ruleTypeRegistry,
+      mockGetAlertIndicesAlias,
+      coreSetup
+    );
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -185,13 +209,19 @@ describe('ruleQueryInspectorRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     const mockHandler = jest.fn().mockResolvedValue(mockInspectorResponse);
-    const registry = createMockRegistry(mockHandler);
+    const ruleTypeRegistry = createMockRuleTypeRegistry(mockHandler);
     const { coreSetup } = createMockCoreSetup({
       ...mockAlertDoc,
       [ALERT_RULE_UUID]: 'different-rule',
     });
 
-    ruleQueryInspectorRoute(router, licenseState, registry, mockGetAlertIndicesAlias, coreSetup);
+    ruleQueryInspectorRoute(
+      router,
+      licenseState,
+      ruleTypeRegistry,
+      mockGetAlertIndicesAlias,
+      coreSetup
+    );
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -218,10 +248,16 @@ describe('ruleQueryInspectorRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     const mockHandler = jest.fn().mockResolvedValue(mockInspectorResponse);
-    const registry = createMockRegistry(mockHandler);
+    const ruleTypeRegistry = createMockRuleTypeRegistry(mockHandler);
     const { coreSetup } = createMockCoreSetup(undefined);
 
-    ruleQueryInspectorRoute(router, licenseState, registry, mockGetAlertIndicesAlias, coreSetup);
+    ruleQueryInspectorRoute(
+      router,
+      licenseState,
+      ruleTypeRegistry,
+      mockGetAlertIndicesAlias,
+      coreSetup
+    );
 
     const [, handler] = router.get.mock.calls[0];
 
@@ -248,7 +284,7 @@ describe('ruleQueryInspectorRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     const mockHandler = jest.fn().mockResolvedValue(mockInspectorResponse);
-    const registry = createMockRegistry(mockHandler);
+    const ruleTypeRegistry = createMockRuleTypeRegistry(mockHandler);
     const alertDocWithoutParams = {
       [ALERT_RULE_UUID]: 'rule-123',
       [ALERT_EVALUATION_TIME_RANGE]: {
@@ -258,7 +294,13 @@ describe('ruleQueryInspectorRoute', () => {
     };
     const { coreSetup } = createMockCoreSetup(alertDocWithoutParams);
 
-    ruleQueryInspectorRoute(router, licenseState, registry, mockGetAlertIndicesAlias, coreSetup);
+    ruleQueryInspectorRoute(
+      router,
+      licenseState,
+      ruleTypeRegistry,
+      mockGetAlertIndicesAlias,
+      coreSetup
+    );
 
     const [, handler] = router.get.mock.calls[0];
 

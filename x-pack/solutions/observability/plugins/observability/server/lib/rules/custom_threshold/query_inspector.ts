@@ -34,13 +34,13 @@ type GetStartServices = () => Promise<
   ]
 >;
 
-interface HandlerOptions {
+interface QueryInspectorOptions {
   compositeSize: number;
 }
 
-export const createCustomThresholdRuleQueryInspectorHandler = (
+export const createQueryInspector = (
   getStartServices: GetStartServices,
-  options: HandlerOptions
+  options: QueryInspectorOptions
 ): RuleQueryInspectorHandler => {
   return async (
     request: KibanaRequest,
