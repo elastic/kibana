@@ -111,7 +111,7 @@ export const AppMenuItem = ({
    */
   const button =
     showTooltip && !hasItems ? (
-      <EuiToolTip content={content} title={title} delay="long">
+      <EuiToolTip content={content} title={title}>
         {buttonComponent}
       </EuiToolTip>
     ) : (

@@ -10,7 +10,6 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 
 import { CreateButton } from '.';
 import { TestProviders } from '../../../../../common/mock';
-import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../../common/constants';
 
@@ -113,7 +112,6 @@ describe('CreateButton', () => {
 
       const createButton = screen.getByTestId('createSchedule');
       fireEvent.mouseOver(createButton.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent('Missing privileges');

@@ -1,8 +1,9 @@
 steps:
   - name: 'Reconcile PR Labels'
-    key: reconcile-pr-labels
-    depends_on:
-      - update-label-color
     command: .buildkite/scripts/steps/version_bump/reconcile_pr_labels.sh
-    env:
-      DRY_RUN: 'true'
+    soft_fail: true
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
