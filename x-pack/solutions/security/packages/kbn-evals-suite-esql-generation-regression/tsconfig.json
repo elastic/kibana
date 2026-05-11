@@ -1,7 +1,6 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "target/types",
     "types": ["jest", "node"]
   },
@@ -9,8 +8,6 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/evals",
-    "@kbn/scout",
-    "@kbn/test",
     "@kbn/inference-common",
     "@kbn/tooling-log"
   ]
