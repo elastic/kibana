@@ -60,6 +60,8 @@ import type {
   PackagePolicyAssetsMap,
   PreconfiguredInputs,
   ArchiveEntry,
+  RegistryVarsEntry,
+  PackagePolicyConfigRecord,
 } from '../../common/types';
 import { packageToPackagePolicy, packageToPackagePolicyInputs } from '../../common/services';
 
@@ -9253,8 +9255,8 @@ describe('Package policy service', () => {
         const makeRenamePackageInfo = (): PackageInfo =>
           makeCelPackageInfo({
             vars: [
-              { name: 'azure_tenant_id', type: 'text', migrate_from: 'tenant_id' },
-              { name: 'token_url', type: 'text', migrate_from: 'login_url' },
+              { name: 'azure_tenant_id', type: 'text', migrate_from: { name: 'tenant_id' } },
+              { name: 'token_url', type: 'text', migrate_from: { name: 'login_url' } },
               { name: 'client_id', type: 'text' }, // same name — no rename needed
             ],
           });
@@ -11152,7 +11154,7 @@ describe('Package policy service', () => {
                   input: 'cel',
                   title: 'Alert stream',
                   vars: [
-                    { name: 'url', type: 'text', migrate_from: 'request_url' },
+                    { name: 'url', type: 'text', migrate_from: { name: 'request_url' } },
                     { name: 'interval', type: 'text' },
                   ],
                 },
@@ -11480,6 +11482,432 @@ describe('Package policy service', () => {
         expect(logsStream?.migrate_from).toBeUndefined();
         // User-configured var should still be preserved
         expect(logsStream?.vars?.tags?.value).toBe('user-tag');
+      });
+    });
+
+    describe('when a var has scope migrate_from (same-input-type)', () => {
+      // Base policy: a single httpjson input with both input-level and stream-level vars set
+      // by the user. The package-version-bump under test keeps the input type as httpjson but
+      // shuffles where particular vars live.
+      const makeBasePolicy = (
+        inputOverrides?: Partial<NewPackagePolicyInput>
+      ): NewPackagePolicy => ({
+        name: 'base-package-policy',
+        description: 'Base Package Policy',
+        namespace: 'default',
+        enabled: true,
+        policy_id: 'xxxx',
+        policy_ids: ['xxxx'],
+        package: { name: 'test-package', title: 'Test Package', version: '0.0.1' },
+        inputs: [
+          {
+            type: 'httpjson',
+            policy_template: 'template_1',
+            enabled: true,
+            vars: {
+              api_token: { type: 'password', value: 'secret-token' },
+              region: { type: 'text', value: 'us-east-1' },
+            },
+            streams: [
+              {
+                enabled: true,
+                data_stream: { dataset: 'test_package.logs', type: 'logs' },
+                vars: {
+                  endpoint: { type: 'text', value: 'https://customer.example.com' },
+                  tags: { type: 'text', value: 'log-tag' },
+                },
+              },
+            ],
+            ...inputOverrides,
+          },
+        ],
+      });
+
+      // PackageInfo for the new version. `inputVars` and `streamVars` allow each test to
+      // declare exactly which vars live at which scope (and any migrate_from declarations).
+      const makePackageInfo = (
+        inputVars: RegistryVarsEntry[],
+        streamVars: RegistryVarsEntry[]
+      ): PackageInfo =>
+        ({
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.2',
+          latestVersion: '0.0.2',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'httpjson',
+                  title: 'HTTP JSON',
+                  description: 'HTTP JSON input',
+                  vars: inputVars,
+                },
+              ],
+            },
+          ],
+          data_streams: [
+            {
+              type: 'logs',
+              dataset: 'test_package.logs',
+              title: 'Logs',
+              release: 'experimental',
+              ingest_pipeline: 'default',
+              path: 'logs',
+              package: 'test-package',
+              streams: [
+                {
+                  input: 'httpjson',
+                  title: 'Logs',
+                  description: 'Logs',
+                  vars: streamVars,
+                },
+              ],
+            },
+          ],
+          assets: {},
+        } as unknown as PackageInfo);
+
+      const makeOverride = (
+        inputVars: PackagePolicyConfigRecord,
+        streamVars: PackagePolicyConfigRecord
+      ): InputsOverride[] => [
+        {
+          type: 'httpjson',
+          policy_template: 'template_1',
+          enabled: true,
+          vars: inputVars,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { dataset: 'test_package.logs', type: 'logs' },
+              vars: streamVars,
+            },
+          ],
+        } as unknown as InputsOverride,
+      ];
+
+      it('carries an input-level value into the new stream-level var (input → stream)', () => {
+        // New schema: api_token moves from input to stream.
+        const inputVars: RegistryVarsEntry[] = [{ name: 'region', type: 'text' }];
+        const streamVars: RegistryVarsEntry[] = [
+          { name: 'endpoint', type: 'text' },
+          { name: 'tags', type: 'text' },
+          {
+            name: 'api_token',
+            type: 'password',
+            migrate_from: { scope: 'input' },
+          },
+        ];
+
+        const result = updatePackageInputs(
+          makeBasePolicy(),
+          makePackageInfo(inputVars, streamVars),
+          makeOverride(
+            { region: { type: 'text', value: 'us-east-1' } },
+            {
+              endpoint: { type: 'text', value: 'https://default.example.com' },
+              tags: { type: 'text', value: 'default-tag' },
+              api_token: { type: 'password', value: null },
+            }
+          ),
+          false
+        );
+
+        const httpjsonInput = result.inputs.find((i) => i.type === 'httpjson');
+        const httpjsonStream = httpjsonInput?.streams.find(
+          (s) => s.data_stream.dataset === 'test_package.logs'
+        );
+        expect(httpjsonStream?.vars?.api_token?.value).toBe('secret-token');
+        // The old input-level api_token is no longer in the new schema and must be dropped.
+        expect(httpjsonInput?.vars?.api_token).toBeUndefined();
+        // Untouched vars carry over normally.
+        expect(httpjsonInput?.vars?.region?.value).toBe('us-east-1');
+        expect(httpjsonStream?.vars?.endpoint?.value).toBe('https://customer.example.com');
+      });
+
+      it('carries a stream-level value into the new input-level var (stream → input)', () => {
+        // New schema: endpoint moves from stream to input. Single old stream, so no
+        // migrate_from.stream is required.
+        const inputVars: RegistryVarsEntry[] = [
+          { name: 'api_token', type: 'password' },
+          { name: 'region', type: 'text' },
+          {
+            name: 'endpoint',
+            type: 'text',
+            migrate_from: { scope: 'stream' },
+          },
+        ];
+        const streamVars: RegistryVarsEntry[] = [{ name: 'tags', type: 'text' }];
+
+        const result = updatePackageInputs(
+          makeBasePolicy(),
+          makePackageInfo(inputVars, streamVars),
+          makeOverride(
+            {
+              api_token: { type: 'password', value: 'default-token' },
+              region: { type: 'text', value: 'us-east-1' },
+              endpoint: { type: 'text', value: 'https://default.example.com' },
+            },
+            { tags: { type: 'text', value: 'default-tag' } }
+          ),
+          false
+        );
+
+        const httpjsonInput = result.inputs.find((i) => i.type === 'httpjson');
+        const httpjsonStream = httpjsonInput?.streams.find(
+          (s) => s.data_stream.dataset === 'test_package.logs'
+        );
+        expect(httpjsonInput?.vars?.endpoint?.value).toBe('https://customer.example.com');
+        // The old stream-level endpoint is no longer in the new schema and must be dropped.
+        expect(httpjsonStream?.vars?.endpoint).toBeUndefined();
+        expect(httpjsonInput?.vars?.api_token?.value).toBe('secret-token');
+      });
+
+      it('falls back to the package default when the old origin-scope value is null', () => {
+        // Old policy: endpoint at stream level is null. New schema moves endpoint to input.
+        const inputVars: RegistryVarsEntry[] = [
+          {
+            name: 'endpoint',
+            type: 'text',
+            migrate_from: { scope: 'stream' },
+            default: 'https://package-default.example.com',
+          },
+        ];
+        const streamVars: RegistryVarsEntry[] = [{ name: 'tags', type: 'text' }];
+
+        const base = makeBasePolicy();
+        // null out the stream-level endpoint
+        base.inputs[0].streams[0].vars!.endpoint.value = null;
+
+        const result = updatePackageInputs(
+          base,
+          makePackageInfo(inputVars, streamVars),
+          makeOverride(
+            { endpoint: { type: 'text', value: 'https://package-default.example.com' } },
+            { tags: { type: 'text', value: 'default-tag' } }
+          ),
+          false
+        );
+
+        const httpjsonInput = result.inputs.find((i) => i.type === 'httpjson');
+        // Null at the origin scope falls through to the package default value.
+        expect(httpjsonInput?.vars?.endpoint?.value).toBe('https://package-default.example.com');
+      });
+
+      it('does not fail when migrate_from is declared for a var missing from the old policy', () => {
+        const inputVars: RegistryVarsEntry[] = [
+          {
+            name: 'never_existed',
+            type: 'text',
+            migrate_from: { scope: 'stream' },
+            default: 'fallback',
+          },
+          { name: 'region', type: 'text' },
+        ];
+        const streamVars: RegistryVarsEntry[] = [{ name: 'tags', type: 'text' }];
+
+        expect(() =>
+          updatePackageInputs(
+            makeBasePolicy(),
+            makePackageInfo(inputVars, streamVars),
+            makeOverride(
+              {
+                never_existed: { type: 'text', value: 'fallback' },
+                region: { type: 'text', value: 'us-east-1' },
+              },
+              { tags: { type: 'text', value: 'default-tag' } }
+            ),
+            false
+          )
+        ).not.toThrow();
+      });
+
+      it('honors migrate_from.stream when the old input has multiple streams', () => {
+        const base = makeBasePolicy();
+        base.inputs[0].streams.push({
+          enabled: true,
+          data_stream: { dataset: 'test_package.audit', type: 'logs' },
+          vars: {
+            endpoint: { type: 'text', value: 'https://audit.example.com' },
+            tags: { type: 'text', value: 'audit-tag' },
+          },
+        });
+
+        const inputVars: RegistryVarsEntry[] = [
+          { name: 'api_token', type: 'password' },
+          { name: 'region', type: 'text' },
+          {
+            name: 'endpoint',
+            type: 'text',
+            migrate_from: { scope: 'stream', stream: 'test_package.audit' },
+          },
+        ];
+        const streamVars: RegistryVarsEntry[] = [{ name: 'tags', type: 'text' }];
+
+        const result = updatePackageInputs(
+          base,
+          makePackageInfo(inputVars, streamVars),
+          [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                api_token: { type: 'password', value: 'default-token' },
+                region: { type: 'text', value: 'us-east-1' },
+                endpoint: { type: 'text', value: 'https://default.example.com' },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.logs', type: 'logs' },
+                  vars: { tags: { type: 'text', value: 'default-tag' } },
+                },
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.audit', type: 'logs' },
+                  vars: { tags: { type: 'text', value: 'default-audit-tag' } },
+                },
+              ],
+            } as unknown as InputsOverride,
+          ],
+          false
+        );
+
+        const httpjsonInput = result.inputs.find((i) => i.type === 'httpjson');
+        // Audit stream's value wins, not the logs stream's.
+        expect(httpjsonInput?.vars?.endpoint?.value).toBe('https://audit.example.com');
+      });
+
+      it('falls back to default when multiple streams exist and migrate_from.stream is omitted', () => {
+        const base = makeBasePolicy();
+        base.inputs[0].streams.push({
+          enabled: true,
+          data_stream: { dataset: 'test_package.audit', type: 'logs' },
+          vars: {
+            endpoint: { type: 'text', value: 'https://audit.example.com' },
+            tags: { type: 'text', value: 'audit-tag' },
+          },
+        });
+
+        const inputVars: RegistryVarsEntry[] = [
+          {
+            name: 'endpoint',
+            type: 'text',
+            migrate_from: { scope: 'stream' }, // intentionally no `stream` field
+            default: 'https://package-default.example.com',
+          },
+        ];
+        const streamVars: RegistryVarsEntry[] = [{ name: 'tags', type: 'text' }];
+
+        const result = updatePackageInputs(
+          base,
+          makePackageInfo(inputVars, streamVars),
+          [
+            {
+              type: 'httpjson',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                endpoint: { type: 'text', value: 'https://package-default.example.com' },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.logs', type: 'logs' },
+                  vars: { tags: { type: 'text', value: 'default-tag' } },
+                },
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'test_package.audit', type: 'logs' },
+                  vars: { tags: { type: 'text', value: 'default-audit-tag' } },
+                },
+              ],
+            } as unknown as InputsOverride,
+          ],
+          false
+        );
+
+        const httpjsonInput = result.inputs.find((i) => i.type === 'httpjson');
+        // Without an explicit stream, Fleet refuses to silently pick — falls back to default.
+        expect(httpjsonInput?.vars?.endpoint?.value).toBe('https://package-default.example.com');
+      });
+
+      it('handles combined rename + scope migration (migrate_from.name + migrate_from.scope)', () => {
+        // Old policy stores a stream-level var named `endpoint`. New schema renames it to
+        // `api_url` and moves it to input level.
+        const inputVars: RegistryVarsEntry[] = [
+          {
+            name: 'api_url',
+            type: 'text',
+            migrate_from: { name: 'endpoint', scope: 'stream' },
+          },
+        ];
+        const streamVars: RegistryVarsEntry[] = [{ name: 'tags', type: 'text' }];
+
+        const result = updatePackageInputs(
+          makeBasePolicy(),
+          makePackageInfo(inputVars, streamVars),
+          makeOverride(
+            { api_url: { type: 'text', value: 'https://default.example.com' } },
+            { tags: { type: 'text', value: 'default-tag' } }
+          ),
+          false
+        );
+
+        const httpjsonInput = result.inputs.find((i) => i.type === 'httpjson');
+        const httpjsonStream = httpjsonInput?.streams.find(
+          (s) => s.data_stream.dataset === 'test_package.logs'
+        );
+        expect(httpjsonInput?.vars?.api_url?.value).toBe('https://customer.example.com');
+        // Old name at the old scope must be gone.
+        expect(httpjsonStream?.vars?.endpoint).toBeUndefined();
+      });
+
+      it('leaves vars without migrate_from unaffected (regression check on removeStaleVars)', () => {
+        // No migrate_from anywhere — same-input-type upgrade should still drop stale vars.
+        const inputVars: RegistryVarsEntry[] = [
+          { name: 'api_token', type: 'password' },
+          { name: 'region', type: 'text' },
+        ];
+        const streamVars: RegistryVarsEntry[] = [{ name: 'tags', type: 'text' }];
+
+        const base = makeBasePolicy();
+        // Add a stale var that no longer exists in the new schema.
+        base.inputs[0].vars!.stale_input_var = { type: 'text', value: 'should-be-removed' };
+        base.inputs[0].streams[0].vars!.stale_stream_var = {
+          type: 'text',
+          value: 'should-be-removed',
+        };
+
+        const result = updatePackageInputs(
+          base,
+          makePackageInfo(inputVars, streamVars),
+          makeOverride(
+            {
+              api_token: { type: 'password', value: 'default-token' },
+              region: { type: 'text', value: 'us-east-1' },
+            },
+            { tags: { type: 'text', value: 'default-tag' } }
+          ),
+          false
+        );
+
+        const httpjsonInput = result.inputs.find((i) => i.type === 'httpjson');
+        const httpjsonStream = httpjsonInput?.streams.find(
+          (s) => s.data_stream.dataset === 'test_package.logs'
+        );
+        expect(httpjsonInput?.vars?.api_token?.value).toBe('secret-token');
+        expect(httpjsonInput?.vars?.stale_input_var).toBeUndefined();
+        expect(httpjsonStream?.vars?.stale_stream_var).toBeUndefined();
       });
     });
   });
