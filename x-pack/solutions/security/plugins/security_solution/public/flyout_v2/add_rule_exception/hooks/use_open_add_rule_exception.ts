@@ -25,9 +25,11 @@ export interface UseOpenAddRuleExceptionArgs {
    */
   hit: DataTableRecord;
   /**
-   * Callback invoked when the exception form closes any alerts as part of submission.
+   * Callback invoked on a successful submission of the exception form. Receives flags
+   * indicating whether the rule was modified, whether the originating alert was closed,
+   * and whether closing was applied in bulk to all matching alerts.
    */
-  onAlertUpdated?: () => void;
+  onConfirm?: (didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => void;
 }
 
 /**
@@ -35,10 +37,7 @@ export interface UseOpenAddRuleExceptionArgs {
  * The selected `ExceptionListTypeEnum` (or `null` for the default rule exception) is passed in
  * from the take-action menu.
  */
-export const useOpenAddRuleException = ({
-  hit,
-  onAlertUpdated,
-}: UseOpenAddRuleExceptionArgs) => {
+export const useOpenAddRuleException = ({ hit, onConfirm }: UseOpenAddRuleExceptionArgs) => {
   const { services } = useKibana();
   const { overlays } = services;
   const store = useStore();
@@ -57,12 +56,12 @@ export const useOpenAddRuleException = ({
       };
 
       const handleConfirm = (
-        _didRuleChange: boolean,
+        didRuleChange: boolean,
         didCloseAlert: boolean,
         didBulkCloseAlert: boolean
       ) => {
-        if ((didCloseAlert || didBulkCloseAlert) && onAlertUpdated) {
-          onAlertUpdated();
+        if (onConfirm) {
+          onConfirm(didRuleChange, didCloseAlert, didBulkCloseAlert);
         }
         close();
       };
@@ -86,6 +85,6 @@ export const useOpenAddRuleException = ({
         }
       );
     },
-    [overlays, services, store, history, historyKey, hit, onAlertUpdated]
+    [overlays, services, store, history, historyKey, hit, onConfirm]
   );
 };

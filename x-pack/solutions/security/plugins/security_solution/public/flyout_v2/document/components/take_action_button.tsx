@@ -14,10 +14,10 @@ import { isNonLocalIndexName } from '@kbn/es-query';
 import { ALERT_WORKFLOW_STATUS, EVENT_KIND } from '@kbn/rule-data-utils';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { getOr } from 'lodash/fp';
 import { EventKind } from '../constants/event_kinds';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { Status } from '../../../../common/api/detection_engine';
-import { getOr } from 'lodash/fp';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useAlertAssigneesActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
@@ -99,11 +99,7 @@ export const TakeActionButton = memo(
       return (Array.isArray(rawStatus) ? rawStatus[0] : rawStatus) as Status;
     }, [hit]);
     const isEndpointAlert = useMemo(() => {
-      const modules = getOr(
-        [],
-        'kibana.alert.original_event.module',
-        hit.flattened
-      ) as string[];
+      const modules = getOr([], 'kibana.alert.original_event.module', hit.flattened) as string[];
       const kinds = getOr([], 'kibana.alert.original_event.kind', hit.flattened) as string[];
       const moduleList = Array.isArray(modules) ? modules : [modules];
       const kindList = Array.isArray(kinds) ? kinds : [kinds];
@@ -184,7 +180,18 @@ export const TakeActionButton = memo(
       closePopover: closePopoverHandler,
     });
 
-    const openAddRuleException = useOpenAddRuleException({ hit, onAlertUpdated });
+    const onAddRuleExceptionConfirm = useCallback(
+      (_didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => {
+        if (didCloseAlert || didBulkCloseAlert) {
+          onAlertUpdated();
+        }
+      },
+      [onAlertUpdated]
+    );
+    const openAddRuleException = useOpenAddRuleException({
+      hit,
+      onConfirm: onAddRuleExceptionConfirm,
+    });
     const handleOpenAddRuleException = useCallback(
       (type?: ExceptionListTypeEnum) => {
         closePopoverHandler();

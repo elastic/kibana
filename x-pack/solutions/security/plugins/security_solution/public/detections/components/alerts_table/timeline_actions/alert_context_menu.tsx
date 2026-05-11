@@ -155,15 +155,20 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     [ecsRowData]
   );
 
-  const onAddRuleExceptionUpdated = useCallback(() => {
-    if (!isActiveTimeline(scopeId ?? '')) {
-      refetchAll();
-    }
-    if (onRuleChange) onRuleChange();
-  }, [onRuleChange, refetchAll, scopeId]);
+  const onAddRuleExceptionConfirm = useCallback(
+    (didRuleChange: boolean, _didCloseAlert: boolean, didBulkCloseAlert: boolean) => {
+      if (!isActiveTimeline(scopeId ?? '') || didBulkCloseAlert) {
+        refetchAll();
+      }
+      if (onRuleChange != null && didRuleChange) {
+        onRuleChange();
+      }
+    },
+    [onRuleChange, refetchAll, scopeId]
+  );
   const openAddRuleException = useOpenAddRuleException({
     hit,
-    onAlertUpdated: onAddRuleExceptionUpdated,
+    onConfirm: onAddRuleExceptionConfirm,
   });
 
   const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =

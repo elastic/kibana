@@ -7,17 +7,22 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { getOr } from 'lodash/fp';
 import { buildDataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import type { SearchHit } from '../../../../../common/search_strategy';
+import { isActiveTimeline } from '../../../../helpers';
+import { useOpenAddRuleException } from '../../../../flyout_v2/add_rule_exception/hooks/use_open_add_rule_exception';
 import { useRunAlertWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
+import { useAlertExceptionActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useEventFilterAction } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_action';
@@ -178,6 +183,13 @@ export const TakeActionDropdown = memo(
       [dataAsNestedObject]
     );
 
+    const isAlertSourceEndpoint = useMemo(() => {
+      const eventModules = getOr([], 'kibana.alert.original_event.module', dataAsNestedObject);
+      const kinds = getOr([], 'kibana.alert.original_event.kind', dataAsNestedObject);
+
+      return eventModules.includes('endpoint') && kinds.includes('alert');
+    }, [dataAsNestedObject]);
+
     // host isolation interaction
     const handleOnAddIsolationStatusClick = useCallback(
       (action: 'isolateHost' | 'unisolateHost') => {
@@ -191,6 +203,32 @@ export const TakeActionDropdown = memo(
       detailsData: dataFormattedForFieldBrowser,
       onAddIsolationStatusClick: handleOnAddIsolationStatusClick,
       isHostIsolationPanelOpen,
+    });
+
+    // exception interaction — reuse the Flyout v2 view so the legacy in-flyout menu
+    // opens the same form as the alerts-table row context menu.
+    const onAddRuleExceptionConfirm = useCallback(
+      (_didRuleChange: boolean, _didCloseAlert: boolean, didBulkCloseAlert: boolean) => {
+        if (refetch && (!isActiveTimeline(scopeId ?? '') || didBulkCloseAlert)) {
+          refetch();
+        }
+      },
+      [refetch, scopeId]
+    );
+    const openAddRuleException = useOpenAddRuleException({
+      hit,
+      onConfirm: onAddRuleExceptionConfirm,
+    });
+    const handleOnAddExceptionTypeClick = useCallback(
+      (type?: ExceptionListTypeEnum) => {
+        setIsPopoverOpen(false);
+        openAddRuleException(type ?? null);
+      },
+      [openAddRuleException]
+    );
+    const { exceptionActionItems } = useAlertExceptionActions({
+      isEndpointAlert: isAlertSourceEndpoint,
+      onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
     });
 
     // event filter interaction
@@ -275,7 +313,12 @@ export const TakeActionDropdown = memo(
     const alertsActionItems = useMemo(
       () =>
         !isEvent && alertSummaryData.ruleId
-          ? [...statusActionItems, ...alertTagsItems, ...alertAssigneesItems]
+          ? [
+              ...statusActionItems,
+              ...alertTagsItems,
+              ...alertAssigneesItems,
+              ...exceptionActionItems,
+            ]
           : isEndpointEvent && canCreateEndpointEventFilters
           ? eventFilterActionItems
           : [],
@@ -283,6 +326,7 @@ export const TakeActionDropdown = memo(
         eventFilterActionItems,
         isEndpointEvent,
         canCreateEndpointEventFilters,
+        exceptionActionItems,
         statusActionItems,
         isEvent,
         alertSummaryData.ruleId,
