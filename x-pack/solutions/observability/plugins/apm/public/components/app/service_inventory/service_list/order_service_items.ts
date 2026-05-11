@@ -5,18 +5,10 @@
  * 2.0.
  */
 import { orderBy } from 'lodash';
-import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import type { ServiceListItem, SloStatus } from '../../../../../common/service_inventory';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
 
 type SortValueGetter = (item: ServiceListItem) => string | number;
-
-const SERVICE_HEALTH_STATUS_ORDER = [
-  ServiceHealthStatus.unknown,
-  ServiceHealthStatus.healthy,
-  ServiceHealthStatus.warning,
-  ServiceHealthStatus.critical,
-];
 
 // SLO status priority order: violated (highest) -> degrading -> noData -> healthy (lowest)
 const SLO_STATUS_ORDER: SloStatus[] = ['healthy', 'noData', 'degrading', 'violated'];
@@ -26,8 +18,7 @@ const SLO_STATUS_ORDER: SloStatus[] = ['healthy', 'noData', 'degrading', 'violat
 const SLO_STATUS_MULTIPLIER = 10000;
 
 const sorts: Record<ServiceInventoryFieldName, SortValueGetter> = {
-  [ServiceInventoryFieldName.HealthStatus]: (item) =>
-    item.healthStatus ? SERVICE_HEALTH_STATUS_ORDER.indexOf(item.healthStatus) : -1,
+  [ServiceInventoryFieldName.AnomalyScore]: (item) => item.anomalyScore ?? -1,
   [ServiceInventoryFieldName.ServiceName]: (item) => item.serviceName.toLowerCase(),
   [ServiceInventoryFieldName.Environments]: (item) =>
     item.environments?.join(', ').toLowerCase() ?? '',
@@ -48,17 +39,17 @@ const sorts: Record<ServiceInventoryFieldName, SortValueGetter> = {
 
 /**
  * Determines the default sort field based on available data in service items.
- * Priority: alertsCount -> sloStatus -> healthStatus -> throughput
+ * Priority: alertsCount -> sloStatus -> anomalyScore -> throughput
  */
 export function getAvailableFields(items: ServiceListItem[]) {
   const hasAlerts = items.some((item) => item.alertsCount !== undefined && item.alertsCount > 0);
   const hasSlos = items.some((item) => item.sloStatus !== undefined);
-  const hasHealthStatuses = items.some((item) => item.healthStatus !== undefined);
+  const hasAnomalyScores = items.some((item) => item.anomalyScore !== undefined);
 
   const availableFields = {
     hasAlerts,
     hasSlos,
-    hasHealthStatuses,
+    hasAnomalyScores,
   };
 
   if (hasAlerts) {
@@ -75,9 +66,9 @@ export function getAvailableFields(items: ServiceListItem[]) {
     };
   }
 
-  if (hasHealthStatuses) {
+  if (hasAnomalyScores) {
     return {
-      sortField: ServiceInventoryFieldName.HealthStatus,
+      sortField: ServiceInventoryFieldName.AnomalyScore,
       ...availableFields,
     };
   }
@@ -99,7 +90,7 @@ export function orderServiceItems({
   sortDirection: 'asc' | 'desc';
   isDefaultSort?: boolean;
 }): ServiceListItem[] {
-  // Default sort: multi-level sorting (alerts -> SLO -> health -> throughput)
+  // Default sort: multi-level sorting (alerts -> SLO -> anomaly score -> throughput)
   // User-selected sort: sort by the selected column only
   if (isDefaultSort) {
     return orderBy(
@@ -107,7 +98,7 @@ export function orderServiceItems({
       [
         sorts[ServiceInventoryFieldName.AlertsCount],
         sorts[ServiceInventoryFieldName.SloStatus],
-        sorts[ServiceInventoryFieldName.HealthStatus],
+        sorts[ServiceInventoryFieldName.AnomalyScore],
         sorts[ServiceInventoryFieldName.Throughput],
       ],
       [sortDirection, sortDirection, sortDirection, sortDirection]

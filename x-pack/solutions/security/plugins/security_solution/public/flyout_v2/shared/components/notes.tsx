@@ -31,7 +31,7 @@ import {
   selectNotesByDocumentId,
 } from '../../../notes/store/notes.slice';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { AlertHeaderBlock } from './alert_header_block';
+import { FlyoutHeaderBlock } from './flyout_header_block';
 import {
   NOTES_ADD_NOTE_BUTTON_TEST_ID,
   NOTES_ADD_NOTE_ICON_BUTTON_TEST_ID,
@@ -158,7 +158,7 @@ export const Notes = memo(({ documentId, onShowNotes, disabled = false }: NotesP
   );
 
   return (
-    <AlertHeaderBlock
+    <FlyoutHeaderBlock
       gutterSize="xs"
       hasBorder
       title={
@@ -193,7 +193,7 @@ export const Notes = memo(({ documentId, onShowNotes, disabled = false }: NotesP
           )}
         </>
       )}
-    </AlertHeaderBlock>
+    </FlyoutHeaderBlock>
   );
 });
 

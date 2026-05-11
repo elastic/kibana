@@ -9,18 +9,35 @@
 
 import dedent from 'dedent';
 import getopts from 'getopts';
+import { resolve } from 'path';
+import { writeFileSync } from 'fs';
+import { tmpdir } from 'os';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
+import {
+  MOCK_IDP_KIBANA_BASE_PATH,
+  MOCK_IDP_REALM_NAME,
+  MOCK_IDP_ENTITY_ID,
+  MOCK_IDP_ATTRIBUTE_PRINCIPAL,
+  MOCK_IDP_ATTRIBUTE_ROLES,
+  MOCK_IDP_ATTRIBUTE_NAME,
+  MOCK_IDP_ATTRIBUTE_EMAIL,
+  createMockIdpMetadata,
+} from '@kbn/mock-idp-utils';
 
 import { Cluster } from '../cluster';
+import { STATEFUL_ROLES_ROOT_PATH } from '../paths';
 import { parseTimeoutToMs } from '../utils';
 import { createCliError } from '../errors';
 import type { Command } from './types';
 
+// Matches the fixed base path applied to stateful Kibana when running with the SAML Mock IdP.
+const DEFAULT_KIBANA_URL = `http://localhost:5601${MOCK_IDP_KIBANA_BASE_PATH}`;
+
 export const snapshot: Command = {
   description: 'Downloads and run from a nightly snapshot',
   help: (defaults = {}) => {
-    const { license = 'basic', password = 'changeme', 'base-path': basePath } = defaults;
+    const { license = 'trial', password = 'changeme', 'base-path': basePath } = defaults;
 
     return dedent`
     Options:
@@ -37,6 +54,8 @@ export const snapshot: Command = {
       --port            The port to bind to on 127.0.0.1 [default: 9200]
       --kill            Kill running ES Docker containers before starting
       --ssl             Sets up SSL on Elasticsearch
+      --kibana-url      Fully qualified URL where Kibana is hosted (including base path). Used to configure
+                        the SAML Mock IdP realm so SP/ACS endpoints match Kibana. [default: ${DEFAULT_KIBANA_URL}]
       --use-cached      Skips cache verification and use cached ES snapshot.
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
@@ -69,12 +88,13 @@ export const snapshot: Command = {
         readyTimeout: 'ready-timeout',
         esLogLevel: 'es-log-level',
         secureFiles: 'secure-files',
+        kibanaUrl: 'kibana-url',
       },
 
-      string: ['version', 'ready-timeout', 'es-log-level'],
+      string: ['version', 'ready-timeout', 'es-log-level', 'kibana-url'],
       boolean: ['download-only', 'use-cached', 'skip-ready-check', 'kill'],
 
-      default: defaults,
+      default: { kibanaUrl: DEFAULT_KIBANA_URL, ...defaults },
     });
 
     const cluster = new Cluster({ ssl: options.ssl });
@@ -92,6 +112,61 @@ export const snapshot: Command = {
         useCached: options.useCached,
       });
     } else {
+      // Collect user-provided esArgs
+      const userEsArgs: string[] = Array.isArray(options.esArgs)
+        ? options.esArgs
+        : options.esArgs
+        ? [options.esArgs]
+        : [];
+
+      let samlResources: string[] = [];
+
+      // Auto-configure SAML realm unless user has already provided SAML realm args via -E
+      // or is using a basic license (SAML requires trial or higher)
+      const hasSamlConfig = userEsArgs.some((arg) =>
+        arg.includes(`authc.realms.saml.${MOCK_IDP_REALM_NAME}.`)
+      );
+
+      const kibanaUrl: string = options.kibanaUrl || DEFAULT_KIBANA_URL;
+
+      if (!hasSamlConfig && options.license !== 'basic') {
+        log.info('Configuring SAML realm for Mock IdP with Kibana at %s', kibanaUrl);
+
+        // Generate IDP metadata with the correct Kibana URL
+        const metadata = await createMockIdpMetadata(kibanaUrl);
+        const metadataPath = resolve(tmpdir(), 'mock_idp_metadata.xml');
+        writeFileSync(metadataPath, metadata);
+
+        const samlEsArgs = [
+          'xpack.security.authc.token.enabled=true',
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${metadataPath}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id=${MOCK_IDP_ENTITY_ID}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${kibanaUrl}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${kibanaUrl}/api/security/saml/callback`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${kibanaUrl}/logout`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal=${MOCK_IDP_ATTRIBUTE_PRINCIPAL}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail=${MOCK_IDP_ATTRIBUTE_EMAIL}`,
+        ];
+
+        // SAML args go first so user -E args can override them
+        options.esArgs = [...samlEsArgs, ...userEsArgs];
+
+        // Copy stateful roles.yml so ES knows about viewer, editor, admin, system_indices_superuser
+        samlResources = [resolve(STATEFUL_ROLES_ROOT_PATH, 'roles.yml')];
+      } else if (options.license === 'basic') {
+        log.warning(
+          `Skipping SAML Mock IdP realm auto-configuration because --license=basic does not support the SAML realm. ` +
+            `Run Kibana with \`--mockIdpPlugin.enabled=false\` (or set it in kibana.dev.yml) so it doesn't try to enable the SAML provider.`
+        );
+      } else {
+        log.warning(
+          `Skipping SAML Mock IdP realm auto-configuration because user-provided -E args already configure the "${MOCK_IDP_REALM_NAME}" SAML realm.`
+        );
+      }
+
       const installStartTime = Date.now();
       const { installPath } = await cluster.installSnapshot({
         version: options.version,
@@ -101,6 +176,7 @@ export const snapshot: Command = {
         useCached: options.useCached,
         password: options.password,
         esArgs: options.esArgs,
+        resources: samlResources,
       });
 
       if (options.dataArchive) {
@@ -112,7 +188,7 @@ export const snapshot: Command = {
       if (typeof options.secureFiles === 'string' && options.secureFiles) {
         const pairs = options.secureFiles
           .split(',')
-          .map((kv) => kv.split('=').map((v) => v.trim()));
+          .map((kv: string) => kv.split('=').map((v: string) => v.trim()));
         await cluster.configureKeystoreWithSecureSettingsFiles(installPath, pairs);
       }
 

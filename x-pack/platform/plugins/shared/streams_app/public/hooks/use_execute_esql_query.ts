@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { ISearchGeneric } from '@kbn/search-types';
-import type { estypes } from '@elastic/elasticsearch';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { getESQLResults } from '@kbn/esql-utils';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { buildEsqlFilter } from '@kbn/streams-plugin/public';
+import type { ISearchGeneric } from '@kbn/search-types';
 
 interface ExecuteEsqlParams {
   query: string;
@@ -21,6 +23,8 @@ interface ExecuteEsqlParams {
   start?: number;
   end?: number;
   dropNullColumns?: boolean;
+  /** Required so KQL → ES|QL `filter` respects Advanced Settings (e.g. `query:allowLeadingWildcards`). */
+  uiSettings: IUiSettingsClient;
 }
 
 /**
@@ -40,8 +44,10 @@ export async function executeEsqlQuery({
   kuery,
   start,
   end,
+  uiSettings,
 }: ExecuteEsqlParams): Promise<ESQLSearchResponse> {
-  const combinedFilter = buildEsqlFilter({ filter, kuery, start, end });
+  const esQueryConfig = getEsQueryConfig(uiSettings);
+  const combinedFilter = buildEsqlFilter({ filter, kuery, start, end, esQueryConfig });
 
   const { response } = await getESQLResults({
     dropNullColumns,

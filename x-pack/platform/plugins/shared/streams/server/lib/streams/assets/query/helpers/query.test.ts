@@ -30,7 +30,7 @@ describe('buildEsqlQueryFromKql', () => {
       const esqlQuery = buildEsqlQueryFromKql(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("message: \\"error\\" or message: \\"failed\\"") AND `some.field` == "some value"'
+        'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("message: \\"error\\" or message: \\"failed\\"") AND COALESCE(`some.field` == "some value", FALSE)'
       );
     });
 
@@ -47,7 +47,7 @@ describe('buildEsqlQueryFromKql', () => {
       const esqlQuery = buildEsqlQueryFromKql(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("level: \\"INFO\\"") AND @timestamp >= "2025-01-01T00:00:00.000Z" AND @timestamp <= "2025-12-31T23:59:59.999Z"'
+        'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("level: \\"INFO\\"") AND COALESCE(@timestamp >= "2025-01-01T00:00:00.000Z" AND @timestamp <= "2025-12-31T23:59:59.999Z", FALSE)'
       );
     });
   });
@@ -58,7 +58,7 @@ describe('buildEsqlQueryFromKql', () => {
     const esqlQuery = buildEsqlQueryFromKql(indices, query);
 
     expect(esqlQuery).toBe(
-      'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("status: \\"success\\"") AND `some.field` == "some value"'
+      'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("status: \\"success\\"") AND COALESCE(`some.field` == "some value", FALSE)'
     );
     expect(esqlQuery).toContain('METADATA _id, _source');
   });
@@ -86,7 +86,7 @@ describe('buildEsqlQueryFromKql', () => {
     const esqlQuery = buildEsqlQueryFromKql(indices, query);
 
     expect(esqlQuery).toBe(
-      'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("event.type: \\"access\\"") AND `some.field` == "some value"'
+      'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("event.type: \\"access\\"") AND COALESCE(`some.field` == "some value", FALSE)'
     );
   });
 
@@ -101,7 +101,7 @@ describe('buildEsqlQueryFromKql', () => {
     const esqlQuery = buildEsqlQueryFromKql(indices, query);
 
     expect(esqlQuery).toBe(
-      'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("event.type: \\"access\\"") AND (`some.field` == "some value" OR `some.other.field` == "some other value")'
+      'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("event.type: \\"access\\"") AND (COALESCE(`some.field` == "some value", FALSE) OR COALESCE(`some.other.field` == "some other value", FALSE))'
     );
   });
 
@@ -112,7 +112,7 @@ describe('buildEsqlQueryFromKql', () => {
       const esqlQuery = buildEsqlQueryFromKql(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("message: \\"hello world\\"") AND `some.field` == "some value"'
+        'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("message: \\"hello world\\"") AND COALESCE(`some.field` == "some value", FALSE)'
       );
     });
 
@@ -122,7 +122,7 @@ describe('buildEsqlQueryFromKql', () => {
       const esqlQuery = buildEsqlQueryFromKql(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("(level: \\"ERROR\\" or level: \\"WARN\\") and service.name: \\"api\\"") AND `some.field` == "some value"'
+        'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("(level: \\"ERROR\\" or level: \\"WARN\\") and service.name: \\"api\\"") AND COALESCE(`some.field` == "some value", FALSE)'
       );
     });
 
@@ -132,7 +132,7 @@ describe('buildEsqlQueryFromKql', () => {
       const esqlQuery = buildEsqlQueryFromKql(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("message: *error* and host.name: web-*") AND `some.field` == "some value"'
+        'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("message: *error* and host.name: web-*") AND COALESCE(`some.field` == "some value", FALSE)'
       );
     });
 
@@ -142,7 +142,7 @@ describe('buildEsqlQueryFromKql', () => {
       const esqlQuery = buildEsqlQueryFromKql(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("url.path: \\"/api/v1/users\\" and response.status: 404") AND `some.field` == "some value"'
+        'FROM logs.child,logs.child.* METADATA _id, _source | WHERE KQL("url.path: \\"/api/v1/users\\" and response.status: 404") AND COALESCE(`some.field` == "some value", FALSE)'
       );
     });
   });
@@ -154,7 +154,7 @@ describe('buildEsqlQueryFromKql', () => {
       const esqlQuery = buildEsqlQueryFromKql(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child METADATA _id, _source | WHERE KQL("message: \\"test \\"quoted\\" sentence\\"") AND `some.field` == "some value"'
+        'FROM logs.child METADATA _id, _source | WHERE KQL("message: \\"test \\"quoted\\" sentence\\"") AND COALESCE(`some.field` == "some value", FALSE)'
       );
     });
 
@@ -164,7 +164,7 @@ describe('buildEsqlQueryFromKql', () => {
       const esqlQuery = buildEsqlQueryFromKql(indices, query);
 
       expect(esqlQuery).toBe(
-        'FROM logs.child METADATA _id, _source | WHERE KQL("file.path: \\"C:\\\\Program Files\\\\App\\"") AND `some.field` == "some value"'
+        'FROM logs.child METADATA _id, _source | WHERE KQL("file.path: \\"C:\\\\Program Files\\\\App\\"") AND COALESCE(`some.field` == "some value", FALSE)'
       );
     });
   });

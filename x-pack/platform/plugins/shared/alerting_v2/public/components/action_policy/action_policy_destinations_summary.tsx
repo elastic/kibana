@@ -9,32 +9,14 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
 import type { ActionPolicyDestination } from '@kbn/alerting-v2-schemas';
-import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
-import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
-import { useFetchWorkflow } from '../../hooks/use_fetch_workflow';
-
-const WorkflowDestinationLink = ({ id, isEnabled }: { id: string; isEnabled: boolean }) => {
-  const application = useService(CoreStart('application'));
-  const { data: workflow } = useFetchWorkflow(id, isEnabled);
-
-  return (
-    <EuiLink
-      href={application.getUrlForApp(WORKFLOWS_APP_ID, { path: `/${id}` })}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {workflow?.name ?? id}
-    </EuiLink>
-  );
-};
+import { WorkflowDestinationLink } from './workflow_destination_link';
 
 export const ActionPolicyDestinationsSummary = ({
   destinations,

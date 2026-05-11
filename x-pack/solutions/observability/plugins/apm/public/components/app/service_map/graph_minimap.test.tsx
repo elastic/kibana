@@ -9,8 +9,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { ServiceMapGraph } from './graph';
+import { getSeverityColor } from '../../../../common/anomaly_detection';
 import type { ServiceMapNode } from '../../../../common/service_map';
-import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import { MOCK_EUI_THEME, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 
 jest.mock('@elastic/eui', () => {
@@ -232,7 +232,7 @@ describe('ServiceMapGraph - MiniMap', () => {
       expect(nodeColorFn(depNode)).toBe(MOCK_EUI_THEME.colors.mediumShade);
     });
 
-    it('returns health status color for service nodes with anomaly stats', () => {
+    it('returns primary when service anomaly stats exist without anomaly score', () => {
       render(
         <ReactFlowProvider>
           <ServiceMapGraph {...defaultProps} />
@@ -241,63 +241,54 @@ describe('ServiceMapGraph - MiniMap', () => {
 
       const nodeColorFn = mockMinimapProps.nodeColor as (node: ServiceMapNode) => string;
 
-      const warningNode: ServiceMapNode = {
-        id: 'svc-warn',
+      const partialStatsNode: ServiceMapNode = {
+        id: 'svc-partial',
         position: { x: 0, y: 0 },
         data: {
-          id: 'svc-warn',
-          label: 'Warning Service',
+          id: 'svc-partial',
+          label: 'Partial stats service',
           isService: true as const,
           agentName: 'java',
           serviceAnomalyStats: {
-            healthStatus: ServiceHealthStatus.warning,
             transactionType: 'request',
           },
         },
         type: 'service',
       };
 
-      const criticalNode: ServiceMapNode = {
-        id: 'svc-crit',
+      expect(nodeColorFn(partialStatsNode)).toBe(MOCK_EUI_THEME.colors.primary);
+      expect(nodeColorFn(createMockServiceNode('svc-1', 'Normal'))).toBe(
+        MOCK_EUI_THEME.colors.primary
+      );
+    });
+
+    it('returns ML severity color from anomaly score when anomalyScore is present', () => {
+      render(
+        <ReactFlowProvider>
+          <ServiceMapGraph {...defaultProps} />
+        </ReactFlowProvider>
+      );
+
+      const nodeColorFn = mockMinimapProps.nodeColor as (node: ServiceMapNode) => string;
+
+      const scoredNode: ServiceMapNode = {
+        id: 'svc-scored',
         position: { x: 0, y: 0 },
         data: {
-          id: 'svc-crit',
-          label: 'Critical Service',
+          id: 'svc-scored',
+          label: 'Scored Service',
           isService: true as const,
           agentName: 'java',
           serviceAnomalyStats: {
-            healthStatus: ServiceHealthStatus.critical,
+            anomalyScore: 90,
+            jobId: 'test-job',
             transactionType: 'request',
           },
         },
         type: 'service',
       };
 
-      const healthyNode: ServiceMapNode = {
-        id: 'svc-healthy',
-        position: { x: 0, y: 0 },
-        data: {
-          id: 'svc-healthy',
-          label: 'Healthy Service',
-          isService: true as const,
-          agentName: 'java',
-          serviceAnomalyStats: {
-            healthStatus: ServiceHealthStatus.healthy,
-            transactionType: 'request',
-          },
-        },
-        type: 'service',
-      };
-
-      const warningColor = nodeColorFn(warningNode);
-      const criticalColor = nodeColorFn(criticalNode);
-      const healthyColor = nodeColorFn(healthyNode);
-      const defaultColor = nodeColorFn(createMockServiceNode('svc-1', 'Normal'));
-
-      expect(warningColor).toBe(MOCK_EUI_THEME.colors.severity.warning);
-      expect(criticalColor).toBe(MOCK_EUI_THEME.colors.severity.danger);
-      expect(healthyColor).toBe(MOCK_EUI_THEME.colors.severity.success);
-      expect(defaultColor).toBe(MOCK_EUI_THEME.colors.primary);
+      expect(nodeColorFn(scoredNode)).toBe(getSeverityColor(90));
     });
   });
 });

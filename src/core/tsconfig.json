@@ -178,6 +178,8 @@
     "@kbn/core-user-activity-server-mocks",
     "@kbn/core-user-activity-server-internal",
     "@kbn/scout",
+    "@kbn/core-user-storage-server-internal",
+    "@kbn/core-user-storage-common",
   ],
   "exclude": [
     "target/**/*",

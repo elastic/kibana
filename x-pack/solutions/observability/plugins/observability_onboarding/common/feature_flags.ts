@@ -7,3 +7,4 @@
 
 export const IS_MANAGED_OTLP_SERVICE_ENABLED = 'observability.managedOtlpServiceEnabled';
 export const IS_MANAGED_OTLP_GA = 'observability.managedOtlpGa';
+export const IS_ADD_DATA_PAGE_V2_ENABLED = 'observability.addDataPageV2Enabled';
