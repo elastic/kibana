@@ -1510,7 +1510,7 @@ groups:
         datatype: bool
         default: true
         applies_to:
-          stack: ga 8.0
+          stack: ga
           ech: ga
           self: ga
 

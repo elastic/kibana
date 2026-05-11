@@ -226,7 +226,7 @@ groups:
           - always
           - never
         applies_to:
-          stack: ga 7.14
+          stack: ga 7.10
           ech: ga
           self: ga
 
