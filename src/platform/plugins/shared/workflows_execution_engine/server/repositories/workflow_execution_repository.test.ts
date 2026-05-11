@@ -1020,4 +1020,23 @@ describe('WorkflowExecutionRepository', () => {
       expect(result.nextSearchAfter).toBeUndefined();
     });
   });
+
+  describe('tryCasPromoteQueuedWorkflowExecutionToPending', () => {
+    it('uses refresh wait_for so search-based slot counts observe pending before the next drain iteration', async () => {
+      esClient.update.mockResolvedValue({ result: 'updated' });
+
+      await repository.tryCasPromoteQueuedWorkflowExecutionToPending({
+        workflowExecutionId: 'exec-1',
+        spaceId: 'default',
+      });
+
+      expect(esClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: WORKFLOWS_EXECUTIONS_INDEX,
+          id: 'exec-1',
+          refresh: 'wait_for',
+        })
+      );
+    });
+  });
 });

@@ -446,7 +446,9 @@ export class WorkflowExecutionRepository {
     const response = await this.esClient.update({
       index: this.indexName,
       id: params.workflowExecutionId,
-      refresh: false,
+      // Near-real-time search must see this doc as PENDING before the next
+      // drain loop iteration counts slot occupancy; otherwise max:1 can double-promote.
+      refresh: 'wait_for',
       script: {
         lang: 'painless',
         source: `
