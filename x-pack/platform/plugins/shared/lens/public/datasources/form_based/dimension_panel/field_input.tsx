@@ -109,6 +109,11 @@ export function getErrorMessage(
       defaultMessage: 'To use this function, select a field.',
     });
   }
+  if (!selectedColumn && incompleteOperation) {
+    return i18n.translate('xpack.lens.indexPattern.chooseFieldLabel', {
+      defaultMessage: 'To use this function, select a field.',
+    });
+  }
   if (fieldInvalid) {
     return i18n.translate('xpack.lens.indexPattern.invalidFieldLabel', {
       defaultMessage: 'Invalid field. Check your data view or pick another field.',
