@@ -235,7 +235,33 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
       expect(toolkit.next).toHaveBeenCalled();
     });
 
-    it('does not update profile when rememberSelectedSpace is false', async () => {
+    it('clears lastSelectedSpaceId when rememberSelectedSpace is false and a value was stored', async () => {
+      getSpaceId.mockReturnValue('foo');
+      getCurrent.mockResolvedValue({
+        uid: 'uid-1',
+        data: {
+          userSettings: {
+            rememberSelectedSpace: false,
+            lastSelectedSpaceId: 'bar',
+          },
+        },
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        path: ENTER_SPACE_PATH,
+        auth: { isAuthenticated: true },
+      });
+
+      await postAuthHandler(request, response, toolkit);
+      await flushMicrotasks();
+
+      expect(update).toHaveBeenCalledWith('uid-1', {
+        userSettings: { lastSelectedSpaceId: null },
+      });
+      expect(toolkit.next).toHaveBeenCalled();
+    });
+
+    it('clears lastSelectedSpaceId when rememberSelectedSpace is false and lastSelectedSpaceId is undefined', async () => {
       getSpaceId.mockReturnValue('foo');
       getCurrent.mockResolvedValue({
         uid: 'uid-1',
@@ -254,7 +280,34 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
       await postAuthHandler(request, response, toolkit);
       await flushMicrotasks();
 
+      expect(update).toHaveBeenCalledWith('uid-1', {
+        userSettings: { lastSelectedSpaceId: null },
+      });
+      expect(toolkit.next).toHaveBeenCalled();
+    });
+
+    it('does not update profile when rememberSelectedSpace is false and lastSelectedSpaceId is already null', async () => {
+      getSpaceId.mockReturnValue('foo');
+      getCurrent.mockResolvedValue({
+        uid: 'uid-1',
+        data: {
+          userSettings: {
+            rememberSelectedSpace: false,
+            lastSelectedSpaceId: null,
+          },
+        },
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        path: ENTER_SPACE_PATH,
+        auth: { isAuthenticated: true },
+      });
+
+      await postAuthHandler(request, response, toolkit);
+      await flushMicrotasks();
+
       expect(update).not.toHaveBeenCalled();
+      expect(toolkit.next).toHaveBeenCalled();
     });
 
     it('does not update profile when unauthenticated', async () => {

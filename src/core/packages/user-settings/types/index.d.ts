@@ -52,7 +52,7 @@ export interface UserSettingsData {
    * The id of the last space the user navigated into. Persisted server-side on every
    * `/spaces/enter` request when `rememberSelectedSpace` is true.
    */
-  lastSelectedSpaceId?: string;
+  lastSelectedSpaceId?: string | null;
   /**
    * Whether the Agent Builder announcement modal was dismissed for the current user (all spaces).
    */

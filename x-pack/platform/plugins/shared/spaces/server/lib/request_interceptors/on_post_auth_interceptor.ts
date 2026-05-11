@@ -69,6 +69,14 @@ export function initSpacesOnPostAuthRequestInterceptor({
             return userProfileService.update(profile.uid, {
               userSettings: { lastSelectedSpaceId: spaceId },
             });
+          } else if (
+            profile?.uid &&
+            profile?.data?.userSettings?.rememberSelectedSpace === false &&
+            profile?.data?.userSettings?.lastSelectedSpaceId !== null
+          ) {
+            return userProfileService.update(profile.uid, {
+              userSettings: { lastSelectedSpaceId: null },
+            });
           }
         })
         .catch((err) => {
