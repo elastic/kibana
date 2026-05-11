@@ -557,6 +557,64 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 * Prevents table sorting when toggling the workflow enable state [#252724]({{kib-pull}}252724).
 * Strips system-managed date fields from ingest pipelines before PUT [#252579]({{kib-pull}}252579).
 
+## 9.3.4 [kibana-9.3.4-release-notes]
+
+### Features and enhancements [kibana-9.3.4-features-enhancements]
+
+**Elastic Observability solution**:
+For the Elastic Observability 9.3.4 release information, refer to [Elastic Observability Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+**Elastic Security solution**:
+For the Elastic Security 9.3.4 release information, refer to [Elastic Security Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+**Kibana platform**:
+* Remembers the pagination state when navigating back from an edit on the **Users** page, instead of always returning to page 1 and resetting the search [#261152]({{kib-pull}}261152).
+
+### Fixes [kibana-9.3.4-fixes]
+
+**Alerting**:
+* Adds the `application/x-zip-compressed` MIME type as an accepted value for case file attachments [#262414]({{kib-pull}}262414).
+* Fixes the "Failed to check if maintenance windows are active" error [#261048]({{kib-pull}}261048).
+
+**Data ingestion and Fleet**:
+* Fixes YAML file downloads being truncated at the first `#` character by properly URL-encoding the content [#264083]({{kib-pull}}264083).
+* Fixes package policy count filters to correctly identify non-latest revisions [#263717]({{kib-pull}}263717).
+* Only auto-installs content packages that are newer than the installed version [#262509]({{kib-pull}}262509).
+* Fixes Fleet Server diagnostic bundles failing to download when `elasticsearch.compression` is enabled [#262394]({{kib-pull}}262394).
+* Fixes missing sort-state announcements for screen readers in the **Ingest pipelines** list [#262226]({{kib-pull}}262226).
+* Fixes focus management for the **Learn more** link [#261902]({{kib-pull}}261902).
+* Fixes screen reader announcements for the **Define as JSON** toggle [#261896]({{kib-pull}}261896).
+* Fixes screen readers announcing duplicate row indices in the **Ingest pipelines** list [#261369]({{kib-pull}}261369).
+* Fixes the inference processor form to accept the `input_output` configuration shape [#260517]({{kib-pull}}260517).
+* Fixes screen readers announcing icon labels twice in the **Ingest pipelines** list [#259185]({{kib-pull}}259185).
+* Fixes screen readers incorrectly combining button announcements on the **Create Pipeline** page [#261603]({{kib-pull}}261603).
+
+**Data management**:
+* Fixes stale screen reader announcements in code boxes [#261921]({{kib-pull}}261921).
+* Fixes the transforms detail summary to show all `source_index` entries when `source_index` is an array [#261875]({{kib-pull}}261875).
+* Fixes screen readers announcing search template options twice [#261585]({{kib-pull}}261585).
+* Fixes screen readers announcing duplicate row indices on the data streams table [#261366]({{kib-pull}}261366).
+* Fixes screen readers announcing icon labels twice in the **Edit policy** flyout [#261324]({{kib-pull}}261324).
+* Fixes screen readers announcing policy actions tooltip text twice in the index lifecycle policies list [#261322]({{kib-pull}}261322).
+* Fixes screen readers announcing copy button labels twice [#261311]({{kib-pull}}261311).
+* Fixes screen readers announcing grey color badge text twice in the transforms list [#261307]({{kib-pull}}261307).
+* Fixes screen readers not announcing invalid field validation errors [#260673]({{kib-pull}}260673).
+
+**Discover**:
+* Resets the time field when the updated index pattern does not include it [#262001]({{kib-pull}}262001).
+* Fixes {{esql}} multi-value filtering with `STATS` [#260998]({{kib-pull}}260998).
+
+**Kibana platform**:
+* Adjusts the **API Key** flyout width [#263858]({{kib-pull}}263858).
+* Allows space colors to be cleared, falling back to the default [#261826]({{kib-pull}}261826).
+* Fixes screen readers announcing data stream and index options twice in the **Create policy** and **Restore snapshot** selectable lists [#261786]({{kib-pull}}261786).
+* Fixes policy buttons to have distinguishable names for screen readers [#261313]({{kib-pull}}261313).
+
+**Machine Learning**:
+* Fixes the single metric chart in Anomaly Explorer not showing anomaly actions correctly [#263925]({{kib-pull}}263925).
+* Updates the `hono` and `@hono/node-server` dependencies [#263794]({{kib-pull}}263794).
+* Fixes execution tree clipping when `foreach` has many iterations [#253576]({{kib-pull}}253576).
+
 ## 9.3.3 [kibana-9.3.3-release-notes]
 
 % ::::{NOTE}

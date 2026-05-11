@@ -12,7 +12,6 @@ import type {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '@kbn/actions-plugin/server';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type {
   AlertingApiRequestHandlerContext,
   AlertingServerSetup,
@@ -38,8 +37,6 @@ import type {
   WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import type { WorkflowsManagementApi } from './api/workflows_management_api';
-
-export type { AgentBuilderPluginSetup };
 
 export interface WorkflowsServerPluginSetup {
   management: WorkflowsManagementApi;
