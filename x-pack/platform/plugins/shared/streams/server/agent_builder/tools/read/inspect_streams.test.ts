@@ -686,4 +686,136 @@ describe('createInspectStreamsTool handler', () => {
     const data = getData(result);
     expect(data.streams['logs.ecs.nginx'].type_context).toContain('dynamic: false');
   });
+
+  describe('lifecycle aspect', () => {
+    const wiredStreamWithIlm = (name: string): Streams.WiredStream.Definition => ({
+      type: 'wired',
+      name,
+      description: `${name} stream`,
+      updated_at: '2026-04-10T00:00:00.000Z',
+      ingest: {
+        wired: { fields: {}, routing: [] },
+        processing: { steps: [], updated_at: '2026-04-10T00:00:00.000Z' },
+        lifecycle: { ilm: { policy: 'my-logs-policy' } },
+        failure_store: { inherit: {} },
+        settings: {},
+      },
+    });
+
+    const wiredStreamWithDsl = (name: string): Streams.WiredStream.Definition => ({
+      type: 'wired',
+      name,
+      description: `${name} stream`,
+      updated_at: '2026-04-10T00:00:00.000Z',
+      ingest: {
+        wired: { fields: {}, routing: [] },
+        processing: { steps: [], updated_at: '2026-04-10T00:00:00.000Z' },
+        lifecycle: { dsl: { data_retention: '30d' } },
+        failure_store: { inherit: {} },
+        settings: {},
+      },
+    });
+
+    const mockDataStreamValue = (name: string) => ({
+      name,
+      timestamp_field: { name: '@timestamp' },
+      indices: [
+        {
+          index_name: `.ds-${name}-000001`,
+          index_uuid: 'uuid1',
+          managed_by: 'Data stream lifecycle',
+        },
+      ],
+      generation: 1,
+      status: 'GREEN',
+      next_generation_managed_by: 'Data stream lifecycle',
+    });
+
+    const mockStatsResponse = {
+      _all: {
+        primaries: {
+          store: { size_in_bytes: 1024000 },
+          docs: { count: 5000 },
+        },
+      },
+    };
+
+    interface LifecycleResult {
+      retention: Record<string, unknown>;
+      storage_size_bytes: number;
+      storage_size_human: string;
+      document_count: number;
+      error?: string;
+    }
+
+    const getLifecycle = (result: ToolHandlerReturn, streamName: string): LifecycleResult => {
+      const data = getData(result);
+      return data.streams[streamName].lifecycle as unknown as LifecycleResult;
+    };
+
+    it('includes policy_phases for ILM streams', async () => {
+      const { tool, context, streamsClient, esClient } = setup();
+      streamsClient.getStream.mockResolvedValue(wiredStreamWithIlm('logs.ecs.nginx'));
+      mockEsMethodResolvedValue(streamsClient.getDataStream, mockDataStreamValue('logs.ecs.nginx'));
+      mockEsMethodResolvedValue(esClient.indices.stats, mockStatsResponse);
+      mockEsMethodResolvedValue(esClient.ilm.getLifecycle, {
+        'my-logs-policy': {
+          policy: {
+            phases: {
+              hot: { min_age: '0ms', actions: {} },
+              warm: { min_age: '7d', actions: {} },
+              delete: { min_age: '90d', actions: { delete: {} } },
+            },
+          },
+        },
+      });
+
+      const result = await tool.handler(
+        { names: ['logs.ecs.nginx'], aspects: ['lifecycle'] },
+        context
+      );
+
+      const lifecycle = getLifecycle(result, 'logs.ecs.nginx');
+      expect(lifecycle.retention.type).toBe('ilm');
+      expect(lifecycle.retention.policy_name).toBe('my-logs-policy');
+      expect(lifecycle.retention.policy_phases).toEqual(['hot', 'warm', 'delete']);
+    });
+
+    it('does not include policy_phases for DSL streams', async () => {
+      const { tool, context, streamsClient, esClient } = setup();
+      streamsClient.getStream.mockResolvedValue(wiredStreamWithDsl('logs.ecs.nginx'));
+      mockEsMethodResolvedValue(streamsClient.getDataStream, mockDataStreamValue('logs.ecs.nginx'));
+      mockEsMethodResolvedValue(esClient.indices.stats, mockStatsResponse);
+
+      const result = await tool.handler(
+        { names: ['logs.ecs.nginx'], aspects: ['lifecycle'] },
+        context
+      );
+
+      const lifecycle = getLifecycle(result, 'logs.ecs.nginx');
+      expect(lifecycle.retention.type).toBe('dsl');
+      expect(lifecycle.retention.data_retention).toBe('30d');
+      expect(lifecycle.retention.policy_phases).toBeUndefined();
+      expect(esClient.ilm.getLifecycle).not.toHaveBeenCalled();
+    });
+
+    it('gracefully degrades when ILM policy fetch fails', async () => {
+      const { tool, context, streamsClient, esClient } = setup();
+      streamsClient.getStream.mockResolvedValue(wiredStreamWithIlm('logs.ecs.nginx'));
+      mockEsMethodResolvedValue(streamsClient.getDataStream, mockDataStreamValue('logs.ecs.nginx'));
+      mockEsMethodResolvedValue(esClient.indices.stats, mockStatsResponse);
+      esClient.ilm.getLifecycle.mockRejectedValue(new Error('policy not found'));
+
+      const result = await tool.handler(
+        { names: ['logs.ecs.nginx'], aspects: ['lifecycle'] },
+        context
+      );
+
+      const lifecycle = getLifecycle(result, 'logs.ecs.nginx');
+      expect(lifecycle.retention.type).toBe('ilm');
+      expect(lifecycle.retention.policy_name).toBe('my-logs-policy');
+      expect(lifecycle.retention.policy_phases).toBeUndefined();
+      expect(lifecycle.storage_size_bytes).toBe(1024000);
+    });
+  });
 });

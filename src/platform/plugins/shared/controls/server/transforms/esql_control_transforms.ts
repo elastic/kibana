@@ -54,6 +54,7 @@ export const registerESQLControlTransforms = (embeddable: EmbeddableSetup) => {
           title,
           variable_name: variable_name ?? '',
           variable_type: variable_type as OptionsListESQLControlState['variable_type'],
+          ...(title && { title }),
         };
         return control_type === EsqlControlType.STATIC_VALUES
           ? {

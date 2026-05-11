@@ -75,6 +75,9 @@ export {
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
 export { isComputedColumn, getQuerySummary } from './utils/get_query_summary';
 export { getEsqlControls, getAllEsqlControls, getVariableNamePrefix } from './utils/controls';
+export { convertFiltersToESQLExpression } from './utils/convert_filters_to_esql';
+export { convertQueryToESQLExpression } from './utils/convert_query_to_esql';
+export { injectWhereClauseAfterSourceCommand } from './utils/inject_where_after_source';
 
 // Callback functions
 export * from './utils/callbacks';
