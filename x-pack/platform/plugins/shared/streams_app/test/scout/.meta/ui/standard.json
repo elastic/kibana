@@ -1,5 +1,5 @@
 {
-  "sha1": "76176583a64a9a02e165097a319aa0ce0cc41c0c",
+  "sha1": "4c5942f35ee239dd381266d87ee5a50140dc8a52",
   "tests": [
     {
       "id": "3cc9409cebf2cef-744ce32675c025c",
@@ -779,6 +779,76 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/data_sources_management.spec.ts",
         "line": 93,
+        "column": 9
+      }
+    },
+    {
+      "id": "32c69b10dd6903f-1908a67631697ac",
+      "title": "Draft stream simulation - processing preview should display sample documents from the parent stream for a draft",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
+        "line": 91,
+        "column": 9
+      }
+    },
+    {
+      "id": "32c69b10dd6903f-8961cf973c704ab",
+      "title": "Draft stream simulation - processing preview should simulate a Set processor and show processed results in preview",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
+        "line": 98,
+        "column": 9
+      }
+    },
+    {
+      "id": "32c69b10dd6903f-334e103d179bed7",
+      "title": "Draft stream simulation - processing preview should simulate a Rename processor on a draft stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
+        "line": 122,
+        "column": 9
+      }
+    },
+    {
+      "id": "32c69b10dd6903f-71493f3cff0bcd9",
+      "title": "Draft stream simulation - processing preview should update simulation preview reactively when configuring a new processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
+        "line": 141,
+        "column": 9
+      }
+    },
+    {
+      "id": "32c69b10dd6903f-2e643d3f9a21477",
+      "title": "Draft stream simulation - processing preview should simulate multiple sequential processors on a draft stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
+        "line": 165,
         "column": 9
       }
     },
