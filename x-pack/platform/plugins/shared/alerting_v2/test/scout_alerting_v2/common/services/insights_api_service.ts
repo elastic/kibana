@@ -9,7 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import type { RuleDoctorInsightDoc } from '../../../../server/resources/indices/rule_doctor_insights';
-import { RULE_DOCTOR_INSIGHTS_INDEX } from '../../common/constants';
+import { RULE_DOCTOR_INSIGHTS_INDEX } from '../constants';
 
 export type InsightSeed = Pick<RuleDoctorInsightDoc, 'insight_id'> &
   Partial<Omit<RuleDoctorInsightDoc, 'insight_id' | '@timestamp'>>;
