@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { Streams } from '@kbn/streams-schema';
+import { isDraftGetResponse, Streams } from '@kbn/streams-schema';
 import React, { type ReactNode } from 'react';
 import type { AsyncState } from 'react-use/lib/useAsync';
 import { useDataStreamStats } from '../stream_management/data_management/stream_detail_lifecycle/hooks/use_data_stream_stats';
@@ -127,7 +127,9 @@ export function ChartEmbeddedSideStats({
   statsHistogramResult: AsyncState<ESQLSearchResponse>;
   docCountInRange: number;
 }) {
-  if (Streams.ingest.all.GetResponse.is(definition)) {
+  const isDraft = isDraftGetResponse(definition);
+
+  if (Streams.ingest.all.GetResponse.is(definition) && !isDraft) {
     return (
       <ChartEmbeddedStats
         definition={definition}
