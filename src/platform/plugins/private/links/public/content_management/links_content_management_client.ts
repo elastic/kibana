@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SearchQuery } from '@kbn/content-management-plugin/common';
+import type { DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
 import { buildPath } from '@kbn/core-http-browser';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type {
@@ -22,13 +22,6 @@ import type { LinksCreateRequestBody, LinksCreateResponseBody } from '../../serv
 import type { LinksReadResponseBody } from '../../server/api/read';
 import type { LinksUpdateRequestBody, LinksUpdateResponseBody } from '../../server/api/update';
 import { contentManagement, coreServices } from '../services/kibana_services';
-
-const deleteLinks = async (id: string) => {
-  await contentManagement.client.delete<LinksCrudTypes['DeleteIn'], LinksCrudTypes['DeleteOut']>({
-    contentTypeId: CONTENT_ID,
-    id,
-  });
-};
 
 const search = async (query: SearchQuery = {}, options?: LinksCrudTypes['SearchOptions']) => {
   return contentManagement.client.search<LinksCrudTypes['SearchIn'], LinksCrudTypes['SearchOut']>({
@@ -68,7 +61,11 @@ export const linksClient = {
     );
     return updateResponse;
   },
-  delete: deleteLinks,
+  delete: async (id: string): Promise<DeleteResult> => {
+    return coreServices.http.delete(buildPath(`${LINKS_API_PATH}/{id}`, { id }), {
+      version: LINKS_API_VERSION,
+    });
+  },
   search,
 };
 
