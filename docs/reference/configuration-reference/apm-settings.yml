@@ -152,7 +152,7 @@ groups:
         datatype: string
         default: 'logs-apm*,apm-*,logs-*.otel-*'
         applies_to:
-          stack: ga 9.1
+          stack: ga
           ech: ga
           self: ga
 
@@ -162,7 +162,7 @@ groups:
         datatype: string
         default: 'apm-*'
         applies_to:
-          stack: ga 9.1
+          stack: ga
           ech: ga
           self: ga
 
@@ -172,7 +172,7 @@ groups:
         datatype: string
         default: 'traces-apm*,apm-*,traces-*.otel-*'
         applies_to:
-          stack: ga 9.1
+          stack: ga
           ech: ga
           self: ga
 
@@ -182,7 +182,7 @@ groups:
         datatype: string
         default: 'traces-apm*,apm-*,traces-*.otel-*'
         applies_to:
-          stack: ga 9.1
+          stack: ga
           ech: ga
           self: ga
 
@@ -192,7 +192,7 @@ groups:
         datatype: string
         default: 'metrics-apm*,apm-*,metrics-*.otel-*'
         applies_to:
-          stack: ga 9.1
+          stack: ga
           ech: ga
           self: ga
 
@@ -202,7 +202,7 @@ groups:
         datatype: string
         default: 'apm-*'
         applies_to:
-          stack: ga 9.1
+          stack: ga
           ech: ga
           self: ga
 
