@@ -2370,10 +2370,10 @@
     semver "7.7.4"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-plugin-eui@2.11.1":
-  version "2.11.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.11.1.tgz#435248596e044fa1d39a54d820115fefedfe25ef"
-  integrity sha512-zUJCq/0RUUGLcsFpZ8iHReboE8POZZ3XBnEd8DtxWnkf0Eb87VvcZWoQNwQHctPdQkzEmN4VRwLk4kuPX2Es+A==
+"@elastic/eslint-plugin-eui@2.12.0":
+  version "2.12.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.12.0.tgz#9333e558c6a5786f4aaf984eeda737d35edd17a0"
+  integrity sha512-nDOmel4ywBWrc6q/j0nqsXna/yD8yK+QyzS3UapxN9C13dhDZaTychqP7B9om95yYvlHd9k0kzKv6IHTUKfhqg==
 
 "@elastic/esql@3.0.0":
   version "3.0.0"
@@ -2401,10 +2401,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@114.3.0":
-  version "114.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-114.3.0.tgz#15ed4744e7531036bc0243ee5c012671838338d3"
-  integrity sha512-dWrs5ULxUajc5wouiIIyb/NeaLDpFiyYrsbp4yscGmj8zj942y5KmFlaIWHQmEalmNjCSBf5h7wKx9px+MnMWg==
+"@elastic/eui@115.0.0":
+  version "115.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-115.0.0.tgz#a946565fc1fa336c1b02834584a879e02bdc2efe"
+  integrity sha512-jbkoTnfF9qYTzLoDsudREIlhLXTpg1vB7uPoytpoZlUkxkxE4773BiUgtcyDzNInZ00KUFlY/NzgI8Wy6IW5eA==
   dependencies:
     "@elastic/eui-theme-common" "9.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
@@ -28589,10 +28589,10 @@ msgpackr@^1.11.2:
   optionalDependencies:
     msgpackr-extract "^3.0.2"
 
-msw@2.13.5:
-  version "2.13.5"
-  resolved "https://registry.yarnpkg.com/msw/-/msw-2.13.5.tgz#3ef9183096c962435781fc37db490239c6b1a77b"
-  integrity sha512-LuJem+CbqbywJtafv4zh5kcCQNmZnKwfJgJ/LcNYjeG3CU/xJLepJM1CNZcbp+oV8tXFGvUfswPGru34Mx7QGQ==
+msw@2.13.6:
+  version "2.13.6"
+  resolved "https://registry.yarnpkg.com/msw/-/msw-2.13.6.tgz#e43a6fcdabd80b7b9db5148ccdef84fbeb7e871c"
+  integrity sha512-GAJbQy8Ra/Ydjt0Hb2MGT2qhzd83J3+QZMHdH85uW7r/XkKc846+Ma2PLif5hGvTm5Yqa+wkcstpim0WeLZU9g==
   dependencies:
     "@inquirer/confirm" "^6.0.11"
     "@mswjs/interceptors" "^0.41.3"
