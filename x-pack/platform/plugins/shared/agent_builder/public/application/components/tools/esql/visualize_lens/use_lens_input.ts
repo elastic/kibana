@@ -13,8 +13,6 @@ import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { TimeRange } from '@kbn/es-query';
 import useAsync from 'react-use/lib/useAsync';
 
-const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-24h', to: 'now' };
-
 interface Params {
   dataViews: DataViewsServicePublic;
   lens: LensPublicStart;
@@ -30,12 +28,7 @@ interface ReturnValue {
 }
 
 export function useLensInput({ dataViews, lens, lensConfig, timeRange }: Params): ReturnValue {
-  const lensHelpersAsync = useAsync(() => {
-    return lens.stateHelperApi();
-  }, [lens]);
-
-  const resolvedTimeRange = timeRange ?? DEFAULT_TIME_RANGE;
-
+  const lensHelpersAsync = useAsync(() => lens.stateHelperApi(), [lens]);
   // convert lens config to lens attributes
   const lensResult = useMemo(() => {
     try {
@@ -50,7 +43,7 @@ export function useLensInput({ dataViews, lens, lensConfig, timeRange }: Params)
       ? {
           attributes: lensResult.attributes,
           id: uuidv4(),
-          timeRange: resolvedTimeRange,
+          timeRange,
         }
       : undefined
   );

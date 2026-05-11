@@ -17,7 +17,21 @@ exports[`DateRangePicker renders 1`] = `
       >
         <div
           class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
+          style="--euiFormControlLeftIconsCount: 1;"
         >
+          <div
+            class="euiFormControlLayoutIcons emotion-euiFormControlLayoutIcons-compressed-absolute-left"
+          >
+            <span
+              class="euiFormControlLayoutCustomIcon emotion-euiFormControlLayoutCustomIcon"
+            >
+              <span
+                aria-hidden="true"
+                class="euiFormControlLayoutCustomIcon__icon"
+                data-euiicon-type="calendar"
+              />
+            </span>
+          </div>
           <span
             class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
             id="generated-id-wrapper"

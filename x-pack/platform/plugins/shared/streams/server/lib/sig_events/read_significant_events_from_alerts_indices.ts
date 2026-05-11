@@ -36,6 +36,8 @@ export const V2_ALERTS_SOURCE: AlertsSource = {
   extraFilters: [{ term: { type: 'signal' } }, { term: { status: 'breached' } }],
 };
 
+const EMPTY_CHANGE_POINTS = { type: {} } as const;
+
 export async function readSignificantEventsFromAlertsIndices(
   params: {
     streamNames?: string[];
@@ -175,11 +177,7 @@ export async function readSignificantEventsFromAlertsIndices(
         ...toStreamQuery(queryLink),
         stream_name: queryLink.stream_name,
         occurrences: [],
-        change_points: {
-          type: {
-            stationary: { p_value: 0, change_point: 0 },
-          },
-        },
+        change_points: EMPTY_CHANGE_POINTS,
         rule_backed: queryLink.rule_backed,
       })),
       aggregated_occurrences: [],
@@ -220,11 +218,7 @@ export async function readSignificantEventsFromAlertsIndices(
       ...toStreamQuery(queryLink),
       stream_name: queryLink.stream_name,
       occurrences: [],
-      change_points: {
-        type: {
-          stationary: { p_value: 0, change_point: 0 },
-        },
-      },
+      change_points: EMPTY_CHANGE_POINTS,
       rule_backed: queryLink.rule_backed,
     }));
 

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*"],
+  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "public/react_embeddable_system/embeddable_renderer_context.tsx"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/inspector-plugin",
@@ -18,7 +18,6 @@
     "@kbn/saved-objects-finder-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/content-management-plugin",
-    "@kbn/presentation-panel-plugin",
     "@kbn/presentation-publishing",
     "@kbn/analytics",
     "@kbn/content-management-utils",
@@ -27,6 +26,15 @@
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
     "@kbn/presentation-util",
+    "@kbn/panel-loader",
+    "@kbn/i18n-react",
+    "@kbn/react-hooks",
+    "@kbn/search-errors",
+    "@kbn/shared-ux-markdown",
+    "@kbn/data-views-plugin",
+    "@kbn/data-plugin",
+    "@kbn/unified-search-plugin",
+    "@kbn/kibana-react-plugin",
   ],
   "exclude": ["target/**/*"]
 }

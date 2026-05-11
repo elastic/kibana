@@ -20,14 +20,14 @@ import { mockContextValue } from '../../../flyout/document_details/shared/mocks/
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { useRuleIndexPattern } from '../../../detection_engine/rule_creation_ui/pages/form';
 import { useHighlightedFieldsPrivilege } from '../hooks/use_highlighted_fields_privilege';
-import { useRuleDetails } from '../../../flyout/rule_details/hooks/use_rule_details';
+import { useRuleDetails } from '../../rule/hooks/use_rule_details';
 
 jest.mock(
   '../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message'
 );
 jest.mock('../../../detection_engine/rule_creation_ui/pages/form');
 jest.mock('../hooks/use_highlighted_fields_privilege');
-jest.mock('../../../flyout/rule_details/hooks/use_rule_details');
+jest.mock('../../rule/hooks/use_rule_details');
 
 const mockSetIsEditLoading = jest.fn();
 const mockCustomHighlightedFields = ['field1', 'field2'];

@@ -1,0 +1,33 @@
+{
+  "sha1": "f55794ca908a49ac611e7eae155650582c2c2bda",
+  "tests": [
+    {
+      "id": "96992190a6b747c-923a699644bffc2",
+      "title": "CPS field dropdown scoping - threat match mapping fields origin-only space: threat field dropdown shows origin fields but not linked fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/detection_engine/cps/field_dropdown_scoping.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "96992190a6b747c-e13885d07095f7a",
+      "title": "CPS field dropdown scoping - threat match mapping fields all-projects space: threat field dropdown shows fields from both origin and linked clusters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/tests/detection_engine/cps/field_dropdown_scoping.spec.ts",
+        "line": 65,
+        "column": 7
+      }
+    }
+  ]
+}

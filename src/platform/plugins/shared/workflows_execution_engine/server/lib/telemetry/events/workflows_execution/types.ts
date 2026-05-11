@@ -523,6 +523,8 @@ export interface TriggerEventDispatchedParams {
   kqlErrorCount: number;
   matchedCount: number;
   depthSkippedCount: number;
+  workflowEventsIgnoreSkippedCount: number;
+  workflowEventsCycleSkippedCount: number;
   scheduledAttemptCount: number;
   scheduledSuccessCount: number;
   scheduledFailureCount: number;

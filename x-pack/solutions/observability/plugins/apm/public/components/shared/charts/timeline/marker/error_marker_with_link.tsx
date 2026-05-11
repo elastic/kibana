@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import type { ErrorMark } from './error_marker';
 import { ErrorMarker } from './error_marker';
 import { TRACE_ID, TRANSACTION_ID } from '../../../../../../common/es_fields/apm';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
-import type { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
 
 export function ErrorMarkerWithLink({ mark }: { mark: ErrorMark }) {
   const { query } = useAnyOfApmParams(

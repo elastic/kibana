@@ -83,6 +83,7 @@ describe('WorkflowContextManager', () => {
     templatingEngineMock.evaluateExpression = jest
       .fn()
       .mockImplementation((...args: unknown[]) => args[0]);
+    templatingEngineMock.extractGlobalVariableSegments = jest.fn().mockReturnValue([]);
 
     // Provide a dummy esClient as required by ContextManagerInit
     const esClient = {
@@ -1395,7 +1396,7 @@ describe('WorkflowContextManager', () => {
         expect(result).toBe('rendered(Workflow {{workflow.name}} in space {{workflow.spaceId}})');
       });
 
-      it('should provide rendering function with step context', () => {
+      it('should provide rendering function with narrowed context when no step paths are referenced', () => {
         testContainer.underTest.renderValueAccordingToContext(
           'Workflow {{workflow.name}} in space {{workflow.spaceId}}'
         );
@@ -1427,19 +1428,49 @@ describe('WorkflowContextManager', () => {
               userId: 'user-123',
               count: 10,
             },
-            steps: {
-              fetchData: {
-                input: undefined,
-                output: {
-                  data: ['item1', 'item2'],
-                  total: 2,
-                },
-                error: null,
-                status: 'completed',
-              },
-            },
+            steps: {},
           })
         );
+      });
+
+      it('should provide rendering function with only the referenced step paths', () => {
+        testContainer.templatingEngineMock.extractGlobalVariableSegments = jest
+          .fn()
+          .mockReturnValue([['steps', 'fetchData', 'output', 'total']]);
+
+        testContainer.underTest.renderValueAccordingToContext('{{ steps.fetchData.output.total }}');
+
+        const renderArgs = (testContainer.templatingEngineMock.render as jest.Mock).mock
+          .calls[0][1];
+        expect(renderArgs.steps).toEqual({
+          fetchData: {
+            output: {
+              total: 2,
+            },
+          },
+        });
+      });
+
+      it('should fall back to full context when template path extraction is unsupported', () => {
+        testContainer.templatingEngineMock.extractGlobalVariableSegments = jest
+          .fn()
+          .mockReturnValue(null);
+
+        testContainer.underTest.renderValueAccordingToContext('{{ steps.fetchData.output.total }}');
+
+        const renderArgs = (testContainer.templatingEngineMock.render as jest.Mock).mock
+          .calls[0][1];
+        expect(renderArgs.steps).toEqual({
+          fetchData: {
+            input: undefined,
+            output: {
+              data: ['item1', 'item2'],
+              total: 2,
+            },
+            error: null,
+            status: 'completed',
+          },
+        });
       });
 
       it('should provide rendering function with object having templates', () => {
@@ -1452,6 +1483,37 @@ describe('WorkflowContextManager', () => {
           },
           expect.anything()
         );
+      });
+
+      it('preserves array shape when both the collection and an indexed item are referenced', () => {
+        testContainer.workflowExecutionState.getLatestStepExecution = jest
+          .fn()
+          .mockImplementation((stepId) => {
+            if (stepId === 'fetchData') {
+              return {
+                state: { status: 'completed' },
+                output: { hits: [{ id: 'a' }, { id: 'b' }, { id: 'c' }] },
+                error: null,
+              };
+            }
+            return undefined;
+          });
+        testContainer.templatingEngineMock.extractGlobalVariableSegments = jest
+          .fn()
+          .mockReturnValue([
+            ['steps', 'fetchData', 'output', 'hits'],
+            ['steps', 'fetchData', 'output', 'hits', 0, 'id'],
+          ]);
+
+        testContainer.underTest.renderValueAccordingToContext(
+          '{{ steps.fetchData.output.hits | size }} - {{ steps.fetchData.output.hits[0].id }}'
+        );
+
+        const renderArgs = (testContainer.templatingEngineMock.render as jest.Mock).mock
+          .calls[0][1];
+        const hits = renderArgs.steps.fetchData.output.hits;
+        expect(Array.isArray(hits)).toBe(true);
+        expect(hits).toEqual([{ id: 'a' }, { id: 'b' }, { id: 'c' }]);
       });
     });
   });

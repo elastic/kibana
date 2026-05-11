@@ -147,6 +147,7 @@ jest.mock('./decorations', () => ({
   useLineDifferencesDecorations: jest.fn(),
   useStepDecorationsInExecution: jest.fn(() => ({ styles: {} })),
   useTriggerTypeDecorations: jest.fn(),
+  useWorkflowEventsOnDecorations: jest.fn(),
   useWorkflowIdDecorations: jest.fn(),
 }));
 
@@ -154,7 +155,8 @@ jest.mock('../styles/use_workflow_editor_styles', () => ({
   useWorkflowEditorStyles: jest.fn(() => ({})),
 }));
 
-jest.mock('../styles/use_workflows_monaco_theme', () => ({
+jest.mock('@kbn/workflows-ui', () => ({
+  ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsMonacoTheme: jest.fn(),
 }));
 

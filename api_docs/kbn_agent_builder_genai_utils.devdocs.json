@@ -3450,7 +3450,7 @@
           ">>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-        "lineNumber": 172,
+        "lineNumber": 171,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3463,7 +3463,7 @@
             "label": "{\n  indices,\n  esClient,\n  cleanup = true,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-            "lineNumber": 176,
+            "lineNumber": 175,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -3479,7 +3479,7 @@
                   "string[]"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-                "lineNumber": 177,
+                "lineNumber": 176,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4483,7 +4483,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-                "lineNumber": 178,
+                "lineNumber": 177,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -4499,7 +4499,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/utils/ccs.ts",
-                "lineNumber": 179,
+                "lineNumber": 178,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -5624,7 +5624,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-        "lineNumber": 199,
+        "lineNumber": 198,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -5637,7 +5637,7 @@
             "label": "{\n  nlQuery,\n  indexPattern = '*',\n  includeAliases = true,\n  includeDatastream = true,\n  limit = 1,\n  esClient,\n  model,\n  logger,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-            "lineNumber": 208,
+            "lineNumber": 207,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -5650,7 +5650,7 @@
                 "label": "nlQuery",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-                "lineNumber": 209,
+                "lineNumber": 208,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -5666,7 +5666,7 @@
                   "string | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-                "lineNumber": 210,
+                "lineNumber": 209,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -5682,7 +5682,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-                "lineNumber": 211,
+                "lineNumber": 210,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -5698,7 +5698,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-                "lineNumber": 212,
+                "lineNumber": 211,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -5714,7 +5714,7 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-                "lineNumber": 213,
+                "lineNumber": 212,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -6718,7 +6718,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-                "lineNumber": 214,
+                "lineNumber": 213,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -6740,7 +6740,7 @@
                   }
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-                "lineNumber": 215,
+                "lineNumber": 214,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -6763,7 +6763,7 @@
                   " | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/index_explorer.ts",
-                "lineNumber": 216,
+                "lineNumber": 215,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -6823,7 +6823,7 @@
           "\nList the search sources (indices, aliases and datastreams) matching a given index pattern,\nusing the `_resolve_index` API."
         ],
         "signature": [
-          "({ pattern, perTypeLimit, includeHidden, includeKibanaIndices, excludeIndicesRepresentedAsAlias, excludeIndicesRepresentedAsDatastream, esClient, }: { pattern: string; perTypeLimit?: number | undefined; includeHidden?: boolean | undefined; includeKibanaIndices?: boolean | undefined; excludeIndicesRepresentedAsAlias?: boolean | undefined; excludeIndicesRepresentedAsDatastream?: boolean | undefined; esClient: ",
+          "({ pattern, perTypeLimit, includeHidden, excludeIndicesRepresentedAsAlias, excludeIndicesRepresentedAsDatastream, esClient, }: { pattern: string; perTypeLimit?: number | undefined; includeHidden?: boolean | undefined; excludeIndicesRepresentedAsAlias?: boolean | undefined; excludeIndicesRepresentedAsDatastream?: boolean | undefined; esClient: ",
           "ElasticsearchClient",
           "; }) => Promise<",
           {
@@ -6836,7 +6836,7 @@
           ">"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
-        "lineNumber": 46,
+        "lineNumber": 44,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -6846,10 +6846,10 @@
             "id": "def-server.listSearchSources.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  pattern,\n  perTypeLimit = 100,\n  includeHidden = false,\n  includeKibanaIndices = false,\n  excludeIndicesRepresentedAsAlias = true,\n  excludeIndicesRepresentedAsDatastream = true,\n  esClient,\n}",
+            "label": "{\n  pattern,\n  perTypeLimit = 100,\n  includeHidden = false,\n  excludeIndicesRepresentedAsAlias = true,\n  excludeIndicesRepresentedAsDatastream = true,\n  esClient,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
-            "lineNumber": 54,
+            "lineNumber": 51,
             "columnNumber": 4,
             "deprecated": false,
             "trackAdoption": false,
@@ -6862,7 +6862,7 @@
                 "label": "pattern",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
-                "lineNumber": 55,
+                "lineNumber": 52,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -6878,7 +6878,7 @@
                   "number | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
-                "lineNumber": 56,
+                "lineNumber": 53,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -6894,23 +6894,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
-                "lineNumber": 57,
-                "columnNumber": 3,
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/agent-builder-genai-utils",
-                "id": "def-server.listSearchSources.$1.includeKibanaIndices",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "includeKibanaIndices",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
-                "lineNumber": 58,
+                "lineNumber": 54,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -6926,7 +6910,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
-                "lineNumber": 59,
+                "lineNumber": 55,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -6942,7 +6926,7 @@
                   "boolean | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
-                "lineNumber": 60,
+                "lineNumber": 56,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false
@@ -7946,7 +7930,7 @@
                   "; }"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/steps/list_search_sources.ts",
-                "lineNumber": 61,
+                "lineNumber": 57,
                 "columnNumber": 3,
                 "deprecated": false,
                 "trackAdoption": false

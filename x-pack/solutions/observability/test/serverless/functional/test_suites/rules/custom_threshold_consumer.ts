@@ -60,26 +60,27 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const consumerSelect = await testSubjects.find('ruleConsumerSelection');
       await consumerSelect.click();
 
-      const consumerOptionsList = await testSubjects.find(
-        'comboBoxOptionsList ruleConsumerSelectionInput-optionsList'
-      );
+      await retry.try(async () => {
+        const consumerOptionsList = await testSubjects.find(
+          'comboBoxOptionsList ruleConsumerSelectionInput-optionsList'
+        );
 
-      const consumerOptions = await consumerOptionsList.findAllByClassName(
-        'euiComboBoxOption__content'
-      );
+        const consumerOptions = await consumerOptionsList.findAllByClassName(
+          'euiComboBoxOption__content'
+        );
 
-      const allAvailableConsumers: Set<string> = new Set();
+        const allAvailableConsumers: Set<string> = new Set();
 
-      for (const option of consumerOptions) {
-        allAvailableConsumers.add(await option.getVisibleText());
-      }
+        for (const option of consumerOptions) {
+          allAvailableConsumers.add(await option.getVisibleText());
+        }
 
-      // Check if sets are equal by verifying they have the same size and all elements match
-      const areConsumersEqual =
-        allAvailableConsumers.size === consumersToVerify.size &&
-        [...consumersToVerify].every((consumer) => allAvailableConsumers.has(consumer));
+        const areConsumersEqual =
+          allAvailableConsumers.size === consumersToVerify.size &&
+          [...consumersToVerify].every((consumer) => allAvailableConsumers.has(consumer));
 
-      expect(areConsumersEqual).toBe(true);
+        expect(areConsumersEqual).toBe(true);
+      });
 
       await retry.try(async () => {
         await testSubjects.click('rulePageFooterSaveButton');

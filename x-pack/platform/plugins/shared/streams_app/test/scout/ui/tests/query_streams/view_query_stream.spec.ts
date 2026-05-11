@@ -36,8 +36,8 @@ test.describe('Query streams - View query stream', { tag: tags.stateful.classic 
     await pageObjects.streams.gotoStreamMainPage();
   });
 
-  test.afterAll(async ({ kbnClient, apiServices, esClient }) => {
-    await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME);
+  test.afterAll(async ({ kbnClient, apiServices, esClient, log }) => {
+    await deleteQueryStream(apiServices, esClient, QUERY_STREAM_NAME, ESQL_VIEW_NAME, log);
     await deleteRootStreamViews(esClient);
     await disableQueryStreams(kbnClient);
   });

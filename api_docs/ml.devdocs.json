@@ -868,7 +868,7 @@
         " | undefined; }"
       ],
       "path": "x-pack/platform/plugins/shared/ml/public/plugin.ts",
-      "lineNumber": 390,
+      "lineNumber": 387,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1434,7 +1434,7 @@
         " & React.RefAttributes<{}>>; }; }"
       ],
       "path": "x-pack/platform/plugins/shared/ml/public/plugin.ts",
-      "lineNumber": 391,
+      "lineNumber": 388,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

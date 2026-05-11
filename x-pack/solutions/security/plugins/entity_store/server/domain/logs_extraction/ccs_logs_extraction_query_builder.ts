@@ -44,6 +44,8 @@ export interface CcsLogsExtractionQueryParams {
   docsLimit: number;
   recoveryId?: string;
   pagination?: PaginationParams;
+  logsPageCursorStart?: PaginationParams;
+  logsPageCursorEnd?: PaginationParams;
 }
 
 /**
@@ -58,6 +60,8 @@ export function buildCcsLogsExtractionEsqlQuery({
   docsLimit,
   recoveryId,
   pagination,
+  logsPageCursorStart,
+  logsPageCursorEnd,
 }: CcsLogsExtractionQueryParams): string {
   const { fields, type } = entityDefinition;
 
@@ -67,7 +71,16 @@ export function buildCcsLogsExtractionEsqlQuery({
   parts.push(`SET unmapped_fields="nullify";`);
 
   // FROM and WHERE
-  parts.push(buildExtractionSourceClause({ indexPatterns, type, fromDateISO, toDateISO }));
+  parts.push(
+    buildExtractionSourceClause({
+      indexPatterns,
+      type,
+      fromDateISO,
+      toDateISO,
+      logsPageCursorStart,
+      logsPageCursorEnd,
+    })
+  );
 
   // Special evaluations for entity id
   if (hasFieldEvaluations(entityDefinition)) {

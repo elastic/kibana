@@ -243,7 +243,10 @@ export class TimePickerPageObject extends FtrService {
     const parsed = moment.tz(fromTime, TimePickerPageObject.LEGACY_DATE_FORMAT, true, tz);
     const expectedFromISO = (parsed.isValid() ? parsed : moment.tz(fromTime, tz)).toISOString();
     await this.retry.waitFor(`date range to be set to ${rangeText}`, async () => {
-      await this.testSubjects.click('dateRangePickerControlButton');
+      // Tooltips can sometimes hide the picker, so move mouse directly to it instead of direct click
+      const picker = await this.testSubjects.find('dateRangePickerControlButton');
+      await picker.moveMouseTo();
+      await picker.click();
       await this.testSubjects.exists('dateRangePickerInput', { timeout: 5000 });
       await this.inputValue('dateRangePickerInput', rangeText);
       // Pressing Enter in inputValue applies the range and closes the popover.
