@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback, useRef, useState } from 'react';
+import React, { useMemo, useCallback, useRef, useState, useEffect } from 'react';
 import { isEqual } from 'lodash';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -16,8 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   euiScrollBarStyles,
-  EuiWindowEvent,
-  keys,
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
@@ -382,11 +380,23 @@ export function LensEditConfigurationFlyout({
     setIsInlineFlyoutVisible
   );
 
-  const onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === keys.ESCAPE) {
-      onCancel();
-    }
-  };
+  useEffect(() => {
+    if (!isInlineFlyoutVisible) return;
+    const handle = coreStart.hotkeys.register(
+      {
+        id: 'lens:closeFlyout',
+        keys: 'Escape',
+        scope: 'context',
+        label: i18n.translate('xpack.lens.editFlyout.closeShortcutLabel', {
+          defaultMessage: 'Close configuration flyout',
+        }),
+      },
+      () => {
+        onCancel();
+      }
+    );
+    return handle.unregister;
+  }, [coreStart.hotkeys, isInlineFlyoutVisible, onCancel]);
 
   const layerIds = useMemo(() => {
     return activeVisualization && visualization.state
@@ -473,8 +483,6 @@ export function LensEditConfigurationFlyout({
   if (hideTextBasedEditor && hidesSuggestions) {
     return (
       <>
-        {isInlineFlyoutVisible && <EuiWindowEvent event="keydown" handler={onKeyDown} />}
-
         <FlyoutWrapper
           isInlineFlyoutVisible={isInlineFlyoutVisible}
           displayFlyoutHeader={displayFlyoutHeader}
@@ -513,7 +521,6 @@ export function LensEditConfigurationFlyout({
 
   return (
     <>
-      {isInlineFlyoutVisible && <EuiWindowEvent event="keydown" handler={onKeyDown} />}
       <FlyoutWrapper
         isInlineFlyoutVisible={isInlineFlyoutVisible}
         displayFlyoutHeader={displayFlyoutHeader}
