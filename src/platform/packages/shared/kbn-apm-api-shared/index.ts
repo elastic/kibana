@@ -48,6 +48,8 @@ export type * from './src/routes/mobile_crashes';
 export type * from './src/routes/data_view';
 export type * from './src/routes/diagnostics';
 export type * from './src/routes/fleet';
+export type * from './src/routes/debug_telemetry';
+export type * from './src/routes/storage_explorer';
 export { filterOptionsRt, payloadRt } from './src/routes/custom_links';
 export {
   rangeRt,

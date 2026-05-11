@@ -51,3 +51,6 @@ export * from './src/config_schema';
 export type * from './src/apm_event';
 export type * from './src/service_map_diagnostic_types';
 export type * from './src/diagnostics';
+export type * from './src/apm_telemetry';
+export * from './src/ilm_types';
+export * from './src/storage_explorer_types';

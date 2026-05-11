@@ -24,6 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { isEmpty } from 'lodash';
+import type { APIReturnType } from '@kbn/apm-api-shared';
 import { downloadJson } from '../../../../utils/download_json';
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
@@ -41,7 +42,6 @@ import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { SizeLabel } from './size_label';
 import { joinByKey } from '../../../../../common/utils/join_by_key';
-import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 interface StorageExplorerItem {
   serviceName: string;
@@ -119,7 +119,8 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
         },
       });
     },
-    [environment, kuery, indexLifecyclePhase, start, end]
+    [environment, kuery, indexLifecyclePhase, start, end],
+    { useCallApmApiV2: true }
   );
 
   const serviceStatisticsFetch = useProgressiveFetcher(
@@ -136,7 +137,8 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
         },
       });
     },
-    [indexLifecyclePhase, start, end, environment, kuery]
+    [indexLifecyclePhase, start, end, environment, kuery],
+    { useCallApmApiV2: true }
   );
 
   const serviceStatisticsItems = serviceStatisticsFetch.data?.serviceStatistics ?? [];
@@ -202,7 +204,13 @@ export function ServicesTable({ summaryStatsData, loadingSummaryStats }: Props) 
             {i18n.translate('xpack.apm.storageExplorer.table.samplingColumnName', {
               defaultMessage: 'Sampling rate',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </>
         </EuiToolTip>
       ),
