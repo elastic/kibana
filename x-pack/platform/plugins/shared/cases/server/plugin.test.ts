@@ -82,6 +82,13 @@ describe('Cases Plugin', () => {
       notifications: notificationsMock.createStart(),
       ruleRegistry: { getRacClientWithRequest: jest.fn(), alerting: alertsMock.createStart() },
       taskManager: taskManagerMock.createStart(),
+      // Cases-analyticsV2 needs the dataViews plugin at start to manage the
+      // Cases data view + runtime fields. The flag is off in the test
+      // fixture so this mock is never actually called.
+      dataViews: {
+        dataViewsServiceFactory: jest.fn(),
+        getScriptedFieldsEnabled: jest.fn().mockReturnValue(false),
+      } as unknown as CasesServerStartDependencies['dataViews'],
     };
   });
 

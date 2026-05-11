@@ -6,10 +6,12 @@
  */
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { CasesAnalyticsV2DataViewService } from './data_view/service';
 import { ensureCaseIndex } from './ensure_indices/case';
 import { registerReconciliationTask, scheduleReconciliationTask } from './reconciliation';
 import {
@@ -43,6 +45,8 @@ interface CasesAnalyticsV2StartDeps {
   taskManager: TaskManagerStartContract;
   /** Internal (no request) SO client used by the reconciliation runner. */
   internalSavedObjectsClient: SavedObjectsClientContract;
+  /** Data views plugin start contract — needed to create + update the managed Cases data view. */
+  dataViewsService: DataViewsServerPluginStart;
 }
 
 /**
@@ -93,6 +97,12 @@ export class CasesAnalyticsV2Service {
    * on a Task Manager timer, not a user request).
    */
   private internalSavedObjectsClient: SavedObjectsClientContract | undefined;
+  /**
+   * Data view sub-service. Constructed at start (after we have the data
+   * views plugin contract); orchestrates the managed Cases data view + its
+   * runtime field map.
+   */
+  private dataViewService: CasesAnalyticsV2DataViewService | undefined;
 
   constructor(deps: CasesAnalyticsV2ServiceDeps) {
     this.logger = deps.logger.get('cases.analyticsV2');
@@ -170,6 +180,17 @@ export class CasesAnalyticsV2Service {
     // Capture the SO client for the reconciliation task — the runner uses it
     // to walk cases since the last cursor.
     this.internalSavedObjectsClient = deps.internalSavedObjectsClient;
+
+    // Bootstrap the managed Cases data view + apply runtime fields from every
+    // template's declared extended fields. Idempotent; safe under concurrent
+    // node starts.
+    this.dataViewService = new CasesAnalyticsV2DataViewService({
+      logger: this.logger,
+      esClient: deps.esClient,
+      internalSavedObjectsClient: deps.internalSavedObjectsClient,
+      dataViewsService: deps.dataViewsService,
+    });
+    await this.dataViewService.start();
 
     // Schedule the singleton reconciliation task. Idempotent; safe under
     // concurrent node starts (Task Manager dedupes by id).

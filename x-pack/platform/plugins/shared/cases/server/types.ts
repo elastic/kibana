@@ -42,6 +42,7 @@ import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server'
 import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
   WorkflowsExtensionsServerPluginStart,
@@ -79,6 +80,8 @@ export interface CasesServerStartDependencies {
   notifications: NotificationsPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  /** Data views server plugin — needed by cases-analytics v2 for managed data view sync. */
+  dataViews: DataViewsServerPluginStart;
 }
 
 export interface CaseRequestContext {

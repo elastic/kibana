@@ -295,6 +295,7 @@ export class CasePlugin
         esClient: core.elasticsearch.client.asInternalUser,
         taskManager: plugins.taskManager,
         internalSavedObjectsClient: v2InternalSavedObjectsClient,
+        dataViewsService: plugins.dataViews,
       });
     }
 
