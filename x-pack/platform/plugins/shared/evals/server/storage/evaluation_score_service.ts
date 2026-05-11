@@ -6,15 +6,8 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { estypes } from '@elastic/elasticsearch';
 import type { EvaluationScoreDocument, IngestScoresRequestBody } from '@kbn/evals-common';
-import {
-  EVALUATIONS_DATA_STREAM_ALIAS,
-  EVALUATIONS_DATA_STREAM_TEMPLATE,
-  EVALUATIONS_DEFAULT_ILM_POLICY,
-  getScoresIndexTemplate,
-} from './scores_index_template';
-import { retryTransientEsErrors } from '../lib/retry_transient_es_errors';
+import { EVALUATIONS_DATA_STREAM_NAME } from './scores_index_template';
 
 interface BulkDroppedDocument {
   document: {
@@ -41,26 +34,6 @@ export interface WriteResult {
 }
 
 const DEFAULT_SUITE_ID = 'unknown-suite';
-
-const getErrorStatusCode = (error: unknown): number | undefined => {
-  if (typeof error !== 'object' || error === null) {
-    return undefined;
-  }
-
-  const asRecord = error as Record<string, unknown>;
-  const directStatusCode = asRecord.statusCode;
-  if (typeof directStatusCode === 'number') {
-    return directStatusCode;
-  }
-
-  const meta = asRecord.meta;
-  if (typeof meta !== 'object' || meta === null) {
-    return undefined;
-  }
-
-  const metaStatusCode = (meta as Record<string, unknown>).statusCode;
-  return typeof metaStatusCode === 'number' ? metaStatusCode : undefined;
-};
 
 export const computeScoreDocumentId = (document: EvaluationScoreDocument): string => {
   const suiteId = document.suite?.id ?? DEFAULT_SUITE_ID;
@@ -121,10 +94,8 @@ const toEvaluationScoreDocuments = (
 };
 
 export class EvaluationScoreService {
-  constructor(private readonly logger: Logger, private readonly isServerless: boolean) {}
-
-  async installAssets(esClient: ElasticsearchClient): Promise<void> {
-    return this.doInstallAssets(esClient);
+  constructor(logger: Logger) {
+    void logger;
   }
 
   async write(
@@ -144,7 +115,7 @@ export class EvaluationScoreService {
       onDocument: ({ payload }) => [
         {
           create: {
-            _index: EVALUATIONS_DATA_STREAM_ALIAS,
+            _index: EVALUATIONS_DATA_STREAM_NAME,
             _id: computeScoreDocumentId(payload),
           },
         },
@@ -174,96 +145,5 @@ export class EvaluationScoreService {
       conflicted,
       failed,
     };
-  }
-
-  private async doInstallAssets(esClient: ElasticsearchClient): Promise<void> {
-    if (!this.isServerless) {
-      await this.ensureLifecyclePolicy(esClient);
-    }
-
-    await this.ensureIndexTemplate(esClient);
-    await this.ensureDatastream(esClient);
-  }
-
-  private async ensureLifecyclePolicy(esClient: ElasticsearchClient): Promise<void> {
-    await retryTransientEsErrors(
-      async () =>
-        esClient.ilm.putLifecycle({
-          name: EVALUATIONS_DEFAULT_ILM_POLICY,
-          policy: {
-            phases: {
-              hot: {
-                actions: {},
-              },
-              delete: {
-                min_age: '90d',
-                actions: {
-                  delete: {},
-                },
-              },
-            },
-          },
-        }),
-      { logger: this.logger }
-    );
-  }
-
-  private async ensureIndexTemplate(esClient: ElasticsearchClient): Promise<void> {
-    const templateExists = await retryTransientEsErrors(
-      async () =>
-        esClient.indices
-          .existsIndexTemplate({
-            name: EVALUATIONS_DATA_STREAM_TEMPLATE,
-          })
-          .catch(() => false),
-      { logger: this.logger }
-    );
-
-    if (templateExists) {
-      return;
-    }
-
-    const templateBody = getScoresIndexTemplate({
-      lifecyclePolicyName: this.isServerless ? undefined : EVALUATIONS_DEFAULT_ILM_POLICY,
-    });
-
-    await retryTransientEsErrors(
-      async () =>
-        esClient.indices.putIndexTemplate({
-          name: EVALUATIONS_DATA_STREAM_TEMPLATE,
-          index_patterns: templateBody.index_patterns,
-          data_stream: templateBody.data_stream,
-          template: templateBody.template as estypes.IndicesPutIndexTemplateIndexTemplateMapping,
-        }),
-      { logger: this.logger }
-    );
-
-    this.logger.debug('Created Elasticsearch index template for evaluation scores');
-  }
-
-  private async ensureDatastream(esClient: ElasticsearchClient): Promise<void> {
-    try {
-      await retryTransientEsErrors(
-        async () =>
-          esClient.indices.getDataStream({
-            name: EVALUATIONS_DATA_STREAM_ALIAS,
-          }),
-        { logger: this.logger }
-      );
-    } catch (error) {
-      if (getErrorStatusCode(error) !== 404) {
-        throw error;
-      }
-
-      await retryTransientEsErrors(
-        async () =>
-          esClient.indices.createDataStream({
-            name: EVALUATIONS_DATA_STREAM_ALIAS,
-          }),
-        { logger: this.logger }
-      );
-
-      this.logger.debug(`Created datastream: ${EVALUATIONS_DATA_STREAM_ALIAS}`);
-    }
   }
 }

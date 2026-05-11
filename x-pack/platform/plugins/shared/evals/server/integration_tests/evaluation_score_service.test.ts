@@ -13,9 +13,8 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { IngestScoresRequestBodyInput } from '@kbn/evals-common';
 import { EvaluationScoreService } from '../storage/evaluation_score_service';
 import {
-  EVALUATIONS_DATA_STREAM_ALIAS,
-  EVALUATIONS_DATA_STREAM_TEMPLATE,
-  EVALUATIONS_DEFAULT_ILM_POLICY,
+  EVALUATIONS_DATA_STREAM_NAME,
+  evaluationsDataStreamDefinition,
 } from '../storage/scores_index_template';
 
 const getPayload = (runId: string): IngestScoresRequestBodyInput => ({
@@ -69,13 +68,12 @@ const getPayload = (runId: string): IngestScoresRequestBodyInput => ({
 });
 
 const cleanupScoresStorage = async (esClient: ElasticsearchClient) => {
-  await esClient.indices.deleteDataStream({ name: EVALUATIONS_DATA_STREAM_ALIAS }).catch(() => {});
+  await esClient.indices.deleteDataStream({ name: EVALUATIONS_DATA_STREAM_NAME }).catch(() => {});
   await esClient.indices
     .deleteIndexTemplate({
-      name: EVALUATIONS_DATA_STREAM_TEMPLATE,
+      name: EVALUATIONS_DATA_STREAM_NAME,
     })
     .catch(() => {});
-  await esClient.ilm.deleteLifecycle({ name: EVALUATIONS_DEFAULT_ILM_POLICY }).catch(() => {});
 };
 
 describe('EvaluationScoreService integration', () => {
@@ -84,6 +82,7 @@ describe('EvaluationScoreService integration', () => {
   let manageES: TestElasticsearchUtils;
   let esClient: ElasticsearchClient;
   let root: ReturnType<typeof createRootWithCorePlugins>;
+  let initializeDataStreamClient: () => Promise<unknown>;
   let originalSetTimeout: typeof global.setTimeout;
   let originalClearTimeout: typeof global.clearTimeout;
 
@@ -98,9 +97,12 @@ describe('EvaluationScoreService integration', () => {
     manageES = await startES();
     root = createRootWithCorePlugins({}, { oss: true });
     await root.preboot();
-    await root.setup();
+    const coreSetup = await root.setup();
+    coreSetup.dataStreams.registerDataStream(evaluationsDataStreamDefinition);
     const coreStart = await root.start();
     esClient = coreStart.elasticsearch.client.asInternalUser;
+    initializeDataStreamClient = () =>
+      coreStart.dataStreams.initializeClient(EVALUATIONS_DATA_STREAM_NAME);
   });
 
   afterAll(async () => {
@@ -114,6 +116,7 @@ describe('EvaluationScoreService integration', () => {
     jest.useRealTimers();
     if (esClient) {
       await cleanupScoresStorage(esClient);
+      await initializeDataStreamClient();
     }
   });
 
@@ -123,36 +126,27 @@ describe('EvaluationScoreService integration', () => {
     }
   });
 
-  it('installs assets and ingests scores with deterministic conflicts on rewrite', async () => {
-    const service = new EvaluationScoreService(loggingSystemMock.createLogger(), false);
+  it('ingests scores with deterministic conflicts on rewrite', async () => {
+    const service = new EvaluationScoreService(loggingSystemMock.createLogger());
     const runId = `service-integration-run-${Date.now()}`;
     const payload = getPayload(runId);
 
-    await service.installAssets(esClient);
-
     expect(
       await esClient.indices.existsIndexTemplate({
-        name: EVALUATIONS_DATA_STREAM_TEMPLATE,
+        name: EVALUATIONS_DATA_STREAM_NAME,
       })
     ).toBe(true);
 
     const dataStream = await esClient.indices.getDataStream({
-      name: EVALUATIONS_DATA_STREAM_ALIAS,
+      name: EVALUATIONS_DATA_STREAM_NAME,
     });
-    expect(dataStream.data_streams.map(({ name }) => name)).toContain(
-      EVALUATIONS_DATA_STREAM_ALIAS
-    );
-
-    const lifecyclePolicy = await esClient.ilm.getLifecycle({
-      name: EVALUATIONS_DEFAULT_ILM_POLICY,
-    });
-    expect(lifecyclePolicy).toHaveProperty(EVALUATIONS_DEFAULT_ILM_POLICY);
+    expect(dataStream.data_streams.map(({ name }) => name)).toContain(EVALUATIONS_DATA_STREAM_NAME);
 
     const firstWrite = await service.write(esClient, payload);
-    expect(firstWrite).toEqual({ ingested: payload.scores.length, conflicted: 0 });
+    expect(firstWrite).toEqual({ ingested: payload.scores.length, conflicted: 0, failed: [] });
 
     const searchResult = await esClient.search({
-      index: EVALUATIONS_DATA_STREAM_ALIAS,
+      index: EVALUATIONS_DATA_STREAM_NAME,
       query: {
         term: {
           run_id: runId,
@@ -162,6 +156,6 @@ describe('EvaluationScoreService integration', () => {
     expect(searchResult.hits.hits).toHaveLength(payload.scores.length);
 
     const secondWrite = await service.write(esClient, payload);
-    expect(secondWrite).toEqual({ ingested: 0, conflicted: payload.scores.length });
+    expect(secondWrite).toEqual({ ingested: 0, conflicted: payload.scores.length, failed: [] });
   });
 });

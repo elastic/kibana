@@ -7,18 +7,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { EvaluationScoreDocument, IngestScoresRequestBody } from '@kbn/evals-common';
 import {
   EvaluationScoreService,
   computeScoreDocumentId,
   type WriteResult,
 } from './evaluation_score_service';
-import {
-  EVALUATIONS_DATA_STREAM_ALIAS,
-  EVALUATIONS_DATA_STREAM_TEMPLATE,
-  EVALUATIONS_DEFAULT_ILM_POLICY,
-} from './scores_index_template';
 
 const getBaseRequest = (): IngestScoresRequestBody => ({
   run_id: 'run-1',
@@ -97,15 +91,6 @@ const createEsClientMock = (
   );
 
   const esClient = {
-    ilm: {
-      putLifecycle: jest.fn().mockResolvedValue({}),
-    },
-    indices: {
-      existsIndexTemplate: jest.fn().mockResolvedValue(false),
-      putIndexTemplate: jest.fn().mockResolvedValue({}),
-      getDataStream: jest.fn().mockRejectedValue({ statusCode: 404 }),
-      createDataStream: jest.fn().mockResolvedValue({}),
-    },
     helpers: {
       bulk,
     },
@@ -114,103 +99,10 @@ const createEsClientMock = (
   return {
     esClient,
     bulk,
-    ilmPutLifecycle: esClient.ilm.putLifecycle as jest.Mock,
-    existsIndexTemplate: esClient.indices.existsIndexTemplate as jest.Mock,
-    putIndexTemplate: esClient.indices.putIndexTemplate as jest.Mock,
-    getDataStream: esClient.indices.getDataStream as jest.Mock,
-    createDataStream: esClient.indices.createDataStream as jest.Mock,
   };
 };
 
 describe('EvaluationScoreService', () => {
-  it('bootstraps template, data stream, and ILM on stateful deployments', async () => {
-    const logger = loggingSystemMock.createLogger();
-    const service = new EvaluationScoreService(logger, false);
-    const { esClient, ilmPutLifecycle, putIndexTemplate, createDataStream } = createEsClientMock();
-
-    await service.installAssets(esClient);
-
-    expect(ilmPutLifecycle).toHaveBeenCalledWith({
-      name: EVALUATIONS_DEFAULT_ILM_POLICY,
-      policy: {
-        phases: {
-          hot: { actions: {} },
-          delete: { min_age: '90d', actions: { delete: {} } },
-        },
-      },
-    });
-    expect(putIndexTemplate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: EVALUATIONS_DATA_STREAM_TEMPLATE,
-        template: expect.objectContaining({
-          settings: expect.objectContaining({
-            index: { lifecycle: { name: EVALUATIONS_DEFAULT_ILM_POLICY } },
-          }),
-        }),
-      })
-    );
-    expect(createDataStream).toHaveBeenCalledWith({ name: EVALUATIONS_DATA_STREAM_ALIAS });
-  });
-
-  it('skips ILM bootstrap on serverless deployments', async () => {
-    const logger = loggingSystemMock.createLogger();
-    const service = new EvaluationScoreService(logger, true);
-    const { esClient, ilmPutLifecycle, putIndexTemplate } = createEsClientMock();
-
-    await service.installAssets(esClient);
-
-    expect(ilmPutLifecycle).not.toHaveBeenCalled();
-    expect(putIndexTemplate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        template: expect.objectContaining({
-          settings: expect.not.objectContaining({
-            index: expect.anything(),
-          }),
-        }),
-      })
-    );
-  });
-
-  it('installAssets is idempotent when called multiple times', async () => {
-    const logger = loggingSystemMock.createLogger();
-    const service = new EvaluationScoreService(logger, false);
-    const { esClient, existsIndexTemplate, getDataStream, putIndexTemplate, createDataStream } =
-      createEsClientMock();
-
-    existsIndexTemplate.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
-    getDataStream.mockRejectedValueOnce({ statusCode: 404 }).mockResolvedValueOnce({});
-
-    await service.installAssets(esClient);
-    await service.installAssets(esClient);
-
-    expect(existsIndexTemplate).toHaveBeenCalledTimes(2);
-    expect(getDataStream).toHaveBeenCalledTimes(2);
-    expect(putIndexTemplate).toHaveBeenCalledTimes(1);
-    expect(createDataStream).toHaveBeenCalledTimes(1);
-  });
-
-  it('retries transient Elasticsearch errors during installAssets', async () => {
-    const logger = loggingSystemMock.createLogger();
-    const service = new EvaluationScoreService(logger, false);
-    const randomSpy = jest.spyOn(Math, 'random').mockReturnValue(0);
-    const { esClient, putIndexTemplate, existsIndexTemplate, getDataStream } = createEsClientMock();
-
-    existsIndexTemplate.mockResolvedValue(false);
-    putIndexTemplate
-      .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
-      .mockResolvedValueOnce({});
-    getDataStream.mockResolvedValueOnce({});
-
-    await service.installAssets(esClient);
-
-    expect(putIndexTemplate).toHaveBeenCalledTimes(2);
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Retrying Elasticsearch operation')
-    );
-
-    randomSpy.mockRestore();
-  });
-
   it('write maps request fields and preserves deterministic ids', async () => {
     const logger = loggingSystemMock.createLogger();
     const request = getBaseRequest();
@@ -220,10 +112,11 @@ describe('EvaluationScoreService', () => {
     const { esClient } = createEsClientMock(async ({ datasource, onDocument }: BulkOptions) => {
       for (const document of datasource) {
         capturedDocuments.push(document.payload);
-        const operation = onDocument(document) as {
-          create: { _id: string };
-        };
-        capturedCreateIds.push(operation.create._id);
+        const operation = onDocument(document) as [
+          { create: { _id: string } },
+          EvaluationScoreDocument
+        ];
+        capturedCreateIds.push(operation[0].create._id);
       }
 
       return {
@@ -233,7 +126,7 @@ describe('EvaluationScoreService', () => {
       };
     });
 
-    const service = new EvaluationScoreService(logger, false);
+    const service = new EvaluationScoreService(logger);
     const result = await service.write(esClient, request);
 
     expect(result).toEqual<WriteResult>({ ingested: 1, conflicted: 0, failed: [] });
@@ -271,7 +164,7 @@ describe('EvaluationScoreService', () => {
       };
     });
 
-    const service = new EvaluationScoreService(logger, false);
+    const service = new EvaluationScoreService(logger);
     const result = await service.write(esClient, request);
 
     expect(result).toEqual({ ingested: 0, conflicted: 1, failed: [] });
@@ -305,7 +198,7 @@ describe('EvaluationScoreService', () => {
       };
     });
 
-    const service = new EvaluationScoreService(logger, false);
+    const service = new EvaluationScoreService(logger);
 
     await expect(service.write(esClient, request)).resolves.toEqual({
       ingested: 0,

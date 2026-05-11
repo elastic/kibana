@@ -29,6 +29,7 @@ import type {
 import { registerRoutes } from './routes/register_routes';
 import { DatasetService } from './storage/dataset_service';
 import { EvaluationScoreService } from './storage/evaluation_score_service';
+import { evaluationsDataStreamDefinition } from './storage/scores_index_template';
 
 export class EvalsPlugin
   implements
@@ -57,7 +58,8 @@ export class EvalsPlugin
 
     this.logger.info('Setting up Evals plugin');
     this.datasetService = new DatasetService(this.logger, this.isServerless);
-    this.evaluationScoreService = new EvaluationScoreService(this.logger, this.isServerless);
+    this.evaluationScoreService = new EvaluationScoreService(this.logger);
+    coreSetup.dataStreams.registerDataStream(evaluationsDataStreamDefinition);
 
     coreSetup.savedObjects.registerType(evalsRemoteKibanaConfigSavedObjectType);
     encryptedSavedObjects.registerType({
@@ -130,11 +132,7 @@ export class EvalsPlugin
     return {};
   }
 
-  start(coreStart: CoreStart, _plugins: EvalsStartDependencies): EvalsPluginStart {
-    this.evaluationScoreService
-      ?.installAssets(coreStart.elasticsearch.client.asInternalUser)
-      .catch((error) => this.logger.error(error));
-
+  start(_coreStart: CoreStart, _plugins: EvalsStartDependencies): EvalsPluginStart {
     return {
       datasetService: this.datasetService,
       evaluationScoreService: this.evaluationScoreService,
