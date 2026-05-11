@@ -55,6 +55,7 @@ export const getExampleLensBody = (
     operation: 'count',
     label: 'Count of records',
     empty_as_null: true,
+    fit: false,
     alignments: {
       labels: LENS_METRIC_STATE_DEFAULTS.titlesTextAlign,
       value: LENS_METRIC_STATE_DEFAULTS.valuesTextAlign,
