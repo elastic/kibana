@@ -193,7 +193,9 @@ export function LayerTabs({
                     return;
                   }
 
-                  const layerDatasourceState = datasourceStates?.[datasourceId]?.state;
+                  const layerDatasourceState = datasourceStates?.[datasourceId]?.state as
+                    | Record<string, unknown>
+                    | undefined;
                   if (!layerDatasourceState) {
                     // eslint-disable-next-line no-console
                     console.log(
@@ -333,14 +335,14 @@ export function LayerTabs({
 
                   // Create mapping from old column IDs to new ES|QL field names
                   const columnIdMapping: Record<string, string> = {};
-                  Object.entries(esqlResult.esAggsIdMap).forEach(([esqlFieldName, columns]) => {
-                    const oldColumnId = columns[0].id;
+                  Object.entries(esqlResult.esAggsIdMap).forEach(([esqlFieldName, cols]) => {
+                    const oldColumnId = cols[0].id;
                     columnIdMapping[oldColumnId] = esqlFieldName;
                     // eslint-disable-next-line no-console
                     console.log('[Convert to ES|QL] Column ID mapping:', {
                       oldColumnId,
                       newFieldName: esqlFieldName,
-                      label: columns[0].label,
+                      label: cols[0].label,
                     });
                   });
 
@@ -349,7 +351,8 @@ export function LayerTabs({
 
                   if (updatedVisualizationState.layers) {
                     updatedVisualizationState.layers = updatedVisualizationState.layers.map(
-                      (vizLayer: any) => {
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      (vizLayer: Record<string, any>) => {
                         if (vizLayer.layerId !== layerConfig.layerId) {
                           return vizLayer;
                         }
