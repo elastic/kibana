@@ -46,7 +46,7 @@ export const SECURITY_RULE_STATUS = 'security_rule_status';
  * attached to the rule-execution transaction. Written as custom context (not labels) to
  * avoid the indexing cost of dozens of low-cardinality fields.
  */
-export const SECURITY_EXECUTION_OUTCOME = 'execution_outcome';
+export const SECURITY_EXECUTION_OUTCOME = 'security_execution_outcome';
 
 // Schema field names and descriptions for APM custom context set by security rule executors
 
