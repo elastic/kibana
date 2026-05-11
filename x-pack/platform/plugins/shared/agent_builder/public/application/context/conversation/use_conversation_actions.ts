@@ -41,7 +41,7 @@ export interface ConversationActions {
     userMessage: string;
     attachments?: AttachmentInput[];
     agentId: string;
-  }) => void;
+  }) => Promise<void>;
   removeOptimisticRound: () => void;
   clearLastRoundResponse: () => void;
   addReasoningStep: ({ step }: { step: ReasoningStep }) => void;
@@ -120,7 +120,7 @@ export const createConversationActions = ({
       queryClient.invalidateQueries({ queryKey: queryKeys.conversations.all });
     },
 
-    addOptimisticRound: ({
+    addOptimisticRound: async ({
       userMessage,
       attachments,
       agentId,
@@ -132,6 +132,14 @@ export const createConversationActions = ({
       if (!conversationId) {
         return;
       }
+      // Cancel any in-flight refetch on this conversation's query before mutating
+      // the cache. After a previous successful stream, the mutation's finally block
+      // calls invalidateConversation() + clearActiveStream(), which opens the
+      // useConversation gate and triggers a GET refetch. If that refetch is still
+      // in flight when we write the optimistic round, its response will overwrite
+      // our write — and the round will then be erroneously popped by
+      // removeOptimisticRound() if this stream errors.
+      await queryClient.cancelQueries({ queryKey });
       setConversation(
         produce((draft) => {
           const current = queryClient.getQueryData<Conversation>(queryKey);
