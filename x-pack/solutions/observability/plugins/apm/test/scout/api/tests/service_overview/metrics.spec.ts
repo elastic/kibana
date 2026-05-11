@@ -98,35 +98,32 @@ apiTest.describe(
       expect(chartKeys).toContain('memory_usage_chart');
     });
 
-    apiTest(
-      'Serverless summary endpoint responds 200 for AWS Lambda',
-      async ({ apiClient }) => {
-        // The aws_lambda synth fixture only emits transactions, not the lambda
-        // metric fields required to populate the summary KPIs. We still assert
-        // the endpoint is reachable + shaped correctly so any future regression
-        // in the route handler shows up here.
-        const response = await apiClient.get(
-          `internal/apm/services/${testData.SERVICE_AWS_LAMBDA}/metrics/serverless/summary?${buildQuery(
-            {
-              start: testData.START_DATE,
-              end: testData.END_DATE,
-              environment: 'ENVIRONMENT_ALL',
-              kuery: '',
-            }
-          )}`,
-          {
-            headers: cookieHeaders,
-            responseType: 'json',
-          }
-        );
+    apiTest('Serverless summary endpoint responds 200 for AWS Lambda', async ({ apiClient }) => {
+      // The aws_lambda synth fixture only emits transactions, not the lambda
+      // metric fields required to populate the summary KPIs. We still assert
+      // the endpoint is reachable + shaped correctly so any future regression
+      // in the route handler shows up here.
+      const response = await apiClient.get(
+        `internal/apm/services/${
+          testData.SERVICE_AWS_LAMBDA
+        }/metrics/serverless/summary?${buildQuery({
+          start: testData.START_DATE,
+          end: testData.END_DATE,
+          environment: 'ENVIRONMENT_ALL',
+          kuery: '',
+        })}`,
+        {
+          headers: cookieHeaders,
+          responseType: 'json',
+        }
+      );
 
-        expect(response).toHaveStatusCode(200);
-        const body = response.body as Record<string, unknown>;
-        const keys = Object.keys(body);
-        expect(keys).toContain('serverlessFunctionsTotal');
-        expect(keys).toContain('serverlessDurationAvg');
-        expect(keys).toContain('billedDurationAvg');
-      }
-    );
+      expect(response).toHaveStatusCode(200);
+      const body = response.body as Record<string, unknown>;
+      const keys = Object.keys(body);
+      expect(keys).toContain('serverlessFunctionsTotal');
+      expect(keys).toContain('serverlessDurationAvg');
+      expect(keys).toContain('billedDurationAvg');
+    });
   }
 );

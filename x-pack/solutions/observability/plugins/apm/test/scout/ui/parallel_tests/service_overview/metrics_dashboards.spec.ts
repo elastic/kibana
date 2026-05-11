@@ -47,7 +47,10 @@ const dashboardScenarios: DashboardScenario[] = [
       'Thread count',
     ],
     expectedLegends: [
-      { panelTitle: 'CPU Usage', labels: ['System average', 'System max', 'Process average', 'Process max'] },
+      {
+        panelTitle: 'CPU Usage',
+        labels: ['System average', 'System max', 'Process average', 'Process max'],
+      },
       { panelTitle: 'System Memory Usage', labels: ['Average', 'Max'] },
     ],
   },
@@ -64,7 +67,10 @@ const dashboardScenarios: DashboardScenario[] = [
       'Average event loop delays',
     ],
     expectedLegends: [
-      { panelTitle: 'CPU Usage', labels: ['System average', 'System max', 'Process average', 'Process max'] },
+      {
+        panelTitle: 'CPU Usage',
+        labels: ['System average', 'System max', 'Process average', 'Process max'],
+      },
       { panelTitle: 'Heap usage', labels: ['used', 'allocated'] },
       { panelTitle: 'External memory usage', labels: ['overall', 'array buffers'] },
     ],
@@ -240,7 +246,9 @@ test.describe(
               const matched = renderedLabels.some((rendered) => rendered.includes(label));
               expect(
                 matched,
-                `Panel "${panelTitle}" on "${scenario.title}" is missing legend label "${label}". Got: ${JSON.stringify(renderedLabels)}`
+                `Panel "${panelTitle}" on "${
+                  scenario.title
+                }" is missing legend label "${label}". Got: ${JSON.stringify(renderedLabels)}`
               ).toBe(true);
             }
           });
