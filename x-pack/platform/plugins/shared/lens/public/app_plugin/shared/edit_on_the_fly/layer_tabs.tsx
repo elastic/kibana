@@ -205,14 +205,18 @@ export function LayerTabs({
                     return;
                   }
 
+                  const layers = layerDatasourceState.layers as
+                    | Record<string, Record<string, unknown>>
+                    | undefined;
+
                   // Check if layer is already ES|QL
-                  if (layerDatasourceState.layers[layerConfig.layerId]?.query) {
+                  if (layers?.[layerConfig.layerId]?.query) {
                     // eslint-disable-next-line no-console
                     console.log('[Convert to ES|QL] Layer is already ES|QL, skipping conversion');
                     return;
                   }
 
-                  const layer = layerDatasourceState.layers[layerConfig.layerId] as FormBasedLayer;
+                  const layer = layers?.[layerConfig.layerId] as FormBasedLayer | undefined;
                   if (!layer || !layer.columnOrder || !layer.columns) {
                     // eslint-disable-next-line no-console
                     console.log('[Convert to ES|QL] Invalid layer structure:', {
