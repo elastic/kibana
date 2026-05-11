@@ -75,7 +75,7 @@ export const SearchHomepagePage = () => {
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                {(true || !cloud?.isCloudEnabled || cloud?.isInTrial()) && (
+                {(!cloud?.isCloudEnabled || cloud?.isInTrial()) && (
                   <EuiFlexItem grow={false}>
                     <LicenseBadge />
                   </EuiFlexItem>

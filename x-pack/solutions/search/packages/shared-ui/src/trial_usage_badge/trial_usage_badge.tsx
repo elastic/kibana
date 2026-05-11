@@ -42,13 +42,13 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
 
-  const [billingUrl, setBillingUrl] = useState<string>('llll');
+  const [billingUrl, setBillingUrl] = useState<string>('');
   useEffect(() => {
     cloud
       ?.getPrivilegedUrls()
       .then((urls) => {
         if (urls.billingUrl) {
-          // setBillingUrl(urls.billingUrl);
+          setBillingUrl(urls.billingUrl);
         }
       })
       .catch(() => {});

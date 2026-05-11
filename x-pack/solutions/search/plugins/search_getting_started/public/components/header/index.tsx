@@ -38,12 +38,12 @@ export const SearchGettingStartedHeader: React.FC = () => {
           })}
         >
           <EuiFlexGroup alignItems="center" justifyContent={isTrial ? 'spaceBetween' : 'flexEnd'}>
-            {(true || isTrial) && (
+            {isTrial && (
               <EuiFlexItem grow={false}>
                 <TrialUsageBadge cloud={cloud} />
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false} order={1}>
+            <EuiFlexItem grow={false}>
               <KibanaVersionBadge
                 docLink={
                   cloud?.isServerlessEnabled
