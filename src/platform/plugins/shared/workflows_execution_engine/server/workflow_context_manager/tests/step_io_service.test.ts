@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Logger } from '@kbn/core/server';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { JsonValue } from '@kbn/utility-types';
 import { ExecutionStatus } from '@kbn/workflows';
 import type {
@@ -26,7 +28,7 @@ import { WorkflowExecutionState } from '../workflow_execution_state';
  * the service under test plus the state so suites can seed step docs via
  * the existing `upsertStep` API.
  */
-function buildHarness(opts: { evictionMinBytes?: number } = {}) {
+function buildHarness(opts: { evictionMinBytes?: number; logger?: Logger } = {}) {
   const workflowExecutionRepository = {
     updateWorkflowExecution: jest.fn(),
   } as unknown as jest.Mocked<WorkflowExecutionRepository>;
@@ -50,8 +52,9 @@ function buildHarness(opts: { evictionMinBytes?: number } = {}) {
   state.updateWorkflowExecution({ scopeStack: [] });
   const service = new StepIoService({
     stepRepository: stepExecutionRepository,
-    state: state.ioStateAccessor,
+    state,
     evictionMinBytes: opts.evictionMinBytes ?? Infinity,
+    logger: opts.logger,
   });
 
   return { state, service, stepExecutionRepository, workflowExecutionRepository };
@@ -568,6 +571,101 @@ describe('StepIoService', () => {
 
       expect(service.hasEvictedOutputs()).toBe(false);
       expect(service.getStepOutput('step-1')).toBeUndefined();
+    });
+
+    it('drops cross-execution docs returned by mget instead of restoring foreign output', async () => {
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+      });
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        { data: 'mine' },
+        250,
+        'connector'
+      );
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      // ES returns a doc for the same `_id` but a different workflowRunId.
+      // The service must refuse to restore it (defends against a custom
+      // resume path with mis-typed IDs or a hash collision).
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValueOnce([
+        {
+          id: 'step-1',
+          stepId: 'myStep',
+          stepType: 'connector',
+          workflowRunId: 'some-other-execution',
+          output: { data: 'NOT MINE' },
+        } as unknown as EsWorkflowStepExecution,
+      ]);
+
+      await service.rehydrateOutputs(['step-1']);
+
+      expect(service.getStepOutput('step-1')).toBeUndefined();
+      expect(service.hasEvictedOutputs()).toBe(false);
+    });
+
+    it('logs missing-doc as warn (not error) when workflow is in a terminal status', async () => {
+      const logger = loggerMock.create();
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+        logger,
+      });
+
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        { data: 'large' },
+        250,
+        'connector'
+      );
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([]);
+      state.updateWorkflowExecution({ status: ExecutionStatus.COMPLETED });
+
+      await service.rehydrateOutputs(['step-1']);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('not found in ES during rehydration')
+      );
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('logs missing-doc as error when workflow is still RUNNING (active data loss)', async () => {
+      const logger = loggerMock.create();
+      const { state, service, stepExecutionRepository } = buildHarness({
+        evictionMinBytes: EVICTION_THRESHOLD,
+        logger,
+      });
+
+      seedCompletedStepWithSize(
+        state,
+        service,
+        'step-1',
+        'myStep',
+        { data: 'large' },
+        250,
+        'connector'
+      );
+      await service.flushStepChanges();
+      await service.flushStepChanges();
+
+      stepExecutionRepository.getStepExecutionsByIds.mockResolvedValue([]);
+      // Workflow remains RUNNING — missing doc indicates active data loss.
+
+      await service.rehydrateOutputs(['step-1']);
+
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('not found in ES during rehydration')
+      );
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 

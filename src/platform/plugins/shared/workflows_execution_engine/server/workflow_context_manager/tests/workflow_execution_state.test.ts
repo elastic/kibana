@@ -50,7 +50,7 @@ describe('WorkflowExecutionState', () => {
   ): StepIoService {
     return new StepIoService({
       stepRepository: repo,
-      state: state.ioStateAccessor,
+      state,
       evictionMinBytes,
     });
   }

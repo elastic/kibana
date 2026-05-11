@@ -35,30 +35,31 @@ type CreateStepInput = Omit<Partial<EsWorkflowStepExecution>, 'input' | 'output'
   Pick<EsWorkflowStepExecution, 'id'>;
 
 /**
- * Narrow view of `WorkflowExecutionState` used by `StepIoService`. Defined
- * here so the dependency graph is one-way — service depends on state, state
- * depends on nothing in the IO layer. Surfaces metadata reads only; IO
- * storage and ES persistence (bulk upsert / mget) belong to the service.
+ * Narrow view of `WorkflowExecutionState` used by `StepIoService`. Implemented
+ * structurally via `Pick<WorkflowExecutionState, …>` rather than a separate
+ * interface — the boundary is enforced by the type but costs nothing at
+ * runtime (no closure bag, no extra allocation per state instance). State
+ * still has no dependency on the IO layer.
+ *
+ * Surfaces metadata reads, workflow-level reads, and the lifecycle
+ * change-tracking primitives that the service merges with its own IO
+ * partials at flush time. IO storage and ES persistence (bulk upsert /
+ * mget) belong to the service.
  */
-export interface StepIoStateAccessor {
-  // Metadata reads.
-  getStepExecution(stepExecutionId: string): StepExecutionMetadata | undefined;
-  getLatestStepExecution(stepId: string): StepExecutionMetadata | undefined;
-  getAllStepExecutions(): StepExecutionMetadata[];
-  getStepExecutionIdsByStepId(stepId: string): ReadonlyArray<string> | undefined;
-
-  // Workflow-level reads.
-  getWorkflowExecutionStatus(): EsWorkflowExecution['status'];
-  getWorkflowExecutionId(): string;
-  getWorkflowExecutionScopeStack(): EsWorkflowExecution['scopeStack'];
-  getWorkflowExecutionStepExecutionIds(): string[] | undefined;
-
-  // Lifecycle change-tracking — the service merges these with its IO partials
-  // at flush time and produces the combined bulk-upsert payload.
-  drainPendingStepChanges(): Map<string, Partial<StepExecutionMetadata>>;
-  ingestLoadedStepDocs(steps: ReadonlyArray<StepExecutionMetadata>): void;
-  flushWorkflowDoc(): Promise<void>;
-}
+export type StepIoStateAccessor = Pick<
+  WorkflowExecutionState,
+  | 'getStepExecution'
+  | 'getLatestStepExecution'
+  | 'getAllStepExecutions'
+  | 'getStepExecutionIdsByStepId'
+  | 'getWorkflowExecutionStatus'
+  | 'getWorkflowExecutionId'
+  | 'getWorkflowExecutionScopeStack'
+  | 'getWorkflowExecutionStepExecutionIds'
+  | 'drainPendingStepChanges'
+  | 'ingestLoadedStepDocs'
+  | 'flushWorkflowDoc'
+>;
 
 /**
  * In-memory step/workflow document store with deferred ES persistence.
@@ -72,7 +73,8 @@ export interface StepIoStateAccessor {
  *   - owns eviction / rehydration.
  *
  * The dependency is strictly one-way: state → workflowExecutionRepository;
- * service → state (via `ioStateAccessor`) and stepExecutionRepository.
+ * service → state (via the structural `StepIoStateAccessor` type) and
+ * stepExecutionRepository.
  */
 export class WorkflowExecutionState {
   private stepExecutions: Map<string, StepExecutionMetadata> = new Map();
@@ -96,27 +98,28 @@ export class WorkflowExecutionState {
     this.workflowExecution = initialWorkflowExecution;
   }
 
-  /**
-   * Narrow accessor consumed by `StepIoService`. Defined as an instance
-   * property whose methods close over `this` so the service can be
-   * constructed with this stable adapter immediately after state is built.
-   */
-  public readonly ioStateAccessor: StepIoStateAccessor = {
-    getStepExecution: (id) => this.stepExecutions.get(id),
-    getLatestStepExecution: (stepId) => this.getLatestStepExecution(stepId),
-    getAllStepExecutions: () => this.getAllStepExecutions(),
-    getStepExecutionIdsByStepId: (stepId) => this.stepIdExecutionIdIndex.get(stepId),
-    getWorkflowExecutionStatus: () => this.workflowExecution.status,
-    getWorkflowExecutionId: () => this.workflowExecution.id,
-    getWorkflowExecutionScopeStack: () => this.workflowExecution.scopeStack,
-    getWorkflowExecutionStepExecutionIds: () => this.workflowExecution.stepExecutionIds,
-    drainPendingStepChanges: () => this.drainPendingStepChanges(),
-    ingestLoadedStepDocs: (steps) => this.ingestLoadedStepDocs(steps),
-    flushWorkflowDoc: () => this.flushWorkflowDoc(),
-  };
-
   public getWorkflowExecution(): EsWorkflowExecution {
     return this.workflowExecution;
+  }
+
+  public getWorkflowExecutionStatus(): EsWorkflowExecution['status'] {
+    return this.workflowExecution.status;
+  }
+
+  public getWorkflowExecutionId(): string {
+    return this.workflowExecution.id;
+  }
+
+  public getWorkflowExecutionScopeStack(): EsWorkflowExecution['scopeStack'] {
+    return this.workflowExecution.scopeStack;
+  }
+
+  public getWorkflowExecutionStepExecutionIds(): string[] | undefined {
+    return this.workflowExecution.stepExecutionIds;
+  }
+
+  public getStepExecutionIdsByStepId(stepId: string): ReadonlyArray<string> | undefined {
+    return this.stepIdExecutionIdIndex.get(stepId);
   }
 
   public setLastFailedStepContext(ctx: FailedStepContext): void {
@@ -205,7 +208,7 @@ export class WorkflowExecutionState {
    * service) merges this with its own IO partials and runs the combined
    * `bulkUpsert`. Returns an empty map when nothing is pending.
    */
-  private drainPendingStepChanges(): Map<string, Partial<StepExecutionMetadata>> {
+  public drainPendingStepChanges(): Map<string, Partial<StepExecutionMetadata>> {
     if (!this.stepDocumentsChanges.size) {
       return new Map();
     }
@@ -219,14 +222,14 @@ export class WorkflowExecutionState {
    * service) is responsible for stripping `output` (and ingesting it into
    * its own IO map for pinned step types). State stores the metadata only.
    */
-  private ingestLoadedStepDocs(steps: ReadonlyArray<StepExecutionMetadata>): void {
+  public ingestLoadedStepDocs(steps: ReadonlyArray<StepExecutionMetadata>): void {
     for (const step of steps) {
       this.stepExecutions.set(step.id, step);
     }
     this.buildStepIdExecutionIdIndex();
   }
 
-  private async flushWorkflowDoc(): Promise<void> {
+  public async flushWorkflowDoc(): Promise<void> {
     if (!this.workflowDocumentChanges) {
       return;
     }

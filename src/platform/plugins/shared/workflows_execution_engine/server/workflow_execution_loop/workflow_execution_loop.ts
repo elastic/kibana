@@ -60,7 +60,9 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
       persistenceLoop(params, persistenceAbortController.signal),
     ]);
   } catch (error) {
-    params.workflowRuntime.setWorkflowError(error as Error);
+    params.workflowRuntime.setWorkflowError(
+      error instanceof Error ? error : new Error(String(error))
+    );
   } finally {
     const finalFlushSpan = apm.startSpan('final flush state', 'workflow', 'persistence');
     await flushState(params);

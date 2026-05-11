@@ -68,9 +68,13 @@ export function parseByteSize(value: string | number): number {
  * For Buffer outputs (binary HTTP responses) uses the raw byte length directly,
  * avoiding the ~4x amplification from JSON.stringify({ type: "Buffer", data: [...] }).
  * Returns the byte count on success, or `null` if the value is not serializable
- * (e.g., circular references, BigInt). A `null` result is a hard signal: the
- * value cannot be persisted to ES, so callers must fail closed (refuse the
- * output / treat as oversized) rather than silently allow it through.
+ * to JSON. This covers both the throwing cases (circular references, BigInt)
+ * and the silent ones — `JSON.stringify(undefined)` and `JSON.stringify(fn)`
+ * return `undefined` rather than throwing, and would otherwise be mis-sized
+ * as the 9-byte string "undefined" by `Buffer.byteLength`. A `null` result is
+ * a hard signal: the value cannot be persisted to ES, so callers must fail
+ * closed (refuse the output / treat as oversized) rather than silently allow
+ * it through.
  */
 export function safeOutputSize(output: unknown): number | null {
   if (Buffer.isBuffer(output)) {
@@ -78,6 +82,9 @@ export function safeOutputSize(output: unknown): number | null {
   }
   try {
     const json = JSON.stringify(output);
+    if (typeof json !== 'string') {
+      return null;
+    }
     return Buffer.byteLength(json, 'utf8');
   } catch {
     return null;

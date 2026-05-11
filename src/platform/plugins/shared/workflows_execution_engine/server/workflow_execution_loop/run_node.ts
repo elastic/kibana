@@ -124,7 +124,9 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     params.workflowRuntime.enterScope();
     nodeSpan?.setOutcome('success');
   } catch (error) {
-    params.workflowRuntime.setWorkflowError(error);
+    params.workflowRuntime.setWorkflowError(
+      error instanceof Error ? error : new Error(String(error))
+    );
     nodeSpan?.setOutcome('failure');
   } finally {
     monitorAbortController?.abort();

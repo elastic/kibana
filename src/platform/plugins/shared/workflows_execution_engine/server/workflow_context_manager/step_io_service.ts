@@ -153,10 +153,30 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    */
   private pendingIoChanges = new Map<string, { input?: JsonValue; output?: JsonValue | null }>();
 
-  /** Step execution IDs whose `output` field has been evicted from memory. Value is the original size in bytes (0 if unknown — e.g. resume-time deferred). */
-  private readonly evictedOutputIdsAndBytes = new Map<string, number>();
+  /**
+   * Every step execution id whose `output` has been evicted from memory.
+   * Reads against this Set are the authoritative "is this output evicted?"
+   * answer — used by {@link hasEvictedOutputs} and the rehydration filter.
+   */
+  private readonly evictedOutputIds = new Set<string>();
+  /**
+   * Sizes for evicted outputs that we actually measured. Resume-time
+   * deferred outputs land in {@link evictedOutputIds} only — their size is
+   * unknown and *deliberately not* recorded as 0 here, because that would
+   * pollute {@link getOutputSizeStats} with phantom zero-entries.
+   */
+  private readonly evictedOutputSizes = new Map<string, number>();
   /** Recorded output sizes (Layer 2 enforcement). Used to gate eviction eligibility. */
   private readonly outputSizes = new Map<string, number>();
+  /**
+   * Running sum of every value held in {@link outputSizes} and
+   * {@link evictedOutputSizes}. Maintained in lockstep with the two maps via
+   * {@link setOutputSize} / {@link clearOutputSize} / {@link setEvicted} /
+   * {@link clearEvicted} so {@link getOutputSizeStats} runs in `O(1)`
+   * instead of iterating both maps on every call (the telemetry layer calls
+   * this once per flush).
+   */
+  private totalRecordedBytes = 0;
   /** IDs queued for eviction on the NEXT flush cycle (one-cycle deferral). */
   private pendingOutputEvictionIds: ReadonlyArray<string> = [];
   /**
@@ -169,11 +189,22 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   private transientlyRehydratedIds: string[] = [];
 
   /**
-   * Memoised `data.set` aggregation. `getVariables()` is called from every
-   * `getContext()` (5–10× per step), and the underlying walk filters and
-   * sorts every step execution. Cache invalidation: any write that touches a
-   * `data.set` step (creation, completion, failure) clears this — see
-   * `invalidateDataSetCacheIfNeeded`.
+   * Per-execution `data.set` output, keyed by step execution id. Populated
+   * incrementally on every `data.set` write (via `setStepOutput`) and on
+   * resume (via `load()`). Iteration order is insertion order, which equals
+   * `globalExecutionIndex` order on both fresh and resumed workflows — the
+   * underlying `state.stepExecutions` is itself an insertion-ordered Map
+   * driven by `globalExecutionIndex`-assigning `createStep` calls, and the
+   * resume path replays the workflow's `stepExecutionIds` array in the same
+   * order. That means `getDataSetVariables()` can walk this map directly
+   * with no sort, in `O(K)` where K = number of `data.set` executions.
+   */
+  private readonly dataSetOutputs = new Map<string, JsonValue | null>();
+  /**
+   * Memoised aggregation of {@link dataSetOutputs}. Invalidated on every
+   * `data.set` write — that is what makes the read path cheap in the common
+   * case (the same context manager calls `getVariables` 5–10× per step but
+   * the underlying data only changes when a `data.set` step runs).
    */
   private dataSetVariablesCache: Record<string, unknown> | undefined;
 
@@ -229,24 +260,20 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   }
 
   /**
-   * Aggregates outputs from all completed `data.set` step executions in
-   * execution order. `data.set` is pinned (never evicted), so this read does
-   * not need rehydration. Memoised — `getContext()` (and therefore this) is
-   * called 5–10× per step, but the result only changes when a `data.set`
-   * step writes; the cache is invalidated by `invalidateDataSetCacheIfNeeded`
-   * on every write path.
+   * Aggregates outputs from all `data.set` step executions in execution
+   * order. `data.set` is pinned (never evicted), so this read does not need
+   * rehydration. Walks {@link dataSetOutputs} in insertion order (which
+   * matches `globalExecutionIndex` order) — `O(K)` where K is the number of
+   * `data.set` executions, not the total number of step executions. The
+   * result is memoised because the same context manager calls
+   * `getVariables()` 5–10× per step.
    */
   public getDataSetVariables(): Record<string, unknown> {
     if (this.dataSetVariablesCache !== undefined) {
       return this.dataSetVariablesCache;
     }
     const result: Record<string, unknown> = {};
-    const sorted = this.state
-      .getAllStepExecutions()
-      .filter((exec) => exec.stepType === 'data.set')
-      .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex);
-    for (const exec of sorted) {
-      const output = this.outputs.get(exec.id);
+    for (const output of this.dataSetOutputs.values()) {
       if (output != null && typeof output === 'object' && !Array.isArray(output)) {
         Object.assign(result, output);
       }
@@ -256,22 +283,14 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   }
 
   /**
-   * Drops the memoised `data.set` aggregation when a write may have changed
-   * its contents. Cheap — invoked on every step write but only does work
-   * when the write touches a `data.set` step.
+   * Records a `data.set` write into the incremental index and invalidates
+   * the memoised aggregation. Inserts on first write so the map's insertion
+   * order matches `globalExecutionIndex` order; subsequent writes (e.g.
+   * retries) update the value in place without changing the order.
    */
-  private invalidateDataSetCacheIfNeeded(stepExecutionId: string, stepType?: string): void {
-    if (stepType === 'data.set') {
-      this.dataSetVariablesCache = undefined;
-      return;
-    }
-    if (stepType === undefined) {
-      // Caller didn't tell us — peek at state to find out.
-      const existing = this.state.getStepExecution(stepExecutionId);
-      if (existing?.stepType === 'data.set') {
-        this.dataSetVariablesCache = undefined;
-      }
-    }
+  private recordDataSetOutput(stepExecutionId: string, output: JsonValue | null): void {
+    this.dataSetOutputs.set(stepExecutionId, output);
+    this.dataSetVariablesCache = undefined;
   }
 
   // ----- IO writes ----------------------------------------------------------
@@ -304,9 +323,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     output: JsonValue | null,
     sizeBytes?: number
   ): void {
-    this.invalidateDataSetCacheIfNeeded(stepExecutionId);
+    if (this.state.getStepExecution(stepExecutionId)?.stepType === 'data.set') {
+      this.recordDataSetOutput(stepExecutionId, output);
+    }
     if (sizeBytes !== undefined && Number.isFinite(sizeBytes) && sizeBytes >= 0) {
-      this.outputSizes.set(stepExecutionId, sizeBytes);
+      this.setOutputSize(stepExecutionId, sizeBytes);
     }
     this.outputs.set(stepExecutionId, output);
     const existing = this.pendingIoChanges.get(stepExecutionId) ?? {};
@@ -317,25 +338,68 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   // ----- Size tracking & telemetry ------------------------------------------
 
   /**
-   * Aggregate output size statistics across active and evicted steps. Uses
-   * pre-recorded sizes only — safe to call after eviction or at terminal state.
+   * Aggregate output size statistics across active and evicted steps. `O(1)`:
+   * the running counter is maintained in lockstep with every write to
+   * {@link outputSizes} / {@link evictedOutputSizes}, so this is safe
+   * to call from a hot path (e.g. the persistence-loop telemetry tick).
    */
   public getOutputSizeStats(): OutputSizeStats {
-    let totalBytes = 0;
-    let stepCount = 0;
-    for (const bytes of this.outputSizes.values()) {
-      totalBytes += bytes;
-      stepCount++;
-    }
-    for (const bytes of this.evictedOutputIdsAndBytes.values()) {
-      totalBytes += bytes;
-      stepCount++;
-    }
-    return { totalBytes, stepCount };
+    return {
+      totalBytes: this.totalRecordedBytes,
+      stepCount: this.outputSizes.size + this.evictedOutputSizes.size,
+    };
   }
 
   public hasEvictedOutputs(): boolean {
-    return this.evictedOutputIdsAndBytes.size > 0;
+    return this.evictedOutputIds.size > 0;
+  }
+
+  /**
+   * Writes a recorded size into {@link outputSizes} and keeps the running
+   * total in sync. Idempotent on rewrites — the previous value is subtracted
+   * before the new one is added.
+   */
+  private setOutputSize(stepExecutionId: string, sizeBytes: number): void {
+    const previous = this.outputSizes.get(stepExecutionId) ?? 0;
+    this.outputSizes.set(stepExecutionId, sizeBytes);
+    this.totalRecordedBytes += sizeBytes - previous;
+  }
+
+  /** Removes a recorded size and decrements the running total. */
+  private clearOutputSize(stepExecutionId: string): void {
+    const previous = this.outputSizes.get(stepExecutionId);
+    if (previous === undefined) return;
+    this.outputSizes.delete(stepExecutionId);
+    this.totalRecordedBytes -= previous;
+  }
+
+  /**
+   * Marks a step output as evicted and, when a size is provided, records it
+   * for the telemetry running total. Pass `undefined` (or omit) to mark a
+   * resume-deferred eviction whose size is genuinely unknown — those are
+   * tracked in {@link evictedOutputIds} only, never as phantom-zero entries
+   * in the size map.
+   */
+  private setEvicted(stepExecutionId: string, sizeBytes?: number): void {
+    this.evictedOutputIds.add(stepExecutionId);
+    if (sizeBytes !== undefined) {
+      const previous = this.evictedOutputSizes.get(stepExecutionId) ?? 0;
+      this.evictedOutputSizes.set(stepExecutionId, sizeBytes);
+      this.totalRecordedBytes += sizeBytes - previous;
+    }
+  }
+
+  /**
+   * Clears the eviction tracking for a step (Set membership + size entry if
+   * we had one). Decrements the running total only when a size had been
+   * recorded.
+   */
+  private clearEvicted(stepExecutionId: string): void {
+    this.evictedOutputIds.delete(stepExecutionId);
+    const previous = this.evictedOutputSizes.get(stepExecutionId);
+    if (previous === undefined) return;
+    this.evictedOutputSizes.delete(stepExecutionId);
+    this.totalRecordedBytes -= previous;
   }
 
   // ----- Lifecycle (public entry points) -----------------------------------
@@ -371,6 +435,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * `prepareForRead`.
    */
   public async load(): Promise<void> {
+    this.dataSetOutputs.clear();
     this.dataSetVariablesCache = undefined;
 
     const stepExecutionIds = this.state.getWorkflowExecutionStepExecutionIds();
@@ -386,16 +451,25 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       ['output']
     );
 
-    // Hand metadata-only docs to state. Strip `output` defensively — the
-    // exclude above should already do it, but a future caller passing
-    // sourceIncludes could re-introduce it.
-    const metadata = foundSteps.map((step) => stripOutput(step));
-    // Capture inputs that ES has — the state was previously seeding them.
-    for (const step of metadata) {
-      const input = (step as { input?: JsonValue }).input;
-      if (input !== undefined) {
-        this.inputs.set(step.id, input);
+    // Capture inputs and hand `output`-stripped metadata to state. The
+    // `output` sourceExclude above should already drop output from the
+    // wire, but stripping defensively guards against a future caller
+    // passing sourceIncludes that re-introduces it.
+    //
+    // We also pre-seed `dataSetOutputs` here so the map's insertion order
+    // matches `globalExecutionIndex` order — `foundSteps` is returned in
+    // workflow `stepExecutionIds` order, which is the same order. Values
+    // are set to `null` as a placeholder and overwritten below once the
+    // pinned-doc fetch returns each step's actual `output`.
+    const metadata: StepExecutionMetadata[] = [];
+    for (const step of foundSteps) {
+      if (step.input !== undefined) {
+        this.inputs.set(step.id, step.input);
       }
+      if (step.stepType === 'data.set') {
+        this.dataSetOutputs.set(step.id, null);
+      }
+      metadata.push(stripIo(step));
     }
     this.state.ingestLoadedStepDocs(metadata);
 
@@ -406,7 +480,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
         'output',
       ]);
       for (const doc of pinnedDocs) {
-        this.outputs.set(doc.id, (doc.output as JsonValue | null | undefined) ?? null);
+        const output: JsonValue | null = doc.output ?? null;
+        this.outputs.set(doc.id, output);
+        if (this.dataSetOutputs.has(doc.id)) {
+          this.dataSetOutputs.set(doc.id, output);
+        }
       }
     }
   }
@@ -493,7 +571,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     this.releaseTransientExcept(neededIds);
 
     // data.set / waitForInput outputs are pinned (never evicted), so they
-    // never appear in evictedOutputIdsAndBytes — rehydrateOutputs filters
+    // never appear in evictedOutputIds — rehydrateOutputs filters
     // out non-evicted IDs cheaply.
     await this.rehydrateOutputs(Array.from(neededIds));
   }
@@ -569,7 +647,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   ): boolean {
     for (const pred of predecessorsResolver(node)) {
       const latestExec = this.state.getLatestStepExecution(pred.stepId);
-      if (latestExec && this.evictedOutputIdsAndBytes.has(latestExec.id)) {
+      if (latestExec && this.evictedOutputIds.has(latestExec.id)) {
         return true;
       }
     }
@@ -620,10 +698,10 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
         // re-evaluated for release at the *next* prepareForRead.
         remaining.push(id);
       } else if (this.isReleaseCandidate(id)) {
-        const sizeBytes = this.outputSizes.get(id) ?? 0;
+        const sizeBytes = this.outputSizes.get(id);
         this.outputs.delete(id);
-        this.evictedOutputIdsAndBytes.set(id, sizeBytes);
-        this.outputSizes.delete(id);
+        this.clearOutputSize(id);
+        this.setEvicted(id, sizeBytes);
         releasedCount++;
       }
     }
@@ -632,7 +710,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
     if (releasedCount > 0) {
       this.logger?.debug(
-        `Released ${releasedCount} transiently rehydrated step output(s); ${remaining.length} kept resident; total evicted: ${this.evictedOutputIdsAndBytes.size}`
+        `Released ${releasedCount} transiently rehydrated step output(s); ${remaining.length} kept resident; total evicted: ${this.evictedOutputIds.size}`
       );
     }
   }
@@ -648,13 +726,13 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * scenario where a missing evicted doc indicates active data loss.
    */
   public async rehydrateOutputs(stepExecutionIds: ReadonlyArray<string>): Promise<void> {
-    const idsToRehydrate = stepExecutionIds.filter((id) => this.evictedOutputIdsAndBytes.has(id));
+    const idsToRehydrate = stepExecutionIds.filter((id) => this.evictedOutputIds.has(id));
     if (idsToRehydrate.length === 0) {
       return;
     }
 
     const totalBytes = idsToRehydrate.reduce(
-      (sum, id) => sum + (this.evictedOutputIdsAndBytes.get(id) ?? 0),
+      (sum, id) => sum + (this.evictedOutputSizes.get(id) ?? 0),
       0
     );
 
@@ -683,13 +761,13 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
     let restoredCount = 0;
     for (const doc of docs) {
-      const previousBytes = this.evictedOutputIdsAndBytes.get(doc.id) ?? 0;
-      this.evictedOutputIdsAndBytes.delete(doc.id);
+      const previousBytes = this.evictedOutputSizes.get(doc.id);
+      this.clearEvicted(doc.id);
       // The repository normalises absent `output` to `null` at the boundary,
       // so `doc.output` here is already `JsonValue | null`. FAILED steps are
       // not eviction candidates, so any rehydrated value was a COMPLETED
       // output, and `null` only occurs when ES legitimately stored null.
-      this.outputs.set(doc.id, (doc.output as JsonValue | null | undefined) ?? null);
+      this.outputs.set(doc.id, doc.output ?? null);
       // Track for transient release: predecessors brought back into memory
       // for one step's read should not stay there forever.
       this.transientlyRehydratedIds.push(doc.id);
@@ -699,34 +777,33 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       //  1. getOutputSizeStats() remains accurate after rehydration
       //  2. The step is eligible for re-eviction next cycle
       // For live-execution evictions the original size is preserved; for
-      // resume-path deferred outputs it's unknown (stored as 0), so we
-      // measure via safeOutputSize. Non-measurable outputs (`null`) are
-      // deliberately not tracked rather than recorded as 0 — these come
-      // from ES so they were serialisable when written; getting null here
-      // means a JSON.stringify quirk, not a poison payload.
-      if (previousBytes > 0) {
-        this.outputSizes.set(doc.id, previousBytes);
+      // resume-path deferred outputs it's genuinely unknown (no entry in
+      // `evictedOutputSizes`), so we measure via `safeOutputSize`.
+      // Non-measurable outputs (`null` from `safeOutputSize`) are deliberately
+      // not tracked rather than recorded as 0 — these came from ES so they
+      // were serialisable when written; getting null here means a
+      // JSON.stringify quirk, not a poison payload.
+      if (previousBytes !== undefined) {
+        this.setOutputSize(doc.id, previousBytes);
       } else {
         const sz = safeOutputSize(doc.output);
         if (sz !== null) {
-          this.outputSizes.set(doc.id, sz);
+          this.setOutputSize(doc.id, sz);
         }
       }
     }
 
     // Defensive: drop IDs not returned by ES so we don't retry forever.
-    const stillEvictedAfterFetch = idsToRehydrate.filter((id) =>
-      this.evictedOutputIdsAndBytes.has(id)
-    );
+    const stillEvictedAfterFetch = idsToRehydrate.filter((id) => this.evictedOutputIds.has(id));
     for (const id of stillEvictedAfterFetch) {
-      this.evictedOutputIdsAndBytes.delete(id);
+      this.clearEvicted(id);
     }
 
     const elapsedMs = Math.round(performance.now() - startMs);
     this.logger?.debug(
       `Rehydrated ${restoredCount}/${idsToRehydrate.length} step output(s) (${formatBytes(
         totalBytes
-      )}) from ES in ${elapsedMs}ms, ${this.evictedOutputIdsAndBytes.size} still evicted`
+      )}) from ES in ${elapsedMs}ms, ${this.evictedOutputIds.size} still evicted`
     );
 
     if (stillEvictedAfterFetch.length > 0) {
@@ -790,8 +867,11 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       if (step.stepType && this.pinnedStepTypes.has(step.stepType)) {
         pinnedIds.push(step.id);
       } else {
-        // Size unknown on resume — recorded as 0, measured on first rehydrate.
-        this.evictedOutputIdsAndBytes.set(step.id, 0);
+        // Size unknown on resume — tracked in evictedOutputIds only. Size is
+        // measured on first rehydrate; until then it is omitted from
+        // `getOutputSizeStats` rather than polluting it with phantom zero
+        // entries.
+        this.setEvicted(step.id);
       }
     }
     return pinnedIds;
@@ -828,7 +908,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     if (step.stepType && this.pinnedStepTypes.has(step.stepType)) return;
     this.outputs.delete(stepExecutionId);
     this.inputs.delete(stepExecutionId);
-    this.outputSizes.delete(stepExecutionId);
+    this.clearOutputSize(stepExecutionId);
   }
 
   private evictCompletedStepOutputs(candidateIds: ReadonlyArray<string>): void {
@@ -836,19 +916,19 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     for (const id of candidateIds) {
       const step = this.state.getStepExecution(id);
       if (step && this.isEvictionCandidate(id, step)) {
-        const sizeBytes = this.outputSizes.get(id) ?? 0;
+        const sizeBytes = this.outputSizes.get(id);
         this.outputs.delete(id);
-        this.evictedOutputIdsAndBytes.set(id, sizeBytes);
-        this.outputSizes.delete(id);
+        this.clearOutputSize(id);
+        this.setEvicted(id, sizeBytes);
         evictedCount++;
         this.logger?.debug(
-          `Evicted output of step '${step.stepId}' (${formatBytes(sizeBytes)}) from memory`
+          `Evicted output of step '${step.stepId}' (${formatBytes(sizeBytes ?? 0)}) from memory`
         );
       }
     }
     if (evictedCount > 0) {
       this.logger?.debug(
-        `Evicted ${evictedCount} step output(s), total evicted: ${this.evictedOutputIdsAndBytes.size}`
+        `Evicted ${evictedCount} step output(s), total evicted: ${this.evictedOutputIds.size}`
       );
     }
   }
@@ -872,7 +952,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   }
 
   private isEvictionCandidate(stepExecutionId: string, step: StepExecutionMetadata): boolean {
-    if (this.evictedOutputIdsAndBytes.has(stepExecutionId)) {
+    if (this.evictedOutputIds.has(stepExecutionId)) {
       return false;
     }
     // Only evict COMPLETED steps. Failed steps have `output: null` (semantic
@@ -905,7 +985,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   private isReleaseCandidate(stepExecutionId: string): boolean {
     const step = this.state.getStepExecution(stepExecutionId);
     if (!step) return false;
-    if (this.evictedOutputIdsAndBytes.has(stepExecutionId)) return false;
+    if (this.evictedOutputIds.has(stepExecutionId)) return false;
     if (step.status !== ExecutionStatus.COMPLETED) return false;
     if (!this.outputs.has(stepExecutionId)) return false;
     if (step.stepType && this.pinnedStepTypes.has(step.stepType)) return false;
@@ -914,13 +994,13 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 }
 
 /**
- * Returns a copy of the step doc with `output` stripped. Used at load time
- * before handing metadata to state — output ownership lives in the service's
- * IO maps, never in state.
+ * Returns a copy of the step doc with `input` and `output` stripped. Used at
+ * load time before handing the doc to state — IO ownership lives in the
+ * service's input/output maps, never in state, so `StepExecutionMetadata`
+ * (which is `Omit<EsWorkflowStepExecution, 'input' | 'output'>`) must not
+ * carry those fields.
  */
-function stripOutput(step: EsWorkflowStepExecution): StepExecutionMetadata {
-  const { output: _output, ...metadata } = step as EsWorkflowStepExecution & {
-    output?: unknown;
-  };
-  return metadata as StepExecutionMetadata;
+function stripIo(step: EsWorkflowStepExecution): StepExecutionMetadata {
+  const { input: _input, output: _output, ...metadata } = step;
+  return metadata;
 }

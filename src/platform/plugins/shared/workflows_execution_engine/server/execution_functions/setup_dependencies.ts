@@ -127,7 +127,7 @@ export async function setupDependencies(
 
   const stepIoService = new StepIoService({
     stepRepository: stepExecutionRepository,
-    state: workflowExecutionState.ioStateAccessor,
+    state: workflowExecutionState,
     evictionMinBytes: config.eviction.minPayloadSize.getValueInBytes(),
     logger,
   });
