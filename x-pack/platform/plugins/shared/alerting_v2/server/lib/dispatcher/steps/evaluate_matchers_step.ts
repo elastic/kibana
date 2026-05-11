@@ -58,14 +58,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
       for (const policy of spacePolicies) {
         if (!policy.enabled) continue;
         if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
-        if (policy.type === 'single_rule' && policy.ruleId !== rule.id) {
-          this.logger.debug({
-            message: () =>
-              `Skipping single_rule policy ${policy.id} for episode ${episode.episode_id}: ` +
-              `policy linked to rule ${policy.ruleId}, episode came from rule ${rule.id}.`,
-          });
-          continue;
-        }
+        if (policy.type === 'single_rule' && policy.ruleId !== rule.id) continue;
 
         if (!policy.matcher) {
           matched.push({ episode, policy });

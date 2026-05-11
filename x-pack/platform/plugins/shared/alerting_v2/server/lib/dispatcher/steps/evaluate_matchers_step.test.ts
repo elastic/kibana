@@ -504,15 +504,5 @@ describe('EvaluateMatchersStep', () => {
       const matchedIds = matched.map(({ policy }) => policy.id).sort();
       expect(matchedIds).toEqual(['g1', 's1']);
     });
-
-    it('emits a debug log when a single_rule policy is skipped', async () => {
-      const episode = createAlertEpisode({ rule_id: 'r1' });
-      const rule = createRule({ id: 'r1' });
-      const policy = createSingleRuleActionPolicy('r2', { id: 'p1' });
-
-      await runStep([episode], new Map([['r1', rule]]), new Map([['p1', policy]]));
-
-      expect(mockLogger.debug).toHaveBeenCalledTimes(1);
-    });
   });
 });
