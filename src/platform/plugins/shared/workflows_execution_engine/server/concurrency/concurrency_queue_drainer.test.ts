@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import { drainConcurrencyQueueSlots } from './concurrency_queue_drainer';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 describe('drainConcurrencyQueueSlots', () => {
+  const scheduleMock = jest.fn().mockResolvedValue(undefined);
   const baseParams = {
-    taskManager: { schedule: jest.fn().mockResolvedValue(undefined) },
-    logger: { debug: jest.fn(), warn: jest.fn() },
+    taskManager: { schedule: scheduleMock } as unknown as TaskManagerStartContract,
+    logger: { debug: jest.fn(), warn: jest.fn() } as unknown as Logger,
     spaceId: 'default',
     concurrencyGroupKey: 'g1',
     concurrencySettings: { key: 'g1', strategy: 'queue' as const, max: 1 },
-    request: {} as any,
+    request: {} as unknown as KibanaRequest,
   };
 
   beforeEach(() => {
@@ -45,7 +48,7 @@ describe('drainConcurrencyQueueSlots', () => {
       workflowExecutionRepository,
     });
 
-    expect(baseParams.taskManager.schedule).toHaveBeenCalledTimes(1);
+    expect(scheduleMock).toHaveBeenCalledTimes(1);
     expect(countMock).toHaveBeenCalledTimes(2);
   });
 
@@ -84,6 +87,6 @@ describe('drainConcurrencyQueueSlots', () => {
       concurrencySettings: { key: 'g1', strategy: 'queue', max: 2 },
     });
 
-    expect(baseParams.taskManager.schedule).toHaveBeenCalledTimes(2);
+    expect(scheduleMock).toHaveBeenCalledTimes(2);
   });
 });
