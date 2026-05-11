@@ -200,14 +200,13 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
 
   const isListLayout = isOutsideListLegendLayoutState(legend);
 
-  const baseOutside = stripUndefined({
-    placement: 'outside' as const,
-    size: legendSizeCompat.toAPI(legend.legendSize),
-    position: legend.position ?? DEFAULT_LEGEND_POSITON,
-  });
+  const position = legend.position ?? DEFAULT_LEGEND_POSITON;
+  const isVerticalPosition = ['left', 'right'].includes(position);
 
-  return {
-    ...baseOutside,
+  return stripUndefined({
+    placement: 'outside',
+    position,
+    size: isVerticalPosition ? legendSizeCompat.toAPI(legend.legendSize) : undefined,
     layout: isListLayout
       ? {
           type: 'list',
@@ -219,7 +218,7 @@ function getLegendLayout(legend: XYVisualizationState['legend']) {
             enabled,
           },
         },
-  } satisfies HorizontalOutsideLayoutLegend | VerticalOutsideLayoutLegend;
+  }) satisfies HorizontalOutsideLayoutLegend | VerticalOutsideLayoutLegend;
 }
 
 function getApiLegendTruncate(
