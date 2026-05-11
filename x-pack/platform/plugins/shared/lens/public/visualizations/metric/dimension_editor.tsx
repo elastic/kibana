@@ -890,7 +890,7 @@ export function DimensionEditorAdditionalSection({
 
   const selectedSupportingVisualization = supportingVisualization(state);
   const colorControlsSectionVisible =
-    selectedSupportingVisualization !== 'panel' || state.applyColorTo !== 'none';
+    selectedSupportingVisualization !== 'panel' || Boolean(state.applyColorTo);
   const { anchorRef: colorControlsAnchorRef, scrollIntoView: scrollToColorControls } =
     useScrollIntoView();
 
@@ -1168,24 +1168,24 @@ export function DimensionEditorAdditionalSection({
                 value: 'none',
               },
               {
-                id: `${buttonIdPrefix}value`,
-                label: i18n.translate('xpack.lens.metric.supportingVis.applyColorTo.value', {
-                  defaultMessage: 'Value',
-                }),
-                value: 'value',
-              },
-              {
                 id: `${buttonIdPrefix}background`,
                 label: i18n.translate('xpack.lens.metric.supportingVis.applyColorTo.background', {
                   defaultMessage: 'Panel',
                 }),
                 value: 'background',
               },
+              {
+                id: `${buttonIdPrefix}value`,
+                label: i18n.translate('xpack.lens.metric.supportingVis.applyColorTo.value', {
+                  defaultMessage: 'Value',
+                }),
+                value: 'value',
+              },
             ]}
             idSelected={
               state.applyColorTo
                 ? `${buttonIdPrefix}${state.applyColorTo}`
-                : `${buttonIdPrefix}background`
+                : `${buttonIdPrefix}none`
             }
             onChange={(_id, newApplyColorTo) => {
               setState({
@@ -1269,7 +1269,7 @@ export function DimensionEditorAdditionalSection({
               display="columnCompressed"
               fullWidth
               label={i18n.translate('xpack.lens.metric.dynamicColorMapping.label', {
-                defaultMessage: 'Color mapping',
+                defaultMessage: 'Dynamic color mapping',
               })}
               css={css`
                 // Center the field wrapper
