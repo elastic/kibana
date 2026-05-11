@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
-import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type {
+  WorkflowsExtensionsRequestHandlerContext,
+  WorkflowsExtensionsServerPluginSetup,
+} from '@kbn/workflows-extensions/server';
 import { registerEmitEventRoute } from './routes/emit_event';
 import { registerEmitLoopRoute } from './routes/emit_loop';
-import type { ExampleRequestHandlerContext } from './request_context';
 import { registerStepDefinitions } from './step_types';
 import { registerTriggers } from './triggers';
-
-export type { ExampleRequestHandlerContext } from './request_context';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface WorkflowsExtensionsExamplePluginSetup {
@@ -51,7 +51,7 @@ export class WorkflowsExtensionsExamplePlugin
     registerStepDefinitions(plugins.workflowsExtensions);
     registerTriggers(plugins.workflowsExtensions);
 
-    const router = core.http.createRouter<ExampleRequestHandlerContext>();
+    const router = core.http.createRouter<WorkflowsExtensionsRequestHandlerContext>();
     registerEmitEventRoute(router);
     registerEmitLoopRoute(router);
 

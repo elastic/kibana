@@ -47,6 +47,7 @@ describe('AlertEpisodeTagsFlyout', () => {
   };
 
   beforeEach(() => {
+    mutate.mockClear();
     useFetchAlertEpisodeTagSuggestionsMock.mockReturnValue({
       data: ['beta', 'gamma'],
       isLoading: false,
@@ -177,5 +178,27 @@ describe('AlertEpisodeTagsFlyout', () => {
     await user.click(screen.getByTestId('alertingEpisodeTagsFlyoutSave'));
 
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('calls onSave with selected tags and closes without calling the internal mutation when onSave is provided', async () => {
+    const user = userEvent.setup();
+    const mockOnSave = jest.fn();
+    const mockOnClose = jest.fn();
+
+    render(
+      <AlertEpisodeTagsFlyout
+        {...defaultProps}
+        onClose={mockOnClose}
+        currentTags={['tag-a']}
+        onSave={mockOnSave}
+      />,
+      { wrapper: queryWrapper }
+    );
+
+    await user.click(screen.getByTestId('alertingEpisodeTagsFlyoutSave'));
+
+    expect(mockOnSave).toHaveBeenCalledWith(['tag-a']);
+    expect(mockOnClose).toHaveBeenCalled();
+    expect(mutate).not.toHaveBeenCalled();
   });
 });

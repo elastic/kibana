@@ -248,7 +248,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('renders solutions selection', async () => {
           await openFlyout();
 
-          await testSubjects.click('caseOwnerSelector');
+          await testSubjects.click('caseOwnerSuperSelect');
 
           for (const owner of TOTAL_OWNERS) {
             await testSubjects.existOrFail(`${owner}OwnerOption`);

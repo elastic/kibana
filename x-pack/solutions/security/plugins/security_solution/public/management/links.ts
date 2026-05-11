@@ -15,6 +15,7 @@ import {
   getEndpointAuthzInitialState,
 } from '../../common/endpoint/service/authz';
 import {
+  ENDPOINT_EXCEPTIONS_PATH,
   ENDPOINTS_PATH,
   ENTITY_ANALYTICS_MANAGEMENT_PATH,
   MANAGE_PATH,
@@ -23,7 +24,6 @@ import {
   SCRIPT_LIBRARY_PATH,
   SECURITY_FEATURE_ID,
   SecurityPageName,
-  TRUSTED_APPS_PATH,
 } from '../../common/constants';
 import {
   ARTIFACTS,
@@ -95,7 +95,7 @@ export const links: LinkItem = {
   path: MANAGE_PATH,
   skipUrlState: true,
   hideTimeline: true,
-  globalNavPosition: 12,
+  globalNavPosition: 13,
   capabilities: [SECURITY_UI_SHOW_PRIVILEGE],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {
@@ -135,7 +135,7 @@ export const links: LinkItem = {
           'Manage exceptions, trusted applications, and other settings that control how endpoints are protected and respond to activity.',
       }),
       landingIcon: IconArtifacts,
-      path: TRUSTED_APPS_PATH,
+      path: ENDPOINT_EXCEPTIONS_PATH,
       skipUrlState: true,
       hideTimeline: true,
     },

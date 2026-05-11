@@ -14,37 +14,43 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { EvaluationScoreDocument } from '../common_attributes.gen';
 
+export const GetEvaluationRunScoresRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Filter by suite ID
+     */
+    suite_id: z.string().optional(),
+    /**
+     * Filter by task model ID
+     */
+    model_id: z.string().optional(),
+  })
+);
 export type GetEvaluationRunScoresRequestQuery = z.infer<typeof GetEvaluationRunScoresRequestQuery>;
-export const GetEvaluationRunScoresRequestQuery = z.object({
-  /**
-   * Filter by suite ID
-   */
-  suite_id: z.string().optional(),
-  /**
-   * Filter by task model ID
-   */
-  model_id: z.string().optional(),
-});
 export type GetEvaluationRunScoresRequestQueryInput = z.input<
   typeof GetEvaluationRunScoresRequestQuery
 >;
 
+export const GetEvaluationRunScoresRequestParams = lazySchema(() =>
+  z.object({
+    runId: z.string(),
+  })
+);
 export type GetEvaluationRunScoresRequestParams = z.infer<
   typeof GetEvaluationRunScoresRequestParams
 >;
-export const GetEvaluationRunScoresRequestParams = z.object({
-  runId: z.string(),
-});
 export type GetEvaluationRunScoresRequestParamsInput = z.input<
   typeof GetEvaluationRunScoresRequestParams
 >;
 
+export const GetEvaluationRunScoresResponse = lazySchema(() =>
+  z.object({
+    scores: z.array(EvaluationScoreDocument),
+    total: z.number().int(),
+  })
+);
 export type GetEvaluationRunScoresResponse = z.infer<typeof GetEvaluationRunScoresResponse>;
-export const GetEvaluationRunScoresResponse = z.object({
-  scores: z.array(EvaluationScoreDocument),
-  total: z.number().int(),
-});

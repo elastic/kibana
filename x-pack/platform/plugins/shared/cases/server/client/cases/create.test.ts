@@ -44,6 +44,21 @@ describe('create', () => {
   const casesClientMock = createCasesClientMock();
   casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
 
+  describe('workflow events', () => {
+    it('emits a caseCreated event on successful create', async () => {
+      const clientArgs = createCasesClientMockArgs();
+
+      clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);
+
+      await create(theCase, clientArgs, casesClientMock);
+
+      expect(clientArgs.casesEventBus.emitCaseCreated).toHaveBeenCalledWith(clientArgs.request, {
+        caseId: caseSO.id,
+        owner: caseSO.attributes.owner,
+      });
+    });
+  });
+
   describe('Assignees', () => {
     const clientArgs = createCasesClientMockArgs();
     clientArgs.services.caseService.createCase.mockResolvedValue(caseSO);

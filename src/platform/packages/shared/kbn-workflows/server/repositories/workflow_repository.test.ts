@@ -155,6 +155,46 @@ describe('WorkflowRepository.areWorkflowsEnabled', () => {
   });
 });
 
+describe('WorkflowRepository.getWorkflow', () => {
+  const baseSource = {
+    name: 'My workflow',
+    enabled: true,
+    valid: true,
+    createdBy: 'user',
+    lastUpdatedBy: 'user',
+    yaml: 'name: My workflow',
+    tags: ['a'],
+  };
+
+  it('maps snake_case timestamps from the workflow index to EsWorkflow dates', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _id: 'wf-1',
+              _source: {
+                ...baseSource,
+                created_at: '2024-01-02T03:04:05.000Z',
+                updated_at: '2024-06-07T08:09:10.000Z',
+              },
+            },
+          ],
+        },
+      }),
+    };
+    const repository = new WorkflowRepository({
+      esClient: esClient as any,
+      logger: loggingSystemMock.create().get(),
+    });
+
+    const wf = await repository.getWorkflow('wf-1', 'default');
+    expect(wf).not.toBeNull();
+    expect(wf!.createdAt.toISOString()).toBe('2024-01-02T03:04:05.000Z');
+    expect(wf!.lastUpdatedAt.toISOString()).toBe('2024-06-07T08:09:10.000Z');
+  });
+});
+
 describe('WorkflowRepository.isWorkflowEnabled', () => {
   it('delegates to areWorkflowsEnabled and reads the keyed flag', async () => {
     const esClient = {

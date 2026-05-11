@@ -3136,7 +3136,7 @@
       "label": "EmbeddableSetup",
       "description": [],
       "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-      "lineNumber": 39,
+      "lineNumber": 42,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3212,7 +3212,7 @@
             "<TSavedObjectAttributes>) => string) | undefined; }) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-          "lineNumber": 40,
+          "lineNumber": 43,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3315,7 +3315,7 @@
             "<any, any, any>>) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-          "lineNumber": 68,
+          "lineNumber": 71,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3407,7 +3407,7 @@
             "<SerializedState, Api>>) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-          "lineNumber": 73,
+          "lineNumber": 76,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3499,7 +3499,7 @@
             "[] | undefined, id?: string | undefined) => object) | undefined>) => void"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-          "lineNumber": 78,
+          "lineNumber": 81,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3515,7 +3515,7 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-              "lineNumber": 83,
+              "lineNumber": 86,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -3564,7 +3564,7 @@
                 "[] | undefined, id?: string | undefined) => object) | undefined>"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-              "lineNumber": 84,
+              "lineNumber": 87,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -3585,7 +3585,7 @@
       "label": "EmbeddableStart",
       "description": [],
       "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-      "lineNumber": 90,
+      "lineNumber": 93,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -3603,7 +3603,27 @@
             ">>"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-          "lineNumber": 91,
+          "lineNumber": 94,
+          "columnNumber": 3,
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "embeddable",
+          "id": "def-public.EmbeddableStart.getAddFromLibraryContentComponent",
+          "type": "Function",
+          "tags": [],
+          "label": "getAddFromLibraryContentComponent",
+          "description": [],
+          "signature": [
+            "() => Promise<React.FC<",
+            "AddFromLibraryContentProps",
+            ">>"
+          ],
+          "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+          "lineNumber": 95,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3636,7 +3656,7 @@
             }
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-          "lineNumber": 92,
+          "lineNumber": 96,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3659,7 +3679,7 @@
                 " | undefined"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-              "lineNumber": 92,
+              "lineNumber": 96,
               "columnNumber": 22,
               "deprecated": false,
               "docsReferencedTypeName": "Storage",
@@ -3696,7 +3716,7 @@
             "[] | undefined, id?: string | undefined) => object) | undefined>"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-          "lineNumber": 93,
+          "lineNumber": 97,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3712,7 +3732,7 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-              "lineNumber": 94,
+              "lineNumber": 98,
               "columnNumber": 5,
               "deprecated": false,
               "trackAdoption": false,
@@ -3732,7 +3752,7 @@
             "(type: string) => boolean"
           ],
           "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-          "lineNumber": 96,
+          "lineNumber": 100,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -3748,7 +3768,7 @@
                 "string"
               ],
               "path": "src/platform/plugins/shared/embeddable/public/types.ts",
-              "lineNumber": 96,
+              "lineNumber": 100,
               "columnNumber": 27,
               "deprecated": false,
               "trackAdoption": false,

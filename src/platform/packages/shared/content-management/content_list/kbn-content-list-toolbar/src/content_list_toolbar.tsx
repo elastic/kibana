@@ -11,11 +11,17 @@ import React, { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { EuiSearchBar } from '@elastic/eui';
 import type { EuiSearchBarOnChangeArgs } from '@elastic/eui';
-import { useContentListConfig, useContentListSearch } from '@kbn/content-list-provider';
+import {
+  useContentListConfig,
+  useContentListSearch,
+  useContentListSelection,
+  useContentListPhase,
+} from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import { Filters } from './filters';
 import { useFilters } from './hooks';
 import { SelectionBar } from './selection_bar';
+import { ToolbarSkeleton } from './skeleton/toolbar_skeleton';
 
 /**
  * Props for the {@link ContentListToolbar} component.
@@ -43,6 +49,7 @@ const ContentListToolbarComponent = ({
   children,
   'data-test-subj': dataTestSubj = 'contentListToolbar',
 }: ContentListToolbarProps) => {
+  const phase = useContentListPhase();
   const { labels, supports } = useContentListConfig();
   const {
     queryText,
@@ -50,6 +57,7 @@ const ContentListToolbarComponent = ({
     isSupported: searchIsSupported,
     fieldNames,
   } = useContentListSearch();
+  const { selectedCount } = useContentListSelection();
   const filters = useFilters(children);
 
   const handleSearchChange = useCallback(
@@ -86,14 +94,27 @@ const ContentListToolbarComponent = ({
     return { strict: false, fields: schemaFields };
   }, [fieldNames]);
 
-  // Only include the selection bar when selection is supported.
+  // Only pass the SelectionBar as a toolsLeft item when there are actually
+  // selected items. EuiSearchBar renders every toolsLeft entry as a flex item
+  // regardless of whether the child renders null, producing an empty gap when
+  // nothing is selected.
   const toolsLeft = useMemo(
     () =>
-      supports.selection
+      supports.selection && selectedCount > 0
         ? [<SelectionBar key="selection" data-test-subj={`${dataTestSubj}-selectionBar`} />]
         : undefined,
-    [supports.selection, dataTestSubj]
+    [supports.selection, selectedCount, dataTestSubj]
   );
+
+  if (phase === 'initialLoad') {
+    return (
+      <ToolbarSkeleton
+        filterCount={filters.length}
+        hasSelection={supports.selection}
+        data-test-subj={`${dataTestSubj}-skeleton`}
+      />
+    );
+  }
 
   return (
     <EuiSearchBar

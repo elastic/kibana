@@ -278,7 +278,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/kbn-scout-synthtrace/src/synthtrace_fixture.ts",
-        "lineNumber": 41,
+        "lineNumber": 52,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -360,6 +360,170 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/scout-synthtrace",
+        "id": "def-common.ApmSynthtraceFixtureClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApmSynthtraceFixtureClient",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/scout-synthtrace",
+            "scope": "common",
+            "docId": "kibKbnScoutSynthtracePluginApi",
+            "section": "def-common.ApmSynthtraceFixtureClient",
+            "text": "ApmSynthtraceFixtureClient"
+          },
+          " extends Pick<",
+          "SynthtraceEsClient",
+          "<",
+          {
+            "pluginId": "@kbn/synthtrace-client",
+            "scope": "common",
+            "docId": "kibKbnSynthtraceClientPluginApi",
+            "section": "def-common.ApmFields",
+            "text": "ApmFields"
+          },
+          ">, \"clean\" | \"index\">"
+        ],
+        "path": "src/platform/packages/shared/kbn-scout-synthtrace/src/synthtrace_fixture.ts",
+        "lineNumber": 24,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-synthtrace",
+            "id": "def-common.ApmSynthtraceFixtureClient.setPipeline",
+            "type": "Function",
+            "tags": [],
+            "label": "setPipeline",
+            "description": [],
+            "signature": [
+              "(cb: (base: ",
+              "Readable",
+              ") => NodeJS.WritableStream) => void"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout-synthtrace/src/synthtrace_fixture.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-synthtrace",
+                "id": "def-common.ApmSynthtraceFixtureClient.setPipeline.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "cb",
+                "description": [],
+                "signature": [
+                  "(base: ",
+                  "Readable",
+                  ") => NodeJS.WritableStream"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/lib/shared/base_client.ts",
+                "lineNumber": 57,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false,
+                "returnComment": [],
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/scout-synthtrace",
+                    "id": "def-common.ApmSynthtraceFixtureClient.setPipeline.$1.$1",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "base",
+                    "description": [],
+                    "signature": [
+                      "Readable"
+                    ],
+                    "path": "src/platform/packages/shared/kbn-synthtrace/src/lib/shared/base_client.ts",
+                    "lineNumber": 57,
+                    "columnNumber": 20,
+                    "deprecated": false,
+                    "docsReferencedTypeName": "Readable",
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/scout-synthtrace",
+            "id": "def-common.ApmSynthtraceFixtureClient.resolvePipelineType",
+            "type": "Function",
+            "tags": [],
+            "label": "resolvePipelineType",
+            "description": [],
+            "signature": [
+              "(pipeline: ",
+              {
+                "pluginId": "@kbn/synthtrace-client",
+                "scope": "common",
+                "docId": "kibKbnSynthtraceClientPluginApi",
+                "section": "def-common.ApmSynthtracePipelines",
+                "text": "ApmSynthtracePipelines"
+              },
+              ", options?: ApmPipelineOptions | undefined) => (base: ",
+              "Readable",
+              ") => NodeJS.WritableStream"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout-synthtrace/src/synthtrace_fixture.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-synthtrace",
+                "id": "def-common.ApmSynthtraceFixtureClient.resolvePipelineType.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "pipeline",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/synthtrace-client",
+                    "scope": "common",
+                    "docId": "kibKbnSynthtraceClientPluginApi",
+                    "section": "def-common.ApmSynthtracePipelineSchema",
+                    "text": "ApmSynthtracePipelineSchema"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/lib/apm/client/apm_synthtrace_es_client/index.ts",
+                "lineNumber": 53,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "ApmSynthtracePipelines",
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/scout-synthtrace",
+                "id": "def-common.ApmSynthtraceFixtureClient.resolvePipelineType.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ApmPipelineOptions | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-synthtrace/src/lib/apm/client/apm_synthtrace_es_client/index.ts",
+                "lineNumber": 54,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "ApmPipelineOptions",
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-synthtrace",
         "id": "def-common.SynthtraceClientOptions",
         "type": "Interface",
         "tags": [],
@@ -428,18 +592,12 @@
           {
             "parentPluginId": "@kbn/scout-synthtrace",
             "id": "def-common.SynthtraceClientOptions.config",
-            "type": "Object",
+            "type": "Any",
             "tags": [],
             "label": "config",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/scout",
-                "scope": "common",
-                "docId": "kibKbnScoutPluginApi",
-                "section": "def-common.ScoutTestConfig",
-                "text": "ScoutTestConfig"
-              }
+              "any"
             ],
             "path": "src/platform/packages/shared/kbn-scout-synthtrace/src/get_synthtrace_client.ts",
             "lineNumber": 20,
@@ -458,7 +616,7 @@
         "label": "SynthtraceFixture",
         "description": [],
         "path": "src/platform/packages/shared/kbn-scout-synthtrace/src/synthtrace_fixture.ts",
-        "lineNumber": 22,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -471,30 +629,16 @@
             "label": "apmSynthtraceEsClient",
             "description": [],
             "signature": [
-              "{ clean: () => Promise<void>; index: (streamOrGenerator: MaybeArray<",
-              "Readable",
-              " | ",
               {
-                "pluginId": "@kbn/synthtrace-client",
+                "pluginId": "@kbn/scout-synthtrace",
                 "scope": "common",
-                "docId": "kibKbnSynthtraceClientPluginApi",
-                "section": "def-common.SynthtraceGenerator",
-                "text": "SynthtraceGenerator"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/synthtrace-client",
-                "scope": "common",
-                "docId": "kibKbnSynthtraceClientPluginApi",
-                "section": "def-common.ApmFields",
-                "text": "ApmFields"
-              },
-              ">>, pipelineCallback?: ((base: ",
-              "Readable",
-              ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
+                "docId": "kibKbnScoutSynthtracePluginApi",
+                "section": "def-common.ApmSynthtraceFixtureClient",
+                "text": "ApmSynthtraceFixtureClient"
+              }
             ],
             "path": "src/platform/packages/shared/kbn-scout-synthtrace/src/synthtrace_fixture.ts",
-            "lineNumber": 23,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -530,7 +674,7 @@
               ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout-synthtrace/src/synthtrace_fixture.ts",
-            "lineNumber": 24,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -566,7 +710,7 @@
               ") => NodeJS.WritableStream) | undefined) => Promise<void>; }"
             ],
             "path": "src/platform/packages/shared/kbn-scout-synthtrace/src/synthtrace_fixture.ts",
-            "lineNumber": 25,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
