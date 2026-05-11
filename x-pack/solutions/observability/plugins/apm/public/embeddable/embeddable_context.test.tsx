@@ -7,6 +7,8 @@
 
 import React, { useContext } from 'react';
 import { render, screen } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
+import { Router } from '@kbn/shared-ux-router';
 import { BehaviorSubject } from 'rxjs';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { ApmEmbeddableContext } from './embeddable_context';
@@ -254,6 +256,23 @@ describe('ApmEmbeddableContext', () => {
         rangeFrom: 'now-15m',
         rangeTo: 'now-5m',
       });
+    });
+  });
+
+  describe('nested v6 router context', () => {
+    it('renders without crashing when mounted inside a page that already has a v6 router context (CompatRouter)', () => {
+      const outerHistory = createMemoryHistory();
+
+      render(
+        <Router history={outerHistory}>
+          <ApmEmbeddableContext deps={mockDeps}>
+            <div data-test-subj="nested-child">Nested Content</div>
+          </ApmEmbeddableContext>
+        </Router>
+      );
+
+      expect(screen.getByTestId('nested-child')).toBeInTheDocument();
+      expect(screen.getByText('Nested Content')).toBeInTheDocument();
     });
   });
 });

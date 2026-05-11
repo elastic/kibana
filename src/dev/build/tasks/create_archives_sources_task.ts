@@ -91,6 +91,7 @@ export const CreateArchivesSources: Task = {
             'serverless.security.yml',
             'serverless.security.{search_ai_lake,essentials,complete}.yml',
           ];
+          const VECTORDB_CONFIGS = ['serverless.vectordb.yml'];
           const configFiles = ['serverless.yml'];
           const solutionId = platform.getSolutionId();
           switch (solutionId) {
@@ -106,13 +107,17 @@ export const CreateArchivesSources: Task = {
             case 'security':
               configFiles.push(...SECURITY_CONFIGS);
               break;
+            case 'vectordb':
+              configFiles.push(...VECTORDB_CONFIGS);
+              break;
             default:
               // we push all of the solution config files for non-solution specific serverless builds
               configFiles.push(
                 ...WORKPLACE_AI_CONFIGS,
                 ...ELASTICSEARCH_CONFIGS,
                 ...OBSERVABILITY_CONFIGS,
-                ...SECURITY_CONFIGS
+                ...SECURITY_CONFIGS,
+                ...VECTORDB_CONFIGS
               );
               break;
           }
