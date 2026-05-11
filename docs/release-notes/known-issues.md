@@ -8,6 +8,45 @@ For Elastic {{observability}} known issues, refer to [Elastic Observability know
 
 For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
+::::{dropdown} Stack alerts remain active instead of transitioning to recovered
+
+Applies to: {{stack}} 9.2.7, 9.2.8, 9.3.2, 9.3.3
+
+**Details**
+
+Some Stack alerts send recovery notifications (for example, Slack, email, or webhook) but remain `active` in {{kib}} instead of transitioning to `recovered`.
+
+**Action**
+
+Manually untrack stale alerts or upgrade to {{stack}} 9.3.4 or 9.4.0.
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.3.4 and 9.4.0.
+
+::::
+
+
+::::{dropdown} Dashboards with controls might fail to open
+
+Applies to: {{stack}} 9.4.0
+
+**Details**
+
+Some existing dashboards are failing to load when a pinned control has `"title": null` in the saved object. This manifests as an error like `Invalid response. [pinned_panels.0.config.title]: expected value of type [string] but got [null].` error on the dashboard app.
+
+**Action**
+
+If you have existing dashboards with controls, do not upgrade to {{stack}} 9.4.0. Upgrade to {{stack}} 9.4.1 when it becomes available.
+
+If you already upgraded to {{stack}} 9.4.0 and dashboards fail to open with this error, contact Elastic Support for remediation guidance.
+
+**Fix**
+
+A fix is planned for {{stack}} 9.4.1.
+
+::::
+
 ::::{dropdown} The connection between agentless integrations and {{fleet-server}} is broken
 :applies_to: ess: ga
 
