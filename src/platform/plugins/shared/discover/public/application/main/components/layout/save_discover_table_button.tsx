@@ -63,7 +63,7 @@ export function SaveDiscoverTableButton() {
 
   return (
     <>
-      <EuiToolTip content={BUTTON_LABEL} delay="long" disableScreenReaderOutput position="top">
+      <EuiToolTip content={BUTTON_LABEL} disableScreenReaderOutput position="top">
         <EuiButtonIcon
           data-test-subj="saveDiscoverTableToDashboardButton"
           aria-label={BUTTON_LABEL}
