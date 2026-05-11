@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-export interface CommonSearchOptions {
-  /**
-   * ES|QL-compatible date strings, for example:
-   * - ISO 8601 formatted datetime
-   * - Relative expression, like NOW() - 15 MINUTES
-   */
-  from?: string;
-  to?: string;
-}
+export { detectionSchema, type Detection } from './detections';
+export { discoverySchema, type Discovery } from './discoveries';
+export { verdictSchema, type Verdict } from './verdicts';
+export { sigEventSchema, type SigEvent } from './events';
