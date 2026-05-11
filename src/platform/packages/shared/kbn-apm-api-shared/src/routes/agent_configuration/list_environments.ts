@@ -9,13 +9,13 @@
 import * as t from 'io-ts';
 import { defineRoute } from '../types';
 
-export type EnvironmentsResponse = Array<{
+export type AgentConfigurationEnvironmentsResponse = Array<{
   name: string;
   alreadyConfigured: boolean;
 }>;
 
 export interface ListAgentConfigurationEnvironmentsResponse {
-  environments: EnvironmentsResponse;
+  environments: AgentConfigurationEnvironmentsResponse;
 }
 
 export const listAgentConfigurationEnvironmentsRoute =

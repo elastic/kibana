@@ -32,7 +32,7 @@ export type {
   SearchAgentConfigurationResponse,
 } from './search_configuration';
 export type {
-  EnvironmentsResponse,
+  AgentConfigurationEnvironmentsResponse,
   ListAgentConfigurationEnvironmentsResponse,
 } from './list_environments';
 export type { AgentConfigurationAgentNameResponse } from './get_agent_name';
