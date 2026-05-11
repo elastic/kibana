@@ -191,11 +191,6 @@ export class EvalsClient {
       return [];
     }
   }
-
-  getScoresByRunId(runId: string, options?: GetRunFilters): Promise<EvaluationScoreDocument[]> {
-    return this.getRunScores(runId, options);
-  }
-
   async assertPluginEnabled(): Promise<void> {
     try {
       await this.kbnClient.request({
