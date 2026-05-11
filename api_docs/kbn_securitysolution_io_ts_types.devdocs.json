@@ -59,6 +59,7 @@
             "lineNumber": 18,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "C",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -189,6 +190,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TValue",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -270,6 +272,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -424,6 +427,7 @@
             "lineNumber": 14,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "C",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -480,6 +484,7 @@
             "lineNumber": 27,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeDurationType",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -790,7 +795,7 @@
             "id": "def-common.TimeDurationC.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{ allowedUnits }",
             "description": [],
             "signature": [
               "TimeDurationType"
@@ -799,6 +804,7 @@
             "lineNumber": 27,
             "columnNumber": 30,
             "deprecated": false,
+            "docsReferencedTypeName": "TimeDurationType",
             "trackAdoption": false
           }
         ],

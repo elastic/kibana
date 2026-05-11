@@ -56,6 +56,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.developer.bundledPackageLocation=./inexistentDir`,
         '--csp.strict=false',
         '--csp.warnLegacyBrowsers=false',
+        // For testing Import flyout with Endpoint artifacts
+        '--xpack.securitySolution.enableExperimental=["endpointExceptionsMovedUnderManagement"]',
       ],
       runOptions: {
         wait: FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP,

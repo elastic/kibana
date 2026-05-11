@@ -23,11 +23,15 @@ import {
   EuiTabbedContent,
   euiDragDropReorder,
 } from '@elastic/eui';
-import { ContentListProvider } from '@kbn/content-list-provider';
-import type { ContentListItem } from '@kbn/content-list-provider';
-import { ContentListTable } from '@kbn/content-list-table';
-import { ContentListToolbar } from '@kbn/content-list-toolbar';
-import { ContentListFooter } from '@kbn/content-list-footer';
+import {
+  ContentList,
+  ContentListProvider,
+  ContentListEmptyState,
+  ContentListTable,
+  ContentListToolbar,
+  ContentListFooter,
+  type ContentListItem,
+} from '@kbn/content-list';
 
 import {
   buildMockItems,
@@ -311,6 +315,17 @@ const usePreview = (state: PlaygroundState, onInspect?: (item: ContentListItem) 
     return Object.keys(s).length > 0 ? s : undefined;
   }, [hasTags, hasStarred, favoritesClient, hasUserProfiles]);
 
+  // Isolate the React Query cache per data variant. The QueryClient is a
+  // module-level singleton shared across every provider remount in the
+  // playground, so without this the cache from a previous variant (e.g. items
+  // from a non-empty state) is briefly shown when toggling `Empty`, causing a
+  // flash of the old table before the new fetch resolves.
+  const queryKeyScope = useMemo(
+    () =>
+      `playground-${data.hasItems ? '1' : '0'}-${data.totalItems}-${data.isLoading ? '1' : '0'}`,
+    [data.hasItems, data.totalItems, data.isLoading]
+  );
+
   const providerProps = useMemo(
     () => ({
       labels,
@@ -318,17 +333,28 @@ const usePreview = (state: PlaygroundState, onInspect?: (item: ContentListItem) 
       features: providerFeatures,
       isReadOnly: provider.isReadOnly,
       item: providerItemConfig,
+      queryKeyScope,
       ...(services && { services }),
     }),
-    [labels, dataSource, providerFeatures, provider.isReadOnly, providerItemConfig, services]
+    [
+      labels,
+      dataSource,
+      providerFeatures,
+      provider.isReadOnly,
+      providerItemConfig,
+      queryKeyScope,
+      services,
+    ]
   );
 
   const consumerJsx = useMemo(
     () => (
       <ContentListProvider id="playground" {...providerProps}>
-        {toolbarElement}
-        <ContentListTable title={tableTitle}>{columns}</ContentListTable>
-        <ContentListFooter />
+        <ContentList emptyState={<ContentListEmptyState />}>
+          {toolbarElement}
+          <ContentListTable title={tableTitle}>{columns}</ContentListTable>
+          <ContentListFooter />
+        </ContentList>
       </ContentListProvider>
     ),
     [providerProps, toolbarElement, tableTitle, columns]
@@ -407,15 +433,11 @@ export const PlaygroundBuilder = () => {
           <>
             <EuiSpacer size="m" />
             <ContentListProvider key={stateKey} id="playground" {...providerProps}>
-              <EuiFlexGroup direction="column" gutterSize="m">
-                <EuiFlexItem>{toolbarElement}</EuiFlexItem>
-                <EuiFlexItem>
-                  <ContentListTable title={tableTitle}>{columns}</ContentListTable>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <ContentListFooter />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <ContentList emptyState={<ContentListEmptyState />}>
+                {toolbarElement}
+                <ContentListTable title={tableTitle}>{columns}</ContentListTable>
+                <ContentListFooter />
+              </ContentList>
             </ContentListProvider>
             {flyout}
             <EuiSpacer size="l" />

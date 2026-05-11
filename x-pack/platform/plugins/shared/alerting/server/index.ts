@@ -44,6 +44,7 @@ export type {
   RuleQueryInspectorResult,
   RuleQueryInspectorTimeRange,
 } from './rule_query_inspector/types';
+export type { RulesClientCreateOptions } from './rules_client_factory';
 export type { FindResult, BulkEditOperation, BulkOperationError } from './rules_client';
 export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';

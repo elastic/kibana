@@ -18,7 +18,7 @@
       "contentManagement"
     ],
     "optionalPlugins": ["licensing", "savedObjectsTaggingOss", "usageCollection"],
-    "requiredBundles": ["kibanaUtils", "presentationPanel"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils", "unifiedSearch"],
     "extraPublicDirs": ["common"]
   }
 }

@@ -90,7 +90,7 @@
                 "id": "def-server.nodeServiceMock.createInternalStartContract.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "__0",
+                "label": "{\n    ui,\n    backgroundTasks,\n    migrator,\n  }",
                 "description": [],
                 "signature": [
                   "{ ui: boolean; backgroundTasks: boolean; migrator: boolean; }"

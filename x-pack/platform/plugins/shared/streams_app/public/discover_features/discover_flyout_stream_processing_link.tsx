@@ -20,8 +20,11 @@ import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../common/url_schema/common';
-import type { StreamsAppLocator, StreamsAppLocatorParams } from '../../common/locators';
-import { useResolvedDefinitionName } from './use_resolved_definition_name';
+import type { StreamsAppLocator, StreamsAppLocatorDefinitionParams } from '../../common/locators';
+import {
+  adaptDocToResolverInputs,
+  useResolvedDefinitionName,
+} from './use_resolved_definition_name';
 
 export interface DiscoverFlyoutStreamProcessingLinkProps {
   dataView: DataView;
@@ -38,9 +41,11 @@ export function DiscoverFlyoutStreamProcessingLink({
   streamsRepositoryClient,
   renderCpsWarning,
 }: DiscoverFlyoutStreamProcessingLinkProps) {
+  const { index, fallbackStreamName } = adaptDocToResolverInputs(doc);
   const { value, loading, error } = useResolvedDefinitionName({
     streamsRepositoryClient,
-    doc,
+    index,
+    fallbackStreamName,
     cpsHasLinkedProjects: renderCpsWarning,
   });
 
@@ -57,7 +62,7 @@ export function DiscoverFlyoutStreamProcessingLink({
       v: 1,
       dataSources: [getTargetDataSource(doc, name)],
     },
-  } as StreamsAppLocatorParams);
+  } as StreamsAppLocatorDefinitionParams);
 
   const message = i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink', {
     defaultMessage: 'Parse content in Streams',

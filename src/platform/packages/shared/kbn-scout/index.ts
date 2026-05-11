@@ -50,6 +50,9 @@ export type {
 // Fixture types
 export type {
   ApiServicesFixture,
+  ApiClientFixture,
+  ApiClientOptions,
+  ApiClientResponse,
   BrowserAuthFixture,
   RequestAuthFixture,
   SamlAuth,
@@ -64,6 +67,7 @@ export type {
   ScoutLogger,
   ScoutServerConfig,
   ScoutTestConfig,
+  ServerlessProductTier,
   KibanaRole,
   ElasticsearchRoleDescriptor,
 } from './src/types';

@@ -135,7 +135,7 @@ export function createQuantitativeGroundednessEvaluator(): Evaluator {
         score,
         label: summaryText,
         explanation: summaryText,
-        metadata: metadata ?? undefined,
+        metadata: { ...(metadata ?? {}), groundednessAnalysis },
       };
     },
     kind: 'LLM',

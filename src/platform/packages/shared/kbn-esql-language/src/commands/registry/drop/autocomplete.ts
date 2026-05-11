@@ -13,6 +13,7 @@ import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
 import { getLastNonWhitespaceChar } from '../../definitions/utils/autocomplete/helpers';
 import type { ICommandCallbacks } from '../types';
 import { type ISuggestionItem, type ICommandContext } from '../types';
+import { endsWithWhitespace } from '../../definitions/utils/regex';
 
 export async function autocomplete(
   query: string,
@@ -23,7 +24,7 @@ export async function autocomplete(
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
   if (
-    /\s/.test(innerText[innerText.length - 1]) &&
+    endsWithWhitespace(innerText) &&
     getLastNonWhitespaceChar(innerText) !== ',' &&
     !/drop\s+\S*$/i.test(innerText)
   ) {

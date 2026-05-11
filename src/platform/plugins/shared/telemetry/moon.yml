@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/core-security-server'
   - '@kbn/telemetry-config'
+  - '@kbn/config'
 tags:
   - plugin
   - prod

@@ -55,9 +55,9 @@ export const createLastNotifiedTimestampsResponse = (
 ): EsqlQueryResponse => {
   return {
     columns: [
-      { name: 'notification_group_id', type: 'keyword' },
+      { name: 'action_group_id', type: 'keyword' },
       { name: 'last_notified', type: 'date' },
     ],
-    values: records.map((r) => [r.notification_group_id, r.last_notified]),
+    values: records.map((r) => [r.action_group_id, r.last_notified]),
   };
 };

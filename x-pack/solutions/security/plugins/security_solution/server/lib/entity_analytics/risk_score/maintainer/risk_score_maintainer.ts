@@ -359,6 +359,16 @@ const executeEntityTypeRun = async ({
     }
   };
 
+  const alertsIndexExists = await runContext.esClient.indices.exists({
+    index: runConfig.alertsIndex,
+  });
+  if (!alertsIndexExists) {
+    runLogger.warn(
+      `Skipping risk scoring run: alerts index "${runConfig.alertsIndex}" does not exist yet.`
+    );
+    return;
+  }
+
   runLogger.debug('starting base scoring/reset pass');
   // Stage 1: score base entity risk and update lookup docs.
   const alertFilters = buildAlertFilters(runConfig.configuration, entityType, runLogger);
@@ -409,10 +419,14 @@ const executeEntityTypeRun = async ({
   checkAbortBetweenStages();
 
   if (!skipRemainingStages) {
-    if (runMetrics.lookupDocsUpserted > 0) {
-      // Refresh so stage 2 can read the latest lookup docs.
+    if (runMetrics.lookupDocsUpserted > 0 || runMetrics.lookupDocsDeleted > 0) {
+      // Refresh so stage 2 can read the latest lookup docs. Deletes (e.g.
+      // after an entity resolution unlink) must also be visible before the
+      // resolution scoring LOOKUP JOIN runs.
       await runContext.esClient.indices.refresh({ index: runContext.lookupIndex });
-      runLogger.debug(`refreshed lookup index after ${runMetrics.lookupDocsUpserted} upserts`);
+      runLogger.debug(
+        `refreshed lookup index after ${runMetrics.lookupDocsUpserted} upserts, ${runMetrics.lookupDocsDeleted} deletes`
+      );
     }
 
     // Stage 2: score resolution targets (group scores).

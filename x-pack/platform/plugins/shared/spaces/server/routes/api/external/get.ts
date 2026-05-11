@@ -9,12 +9,14 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { ExternalRouteDeps } from '.';
+import { getSpaceExamples } from './examples';
 import { API_VERSIONS } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
+import { getSpaceSchema } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initGetSpaceApi(deps: ExternalRouteDeps) {
-  const { router, getSpacesService } = deps;
+  const { router, getSpacesService, isServerless } = deps;
 
   router.versioned
     .get({
@@ -36,6 +38,9 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: getSpaceExamples,
+        },
         validate: {
           request: {
             params: schema.object({
@@ -44,6 +49,7 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
           },
           response: {
             200: {
+              body: () => getSpaceSchema(isServerless),
               description: 'Indicates a successful call.',
             },
           },

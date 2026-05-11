@@ -82,10 +82,7 @@ export async function autocomplete(
         (source) => source.name === indexNameInput || source.aliases.includes(indexNameInput)
       );
       if (canCreate && !indexAlreadyExists) {
-        const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(
-          innerText,
-          indexNameInput
-        );
+        const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(indexNameInput);
         suggestions.push(createIndexCommandSuggestion);
       }
 

@@ -10,9 +10,9 @@
 import { escapeQuotes, fromKueryExpression, type KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { type QuerySuggestion, QuerySuggestionTypes } from '@kbn/kql/public';
+import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import { EVENT_FIELD_PREFIX } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
-import { getSchemaAtPath } from '../../../../../../../common/lib/zod';
 
 /** Must match {@link setupKqlQuerySuggestionProvider} / KQL grammar cursor token. */
 export const KQL_PARSE_CURSOR_SYMBOL = '@kuery-cursor@';

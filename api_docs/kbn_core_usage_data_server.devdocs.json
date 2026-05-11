@@ -434,7 +434,15 @@
             "tags": [],
             "label": "registerUsageCounter",
             "description": [
-              "\nAPI for a usage tracker plugin to inject the {@link CoreUsageCounter} to use\nwhen tracking events."
+              "\nAPI for a usage tracker plugin to inject the ",
+              {
+                "pluginId": "@kbn/core-usage-data-server",
+                "scope": "server",
+                "docId": "kibKbnCoreUsageDataServerPluginApi",
+                "section": "def-server.CoreUsageCounter",
+                "text": "CoreUsageCounter"
+              },
+              " to use\nwhen tracking events."
             ],
             "signature": [
               "(usageCounter: ",
@@ -461,6 +469,7 @@
                 "lineNumber": 23,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreUsageCounter",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -499,6 +508,7 @@
                 "lineNumber": 24,
                 "columnNumber": 34,
                 "deprecated": false,
+                "docsReferencedTypeName": "DeprecatedApiUsageFetcher",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2683,6 +2693,7 @@
             "lineNumber": 52,
             "columnNumber": 42,
             "deprecated": false,
+            "docsReferencedTypeName": "CoreIncrementCounterParams",
             "trackAdoption": false
           }
         ],

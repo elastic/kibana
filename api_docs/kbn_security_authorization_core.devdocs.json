@@ -265,6 +265,7 @@
             "lineNumber": 272,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FeatureKibanaPrivileges",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -332,6 +333,7 @@
             "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Actions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -355,6 +357,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FeaturesPluginSetup",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -380,6 +383,7 @@
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Pick",
             "trackAdoption": false,
             "isRequired": true
           }

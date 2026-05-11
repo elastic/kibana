@@ -43,6 +43,7 @@ import type { XScaleSchemaType } from '../../../schema/charts/shared';
 function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapConfig['legend'] {
   return {
     visibility: legend.isVisible ? 'visible' : 'hidden',
+    position: legend.position,
     ...stripUndefined<HeatmapConfig['legend']>({
       truncate_after_lines: getLegendTruncateAfterLines(legend),
       size: legendSizeCompat.toAPI(legend.legendSize),
@@ -52,7 +53,8 @@ function getLegendProps(legend: HeatmapVisualizationState['legend']): HeatmapCon
 
 function getGridConfigProps(
   gridConfig: HeatmapVisualizationState['gridConfig'],
-  xAxisScale?: XScaleSchemaType
+  xAxisScale: XScaleSchemaType | undefined,
+  yAccessor: HeatmapVisualizationState['yAccessor']
 ): HeatmapConfig['axis'] {
   return {
     x: {
@@ -70,14 +72,18 @@ function getGridConfigProps(
       ...(gridConfig.xSortPredicate ? { sort: gridConfig.xSortPredicate } : {}),
       scale: xAxisScale ?? 'ordinal',
     },
-    y: {
-      labels: { visible: gridConfig.isYAxisLabelVisible },
-      title: {
-        text: gridConfig.yTitle,
-        visible: gridConfig.isYAxisTitleVisible,
-      },
-      ...(gridConfig.ySortPredicate ? { sort: gridConfig.ySortPredicate } : {}),
-    },
+    ...(yAccessor
+      ? {
+          y: {
+            labels: { visible: gridConfig.isYAxisLabelVisible },
+            title: {
+              text: gridConfig.yTitle,
+              visible: gridConfig.isYAxisTitleVisible,
+            },
+            ...(gridConfig.ySortPredicate ? { sort: gridConfig.ySortPredicate } : {}),
+          },
+        }
+      : {}),
   };
 }
 
@@ -104,7 +110,7 @@ function reverseBuildVisualizationState(
     ...generateApiLayer(layer),
     type: HEATMAP_NAME,
     legend: getLegendProps(visualization.legend),
-    axis: getGridConfigProps(visualization.gridConfig, xAxisScale),
+    axis: getGridConfigProps(visualization.gridConfig, xAxisScale, visualization.yAccessor),
     styling: {
       cells: {
         labels: { visible: visualization.gridConfig.isCellLabelVisible },
@@ -153,7 +159,9 @@ function reverseBuildVisualizationState(
       ...paletteProps,
     } as LensApiAllMetricOperations,
     x: operationFromColumn(visualization.xAccessor!, layer),
-    y: visualization.yAccessor && operationFromColumn(visualization.yAccessor, layer),
+    ...(visualization.yAccessor && {
+      y: operationFromColumn(visualization.yAccessor, layer),
+    }),
   } as HeatmapConfigNoESQL;
 }
 

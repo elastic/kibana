@@ -30,39 +30,34 @@ import {
   MANAGED_STREAM_SEARCH_PATTERN,
   resolveScenarioSnapshotSource,
   snapshotCatalogKey,
+  type KIFeatureExtractionScenario,
+  type KIFeatureDeduplicationScenario,
 } from '../../src/datasets';
 import { collectSampleDocuments } from '../ki_feature_extraction/collect_sample_documents';
+
+interface AvailableDeduplicationScenario {
+  scenario: KIFeatureDeduplicationScenario;
+  extractionScenario: KIFeatureExtractionScenario;
+}
 
 evaluate.describe(
   'KI feature deduplication',
   { tag: tags.serverless.observability.complete },
   () => {
     const activeDatasets = getActiveDatasets();
-    const deduplicationRuns = activeDatasets.flatMap((dataset) => {
-      return dataset.kiFeatureDeduplication.flatMap((scenario) => {
-        const extractionScenario = dataset.kiFeatureExtraction.find(
-          (s) => s.input.scenario_id === scenario.input.scenario_id
-        );
-        if (!extractionScenario) {
-          throw new Error(
-            `KI feature deduplication scenario "${scenario.input.scenario_id}" in dataset "${dataset.id}" ` +
-              `has no matching KI feature extraction scenario (needed for sample document collection)`
-          );
-        }
-        return { dataset, scenario, extractionScenario };
-      });
-    });
     const availableSnapshotsBySource = new Map<string, Set<string>>();
 
     evaluate.beforeAll(async ({ esClient, log }) => {
       const uniqueCatalogSources = new Map<string, GcsConfig>();
-      for (const { dataset, scenario } of deduplicationRuns) {
-        const source = resolveScenarioSnapshotSource({
-          scenarioId: scenario.input.scenario_id,
-          datasetGcs: dataset.gcs,
-          snapshotSource: scenario.snapshot_source,
-        });
-        uniqueCatalogSources.set(snapshotCatalogKey(source.gcs), source.gcs);
+      for (const dataset of activeDatasets) {
+        for (const scenario of dataset.kiFeatureDeduplication) {
+          const source = resolveScenarioSnapshotSource({
+            scenarioId: scenario.input.scenario_id,
+            datasetGcs: dataset.gcs,
+            snapshotSource: scenario.snapshot_source,
+          });
+          uniqueCatalogSources.set(snapshotCatalogKey(source.gcs), source.gcs);
+        }
       }
 
       for (const [catalogSourceKey, gcs] of uniqueCatalogSources.entries()) {
@@ -71,30 +66,48 @@ evaluate.describe(
       }
     });
 
-    for (const { dataset, scenario, extractionScenario } of deduplicationRuns) {
-      evaluate.describe(`${dataset.id} / ${scenario.input.scenario_id}`, () => {
-        evaluate.beforeAll(async ({ esClient, log }) => {
-          const source = resolveScenarioSnapshotSource({
-            scenarioId: scenario.input.scenario_id,
-            datasetGcs: dataset.gcs,
-            snapshotSource: scenario.snapshot_source,
-          });
+    for (const dataset of activeDatasets) {
+      evaluate.describe(dataset.id, () => {
+        const availableScenarios: AvailableDeduplicationScenario[] = [];
+        const snapshotSources = new Map<string, { snapshotName: string; gcs: GcsConfig }>();
 
-          const availableSnapshots =
-            availableSnapshotsBySource.get(snapshotCatalogKey(source.gcs)) ?? new Set();
-
-          if (!availableSnapshots.has(source.snapshotName)) {
-            log.info(
-              `Snapshot "${source.snapshotName}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}" ` +
-                `(source: ${source.gcs.bucket}/${source.gcs.basePathPrefix}) - skipping`
+        evaluate.beforeAll(async ({ log }) => {
+          for (const scenario of dataset.kiFeatureDeduplication) {
+            const extractionScenario = dataset.kiFeatureExtraction.find(
+              (s) => s.input.scenario_id === scenario.input.scenario_id
             );
-            evaluate.skip();
-            return;
+            if (!extractionScenario) {
+              throw new Error(
+                `KI feature deduplication scenario "${scenario.input.scenario_id}" in dataset "${dataset.id}" ` +
+                  `has no matching KI feature extraction scenario (needed for sample document collection)`
+              );
+            }
+
+            const source = resolveScenarioSnapshotSource({
+              scenarioId: scenario.input.scenario_id,
+              datasetGcs: dataset.gcs,
+              snapshotSource: scenario.snapshot_source,
+            });
+
+            const available =
+              availableSnapshotsBySource.get(snapshotCatalogKey(source.gcs)) ?? new Set();
+
+            if (!available.has(source.snapshotName)) {
+              log.info(
+                `Snapshot "${source.snapshotName}" not found in run "${SIGEVENTS_SNAPSHOT_RUN}" ` +
+                  `(source: ${source.gcs.bucket}/${source.gcs.basePathPrefix}) - skipping`
+              );
+              continue;
+            }
+
+            availableScenarios.push({ scenario, extractionScenario });
+            snapshotSources.set(scenario.input.scenario_id, source);
           }
 
-          await cleanSignificantEventsDataStreams(esClient, log);
-          await replaySignificantEventsSnapshot(esClient, log, source.snapshotName, source.gcs);
-          await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
+          if (availableScenarios.length === 0) {
+            log.info(`No scenarios available for dataset "${dataset.id}" - skipping`);
+            evaluate.skip();
+          }
         });
 
         evaluate(
@@ -113,30 +126,62 @@ evaluate.describe(
               connectorId: evaluationConnector.id,
             });
 
+            const extractionScenariosByScenarioId = new Map(
+              availableScenarios.map(({ scenario, extractionScenario }) => [
+                scenario.input.scenario_id,
+                extractionScenario,
+              ])
+            );
+
+            let lastReplayedSnapshot: string | undefined;
+
             await executorClient.runExperiment(
               {
                 dataset: {
                   name: `sigevents: KI feature deduplication (${dataset.id})`,
                   description: `[${dataset.id}] KI feature deduplication across scenarios`,
-                  examples: [
-                    {
-                      id: scenario.input.scenario_id,
-                      input: {
-                        stream_name: MANAGED_STREAM_NAME,
-                        iterations: scenario.input.iterations,
-                      },
+                  examples: availableScenarios.map(({ scenario }) => ({
+                    id: scenario.input.scenario_id,
+                    input: {
+                      scenario_id: scenario.input.scenario_id,
+                      stream_name: MANAGED_STREAM_NAME,
+                      iterations: scenario.input.iterations,
                     },
-                  ],
+                  })),
                 },
                 concurrency: 1,
                 task: async ({
                   input,
                 }: {
                   input: {
+                    scenario_id: string;
                     stream_name: string;
                     iterations: number;
                   };
                 }) => {
+                  const source = snapshotSources.get(input.scenario_id);
+                  if (!source) {
+                    throw new Error(`No snapshot source found for scenario "${input.scenario_id}"`);
+                  }
+                  if (source.snapshotName !== lastReplayedSnapshot) {
+                    await cleanSignificantEventsDataStreams(esClient, log);
+                    await replaySignificantEventsSnapshot(
+                      esClient,
+                      log,
+                      source.snapshotName,
+                      source.gcs
+                    );
+                    await esClient.indices.refresh({ index: MANAGED_STREAM_SEARCH_PATTERN });
+                    lastReplayedSnapshot = source.snapshotName;
+                  }
+
+                  const extractionScenario = extractionScenariosByScenarioId.get(input.scenario_id);
+                  if (!extractionScenario) {
+                    throw new Error(
+                      `No extraction scenario found for scenario "${input.scenario_id}"`
+                    );
+                  }
+
                   const iterations: Array<{
                     features: BaseFeature[];
                     previousFeatureCount: number;
@@ -175,13 +220,8 @@ evaluate.describe(
                       const existing = accumulated.findDuplicate(baseFeature);
                       if (existing) {
                         if (existing.id.toLowerCase() === baseFeature.id.toLowerCase()) {
-                          // id-based merges are LLM judgment calls and are graded by the
-                          // merge correctness evaluator
                           mergeEvents.push({ existing, incoming: baseFeature });
                         } else {
-                          // fingerprint-only matches mean the model failed to reuse an
-                          // existing id even though the feature was already known; tracked
-                          // for the id-reuse evaluator
                           fingerprintOnlyMergeEvents.push({ existing, incoming: baseFeature });
                         }
                         const merged = mergeFeature(existing, baseFeature);

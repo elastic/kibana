@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/triggers_actions_ui
 dependsOn:
   - '@kbn/core'
+  - '@kbn/human-readable-id'
   - '@kbn/alerting-plugin'
   - '@kbn/features-plugin'
   - '@kbn/rule-registry-plugin'

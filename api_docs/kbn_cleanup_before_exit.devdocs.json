@@ -46,6 +46,7 @@
             "lineNumber": 60,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "CleanupCallback",
             "trackAdoption": false,
             "returnComment": [],
             "children": []
@@ -64,6 +65,7 @@
             "lineNumber": 61,
             "columnNumber": 5,
             "deprecated": false,
+            "docsReferencedTypeName": "CleanupBeforeExitOptions",
             "trackAdoption": false
           }
         ],

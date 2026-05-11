@@ -116,6 +116,7 @@
             "lineNumber": 12,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "TabItem",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -405,6 +406,7 @@
                 "lineNumber": 58,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "TabItem",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -484,6 +486,7 @@
                 "lineNumber": 61,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "TabbedContentState",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -542,6 +545,7 @@
                 "lineNumber": 62,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "TabItem",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -592,6 +596,7 @@
                 "lineNumber": 63,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "TabsEBTEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -684,6 +689,7 @@
                 "lineNumber": 67,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "TabItem",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -744,6 +750,7 @@
                 "lineNumber": 69,
                 "columnNumber": 32,
                 "deprecated": false,
+                "docsReferencedTypeName": "TabItem",
                 "trackAdoption": false,
                 "isRequired": true
               }

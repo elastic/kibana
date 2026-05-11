@@ -50,6 +50,7 @@ import type {
   RulePreviewRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
+import type { SearchRulesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/search_rules/search_rules_route.gen';
 import type { SearchUnifiedAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/unified_alerts/search/search_route.gen';
 import type { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import type { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
@@ -488,6 +489,17 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
       .send(props.body as object);
   },
   /**
+   * Retrieve a paginated list of detection rules with KQL filter, facet counts, and search_after pagination.
+   */
+  searchRules(props: SearchRulesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/internal/detection_engine/rules/_search', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
    * Find and/or aggregate detection and attack alerts that match the given query.
    */
   searchUnifiedAlerts(props: SearchUnifiedAlertsProps, kibanaSpace: string = 'default') {
@@ -682,6 +694,9 @@ export interface RulePreviewProps {
 }
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;
+}
+export interface SearchRulesProps {
+  body: SearchRulesRequestBodyInput;
 }
 export interface SearchUnifiedAlertsProps {
   body: SearchUnifiedAlertsRequestBodyInput;
