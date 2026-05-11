@@ -30,6 +30,7 @@ import {
   validateActions,
 } from '../../../../rules_client/lib';
 import {
+  addMissingUiamKeyTagIfNeeded,
   apiKeyAsAlertAttributes,
   apiKeyAsRuleDomainProperties,
 } from '../../../../rules_client/common';
@@ -321,11 +322,20 @@ export const prepareRule = async <Params extends RuleParams>({
     const throttle = data.throttle ?? null;
     const { systemActions: _sa, actions: _a, ...restData } = data;
 
+    const tagsWithUiamCheck = await addMissingUiamKeyTagIfNeeded(
+      data.tags,
+      apiKeyProps.uiamApiKey,
+      apiKeyProps.apiKeyCreatedByUser,
+      context.isServerless,
+      context.featureFlags
+    );
+
     const ruleAttributes = transformRuleDomainToRuleAttributes({
       actionsWithRefs,
       artifactsWithRefs,
       rule: {
         ...restData,
+        tags: tagsWithUiamCheck,
         ...apiKeyProps,
         enabled: effectiveEnabled,
         id,
