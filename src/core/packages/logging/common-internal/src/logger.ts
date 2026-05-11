@@ -35,7 +35,7 @@ export type CreateLogRecordFn = <Meta extends LogMeta>(
  * When no filters are present the gate level equals the nominal level.
  * When filters are present the gate level is the minimum level (most verbose)
  * across the nominal level and all filter levels, so that records eligible for
- * any filter can pass the early check and reach {@link resolveEffectiveLevel}.
+ * any filter can pass the early check before meta is inspected.
  */
 const computeGateLevel = (nominalLevel: LogLevel, filters: ReadonlyArray<MetaFilterConfig>) =>
   filters.reduce((gateLevel, filter) => {
@@ -99,7 +99,7 @@ const matchesMeta = (
 export abstract class AbstractLogger implements Logger {
   /**
    * The most permissive log level across the nominal level and all filter levels.
-   * Used as the early guard before meta is available.
+   * Used as the O(1) early guard before meta is inspected.
    */
   private readonly gateLevel: LogLevel;
 
@@ -120,94 +120,72 @@ export abstract class AbstractLogger implements Logger {
   ): LogRecord;
 
   public trace<Meta extends LogMeta = LogMeta>(message: LogMessageSource, meta?: Meta): void {
-    if (!this.gateLevel.supports(LogLevel.Trace)) {
-      return;
-    }
-    if (typeof message === 'function') {
-      message = message();
-    }
-    this.performLog(this.createLogRecord<Meta>(LogLevel.Trace, message, meta));
+    if (!this.gateLevel.supports(LogLevel.Trace)) return;
+    if (!resolveEffectiveLevel(this.level, this.filters, meta).supports(LogLevel.Trace)) return;
+    if (typeof message === 'function') message = message();
+    this.appendRecord(this.createLogRecord<Meta>(LogLevel.Trace, message, meta));
   }
 
   public debug<Meta extends LogMeta = LogMeta>(message: LogMessageSource, meta?: Meta): void {
-    if (!this.gateLevel.supports(LogLevel.Debug)) {
-      return;
-    }
-    if (typeof message === 'function') {
-      message = message();
-    }
-    this.performLog(this.createLogRecord<Meta>(LogLevel.Debug, message, meta));
+    if (!this.gateLevel.supports(LogLevel.Debug)) return;
+    if (!resolveEffectiveLevel(this.level, this.filters, meta).supports(LogLevel.Debug)) return;
+    if (typeof message === 'function') message = message();
+    this.appendRecord(this.createLogRecord<Meta>(LogLevel.Debug, message, meta));
   }
 
   public info<Meta extends LogMeta = LogMeta>(message: LogMessageSource, meta?: Meta): void {
-    if (!this.gateLevel.supports(LogLevel.Info)) {
-      return;
-    }
-    if (typeof message === 'function') {
-      message = message();
-    }
-    this.performLog(this.createLogRecord<Meta>(LogLevel.Info, message, meta));
+    if (!this.gateLevel.supports(LogLevel.Info)) return;
+    if (!resolveEffectiveLevel(this.level, this.filters, meta).supports(LogLevel.Info)) return;
+    if (typeof message === 'function') message = message();
+    this.appendRecord(this.createLogRecord<Meta>(LogLevel.Info, message, meta));
   }
 
   public warn<Meta extends LogMeta = LogMeta>(
     errorOrMessage: LogMessageSource | Error,
     meta?: Meta
   ): void {
-    if (!this.gateLevel.supports(LogLevel.Warn)) {
-      return;
-    }
-    if (typeof errorOrMessage === 'function') {
-      errorOrMessage = errorOrMessage();
-    }
-    this.performLog(this.createLogRecord<Meta>(LogLevel.Warn, errorOrMessage, meta));
+    if (!this.gateLevel.supports(LogLevel.Warn)) return;
+    if (!resolveEffectiveLevel(this.level, this.filters, meta).supports(LogLevel.Warn)) return;
+    if (typeof errorOrMessage === 'function') errorOrMessage = errorOrMessage();
+    this.appendRecord(this.createLogRecord<Meta>(LogLevel.Warn, errorOrMessage, meta));
   }
 
   public error<Meta extends LogMeta = LogMeta>(
     errorOrMessage: LogMessageSource | Error,
     meta?: Meta
   ): void {
-    if (!this.gateLevel.supports(LogLevel.Error)) {
-      return;
-    }
-    if (typeof errorOrMessage === 'function') {
-      errorOrMessage = errorOrMessage();
-    }
-    this.performLog(this.createLogRecord<Meta>(LogLevel.Error, errorOrMessage, meta));
+    if (!this.gateLevel.supports(LogLevel.Error)) return;
+    if (!resolveEffectiveLevel(this.level, this.filters, meta).supports(LogLevel.Error)) return;
+    if (typeof errorOrMessage === 'function') errorOrMessage = errorOrMessage();
+    this.appendRecord(this.createLogRecord<Meta>(LogLevel.Error, errorOrMessage, meta));
   }
 
   public fatal<Meta extends LogMeta = LogMeta>(
     errorOrMessage: LogMessageSource | Error,
     meta?: Meta
   ): void {
-    if (!this.gateLevel.supports(LogLevel.Fatal)) {
-      return;
-    }
-    if (typeof errorOrMessage === 'function') {
-      errorOrMessage = errorOrMessage();
-    }
-    this.performLog(this.createLogRecord<Meta>(LogLevel.Fatal, errorOrMessage, meta));
+    if (!this.gateLevel.supports(LogLevel.Fatal)) return;
+    if (!resolveEffectiveLevel(this.level, this.filters, meta).supports(LogLevel.Fatal)) return;
+    if (typeof errorOrMessage === 'function') errorOrMessage = errorOrMessage();
+    this.appendRecord(this.createLogRecord<Meta>(LogLevel.Fatal, errorOrMessage, meta));
   }
 
   public isLevelEnabled(levelId: LogLevelId): boolean {
-    return this.gateLevel.supports(LogLevel.fromId(levelId));
+    return this.level.supports(LogLevel.fromId(levelId));
   }
 
   public log(record: LogRecord) {
-    if (!this.gateLevel.supports(record.level)) {
+    if (!this.gateLevel.supports(record.level)) return;
+    if (!resolveEffectiveLevel(this.level, this.filters, record.meta).supports(record.level))
       return;
-    }
-    this.performLog(record);
+    this.appendRecord(record);
   }
 
   public get(...childContextPaths: string[]): Logger {
     return this.factory.get(...[this.context, ...childContextPaths]);
   }
 
-  private performLog(record: LogRecord) {
-    const effectiveLevel = resolveEffectiveLevel(this.level, this.filters, record.meta);
-    if (!effectiveLevel.supports(record.level)) {
-      return;
-    }
+  private appendRecord(record: LogRecord) {
     for (const appender of this.appenders) {
       appender.append(record);
     }

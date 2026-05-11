@@ -328,6 +328,30 @@ describe('AbstractLogger', () => {
       }
     });
 
+    it('does not evaluate a closure message when meta does not match the filter', () => {
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+      const messageFn = jest.fn(() => 'expensive message');
+
+      logger.debug(messageFn, nonMatchingMeta);
+
+      expect(messageFn).not.toHaveBeenCalled();
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).not.toHaveBeenCalled();
+      }
+    });
+
+    it('evaluates a closure message when meta matches the filter', () => {
+      logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
+      const messageFn = jest.fn(() => 'expensive message');
+
+      logger.debug(messageFn, matchingMeta);
+
+      expect(messageFn).toHaveBeenCalledTimes(1);
+      for (const appenderMock of appenderMocks) {
+        expect(appenderMock.append).toHaveBeenCalledTimes(1);
+      }
+    });
+
     it('drops records at the filter level when meta is absent', () => {
       logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
       logger.debug('debug message');
@@ -395,15 +419,17 @@ describe('AbstractLogger', () => {
     });
 
     describe('isLevelEnabled', () => {
-      it('reflects the most permissive filter level, not the nominal level', () => {
+      it('always reflects the nominal level, never the filter level', () => {
         logger = new TestLogger(context, LogLevel.Warn, appenderMocks, factory, [filter]);
 
-        expect(logger.isLevelEnabled('debug')).toBe(true);
+        // The filter allows debug for matching meta, but isLevelEnabled is conservative:
+        // it answers "will this logger pass this level?" without knowing meta in advance.
+        expect(logger.isLevelEnabled('debug')).toBe(false);
         expect(logger.isLevelEnabled('trace')).toBe(false);
         expect(logger.isLevelEnabled('warn')).toBe(true);
       });
 
-      it('falls back to nominal level when no filters are configured', () => {
+      it('reflects the nominal level when no filters are configured', () => {
         logger = new TestLogger(context, LogLevel.Info, appenderMocks, factory);
 
         expect(logger.isLevelEnabled('debug')).toBe(false);

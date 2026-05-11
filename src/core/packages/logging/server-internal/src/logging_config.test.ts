@@ -402,6 +402,34 @@ describe('meta filters', () => {
     ).toThrow();
   });
 
+  it('rejects a filter with a missing level', () => {
+    expect(() =>
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins',
+            level: 'warn',
+            filters: [{ type: 'meta', match: { 'labels.ruleType': 'esql' } }],
+          },
+        ],
+      })
+    ).toThrow();
+  });
+
+  it('rejects a filter with an empty match object', () => {
+    expect(() =>
+      config.schema.validate({
+        loggers: [
+          {
+            name: 'plugins',
+            level: 'warn',
+            filters: [{ type: 'meta', match: {}, level: 'debug' }],
+          },
+        ],
+      })
+    ).toThrow();
+  });
+
   it('rejects more than 10 filters per logger', () => {
     expect(() =>
       config.schema.validate({
