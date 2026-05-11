@@ -1,3 +1,6 @@
+env:
+  KBN_ES_SNAPSHOT_USE_CACHED: 'true'
+
 steps:
   # Build Kibana Distribution is uploaded early in pipeline.sh (via early_steps.yml)
   # so its agent starts provisioning immediately, in parallel with dynamic pipeline generation.
