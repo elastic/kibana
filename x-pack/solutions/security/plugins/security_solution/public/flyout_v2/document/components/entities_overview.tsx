@@ -7,22 +7,17 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { getFieldValue } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
 import { HostEntityOverview } from './host_entity_overview';
 import { UserEntityOverview } from './user_entity_overview';
-import type { IdentityFields } from '../../../flyout/document_details/shared/utils';
-import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import { useEventDetails } from '../../../flyout/document_details/shared/hooks/use_event_details';
 import { noopCellActionRenderer } from '../../shared/components/cell_actions';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
+import { useEntitiesOverview } from '../hooks/use_entities_overview';
 
 export interface EntitiesOverviewProps {
   /**
@@ -30,9 +25,8 @@ export interface EntitiesOverviewProps {
    */
   hit: DataTableRecord;
   /**
-   * Pre-fetched ECS-nested object. When provided the internal fetch is skipped.
-   * The old flyout passes this from its context to avoid a duplicate network request.
-   * When omitted (new flyout) the data is fetched internally via useEventDetails.
+   * Pre-fetched ECS-nested object supplied by legacy adapters that already have it.
+   * Flyout v2 and Discover derive identity from `hit.flattened`/`hit.raw` instead.
    */
   dataAsNestedObject?: Ecs | null;
   /**
@@ -91,80 +85,10 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
     onShowEntitiesDetails,
     enableEntityLinks = false,
   }) => {
-    const hostName = getFieldValue(hit, 'host.name') as string | null;
-    const userName = getFieldValue(hit, 'user.name') as string | null;
-
-    const euidApi = useEntityStoreEuidApi();
-    const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
-
-    // The old flyout supplies dataAsNestedObject from its context. The new flyout (and Discover)
-    // does not, so we fetch it here. The fetch is skipped when the prop is provided.
-    const { dataAsNestedObject: fetchedData } = useEventDetails({
-      eventId: hit.raw._id,
-      indexName: hit.raw._index,
-      skip: dataAsNestedObjectProp !== undefined,
+    const { user, host, hasAnyEntity } = useEntitiesOverview({
+      hit,
+      dataAsNestedObject: dataAsNestedObjectProp,
     });
-    const dataAsNestedObject =
-      dataAsNestedObjectProp !== undefined ? dataAsNestedObjectProp : fetchedData;
-
-    // Memoize identifier extraction so AlertCountInsight (deep inside the host/user cards)
-    // doesn't churn on referential changes — `getEntityIdentifiersFromDocument` returns a fresh
-    // object every call. Same pattern as `highlighted_fields.tsx`.
-    const hostEntityIdentifiers = useMemo(
-      () =>
-        (euidApi?.euid.getEntityIdentifiersFromDocument('host', dataAsNestedObject) ??
-          undefined) as IdentityFields | undefined,
-      [euidApi?.euid, dataAsNestedObject]
-    );
-    const userEntityIdentifiers = useMemo(
-      () =>
-        (euidApi?.euid.getEntityIdentifiersFromDocument('user', dataAsNestedObject) ??
-          undefined) as IdentityFields | undefined,
-      [euidApi?.euid, dataAsNestedObject]
-    );
-    // Fall back to a `<entity>.name`-only identity when EUID can't extract identifiers from the
-    // document (e.g. alerts that carry just `host.name` / `user.name`), so the entity store still
-    // gets queried.
-    const legacyUserIdentityForStore =
-      userName != null && userName !== ''
-        ? ({ 'user.name': userName } as IdentityFields)
-        : undefined;
-    const legacyHostIdentityForStore =
-      hostName != null && hostName !== ''
-        ? ({ 'host.name': hostName } as IdentityFields)
-        : undefined;
-    const hostEntityId = euidApi?.euid.getEuidFromObject('host', dataAsNestedObject);
-    const userEntityId = euidApi?.euid.getEuidFromObject('user', dataAsNestedObject);
-
-    const userEntityFromStore = useEntityFromStore({
-      entityId: userEntityId,
-      identityFields: userEntityIdentifiers ?? legacyUserIdentityForStore,
-      entityType: 'user',
-      skip:
-        !entityStoreV2Enabled ||
-        (userEntityIdentifiers == null && legacyUserIdentityForStore == null),
-    });
-    const hostEntityFromStore = useEntityFromStore({
-      entityId: hostEntityId,
-      identityFields: hostEntityIdentifiers ?? legacyHostIdentityForStore,
-      entityType: 'host',
-      skip:
-        !entityStoreV2Enabled ||
-        (hostEntityIdentifiers == null && legacyHostIdentityForStore == null),
-    });
-
-    const userEntityRecord = userEntityFromStore.entityRecord;
-    const hostEntityRecord = hostEntityFromStore.entityRecord;
-    // Fall back to the store record's name when the document doesn't carry user/host.name —
-    // happens when the entity exists only in the store.
-    const resolvedUserName = userName || userEntityRecord?.entity?.name || '';
-    const resolvedHostName = hostName || hostEntityRecord?.entity?.name || '';
-
-    const showUserOverview =
-      (!entityStoreV2Enabled && userName != null) || (entityStoreV2Enabled && !!resolvedUserName);
-    const showHostOverview =
-      (!entityStoreV2Enabled && hostName != null) || (entityStoreV2Enabled && !!resolvedHostName);
-    const hasAnyEntity = showUserOverview || showHostOverview;
 
     const link = useMemo(
       () =>
@@ -188,27 +112,24 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
       >
         {hasAnyEntity ? (
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-            {showUserOverview && (
-              <>
-                <EuiFlexItem>
-                  <UserEntityOverview
-                    userName={resolvedUserName}
-                    identityFields={userEntityIdentifiers}
-                    entityRecord={entityStoreV2Enabled ? userEntityRecord : undefined}
-                    scopeId={scopeId}
-                    renderCellActions={renderCellActions}
-                    enableEntityLinks={enableEntityLinks}
-                  />
-                </EuiFlexItem>
-                <EuiSpacer size="s" />
-              </>
+            {user && (
+              <EuiFlexItem>
+                <UserEntityOverview
+                  userName={user.name}
+                  identityFields={user.identityFields}
+                  entityRecord={user.entityRecord}
+                  scopeId={scopeId}
+                  renderCellActions={renderCellActions}
+                  enableEntityLinks={enableEntityLinks}
+                />
+              </EuiFlexItem>
             )}
-            {showHostOverview && (
+            {host && (
               <EuiFlexItem>
                 <HostEntityOverview
-                  hostName={resolvedHostName}
-                  identityFields={hostEntityIdentifiers}
-                  entityRecord={entityStoreV2Enabled ? hostEntityRecord : undefined}
+                  hostName={host.name}
+                  identityFields={host.identityFields}
+                  entityRecord={host.entityRecord}
                   scopeId={scopeId}
                   renderCellActions={renderCellActions}
                   enableEntityLinks={enableEntityLinks}
