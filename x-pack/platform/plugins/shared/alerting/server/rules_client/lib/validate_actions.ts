@@ -54,7 +54,8 @@ export async function validateActions(
   const actionsClient = await context.getActionsClient();
   const actionIds = [...new Set(actions.map((action) => action.id))];
 
-  const actionResults = (await actionsClient.getBulk({ ids: actionIds, throwIfSystemAction: false })) || [];
+  const actionResults =
+    (await actionsClient.getBulk({ ids: actionIds, throwIfSystemAction: false })) || [];
 
   const actionsUsingConnectorsWithMissingSecrets = actionResults.filter(
     (result) => result.isMissingSecrets
