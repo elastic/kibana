@@ -1023,8 +1023,7 @@ describe('MetricVisComponent', function () {
     });
 
     describe('by static color', () => {
-      it('ignores palette and static color and uses the default when applyColorTo is not set', async () => {
-        const staticColor = faker.color.rgb();
+      it('uses the default when applyColorTo and color is not set', async () => {
         const colorFromPalette = faker.color.rgb();
         mockGetColorForValue.mockReturnValue(colorFromPalette);
         const { applyColorTo, ...metricWithoutApplyColorTo } = defaultMetricParams;
@@ -1035,19 +1034,7 @@ describe('MetricVisComponent', function () {
             },
             metric: {
               ...metricWithoutApplyColorTo,
-              color: staticColor,
-              palette: {
-                type: 'palette',
-                name: 'default',
-                params: {
-                  colors: [],
-                  gradient: true,
-                  stops: [],
-                  range: 'number',
-                  rangeMin: 2,
-                  rangeMax: 10,
-                },
-              },
+              color: undefined,
             } as unknown as MetricVisParam,
           },
         });

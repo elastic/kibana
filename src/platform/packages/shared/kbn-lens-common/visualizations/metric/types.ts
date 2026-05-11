@@ -97,6 +97,7 @@ export type MetricStateOptinalsWithDefault = Pick<
   | 'valueFontMode'
   | 'primaryPosition'
   | 'secondaryLabelPosition'
+  | 'applyColorTo'
 >;
 
 export type MetricStateDefaults = Required<MetricStateOptinalsWithDefault>;
