@@ -24,6 +24,7 @@ export const AGENT_BUILDER_UI_EBT_ELEMENT = {
   CONVERSATION: 'agentBuilder.conversation',
   MANAGE_GLOBAL: 'agentBuilder.layer3.manage',
   INAPP_CHAT: 'agentBuilder.inappChat',
+  ACCESS_PROMPT: 'agentBuilder.access.prompt',
 } as const;
 
 // `data-ebt-detail` helpers
@@ -122,4 +123,12 @@ export const AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION = {
   OPEN_ADD_MENU: 'open_add_menu',
   CROSS_NAVIGATE: 'cross_navigate',
   INSTALL_FROM_URL_OR_ZIP: 'install_from_url_or_zip',
+} as const;
+
+export const AGENT_BUILDER_UI_EBT_ACCESS_ACTION = {
+  CONNECT_LLM: 'access_connect_llm',
+  OPEN_EXTERNAL_DOCS: 'access_open_external_docs',
+  OPEN_AGENT_BUILDER_DOCS: 'access_open_agent_builder_docs',
+  UPGRADE_SUBSCRIPTION: 'access_upgrade_subscription',
+  MANAGE_LICENSE: 'access_manage_license',
 } as const;

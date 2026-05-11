@@ -8,12 +8,12 @@
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_RELEASE_NOTES_URL } from './announcement_urls';
+import * as i18n from './translations';
 
 export const announcementModalFooterCss = css`
   margin-top: 1em;
 `;
-import { AGENT_BUILDER_RELEASE_NOTES_URL } from './announcement_urls';
-import * as i18n from './translations';
 
 export function AnnouncementReleaseNotesButton() {
   return (

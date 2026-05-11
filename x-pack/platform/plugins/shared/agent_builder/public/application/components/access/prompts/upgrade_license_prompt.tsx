@@ -8,6 +8,10 @@
 import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  AGENT_BUILDER_UI_EBT_ACCESS_ACTION,
+  AGENT_BUILDER_UI_EBT_ELEMENT,
+} from '../../../agent_builder_ui_ebt';
 import type { PromptLayoutVariant } from '../../common/prompt/layout';
 import { ErrorPrompt } from '../../common/prompt/error_prompt';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
@@ -25,7 +29,13 @@ export const UpgradeLicensePrompt: React.FC<UpgradeLicensePromptProps> = ({ vari
   const { navigationService } = useAgentBuilderServices();
 
   const primaryButton = (
-    <EuiButton fill href={SUBSCRIPTIONS_LINK} target="_blank">
+    <EuiButton
+      fill
+      href={SUBSCRIPTIONS_LINK}
+      target="_blank"
+      data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.ACCESS_PROMPT}
+      data-ebt-action={AGENT_BUILDER_UI_EBT_ACCESS_ACTION.UPGRADE_SUBSCRIPTION}
+    >
       <FormattedMessage
         id="xpack.agentBuilder.access.prompt.upgradeLicense.actions.subscriptionPlansButton"
         defaultMessage="Subscription plans"
@@ -38,6 +48,8 @@ export const UpgradeLicensePrompt: React.FC<UpgradeLicensePromptProps> = ({ vari
       onClick={() => {
         navigationService.navigateToLicenseManagementDashboard();
       }}
+      data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.ACCESS_PROMPT}
+      data-ebt-action={AGENT_BUILDER_UI_EBT_ACCESS_ACTION.MANAGE_LICENSE}
     >
       <FormattedMessage
         id="xpack.agentBuilder.access.prompt.upgradeLicense.actions.manageLicenseButton"
