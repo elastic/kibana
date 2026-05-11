@@ -25,6 +25,17 @@ import { createSummarizeStreamsPrompt } from './prompts/summarize_streams/prompt
 import { SUBMIT_INSIGHTS_TOOL_NAME } from './client/insight_tool';
 import { extractInsightsFromResponse, collectQueryData, type QueryData } from './utils';
 
+const CONTEXT_LENGTH_PHRASES = [
+  `The request exceeded the model's maximum context length`, // OpenAI / Azure OpenAI
+  `Input is too long for requested model`, // Amazon Bedrock
+  `prompt is too long`, // Gemini / Vertex AI
+];
+
+const isContextLengthError = (error: unknown) => {
+  const msg = getErrorMessage(error);
+  return CONTEXT_LENGTH_PHRASES.some((phrase) => msg.includes(phrase));
+};
+
 export interface InsightsMemoryTools {
   tools: Record<string, ToolDefinition>;
   callbacks: Record<string, ToolCallback>;
@@ -126,9 +137,7 @@ export async function generateInsights({
       tokens_used: sumTokens({ accumulated: tokensUsed, added: response.tokens }),
     };
   } catch (error) {
-    if (
-      getErrorMessage(error).includes(`The request exceeded the model's maximum context length`)
-    ) {
+    if (isContextLengthError(error)) {
       logger.debug(
         `Context too big when generating system insights, number of streams: ${streamInsightsWithData.length}`,
         { error } as LogMeta
@@ -215,9 +224,7 @@ async function generateStreamInsights({
       tokens_used: response.tokens ?? EMPTY_TOKENS,
     };
   } catch (error) {
-    if (
-      getErrorMessage(error).includes(`The request exceeded the model's maximum context length`)
-    ) {
+    if (isContextLengthError(error)) {
       logger.debug(
         `Context too big when generating insights for stream ${stream.name}, number of queries: ${queryDataList.length}`,
         { error } as LogMeta
