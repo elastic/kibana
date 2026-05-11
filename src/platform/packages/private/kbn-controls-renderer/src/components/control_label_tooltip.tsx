@@ -48,14 +48,14 @@ export const ControlLabelTooltip: React.FC<Props> = ({
       ? i18n.translate('controls.controlGroup.noRelatedPanels', {
           defaultMessage:
             // In practice, this message can only appear for ES|QL controls
-            "This control isn't used in any ES|QL visualizations. Update your visualizations to use it.",
+            "This variable isn't used in any visualizations.",
         })
       : isIndicatingRelatedPanels
       ? i18n.translate('controls.controlGroup.clickToStopHighlighting', {
-          defaultMessage: 'Click to stop highlighting panels',
+          defaultMessage: 'Click to stop highlighting panels.',
         })
       : i18n.translate('controls.controlGroup.clickToHighlight', {
-          defaultMessage: 'Click to highlight panels',
+          defaultMessage: 'Click to highlight panels.',
         });
 
   const tooltipProps = canIndicateRelatedPanels
