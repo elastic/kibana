@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/core-notifications-browser'
   - '@kbn/react-kibana-mount'
   - '@kbn/core-lifecycle-browser'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod
