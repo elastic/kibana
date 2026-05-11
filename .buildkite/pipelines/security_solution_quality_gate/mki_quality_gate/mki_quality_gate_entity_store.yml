@@ -1,0 +1,14 @@
+steps:
+  - label: 'Scout MKI - Entity Store quality gate tests'
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/scout/mki_security_solution_entity_store_scout.sh
+    key: scout_entity_store_mki
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: "1"
+          limit: 1
