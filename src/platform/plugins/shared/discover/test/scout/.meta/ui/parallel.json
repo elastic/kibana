@@ -1,5 +1,5 @@
 {
-  "sha1": "6b71237a8798d946741ee04ea178e2aa590c0b99",
+  "sha1": "98eb72b33d9aa77609350f09acc0f52fad52ffda",
   "tests": [
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
@@ -34,7 +34,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_table.spec.ts",
-        "line": 58,
+        "line": 59,
         "column": 12
       }
     },
@@ -60,7 +60,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_table.spec.ts",
-        "line": 64,
+        "line": 65,
         "column": 12
       }
     },
@@ -86,7 +86,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_table.spec.ts",
-        "line": 77,
+        "line": 78,
         "column": 12
       }
     },
@@ -112,7 +112,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_table.spec.ts",
-        "line": 91,
+        "line": 92,
         "column": 12
       }
     },
@@ -138,7 +138,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
-        "line": 55,
+        "line": 56,
         "column": 12
       }
     },
@@ -164,7 +164,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
-        "line": 74,
+        "line": 75,
         "column": 12
       }
     },
@@ -190,7 +190,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
-        "line": 97,
+        "line": 98,
         "column": 12
       }
     },
@@ -216,7 +216,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
-        "line": 102,
+        "line": 103,
         "column": 12
       }
     },
@@ -242,7 +242,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
-        "line": 111,
+        "line": 112,
         "column": 12
       }
     },
@@ -268,7 +268,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_viewer.spec.ts",
-        "line": 124,
+        "line": 125,
         "column": 12
       }
     },
