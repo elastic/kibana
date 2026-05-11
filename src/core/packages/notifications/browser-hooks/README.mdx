@@ -1,0 +1,177 @@
+---
+id: kibDevDocsCoreNotificationsBrowserHooks
+slug: /kibana-dev-docs/core/notifications-browser-hooks
+title: Core Notifications Browser Hooks
+description: React hooks for consuming persistent notification events in Kibana's notification center.
+tags: ['kibana', 'core', 'notifications', 'notification-center', 'hooks', 'shared-ux']
+date: 2026-05-11
+---
+
+# @kbn/core-notifications-browser-hooks
+
+React hooks that read from the persistent notification events stream exposed by
+[`NotificationsStart#events`](../browser/src/events_types.ts). The hooks are
+designed for the chrome notification center UI but can be used anywhere in
+Kibana to surface unread events, read history, or counts.
+
+The hooks are thin wrappers around the
+[`INotificationEvents`](../browser/src/events_types.ts) observable API; they
+subscribe via [`@kbn/use-observable`](../../../shared/use-observable) so React
+components rerender automatically when events arrive or change.
+
+## Usage
+
+### Mounting the provider
+
+Wrap the consumer subtree with `NotificationEventsProvider` near the application
+root and pass `notifications.events` as the value. Anywhere chrome layout
+components mount is a sensible place — typically the same level you mount the
+chrome layout.
+
+```tsx
+import { NotificationEventsProvider } from '@kbn/core-notifications-browser-hooks';
+
+function AppRoot({ core }: { core: CoreStart }) {
+  return (
+    <NotificationEventsProvider value={core.notifications.events}>
+      <App />
+    </NotificationEventsProvider>
+  );
+}
+```
+
+### Reading events from a component
+
+```tsx
+import {
+  useNotifications,
+  useUnreadNotifications,
+  useUnreadNotificationCount,
+} from '@kbn/core-notifications-browser-hooks';
+
+function NotificationBell() {
+  const unreadCount = useUnreadNotificationCount();
+  return (
+    <EuiNotificationBadge>{unreadCount}</EuiNotificationBadge>
+  );
+}
+
+function NotificationList() {
+  const unread = useUnreadNotifications();
+  return (
+    <>
+      {unread.map((event) => (
+        <NotificationEvent key={event.id} {...event} />
+      ))}
+    </>
+  );
+}
+```
+
+### Publishing events
+
+The hooks only read — to publish events, call the service directly through
+`core.notifications.events`:
+
+```ts
+core.notifications.events.notify({
+  id: 'report-1234',
+  timestamp: Date.now(),
+  title: '[Error Monitoring Report] is generated',
+  message: 'The report was generated at 17:12:16 GMT+4',
+  isRead: false,
+  severity: 'info',
+  iconType: 'logoKibana',
+  eventName: 'report-generated',
+});
+```
+
+To register a custom event type and obtain a typed callback that updates events
+matching by `id`:
+
+```ts
+const updateReportEvent = core.notifications.events.registerType<ReportMetadata>(
+  'report',
+  {
+    severity: 'info',
+    iconType: 'logoKibana',
+    eventName: 'report',
+  },
+  (event) => {
+    // optional side-effect when a typed event lands
+    track('notification.report.received', { id: event.id });
+  }
+);
+
+// Later, mutate an event by passing the same id back through the callback
+updateReportEvent({
+  id: 'report-1234',
+  typeId: 'report',
+  timestamp: Date.now(),
+  title: 'Report updated',
+  message: 'Report is ready for download',
+  isRead: false,
+  metadata: { format: 'pdf' },
+});
+```
+
+## API
+
+### `NotificationEventsProvider`
+
+| Prop       | Type                  | Required | Description                                                                    |
+| ---------- | --------------------- | -------- | ------------------------------------------------------------------------------ |
+| `value`    | `INotificationEvents` | Yes      | The events API instance. Typically `core.notifications.events` from `start()`. |
+| `children` | `ReactNode`           | Yes      | Subtree that can consume the hooks below.                                      |
+
+### `useNotificationEventsService(): INotificationEvents`
+
+Returns the raw events service. Useful when you need to call `notify`,
+`markAsRead`, or `registerType` from a component. Throws if called outside the
+provider.
+
+### `useNotifications(): NotificationEvent[]`
+
+All notification events, ordered by insertion. Re-renders on every change to the
+underlying stream.
+
+### `useUnreadNotifications(): NotificationEvent[]`
+
+Subset of `useNotifications()` where `isRead` is `false`. Memoized; the array
+reference is stable across renders that did not change the filtered result.
+
+### `useReadNotifications(): NotificationEvent[]`
+
+Inverse of `useUnreadNotifications()` — events the user has acknowledged.
+
+### `useUnreadNotificationCount(): number`
+
+Convenience selector for the unread badge.
+
+## Architecture
+
+The events stream lives on `NotificationsStart#events`, a
+[`BehaviorSubject`](https://rxjs.dev/api/index/class/BehaviorSubject)-backed
+service implemented in
+[`@kbn/core-notifications-browser-internal`](../browser-internal/src/events).
+Each hook resolves the service from React context and pipes the observable
+through `useObservable`, so the components stay declarative and there's no
+manual subscription cleanup to manage.
+
+Read/unread is the only built-in axis. Higher-level concepts such as
+archiving or grouping are intentionally not modeled here — consumers can layer
+those on top by composing the hooks with their own selectors.
+
+## Development
+
+```bash
+yarn kbn bootstrap
+```
+
+## Testing
+
+```bash
+yarn test:jest src/core/packages/notifications/browser-hooks              # Run all tests
+yarn test:jest src/core/packages/notifications/browser-hooks --watch      # Watch mode
+yarn test:jest src/core/packages/notifications/browser-hooks --coverage   # Coverage report
+```

@@ -5830,6 +5830,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-notifications-browser-hooks@link:src/core/packages/notifications/browser-hooks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-notifications-browser-internal@link:src/core/packages/notifications/browser-internal":
   version "0.0.0"
   uid ""

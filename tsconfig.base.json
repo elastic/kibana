@@ -698,6 +698,8 @@
       "@kbn/core-node-server-mocks/*": ["src/core/packages/node/server-mocks/*"],
       "@kbn/core-notifications-browser": ["src/core/packages/notifications/browser"],
       "@kbn/core-notifications-browser/*": ["src/core/packages/notifications/browser/*"],
+      "@kbn/core-notifications-browser-hooks": ["src/core/packages/notifications/browser-hooks"],
+      "@kbn/core-notifications-browser-hooks/*": ["src/core/packages/notifications/browser-hooks/*"],
       "@kbn/core-notifications-browser-internal": ["src/core/packages/notifications/browser-internal"],
       "@kbn/core-notifications-browser-internal/*": ["src/core/packages/notifications/browser-internal/*"],
       "@kbn/core-notifications-browser-mocks": ["src/core/packages/notifications/browser-mocks"],

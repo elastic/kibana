@@ -26,3 +26,10 @@ export type {
 } from './src/contracts';
 export type { FeedbackStart } from './src/feedback_types';
 export type { ToursStart } from './src/tours_types';
+export type {
+  INotificationEvents,
+  NotificationEvent,
+  NotificationEventTypeData,
+  RegisteredNotificationEventType,
+  TypedNotificationEvent,
+} from './src/events_types';
