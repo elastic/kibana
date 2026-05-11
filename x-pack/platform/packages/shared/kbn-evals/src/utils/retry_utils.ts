@@ -55,7 +55,7 @@ function toErrorMessage(error: unknown): string {
   }
 }
 
-function getStatusCode(error: any): number | undefined {
+export function getStatusCode(error: any): number | undefined {
   // KbnClientRequesterError keeps the HTTP status on its `axiosError` after
   // `clean()` strips `response`/top-level fields, so it must be checked
   // alongside the more conventional shapes.
@@ -102,10 +102,6 @@ function computeDelayMs({
   return base + Math.floor(Math.random() * extra);
 }
 
-// 500 is intentionally excluded: in this codebase it has historically meant
-// a deterministic server-side bug (e.g. inference plugin chunk parser) where
-// retrying with the same payload would just mask the regression. Limit retries
-// to canonical transient infra failures: bad gateway / unavailable / timeout.
 const RETRYABLE_SERVER_STATUSES = new Set<number>([502, 503, 504]);
 
 function isRetryable(error: any): { retry: boolean; retryAfterMs?: number } {
@@ -129,10 +125,6 @@ function isRetryable(error: any): { retry: boolean; retryAfterMs?: number } {
     return { retry: true };
   }
 
-  // Everything else is terminal:
-  // - 4xx (400/401/403/404/409/413) — client errors, retry won't help.
-  // - 500 — historically deterministic application bugs in this stack;
-  //   surfacing them fast beats hiding them behind retries.
   return { retry: false };
 }
 

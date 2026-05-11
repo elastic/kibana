@@ -7,7 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/kbn-client';
-import { withRetry } from './retry_utils';
+import { getStatusCode, withRetry } from './retry_utils';
 
 function toErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -42,21 +42,6 @@ function parseRetryAfterMsFromMessage(message: string): number | undefined {
   const seconds = Number(match[1]);
   if (!Number.isFinite(seconds) || seconds <= 0) return undefined;
   return seconds * 1000;
-}
-
-function getStatusCode(error: any): number | undefined {
-  // KbnClientRequesterError keeps the HTTP status on its `axiosError` after
-  // `clean()` strips `response`/top-level fields, so it must be checked
-  // alongside the more conventional shapes.
-  return (
-    error?.statusCode ??
-    error?.status ??
-    error?.response?.status ??
-    error?.meta?.status ??
-    error?.axiosError?.status ??
-    error?.axiosError?.response?.status ??
-    undefined
-  );
 }
 
 function isSseRateLimitPayload(payload: unknown): boolean {
