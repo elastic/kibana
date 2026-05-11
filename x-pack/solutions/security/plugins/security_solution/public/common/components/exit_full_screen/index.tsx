@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { EuiButton, EuiWindowEvent } from '@elastic/eui';
-import React, { useCallback } from 'react';
+import { EuiButton } from '@elastic/eui';
+import React, { useCallback, useEffect } from 'react';
+import { i18n as kbnI18n } from '@kbn/i18n';
 
+import { useKibana } from '../../lib/kibana/use_kibana';
 import * as i18n from './translations';
 
 export const EXIT_FULL_SCREEN_CLASS_NAME = 'exit-full-screen';
@@ -18,20 +20,32 @@ interface Props {
 }
 
 const ExitFullScreenComponent: React.FC<Props> = ({ fullScreen, setFullScreen }) => {
+  const {
+    services: { hotkeys },
+  } = useKibana();
+
   const exitFullScreen = useCallback(() => {
     setFullScreen(false);
   }, [setFullScreen]);
 
-  const onKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+  useEffect(() => {
+    if (!fullScreen) return;
+    const handle = hotkeys.register(
+      {
+        id: 'securitySolution:exitFullScreen',
+        keys: 'Escape',
+        scope: 'context',
+        label: kbnI18n.translate('xpack.securitySolution.exitFullScreen.shortcutLabel', {
+          defaultMessage: 'Exit full screen',
+        }),
+      },
+      (event) => {
         event.preventDefault();
-
         exitFullScreen();
       }
-    },
-    [exitFullScreen]
-  );
+    );
+    return handle.unregister;
+  }, [hotkeys, fullScreen, exitFullScreen]);
 
   if (!fullScreen) {
     return null;
@@ -39,7 +53,6 @@ const ExitFullScreenComponent: React.FC<Props> = ({ fullScreen, setFullScreen })
 
   return (
     <>
-      <EuiWindowEvent event="keydown" handler={onKeyDown} />
       <EuiButton
         className={EXIT_FULL_SCREEN_CLASS_NAME}
         data-test-subj="exit-full-screen"

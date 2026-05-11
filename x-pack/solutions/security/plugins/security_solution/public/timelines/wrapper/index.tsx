@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { EuiFocusTrap, EuiWindowEvent, getFlyoutManagerStore, keys } from '@elastic/eui';
-import React, { useCallback, useMemo, useRef } from 'react';
+import { EuiFocusTrap, getFlyoutManagerStore } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useCallback, useMemo, useRef, useEffect } from 'react';
 import type { AppLeaveHandler } from '@kbn/core/public';
 import { useDispatch } from 'react-redux-v7';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useKibana } from '../../common/lib/kibana/use_kibana';
 import { TimelineModal } from '../components/modal';
 import type { TimelineId } from '../../../common/types';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
@@ -49,76 +51,88 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
     const { closeFlyout } = useExpandableFlyoutApi();
     const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
 
+    const {
+      services: { hotkeys },
+    } = useKibana();
+
     // pressing the ESC key closes the timeline portal unless a flyout is opened on top of it
-    const onKeyDown = useCallback(
-      (ev: KeyboardEvent) => {
-        if (ev.key !== keys.ESCAPE) {
-          return;
-        }
-
-        if (newFlyoutSystemEnabled) {
-          if (!show) {
-            // Timeline isn't visible: let flyouts' own Esc handling run normally.
-            return;
-          }
-
-          const { sessions } = getFlyoutManagerStore().getState();
-          const topSession = sessions[sessions.length - 1];
-          // Flyouts opened from *within* Timeline (eg from its table) are given
-          // `timelineFlyoutHistoryKey`
-          const topSessionOpenedFromTimeline = topSession?.historyKey === timelineFlyoutHistoryKey;
-
-          // Each managed flyout registers its own window-level Esc handler, but its
-          // "should I close on Esc" decision is based on the *globally* topmost session.
-          // Without stopping propagation here, a flyout that was already open *underneath*
-          // Timeline could incorrectly close itself on the same keypress as the block below.
-          ev.stopImmediatePropagation();
-          ev.preventDefault();
-
-          if (topSession && topSessionOpenedFromTimeline) {
-            const store = getFlyoutManagerStore();
-
-            if (topSession.childFlyoutId) {
-              // Drill down into the child flyout first, same as EuiManagedFlyout's own
-              // `onClose` does for a child-level flyout (`closeFlyout(id)`).
-              store.closeFlyout(topSession.childFlyoutId);
-            } else {
-              // No child left: this main flyout closes next. Mirror EuiManagedFlyout's own
-              // `onClose` for a *main*-level flyout
-              store.closeAllFlyouts();
+    useEffect(() => {
+      if (!show) return;
+      const handle = hotkeys.register(
+        {
+          id: 'securitySolution:closeTimeline',
+          keys: 'Escape',
+          scope: 'context',
+          label: i18n.translate('xpack.securitySolution.timeline.closeShortcutLabel', {
+            defaultMessage: 'Close timeline',
+          }),
+        },
+        (ev) => {
+          if (newFlyoutSystemEnabled) {
+            if (!show) {
+              // Timeline isn't visible: let flyouts' own Esc handling run normally.
+              return;
             }
+
+            const { sessions } = getFlyoutManagerStore().getState();
+            const topSession = sessions[sessions.length - 1];
+            // Flyouts opened from *within* Timeline (eg from its table) are given
+            // `timelineFlyoutHistoryKey`
+            const topSessionOpenedFromTimeline =
+              topSession?.historyKey === timelineFlyoutHistoryKey;
+
+            // Each managed flyout registers its own window-level Esc handler, but its
+            // "should I close on Esc" decision is based on the *globally* topmost session.
+            // Without stopping propagation here, a flyout that was already open *underneath*
+            // Timeline could incorrectly close itself on the same keypress as the block below.
+            ev.stopImmediatePropagation();
+            ev.preventDefault();
+
+            if (topSession && topSessionOpenedFromTimeline) {
+              const store = getFlyoutManagerStore();
+
+              if (topSession.childFlyoutId) {
+                // Drill down into the child flyout first, same as EuiManagedFlyout's own
+                // `onClose` does for a child-level flyout (`closeFlyout(id)`).
+                store.closeFlyout(topSession.childFlyoutId);
+              } else {
+                // No child left: this main flyout closes next. Mirror EuiManagedFlyout's own
+                // `onClose` for a *main*-level flyout
+                store.closeAllFlyouts();
+              }
+              return;
+            }
+
+            // Nothing left on top that was opened from within Timeline: Timeline is now the
+            // topmost surface, so it closes next. Any flyout that was already open underneath it
+            // (before Timeline was shown) is left untouched until the next Esc press.
+            handleClose();
             return;
           }
 
-          // Nothing left on top that was opened from within Timeline: Timeline is now the
-          // topmost surface, so it closes next. Any flyout that was already open underneath it
-          // (before Timeline was shown) is left untouched until the next Esc press.
+          const query = new URLSearchParams(window.location.search);
+          const timelineFlyoutOpen = isTimelineFlyoutOpen(query);
+
+          // While the Timeline modal is visible, keep this Esc keydown from reaching the
+          // window-level handler of the underlying expandable flyout (e.g. the graph
+          // investigation view), which would otherwise also close it. Both listeners are
+          // registered on `window`, so `stopImmediatePropagation` (not `stopPropagation`)
+          // is required to suppress the sibling listener. We skip this when the Timeline is
+          // not visible so Esc still closes flyouts on other pages.
+          if (show) {
+            ev.stopImmediatePropagation();
+            ev.preventDefault();
+          }
+
+          if (timelineFlyoutOpen) {
+            closeFlyout();
+            return;
+          }
           handleClose();
-          return;
         }
-
-        const query = new URLSearchParams(window.location.search);
-        const timelineFlyoutOpen = isTimelineFlyoutOpen(query);
-
-        // While the Timeline modal is visible, keep this Esc keydown from reaching the
-        // window-level handler of the underlying expandable flyout (e.g. the graph
-        // investigation view), which would otherwise also close it. Both listeners are
-        // registered on `window`, so `stopImmediatePropagation` (not `stopPropagation`)
-        // is required to suppress the sibling listener. We skip this when the Timeline is
-        // not visible so Esc still closes flyouts on other pages.
-        if (show) {
-          ev.stopImmediatePropagation();
-          ev.preventDefault();
-        }
-
-        if (timelineFlyoutOpen) {
-          closeFlyout();
-          return;
-        }
-        handleClose();
-      },
-      [show, newFlyoutSystemEnabled, closeFlyout, handleClose]
-    );
+      );
+      return handle.unregister;
+    }, [hotkeys, show, closeFlyout, handleClose, newFlyoutSystemEnabled]);
 
     useTimelineSavePrompt(timelineId, onAppLeave);
 
@@ -128,7 +142,6 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
           <TimelineModal timelineId={timelineId} visible={show} openToggleRef={openToggleRef} />
         </EuiFocusTrap>
         <TimelineBottomBar show={show} timelineId={timelineId} openToggleRef={openToggleRef} />
-        <EuiWindowEvent event="keydown" handler={onKeyDown} />
       </>
     );
   }
