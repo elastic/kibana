@@ -25,12 +25,14 @@ export const useViewShortcuts = ({
   currentDataView,
   sidebarToggleState$,
 }: UseViewShortcutsParams) => {
-  const { canSwitchLanguageMode, openInspector, switchLanguageMode } = useCurrentTabViewActions({
-    currentDataView,
-  });
-  const { toggleChart, toggleSidebar, toggleTable } = usePanelsToggleActions({
-    sidebarToggleState$,
-  });
+  const { canSwitchLanguageMode, isDataViewMode, openInspector, switchLanguageMode } =
+    useCurrentTabViewActions({
+      currentDataView,
+    });
+  const { isChartHidden, isSidebarHidden, isTableHidden, toggleChart, toggleSidebar, toggleTable } =
+    usePanelsToggleActions({
+      sidebarToggleState$,
+    });
 
   return useMemo<LeaderKeyShortcut[]>(() => {
     const shortcuts: LeaderKeyShortcut[] = [
@@ -47,9 +49,13 @@ export const useViewShortcuts = ({
       {
         key: 'c',
         label: 'c',
-        description: i18n.translate('discover.viewShortcuts.visualization', {
-          defaultMessage: 'Visualization',
-        }),
+        description: isChartHidden
+          ? i18n.translate('discover.viewShortcuts.showVisualization', {
+              defaultMessage: 'Show visualization',
+            })
+          : i18n.translate('discover.viewShortcuts.hideVisualization', {
+              defaultMessage: 'Hide visualization',
+            }),
         onTrigger: () => {
           toggleChart();
         },
@@ -57,9 +63,13 @@ export const useViewShortcuts = ({
       {
         key: 't',
         label: 't',
-        description: i18n.translate('discover.viewShortcuts.table', {
-          defaultMessage: 'Table',
-        }),
+        description: isTableHidden
+          ? i18n.translate('discover.viewShortcuts.showTable', {
+              defaultMessage: 'Show table',
+            })
+          : i18n.translate('discover.viewShortcuts.hideTable', {
+              defaultMessage: 'Hide table',
+            }),
         onTrigger: () => {
           toggleTable();
         },
@@ -67,9 +77,13 @@ export const useViewShortcuts = ({
       {
         key: 's',
         label: 's',
-        description: i18n.translate('discover.viewShortcuts.sidebar', {
-          defaultMessage: 'Sidebar',
-        }),
+        description: isSidebarHidden
+          ? i18n.translate('discover.viewShortcuts.showSidebar', {
+              defaultMessage: 'Show sidebar',
+            })
+          : i18n.translate('discover.viewShortcuts.hideSidebar', {
+              defaultMessage: 'Hide sidebar',
+            }),
         onTrigger: () => {
           toggleSidebar();
         },
@@ -80,9 +94,13 @@ export const useViewShortcuts = ({
       shortcuts.splice(1, 0, {
         key: 'm',
         label: 'm',
-        description: i18n.translate('discover.viewShortcuts.switchMode', {
-          defaultMessage: 'Switch mode',
-        }),
+        description: isDataViewMode
+          ? i18n.translate('discover.viewShortcuts.switchToESQL', {
+              defaultMessage: 'Switch to ES|QL',
+            })
+          : i18n.translate('discover.viewShortcuts.switchToClassic', {
+              defaultMessage: 'Switch to classic',
+            }),
         onTrigger: () => {
           switchLanguageMode();
         },
@@ -92,6 +110,10 @@ export const useViewShortcuts = ({
     return shortcuts;
   }, [
     canSwitchLanguageMode,
+    isChartHidden,
+    isDataViewMode,
+    isSidebarHidden,
+    isTableHidden,
     openInspector,
     switchLanguageMode,
     toggleChart,
