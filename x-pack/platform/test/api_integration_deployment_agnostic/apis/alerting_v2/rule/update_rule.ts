@@ -51,7 +51,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should update metadata and evaluation together', async () => {
       const createResponse = await createRule(roleAuthc);
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
 
       const ruleId = createResponse.body.id as string;
 
@@ -77,7 +77,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should update only metadata name', async () => {
       const createResponse = await createRule(roleAuthc);
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
 
       const ruleId = createResponse.body.id as string;
 
@@ -99,7 +99,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should update schedule lookback without changing interval', async () => {
       const createResponse = await createRule(roleAuthc);
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
 
       const ruleId = createResponse.body.id as string;
 
@@ -120,7 +120,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should update only evaluation query', async () => {
       const createResponse = await createRule(roleAuthc);
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
 
       const ruleId = createResponse.body.id as string;
 
@@ -139,7 +139,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should clear optional fields when set to null', async () => {
       const createResponse = await createRule(roleAuthc);
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
 
       const ruleId = createResponse.body.id as string;
 
