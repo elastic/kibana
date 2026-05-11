@@ -55,13 +55,9 @@ export function getEditorFlyout({
         };
         if (initialState?.refId) {
           const { refId, ...updateState } = newState;
-          await linksClient.update({
-            id: initialState.refId,
-            data: {
-              ...updateState,
-              links: serializeResolvedLinks(newLinks),
-            },
-            options: { references: [] },
+          await linksClient.update(initialState.refId, {
+            ...updateState,
+            links: serializeResolvedLinks(newLinks),
           });
           onCompleteEdit?.(newState);
           closeFlyout();

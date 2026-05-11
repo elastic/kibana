@@ -55,11 +55,7 @@ export const runSaveToLibrary = async (newState: EditorState): Promise<EditorSta
       };
 
       try {
-        const {
-          item: { id },
-        } = await linksClient.create({
-          data: newAttributes,
-        });
+        const { id } = await linksClient.create(newAttributes);
         resolve({
           ...newState,
           title: newTitle,

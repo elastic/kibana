@@ -14,32 +14,14 @@ import type {
   SerializableAttributes,
   VisualizationClient,
 } from '@kbn/visualizations-plugin/public';
+
 import { CONTENT_ID } from '../../common';
 import { LINKS_API_PATH, LINKS_API_VERSION, LINKS_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type { LinksCrudTypes } from '../../common/content_management';
 import type { LinksCreateRequestBody, LinksCreateResponseBody } from '../../server/api/create';
 import type { LinksReadResponseBody } from '../../server/api/read';
+import type { LinksUpdateRequestBody, LinksUpdateResponseBody } from '../../server/api/update';
 import { contentManagement, coreServices } from '../services/kibana_services';
-
-const get = async (id: string) => {
-  return contentManagement.client.get<LinksCrudTypes['GetIn'], LinksCrudTypes['GetOut']>({
-    contentTypeId: CONTENT_ID,
-    id,
-  });
-};
-
-const update = async ({ id, data, options }: Omit<LinksCrudTypes['UpdateIn'], 'contentTypeId'>) => {
-  const res = await contentManagement.client.update<
-    LinksCrudTypes['UpdateIn'],
-    LinksCrudTypes['UpdateOut']
-  >({
-    contentTypeId: CONTENT_ID,
-    id,
-    data,
-    options,
-  });
-  return res;
-};
 
 const deleteLinks = async (id: string) => {
   await contentManagement.client.delete<LinksCrudTypes['DeleteIn'], LinksCrudTypes['DeleteOut']>({
@@ -76,7 +58,16 @@ export const linksClient = {
       body: JSON.stringify(request),
     });
   },
-  update,
+  update: async (id: string, request: LinksUpdateRequestBody) => {
+    const updateResponse = await coreServices.http.put<LinksUpdateResponseBody>(
+      buildPath(`${LINKS_API_PATH}/{id}`, { id }),
+      {
+        version: LINKS_API_VERSION,
+        body: JSON.stringify(request),
+      }
+    );
+    return updateResponse;
+  },
   delete: deleteLinks,
   search,
 };
