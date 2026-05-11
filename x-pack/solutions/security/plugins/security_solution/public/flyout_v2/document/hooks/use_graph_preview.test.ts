@@ -177,6 +177,33 @@ describe('useGraphPreview', () => {
     expect(result.current.hasGraphData).toBe(true);
   });
 
+  it('detects graph data for non-IDP user events with raw actor and target fields', () => {
+    mockUseEntityStoreEuidApi.mockReturnValue({
+      euid: {
+        ...mockEuid,
+        getEntityIdentifiersFromDocument: jest.fn(() => undefined),
+      },
+    });
+
+    const { result } = renderHook(() =>
+      useGraphPreview({
+        hit: createMockHit({
+          '@timestamp': '2024-09-01T12:35:00.789Z',
+          'event.action': 'google.iam.admin.v1.SetIamPolicy',
+          'event.id': 'multi-relationships-event-id-12345',
+          'event.kind': 'event',
+          'event.outcome': 'success',
+          'event.provider': 'gcp',
+          'user.id': 'gcp-admin-user@my-gcp-project.iam.gserviceaccount.com',
+          'user.target.id': 'data-pipeline@my-gcp-project.iam.gserviceaccount.com',
+        }),
+      })
+    );
+
+    expect(result.current.hasGraphData).toBe(true);
+    expect(result.current.shouldShowGraph).toBe(true);
+  });
+
   it('still detects actor via v1 *.entity.id fields when euid is not yet hydrated', () => {
     mockUseEntityStoreEuidApi.mockReturnValue(null);
 

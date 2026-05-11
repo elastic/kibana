@@ -8,8 +8,10 @@
 import { useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import {
+  type EuidSourceFields,
   GRAPH_ACTOR_ENTITY_FIELDS,
   GRAPH_TARGET_ENTITY_FIELDS,
+  getGraphActorEuidSourceFields,
   getGraphTargetEuidSourceFields,
 } from '@kbn/cloud-security-posture-common';
 import { ALL_ENTITY_TYPES, useEntityStoreEuidApi } from '@kbn/entity-store/public';
@@ -35,6 +37,14 @@ export interface UseGraphPreviewResult {
   hasGraphData: boolean;
   isAlert: boolean;
 }
+
+const hasEuidIdentity = (
+  fieldsByType: EuidSourceFields,
+  flattened: DataTableRecord['flattened']
+): boolean =>
+  ALL_ENTITY_TYPES.some((type) =>
+    fieldsByType[type].some((field) => getFieldArray(flattened[field]).length > 0)
+  );
 
 /**
  * Derives graph preview parameters from a `DataTableRecord`. Used by the Flyout v2
@@ -62,11 +72,7 @@ export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreview
     (field) => getFieldArray(hit.flattened[field]).length > 0
   );
   const hasV2Actor = useMemo(
-    () =>
-      euid != null &&
-      ALL_ENTITY_TYPES.some(
-        (type) => euid.getEntityIdentifiersFromDocument(type, hit.flattened) != null
-      ),
+    () => euid != null && hasEuidIdentity(getGraphActorEuidSourceFields(euid), hit.flattened),
     [euid, hit.flattened]
   );
   const hasActor = hasV1Actor || hasV2Actor;
@@ -74,13 +80,10 @@ export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreview
   const hasV1Target = GRAPH_TARGET_ENTITY_FIELDS.some(
     (field) => getFieldArray(hit.flattened[field]).length > 0
   );
-  const hasV2Target = useMemo(() => {
-    if (euid == null) return false;
-    const targetFields = getGraphTargetEuidSourceFields(euid);
-    return ALL_ENTITY_TYPES.some((type) =>
-      targetFields[type].some((field) => getFieldArray(hit.flattened[field]).length > 0)
-    );
-  }, [euid, hit.flattened]);
+  const hasV2Target = useMemo(
+    () => euid != null && hasEuidIdentity(getGraphTargetEuidSourceFields(euid), hit.flattened),
+    [euid, hit.flattened]
+  );
   const hasTarget = hasV1Target || hasV2Target;
 
   const actionField = getFieldsData('event.action');
