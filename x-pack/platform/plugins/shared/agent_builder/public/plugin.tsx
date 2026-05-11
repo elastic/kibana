@@ -40,6 +40,7 @@ import {
   ToolsService,
   SkillsService,
   SmlService,
+  OAuthClientsService,
   PluginsService,
   EventsService,
   type AgentBuilderInternalService,
@@ -158,6 +159,7 @@ export class AgentBuilderPlugin
     const skillsService = new SkillsService({ http });
     const smlService = new SmlService({ http });
     const pluginsService = new PluginsService({ http });
+    const oauthClientsService = new OAuthClientsService({ http });
     const accessChecker = new AgentBuilderAccessChecker({ licensing, inference });
 
     if (!this.setupServices) {
@@ -217,6 +219,7 @@ export class AgentBuilderPlugin
       skillsService,
       smlService,
       pluginsService,
+      oauthClientsService,
       startDependencies,
       usageCollection,
       accessChecker,
