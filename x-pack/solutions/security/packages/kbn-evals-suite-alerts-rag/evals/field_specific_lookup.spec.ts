@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { tags, withRetry } from '@kbn/evals';
-import type { Evaluator } from '@kbn/evals';
+import type { CorrectnessAnalysis, GroundednessAnalysis } from '@kbn/evals';
+import { tags, withEvaluatorSpan, withRetry } from '@kbn/evals';
 import { evaluate } from '../src/evaluate';
 import { filterByCategory } from '../src/datasets';
-import type { AlertsRagDatasetExample, AlertsRagTaskOutput } from '../src/evaluate_dataset';
-import { buildAlertContextText, toDatasetExample } from '../src/evaluate_dataset';
-import { createAlertsFaithfulnessEvaluator } from '../src/evaluators/alerts_rag_faithfulness_evaluator';
-import { createAlertsCorrectnessEvaluator } from '../src/evaluators/alerts_rag_correctness_evaluator';
+import type { AlertsRagTaskOutput } from '../src/evaluate_dataset';
+import {
+  buildAlertContextText,
+  buildAlertsRagEvaluators,
+  toDatasetExample,
+} from '../src/evaluate_dataset';
 
 const CHAT_COMPLETE_PATH = '/api/security_ai_assistant/chat/complete';
 const CHAT_COMPLETE_API_VERSION = '2023-10-31';
@@ -28,18 +30,29 @@ interface ChatCompleteApiResponse {
   connector_id?: string;
 }
 
+const resolveK = (): number => {
+  const raw = process.env.ALERTS_RAG_EVAL_K;
+  if (!raw) return 10;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 10;
+};
+
+const emptyTaskOutput: AlertsRagTaskOutput = {
+  answer: '',
+  messages: [],
+  steps: [],
+  correctnessAnalysis: null,
+  groundednessAnalysis: null,
+};
+
 evaluate.describe('Alerts RAG – Field-Specific Lookups', { tag: tags.stateful.classic }, () => {
   const examples = filterByCategory('field_specific_lookup');
 
   evaluate(
     `field-specific lookups (${examples.length} examples) via Security AI Assistant API`,
-    async ({ kbnClient, connector, executorClient, inferenceClient, log }) => {
+    async ({ kbnClient, connector, evaluators, executorClient, log }) => {
       const wrappedExamples = examples.map(toDatasetExample);
-
-      const evaluators: Array<Evaluator<AlertsRagDatasetExample, AlertsRagTaskOutput>> = [
-        createAlertsFaithfulnessEvaluator({ inferenceClient, log }),
-        createAlertsCorrectnessEvaluator({ inferenceClient, log }),
-      ];
+      const evalStack = buildAlertsRagEvaluators({ k: resolveK() });
 
       await executorClient.runExperiment(
         {
@@ -51,7 +64,7 @@ evaluate.describe('Alerts RAG – Field-Specific Lookups', { tag: tags.stateful.
           task: async (example): Promise<AlertsRagTaskOutput> => {
             const input = example.input;
             if (!input) {
-              return { answer: '' };
+              return emptyTaskOutput;
             }
             const { question, context } = input;
             const contextText = buildAlertContextText(context);
@@ -80,6 +93,7 @@ evaluate.describe('Alerts RAG – Field-Specific Lookups', { tag: tags.stateful.
               )}`
             );
 
+            let answer = '';
             try {
               const response = await withRetry(
                 () =>
@@ -111,15 +125,13 @@ evaluate.describe('Alerts RAG – Field-Specific Lookups', { tag: tags.stateful.
                   },
                 }
               );
-
-              const answer = response.data?.data ?? '';
+              answer = response.data?.data ?? '';
               const answerPreview = `${answer.slice(0, 500)}${answer.length > 500 ? '...' : ''}`;
               log.info(
                 `[field-specific-lookup] API response: status=${
                   response.data?.status ?? 'unknown'
                 } answer="${answerPreview}"`
               );
-              return { answer };
             } catch (err) {
               log.error(
                 new Error(
@@ -127,11 +139,49 @@ evaluate.describe('Alerts RAG – Field-Specific Lookups', { tag: tags.stateful.
                   { cause: err as Error }
                 )
               );
-              return { answer: '' };
+              return emptyTaskOutput;
             }
+
+            // Shape required by the framework's analysis evaluators (mirrors
+            // the pattern in `createEvaluateAlertsRagDataset`): `messages`
+            // last entry is the answer text the judge reads, `steps` is the
+            // tool-call trace which is empty for this single-turn API call.
+            const taskOutput = {
+              messages: [{ message: answer }],
+              steps: [] as unknown[],
+            };
+
+            const [correctnessResult, groundednessResult] = await Promise.all([
+              withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
+                evaluators.correctnessAnalysis().evaluate({
+                  input,
+                  expected: example.output,
+                  output: taskOutput,
+                  metadata: example.metadata,
+                })
+              ),
+              withEvaluatorSpan('GroundednessAnalysis', {}, () =>
+                evaluators.groundednessAnalysis().evaluate({
+                  input,
+                  expected: example.output,
+                  output: taskOutput,
+                  metadata: example.metadata,
+                })
+              ),
+            ]);
+
+            return {
+              answer,
+              messages: taskOutput.messages,
+              steps: taskOutput.steps,
+              correctnessAnalysis:
+                (correctnessResult?.metadata as CorrectnessAnalysis | undefined) ?? null,
+              groundednessAnalysis:
+                (groundednessResult?.metadata as GroundednessAnalysis | undefined) ?? null,
+            };
           },
         },
-        evaluators
+        evalStack
       );
     }
   );

@@ -48,6 +48,7 @@ export {
   calculateRelevanceScore,
 } from './src/evaluators/correctness/scoring';
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
+export type { GroundednessAnalysis } from './src/evaluators/groundedness/types';
 export type { EvaluationDataset, EvaluationWorkerFixtures, EvaluationReport } from './src/types';
 export { withEvaluatorSpan, withTaskSpan, getCurrentTraceId } from './src/utils/tracing';
 export { withRetry, type RetryOptions } from './src/utils/retry_utils';

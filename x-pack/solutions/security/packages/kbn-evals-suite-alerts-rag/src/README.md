@@ -71,17 +71,37 @@ All examples in the dataset reason over this same alert backdrop.
 
 ## Evaluators
 
-Three evaluators run on every example:
+Seven evaluators run on every example, sourced entirely from the `@kbn/evals`
+framework (no custom suite-local LLM judges — this was a Phase-1 migration goal,
+see `docs/parity-verification.md`):
 
-- **RAG Precision@K / Recall@K / F1@K** — retrieval quality measured by comparing alert IDs
-  extracted from the model's answer against those present in the `expected.reference`.
-  `K` defaults to 10 and can be overridden via `ALERTS_RAG_EVAL_K`.
-- **Faithfulness** (`src/evaluators/alerts_rag_faithfulness_evaluator.ts`) — LLM-as-judge check
-  that the answer does not contradict the provided alert context.
-- **Correctness** (`src/evaluators/alerts_rag_correctness_evaluator.ts`) — LLM-as-judge check
-  that the answer matches the expected reference.
+- **RAG Precision@K / Recall@K / F1@K** — retrieval quality measured by comparing
+  alert IDs extracted from the model's answer against those present in the
+  `expected.reference`. `K` defaults to 10 and can be overridden via
+  `ALERTS_RAG_EVAL_K`. Sourced from
+  `x-pack/platform/packages/shared/kbn-evals/src/evaluators/rag/`.
+- **Factuality / Relevance / Sequence Accuracy** — three deterministic scores
+  produced by `createQuantitativeCorrectnessEvaluators` from a single
+  `CorrectnessAnalysis` precomputed in the task. The judge LLM runs once per
+  example (inside `evaluators.correctnessAnalysis()`) and the three quantitative
+  evaluators read its output via `output.correctnessAnalysis`. Sourced from
+  `x-pack/platform/packages/shared/kbn-evals/src/evaluators/correctness/`.
+- **Groundedness** — single deterministic score from
+  `createQuantitativeGroundednessEvaluator`. Same pattern as correctness: the
+  judge runs once inside `evaluators.groundednessAnalysis()` and the
+  quantitative evaluator reads `output.groundednessAnalysis`. Replaces the
+  previous custom `Faithfulness` evaluator. Sourced from
+  `x-pack/platform/packages/shared/kbn-evals/src/evaluators/groundedness/`.
 
-Passing thresholds are defined in `src/thresholds.ts` and derived from LangSmith P10 baselines.
+Thresholds live in `x-pack/platform/packages/shared/kbn-evals/src/evaluators/correctness/scoring.ts`
+and `x-pack/platform/packages/shared/kbn-evals/src/evaluators/groundedness/scoring.ts`
+(framework-owned, so they're identical across every suite that opts into the same
+quantitative evaluators). Regression detection runs at the Buildkite report layer
+against historical score documents rather than against a hard-coded floor in
+this package.
+
+The canonical evaluator order is pinned by `src/evaluate_dataset.test.ts` so a
+silent rename or drop in the framework set is caught locally before nightly.
 
 ---
 
@@ -114,12 +134,10 @@ Passing thresholds are defined in `src/thresholds.ts` and derived from LangSmith
    }
    ```
 
-4. **Update the thresholds** in `src/thresholds.ts` if the new examples meaningfully change the
-   expected score distribution. Thresholds represent the P10 floor — a score below the floor
-   signals a regression.
-
-5. **Run the suite** once against a known-good connector to establish a baseline before opening a
-   PR. Compare scores against `src/thresholds.ts` to confirm no regression.
+4. **Run the suite** once against a known-good connector to establish a baseline before opening
+   a PR. Score documents are written to Elasticsearch by the framework's score repository; a
+   regression is detected by comparing the new run's per-evaluator average against the historical
+   baseline at the Buildkite report layer, not against a hard-coded threshold here.
 
 ---
 
@@ -132,9 +150,10 @@ src/
 │   ├── alerts_rag_dataset.ts   # 9 inline fixture examples + SCENARIO_CONTEXT (95 alerts)
 │   └── index.ts                # Re-exports alertsRagDataset
 ├── evaluate.ts                 # Playwright fixture extending @kbn/evals evaluate
-├── evaluate_dataset.ts         # createEvaluateAlertsRagDataset — task + evaluator wiring
-├── evaluators/
-│   ├── alerts_rag_correctness_evaluator.ts
-│   └── alerts_rag_faithfulness_evaluator.ts
-└── thresholds.ts               # Passing/partial score floors derived from LangSmith P10
+├── evaluate_dataset.ts         # createEvaluateAlertsRagDataset — task + framework-evaluator wiring
+└── evaluate_dataset.test.ts    # Pins the canonical evaluator set against drift
 ```
+
+All evaluators are framework primitives from `@kbn/evals` — no suite-local
+evaluator files. Thresholds and scoring functions live in the framework
+package alongside the evaluators they parameterise.

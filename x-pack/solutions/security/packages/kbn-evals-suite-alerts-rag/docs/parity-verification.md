@@ -86,7 +86,7 @@ The migrated suite differs from the LangSmith baseline in the following ways:
 | Host context | UUID-based (from ES `_source`) | Explicit `host.name` strings |
 | User context | UUID-based (from ES `_source`) | Explicit `user.name: "Administrator"` |
 | Connectors | Mixed (GPT, Claude, Gemini — varies by build) | GPT-4o, Claude 3.5 Sonnet, Gemini 2.5 Pro |
-| Evaluators | Binary correctness only | Correctness + Faithfulness + RAG Precision/Recall/F1@K |
+| Evaluators | Binary correctness only | Factuality + Relevance + Sequence Accuracy + Groundedness + RAG Precision/Recall/F1@K (all `@kbn/evals` framework primitives) |
 
 ---
 
@@ -139,8 +139,10 @@ Pro in every build due to connector misconfiguration.
 | GPT baseline reproduced (expected ≥ 0.667 on 6 original examples) | ✅ Expected (pending connector run) |
 | Claude baseline available | ⚠️ No valid LangSmith signal; @kbn/evals establishes new baseline |
 | Gemini baseline available | ⚠️ No valid LangSmith signal; @kbn/evals establishes new baseline |
-| Faithfulness evaluator added (not in LangSmith) | ✅ New coverage |
+| Groundedness evaluator added (framework primitive; replaces LangSmith's absent grounding signal) | ✅ New coverage |
+| Quantitative correctness split into Factuality + Relevance + Sequence Accuracy | ✅ New coverage (LangSmith reported a single binary score) |
 | RAG Precision/Recall/F1@K added (not in LangSmith) | ✅ New coverage |
+| All evaluators sourced from `@kbn/evals` framework (no suite-local LLM judges) | ✅ Phase-1 migration goal achieved — shared with agent-builder, observability-ai, etc. |
 
 **Conclusion:** The @kbn/evals suite is a strict superset of the LangSmith evaluation. The
 6 original examples are ported verbatim with traceability via `langsmithExampleId`. Both
