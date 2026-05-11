@@ -135,7 +135,7 @@ test.describe(
           'Memory usage avg.',
         ]) {
           await expect(
-            metricsTab.serverlessSummary.getByText(label, { exact: true })
+            metricsTab.serverlessSummaryFeedbackLink.getByText(label, { exact: true })
           ).toBeVisible();
         }
       });
