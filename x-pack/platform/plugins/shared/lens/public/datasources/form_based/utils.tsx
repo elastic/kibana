@@ -343,7 +343,8 @@ export function getUnsupportedOperationsWarningMessage(
     // filter layers without dataView loaded yet
     .filter(({ indexPatternId }) => dataViews.indexPatterns[indexPatternId])
     .flatMap((layer) => {
-      if (layer.query) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((layer as any).query) {
         return [];
       }
       const dataView = dataViews.indexPatterns[layer.indexPatternId];
