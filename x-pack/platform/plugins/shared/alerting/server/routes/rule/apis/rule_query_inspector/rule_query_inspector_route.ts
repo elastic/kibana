@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import type { IRouter } from '@kbn/core/server';
-import type { ILicenseState } from '../../../../lib';
+import type { CoreSetup, IRouter } from '@kbn/core/server';
+import {
+  ALERT_EVALUATION_TIME_RANGE,
+  ALERT_RULE_PARAMETERS,
+  ALERT_RULE_UUID,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
+import type { GetAlertIndicesAlias, ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 import type { RuleQueryInspectorRegistry } from '../../../../rule_query_inspector/registry';
+import type { RuleQueryInspectorTimeRange } from '../../../../rule_query_inspector/types';
+import type { AlertingPluginsStart } from '../../../../plugin';
 import type {
   RuleQueryInspectorRequestParamsV1,
   RuleQueryInspectorRequestQueryV1,
@@ -26,7 +34,9 @@ import {
 export const ruleQueryInspectorRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState,
-  ruleQueryInspectorRegistry: RuleQueryInspectorRegistry
+  ruleQueryInspectorRegistry: RuleQueryInspectorRegistry,
+  getAlertIndicesAlias: GetAlertIndicesAlias,
+  core: CoreSetup<AlertingPluginsStart, unknown>
 ) => {
   router.get(
     {
@@ -78,13 +88,58 @@ export const ruleQueryInspectorRoute = (
           });
         }
 
-        const result = await handler(
-          req,
-          ruleId,
-          rule.params as Record<string, unknown>,
-          mode,
-          alertId
-        );
+        let ruleParams = rule.params as Record<string, unknown>;
+        let timeRange: RuleQueryInspectorTimeRange | undefined;
+
+        if (alertId) {
+          const spaceId = rulesClient.getSpaceId();
+          const alertIndex = getAlertIndicesAlias([rule.alertTypeId], spaceId).join(',');
+          const [{ elasticsearch }] = await core.getStartServices();
+          const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
+
+          const searchResult = await esClient.search({
+            index: alertIndex,
+            size: 1,
+            query: { term: { [ALERT_UUID]: alertId } },
+            _source: [ALERT_RULE_UUID, ALERT_RULE_PARAMETERS, ALERT_EVALUATION_TIME_RANGE],
+          });
+
+          const alertDoc = searchResult.hits.hits[0]?._source as
+            | Record<string, unknown>
+            | undefined;
+
+          if (!alertDoc) {
+            return res.notFound({
+              body: {
+                message: `Alert "${alertId}" not found`,
+              },
+            });
+          }
+
+          if (alertDoc[ALERT_RULE_UUID] !== ruleId) {
+            return res.badRequest({
+              body: {
+                message: `Alert "${alertId}" does not belong to rule "${ruleId}"`,
+              },
+            });
+          }
+
+          const alertParams = alertDoc[ALERT_RULE_PARAMETERS] as
+            | Record<string, unknown>
+            | undefined;
+          if (alertParams) {
+            ruleParams = alertParams;
+          }
+
+          const evalTimeRange = alertDoc[ALERT_EVALUATION_TIME_RANGE] as
+            | { gte: string; lte: string }
+            | undefined;
+          if (evalTimeRange) {
+            timeRange = { gte: evalTimeRange.gte, lte: evalTimeRange.lte };
+          }
+        }
+
+        const result = await handler(req, ruleParams, mode, timeRange);
         return res.ok({ body: result });
       })
     )

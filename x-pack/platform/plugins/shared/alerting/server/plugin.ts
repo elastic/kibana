@@ -478,7 +478,13 @@ export class AlertingPlugin {
       core,
     });
 
-    ruleQueryInspectorRoute(router, this.licenseState, this.ruleQueryInspectorRegistry);
+    ruleQueryInspectorRoute(
+      router,
+      this.licenseState,
+      this.ruleQueryInspectorRegistry,
+      createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
+      core
+    );
 
     return {
       registerConnectorAdapter: <

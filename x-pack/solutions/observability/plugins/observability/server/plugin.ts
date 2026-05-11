@@ -132,7 +132,6 @@ export class ObservabilityPlugin
             {
               dataViews: pluginStart.dataViews,
               data: pluginStart.data,
-              ruleRegistry: pluginStart.ruleRegistry,
             },
           ]),
         { compositeSize: config.customThresholdRule.groupByPageSize }
