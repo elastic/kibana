@@ -96,6 +96,12 @@ describe('connector attachment type', () => {
           type: 'text',
           value: expect.stringContaining('My Github Connector'),
         });
+        expect((representation as { value: string }).value).toContain(
+          'platform.core.execute_connector_sub_action'
+        );
+        expect((representation as { value: string }).value).toContain(
+          '"connectorId":"connector-123"'
+        );
       });
 
       it('uses metadata.description from connector spec when available', () => {
@@ -118,6 +124,7 @@ describe('connector attachment type', () => {
         const representation = formatted.getRepresentation!() as { value: string };
 
         expect(representation.value).toContain('Generic GitHub connector');
+        expect(representation.value).toContain('platform.core.execute_connector_sub_action');
       });
 
       it('falls back to connector_type when no spec is found', () => {
@@ -131,6 +138,7 @@ describe('connector attachment type', () => {
         const representation = formatted.getRepresentation!() as { value: string };
 
         expect(representation.value).toContain('Description: .github');
+        expect(representation.value).toContain('"connectorId":"connector-123"');
       });
 
       it('lists sub-actions from ConnectorSpec when available', () => {
@@ -183,6 +191,10 @@ describe('connector attachment type', () => {
         expect(representation.value).toContain('sendMessage: Send a message to a channel');
         expect(representation.value).not.toContain('internalAction');
         expect(representation.value).toContain('Connector ID: connector-123');
+        expect(representation.value).toContain('Required JSON shape for tool');
+        expect(representation.value).toContain(
+          '"connectorId":"connector-123","subAction":"<sub-action name>","params":{ ... }'
+        );
       });
 
       it('includes skill content when spec has skill', () => {
@@ -276,10 +288,12 @@ describe('connector attachment type', () => {
   });
 
   describe('getAgentDescription', () => {
-    it('returns a non-empty string', () => {
+    it('documents platform tool id and required JSON envelope', () => {
       const description = connectorType.getAgentDescription!();
-      expect(typeof description).toBe('string');
-      expect(description.length).toBeGreaterThan(0);
+      expect(description).toContain('platform.core.execute_connector_sub_action');
+      expect(description).toContain('connectorId');
+      expect(description).toContain('subAction');
+      expect(description).toContain('params');
     });
   });
 

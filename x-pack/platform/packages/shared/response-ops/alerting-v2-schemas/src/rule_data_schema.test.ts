@@ -149,25 +149,46 @@ describe('createRuleDataSchema', () => {
   });
 
   describe('metadata.tags', () => {
-    it('rejects tags exceeding 100 items', () => {
+    it('rejects tags exceeding 20 items', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         metadata: {
           name: 'test rule',
-          tags: Array.from({ length: 101 }, (_, i) => `label-${i}`),
+          tags: Array.from({ length: 21 }, (_, i) => `label-${i}`),
         },
       });
 
       expect(result.success).toBe(false);
     });
 
-    it('rejects a label exceeding 64 characters', () => {
+    it('accepts up to 20 tags', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
-        metadata: { name: 'test rule', tags: ['a'.repeat(65)] },
+        metadata: {
+          name: 'test rule',
+          tags: Array.from({ length: 20 }, (_, i) => `label-${i}`),
+        },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a label exceeding 128 characters', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', tags: ['a'.repeat(129)] },
       });
 
       expect(result.success).toBe(false);
+    });
+
+    it('accepts a label at the 128 character limit', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', tags: ['a'.repeat(128)] },
+      });
+
+      expect(result.success).toBe(true);
     });
   });
 
@@ -734,9 +755,9 @@ describe('updateRuleDataSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('rejects more than 100 tags', () => {
+    it('rejects more than 20 tags', () => {
       const result = updateRuleDataSchema.safeParse({
-        metadata: { tags: Array.from({ length: 101 }, (_, i) => `label-${i}`) },
+        metadata: { tags: Array.from({ length: 21 }, (_, i) => `label-${i}`) },
       });
 
       expect(result.success).toBe(false);
