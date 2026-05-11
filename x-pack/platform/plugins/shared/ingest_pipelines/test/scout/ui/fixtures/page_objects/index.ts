@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DemoPage } from './demo';
+export { IngestPipelinesPage } from './ingest_pipelines_page';

@@ -7,11 +7,11 @@
 
 import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout';
-import { DemoPage } from './page_objects';
+import { IngestPipelinesPage } from './page_objects';
 
 export interface ExtScoutTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
-    demo: DemoPage;
+    ingestPipelines: IngestPipelinesPage;
   };
 }
 
@@ -28,7 +28,7 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
   ) => {
     const extendedPageObjects = {
       ...pageObjects,
-      demo: createLazyPageObject(DemoPage, page),
+      ingestPipelines: createLazyPageObject(IngestPipelinesPage, page),
     };
 
     await use(extendedPageObjects);

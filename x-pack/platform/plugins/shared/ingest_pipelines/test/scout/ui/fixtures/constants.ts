@@ -5,13 +5,97 @@
  * 2.0.
  */
 
-export const DEFAULT_START_TIME = '2020-01-01T00:00:00.000Z';
-export const DEFAULT_END_TIME = '2020-01-02T00:00:00.000Z';
+export const TEST_PIPELINE_NAME = 'test_pipeline';
+export const TREE_PIPELINE_NAME = 'tree_pipeline';
 
-export const ES_ARCHIVES = {
-  SOME_ARCHIVE: 'path/to/es_archive',
+export const PIPELINE = {
+  name: TEST_PIPELINE_NAME,
+  description: 'My pipeline description.',
+  version: 1,
 };
 
-export const KBN_ARCHIVES = {
-  SOME_ARCHIVE: 'path/to/kbn_archive',
+export const TREE_PIPELINE = {
+  name: TREE_PIPELINE_NAME,
+  description: 'Pipeline that has Pipeline processors.',
+  version: 1,
+  processors: [
+    {
+      pipeline: {
+        name: TEST_PIPELINE_NAME,
+      },
+    },
+  ],
+};
+
+export const PIPELINE_CSV = {
+  name: TEST_PIPELINE_NAME,
+};
+
+export const MAXMIND_DATABASE_NAME = 'GeoIP2-Anonymous-IP';
+export const IPINFO_DATABASE_NAME = 'Free IP to ASN';
+
+export const INGEST_PIPELINES_USER_ROLE = {
+  elasticsearch: {
+    cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: {
+        advancedSettings: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+export const MANAGE_PROCESSORS_USER_ROLE = {
+  elasticsearch: {
+    cluster: ['manage'],
+  },
+  kibana: [
+    {
+      base: [],
+      feature: {
+        advancedSettings: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+export const GLOBAL_DASHBOARD_READ_WITH_INGEST_PIPELINES_ROLE = {
+  elasticsearch: INGEST_PIPELINES_USER_ROLE.elasticsearch,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        advancedSettings: ['read'],
+        dashboard: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+export const GLOBAL_DEVTOOLS_READ_WITH_INGEST_PIPELINES_ROLE = {
+  elasticsearch: {
+    indices: [
+      {
+        names: ['*'],
+        privileges: ['read', 'all'],
+      },
+    ],
+    cluster: INGEST_PIPELINES_USER_ROLE.elasticsearch.cluster,
+  },
+  kibana: [
+    {
+      base: [],
+      feature: {
+        advancedSettings: ['read'],
+        dev_tools: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
 };
