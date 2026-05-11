@@ -89,8 +89,6 @@ export const storedPackagePolicyToAgentInputs = (
       return;
     }
 
-    // Integration-level condition fans out to each non-otelcol input on non-agentless
-    // policies. The caller (here) owns this gating; getFullInputStreams just combines.
     const integrationLevelCondition =
       enableIntegrationConditions && !isAgentless && input.type !== OTEL_COLLECTOR_INPUT_TYPE
         ? packagePolicy.condition
@@ -201,10 +199,7 @@ export const getFullInputStreams = (
   }: GetFullInputStreamsOptions = {}
 ): FullAgentPolicyInputStream => {
   const { enableIntegrationConditions } = appContextService.getExperimentalFeatures();
-  // Extract template-defined `condition` (from compiled_input) before spreading so it can
-  // AND-combine flat with the integration- and user-level conditions instead of being
-  // overwritten by the spread.
-  // User-set conditions are flag-gated: when off, only the template condition flows through.
+
   const { condition: compiledInputCondition, ...compiledInputRest } = input.compiled_input || {};
   const userInputCondition = enableIntegrationConditions ? input.condition : undefined;
   const inputCondition = combineConditions([
