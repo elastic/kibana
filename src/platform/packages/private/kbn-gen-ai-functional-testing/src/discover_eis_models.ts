@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -15,7 +17,7 @@
  *   export KIBANA_EIS_CCM_API_KEY="$(vault read -field key secret/kibana-issues/dev/inference/kibana-eis-ccm)"
  *   node scripts/discover_eis_models.js
  *
- * The output file (target/eis_models.json) is read by FTR tests.
+ * The output file (target/eis_models.json) is read by smoke tests.
  */
 
 import { run } from '@kbn/dev-cli-runner';
@@ -27,7 +29,6 @@ import { createServer } from 'net';
 
 const EIS_CCM_API_KEY_ENV = 'KIBANA_EIS_CCM_API_KEY';
 const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
-// Store in repo root target/ directory (standard CI artifact location)
 const OUTPUT_PATH = resolve(REPO_ROOT, 'target/eis_models.json');
 
 const DEFAULT_TEST_ES_PORT = process.env.TEST_ES_PORT
@@ -120,7 +121,6 @@ run(
       return;
     }
 
-    // Start a temporary ES cluster with EIS URL configured
     log.info('Starting temporary Elasticsearch with EIS config...');
     const port = await getTestEsPort(log);
     const cluster = createTestEsCluster({
@@ -136,7 +136,6 @@ run(
 
       const es = cluster.getClient();
 
-      // Enable CCM
       log.info('Enabling Cloud Connected Mode...');
       await es.transport.request({
         method: 'PUT',
@@ -145,7 +144,6 @@ run(
       });
       log.info('✅ CCM enabled');
 
-      // Discover models with retry (EIS needs time to provision endpoints)
       log.info('Discovering EIS inference endpoints...');
       let models: DiscoveredModel[] = [];
       const maxRetries = Number(flags.retries) || 5;
@@ -182,18 +180,15 @@ run(
         throw new Error('No EIS chat completion models discovered after all retries');
       }
 
-      // Write output
       mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
       writeFileSync(OUTPUT_PATH, JSON.stringify({ models }, null, 2));
       log.info(`✅ Wrote ${models.length} models to ${OUTPUT_PATH}`);
 
-      // Log discovered models
       if (models.length > 0) {
         log.info('Discovered models:');
         models.forEach((m, i) => log.info(`  ${i + 1}. ${m.modelId} (${m.inferenceId})`));
       }
     } finally {
-      // Always stop ES
       log.info('Stopping Elasticsearch...');
       await cluster.cleanup();
       log.info('✅ Elasticsearch stopped');
@@ -201,7 +196,7 @@ run(
   },
   {
     description:
-      'Discovers EIS chat completion models and writes them to target/eis_models.json for FTR tests',
+      'Discovers EIS chat completion models and writes them to target/eis_models.json for smoke tests',
     flags: {
       number: ['retries'],
       default: {

@@ -6,8 +6,8 @@
  */
 
 /**
- * Scout-only copy of EIS smoke helpers (FTR keeps its own under
- * `x-pack/platform/test/agent_builder/smoke_tests/tests/eis_helpers.ts`).
+ * Scout-only copy of EIS smoke helpers. The shared version lives in
+ * `@kbn/gen-ai-functional-testing` (src/platform/packages/private/kbn-gen-ai-functional-testing/src/eis_helpers.ts).
  */
 
 import { existsSync, readFileSync } from 'fs';

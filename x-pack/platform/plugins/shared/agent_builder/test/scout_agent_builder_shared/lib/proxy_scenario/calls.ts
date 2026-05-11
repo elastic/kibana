@@ -7,7 +7,7 @@
 
 import { last } from 'lodash';
 import type { LlmProxy, LLmError } from '@kbn/ftr-llm-proxy';
-import { createToolCallMessage, createMultiToolCallMessage } from '../llm_proxy';
+import { createToolCallMessage, createMultiToolCallMessage } from '@kbn/ftr-llm-proxy';
 
 const getToolChoiceFunctionName = (toolChoice: unknown): string | undefined => {
   if (!toolChoice || typeof toolChoice !== 'object') return undefined;
@@ -114,7 +114,7 @@ export const mockFinalAnswer = (llmProxy: LlmProxy, answer: string) => {
   void llmProxy
     .intercept({
       name: 'final-assistant-response',
-      when: (body) => {
+      when: (_body) => {
         return true;
       },
       responseMock: answer,
