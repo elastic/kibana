@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import type { ApplicationStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { PLUGIN_ID } from '../../common';
+import { PLUGIN_ID, EVALS_UI_PRIVILEGES } from '../../common';
 
 export const useEvalsPermissions = () => {
   const {
     services: { application },
-  } = useKibana();
+  } = useKibana<{ application: ApplicationStart }>();
 
-  const capabilities = application?.capabilities[PLUGIN_ID];
+  const capabilities = application?.capabilities?.[PLUGIN_ID];
 
   return {
-    canRead: !!capabilities?.show,
-    canManage: !!capabilities?.manage,
+    canRead: !!capabilities?.[EVALS_UI_PRIVILEGES.show],
+    canManage: !!capabilities?.[EVALS_UI_PRIVILEGES.manage],
   };
 };

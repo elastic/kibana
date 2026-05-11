@@ -86,6 +86,7 @@ export interface EvalsPublicStart {
   TraceWaterfall: ComponentType<{ traceId: string }>;
   openAddToDatasetFlyout: (options: AddToDatasetFlyoutOpenOptions) => void;
   getAddToDatasetAction: (config: AddToDatasetActionConfig) => AddToDatasetAction;
+  canAddToDataset: boolean;
 }
 
 export interface EvalsSetupDependencies {

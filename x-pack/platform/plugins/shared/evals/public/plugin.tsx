@@ -9,7 +9,7 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import React, { Suspense } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import { PLUGIN_ID, PLUGIN_NAME, EVALS_UI_PRIVILEGES } from '../common';
 import type {
   AddToDatasetAction,
   AddToDatasetActionConfig,
@@ -54,6 +54,9 @@ export class EvalsPublicPlugin
   }
 
   start(core: CoreStart, _plugins: EvalsStartDependencies): EvalsPublicStart {
+    const canAddToDataset =
+      !!core.application.capabilities?.[PLUGIN_ID]?.[EVALS_UI_PRIVILEGES.manage];
+
     const LazyTraceWaterfall = React.lazy(async () => {
       const mod = await import('./components/trace_waterfall');
       return { default: mod.TraceWaterfall };
@@ -68,8 +71,7 @@ export class EvalsPublicPlugin
     };
 
     const openAddToDatasetFlyout = (options: AddToDatasetFlyoutOpenOptions) => {
-      const canManage = !!core.application.capabilities[PLUGIN_ID]?.manage;
-      if (!canManage) {
+      if (!canAddToDataset) {
         return;
       }
 
@@ -110,6 +112,9 @@ export class EvalsPublicPlugin
         ariaLabel,
         iconType,
         onClick: (event) => {
+          if (!canAddToDataset) {
+            return;
+          }
           if (stopPropagation) event?.stopPropagation?.();
           onBeforeOpen?.();
           openAddToDatasetFlyout(options);
@@ -117,7 +122,7 @@ export class EvalsPublicPlugin
       };
     };
 
-    return { TraceWaterfall, openAddToDatasetFlyout, getAddToDatasetAction };
+    return { TraceWaterfall, canAddToDataset, openAddToDatasetFlyout, getAddToDatasetAction };
   }
 
   stop() {}

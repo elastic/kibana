@@ -80,7 +80,7 @@ export class EvalsPlugin
       id: PLUGIN_ID,
       name: PLUGIN_NAME,
       order: 9000,
-      category: DEFAULT_APP_CATEGORIES.management,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       app: ['kibana', PLUGIN_ID],
       management: { ai: [PLUGIN_ID] },
       privileges: {
