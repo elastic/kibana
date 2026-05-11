@@ -609,7 +609,7 @@ export function getTextBasedDatasource({
             },
           };
         },
-        hasDefaultTimeField: () => false,
+        hasDefaultTimeField: () => Boolean(state.layers[layerId]?.timeField),
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {

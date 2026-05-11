@@ -389,7 +389,12 @@ export function generateEsqlQuery(
       return getEsqlQueryFailedResult('function_not_supported', col.operationType);
     }
 
-    const esAggsId = rawResult.template;
+    // Use source field name as alias for bucket expressions containing named params
+    // to ensure stable column names in ES|QL results (params get resolved to literal values)
+    const needsAlias =
+      rawResult.template.includes('?_tstart') || rawResult.template.includes('?_tend');
+    const bucketAlias = needsAlias && 'sourceField' in col ? col.sourceField : undefined;
+    const esAggsId = bucketAlias ?? rawResult.template;
     resolvedBucketExprs.set(index, esAggsId);
 
     const format =
@@ -439,7 +444,14 @@ export function generateEsqlQuery(
 
   if (validBuckets.length > 0) {
     if (validMetrics.length > 0) {
-      const statsBody = `${validMetrics.join(', ')} BY ${validBuckets.join(', ')}`;
+      // Alias bucket expressions that use named params so column names are stable
+      const aliasedBuckets = bucketEsAggsEntries.map(([, col], index) => {
+        const expr = validBuckets[index];
+        const resolvedId = resolvedBucketExprs.get(index);
+        // If the esAggsId differs from the expression, it means we assigned an alias
+        return resolvedId && resolvedId !== expr ? `${resolvedId} = ${expr}` : expr;
+      });
+      const statsBody = `${validMetrics.join(', ')} BY ${aliasedBuckets.join(', ')}`;
       queryParts.push(`STATS ${statsBody}`);
     }
 
