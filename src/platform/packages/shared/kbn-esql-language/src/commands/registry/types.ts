@@ -158,7 +158,7 @@ export interface ESQLCommandSummary {
    */
   metadataColumns?: Set<string>;
   /**
-   * A set of renamed columns pairs [oldName, newName]
+   * A set of renamed columns pairs [newName, oldName]
    */
   renamedColumnsPairs?: Set<[string, string]>;
 
