@@ -45,8 +45,8 @@ export const useViewShortcuts = ({
         },
       },
       {
-        key: 'v',
-        label: 'v',
+        key: 'c',
+        label: 'c',
         description: i18n.translate('discover.viewShortcuts.visualization', {
           defaultMessage: 'Visualization',
         }),
