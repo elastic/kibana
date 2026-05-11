@@ -115,6 +115,11 @@ export class TaskClient<TaskType extends string> {
       last_failed_at: storedTask.last_failed_at,
     };
 
+    // Update storage first so created_at is always refreshed. If TM already has
+    // the task running (version conflict below), the stored doc is still up-to-date
+    // and getStatus will return InProgress rather than Stale.
+    await this.update(taskDoc);
+
     try {
       await this.taskManagerStart.schedule(
         {
@@ -136,7 +141,6 @@ export class TaskClient<TaskType extends string> {
       );
 
       this.logger.debug(`Scheduled ${task.type} task (${task.id})`);
-      await this.update(taskDoc);
     } catch (error) {
       const isVersionConflict =
         isResponseError(error) && error.message.includes('version conflict');
