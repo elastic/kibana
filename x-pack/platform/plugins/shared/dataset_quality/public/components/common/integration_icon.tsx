@@ -27,6 +27,12 @@ export const IntegrationIcon = ({ integration }: IntegrationIconProps) => {
       tryApi
     />
   ) : (
-    <EuiIcon type={loggingIcon} size="m" aria-label={i18n.translate('xpack.datasetQuality.weightedIcon.loggingAriaLabel', { defaultMessage: 'Logging' })} />
+    <EuiIcon
+      type={loggingIcon}
+      size="m"
+      aria-label={i18n.translate('xpack.datasetQuality.weightedIcon.loggingAriaLabel', {
+        defaultMessage: 'Logging',
+      })}
+    />
   );
 };

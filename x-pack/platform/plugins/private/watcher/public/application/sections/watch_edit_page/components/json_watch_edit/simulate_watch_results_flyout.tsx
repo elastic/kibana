@@ -215,7 +215,12 @@ export const SimulateWatchResultsFlyout = ({
     </>
   )) || (
     <>
-      <EuiIcon color="subdued" type="cross" data-test-subj="conditionNotMetStatus" aria-hidden={true} />{' '}
+      <EuiIcon
+        color="subdued"
+        type="cross"
+        data-test-subj="conditionNotMetStatus"
+        aria-hidden={true}
+      />{' '}
       <FormattedMessage
         id="xpack.watcher.sections.watchEdit.simulateResults.conditionNotMetStatus"
         defaultMessage="Condition not met"

@@ -37,9 +37,15 @@ export const JobIcon: FC<Props> = ({ message, showTooltip = false }) => {
   if (showTooltip) {
     return <EuiIconTip position="bottom" content={message.text} type={icon} color={color} />;
   } else {
-    return <EuiIcon type={icon} color={color} aria-label={i18n.translate('xpack.transform.jobIcon.ariaLabel', {
-      defaultMessage: 'Transform job status: {level}',
-      values: { level: message.level },
-    })} />;
+    return (
+      <EuiIcon
+        type={icon}
+        color={color}
+        aria-label={i18n.translate('xpack.transform.jobIcon.ariaLabel', {
+          defaultMessage: 'Transform job status: {level}',
+          values: { level: message.level },
+        })}
+      />
+    );
   }
 };
