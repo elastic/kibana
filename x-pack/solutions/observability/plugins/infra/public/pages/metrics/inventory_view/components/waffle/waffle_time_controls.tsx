@@ -90,7 +90,6 @@ export const WaffleTimeControls = withEuiTheme(({ interval }: PropsWithTheme) =>
       >
         <EuiToolTip
           content={showingLastOneMinuteDataText}
-          delay="long"
           display="inlineBlock"
           position="top"
           data-test-subj="waffleDatePickerIntervalTooltip"
