@@ -6,9 +6,11 @@
  */
 
 import type { RuleChangeHistoryDocument } from '@kbn/alerting-plugin/server';
+import type { SanitizedRule } from '@kbn/alerting-types';
 import type { RuleHistoryItem } from '../../../../../../common/api/detection_engine/rule_management';
 import { convertAlertingRuleToRuleResponse } from '../detection_rules_client/converters/convert_alerting_rule_to_rule_response';
 import { computeOldValues } from './compute_old_values';
+import type { RuleParams } from '../../../rule_schema';
 
 /**
  * Convert a single alerting-framework `RuleChangeHistoryDocument` into the
@@ -20,8 +22,10 @@ export const mapRuleHistoryItem = (
   current: RuleChangeHistoryDocument,
   previous?: RuleChangeHistoryDocument
 ): RuleHistoryItem => {
-  const rule = convertAlertingRuleToRuleResponse(current.rule);
-  const previousRule = previous ? convertAlertingRuleToRuleResponse(previous.rule) : undefined;
+  const rule = convertAlertingRuleToRuleResponse(current.rule as SanitizedRule<RuleParams>);
+  const previousRule = previous
+    ? convertAlertingRuleToRuleResponse(previous.rule as SanitizedRule<RuleParams>)
+    : undefined;
 
   return {
     timestamp: current['@timestamp'],

@@ -44,12 +44,10 @@ export type {
   BulkEditOperation,
   BulkOperationError,
   GetRuleHistoryParams,
-  RuleChangeTrackingDisabledError,
-} from './rules_client';
-export type {
   RuleChangeHistoryDocument,
   GetRuleHistoryResult,
-} from './rules_client/lib/change_tracking';
+  RuleChangeTrackingDisabledError,
+} from './rules_client';
 export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration, isRuleSnoozed } from './lib';

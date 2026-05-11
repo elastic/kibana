@@ -11,12 +11,11 @@ import type {
   KibanaRequest,
 } from '@kbn/core/server';
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { RuleTypeSolution, SanitizedRule } from '@kbn/alerting-types';
+import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type {
   ObjectChange,
   GetHistoryResult,
   LogChangeHistoryOptions,
-  ChangeHistoryDocument,
   GetChangeHistoryOptions,
 } from '@kbn/change-history';
 import type { RawRule } from '../../../types';
@@ -30,14 +29,6 @@ export interface RuleChange extends Omit<ObjectChange, 'snapshot'> {
   module: RuleTypeSolution;
   /** Post-change rule state; persisted as `object.snapshot` by @kbn/change-history. */
   snapshot: RuleSnapshot;
-}
-
-export interface RuleChangeHistoryDocument extends ChangeHistoryDocument {
-  rule: SanitizedRule;
-}
-
-export interface GetRuleHistoryResult extends GetHistoryResult {
-  items: RuleChangeHistoryDocument[];
 }
 
 export interface ChangeTrackingServiceInitializeParams {

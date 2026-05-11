@@ -269,4 +269,71 @@ describe('getHistory()', () => {
       );
     });
   });
+
+  describe('rule hydration', () => {
+    test('hydrates `rule` from `object.snapshot.attributes` on each item', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
+      ruleTypeRegistry.get.mockReturnValue({
+        id: 'siem.queryRule',
+        actionGroups: [],
+        defaultActionGroupId: '',
+        recoveryActionGroup: { id: '', name: '' },
+        validate: { params: { validate: jest.fn() } },
+        isExportable: true,
+        minimumLicenseRequired: 'basic',
+        executor: jest.fn(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+      changeTrackingService.getHistory.mockResolvedValueOnce({
+        total: 1,
+        items: [
+          {
+            '@timestamp': '2026-05-01T10:00:00.000Z',
+            object: {
+              id: 'rule-1',
+              type: 'alert',
+              hash: 'h',
+              fields: { hashed: [] },
+              snapshot: {
+                attributes: { alertTypeId: 'siem.queryRule', name: 'My rule' },
+                references: [],
+              },
+            },
+          } as never,
+        ],
+      });
+
+      const result = await rulesClient.getHistory({ module: 'security', ruleId: '1' });
+
+      expect(result.items).toHaveLength(1);
+      expect(result.items[0].rule).toBeDefined();
+      expect(result.items[0].rule.id).toBe('rule-1');
+      expect(result.items[0].rule.alertTypeId).toBe('siem.queryRule');
+    });
+
+    test('passes items through without `rule` when the snapshot is malformed', async () => {
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
+      changeTrackingService.getHistory.mockResolvedValueOnce({
+        total: 1,
+        items: [
+          {
+            '@timestamp': '2026-05-01T10:00:00.000Z',
+            object: {
+              id: 'rule-1',
+              type: 'alert',
+              hash: 'h',
+              fields: { hashed: [] },
+              snapshot: { references: [] },
+            },
+          } as never,
+        ],
+      });
+
+      const result = await rulesClient.getHistory({ module: 'security', ruleId: '1' });
+
+      expect(result.items).toHaveLength(1);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      expect((result.items[0] as any).rule).toBeUndefined();
+    });
+  });
 });

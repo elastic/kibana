@@ -39,16 +39,16 @@ export const getHistoryForRule = async ({
   });
 
   const fetchedItems = result.items;
-  const items: RuleHistoryItem[] = [];
+  const resultItems: RuleHistoryItem[] = [];
 
-  for (let i = 0; i < perPage; ++i) {
-    items.push(mapRuleHistoryItem(fetchedItems[i], fetchedItems[i + 1]));
+  for (let i = 0; i < Math.min(perPage, fetchedItems.length); ++i) {
+    resultItems.push(mapRuleHistoryItem(fetchedItems[i], fetchedItems[i + 1]));
   }
 
   return {
     page,
     perPage,
     total: result.total,
-    items,
+    items: resultItems,
   };
 };
