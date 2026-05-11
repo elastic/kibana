@@ -13,10 +13,10 @@ import { TestProviders } from '../../../common/mock';
 import React from 'react';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID } from './test_ids';
-import { useRuleDetailsLink } from '../../../flyout/document_details/shared/hooks/use_rule_details_link';
+import { useRuleDetailsLink } from '../../rule/hooks/use_rule_details_link';
 
 jest.mock('../hooks/use_process_data');
-jest.mock('../../../flyout/document_details/shared/hooks/use_rule_details_link');
+jest.mock('../../rule/hooks/use_rule_details_link');
 
 const hit = {
   id: '1',

@@ -22,6 +22,18 @@ export interface ResolvedExtendedFieldFilter {
   templateVersions: Array<{ id: string; version: number }>;
 }
 
+export interface LabelSearchToken {
+  text: string;
+  exact: boolean;
+}
+
+export interface ResolvedFieldLabelFilter {
+  storageKey: string;
+  esType: string;
+  control: string;
+  templateVersions: Array<{ id: string; version: number }>;
+}
+
 type RuntimeType = 'keyword' | 'long' | 'double' | 'date';
 
 const ES_TYPE_TO_RUNTIME_TYPE: Record<string, RuntimeType> = {
@@ -109,48 +121,7 @@ export const resolveExtendedFieldFilters = (
   extendedFieldFilters: ExtendedFieldFilter[],
   templates: Array<Pick<Template, 'fieldNames' | 'templateId' | 'templateVersion'>>
 ): ResolvedExtendedFieldFilter[][] => {
-  // labelKey → storageKey → { meta, templateVersions[] }
-  const labelToMetas = new Map<
-    string,
-    Map<
-      string,
-      {
-        storageKey: string;
-        esType: string;
-        control: string;
-        templateVersions: Array<{ id: string; version: number }>;
-      }
-    >
-  >();
-
-  for (const template of templates) {
-    for (const field of template.fieldNames ?? []) {
-      const labelKey = field.label.toLowerCase();
-      const storageKey = `${field.name}_as_${field.type}`;
-
-      let byStorageKey = labelToMetas.get(labelKey);
-      if (byStorageKey == null) {
-        byStorageKey = new Map();
-        labelToMetas.set(labelKey, byStorageKey);
-      }
-
-      let entry = byStorageKey.get(storageKey);
-      if (entry == null) {
-        entry = {
-          storageKey,
-          esType: field.type,
-          control: field.control,
-          templateVersions: [],
-        };
-        byStorageKey.set(storageKey, entry);
-      }
-
-      entry.templateVersions.push({
-        id: template.templateId,
-        version: template.templateVersion,
-      });
-    }
-  }
+  const labelToMetas = buildLabelToMetasIndex(templates);
 
   return extendedFieldFilters.flatMap(({ label, value }) => {
     const metas = labelToMetas.get(label.toLowerCase());
@@ -287,4 +258,182 @@ export const buildExtendedFieldFilterClauses = (
     if (clauses.length === 1) return clauses;
 
     return [{ bool: { should: clauses, minimum_should_match: 1 } }];
+  });
+
+/**
+ * Parses the search string into tokens for field-label matching.
+ * - Quoted phrases ("Start date") become substring-match tokens (exact: false)
+ * - Bare words (priority) become exact full-label match tokens (exact: true)
+ * Tokens already consumed by label:value syntax should not be present in the input.
+ */
+export const tokenizeSearchForLabels = (search: string): LabelSearchToken[] => {
+  const tokens: LabelSearchToken[] = [];
+  const withoutQuoted = search.replace(/"([^"]*)"/g, (_match, quoted: string) => {
+    const trimmed = quoted.trim();
+    if (trimmed.length > 0) {
+      tokens.push({ text: trimmed.toLowerCase(), exact: false });
+    }
+    return '';
+  });
+
+  for (const word of withoutQuoted.split(/\s+/)) {
+    const trimmed = word.trim();
+    if (trimmed.length > 0) {
+      tokens.push({ text: trimmed.toLowerCase(), exact: true });
+    }
+  }
+
+  return tokens;
+};
+
+type LabelToMetasMap = Map<
+  string,
+  Map<
+    string,
+    {
+      storageKey: string;
+      esType: string;
+      control: string;
+      templateVersions: Array<{ id: string; version: number }>;
+    }
+  >
+>;
+
+const buildLabelToMetasIndex = (
+  templates: Array<Pick<Template, 'fieldNames' | 'templateId' | 'templateVersion'>>
+): LabelToMetasMap => {
+  const labelToMetas: LabelToMetasMap = new Map();
+
+  for (const template of templates) {
+    for (const field of template.fieldNames ?? []) {
+      const labelKey = field.label.toLowerCase();
+      const storageKey = `${field.name}_as_${field.type}`;
+
+      let byStorageKey = labelToMetas.get(labelKey);
+      if (byStorageKey == null) {
+        byStorageKey = new Map();
+        labelToMetas.set(labelKey, byStorageKey);
+      }
+
+      let entry = byStorageKey.get(storageKey);
+      if (entry == null) {
+        entry = {
+          storageKey,
+          esType: field.type,
+          control: field.control,
+          templateVersions: [],
+        };
+        byStorageKey.set(storageKey, entry);
+      }
+
+      entry.templateVersions.push({
+        id: template.templateId,
+        version: template.templateVersion,
+      });
+    }
+  }
+
+  return labelToMetas;
+};
+
+/**
+ * Resolves search tokens against template field labels.
+ * - exact tokens: full label must equal the token text
+ * - substring tokens (quoted): label must contain the token text
+ */
+export const resolveFieldLabelSearch = (
+  tokens: LabelSearchToken[],
+  templates: Array<Pick<Template, 'fieldNames' | 'templateId' | 'templateVersion'>>
+): ResolvedFieldLabelFilter[] => {
+  if (tokens.length === 0 || templates.length === 0) return [];
+
+  const labelToMetas = buildLabelToMetasIndex(templates);
+  const seen = new Set<string>();
+  const results: ResolvedFieldLabelFilter[] = [];
+
+  for (const token of tokens) {
+    const matchingMetas: Array<{
+      storageKey: string;
+      esType: string;
+      control: string;
+      templateVersions: Array<{ id: string; version: number }>;
+    }> = [];
+
+    const normalizedText = token.text.toLowerCase();
+
+    for (const [labelKey, metas] of labelToMetas) {
+      const isMatch = token.exact ? labelKey === normalizedText : labelKey.includes(normalizedText);
+
+      if (isMatch) {
+        matchingMetas.push(...metas.values());
+      }
+    }
+
+    for (const meta of matchingMetas) {
+      if (!seen.has(meta.storageKey)) {
+        seen.add(meta.storageKey);
+        results.push({
+          storageKey: meta.storageKey,
+          esType: meta.esType,
+          control: meta.control,
+          templateVersions: meta.templateVersions,
+        });
+      }
+    }
+  }
+
+  return results;
+};
+
+/** Builds runtime field mappings for field-label existence queries. */
+export const buildFieldLabelRuntimeMappings = (
+  resolvedLabels: ResolvedFieldLabelFilter[]
+): Record<string, estypes.MappingRuntimeField> => {
+  const runtimeMappings: Record<string, estypes.MappingRuntimeField> = {};
+
+  for (const { storageKey, esType, control } of resolvedLabels) {
+    const runtimeType = control === DATE_PICKER ? 'keyword' : mapToRuntimeType(esType);
+    runtimeMappings[`ef_${storageKey}`] = {
+      type: runtimeType,
+      script: {
+        source: buildPainlessScript(storageKey, runtimeType, control),
+      },
+    };
+  }
+
+  return runtimeMappings;
+};
+
+/**
+ * Builds ES query clauses that check for the existence of extended fields
+ * (field has any value), scoped to the correct template versions.
+ * All clauses are OR'd — any matching label is sufficient.
+ */
+export const buildFieldLabelExistsClauses = (
+  resolvedLabels: ResolvedFieldLabelFilter[]
+): estypes.QueryDslQueryContainer[] =>
+  resolvedLabels.flatMap((resolved): estypes.QueryDslQueryContainer[] => {
+    const fieldName = `ef_${resolved.storageKey}`;
+
+    const existsClause: estypes.QueryDslQueryContainer = {
+      exists: { field: fieldName },
+    };
+
+    const templateVersionFilters = resolved.templateVersions.map(({ id, version }) => ({
+      bool: {
+        must: [
+          { term: { 'cases.template.id': id } },
+          { term: { 'cases.template.version': version } },
+        ],
+      },
+    }));
+
+    const templateFilter: estypes.QueryDslQueryContainer = {
+      bool: {
+        should: templateVersionFilters,
+        minimum_should_match: 1,
+      },
+    };
+
+    return [{ bool: { filter: [existsClause, templateFilter] } }];
   });

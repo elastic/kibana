@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/core-user-storage-common",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

@@ -105,6 +105,108 @@ This is the same signature expected by `TableListView.findItems`.
 
 > **Note:** The `refs` parameter (for tag filtering) is not yet supported in the new `ContentListProvider` architecture. Only `searchQuery` is forwarded in this initial version. Tag filtering support is planned for a future release.
 
+## Saved-object listing services
+
+`ContentListClientProvider` is a generic primitive — it accepts plain `services`/`features`/`contentEditor`/`findItems` args. For typical saved-object listings (Dashboards, Maps, Visualize, Graph, etc.) the wiring of those args is repetitive: build a tags service from the tagging API, instantiate a favorites client, decorate `findItems` with EBT performance metrics, format duplicate-title validators, and so on.
+
+The `services/` folder ships small, single-purpose helpers — one per capability area. Each helper builds exactly one piece of the args you already pass to `ContentListClientProvider`. They are not a wrapper, hook, or "preset"; they are the building blocks of the existing API surface.
+
+Each subfolder is named after the `ContentListClientProvider` field it serves:
+
+| Helper                                | Subfolder                | Fills                                |
+| ------------------------------------- | ------------------------ | ------------------------------------ |
+| `createTagsService(api)`              | `services/tags/`         | `services.tags`                      |
+| `createFavoritesService(opts)`        | `services/favorites/`    | `services.favorites`                 |
+| `createUserProfilesService(profile)`  | `services/user_profiles/`| `services.userProfiles`              |
+| `createContentInsightsService(opts)` + `<SavedObjectActivityRow>` | `services/content_insights/` | `contentEditor.appendRows`            |
+| `createDuplicateTitleValidator(opts)` | `services/duplicate_title/` | `contentEditor.customValidators.title`|
+| `useRecentlyAccessedDecoration(src)`  | `services/recently_accessed/` | `findItems` decoration + `features.flags` + a closure-bound `RecentsFilter` |
+| `withPerformanceMetrics(fn, opts)`    | `services/performance_metrics/` | wraps `findItems` / `onDelete` |
+
+Each helper is tested in isolation and is independently optional. Use one, several, or none — `ContentListClientProvider` accepts the raw types either way.
+
+### Composing them in a consumer
+
+```tsx
+import {
+  ContentListClientProvider,
+  createTagsService,
+  createFavoritesService,
+  createUserProfilesService,
+  createContentInsightsService,
+  createDuplicateTitleValidator,
+  useRecentlyAccessedDecoration,
+  withPerformanceMetrics,
+  SavedObjectActivityRow,
+} from '@kbn/content-list-provider-client';
+
+const tags = createTagsService(savedObjectsTagging.getTaggingApi()?.ui);
+const favorites = createFavoritesService({
+  appId: 'dashboards',
+  savedObjectType: 'dashboard',
+  http: coreServices.http,
+  userProfile: coreServices.userProfile,
+  usageCollection: usageCollectionService,
+});
+const userProfiles = createUserProfilesService(coreServices.userProfile);
+const insights = createContentInsightsService({
+  http: coreServices.http,
+  logger,
+  domainId: 'dashboard',
+});
+const search = useMemo(
+  () =>
+    withPerformanceMetrics(rawSearch, {
+      analytics: coreServices.analytics,
+      eventName: SAVED_OBJECT_LOADED_TIME,
+      savedObjectType: 'dashboard',
+    }),
+  [rawSearch]
+);
+const recents = useRecentlyAccessedDecoration(getDashboardRecentlyAccessedService());
+
+return (
+  <ContentListClientProvider
+    services={{ uiSettings: core.uiSettings, tags, favorites, userProfiles }}
+    findItems={async (q, opts) => recents.decorate(await search(q, opts))}
+    features={{ flags: [recents.flag] }}
+    contentEditor={{
+      openContentEditor,
+      onSave: updateItemMeta,
+      customValidators: {
+        title: [
+          createDuplicateTitleValidator({
+            findCurrentTitle: (id) =>
+              findService.findById(id).then((r) =>
+                r.status === 'error' ? undefined : r.attributes.title
+              ),
+            checkForDuplicate: ({ title, lastSavedTitle }) =>
+              checkForDuplicateDashboardTitle({
+                title,
+                lastSavedTitle,
+                copyOnSave: false,
+                isTitleDuplicateConfirmed: false,
+              }),
+          }),
+        ],
+      },
+      appendRows: (item) => (
+        <SavedObjectActivityRow service={insights} item={item} entityNamePlural="dashboards" />
+      ),
+    }}
+  >
+    <ContentListToolbar>
+      <Filters>
+        <Filters.Starred />
+        <recents.RecentsFilter />
+        <Filters.Tags />
+      </Filters>
+    </ContentListToolbar>
+    <ContentListTable>{/* ... */}</ContentListTable>
+  </ContentListClientProvider>
+);
+```
+
 ## Exports
 
 ```typescript
@@ -122,8 +224,22 @@ export type {
   TableListViewFindItemsResult,
   SavedObjectReference,
 } from './types';
+
+// Saved-object listing services (see "Saved-object listing services" above).
+export {
+  createTagsService,
+  createFavoritesService,
+  createUserProfilesService,
+  createContentInsightsService,
+  SavedObjectActivityRow,
+  createDuplicateTitleValidator,
+  useRecentlyAccessedDecoration,
+  RecentsFilterRenderer,
+  withPerformanceMetrics,
+} from './services';
 ```
 
 ## Related Packages
 
 - [`@kbn/content-list-provider`](../kbn-content-list-provider) — Core provider and hooks.
+- [`@kbn/content-list-toolbar`](../kbn-content-list-toolbar) — Toolbar components consumed by `<recents.RecentsFilter />`.
