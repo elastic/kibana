@@ -57,21 +57,22 @@ export const SAFE_STEP_TYPES = new Set([
   'cases.findSimilarCases',
   'cases.getAllAttachments',
   'cases.getCasesByAlertId',
+  // Slack read-only actions (.slack2 connector): query the Slack API without
+  // posting messages or mutating workspace state.
+  'slack2.searchMessages',
+  'slack2.listChannels',
+  'slack2.resolveChannelId',
 ]);
 
 /**
- * Step types that are destructive (irreversible). Surfaced in the HITL
- * confirmation dialog with `color: 'danger'`. All other unsafe types render
- * as `'warning'`.
+ * Every unsafe step already requires human approval — the HITL dialog gates
+ * execution regardless of step type. This list only adds emphasis: entries
+ * render the confirm button with `color: 'danger'` instead of `'warning'`.
  */
 const DESTRUCTIVE_STEP_TYPES = new Set([
   'elasticsearch.indices.delete',
-  'elasticsearch.delete',
-  'elasticsearch.deleteByQuery',
-  'kibana.deleteCase',
-  'cases.deleteCase',
   'cases.deleteCases',
-  'cases.removeAttachments',
+  'cases.deleteObservable',
 ]);
 
 const CONDITION_STEP_TYPES = new Set(['if', 'while']);

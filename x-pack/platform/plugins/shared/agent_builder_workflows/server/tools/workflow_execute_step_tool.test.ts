@@ -6,6 +6,7 @@
  */
 
 import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents/prompts';
 import { AgentPromptType, ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type {
@@ -128,19 +129,8 @@ interface MockContextOptions {
 
 const createMockContext = (yaml?: string, options: MockContextOptions = {}) => {
   const askForConfirmation = jest.fn(
-    (def: {
-      id: string;
-      title?: string;
-      message?: string;
-      color?: string;
-    }): ToolHandlerPromptReturn => ({
-      prompt: {
-        type: AgentPromptType.confirmation,
-        id: def.id,
-        title: def.title,
-        message: def.message,
-        color: def.color as 'primary' | 'warning' | 'danger' | undefined,
-      },
+    (def: ConfirmPromptDefinition): ToolHandlerPromptReturn => ({
+      prompt: { type: AgentPromptType.confirmation, ...def },
     })
   );
   const checkConfirmationStatus = jest.fn().mockReturnValue({
@@ -314,6 +304,42 @@ describe('registerWorkflowExecuteStepTool', () => {
         'default',
         context.request
       );
+    });
+
+    it.each([
+      ['slack2.listChannels', { limit: 10 }],
+      ['slack2.resolveChannelId', { name: 'general' }],
+      ['slack2.searchMessages', { query: 'release' }],
+    ])('executes a %s step without prompting', async (stepType, withParams) => {
+      jest.useRealTimers();
+
+      const yaml = `version: '1'
+name: slack-read
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: slack_read
+    type: ${stepType}
+    connector-id: my-slack
+    with: ${JSON.stringify(withParams)}
+`;
+
+      mockApi.testStep.mockResolvedValue('exec-slack-read');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [{ stepId: 'slack_read', status: ExecutionStatus.COMPLETED }],
+        error: null,
+        duration: 40,
+      });
+
+      const context = createMockContext(yaml);
+      const result = await invokeHandler(registeredTool, { stepName: 'slack_read' }, context);
+      const data = result.results[0].data as Record<string, unknown>;
+
+      expect(data.success).toBe(true);
+      expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+      expect(context.prompts.checkConfirmationStatus).not.toHaveBeenCalled();
     });
 
     it('passes contextOverride to testStep', async () => {
@@ -664,8 +690,8 @@ describe('registerWorkflowExecuteStepTool', () => {
       expect(result.prompt.type).toBe(AgentPromptType.confirmation);
       expect(result.prompt.id).toContain(WORKFLOW_EXECUTE_STEP_TOOL_ID);
       // Slack is unsafe but not destructive → 'warning'
-      expect((result.prompt as any).color).toBe('warning');
-      expect((result.prompt as any).message).toContain('#alerts');
+      expect(result.prompt.color).toBe('warning');
+      expect(result.prompt.message).toContain('#alerts');
       expect(mockApi.testStep).not.toHaveBeenCalled();
     });
 
@@ -682,8 +708,8 @@ describe('registerWorkflowExecuteStepTool', () => {
         context
       );
 
-      expect((result.prompt as any).color).toBe('danger');
-      expect((result.prompt as any).title).toContain('elasticsearch.indices.delete');
+      expect(result.prompt.color).toBe('danger');
+      expect(result.prompt.title).toContain('elasticsearch.indices.delete');
     });
 
     it('falls back to a generated preview when confirmation_body is omitted', async () => {
@@ -692,8 +718,8 @@ describe('registerWorkflowExecuteStepTool', () => {
       });
       const result = await invokePromptHandler(registeredTool, { stepName: 'send_slack' }, context);
 
-      expect((result.prompt as any).message).toContain('send_slack');
-      expect((result.prompt as any).message).toContain('slack');
+      expect(result.prompt.message).toContain('send_slack');
+      expect(result.prompt.message).toContain('slack');
     });
 
     it('executes the step after the user accepts the prompt', async () => {
@@ -814,8 +840,8 @@ describe('registerWorkflowExecuteStepTool', () => {
 
       expect(result.prompt).toBeDefined();
       expect(result.prompt.type).toBe(AgentPromptType.confirmation);
-      expect((result.prompt as any).color).toBe('warning');
-      expect((result.prompt as any).message).toContain('https://example.com');
+      expect(result.prompt.color).toBe('warning');
+      expect(result.prompt.message).toContain('https://example.com');
       expect(mockApi.testStep).not.toHaveBeenCalled();
     });
 
