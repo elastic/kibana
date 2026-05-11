@@ -59,7 +59,9 @@ const throttleSchema = z.object({
   strategy: throttleStrategySchema.optional().describe('The throttle strategy.'),
   interval: durationSchema
     .nullish()
-    .describe('The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.'),
+    .describe(
+      'The throttle interval duration (e.g. 5m, 1h), or null when the strategy is intervalless.'
+    ),
 });
 
 const PER_EPISODE_STRATEGIES = new Set<string>([
@@ -70,10 +72,13 @@ const PER_EPISODE_STRATEGIES = new Set<string>([
 const AGGREGATE_STRATEGIES = new Set<string>(['time_interval', 'every_time']);
 const STRATEGIES_REQUIRING_INTERVAL = new Set<string>(['per_status_interval', 'time_interval']);
 
+export const needsInterval = (strategy: string | undefined): boolean =>
+  strategy != null && STRATEGIES_REQUIRING_INTERVAL.has(strategy);
+
 interface ValidationPayload {
   value: {
     groupingMode?: string | null;
-    throttle?: { strategy?: string; interval?: string } | null;
+    throttle?: { strategy?: string; interval?: string | null } | null;
   };
   issues: z.core.$ZodRawIssue[];
 }
@@ -83,7 +88,7 @@ const validateStrategyInterval = (payload: ValidationPayload) => {
   const strategy = data.throttle?.strategy;
   if (!strategy) return;
 
-  if (STRATEGIES_REQUIRING_INTERVAL.has(strategy) && !data.throttle?.interval) {
+  if (needsInterval(strategy) && !data.throttle?.interval) {
     issues.push({
       code: 'custom',
       message: `Strategy "${strategy}" requires an interval to be defined`,

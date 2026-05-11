@@ -206,7 +206,7 @@ describe('ActionPolicyFormPage', () => {
             name: 'Policy from test',
             description: 'Description from test',
             groupingMode: 'per_episode',
-            throttle: { strategy: 'on_status_change' },
+            throttle: { strategy: 'on_status_change', interval: null },
             destinations: [{ type: 'workflow', id: 'workflow-1' }],
           },
           expect.objectContaining({ onSuccess: expect.any(Function) })

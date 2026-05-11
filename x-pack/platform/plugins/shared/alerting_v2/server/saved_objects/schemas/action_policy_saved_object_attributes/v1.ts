@@ -42,7 +42,7 @@ export const actionPolicySavedObjectAttributesSchema = schema.object({
             schema.literal('every_time'),
           ])
         ),
-        interval: schema.maybe(schema.string()),
+        interval: schema.maybe(schema.nullable(schema.string())),
       })
     )
   ),
