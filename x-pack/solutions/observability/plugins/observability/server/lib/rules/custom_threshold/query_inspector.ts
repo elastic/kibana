@@ -9,7 +9,7 @@ import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
-  RuleQueryInspectorHandler,
+  RuleQueryInspectorFn,
   RuleQueryInspectorResponse,
   RuleQueryInspectorTimeRange,
 } from '@kbn/alerting-plugin/server';
@@ -41,7 +41,7 @@ interface QueryInspectorOptions {
 export const createQueryInspector = (
   getStartServices: GetStartServices,
   options: QueryInspectorOptions
-): RuleQueryInspectorHandler => {
+): RuleQueryInspectorFn => {
   return async (
     request: KibanaRequest,
     ruleParams: Record<string, unknown>,

@@ -23,7 +23,7 @@ export interface RuleQueryInspectorTimeRange {
   lte: string;
 }
 
-export type RuleQueryInspectorHandler = (
+export type RuleQueryInspectorFn = (
   request: KibanaRequest,
   ruleParams: Record<string, unknown>,
   mode: 'build' | 'execute',

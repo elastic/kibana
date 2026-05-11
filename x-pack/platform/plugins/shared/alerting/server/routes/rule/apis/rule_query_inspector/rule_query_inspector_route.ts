@@ -79,8 +79,8 @@ export const ruleQueryInspectorRoute = (
         const rule = await rulesClient.get({ id: ruleId });
 
         const ruleType = ruleTypeRegistry.get(rule.alertTypeId);
-        const handler = ruleType.queryInspector;
-        if (!handler) {
+        const queryInspector = ruleType.queryInspector;
+        if (!queryInspector) {
           return res.badRequest({
             body: {
               message: `Query inspection is not supported for rule type "${rule.alertTypeId}"`,
@@ -139,7 +139,7 @@ export const ruleQueryInspectorRoute = (
           }
         }
 
-        const result = await handler(req, ruleParams, mode, timeRange);
+        const result = await queryInspector(req, ruleParams, mode, timeRange);
         return res.ok({ body: result });
       })
     )
