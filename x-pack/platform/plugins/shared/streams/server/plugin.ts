@@ -25,6 +25,10 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
+import {
+  createLocalDataClusterClient,
+  createRemoteDataClusterClient,
+} from './lib/data_cluster_client';
 import type { StreamsConfig } from '../common/config';
 import {
   STREAMS_API_PRIVILEGES,
@@ -73,6 +77,7 @@ import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
+import { RemoteEsClientService } from './lib/remote_cluster/remote_es_client_service';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -96,6 +101,7 @@ export class StreamsPlugin
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
+  private remoteEsClientService?: RemoteEsClientService;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -118,6 +124,11 @@ export class StreamsPlugin
       this.logger.get('patternExtraction')
     );
 
+    if (this.config.remoteEsCluster) {
+      this.remoteEsClientService = new RemoteEsClientService(this.config.remoteEsCluster);
+      this.logger.info('Remote ES cluster client initialised');
+    }
+
     this.ebtTelemetryService.setup(core.analytics);
     this.statsTelemetryService.setup(
       core,
@@ -130,7 +141,11 @@ export class StreamsPlugin
       consumers: [STREAMS_CONSUMER],
     }));
 
-    registerRules({ plugins, logger: this.logger.get('rules') });
+    registerRules({
+      plugins,
+      logger: this.logger.get('rules'),
+      remoteEsClientService: this.remoteEsClientService,
+    });
     registerStreamsSavedObjects(core.savedObjects);
     registerSignificantEventsInferenceFeatures(
       plugins.searchInferenceEndpoints,
@@ -224,6 +239,14 @@ export class StreamsPlugin
         this.logger
       );
 
+      const remoteEsClientService = this.remoteEsClientService;
+      const getDataClusterClientForStream = (definition: Streams.all.Definition) => {
+        if (Streams.RemoteStream.Definition.is(definition) && remoteEsClientService) {
+          return createRemoteDataClusterClient(remoteEsClientService.getClient());
+        }
+        return createLocalDataClusterClient(scopedClusterClient.asInternalUser);
+      };
+
       return {
         scopedClusterClient,
         soClient,
@@ -242,6 +265,7 @@ export class StreamsPlugin
         streamsSettingsStorageClient,
         isSecurityEnabled,
         tuningConfig,
+        getDataClusterClientForStream,
       };
     };
 
@@ -357,6 +381,7 @@ export class StreamsPlugin
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
         continuousKiExtractionWorkflowService,
+        remoteEsClientService: this.remoteEsClientService,
       },
       core,
       logger: this.logger,

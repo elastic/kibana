@@ -42,7 +42,9 @@ export const YamlEditorWrapper = () => {
   const definition = useStreamEnrichmentSelector((state) => state.context.definition);
   const streamType = getStreamTypeFromDefinition(definition.stream);
   const editorStreamType =
-    streamType === 'unknown' || streamType === 'query' ? undefined : streamType;
+    streamType === 'unknown' || streamType === 'query' || streamType === 'remote'
+      ? undefined
+      : streamType;
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
   const canSimulate = useStreamEnrichmentSelector(
     (state) => state.context.definition.privileges.simulate

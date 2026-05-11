@@ -23,7 +23,7 @@ interface ManagementBottomBarProps {
   insufficientPrivileges?: boolean;
   isLoading?: boolean;
   isInvalid?: boolean;
-  streamType?: 'classic' | 'wired' | 'query' | 'unknown';
+  streamType?: 'classic' | 'wired' | 'query' | 'remote' | 'unknown';
   onCancel: () => void;
   onConfirm: () => void;
   onViewCodeClick?: () => void;

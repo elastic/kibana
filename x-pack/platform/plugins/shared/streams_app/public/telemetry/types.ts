@@ -9,7 +9,7 @@ import type { AttachmentType } from '@kbn/streams-plugin/server/lib/streams/atta
 import type { InsightImpactLevel, InsightUserEvaluation } from '@kbn/streams-schema';
 import type { EnrichmentDataSource } from '../../common/url_schema';
 
-type StreamType = 'wired' | 'classic' | 'query' | 'unknown';
+type StreamType = 'wired' | 'classic' | 'query' | 'remote' | 'unknown';
 
 type ConfigurationMode = 'interactive' | 'yaml';
 

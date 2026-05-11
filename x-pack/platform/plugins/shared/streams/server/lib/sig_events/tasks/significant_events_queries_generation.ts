@@ -59,8 +59,8 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                 soClient,
                 getFeatureClient,
                 getQueryClient,
-                scopedClusterClient,
                 uiSettingsClient,
+                getDataClusterClientForStream,
               } = await taskContext.getScopedClients({
                 request: fakeRequest,
               });
@@ -68,10 +68,12 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
               const taskLogger = taskContext.logger.get('significant_events_queries_generation');
 
               try {
-                const [featureClient, queryClient] = await Promise.all([
+                const [featureClient, queryClient, definition] = await Promise.all([
                   getFeatureClient(),
                   getQueryClient(),
+                  streamsClient.getStream(streamName),
                 ]);
+                const dataClusterClient = getDataClusterClientForStream(definition);
 
                 const result = await generateKIQueries(
                   { streamName, connectorId: connectorIdOverride },
@@ -81,7 +83,7 @@ export function createStreamsSignificantEventsQueriesGenerationTask(taskContext:
                     soClient,
                     featureClient,
                     queryClient,
-                    esClient: scopedClusterClient.asCurrentUser,
+                    esClient: dataClusterClient.esClient,
                     uiSettingsClient,
                     searchInferenceEndpoints: taskContext.server.searchInferenceEndpoints,
                     request: fakeRequest,

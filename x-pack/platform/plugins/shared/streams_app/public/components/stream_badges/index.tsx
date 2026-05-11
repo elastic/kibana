@@ -119,6 +119,38 @@ export function QueryStreamBadge() {
   );
 }
 
+export function RemoteStreamBadge() {
+  return (
+    <EuiToolTip
+      position="top"
+      title={i18n.translate('xpack.streams.badges.remote.title', {
+        defaultMessage: 'Remote Stream',
+      })}
+      content={i18n.translate('xpack.streams.badges.remote.description', {
+        defaultMessage:
+          'Remote streams query data directly from a remote Elasticsearch cluster configured in kibana.yml. They are read-only and cannot be discovered in Discover.',
+      })}
+      anchorProps={{
+        css: css`
+          display: inline-flex;
+        `,
+      }}
+    >
+      <EuiBadge
+        color="hollow"
+        iconType="remote"
+        iconSide="left"
+        tabIndex={0}
+        data-test-subj="remoteStreamBadge"
+      >
+        {i18n.translate('xpack.streams.badges.remote.label', {
+          defaultMessage: 'Remote',
+        })}
+      </EuiBadge>
+    </EuiToolTip>
+  );
+}
+
 export function DeprecatedLogsBadge({
   openFlyout,
   hasNewStreams,

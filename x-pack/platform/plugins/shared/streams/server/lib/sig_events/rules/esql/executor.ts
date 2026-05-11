@@ -20,109 +20,122 @@ import { MAX_ALERTS_PER_EXECUTION, MAX_DEDUP_IDS, MATCH_LOOKBACK_MINUTES } from 
 import { buildEsqlSearchRequest } from './lib/build_esql_search_request';
 import { executeEsqlRequest } from './lib/execute_esql_request';
 import type { EsqlRuleInstanceState, EsqlRuleParams } from './types';
+import type { RemoteEsClientService } from '../../../remote_cluster/remote_es_client_service';
 
-export async function getRuleExecutor(
-  options: RuleExecutorOptions<
-    EsqlRuleParams,
-    EsqlRuleInstanceState,
-    AlertInstanceState,
-    AlertInstanceContext,
-    'default',
-    Alert
-  > & {
-    services: PersistenceServices;
-  }
-) {
-  const { services, params, logger, state, startedAt, spaceId, rule } = options;
-  const { scopedClusterClient, alertWithPersistence } = services;
+type RuleExecutorArgs = RuleExecutorOptions<
+  EsqlRuleParams,
+  EsqlRuleInstanceState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  'default',
+  Alert
+> & {
+  services: PersistenceServices;
+};
 
-  // The executor cannot self-heal (no rulesClient access); cleanup is
-  // handled by syncQueries / the demotedToStats path in QueryClient.
-  // This guard prevents wasted ES queries until the next sync cycle runs.
-  if (hasStatsCommand(params.query)) {
-    logger.error(
-      `Rule "${rule.id}" contains a STATS query that cannot produce document-level alerts. ` +
-        `This is a transient state — the rule will be uninstalled on the next syncQueries cycle. Skipping execution.`
-    );
-    return { state: { previousOriginalDocumentIds: [] } };
-  }
+/**
+ * Returns a rule executor that, when `params.useRemoteCluster` is true, routes
+ * ES|QL queries through the configured remote cluster client instead of the
+ * default scoped cluster client.
+ */
+export function createRuleExecutor(remoteEsClientService?: RemoteEsClientService) {
+  return async function getRuleExecutor(options: RuleExecutorArgs) {
+    const { services, params, logger, state, startedAt, spaceId, rule } = options;
+    const { scopedClusterClient, alertWithPersistence } = services;
 
-  const previousOriginalDocumentIds = state.previousOriginalDocumentIds ?? [];
+    // The executor cannot self-heal (no rulesClient access); cleanup is
+    // handled by syncQueries / the demotedToStats path in QueryClient.
+    // This guard prevents wasted ES queries until the next sync cycle runs.
+    if (hasStatsCommand(params.query)) {
+      logger.error(
+        `Rule "${rule.id}" contains a STATS query that cannot produce document-level alerts. ` +
+          `This is a transient state — the rule will be uninstalled on the next syncQueries cycle. Skipping execution.`
+      );
+      return { state: { previousOriginalDocumentIds: [] } };
+    }
 
-  const now = moment(startedAt);
+    const previousOriginalDocumentIds = state.previousOriginalDocumentIds ?? [];
 
-  const esqlRequest = buildEsqlSearchRequest({
-    query: params.query,
-    timestampField: params.timestampField,
-    from: now.clone().subtract(MATCH_LOOKBACK_MINUTES, 'minutes').toISOString(),
-    to: now.clone().toISOString(),
-    previousOriginalDocumentIds,
-  });
+    const now = moment(startedAt);
 
-  const results = await executeEsqlRequest({
-    esClient: scopedClusterClient.asCurrentUser,
-    esqlRequest,
-    logger,
-  });
+    const esqlRequest = buildEsqlSearchRequest({
+      query: params.query,
+      timestampField: params.timestampField,
+      from: now.clone().subtract(MATCH_LOOKBACK_MINUTES, 'minutes').toISOString(),
+      to: now.clone().toISOString(),
+      previousOriginalDocumentIds,
+    });
 
-  if (results.length === 0) {
-    return {
-      state: {
-        previousOriginalDocumentIds,
-      },
-    };
-  }
+    const esClient =
+      params.useRemoteCluster && remoteEsClientService
+        ? remoteEsClientService.getClient()
+        : scopedClusterClient.asCurrentUser;
 
-  const alertDocIdToDocumentIdMap = new Map<string, string>();
-  const alerts = results.map((result) => {
-    const alertDocId = objectHash([result._id, rule.id, spaceId]);
-    alertDocIdToDocumentIdMap.set(alertDocId, result._id);
+    const results = await executeEsqlRequest({
+      esClient,
+      esqlRequest,
+      logger,
+    });
 
-    return {
-      _id: alertDocId,
-      _source: {
-        original_source: {
-          _id: result._id,
-          ...result._source,
+    if (results.length === 0) {
+      return {
+        state: {
+          previousOriginalDocumentIds,
         },
-      },
-    };
-  });
+      };
+    }
 
-  const refreshOnIndexingAlerts = false;
-  const { createdAlerts, errors } = await alertWithPersistence(
-    alerts,
-    refreshOnIndexingAlerts,
-    MAX_ALERTS_PER_EXECUTION
-  );
+    const alertDocIdToDocumentIdMap = new Map<string, string>();
+    const alerts = results.map((result) => {
+      const alertDocId = objectHash([result._id, rule.id, spaceId]);
+      alertDocIdToDocumentIdMap.set(alertDocId, result._id);
 
-  if (!isEmpty(errors)) {
-    logger.error(
-      `alertWithPersistence completed with ${errors.length} error(s) (${
-        createdAlerts.length
-      } alerts created): ${JSON.stringify(errors)}`
+      return {
+        _id: alertDocId,
+        _source: {
+          original_source: {
+            _id: result._id,
+            ...result._source,
+          },
+        },
+      };
+    });
+
+    const refreshOnIndexingAlerts = false;
+    const { createdAlerts, errors } = await alertWithPersistence(
+      alerts,
+      refreshOnIndexingAlerts,
+      MAX_ALERTS_PER_EXECUTION
     );
-  }
 
-  const originalDocumentIds: string[] = [];
-  for (const alert of createdAlerts) {
-    const docId = alertDocIdToDocumentIdMap.get(alert._id);
-    if (docId) {
-      originalDocumentIds.push(docId);
-    } else {
-      logger.warn(
-        `Alert "${alert._id}" has no mapped original document ID; skipping dedup entry — this may cause duplicate alerts on the next run`
+    if (!isEmpty(errors)) {
+      logger.error(
+        `alertWithPersistence completed with ${errors.length} error(s) (${
+          createdAlerts.length
+        } alerts created): ${JSON.stringify(errors)}`
       );
     }
-  }
 
-  // Previous IDs come first, new IDs are appended — slice(-N) keeps the most recent ones.
-  const mergedIds = [...new Set([...previousOriginalDocumentIds, ...originalDocumentIds])];
+    const originalDocumentIds: string[] = [];
+    for (const alert of createdAlerts) {
+      const docId = alertDocIdToDocumentIdMap.get(alert._id);
+      if (docId) {
+        originalDocumentIds.push(docId);
+      } else {
+        logger.warn(
+          `Alert "${alert._id}" has no mapped original document ID; skipping dedup entry — this may cause duplicate alerts on the next run`
+        );
+      }
+    }
 
-  return {
-    state: {
-      previousOriginalDocumentIds:
-        mergedIds.length > MAX_DEDUP_IDS ? mergedIds.slice(-MAX_DEDUP_IDS) : mergedIds,
-    },
+    // Previous IDs come first, new IDs are appended — slice(-N) keeps the most recent ones.
+    const mergedIds = [...new Set([...previousOriginalDocumentIds, ...originalDocumentIds])];
+
+    return {
+      state: {
+        previousOriginalDocumentIds:
+          mergedIds.length > MAX_DEDUP_IDS ? mergedIds.slice(-MAX_DEDUP_IDS) : mergedIds,
+      },
+    };
   };
 }

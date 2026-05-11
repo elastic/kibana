@@ -371,7 +371,7 @@ export const streamEnrichmentMachine = setup({
         input: {
           steps: [],
           streamName: input.definition.stream.name,
-          streamType: streamType === 'query' ? 'unknown' : streamType,
+          streamType: streamType === 'query' || streamType === 'remote' ? 'unknown' : streamType,
         },
       }),
     };

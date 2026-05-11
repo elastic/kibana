@@ -15,7 +15,7 @@ import type {
   StorageClientSearchResponse,
 } from '@kbn/storage-adapter';
 import { deriveQueryType } from '@kbn/streams-schema/src/helpers/esql_helpers';
-import type { Streams } from '@kbn/streams-schema/src/models/streams';
+import { Streams } from '@kbn/streams-schema/src/models/streams';
 import {
   type QueryType,
   type StreamQuery,
@@ -1175,6 +1175,7 @@ export class QueryClient {
 
   private toCreateRuleParams(queryLink: QueryLink, definition: Streams.all.Definition) {
     const { rule_id: ruleId, query } = queryLink;
+    const useRemoteCluster = Streams.RemoteStream.Definition.is(definition) || undefined;
 
     return {
       data: {
@@ -1185,6 +1186,7 @@ export class QueryClient {
         params: {
           timestampField: '@timestamp',
           query: query.esql.query,
+          ...(useRemoteCluster ? { useRemoteCluster } : {}),
         },
         enabled: true,
         tags: ['streams', definition.name],
@@ -1200,6 +1202,7 @@ export class QueryClient {
 
   private toUpdateRuleParams(queryLink: QueryLink, definition: Streams.all.Definition) {
     const { rule_id: ruleId, query } = queryLink;
+    const useRemoteCluster = Streams.RemoteStream.Definition.is(definition) || undefined;
 
     return {
       id: ruleId,
@@ -1209,6 +1212,7 @@ export class QueryClient {
         params: {
           timestampField: '@timestamp',
           query: query.esql.query,
+          ...(useRemoteCluster ? { useRemoteCluster } : {}),
         },
         tags: ['streams', definition.name],
         schedule: {

@@ -8,6 +8,7 @@
 import { omit } from 'lodash';
 import { Streams } from '../models/streams';
 import { QueryStream } from '../models/query';
+import { RemoteStream } from '../models/remote';
 
 /**
  * Parses a stream upsert request and converts it into the corresponding stream definition.
@@ -55,6 +56,14 @@ export const convertUpsertRequestIntoDefinition = (
   }
 
   if (QueryStream.UpsertRequest.is(request)) {
+    return {
+      ...request.stream,
+      name,
+      updated_at: now,
+    };
+  }
+
+  if (RemoteStream.UpsertRequest.is(request)) {
     return {
       ...request.stream,
       name,
@@ -111,6 +120,15 @@ export const convertGetResponseIntoUpsertRequest = (
   }
 
   if (QueryStream.GetResponse.is(getResponse)) {
+    return {
+      dashboards: getResponse.dashboards,
+      queries: getResponse.queries,
+      rules: getResponse.rules,
+      stream: omit(getResponse.stream, ['name', 'updated_at']),
+    };
+  }
+
+  if (RemoteStream.GetResponse.is(getResponse)) {
     return {
       dashboards: getResponse.dashboards,
       queries: getResponse.queries,

@@ -77,10 +77,15 @@ const previewSignificantEventsRoute = createServerRoute({
     server,
     logger,
   }): Promise<SignificantEventsPreviewResponse> => {
-    const { streamsClient, scopedClusterClient, licensing, uiSettingsClient } =
-      await getScopedClients({
-        request,
-      });
+    const {
+      streamsClient,
+      scopedClusterClient,
+      licensing,
+      uiSettingsClient,
+      getDataClusterClientForStream,
+    } = await getScopedClients({
+      request,
+    });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
@@ -89,7 +94,8 @@ const previewSignificantEventsRoute = createServerRoute({
       query: { bucketSize, from, to },
     } = params;
 
-    await streamsClient.ensureStream(name);
+    const definition = await streamsClient.getStream(name);
+    const dataClusterClient = getDataClusterClientForStream(definition);
 
     return await previewSignificantEvents(
       {
@@ -99,7 +105,9 @@ const previewSignificantEventsRoute = createServerRoute({
         to,
       },
       {
-        scopedClusterClient,
+        esClient: dataClusterClient.isRemote
+          ? dataClusterClient.esClient
+          : scopedClusterClient.asCurrentUser,
         logger,
       }
     );
@@ -243,6 +251,7 @@ const generateSignificantEventsRoute = createServerRoute({
       getFeatureClient,
       getQueryClient,
       scopedClusterClient,
+      getDataClusterClientForStream,
     } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
@@ -254,20 +263,24 @@ const generateSignificantEventsRoute = createServerRoute({
       logger,
     });
 
+    const definition = await streamsClient.getStream(params.path.name);
+    const dataClusterClient = getDataClusterClientForStream(definition);
+
     const useMemory = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
     const memoryTools = useMemory
       ? createMemoryDiscoveryTools({
           memoryService: new MemoryServiceImpl({
             logger: logger.get('memory'),
-            esClient: scopedClusterClient.asCurrentUser,
+            esClient: dataClusterClient.isRemote
+              ? dataClusterClient.esClient
+              : scopedClusterClient.asCurrentUser,
           }),
         })
       : undefined;
 
-    const [connector, definition, { significantEventsPromptOverride }, featureClient, queryClient] =
+    const [connector, { significantEventsPromptOverride }, featureClient, queryClient] =
       await Promise.all([
         inferenceClient.getConnectorById(connectorId),
-        streamsClient.getStream(params.path.name),
         new PromptsConfigService({ soClient, logger }).getPrompt(),
         getFeatureClient(),
         getQueryClient(),
@@ -286,7 +299,7 @@ const generateSignificantEventsRoute = createServerRoute({
           queryClient,
           logger: logger.get('significant_events'),
           signal: getRequestAbortSignal(request),
-          esClient: scopedClusterClient.asCurrentUser,
+          esClient: dataClusterClient.esClient,
           memoryTools,
         }
       )

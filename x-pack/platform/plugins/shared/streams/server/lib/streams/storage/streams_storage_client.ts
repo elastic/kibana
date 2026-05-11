@@ -28,6 +28,7 @@ const streamsStorageSettings = {
       query: types.object({ enabled: false }),
       query_streams: types.object({ enabled: false }),
       field_descriptions: types.object({ enabled: false }),
+      remote_index_pattern: types.keyword(),
     },
   },
 } satisfies StorageSettings;

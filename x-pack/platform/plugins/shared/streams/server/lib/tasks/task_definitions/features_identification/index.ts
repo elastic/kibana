@@ -97,12 +97,12 @@ async function runFeaturesIdentification(
 
   const {
     taskClient,
-    scopedClusterClient,
     getFeatureClient,
     streamsClient,
     inferenceClient,
     soClient,
     tuningConfig,
+    getDataClusterClientForStream,
   } = await taskContext.getScopedClients({ request: fakeRequest });
 
   const taskLogger = taskContext.logger.get('features_identification', streamName);
@@ -129,7 +129,7 @@ async function runFeaturesIdentification(
 
     const streamType = getStreamTypeFromDefinition(stream);
     const boundInferenceClient = inferenceClient.bindTo({ connectorId });
-    const esClient = scopedClusterClient.asCurrentUser;
+    const { esClient } = getDataClusterClientForStream(stream);
 
     const trackFeaturesIdentified = (
       data: Parameters<typeof taskContext.telemetry.trackFeaturesIdentified>[0]

@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { BasicPrettyPrinter, Builder, Parser } from '@elastic/esql';
 import type { ESQLCommand } from '@elastic/esql/types';
 import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
@@ -176,12 +176,12 @@ export async function previewSignificantEvents(
     timestampField?: string;
   },
   dependencies: {
-    scopedClusterClient: IScopedClusterClient;
+    esClient: ElasticsearchClient;
     logger?: Logger;
   }
 ): Promise<SignificantEventsPreviewResponse> {
   const { esqlQuery, bucketSize, from, to, timestampField = '@timestamp' } = params;
-  const { scopedClusterClient, logger } = dependencies;
+  const { esClient, logger } = dependencies;
 
   const isStats = hasStatsCommand(esqlQuery);
   const resolvedBucketTarget = isStats ? extractBucketTargetField(esqlQuery) : null;
@@ -206,15 +206,12 @@ export async function previewSignificantEvents(
   };
 
   if (isStats) {
-    return previewStatsQuery(
-      { esqlQuery, filter, from, to, bucketSize },
-      { scopedClusterClient, logger }
-    );
+    return previewStatsQuery({ esqlQuery, filter, from, to, bucketSize }, { esClient, logger });
   }
 
   return previewMatchQuery(
     { esqlQuery, filter, from, to, bucketSize, timestampField: effectiveTimestampField },
-    { scopedClusterClient, logger }
+    { esClient, logger }
   );
 }
 
@@ -227,12 +224,12 @@ async function previewMatchQuery(
     bucketSize: string;
     timestampField?: string;
   },
-  deps: { scopedClusterClient: IScopedClusterClient; logger?: Logger }
+  deps: { esClient: ElasticsearchClient; logger?: Logger }
 ): Promise<SignificantEventsPreviewResponse> {
   const { esqlQuery, filter, from, to, bucketSize, timestampField } = params;
-  const { scopedClusterClient, logger } = deps;
+  const { esClient, logger } = deps;
 
-  const response = await scopedClusterClient.asCurrentUser.esql.query({
+  const response = await esClient.esql.query({
     query: buildHistogramQuery(esqlQuery, bucketSize, timestampField),
     filter,
     drop_null_columns: true,
@@ -305,17 +302,17 @@ async function previewStatsQuery(
     to: Date;
     bucketSize: string;
   },
-  deps: { scopedClusterClient: IScopedClusterClient; logger?: Logger }
+  deps: { esClient: ElasticsearchClient; logger?: Logger }
 ): Promise<SignificantEventsPreviewResponse> {
   const { esqlQuery, filter, from, to, bucketSize } = params;
-  const { scopedClusterClient, logger } = deps;
+  const { esClient, logger } = deps;
 
   const queryWithoutLimit = stripLimitCommand(esqlQuery);
   const composedQuery = `${queryWithoutLimit} | LIMIT ${PREVIEW_STATS_LIMIT}`;
 
   logger?.debug(`STATS preview executing composed query: ${composedQuery}`);
 
-  const response = await scopedClusterClient.asCurrentUser.esql.query({
+  const response = await esClient.esql.query({
     query: composedQuery,
     filter,
     drop_null_columns: true,

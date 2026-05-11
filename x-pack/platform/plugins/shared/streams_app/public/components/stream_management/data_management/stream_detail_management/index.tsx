@@ -10,6 +10,7 @@ import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { WiredStreamDetailManagement } from './wired';
 import { ClassicStreamDetailManagement } from './classic';
 import { QueryStreamDetailManagement } from './query';
+import { RemoteStreamDetailManagement } from './remote';
 
 export function StreamDetailManagement() {
   const { definition, refresh } = useStreamDetail();
@@ -20,6 +21,10 @@ export function StreamDetailManagement() {
 
   if (Streams.QueryStream.GetResponse.is(definition)) {
     return <QueryStreamDetailManagement definition={definition} refreshDefinition={refresh} />;
+  }
+
+  if (Streams.RemoteStream.GetResponse.is(definition)) {
+    return <RemoteStreamDetailManagement definition={definition} refreshDefinition={refresh} />;
   }
 
   return <ClassicStreamDetailManagement definition={definition} refreshDefinition={refresh} />;

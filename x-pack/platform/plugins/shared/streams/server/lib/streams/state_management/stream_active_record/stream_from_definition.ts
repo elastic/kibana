@@ -12,6 +12,7 @@ import { ClassicStream } from '../streams/classic_stream';
 import { DraftStream } from '../streams/draft_stream';
 import { WiredStream } from '../streams/wired_stream';
 import { QueryStream } from '../streams/query_stream';
+import { RemoteStream } from '../streams/remote_stream';
 
 // This should be the only thing that knows about the various stream types
 export function streamFromDefinition(
@@ -26,6 +27,8 @@ export function streamFromDefinition(
     return new ClassicStream(definition, dependencies);
   } else if (Streams.QueryStream.Definition.is(definition)) {
     return new QueryStream(definition, dependencies);
+  } else if (Streams.RemoteStream.Definition.is(definition)) {
+    return new RemoteStream(definition, dependencies);
   }
 
   throw new Error('Unsupported stream type');

@@ -7,7 +7,7 @@
 
 import { Streams } from '../models/streams';
 
-export type StreamType = 'wired' | 'classic' | 'query' | 'unknown';
+export type StreamType = 'wired' | 'classic' | 'query' | 'remote' | 'unknown';
 
 export function getStreamTypeFromDefinition(definition: Streams.all.Definition): StreamType {
   if (Streams.WiredStream.Definition.is(definition)) {
@@ -20,6 +20,10 @@ export function getStreamTypeFromDefinition(definition: Streams.all.Definition):
 
   if (Streams.QueryStream.Definition.is(definition)) {
     return 'query';
+  }
+
+  if (Streams.RemoteStream.Definition.is(definition)) {
+    return 'remote';
   }
 
   return 'unknown';

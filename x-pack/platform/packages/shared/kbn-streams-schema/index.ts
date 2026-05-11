@@ -22,6 +22,7 @@ export {
   ClassicIngestUpsertRequest,
 } from './src/models/ingest/classic';
 export { Query, QueryStream } from './src/models/query';
+export { RemoteStream } from './src/models/remote';
 export {
   ESQL_VIEW_PREFIX,
   getEsqlViewName,

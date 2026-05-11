@@ -84,6 +84,10 @@ export function StreamDetailContextProvider({
             return response;
           }
 
+          if (Streams.RemoteStream.GetResponse.is(response)) {
+            return response;
+          }
+
           throw new Error('Stream detail only supports Ingest and Query streams.');
         });
     },

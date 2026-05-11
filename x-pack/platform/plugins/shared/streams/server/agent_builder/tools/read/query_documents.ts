@@ -107,12 +107,16 @@ export const createQueryDocumentsTool = ({
   schema: queryDocumentsSchema,
   handler: async ({ name, query: nlQuery, source }, { request, modelProvider }) => {
     try {
-      const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
-      const esClient = scopedClusterClient.asCurrentUser;
-
-      const targetIndex = source === 'failures' ? `${name}${FAILURE_STORE_SELECTOR}` : name;
+      const { streamsClient, scopedClusterClient, getDataClusterClientForStream } =
+        await getScopedClients({ request });
 
       const definition = await streamsClient.getStream(name);
+      const dataClusterClient = getDataClusterClientForStream(definition);
+      const esClient = dataClusterClient.isRemote
+        ? dataClusterClient.esClient
+        : scopedClusterClient.asCurrentUser;
+
+      const targetIndex = source === 'failures' ? `${name}${FAILURE_STORE_SELECTOR}` : name;
       const definitionFieldTypes = getDefinitionFieldTypes(definition);
 
       const [fieldCapsResponse, sampleDocs, model] = await Promise.all([

@@ -170,8 +170,15 @@ export const editStreamRoute = createServerRoute({
     request,
     getScopedClients,
     context,
+    remoteEsClientService,
   }): Promise<UpsertStreamResponse> => {
     const { streamsClient } = await getScopedClients({ request });
+
+    if (Streams.RemoteStream.UpsertRequest.is(params.body) && !remoteEsClientService) {
+      throw badData(
+        'Cannot create a remote stream: xpack.streams.remoteEsCluster is not configured in kibana.yml.'
+      );
+    }
 
     // Replicated data streams are managed by the source cluster via CCR.
     // Only Kibana-side data (description, dashboards, queries) can be updated.

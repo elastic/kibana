@@ -15,16 +15,14 @@ import {
   STREAMS_PRODUCER,
   STREAMS_RULE_REGISTRATION_CONTEXT,
 } from '../../../../../common/constants';
-import { getRuleExecutor } from './executor';
+import { createRuleExecutor } from './executor';
 import type { EsqlRuleParams } from './types';
 import { esqlRuleParams } from './types';
+import type { RemoteEsClientService } from '../../../remote_cluster/remote_es_client_service';
 
-export function esqlRuleType(): PersistenceAlertType<
-  EsqlRuleParams,
-  RuleTypeState,
-  AlertInstanceContext,
-  'default'
-> {
+export function esqlRuleType(
+  remoteEsClientService?: RemoteEsClientService
+): PersistenceAlertType<EsqlRuleParams, RuleTypeState, AlertInstanceContext, 'default'> {
   return {
     id: STREAMS_ESQL_RULE_TYPE_ID,
     name: 'ES|QL Rule',
@@ -51,7 +49,7 @@ export function esqlRuleType(): PersistenceAlertType<
     solution: 'observability',
     isExportable: false,
     actionVariables: {},
-    executor: getRuleExecutor,
+    executor: createRuleExecutor(remoteEsClientService),
     autoRecoverAlerts: false,
     alerts: {
       context: STREAMS_RULE_REGISTRATION_CONTEXT,

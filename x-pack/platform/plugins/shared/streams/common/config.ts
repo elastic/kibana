@@ -23,6 +23,12 @@ export const configSchema = schema.object({
       taskTimeout: schema.duration({ defaultValue: '30s' }),
     }),
   }),
+  remoteEsCluster: schema.maybe(
+    schema.object({
+      host: schema.uri({ scheme: ['http', 'https'] }),
+      apiKey: schema.string(),
+    })
+  ),
 });
 
 export type StreamsConfig = TypeOf<typeof configSchema>;

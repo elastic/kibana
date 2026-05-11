@@ -19,9 +19,15 @@ export const esqlRuleInstanceState = z.object({
 export interface EsqlRuleParams extends RuleTypeParams {
   query: string;
   timestampField: string;
+  /**
+   * When true, the executor will use the remote ES cluster client configured
+   * via `xpack.streams.remoteEsCluster` instead of the default scoped client.
+   */
+  useRemoteCluster?: boolean;
 }
 
 export const esqlRuleParams = z.object({
   query: z.string(),
   timestampField: z.string(),
+  useRemoteCluster: z.boolean().optional(),
 }) satisfies z.Schema<EsqlRuleParams>;

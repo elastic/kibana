@@ -15,13 +15,15 @@ import {
 } from '../../../../common/constants';
 import type { StreamsPluginSetupDependencies } from '../../../types';
 import { esqlRuleType } from './esql/register';
+import type { RemoteEsClientService } from '../../remote_cluster/remote_es_client_service';
 
 interface Props {
   plugins: StreamsPluginSetupDependencies;
   logger: Logger;
+  remoteEsClientService?: RemoteEsClientService;
 }
 
-export function registerRules({ plugins, logger }: Props) {
+export function registerRules({ plugins, logger, remoteEsClientService }: Props) {
   const ruleDataClient = plugins.ruleRegistry.ruleDataService.initializeIndex({
     feature: STREAMS_FEATURE_ID,
     registrationContext: STREAMS_RULE_REGISTRATION_CONTEXT,
@@ -41,5 +43,5 @@ export function registerRules({ plugins, logger }: Props) {
     formatAlert: undefined,
   });
 
-  plugins.alerting.registerType(persistenceRuleTypeWrapper(esqlRuleType()));
+  plugins.alerting.registerType(persistenceRuleTypeWrapper(esqlRuleType(remoteEsClientService)));
 }

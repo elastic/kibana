@@ -13,6 +13,7 @@ import { IngestStream } from './ingest';
 import { ClassicStream as nClassicStream } from './ingest/classic';
 import { WiredStream as nWiredStream } from './ingest/wired';
 import { QueryStream as nQueryStream } from './query';
+import { RemoteStream as nRemoteStream } from './remote';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
@@ -22,30 +23,43 @@ export namespace Streams {
   export import WiredStream = nWiredStream;
   export import ClassicStream = nClassicStream;
   export import QueryStream = nQueryStream;
+  export import RemoteStream = nRemoteStream;
 
   export namespace all {
-    export type Model = ingest.all.Model | QueryStream.Model;
-    export type Source = ingest.all.Source | QueryStream.Source;
-    export type Definition = ingest.all.Definition | QueryStream.Definition;
-    export type GetResponse = ingest.all.GetResponse | QueryStream.GetResponse;
-    export type UpsertRequest = ingest.all.UpsertRequest | QueryStream.UpsertRequest;
+    export type Model = ingest.all.Model | QueryStream.Model | RemoteStream.Model;
+    export type Source = ingest.all.Source | QueryStream.Source | RemoteStream.Source;
+    export type Definition =
+      | ingest.all.Definition
+      | QueryStream.Definition
+      | RemoteStream.Definition;
+    export type GetResponse =
+      | ingest.all.GetResponse
+      | QueryStream.GetResponse
+      | RemoteStream.GetResponse;
+    export type UpsertRequest =
+      | ingest.all.UpsertRequest
+      | QueryStream.UpsertRequest
+      | RemoteStream.UpsertRequest;
   }
 
   const allDefinitionSchema = z.union([
     nWiredStream.Definition.right,
     nClassicStream.Definition.right,
     nQueryStream.Definition.right,
+    nRemoteStream.Definition.right,
   ]);
   const allSourceSchema = z.union([
     nWiredStream.Source.right,
     nClassicStream.Source.right,
     nQueryStream.Source.right,
+    nRemoteStream.Source.right,
   ]);
   const allGetResponseSchema = z
     .union([
       nWiredStream.GetResponse.right,
       nClassicStream.GetResponse.right,
       nQueryStream.GetResponse.right,
+      nRemoteStream.GetResponse.right,
     ])
     .meta({ id: 'StreamGetResponse' });
   const allUpsertRequestSchema = z
@@ -53,6 +67,7 @@ export namespace Streams {
       nWiredStream.UpsertRequest.right,
       nClassicStream.UpsertRequest.right,
       nQueryStream.UpsertRequest.right,
+      nRemoteStream.UpsertRequest.right,
     ])
     .meta({ id: 'StreamUpsertRequest' });
 
@@ -85,9 +100,10 @@ Streams.ingest = IngestStream;
 Streams.WiredStream = nWiredStream;
 Streams.ClassicStream = nClassicStream;
 Streams.QueryStream = nQueryStream;
+Streams.RemoteStream = nRemoteStream;
 
 /**
- * Union of all three stream definition schemas, discriminated by the `type`
+ * Union of all four stream definition schemas, discriminated by the `type`
  * literal field. Registered as a named OAS component (`StreamDefinition`) with
  * a `discriminator` extension so code generators can produce properly typed
  * sealed-class / tagged-union structs.
@@ -97,6 +113,7 @@ export const streamDefinitionSchema = z
     nWiredStream.Definition.right,
     nClassicStream.Definition.right,
     nQueryStream.Definition.right,
+    nRemoteStream.Definition.right,
   ])
   .meta({
     id: 'StreamDefinition',
@@ -107,6 +124,7 @@ export const streamDefinitionSchema = z
           wired: '#/components/schemas/WiredStreamDefinition',
           classic: '#/components/schemas/ClassicStreamDefinition',
           query: '#/components/schemas/QueryStreamDefinition',
+          remote: '#/components/schemas/RemoteStreamDefinition',
         },
       },
     },

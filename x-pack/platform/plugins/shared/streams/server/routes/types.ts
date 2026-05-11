@@ -14,6 +14,7 @@ import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository'
 import type { IUiSettingsClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
+import type { Streams } from '@kbn/streams-schema';
 import type { ContentClient } from '../lib/content/content_client';
 import type { AttachmentClient } from '../lib/streams/attachments/attachment_client';
 import type { QueryClient } from '../lib/streams/assets/query/query_client';
@@ -29,6 +30,8 @@ import type { InsightClient } from '../lib/sig_events/insights/client/insight_cl
 import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
 import type { ContinuousKiExtractionWorkflowService } from '../lib/workflows/continuous_extraction_workflow';
 import type { SigEventsTuningConfig } from '../../common/sig_events_tuning_config';
+import type { DataClusterClient } from '../lib/data_cluster_client';
+import type { RemoteEsClientService } from '../lib/remote_cluster/remote_es_client_service';
 
 export type GetScopedClients = (params: {
   request: KibanaRequest;
@@ -53,6 +56,8 @@ export interface RouteHandlerScopedClients {
   streamsSettingsStorageClient: StreamsSettingsStorageClient;
   isSecurityEnabled: boolean;
   tuningConfig: SigEventsTuningConfig;
+  /** Returns the appropriate cluster client for a given stream definition (local or remote). */
+  getDataClusterClientForStream: (definition: Streams.all.Definition) => DataClusterClient;
 }
 
 export interface RouteDependencies {
@@ -62,6 +67,7 @@ export interface RouteDependencies {
   processorSuggestions: ProcessorSuggestionsService;
   patternExtractionService: IPatternExtractionService;
   continuousKiExtractionWorkflowService?: ContinuousKiExtractionWorkflowService;
+  remoteEsClientService?: RemoteEsClientService;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;

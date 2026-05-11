@@ -16,6 +16,7 @@ import { WiredStream } from './models/ingest/wired';
 import { ClassicStream, ClassicIngest } from './models/ingest/classic';
 import { WiredIngest } from './models/ingest/wired';
 import { QueryStream } from './models/query';
+import { RemoteStream } from './models/remote';
 import { streamDefinitionSchema, Streams } from './models/streams';
 import {
   fieldDefinitionSchema,
@@ -45,6 +46,7 @@ export const streamsOasDefinitions = {
   WiredStreamDefinition: WiredStream.Definition.right,
   ClassicStreamDefinition: ClassicStream.Definition.right,
   QueryStreamDefinition: QueryStream.Definition.right,
+  RemoteStreamDefinition: RemoteStream.Definition.right,
 
   // Get response union and variants
   // .meta({ id }) applied at definition time in their respective files
@@ -52,6 +54,7 @@ export const streamsOasDefinitions = {
   WiredStreamGetResponse: WiredStream.GetResponse.right,
   ClassicStreamGetResponse: ClassicStream.GetResponse.right,
   QueryStreamGetResponse: QueryStream.GetResponse.right,
+  RemoteStreamGetResponse: RemoteStream.GetResponse.right,
 
   // Upsert request union and variants
   // .meta({ id }) applied at definition time in their respective files
@@ -59,6 +62,7 @@ export const streamsOasDefinitions = {
   WiredStreamUpsertRequest: WiredStream.UpsertRequest.right,
   ClassicStreamUpsertRequest: ClassicStream.UpsertRequest.right,
   QueryStreamUpsertRequest: QueryStream.UpsertRequest.right,
+  RemoteStreamUpsertRequest: RemoteStream.UpsertRequest.right,
 
   // Ingest configs
   WiredIngest: WiredIngest.right,

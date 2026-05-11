@@ -76,6 +76,7 @@ import {
   DiscoverBadgeButton,
   DraftStreamBadge,
   QueryStreamBadge,
+  RemoteStreamBadge,
 } from '../stream_badges';
 
 const datePickerStyle = css`
@@ -473,6 +474,7 @@ export function StreamsTreeTable({
                     (Streams.WiredStream.Definition.is(item.stream) &&
                       isDraftStream(item.stream))) && <TechnicalPreviewBadge />}
                   {Streams.QueryStream.Definition.is(item.stream) && <QueryStreamBadge />}
+                  {Streams.RemoteStream.Definition.is(item.stream) && <RemoteStreamBadge />}
                   {isDraftStream(item.stream) && <DraftStreamBadge />}
                   {item.stream.name === LOGS_ROOT_STREAM_NAME &&
                     !Streams.QueryStream.Definition.is(item.stream) && (
@@ -484,7 +486,8 @@ export function StreamsTreeTable({
                   {isRoot(item.stream.name) &&
                     item.stream.name !== LOGS_ROOT_STREAM_NAME &&
                     !item.data_stream &&
-                    !Streams.QueryStream.Definition.is(item.stream) && (
+                    !Streams.QueryStream.Definition.is(item.stream) &&
+                    !Streams.RemoteStream.Definition.is(item.stream) && (
                       <EuiToolTip
                         position="right"
                         content={i18n.translate(
@@ -624,6 +627,9 @@ export function StreamsTreeTable({
               !!item.data_stream || Streams.QueryStream.Definition.is(item.stream);
             if (Streams.QueryStream.Definition.is(item.stream)) {
               return <DiscoverBadgeButton hasDataStream={hasDataStream} stream={item.stream} />;
+            }
+            if (Streams.RemoteStream.Definition.is(item.stream)) {
+              return null;
             }
             return (
               <DiscoverBadgeButton

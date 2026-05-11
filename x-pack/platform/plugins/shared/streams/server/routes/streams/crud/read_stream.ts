@@ -69,6 +69,17 @@ export async function readStream({
     return query.query;
   });
 
+  if (Streams.RemoteStream.Definition.is(streamDefinition)) {
+    const remoteStreamResponse: Streams.RemoteStream.GetResponse = {
+      stream: streamDefinition,
+      dashboards,
+      rules,
+      queries,
+      inherited_fields: {},
+    };
+    return remoteStreamResponse;
+  }
+
   if (Streams.QueryStream.Definition.is(streamDefinition)) {
     // Fetch the actual ES|QL from the view (source of truth)
     const esqlView = await getEsqlView({
