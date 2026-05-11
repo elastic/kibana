@@ -231,6 +231,14 @@ export const allowedExperimentalValues = Object.freeze({
   pciComplianceAgentBuilder: true,
 
   /**
+   * Enables the Detection Emulation Agent Builder skill and the
+   * `runEmulationCommand` route's real-execution path. When `false`, the
+   * skill is not registered and the route returns 403 — there is no
+   * dry-run mode. Default off.
+   */
+  detectionEmulationRealExecution: false,
+
+  /**
    * Enables the new flyout using the EUI flyout system
    */
   newFlyoutSystemEnabled: false,

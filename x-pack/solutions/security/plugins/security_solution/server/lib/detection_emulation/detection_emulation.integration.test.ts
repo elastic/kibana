@@ -17,12 +17,7 @@ import {
   ALERT_EMULATION_ID,
   ALERT_EMULATION_MODE,
 } from './alert_tagging';
-import {
-  buildEmulationComment,
-  buildEmulationReason,
-  parseEmulationReason,
-  isEmulationReason,
-} from './execution/audit_logger';
+import { buildEmulationComment } from './execution/audit_logger';
 import {
   EmulationAllowlist,
   createDefaultAllowlistConfig,
@@ -71,13 +66,13 @@ describe('detection_emulation — alert tagging', () => {
     });
 
     expect(updated).toBe(2);
+    // The ES v8 client expects `query` / `script` at the top level — not nested
+    // under a legacy `body:` wrapper.
     expect(mockUpdateByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.objectContaining({
-          query: { ids: { values: ['alert-1', 'alert-2'] } },
-          script: expect.objectContaining({
-            params: { emulationId: 'emulation-abc', mode: 'test' },
-          }),
+        query: { ids: { values: ['alert-1', 'alert-2'] } },
+        script: expect.objectContaining({
+          params: { emulationId: 'emulation-abc', mode: 'test' },
         }),
       })
     );
@@ -98,16 +93,12 @@ describe('detection_emulation — alert tagging', () => {
     // updateByQuery is called only with the specified IDs — other alerts are not in the query.
     expect(mockUpdateByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.objectContaining({
-          query: { ids: { values: ['alert-a'] } },
-        }),
+        query: { ids: { values: ['alert-a'] } },
       })
     );
     expect(mockUpdateByQuery).not.toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.objectContaining({
-          query: { ids: { values: expect.arrayContaining(['alert-b', 'alert-c']) } },
-        }),
+        query: { ids: { values: expect.arrayContaining(['alert-b', 'alert-c']) } },
       })
     );
   });
@@ -136,20 +127,16 @@ describe('detection_emulation — alert tagging', () => {
     expect(mockUpdateByQuery).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        body: expect.objectContaining({
-          query: { ids: { values: ['run1-alert'] } },
-          script: expect.objectContaining({ params: { emulationId: 'run-1', mode: 'test' } }),
-        }),
+        query: { ids: { values: ['run1-alert'] } },
+        script: expect.objectContaining({ params: { emulationId: 'run-1', mode: 'test' } }),
       })
     );
     expect(mockUpdateByQuery).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        body: expect.objectContaining({
-          query: { ids: { values: ['run2-alert'] } },
-          script: expect.objectContaining({
-            params: { emulationId: 'run-2', mode: 'production' },
-          }),
+        query: { ids: { values: ['run2-alert'] } },
+        script: expect.objectContaining({
+          params: { emulationId: 'run-2', mode: 'production' },
         }),
       })
     );
@@ -206,26 +193,9 @@ describe('detection_emulation — alert tagging', () => {
   });
 });
 
-// ─── Audit logger round-trip (pure functions, no ES needed) ──────────────────
+// ─── Audit comment helper (pure function, no ES needed) ──────────────────────
 
-describe('detection_emulation — audit logger reason round-trip', () => {
-  it('parseEmulationReason recovers the emulationId built by buildEmulationReason', () => {
-    const emulationId = 'emulation-12345-abcde';
-    const reason = buildEmulationReason(emulationId);
-    expect(parseEmulationReason(reason)).toBe(emulationId);
-  });
-
-  it('isEmulationReason is true for reasons produced by buildEmulationReason', () => {
-    const reason = buildEmulationReason('emu-xyz');
-    expect(isEmulationReason(reason)).toBe(true);
-  });
-
-  it('isEmulationReason is false for unrelated reason strings', () => {
-    expect(isEmulationReason('user-initiated')).toBe(false);
-    expect(isEmulationReason('')).toBe(false);
-    expect(isEmulationReason('emulation')).toBe(false);
-  });
-
+describe('detection_emulation — audit comment', () => {
   it('buildEmulationComment embeds emulationId and command', () => {
     const comment = buildEmulationComment('emu-001', 'execute');
     expect(comment).toContain('emu-001');
@@ -237,8 +207,10 @@ describe('detection_emulation — audit logger reason round-trip', () => {
     expect(comment).toContain('analyst note');
   });
 
-  it('reason format is stable (prefix: emulation:<id>)', () => {
-    expect(buildEmulationReason('abc-123')).toBe('emulation:abc-123');
+  it('comment format is stable (prefix: Detection Emulation [<id>]:)', () => {
+    expect(buildEmulationComment('abc-123', 'isolate')).toBe(
+      'Detection Emulation [abc-123]: isolate'
+    );
   });
 });
 
@@ -257,8 +229,9 @@ describe('detection_emulation — guard chain (allowlist + rate limiter)', () =>
     const allowlistResult = allowlist.validate(['endpoint-1']);
     expect(allowlistResult.allowed).toBe(true);
 
-    const rateResult = rateLimiter.checkAndRecord('space-1', 'emu-1', 'execute');
+    const rateResult = rateLimiter.acquire('space-1', 'emu-1', 'execute');
     expect(rateResult.allowed).toBe(true);
+    expect(rateResult.token).toBeDefined();
   });
 
   it('blocks at the allowlist before consulting the rate limiter', () => {
@@ -283,14 +256,14 @@ describe('detection_emulation — guard chain (allowlist + rate limiter)', () =>
       makeLogger()
     );
 
-    // Exhaust the rate limit.
-    rateLimiter.record('space-1', 'emu-A', 'execute');
-    rateLimiter.record('space-1', 'emu-A', 'kill-process');
+    // Exhaust the rate limit via two successful acquires.
+    expect(rateLimiter.acquire('space-1', 'emu-A', 'execute').allowed).toBe(true);
+    expect(rateLimiter.acquire('space-1', 'emu-A', 'kill-process').allowed).toBe(true);
 
     const allowlistResult = allowlist.validate(['endpoint-1']);
     expect(allowlistResult.allowed).toBe(true);
 
-    const rateResult = rateLimiter.check('space-1');
+    const rateResult = rateLimiter.acquire('space-1', 'emu-A', 'isolate');
     expect(rateResult.allowed).toBe(false);
     expect(rateResult.currentCount).toBe(2);
     expect(rateResult.maxCommands).toBe(2);
@@ -302,24 +275,27 @@ describe('detection_emulation — guard chain (allowlist + rate limiter)', () =>
       makeLogger()
     );
 
-    rateLimiter.record('space-A', 'emu-1', 'execute');
+    expect(rateLimiter.acquire('space-A', 'emu-1', 'execute').allowed).toBe(true);
 
     // space-A is now at the limit.
-    expect(rateLimiter.check('space-A').allowed).toBe(false);
+    expect(rateLimiter.acquire('space-A', 'emu-1', 'execute').allowed).toBe(false);
     // space-B is unaffected.
-    expect(rateLimiter.check('space-B').allowed).toBe(true);
+    expect(rateLimiter.acquire('space-B', 'emu-1', 'execute').allowed).toBe(true);
   });
 
-  it('allowlist.addEndpoint unblocks a previously blocked endpoint', () => {
-    const allowlist = new EmulationAllowlist(
-      createRestrictiveAllowlistConfig(['endpoint-original']),
+  it('release() rolls back a successful acquire so the slot can be reused', () => {
+    const rateLimiter = new EmulationRateLimiter(
+      { maxCommands: 1, windowMs: 60_000, disabled: false },
       makeLogger()
     );
 
-    expect(allowlist.validate(['endpoint-new']).allowed).toBe(false);
-
-    allowlist.addEndpoint('endpoint-new');
-    expect(allowlist.validate(['endpoint-new']).allowed).toBe(true);
+    const first = rateLimiter.acquire('space-1', 'emu-1', 'isolate');
+    expect(first.allowed).toBe(true);
+    // Limit hit.
+    expect(rateLimiter.acquire('space-1', 'emu-1', 'isolate').allowed).toBe(false);
+    // Roll back; subsequent acquire should succeed.
+    rateLimiter.release(first.token);
+    expect(rateLimiter.acquire('space-1', 'emu-1', 'isolate').allowed).toBe(true);
   });
 
   it('a command passing all guards leaves rate limiter count incremented', () => {
@@ -332,23 +308,21 @@ describe('detection_emulation — guard chain (allowlist + rate limiter)', () =>
 
     // Simulate the route handler gate sequence.
     expect(allowlist.validate(['ep-1']).allowed).toBe(true);
-    const rateResult = rateLimiter.checkAndRecord(spaceId, 'emu-1', 'scan');
+    const rateResult = rateLimiter.acquire(spaceId, 'emu-1', 'scan');
     expect(rateResult.allowed).toBe(true);
 
     expect(rateLimiter.getCurrentCount(spaceId)).toBe(1);
   });
 
-  it('disabled rate limiter always allows regardless of recorded commands', () => {
+  it('disabled rate limiter always allows regardless of how many commands fired', () => {
     const rateLimiter = new EmulationRateLimiter(
       { maxCommands: 1, windowMs: 60_000, disabled: true },
       makeLogger()
     );
 
-    rateLimiter.record('space-1', 'emu-1', 'execute');
-    rateLimiter.record('space-1', 'emu-1', 'execute');
-    rateLimiter.record('space-1', 'emu-1', 'execute');
-
-    expect(rateLimiter.check('space-1').allowed).toBe(true);
+    expect(rateLimiter.acquire('space-1', 'emu-1', 'execute').allowed).toBe(true);
+    expect(rateLimiter.acquire('space-1', 'emu-1', 'execute').allowed).toBe(true);
+    expect(rateLimiter.acquire('space-1', 'emu-1', 'execute').allowed).toBe(true);
   });
 });
 

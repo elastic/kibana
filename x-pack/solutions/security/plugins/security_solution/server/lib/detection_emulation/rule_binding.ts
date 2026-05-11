@@ -6,7 +6,11 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import {
+  SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
+  type SavedObjectsModelVersionMap,
+} from '@kbn/core-saved-objects-server';
+import { schema } from '@kbn/config-schema';
 
 /**
  * Saved object type name for emulation-to-rule bindings.
@@ -135,10 +139,60 @@ export const emulationRuleBindingTypeMappings: SavedObjectsType['mappings'] = {
  * });
  * ```
  */
-export const emulationRuleBindingType: SavedObjectsType = {
+/**
+ * Initial model version for the saved object. Adding a baseline `1` model
+ * version here is what unlocks future schema migrations: any subsequent
+ * change to attributes / mappings has to bump to version 2 with an explicit
+ * forward + backward transformation. Without this baseline the SO type is
+ * pinned to legacy migrations and cannot evolve safely.
+ */
+const modelVersions: SavedObjectsModelVersionMap = {
+  '1': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: schema.object(
+        {
+          emulationId: schema.string(),
+          ruleId: schema.string(),
+          ruleName: schema.maybe(schema.string()),
+          createdAt: schema.string(),
+          metadata: schema.maybe(
+            schema.object(
+              {
+                mode: schema.maybe(schema.string()),
+                tags: schema.maybe(schema.arrayOf(schema.string())),
+              },
+              { unknowns: 'ignore' }
+            )
+          ),
+        },
+        { unknowns: 'ignore' }
+      ),
+      create: schema.object({
+        emulationId: schema.string(),
+        ruleId: schema.string(),
+        ruleName: schema.maybe(schema.string()),
+        createdAt: schema.string(),
+        metadata: schema.maybe(
+          schema.object({
+            mode: schema.maybe(schema.string()),
+            tags: schema.maybe(schema.arrayOf(schema.string())),
+          })
+        ),
+      }),
+    },
+  },
+};
+
+export const emulationRuleBindingType: SavedObjectsType<EmulationRuleBindingAttributes> = {
   name: emulationRuleBindingTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
-  hidden: false,
+  // hidden:true keeps the SO out of the generic SO HTTP API surface — callers
+  // must go through the security_solution plugin. Combined with
+  // hiddenFromHttpApis it removes the entire CRUD-via-HTTP attack surface.
+  hidden: true,
+  hiddenFromHttpApis: true,
   namespaceType: 'multiple-isolated',
   mappings: emulationRuleBindingTypeMappings,
+  modelVersions,
 };

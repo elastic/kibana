@@ -137,19 +137,30 @@ describe('Security Skills', () => {
       expect(skill.description.length).toBeLessThanOrEqual(1024);
     });
 
-    it('has one inline tool (run-command)', () => {
+    it('has one inline tool (run-command)', async () => {
       const skill = getDetectionEmulationSkill(createDetectionEmulationCtx());
-      const tools = skill.getInlineTools!();
+      // getInlineTools may return a Promise<Tool[]> or a Tool[]; await covers both.
+      const tools = await skill.getInlineTools!();
       expect(tools).toHaveLength(1);
       expect((tools[0] as { id: string }).id).toBe('security.detection-emulation.run-command');
     });
 
-    it('content mentions all four supported EDR agent types', () => {
+    it('content describes the only currently-wired agent type (endpoint) and explicitly notes the other three as not-yet-supported', () => {
       const skill = getDetectionEmulationSkill(createDetectionEmulationCtx());
       expect(skill.content).toContain('endpoint');
+      // The doc is honest about scope: it must list the unsupported types in
+      // the "Things this skill does NOT do (yet)" section so the LLM does not
+      // try to dispatch against them.
       expect(skill.content).toContain('sentinel_one');
       expect(skill.content).toContain('crowdstrike');
       expect(skill.content).toContain('microsoft_defender_endpoint');
+      // And the description must say the same so it surfaces in skill catalogs.
+      expect(skill.description).toContain('endpoint');
+    });
+
+    it('description references the experimental feature flag', () => {
+      const skill = getDetectionEmulationSkill(createDetectionEmulationCtx());
+      expect(skill.description).toContain('detectionEmulationRealExecution');
     });
   });
 

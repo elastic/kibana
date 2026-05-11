@@ -72,12 +72,17 @@ export const registerSkills = async ({
     agentBuilder.skills.register(pciComplianceSkill);
   }
 
-  agentBuilder.skills.register(
-    getDetectionEmulationSkill({
-      core,
-      endpointService: options.endpointAppContextService,
-      config,
-      logger,
-    })
-  );
+  // The detection-emulation skill is destructive (it dispatches Response Actions
+  // against real endpoints). Keep it gated behind the experimental flag so it
+  // never reaches the agent-builder catalog in builds that haven't opted in.
+  if (experimentalFeatures.detectionEmulationRealExecution) {
+    agentBuilder.skills.register(
+      getDetectionEmulationSkill({
+        core,
+        endpointService: options.endpointAppContextService,
+        config,
+        logger,
+      })
+    );
+  }
 };

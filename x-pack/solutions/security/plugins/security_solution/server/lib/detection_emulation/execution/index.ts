@@ -9,3 +9,4 @@ export * from './runner';
 export * from './allowlist';
 export * from './rate_limiter';
 export * from './audit_logger';
+export * from './idempotency_cache';

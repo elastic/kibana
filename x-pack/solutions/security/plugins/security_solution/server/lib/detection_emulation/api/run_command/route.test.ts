@@ -18,8 +18,62 @@ import { EmulationAllowlist, createRestrictiveAllowlistConfig } from '../../exec
 import { EmulationRateLimiter } from '../../execution/rate_limiter';
 
 const FEATURE_ENABLED_CONFIG = {
-  detectionEmulation: { realExecution: true, logInjection: false },
+  experimentalFeatures: { detectionEmulationRealExecution: true },
 } as unknown as ConfigType;
+
+const FEATURE_DISABLED_CONFIG = {
+  experimentalFeatures: { detectionEmulationRealExecution: false },
+} as unknown as ConfigType;
+
+/**
+ * The route's N5 gate (added with this PR) refuses to dispatch when no
+ * authenticated user is present. The default `requestContextMock` does
+ * not stub `getCurrentUser`, so tests targeting later gates (RBAC,
+ * allowlist, rate limiter) must opt in to an authenticated identity to
+ * skip past N5. Any test that wants to exercise N5 itself just *omits*
+ * this call (or overrides it explicitly).
+ */
+const stubAuthenticatedUser = (
+  context: ReturnType<typeof requestContextMock.createTools>['context'],
+  username = 'test-user'
+) => {
+  (context.core.security.authc.getCurrentUser as jest.Mock).mockReturnValue({ username });
+};
+
+// ─── Feature-flag gate ────────────────────────────────────────────────────────
+
+describe('runEmulationCommandRoute — feature-flag gate', () => {
+  let server: ReturnType<typeof serverMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    server = serverMock.create();
+  });
+
+  it('returns 403 when realExecution is disabled', async () => {
+    runEmulationCommandRoute(server.router, FEATURE_DISABLED_CONFIG, logger);
+    const { context } = requestContextMock.createTools();
+    context.securitySolution.getEndpointAuthz.mockResolvedValue(getEndpointAuthzInitialStateMock());
+
+    const response = await server.inject(
+      requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_EMULATION_RUN_COMMAND_URL,
+        body: {
+          emulationId: 'emu-flag-test',
+          agentType: 'endpoint',
+          endpointIds: ['agent-1'],
+          command: 'isolate',
+        },
+      }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toBe(403);
+    expect(response.body).toMatchObject({ status_code: 403 });
+  });
+});
 
 // ─── RBAC gate negative tests ─────────────────────────────────────────────────
 
@@ -33,16 +87,27 @@ describe('runEmulationCommandRoute — RBAC gate', () => {
     runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger);
   });
 
-  it.each<[string, string, Partial<EndpointAuthz>]>([
-    ['execute', 'canWriteExecuteOperations', { canWriteExecuteOperations: false }],
-    ['isolate', 'canIsolateHost', { canIsolateHost: false }],
-    ['runscript', 'canWriteExecuteOperations', { canWriteExecuteOperations: false }],
-    ['scan', 'canWriteScanOperations', { canWriteScanOperations: false }],
-    ['get-file', 'canWriteFileOperations', { canWriteFileOperations: false }],
+  it.each<[string, string, Partial<EndpointAuthz>, Record<string, unknown>?]>([
+    [
+      'execute',
+      'canWriteExecuteOperations',
+      { canWriteExecuteOperations: false },
+      { command: 'whoami' },
+    ],
+    ['isolate', 'canIsolateHost', { canIsolateHost: false }, undefined],
+    [
+      'runscript',
+      'canWriteExecuteOperations',
+      { canWriteExecuteOperations: false },
+      { scriptId: 'echo-hi' },
+    ],
+    ['scan', 'canWriteScanOperations', { canWriteScanOperations: false }, { path: '/tmp' }],
+    ['get-file', 'canWriteFileOperations', { canWriteFileOperations: false }, { path: '/tmp' }],
   ])(
     'returns 403 when command [%s] is blocked because caller lacks [%s]',
-    async (command, expectedAuthzKey, authzOverride) => {
+    async (command, expectedAuthzKey, authzOverride, parameters) => {
       const { context } = requestContextMock.createTools();
+      stubAuthenticatedUser(context);
       context.securitySolution.getEndpointAuthz.mockResolvedValue(
         getEndpointAuthzInitialStateMock(authzOverride)
       );
@@ -55,6 +120,7 @@ describe('runEmulationCommandRoute — RBAC gate', () => {
           agentType: 'endpoint',
           endpointIds: ['agent-1'],
           command,
+          ...(parameters ? { parameters } : {}),
         },
       });
 
@@ -67,6 +133,7 @@ describe('runEmulationCommandRoute — RBAC gate', () => {
 
   it('includes the missing privilege name in the 403 response body', async () => {
     const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
     context.securitySolution.getEndpointAuthz.mockResolvedValue(
       getEndpointAuthzInitialStateMock({ canWriteExecuteOperations: false })
     );
@@ -79,6 +146,7 @@ describe('runEmulationCommandRoute — RBAC gate', () => {
         agentType: 'endpoint',
         endpointIds: ['agent-1'],
         command: 'execute',
+        parameters: { command: 'whoami' },
       },
     });
 
@@ -93,6 +161,7 @@ describe('runEmulationCommandRoute — RBAC gate', () => {
 
   it('logs a warning that names the missing privilege when the RBAC gate blocks', async () => {
     const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
     context.securitySolution.getEndpointAuthz.mockResolvedValue(
       getEndpointAuthzInitialStateMock({ canWriteExecuteOperations: false })
     );
@@ -105,6 +174,7 @@ describe('runEmulationCommandRoute — RBAC gate', () => {
         agentType: 'endpoint',
         endpointIds: ['agent-1'],
         command: 'execute',
+        parameters: { command: 'whoami' },
       },
     });
 
@@ -145,6 +215,7 @@ describe('runEmulationCommandRoute — allowlist gate', () => {
     runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { allowlist });
 
     const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
     context.securitySolution.getEndpointAuthz.mockResolvedValue(getEndpointAuthzInitialStateMock());
 
     const response = await server.inject(
@@ -166,6 +237,7 @@ describe('runEmulationCommandRoute — allowlist gate', () => {
     runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { allowlist });
 
     const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
     context.securitySolution.getEndpointAuthz.mockResolvedValue(getEndpointAuthzInitialStateMock());
 
     const response = await server.inject(
@@ -187,6 +259,7 @@ describe('runEmulationCommandRoute — allowlist gate', () => {
     runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { allowlist });
 
     const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
     context.securitySolution.getEndpointAuthz.mockResolvedValue(getEndpointAuthzInitialStateMock());
 
     await server.inject(
@@ -216,8 +289,8 @@ describe('runEmulationCommandRoute — rate limiter gate', () => {
       },
     });
 
-  // maxCommands: 0 immediately exhausts the limit regardless of spaceId —
-  // 0 >= 0 is always true so check() always returns { allowed: false }.
+  // maxCommands: 0 immediately exhausts the limit regardless of spaceId — 0 >= 0 is
+  // always true, so acquire() always returns { allowed: false }.
   const makeExhaustedRateLimiter = () =>
     new EmulationRateLimiter({ maxCommands: 0, windowMs: 60_000, disabled: false }, logger);
 
@@ -231,6 +304,7 @@ describe('runEmulationCommandRoute — rate limiter gate', () => {
     runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { rateLimiter });
 
     const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
     context.securitySolution.getEndpointAuthz.mockResolvedValue(getEndpointAuthzInitialStateMock());
 
     const response = await server.inject(
@@ -246,6 +320,7 @@ describe('runEmulationCommandRoute — rate limiter gate', () => {
     runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { rateLimiter });
 
     const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
     context.securitySolution.getEndpointAuthz.mockResolvedValue(getEndpointAuthzInitialStateMock());
 
     const response = await server.inject(
@@ -265,10 +340,48 @@ describe('runEmulationCommandRoute — rate limiter gate', () => {
     runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger, { rateLimiter });
 
     const { context } = requestContextMock.createTools();
+    stubAuthenticatedUser(context);
     context.securitySolution.getEndpointAuthz.mockResolvedValue(getEndpointAuthzInitialStateMock());
 
     await server.inject(buildIsolateRequest(), requestContextMock.convertContext(context));
 
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('rate limiter'));
+  });
+});
+
+// ─── N5: missing user gate ────────────────────────────────────────────────────
+
+describe('runEmulationCommandRoute — missing user gate', () => {
+  let server: ReturnType<typeof serverMock.create>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    server = serverMock.create();
+    runEmulationCommandRoute(server.router, FEATURE_ENABLED_CONFIG, logger);
+  });
+
+  it('returns 401 when no current user is available (does not fall back to "unknown")', async () => {
+    const { context } = requestContextMock.createTools();
+    context.securitySolution.getEndpointAuthz.mockResolvedValue(getEndpointAuthzInitialStateMock());
+    // Force getCurrentUser to return null — destructive emulation actions must not
+    // proceed under an unauthenticated identity.
+    (context.core.security.authc.getCurrentUser as jest.Mock).mockReturnValue(null);
+
+    const response = await server.inject(
+      requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_EMULATION_RUN_COMMAND_URL,
+        body: {
+          emulationId: 'emu-no-user',
+          agentType: 'endpoint',
+          endpointIds: ['agent-1'],
+          command: 'isolate',
+        },
+      }),
+      requestContextMock.convertContext(context)
+    );
+
+    expect(response.status).toBe(401);
   });
 });

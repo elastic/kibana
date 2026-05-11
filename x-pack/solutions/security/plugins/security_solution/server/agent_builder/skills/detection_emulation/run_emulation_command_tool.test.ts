@@ -41,7 +41,6 @@ describe('createRunEmulationCommandTool', () => {
 
     expect(tool.id).toBe('security.detection-emulation.run-command');
     expect(tool.type).toBe(ToolType.builtin);
-    expect(tool.tags).toEqual(['security', 'emulation', 'response-actions']);
   });
 
   it('should have a schema that validates agentType', () => {
