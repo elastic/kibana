@@ -16,6 +16,10 @@ import {
   buildFlyoutContent,
   buildFlyoutTitleFromField,
 } from '../../flyout_v2/shared/utils/flyout_field_resolver';
+import {
+  buildToolSessionTitle,
+  getDocumentTitle,
+} from '../../flyout_v2/document/utils/get_header_title';
 import { DataViewManagerBootstrap } from '../alert_flyout_overview_tab_component/data_view_manager_bootstrap';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
@@ -43,6 +47,8 @@ export const IpCellRenderer = React.memo<IpCellRendererProps>(({ services, store
     return [];
   }, [rawValue]);
 
+  const docTitle = useMemo(() => getDocumentTitle(props.row), [props.row]);
+
   const handleClick = useCallback(
     (ip: string) => {
       const flyoutContent = buildFlyoutContent(props.columnId, ip);
@@ -63,12 +69,12 @@ export const IpCellRenderer = React.memo<IpCellRendererProps>(({ services, store
           {
             ...defaultDocumentFlyoutProperties,
             session: 'start',
-            title: ipTitle,
+            title: buildToolSessionTitle(ipTitle, docTitle),
           }
         );
       }
     },
-    [defaultDocumentFlyoutProperties, overlays, services, store, history, props.columnId]
+    [defaultDocumentFlyoutProperties, docTitle, overlays, services, store, history, props.columnId]
   );
 
   if (addresses.length === 0) {

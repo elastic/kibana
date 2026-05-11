@@ -17,6 +17,10 @@ import {
   buildFlyoutContent,
   buildFlyoutTitleFromField,
 } from '../../flyout_v2/shared/utils/flyout_field_resolver';
+import {
+  buildToolSessionTitle,
+  getDocumentTitle,
+} from '../../flyout_v2/document/utils/get_header_title';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 
@@ -54,6 +58,8 @@ export const RuleNameCellRenderer = React.memo<RuleNameCellRendererProps>(
       [props.columnId, ruleId]
     );
 
+    const docTitle = useMemo(() => getDocumentTitle(props.row), [props.row]);
+
     const handleClick = useCallback(() => {
       if (!flyoutContent) return;
       const ruleTitle = buildFlyoutTitleFromField(props.columnId, ruleName ?? '');
@@ -67,11 +73,12 @@ export const RuleNameCellRenderer = React.memo<RuleNameCellRendererProps>(
         {
           ...defaultDocumentFlyoutProperties,
           session: 'start',
-          title: ruleTitle,
+          title: buildToolSessionTitle(ruleTitle, docTitle),
         }
       );
     }, [
       defaultDocumentFlyoutProperties,
+      docTitle,
       flyoutContent,
       history,
       overlays,

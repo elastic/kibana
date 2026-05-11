@@ -37,6 +37,7 @@ import {
   PREVALENCE_TITLE,
   THREAT_INTELLIGENCE_TITLE,
 } from '../../shared/constants/flyout_titles';
+import { buildToolSessionTitle, getDocumentTitle } from '../utils/get_header_title';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
 
@@ -105,7 +106,7 @@ export const InsightsSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
-          title: THREAT_INTELLIGENCE_TITLE,
+          title: buildToolSessionTitle(THREAT_INTELLIGENCE_TITLE, getDocumentTitle(hit)),
         }
       );
     }, [history, historyKey, hit, overlays, services, store]);
@@ -130,7 +131,7 @@ export const InsightsSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
-          title: CORRELATIONS_TITLE,
+          title: buildToolSessionTitle(CORRELATIONS_TITLE, getDocumentTitle(hit)),
         }
       );
     }, [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]);
@@ -154,7 +155,7 @@ export const InsightsSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
-          title: PREVALENCE_TITLE,
+          title: buildToolSessionTitle(PREVALENCE_TITLE, getDocumentTitle(hit)),
         }
       );
     }, [

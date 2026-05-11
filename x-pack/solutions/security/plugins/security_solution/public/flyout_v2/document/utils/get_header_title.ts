@@ -20,6 +20,13 @@ import { DEFAULT_DOCUMENT_TITLE } from '../../shared/constants/flyout_titles';
 export const formatFlyoutTitle = (canonicalName: string, value?: string | null): string =>
   value ? `${canonicalName} - ${value}` : canonicalName;
 
+/**
+ * Formats a tool flyout session title as "{toolName} ({docTitle})", giving the tool
+ * history entry context about the parent document it was launched from.
+ */
+export const buildToolSessionTitle = (toolName: string, docTitle: string): string =>
+  `${toolName} (${docTitle})`;
+
 const DEFAULT_EVENT_TITLE = i18n.translate(
   'xpack.securitySolution.flyout.document.title.eventTitle',
   {
