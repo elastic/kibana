@@ -81,11 +81,7 @@ export const HorizontalMinimalStepper: React.FC<HorizontalMinimalStepperProps> =
 
       {/* N / N counter */}
       <EuiFlexItem grow={false}>
-        <EuiText
-          size="xs"
-          color="subdued"
-          aria-label={`Step ${displayIndex + 1} of ${total}`}
-        >
+        <EuiText size="xs" color="subdued" aria-label={`Step ${displayIndex + 1} of ${total}`}>
           {displayIndex + 1} / {total}
         </EuiText>
       </EuiFlexItem>

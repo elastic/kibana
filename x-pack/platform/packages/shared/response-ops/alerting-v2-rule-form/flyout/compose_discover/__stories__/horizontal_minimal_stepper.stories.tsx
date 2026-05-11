@@ -30,7 +30,12 @@ const makeSteps = (titles: string[], currentIndex: number): MinimalStep[] =>
     status: i < currentIndex ? 'complete' : i === currentIndex ? 'current' : 'incomplete',
   }));
 
-const RULE_STEPS = ['Alert Condition', 'Recovery Condition', 'Details & Artifacts', 'Notifications'];
+const RULE_STEPS = [
+  'Alert Condition',
+  'Recovery Condition',
+  'Details & Artifacts',
+  'Notifications',
+];
 const RULE_STEPS_SHORT = ['Alert Condition', 'Details & Artifacts', 'Notifications'];
 
 // ---------------------------------------------------------------------------
@@ -104,12 +109,21 @@ export const ThreeSteps: Story = {
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" disabled={currentStep === 0} onClick={() => setCurrentStep((s) => s - 1)}>
+            <EuiButton
+              size="s"
+              disabled={currentStep === 0}
+              onClick={() => setCurrentStep((s) => s - 1)}
+            >
               ← Back
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" fill disabled={currentStep === RULE_STEPS_SHORT.length - 1} onClick={() => setCurrentStep((s) => s + 1)}>
+            <EuiButton
+              size="s"
+              fill
+              disabled={currentStep === RULE_STEPS_SHORT.length - 1}
+              onClick={() => setCurrentStep((s) => s + 1)}
+            >
               Next →
             </EuiButton>
           </EuiFlexItem>
@@ -123,4 +137,3 @@ export const ThreeSteps: Story = {
     );
   },
 };
-

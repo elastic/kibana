@@ -19,10 +19,7 @@ export const useHorizontalMinimalStepperStyles = ({ euiTheme }: UseEuiTheme) => 
     height: ${DOT_SIZE}px;
     flex-shrink: 0;
     ${euiCanAnimate} {
-      transition:
-        width 220ms ${SPRING},
-        border-radius 220ms ${SPRING},
-        background-color 150ms ease;
+      transition: width 220ms ${SPRING}, border-radius 220ms ${SPRING}, background-color 150ms ease;
     }
   `;
 
