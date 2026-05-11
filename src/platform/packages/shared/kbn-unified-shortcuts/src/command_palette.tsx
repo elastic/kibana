@@ -19,68 +19,20 @@ import {
   EuiSelectable,
   EuiSpacer,
   EuiText,
-  type EuiSelectableOption,
   type EuiSelectableProps,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { distance } from 'fastest-levenshtein';
 import useUnmount from 'react-use/lib/useUnmount';
+import {
+  commandPaletteOptionMatcher,
+  type CommandPaletteOption,
+} from './command_palette_fuzzy_search';
 import { consumeKeyboardEvent, isPrimaryModifierOnly } from './shortcut_utils';
 import { useShortcutsContext } from './shortcuts_provider';
 
-type CommandPaletteOption = EuiSelectableOption<{
-  keywords: string[];
-  shortcutLabel: string;
-  run: () => void;
-}>;
-
 const COMMAND_PALETTE_TRIGGER_CODE = 'Period';
-const MIN_FUZZY_TOKEN_LENGTH = 3;
-const MAX_FUZZY_DISTANCE = 1;
-
-const tokenize = (value: string) => {
-  return value
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter(Boolean);
-};
-
-const matchesToken = (candidate: string, searchToken: string) => {
-  if (candidate.includes(searchToken)) {
-    return true;
-  }
-
-  if (
-    searchToken.length < MIN_FUZZY_TOKEN_LENGTH ||
-    Math.abs(candidate.length - searchToken.length) > 1
-  ) {
-    return false;
-  }
-
-  return distance(candidate, searchToken) <= MAX_FUZZY_DISTANCE;
-};
-
-const optionMatcher: NonNullable<EuiSelectableProps<CommandPaletteOption>['optionMatcher']> = ({
-  option,
-  normalizedSearchValue,
-}) => {
-  const searchTokens = tokenize(normalizedSearchValue ?? '');
-
-  if (searchTokens.length === 0) {
-    return true;
-  }
-
-  const candidates = [option.label, ...(option.keywords ?? [])];
-  const candidateTokens = candidates.flatMap(tokenize);
-
-  return searchTokens.every(
-    (searchToken) =>
-      candidates.some((candidate) => candidate.toLowerCase().includes(searchToken)) ||
-      candidateTokens.some((candidateToken) => matchesToken(candidateToken, searchToken))
-  );
-};
 
 const renderOption: NonNullable<EuiSelectableProps<CommandPaletteOption>['renderOption']> = (
   option
@@ -206,7 +158,7 @@ export const CommandPalette = () => {
                 height={320}
                 options={options}
                 onChange={onChange}
-                optionMatcher={optionMatcher}
+                optionMatcher={commandPaletteOptionMatcher}
                 renderOption={renderOption}
                 data-test-subj="shortcutsCommandPalette"
                 listProps={{
