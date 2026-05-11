@@ -8,7 +8,7 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import { METRICS_INFO_EVENT_TYPE } from './constants';
+import { METRICS_INFO_ERROR_EVENT_TYPE, METRICS_INFO_EVENT_TYPE } from './constants';
 
 export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
   analytics.registerEventType({
@@ -58,6 +58,34 @@ export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
               description: 'Count of METRICS_INFO rows where metric_type had more than one value',
             },
           },
+        },
+      },
+    },
+  });
+
+  analytics.registerEventType({
+    eventType: METRICS_INFO_ERROR_EVENT_TYPE,
+    schema: {
+      error_name: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'JavaScript error name surfaced by the METRICS_INFO fetch (e.g. EsqlResponseError, Error, UnknownError).',
+        },
+      },
+      status: {
+        type: 'integer',
+        _meta: {
+          description: 'HTTP-ish status code carried by the response error, when available.',
+          optional: true,
+        },
+      },
+      es_error_type: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Elasticsearch error type from the response body (e.g. verification_exception), when available.',
+          optional: true,
         },
       },
     },

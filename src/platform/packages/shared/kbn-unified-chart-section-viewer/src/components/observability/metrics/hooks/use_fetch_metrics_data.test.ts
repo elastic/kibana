@@ -16,6 +16,7 @@ const mockTrackRequest = jest.fn(
   }
 );
 const mockTrackMetricsInfo = jest.fn();
+const mockTrackMetricsInfoError = jest.fn();
 
 // Mock ALL external heavy dependencies with factory functions to avoid loading
 // their transitive dependency trees (e.g., @kbn/data-plugin/public).
@@ -38,7 +39,10 @@ jest.mock('@kbn/field-utils', () => ({
   getFieldIconType: jest.fn(() => 'number'),
 }));
 jest.mock('../../../../context/ebt_telemetry_context', () => ({
-  useTelemetry: () => ({ trackMetricsInfo: mockTrackMetricsInfo }),
+  useTelemetry: () => ({
+    trackMetricsInfo: mockTrackMetricsInfo,
+    trackMetricsInfoError: mockTrackMetricsInfoError,
+  }),
 }));
 jest.mock('../../../../context/chart_section_inspector', () => ({
   useChartSectionInspector: () => ({
@@ -52,6 +56,7 @@ import { useFetchMetricsData } from './use_fetch_metrics_data';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
+import { EsqlResponseError } from '../utils/esql_response_error';
 
 const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof executeEsqlQuery>;
 const mockParseMetricsWithTelemetry = parseMetricsWithTelemetry as jest.MockedFunction<
@@ -645,6 +650,77 @@ describe('useFetchMetricsData', () => {
           total_number_of_metrics: 1,
         })
       );
+    });
+
+    it('emits trackMetricsInfoError with builder output when fetch rejects with a generic Error', async () => {
+      mockExecuteEsqlQuery.mockRejectedValue(new Error('Network error'));
+
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.error).toBeTruthy();
+      });
+
+      expect(mockTrackMetricsInfoError).toHaveBeenCalledTimes(1);
+      expect(mockTrackMetricsInfoError).toHaveBeenCalledWith({ error_name: 'Error' });
+      // Success-path emission must NOT fire when the fetch failed.
+      expect(mockTrackMetricsInfo).not.toHaveBeenCalled();
+    });
+
+    it('emits trackMetricsInfoError with EsqlResponseError fields when the response carries an embedded error', async () => {
+      const responseError = new EsqlResponseError(
+        { type: 'verification_exception', reason: 'Unknown column [host.name]' },
+        { status: 400 }
+      );
+      mockExecuteEsqlQuery.mockRejectedValue(responseError);
+
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.error).toBeTruthy();
+      });
+
+      expect(mockTrackMetricsInfoError).toHaveBeenCalledTimes(1);
+      expect(mockTrackMetricsInfoError).toHaveBeenCalledWith({
+        error_name: 'EsqlResponseError',
+        status: 400,
+        es_error_type: 'verification_exception',
+      });
+    });
+
+    it('does NOT emit trackMetricsInfoError when the error is an AbortError', async () => {
+      const abortError = new Error('aborted');
+      abortError.name = 'AbortError';
+      mockExecuteEsqlQuery.mockRejectedValue(abortError);
+
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(mockTrackMetricsInfoError).not.toHaveBeenCalled();
+    });
+
+    it('still surfaces error on the hook return after emitting telemetry', async () => {
+      mockExecuteEsqlQuery.mockRejectedValue(new Error('boom'));
+
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      // Re-throw preserves useAsyncFn's error surface so MetricsInfoError can still render.
+      expect(result.current.error).toBeTruthy();
+      expect(result.current.error?.message).toBe('boom');
+      expect(mockTrackMetricsInfoError).toHaveBeenCalled();
     });
   });
 });

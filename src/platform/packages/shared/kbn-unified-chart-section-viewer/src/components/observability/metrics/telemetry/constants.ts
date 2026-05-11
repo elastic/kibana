@@ -8,3 +8,4 @@
  */
 
 export const METRICS_INFO_EVENT_TYPE = 'discover_metrics_info';
+export const METRICS_INFO_ERROR_EVENT_TYPE = 'discover_metrics_info_error';

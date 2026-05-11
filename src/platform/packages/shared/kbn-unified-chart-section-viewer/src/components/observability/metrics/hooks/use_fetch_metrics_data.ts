@@ -18,6 +18,8 @@ import { useChartSectionInspector } from '../../../../context/chart_section_insp
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getEsqlQuery } from '../utils/get_esql_query';
+import { isSuppressedFetchError } from '../utils/is_suppressed_fetch_error';
+import { buildMetricsInfoErrorTelemetry } from '../telemetry/build_metrics_info_error_telemetry';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -36,7 +38,7 @@ export function useFetchMetricsData({
   isComponentVisible: boolean;
   selectedDimensionNames?: Dimension[];
 }): MetricsInfo {
-  const { trackMetricsInfo } = useTelemetry();
+  const { trackMetricsInfo, trackMetricsInfoError } = useTelemetry();
   const { trackRequest } = useChartSectionInspector();
   const esql = getEsqlQuery(fetchParams.query);
 
@@ -70,55 +72,66 @@ export function useFetchMetricsData({
     async (
       signal: AbortSignal
     ): Promise<(ParsedMetrics & { activeDimensions: Dimension[] }) | null> => {
-      const documents = await trackRequest(
-        'Grid of metrics',
-        'This request queries Elasticsearch to fetch metrics info for the grid.',
-        async () => {
-          const {
-            documents: docs,
-            rawResponse,
-            requestParams,
-          } = await executeEsqlQuery<MetricsESQLResponse>({
-            esqlQuery: metricsInfoQuery,
-            search: services.data.search.search,
-            signal,
-            dataView: fetchParams.dataView,
-            timeRange: fetchParams.timeRange,
-            filters: fetchParams.filters ?? [],
-            variables: fetchParams.esqlVariables,
-            uiSettings: services.uiSettings,
-          });
+      try {
+        const documents = await trackRequest(
+          'Grid of metrics',
+          'This request queries Elasticsearch to fetch metrics info for the grid.',
+          async () => {
+            const {
+              documents: docs,
+              rawResponse,
+              requestParams,
+            } = await executeEsqlQuery<MetricsESQLResponse>({
+              esqlQuery: metricsInfoQuery,
+              search: services.data.search.search,
+              signal,
+              dataView: fetchParams.dataView,
+              timeRange: fetchParams.timeRange,
+              filters: fetchParams.filters ?? [],
+              variables: fetchParams.esqlVariables,
+              uiSettings: services.uiSettings,
+            });
 
-          return {
-            data: docs,
-            request: requestParams,
-            response: rawResponse,
-          };
+            return {
+              data: docs,
+              request: requestParams,
+              response: rawResponse,
+            };
+          }
+        );
+
+        const getFieldType = (name: string) => {
+          const field = fetchParams.dataView?.getFieldByName(name);
+          return field ? getFieldIconType(field) : undefined;
+        };
+
+        const parsed = parseMetricsWithTelemetry(documents, getFieldType);
+
+        const sortedMetrics: ParsedMetrics = {
+          metricItems: [...parsed.metricItems].sort((a, b) =>
+            a.metricName.localeCompare(b.metricName)
+          ),
+          allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
+        };
+
+        if (!signal.aborted) {
+          trackMetricsInfo(parsed.telemetry);
         }
-      );
 
-      const getFieldType = (name: string) => {
-        const field = fetchParams.dataView?.getFieldByName(name);
-        return field ? getFieldIconType(field) : undefined;
-      };
-
-      const parsed = parseMetricsWithTelemetry(documents, getFieldType);
-
-      const sortedMetrics: ParsedMetrics = {
-        metricItems: [...parsed.metricItems].sort((a, b) =>
-          a.metricName.localeCompare(b.metricName)
-        ),
-        allDimensions: [...parsed.allDimensions].sort((a, b) => a.name.localeCompare(b.name)),
-      };
-
-      if (!signal.aborted) {
-        trackMetricsInfo(parsed.telemetry);
+        return {
+          ...sortedMetrics,
+          activeDimensions: appliedDimensions ?? [],
+        };
+      } catch (err) {
+        // Skip telemetry for aborted fetches (normal control flow on re-render /
+        // unmount / dependency change) and for AbortErrors that surface through
+        // the platform's data plugin. Real failures emit the structured event
+        // and re-throw so MetricsInfoError still renders via useAsyncFn's error.
+        if (!signal.aborted && !isSuppressedFetchError(err)) {
+          trackMetricsInfoError(buildMetricsInfoErrorTelemetry(err));
+        }
+        throw err;
       }
-
-      return {
-        ...sortedMetrics,
-        activeDimensions: appliedDimensions ?? [],
-      };
     },
     [
       metricsInfoQuery,
@@ -130,6 +143,7 @@ export function useFetchMetricsData({
       services.data.search.search,
       services.uiSettings,
       trackMetricsInfo,
+      trackMetricsInfoError,
       appliedDimensions,
     ]
   );

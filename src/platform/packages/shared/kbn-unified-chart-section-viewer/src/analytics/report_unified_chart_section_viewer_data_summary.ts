@@ -9,10 +9,15 @@
 
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { MetricsTelemetry } from '../types';
-import { METRICS_INFO_EVENT_TYPE } from '../components/observability/metrics/telemetry';
+import {
+  METRICS_INFO_ERROR_EVENT_TYPE,
+  METRICS_INFO_EVENT_TYPE,
+  type MetricsInfoErrorTelemetry,
+} from '../components/observability/metrics/telemetry';
 
 export interface UnifiedChartSectionViewerTelemetry {
   trackMetricsInfo: (telemetryPayload: MetricsTelemetry) => void;
+  trackMetricsInfoError: (telemetryPayload: MetricsInfoErrorTelemetry) => void;
 }
 
 export const createUnifiedChartSectionViewerTelemetry = (
@@ -23,5 +28,11 @@ export const createUnifiedChartSectionViewerTelemetry = (
       return;
     }
     analytics.reportEvent(METRICS_INFO_EVENT_TYPE, telemetryPayload);
+  },
+  trackMetricsInfoError: (telemetryPayload: MetricsInfoErrorTelemetry) => {
+    if (!analytics) {
+      return;
+    }
+    analytics.reportEvent(METRICS_INFO_ERROR_EVENT_TYPE, telemetryPayload);
   },
 });
