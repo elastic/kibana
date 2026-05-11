@@ -59,8 +59,6 @@ apiTest.describe('lens visualizations - search', { tag: tags.deploymentAgnostic 
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toBe(
-      "[request query.xyz]: Additional properties are not allowed ('xyz' was unexpected)"
-    );
+    expect(response.body.message).toBe('[request query.xyz]: definition for this key is missing');
   });
 });

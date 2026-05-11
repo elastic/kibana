@@ -49,6 +49,6 @@ apiTest.describe('lens visualizations - delete', { tag: tags.deploymentAgnostic 
     });
 
     expect(response).toHaveStatusCode(404);
-    expect(response.body.message).toBe(`A visualization with id [${missingId}] was not found.`);
+    expect(response.body.message).toBe(`A Lens visualization with id [${missingId}] was not found.`);
   });
 });

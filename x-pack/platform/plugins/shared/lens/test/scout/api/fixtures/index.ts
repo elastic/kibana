@@ -62,7 +62,6 @@ export const apiTest = baseApiTest.extend<ScoutTestFixtures, LensApiWorkerFixtur
 
 export {
   COMMON_HEADERS,
-  INVALID_LENS_ID,
   KNOWN_LENS_ID,
   LENS_API_PATH,
   LENS_API_VERSION,

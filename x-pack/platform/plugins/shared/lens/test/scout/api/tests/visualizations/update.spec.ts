@@ -13,7 +13,6 @@ import { expect } from '@kbn/scout/api';
 
 import {
   COMMON_HEADERS,
-  INVALID_LENS_ID,
   KNOWN_LENS_ID,
   LENS_API_PATH,
   apiTest,
@@ -48,38 +47,20 @@ apiTest.describe('lens visualizations - update', { tag: tags.deploymentAgnostic 
     expect(response.body.data.title).toBe(title);
   });
 
-  apiTest('should upsert when no visualization exists for the id', async ({ apiClient }) => {
-    const id = randomUUID();
-    const title = 'Upsert title';
+  apiTest('should return 404 when updating a non-existent visualization', async ({ apiClient }) => {
+    const missingId = randomUUID();
 
-    const response = await apiClient.put(`${LENS_API_PATH}/${id}`, {
+    const response = await apiClient.put(`${LENS_API_PATH}/${missingId}`, {
       headers: {
         ...COMMON_HEADERS,
         ...editorCredentials.apiKeyHeader,
       },
-      body: getExampleLensBody(title),
+      body: getExampleLensBody('Custom title'),
       responseType: 'json',
     });
 
-    expect(response).toHaveStatusCode(201);
-    expect(response.body.id).toBe(id);
-    expect(response.body.data.title).toBe(title);
-  });
-
-  apiTest('validation - returns 400 for an invalid id', async ({ apiClient }) => {
-    const response = await apiClient.put(`${LENS_API_PATH}/${INVALID_LENS_ID}`, {
-      headers: {
-        ...COMMON_HEADERS,
-        ...editorCredentials.apiKeyHeader,
-      },
-      body: getExampleLensBody('Some title'),
-      responseType: 'json',
-    });
-
-    expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toBe(
-      'ID must contain only lowercase letters, numbers, hyphens, and underscores.'
-    );
+    expect(response).toHaveStatusCode(404);
+    expect(response.body.message).toBe(`A Lens visualization with id [${missingId}] was not found.`);
   });
 
   apiTest('validation - returns 400 when body is empty', async ({ apiClient }) => {
@@ -93,7 +74,7 @@ apiTest.describe('lens visualizations - update', { tag: tags.deploymentAgnostic 
     });
 
     expect(response).toHaveStatusCode(400);
-    // TODO: assert `response.body.message` once the public API stabilizes its
+    // TODO: assert `response.body.message` once the API stabilizes its
     // validation messaging.
   });
 });
