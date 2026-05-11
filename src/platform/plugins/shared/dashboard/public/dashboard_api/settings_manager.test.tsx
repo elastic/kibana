@@ -27,7 +27,7 @@ describe('initializeSettingsManager', () => {
             expect(title).toBe('new title');
           } catch (error) {
             // title assertion fails when
-            //anyStateChange$ emits on subscribe
+            // anyStateChange$ emits on subscribe
             done(error);
             return;
           }
@@ -36,7 +36,7 @@ describe('initializeSettingsManager', () => {
       });
       settingsManager.api.setSettings({
         ...settingsManager.internalApi.serializeSettings(),
-        title: 'new title'
+        title: 'new title',
       });
     });
   });

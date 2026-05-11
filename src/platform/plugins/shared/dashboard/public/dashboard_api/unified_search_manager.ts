@@ -31,6 +31,7 @@ import {
   distinctUntilChanged,
   finalize,
   map,
+  merge,
   skip,
   startWith,
   switchMap,
@@ -291,13 +292,13 @@ export function initializeUnifiedSearchManager(
     };
   };
 
-  const anyStateChange$ = combineLatest([
-    asCodeFilters$,
-    asCodeQuery$,
-    refreshInterval$,
-    timeRange$,
-    timeRestore$,
-  ]).pipe(skip(1));
+  const anyStateChange$ = merge(
+    asCodeFilters$.pipe(skip(1)),
+    asCodeQuery$.pipe(skip(1)),
+    refreshInterval$.pipe(skip(1)),
+    timeRange$.pipe(skip(1)),
+    timeRestore$.pipe(skip(1))
+  ).pipe(map(() => undefined));
 
   return {
     api: {

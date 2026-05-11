@@ -37,7 +37,7 @@ describe('initializeUnifiedSearchManager', () => {
             });
           } catch (error) {
             // time_range assertion fails when
-            //anyStateChange$ emits on subscribe
+            // anyStateChange$ emits on subscribe
             done(error);
             return;
           }
@@ -47,7 +47,7 @@ describe('initializeUnifiedSearchManager', () => {
       unifiedSearchManager.api.setTimeRange({
         to: 'now',
         from: 'now-7m',
-      })
+      });
     });
   });
 
