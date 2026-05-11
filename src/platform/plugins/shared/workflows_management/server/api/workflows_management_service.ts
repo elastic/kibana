@@ -393,7 +393,7 @@ export class WorkflowsService {
 
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
-    options?: ManagedWorkflowOperationOptions & { isStartupReconcile?: boolean },
+    options: ManagedWorkflowOperationOptions & { isStartupReconcile?: boolean },
     registeredPluginId?: string
   ): Promise<void> {
     await this.ensureInitialized();
@@ -402,7 +402,7 @@ export class WorkflowsService {
 
   public async uninstallManagedWorkflow(
     id: ManagedWorkflowId,
-    options?: ManagedWorkflowOperationOptions,
+    options: ManagedWorkflowOperationOptions,
     registeredPluginId?: string
   ): Promise<void> {
     await this.ensureInitialized();
@@ -412,7 +412,7 @@ export class WorkflowsService {
   public async executeManagedWorkflow(
     id: ManagedWorkflowId,
     request: KibanaRequest,
-    options?: ExecuteManagedWorkflowOptions,
+    options: ExecuteManagedWorkflowOptions,
     registeredPluginId?: string
   ): Promise<string> {
     await this.ensureInitialized();

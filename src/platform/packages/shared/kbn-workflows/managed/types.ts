@@ -8,21 +8,25 @@
  */
 
 export interface ManagedWorkflowManagement {
-  lifecycle?: 'static' | 'dynamic';
-  versionStrategy?: 'auto' | 'on_adopt';
-  enablement?: 'enforced' | 'restorable';
+  lifecycle: 'static' | 'dynamic';
+  versionStrategy: 'auto' | 'on_adopt';
+  enablement: 'enforced' | 'restorable';
 }
 
-export type ManagedWorkflowTemplateValues = Record<string, unknown>;
+export type ManagedWorkflowTemplateValues = object;
 
-export interface ManagedWorkflowDefinition {
+type ManagedWorkflowDefinitionSource<TValues extends object> =
+  | {
+      yaml: string;
+      yamlTemplate?: never;
+    }
+  | {
+      yaml?: never;
+      yamlTemplate(values: TValues): string;
+    };
+
+export type ManagedWorkflowDefinition<TValues extends object = ManagedWorkflowTemplateValues> = {
   id: string;
   pluginId: string;
-  yaml?: string;
-  yamlTemplate?: (values: ManagedWorkflowTemplateValues) => string;
-  management?: ManagedWorkflowManagement;
-}
-
-export interface ResolvedManagedWorkflowDefinition extends ManagedWorkflowDefinition {
-  management: Required<ManagedWorkflowManagement>;
-}
+  management: ManagedWorkflowManagement;
+} & ManagedWorkflowDefinitionSource<TValues>;

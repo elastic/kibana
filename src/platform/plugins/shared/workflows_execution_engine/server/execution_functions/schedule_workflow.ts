@@ -105,6 +105,10 @@ export async function checkAndSkipIfExistingScheduledExecution(
       id: generateUuid(),
       spaceId,
       workflowId: workflow.id,
+      ...(workflow.managed === true ? { managed: true } : {}),
+      ...(typeof workflow.originSystemWorkflowId === 'string'
+        ? { originSystemWorkflowId: workflow.originSystemWorkflowId }
+        : {}),
       isTestRun: workflow.isTestRun,
       workflowDefinition: workflow.definition,
       yaml: workflow.yaml,

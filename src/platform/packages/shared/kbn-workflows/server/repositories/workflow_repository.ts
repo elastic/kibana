@@ -22,6 +22,27 @@ export type WorkflowRepositoryParams = Omit<WorkflowRepositoryOptions, 'indexNam
   indexName?: string;
 };
 
+export type ManagedFilter = 'all' | 'managed' | 'unmanaged';
+
+export interface WorkflowLookupOptions {
+  includeGlobal?: boolean;
+  managedFilter?: ManagedFilter;
+}
+
+const applyManagedFilter = (
+  managedFilter: ManagedFilter | undefined,
+  query: { must: estypes.QueryDslQueryContainer[]; must_not: estypes.QueryDslQueryContainer[] }
+): void => {
+  if (managedFilter === 'managed') {
+    query.must.push({ term: { managed: true } });
+    return;
+  }
+
+  if (managedFilter === 'unmanaged') {
+    query.must_not.push({ term: { managed: true } });
+  }
+};
+
 export class WorkflowRepository {
   private options: WorkflowRepositoryOptions;
 
@@ -35,18 +56,25 @@ export class WorkflowRepository {
   async getWorkflow(
     workflowId: string,
     spaceId: string,
-    options?: { includeGlobal?: boolean }
+    options?: WorkflowLookupOptions
   ): Promise<EsWorkflow | null> {
     try {
-      const { must, must_not } = buildWorkflowSpaceFilter(spaceId, {
+      const spaceFilter = buildWorkflowSpaceFilter(spaceId, {
         includeGlobal: options?.includeGlobal ?? false,
       });
+      const queryMust: estypes.QueryDslQueryContainer[] = [
+        { ids: { values: [workflowId] } },
+        ...spaceFilter.must,
+      ];
+      const queryMustNot = [...spaceFilter.must_not];
+      applyManagedFilter(options?.managedFilter, { must: queryMust, must_not: queryMustNot });
+
       const response = await this.options.esClient.search({
         index: this.options.indexName,
         query: {
           bool: {
-            must: [{ ids: { values: [workflowId] } }, ...must],
-            must_not,
+            must: queryMust,
+            must_not: queryMustNot,
           },
         },
         size: 1,
@@ -64,6 +92,13 @@ export class WorkflowRepository {
 
       // Map index _source → EsWorkflow (read created_at / updated_at; EsWorkflow uses createdAt / lastUpdatedAt).
       const source = document._source as Record<string, unknown>;
+      const managed = typeof source.managed === 'boolean' ? (source.managed as boolean) : undefined;
+      const originSystemWorkflowId =
+        typeof source.originSystemWorkflowId === 'string'
+          ? source.originSystemWorkflowId
+          : source.originSystemWorkflowId === null
+          ? null
+          : undefined;
       return {
         id: workflowId,
         name: source.name as string,
@@ -78,6 +113,8 @@ export class WorkflowRepository {
         definition: source.definition as EsWorkflow['definition'],
         deleted_at: source.deleted_at ? new Date(source.deleted_at as string) : null,
         yaml: source.yaml as string,
+        ...(managed !== undefined ? { managed } : {}),
+        ...(originSystemWorkflowId !== undefined ? { originSystemWorkflowId } : {}),
       };
     } catch (error) {
       if (error.statusCode === 404) {
@@ -94,7 +131,7 @@ export class WorkflowRepository {
   async isWorkflowEnabled(
     workflowId: string,
     spaceId: string,
-    options?: { includeGlobal?: boolean }
+    options?: WorkflowLookupOptions
   ): Promise<boolean> {
     const map = await this.areWorkflowsEnabled([{ workflowId, spaceId }], options);
     return map.get(`${spaceId}:${workflowId}`) ?? false;
@@ -114,7 +151,7 @@ export class WorkflowRepository {
    */
   async areWorkflowsEnabled(
     refs: Array<{ workflowId: string; spaceId: string }>,
-    options?: { includeGlobal?: boolean }
+    options?: WorkflowLookupOptions
   ): Promise<Map<string, boolean>> {
     const result = new Map<string, boolean>();
     if (refs.length === 0) {
@@ -137,14 +174,21 @@ export class WorkflowRepository {
     }
 
     const should = Array.from(bySpace.entries()).map(([spaceId, ids]) => {
-      const { must, must_not } = buildWorkflowSpaceFilter(spaceId, {
+      const spaceFilter = buildWorkflowSpaceFilter(spaceId, {
         includeDeleted: true,
         includeGlobal: options?.includeGlobal ?? false,
       });
+      const queryMust: estypes.QueryDslQueryContainer[] = [
+        { ids: { values: Array.from(ids) } },
+        ...spaceFilter.must,
+      ];
+      const queryMustNot = [...spaceFilter.must_not];
+      applyManagedFilter(options?.managedFilter, { must: queryMust, must_not: queryMustNot });
+
       return {
         bool: {
-          must: [{ ids: { values: Array.from(ids) } }, ...must],
-          must_not,
+          must: queryMust,
+          must_not: queryMustNot,
         },
       };
     });

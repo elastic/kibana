@@ -13,9 +13,8 @@ import type { EsWorkflowCreate, WorkflowYaml } from '@kbn/workflows';
 import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
-  type ManagedWorkflowId,
+  type ManagedWorkflowDefinition,
   type ManagedWorkflowTemplateValues,
-  type ResolvedManagedWorkflowDefinition,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type {
@@ -87,8 +86,8 @@ export class ManagedWorkflowsService {
   }
 
   public async installManagedWorkflow(
-    id: ManagedWorkflowId,
-    options?: InstallManagedWorkflowOptions,
+    id: string,
+    options: InstallManagedWorkflowOptions,
     registeredPluginId?: string
   ): Promise<void> {
     const definition = getManagedWorkflowDefinition(id);
@@ -98,7 +97,7 @@ export class ManagedWorkflowsService {
     this.assertPluginRegistration(definition, registeredPluginId);
 
     const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
-    const spaceId = options?.spaceId ?? GLOBAL_WORKFLOW_SPACE_ID;
+    const spaceId = this.getRequiredSpaceId(options);
     const now = new Date().toISOString();
     const definitionHash = this.computeManagedDefinitionHash(definition);
     const existing = await this.deps.crudService.getWorkflowDocumentSource(
@@ -107,7 +106,7 @@ export class ManagedWorkflowsService {
     );
     const { yaml, managedTemplateValues } = this.resolveManagedWorkflowYaml({
       definition,
-      values: options?.values,
+      values: options.values,
       existingTemplateValues: existing?.managedTemplateValues,
     });
 
@@ -136,7 +135,7 @@ export class ManagedWorkflowsService {
       }
     }
 
-    if (definition.management.versionStrategy === 'on_adopt' && options?.isStartupReconcile) {
+    if (definition.management.versionStrategy === 'on_adopt' && options.isStartupReconcile) {
       return;
     }
 
@@ -155,8 +154,8 @@ export class ManagedWorkflowsService {
   }
 
   public async uninstallManagedWorkflow(
-    id: ManagedWorkflowId,
-    options?: ManagedWorkflowOperationOptions,
+    id: string,
+    options: ManagedWorkflowOperationOptions,
     registeredPluginId?: string
   ): Promise<void> {
     const definition = getManagedWorkflowDefinition(id);
@@ -166,7 +165,7 @@ export class ManagedWorkflowsService {
     this.assertPluginRegistration(definition, registeredPluginId);
 
     const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
-    const spaceId = options?.spaceId ?? GLOBAL_WORKFLOW_SPACE_ID;
+    const spaceId = this.getRequiredSpaceId(options);
     const existing = await this.deps.crudService.getWorkflowDocumentSource(
       workflowDocumentId,
       spaceId,
@@ -182,9 +181,9 @@ export class ManagedWorkflowsService {
   }
 
   public async executeManagedWorkflow(
-    id: ManagedWorkflowId,
+    id: string,
     request: KibanaRequest,
-    options?: ExecuteManagedWorkflowOptions,
+    options: ExecuteManagedWorkflowOptions,
     registeredPluginId?: string
   ): Promise<string> {
     const definition = getManagedWorkflowDefinition(id);
@@ -194,7 +193,7 @@ export class ManagedWorkflowsService {
     this.assertPluginRegistration(definition, registeredPluginId);
 
     const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
-    const spaceId = options?.spaceId ?? GLOBAL_WORKFLOW_SPACE_ID;
+    const spaceId = this.getRequiredSpaceId(options);
     const existing = await this.deps.crudService.getWorkflowDocumentSource(
       workflowDocumentId,
       spaceId,
@@ -213,10 +212,10 @@ export class ManagedWorkflowsService {
 
     const context: Record<string, unknown> = {
       spaceId,
-      inputs: options?.inputs ?? {},
-      triggeredBy: options?.triggeredBy ?? 'manual',
+      inputs: options.inputs ?? {},
+      triggeredBy: options.triggeredBy ?? 'manual',
     };
-    if (options?.metadata) {
+    if (options.metadata) {
       context.metadata = options.metadata;
     }
 
@@ -227,6 +226,10 @@ export class ManagedWorkflowsService {
         enabled: existing.enabled,
         definition: existing.definition,
         yaml: existing.yaml,
+        ...(existing.managed === true ? { managed: true } : {}),
+        ...(typeof existing.originSystemWorkflowId === 'string'
+          ? { originSystemWorkflowId: existing.originSystemWorkflowId }
+          : {}),
       },
       context,
       request
@@ -236,7 +239,7 @@ export class ManagedWorkflowsService {
   }
 
   private buildManagedWorkflowDocument(params: {
-    definition: ResolvedManagedWorkflowDefinition;
+    definition: ManagedWorkflowDefinition;
     yaml: string;
     managedTemplateValues: ManagedWorkflowTemplateValues | null;
     spaceId: string;
@@ -284,7 +287,7 @@ export class ManagedWorkflowsService {
       managed: true,
       managedBy: definition.pluginId,
       definitionHash,
-      managedTemplateValues,
+      managedTemplateValues: managedTemplateValues as Record<string, unknown> | null,
       originSystemWorkflowId: definition.id,
       lifecycle: definition.management.lifecycle,
       deleted_at: null,
@@ -295,7 +298,7 @@ export class ManagedWorkflowsService {
   }
 
   private assertPluginRegistration(
-    definition: ResolvedManagedWorkflowDefinition,
+    definition: ManagedWorkflowDefinition,
     registeredPluginId?: string
   ): void {
     if (!registeredPluginId) {
@@ -309,12 +312,9 @@ export class ManagedWorkflowsService {
     }
   }
 
-  private resolveWorkflowDocumentId(
-    id: ManagedWorkflowId,
-    options?: ManagedWorkflowOperationOptions
-  ): string {
-    const customId = options?.workflowId?.trim();
-    const suffix = options?.workflowIdSuffix?.trim();
+  private resolveWorkflowDocumentId(id: string, options: ManagedWorkflowOperationOptions): string {
+    const customId = options.workflowId?.trim();
+    const suffix = options.workflowIdSuffix?.trim();
 
     if (customId && suffix) {
       throw new Error(
@@ -338,10 +338,20 @@ export class ManagedWorkflowsService {
     return id;
   }
 
+  private getRequiredSpaceId(options: ManagedWorkflowOperationOptions): string {
+    const spaceId = options.spaceId?.trim();
+    if (!spaceId) {
+      throw new Error(
+        `Managed workflow operations require an explicit spaceId. Use '${GLOBAL_WORKFLOW_SPACE_ID}' for global workflows.`
+      );
+    }
+    return spaceId;
+  }
+
   private resolveManagedWorkflowYaml(params: {
-    definition: ResolvedManagedWorkflowDefinition;
+    definition: ManagedWorkflowDefinition;
     values?: ManagedWorkflowTemplateValues;
-    existingTemplateValues?: Record<string, unknown> | null;
+    existingTemplateValues?: ManagedWorkflowTemplateValues | null;
   }): { yaml: string; managedTemplateValues: ManagedWorkflowTemplateValues | null } {
     const { definition, values, existingTemplateValues } = params;
 
@@ -371,7 +381,7 @@ export class ManagedWorkflowsService {
     };
   }
 
-  private computeManagedDefinitionHash(definition: ResolvedManagedWorkflowDefinition): string {
+  private computeManagedDefinitionHash(definition: ManagedWorkflowDefinition): string {
     if (definition.yamlTemplate) {
       return computeDefinitionHash(definition.yamlTemplate.toString());
     }
@@ -384,8 +394,8 @@ export class ManagedWorkflowsService {
   }
 
   private areTemplateValuesEqual(
-    existing: Record<string, unknown> | null | undefined,
-    next: Record<string, unknown> | null
+    existing: ManagedWorkflowTemplateValues | null | undefined,
+    next: ManagedWorkflowTemplateValues | null
   ): boolean {
     return JSON.stringify(existing ?? null) === JSON.stringify(next ?? null);
   }

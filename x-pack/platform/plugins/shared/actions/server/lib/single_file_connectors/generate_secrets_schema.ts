@@ -51,7 +51,7 @@ export const generateSecretsSchema = (
 
       if (authType === 'ears' && !configurationUtilities.isEarsEnabled()) {
         throw new Error(
-          'EARS OAuth authentication is not enabled. Enable it via xpack.actions.ears.enabled in kibana.yml.'
+          'EARS OAuth authentication is not enabled. Enable it via xpack.actions.auth.ears.enabled in kibana.yml.'
         );
       }
 

@@ -509,6 +509,7 @@ export class WorkflowsExecutionEnginePlugin
                 id: generateUuid(),
                 spaceId,
                 workflowId: workflow.id,
+                ...this.buildManagedWorkflowExecutionMetadata(workflow),
                 isTestRun: false,
                 workflowDefinition: workflow.definition,
                 yaml: workflow.yaml,
@@ -673,6 +674,7 @@ export class WorkflowsExecutionEnginePlugin
         id: generateUuid(),
         spaceId,
         workflowId: workflow.id,
+        ...this.buildManagedWorkflowExecutionMetadata(workflow),
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
@@ -1090,6 +1092,7 @@ export class WorkflowsExecutionEnginePlugin
         spaceId: workflow.spaceId,
         stepId,
         workflowId: workflow.id,
+        ...this.buildManagedWorkflowExecutionMetadata(workflow),
         isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         yaml: workflow.yaml,
@@ -1296,9 +1299,19 @@ export class WorkflowsExecutionEnginePlugin
 
   private async initialize(coreStart: CoreStart): Promise<void> {
     if (!this.initializePromise) {
-      this.initializePromise = createIndexes({
+      // Clear the cached promise on rejection so a transient failure (e.g. an ES
+      // circuit_breaking_exception) doesn't poison every subsequent call. In-flight
+      // callers still share the same attempt; only the *next* call after rejection
+      // gets a fresh `createIndexes` invocation.
+      const attempt = createIndexes({
         esClient: coreStart.elasticsearch.client.asInternalUser,
         logger: this.logger,
+      });
+      this.initializePromise = attempt;
+      attempt.catch(() => {
+        if (this.initializePromise === attempt) {
+          this.initializePromise = undefined;
+        }
       });
     }
     await this.initializePromise;
@@ -1345,6 +1358,24 @@ export class WorkflowsExecutionEnginePlugin
       concurrencySettings,
       buildWorkflowContext(normalizedWorkflowExecution, coreStart, dependencies)
     );
+  }
+
+  private buildManagedWorkflowExecutionMetadata(
+    workflow: Pick<WorkflowExecutionEngineModel, 'managed' | 'originSystemWorkflowId'>
+  ): Partial<Pick<EsWorkflowExecution, 'managed' | 'originSystemWorkflowId'>> {
+    const managedMetadata: Partial<
+      Pick<EsWorkflowExecution, 'managed' | 'originSystemWorkflowId'>
+    > = {};
+
+    if (workflow.managed === true) {
+      managedMetadata.managed = true;
+    }
+
+    if (typeof workflow.originSystemWorkflowId === 'string') {
+      managedMetadata.originSystemWorkflowId = workflow.originSystemWorkflowId;
+    }
+
+    return managedMetadata;
   }
 
   /**

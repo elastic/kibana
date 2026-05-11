@@ -69,10 +69,7 @@ export class WorkflowCrudService {
     spaceId: string,
     options?: { includeDeleted?: boolean; includeGlobal?: boolean }
   ): Promise<WorkflowProperties | null> {
-    const { must, must_not } = buildWorkflowSpaceFilter(spaceId, {
-      includeDeleted: options?.includeDeleted ?? false,
-      includeGlobal: options?.includeGlobal ?? false,
-    });
+    const { must, must_not } = buildWorkflowSpaceFilter(spaceId, options);
     must.push({ ids: { values: [id] } });
     const searchResponse = await this.deps.workflowStorage.getClient().search({
       query: { bool: { must, must_not } },

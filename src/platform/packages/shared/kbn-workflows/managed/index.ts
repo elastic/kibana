@@ -11,74 +11,62 @@ import type {
   ManagedWorkflowDefinition,
   ManagedWorkflowManagement,
   ManagedWorkflowTemplateValues,
-  ResolvedManagedWorkflowDefinition,
 } from './types';
 import {
-  ENTITY_MONITOR_WORKFLOW_EXAMPLE,
-  ENTITY_MONITOR_WORKFLOW_ID,
+  EXAMPLE_MANAGED_WORKFLOW,
+  EXAMPLE_MANAGED_WORKFLOW_ID,
   STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW,
   STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   STREAMS_KI_ONBOARDING_WORKFLOW,
   STREAMS_KI_ONBOARDING_WORKFLOW_ID,
   STREAMS_KI_QUERIES_GENERATION_WORKFLOW,
   STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,
-  WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW,
-  WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID,
 } from './workflows';
 
-export type {
-  ManagedWorkflowDefinition,
-  ManagedWorkflowManagement,
-  ManagedWorkflowTemplateValues,
-  ResolvedManagedWorkflowDefinition,
-};
-
-const defaultManagementPolicy: Required<ManagedWorkflowManagement> = {
-  lifecycle: 'static',
-  versionStrategy: 'auto',
-  enablement: 'restorable',
-};
+export type { ManagedWorkflowDefinition, ManagedWorkflowManagement, ManagedWorkflowTemplateValues };
 
 export const managedWorkflowDefinitions = [
-  WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW,
-  ENTITY_MONITOR_WORKFLOW_EXAMPLE,
+  EXAMPLE_MANAGED_WORKFLOW,
   STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW,
   STREAMS_KI_QUERIES_GENERATION_WORKFLOW,
   STREAMS_KI_ONBOARDING_WORKFLOW,
 ] as const;
 
-export type ManagedWorkflowId = (typeof managedWorkflowDefinitions)[number]['id'];
+type ManagedWorkflowDefinitionById = {
+  [TDefinition in (typeof managedWorkflowDefinitions)[number] as TDefinition['id']]: TDefinition;
+};
 
-export const getManagedWorkflowDefinition = (
-  id: string
-): ResolvedManagedWorkflowDefinition | undefined => {
-  const workflow = managedWorkflowDefinitions.find((definition) => definition.id === id);
+export type ManagedWorkflowId = keyof ManagedWorkflowDefinitionById;
+type ManagedWorkflowDefinitionEntry = ManagedWorkflowDefinitionById[ManagedWorkflowId];
+
+export type ManagedWorkflowTemplateValuesById = {
+  [TId in ManagedWorkflowId]: ManagedWorkflowDefinitionById[TId] extends {
+    yamlTemplate: (values: infer TValues) => string;
+  }
+    ? TValues
+    : never;
+};
+
+export type ManagedWorkflowTemplateValuesForId<TId extends ManagedWorkflowId> =
+  ManagedWorkflowTemplateValuesById[TId];
+
+export const getManagedWorkflowDefinition = (id: string): ManagedWorkflowDefinition | undefined => {
+  const workflow = managedWorkflowDefinitions.find(
+    (definition): definition is ManagedWorkflowDefinitionEntry => definition.id === id
+  );
   if (!workflow) {
     return undefined;
   }
 
-  return {
-    ...workflow,
-    management: {
-      ...defaultManagementPolicy,
-      ...workflow.management,
-    },
-  };
+  return workflow;
 };
 
-export const getManagedWorkflowDefinitions = (): ResolvedManagedWorkflowDefinition[] => {
-  return managedWorkflowDefinitions.map((workflow) => ({
-    ...workflow,
-    management: {
-      ...defaultManagementPolicy,
-      ...workflow.management,
-    },
-  }));
+export const getManagedWorkflowDefinitions = (): ManagedWorkflowDefinition[] => {
+  return [...managedWorkflowDefinitions];
 };
 
 export {
-  WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID,
-  ENTITY_MONITOR_WORKFLOW_ID,
+  EXAMPLE_MANAGED_WORKFLOW_ID,
   STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,
   STREAMS_KI_ONBOARDING_WORKFLOW_ID,

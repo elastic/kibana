@@ -95,6 +95,8 @@ export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
   workflowId: string;
+  managed?: boolean;
+  originSystemWorkflowId?: string | null;
   isTestRun: boolean;
   status: ExecutionStatus;
   context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -255,6 +257,8 @@ export const EsWorkflowSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
   enabled: z.boolean(),
+  managed: z.boolean().optional(),
+  originSystemWorkflowId: z.string().nullable().optional(),
   tags: z.array(z.string()),
   createdAt: z.date(),
   createdBy: z.string(),
@@ -397,7 +401,10 @@ export interface WorkflowListDto {
   results: WorkflowListItemDto[];
 }
 export interface WorkflowExecutionEngineModel
-  extends Pick<EsWorkflow, 'id' | 'name' | 'enabled' | 'definition' | 'yaml'> {
+  extends Pick<
+    EsWorkflow,
+    'id' | 'name' | 'enabled' | 'definition' | 'yaml' | 'managed' | 'originSystemWorkflowId'
+  > {
   isTestRun?: boolean;
   spaceId?: string;
 }

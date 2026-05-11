@@ -54,56 +54,28 @@ export const STREAMS_KI_ONBOARDING_WORKFLOW: ManagedWorkflowDefinition = {
   },
 };
 
-// ─── Workflows Management Built-in Workflows ─────────────────────────────────
+export const EXAMPLE_MANAGED_WORKFLOW_ID = 'system-example-greeting';
 
-export const WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID = 'system-workflow-health-check';
+export interface ExampleManagedWorkflowTemplateValues {
+  recipient: string;
+}
 
-export const WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW: ManagedWorkflowDefinition = {
-  id: WORKFLOWS_MANAGEMENT_HEALTH_CHECK_WORKFLOW_ID,
-  pluginId: 'workflowsManagement',
-  yaml: `name: Workflows Management Health Check
+export const EXAMPLE_MANAGED_WORKFLOW = {
+  id: EXAMPLE_MANAGED_WORKFLOW_ID,
+  pluginId: 'workflowsExtensionsExample',
+  yamlTemplate: ({ recipient }) => `name: Example Greeting - ${recipient}
 enabled: true
 triggers:
-  - type: scheduled
-    with:
-      every: 21m
+  - type: manual
 steps:
-  - name: echo
+  - name: greet
     type: console
     with:
-      message: 'Workflows Management Health Check'
+      message: "Hello, ${recipient}! This is a managed workflow example."
 `,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
     enablement: 'restorable',
   },
-};
-
-export const ENTITY_MONITOR_WORKFLOW_ID = 'system-entity-monitor';
-
-export interface EntityMonitorWorkflowTemplateValues {
-  entityId: string;
-}
-
-export const ENTITY_MONITOR_WORKFLOW_EXAMPLE: ManagedWorkflowDefinition = {
-  id: ENTITY_MONITOR_WORKFLOW_ID,
-  pluginId: 'workflowsManagement',
-  yamlTemplate: ({ entityId }) => `name: Entity Monitor - ${entityId}
-enabled: true
-triggers:
-  - type: scheduled
-    with:
-      every: 52m
-steps:
-  - name: check_entity
-    type: console
-    with:
-      message: "Checking entity: ${entityId}"
-`,
-  management: {
-    lifecycle: 'dynamic',
-    versionStrategy: 'auto',
-    enablement: 'restorable',
-  },
-};
+} as const satisfies ManagedWorkflowDefinition<ExampleManagedWorkflowTemplateValues>;
