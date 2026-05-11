@@ -39,7 +39,7 @@ export const IPINFO_DATABASE_ID = 'asn';
 
 export const INGEST_PIPELINES_USER_ROLE = {
   elasticsearch: {
-    cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
+    cluster: ['manage_pipeline', 'monitor'],
   },
   kibana: [
     {
