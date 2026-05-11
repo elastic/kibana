@@ -165,6 +165,71 @@ describe('computePipelineDiff', () => {
     expect(diff.removed_count).toBe(1);
     expect(diff.added_count).toBe(1);
   });
+
+  it('matches condition blocks whose nested steps differ only in key insertion order', () => {
+    // Condition blocks must benefit from the same key-order normalization as
+    // top-level steps — otherwise the LLM re-emitting an existing
+    // conditional with a different key order would look like a removal +
+    // addition and trigger spurious drop warnings.
+    const existing = [conditionStep([grokStep()])];
+    const proposed: StreamlangStep[] = [
+      {
+        condition: {
+          // Inner step with keys re-ordered relative to `grokStep()`.
+          steps: [
+            {
+              ignore_failure: true,
+              patterns: ['%{IP:attributes.source.ip}'],
+              from: 'body.text',
+              action: 'grok',
+            },
+          ],
+          eq: 'ERROR',
+          field: 'severity_text',
+        },
+      } as unknown as StreamlangStep,
+    ];
+
+    const diff = computePipelineDiff(existing, proposed);
+
+    expect(diff.unchanged_count).toBe(1);
+    expect(diff.added_count).toBe(0);
+    expect(diff.removed_count).toBe(0);
+  });
+
+  it('strips `customIdentifier` recursively from nested condition steps', () => {
+    // `addDeterministicCustomIdentifiers` re-tags every step including
+    // those inside condition blocks. The signature must ignore those tags
+    // at every depth, not just the top level — otherwise a re-tag would
+    // make every conditional look "modified" on every diff.
+    const existing = [conditionStep([grokStep({ customIdentifier: 'old-nested-id' })])];
+    const proposed = [conditionStep([grokStep({ customIdentifier: 'fresh-nested-id' })])];
+
+    const diff = computePipelineDiff(existing, proposed);
+
+    expect(diff.unchanged_count).toBe(1);
+    expect(diff.added_count).toBe(0);
+    expect(diff.removed_count).toBe(0);
+  });
+
+  it('treats array order as semantically meaningful (grok pattern order matters)', () => {
+    // Grok runs patterns in declared order and stops at the first match,
+    // so reordering them changes runtime behaviour. A future "optimization"
+    // that started sorting arrays in canonicalSignature would silently
+    // hide that change from the user — this test guards against it.
+    const existing = [
+      grokStep({ patterns: ['%{IPV4:attributes.source.ip}', '%{IPV6:attributes.source.ip}'] }),
+    ];
+    const proposed = [
+      grokStep({ patterns: ['%{IPV6:attributes.source.ip}', '%{IPV4:attributes.source.ip}'] }),
+    ];
+
+    const diff = computePipelineDiff(existing, proposed);
+
+    expect(diff.unchanged_count).toBe(0);
+    expect(diff.added_count).toBe(1);
+    expect(diff.removed_count).toBe(1);
+  });
 });
 
 describe('labelForStep', () => {
