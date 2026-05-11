@@ -1,0 +1,10 @@
+{
+  "name": "@kbn/workflows-execution-engine-utils",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Pure, server-side utilities extracted from the workflows execution engine plugin (zero runtime/plugin deps).",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "sideEffects": false
+}

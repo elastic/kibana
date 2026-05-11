@@ -2688,6 +2688,8 @@
       "@kbn/workflows/*": ["src/platform/packages/shared/kbn-workflows/*"],
       "@kbn/workflows-execution-engine": ["src/platform/plugins/shared/workflows_execution_engine"],
       "@kbn/workflows-execution-engine/*": ["src/platform/plugins/shared/workflows_execution_engine/*"],
+      "@kbn/workflows-execution-engine-utils": ["src/platform/packages/shared/kbn-workflows-execution-engine-utils"],
+      "@kbn/workflows-execution-engine-utils/*": ["src/platform/packages/shared/kbn-workflows-execution-engine-utils/*"],
       "@kbn/workflows-extensions": ["src/platform/plugins/shared/workflows_extensions"],
       "@kbn/workflows-extensions/*": ["src/platform/plugins/shared/workflows_extensions/*"],
       "@kbn/workflows-extensions-example": ["examples/workflows_extensions_example"],

@@ -1,0 +1,7 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/workflows-execution-engine-utils",
+  "owner": ["@elastic/workflows-eng"],
+  "group": "platform",
+  "visibility": "shared"
+}
