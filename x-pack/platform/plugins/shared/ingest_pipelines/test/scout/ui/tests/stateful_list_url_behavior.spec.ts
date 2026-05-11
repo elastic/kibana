@@ -45,8 +45,7 @@ test.describe('Ingest pipelines stateful list URL behavior', { tag: tags.statefu
 
     await expect.poll(() => page.url()).toContain('queryText=test');
 
-    await page.testSubj.locator('filtersDropdown').click();
-    await page.testSubj.locator('managedFilter').click();
+    await pageObjects.ingestPipelines.filterByManaged();
 
     await expect.poll(() => page.url()).toContain('managed=on');
   });
