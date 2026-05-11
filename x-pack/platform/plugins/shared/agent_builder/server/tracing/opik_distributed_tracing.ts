@@ -19,14 +19,26 @@ export interface OpikDistributedTraceHeaders {
   opik_parent_span_id?: string;
 }
 
+interface OpikSpanInfo {
+  traceId: string;
+  spanId: string;
+}
+
 const isValidUuidV7 = (value: unknown): value is string =>
   typeof value === 'string' && uuidValidate(value) && uuidVersion(value) === 7;
 
 /**
- * Reads opik_trace_id and opik_parent_span_id from request headers and sets
+ * Shared registry mapping OTel span ID → Opik span info. Populated by
+ * attachOpikDistributedTrace for the boundary span and by the processor for
+ * all descendant spans. Entries are removed in onEnd to avoid memory leaks.
+ */
+const opikSpanRegistry = new Map<string, OpikSpanInfo>();
+
+/**
+ * Reads opik_trace_id and opik_parent_span_id from request headers, sets
  * opik.trace_id, opik.span_id, and opik.parent_span_id as OTel span attributes
- * on the boundary span. This links the span to an existing Opik trace created
- * on the client side.
+ * on the boundary span, and registers the span in the shared registry so the
+ * OpikDistributedTracingSpanProcessor can propagate opik context to descendants.
  *
  * Returns true if the headers contained valid Opik trace context, false otherwise.
  */
@@ -40,9 +52,11 @@ export const attachOpikDistributedTrace = (
     return false;
   }
 
+  const opikSpanId = uuidv7();
+
   const attrs: Record<string, string> = {
     [OPIK_TRACE_ID]: traceId,
-    [OPIK_SPAN_ID]: uuidv7(),
+    [OPIK_SPAN_ID]: opikSpanId,
   };
 
   if (parentSpanId && isValidUuidV7(parentSpanId)) {
@@ -50,6 +64,10 @@ export const attachOpikDistributedTrace = (
   }
 
   span.setAttributes(attrs);
+
+  // Register the boundary span so the processor can propagate opik context to descendants.
+  opikSpanRegistry.set(span.spanContext().spanId, { traceId, spanId: opikSpanId });
+
   return true;
 };
 
@@ -58,26 +76,33 @@ export const attachOpikDistributedTrace = (
  * assigning each a new opik.span_id and setting opik.parent_span_id to the
  * parent's opik.span_id. This ensures every child span lands under the correct
  * Opik trace in the Opik UI.
+ *
+ * Uses a shared registry keyed by OTel span ID to track opik span assignments,
+ * avoiding any cast of api.Span to ReadableSpan to read parent attributes.
  */
 export class OpikDistributedTracingSpanProcessor implements tracing.SpanProcessor {
   onStart(span: tracing.Span, parentContext: api.Context): void {
     if (!isInferenceSpan(span, parentContext)) return;
 
-    const parentSpan = trace.getSpan(parentContext);
-    if (!parentSpan) return;
+    const parentOtelSpanId = trace.getSpan(parentContext)?.spanContext().spanId;
+    const parentOpikInfo = parentOtelSpanId ? opikSpanRegistry.get(parentOtelSpanId) : undefined;
 
-    const { attributes: attrs = {} } = parentSpan as unknown as tracing.ReadableSpan;
-    const parentTraceId = attrs[OPIK_TRACE_ID];
-    const parentSpanId = attrs[OPIK_SPAN_ID];
+    if (!parentOpikInfo) return;
 
-    if (!isValidUuidV7(parentTraceId) || !isValidUuidV7(parentSpanId)) return;
+    const newOpikSpanId = uuidv7();
+    opikSpanRegistry.set(span.spanContext().spanId, {
+      traceId: parentOpikInfo.traceId,
+      spanId: newOpikSpanId,
+    });
 
-    span.setAttribute(OPIK_TRACE_ID, parentTraceId);
-    span.setAttribute(OPIK_SPAN_ID, uuidv7());
-    span.setAttribute(OPIK_PARENT_SPAN_ID, parentSpanId);
+    span.setAttribute(OPIK_TRACE_ID, parentOpikInfo.traceId);
+    span.setAttribute(OPIK_SPAN_ID, newOpikSpanId);
+    span.setAttribute(OPIK_PARENT_SPAN_ID, parentOpikInfo.spanId);
   }
 
-  onEnd(_span: tracing.ReadableSpan): void {}
+  onEnd(span: tracing.ReadableSpan): void {
+    opikSpanRegistry.delete(span.spanContext().spanId);
+  }
 
   forceFlush(): Promise<void> {
     return Promise.resolve();
