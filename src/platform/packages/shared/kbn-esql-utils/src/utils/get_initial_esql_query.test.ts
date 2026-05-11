@@ -78,7 +78,7 @@ describe('getInitialESQLQuery', () => {
         filterable: false,
       },
     ] as DataView['fields'];
-    const dataView = getDataView('logs*', fields, 'timestamp');
+    const dataView = getDataView('logs*', fields, '@timestamp');
     expect(getInitialESQLQuery(dataView)).toBe('FROM logs*');
   });
 
@@ -151,7 +151,7 @@ describe('getInitialESQLQuery', () => {
         filterable: false,
       },
     ] as DataView['fields'];
-    const dataView = getDataView('logs*', fields, 'timestamp');
+    const dataView = getDataView('logs*', fields, '@timestamp');
     expect(getInitialESQLQuery(dataView, { language: 'lucene', query: 'error' })).toBe(
       'FROM logs* | WHERE QSTR("""error""")'
     );
@@ -176,7 +176,7 @@ describe('getInitialESQLQuery', () => {
         filterable: false,
       },
     ] as DataView['fields'];
-    const dataView = getDataView('logs*', fields, 'timestamp');
+    const dataView = getDataView('logs*', fields, '@timestamp');
     expect(getInitialESQLQuery(dataView, { language: 'unknown', query: 'error' })).toBe(
       'FROM logs*'
     );
