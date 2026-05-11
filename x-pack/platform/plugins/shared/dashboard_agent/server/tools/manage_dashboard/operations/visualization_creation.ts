@@ -11,7 +11,6 @@ import type { AddPanelsItemInput } from './add_panels';
 import type { VisualizationPanelInput } from './panel_kinds';
 
 type ResolvedVisualizationPanel = Awaited<ReturnType<ResolveVisualizationConfig>>;
-export type VisualizationCreationOperationType = 'add_section' | 'add_panels';
 
 export type VisualizationCreationRequest =
   | {
@@ -143,24 +142,13 @@ export const resolveVisualizationCreationRequests = async ({
 
 /**
  * Return the resolved create results for one operation during the apply phase.
- * Throw if an operation that should have resolved create results does not have them.
+ * Returns an empty array for operations with no visualization panels
  */
 export const getResolvedVisualizationCreationRequests = ({
   resolvedRequestsByOperationIndex,
   operationIndex,
-  operationType,
 }: {
   resolvedRequestsByOperationIndex: Map<number, ResolvedVisualizationCreationRequest[]>;
   operationIndex: number;
-  operationType: VisualizationCreationOperationType;
-}): ResolvedVisualizationCreationRequest[] => {
-  const resolvedRequests = resolvedRequestsByOperationIndex.get(operationIndex);
-
-  if (!resolvedRequests) {
-    throw new Error(
-      `Missing pre-resolved visualization requests for ${operationType} operation at index ${operationIndex}.`
-    );
-  }
-
-  return resolvedRequests;
-};
+}): ResolvedVisualizationCreationRequest[] =>
+  resolvedRequestsByOperationIndex.get(operationIndex) ?? [];

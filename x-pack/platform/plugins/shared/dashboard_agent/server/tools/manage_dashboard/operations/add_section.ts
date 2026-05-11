@@ -47,18 +47,12 @@ export const addSectionOperation = defineOperation({
     };
 
     if (operation.panels) {
-      const hasVisualizationPanel = operation.panels.some(
-        (panel) => panel.kind === 'visualization'
+      const resolvedRequestsByInputIndex = new Map(
+        getResolvedVisualizationCreationRequests({
+          resolvedRequestsByOperationIndex: context.resolvedVisualizationCreationRequests,
+          operationIndex,
+        }).map((resolvedRequest) => [resolvedRequest.request.panelInputIndex, resolvedRequest])
       );
-      const resolvedRequestsByInputIndex = hasVisualizationPanel
-        ? new Map(
-            getResolvedVisualizationCreationRequests({
-              resolvedRequestsByOperationIndex: context.resolvedVisualizationCreationRequests,
-              operationIndex,
-              operationType: operation.operation,
-            }).map((resolvedRequest) => [resolvedRequest.request.panelInputIndex, resolvedRequest])
-          )
-        : new Map<number, never>();
 
       const sectionPanels: AttachmentPanel[] = [];
 
