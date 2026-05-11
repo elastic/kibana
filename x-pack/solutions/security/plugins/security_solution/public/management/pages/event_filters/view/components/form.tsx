@@ -31,10 +31,12 @@ import {
   ENDPOINT_ARTIFACT_OPERATORS,
   hasWrongOperatorWithWildcard,
   hasPartialCodeSignatureEntry,
+  hasEscaping,
 } from '@kbn/securitysolution-list-utils';
 import {
   WildCardWithWrongOperatorCallout,
   PartialCodeSignatureCallout,
+  UnnecessaryEscapingCallout,
 } from '@kbn/securitysolution-exception-list-components';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
@@ -136,6 +138,9 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] = useState<boolean>(
       hasWrongOperatorWithWildcard([exception])
     );
+    const [hasUnnecessaryEscaping, setHasUnnecessaryEscaping] = useState<boolean>(
+      hasEscaping([exception])
+    );
 
     const [hasPartialCodeSignatureWarning, setHasPartialCodeSignatureWarning] =
       useState<boolean>(false);
@@ -186,14 +191,18 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         onChange({
           item,
           isValid: isFormValid && areConditionsValid && hasFormChanged,
-          confirmModalLabels: hasWildcardWithWrongOperator
-            ? CONFIRM_WARNING_MODAL_LABELS(
-                i18n.translate('xpack.securitySolution.eventFilter.flyoutForm.confirmModal.name', {
-                  defaultMessage: 'event filter',
-                }),
-                { hasWildcardWithWrongOperator }
-              )
-            : undefined,
+          confirmModalLabels:
+            hasWildcardWithWrongOperator || hasUnnecessaryEscaping
+              ? CONFIRM_WARNING_MODAL_LABELS(
+                  i18n.translate(
+                    'xpack.securitySolution.eventFilter.flyoutForm.confirmModal.name',
+                    {
+                      defaultMessage: 'event filter',
+                    }
+                  ),
+                  { hasWildcardWithWrongOperator, hasUnnecessaryEscaping }
+                )
+              : undefined,
         });
       },
       [
@@ -203,6 +212,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         isFormValid,
         onChange,
         hasWildcardWithWrongOperator,
+        hasUnnecessaryEscaping,
       ]
     );
 
@@ -505,8 +515,8 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           setHasDuplicateFields(false);
         }
 
-        // handle wildcard with wrong operator case
         setHasWildcardWithWrongOperator(hasWrongOperatorWithWildcard(arg.exceptionItems));
+        setHasUnnecessaryEscaping(hasEscaping(arg.exceptionItems));
         setHasPartialCodeSignatureWarning(hasPartialCodeSignatureEntry(arg.exceptionItems));
 
         const updatedItem: Partial<ArtifactFormComponentProps['item']> =
@@ -652,9 +662,11 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         {detailsSection}
         <EuiHorizontalRule />
         {criteriaSection}
-        {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
-        {hasWildcardWithWrongOperator && hasPartialCodeSignatureWarning && <EuiSpacer size="xs" />}
-        {hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+          {hasUnnecessaryEscaping && <UnnecessaryEscapingCallout />}
+          {hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
+        </EuiFlexGroup>
         {hasDuplicateFields && (
           <>
             <EuiSpacer size="xs" />
