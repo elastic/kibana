@@ -11,17 +11,12 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { WorkflowDisabledError } from '@kbn/workflows/common/errors';
 import {
   createExternalService,
   type ScheduleWorkflowServiceFunction,
   type WorkflowsServiceFunction,
 } from './service';
-
-const createDisabledWorkflowError = (message: string) => {
-  const error = new Error(message);
-  (error as Error & { isUserError: boolean }).isUserError = true;
-  return error;
-};
 
 describe('Workflows Service', () => {
   let mockLogger: jest.Mocked<Logger>;
@@ -227,11 +222,7 @@ describe('Workflows Service', () => {
     it('runWorkflow classifies disabled workflow error as user error', async () => {
       const mockWorkflowService: WorkflowsServiceFunction = jest
         .fn()
-        .mockRejectedValue(
-          createDisabledWorkflowError(
-            'Workflow is disabled: test-workflow-id. Enable the workflow to run it.'
-          )
-        );
+        .mockRejectedValue(new WorkflowDisabledError('test-workflow-id'));
 
       const service = createExternalService(
         actionId,
@@ -509,11 +500,7 @@ describe('Workflows Service', () => {
     it('scheduleWorkflow classifies disabled workflow error as user error', async () => {
       const mockScheduleWorkflowService: ScheduleWorkflowServiceFunction = jest
         .fn()
-        .mockRejectedValue(
-          createDisabledWorkflowError(
-            'Workflow is disabled: new-workflow. Enable the workflow to run it.'
-          )
-        );
+        .mockRejectedValue(new WorkflowDisabledError('new-workflow'));
 
       const service = createExternalService(
         actionId,
