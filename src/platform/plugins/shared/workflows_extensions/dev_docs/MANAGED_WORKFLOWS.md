@@ -97,6 +97,50 @@ async function onEntityCreated(entityId: string, spaceId: string) {
 
 Installs are idempotent on `(definition version, persisted values)`, so it is safe to call `install` again for the same id without checking whether the document already exists.
 
+## 3.1) Signaling readiness (`ready()`)
+
+After installing all **static** workflows in `start()`, call `managed.ready()` to signal that the plugin has completed its startup installs:
+
+```ts
+// start()
+const managed = await workflowsExtensions.initManagedWorkflowsClient(MY_PLUGIN_ID);
+
+await managed.install(WORKFLOW_A_ID, { spaceId: 'default' });
+await managed.install(WORKFLOW_B_ID, { workflowIdSuffix: 'us-east', spaceId: 'us-east' });
+await managed.install(WORKFLOW_B_ID, { workflowIdSuffix: 'eu-west', spaceId: 'eu-west' });
+
+await managed.ready();
+```
+
+### What `ready()` does
+
+1. **Marks the startup window as closed** for this plugin. Any subsequent `install` of a static workflow logs a warning (the operation still succeeds, but it won't be tracked for reconciliation).
+2. **Triggers per-plugin reconciliation** — the platform compares the set of `(workflowDocumentId, spaceId)` pairs that were installed during the startup window against all persisted static documents owned by this plugin. Any persisted document whose key was **not** seen during this startup is deleted as an orphan.
+
+### Granularity of tracking
+
+Reconciliation tracks installs at the **full document identity** level: `${workflowDocumentId}:${spaceId}`. The `workflowDocumentId` includes any suffix (e.g., `system-my-wf-us-east`). This means:
+
+- Different suffix-based instances are tracked independently.
+- The same definition in different spaces is tracked independently.
+- Removing one suffix variant or one space from the `start()` install set causes only that specific instance to be cleaned up — other instances of the same definition remain untouched.
+
+**Example:**
+
+Previous startup installed:
+- `system-monitor-host-a` in space `prod`
+- `system-monitor-host-b` in space `prod`
+- `system-monitor-host-a` in space `staging`
+
+This startup only installs:
+- `system-monitor-host-b` in space `prod`
+
+After `ready()`: the two instances that were not re-installed (`system-monitor-host-a:prod` and `system-monitor-host-a:staging`) are removed.
+
+### Dynamic workflows are excluded
+
+Reconciliation only targets documents whose definition has `lifecycle: 'static'`. Dynamic workflows are never auto-cleaned — their lifecycle is explicitly managed by the owning plugin via `install`/`uninstall`.
+
 ## 4) Space-scoped vs global installs
 
 Managed workflows can live in a specific space or in the **global** space (`'*'`, exported as `GLOBAL_WORKFLOW_SPACE_ID` from `@kbn/workflows/server`).
@@ -214,8 +258,8 @@ management: {
 
 | Field | Value | Behavior |
 |---|---|---|
-| `lifecycle` | `static` | Baseline workflow that should exist continuously. Typically installed at start. |
-| `lifecycle` | `dynamic` | Instance-like workflow created from runtime context (per entity / tenant / etc.). |
+| `lifecycle` | `static` | Baseline workflow that must be installed every startup before `ready()`. Any persisted static instance not re-installed during the startup window is removed by reconciliation. |
+| `lifecycle` | `dynamic` | Instance-like workflow created on-demand from runtime context (per entity / tenant / etc.). Not auto-removed by per-plugin reconciliation — lifecycle is explicitly managed by the owning plugin via `install`/`uninstall`. |
 | `versionStrategy` | `auto` | Startup reconciliation may re-apply updates when the definition version changes. |
 | `versionStrategy` | `on_adopt` | Startup never auto-upgrades. Updates only happen on explicit `install`. |
 | `enablement` | `enforced` | Managed updates always re-apply enabled state from the definition. |
@@ -223,8 +267,12 @@ management: {
 
 Choosing rules of thumb:
 
-- platform-owned background workflow → `static` + `auto` + `enforced`
-- per-entity instance under runtime control → `dynamic` + `on_adopt` + `restorable`
+- platform-owned background workflow with a fixed set of instances → `static` + `auto` + `enforced`
+- per-entity / per-tenant instance created or removed at runtime → `dynamic` + `on_adopt` + `restorable`
+
+Key distinction: **static** workflows are declarative — the set installed at startup is the source of truth and anything not declared is cleaned up. **Dynamic** workflows are imperative — only explicit `uninstall` removes them during normal operation.
+
+> **Global orphan cleanup (both lifecycles):** Regardless of lifecycle, all managed documents are removed at startup if their owning plugin is no longer registered or their definition has been removed from `@kbn/workflows/managed`. This ensures that uninstalling a plugin or deleting a definition leaves no dangling documents behind.
 
 ## 7) Authoring a definition
 
@@ -396,9 +444,10 @@ Global workflows (`spaceId: '*'`) are visible from any space, but each execution
 2. Add the definition to `managedWorkflowDefinitions` in `managed/index.ts`, and re-export the id from the package barrel.
 3. Register the owner plugin id in `setup()`.
 4. Initialize the plugin-scoped client in `start()`.
-5. Install baseline workflows at `start()`. Use on-demand installs (the same `install` API) for dynamic instances.
-6. Pick an explicit `spaceId` strategy: space-scoped or global.
-7. For multiple instances, always pass `workflowIdSuffix` (or `workflowId`) — never rely on the definition id alone.
-8. Pick lifecycle policy intentionally (`static`/`dynamic`, `auto`/`on_adopt`, `enforced`/`restorable`).
-9. Use `yamlTemplate` only when install-time values are required.
-10. Execute via `managed.execute(request, ...)`; for dynamic instances, pass the deterministic `workflowId`.
+5. Install baseline (static) workflows at `start()`. Use on-demand installs (the same `install` API) for dynamic instances.
+6. Call `managed.ready()` after all static installs in `start()` — this triggers per-plugin reconciliation.
+7. Pick an explicit `spaceId` strategy: space-scoped or global.
+8. For multiple instances, always pass `workflowIdSuffix` (or `workflowId`) — never rely on the definition id alone.
+9. Pick lifecycle policy intentionally (`static`/`dynamic`, `auto`/`on_adopt`, `enforced`/`restorable`).
+10. Use `yamlTemplate` only when install-time values are required.
+11. Execute via `managed.execute(request, ...)`; for dynamic instances, pass the deterministic `workflowId`.

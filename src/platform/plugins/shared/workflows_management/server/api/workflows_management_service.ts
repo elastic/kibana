@@ -165,6 +165,7 @@ export class WorkflowsService {
     this.managedWorkflowsService = new ManagedWorkflowsService({
       crudService: this.crudService,
       workflowsExecutionEngine: this.workflowsExecutionEngine,
+      logger: this.logger,
     });
   }
 
@@ -393,8 +394,8 @@ export class WorkflowsService {
 
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
-    options: ManagedWorkflowOperationOptions & { isStartupReconcile?: boolean },
-    registeredPluginId?: string
+    options: ManagedWorkflowOperationOptions,
+    registeredPluginId: string
   ): Promise<void> {
     await this.ensureInitialized();
     return this.managedWorkflowsService.installManagedWorkflow(id, options, registeredPluginId);
@@ -403,7 +404,7 @@ export class WorkflowsService {
   public async uninstallManagedWorkflow(
     id: ManagedWorkflowId,
     options: ManagedWorkflowOperationOptions,
-    registeredPluginId?: string
+    registeredPluginId: string
   ): Promise<void> {
     await this.ensureInitialized();
     return this.managedWorkflowsService.uninstallManagedWorkflow(id, options, registeredPluginId);
@@ -413,7 +414,7 @@ export class WorkflowsService {
     id: ManagedWorkflowId,
     request: KibanaRequest,
     options: ExecuteManagedWorkflowOptions,
-    registeredPluginId?: string
+    registeredPluginId: string
   ): Promise<string> {
     await this.ensureInitialized();
     return this.managedWorkflowsService.executeManagedWorkflow(
@@ -432,13 +433,13 @@ export class WorkflowsService {
     return this.managedWorkflowsService.registerManagedWorkflowPlugin(pluginId, options);
   }
 
-  public async reconcileManagedWorkflowOrphans(pluginIds: string[]): Promise<void> {
+  public async pluginReady(pluginId: string): Promise<void> {
     await this.ensureInitialized();
-    return this.managedWorkflowsService.reconcileManagedWorkflowOrphans(pluginIds);
+    return this.managedWorkflowsService.pluginReady(pluginId);
   }
 
-  public async reconcileAutoManagedWorkflowUpdates(): Promise<void> {
+  public async cleanupUnregisteredOrphans(registeredPluginIds: string[]): Promise<void> {
     await this.ensureInitialized();
-    return this.managedWorkflowsService.reconcileAutoManagedWorkflowUpdates();
+    return this.managedWorkflowsService.cleanupUnregisteredOrphans(registeredPluginIds);
   }
 }

@@ -202,6 +202,11 @@ export class WorkflowsExtensionsServerPlugin
           'No managed workflows system API provider set, using noop uninstall to avoid errors.'
         );
       },
+      ready: async () => {
+        this.logger.warn(
+          'No managed workflows system API provider set, using noop ready to avoid errors.'
+        );
+      },
     };
   }
 
@@ -212,6 +217,7 @@ export class WorkflowsExtensionsServerPlugin
     return {
       install: lifecycleClient.install,
       uninstall: lifecycleClient.uninstall,
+      ready: lifecycleClient.ready,
       execute: async (request, id, options) => {
         const requestClient = this.workflowsClientProvider
           ? await this.workflowsClientProvider(request)

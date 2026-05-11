@@ -99,6 +99,8 @@ export class WorkflowsExtensionsExamplePlugin
         values: { recipient: 'World' },
       });
 
+      await client.ready();
+
       this.logger.info('Workflows Extensions Example: Managed workflow installed successfully');
     } catch (error) {
       this.logger.warn('Workflows Extensions Example: Failed to install managed workflow', {

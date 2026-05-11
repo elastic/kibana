@@ -117,23 +117,20 @@ export class WorkflowsPlugin
 
     if (this.workflowsService) {
       const managedWorkflowPluginIds = plugins.workflowsExtensions.getManagedWorkflowPluginIds();
-      void this.runManagedWorkflowsStartupReconciliation(managedWorkflowPluginIds);
+      void this.runGlobalOrphanCleanup(managedWorkflowPluginIds);
     }
 
     this.logger.debug('Workflows Management: Started');
     return {};
   }
 
-  private async runManagedWorkflowsStartupReconciliation(pluginIds: string[]): Promise<void> {
+  private async runGlobalOrphanCleanup(registeredPluginIds: string[]): Promise<void> {
     try {
-      await this.workflowsService?.reconcileManagedWorkflowOrphans(pluginIds);
-      await this.workflowsService?.reconcileAutoManagedWorkflowUpdates();
+      await this.workflowsService?.cleanupUnregisteredOrphans(registeredPluginIds);
     } catch (error) {
       this.logger.warn(
-        'Workflows Management: Failed to complete managed workflows startup reconciliation',
-        {
-          error,
-        }
+        'Workflows Management: Failed to complete global orphan cleanup for unregistered workflows',
+        { error }
       );
     }
   }

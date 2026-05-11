@@ -89,7 +89,6 @@ export const createManagedWorkflowsSystemApiProvider = (
           logger.debug('Workflows is not available in this environment. Managed install ignored.');
           return;
         }
-        await workflowsService.registerManagedWorkflowPlugin(pluginId, options);
         await workflowsService.installManagedWorkflow(id, options, pluginId);
       },
       uninstall: async (id, options) => {
@@ -99,8 +98,14 @@ export const createManagedWorkflowsSystemApiProvider = (
           );
           return;
         }
-        await workflowsService.registerManagedWorkflowPlugin(pluginId, options);
         await workflowsService.uninstallManagedWorkflow(id, options, pluginId);
+      },
+      ready: async () => {
+        if (!isWorkflowsAvailable) {
+          logger.debug('Workflows is not available in this environment. Managed ready() ignored.');
+          return;
+        }
+        await workflowsService.pluginReady(pluginId);
       },
     };
   };
