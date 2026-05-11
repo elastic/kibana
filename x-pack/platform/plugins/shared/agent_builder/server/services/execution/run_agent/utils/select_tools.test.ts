@@ -93,6 +93,7 @@ describe('selectTools', () => {
       experimentalFeatures: {
         filestore: false,
       } as any,
+      todoStateManager: { get: jest.fn(), set: jest.fn() } as any,
     });
 
     // Origins are now included in each selected tool payload passed to ToolManager.addTools.
@@ -156,6 +157,7 @@ describe('selectTools', () => {
         runInternalTool: jest.fn(),
       } as any,
       experimentalFeatures: { filestore: false } as any,
+      todoStateManager: { get: jest.fn(), set: jest.fn() } as any,
     });
 
     // Attachment-scoped bounded tools are treated as inline because they are not registry entries.

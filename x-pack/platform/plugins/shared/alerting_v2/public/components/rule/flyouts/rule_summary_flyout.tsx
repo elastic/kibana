@@ -40,6 +40,7 @@ export interface RuleSummaryFlyoutProps {
   rule: RuleApiResponse;
   onClose: () => void;
   onEdit: (rule: RuleApiResponse) => void;
+  onQuickEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
   onToggleEnabled: (rule: RuleApiResponse) => void;
@@ -49,6 +50,7 @@ export const RuleSummaryFlyout = ({
   rule,
   onClose,
   onEdit,
+  onQuickEdit,
   onClone,
   onDelete,
   onToggleEnabled,
@@ -82,6 +84,17 @@ export const RuleSummaryFlyout = ({
             responsive={false}
             alignItems="center"
           >
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="pencil"
+                color="text"
+                onClick={() => onQuickEdit(rule)}
+                aria-label={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.quickEdit', {
+                  defaultMessage: 'Quick edit rule',
+                })}
+                data-test-subj="ruleSummaryFlyoutQuickEditButton"
+              />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <RuleActionsMenu
                 rule={rule}
