@@ -8,12 +8,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
   EuiText,
+  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import type { CreateAPIKeyResult } from '@kbn/security-api-key-management';
@@ -22,14 +24,15 @@ import { CardLogoIcon } from './pages/ingest_hub/ingest_hub_components';
 import { API_ENDPOINTS, type ApiEndpoint } from './pages/ingest_hub/ingest_hub_data';
 import { ApiEndpointCodeBlockWithStyledCopy } from './api_endpoint_code_block_with_styled_copy';
 import { ApiEndpointSecretCodeBlockWithToolbar } from './api_endpoint_secret_code_block_with_toolbar';
+import { Version2ApiEndpointsCreateApiKeyButton } from './version_2_api_endpoints_create_api_key_button';
 
-/** Compact min height for `// Label` + value (two lines) inside each snippet block. */
+/** Base min height for snippet code blocks; endpoint/secret value rows tighten to one line in child CSS. */
 const API_ENDPOINT_SNIPPET_BLOCK_MIN_HEIGHT_PX = 46;
 
-/** Default endpoint shown when the list is collapsed (matches primary REST use case). */
-const ELASTICSEARCH_ENDPOINT_ID = 'endpoint-elasticsearch';
-/** Also pin OTLP in collapsed view (primary ingest path). */
+/** First card when the list is collapsed (primary OTel ingest). */
 const OTLP_ENDPOINT_ID = 'endpoint-otlp';
+/** Second card when collapsed (APM path). */
+const APM_ENDPOINT_ID = 'endpoint-apm';
 
 export interface Version2ApiEndpointsSplitProps {
   /** Lowercased trimmed filter string, or empty for full list */
@@ -46,6 +49,11 @@ export interface Version2ApiEndpointsSplitProps {
   onApiKeyCreated: (result: CreateAPIKeyResult, endpointId: string) => void;
   /** `data-test-subj` for the Create API key split control (without suffix). */
   createApiKeyDataTestSubj: string;
+  /**
+   * Version 1: credential create/manage only in the page header; cards show titles + copy only
+   * for secrets (no per-card New token / Create key / manage popover on the snippet).
+   */
+  unifiedHeaderCredentialActions?: boolean;
 }
 
 interface ApiEndpointCardProps {
@@ -55,6 +63,7 @@ interface ApiEndpointCardProps {
   secretsByEndpointId?: Record<string, string>;
   apiKeyManageHref: string;
   onApiKeyCreated: (result: CreateAPIKeyResult, endpointId: string) => void;
+  unifiedHeaderCredentialActions: boolean;
 }
 
 const ApiEndpointCard: React.FC<ApiEndpointCardProps> = ({
@@ -64,6 +73,7 @@ const ApiEndpointCard: React.FC<ApiEndpointCardProps> = ({
   secretsByEndpointId,
   apiKeyManageHref,
   onApiKeyCreated,
+  unifiedHeaderCredentialActions,
 }) => {
   const { euiTheme } = useEuiTheme();
   const origin = window.location.origin;
@@ -73,8 +83,6 @@ const ApiEndpointCard: React.FC<ApiEndpointCardProps> = ({
   const secretEmptyPlaceholder = isEnrollment ? 'No enrollment token yet' : 'No API key yet';
   const displayedSecret = secretValue ?? endpoint.sampleSecret ?? secretEmptyPlaceholder;
   const secretIsMissing = displayedSecret === secretEmptyPlaceholder;
-  const endpointFieldLabel = endpoint.id === 'endpoint-cloud-id' ? 'Cloud ID' : 'Endpoint';
-  const secretFieldLabel = isEnrollment ? 'Enrollment token' : 'API key';
   const fleetUrl = endpoint.openUrl?.(origin);
   const codeBlockShortCss = css`
     &.euiCodeBlock {
@@ -130,9 +138,10 @@ const ApiEndpointCard: React.FC<ApiEndpointCardProps> = ({
     : undefined;
 
   const showSecretRowAction =
-    (isEnrollment && Boolean(fleetUrl)) ||
-    endpoint.keyType === 'api_key' ||
-    endpoint.keyType === 'kibana_note';
+    !unifiedHeaderCredentialActions &&
+    ((isEnrollment && Boolean(fleetUrl)) ||
+      endpoint.keyType === 'api_key' ||
+      endpoint.keyType === 'kibana_note');
 
   const endpointSnippetAriaLabel = i18n.translate(
     'xpack.observability_onboarding.version2ApiEndpoints.endpointSnippetAriaLabel',
@@ -146,6 +155,50 @@ const ApiEndpointCard: React.FC<ApiEndpointCardProps> = ({
       defaultMessage: 'API key or enrollment snippet',
     }
   );
+  const apiKeysSectionTitle = i18n.translate(
+    'xpack.observability_onboarding.version2ApiEndpoints.apiKeysSectionTitle',
+    {
+      defaultMessage: 'API Keys',
+    }
+  );
+  const enrollmentTokenSectionTitle = i18n.translate(
+    'xpack.observability_onboarding.version2ApiEndpoints.enrollmentTokenSectionTitle',
+    {
+      defaultMessage: 'Enrollment token',
+    }
+  );
+  const secretCredentialsSectionTitle = isEnrollment
+    ? enrollmentTokenSectionTitle
+    : apiKeysSectionTitle;
+  const endpointSectionTitleEndpoint = i18n.translate(
+    'xpack.observability_onboarding.version2ApiEndpoints.endpointSectionTitle',
+    {
+      defaultMessage: 'Endpoint',
+    }
+  );
+  const endpointSectionTitleCloudId = i18n.translate(
+    'xpack.observability_onboarding.version2ApiEndpoints.cloudIdSectionTitle',
+    {
+      defaultMessage: 'Cloud ID',
+    }
+  );
+  const endpointSectionTitle =
+    endpoint.id === 'endpoint-cloud-id'
+      ? endpointSectionTitleCloudId
+      : endpointSectionTitleEndpoint;
+  const newKeyButtonLabel = i18n.translate(
+    'xpack.observability_onboarding.version2ApiEndpoints.newKeyButton',
+    {
+      defaultMessage: 'New key',
+    }
+  );
+  const newTokenButtonLabel = i18n.translate(
+    'xpack.observability_onboarding.version2ApiEndpoints.newTokenButton',
+    {
+      defaultMessage: 'New token',
+    }
+  );
+  const newCredentialButtonLabel = isEnrollment ? newTokenButtonLabel : newKeyButtonLabel;
 
   /** One-line preview under the endpoint name (uses `ApiEndpoint.panelActionTitle` from ingest data). */
   const cardTeaserCss = css`
@@ -214,7 +267,7 @@ const ApiEndpointCard: React.FC<ApiEndpointCardProps> = ({
         <div
           data-test-subj={`${dataTestSubjPrefix}Block--${endpoint.id}`}
           css={css`
-            margin-block-start: 12px;
+            margin-block-start: 24px;
           `}
         >
           <div
@@ -225,49 +278,135 @@ const ApiEndpointCard: React.FC<ApiEndpointCardProps> = ({
               align-self: stretch;
               width: 100%;
               min-width: 0;
-              row-gap: ${euiTheme.size.s};
+              row-gap: 24px;
             `}
           >
             <div
+              data-test-subj={`${dataTestSubjPrefix}EndpointSection--${endpoint.id}`}
               css={css`
+                display: flex;
+                flex-direction: column;
+                align-self: stretch;
+                width: 100%;
                 min-width: 0;
-                min-inline-size: 0;
-                inline-size: 100%;
+                row-gap: 8px;
               `}
             >
-              <ApiEndpointCodeBlockWithStyledCopy
-                copyValue={endpointUrl}
-                lineCommentLabel={endpointFieldLabel}
-                ariaLabel={endpointSnippetAriaLabel}
-                dataTestSubj={`${dataTestSubjPrefix}EndpointCode--${endpoint.id}`}
-                copyDataTestSubj={`${dataTestSubjPrefix}EndpointCopy--${endpoint.id}`}
-                codeBlockShortCss={codeBlockShortCss}
-              />
+              <EuiTitle size="xxxs">
+                <h4
+                  css={css`
+                    margin-block: 0;
+                  `}
+                >
+                  {endpointSectionTitle}
+                </h4>
+              </EuiTitle>
+              <div
+                css={css`
+                  min-width: 0;
+                  min-inline-size: 0;
+                  inline-size: 100%;
+                `}
+              >
+                <ApiEndpointCodeBlockWithStyledCopy
+                  copyValue={endpointUrl}
+                  ariaLabel={endpointSnippetAriaLabel}
+                  dataTestSubj={`${dataTestSubjPrefix}EndpointCode--${endpoint.id}`}
+                  copyDataTestSubj={`${dataTestSubjPrefix}EndpointCopy--${endpoint.id}`}
+                  codeBlockShortCss={codeBlockShortCss}
+                />
+              </div>
             </div>
             <div
+              data-test-subj={`${dataTestSubjPrefix}SecretSection--${endpoint.id}`}
               css={css`
+                display: flex;
+                flex-direction: column;
+                align-self: stretch;
+                width: 100%;
                 min-width: 0;
-                min-inline-size: 0;
-                inline-size: 100%;
+                row-gap: 8px;
               `}
             >
-              <ApiEndpointSecretCodeBlockWithToolbar
-                displayedSecret={displayedSecret}
-                secretIsMissing={secretIsMissing}
-                lineCommentLabel={secretFieldLabel}
-                ariaLabel={secretSnippetAriaLabel}
-                dataTestSubj={`${dataTestSubjPrefix}SecretCode--${endpoint.id}`}
-                codeBlockShortCss={codeBlockShortCss}
-                secretCodeSubduedCss={secretCodeSubduedCss}
-                showActions={showSecretRowAction}
-                isEnrollment={isEnrollment}
-                fleetUrl={fleetUrl}
-                apiKeyManageHref={apiKeyManageHref}
-                onApiKeyCreated={(result) => onApiKeyCreated(result, endpoint.id)}
-                createApiKeyDataTestSubj={`${createApiKeyDataTestSubj}--${endpoint.id}`}
-                copySecretDataTestSubj={`${dataTestSubjPrefix}SecretCopy--${endpoint.id}`}
-                createEnrollmentTokenDataTestSubj={`${dataTestSubjPrefix}CreateEnrollmentToken--${endpoint.id}`}
-              />
+              {unifiedHeaderCredentialActions ? (
+                <EuiTitle size="xxxs">
+                  <h4
+                    css={css`
+                      margin-block: 0;
+                    `}
+                  >
+                    {secretCredentialsSectionTitle}
+                  </h4>
+                </EuiTitle>
+              ) : (
+                <EuiFlexGroup
+                  responsive={false}
+                  alignItems="center"
+                  justifyContent="spaceBetween"
+                  gutterSize="s"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xxxs">
+                      <h4
+                        css={css`
+                          margin-block: 0;
+                        `}
+                      >
+                        {secretCredentialsSectionTitle}
+                      </h4>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  {showSecretRowAction ? (
+                    <EuiFlexItem grow={false}>
+                      {isEnrollment && fleetUrl ? (
+                        <EuiButton
+                          data-test-subj={`${dataTestSubjPrefix}NewToken--${endpoint.id}`}
+                          size="xs"
+                          display="base"
+                          fill={false}
+                          iconType="plusInCircle"
+                          iconSide="left"
+                          href={fleetUrl}
+                        >
+                          {newCredentialButtonLabel}
+                        </EuiButton>
+                      ) : (
+                        <Version2ApiEndpointsCreateApiKeyButton
+                          variant="small"
+                          dataTestSubj={`${createApiKeyDataTestSubj}--${endpoint.id}`}
+                          manageApiKeysHref={apiKeyManageHref}
+                          onCreated={(result) => onApiKeyCreated(result, endpoint.id)}
+                        />
+                      )}
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
+              )}
+              <div
+                css={css`
+                  min-width: 0;
+                  min-inline-size: 0;
+                  inline-size: 100%;
+                `}
+              >
+                <ApiEndpointSecretCodeBlockWithToolbar
+                  displayedSecret={displayedSecret}
+                  secretIsMissing={secretIsMissing}
+                  ariaLabel={secretSnippetAriaLabel}
+                  dataTestSubj={`${dataTestSubjPrefix}SecretCode--${endpoint.id}`}
+                  codeBlockShortCss={codeBlockShortCss}
+                  secretCodeSubduedCss={secretCodeSubduedCss}
+                  showActions={false}
+                  isEnrollment={isEnrollment}
+                  fleetUrl={fleetUrl}
+                  apiKeyManageHref={apiKeyManageHref}
+                  onApiKeyCreated={(result) => onApiKeyCreated(result, endpoint.id)}
+                  createApiKeyDataTestSubj={`${createApiKeyDataTestSubj}--${endpoint.id}`}
+                  copySecretDataTestSubj={`${dataTestSubjPrefix}SecretCopy--${endpoint.id}`}
+                  createEnrollmentTokenDataTestSubj={`${dataTestSubjPrefix}CreateEnrollmentToken--${endpoint.id}`}
+                  showManageMenu={!unifiedHeaderCredentialActions}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -285,6 +424,7 @@ export const Version2ApiEndpointsSplit: React.FC<Version2ApiEndpointsSplitProps>
   apiKeyManageHref,
   onApiKeyCreated,
   createApiKeyDataTestSubj,
+  unifiedHeaderCredentialActions = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [showMoreEndpoints, setShowMoreEndpoints] = useState(false);
@@ -309,7 +449,7 @@ export const Version2ApiEndpointsSplit: React.FC<Version2ApiEndpointsSplitProps>
       return [] as ApiEndpoint[];
     }
     const endpointMap = new Map(filteredEndpoints.map((endpoint) => [endpoint.id, endpoint]));
-    const pinned = [ELASTICSEARCH_ENDPOINT_ID, OTLP_ENDPOINT_ID]
+    const pinned = [OTLP_ENDPOINT_ID, APM_ENDPOINT_ID]
       .map((id) => endpointMap.get(id))
       .filter((endpoint): endpoint is ApiEndpoint => Boolean(endpoint));
     if (pinned.length > 0) {
@@ -372,6 +512,7 @@ export const Version2ApiEndpointsSplit: React.FC<Version2ApiEndpointsSplitProps>
     secretsByEndpointId,
     apiKeyManageHref,
     onApiKeyCreated,
+    unifiedHeaderCredentialActions,
   };
 
   return (

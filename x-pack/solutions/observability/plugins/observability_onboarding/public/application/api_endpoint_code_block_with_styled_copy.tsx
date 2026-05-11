@@ -14,10 +14,8 @@ import { i18n } from '@kbn/i18n';
 import { API_ENDPOINT_CODE_TOOLBAR_BUTTON_PROPS } from './api_endpoint_code_toolbar_constants';
 
 export interface ApiEndpointCodeBlockWithStyledCopyProps {
-  /** Plain value copied to the clipboard (excludes the leading `//` comment line). */
+  /** Plain value shown and copied to the clipboard. */
   copyValue: string;
-  /** Comment label, e.g. `Endpoint` or `Cloud ID` (shown as `// Label` on its own line). */
-  lineCommentLabel: string;
   ariaLabel: string;
   dataTestSubj: string;
   copyDataTestSubj: string;
@@ -25,14 +23,12 @@ export interface ApiEndpointCodeBlockWithStyledCopyProps {
 }
 
 /**
- * Code block showing `// {label}` on line 1 and `{value}` on line 2.
- * Uses non-string children so the comment token can be styled independently; copy still pastes only `copyValue`.
+ * Code block showing only `{copyValue}` (section title lives outside). Copy pastes `copyValue`.
  */
 export const ApiEndpointCodeBlockWithStyledCopy: React.FC<
   ApiEndpointCodeBlockWithStyledCopyProps
 > = ({
   copyValue,
-  lineCommentLabel,
   ariaLabel,
   dataTestSubj,
   copyDataTestSubj,
@@ -61,7 +57,17 @@ export const ApiEndpointCodeBlockWithStyledCopy: React.FC<
     }
   );
 
-  const mergedBlockCss = [codeBlockShortCss, toolbarPaddingCss] as Interpolation<Theme>[];
+  const endpointValueOnlyCss = css`
+    min-block-size: 32px;
+    .euiCodeBlock__pre {
+      min-block-size: 32px;
+    }
+    .euiCodeBlock__code {
+      -webkit-line-clamp: 1;
+    }
+  `;
+
+  const mergedBlockCss = [codeBlockShortCss, endpointValueOnlyCss, toolbarPaddingCss] as Interpolation<Theme>[];
 
   return (
     <div
@@ -82,11 +88,7 @@ export const ApiEndpointCodeBlockWithStyledCopy: React.FC<
         data-test-subj={dataTestSubj}
         css={mergedBlockCss}
       >
-        <React.Fragment>
-          <span className="token comment">{`// ${lineCommentLabel}`}</span>
-          {'\n'}
-          <span>{copyValue}</span>
-        </React.Fragment>
+        {copyValue}
       </EuiCodeBlock>
       <div data-test-subj={`${dataTestSubj}Toolbar`} css={toolbarCss}>
         <EuiToolTip content={copyTooltip} disableScreenReaderOutput>

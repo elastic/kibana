@@ -7,6 +7,8 @@
 
 import React, { useState } from 'react';
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -25,13 +27,15 @@ export interface Version2ApiEndpointsCreateApiKeyButtonProps {
   dataTestSubj: string;
   manageApiKeysHref: string;
   onCreated: (result: CreateAPIKeyResult) => void;
-  /** `icon` renders a single control that opens the create flyout (used on code blocks). */
-  variant?: 'split' | 'icon';
+  /** `icon` renders a single control; `small` renders a text empty button; both open the create flyout. */
+  variant?: 'split' | 'icon' | 'small';
+  /** Overrides default “New key” label when `variant="small"`. */
+  smallButtonLabel?: string;
 }
 
 export const Version2ApiEndpointsCreateApiKeyButton: React.FC<
   Version2ApiEndpointsCreateApiKeyButtonProps
-> = ({ dataTestSubj, manageApiKeysHref, onCreated, variant = 'split' }) => {
+> = ({ dataTestSubj, manageApiKeysHref, onCreated, variant = 'split', smallButtonLabel }) => {
   const {
     services: { notifications },
   } = useKibana<ObservabilityOnboardingAppServices>();
@@ -57,6 +61,21 @@ export const Version2ApiEndpointsCreateApiKeyButton: React.FC<
             aria-label={createApiKeyLabel}
           />
         </EuiToolTip>
+      ) : variant === 'small' ? (
+        <EuiButton
+          data-test-subj={dataTestSubj}
+          size="xs"
+          display="base"
+          fill={false}
+          iconType="plusInCircle"
+          iconSide="left"
+          onClick={() => setIsFlyoutOpen(true)}
+        >
+          {smallButtonLabel ??
+            i18n.translate('xpack.observabilityOnboarding.version2ApiEndpoints.newKeyButton', {
+              defaultMessage: 'New key',
+            })}
+        </EuiButton>
       ) : (
         <EuiSplitButton
           data-test-subj={`${dataTestSubj}Split`}

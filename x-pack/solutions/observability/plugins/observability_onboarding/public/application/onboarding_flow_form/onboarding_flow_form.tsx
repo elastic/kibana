@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { FunctionComponent } from 'react';
 import {
@@ -51,6 +51,11 @@ import { CardLogoIcon, IntegrationCard } from '../pages/ingest_hub/ingest_hub_co
 import { useActiveVersion } from '../version_switcher_widget';
 import { Version2ApiEndpointsSplit } from '../version_2_api_endpoints_split';
 import { Version3ApiEndpointsSplit } from '../version_3_api_endpoints_split';
+import {
+  getFleetEnrollmentBaseHref,
+  resolveVersion1HeaderCreateApiKeyTargetEndpointId,
+  Version1ApiEndpointsHeaderCredentialSplit,
+} from '../version_1_api_endpoints_header_credential_split';
 
 const allSections = [...SECTIONS];
 
@@ -110,13 +115,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const [openAccordionId, setOpenAccordionId] = useState<string | null>(null);
   const [flyoutTab, setFlyoutTab] = useState<'details' | 'api-key'>('details');
   const [version2ApiEndpointId, setVersion2ApiEndpointId] = useState(
-    API_ENDPOINTS[0]?.id ?? 'endpoint-elasticsearch'
+    API_ENDPOINTS[0]?.id ?? 'endpoint-otlp'
   );
   /** Package search + results portal target (Version 2: Integrations section below API). */
   const [version2IntegrationsPackageHost, setVersion2IntegrationsPackageHost] =
     useState<HTMLDivElement | null>(null);
   const [version3ApiEndpointId, setVersion3ApiEndpointId] = useState(
-    API_ENDPOINTS[0]?.id ?? 'endpoint-elasticsearch'
+    API_ENDPOINTS[0]?.id ?? 'endpoint-otlp'
   );
   const [version3IntegrationsPackageHost, setVersion3IntegrationsPackageHost] =
     useState<HTMLDivElement | null>(null);
@@ -125,15 +130,32 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const customCards = useCustomCards(createCollectionCardHandler);
 
   const isLandingV2OrV3 = activeVersion === 'version2' || activeVersion === 'version3';
+  /** Same shell as Version 2: Integrations block first, then API. */
+  const integrationsFirstLayout = activeVersion === 'version1' || activeVersion === 'version2';
+  const usesV2StyleApiEndpoints =
+    activeVersion === 'version1' || activeVersion === 'version2' || activeVersion === 'version3';
+
+  const version1HeaderCredentialTargetEndpointId = useMemo(
+    () => resolveVersion1HeaderCreateApiKeyTargetEndpointId(version2ApiEndpointId),
+    [version2ApiEndpointId]
+  );
+  const version1EnrollmentFleetHref = useMemo(
+    () => getFleetEnrollmentBaseHref(window.location.origin),
+    []
+  );
 
   useEffect(() => {
-    if (activeVersion === 'version2' || activeVersion === 'version3') {
+    if (
+      activeVersion === 'version1' ||
+      activeVersion === 'version2' ||
+      activeVersion === 'version3'
+    ) {
       setOpenAccordionId(null);
     }
   }, [activeVersion]);
 
   useEffect(() => {
-    if (activeVersion !== 'version2') {
+    if (activeVersion !== 'version2' && activeVersion !== 'version1') {
       return;
     }
     if (!API_ENDPOINTS.some((e) => e.id === version2ApiEndpointId)) {
@@ -151,7 +173,11 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   }, [activeVersion, version3ApiEndpointId]);
 
   useEffect(() => {
-    if (activeVersion !== 'version2' && activeVersion !== 'version3') {
+    if (
+      activeVersion !== 'version1' &&
+      activeVersion !== 'version2' &&
+      activeVersion !== 'version3'
+    ) {
       setVersion2IntegrationsPackageHost(null);
       setVersion3IntegrationsPackageHost(null);
     }
@@ -169,7 +195,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         excludePackageIdList={searchExcludePackageIdList}
         onLoadingChange={(loading) => setIsPageLoading(loading)}
         portaledUiContainerEl={
-          activeVersion === 'version2'
+          integrationsFirstLayout
             ? version2IntegrationsPackageHost
             : activeVersion === 'version3'
             ? version3IntegrationsPackageHost
@@ -184,12 +210,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         </EuiFlexGroup>
       )}
 
-      {/* Categorized sections — hidden while loading; Version 2/3 stays visible while searching */}
-      {!isPageLoading && (isLandingV2OrV3 || !integrationSearch) && (
+      {/* Categorized sections — hidden while loading; Version 1/2/3 stays visible while searching when using that layout */}
+      {!isPageLoading && (isLandingV2OrV3 || integrationsFirstLayout || !integrationSearch) && (
         <>
-          {activeVersion === 'version2' ? (
+          {integrationsFirstLayout ? (
             <>
-              {/* Integrations first on Version 2 (same shell as below; API block follows) */}
+              {/* Integrations first on Version 1 & 2 (API block follows) */}
               <EuiTitle size="s">
                 <h3>Integrations</h3>
               </EuiTitle>
@@ -236,7 +262,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                     marginBottom: integrationSearch.trim() ? 40 : 0,
                   }}
                 />
-                {(!isLandingV2OrV3 || !integrationSearch) && (
+                {!integrationSearch.trim() && (
                   <>
                     {allSections.map((section, index) => (
                       <div key={section.title}>
@@ -477,41 +503,70 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               alignSelf: 'stretch',
               width: '100%',
               minWidth: 0,
-              ...(activeVersion === 'version2' ? { marginBlockEnd: 24 } : {}),
+              ...(integrationsFirstLayout ? { marginBlockEnd: 24 } : {}),
             }}
           >
             <EuiFlexGroup
-              alignItems="flexStart"
+              alignItems="flexEnd"
+              justifyContent="spaceBetween"
               responsive={true}
               gutterSize="m"
               style={{ flexGrow: 0, width: '100%', minWidth: 0 }}
             >
               <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-                <EuiTitle size="s">
-                  <h3>API endpoints</h3>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                <EuiText size="s" color="subdued">
-                  <p>
-                    Direct access to your deployment&apos;s endpoints. Create an API key to
-                    authenticate.{' '}
-                    <EuiLink
-                      data-test-subj="obsOnboardingLandingV2ApiEndpointsDocumentation"
-                      href="https://www.elastic.co/docs/deploy-manage/api-keys/elasticsearch-api-keys"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      external
-                    >
-                      {i18n.translate(
-                        'xpack.observabilityOnboarding.version2ApiEndpoints.elasticsearchApiKeysLearnMore',
-                        { defaultMessage: 'Learn more' }
-                      )}
-                    </EuiLink>
-                  </p>
-                </EuiText>
+                <div>
+                  <EuiTitle size="s">
+                    <h3>API endpoints</h3>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <EuiText size="s" color="subdued">
+                    <p>
+                      Direct access to your deployment&apos;s endpoints. Create an API key to
+                      authenticate.{' '}
+                      <EuiLink
+                        data-test-subj={
+                          activeVersion === 'version1'
+                            ? 'obsOnboardingLandingV1ApiEndpointsDocumentation'
+                            : 'obsOnboardingLandingV2ApiEndpointsDocumentation'
+                        }
+                        href="https://www.elastic.co/docs/deploy-manage/api-keys/elasticsearch-api-keys"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        external
+                      >
+                        {i18n.translate(
+                          'xpack.observabilityOnboarding.version2ApiEndpoints.elasticsearchApiKeysLearnMore',
+                          { defaultMessage: 'Learn more' }
+                        )}
+                      </EuiLink>
+                    </p>
+                  </EuiText>
+                </div>
               </EuiFlexItem>
+              {activeVersion === 'version1' ? (
+                <EuiFlexItem grow={false}>
+                  <Version1ApiEndpointsHeaderCredentialSplit
+                    dataTestSubj="obsOnboardingLandingV1ApiEndpointsHeaderCredential"
+                    apiKeyManageHref={http.basePath.prepend('/app/management/security/api_keys')}
+                    enrollmentFleetHref={version1EnrollmentFleetHref}
+                    createApiKeyForEndpointId={version1HeaderCredentialTargetEndpointId}
+                    onApiKeyCreated={(result, endpointId) => {
+                      const endpoint = API_ENDPOINTS.find((e) => e.id === endpointId);
+                      if (
+                        endpoint &&
+                        (endpoint.keyType === 'api_key' || endpoint.keyType === 'kibana_note')
+                      ) {
+                        setCreatedKeys((prev) => ({
+                          ...prev,
+                          [endpointId]: result.encoded,
+                        }));
+                      }
+                    }}
+                  />
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
-            {isLandingV2OrV3 ? (
+            {usesV2StyleApiEndpoints ? (
               activeVersion === 'version3' ? (
                 <Version3ApiEndpointsSplit
                   searchQuery=""
@@ -539,10 +594,19 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                   searchQuery=""
                   selectedEndpointId={version2ApiEndpointId}
                   onSelectEndpoint={setVersion2ApiEndpointId}
-                  dataTestSubjPrefix="obsOnboardingLandingV2ApiEndpoint"
+                  dataTestSubjPrefix={
+                    activeVersion === 'version1'
+                      ? 'obsOnboardingLandingV1ApiEndpoint'
+                      : 'obsOnboardingLandingV2ApiEndpoint'
+                  }
                   secretsByEndpointId={createdKeys}
                   apiKeyManageHref={http.basePath.prepend('/app/management/security/api_keys')}
-                  createApiKeyDataTestSubj="obsOnboardingLandingV2CreateApiKey"
+                  createApiKeyDataTestSubj={
+                    activeVersion === 'version1'
+                      ? 'obsOnboardingLandingV1CreateApiKey'
+                      : 'obsOnboardingLandingV2CreateApiKey'
+                  }
+                  unifiedHeaderCredentialActions={activeVersion === 'version1'}
                   onApiKeyCreated={(result, endpointId) => {
                     const endpoint = API_ENDPOINTS.find((e) => e.id === endpointId);
                     if (
@@ -745,7 +809,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
 
           {/* API endpoint detail flyout */}
           {openAccordionId &&
-            !isLandingV2OrV3 &&
+            !usesV2StyleApiEndpoints &&
             (() => {
               const endpoint = API_ENDPOINTS.find((e) => e.id === openAccordionId);
               if (!endpoint) return null;
@@ -901,8 +965,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               );
             })()}
 
-          {/* Integrations section (after API for Version 1 & 3; Version 2 renders Integrations above API) */}
-          {activeVersion !== 'version2' ? (
+          {/* Integrations section (after API for Version 3 and non-ingest layouts; Version 1 & 2 render Integrations above API) */}
+          {!integrationsFirstLayout ? (
             <>
               <div style={{ height: 40 }} />
               <EuiTitle size="s">
@@ -1316,8 +1380,8 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           );
         })()}
 
-      {/* Not ready section — shown once loaded (hidden for ingest hub Version 2) */}
-      {!isPageLoading && activeVersion !== 'version2' && (
+      {/* Not ready section — shown once loaded (hidden when Integrations-first layout: Version 1 & 2) */}
+      {!isPageLoading && !integrationsFirstLayout && (
         <div
           css={css`
             padding-block-end: 80px;

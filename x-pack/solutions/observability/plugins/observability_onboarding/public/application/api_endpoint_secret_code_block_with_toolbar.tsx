@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiCodeBlock, EuiCopy, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCodeBlock,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiCopy,
+  EuiPopover,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { Interpolation, Theme } from '@emotion/react';
 import type { CreateAPIKeyResult } from '@kbn/security-api-key-management';
 import { i18n } from '@kbn/i18n';
@@ -21,8 +30,6 @@ const MASKED_SECRET_DISPLAY = '********************************';
 export interface ApiEndpointSecretCodeBlockWithToolbarProps {
   displayedSecret: string;
   secretIsMissing: boolean;
-  /** Label for the comment line, e.g. `API key` (shown as `// Label` on line 1). */
-  lineCommentLabel: string;
   ariaLabel: string;
   dataTestSubj: string;
   codeBlockShortCss: Interpolation<Theme>;
@@ -36,6 +43,8 @@ export interface ApiEndpointSecretCodeBlockWithToolbarProps {
   createApiKeyDataTestSubj: string;
   copySecretDataTestSubj: string;
   createEnrollmentTokenDataTestSubj: string;
+  /** When false, the manage popover is hidden (e.g. Version 1 uses header actions only). */
+  showManageMenu?: boolean;
 }
 
 export const ApiEndpointSecretCodeBlockWithToolbar: React.FC<
@@ -43,7 +52,6 @@ export const ApiEndpointSecretCodeBlockWithToolbar: React.FC<
 > = ({
   displayedSecret,
   secretIsMissing,
-  lineCommentLabel,
   ariaLabel,
   dataTestSubj,
   codeBlockShortCss,
@@ -56,8 +64,10 @@ export const ApiEndpointSecretCodeBlockWithToolbar: React.FC<
   createApiKeyDataTestSubj,
   copySecretDataTestSubj,
   createEnrollmentTokenDataTestSubj,
+  showManageMenu = true,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const [isSecretActionsOpen, setIsSecretActionsOpen] = useState(false);
 
   const copyTooltip = secretIsMissing
     ? i18n.translate(
@@ -88,19 +98,79 @@ export const ApiEndpointSecretCodeBlockWithToolbar: React.FC<
     }
   );
 
+  const manageCredentialHref = isEnrollment
+    ? fleetUrl != null
+      ? `${fleetUrl.replace(/\/$/, '')}/enrollment-tokens`
+      : undefined
+    : apiKeyManageHref;
+
+  const manageApiKeysLabel = i18n.translate(
+    'xpack.observability_onboarding.apiEndpointSecretCodeBlockWithToolbar.manageApiKeys',
+    {
+      defaultMessage: 'Manage API keys',
+    }
+  );
+  const manageTokensLabel = i18n.translate(
+    'xpack.observability_onboarding.apiEndpointSecretCodeBlockWithToolbar.manageTokens',
+    {
+      defaultMessage: 'Manage tokens',
+    }
+  );
+  const manageCredentialLabel = isEnrollment ? manageTokensLabel : manageApiKeysLabel;
+
+  const moreActionsAriaLabel = i18n.translate(
+    'xpack.observability_onboarding.apiEndpointSecretCodeBlockWithToolbar.moreActionsAriaLabel',
+    {
+      defaultMessage: 'More actions',
+    }
+  );
+
+  const secretActionsMenuItems = useMemo(() => {
+    if (manageCredentialHref == null) {
+      return [];
+    }
+    return [
+      <EuiContextMenuItem
+        key="manage"
+        data-test-subj={`${dataTestSubj}ManageMenuItem`}
+        icon="popout"
+        href={manageCredentialHref}
+        onClick={() => setIsSecretActionsOpen(false)}
+      >
+        {manageCredentialLabel}
+      </EuiContextMenuItem>,
+    ];
+  }, [dataTestSubj, manageCredentialHref, manageCredentialLabel]);
+
   const toolbarPaddingCss = css`
     .euiCodeBlock__pre {
       padding-inline-end: calc(
-        ${showActions
-            ? `${euiTheme.size.l} + ${euiTheme.size.l} + ${euiTheme.size.xxs}`
-            : `${euiTheme.size.l}`} + ${euiTheme.size.s}
+        8px + ${euiTheme.size.l} +
+          ${showManageMenu && manageCredentialHref != null
+            ? `${euiTheme.size.xxs} + ${euiTheme.size.l}`
+            : '0px'} + ${showActions ? `${euiTheme.size.xxs} + ${euiTheme.size.l}` : '0px'} +
+          ${euiTheme.size.s}
       ) !important;
     }
   `;
 
-  const mergedBlockCss = [codeBlockShortCss, secretCodeSubduedCss, toolbarPaddingCss].filter(
-    Boolean
-  ) as Interpolation<Theme>[];
+  /** Secret snippet is value-only (no `//` line); one line vs endpoint’s two-line block. */
+  const secretValueOnlyCss = css`
+    min-block-size: 32px;
+    .euiCodeBlock__pre {
+      min-block-size: 32px;
+    }
+    .euiCodeBlock__code {
+      -webkit-line-clamp: 1;
+    }
+  `;
+
+  const mergedBlockCss = [
+    codeBlockShortCss,
+    secretValueOnlyCss,
+    secretCodeSubduedCss,
+    toolbarPaddingCss,
+  ].filter(Boolean) as Interpolation<Theme>[];
   const visibleSecretLine = secretIsMissing ? displayedSecret : MASKED_SECRET_DISPLAY;
 
   const toolbarCss = css`
@@ -133,11 +203,7 @@ export const ApiEndpointSecretCodeBlockWithToolbar: React.FC<
         data-test-subj={dataTestSubj}
         css={mergedBlockCss}
       >
-        <React.Fragment>
-          <span className="token comment">{`// ${lineCommentLabel}`}</span>
-          {'\n'}
-          <span>{visibleSecretLine}</span>
-        </React.Fragment>
+        {visibleSecretLine}
       </EuiCodeBlock>
       <div data-test-subj={`${dataTestSubj}Toolbar`} css={toolbarCss}>
         <EuiToolTip content={copyTooltip} disableScreenReaderOutput>
@@ -163,6 +229,25 @@ export const ApiEndpointSecretCodeBlockWithToolbar: React.FC<
             </EuiCopy>
           )}
         </EuiToolTip>
+        {showManageMenu && manageCredentialHref != null ? (
+          <EuiPopover
+            button={
+              <EuiButtonIcon
+                data-test-subj={`${dataTestSubj}ActionsMenu`}
+                {...API_ENDPOINT_CODE_TOOLBAR_BUTTON_PROPS}
+                iconType="boxesVertical"
+                onClick={() => setIsSecretActionsOpen((open) => !open)}
+                aria-label={moreActionsAriaLabel}
+              />
+            }
+            isOpen={isSecretActionsOpen}
+            closePopover={() => setIsSecretActionsOpen(false)}
+            anchorPosition="downRight"
+            panelPaddingSize="none"
+          >
+            <EuiContextMenuPanel size="s" items={secretActionsMenuItems} />
+          </EuiPopover>
+        ) : null}
         {showActions ? (
           isEnrollment && fleetUrl ? (
             <EuiToolTip content={createEnrollmentTooltip} disableScreenReaderOutput>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { useParams, useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import {
@@ -63,6 +63,11 @@ import {
 import type { ObservabilityOnboardingAppServices } from '../../..';
 import { Version2ApiEndpointsSplit } from '../../version_2_api_endpoints_split';
 import { Version3ApiEndpointsSplit } from '../../version_3_api_endpoints_split';
+import {
+  getFleetEnrollmentBaseHref,
+  resolveVersion1HeaderCreateApiKeyTargetEndpointId,
+  Version1ApiEndpointsHeaderCredentialSplit,
+} from '../../version_1_api_endpoints_header_credential_split';
 import {
   SECTIONS,
   SAAS_TILES,
@@ -332,13 +337,13 @@ export const IngestHubPage: React.FC = () => {
   }, [location.search]);
   const [integrationsSearch, setIntegrationsSearch] = useState<string>('');
   const [version2ApiEndpointId, setVersion2ApiEndpointId] = useState<string>(
-    API_ENDPOINTS[0]?.id ?? 'endpoint-elasticsearch'
+    API_ENDPOINTS[0]?.id ?? 'endpoint-otlp'
   );
   const [version2ApiEndpointSecrets, setVersion2ApiEndpointSecrets] = useState<
     Record<string, string>
   >({});
   const [version3ApiEndpointId, setVersion3ApiEndpointId] = useState<string>(
-    API_ENDPOINTS[0]?.id ?? 'endpoint-elasticsearch'
+    API_ENDPOINTS[0]?.id ?? 'endpoint-otlp'
   );
   const [version3ApiEndpointSecrets, setVersion3ApiEndpointSecrets] = useState<
     Record<string, string>
@@ -346,7 +351,9 @@ export const IngestHubPage: React.FC = () => {
 
   useEffect(() => {
     if (
-      (activeVersion !== 'version2' && activeVersion !== 'version3') ||
+      (activeVersion !== 'version1' &&
+        activeVersion !== 'version2' &&
+        activeVersion !== 'version3') ||
       selectedCategory !== 'all-api-ingestion'
     ) {
       return;
@@ -378,6 +385,15 @@ export const IngestHubPage: React.FC = () => {
     version2ApiEndpointId,
     version3ApiEndpointId,
   ]);
+
+  const version1HeaderCredentialTargetEndpointId = useMemo(
+    () => resolveVersion1HeaderCreateApiKeyTargetEndpointId(version2ApiEndpointId),
+    [version2ApiEndpointId]
+  );
+  const version1EnrollmentFleetHref = useMemo(
+    () => getFleetEnrollmentBaseHref(window.location.origin),
+    []
+  );
 
   const [isStatusPopoverOpen, setIsStatusPopoverOpen] = useState(false);
   const [isSignalsPopoverOpen, setIsSignalsPopoverOpen] = useState(false);
@@ -1981,7 +1997,9 @@ export const IngestHubPage: React.FC = () => {
           <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
             {selectedCategory === 'all' && !rawQ ? (
               renderAddDataRecommendedContent()
-            ) : (activeVersion === 'version2' || activeVersion === 'version3') &&
+            ) : (activeVersion === 'version1' ||
+                activeVersion === 'version2' ||
+                activeVersion === 'version3') &&
               selectedCategory === 'all-api-ingestion' ? (
               <EuiFlexGroup
                 direction="column"
@@ -1997,39 +2015,69 @@ export const IngestHubPage: React.FC = () => {
                 }}
               >
                 <EuiFlexGroup
-                  alignItems="flexStart"
+                  alignItems="flexEnd"
+                  justifyContent="spaceBetween"
                   responsive={true}
                   gutterSize="m"
                   style={{ flexGrow: 0, width: '100%', minWidth: 0 }}
                 >
                   <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
-                    <EuiTitle size="xs">
-                      <h2>API endpoints</h2>
-                    </EuiTitle>
-                    <EuiSpacer size="xs" />
-                    <EuiText size="s" color="subdued">
-                      <p>
-                        Direct access to your deployment&apos;s endpoints. Create an API key to
-                        authenticate.{' '}
-                        <EuiLink
-                          data-test-subj={
-                            activeVersion === 'version3'
-                              ? 'obsOnboardingIngestHubV3ApiEndpointsDocumentation'
-                              : 'obsOnboardingIngestHubV2ApiEndpointsDocumentation'
-                          }
-                          href="https://www.elastic.co/docs/deploy-manage/api-keys/elasticsearch-api-keys"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          external
-                        >
-                          {i18n.translate(
-                            'xpack.observabilityOnboarding.version2ApiEndpoints.elasticsearchApiKeysLearnMore',
-                            { defaultMessage: 'Learn more' }
-                          )}
-                        </EuiLink>
-                      </p>
-                    </EuiText>
+                    <div>
+                      <EuiTitle size="xs">
+                        <h2>API endpoints</h2>
+                      </EuiTitle>
+                      <EuiSpacer size="xs" />
+                      <EuiText size="s" color="subdued">
+                        <p>
+                          Direct access to your deployment&apos;s endpoints. Create an API key to
+                          authenticate.{' '}
+                          <EuiLink
+                            data-test-subj={
+                              activeVersion === 'version3'
+                                ? 'obsOnboardingIngestHubV3ApiEndpointsDocumentation'
+                                : activeVersion === 'version1'
+                                ? 'obsOnboardingIngestHubV1ApiEndpointsDocumentation'
+                                : 'obsOnboardingIngestHubV2ApiEndpointsDocumentation'
+                            }
+                            href="https://www.elastic.co/docs/deploy-manage/api-keys/elasticsearch-api-keys"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            external
+                          >
+                            {i18n.translate(
+                              'xpack.observabilityOnboarding.version2ApiEndpoints.elasticsearchApiKeysLearnMore',
+                              { defaultMessage: 'Learn more' }
+                            )}
+                          </EuiLink>
+                        </p>
+                      </EuiText>
+                    </div>
                   </EuiFlexItem>
+                  {activeVersion === 'version1' ? (
+                    <EuiFlexItem grow={false}>
+                      <Version1ApiEndpointsHeaderCredentialSplit
+                        dataTestSubj="obsOnboardingIngestHubV1ApiEndpointsHeaderCredential"
+                        apiKeyManageHref={
+                          services.http?.basePath.prepend('/app/management/security/api_keys') ??
+                          '/app/management/security/api_keys'
+                        }
+                        enrollmentFleetHref={version1EnrollmentFleetHref}
+                        createApiKeyForEndpointId={version1HeaderCredentialTargetEndpointId}
+                        onApiKeyCreated={(result, endpointId) => {
+                          const endpoint = API_ENDPOINTS.find((e) => e.id === endpointId);
+                          if (
+                            endpoint &&
+                            (endpoint.keyType === 'api_key' || endpoint.keyType === 'kibana_note')
+                          ) {
+                            setVersion2ApiEndpointSecrets((prev) => ({
+                              ...prev,
+                              [endpointId]: result.encoded,
+                            }));
+                          }
+                        }}
+                      />
+                    </EuiFlexItem>
+                  ) : null}
                 </EuiFlexGroup>
                 {activeVersion === 'version3' ? (
                   <Version3ApiEndpointsSplit
@@ -2061,13 +2109,22 @@ export const IngestHubPage: React.FC = () => {
                     searchQuery={rawQ}
                     selectedEndpointId={version2ApiEndpointId}
                     onSelectEndpoint={setVersion2ApiEndpointId}
-                    dataTestSubjPrefix="obsOnboardingIngestHubV2ApiEndpoint"
+                    dataTestSubjPrefix={
+                      activeVersion === 'version1'
+                        ? 'obsOnboardingIngestHubV1ApiEndpoint'
+                        : 'obsOnboardingIngestHubV2ApiEndpoint'
+                    }
                     secretsByEndpointId={version2ApiEndpointSecrets}
                     apiKeyManageHref={
                       services.http?.basePath.prepend('/app/management/security/api_keys') ??
                       '/app/management/security/api_keys'
                     }
-                    createApiKeyDataTestSubj="obsOnboardingIngestHubV2CreateApiKey"
+                    createApiKeyDataTestSubj={
+                      activeVersion === 'version1'
+                        ? 'obsOnboardingIngestHubV1CreateApiKey'
+                        : 'obsOnboardingIngestHubV2CreateApiKey'
+                    }
+                    unifiedHeaderCredentialActions={activeVersion === 'version1'}
                     onApiKeyCreated={(result, endpointId) => {
                       const endpoint = API_ENDPOINTS.find((e) => e.id === endpointId);
                       if (
