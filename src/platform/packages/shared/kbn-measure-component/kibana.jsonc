@@ -1,0 +1,8 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/measure-component",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Developer Toolbar addon used for measuring spacing between components."
+}

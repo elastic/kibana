@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { getOr } from 'lodash/fp';
 import { buildDataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import type { SearchHit } from '../../../../../common/search_strategy';
 import { useRunAlertWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
@@ -174,7 +174,7 @@ export const TakeActionDropdown = memo(
     );
 
     const isRemoteDocument = useMemo(
-      () => isCCSRemoteIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
+      () => isNonLocalIndexName(hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''),
       [hit]
     );
 

@@ -51,32 +51,30 @@ export const useLoadConnectors = ({
   featureId,
 }: UseLoadConnectorsProps): UseLoadConnectorsResult => {
   const [soEntryFound, setSoEntryFound] = useState(false);
-  const query = useQuery(
-    [...QUERY_KEY, featureId],
-    async () => {
+  const query = useQuery({
+    queryKey: [...QUERY_KEY, featureId],
+    queryFn: async () => {
       const result = await fetchConnectorsForFeature(http, featureId);
       setSoEntryFound(result.soEntryFound);
       return result.connectors.map(toAIConnector);
     },
-    {
-      retry: false,
-      keepPreviousData: true,
-      onError: (error: IHttpFetchError) => {
-        if (error.name !== 'AbortError') {
-          toasts?.addError(
-            error.body && (error.body as { message?: string }).message
-              ? new Error((error.body as { message: string }).message)
-              : error,
-            {
-              title: i18n.translate('inferenceConnectors.useLoadConnectors.errorMessage', {
-                defaultMessage: 'Error loading models',
-              }),
-            }
-          );
-        }
-      },
-    }
-  );
+    retry: false,
+    keepPreviousData: true,
+    onError: (error: IHttpFetchError) => {
+      if (error.name !== 'AbortError') {
+        toasts?.addError(
+          error.body && (error.body as { message?: string }).message
+            ? new Error((error.body as { message: string }).message)
+            : error,
+          {
+            title: i18n.translate('inferenceConnectors.useLoadConnectors.errorMessage', {
+              defaultMessage: 'Error loading models',
+            }),
+          }
+        );
+      }
+    },
+  });
 
   return { ...query, soEntryFound };
 };

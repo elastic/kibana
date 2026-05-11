@@ -124,7 +124,7 @@
                 "id": "def-public.pluginsServiceMock.createPluginInitializerContext.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "__1",
+                "label": "{ buildFlavor = 'serverless' }",
                 "description": [],
                 "signature": [
                   "{ buildFlavor?: ",

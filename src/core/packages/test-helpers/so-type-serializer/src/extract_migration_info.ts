@@ -20,6 +20,7 @@ import type {
 import { aggregateMappingAdditions } from '@kbn/core-saved-objects-base-server-internal';
 import type { SavedObjectsModelChange } from '@kbn/core-saved-objects-server';
 import { createHash } from 'crypto';
+import { type Type, isConfigSchema } from '@kbn/config-schema';
 
 export interface SavedObjectTypeMigrationInfo {
   name: string;
@@ -70,7 +71,7 @@ export const extractMigrationInfo = (soType: SavedObjectsType): SavedObjectTypeM
     modelVersion: SavedObjectsModelVersion | SavedObjectsFullModelVersion
   ) => {
     const hash = createHash('sha256');
-    const modelVersionData = JSON.stringify(modelVersion);
+    const modelVersionData = JSON.stringify(normalizeForHash(modelVersion));
     return `${hash.update(modelVersionData).digest('hex')}`;
   };
 
@@ -126,11 +127,48 @@ const getSchemaPropertiesHashes = (
 const getHash = (schemaProp: unknown) => {
   const hash = createHash('sha256');
   if (typeof schemaProp === 'function') {
-    const funcString = schemaProp.toString();
-    return `${hash.update(funcString).digest('hex')}`;
+    return hash.update(schemaProp.toString()).digest('hex');
+  } else if (isConfigSchema(schemaProp)) {
+    return hash.update(JSON.stringify(serializeConfigSchema(schemaProp))).digest('hex');
   } else if (typeof schemaProp === 'object' && schemaProp !== null) {
-    const schemaPropData = JSON.stringify(schemaProp);
-    return `${hash.update(schemaPropData).digest('hex')}`;
+    return hash.update(JSON.stringify(schemaProp)).digest('hex');
   }
   return false;
+};
+
+/**
+ * Recursively walks a value and replaces any `@kbn/config-schema` `Type` instances
+ * with a Joi-version-stable representation derived from `schema.describe()`.
+ * Non-schema functions are left as-is and will be dropped by `JSON.stringify`.
+ */
+export const normalizeForHash = (value: unknown): unknown => {
+  if (isConfigSchema(value)) return serializeConfigSchema(value);
+  if (Array.isArray(value)) return value.map(normalizeForHash);
+  if (value !== null && typeof value === 'object')
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, normalizeForHash(v)]));
+  return value;
+};
+
+/**
+ * Converts a `@kbn/config-schema` `Type` instance to a Joi-version-stable,
+ * JSON-serializable representation by using Joi's public `describe()` API and
+ * replacing any remaining function values with their source text.
+ */
+const serializeConfigSchema = (configSchema: Type<unknown>): unknown =>
+  replaceFunctionsWithSource(configSchema.getSchema().describe());
+
+/**
+ * Recursively walks a value (typically from `schema.describe()`) and replaces
+ * any function values with `{ __fn: fn.toString() }` so they are not silently
+ * dropped by `JSON.stringify`. This captures custom-validator presence
+ * (added/removed rules change the hash) while remaining Joi-version-stable.
+ */
+const replaceFunctionsWithSource = (value: unknown): unknown => {
+  if (typeof value === 'function') return { __fn: value.toString() };
+  if (Array.isArray(value)) return value.map(replaceFunctionsWithSource);
+  if (value !== null && typeof value === 'object')
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [k, replaceFunctionsWithSource(v)])
+    );
+  return value;
 };

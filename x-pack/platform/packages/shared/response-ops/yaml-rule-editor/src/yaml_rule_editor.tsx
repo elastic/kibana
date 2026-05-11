@@ -73,6 +73,7 @@ const toCompletionItems = (
 export const YamlRuleEditor: React.FC<YamlRuleEditorProps> = ({
   value,
   onChange,
+  onBlur,
   esqlCallbacks,
   esqlPropertyNames = DEFAULT_ESQL_PROPERTY_NAMES,
   isReadOnly = false,
@@ -81,6 +82,11 @@ export const YamlRuleEditor: React.FC<YamlRuleEditorProps> = ({
 }) => {
   const editorSuggestDisposable = useRef<monaco.IDisposable | null>(null);
   const editorValidationDisposable = useRef<monaco.IDisposable | null>(null);
+  const editorBlurDisposable = useRef<monaco.IDisposable | null>(null);
+  // Hold the latest onBlur in a ref so the Monaco listener (set up once on mount)
+  // always calls the current callback without re-attaching on every render.
+  const onBlurRef = useRef(onBlur);
+  onBlurRef.current = onBlur;
 
   // Update the Monaco language configuration when property names change
   useEffect(() => {
@@ -238,6 +244,12 @@ export const YamlRuleEditor: React.FC<YamlRuleEditorProps> = ({
       editorValidationDisposable.current = editor.onDidChangeModelContent(() => {
         buildYamlValidationMarkers(model);
       });
+
+      // Forward blur to the consumer via the ref so the latest onBlur is invoked.
+      editorBlurDisposable.current?.dispose();
+      editorBlurDisposable.current = editor.onDidBlurEditorText(() => {
+        onBlurRef.current?.();
+      });
     },
     [esqlPropertyNames]
   );
@@ -247,6 +259,8 @@ export const YamlRuleEditor: React.FC<YamlRuleEditorProps> = ({
     editorSuggestDisposable.current = null;
     editorValidationDisposable.current?.dispose();
     editorValidationDisposable.current = null;
+    editorBlurDisposable.current?.dispose();
+    editorBlurDisposable.current = null;
   }, []);
 
   return (

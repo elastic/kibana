@@ -29,6 +29,8 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import {
   DEFAULT_COLUMNS_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
+  getChartHidden,
+  getTableHidden,
   getEsqlDataView,
 } from '@kbn/discover-utils';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
@@ -366,14 +368,15 @@ export function getDataStateContainer({
             })
           );
 
-          const { didProfileChange } = await scopedProfilesManager.resolveDataSourceProfile(
-            {
-              dataSource: getCurrentTab().appState.dataSource,
-              dataView: currentDataView$.getValue(),
-              query: getCurrentTab().appState.query,
-            },
-            resetFetchChart$
-          );
+          const { didProfileChange, isFirstResolution } =
+            await scopedProfilesManager.resolveDataSourceProfile(
+              {
+                dataSource: getCurrentTab().appState.dataSource,
+                dataView: currentDataView$.getValue(),
+                query: getCurrentTab().appState.query,
+              },
+              resetFetchChart$
+            );
 
           let shouldApplyDefaultProfileState = true;
 
@@ -401,6 +404,23 @@ export function getDataStateContainer({
                 )
               );
             } else {
+              // If it's not the first profile resolution (i.e. page load or tab init),
+              // and there's no profile state to restore, fall back to shared layout state
+              if (!isFirstResolution) {
+                await withSkipNextFetch(async () =>
+                  internalState.dispatch(
+                    injectCurrentTab(internalStateActions.setAppState)({
+                      appState: {
+                        ...getCurrentTab().appState,
+                        hideChart: getChartHidden(services.storage, 'discover'),
+                        hideTable: getTableHidden(services.storage, 'discover'),
+                      },
+                      isSystemTriggered: true,
+                    })
+                  )
+                );
+              }
+
               // If there is no profile state yet, sync a snapshot of the current
               // state so it can be restored when switching back to this profile
               internalState.dispatch(

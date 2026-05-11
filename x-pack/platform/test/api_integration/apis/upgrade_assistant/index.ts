@@ -32,7 +32,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./es_deprecation_logs'));
     loadTestFile(require.resolve('./remote_clusters'));
     loadTestFile(require.resolve('./cluster_settings'));
-    loadTestFile(require.resolve('./version_precheck'));
     loadTestFile(require.resolve('./node_disk_space'));
   });
 }

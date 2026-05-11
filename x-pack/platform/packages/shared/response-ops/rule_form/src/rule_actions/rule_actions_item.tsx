@@ -17,12 +17,13 @@ import {
   useEuiTheme,
   EuiIconTip,
   EuiText,
-  EuiTabs,
-  EuiTab,
   EuiToolTip,
   EuiBadge,
   EuiBetaBadge,
   EuiEmptyPrompt,
+  EuiSpacer,
+  EuiTitle,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import type {
   ActionVariable,
@@ -55,6 +56,8 @@ import {
   ACTION_WARNING_TITLE,
   TECH_PREVIEW_DESCRIPTION,
   TECH_PREVIEW_LABEL,
+  ADD_ACTION_SETTINGS_LABEL,
+  ADD_ACTION_MESSAGE_LABEL,
 } from '../translations';
 
 const SUMMARY_GROUP_TITLE = i18n.translate(
@@ -90,9 +93,6 @@ export interface RuleActionsItemProps {
 
 type ParamsType = RecursivePartial<any>;
 
-const MESSAGES_TAB = 'messages';
-const SETTINGS_TAB = 'settings';
-
 export const RuleActionsItem = (props: RuleActionsItemProps) => {
   const { action, index, producerId } = props;
 
@@ -106,7 +106,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     alertFields,
   } = useRuleFormState();
 
-  const [tab, setTab] = useState<string>(MESSAGES_TAB);
   const { euiTheme } = useEuiTheme();
   const subdued = euiTheme.colors.lightestShade;
   const plain = euiTheme.colors.backgroundBasePlain;
@@ -494,39 +493,36 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
         }}
       >
         <EuiFlexItem>
-          <EuiTabs>
-            <EuiTab isSelected={tab === MESSAGES_TAB} onClick={() => setTab(MESSAGES_TAB)}>
-              Message
-            </EuiTab>
-            <EuiTab isSelected={tab === SETTINGS_TAB} onClick={() => setTab(SETTINGS_TAB)}>
-              Settings
-            </EuiTab>
-          </EuiTabs>
+          <EuiTitle size="xxs">
+            <h4>{ADD_ACTION_SETTINGS_LABEL}</h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <RuleActionsSettings
+            action={action}
+            onUseDefaultMessageChange={() => setUseDefaultMessage(true)}
+            onNotifyWhenChange={onNotifyWhenChange}
+            onActionGroupChange={onActionGroupChange}
+            onAlertsFilterChange={onAlertsFilterChange}
+            onTimeframeChange={onTimeframeChange}
+          />
         </EuiFlexItem>
+        <EuiHorizontalRule margin="s" />
         <EuiFlexItem>
-          {tab === MESSAGES_TAB && (
-            <RuleActionsMessage
-              action={action}
-              index={index}
-              useDefaultMessage={useDefaultMessage}
-              connector={connector}
-              producerId={producerId}
-              warning={warning}
-              templateFields={templateFields}
-              onParamsChange={onParamsChange}
-              onUseAadTemplateFieldsChange={onUseAadTemplateFieldsChange}
-            />
-          )}
-          {tab === SETTINGS_TAB && (
-            <RuleActionsSettings
-              action={action}
-              onUseDefaultMessageChange={() => setUseDefaultMessage(true)}
-              onNotifyWhenChange={onNotifyWhenChange}
-              onActionGroupChange={onActionGroupChange}
-              onAlertsFilterChange={onAlertsFilterChange}
-              onTimeframeChange={onTimeframeChange}
-            />
-          )}
+          <EuiTitle size="xxs">
+            <h4>{ADD_ACTION_MESSAGE_LABEL}</h4>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <RuleActionsMessage
+            action={action}
+            index={index}
+            useDefaultMessage={useDefaultMessage}
+            connector={connector}
+            producerId={producerId}
+            warning={warning}
+            templateFields={templateFields}
+            onParamsChange={onParamsChange}
+            onUseAadTemplateFieldsChange={onUseAadTemplateFieldsChange}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -537,7 +533,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     euiTheme,
     plain,
     index,
-    tab,
     templateFields,
     useDefaultMessage,
     warning,

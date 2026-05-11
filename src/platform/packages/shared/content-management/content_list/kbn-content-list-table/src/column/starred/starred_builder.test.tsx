@@ -105,18 +105,39 @@ describe('starred column builder', () => {
       field: 'id',
       align: 'center',
       sortable: false,
-      width: '40px',
       'data-test-subj': 'content-list-table-column-starred',
     });
   });
 
-  it('uses a custom width when provided', () => {
+  it('locks width / minWidth / maxWidth to 40px when no props supplied', () => {
+    const result = buildStarredColumn({}, defaultContext);
+
+    // Setting all three to the same value keeps the column at a fixed 40px
+    // (the `EuiIcon` footprint plus a small gutter) regardless of available
+    // table width.
+    expect(result).toMatchObject({ width: '40px', minWidth: '40px', maxWidth: '40px' });
+  });
+
+  it('uses custom layout props when provided', () => {
     const result = buildStarredColumn(
-      { width: '64px' } satisfies StarredColumnProps,
+      { width: '64px', minWidth: '64px', maxWidth: '64px' } satisfies StarredColumnProps,
       defaultContext
     );
 
-    expect(result).toMatchObject({ width: '64px' });
+    expect(result).toMatchObject({ width: '64px', minWidth: '64px', maxWidth: '64px' });
+  });
+
+  it('treats explicit `undefined` as an opt-out — clears the lock so the icon column can flex', () => {
+    // Useful when a consumer wants the icon column to flex with sibling
+    // columns instead of being pinned to a fixed 40px box.
+    const result = buildStarredColumn(
+      { width: undefined, minWidth: undefined, maxWidth: undefined } satisfies StarredColumnProps,
+      defaultContext
+    );
+
+    expect(result).not.toHaveProperty('width');
+    expect(result).not.toHaveProperty('minWidth');
+    expect(result).not.toHaveProperty('maxWidth');
   });
 
   it('renders the starred header and cell', () => {

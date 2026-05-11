@@ -104,6 +104,20 @@ export const Dynamic: DynamicStory = {
 };
 
 /**
+ * DynamicRuleFormFlyout with the Form/YAML edit mode toggle enabled.
+ * This is the configuration used when opened from the Discover flyout.
+ */
+export const DynamicWithYamlToggle: DynamicStory = {
+  args: {
+    services: mockServices,
+    query: 'FROM logs-* | WHERE @timestamp > NOW() - 5m | STATS count = COUNT(*) BY host.name',
+    push: true,
+    onClose: action('onClose'),
+    includeYaml: true,
+  },
+};
+
+/**
  * StandaloneRuleFormFlyout - For plugin integration
  * Static initialization, ignores prop changes after mount.
  * Time field is auto-selected from available date fields.

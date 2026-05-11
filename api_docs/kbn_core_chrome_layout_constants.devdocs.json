@@ -55,6 +55,7 @@
             "lineNumber": 60,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "CSSVarName",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -119,6 +120,7 @@
             "lineNumber": 88,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "CSSVarName",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -352,7 +354,9 @@
             "type": "Object",
             "tags": [],
             "label": "prop",
-            "description": [],
+            "description": [
+              "\nThe selector for elements that should be included in the focus trap of a flyout.\nThis will allow the flyout focus trap to include header and sidenav by default."
+            ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
             "lineNumber": 60,
             "columnNumber": 3,
@@ -380,7 +384,9 @@
             "type": "string",
             "tags": [],
             "label": "selector",
-            "description": [],
+            "description": [
+              "\nThe selector for elements that should be included in the focus trap of a flyout.\nThis will allow the flyout focus trap to include header and sidenav by default."
+            ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
             "lineNumber": 63,
             "columnNumber": 3,

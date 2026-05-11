@@ -112,7 +112,7 @@ describe('useAlertingEpisodesDataView', () => {
         },
       },
     });
-    expect(mockDataView.addRuntimeField).toHaveBeenCalledTimes(1);
+    expect(mockDataView.addRuntimeField).toHaveBeenCalledTimes(2);
   });
 
   it('should return undefined when data view is not loaded yet', () => {

@@ -17,8 +17,11 @@ import { useKibana, useFormData } from '../../../../../../../shared_imports';
 import { useEditPolicyContext } from '../../../../edit_policy_context';
 import { useConfiguration, UseField, globalFields } from '../../../../form';
 import { FieldLoadingError, DescribedFormRow, LearnMoreLink } from '../../..';
+import type { FormInternal } from '../../../../types';
 import { SearchableSnapshotDataProvider } from './searchable_snapshot_data_provider';
 import { RepositoryComboBoxField } from './repository_combobox_field';
+import { ForceMergeIndexSwitchField } from './force_merge_index_switch_field';
+import { ForceMergeOnCloneSwitchField } from './force_merge_on_clone_switch_field';
 
 const useStyles = () => {
   const { euiTheme } = useEuiTheme();
@@ -100,12 +103,15 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
   const { isUsingSearchableSnapshotInHotPhase } = useConfiguration();
 
   const searchableSnapshotRepoPath = `phases.${phase}.actions.searchable_snapshot.snapshot_repository`;
+  const forceMergeIndexPath = `phases.${phase}.actions.searchable_snapshot.force_merge_index`;
 
   const [formData] = useFormData({
-    watch: globalFields.searchableSnapshotRepo.path,
+    watch: [globalFields.searchableSnapshotRepo.path, forceMergeIndexPath],
   });
 
   const searchableSnapshotGlobalRepo = get(formData, globalFields.searchableSnapshotRepo.path);
+  const forceMergeIndexValue = get(formData, forceMergeIndexPath) as boolean | undefined;
+  const isForceMergeIndexEnabled = forceMergeIndexValue ?? true;
   const isColdPhase = phase === 'cold';
   const isFrozenPhase = phase === 'frozen';
   const isColdOrFrozenPhase = isColdPhase || isFrozenPhase;
@@ -251,6 +257,34 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
                 noSuggestions: !!(error || repos.length === 0),
               }}
             />
+
+            <EuiSpacer size="m" />
+
+            <UseField<boolean | undefined, FormInternal>
+              path={forceMergeIndexPath}
+              defaultValue={
+                policy.phases[phase]?.actions?.searchable_snapshot?.force_merge_index ?? true
+              }
+              component={ForceMergeIndexSwitchField}
+              componentProps={{
+                phase,
+              }}
+            />
+
+            <EuiSpacer size="m" />
+            {isForceMergeIndexEnabled ? (
+              <UseField<boolean | undefined, FormInternal>
+                path={`phases.${phase}.actions.searchable_snapshot.force_merge_on_clone`}
+                defaultValue={
+                  policy.phases[phase]?.actions?.searchable_snapshot?.force_merge_on_clone ?? true
+                }
+                component={ForceMergeOnCloneSwitchField}
+                componentProps={{
+                  phase,
+                }}
+              />
+            ) : null}
+
             {calloutContent && (
               <>
                 <EuiSpacer size="s" />

@@ -15,5 +15,7 @@ export type FeedbackRegistryEntryId = string;
 
 /**
  * List of feedback plugin questions for a given application.
+ * Each entry is a lazy loader that returns the questions for a specific app,
+ * ensuring only the relevant questions are loaded at runtime.
  */
-export type FeedbackRegistry = Map<FeedbackRegistryEntryId, FeedbackRegistryEntry[]>;
+export type FeedbackRegistry = Map<FeedbackRegistryEntryId, () => Promise<FeedbackRegistryEntry[]>>;

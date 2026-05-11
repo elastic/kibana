@@ -19,34 +19,6 @@ Default to [parallel UI suites](./parallelism.md) when possible. Parallel worker
 | **Parallel**   | UI tests (most suites), suites that share pre-ingested data (often using the [global setup hook](./global-setup-hook.md)) |
 | **Sequential** | API tests, suites that require a “clean” Elasticsearch state                                                              |
 
-## Test behavior, not data correctness [focus-ui-tests-on-behavior-not-data-correctness]
-
-UI tests should answer “does this feature work for the user?” Verify that components render, respond to interaction, and navigate correctly. Leave exact data validation (computed values, aggregation results, edge cases) to API or unit tests, which are faster and less brittle.
-
-| What you’re testing                                                         | Recommended layer  |
-| --------------------------------------------------------------------------- | ------------------ |
-| User flows, navigation, rendering                                           | Scout UI test      |
-| Data correctness, API contracts, edge cases                                 | Scout API test     |
-| Isolated component logic (loading/error states, tooltips, field validation) | RTL/Jest unit test |
-
-:::::{dropdown} Examples
-❌ **Don’t:** verify computed values that belong in an API test:
-
-```ts
-await expect(page.testSubj.locator('row-0-col-count')).toHaveText('1,024');
-await expect(page.testSubj.locator('row-0-col-avg')).toHaveText('42.7');
-```
-
-✔️ **Do:** verify that the UI renders and responds to interaction:
-
-```ts
-await expect(page.testSubj.locator('datasetQualityTable-loaded')).toBeVisible();
-await page.testSubj.click('tableSortByLastActivity');
-await expect(page.testSubj.locator('row-0-col-dataset')).not.toHaveText('');
-```
-
-:::::
-
 ## Prefer realistic in-app navigation for user flows [prefer-realistic-in-app-navigation]
 
 When a test asserts **user flow** (not just “land on a page”), prefer navigation the way a user would: follow links and buttons, and use browser history (`page.goBack()`) instead of direct URL jumps where it matters for the scenario. Reserve `page.goto` / deep links for cheap setup when the test is not about navigation.

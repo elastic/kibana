@@ -61,6 +61,7 @@
                 "lineNumber": 30,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Record",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -694,6 +695,7 @@
                 "lineNumber": 42,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "RunWithCommandsOptions",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -718,6 +720,7 @@
                 "lineNumber": 43,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Array",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -777,6 +780,7 @@
                 "lineNumber": 46,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "Command",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -874,6 +878,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "FlagOptions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -957,6 +962,7 @@
             "lineNumber": 14,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "FlagOptions",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -980,6 +986,7 @@
             "lineNumber": 14,
             "columnNumber": 60,
             "deprecated": false,
+            "docsReferencedTypeName": "FlagOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1056,6 +1063,7 @@
             "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RunFn",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1080,6 +1088,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RunOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1164,6 +1173,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RunFn",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -1196,6 +1206,7 @@
             "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RunOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1702,6 +1713,7 @@
                 "lineNumber": 22,
                 "columnNumber": 20,
                 "deprecated": false,
+                "docsReferencedTypeName": "CleanupTask",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1978,6 +1990,7 @@
                 "lineNumber": 37,
                 "columnNumber": 18,
                 "deprecated": false,
+                "docsReferencedTypeName": "RunContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2194,6 +2207,7 @@
             "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "RunContext",
             "trackAdoption": false
           }
         ],

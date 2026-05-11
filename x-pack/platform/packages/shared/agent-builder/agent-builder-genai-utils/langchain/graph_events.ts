@@ -15,8 +15,10 @@ import type {
   PromptRequestEvent,
   BrowserToolCallEvent,
   ToolResultEvent,
+  BackgroundAgentCompleteEvent,
 } from '@kbn/agent-builder-common/chat/events';
-import { ChatEventType } from '@kbn/agent-builder-common';
+import { ChatEventType, type ToolOrigin } from '@kbn/agent-builder-common';
+import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { PromptRequestSource, PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 
@@ -49,6 +51,7 @@ export const createToolCallEvent = (data: {
   toolId: string;
   params: Record<string, unknown>;
   toolCallGroupId?: string;
+  toolOrigin?: ToolOrigin;
 }): ToolCallEvent => {
   return {
     type: ChatEventType.toolCall,
@@ -57,6 +60,7 @@ export const createToolCallEvent = (data: {
       tool_id: data.toolId,
       params: data.params,
       tool_call_group_id: data.toolCallGroupId,
+      tool_origin: data.toolOrigin,
     },
   };
 };
@@ -159,5 +163,14 @@ export const createThinkingCompleteEvent = (timeToFirstToken: number): ThinkingC
     data: {
       time_to_first_token: timeToFirstToken,
     },
+  };
+};
+
+export const createBackgroundAgentCompleteEvent = (
+  execution: BackgroundExecutionState
+): BackgroundAgentCompleteEvent => {
+  return {
+    type: ChatEventType.backgroundAgentComplete,
+    data: { execution },
   };
 };

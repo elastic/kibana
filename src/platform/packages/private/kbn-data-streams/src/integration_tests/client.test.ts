@@ -261,18 +261,6 @@ describe('DataStreamClient', () => {
           mappedField: 'test-value',
         });
         expect(hit._source).not.toHaveProperty('kibana');
-
-        // Verify the property is actually stored in ES (bypassing client)
-        const rawDocSearch = await esClient.search<
-          MappingsDefinition & { kibana: { space_ids: string[] } }
-        >({
-          index: testDataStream.name,
-          query: { ids: { values: [response.items[0].create?._id!] } },
-          size: 1,
-        });
-        const rawDoc = rawDocSearch.hits.hits[0];
-        expect(rawDoc).toBeDefined();
-        expect(rawDoc._source?.kibana).toEqual({ space_ids: ['test-space'] });
       });
 
       it('should index with space and explicit ID, prefixing the ID correctly', async () => {
@@ -290,7 +278,7 @@ describe('DataStreamClient', () => {
 
         expect(response.items[0].create?._id).toBe('test-space::my-doc');
 
-        // Search by prefixed ID
+        // Search by prefixed ID and verify kibana.space_ids is stripped from _source
         const searchResponse = await client.search({
           space: 'test-space',
           query: { ids: { values: ['test-space::my-doc'] } },
@@ -323,7 +311,7 @@ describe('DataStreamClient', () => {
           refresh: true,
         });
 
-        // Search space-a should return 2 documents
+        // Search space-a should return 2 documents with kibana.space_ids stripped
         const searchResponseA = await client.search({
           space: 'space-a',
           query: { match_all: {} },
@@ -598,6 +586,124 @@ describe('DataStreamClient', () => {
             expect(doc._source).not.toHaveProperty('kibana');
           }
         });
+      });
+    });
+
+    describe("operations with 'default' space", () => {
+      it("should prefix an auto-generated ID with 'default::'", async () => {
+        const response = await client.create({
+          space: 'default',
+          documents: [{ '@timestamp': new Date().toISOString(), mappedField: 'auto-id-doc' }],
+          refresh: true,
+        });
+
+        expect(response.items[0].create).toHaveProperty('result', 'created');
+        expect(response.items[0].create?._id).toMatch(/^default::[0-9a-f-]{36}$/);
+      });
+
+      it("should prefix ID with 'default::' and strip kibana.space_ids from search response", async () => {
+        const response = await client.create({
+          space: 'default',
+          documents: [
+            {
+              _id: 'my-default-doc',
+              '@timestamp': new Date().toISOString(),
+              mappedField: 'default-value',
+            },
+          ],
+          refresh: true,
+        });
+
+        expect(response.items[0].create).toHaveProperty('result', 'created');
+        expect(response.items[0].create?._id).toBe('default::my-default-doc');
+
+        // Verify kibana.space_ids is stripped from search response
+        const searchResponse = await client.search({
+          space: 'default',
+          query: { ids: { values: ['default::my-default-doc'] } },
+          size: 1,
+        });
+        expect(searchResponse.hits.hits.length).toBe(1);
+        expect(searchResponse.hits.hits[0]._source).toEqual({
+          '@timestamp': expect.any(String),
+          mappedField: 'default-value',
+        });
+        expect(searchResponse.hits.hits[0]._source).not.toHaveProperty('kibana');
+      });
+
+      it("should return only docs with kibana.space_ids: ['default'], not space-agnostic docs", async () => {
+        // Create a space-agnostic doc (no space)
+        await client.create({
+          documents: [{ '@timestamp': new Date().toISOString(), mappedField: 'agnostic' }],
+          refresh: true,
+        });
+
+        // Create a doc explicitly in 'default' space
+        await client.create({
+          space: 'default',
+          documents: [{ '@timestamp': new Date().toISOString(), mappedField: 'default-space' }],
+          refresh: true,
+        });
+
+        // Search in 'default' space should return only the explicitly tagged doc, with kibana stripped
+        const defaultSearch = await client.search({
+          space: 'default',
+          query: { match_all: {} },
+        });
+        expect(defaultSearch.hits.hits.length).toBe(1);
+        expect((defaultSearch.hits.hits[0]._source as any)?.mappedField).toBe('default-space');
+        expect(defaultSearch.hits.hits[0]._source).not.toHaveProperty('kibana');
+      });
+
+      it("should not return 'default' space docs when searching with a different space", async () => {
+        await client.create({
+          space: 'default',
+          documents: [{ '@timestamp': new Date().toISOString(), mappedField: 'default-doc' }],
+          refresh: true,
+        });
+
+        const otherSpaceSearch = await client.search({
+          space: 'other-space',
+          query: { match_all: {} },
+        });
+        expect(otherSpaceSearch.hits.hits.length).toBe(0);
+      });
+
+      it("should not return 'default' space docs in space-agnostic searches", async () => {
+        await client.create({
+          space: 'default',
+          documents: [{ '@timestamp': new Date().toISOString(), mappedField: 'default-doc' }],
+          refresh: true,
+        });
+
+        const agnosticSearch = await client.search({ query: { match_all: {} } });
+        expect(agnosticSearch.hits.hits.length).toBe(0);
+      });
+
+      it("should treat empty string space as 'default' in create and search", async () => {
+        const response = await client.create({
+          space: '',
+          documents: [
+            {
+              _id: 'empty-space-doc',
+              '@timestamp': new Date().toISOString(),
+              mappedField: 'empty-space-value',
+            },
+          ],
+          refresh: true,
+        });
+
+        // Empty string is normalized to 'default', so ID should be prefixed with 'default::'
+        expect(response.items[0].create?._id).toBe('default::empty-space-doc');
+
+        // Searching with '' should also normalize to 'default' and find the doc, with kibana stripped
+        const searchResponse = await client.search({
+          space: '',
+          query: { ids: { values: ['default::empty-space-doc'] } },
+          size: 1,
+        });
+        expect(searchResponse.hits.hits.length).toBe(1);
+        expect(searchResponse.hits.hits[0]._source).not.toHaveProperty('kibana');
       });
     });
 

@@ -18,7 +18,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { UsersAvatarsPanel } from '../../../common/components/user_profiles/users_avatars_panel';
 import { useBulkGetUserProfiles } from '../../../common/components/user_profiles/use_bulk_get_user_profiles';
@@ -58,7 +58,7 @@ AssigneesButton.displayName = 'AssigneesButton';
  */
 export const Assignees = memo(() => {
   const { attackId, indexName, refetch } = useAttackDetailsContext();
-  const isRemoteDocument = useMemo(() => isCCSRemoteIndexName(indexName), [indexName]);
+  const isRemoteDocument = useMemo(() => isNonLocalIndexName(indexName), [indexName]);
   const { alertIds, assignees } = useHeaderData();
   const invalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries();
   const { hasIndexWrite, hasAttackIndexWrite, loading: privilegesLoading } = useAttacksPrivileges();

@@ -7,24 +7,23 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
-import { flyoutHeaderBlockStyles } from './constants/styles';
+import { flyoutHeaderBlockStyles } from '../shared/components/flyout_header_block';
 import { EventKind } from './constants/event_kinds';
 import { Assignees } from './components/assignees';
 import { Title } from './components/title';
 import { Status } from './components/status';
 import { Notes } from '../shared/components/notes';
 import { DocumentSeverity } from './components/severity';
-import { Timestamp } from './components/timestamp';
+import { Timestamp } from '../shared/components/timestamp';
 import { RiskScore } from './components/risk_score';
 import { ALERT_SUMMARY_PANEL_TEST_ID } from '../shared/components/test_ids';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { noopCellActionRenderer } from '../shared/components/cell_actions';
 import { useUserPrivileges } from '../../common/components/user_privileges';
-import { RemoteDocumentBadge } from './components/remote_document_badge';
 
 export interface HeaderProps {
   /**
@@ -63,11 +62,12 @@ export const Header: FC<HeaderProps> = memo(
         <DocumentSeverity hit={hit}>
           <EuiSpacer size="s" />
         </DocumentSeverity>
-        <Timestamp hit={hit}>
-          <EuiSpacer size="xs" />
-        </Timestamp>
+        <EuiText size="s">
+          <Timestamp hit={hit} />
+        </EuiText>
+        <EuiSpacer size="xs" />
+
         <Title hit={hit} hideLink={!canReadRules} />
-        <RemoteDocumentBadge hit={hit} />
         {isAlert && (
           <>
             <EuiSpacer size="m" />

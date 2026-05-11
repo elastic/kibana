@@ -210,6 +210,7 @@
             "lineNumber": 56,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "GetTimeFieldRangeOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -274,6 +275,7 @@
             "lineNumber": 118,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "TimefilterContract",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -376,6 +378,7 @@
             "lineNumber": 41,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "UseTimefilterOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1139,6 +1142,7 @@
                 "lineNumber": 70,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "GetTimeFieldRangeResponse",
                 "trackAdoption": false,
                 "isRequired": true
               }

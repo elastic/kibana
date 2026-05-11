@@ -241,6 +241,7 @@ export const PingType = t.intersection([
     }),
     labels: t.record(t.string, t.string),
     remote: remoteMonitorInfoSchema,
+    kibanaUrl: t.string,
   }),
 ]);
 

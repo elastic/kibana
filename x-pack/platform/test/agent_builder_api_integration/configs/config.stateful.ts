@@ -30,6 +30,7 @@ export default async (context: FtrConfigProviderContext) => {
           },
         ])}`,
         '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
+        '--uiSettings.overrides.agentContextLayer:experimentalFeatures=true',
         `--xpack.agentBuilder.githubBaseUrl=http://localhost:${pluginsServerPort}`,
       ],
     },

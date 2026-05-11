@@ -14,16 +14,18 @@
  *   version: not applicable
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const PromptItem = lazySchema(() =>
+  z.object({
+    promptId: z.string(),
+    prompt: z.string(),
+  })
+);
 export type PromptItem = z.infer<typeof PromptItem>;
-export const PromptItem = z.object({
-  promptId: z.string(),
-  prompt: z.string(),
-});
 
 /**
  * Prompt array by prompt group id and prompt id.
  */
+export const PromptItemArray = lazySchema(() => z.array(PromptItem));
 export type PromptItemArray = z.infer<typeof PromptItemArray>;
-export const PromptItemArray = z.array(PromptItem);

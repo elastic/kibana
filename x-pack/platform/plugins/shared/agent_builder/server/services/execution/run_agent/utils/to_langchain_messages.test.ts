@@ -13,8 +13,13 @@ import type {
   ToolCallStep,
   ToolCallWithResult,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
-import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
+import {
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+  ExecutionStatus,
+} from '@kbn/agent-builder-common';
+import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
+import { sanitizeToolId, wrapToolResultContent } from '@kbn/agent-builder-genai-utils/langchain';
 import { convertPreviousRounds, groupToolCallSteps } from './to_langchain_messages';
 import type { ToolCallResultTransformer } from './create_result_transformer';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
@@ -194,17 +199,19 @@ describe('convertPreviousRounds', () => {
     // ToolMessage type guard is not imported, so just check property
     expect((toolCallToolMessage as ToolMessage).tool_call_id).toBe('call-1');
     expect(toolCallToolMessage.content).toEqual(
-      JSON.stringify({
-        results: [
-          {
-            tool_result_id: 'result-1',
-            type: ToolResultType.other,
-            data: {
-              some: 'result1',
+      wrapToolResultContent(
+        JSON.stringify({
+          results: [
+            {
+              tool_result_id: 'result-1',
+              type: ToolResultType.other,
+              data: {
+                some: 'result1',
+              },
             },
-          },
-        ],
-      })
+          ],
+        })
+      )
     );
     expect(isAIMessage(assistantMessage)).toBe(true);
     expect(assistantMessage.content).toBe('done!');
@@ -265,11 +272,13 @@ describe('convertPreviousRounds', () => {
     expect((toolCallAIMessage as AIMessage).tool_calls![0].id).toBe('call-2');
     expect((toolCallToolMessage as ToolMessage).tool_call_id).toBe('call-2');
     expect(toolCallToolMessage.content).toEqual(
-      JSON.stringify({
-        results: [
-          { tool_result_id: 'result-2', type: ToolResultType.other, data: { some: 'result1' } },
-        ],
-      })
+      wrapToolResultContent(
+        JSON.stringify({
+          results: [
+            { tool_result_id: 'result-2', type: ToolResultType.other, data: { some: 'result1' } },
+          ],
+        })
+      )
     );
     expect(isAIMessage(secondAssistantMessage)).toBe(true);
     expect(secondAssistantMessage.content).toBe('done with bar');
@@ -451,7 +460,9 @@ describe('convertPreviousRounds', () => {
       });
 
       const toolResultMessage = result[2] as ToolMessage;
-      const content = JSON.parse(toolResultMessage.content as string);
+      const content = JSON.parse(
+        (toolResultMessage.content as string).replace(/^<tool_result>|<\/tool_result>$/g, '')
+      );
 
       expect(customTransformer).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -516,7 +527,9 @@ describe('convertPreviousRounds', () => {
       });
 
       const toolResultMessage = result[2] as ToolMessage;
-      const content = JSON.parse(toolResultMessage.content as string);
+      const content = JSON.parse(
+        (toolResultMessage.content as string).replace(/^<tool_result>|<\/tool_result>$/g, '')
+      );
 
       // Should have one aggregated result
       expect(content.results).toHaveLength(1);
@@ -764,6 +777,92 @@ describe('convertPreviousRounds', () => {
         _reasoning: 'reason for call-2',
         id: 42,
       });
+    });
+  });
+
+  describe('background execution notices (from round steps)', () => {
+    const makeBgStep = (overrides: Partial<BackgroundExecutionState> = {}): ConversationRoundStep =>
+      ({
+        type: ConversationRoundStepType.backgroundAgentComplete,
+        execution_id: 'bg-exec-1',
+        status: ExecutionStatus.completed,
+        response: { message: 'Background result' },
+        completed_at: { round_id: 'round-1' },
+        ...overrides,
+      } as ConversationRoundStep);
+
+    it('injects system notice for background execution complete step', async () => {
+      const round = createRound({
+        id: 'round-1',
+        input: makeRoundInput('hello'),
+        response: makeAssistantResponse('world'),
+        steps: [makeBgStep()],
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds: [round],
+          nextInput: makeRoundInput('next'),
+        }),
+      });
+
+      const noticeMessage = result.find(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect(noticeMessage).toBeDefined();
+      expect((noticeMessage as any).content).toContain('bg-exec-1');
+      expect((noticeMessage as any).content).toContain('Background result');
+    });
+
+    it('injects error system notice for failed background step', async () => {
+      const round = createRound({
+        id: 'round-1',
+        input: makeRoundInput('hello'),
+        response: makeAssistantResponse('world'),
+        steps: [
+          makeBgStep({
+            execution_id: 'bg-fail-1',
+            status: ExecutionStatus.failed,
+            response: undefined,
+            error: { code: 'internalError' as any, message: 'Something broke' },
+          }),
+        ],
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds: [round],
+          nextInput: makeRoundInput('next'),
+        }),
+      });
+
+      const noticeMessage = result.find(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect(noticeMessage).toBeDefined();
+      expect((noticeMessage as any).content).toContain('has failed');
+      expect((noticeMessage as any).content).toContain('Something broke');
+    });
+
+    it('does not inject notices when no background steps exist', async () => {
+      const round = createRound({
+        id: 'round-1',
+        input: makeRoundInput('hello'),
+        response: makeAssistantResponse('world'),
+        steps: [],
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds: [round],
+          nextInput: makeRoundInput('next'),
+        }),
+      });
+
+      const noticeMessages = result.filter(
+        (msg) => isHumanMessage(msg) && (msg as any).content.includes('<system_notice>')
+      );
+      expect(noticeMessages).toHaveLength(0);
     });
   });
 });

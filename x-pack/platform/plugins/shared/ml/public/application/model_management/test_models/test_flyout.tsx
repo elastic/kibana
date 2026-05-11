@@ -16,7 +16,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { TrainedModelItem } from '../../../../common/types/trained_models';
+import type { TrainedModelItem } from '@kbn/ml-common-types/trained_models';
 import { TestTrainedModelContent } from './test_trained_model_content';
 
 interface Props {

@@ -189,27 +189,32 @@ You now submit a more detailed and complete set of partitions.
 
 ### **User Guidance & Refinement**
 
-When user guidance is provided, you MUST first check the **refinement history** (if any) to understand the full conversation context. The user's current message is a continuation of that conversation — interpret it accordingly.
+**1. With user guidance (prompt is provided):**
 
-**How to interpret user guidance:**
+Interpret the user's intent from their prompt wording and whether existing partitions are present:
 
-1.  **First, check whether there is a refinement history.** The presence or absence of history fundamentally changes how you interpret the user's message.
+*   **"Partition by X" / "split by X" / "by X":**
+    *   **If no existing partitions exist:** Clean slate. Create one partition per distinct value of field X.
+    *   **If existing partitions exist:** Add field X as an extra condition to each existing partition, making them more specific. For example, if an existing partition matches `{"field": "service.name", "eq": "apache"}` and the user says "partition by host.name", produce one partition per combination: `{"and": [{"field": "service.name", "eq": "apache"}, {"field": "host.name", "eq": "host-1"}]}`, etc.
+    *   **Single field** (e.g., "partition by X"): One partition per distinct value. Each condition matches exactly one value — do NOT group multiple values with `or`.
+    *   **Multiple fields** (e.g., "partition by X and Y"): One partition per combination of values, each using an `and` condition.
 
-2.  **No refinement history (first refinement):**
-    *   "Partition by X" / "split by X" / "by X" = **clean slate**. Discard ALL existing partitions. Do not carry over, combine with, or reference any previous partitions — even if the initial clustering shows them as "pure" or with 1 cluster. The clustering data for existing partitions is irrelevant when the user specifies a field — ignore it completely.
-        *   **Single field** (e.g., "partition by X"): Create one partition per distinct value of that field. Each partition condition must match exactly one value — do NOT group multiple values into a single partition with `or`. Example: `{"field": "X", "eq": "value-1"}`, `{"field": "X", "eq": "value-2"}`, etc.
-        *   **Multiple fields** (e.g., "partition by X and Y"): Create one partition per combination of values across the specified fields. Each partition uses an `and` condition matching one specific value for each field. Example: `{"and": [{"field": "X", "eq": "value-1"}, {"field": "Y", "eq": "value-a"}]}`. Do NOT group different values of the same field into one partition.
+*   **"Add partition by X" / "add partitions for X":** Create new, separate partitions based on field X alongside any existing ones. Do not modify existing partition conditions.
 
-3.  **With refinement history (subsequent refinements):**
-    The user has already guided the partitioning at least once. Their current message builds on that context. Determine their intent:
-    *   **Clean slate** — The user explicitly wants to start over. Signaled by phrases like "partition by Y only", "start over with Y", "forget everything, use Y", "ignore previous suggestions". Discard all current partitions and build fresh with the new field.
-    *   **Add a condition to existing partitions** — The user wants to refine the current partitions by adding an extra condition. Signaled by phrases like "also check process.name", "add a process name verification", "make sure they also match on host". Keep the current partitions but add the requested condition to their rules.
-    *   **Add new partitions** — The user wants to keep the current partitions and add more alongside them. Signaled by phrases like "add partitions by Z", "also partition by hostname", "include service name partitions too". Keep all current partitions and create additional ones based on the new field.
-    *   **Corrections** — The user wants to fix specific partitions or conditions. Signaled by phrases like "use exists instead of eq", "remove the apache ones", "merge namespace-3 and namespace-6". Apply the change to the targeted partitions, keep the rest intact.
+*   **Explicit clean slate:** The user wants to discard everything and start over. Signaled by unambiguous phrases like "partition by Y **only**", "**start over** with Y", "**forget everything**", "**ignore previous** suggestions", "**replace all** with Y", "**start from scratch**". Discard all existing partitions and build fresh from field Y.
 
-    **Default: preserve existing partitions.** Unless the user explicitly signals a clean slate, you MUST keep all current partitions and only make the changes they asked for. Do not remove partitions the user did not explicitly asked as the user can reject suggestions manually. Unsolicited changes are disruptive and discard work the user has already reviewed.
+*   **Corrections:** The user wants to fix specific partitions. Signaled by phrases like "use exists instead of eq", "remove the apache ones", "merge namespace-3 and namespace-6". Apply the change to the targeted partitions, keep the rest intact.
 
-4.  **Without user guidance**, treat current partitions as a starting point for refinement based on clustering data.
+**Default when existing partitions are present: preserve them** unless the user explicitly asks to discard. The user can reject individual suggestions manually, so do not remove partitions they did not ask you to remove.
+
+**2. Without user guidance (no prompt):**
+
+*   **If existing partitions are provided**, the user wants to try a completely different approach. You MUST:
+    1.  **Discard all existing partitions entirely** — do not keep, modify, or reference them.
+    2.  **Pick ONE single field** that is different from the fields used in the existing partition conditions. Do not combine multiple fields with `and` or `or`.
+    3.  **Create one partition per distinct value** of that field, each with a simple `eq` condition. Example: `{"field": "service.name", "eq": "apache"}`.
+    4.  **Name each partition after the value it matches** (e.g., `apache`, `redis`, `nginx`), not after the previous partition names.
+*   **If no existing partitions are provided**, start fresh based on the clustering data alone.
 
 ### **System Variables**
 

@@ -455,6 +455,7 @@
                 "lineNumber": 58,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "Iterable",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -594,6 +595,7 @@
                 "lineNumber": 73,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -612,6 +614,7 @@
                 "lineNumber": 73,
                 "columnNumber": 39,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateNodeOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -660,6 +663,7 @@
                 "lineNumber": 74,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "T",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -698,6 +702,7 @@
                 "lineNumber": 74,
                 "columnNumber": 86,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateNodeOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -783,6 +788,7 @@
                 "lineNumber": 79,
                 "columnNumber": 92,
                 "deprecated": false,
+                "docsReferencedTypeName": "CreateNodeOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1217,6 +1223,7 @@
                 "lineNumber": 127,
                 "columnNumber": 55,
                 "deprecated": false,
+                "docsReferencedTypeName": "SchemaOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1357,6 +1364,7 @@
                 "lineNumber": 140,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToStringOptions",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1484,6 +1492,7 @@
                 "lineNumber": 18,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "K",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1542,6 +1551,7 @@
                 "lineNumber": 19,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "Schema",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1599,6 +1609,7 @@
                 "lineNumber": 20,
                 "columnNumber": 25,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToJSContext",
                 "trackAdoption": false,
                 "isRequired": false
               }
@@ -1638,6 +1649,7 @@
                 "lineNumber": 21,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "StringifyContext",
                 "trackAdoption": false,
                 "isRequired": false
               },

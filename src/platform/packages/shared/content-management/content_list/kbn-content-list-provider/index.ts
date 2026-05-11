@@ -27,6 +27,20 @@ export type {
 // Hooks.
 export { useContentListItems, useContentListState } from './src/state';
 export type { ContentListQueryData } from './src/state';
+
+// Phase.
+export {
+  useContentListPhase,
+  useIsInitialLoad,
+  useIsEmpty,
+  useIsFiltering,
+  useIsFiltered,
+  useIsPopulated,
+  derivePhase,
+  derivePhaseFromState,
+} from './src/phase';
+export type { ContentListPhase, DerivePhaseInput } from './src/phase';
+
 export {
   isFilterFacetConfig,
   useContentListSort,
@@ -41,6 +55,7 @@ export {
   isSortingConfig,
   isPaginationConfig,
   isSearchConfig,
+  isSelectionConfig,
   TAG_FILTER_ID,
   CREATED_BY_FILTER_ID,
   DEFAULT_SORT_FIELDS,
@@ -70,6 +85,7 @@ export type {
   UseContentListPaginationReturn,
   SearchConfig,
   UseContentListSearchReturn,
+  SelectionConfig,
   UseContentListSelectionReturn,
   UseContentListFiltersReturn,
   DeleteConfirmationModalProps,

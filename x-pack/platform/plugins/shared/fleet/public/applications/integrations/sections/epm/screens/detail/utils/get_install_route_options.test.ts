@@ -222,7 +222,7 @@ describe('getInstallPkgRouteOptions', () => {
       expect(getInstallPkgRouteOptions(opts)[1]).toMatchObject(expectedOptions);
     });
 
-    it('should not use multi-page layout if isAgentlessDefault is true', () => {
+    it('should not use multi-page layout if isAgentlessByDefault is true', () => {
       const opts = {
         currentPath: 'currentPath',
         integration: 'myintegration',
@@ -230,7 +230,7 @@ describe('getInstallPkgRouteOptions', () => {
         isFirstTimeAgentUser: true,
         isCloud: true,
         isExperimentalAddIntegrationPageEnabled: true,
-        isAgentlessDefault: true,
+        isAgentlessByDefault: true,
       };
 
       const expectedOptions = {

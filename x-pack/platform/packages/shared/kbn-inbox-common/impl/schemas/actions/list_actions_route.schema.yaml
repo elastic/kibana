@@ -1,0 +1,105 @@
+openapi: 3.0.0
+info:
+  title: List Inbox Actions API endpoint
+  version: '1'
+paths:
+  /internal/inbox/actions:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: ListInboxActions
+      description: List inbox actions awaiting human-in-the-loop feedback
+      summary: List inbox actions
+      tags:
+        - Inbox API
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - pending
+              - approved
+              - rejected
+          description: Filter actions by status
+        - name: source_app
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter actions by the originating app id
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  actions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/InboxAction'
+                  total:
+                    type: integer
+                required:
+                  - actions
+                  - total
+
+components:
+  schemas:
+    InboxAction:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Stable identifier for the action
+        title:
+          type: string
+          description: Short, human-readable summary of what needs approval
+        description:
+          type: string
+          nullable: true
+          description: Longer context about the action
+        status:
+          type: string
+          enum:
+            - pending
+            - approved
+            - rejected
+        source_app:
+          type: string
+          description: App id of the system that produced the action (e.g. security_solution, attack_discovery)
+        source_id:
+          type: string
+          description: Stable id of the originating entity (task/agent/run)
+        requested_by:
+          type: string
+          nullable: true
+          description: Username/principal that requested the action
+        created_at:
+          type: string
+          description: ISO 8601 timestamp of when the action was created
+      required:
+        - id
+        - title
+        - status
+        - source_app
+        - source_id
+        - created_at

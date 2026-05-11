@@ -9,11 +9,27 @@
 
 import { useMemo } from 'react';
 import type { ReactNode } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import { useEuiTheme, type EuiBasicTableColumn } from '@elastic/eui';
 import { useContentListConfig, type ContentListItem } from '@kbn/content-list-provider';
-import type { ParsedPart } from '@kbn/content-list-assembly';
+import type { ParsedPart, SkeletonOutput } from '@kbn/content-list-assembly';
 import type { ColumnBuilderContext } from '../column/types';
 import { column } from '../column/part';
+import { inferColumnSkeleton } from '../skeleton/infer_skeleton';
+
+/**
+ * A resolved column plus the skeleton shape the table skeleton should draw
+ * in its place during `'initialLoad'`.
+ *
+ * `skeleton` is either the preset's own {@link SkeletonOutput} (when
+ * registered via `column.createPreset({ skeleton })`) or an inferred
+ * descriptor derived from the real column's metadata.
+ */
+export interface ResolvedColumn {
+  /** The real column handed to `EuiBasicTable`. */
+  column: EuiBasicTableColumn<ContentListItem>;
+  /** Skeleton shape descriptor — preset-provided or inferred. */
+  skeleton: SkeletonOutput;
+}
 
 /**
  * Default columns when no children are provided.
@@ -69,16 +85,22 @@ const parseColumnParts = (children: ReactNode): ParsedPart[] => {
  * Encapsulates the full column resolution flow:
  * 1. Parse declarative `Column` components from children via `column.parseChildren`.
  * 2. Resolve `EuiBasicTableColumn` definitions via `column.resolve`.
- * 3. Fall back to the default Name column if none are found.
+ * 3. Resolve per-preset skeleton descriptors via `column.resolveSkeleton`,
+ *    falling back to inference from the resolved column metadata.
+ * 4. Fall back to the default columns if none are found.
  *
  * @param children - React children containing `Column` declarative components.
- * @returns Array of EUI table columns ready for `EuiBasicTable`.
+ * @param onDelete - Optional callback invoked by the default Delete action.
+ * @returns Array of {@link ResolvedColumn} entries — each pairing an
+ *   `EuiBasicTableColumn` (for the real table) with a `SkeletonOutput`
+ *   (for the loading skeleton).
  */
 export const useColumns = (
   children: ReactNode,
   onDelete?: (items: ContentListItem[]) => void
-): Array<EuiBasicTableColumn<ContentListItem>> => {
+): ResolvedColumn[] => {
   const { item: itemConfig, isReadOnly, labels, supports } = useContentListConfig();
+  const { euiTheme } = useEuiTheme();
 
   return useMemo(() => {
     const parts = parseColumnParts(children);
@@ -88,14 +110,30 @@ export const useColumns = (
       entityName: labels.entity,
       supports,
       actions: { onDelete },
+      euiTheme,
     };
 
-    return parts
-      .map((part) => column.resolve(part, context))
-      .filter((col): col is EuiBasicTableColumn<ContentListItem> => col !== undefined);
+    const resolved: ResolvedColumn[] = [];
+
+    for (const part of parts) {
+      const resolvedColumn = column.resolve(part, context);
+      // A preset resolver may intentionally return `undefined` to signal
+      // the column should be skipped (read-only mode, missing handlers,
+      // etc.). Drop those without producing a skeleton either.
+      if (resolvedColumn === undefined) {
+        continue;
+      }
+
+      const presetSkeleton = column.resolveSkeleton(part, context);
+      const skeleton = presetSkeleton ?? inferColumnSkeleton(resolvedColumn);
+
+      resolved.push({ column: resolvedColumn, skeleton });
+    }
+
+    return resolved;
     // `children` is intentionally excluded: JSX children create a new reference on every
     // parent render, so including them would defeat memoization. Re-running when context
     // deps change is sufficient.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemConfig, isReadOnly, labels.entity, supports, onDelete]);
+  }, [itemConfig, isReadOnly, labels.entity, supports, onDelete, euiTheme]);
 };

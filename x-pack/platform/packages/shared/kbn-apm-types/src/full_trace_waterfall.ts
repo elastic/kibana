@@ -5,8 +5,8 @@
  * 2.0.
  */
 type FullTraceWaterfallScrollProps =
-  | { scrollStrategy?: 'window'; highlightedSpanId?: string }
-  | { scrollStrategy: 'parent'; highlightedSpanId?: string; scrollToHighlightedOnMount?: boolean };
+  | { scrollStrategy?: 'window'; contextSpanIds?: string[] }
+  | { scrollStrategy: 'parent'; contextSpanIds?: string[]; scrollToContextOnMount?: boolean };
 
 export type FullTraceWaterfallProps = {
   traceId: string;
@@ -16,6 +16,11 @@ export type FullTraceWaterfallProps = {
   scrollElement?: Element;
   onNodeClick?: (nodeSpanId: string) => void;
   onErrorClick?: FullTraceWaterfallOnErrorClick;
+  ebt: {
+    row: { element: string };
+    errorBadge: { element: string };
+    serviceBadge: { element: string };
+  };
 } & FullTraceWaterfallScrollProps;
 
 export type FullTraceWaterfallOnErrorClick = (params: {

@@ -8,4 +8,4 @@
  */
 
 export { parseRgbString, shouldApplyColor, needsLightText } from './palette';
-export { formatValue } from './format';
+export { formatValueAsText, formatValueAsReactNode } from './format';

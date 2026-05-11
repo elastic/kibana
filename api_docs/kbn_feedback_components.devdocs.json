@@ -14,7 +14,7 @@
           "({ getQuestions, getAppDetails, getCurrentUserEmail, sendFeedback, showToast, hideFeedbackContainer, }: Props) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/feedback-components/src/components/feedback_container.tsx",
-        "lineNumber": 28,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -30,9 +30,10 @@
               "Props"
             ],
             "path": "src/platform/packages/shared/feedback-components/src/components/feedback_container.tsx",
-            "lineNumber": 28,
+            "lineNumber": 30,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -70,6 +71,7 @@
             "lineNumber": 29,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }

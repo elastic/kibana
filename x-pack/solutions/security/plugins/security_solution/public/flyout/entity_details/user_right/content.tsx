@@ -120,6 +120,7 @@ export const UserPanelContent = ({
         />
       )}
       <EntityInsight
+        entityRecord={entityRecord}
         identityFields={identityFields}
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
@@ -127,6 +128,7 @@ export const UserPanelContent = ({
       />
       <ObservedDataSection
         identityFields={identityFields}
+        entityRecord={entityRecord}
         userName={userName}
         observedUser={observedUser}
         contextID={contextID}
