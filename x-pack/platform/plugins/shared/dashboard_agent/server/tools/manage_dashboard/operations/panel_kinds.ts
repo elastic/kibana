@@ -12,17 +12,13 @@ import { z } from '@kbn/zod/v4';
 export const markdownPanelInputSchema = z.object({
   kind: z.literal('markdown'),
   markdownContent: z.string().describe('Markdown content for the panel.'),
-  grid: panelGridSchema.describe(
-    'Panel layout in grid units. w: width (1–48), h: height, x: column (0–47), y: row.'
-  ),
+  grid: panelGridSchema,
 });
 
 export const attachmentPanelInputSchema = z.object({
   kind: z.literal('attachment'),
   attachmentId: z.string().describe('Visualization attachment ID to add as a dashboard panel.'),
-  grid: panelGridSchema.describe(
-    'Panel layout in grid units. w: width (1–48), h: height, x: column (0–47), y: row. The dashboard is 48 columns wide. Always set x and y to place panels without gaps.'
-  ),
+  grid: panelGridSchema,
 });
 
 export const visualizationPanelBaseInputSchema = z.object({
@@ -45,9 +41,7 @@ export const visualizationPanelBaseInputSchema = z.object({
     .describe(
       '(optional) An ES|QL query. If not provided, the tool will generate the query. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
     ),
-  grid: panelGridSchema.describe(
-    'Panel layout in grid units. w: width (1–48), h: height, x: column (0–47), y: row. The dashboard is 48 columns wide. Always set x and y to place panels without gaps.'
-  ),
+  grid: panelGridSchema,
 });
 
 export const visualizationPanelInputSchema = visualizationPanelBaseInputSchema.extend({
