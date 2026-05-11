@@ -55,6 +55,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
     services: {
       application,
       http,
+      hotkeys,
       notifications,
       plugins: {
         start: {
@@ -144,26 +145,43 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
   const tooltipRef = useRef<EuiToolTipRef>(null);
   const [tooltipVisible, setTooltipVisible] = useState(true);
   useEffect(() => {
-    const keyboardListener = (event: KeyboardEvent) => {
-      const hasModifier = isMac ? event.metaKey : event.ctrlKey;
-      if (hasModifier && (event.code === 'Semicolon' || event.key === ';')) {
+    const handle = hotkeys.register(
+      {
+        id: 'observabilityAiAssistant:openNewConversation',
+        keys: 'Mod+;',
+        scope: 'global',
+        label: i18n.translate(
+          'xpack.observabilityAiAssistant.navControl.openNewConversationShortcutLabel',
+          { defaultMessage: 'Open Observability AI Assistant' }
+        ),
+      },
+      (event) => {
         event.preventDefault();
-        service.conversations.openNewConversation({
-          messages: [],
-        });
+        service.conversations.openNewConversation({ messages: [] });
       }
-      if (event.key === 'Escape' && isOpen) {
+    );
+    return handle.unregister;
+  }, [hotkeys, service.conversations]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handle = hotkeys.register(
+      {
+        id: 'observabilityAiAssistant:closeFlyout',
+        keys: 'Escape',
+        scope: 'context',
+        label: i18n.translate(
+          'xpack.observabilityAiAssistant.navControl.closeFlyoutShortcutLabel',
+          { defaultMessage: 'Close Observability AI Assistant' }
+        ),
+      },
+      () => {
         setTooltipVisible(true);
         buttonRef.current?.focus();
       }
-    };
-
-    window.addEventListener('keydown', keyboardListener);
-
-    return () => {
-      window.removeEventListener('keydown', keyboardListener);
-    };
-  }, [service.conversations, isOpen, setFlyoutSettings, setIsOpen, setTooltipVisible]);
+    );
+    return handle.unregister;
+  }, [hotkeys, isOpen]);
 
   const buttonLabel = i18n.translate('xpack.observabilityAiAssistant.navControl.assistantNavLink', {
     defaultMessage: 'AI Assistant',
