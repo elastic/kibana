@@ -7,34 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import React, { type ReactNode, useCallback, useEffect, useState } from 'react';
+import { EuiLiveAnnouncer } from '@elastic/eui';
 import useUnmount from 'react-use/lib/useUnmount';
 import { consumeKeyboardEvent } from './shortcut_utils';
 import { useShortcutsContext } from './shortcuts_provider';
 
-interface UseShortcutsLayerOptions {
+export interface UseShortcutsLayerOptions {
   instanceIdLabel: string;
+  screenReaderHint?: string;
+  screenReaderAnnouncement?: string;
   shouldOpen: (event: KeyboardEvent) => boolean;
   runAction?: (event: KeyboardEvent) => void;
-  onOpen?: () => void;
-  onClose?: () => void;
 }
 
 export interface UseShortcutsLayerResult {
   isVisible: boolean;
+  liveAnnouncement: ReactNode;
   open: () => boolean;
   close: () => void;
 }
 
 export const useShortcutsLayer = ({
   instanceIdLabel,
+  screenReaderHint,
+  screenReaderAnnouncement,
   shouldOpen,
   runAction,
-  onOpen,
-  onClose,
 }: UseShortcutsLayerOptions): UseShortcutsLayerResult => {
   const { tryAcquireShortcutsLock, releaseShortcutsLock } = useShortcutsContext();
   const [isVisible, setIsVisible] = useState(false);
+  const [liveAnnouncement, setLiveAnnouncement] = useState(screenReaderHint);
   const [instanceId] = useState(() => Symbol(instanceIdLabel));
   const open = useCallback(() => {
     if (isVisible) {
@@ -44,19 +47,19 @@ export const useShortcutsLayer = ({
     const lockAcquired = tryAcquireShortcutsLock(instanceId);
 
     if (lockAcquired) {
-      onOpen?.();
+      setLiveAnnouncement(screenReaderAnnouncement);
       setIsVisible(true);
     }
 
     return lockAcquired;
-  }, [instanceId, isVisible, onOpen, tryAcquireShortcutsLock]);
+  }, [instanceId, isVisible, screenReaderAnnouncement, tryAcquireShortcutsLock]);
   const close = useCallback(() => {
     if (isVisible) {
       releaseShortcutsLock(instanceId);
-      onClose?.();
+      setLiveAnnouncement(undefined);
       setIsVisible(false);
     }
-  }, [instanceId, isVisible, onClose, releaseShortcutsLock]);
+  }, [instanceId, isVisible, releaseShortcutsLock]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -95,5 +98,12 @@ export const useShortcutsLayer = ({
     releaseShortcutsLock(instanceId);
   });
 
-  return { isVisible, open, close };
+  return {
+    isVisible,
+    liveAnnouncement: liveAnnouncement ? (
+      <EuiLiveAnnouncer>{liveAnnouncement}</EuiLiveAnnouncer>
+    ) : undefined,
+    open,
+    close,
+  };
 };

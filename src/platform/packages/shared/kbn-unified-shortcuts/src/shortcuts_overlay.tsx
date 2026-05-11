@@ -13,21 +13,19 @@ import React, {
   forwardRef,
   isValidElement,
   useImperativeHandle,
-  useState,
 } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLiveAnnouncer,
   EuiPanel,
   EuiPortal,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useShortcutsLayer } from './use_shortcuts_layer';
+import { useShortcutsLayer, type UseShortcutsLayerOptions } from './use_shortcuts_layer';
 
 /**
  * Ref methods for {@link ShortcutsOverlay}.
@@ -36,15 +34,18 @@ export interface ShortcutsOverlayRef {
   open: () => boolean;
 }
 
+type LayerOptions = Pick<
+  UseShortcutsLayerOptions,
+  'screenReaderHint' | 'screenReaderAnnouncement' | 'shouldOpen'
+>;
+
+type RequiredLayerOptions = Required<Pick<UseShortcutsLayerOptions, 'runAction'>>;
+
 /**
  * Props for {@link ShortcutsOverlay}.
  */
-export interface ShortcutsOverlayProps {
+export interface ShortcutsOverlayProps extends LayerOptions, RequiredLayerOptions {
   items: ReactNode[];
-  screenReaderHint?: string;
-  screenReaderAnnouncement?: string;
-  shouldOpen: (event: KeyboardEvent) => boolean;
-  runAction: (event: KeyboardEvent) => void;
 }
 
 /**
@@ -81,26 +82,19 @@ const ShortcutsOverlayFlexItem = ({ children }: PropsWithChildren) => {
 export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlayProps>(
   ({ items, screenReaderHint, screenReaderAnnouncement, shouldOpen, runAction }, ref) => {
     const { euiTheme } = useEuiTheme();
-    const [liveAnnouncement, setLiveAnnouncement] = useState<string | undefined>(
-      () => screenReaderHint
-    );
-    const { isVisible, open } = useShortcutsLayer({
+    const { isVisible, liveAnnouncement, open } = useShortcutsLayer({
       instanceIdLabel: 'shortcuts-overlay',
+      screenReaderHint,
+      screenReaderAnnouncement,
       shouldOpen,
       runAction,
-      onOpen: () => {
-        setLiveAnnouncement(screenReaderAnnouncement);
-      },
-      onClose: () => {
-        setLiveAnnouncement(undefined);
-      },
     });
 
     useImperativeHandle(ref, () => ({ open }), [open]);
 
     return (
       <>
-        {liveAnnouncement ? <EuiLiveAnnouncer>{liveAnnouncement}</EuiLiveAnnouncer> : null}
+        {liveAnnouncement}
         <EuiPortal>
           <EuiPanel
             aria-hidden="true"
