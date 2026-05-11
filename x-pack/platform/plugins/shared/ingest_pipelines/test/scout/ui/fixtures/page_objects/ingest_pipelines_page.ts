@@ -153,13 +153,6 @@ export class IngestPipelinesPage {
     await this.page.testSubj.locator('managedFilter').click();
   }
 
-  async openFirstPipelineDetails() {
-    const firstRow = this.page.testSubj.locator('pipelineTableRow').first();
-    await firstRow.waitFor();
-    await firstRow.locator('[data-test-subj="pipelineDetailsLink"]').click();
-    await this.detailsFlyout.waitFor();
-  }
-
   async clickDeletePipelineAction() {
     await this.page.testSubj.locator('actionsPopoverButton').click();
     await this.page.testSubj.locator('deletePipelineButton').click();

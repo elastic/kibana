@@ -10,14 +10,26 @@ import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 
 test.describe('Ingest pipelines delete', { tag: tags.stateful.classic }, () => {
+  test.beforeAll(async ({ esClient }) => {
+    await esClient.ingest.putPipeline({
+      id: testData.MANAGED_PIPELINE_NAME,
+      _meta: { managed: true },
+      processors: [],
+    });
+  });
+
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginWithCustomRole(testData.INGEST_PIPELINES_USER_ROLE);
     await pageObjects.ingestPipelines.goto();
   });
 
+  test.afterAll(async ({ esClient }) => {
+    await esClient.ingest.deletePipeline({ id: testData.MANAGED_PIPELINE_NAME }).catch(() => {});
+  });
+
   test('shows warning callout when deleting a managed pipeline', async ({ pageObjects }) => {
     await pageObjects.ingestPipelines.filterByManaged();
-    await pageObjects.ingestPipelines.openFirstPipelineDetails();
+    await pageObjects.ingestPipelines.openPipelineDetailsByName(testData.MANAGED_PIPELINE_NAME);
     await pageObjects.ingestPipelines.clickDeletePipelineAction();
     await expect(pageObjects.ingestPipelines.deleteManagedAssetsCallout).toBeVisible();
   });

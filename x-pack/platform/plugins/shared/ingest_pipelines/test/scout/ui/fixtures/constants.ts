@@ -7,6 +7,7 @@
 
 export const TEST_PIPELINE_NAME = 'test_pipeline';
 export const TREE_PIPELINE_NAME = 'tree_pipeline';
+export const MANAGED_PIPELINE_NAME = 'managed_test_pipeline';
 
 export const PIPELINE = {
   name: TEST_PIPELINE_NAME,

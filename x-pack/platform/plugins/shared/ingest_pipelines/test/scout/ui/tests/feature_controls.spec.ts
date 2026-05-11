@@ -27,10 +27,8 @@ test.describe('Ingest pipelines feature controls', { tag: tags.stateful.classic 
       elasticsearch: { cluster: [] },
       kibana: [
         {
-          base: [],
-          feature: {
-            advancedSettings: ['all'],
-          },
+          base: ['all'],
+          feature: {},
           spaces: ['*'],
         },
       ],
