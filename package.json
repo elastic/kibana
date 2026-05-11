@@ -1264,6 +1264,7 @@
     "@kbn/watcher-plugin": "link:x-pack/platform/plugins/private/watcher",
     "@kbn/workflows": "link:src/platform/packages/shared/kbn-workflows",
     "@kbn/workflows-execution-engine": "link:src/platform/plugins/shared/workflows_execution_engine",
+    "@kbn/workflows-execution-engine-core": "link:src/platform/packages/shared/kbn-workflows-execution-engine-core",
     "@kbn/workflows-execution-engine-utils": "link:src/platform/packages/shared/kbn-workflows-execution-engine-utils",
     "@kbn/workflows-extensions": "link:src/platform/plugins/shared/workflows_extensions",
     "@kbn/workflows-extensions-example": "link:examples/workflows_extensions_example",
