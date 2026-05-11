@@ -60,7 +60,9 @@ apiTest.describe('lens visualizations - update', { tag: tags.deploymentAgnostic 
     });
 
     expect(response).toHaveStatusCode(404);
-    expect(response.body.message).toBe(`A Lens visualization with id [${missingId}] was not found.`);
+    expect(response.body.message).toBe(
+      `A Lens visualization with id [${missingId}] was not found.`
+    );
   });
 
   apiTest('validation - returns 400 when body is empty', async ({ apiClient }) => {
