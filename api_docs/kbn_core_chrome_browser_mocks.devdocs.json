@@ -15,7 +15,7 @@
         "label": "chromeServiceMock",
         "description": [],
         "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
-        "lineNumber": 126,
+        "lineNumber": 129,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -33,7 +33,7 @@
               ">"
             ],
             "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
-            "lineNumber": 127,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -61,7 +61,7 @@
               ">"
             ],
             "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
-            "lineNumber": 128,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -89,7 +89,7 @@
               ">"
             ],
             "path": "src/core/packages/chrome/browser-mocks/src/chrome_service.mock.ts",
-            "lineNumber": 129,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
