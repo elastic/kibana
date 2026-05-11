@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { SmlTypeRegistry } from './sml_type_registry';
-import type { SmlIndexAction, SmlContext, SmlDocument } from './types';
+import type { SmlChunk, SmlIndexAction, SmlContext, SmlDocument, SmlDocumentSource } from './types';
 import { createSmlStorage, smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
 
@@ -25,6 +25,25 @@ export interface SmlIndexerDeps {
 export interface SmlIndexer {
   /**
    * Index, update, or delete SML data for a specific item.
+   *
+   * The operation runs in one of two modes:
+   *  - **`direct`**: caller supplies `chunks` (or sets `source: 'direct'`
+   *    explicitly). The indexer wipes any pre-existing chunks for `originId`
+   *    (regardless of source) and writes the supplied chunks tagged with
+   *    `source: 'direct'`. For `action: 'delete'` all chunks for the origin
+   *    are wiped.
+   *  - **`resolved`**: caller omits `chunks` (or sets `source: 'resolved'`).
+   *    The indexer looks up the registered type, calls its `getSmlData(originId)`
+   *    hook, and writes the result tagged with `source: 'resolved'`. If chunks
+   *    tagged `source: 'direct'` already exist for this origin, the operation
+   *    is **skipped** to preserve the user's override. The same protection
+   *    applies to `action: 'delete'` in resolved mode.
+   *
+   * `source` is inferred when not provided: `'direct'` if `chunks` is set,
+   * otherwise `'resolved'`.
+   *
+   * Per-`originId` invariant: the index never holds both `resolved` and
+   * `direct` chunks at the same time.
    */
   indexAttachment: (params: {
     originId: string;
@@ -34,6 +53,10 @@ export interface SmlIndexer {
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
     logger: Logger;
+    /** Pre-computed chunks (direct mode for `create`/`update`). */
+    chunks?: SmlChunk[];
+    /** Explicit source; defaults to inferred (direct if chunks else resolved). */
+    source?: SmlDocumentSource;
   }) => Promise<void>;
 }
 
@@ -58,6 +81,8 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient,
     savedObjectsClient,
     logger: contextLogger,
+    chunks: directChunks,
+    source: explicitSource,
   }: {
     originId: string;
     attachmentType: string;
@@ -66,54 +91,98 @@ class SmlIndexerImpl implements SmlIndexer {
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository;
     logger: Logger;
+    chunks?: SmlChunk[];
+    source?: SmlDocumentSource;
   }): Promise<void> {
+    const source: SmlDocumentSource =
+      explicitSource ?? (directChunks !== undefined ? 'direct' : 'resolved');
     this.logger.info(
-      `SML indexer: indexAttachment called — originId='${originId}', type='${attachmentType}', action='${action}', spaces=[${spaces.join(
+      `SML indexer: indexAttachment called — originId='${originId}', type='${attachmentType}', action='${action}', source='${source}', spaces=[${spaces.join(
         ', '
       )}]`
     );
 
-    const definition = this.registry.get(attachmentType);
-    if (!definition) {
-      this.logger.warn(
-        `SML indexer: type definition '${attachmentType}' not found — skipping indexing for '${originId}'. Registered types: [${this.registry
-          .list()
-          .map((t) => t.id)
-          .join(', ')}]`
-      );
-      return;
-    }
-
     if (action === 'delete') {
+      if (source === 'resolved') {
+        const hasDirect = await this.hasDirectChunks({ originId, esClient });
+        if (hasDirect) {
+          this.logger.info(
+            `SML indexer: skipping resolved-mode delete for origin '${originId}' — direct chunks exist and take precedence`
+          );
+          return;
+        }
+      }
       this.logger.info(`SML indexer: deleting chunks for origin '${originId}'`);
       await this.deleteChunks({ originId, esClient });
       return;
     }
 
-    const context: SmlContext = {
-      esClient,
-      savedObjectsClient,
-      logger: contextLogger,
-    };
-
-    this.logger.info(
-      `SML indexer: calling getSmlData for origin '${originId}' of type '${attachmentType}'`
-    );
-    const smlData = await definition.getSmlData(originId, context);
-    if (!smlData || smlData.chunks.length === 0) {
+    let chunks: SmlChunk[];
+    if (source === 'direct') {
+      if (directChunks === undefined) {
+        this.logger.warn(
+          `SML indexer: source='direct' but no chunks supplied for origin '${originId}' — treating as delete`
+        );
+        await this.deleteChunks({ originId, esClient });
+        return;
+      }
+      if (directChunks.length === 0) {
+        this.logger.info(
+          `SML indexer: direct mode received empty chunks for origin '${originId}' — deleting existing chunks`
+        );
+        await this.deleteChunks({ originId, esClient });
+        return;
+      }
+      chunks = directChunks;
       this.logger.info(
-        `SML indexer: no SML data returned for origin '${originId}' of type '${attachmentType}' — deleting existing chunks`
+        `SML indexer: direct mode — using ${chunks.length} caller-supplied chunk(s) for origin '${originId}' (will override any existing chunks)`
       );
-      await this.deleteChunks({ originId, esClient });
-      return;
+    } else {
+      const hasDirect = await this.hasDirectChunks({ originId, esClient });
+      if (hasDirect) {
+        this.logger.info(
+          `SML indexer: skipping resolved-mode index for origin '${originId}' — direct chunks exist and take precedence`
+        );
+        return;
+      }
+
+      const definition = this.registry.get(attachmentType);
+      if (!definition) {
+        this.logger.warn(
+          `SML indexer: type definition '${attachmentType}' not found — skipping indexing for '${originId}'. Registered types: [${this.registry
+            .list()
+            .map((t) => t.id)
+            .join(', ')}]`
+        );
+        return;
+      }
+
+      const context: SmlContext = {
+        esClient,
+        savedObjectsClient,
+        logger: contextLogger,
+      };
+
+      this.logger.info(
+        `SML indexer: calling getSmlData for origin '${originId}' of type '${attachmentType}'`
+      );
+      const smlData = await definition.getSmlData(originId, context);
+      if (!smlData || smlData.chunks.length === 0) {
+        this.logger.info(
+          `SML indexer: no SML data returned for origin '${originId}' of type '${attachmentType}' — deleting existing chunks`
+        );
+        await this.deleteChunks({ originId, esClient });
+        return;
+      }
+      chunks = smlData.chunks;
     }
 
     this.logger.info(
-      `SML indexer: getSmlData returned ${
-        smlData.chunks.length
-      } chunk(s) for origin '${originId}'. First chunk title: '${
-        smlData.chunks[0]?.title
-      }', content length: ${smlData.chunks[0]?.content?.length ?? 0}`
+      `SML indexer: indexing ${
+        chunks.length
+      } chunk(s) for origin '${originId}' (source='${source}'). First chunk title: '${
+        chunks[0]?.title
+      }', content length: ${chunks[0]?.content?.length ?? 0}`
     );
 
     await this.deleteChunks({ originId, esClient });
@@ -122,7 +191,7 @@ class SmlIndexerImpl implements SmlIndexer {
     const smlClient = storage.getClient();
 
     const now = new Date().toISOString();
-    const bulkOps = smlData.chunks.map((chunk) => {
+    const bulkOps = chunks.map((chunk) => {
       const chunkId = `${attachmentType}:${originId}:${uuidv4()}`;
       const document: SmlDocument = {
         id: chunkId,
@@ -134,6 +203,7 @@ class SmlIndexerImpl implements SmlIndexer {
         updated_at: now,
         spaces,
         permissions: chunk.permissions ?? [],
+        source,
       };
       if (chunk.description !== undefined) {
         document.description = chunk.description;
@@ -171,7 +241,7 @@ class SmlIndexerImpl implements SmlIndexer {
           );
         } else {
           this.logger.info(
-            `SML indexer: successfully indexed ${smlData.chunks.length} chunk(s) for origin '${originId}'`
+            `SML indexer: successfully indexed ${chunks.length} chunk(s) for origin '${originId}'`
           );
         }
       } catch (error) {
@@ -182,6 +252,48 @@ class SmlIndexerImpl implements SmlIndexer {
         );
         throw error;
       }
+    }
+  }
+
+  /**
+   * Check whether any chunks tagged `source: 'direct'` exist for the given
+   * `originId`. Used to enforce the per-origin mutual-exclusion invariant:
+   * resolved writes are skipped when direct chunks exist.
+   *
+   * Safe to call before the index has been created.
+   */
+  private async hasDirectChunks({
+    originId,
+    esClient,
+  }: {
+    originId: string;
+    esClient: ElasticsearchClient;
+  }): Promise<boolean> {
+    try {
+      const result = await esClient.count({
+        index: smlIndexName,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        query: {
+          bool: {
+            filter: [{ term: { origin_id: originId } }, { term: { source: 'direct' } }],
+          },
+        },
+      });
+      return (result.count ?? 0) > 0;
+    } catch (error) {
+      if (isNotFoundError(error)) {
+        return false;
+      }
+      this.logger.warn(
+        `SML indexer: failed to check for direct chunks for origin '${originId}': ${
+          (error as Error).message
+        }`
+      );
+      // Fail open: treat as no direct chunks rather than blocking the
+      // resolved-mode write. The next direct write will re-establish the
+      // override.
+      return false;
     }
   }
 

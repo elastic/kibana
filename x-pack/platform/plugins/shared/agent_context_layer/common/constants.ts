@@ -7,3 +7,4 @@
 
 export const internalApiPath = '/internal/agent_context_layer';
 export const smlSearchPath = `${internalApiPath}/sml/_search`;
+export const smlIndexAttachmentPath = `${internalApiPath}/sml/_index`;

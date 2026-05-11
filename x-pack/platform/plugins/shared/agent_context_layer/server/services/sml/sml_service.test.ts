@@ -357,6 +357,8 @@ describe('SmlService', () => {
         updated_at: '2024-01-02',
         spaces: ['default'],
         permissions: ['saved_object:lens/get'],
+        // Hit had no `source` (pre-`source` doc) — service defaults to 'resolved'.
+        source: 'resolved',
         score: 1.5,
       });
       expect(result.total).toBe(1);
@@ -848,6 +850,8 @@ describe('SmlService', () => {
         updated_at: '2024-01-02',
         spaces: ['default'],
         permissions: [],
+        // Hit had no `source` (pre-`source` doc) — service defaults to 'resolved'.
+        source: 'resolved',
       });
       expect(result.get('doc-2')).toEqual({
         id: 'doc-2',
@@ -862,6 +866,7 @@ describe('SmlService', () => {
         updated_at: '2024-01-02',
         spaces: ['default'],
         permissions: [],
+        source: 'resolved',
       });
     });
 

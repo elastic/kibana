@@ -109,7 +109,17 @@ class SmlServiceImpl implements SmlServiceInstance {
         });
       },
       indexAttachment: async (params) => {
-        return this.getIndexer().indexAttachment(params);
+        return this.getIndexer().indexAttachment({
+          originId: params.originId,
+          attachmentType: params.attachmentType,
+          action: params.action,
+          spaces: params.spaces,
+          esClient: params.esClient,
+          savedObjectsClient: params.savedObjectsClient,
+          logger: params.logger,
+          chunks: params.chunks,
+          source: params.source,
+        });
       },
       getDocuments: async ({ ids, spaceId, esClient }) => {
         return getDocumentsByIds({ ids, spaceId, esClient, logger });
@@ -488,6 +498,9 @@ const searchSml = async ({
           spaces: source.spaces ?? [],
           permissions: source.permissions ?? [],
           user_id: source.user_id,
+          // Pre-`source` docs in the index default to `resolved` (the crawler
+          // was the only writer before this field existed).
+          source: source.source ?? 'resolved',
           score: hit._score ?? 0,
         };
       });
@@ -556,6 +569,8 @@ const getDocumentsByIds = async ({
         updated_at: source.updated_at ?? '',
         spaces: source.spaces ?? [],
         permissions: source.permissions ?? [],
+        // Pre-`source` docs in the index default to `resolved`.
+        source: source.source ?? 'resolved',
       };
       if (source.description !== undefined) {
         doc.description = source.description;

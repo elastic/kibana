@@ -16,18 +16,22 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type {
   SmlTypeDefinition,
   SmlSearchResult,
   SmlSearchFilters,
   SmlDocument,
   SmlIndexAction,
+  SmlChunk,
+  SmlDocumentSource,
 } from './services/sml/types';
 import type { SmlResolvedItemResult } from './services/sml/execute_sml_attach_items';
 
 export interface AgentContextLayerSetupDependencies {
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface AgentContextLayerStartDependencies {
@@ -85,4 +89,19 @@ export interface SmlIndexAttachmentParams {
   action: SmlIndexAction;
   spaceId?: string;
   includedHiddenTypes?: string[];
+  /**
+   * Optional pre-computed chunks. When provided (for `create`/`update`), the
+   * SML service skips the registered type's `getSmlData` hook and indexes the
+   * supplied chunks directly. Ignored for `action: 'delete'`.
+   */
+  chunks?: SmlChunk[];
+  /**
+   * Explicit source for this operation. When not provided, defaults to
+   * `'direct'` if `chunks` is set, otherwise `'resolved'`.
+   *
+   * `direct` writes override any existing chunks for the `originId`.
+   * `resolved` writes are skipped when `direct` chunks already exist for the
+   * `originId` (preserving the user's override).
+   */
+  source?: SmlDocumentSource;
 }

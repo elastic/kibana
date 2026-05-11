@@ -40,3 +40,88 @@ export interface SmlSearchHttpResultItem {
   score: number;
   content?: string;
 }
+
+/**
+ * Allowed values for the `action` field of the SML index endpoint.
+ */
+export type SmlIndexAttachmentHttpAction = 'create' | 'update' | 'delete';
+
+/**
+ * Max length of `origin_id` for `POST /internal/agent_context_layer/sml/_index`.
+ */
+export const SML_HTTP_INDEX_ORIGIN_ID_MAX_LENGTH = 1024;
+
+/**
+ * Max length of `attachment_type` for `POST /internal/agent_context_layer/sml/_index`.
+ */
+export const SML_HTTP_INDEX_ATTACHMENT_TYPE_MAX_LENGTH = 256;
+
+/**
+ * Max length of a chunk's `title`.
+ */
+export const SML_HTTP_CHUNK_TITLE_MAX_LENGTH = 1024;
+
+/**
+ * Max length of a chunk's `content`.
+ *
+ * Conservative cap to keep request bodies small; callers with larger documents
+ * should split them across multiple chunks.
+ */
+export const SML_HTTP_CHUNK_CONTENT_MAX_LENGTH = 32_768;
+
+/**
+ * Max length of a chunk's optional `description`.
+ */
+export const SML_HTTP_CHUNK_DESCRIPTION_MAX_LENGTH = 4_096;
+
+/**
+ * Max number of chunks accepted in a single `create`/`update` request.
+ */
+export const SML_HTTP_INDEX_MAX_CHUNKS = 100;
+
+/**
+ * Single SML chunk in the HTTP request body. Mirrors {@link import('../../server/services/sml/types').SmlChunk}.
+ */
+export interface SmlIndexAttachmentHttpChunk {
+  /** Type of the chunk (e.g., 'visualization', 'dashboard'). */
+  type: string;
+  /** Display title. */
+  title: string;
+  /** Searchable content (indexed as `semantic_text`). */
+  content: string;
+  /** Optional longer summary for semantic search. */
+  description?: string;
+  /** Optional owner or last-modifier user id. */
+  user_id?: string;
+  /** Optional list of referenced SML chunk ids. */
+  references?: string[];
+  /** Optional Kibana privilege strings required to view this chunk in search results. */
+  permissions?: string[];
+}
+
+/**
+ * Request body for `POST /internal/agent_context_layer/sml/_index`.
+ *
+ * `chunks` is **required** for `create`/`update` actions (caller supplies the
+ * content directly; no `getSmlData` hook is invoked) and **forbidden** for
+ * `delete` (which only needs `origin_id`).
+ */
+export type SmlIndexAttachmentHttpRequest =
+  | {
+      origin_id: string;
+      attachment_type: string;
+      action: 'create' | 'update';
+      chunks: SmlIndexAttachmentHttpChunk[];
+    }
+  | {
+      origin_id: string;
+      attachment_type: string;
+      action: 'delete';
+    };
+
+/**
+ * Response body for `POST /internal/agent_context_layer/sml/_index`.
+ */
+export interface SmlIndexAttachmentHttpResponse {
+  acknowledged: true;
+}

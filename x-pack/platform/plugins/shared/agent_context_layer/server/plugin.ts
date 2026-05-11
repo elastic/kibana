@@ -16,6 +16,7 @@ import type {
 import { registerFeatures } from './features';
 import { registerUISettings } from './ui_settings';
 import { registerSearchRoute } from './routes/search';
+import { registerIndexAttachmentRoute } from './routes/index_attachment';
 import { createSmlService, type SmlServiceInstance } from './services/sml/sml_service';
 import {
   registerSmlCrawlerTaskDefinition,
@@ -23,6 +24,7 @@ import {
 } from './services/sml/sml_task_definitions';
 import { resolveSmlAttachItems } from './services/sml/execute_sml_attach_items';
 import type { SmlService } from './services/sml/types';
+import { registerAgentContextLayerWorkflowSteps } from './workflow_steps';
 
 export class AgentContextLayerPlugin
   implements
@@ -36,6 +38,8 @@ export class AgentContextLayerPlugin
   private logger: Logger;
   private smlServiceInstance: SmlServiceInstance;
   private smlService?: SmlService;
+  private startContract?: AgentContextLayerPluginStart;
+  private spaces?: AgentContextLayerStartDependencies['spaces'];
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -82,6 +86,27 @@ export class AgentContextLayerPlugin
       logger: this.logger,
       getSmlService,
     });
+    registerIndexAttachmentRoute({
+      router,
+      coreSetup,
+      logger: this.logger,
+      getSmlService,
+    });
+
+    if (setupDeps.workflowsExtensions) {
+      registerAgentContextLayerWorkflowSteps({
+        workflowsExtensions: setupDeps.workflowsExtensions,
+        getStartContract: () => {
+          if (!this.startContract) {
+            throw new Error(
+              'Agent Context Layer start contract is not available — plugin has not started'
+            );
+          }
+          return this.startContract;
+        },
+        getSpaces: () => this.spaces,
+      });
+    }
 
     return {
       registerType: smlSetup.registerType,
@@ -98,6 +123,7 @@ export class AgentContextLayerPlugin
       logger: this.logger.get('sml'),
       securityAuthz: security?.authz,
     });
+    this.spaces = spaces;
 
     const smlService = this.smlService;
 
@@ -109,7 +135,7 @@ export class AgentContextLayerPlugin
       this.logger.error(`Failed to schedule SML crawler tasks: ${error.message}`);
     });
 
-    return {
+    const startContract: AgentContextLayerPluginStart = {
       search: smlService.search,
       checkItemsAccess: smlService.checkItemsAccess,
       getDocuments: smlService.getDocuments,
@@ -131,9 +157,14 @@ export class AgentContextLayerPlugin
           esClient: elasticsearch.client.asInternalUser,
           savedObjectsClient: soClient,
           logger: this.logger.get('sml'),
+          chunks: params.chunks,
+          source: params.source,
         });
       },
     };
+
+    this.startContract = startContract;
+    return startContract;
   }
 
   stop() {}
