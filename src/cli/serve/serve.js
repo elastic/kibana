@@ -637,8 +637,10 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
     opts.basePath !== false &&
     _.get(rawConfig, 'server.basePath') !== MOCK_IDP_KIBANA_BASE_PATH
   ) {
+    const kibanaUrl = `http://localhost:5601${_.get(rawConfig, 'server.basePath')}`;
+
     console.warn(
-      'Kibana is running with a non-default base path. Make sure to adjust the `--kibanaUrl` parameter while running the local ES cluster.'
+      `Kibana is running with a non-default base path. Make sure to adjust the --kibanaUrl=${kibanaUrl} parameter while running the local ES cluster.`
     );
   }
 
