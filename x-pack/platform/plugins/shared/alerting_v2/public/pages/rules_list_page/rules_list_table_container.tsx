@@ -15,7 +15,7 @@ import { useBulkDeleteRules } from '../../hooks/use_bulk_delete_rules';
 import { useBulkEnableRules, useBulkDisableRules } from '../../hooks/use_bulk_enable_disable_rules';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
 import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
-import { RuleSummaryFlyout } from '../../components/rule/flyouts';
+import { RuleSummaryFlyout, QuickEditRuleFlyout } from '../../components/rule/flyouts';
 import { paths } from '../../constants';
 import { RulesListTable, type RulesListTableSortField } from './rules_list_table';
 
@@ -52,9 +52,13 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
 
   const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
   const [expandedRuleId, setExpandedRuleId] = useState<string | null>(null);
+  const [quickEditRuleId, setQuickEditRuleId] = useState<string | null>(null);
   const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
   const expandedRule = expandedRuleId ? items.find((r) => r.id === expandedRuleId) ?? null : null;
+  const quickEditRule = quickEditRuleId
+    ? items.find((r) => r.id === quickEditRuleId) ?? null
+    : null;
 
   const deleteRuleMutation = useDeleteRule();
   const bulkDeleteMutation = useBulkDeleteRules();
@@ -139,7 +143,14 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onBulkDisable={handleBulkDisable}
         onBulkDelete={handleBulkDelete}
         onNavigateToDetails={(r) => navigateToUrl(basePath.prepend(paths.ruleDetails(r.id)))}
-        onExpand={(r) => setExpandedRuleId(r.id)}
+        onExpand={(r) => {
+          setQuickEditRuleId(null);
+          setExpandedRuleId(r.id);
+        }}
+        onQuickEdit={(r) => {
+          setExpandedRuleId(null);
+          setQuickEditRuleId(r.id);
+        }}
         onEdit={(r) => navigateToUrl(basePath.prepend(paths.ruleEdit(r.id)))}
         onClone={(r) =>
           navigateToUrl(
@@ -154,6 +165,10 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         <RuleSummaryFlyout
           rule={expandedRule}
           onClose={() => setExpandedRuleId(null)}
+          onQuickEdit={(r) => {
+            setExpandedRuleId(null);
+            setQuickEditRuleId(r.id);
+          }}
           onEdit={(r) => navigateToUrl(basePath.prepend(paths.ruleEdit(r.id)))}
           onClone={(r) =>
             navigateToUrl(
@@ -162,6 +177,13 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
           }
           onDelete={(r) => setRuleToDelete(r)}
           onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
+        />
+      ) : null}
+      {quickEditRule ? (
+        <QuickEditRuleFlyout
+          key={quickEditRule.id}
+          rule={quickEditRule}
+          onClose={() => setQuickEditRuleId(null)}
         />
       ) : null}
       {ruleToDelete ? (
