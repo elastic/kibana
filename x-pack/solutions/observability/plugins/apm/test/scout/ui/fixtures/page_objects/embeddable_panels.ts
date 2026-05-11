@@ -12,7 +12,6 @@ const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
 const EMBEDDABLE_PANEL_SELECTOR = '[data-test-subj="embeddablePanel"]';
 const EMBEDDABLE_ERROR_SELECTOR = '[data-test-subj="embeddableError"]';
 const EMPTY_PLACEHOLDER_SELECTOR = '[data-test-subj="emptyPlaceholder"]';
-const PANEL_HEADING_SELECTOR = '[data-test-subj^="embeddablePanelHeading-"]';
 const PANEL_TITLE_SELECTOR = '[data-test-subj="embeddablePanelTitle"]';
 const LEGEND_ITEM_LABEL_SELECTOR = '.echLegendItem__label';
 
@@ -40,6 +39,13 @@ export class EmbeddablePanels {
   }
 
   getPanelByTitle(title: string): Locator {
+    // Mirrors how Kibana builds `embeddablePanelHeading-<slug>` in
+    // `presentation_panel_header.tsx`: the panel title with all whitespace
+    // removed. If that slug rule changes upstream we will silently miss
+    // panels here. The `has:` filter is auto-scoped to each parent
+    // `[data-test-subj="embeddablePanel"]` matched by `getEmbeddablePanels()`,
+    // so building the inner locator from `this.page` (rather than
+    // `this.scope`) is intentional and standard Playwright.
     const slug = title.replace(/\s/g, '');
     return this.getEmbeddablePanels().filter({
       has: this.page.locator(`[data-test-subj="embeddablePanelHeading-${slug}"]`),

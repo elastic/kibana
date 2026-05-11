@@ -13,7 +13,7 @@ import {
   APM_METRICS_SERVICE_NAMES,
   createMetricsServiceInstance,
   generateAppMetrics,
-} from '@kbn/synthtrace/src/scenarios/helpers/apm_metrics_dashboards';
+} from '@kbn/synthtrace';
 import { METRICS_ENVIRONMENT } from '../constants';
 
 const METRIC_SERVICES = [

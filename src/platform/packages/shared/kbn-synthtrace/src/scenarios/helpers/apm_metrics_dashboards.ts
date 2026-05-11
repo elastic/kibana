@@ -8,7 +8,7 @@
  */
 
 import { apm } from '@kbn/synthtrace-client';
-import type { Instance } from '@kbn/synthtrace-client';
+import type { ApmFields, Instance } from '@kbn/synthtrace-client';
 
 export interface ApmMetricsServiceConfig {
   name: string;
@@ -47,11 +47,13 @@ export const APM_METRICS_SERVICE_NAMES = {
 /*
  * Each *_METRICS map below is the source-of-truth for the values seeded into
  * Elasticsearch by the synthtrace scenario / Scout fixture, AND the values
- * Scout tests assert against. When tweaking a number here, update the
- * corresponding assertion in `metrics_dashboards.spec.ts` /
- * `metrics_non_dashboard.spec.ts`.
+ * APM Scout tests assert against. When tweaking a number here, update the
+ * corresponding assertion in any APM Scout spec under
+ * `x-pack/solutions/observability/plugins/apm/test/scout/` (currently the UI
+ * `metrics_dashboards.spec.ts` / `metrics_non_dashboard.spec.ts` and the API
+ * `service_overview/metrics.spec.ts`).
  *
- * Constant -> dashboard files it powers:
+ * Constant -> consumers:
  *   SYSTEM_METRICS                 -> CPU / System Memory panels in every classic_apm dashboard
  *   JAVA_APM_METRICS               -> dashboards/java.json
  *   NODEJS_APM_METRICS             -> dashboards/nodejs.json
@@ -63,6 +65,7 @@ export const APM_METRICS_SERVICE_NAMES = {
  *   OTEL_PYTHON_METRICS            -> otel_native-{edot,otel_other}-python.json
  *   OTEL_GO_METRICS                -> otel_native-otel_other-go.json
  *   RUBY_JRUBY_METRICS             -> JVM table on the metrics tab (non-dashboard variation)
+ *                                     and the JVM nodes / charts API specs.
  */
 
 export const SYSTEM_METRICS: Record<string, unknown> = {
@@ -364,11 +367,17 @@ export const createMetricsServiceInstance = (
     .service({ name: config.name, environment, agentName: config.agentName })
     .instance(`${config.name}-instance`);
 
-  const fields = instance.fields as Record<string, unknown>;
-  if (config.runtimeVersion) fields['service.runtime.version'] = config.runtimeVersion;
-  if (config.runtimeName) fields['service.runtime.name'] = config.runtimeName;
-  if (config.telemetrySdkName) fields['telemetry.sdk.name'] = config.telemetrySdkName;
-  if (config.telemetrySdkLanguage) fields['telemetry.sdk.language'] = config.telemetrySdkLanguage;
+  // `service.runtime.*` are part of `ApmFields`. `telemetry.sdk.*` are OTel
+  // additions not yet declared on `ApmFields`, so we widen the overrides
+  // map at this single boundary instead of mutating `instance.fields` via
+  // an `as Record<string, unknown>` cast.
+  const overrides: Record<string, string> = {};
+  if (config.runtimeVersion) overrides['service.runtime.version'] = config.runtimeVersion;
+  if (config.runtimeName) overrides['service.runtime.name'] = config.runtimeName;
+  if (config.telemetrySdkName) overrides['telemetry.sdk.name'] = config.telemetrySdkName;
+  if (config.telemetrySdkLanguage)
+    overrides['telemetry.sdk.language'] = config.telemetrySdkLanguage;
+  instance.overrides(overrides as Partial<ApmFields>);
 
   return { instance, config };
 };
@@ -381,16 +390,16 @@ const extraMetricFieldSets = (
 };
 
 /**
- * Generates app-metric documents for a single timestamp, normalising
- * extraMetrics into an array and applying each entry as a separate metricset.
+ * Generates app-metric documents for a single timestamp. Each metricset is
+ * built on top of `SYSTEM_METRICS` (the host/process baseline) and merged
+ * with the corresponding entry from `config.extraMetrics`; if `extraMetrics`
+ * is an array, one metricset is emitted per entry.
  */
 export const generateAppMetrics = (
   instance: Instance,
   config: ApmMetricsServiceConfig,
   timestamp: number
 ) =>
-  extraMetricFieldSets(config.extraMetrics).map((extraFields) => {
-    const metricset = instance.appMetrics(SYSTEM_METRICS).timestamp(timestamp);
-    metricset.fields = { ...metricset.fields, ...extraFields };
-    return metricset;
-  });
+  extraMetricFieldSets(config.extraMetrics).map((extraFields) =>
+    instance.appMetrics({ ...SYSTEM_METRICS, ...extraFields }).timestamp(timestamp)
+  );

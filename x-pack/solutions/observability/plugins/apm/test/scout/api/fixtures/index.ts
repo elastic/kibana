@@ -10,4 +10,4 @@ import { synthtraceFixture } from '@kbn/scout-synthtrace';
 
 export const apiTest = mergeTests(baseApiTest, synthtraceFixture);
 
-export * as testData from '../../ui/fixtures/constants';
+export { testData } from '../../shared';

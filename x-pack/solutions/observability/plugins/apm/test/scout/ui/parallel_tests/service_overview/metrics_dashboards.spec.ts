@@ -20,6 +20,11 @@ interface DashboardScenario {
    *   x-pack/solutions/observability/plugins/apm/public/components/app/metrics/static_dashboard/dashboards/
    * We assert a subset (not the full panel list) because some dashboards
    * include unnamed Lens panels that render with auto-generated titles.
+   *
+   * An empty array means "this dashboard's panels are not titled in a
+   * stable way for `embeddablePanelHeading-` lookups": the scenario is
+   * exercised for the dashboard-load + no-error + has-data invariants
+   * only and does not pin specific panel names.
    */
   expectedPanelTitles: string[];
   /**
@@ -29,6 +34,18 @@ interface DashboardScenario {
    */
   expectedLegends?: Array<{ panelTitle: string; labels: string[] }>;
 }
+
+const escapeRegex = (input: string): string => input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Tests whether the rendered legend label contains the expected label as a
+ * whole "word" — anchored on either side by a non-word char or string
+ * boundary. This avoids false positives like `'p500'` matching `'p50'`,
+ * or `'unused'` matching `'used'`, while still tolerating breakdown
+ * prefixes (e.g. `'instance-1 - p50'`).
+ */
+const containsLegendLabel = (rendered: string, label: string): boolean =>
+  new RegExp(`\\b${escapeRegex(label)}\\b`).test(rendered);
 
 const dashboardScenarios: DashboardScenario[] = [
   {
@@ -224,26 +241,24 @@ test.describe(
           await expect(metricsTab.noDashboardCallout).toBeHidden();
         });
 
-        if (scenario.expectedPanelTitles.length > 0) {
-          await test.step('Expected named panels are present', async () => {
-            const renderedTitles = await metricsTab.getPanelTitles();
-            for (const expectedTitle of scenario.expectedPanelTitles) {
-              expect(
-                renderedTitles,
-                `Dashboard "${scenario.title}" is missing the "${expectedTitle}" panel`
-              ).toContain(expectedTitle);
-            }
-          });
-        }
+        await test.step('Expected named panels are present', async () => {
+          const renderedTitles = await metricsTab.getPanelTitles();
+          for (const expectedTitle of scenario.expectedPanelTitles) {
+            expect(
+              renderedTitles,
+              `Dashboard "${scenario.title}" is missing the "${expectedTitle}" panel`
+            ).toContain(expectedTitle);
+          }
+        });
 
         for (const { panelTitle, labels } of scenario.expectedLegends ?? []) {
           await test.step(`Legend on "${panelTitle}" exposes the seeded series`, async () => {
             await expect(metricsTab.getPanelByTitle(panelTitle)).toBeVisible();
             const renderedLabels = await metricsTab.getLegendLabels(panelTitle);
             for (const label of labels) {
-              // Legend entries can include a breakdown prefix (e.g. instance
-              // name), so we check substring presence rather than exact match.
-              const matched = renderedLabels.some((rendered) => rendered.includes(label));
+              const matched = renderedLabels.some((rendered) =>
+                containsLegendLabel(rendered, label)
+              );
               expect(
                 matched,
                 `Panel "${panelTitle}" on "${
