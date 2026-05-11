@@ -167,7 +167,6 @@ dependsOn:
   - '@kbn/product-doc-common'
   - '@kbn/alerting-v2-episodes-ui'
   - '@kbn/inbox-common'
-  - '@kbn/agent-context-layer-plugin'
 tags:
   - test-helper
   - package
