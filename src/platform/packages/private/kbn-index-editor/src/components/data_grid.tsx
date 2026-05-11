@@ -18,6 +18,7 @@ import {
   UnifiedDataTable,
   type EuiDataGridRefProps,
 } from '@kbn/unified-data-table';
+import { IndexPatternSource } from '@kbn/data-source';
 import type { RestorableStateProviderApi } from '@kbn/restorable-state';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -112,6 +113,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const columnsByName = useMemo(() => {
     return new Map(props.columns.map((column) => [column.id, column]));
   }, [props.columns]);
+
+  const dataSource = useMemo(() => new IndexPatternSource(props.dataView), [props.dataView]);
 
   const services = useMemo(() => {
     return {
@@ -259,7 +262,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       sampleSizeState={10000}
       canDragAndDropColumns={false}
       loadingState={isFetching ? DataLoadingState.loading : DataLoadingState.loaded}
-      dataView={props.dataView}
+      dataSource={dataSource}
       onSetColumns={setActiveColumns}
       onUpdateRowsPerPage={setRowsPerPage}
       sort={sortOrder}

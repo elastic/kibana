@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { SortOrder } from '@kbn/unified-data-table';
+import { IndexPatternSource } from '@kbn/data-source';
 import {
   DataLoadingState,
   ROWS_HEIGHT_OPTIONS,
@@ -140,6 +141,10 @@ export const AlertEpisodesListPage = () => {
     sortState,
     timeRange,
   });
+  const dataSource = useMemo(
+    () => (dataView ? new IndexPatternSource(dataView) : undefined),
+    [dataView]
+  );
 
   const sort: SortOrder[] = useMemo(
     () => [[sortState.sortField, sortState.sortDirection]],
@@ -330,7 +335,7 @@ export const AlertEpisodesListPage = () => {
                   stripes: false,
                   cellPadding: 'l',
                 }}
-                dataView={dataView}
+                dataSource={dataSource}
                 columns={columns}
                 onSetColumns={onSetColumns}
                 canDragAndDropColumns

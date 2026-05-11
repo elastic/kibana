@@ -18,6 +18,7 @@ import {
   type DataCascadeRowCellProps,
   type DataCascadeRestorableState,
 } from '@kbn/shared-ux-document-data-cascade';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
 import { EsqlQuery } from '@elastic/esql';
@@ -45,11 +46,16 @@ export interface ESQLDataCascadeProps
     | 'columns'
     | 'dataGridDensityState'
     | 'showTimeCol'
-    | 'dataView'
     | 'showKeyboardShortcuts'
     | 'externalCustomRenderers'
     | 'onUpdateDataGridDensity'
   > {
+  /**
+   * Cascade is ES|QL-only; the ad-hoc DataView produced by `getEsqlDataView` is
+   * always provided at runtime, but we accept undefined to keep the type compatible
+   * with consumers that hold a `DataView | undefined` (e.g. `DiscoverGrid`).
+   */
+  dataView?: DataView;
   togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover'];
   queryMeta: ESQLStatsQueryMeta;
 }
@@ -192,6 +198,11 @@ export type CascadedDocumentsLayoutProps = Omit<
 
 export const CascadedDocumentsLayout = React.memo(
   ({ dataView, ...props }: CascadedDocumentsLayoutProps) => {
+    if (!dataView) {
+      // Cascade is only rendered for ES|QL queries, which always carry an
+      // ad-hoc DataView from `getEsqlDataView`. This branch is a type guard.
+      throw new Error('CascadedDocumentsLayout requires a DataView');
+    }
     const { esqlQuery, esqlVariables, onUpdateESQLQuery, openInNewTab, setDataCascadeUiState } =
       useCascadedDocumentsContext();
     const { euiTheme } = useEuiTheme();

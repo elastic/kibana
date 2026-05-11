@@ -37,7 +37,7 @@ export interface CompareDocumentsProps {
   consumer: string;
   ariaDescribedBy: string;
   ariaLabelledBy: string;
-  dataView: DataView;
+  dataView?: DataView;
   isPlainRecord: boolean;
   selectedFieldNames: string[];
   selectedDocIds: string[];

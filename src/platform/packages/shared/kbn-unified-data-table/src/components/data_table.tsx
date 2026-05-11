@@ -162,9 +162,7 @@ interface InternalUnifiedDataTableProps {
   columns: string[];
   /**
    * Polymorphic data source — `IndexPatternSource` for DSL queries, `EsqlSource`
-   * for ES|QL. Internal helpers consume this exclusively. If not provided, will
-   * be derived from `dataView` (wrapped in `IndexPatternSource`) for backward
-   * compatibility.
+   * for ES|QL. Internal helpers consume this exclusively.
    */
   dataSource?: DataSource;
   /**
@@ -191,10 +189,6 @@ interface InternalUnifiedDataTableProps {
    * If set, the given document is displayed in a flyout
    */
   expandedDoc?: DataTableRecord;
-  /**
-   * The used data view
-   */
-  dataView: DataView;
   /**
    * Determines if data is currently loaded
    */
@@ -522,7 +516,6 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdateHeaderRowHeight,
       controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
       rowAdditionalLeadingControls,
-      dataView,
       loadingState,
       onFilter,
       onResize,
@@ -598,12 +591,9 @@ const InternalUnifiedDataTable = React.forwardRef<
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
     useImperativeHandle(ref, () => dataGridRef.current!);
 
-    // Derive a DataSource from the prop or from the DataView for backward
-    // compatibility with callers that haven't migrated yet.
-    const dataSource = useMemo<DataSource | undefined>(
-      () => dataSourceProp ?? (dataView?.id ? new IndexPatternSource(dataView) : undefined),
-      [dataSourceProp, dataView]
-    );
+    const dataSource = dataSourceProp;
+    const dataView =
+      dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
 
     const [isFilterActive, setIsFilterActive] = useRestorableState('isFilterActive', false);
     const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
@@ -645,7 +635,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       }
     }, [isFilterActive, hasSelectedDocs, setIsFilterActive]);
 
-    const timeFieldName = dataView.timeFieldName;
+    const timeFieldName = dataSource?.timeFieldName;
     const shouldPrependTimeFieldColumn = useCallback(
       (activeColumns: string[]) =>
         canPrependTimeFieldColumn(
@@ -825,6 +815,9 @@ const InternalUnifiedDataTable = React.forwardRef<
     );
 
     const shouldShowFieldHandler = useMemo(() => {
+      if (!dataView) {
+        return () => true;
+      }
       const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
       return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
     }, [dataView, showMultiFields]);
@@ -925,7 +918,7 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     const editField = useMemo(
       () =>
-        onFieldEdited
+        onFieldEdited && dataView
           ? async (fieldName: string) => {
               const editedDataView = shouldKeepAdHocDataViewImmutable
                 ? await prepareDataViewForEditing(dataView, data.dataViews)
@@ -979,8 +972,8 @@ const InternalUnifiedDataTable = React.forwardRef<
     }, [cellActionsTriggerId, visibleColumns, dataSource]);
 
     const allCellActionsMetadata = useMemo(
-      () => ({ dataViewId: dataView.id, ...(cellActionsMetadata ?? {}) }),
-      [dataView, cellActionsMetadata]
+      () => ({ dataViewId: dataSource?.id, ...(cellActionsMetadata ?? {}) }),
+      [dataSource, cellActionsMetadata]
     );
 
     const columnsCellActions = useDataGridColumnsCellActions({

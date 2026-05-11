@@ -217,7 +217,6 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       isPlainRecord
       isSortEnabled={false}
       loadingState={DataLoadingState.loaded}
-      dataView={props.dataView}
       sampleSizeState={rows.length}
       rowsPerPageState={rowsPerPage}
       rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}

@@ -89,6 +89,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/charts-plugin",
     "@kbn/unified-data-table",
+    "@kbn/data-source",
     "@kbn/cell-actions",
     "@kbn/discover-utils",
     "@kbn/shared-ux-page-kibana-template",

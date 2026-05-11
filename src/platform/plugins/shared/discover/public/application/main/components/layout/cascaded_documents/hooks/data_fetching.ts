@@ -144,7 +144,7 @@ const useStableHandler = <T extends (...args: Parameters<T>) => ReturnType<T>>(h
 export function useDataCascadeRowExpansionHandlers({
   dataView,
 }: {
-  dataView: DataView;
+  dataView?: DataView;
 }): Pick<
   DataCascadeRowProps<ESQLDataGroupNode, DataTableRecord>,
   'onCascadeGroupNodeExpanded' | 'onCascadeGroupNodeCollapsed'
@@ -189,6 +189,10 @@ export function useDataCascadeRowExpansionHandlers({
     >['onCascadeLeafNodeExpanded']
   >(({ row, nodePath, nodePathMap }) => {
     trackCascadeExpanded(row.id);
+
+    if (!dataView) {
+      return Promise.resolve([]);
+    }
 
     return cascadedDocumentsFetcher.fetchCascadedDocuments({
       nodeId: row.id,

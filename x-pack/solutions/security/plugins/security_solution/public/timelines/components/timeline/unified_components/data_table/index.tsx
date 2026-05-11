@@ -13,6 +13,7 @@ import type {
   UnifiedDataTableSettingsColumn,
 } from '@kbn/unified-data-table';
 import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
+import { IndexPatternSource } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   EuiDataGridControlColumn,
@@ -123,6 +124,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     onUpdatePageIndex,
   }) {
     const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
+    const dataSource = useMemo(
+      () => (dataView ? new IndexPatternSource(dataView) : undefined),
+      [dataView]
+    );
     const dispatch = useDispatch();
     const store = useStore();
     const history = useHistory();
@@ -451,7 +456,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             columns={columnIds}
             expandedDoc={expandedDoc}
             gridStyleOverride={tableStylesOverride}
-            dataView={dataView}
+            dataSource={dataSource}
             showColumnTokens={true}
             loadingState={dataLoadingState}
             onFilter={onFilter}

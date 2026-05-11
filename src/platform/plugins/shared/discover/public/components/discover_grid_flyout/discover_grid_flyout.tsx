@@ -38,7 +38,7 @@ export interface DiscoverGridFlyoutProps
   dataSource?: DataSource;
   hit: DataTableRecord;
   hits?: DataTableRecord[];
-  dataView: DataView;
+  dataView?: DataView;
   initialTabId?: string;
   docViewerRef?: DocViewerProps['ref'];
   docViewerExtensionActions?: DocViewerExtensionParams['actions'];
@@ -78,6 +78,59 @@ export function DiscoverGridFlyout({
   onUpdateSelectedTabId,
   hideFilteringOnComputedColumns,
 }: DiscoverGridFlyoutProps) {
+  if (!dataView) {
+    // DataView is required by the doc viewer; ES|QL paths always supply an ad-hoc one.
+    return null;
+  }
+
+  return (
+    <DiscoverGridFlyoutContent
+      hit={hit}
+      hits={hits}
+      dataView={dataView}
+      columns={columns}
+      dataSource={dataSource}
+      savedSearchId={savedSearchId}
+      filters={filters}
+      query={query}
+      initialTabId={initialTabId}
+      docViewerRef={docViewerRef}
+      docViewerExtensionActions={docViewerExtensionActions}
+      onFilter={onFilter}
+      onClose={onClose}
+      onRemoveColumn={onRemoveColumn}
+      onAddColumn={onAddColumn}
+      setExpandedDoc={setExpandedDoc}
+      initialDocViewerState={initialDocViewerState}
+      onInitialDocViewerStateChange={onInitialDocViewerStateChange}
+      onUpdateSelectedTabId={onUpdateSelectedTabId}
+      hideFilteringOnComputedColumns={hideFilteringOnComputedColumns}
+    />
+  );
+}
+
+function DiscoverGridFlyoutContent({
+  hit,
+  hits,
+  dataView,
+  columns,
+  dataSource,
+  savedSearchId,
+  filters,
+  query,
+  initialTabId,
+  docViewerRef,
+  docViewerExtensionActions,
+  onFilter,
+  onClose,
+  onRemoveColumn,
+  onAddColumn,
+  setExpandedDoc,
+  initialDocViewerState,
+  onInitialDocViewerStateChange,
+  onUpdateSelectedTabId,
+  hideFilteringOnComputedColumns,
+}: DiscoverGridFlyoutProps & { dataView: DataView }) {
   const services = useDiscoverServices();
   const isESQLQuery = isOfAggregateQueryType(query);
   // Get actual hit with updated highlighted searches

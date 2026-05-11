@@ -9,6 +9,7 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
@@ -36,6 +37,7 @@ export interface InlineEditing {
 }
 
 interface DiscoverGridEmbeddableProps extends Omit<UnifiedDataTableProps, 'sampleSizeState'> {
+  dataView?: DataView;
   sampleSizeState: number; // a required prop
   totalHitCount?: number;
   query: AggregateQuery | Query | undefined;
