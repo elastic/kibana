@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchRoleDescriptor } from '@kbn/scout-security';
-import { apiTest } from '@kbn/scout-security';
+import { apiTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 
 import {
@@ -71,7 +71,7 @@ const buildRoleDescriptor = ({
 const getRoleWithoutTargetIndexPrivileges = () => buildRoleDescriptor({ withTargetIndex: false });
 const getRoleWithoutSavedObjectCreate = () => buildRoleDescriptor({ withSavedObjectCreate: false });
 
-apiTest.describe('Entity Store entity maintainers', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Entity Store entity maintainers', { tag: [...ENTITY_STORE_TAGS, ...tags.qualityGate] }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 

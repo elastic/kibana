@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apiTest } from '@kbn/scout-security';
+import { apiTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { Client } from '@elastic/elasticsearch';
 import { hashEuid, getEuidFromObject } from '../../../../common/domain/euid';
@@ -19,7 +19,7 @@ import {
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import { clearEntityStoreIndices } from '../fixtures/helpers';
 
-apiTest.describe('Entity Store CRUD API tests', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Entity Store CRUD API tests', { tag: [...ENTITY_STORE_TAGS, ...tags.qualityGate] }, () => {
   let defaultHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ apiClient, kbnClient, samlAuth }) => {

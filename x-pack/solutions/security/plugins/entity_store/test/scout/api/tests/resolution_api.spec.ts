@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apiTest } from '@kbn/scout-security';
+import { apiTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import type { Client } from '@elastic/elasticsearch';
 import { get } from 'lodash';
@@ -22,7 +22,7 @@ import { clearEntityStoreIndices } from '../fixtures/helpers';
 
 const RESOLVED_TO_FIELD = 'entity.relationships.resolution.resolved_to';
 
-apiTest.describe('Entity Store Resolution API tests', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Entity Store Resolution API tests', { tag: [...ENTITY_STORE_TAGS, ...tags.qualityGate] }, () => {
   let defaultHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ apiClient, esClient, kbnClient, samlAuth }) => {

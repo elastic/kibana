@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apiTest } from '@kbn/scout-security';
+import { apiTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
   PUBLIC_HEADERS,
@@ -21,7 +21,7 @@ import {
   normalizeKeywordList,
 } from '../fixtures/helpers';
 
-apiTest.describe('Entity Store History Snapshot', { tag: ENTITY_STORE_TAGS }, () => {
+apiTest.describe('Entity Store History Snapshot', { tag: [...ENTITY_STORE_TAGS, ...tags.qualityGate] }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
