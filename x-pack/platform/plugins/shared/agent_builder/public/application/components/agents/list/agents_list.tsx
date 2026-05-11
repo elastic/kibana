@@ -194,7 +194,7 @@ export const AgentsList: React.FC = () => {
           // Can use default action if this proposal is implemented: https://github.com/elastic/eui/discussions/8735
           render: (agent) => {
             return (
-              <EuiToolTip position="right" content={actionLabels.deleteDescription} delay="long">
+              <EuiToolTip position="right" content={actionLabels.deleteDescription}>
                 <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
                   <EuiIcon type="trash" color="danger" aria-hidden={true} />
                   <EuiLink
