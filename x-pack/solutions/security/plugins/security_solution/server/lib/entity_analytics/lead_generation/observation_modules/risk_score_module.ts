@@ -9,9 +9,9 @@ import type { Logger } from '@kbn/core/server';
 import type { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import type { LeadEntity, Observation, ObservationModule, ObservationSeverity } from '../types';
 import {
+  entityToKey,
   makeObservation,
   getEntityField,
-  getEntityId,
   groupEntitiesByType,
   entityTypeLabel,
   extractIsPrivileged,
@@ -113,9 +113,7 @@ export const createRiskScoreModule = ({
       const internals = extractEntityInternals(entity);
       if (internals) {
         const { scoreNorm, level, isPrivileged } = internals;
-        const euid = getEntityId(entity);
-        const historicalScores =
-          (euid ? timeSeriesScores.get(`${entity.type}:${euid}`) : undefined) ?? [];
+        const historicalScores = timeSeriesScores.get(entityToKey(entity)) ?? [];
 
         const severity = RISK_LEVEL_TO_SEVERITY[level];
         const observationType = RISK_LEVEL_TO_TYPE[level];
@@ -227,10 +225,12 @@ const extractEntityInternals = (entity: LeadEntity): EntityInternals | undefined
 /**
  * Fetches daily average risk score history from the time-series index.
  *
- * The risk engine writes `host.name` (or `user.name`) using the EUID
- * (e.g. `"host:InnoDB"`), so we must query with EUIDs rather than plain
- * entity names. The returned map is keyed by `"entityType:euid"` (the
- * format `getDailyAverageRiskScoreNormSeries` produces).
+ * Identity is resolved via `risk.id_field`/`risk.id_value` inside the data
+ * client, which authoritatively selects V2-shaped documents regardless of
+ * which writer last ran. Correct under both `entityAnalyticsEntityStoreV2 = true`
+ * (entity-store risk-score maintainer) and `= false` (legacy scoring task);
+ * legacy-shaped documents are excluded from the lookback window. The returned
+ * map is keyed directly by EUID.
  */
 const fetchTimeSeriesRiskScores = async (
   riskScoreDataClient: RiskScoreDataClient,
@@ -240,12 +240,12 @@ const fetchTimeSeriesRiskScores = async (
   const result = new Map<string, number[]>();
 
   for (const [entityType, group] of groupEntitiesByType(entities).entries()) {
-    const euids = group.map((e) => getEntityId(e)).filter((id): id is string => id != null);
-    if (euids.length > 0) {
+    const entityIds = group.map((e) => e.id);
+    if (entityIds.length > 0) {
       try {
         const batch = await riskScoreDataClient.getDailyAverageRiskScoreNormSeries({
           entityType,
-          entityNames: euids,
+          entityIds,
         });
         for (const [key, scores] of batch.entries()) {
           result.set(key, scores);

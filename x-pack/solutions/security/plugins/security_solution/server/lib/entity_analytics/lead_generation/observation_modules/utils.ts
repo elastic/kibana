@@ -7,8 +7,8 @@
 
 import type { LeadEntity, Observation } from '../types';
 
-/** Returns a stable string key for a LeadEntity: "type:name" */
-export const entityToKey = (entity: LeadEntity): string => `${entity.type}:${entity.name}`;
+/** Returns a stable string key for a LeadEntity: its EUID (e.g. `"user:alice"`). */
+export const entityToKey = (entity: LeadEntity): string => entity.id;
 
 /**
  * Creates an Observation, automatically filling entityId and moduleId.
@@ -40,10 +40,6 @@ export const extractIsPrivileged = (entity: LeadEntity): boolean => {
     (w) => typeof w === 'string' && w.startsWith(PRIVILEGED_USER_WATCHLIST_ID)
   );
 };
-
-/** Extracts the EUID (`entity.id`) from a LeadEntity record, e.g. `"host:InnoDB"`. */
-export const getEntityId = (entity: LeadEntity): string | undefined =>
-  (getEntityField(entity) as { id?: string } | undefined)?.id;
 
 /** Capitalises the entity type for use in human-readable descriptions (e.g. "host" → "Host"). */
 export const entityTypeLabel = (entity: LeadEntity): string =>

@@ -93,17 +93,25 @@ export class RiskScoreDataClient {
   /**
    * Daily average normalized risk scores per entity (oldest → newest calendar buckets)
    * from the risk score time-series index. Suitable for trend / escalation analysis.
+   *
+   * Filters on `risk.id_field === 'entity.id'` so only V2-shaped documents
+   * (written by the entity-store risk-score maintainer) participate; legacy
+   * documents written by the pre-V2 scoring task with `risk.id_field === '${type}.name'`
+   * are excluded, which is what we want — their `risk.id_value` carries a raw
+   * name rather than an EUID and would silently distort the trend.
+   *
+   * The returned map is keyed by EUID (e.g. `"host:InnoDB"`).
    */
   public async getDailyAverageRiskScoreNormSeries(params: {
     entityType: string;
-    entityNames: readonly string[];
+    entityIds: readonly string[];
     lookbackRange?: { readonly gte: string; readonly lte: string };
   }): Promise<Map<string, number[]>> {
-    const { entityType, entityNames } = params;
+    const { entityType, entityIds } = params;
     const range = params.lookbackRange ?? { gte: 'now-90d', lte: 'now' };
     const result = new Map<string, number[]>();
 
-    if (entityNames.length === 0) {
+    if (entityIds.length === 0) {
       return result;
     }
 
@@ -118,14 +126,15 @@ export class RiskScoreDataClient {
       query: {
         bool: {
           filter: [
-            { terms: { [`${entityType}.name`]: [...entityNames] } },
+            { term: { 'risk.id_field': 'entity.id' } },
+            { terms: { 'risk.id_value': [...entityIds] } },
             { range: { '@timestamp': range } },
           ],
         },
       },
       aggs: {
         by_entity: {
-          terms: { field: `${entityType}.name`, size: entityNames.length },
+          terms: { field: 'risk.id_value', size: entityIds.length },
           aggs: {
             scores_over_time: {
               date_histogram: { field: '@timestamp', calendar_interval: 'day' },
@@ -148,7 +157,7 @@ export class RiskScoreDataClient {
       const scores = bucket.scores_over_time.buckets
         .map((b) => b.avg_score.value)
         .filter((v): v is number => v != null);
-      result.set(`${entityType}:${bucket.key}`, scores);
+      result.set(bucket.key, scores);
     }
 
     return result;

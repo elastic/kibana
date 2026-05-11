@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { LeadEntity, Observation, ObservationModule } from '../../types';
+import { entityToKey } from '../utils';
 import { MODULE_ID, MODULE_NAME, MODULE_PRIORITY } from './config';
 import { fetchAlertSummariesForEntities } from './data_access';
 import { buildObservationsForEntity } from './observations';
@@ -36,7 +37,7 @@ export const createBehavioralAnalysisModule = ({
     const observations: Observation[] = [];
 
     for (const entity of entities) {
-      const summary = alertDataByEntity.get(`${entity.type}:${entity.name}`);
+      const summary = alertDataByEntity.get(entityToKey(entity));
       if (summary && summary.totalAlerts > 0) {
         observations.push(...buildObservationsForEntity(entity, summary));
       }

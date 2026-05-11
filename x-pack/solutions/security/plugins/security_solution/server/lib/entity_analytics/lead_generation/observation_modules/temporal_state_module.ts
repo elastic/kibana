@@ -10,6 +10,7 @@ import { getHistorySnapshotIndexPattern } from '@kbn/entity-store/server';
 import type { LeadEntity, Observation, ObservationModule, ObservationSeverity } from '../types';
 import {
   PRIVILEGED_USER_WATCHLIST_ID,
+  entityToKey,
   makeObservation,
   extractIsPrivileged,
   entityTypeLabel,
@@ -52,7 +53,7 @@ export const createTemporalStateModule = ({
     const observations: Observation[] = [];
 
     for (const entity of entities) {
-      if (escalations.has(`${entity.type}:${entity.name}`)) {
+      if (escalations.has(entityToKey(entity))) {
         observations.push(buildPrivilegeEscalationObservation(entity));
       }
     }
@@ -82,7 +83,7 @@ const fetchPrivilegeEscalations = async (
   for (const entityType of SUPPORTED_ENTITY_TYPES) {
     const ofType = privilegedEntities.filter((e) => e.type === entityType);
     if (ofType.length > 0) {
-      const names = ofType.map((e) => e.name);
+      const euids = ofType.map((e) => e.id);
       const historyPattern = getHistorySnapshotIndexPattern(spaceId);
 
       try {
@@ -92,11 +93,11 @@ const fetchPrivilegeEscalations = async (
           ignore_unavailable: true,
           allow_no_indices: true,
           query: {
-            bool: { filter: [{ terms: { [`${entityType}.name`]: names } }] },
+            bool: { filter: [{ terms: { 'entity.id': euids } }] },
           },
           aggs: {
             by_entity: {
-              terms: { field: `${entityType}.name`, size: names.length },
+              terms: { field: 'entity.id', size: euids.length },
               aggs: {
                 oldest_snapshot: {
                   top_hits: {
@@ -127,7 +128,7 @@ const fetchPrivilegeEscalations = async (
             );
 
             if (!wasPrivileged) {
-              escalated.add(`${entityType}:${bucket.key}`);
+              escalated.add(bucket.key);
             }
           }
         }
