@@ -845,6 +845,25 @@ steps:
       expect(mockApi.testStep).not.toHaveBeenCalled();
     });
 
+    it('names the unsafe descendant in the fallback when confirmation_body is omitted on a container step', async () => {
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+      const result = await invokePromptHandler(
+        registeredTool,
+        { stepName: 'outer_foreach' },
+        context
+      );
+
+      // Title flags the descendant, not just the container.
+      expect(result.prompt.title).toContain('outer_foreach');
+      expect(result.prompt.title).toContain('deep_http');
+      expect(result.prompt.title).toContain('http');
+      // Fallback body names the descendant too.
+      expect(result.prompt.message).toContain('deep_http');
+      expect(result.prompt.message).toContain('http');
+    });
+
     it('keeps if/while-with-unsafe-children on the stub path (no prompt)', async () => {
       jest.useRealTimers();
       mockApi.testStep.mockResolvedValue('exec-stub');

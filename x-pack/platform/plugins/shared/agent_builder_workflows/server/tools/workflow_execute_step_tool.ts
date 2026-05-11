@@ -411,6 +411,7 @@ const executeConditionStepWithStubs = async ({
 
 const buildFallbackPreview = (
   stepInfo: StepInfo,
+  unsafeStep: StepInfo,
   contextOverride?: Record<string, unknown>
 ): string => {
   const lines: string[] = [
@@ -423,6 +424,14 @@ const buildFallbackPreview = (
       values: { stepType: stepInfo.stepType },
     }),
   ];
+  if (unsafeStep.stepId !== stepInfo.stepId) {
+    lines.push(
+      i18n.translate('workflows.agentBuilder.executeStep.fallbackPreview.unsafeDescendant', {
+        defaultMessage: '**Unsafe descendant:** `{stepId}` (`{stepType}`)',
+        values: { stepId: unsafeStep.stepId, stepType: unsafeStep.stepType },
+      })
+    );
+  }
   if (contextOverride && Object.keys(contextOverride).length > 0) {
     const keys = Object.keys(contextOverride).join(', ');
     lines.push(
@@ -651,13 +660,26 @@ If the user declines a confirmation, do NOT retry the same step. Acknowledge the
 
         if (status.status === ConfirmationStatus.unprompted) {
           const isDestructive = DESTRUCTIVE_STEP_TYPES.has(unsafeStep.stepType);
+          const isContainer = unsafeStep.stepId !== stepInfo.stepId;
           return context.prompts.askForConfirmation({
             id: promptId,
-            title: i18n.translate('workflows.agentBuilder.executeStep.confirmation.title', {
-              defaultMessage: 'Execute step "{stepName}" ({stepType})',
-              values: { stepName, stepType: stepInfo.stepType },
-            }),
-            message: confirmationBody ?? buildFallbackPreview(stepInfo, contextOverride),
+            title: isContainer
+              ? i18n.translate('workflows.agentBuilder.executeStep.confirmation.titleContainer', {
+                  defaultMessage:
+                    'Execute step "{stepName}" ({stepType}) — contains unsafe `{unsafeStepId}` ({unsafeStepType})',
+                  values: {
+                    stepName,
+                    stepType: stepInfo.stepType,
+                    unsafeStepId: unsafeStep.stepId,
+                    unsafeStepType: unsafeStep.stepType,
+                  },
+                })
+              : i18n.translate('workflows.agentBuilder.executeStep.confirmation.title', {
+                  defaultMessage: 'Execute step "{stepName}" ({stepType})',
+                  values: { stepName, stepType: stepInfo.stepType },
+                }),
+            message:
+              confirmationBody ?? buildFallbackPreview(stepInfo, unsafeStep, contextOverride),
             confirm_text: i18n.translate(
               'workflows.agentBuilder.executeStep.confirmation.confirmText',
               { defaultMessage: 'Run step' }
