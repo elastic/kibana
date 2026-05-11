@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { buildPath } from '@kbn/core-http-browser';
 import type { HttpSetup, AnalyticsServiceStart } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import type { ITagsCache } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type {
   Tag,
   TagAttributes,
@@ -26,7 +28,8 @@ const UPDATE_TAG_EVENT = 'updateTag';
 export interface TagsClientOptions {
   analytics: AnalyticsServiceStart;
   http: HttpSetup;
-  changeListener?: ITagsChangeListener;
+  /** When set, read APIs consult this cache before calling the network. */
+  cache?: ITagsCache & ITagsChangeListener;
 }
 
 export interface FindTagsOptions {
@@ -56,12 +59,12 @@ export interface ITagInternalClient extends ITagsClient {
 export class TagsClient implements ITagInternalClient {
   private readonly analytics: AnalyticsServiceStart;
   private readonly http: HttpSetup;
-  private readonly changeListener?: ITagsChangeListener;
+  private readonly cache?: ITagsCache & ITagsChangeListener;
 
-  constructor({ analytics, http, changeListener }: TagsClientOptions) {
+  constructor({ analytics, http, cache }: TagsClientOptions) {
     this.analytics = analytics;
     this.http = http;
-    this.changeListener = changeListener;
+    this.cache = cache;
   }
 
   // public APIs from ITagsClient
@@ -78,8 +81,8 @@ export class TagsClient implements ITagInternalClient {
     });
 
     trapErrors(() => {
-      if (this.changeListener) {
-        this.changeListener.onCreate(tag);
+      if (this.cache) {
+        this.cache.onDidCreate(tag);
       }
     });
 
@@ -88,9 +91,12 @@ export class TagsClient implements ITagInternalClient {
 
   public async update(id: string, attributes: TagAttributes) {
     const startTime = window.performance.now();
-    const { tag } = await this.http.post<{ tag: Tag }>(`/api/saved_objects_tagging/tags/${id}`, {
-      body: JSON.stringify(attributes),
-    });
+    const { tag } = await this.http.post<{ tag: Tag }>(
+      buildPath('/api/saved_objects_tagging/tags/{id}', { id }),
+      {
+        body: JSON.stringify(attributes),
+      }
+    );
     const duration = window.performance.now() - startTime;
     reportPerformanceMetricEvent(this.analytics, {
       eventName: UPDATE_TAG_EVENT,
@@ -98,9 +104,9 @@ export class TagsClient implements ITagInternalClient {
     });
 
     trapErrors(() => {
-      if (this.changeListener) {
+      if (this.cache) {
         const { id: newId, ...newAttributes } = tag;
-        this.changeListener.onUpdate(newId, newAttributes);
+        this.cache.onDidUpdate(newId, newAttributes);
       }
     });
 
@@ -108,11 +114,29 @@ export class TagsClient implements ITagInternalClient {
   }
 
   public async get(id: string) {
-    const { tag } = await this.http.get<{ tag: Tag }>(`/api/saved_objects_tagging/tags/${id}`);
+    const cached = (this.cache?.getState() ?? []).find((t) => t.id === id);
+    if (cached) {
+      return cached;
+    }
+
+    const { tag } = await this.http.get<{ tag: Tag }>(
+      buildPath('/api/saved_objects_tagging/tags/{id}', { id })
+    );
+
+    trapErrors(() => {
+      if (this.cache) {
+        this.cache.onDidCreate(tag);
+      }
+    });
+
     return tag;
   }
 
-  public async getAll({ asSystemRequest }: GetAllTagsOptions = {}) {
+  /**
+   * Loads all tags from the server, updates the change listener / cache, and returns the list.
+   * Used by {@link TagsCache} refresh so periodic reloads always hit the network.
+   */
+  public async fetchAllFromNetwork({ asSystemRequest }: GetAllTagsOptions = {}): Promise<Tag[]> {
     const startTime = window.performance.now();
     const fetchOptions = { asSystemRequest };
     const { tags } = await this.http.get<{ tags: Tag[] }>(
@@ -126,17 +150,24 @@ export class TagsClient implements ITagInternalClient {
     });
 
     trapErrors(() => {
-      if (this.changeListener) {
-        this.changeListener.onGetAll(tags);
+      if (this.cache) {
+        this.cache.onDidGetAll(tags);
       }
     });
 
     return tags;
   }
 
+  public async getAll(options: GetAllTagsOptions = {}) {
+    if (this.cache?.isInitialized()) {
+      return [...this.cache.getState()];
+    }
+    return this.fetchAllFromNetwork(options);
+  }
+
   public async delete(id: string) {
     const startTime = window.performance.now();
-    await this.http.delete<{}>(`/api/saved_objects_tagging/tags/${id}`);
+    await this.http.delete<{}>(buildPath('/api/saved_objects_tagging/tags/{id}', { id }));
     const duration = window.performance.now() - startTime;
     reportPerformanceMetricEvent(this.analytics, {
       eventName: DELETE_TAG_EVENT,
@@ -144,8 +175,8 @@ export class TagsClient implements ITagInternalClient {
     });
 
     trapErrors(() => {
-      if (this.changeListener) {
-        this.changeListener.onDelete(id);
+      if (this.cache) {
+        this.cache.onDidDelete(id);
       }
     });
   }
@@ -174,12 +205,36 @@ export class TagsClient implements ITagInternalClient {
   }
 
   public async findByName(name: string, { exact }: { exact?: boolean } = { exact: false }) {
+    if (exact && this.cache?.isInitialized()) {
+      const cached = this.cache
+        .getState()
+        .find((t) => t.name.toLocaleLowerCase() === name.toLocaleLowerCase());
+      if (cached) {
+        return cached;
+      }
+    }
+
     const { tags = [] } = await this.find({ page: 1, perPage: 10000, search: name });
+
+    if (tags.length > 0) {
+      this.mergeFindResultsIntoCache(tags);
+    }
+
     if (exact) {
-      const tag = tags.find((t) => t.name.toLocaleLowerCase() === name.toLocaleLowerCase());
-      return tag ?? null;
+      return tags.find((t) => t.name.toLocaleLowerCase() === name.toLocaleLowerCase()) ?? null;
     }
     return tags.length > 0 ? tags[0] : null;
+  }
+
+  private mergeFindResultsIntoCache(tags: TagWithRelations[]) {
+    for (const t of tags) {
+      const { relationCount: _relationCount, ...plain } = t;
+      trapErrors(() => {
+        if (this.cache) {
+          this.cache.onDidCreate(plain as Tag);
+        }
+      });
+    }
   }
 
   public async bulkDelete(tagIds: string[]) {
@@ -196,9 +251,9 @@ export class TagsClient implements ITagInternalClient {
     });
 
     trapErrors(() => {
-      if (this.changeListener) {
+      if (this.cache) {
         tagIds.forEach((tagId) => {
-          this.changeListener!.onDelete(tagId);
+          this.cache!.onDidDelete(tagId);
         });
       }
     });
