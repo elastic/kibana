@@ -45,7 +45,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
         });
 
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
       const createdRuleId = createResponse.body.id;
 
       const deleteResponse = await supertestWithoutAuth
