@@ -67,7 +67,8 @@ export function MobileLocationStats({
         },
       });
     },
-    [start, end, environment, kuery, serviceName, locationField, offset]
+    [start, end, environment, kuery, serviceName, locationField, offset],
+    { useCallApmApiV2: true }
   );
 
   const getIcon = useCallback(
@@ -76,7 +77,7 @@ export function MobileLocationStats({
         return locationStatsStatus === FETCH_STATUS.LOADING ? (
           <EuiLoadingSpinner size="m" />
         ) : (
-          <EuiIcon type={type} width={width} height={height} fill={color} />
+          <EuiIcon type={type} width={width} height={height} fill={color} aria-hidden={true} />
         );
       },
     [locationStatsStatus]

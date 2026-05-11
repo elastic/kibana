@@ -45,7 +45,8 @@ export function MobileStats({ start, end, kuery }: { start: string; end: string;
         },
       });
     },
-    [start, end, environment, kuery, serviceName, transactionType, offset]
+    [start, end, environment, kuery, serviceName, transactionType, offset],
+    { useCallApmApiV2: true }
   );
 
   const getComparisonValueFormatter = useCallback(
@@ -67,7 +68,7 @@ export function MobileStats({ start, end, kuery }: { start: string; end: string;
         return status === FETCH_STATUS.LOADING ? (
           <EuiLoadingSpinner size="m" />
         ) : (
-          <EuiIcon type={type} width={width} height={height} fill={color} />
+          <EuiIcon type={type} width={width} height={height} fill={color} aria-hidden={true} />
         );
       },
     [status]

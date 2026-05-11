@@ -33,6 +33,7 @@ import { serviceGroupsRouteDefinitions } from './service_groups';
 import { timeRangeMetadataRouteDefinitions } from './time_range_metadata';
 import { customLinksRouteDefinitions } from './custom_links';
 import { anomalyDetectionRouteDefinitions } from './anomaly_detection';
+import { mobileRouteDefinitions } from './mobile';
 import type { BuildGroupedRepository } from './types';
 
 export const routeDefinitions = {
@@ -63,6 +64,7 @@ export const routeDefinitions = {
   timeRangeMetadata: timeRangeMetadataRouteDefinitions,
   customLinks: customLinksRouteDefinitions,
   anomalyDetection: anomalyDetectionRouteDefinitions,
+  mobile: mobileRouteDefinitions,
 };
 
 export type SharedAPMRouteRepository = BuildGroupedRepository<typeof routeDefinitions>;
