@@ -101,6 +101,12 @@ test.describe('Alert deletion', { tag: tags.stateful.classic }, () => {
       refresh: true,
       conflicts: 'proceed',
     });
+    await esClient.deleteByQuery({
+      index: '.kibana-event-log*',
+      query: { bool: { must: [{ match: { 'event.action': 'delete-alerts' } }] } },
+      refresh: true,
+      conflicts: 'proceed',
+    });
   });
 
   test('schedules a deletion task and removes old alerts', async ({ page, esClient }) => {
