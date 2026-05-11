@@ -27,7 +27,7 @@ function buildColorProps(
     | NonNullable<DatatableConfig['metrics']>[number]
     | NonNullable<DatatableConfig['rows']>[number]
 ): Partial<Pick<ColumnState, 'palette' | 'colorMapping' | 'colorMode'>> {
-  if (!config.apply_color_to || config.apply_color_to === 'none') return {};
+  if (!config.apply_color_to) return {};
   const colorMode = applyColorToToColorMode(config.apply_color_to);
 
   if (isColorMappingColor(config.color)) {

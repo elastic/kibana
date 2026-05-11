@@ -183,7 +183,7 @@ export const MetricVis = ({
 
     let tileColor = defaultColor;
 
-    if (config.metric.applyColorTo !== 'none') {
+    if (config.metric.applyColorTo) {
       if (config.metric.palette?.params && typeof value === 'number') {
         tileColor =
           getColor(
@@ -237,10 +237,7 @@ export const MetricVis = ({
         subtitle,
         icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
         extra: secondaryMetricProps,
-        color:
-          config.metric.applyColorTo !== 'none'
-            ? config.metric.color ?? defaultColor
-            : defaultColor,
+        color: config.metric.applyColorTo ? config.metric.color ?? defaultColor : defaultColor,
       };
       return Array.isArray(value)
         ? { ...nonNumericMetricBase, value: value.map((v) => formatPrimaryMetric(v)) }

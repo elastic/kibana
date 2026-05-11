@@ -1190,7 +1190,7 @@ export function DimensionEditorAdditionalSection({
             onChange={(_id, newApplyColorTo) => {
               setState({
                 ...state,
-                applyColorTo: newApplyColorTo,
+                applyColorTo: newApplyColorTo === 'none' ? undefined : newApplyColorTo,
               });
               scrollToColorControls();
             }}

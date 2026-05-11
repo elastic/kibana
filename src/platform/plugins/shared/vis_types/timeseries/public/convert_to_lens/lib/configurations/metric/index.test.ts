@@ -116,7 +116,6 @@ describe('getConfigurationForMetric', () => {
       metricAccessor: columnId1,
       palette: undefined,
       secondaryMetricAccessor: columnId2,
-      applyColorTo: 'none',
     });
     expect(mockGetPalette).toBeCalledTimes(1);
   });
@@ -147,7 +146,6 @@ describe('getConfigurationForMetric', () => {
     const config = getConfigurationForMetric(model, layer, bucket);
 
     expect(config).toEqual({
-      applyColorTo: 'none',
       layerId,
       layerType: 'data',
       metricAccessor: columnId,

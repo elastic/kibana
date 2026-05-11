@@ -1023,18 +1023,18 @@ describe('MetricVisComponent', function () {
     });
 
     describe('by static color', () => {
-      it('ignores palette and static color and uses the default when applyColorTo is `none`', async () => {
+      it('ignores palette and static color and uses the default when applyColorTo is not set', async () => {
         const staticColor = faker.color.rgb();
         const colorFromPalette = faker.color.rgb();
         mockGetColorForValue.mockReturnValue(colorFromPalette);
+        const { applyColorTo, ...metricWithoutApplyColorTo } = defaultMetricParams;
         await renderMetricChart({
           config: {
             dimensions: {
               metric: basePriceColumnId,
             },
             metric: {
-              ...defaultMetricParams,
-              applyColorTo: 'none',
+              ...metricWithoutApplyColorTo,
               color: staticColor,
               palette: {
                 type: 'palette',
@@ -1048,7 +1048,7 @@ describe('MetricVisComponent', function () {
                   rangeMax: 10,
                 },
               },
-            } as MetricVisParam,
+            } as unknown as MetricVisParam,
           },
         });
         expect(mockGetColorForValue).not.toHaveBeenCalled();

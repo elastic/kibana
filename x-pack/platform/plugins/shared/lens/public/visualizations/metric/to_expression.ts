@@ -213,13 +213,10 @@ export const toExpression = (
     iconAlign,
     valueFontSize: state.valueFontMode ?? LENS_METRIC_STATE_DEFAULTS.valueFontMode,
     primaryPosition: state.primaryPosition ?? LENS_METRIC_STATE_DEFAULTS.primaryPosition,
-    color:
-      state.applyColorTo !== 'none'
-        ? state.color ?? getDefaultColor(state, isMetricNumeric)
-        : undefined,
+    color: state.applyColorTo ? state.color ?? getDefaultColor(state, isMetricNumeric) : undefined,
     icon: hasMetricIcon ? state.icon : undefined,
     palette:
-      state.applyColorTo !== 'none' && isMetricNumeric && state.palette?.params
+      state.applyColorTo && isMetricNumeric && state.palette?.params
         ? [
             paletteService
               .get(CUSTOM_PALETTE)
@@ -231,7 +228,7 @@ export const toExpression = (
     inspectorTableId: state.layerId,
     secondaryLabelPosition:
       state.secondaryLabelPosition ?? LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
-    applyColorTo: state.applyColorTo ?? LENS_METRIC_STATE_DEFAULTS.applyColorTo,
+    applyColorTo: state.applyColorTo,
   });
 
   return {

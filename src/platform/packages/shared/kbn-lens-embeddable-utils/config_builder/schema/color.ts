@@ -409,11 +409,11 @@ export const DEFAULT_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType =
  * Schema for where to apply the color (to value or background).
  */
 export const applyColorToSchema = schema.oneOf(
-  [schema.literal('value'), schema.literal('background'), schema.literal('none')],
+  [schema.literal('value'), schema.literal('background')],
   {
     meta: {
       description:
-        'Color target: `value` colors the metric text, `background` colors the cell or panel background. `none` disables coloring.',
+        'Color target: `value` colors the metric text, `background` colors the cell or panel background.',
     },
   }
 );

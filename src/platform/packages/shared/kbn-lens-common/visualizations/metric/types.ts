@@ -80,7 +80,7 @@ export interface MetricVisualizationState {
   trendlineSecondaryMetricAccessor?: string;
   trendlineBreakdownByAccessor?: string;
 
-  applyColorTo?: 'background' | 'value' | 'none'; // Used for coordination between dimension editor sections
+  applyColorTo?: 'background' | 'value'; // Used for coordination between dimension editor sections
 }
 
 export type MetricVisualizationStateOptionals = Pick<
@@ -97,7 +97,6 @@ export type MetricStateOptinalsWithDefault = Pick<
   | 'valueFontMode'
   | 'primaryPosition'
   | 'secondaryLabelPosition'
-  | 'applyColorTo'
 >;
 
 export type MetricStateDefaults = Required<MetricStateOptinalsWithDefault>;
