@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo, memo, useRef, useLayoutEffect, useCallback } from 'react';
+import React, { useState, useMemo, memo, useRef, useLayoutEffect } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,13 +31,15 @@ const Pagination = styled(EuiPagination)`
   max-width: 130px;
 `;
 
-const COLLAPSED_HEIGHT_PX = 360;
+const ImageContainer = styled.div`
+  container-type: inline-size;
+`;
 
-const ImageContainer = styled.div<{ isCollapsed: boolean; backgroundColor: string }>`
+const ImageClip = styled.div<{ isCollapsed: boolean; backgroundColor: string }>`
   ${({ isCollapsed, backgroundColor }) =>
     isCollapsed
       ? `
-    max-height: ${COLLAPSED_HEIGHT_PX}px;
+    max-height: 150cqw;
     overflow: hidden;
     position: relative;
     &::after {
@@ -61,23 +63,23 @@ export const Screenshots: React.FC<ScreenshotProps> = memo(({ images, packageNam
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [isOverflowing, setIsOverflowing] = useState<boolean>(false);
-  const imageContainerRef = useRef<HTMLDivElement>(null);
+  const clipRef = useRef<HTMLDivElement>(null);
   const maxImageIndex = useMemo(() => images.length - 1, [images.length]);
   const currentImageUrl = useMemo(
     () => toPackageImage(images[currentImageIndex], packageName, version),
     [currentImageIndex, images, packageName, toPackageImage, version]
   );
 
-  const checkOverflow = useCallback(() => {
-    const el = imageContainerRef.current;
+  const checkOverflow = () => {
+    const el = clipRef.current;
     if (el) {
-      setIsOverflowing(el.scrollHeight > COLLAPSED_HEIGHT_PX);
+      setIsOverflowing(el.scrollHeight > el.clientHeight);
     }
-  }, []);
+  };
 
   useLayoutEffect(() => {
     checkOverflow();
-  }, [checkOverflow, currentImageIndex, currentImageUrl]);
+  }, [currentImageIndex, currentImageUrl]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -118,35 +120,38 @@ export const Screenshots: React.FC<ScreenshotProps> = memo(({ images, packageNam
 
       {/* Current screenshot */}
       <EuiFlexItem>
-        <ImageContainer
-          ref={imageContainerRef}
-          isCollapsed={!isExpanded && isOverflowing}
-          backgroundColor={euiTheme.colors.emptyShade}
-        >
-          {currentImageUrl ? (
-            <EuiImage
-              allowFullScreen
-              hasShadow
-              onLoad={checkOverflow}
-              alt={
-                images[currentImageIndex].title ||
-                i18n.translate('xpack.fleet.epm.screenshotAltText', {
-                  defaultMessage: '{packageName} screenshot #{imageNumber}',
-                  values: {
-                    packageName,
-                    imageNumber: currentImageIndex + 1,
-                  },
-                })
-              }
-              title={images[currentImageIndex].title}
-              url={currentImageUrl}
-            />
-          ) : (
-            <FormattedMessage
-              id="xpack.fleet.epm.screenshotErrorText"
-              defaultMessage="Unable to load this screenshot"
-            />
-          )}
+        <ImageContainer>
+          <ImageClip
+            ref={clipRef}
+            isCollapsed={!isExpanded && isOverflowing}
+            backgroundColor={euiTheme.colors.emptyShade}
+          >
+            {currentImageUrl ? (
+              <EuiImage
+                allowFullScreen
+                hasShadow
+                size="fullWidth"
+                onLoad={checkOverflow}
+                alt={
+                  images[currentImageIndex].title ||
+                  i18n.translate('xpack.fleet.epm.screenshotAltText', {
+                    defaultMessage: '{packageName} screenshot #{imageNumber}',
+                    values: {
+                      packageName,
+                      imageNumber: currentImageIndex + 1,
+                    },
+                  })
+                }
+                title={images[currentImageIndex].title}
+                url={currentImageUrl}
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.epm.screenshotErrorText"
+                defaultMessage="Unable to load this screenshot"
+              />
+            )}
+          </ImageClip>
         </ImageContainer>
       </EuiFlexItem>
 
