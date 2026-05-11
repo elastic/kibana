@@ -12,10 +12,12 @@ import {
   getDataStreamApiService,
   getInsightsApiService,
   getRulesApiService,
+  getTaskExecutionsApiService,
   type DataStreamApiService,
   type InsightsApiService,
   type RulesApiService,
   type RuleEventsApiService,
+  type TaskExecutionsApiService,
 } from '../../common/services';
 import { getRuleEventsApiService } from '../../common/services/rule_events_api_service';
 import type { SourceIndexApiService } from '../../common/services/source_index_api_service';
@@ -27,6 +29,7 @@ export interface AlertingApiServices {
   alertActions: DataStreamApiService;
   insights: InsightsApiService;
   sourceIndex: SourceIndexApiService;
+  taskExecutions: TaskExecutionsApiService;
 }
 
 export interface AlertingApiServicesFixture extends ApiServicesFixture {
@@ -56,6 +59,7 @@ export const buildAlertingApiServices = ({
   }),
   insights: getInsightsApiService({ esClient, log }),
   sourceIndex: getSourceIndexApiService({ esClient, log }),
+  taskExecutions: getTaskExecutionsApiService({ esClient, log }),
 });
 
 export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServicesFixture }>({

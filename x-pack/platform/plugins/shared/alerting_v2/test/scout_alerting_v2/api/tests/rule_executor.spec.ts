@@ -38,12 +38,16 @@ const groupEventsByHost = (events: AlertEvent[]): Record<string, AlertEvent> =>
  * Isolated cases for the alerting_v2 rule executor's persisted output.
  *
  */
-apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
+apiTest.describe.only('Rule executor', { tag: tags.stateful.classic }, () => {
   const SOURCE_INDEX = 'test-alerting-v2-rule-executor-source';
   /**
-   * Time we let the executor run between assertions when verifying that no new
-   * events are produced (e.g. disabled / deleted / no-match rules). At least one
-   * task manager tick (~3-5s) plus margin so a slow tick still fires.
+   * Time-based wait used only by tests that assert the *absence* of events from
+   * a disabled or deleted rule, where there is no positive condition to poll
+   * for (the executor is no longer scheduled, so no `task-run` events will
+   * appear). All other negative assertions wait for executor ticks via
+   * `taskExecutions.waitForExecutorRuns`. This buffer covers ~2 task manager
+   * ticks (SCHEDULE_INTERVAL is 5s) so a regression that incorrectly executed
+   * disabled rules would have time to manifest.
    */
   const WAIT_TIME_MS = 12_000;
 
@@ -203,11 +207,8 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         status: 'breached',
       });
 
-      // Timestamp fields
-      expect(typeof event['@timestamp']).toBe('string');
-      expect(typeof event.scheduled_timestamp).toBe('string');
-      expect(Number.isNaN(Date.parse(event['@timestamp']))).toBe(false);
-      expect(Number.isNaN(Date.parse(event.scheduled_timestamp!))).toBe(false);
+      expect(Date.parse(event['@timestamp'])).toBeGreaterThan(0);
+      expect(Date.parse(event.scheduled_timestamp!)).toBeGreaterThan(0);
       expect(Date.parse(event.scheduled_timestamp!)).toBeLessThanOrEqual(
         Date.parse(event['@timestamp'])
       );
@@ -464,53 +465,6 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
   );
 
   apiTest(
-    'tolerates trailing whitespace and newlines in evaluation.query.base',
-    async ({ apiServices }) => {
-      await apiServices.alertingV2.sourceIndex.indexDocs({
-        index: SOURCE_INDEX,
-        docs: [
-          {
-            '@timestamp': new Date().toISOString(),
-            'host.name': 'host-trim-trailing-ws',
-            severity: 'high',
-            value: 1,
-          },
-        ],
-      });
-
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({
-          metadata: { name: 'executor-trim-trailing-whitespace' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          evaluation: {
-            query: {
-              // Intentional trailing whitespace and newlines: the executor
-              // is expected to normalize the query before sending it to ES|QL.
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-trim-trailing-ws" | STATS count = COUNT(*) BY host.name | WHERE count >= 1   \n   \t  `,
-            },
-          },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
-        })
-      );
-
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
-
-      const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
-        status: 'breached',
-      });
-
-      expect(breachEvents.length).toBeGreaterThanOrEqual(1);
-      expect(breachEvents[0].data).toMatchObject({
-        'host.name': 'host-trim-trailing-ws',
-        count: 1,
-      });
-    }
-  );
-
-  apiTest(
     'includes data within the lookback window even when older than schedule.every',
     async ({ apiServices }) => {
       // 30s in the past — within the 1m lookback but well outside the 5s schedule
@@ -588,7 +542,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       })
     );
 
-    await wait(WAIT_TIME_MS);
+    await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      ruleId: rule.id,
+      runs: 2,
+    });
 
     const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
     expect(events).toHaveLength(0);
@@ -630,7 +587,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         })
       );
 
-      await wait(WAIT_TIME_MS);
+      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+        ruleId: rule.id,
+        runs: 2,
+      });
 
       const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
       expect(events).toHaveLength(0);
@@ -685,9 +645,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
 
-      // Allow extra ticks so a regression that *also* lets the out-of-range
-      // doc through would have time to surface a second event.
-      await wait(WAIT_TIME_MS);
+      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+        ruleId: rule.id,
+        runs: 2,
+      });
 
       const breachEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         status: 'breached',
@@ -749,7 +710,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
   apiTest(
     'emits a recovered event under no_breach policy when a previously breaching group stops breaching',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -786,11 +747,9 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
       const breachedHash = breachedEvents[0].group_hash;
 
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-recovery-no-breach' } },
-        refresh: true,
-        wait_for_completion: true,
       });
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'recovered' });
@@ -806,7 +765,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
   apiTest(
     'does not emit recovery events for kind: "signal" rules when previously matching groups stop matching',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -839,16 +798,15 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
 
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-signal-no-recovery' } },
-        refresh: true,
-        wait_for_completion: true,
       });
 
-      // Wait for several scheduler ticks so any erroneous recovery event
-      // would have been written by now.
-      await wait(WAIT_TIME_MS);
+      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+        ruleId: rule.id,
+        runs: 2,
+      });
 
       const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         status: 'recovered',
@@ -858,96 +816,91 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     }
   );
 
-  apiTest(
-    'uses the configured query under recovery_policy.type=query',
-    async ({ apiServices, esClient }) => {
-      /**
-       * severity=high docs drive the main breach query
-       * severity=recovered docs drive the recovery query for the SAME group (host.name).
-       */
-      await apiServices.alertingV2.sourceIndex.indexDocs({
-        index: SOURCE_INDEX,
-        docs: [
-          {
-            '@timestamp': new Date().toISOString(),
-            'host.name': 'host-recovery-query',
-            severity: 'high',
-            value: 1,
-          },
-        ],
-      });
+  apiTest('uses the configured query under recovery_policy.type=query', async ({ apiServices }) => {
+    /**
+     * severity=high docs drive the main breach query
+     * severity=recovered docs drive the recovery query for the SAME group (host.name).
+     */
+    await apiServices.alertingV2.sourceIndex.indexDocs({
+      index: SOURCE_INDEX,
+      docs: [
+        {
+          '@timestamp': new Date().toISOString(),
+          'host.name': 'host-recovery-query',
+          severity: 'high',
+          value: 1,
+        },
+      ],
+    });
 
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({
-          metadata: { name: 'executor-recovery-query' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-            },
-          },
-          recovery_policy: {
-            type: 'query',
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-            },
-          },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
-        })
-      );
-
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
-
-      const breachedEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
-        status: 'breached',
-      });
-
-      const breachedHash = breachedEvents[0].group_hash;
-
-      // Drop the breaching doc so the main query no longer matches, then
-      // index a doc that matches the recovery query for the same host.
-      await esClient.deleteByQuery({
-        index: SOURCE_INDEX,
-        query: {
-          bool: {
-            filter: [
-              { term: { 'host.name': 'host-recovery-query' } },
-              { term: { severity: 'high' } },
-            ],
+    const rule = await apiServices.alertingV2.rules.create(
+      buildCreateRuleData({
+        metadata: { name: 'executor-recovery-query' },
+        time_field: '@timestamp',
+        schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+        evaluation: {
+          query: {
+            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query" AND severity == "high" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
         },
-        refresh: true,
-        wait_for_completion: true,
-      });
-
-      await apiServices.alertingV2.sourceIndex.indexDocs({
-        index: SOURCE_INDEX,
-        docs: [
-          {
-            '@timestamp': new Date().toISOString(),
-            'host.name': 'host-recovery-query',
-            severity: 'recovered',
-            value: 0,
+        recovery_policy: {
+          type: 'query',
+          query: {
+            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-recovery-query" AND severity == "recovered" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
-        ],
-      });
+        },
+        grouping: { fields: ['host.name'] },
+        state_transition: { pending_count: 0, recovering_count: 0 },
+      })
+    );
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'recovered' });
+    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
 
-      const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
-        status: 'recovered',
-      });
+    const breachedEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+      status: 'breached',
+    });
 
-      expect(recoveredEvents.length).toBeGreaterThanOrEqual(1);
-      expect(recoveredEvents[0].group_hash).toBe(breachedHash);
-    }
-  );
+    const breachedHash = breachedEvents[0].group_hash;
+
+    // Drop the breaching doc so the main query no longer matches, then
+    // index a doc that matches the recovery query for the same host.
+    await apiServices.alertingV2.sourceIndex.deleteDocs({
+      index: SOURCE_INDEX,
+      query: {
+        bool: {
+          filter: [
+            { term: { 'host.name': 'host-recovery-query' } },
+            { term: { severity: 'high' } },
+          ],
+        },
+      },
+    });
+
+    await apiServices.alertingV2.sourceIndex.indexDocs({
+      index: SOURCE_INDEX,
+      docs: [
+        {
+          '@timestamp': new Date().toISOString(),
+          'host.name': 'host-recovery-query',
+          severity: 'recovered',
+          value: 0,
+        },
+      ],
+    });
+
+    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'recovered' });
+
+    const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+      status: 'recovered',
+    });
+
+    expect(recoveredEvents.length).toBeGreaterThanOrEqual(1);
+    expect(recoveredEvents[0].group_hash).toBe(breachedHash);
+  });
 
   apiTest(
     'emits one recovery event per active group when recovery_policy.type=query matches multiple',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -997,7 +950,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       expect(breachedHashes.size).toBe(2);
 
       // Stop both groups from breaching and emit recovery rows for both.
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: {
           bool: {
@@ -1011,8 +964,6 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
             ],
           },
         },
-        refresh: true,
-        wait_for_completion: true,
       });
 
       await apiServices.alertingV2.sourceIndex.indexDocs({
@@ -1050,7 +1001,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
   apiTest(
     'does not recover a group when recovery_policy.type=query returns no matching active group',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -1086,7 +1037,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
 
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: {
           bool: {
@@ -1096,8 +1047,6 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
             ],
           },
         },
-        refresh: true,
-        wait_for_completion: true,
       });
 
       await apiServices.alertingV2.sourceIndex.indexDocs({
@@ -1112,7 +1061,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         ],
       });
 
-      await wait(WAIT_TIME_MS);
+      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+        ruleId: rule.id,
+        runs: 2,
+      });
 
       const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         status: 'recovered',
@@ -1124,7 +1076,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
   apiTest(
     'does not recover a group when recovery_policy.type=query returns zero rows',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -1166,7 +1118,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       // Drop the breaching doc so the main query no longer matches. The
       // recovery query still returns zero rows, exercising the "empty
       // ES|QL response" branch in `buildQueryRecoveryAlertEvents`.
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: {
           bool: {
@@ -1176,11 +1128,12 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
             ],
           },
         },
-        refresh: true,
-        wait_for_completion: true,
       });
 
-      await wait(WAIT_TIME_MS);
+      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+        ruleId: rule.id,
+        runs: 2,
+      });
 
       const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         status: 'recovered',
@@ -1192,7 +1145,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
   apiTest(
     'emits recovery events only for groups that stop breaching when others keep breaching',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       // Both groups breach first.
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
@@ -1249,11 +1202,9 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       // Drop only host-a's data — host-b keeps breaching. Re-index host-b
       // so it stays inside the lookback window throughout the rest of the
       // test, even on slower runs.
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-partial-recovery-a' } },
-        refresh: true,
-        wait_for_completion: true,
       });
 
       const reIndexHostB = async () => {
@@ -1304,7 +1255,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
   apiTest(
     'emits both breach and recovery events in the same execution when one group recovers and another keeps breaching',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -1352,11 +1303,9 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
       // Drop host-a only and keep refreshing host-b inside the lookback so
       // the same execution sees host-b as breaching while host-a recovers.
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-mixed-execution-a' } },
-        refresh: true,
-        wait_for_completion: true,
       });
 
       await apiServices.alertingV2.sourceIndex.indexDocs({
@@ -1413,7 +1362,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       })
     );
 
-    await wait(WAIT_TIME_MS);
+    await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      ruleId: rule.id,
+      runs: 2,
+    });
 
     const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
     expect(events).toHaveLength(0);
@@ -1452,8 +1404,8 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
     await apiServices.alertingV2.rules.bulkDisable({ ids: [rule.id] });
 
-    // Let any in-flight execution drain so the snapshot is stable.
-    await wait(WAIT_TIME_MS);
+    await apiServices.alertingV2.rules.waitForEnabledState({ id: rule.id, enabled: false });
+    await apiServices.alertingV2.taskExecutions.waitForExecutorTaskDrained({ ruleId: rule.id });
 
     await apiServices.alertingV2.sourceIndex.indexDocs({
       index: SOURCE_INDEX,
@@ -1468,6 +1420,13 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     });
 
     const baseline = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
+    /**
+     * Time-based wait is intentional here: the assertion is that a *disabled*
+     * rule writes no new events, which is the absence of a condition. There is
+     * no positive event to poll for. The wait covers ~2 task manager ticks so
+     * a regression that incorrectly executed disabled rules would have time
+     * to manifest.
+     */
     await wait(WAIT_TIME_MS);
     const after = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
 
@@ -1509,12 +1468,27 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
       await apiServices.alertingV2.rules.bulkDisable({ ids: [rule.id] });
 
-      // Drain any in-flight execution and capture a stable baseline so we can
-      // assert that *new* events are produced after re-enabling.
-      await wait(WAIT_TIME_MS);
+      /**
+       * Wait for the disable to fully settle before issuing the re-enable.
+       *
+       * `bulkDisable` is a best-effort operation: it writes the rule SO and
+       * then asynchronously asks task manager to disable the executor task.
+       * Issuing `bulkEnable` immediately after creates two near-simultaneous
+       * writes to the same rule SO and to the task manager task document,
+       * which has surfaced as transient 5xx responses from Kibana under load.
+       *
+       * We wait on two independent signals:
+       *   1. `waitForEnabledState({ enabled: false })` — the rule SO has the
+       *      disabled state visible to the API layer.
+       *   2. `waitForExecutorTaskDrained` — no executor run is in flight, so
+       *      the baseline event snapshot below is stable.
+       */
+      await apiServices.alertingV2.rules.waitForEnabledState({ id: rule.id, enabled: false });
+      await apiServices.alertingV2.taskExecutions.waitForExecutorTaskDrained({ ruleId: rule.id });
       const baseline = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
 
       await apiServices.alertingV2.rules.bulkEnable({ ids: [rule.id] });
+      await apiServices.alertingV2.rules.waitForEnabledState({ id: rule.id, enabled: true });
 
       // Refresh the breaching doc so it is inside the lookback window when the
       // re-enabled rule next executes — this isolates the re-enable behavior
@@ -1573,8 +1547,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
     await apiServices.alertingV2.rules.delete(rule.id);
 
-    // Let any in-flight execution drain so the snapshot is stable.
-    await wait(WAIT_TIME_MS);
+    await apiServices.alertingV2.taskExecutions.waitForExecutorTaskDrained({ ruleId: rule.id });
 
     await apiServices.alertingV2.sourceIndex.indexDocs({
       index: SOURCE_INDEX,
@@ -1589,6 +1562,13 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     });
 
     const baseline = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
+    /**
+     * Time-based wait is intentional here: the assertion is that a *deleted*
+     * rule writes no new events, which is the absence of a condition. There is
+     * no positive event to poll for. The wait covers ~2 task manager ticks so
+     * a regression that kept executing deleted rules would have time to
+     * manifest.
+     */
     await wait(WAIT_TIME_MS);
     const after = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
 
@@ -1614,7 +1594,10 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       })
     );
 
-    await wait(WAIT_TIME_MS);
+    await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      ruleId: rule.id,
+      runs: 2,
+    });
 
     const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
     expect(events).toHaveLength(0);

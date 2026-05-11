@@ -6,7 +6,7 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
-import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingProperty, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 
@@ -24,6 +24,11 @@ export interface IndexSourceDocsParams {
   docs: Array<Record<string, unknown>>;
 }
 
+export interface DeleteSourceDocsParams {
+  index: string;
+  query: QueryDslQueryContainer;
+}
+
 export interface DeleteSourceIndexParams {
   index: string;
 }
@@ -31,12 +36,14 @@ export interface DeleteSourceIndexParams {
 /**
  * Test-time helper for managing source data indices that alerting_v2 rules
  * query via ES|QL. Creation tolerates `index_already_exists`, deletion
- * tolerates a missing index, and inserts use `refresh: 'wait_for'` so
- * subsequent rule executions immediately see the new docs.
+ * tolerates a missing index, and inserts/deletes use `refresh: 'wait_for'`
+ * (or `refresh: true`) so subsequent rule executions immediately see the
+ * change.
  */
 export interface SourceIndexApiService {
   create: (params: CreateSourceIndexParams) => Promise<void>;
   indexDocs: (params: IndexSourceDocsParams) => Promise<void>;
+  deleteDocs: (params: DeleteSourceDocsParams) => Promise<void>;
   delete: (params: DeleteSourceIndexParams) => Promise<void>;
 }
 
@@ -67,6 +74,20 @@ export const getSourceIndexApiService = ({
         operations: docs.flatMap((doc) => [{ index: { _index: index } }, doc]),
         refresh: 'wait_for',
       });
+    }),
+
+  deleteDocs: ({ index, query }) =>
+    measurePerformanceAsync(log, `sourceIndex[${index}].deleteDocs`, async () => {
+      await esClient.deleteByQuery(
+        {
+          index,
+          query,
+          refresh: true,
+          wait_for_completion: true,
+          conflicts: 'proceed',
+        },
+        { ignore: [404] }
+      );
     }),
 
   delete: ({ index }) =>
