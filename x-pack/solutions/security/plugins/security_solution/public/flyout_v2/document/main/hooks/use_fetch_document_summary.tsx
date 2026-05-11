@@ -13,26 +13,26 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 
-export interface UseFetchAlertSummaryParams {
+export interface UseFetchDocumentSummaryParams {
   signal?: AbortSignal | undefined;
   alertId: string;
   connectorId: string;
 }
 
 /**
- * API call for fetching alert_summary for current spaceId
+ * API call for fetching the AI document summary for the current spaceId.
  *
  * @param {Object} options - The options object.
  * @param {string} options.alertId - alert id
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {useQuery} hook for getting the status of the alert_summary
+ * @returns {useQuery} hook for getting the status of the document summary
  */
-export const useFetchAlertSummary = ({
+export const useFetchDocumentSummary = ({
   alertId,
   connectorId,
   signal,
-}: UseFetchAlertSummaryParams) => {
+}: UseFetchDocumentSummaryParams) => {
   const {
     assistantAvailability: { isAssistantEnabled },
     http,

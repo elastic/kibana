@@ -16,8 +16,8 @@ import {
   useFetchAnonymizationFields,
 } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
-import { useFetchAlertSummary } from './use_fetch_alert_summary';
-import { useBulkUpdateAlertSummary } from './use_bulk_update_alert_summary';
+import { useFetchDocumentSummary } from './use_fetch_document_summary';
+import { useBulkUpdateDocumentSummary } from './use_bulk_update_document_summary';
 
 const NO_SUMMARY_AVAILABLE = i18n.translate(
   'xpack.securitySolution.alertSummary.noSummaryAvailable',
@@ -26,7 +26,7 @@ const NO_SUMMARY_AVAILABLE = i18n.translate(
   }
 );
 
-export interface UseAlertSummaryParams {
+export interface UseDocumentSummaryParams {
   /**
    * If of the alert we want to generate the summary for
    */
@@ -45,11 +45,11 @@ export interface UseAlertSummaryParams {
   showAnonymizedValues?: boolean;
 }
 
-export interface UseAlertSummaryResult {
+export interface UseDocumentSummaryResult {
   /**
-   * Generated summary for the alert
+   * Generated summary for the document
    */
-  alertSummary: string;
+  summary: string;
   /**
    * Timestamp (epoch ms) the persisted alert summary was last updated, or
    * `null` if no summary has been generated yet (or the API didn't return
@@ -58,9 +58,9 @@ export interface UseAlertSummaryResult {
    */
   generatedAt: number | null;
   /**
-   * Returns true if the alert has a summary
+   * Returns true if the document has a summary
    */
-  hasAlertSummary: boolean;
+  hasSummary: boolean;
   /**
    * Callback that fetches the AI summary
    */
@@ -84,14 +84,14 @@ export interface UseAlertSummaryResult {
 }
 
 /**
- * Hook that generates the alert AI summary along side other related items
+ * Hook that generates the document AI summary along side other related items
  */
-export const useAlertSummary = ({
+export const useDocumentSummary = ({
   alertId,
   defaultConnectorId,
   promptContext,
   showAnonymizedValues = false,
-}: UseAlertSummaryParams): UseAlertSummaryResult => {
+}: UseDocumentSummaryParams): UseDocumentSummaryResult => {
   const { abortStream, sendMessage } = useChatComplete({
     connectorId: defaultConnectorId,
   });
@@ -100,47 +100,47 @@ export const useAlertSummary = ({
     useFetchAnonymizationFields();
 
   const [isConnectorMissing, setIsConnectorMissing] = useState<boolean>(false);
-  const [alertSummary, setAlertSummary] = useState<string>(NO_SUMMARY_AVAILABLE);
+  const [summary, setSummary] = useState<string>(NO_SUMMARY_AVAILABLE);
   const [recommendedActions, setRecommendedActions] = useState<string | undefined>();
   const [messageAndReplacements, setMessageAndReplacements] = useState<{
     message: string;
     replacements: Replacements;
   } | null>(null);
-  // indicates that an alert summary exists or is being created/fetched
-  const [hasAlertSummary, setHasAlertSummary] = useState<boolean>(false);
+  // indicates that a document summary exists or is being created/fetched
+  const [hasSummary, setHasSummary] = useState<boolean>(false);
   const {
-    data: fetchedAlertSummary,
-    refetch: refetchAlertSummary,
-    isFetched: isAlertSummaryFetched,
-  } = useFetchAlertSummary({
+    data: fetchedSummary,
+    refetch: refetchSummary,
+    isFetched: isSummaryFetched,
+  } = useFetchDocumentSummary({
     alertId,
     connectorId: defaultConnectorId,
   });
-  const { bulkUpdate } = useBulkUpdateAlertSummary();
+  const { bulkUpdate } = useBulkUpdateDocumentSummary();
 
   useEffect(() => {
-    if (fetchedAlertSummary.data.length > 0) {
-      setHasAlertSummary(true);
-      setAlertSummary(
+    if (fetchedSummary.data.length > 0) {
+      setHasSummary(true);
+      setSummary(
         showAnonymizedValues
-          ? fetchedAlertSummary.data[0].summary
+          ? fetchedSummary.data[0].summary
           : replaceAnonymizedValuesWithOriginalValues({
-              messageContent: fetchedAlertSummary.data[0].summary,
-              replacements: fetchedAlertSummary.data[0].replacements,
+              messageContent: fetchedSummary.data[0].summary,
+              replacements: fetchedSummary.data[0].replacements,
             })
       );
-      if (fetchedAlertSummary.data[0].recommendedActions) {
+      if (fetchedSummary.data[0].recommendedActions) {
         setRecommendedActions(
           showAnonymizedValues
-            ? fetchedAlertSummary.data[0].recommendedActions
+            ? fetchedSummary.data[0].recommendedActions
             : replaceAnonymizedValuesWithOriginalValues({
-                messageContent: fetchedAlertSummary.data[0].recommendedActions,
-                replacements: fetchedAlertSummary.data[0].replacements,
+                messageContent: fetchedSummary.data[0].recommendedActions,
+                replacements: fetchedSummary.data[0].replacements,
               })
         );
       }
     }
-  }, [fetchedAlertSummary, showAnonymizedValues]);
+  }, [fetchedSummary, showAnonymizedValues]);
 
   useEffect(() => {
     const fetchContext = async () => {
@@ -154,7 +154,7 @@ export const useAlertSummary = ({
 
       const userMessage = getCombinedMessage({
         currentReplacements: {},
-        promptText: fetchedAlertSummary.prompt,
+        promptText: fetchedSummary.prompt,
         selectedPromptContexts,
       });
       const baseReplacements: Replacements = userMessage.replacements ?? {};
@@ -170,21 +170,21 @@ export const useAlertSummary = ({
       setMessageAndReplacements({ message: userMessage.content ?? '', replacements });
     };
 
-    if (isFetchedAnonymizationFields && isAlertSummaryFetched) fetchContext();
+    if (isFetchedAnonymizationFields && isSummaryFetched) fetchContext();
   }, [
     anonymizationFields,
     isFetchedAnonymizationFields,
-    isAlertSummaryFetched,
-    fetchedAlertSummary.prompt,
+    isSummaryFetched,
+    fetchedSummary.prompt,
     promptContext,
   ]);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const fetchAISummary = useCallback(() => {
-    const fetchSummary = async (content: { message: string; replacements: Replacements }) => {
+    const generateSummary = async (content: { message: string; replacements: Replacements }) => {
       setIsConnectorMissing(false);
       setIsGenerating(true);
-      setHasAlertSummary(true);
+      setHasSummary(true);
 
       const rawResponse = await sendMessage({
         ...content,
@@ -205,12 +205,12 @@ export const useAlertSummary = ({
       }
 
       if (!rawResponse.isError) {
-        if (fetchedAlertSummary.data.length > 0) {
+        if (fetchedSummary.data.length > 0) {
           await bulkUpdate({
             alertSummary: {
               update: [
                 {
-                  id: fetchedAlertSummary.data[0].id,
+                  id: fetchedSummary.data[0].id,
                   summary: responseSummary,
                   ...(responseRecommendedActions
                     ? { recommendedActions: responseRecommendedActions }
@@ -236,12 +236,12 @@ export const useAlertSummary = ({
             },
           });
         }
-        await refetchAlertSummary();
+        await refetchSummary();
       } else {
         if (responseSummary.includes('Failed to load action')) {
           setIsConnectorMissing(true);
         }
-        setAlertSummary(
+        setSummary(
           showAnonymizedValues
             ? responseSummary
             : replaceAnonymizedValuesWithOriginalValues({
@@ -253,13 +253,13 @@ export const useAlertSummary = ({
       setIsGenerating(false);
     };
 
-    if (messageAndReplacements !== null) fetchSummary(messageAndReplacements);
+    if (messageAndReplacements !== null) generateSummary(messageAndReplacements);
   }, [
     alertId,
     bulkUpdate,
-    fetchedAlertSummary.data,
+    fetchedSummary.data,
     messageAndReplacements,
-    refetchAlertSummary,
+    refetchSummary,
     sendMessage,
     showAnonymizedValues,
   ]);
@@ -271,16 +271,16 @@ export const useAlertSummary = ({
   }, [abortStream]);
 
   const generatedAt = useMemo<number | null>(() => {
-    const updatedAt = fetchedAlertSummary.data[0]?.updatedAt;
+    const updatedAt = fetchedSummary.data[0]?.updatedAt;
     if (!updatedAt) return null;
     const parsed = new Date(updatedAt).getTime();
     return Number.isNaN(parsed) ? null : parsed;
-  }, [fetchedAlertSummary.data]);
+  }, [fetchedSummary.data]);
 
   return {
-    alertSummary,
+    summary,
     generatedAt,
-    hasAlertSummary,
+    hasSummary,
     fetchAISummary,
     isConnectorMissing,
     isLoading: isGenerating,

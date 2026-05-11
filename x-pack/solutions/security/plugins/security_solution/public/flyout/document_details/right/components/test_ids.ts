@@ -72,10 +72,6 @@ export const INSIGHTS_TEST_ID = `${PREFIX}Insights` as const;
 export const INSIGHTS_HEADER_TEST_ID = INSIGHTS_TEST_ID + HEADER_TEST_ID;
 export const INSIGHTS_CONTENT_TEST_ID = INSIGHTS_TEST_ID + CONTENT_TEST_ID;
 
-/* AI summary section */
-
-export const AI_SUMMARY_TEST_ID = `${PREFIX}AISummary` as const;
-
 /* Visualizations section */
 
 export const VISUALIZATIONS_TEST_ID = `${PREFIX}Visualizations` as const;

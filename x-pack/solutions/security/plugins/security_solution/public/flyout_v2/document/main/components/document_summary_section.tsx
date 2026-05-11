@@ -17,19 +17,19 @@ import {
 } from '@elastic/eui';
 import { type PromptContext } from '@kbn/elastic-assistant';
 import { i18n } from '@kbn/i18n';
-import { AlertSummary } from './alert_summary';
-import { AlertSummaryOptionsMenu } from './alert_summary_options_menu';
+import { DocumentSummary } from './document_summary';
+import { DocumentSummaryOptionsMenu } from './document_summary_options_menu';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDefaultAIConnectorId } from '../../../../common/hooks/use_default_ai_connector_id';
 import { useAnonymizationToggle } from '../hooks/use_anonymization_toggle';
 
-export const ALERT_SUMMARY_SECTION_TEST_ID = 'alert-flyout-ai-summary-section';
+export const DOCUMENT_SUMMARY_SECTION_TEST_ID = 'document-flyout-ai-summary-section';
 
 const AI_SUMMARY = i18n.translate('xpack.securitySolution.alertSummary.aiSummarySection.title', {
   defaultMessage: 'AI summary',
 });
 
-export interface AlertSummarySectionProps {
+export interface DocumentSummarySectionProps {
   /**
    * Id of the alert the section is summarising.
    */
@@ -41,17 +41,17 @@ export interface AlertSummarySectionProps {
   getPromptContext: () => Promise<string> | Promise<Record<string, string[]>>;
   /**
    * Optional override for the section's outermost data-test-subj. Defaults
-   * to `ALERT_SUMMARY_SECTION_TEST_ID`.
+   * to `DOCUMENT_SUMMARY_SECTION_TEST_ID`.
    */
   ['data-test-subj']?: string;
 }
 
 /**
- * Shared "AI summary" section rendered in three flyouts (EASE, legacy
- * expandable flyout, v2 flyout). Owns the section's local state — the
- * anonymization toggle (via `useAnonymizationToggle`) and the
- * `hasAlertSummary` flag — so the three call sites only need to forward the
- * alert id and a prompt-context provider.
+ * Shared "AI summary" section rendered in the EASE flyout and the v2
+ * document flyout. Owns the section's local state — the anonymization
+ * toggle (via `useAnonymizationToggle`) and the `hasSummary` flag — so
+ * the call sites only need to forward the alert id and a prompt-context
+ * provider.
  *
  * Visually mirrors the "Entity summary" section
  * (`EntityHighlightsAccordion`): an `EuiAccordion` that defaults open, an
@@ -59,13 +59,13 @@ export interface AlertSummarySectionProps {
  * `extraAction`, and a trailing `EuiHorizontalRule` so each host flyout
  * gets the same chrome without per-flyout overrides.
  */
-export const AlertSummarySection = memo(
+export const DocumentSummarySection = memo(
   ({
     alertId,
     getPromptContext,
-    'data-test-subj': dataTestSubj = ALERT_SUMMARY_SECTION_TEST_ID,
-  }: AlertSummarySectionProps) => {
-    const [hasAlertSummary, setHasAlertSummary] = useState(false);
+    'data-test-subj': dataTestSubj = DOCUMENT_SUMMARY_SECTION_TEST_ID,
+  }: DocumentSummarySectionProps) => {
+    const [hasSummary, setHasSummary] = useState(false);
 
     const {
       application: { capabilities },
@@ -91,8 +91,8 @@ export const AlertSummarySection = memo(
     const accordionId = useGeneratedHtmlId({ prefix: 'aiSummaryAccordion' });
 
     const optionsMenu = (
-      <AlertSummaryOptionsMenu
-        hasAlertSummary={hasAlertSummary}
+      <DocumentSummaryOptionsMenu
+        hasSummary={hasSummary}
         showAnonymizedValues={showAnonymizedValues}
         setShowAnonymizedValues={setShowAnonymizedValues}
       />
@@ -101,12 +101,12 @@ export const AlertSummarySection = memo(
     const body = isLoadingDefaultConnectorId ? (
       <EuiSkeletonText lines={3} size="s" />
     ) : (
-      <AlertSummary
+      <DocumentSummary
         alertId={alertId}
         canSeeAdvancedSettings={canSeeAdvancedSettings}
         defaultConnectorId={defaultConnectorId}
         promptContext={promptContext}
-        setHasAlertSummary={setHasAlertSummary}
+        setHasSummary={setHasSummary}
         showAnonymizedValues={showAnonymizedValues}
       />
     );
@@ -135,4 +135,4 @@ export const AlertSummarySection = memo(
   }
 );
 
-AlertSummarySection.displayName = 'AlertSummarySection';
+DocumentSummarySection.displayName = 'DocumentSummarySection';

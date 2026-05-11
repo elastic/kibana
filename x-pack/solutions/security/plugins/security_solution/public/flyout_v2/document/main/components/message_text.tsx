@@ -20,7 +20,7 @@ import React, { useMemo } from 'react';
 import { CustomCodeBlock } from '@kbn/elastic-assistant/impl/get_comments/custom_codeblock/custom_code_block';
 import { customCodeBlockLanguagePlugin } from '@kbn/elastic-assistant/impl/get_comments/custom_codeblock/custom_codeblock_markdown_plugin';
 
-export const MESSAGE_TEXT_TEST_ID = 'alert-flyout-ai-summary-message-text';
+export const MESSAGE_TEXT_TEST_ID = 'document-flyout-ai-summary-message-text';
 
 const getPluginDependencies = () => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();

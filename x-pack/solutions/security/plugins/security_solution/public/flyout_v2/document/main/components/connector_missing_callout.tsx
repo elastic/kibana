@@ -34,9 +34,9 @@ const ADVANCED_SETTINGS_LINK_TITLE = i18n.translate(
 );
 
 export const MISSING_CONNECTOR_CALLOUT_TEST_ID =
-  'alert-flyout-ai-summary-missing-connector-callout';
+  'document-flyout-ai-summary-missing-connector-callout';
 export const MISSING_CONNECTOR_CALLOUT_LINK_TEST_ID =
-  'alert-flyout-ai-summary-missing-connector-callout-link';
+  'document-flyout-ai-summary-missing-connector-callout-link';
 
 export interface ConnectorMissingCalloutProps {
   /**
