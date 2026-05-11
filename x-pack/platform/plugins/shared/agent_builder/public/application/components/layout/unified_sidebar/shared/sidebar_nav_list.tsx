@@ -11,6 +11,10 @@ import { Link } from 'react-router-dom-v5-compat';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import {
+  AGENT_BUILDER_UI_EBT_ELEMENT,
+  AGENT_BUILDER_UI_EBT_NAV_SIDEBAR_ACTION,
+} from '../../../../agent_builder_ui_ebt';
 import type { SidebarNavItem } from '../../../../route_config';
 
 interface SidebarNavListProps {
@@ -54,6 +58,14 @@ export const SidebarNavList: React.FC<SidebarNavListProps> = ({ items, isActive,
               to={item.path}
               css={isActive(item.path) ? activeLinkStyles : baseLinkStyles}
               onClick={onItemClick}
+              {...(item.ebtNavItem != null
+                ? {
+                    'data-ebt-element': AGENT_BUILDER_UI_EBT_ELEMENT.SIDEBAR,
+                    'data-ebt-action':
+                      AGENT_BUILDER_UI_EBT_NAV_SIDEBAR_ACTION.SIDEBAR_NAVIGATION_CLICK,
+                    'data-ebt-detail': item.ebtNavItem,
+                  }
+                : {})}
             >
               {item.icon && <EuiIcon type={item.icon} size="s" aria-hidden={true} />}
               {item.label}

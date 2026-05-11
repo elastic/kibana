@@ -28,6 +28,10 @@ import { AgentBuilderPluginsPage } from './pages/plugins';
 import { AgentBuilderPluginDetailsPage } from './pages/plugin_details';
 import { AgentBuilderConnectorsPage } from './pages/connectors';
 import { agentBuilderViewIds } from './agent_builder_view_ids';
+import {
+  AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM,
+  type AgentBuilderUiEbtSidebarNavItem,
+} from './agent_builder_ui_ebt';
 import { appPaths } from './utils/app_paths';
 
 export type SidebarView = 'conversation' | 'manage';
@@ -44,6 +48,8 @@ export interface RouteDefinition {
   isExperimental?: boolean;
   navLabel?: string;
   navIcon?: string;
+  /** `agent_builder_ui_click` detail for sidebar Customize / Manage nav links */
+  ebtNavItem?: AgentBuilderUiEbtSidebarNavItem;
 }
 
 const navLabels = {
@@ -80,6 +86,7 @@ export const agentRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.agentOverview,
     sidebarView: 'conversation',
     navLabel: navLabels.overview,
+    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.INSTRUCTIONS,
     element: <AgentBuilderAgentOverviewPage />,
   },
   {
@@ -87,6 +94,7 @@ export const agentRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.agentSkills,
     sidebarView: 'conversation',
     navLabel: navLabels.skills,
+    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.SKILLS,
     element: <AgentBuilderAgentSkillsPage />,
   },
   {
@@ -95,6 +103,7 @@ export const agentRoutes: RouteDefinition[] = [
     sidebarView: 'conversation',
     isExperimental: true,
     navLabel: navLabels.plugins,
+    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.PLUGINS,
     element: <AgentBuilderAgentPluginsPage />,
   },
   {
@@ -102,6 +111,7 @@ export const agentRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.agentTools,
     sidebarView: 'conversation',
     navLabel: navLabels.tools,
+    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.TOOLS,
     element: <AgentBuilderAgentToolsPage />,
   },
   // Catch-all for agent root - must be last
@@ -119,6 +129,7 @@ export const manageRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.manageAgents,
     sidebarView: 'manage',
     navLabel: navLabels.agents,
+    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.AGENTS,
     element: <AgentBuilderAgentsPage />,
   },
   {
@@ -138,6 +149,7 @@ export const manageRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.manageSkills,
     sidebarView: 'manage',
     navLabel: navLabels.skills,
+    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.SKILLS,
     element: <AgentBuilderSkillsPage />,
   },
   {
@@ -158,6 +170,7 @@ export const manageRoutes: RouteDefinition[] = [
     sidebarView: 'manage',
     isExperimental: true,
     navLabel: navLabels.plugins,
+    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.PLUGINS,
     element: <AgentBuilderPluginsPage />,
   },
   {
@@ -173,6 +186,7 @@ export const manageRoutes: RouteDefinition[] = [
     sidebarView: 'manage',
     navLabel: navLabels.connectors,
     isExperimental: true,
+    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.CONNECTORS,
     element: <AgentBuilderConnectorsPage />,
   },
   {
@@ -180,6 +194,7 @@ export const manageRoutes: RouteDefinition[] = [
     viewId: agentBuilderViewIds.manageTools,
     sidebarView: 'manage',
     navLabel: navLabels.tools,
+    ebtNavItem: AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM.TOOLS,
     element: <AgentBuilderToolsPage />,
   },
   {
@@ -255,6 +270,7 @@ export interface SidebarNavItem {
   label: string;
   path: string;
   icon?: string;
+  ebtNavItem?: AgentBuilderUiEbtSidebarNavItem;
 }
 
 const isRouteEnabled = (route: RouteDefinition, flags: FeatureFlags): boolean => {
@@ -276,6 +292,7 @@ export const getAgentSettingsNavItems = (
       label: route.navLabel ?? '',
       path: route.path.replace(':agentId', agentId),
       icon: route.navIcon,
+      ebtNavItem: route.ebtNavItem,
     }));
 };
 
@@ -286,5 +303,6 @@ export const getManageNavItems = (flags: FeatureFlags): SidebarNavItem[] => {
       label: route.navLabel!,
       path: route.path,
       icon: route.navIcon,
+      ebtNavItem: route.ebtNavItem,
     }));
 };

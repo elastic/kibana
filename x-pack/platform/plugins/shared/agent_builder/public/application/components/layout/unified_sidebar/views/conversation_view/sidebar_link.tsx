@@ -14,6 +14,9 @@ interface SidebarLinkProps {
   href: string;
   onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   hideIcon?: boolean;
+  'data-ebt-element'?: string;
+  'data-ebt-action'?: string;
+  'data-ebt-detail'?: string;
 }
 
 export const SidebarLink: React.FC<SidebarLinkProps> = ({
@@ -21,6 +24,9 @@ export const SidebarLink: React.FC<SidebarLinkProps> = ({
   href,
   onClick,
   hideIcon = false,
+  'data-ebt-element': dataEbtElement,
+  'data-ebt-action': dataEbtAction,
+  'data-ebt-detail': dataEbtDetail,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -54,7 +60,14 @@ export const SidebarLink: React.FC<SidebarLinkProps> = ({
 
   return (
     <div css={wrapperStyles}>
-      <a href={href} onClick={onClick} css={linkStyles}>
+      <a
+        href={href}
+        onClick={onClick}
+        css={linkStyles}
+        {...(dataEbtElement != null ? { 'data-ebt-element': dataEbtElement } : {})}
+        {...(dataEbtAction != null ? { 'data-ebt-action': dataEbtAction } : {})}
+        {...(dataEbtDetail != null ? { 'data-ebt-detail': dataEbtDetail } : {})}
+      >
         <EuiText size="s">{label}</EuiText>
         {!hideIcon && (
           <EuiIcon

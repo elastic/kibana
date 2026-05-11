@@ -18,6 +18,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 
+import {
+  AGENT_BUILDER_UI_EBT_CONVERSATION_ACTION,
+  AGENT_BUILDER_UI_EBT_ELEMENT,
+  AGENT_BUILDER_UI_EBT_LAYER_TRANSITION_TRIGGER,
+  AGENT_BUILDER_UI_EBT_NAV_SIDEBAR_ACTION,
+  AGENT_BUILDER_UI_EBT_SIDEBAR_CHROME_DETAIL,
+} from '../../../../agent_builder_ui_ebt';
 import { getLastAgentId } from '../../../../hooks/use_last_agent_id';
 import { useNavigation } from '../../../../hooks/use_navigation';
 import { appPaths } from '../../../../utils/app_paths';
@@ -85,6 +92,9 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
             color="text"
             size="s"
             onClick={onToggleCondensed}
+            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.SIDEBAR}
+            data-ebt-action={AGENT_BUILDER_UI_EBT_NAV_SIDEBAR_ACTION.SIDEBAR_NAVIGATION_CLICK}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT_SIDEBAR_CHROME_DETAIL.TOGGLE_WIDTH}
           />
         </EuiFlexItem>
         {sidebarView === 'conversation' && (
@@ -97,6 +107,11 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               aria-label={labels.newConversation}
               onClick={() =>
                 navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }))
+              }
+              data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CONVERSATION}
+              data-ebt-action={AGENT_BUILDER_UI_EBT_CONVERSATION_ACTION.CONVERSATION_START}
+              data-ebt-detail={
+                AGENT_BUILDER_UI_EBT_SIDEBAR_CHROME_DETAIL.NEW_CONVERSATION_CONDENSED
               }
             />
           </EuiFlexItem>
@@ -121,6 +136,9 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               flush="both"
               color="text"
               onClick={() => navigate(appPaths.agent.root({ agentId: getLastAgentId() }))}
+              data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.SIDEBAR}
+              data-ebt-action={AGENT_BUILDER_UI_EBT_NAV_SIDEBAR_ACTION.SIDEBAR_LAYER_TRANSITION}
+              data-ebt-detail={AGENT_BUILDER_UI_EBT_LAYER_TRANSITION_TRIGGER.BACK_CLICK}
             >
               {labels.manageComponents}
             </EuiButtonEmpty>
@@ -134,6 +152,9 @@ export const SidebarHeader: React.FC<SidebarHeaderProps> = ({
               color="text"
               size="s"
               onClick={onToggleCondensed}
+              data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.SIDEBAR}
+              data-ebt-action={AGENT_BUILDER_UI_EBT_NAV_SIDEBAR_ACTION.SIDEBAR_NAVIGATION_CLICK}
+              data-ebt-detail={AGENT_BUILDER_UI_EBT_SIDEBAR_CHROME_DETAIL.TOGGLE_WIDTH}
             />
           </EuiFlexItem>
         }

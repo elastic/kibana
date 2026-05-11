@@ -50,6 +50,17 @@ export const AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM = {
   TOOLS: 'tools',
 } as const;
 
+export type AgentBuilderUiEbtSidebarNavItem =
+  (typeof AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM)[keyof typeof AGENT_BUILDER_UI_EBT_SIDEBAR_NAV_ITEM];
+
+/** Non-nav sidebar controls (toggle width, condensed shortcuts, …). */
+export const AGENT_BUILDER_UI_EBT_SIDEBAR_CHROME_DETAIL = {
+  TOGGLE_WIDTH: 'sidebar_toggle_width',
+  NEW_CONVERSATION_CONDENSED: 'new_conversation_condensed',
+  NEW_AGENT_FROM_SELECTOR: 'new_agent_from_selector',
+  MANAGE_AGENTS_FROM_SELECTOR: 'manage_agents_from_selector',
+} as const;
+
 export const AGENT_BUILDER_UI_EBT_LAYER_TRANSITION_TRIGGER = {
   CUSTOMIZE_CLICK: 'customize_click',
   MANAGE_CLICK: 'manage_click',

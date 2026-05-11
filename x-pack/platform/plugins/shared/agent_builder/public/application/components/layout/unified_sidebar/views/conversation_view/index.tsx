@@ -35,6 +35,10 @@ import { useAgentBuilderAgents } from '../../../../../hooks/agents/use_agents';
 import { useLastAgentId } from '../../../../../hooks/use_last_agent_id';
 import { useConversationList } from '../../../../../hooks/use_conversation_list';
 import { useSendMessageContext } from '../../../../../context/send_message/send_message_context';
+import {
+  AGENT_BUILDER_UI_EBT_CONVERSATION_ACTION,
+  AGENT_BUILDER_UI_EBT_ELEMENT,
+} from '../../../../../agent_builder_ui_ebt';
 import { SidebarNavList } from '../../shared/sidebar_nav_list';
 
 import { ConversationFooter } from './conversation_footer';
@@ -204,6 +208,10 @@ export const ConversationSidebarView: React.FC = () => {
                             color="text"
                             onClick={handlePressNewConversation}
                             data-test-subj="agentBuilderSidebarNewConversationButton"
+                            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CONVERSATION}
+                            data-ebt-action={
+                              AGENT_BUILDER_UI_EBT_CONVERSATION_ACTION.CONVERSATION_START
+                            }
                           >
                             {newLabel}
                           </EuiButton>
@@ -218,6 +226,10 @@ export const ConversationSidebarView: React.FC = () => {
                             onClick={() => setIsSearchModalOpen(true)}
                             disabled={!hasConversations}
                             data-test-subj="agentBuilderSidebarSearchChatsButton"
+                            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CONVERSATION}
+                            data-ebt-action={
+                              AGENT_BUILDER_UI_EBT_CONVERSATION_ACTION.CONVERSATION_SEARCH
+                            }
                           >
                             {searchLabel}
                           </EuiButton>

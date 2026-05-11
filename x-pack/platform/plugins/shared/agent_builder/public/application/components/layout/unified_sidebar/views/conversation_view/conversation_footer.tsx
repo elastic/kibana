@@ -11,6 +11,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
+import {
+  AGENT_BUILDER_UI_EBT_ELEMENT,
+  AGENT_BUILDER_UI_EBT_LAYER_TRANSITION_TRIGGER,
+  AGENT_BUILDER_UI_EBT_NAV_SIDEBAR_ACTION,
+} from '../../../../../agent_builder_ui_ebt';
 import { appPaths } from '../../../../../utils/app_paths';
 import { useNavigation } from '../../../../../hooks/use_navigation';
 import { SidebarLink } from './sidebar_link';
@@ -40,6 +45,9 @@ export const ConversationFooter: React.FC = () => {
             e.preventDefault();
             navigateToAgentBuilderUrl(appPaths.manage.agents);
           }}
+          data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.SIDEBAR}
+          data-ebt-action={AGENT_BUILDER_UI_EBT_NAV_SIDEBAR_ACTION.SIDEBAR_LAYER_TRANSITION}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT_LAYER_TRANSITION_TRIGGER.MANAGE_CLICK}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
