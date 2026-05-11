@@ -6,8 +6,8 @@
  */
 
 import { useMemo } from 'react';
+import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { getModelEOLDate } from '../utils/eis_utils';
-import type { EisInferenceEndpointMetadata } from '../../common/types';
 
 /**
  * Returns the model's end-of-life date formatted for the current locale,

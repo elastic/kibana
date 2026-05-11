@@ -9,9 +9,9 @@ import React from 'react';
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 
 import { useFormattedEOLDate } from '../../hooks/use_formatted_eol_date';
-import type { EisInferenceEndpointMetadata } from '../../types';
 
 interface ModelEOLBadgeProps {
   id: string;

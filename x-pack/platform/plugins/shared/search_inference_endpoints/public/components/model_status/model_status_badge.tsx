@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { type EisInferenceEndpointMetadata, EisModelStatus } from '../../types';
+import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
+import { EisModelStatus } from '../../types';
 
 import { ModelPreviewBadge } from './model_preview_badge';
 import { ModelDeprecatedBadge } from './model_deprecated_badge';

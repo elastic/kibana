@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { EisInferenceEndpointMetadata } from '../../common/types';
+import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { useFormattedEOLDate } from './use_formatted_eol_date';
 
 const makeMetadata = (

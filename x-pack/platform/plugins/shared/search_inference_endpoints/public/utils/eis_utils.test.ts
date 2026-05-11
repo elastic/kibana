@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EisModelStatus, type EisInferenceEndpointMetadata } from '../../common/types';
+import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
+import { EisModelStatus } from '../../common/types';
 import { getModelEOLDate, getModelStatus, isModelEndOfLifeReached } from './eis_utils';
 
 const makeMetadata = (

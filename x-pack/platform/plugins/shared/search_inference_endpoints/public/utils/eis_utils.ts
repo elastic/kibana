@@ -9,12 +9,9 @@ import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
+import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import {
-  type EisInferenceEndpoint,
-  type EisInferenceEndpointMetadata,
-  EisModelStatus,
-} from '../../common/types';
+import { type EisInferenceEndpoint, EisModelStatus } from '../../common/types';
 import {
   isInferenceEndpointWithMetadata,
   isInferenceEndpointWithDisplayNameMetadata,

@@ -6,7 +6,7 @@
  */
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { InferenceConnector, EisInferenceEndpointMetadata } from '@kbn/inference-common';
 import { INFERENCE_CONNECTORS_INTERNAL_API_PATH } from '@kbn/inference-common';
 
 /** Route path constants (const object so imported paths stay type-narrowed as `string`). */
@@ -76,20 +76,8 @@ export interface InferenceFeatureResponse {
 export type EisInferenceEndpoint = InferenceAPIConfigResponse & {
   service: 'elastic';
   service_settings: { model_id: string };
+  metadata?: EisInferenceEndpointMetadata;
 };
-
-export type EisInferenceEndpointMetadata = {
-  heuristics?: {
-    properties?: string[];
-    status?: string;
-    release_date?: string;
-    end_of_life_date?: string;
-  } & Record<string, unknown>;
-  display?: {
-    name?: string;
-    model_creator?: string;
-  } & Record<string, unknown>;
-} & Record<string, unknown>;
 
 export type InferenceEndpointWithMetadata = EisInferenceEndpoint & {
   metadata: EisInferenceEndpointMetadata;
