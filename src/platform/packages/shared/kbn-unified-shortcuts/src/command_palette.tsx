@@ -99,66 +99,60 @@ export const CommandPalette = () => {
 
   return (
     <EuiPortal>
-      <EuiOverlayMask>
-        <div
-          css={css`
-            display: flex;
-            justify-content: center;
-            padding: min(12vh, ${euiTheme.size.xxxl}) ${euiTheme.size.l};
-          `}
-        >
-          <EuiOutsideClickDetector onOutsideClick={close}>
-            <EuiPanel
-              paddingSize="m"
-              css={css`
-                width: min(40rem, 100%);
-              `}
+      <EuiOverlayMask
+        css={css`
+          padding: ${euiTheme.size.l};
+        `}
+      >
+        <EuiOutsideClickDetector onOutsideClick={close}>
+          <EuiPanel
+            paddingSize="m"
+            css={css`
+              max-width: 56rem;
+            `}
+          >
+            <EuiSelectable<CommandPaletteOption>
+              aria-label={i18n.translate('unifiedShortcuts.commandPalette.ariaLabel', {
+                defaultMessage: 'Command palette',
+              })}
+              searchable
+              singleSelection={true}
+              height={320}
+              options={options}
+              onChange={onChange}
+              optionMatcher={commandPaletteOptionMatcher}
+              renderOption={renderOption}
+              data-test-subj="shortcutsCommandPalette"
+              listProps={{
+                isVirtualized: options.length > 20,
+                rowHeight: 30,
+                onFocusBadge: false,
+                showIcons: false,
+              }}
+              searchProps={{
+                autoFocus: true,
+                placeholder: i18n.translate('unifiedShortcuts.commandPalette.searchPlaceholder', {
+                  defaultMessage: 'Search commands',
+                }),
+                'data-test-subj': 'shortcutsCommandPaletteSearch',
+              }}
+              emptyMessage={i18n.translate('unifiedShortcuts.commandPalette.emptyMessage', {
+                defaultMessage: 'No commands available.',
+              })}
+              noMatchesMessage={i18n.translate('unifiedShortcuts.commandPalette.noMatchesMessage', {
+                defaultMessage: 'No commands match your search.',
+              })}
             >
-              <EuiSelectable<CommandPaletteOption>
-                aria-label={i18n.translate('unifiedShortcuts.commandPalette.ariaLabel', {
-                  defaultMessage: 'Command palette',
-                })}
-                searchable
-                singleSelection={true}
-                height={320}
-                options={options}
-                onChange={onChange}
-                optionMatcher={commandPaletteOptionMatcher}
-                renderOption={renderOption}
-                data-test-subj="shortcutsCommandPalette"
-                listProps={{
-                  isVirtualized: options.length > 20,
-                  rowHeight: 40,
-                  showIcons: false,
-                }}
-                searchProps={{
-                  autoFocus: true,
-                  placeholder: i18n.translate('unifiedShortcuts.commandPalette.searchPlaceholder', {
-                    defaultMessage: 'Search commands',
-                  }),
-                  'data-test-subj': 'shortcutsCommandPaletteSearch',
-                }}
-                emptyMessage={i18n.translate('unifiedShortcuts.commandPalette.emptyMessage', {
-                  defaultMessage: 'No commands available.',
-                })}
-                noMatchesMessage={i18n.translate(
-                  'unifiedShortcuts.commandPalette.noMatchesMessage',
-                  {
-                    defaultMessage: 'No commands match your search.',
-                  }
-                )}
-              >
-                {(list, search) => (
-                  <>
-                    {search}
-                    <EuiSpacer size="s" />
-                    {list}
-                  </>
-                )}
-              </EuiSelectable>
-            </EuiPanel>
-          </EuiOutsideClickDetector>
-        </div>
+              {(list, search) => (
+                <>
+                  {search}
+                  <EuiSpacer size="s" />
+                  {list}
+                </>
+              )}
+            </EuiSelectable>
+          </EuiPanel>
+        </EuiOutsideClickDetector>
       </EuiOverlayMask>
     </EuiPortal>
   );
