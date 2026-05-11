@@ -1515,7 +1515,7 @@ groups:
 
       - setting: vis_type_vega.enabled
         description: |
-          For 7.7 version and later, set to `false` to disable Vega visualizations.
+          For versions 7.7 and later, set to `false` to disable Vega visualizations.
         datatype: bool
         default: true
         applies_to:
