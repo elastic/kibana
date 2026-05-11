@@ -183,6 +183,26 @@ steps:
   #        - exit_status: '-1'
   #          limit: 3
 
+  - command: .buildkite/scripts/steps/check_package_docs.sh
+    label: Check Package Docs
+    key: check_package_docs
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: c4d-highmem-4
+      diskType: hyperdisk-balanced
+      preemptible: true
+      spotZones: us-central1-a,us-central1-b,us-central1-c
+      diskSizeGb: 105
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+        - exit_status: '*'
+          limit: 1
+
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
@@ -194,6 +214,7 @@ steps:
     timeout_in_minutes: 10
     depends_on:
       - build
+      - check_package_docs
     retry:
       automatic:
         - exit_status: '*'
