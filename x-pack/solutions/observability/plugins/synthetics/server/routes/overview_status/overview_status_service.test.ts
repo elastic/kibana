@@ -1356,10 +1356,12 @@ describe('current status route', () => {
     });
 
     it('does not surface a cross-space local monitor through the remote-only branch', async () => {
-      // The ES query intentionally drops the `meta.space_id` filter when CCS is
-      // enabled (we cannot disambiguate local vs remote shards at filter time),
-      // so a monitor living in another local space CAN reach the reconciliation
-      // step. The JS-side guard in the remote-only branch must drop it because
+      // Defence-in-depth: the ES query already filters on `meta.space_id` for
+      // both local and remote pings, so
+      // a doc from another local space would normally be dropped at filter
+      // time. Even if a stray cross-space doc reaches the reconciliation
+      // step (e.g. in this test where we mock the ES response directly), the
+      // JS-side guard in the remote-only branch must still drop it because
       // its `_index` has no cluster alias prefix.
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
 
@@ -1416,11 +1418,9 @@ describe('current status route', () => {
       expect(result.up).toBe(0);
     });
 
-    it('keeps the meta.space_id filter for local pings (OR remote-index wildcard) when CCS is enabled', async () => {
-      // Local pings must still honour the active space; remote-cluster pings
-      // bypass the space terms via a `wildcard` match on the cluster-alias
-      // prefix in `_index` (the prefix is visible at filter time when the
-      // search target includes the alias).
+    it('applies the same meta.space_id filter to local and remote pings when CCS is enabled', async () => {
+      // both local pings and remote pings carry `meta.space_id`
+      // we only surface the ones whose space slug matches the active local space (plus `*`)
       const { esClient, syntheticsEsClient } = getUptimeESMockClient();
 
       esClient.search.mockResponseOnce(
@@ -1467,19 +1467,17 @@ describe('current status route', () => {
 
       const searchCall = esClient.search.mock.calls[0][0] as any;
       const filters = searchCall.query.bool.filter;
-      const spaceFilter = filters.find(
+
+      const spaceFilter = filters.find((f: any) => f.terms && f.terms['meta.space_id']);
+      expect(spaceFilter).toBeDefined();
+      expect(spaceFilter.terms['meta.space_id']).toEqual(['default', '*']);
+
+      const splitFilter = filters.find(
         (f: any) =>
           f.bool?.should?.some((s: any) => s.terms?.['meta.space_id']) &&
           f.bool?.should?.some((s: any) => s.wildcard?._index)
       );
-      expect(spaceFilter).toBeDefined();
-      expect(spaceFilter.bool.minimum_should_match).toBe(1);
-
-      const localTerms = spaceFilter.bool.should.find((s: any) => s.terms?.['meta.space_id']);
-      expect(localTerms.terms['meta.space_id']).toContain('default');
-
-      const remoteWildcard = spaceFilter.bool.should.find((s: any) => s.wildcard?._index);
-      expect(remoteWildcard.wildcard._index).toBe('*:*');
+      expect(splitFilter).toBeUndefined();
     });
 
     it('includes simple_query_string filter when query param is provided', async () => {

@@ -136,27 +136,17 @@ export class OverviewStatusService {
         },
       ];
     };
-    // Local pings must always honour the active space, otherwise a monitor in
-    // a different local space would surface as a remote-rendered entry on the
-    // Overview. Remote-cluster pings (with `_index` like
-    // "cluster1:.ds-synthetics-*") carry the *remote* cluster's
-    // `meta.space_id`, so applying the local space terms there would
-    // over-filter them — accept them regardless of space via a `wildcard`
-    // match on the cluster-alias prefix in `_index`. Note: `regexp` is not
-    // allowed on `_index`; `wildcard` is.
-    const ccsEnabled = isCCSEnabled(this.routeContext.server);
+    // Both local and remote pings carry `meta.space_id` (remote pings hold the
+    // *remote* cluster's space slug).
+    // We only surface pings whose `meta.space_id` matches the active local space (or `*`).
+    // Same-named spaces across clusters federate together; remote pings from
+    // other spaces are dropped at ES filter time, which prevents
+    // cross-space leakage and avoids transferring monitors the user can't
+    // see anyway.
     const skipSpaceFilter = showFromAllSpaces || !spaceId || spaceId === ALL_SPACES_ID;
-    const localSpaceTerms: QueryDslQueryContainer = {
+    const spaceFilter: QueryDslQueryContainer = {
       terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] },
     };
-    const spaceFilter: QueryDslQueryContainer = ccsEnabled
-      ? {
-          bool: {
-            should: [localSpaceTerms, { wildcard: { _index: '*:*' } }],
-            minimum_should_match: 1,
-          },
-        }
-      : localSpaceTerms;
 
     const filters: QueryDslQueryContainer[] = [
       ...(skipSpaceFilter ? [] : [spaceFilter]),
