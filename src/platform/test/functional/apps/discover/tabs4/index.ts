@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const { common, timePicker, discover } = getPageObjects(['common', 'timePicker', 'discover']);
+  const { timePicker, discover } = getPageObjects(['timePicker', 'discover']);
 
   describe('discover/tabs4', function () {
     before(async function () {
@@ -40,8 +40,12 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     });
 
     beforeEach(async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.waitUntilTabIsLoaded();
+    });
+
+    afterEach(async () => {
+      await discover.resetQueryMode();
     });
 
     after(async () => {

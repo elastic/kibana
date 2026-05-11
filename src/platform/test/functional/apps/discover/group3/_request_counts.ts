@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
       });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
     });
 
     after(async () => {
@@ -53,6 +53,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
+    });
+
+    afterEach(async () => {
+      await discover.resetQueryMode();
     });
 
     const expectSearches = async (type: 'ese' | 'esql', expected: number, cb: Function) => {
@@ -177,7 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const type = 'ese';
 
       beforeEach(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await header.waitUntilLoadingHasFinished();
       });
 

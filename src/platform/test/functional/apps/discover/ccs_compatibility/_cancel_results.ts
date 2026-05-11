@@ -53,9 +53,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
+    afterEach(async () => {
+      await discover.resetQueryMode();
+    });
+
     describe('classic mode', () => {
       it('should show warning and results', async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await dataViews.createFromSearchBar({
           name: 'ftr-remote:logstash-*,logstash-*',
           hasTimeField: false,

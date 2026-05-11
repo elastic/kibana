@@ -19,12 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const filterBar = getService('filterBar');
   const retry = getService('retry');
-  const { common, discover, header, timePicker } = getPageObjects([
-    'common',
-    'discover',
-    'header',
-    'timePicker',
-  ]);
+  const { discover, header, timePicker } = getPageObjects(['discover', 'header', 'timePicker']);
   const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -110,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     beforeEach(async function () {
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
     });

@@ -14,8 +14,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const dataGrid = getService('dataGrid');
-  const { common, timePicker, settings, context } = getPageObjects([
+  const { common, discover, timePicker, settings, context } = getPageObjects([
     'common',
+    'discover',
     'timePicker',
     'settings',
     'context',
@@ -51,7 +52,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
+      });
+
+      afterEach(async () => {
+        await discover.resetQueryMode();
       });
 
       describe('discover', () => {
@@ -109,11 +114,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
       });
 
       afterEach(async () => {
         await queryBar.clearQuery();
+        await discover.resetQueryMode();
       });
 
       after(async () => {

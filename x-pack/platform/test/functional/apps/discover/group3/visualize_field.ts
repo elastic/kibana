@@ -60,12 +60,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await setDiscoverTimeRange();
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
+    });
+
+    afterEach(async () => {
+      await discover.resetQueryMode();
     });
 
     after(async () => {

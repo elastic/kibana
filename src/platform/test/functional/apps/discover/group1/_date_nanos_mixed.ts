@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1200, 900);
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_mixed']);
       await common.setTime({ from, to });
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
     });
 
     after(async () => {
@@ -43,6 +43,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/date_nanos_mixed');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await common.unsetTime();
+    });
+
+    afterEach(async () => {
+      await discover.resetQueryMode();
     });
 
     it('shows a list of records of indices with date & date_nanos fields in the right order', async function () {

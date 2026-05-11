@@ -31,11 +31,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/invalid_scripted_field'
       );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
     });
 
     after(async function () {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+    });
+
+    afterEach(async () => {
+      await discover.resetQueryMode();
     });
 
     describe('invalid scripted field error', () => {

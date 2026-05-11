@@ -55,9 +55,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.unset('search:timeout');
     });
 
+    afterEach(async () => {
+      await discover.resetQueryMode();
+    });
+
     describe('bfetch enabled', () => {
       it('timeout on single shard shows warning and results with bfetch enabled', async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await dataViews.createFromSearchBar({
           name: 'ftr-remote:logstash-*,logstash-*',
           hasTimeField: false,
@@ -118,7 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('timeout on single shard shows warning and results', async () => {
-        await common.navigateToApp('discover');
+        await discover.navigateToApp('classic');
         await dataViews.createFromSearchBar({
           name: 'ftr-remote:logstash-*,logstash-*',
           hasTimeField: false,

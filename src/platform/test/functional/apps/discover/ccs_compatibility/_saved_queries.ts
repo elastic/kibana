@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // set up a query with filters and a time filter
     log.debug('set up a query with filters to save');
     await common.setTime({ from, to });
-    await common.navigateToApp('discover');
+    await discover.navigateToApp('classic');
     await dataViews.switchToAndValidate(logstashIndexPatternString);
     await retry.try(async function tryingForTime() {
       const hitCount = await discover.getHitCount();
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
     });
 
     after(async () => {
@@ -99,6 +99,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esNode.unload('src/platform/test/functional/fixtures/es_archiver/date_nested');
       await esNode.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
       await common.unsetTime();
+    });
+
+    afterEach(async () => {
+      await discover.resetQueryMode();
     });
 
     describe('saved query selection', () => {

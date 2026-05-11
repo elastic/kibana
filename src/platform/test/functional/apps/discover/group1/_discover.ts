@@ -43,11 +43,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await timePicker.setDefaultAbsoluteRange();
     });
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+    });
+    afterEach(async () => {
+      await discover.resetQueryMode();
     });
     describe('query', function () {
       const queryName1 = 'Query # 1';

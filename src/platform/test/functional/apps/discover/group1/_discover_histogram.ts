@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'long_window_logstash']);
       await kibanaServer.uiSettings.replace(defaultSettings);
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
     });
 
     after(async () => {
@@ -66,9 +66,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.clearLocalStorage();
     });
 
+    afterEach(async () => {
+      await discover.resetQueryMode();
+    });
+
     async function prepareTest(time: TimeStrings, interval?: string) {
       await common.setTime(time);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.waitUntilSearchingHasFinished();
       if (interval) {
         await discover.setChartInterval(interval);
@@ -77,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
 
     it('should modify the time range when the histogram is brushed', async function () {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.waitUntilSearchingHasFinished();
       await elasticChart.waitForRenderComplete();
       let prevRowData = '';
@@ -101,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should update correctly when switching data views and brushing the histogram', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.waitUntilSearchingHasFinished();
       await discover.selectIndexPattern('logstash-*');
       await discover.waitUntilSearchingHasFinished();
@@ -116,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
       });
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await header.awaitKibanaChrome();
       const initialTimeString = await discover.getChartTimespan();
       await queryBar.clickQuerySubmitButton();
@@ -267,7 +271,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       // go to discover
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await header.waitUntilLoadingHasFinished();
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(true);
@@ -281,7 +285,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should recover from broken query search when clearing the query bar', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.waitUntilSearchingHasFinished();
       // type an invalid search query, hit refresh
       await queryBar.setQuery('this is > not valid');
@@ -298,7 +302,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reset all histogram state when resetting the saved search', async () => {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await timePicker.setDefaultAbsoluteRange();
@@ -339,7 +343,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should save chart interval in persisted discover session', async () => {
       const savedSearchName = 'with chart interval';
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await timePicker.setDefaultAbsoluteRange();
@@ -360,7 +364,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should clear chart interval in persisted discover session', async () => {
       const savedSearchName = 'with chart interval then cleared';
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await timePicker.setDefaultAbsoluteRange();

@@ -54,6 +54,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.unsetTime();
     });
 
+    afterEach(async () => {
+      await discover.resetQueryMode();
+    });
+
     describe('Customize time range', () => {
       it('should be possible to customize time range for saved searches on dashboards', async () => {
         await dashboard.navigateToApp();
@@ -77,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it(`should unselect saved search when navigating to a 'new'`, async function () {
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.selectIndexPattern('ecommerce');
       await filterBar.addFilter({ field: 'category', operation: 'is', value: `Men's Shoes` });
       await queryBar.setQuery('customer_gender:MALE');

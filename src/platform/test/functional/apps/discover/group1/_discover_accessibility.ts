@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const { common } = getPageObjects(['common']);
+  const { discover } = getPageObjects(['discover']);
 
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -43,11 +43,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
     });
 
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+    });
+
+    afterEach(async () => {
+      await discover.resetQueryMode();
     });
 
     describe('top nav menu buttons', () => {

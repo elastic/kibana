@@ -13,7 +13,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const { common, timePicker, discover } = getPageObjects(['common', 'timePicker', 'discover']);
+  const { timePicker, discover } = getPageObjects(['timePicker', 'discover']);
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const retry = getService('retry');
@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'date-nanos' });
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await timePicker.setAbsoluteRange(fromTime, toTime);
     });
 
@@ -37,6 +37,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
       await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/date_nanos');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+    });
+
+    afterEach(async () => {
+      await discover.resetQueryMode();
     });
 
     it('should show a timestamp with nanoseconds in the first result row', async function () {

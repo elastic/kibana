@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
-  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
+  const { discover, timePicker } = getPageObjects(['discover', 'timePicker']);
 
   const isCcsTest = config.get('esTestCluster.ccs');
   const archiveDirectory = isCcsTest
@@ -42,8 +42,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esNode.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
     });
 
+    beforeEach(async () => {
+      await discover.navigateToApp('classic');
+    });
+
+    afterEach(async () => {
+      await discover.resetQueryMode();
+    });
+
     it('exception on single shard shows warning and results', async () => {
-      await common.navigateToApp('discover');
       await dataViews.switchToAndValidate(defaultIndex);
       await timePicker.setDefaultAbsoluteRange();
       await retry.try(async () => {
@@ -76,7 +83,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('exception on all shards shows error', async () => {
-      await common.navigateToApp('discover');
       await dataViews.switchToAndValidate(defaultIndex);
       await timePicker.setDefaultAbsoluteRange();
       await retry.try(async () => {

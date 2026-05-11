@@ -13,8 +13,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const { common, discover, timePicker, header, unifiedFieldList } = getPageObjects([
-    'common',
+  const { discover, timePicker, header, unifiedFieldList } = getPageObjects([
     'discover',
     'timePicker',
     'header',
@@ -36,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
       });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await common.navigateToApp('discover');
+      await discover.navigateToApp('classic');
       await discover.waitUntilSearchingHasFinished();
     });
 
@@ -47,6 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
       await unifiedFieldList.cleanSidebarLocalStorage();
+      await discover.resetQueryMode();
     });
 
     describe('should add fields as columns via drag and drop', function () {
