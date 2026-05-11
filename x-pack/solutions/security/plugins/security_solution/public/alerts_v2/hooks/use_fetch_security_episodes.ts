@@ -91,7 +91,7 @@ const buildSecurityEpisodesQuery = (
   spaceId: string,
   filterState?: SecurityEpisodesFilterState
 ) => {
-  const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM]);
+  const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM], ['_source']);
 
   query.where`space_id == ${spaceId}`;
 

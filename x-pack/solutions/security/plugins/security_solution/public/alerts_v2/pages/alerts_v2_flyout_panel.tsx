@@ -34,7 +34,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
-import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { useFetchEpisodeEventsQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_events_query';
 import { useFetchEpisodeEventDataQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_event_data_query';
@@ -58,6 +57,12 @@ import {
   getEpisodeDurationMs,
 } from '@kbn/alerting-v2-episodes-ui/utils/episode_series_derived';
 import type { EpisodeEventRow } from '@kbn/alerting-v2-episodes-ui/queries/episode_events_query';
+import {
+  parseEpisodeDataJson,
+  getNonEmptyGroupingFields,
+  getValueByFieldPath,
+  formatGroupingValueForDisplay,
+} from '@kbn/alerting-v2-episodes-ui/utils/episode_grouping_data';
 import {
   useFetchEpisodeChangelog,
   type EpisodeChangelogEntry,
@@ -135,16 +140,6 @@ const getEventColumns = (
   },
 ];
 
-const formatDuration = (ms: number | undefined): string => {
-  if (ms == null) return '\u2014';
-  if (ms < 1000) return `${ms}ms`;
-  const seconds = Math.floor(ms / 1000);
-  if (seconds < 60) return `${seconds}s`;
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ${seconds % 60}s`;
-  const hours = Math.floor(minutes / 60);
-  return `${hours}h ${minutes % 60}m`;
-};
 
 const monoWrapCss = css`
   font-family: 'Roboto Mono', 'Courier New', monospace;
@@ -378,13 +373,6 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
   const rawTags = groupAction?.tags;
   const tags = Array.isArray(rawTags) ? rawTags : rawTags ? [rawTags] : [];
 
-  const hasNoActors = useMemo(
-    () =>
-      episodeAction?.lastAckAction !== ALERT_EPISODE_ACTION_TYPE.ACK &&
-      groupAction?.lastSnoozeAction !== ALERT_EPISODE_ACTION_TYPE.SNOOZE &&
-      groupAction?.lastDeactivateAction !== ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
-    [episodeAction, groupAction]
-  );
 
   const episodeActions = useMemo(
     () =>
@@ -485,6 +473,17 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
   const { rulesCache } = useAlertingRulesCache({ ruleIds, services });
   const ruleName = ruleId ? rulesCache[ruleId]?.metadata?.name : undefined;
   const ruleQuery = ruleId ? rulesCache[ruleId]?.evaluation?.query?.base : undefined;
+  const ruleGroupingFields = ruleId ? rulesCache[ruleId]?.grouping?.fields : undefined;
+
+  const groupingFieldItems = useMemo(() => {
+    if (!ruleGroupingFields?.length || !episodeEventData?.data) return [];
+    const data = episodeEventData.data as Record<string, unknown>;
+    const parsed = typeof data === 'string' ? parseEpisodeDataJson(data) : data;
+    return getNonEmptyGroupingFields(ruleGroupingFields, parsed).map((field) => ({
+      field,
+      value: formatGroupingValueForDisplay(getValueByFieldPath(parsed, field)),
+    }));
+  }, [ruleGroupingFields, episodeEventData]);
 
   const metadataServices = useMemo(
     () => ({ dataViews: services.dataViews, http: services.http }),
@@ -552,45 +551,29 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
         title: i18n.FLYOUT_GROUP_HASH_LABEL,
         description: groupHash ? <CopyableId value={groupHash} /> : '\u2014',
       },
+      ...(groupingFieldItems.length > 0
+        ? [
+            {
+              title: i18n.FLYOUT_GROUPING_FIELDS_LABEL,
+              description: (
+                <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
+                  {groupingFieldItems.map(({ field, value }) => (
+                    <EuiFlexItem grow={false} key={field}>
+                      <EuiBadge color="hollow">
+                        <strong>{field}</strong>
+                        {`: ${value}`}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              ),
+            },
+          ]
+        : []),
     ],
-    [episodeId, ruleId, ruleName, triggeredAt, groupHash, workflowStatusBadge, tags, assigneeUid, services.userProfile]
+    [episodeId, ruleId, ruleName, triggeredAt, groupHash, workflowStatusBadge, tags, assigneeUid, services.userProfile, groupingFieldItems]
   );
 
-  const actionsOverviewItems = useMemo(() => {
-    const items: Array<{ title: string; description: NonNullable<React.ReactNode> }> = [];
-
-    if (episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK) {
-      items.push({
-        title: i18n.FLYOUT_ACKNOWLEDGED_BY_LABEL,
-        description: episodeAction.lastAckActor ?? '\u2014',
-      });
-    }
-
-    if (groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE) {
-      items.push({
-        title: i18n.FLYOUT_CLOSED_BY_LABEL,
-        description: groupAction.lastDeactivateActor ?? '\u2014',
-      });
-    }
-
-    if (groupAction?.lastSnoozeAction === ALERT_EPISODE_ACTION_TYPE.SNOOZE) {
-      items.push({
-        title: i18n.FLYOUT_SNOOZED_BY_LABEL,
-        description: groupAction.lastSnoozeActor ?? '\u2014',
-      });
-      if (groupAction.snoozeExpiry) {
-        items.push({
-          title: i18n.FLYOUT_SNOOZED_UNTIL_LABEL,
-          description: new Date(groupAction.snoozeExpiry).toLocaleString(undefined, {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-          }),
-        });
-      }
-    }
-
-    return items;
-  }, [episodeAction, groupAction]);
 
   if (isLoadingEvents) {
     return (
@@ -609,20 +592,6 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiDescriptionList compressed type="responsiveColumn" listItems={detailItems} />
-
-      <EuiHorizontalRule margin="l" />
-
-      <EuiTitle size="xs">
-        <h3>{i18n.FLYOUT_ACTIONS_OVERVIEW_TITLE}</h3>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      {hasNoActors ? (
-        <EuiText size="s" color="subdued">
-          {i18n.FLYOUT_ACTIONS_OVERVIEW_EMPTY}
-        </EuiText>
-      ) : (
-        <EuiDescriptionList compressed type="responsiveColumn" listItems={actionsOverviewItems} />
-      )}
 
       <EuiHorizontalRule margin="l" />
 

@@ -116,6 +116,11 @@ export const FLYOUT_GROUP_HASH_LABEL = i18n.translate(
   { defaultMessage: 'Group hash' }
 );
 
+export const FLYOUT_GROUPING_FIELDS_LABEL = i18n.translate(
+  'xpack.securitySolution.alertsV2.flyout.groupingFieldsLabel',
+  { defaultMessage: 'Grouping fields' }
+);
+
 export const FLYOUT_ASSIGNEE_LABEL = i18n.translate(
   'xpack.securitySolution.alertsV2.flyout.assigneeLabel',
   { defaultMessage: 'Assignee' }

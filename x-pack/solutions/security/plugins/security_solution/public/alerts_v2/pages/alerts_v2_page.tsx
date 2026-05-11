@@ -121,14 +121,21 @@ const alertEpisodeToDataTableRecord = (row: SecurityAlertEpisode): DataTableReco
 });
 
 const dataTableRecordToEpisode = (record: DataTableRecord): SecurityAlertEpisode =>
-  record.flattened as unknown as SecurityAlertEpisode;
+  normalizeEpisodeTags(record.flattened as unknown as SecurityAlertEpisode);
+
+const normalizeEpisodeTags = (ep: SecurityAlertEpisode): SecurityAlertEpisode => {
+  const raw = ep.last_tags;
+  return Array.isArray(raw)
+    ? ep
+    : { ...ep, last_tags: typeof raw === 'string' ? [raw] : [] };
+};
 
 const getEpisodesFromDocIds = (
   selectedDocIds: string[],
   episodes: SecurityAlertEpisode[]
 ): SecurityAlertEpisode[] => {
   const selected = new Set(selectedDocIds);
-  return episodes.filter((ep) => selected.has(ep['episode.id']));
+  return episodes.filter((ep) => selected.has(ep['episode.id'])).map(normalizeEpisodeTags);
 };
 
 export const AlertsV2Page = () => {

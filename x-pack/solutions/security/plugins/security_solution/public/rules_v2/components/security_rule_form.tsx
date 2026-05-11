@@ -6,24 +6,23 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useForm, FormProvider } from 'react-hook-form';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
-import type {
-  FormValues,
-  RuleFormServices,
-} from '@kbn/alerting-v2-rule-form';
+import type { FormValues, RuleFormServices } from '@kbn/alerting-v2-rule-form';
 import {
-  StandaloneRuleForm,
+  RuleFormProvider,
+  RulePreviewPanel,
+  useFormDefaults,
   mapFormValuesToCreateRequest,
   mapFormValuesToUpdateRequest,
 } from '@kbn/alerting-v2-rule-form';
 import { DEFAULT_INDEX_PATTERN } from '../../../common/constants';
 import type { SecurityRuleType } from '../constants';
-import * as i18n from '../translations';
-import { RuleTypeSwitcher } from './rule_type_switcher';
-import { ThresholdFields } from './threshold_fields';
 import { buildThresholdEsqlQuery, parseThresholdEsqlQuery } from '../utils/threshold_to_esql';
+import { SecurityGuiRuleForm } from './security_gui_rule_form';
 
 const DEFAULT_THRESHOLD_VALUE = 200;
 
@@ -42,24 +41,15 @@ interface SecurityRuleFormProps {
   services: RuleFormServices;
   ruleId?: string;
   initialValues?: Partial<FormValues>;
-  /** Initial ES|QL query for the platform form (from loaded rule on edit). */
   initialQuery?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
 /**
- * Security-specific rule creation form that wraps the platform alerting v2 form.
- *
- * Supports two rule types:
- * - ES|QL: renders the full platform form with the ES|QL editor
- * - Threshold: renders security-specific threshold fields, converts to ES|QL,
- *   and passes the generated query to the platform form (read-only query view)
- *
- * Hardcodes security-specific defaults:
- * - kind: 'alert' (always lifecycle-managed)
- * - recovery_policy: { type: 'no_breach' } (recover when condition no longer holds)
- * - state_transition: { pending_count: 0, recovering_count: 0 } (instant breach/recovery)
+ * Security-specific rule form that owns its own react-hook-form, react-query,
+ * and RuleFormProvider contexts. Composes platform field groups via
+ * SecurityGuiRuleForm instead of wrapping StandaloneRuleForm.
  */
 export const SecurityRuleForm = ({
   services,
@@ -110,27 +100,7 @@ export const SecurityRuleForm = ({
       cardinalityField: cardinalityField || undefined,
       cardinalityValue: cardinalityField ? cardinalityValue : undefined,
     });
-  }, [
-    ruleType,
-    indexPatterns,
-    groupByFields,
-    thresholdValue,
-    cardinalityField,
-    cardinalityValue,
-  ]);
-
-  const securityDefaults = useMemo<Partial<FormValues>>(() => {
-    const base: Partial<FormValues> = {
-      ...SECURITY_OVERRIDES,
-      ...initialValues,
-    };
-
-    if (ruleType === 'threshold' && generatedQuery) {
-      base.evaluation = { query: { base: generatedQuery } };
-    }
-
-    return base;
-  }, [ruleType, generatedQuery, initialValues]);
+  }, [ruleType, indexPatterns, groupByFields, thresholdValue, cardinalityField, cardinalityValue]);
 
   const defaultFromClause = `FROM ${DEFAULT_INDEX_PATTERN.join(', ')}`;
 
@@ -140,6 +110,67 @@ export const SecurityRuleForm = ({
     }
     return initialQuery ?? initialValues?.evaluation?.query?.base ?? defaultFromClause;
   }, [ruleType, generatedQuery, initialQuery, initialValues, defaultFromClause]);
+
+  const queryDefaults = useFormDefaults({ query: effectiveQuery });
+
+  const defaultValues = useMemo<FormValues>(() => {
+    const securityDefaults: Partial<FormValues> = {
+      ...SECURITY_OVERRIDES,
+      ...initialValues,
+    };
+
+    if (ruleType === 'threshold' && generatedQuery) {
+      securityDefaults.evaluation = { query: { base: generatedQuery } };
+    }
+
+    return {
+      ...queryDefaults,
+      ...securityDefaults,
+      metadata: {
+        ...queryDefaults.metadata,
+        ...securityDefaults.metadata,
+      },
+      schedule: {
+        ...queryDefaults.schedule,
+        ...securityDefaults.schedule,
+      },
+      evaluation: {
+        ...queryDefaults.evaluation,
+        query: {
+          ...queryDefaults.evaluation.query,
+          ...securityDefaults.evaluation?.query,
+        },
+      },
+      ...(securityDefaults.grouping !== undefined ? { grouping: securityDefaults.grouping } : {}),
+      ...(securityDefaults.recoveryPolicy !== undefined
+        ? { recoveryPolicy: securityDefaults.recoveryPolicy }
+        : {}),
+      ...(securityDefaults.stateTransition !== undefined
+        ? { stateTransition: securityDefaults.stateTransition }
+        : {}),
+      stateTransitionAlertDelayMode:
+        securityDefaults.stateTransitionAlertDelayMode ?? queryDefaults.stateTransitionAlertDelayMode,
+      stateTransitionRecoveryDelayMode:
+        securityDefaults.stateTransitionRecoveryDelayMode ?? queryDefaults.stateTransitionRecoveryDelayMode,
+    };
+  }, [queryDefaults, initialValues, ruleType, generatedQuery]);
+
+  const methods = useForm<FormValues>({
+    mode: 'onBlur',
+    defaultValues,
+  });
+
+  const queryClient = useMemo(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: { retry: false, refetchOnWindowFocus: false },
+        },
+      }),
+    []
+  );
+
+  const meta = useMemo(() => ({ layout: 'page' as const }), []);
 
   const handleSubmit = useCallback(
     async (values: FormValues) => {
@@ -153,7 +184,11 @@ export const SecurityRuleForm = ({
       enriched.metadata = {
         ...enriched.metadata,
         owner: 'siem',
-        tags: [...existingTags.filter((t) => t !== 'security' && t !== 'threshold' && t !== 'esql'), 'security', securityTag],
+        tags: [
+          ...existingTags.filter((t) => t !== 'security' && t !== 'threshold' && t !== 'esql'),
+          'security',
+          securityTag,
+        ],
       };
 
       if (ruleType === 'threshold' && generatedQuery) {
@@ -185,62 +220,40 @@ export const SecurityRuleForm = ({
     [ruleType, generatedQuery, ruleId, services]
   );
 
-  const prepend = useMemo(
-    () => (
-      <>
-        <RuleTypeSwitcher ruleType={ruleType} onChange={setRuleType} isUpdateView={Boolean(ruleId)} />
-        {ruleType === 'threshold' && (
-          <>
-            <EuiSpacer size="m" />
-            <ThresholdFields
-              indexPatterns={indexPatterns}
-              onIndexPatternsChange={setIndexPatterns}
-              groupByFields={groupByFields}
-              onGroupByFieldsChange={setGroupByFields}
-              thresholdValue={thresholdValue}
-              onThresholdValueChange={setThresholdValue}
-              cardinalityField={cardinalityField}
-              onCardinalityFieldChange={setCardinalityField}
-              cardinalityValue={cardinalityValue}
-              onCardinalityValueChange={setCardinalityValue}
-              generatedQuery={generatedQuery}
-              search={services.data.search.search}
-            />
-          </>
-        )}
-      </>
-    ),
-    [
-      ruleType,
-      ruleId,
-      indexPatterns,
-      groupByFields,
-      thresholdValue,
-      cardinalityField,
-      cardinalityValue,
-      generatedQuery,
-      services.data.search.search,
-    ]
-  );
-
   return (
-    <StandaloneRuleForm
-      key={`${ruleType}-${generatedQuery}`}
-      query={effectiveQuery}
-      services={services}
-      layout="page"
-      includeQueryEditor={ruleType !== 'threshold'}
-      includeYaml={false}
-      includeKindField={false}
-      includeAlertConditions={false}
-      prependContent={prepend}
-      groupFieldLabel={i18n.SUPPRESSION_FIELDS_LABEL}
-      includeSubmission
-      isSubmitting={isSubmitting}
-      onSubmit={handleSubmit}
-      onCancel={onCancel}
-      initialValues={securityDefaults}
-      ruleId={ruleId}
-    />
+    <QueryClientProvider client={queryClient}>
+      <RuleFormProvider services={services} meta={meta}>
+        <FormProvider {...methods}>
+          <EuiFlexGroup gutterSize="l" alignItems="flexStart" key={`${ruleType}-${generatedQuery}`}>
+            <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
+              <SecurityGuiRuleForm
+                onSubmit={handleSubmit}
+                ruleType={ruleType}
+                onRuleTypeChange={setRuleType}
+                isUpdateView={Boolean(ruleId)}
+                isSubmitting={isSubmitting}
+                onCancel={onCancel}
+                ruleId={ruleId}
+                indexPatterns={indexPatterns}
+                onIndexPatternsChange={setIndexPatterns}
+                groupByFields={groupByFields}
+                onGroupByFieldsChange={setGroupByFields}
+                thresholdValue={thresholdValue}
+                onThresholdValueChange={setThresholdValue}
+                cardinalityField={cardinalityField}
+                onCardinalityFieldChange={setCardinalityField}
+                cardinalityValue={cardinalityValue}
+                onCardinalityValueChange={setCardinalityValue}
+                generatedQuery={generatedQuery}
+                search={services.data.search.search}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
+              <RulePreviewPanel />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </FormProvider>
+      </RuleFormProvider>
+    </QueryClientProvider>
   );
 };

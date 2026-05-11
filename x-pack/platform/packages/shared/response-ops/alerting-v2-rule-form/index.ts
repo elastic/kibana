@@ -37,6 +37,20 @@ export {
   mapRuleResponseToFormValues,
 } from './form';
 
+// Field groups & fields — for consumers building custom form layouts
+export {
+  ConditionFieldGroup,
+  RuleDetailsFieldGroup,
+  RuleExecutionFieldGroup,
+  RulePreviewPanel,
+  GroupFieldSelect,
+  SubmissionButtons,
+  ErrorCallOut,
+  useFormDefaults,
+} from './form';
+
+export type { SubmissionButtonsProps } from './form';
+
 // Types
 export type {
   FormValues,
