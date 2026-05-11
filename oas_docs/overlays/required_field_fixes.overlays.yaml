@@ -18,7 +18,7 @@ info:
   version: 0.0.1
 actions:
   - target: "$.components.schemas['Kibana_HTTP_APIs_security_query_roles_body'].required"
-    description: "Remove wrongly-required fields (x-oas-optional or has default): sort, filters"
+    description: "Remove incorrect 'required' property from optional fields (x-oas-optional or has default): sort, filters"
     remove: true
   - target: "$.components.schemas['Kibana_HTTP_APIs_security_query_roles_body']"
     description: "Restore required array without optional fields"
