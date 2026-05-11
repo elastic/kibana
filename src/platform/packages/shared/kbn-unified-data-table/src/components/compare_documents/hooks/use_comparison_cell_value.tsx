@@ -10,10 +10,11 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { formatFieldValueReact } from '@kbn/discover-utils';
 import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
+import { getFieldIconProps } from '@kbn/field-utils';
 import { FieldIcon } from '@kbn/react-field';
 import classNames from 'classnames';
 import { isEqual, memoize } from 'lodash';
@@ -102,12 +103,18 @@ const CellValue = (props: CellValueProps) => {
   const { dataView, comparisonFields, fieldColumnId, rowIndex, columnId, getDocById, columnsMeta } =
     props;
   const fieldName = comparisonFields[rowIndex];
-  const field = useMemo(() => dataView.fields.getByName(fieldName), [dataView.fields, fieldName]);
+  const field = useMemo(
+    () =>
+      getDataViewFieldOrCreateFromColumnMeta({
+        dataView,
+        fieldName,
+        columnMeta: columnsMeta?.[fieldName],
+      }),
+    [dataView, fieldName, columnsMeta]
+  );
   const comparisonDoc = useMemo(() => getDocById(columnId), [columnId, getDocById]);
   if (columnId === fieldColumnId) {
-    return (
-      <FieldCellValue field={field} fieldName={fieldName} columnMeta={columnsMeta?.[fieldName]} />
-    );
+    return <FieldCellValue field={field} fieldName={fieldName} />;
   }
 
   if (!comparisonDoc) {
@@ -122,17 +129,12 @@ const CellValue = (props: CellValueProps) => {
 interface FieldCellValueProps {
   field: DataViewField | undefined;
   fieldName: string;
-  columnMeta?: DataTableColumnsMeta[string];
 }
 
-const FieldCellValue = ({ field, fieldName, columnMeta }: FieldCellValueProps) => {
+const FieldCellValue = ({ field, fieldName }: FieldCellValueProps) => {
   const iconNode = useMemo(() => {
-    if (field) {
-      return <FieldIcon {...getFieldIconProps(field)} />;
-    }
-    const iconType = columnMeta ? getTextBasedColumnIconType(columnMeta) : undefined;
-    return <FieldIcon type={iconType ?? 'unknown'} />;
-  }, [field, columnMeta]);
+    return field ? <FieldIcon {...getFieldIconProps(field)} /> : <FieldIcon type="unknown" />;
+  }, [field]);
 
   return (
     <EuiFlexGroup responsive={false} gutterSize="s">

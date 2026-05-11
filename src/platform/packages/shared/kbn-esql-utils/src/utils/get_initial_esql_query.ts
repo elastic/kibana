@@ -34,7 +34,7 @@ const getFinalWhereClause = (
  * @param filters - DSL filters to convert to ES|QL WHERE clauses
  */
 export function getInitialESQLQuery(dataView: DataView, query?: Query, filters?: Filter[]): string {
-  const hasAtTimestampField = dataView?.fields?.getByName?.('@timestamp')?.type === 'date';
+  const hasAtTimestampField = dataView?.timeFieldName === '@timestamp';
   const timeFieldName = dataView?.timeFieldName;
   const filterByTimeParams =
     !hasAtTimestampField && timeFieldName
