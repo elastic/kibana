@@ -1327,3 +1327,33 @@ groups:
                       - id: '.server-log'
                         max: 5
           ```
+
+      - setting: xpack.alerting.maxEphemeralActionsPerAlert
+        description: |
+          The maximum number of actions that a single alert instance could run using ephemeral tasks (in-memory, non-persisted). Deprecated and ignored in 9.0; remove this setting from your configuration.
+        datatype: int
+        applies_to:
+          - "stack: ga 7.14, removed 9.0"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Deprecated and ignored since 9.0. Ephemeral tasks were removed. Remove this setting."
+
+      - setting: xpack.alerting.defaultRuleTaskTimeout
+        description: |
+          The default timeout for rule tasks. Accepts a duration string such as `5m` or `1h`. Removed in 8.2; use `xpack.alerting.rules.run.timeout` instead.
+        datatype: string
+        applies_to:
+          - "stack: ga 7.14, removed 8.2"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Removed in 8.2. Use `xpack.alerting.rules.run.timeout` instead."
+
+      - setting: xpack.eventLog.logEntries
+        description: |
+          Set to `true` to log event log document entries in the Kibana server log. Useful for debugging but can be verbose in production.
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga 7.7
+          ech: ga
+          self: ga

@@ -1504,6 +1504,16 @@ groups:
           - "ech: ga"
           - "self: ga"
 
+      - setting: vis_type_timelion.enabled
+        description: |
+          Set to `false` to disable Timelion visualizations.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: ga 8.0
+          ech: ga
+          self: ga
+
       - setting: vis_type_table.legacyVisEnabled
         description: |
           Starting from version 7.11, a new datatable visualization is used. Set to `true` to enable the legacy version. In version 8.0 and later, the old implementation is removed and this setting is no longer supported.
