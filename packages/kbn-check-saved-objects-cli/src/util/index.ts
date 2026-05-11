@@ -9,5 +9,5 @@
 
 export { downloadFile } from './download_file';
 export { expandGitRev, getFileFromKibanaRepo } from './git';
-export { startElasticsearch, getKibanaServer, stopElasticsearch, stopKibana } from './servers';
+export { startElasticsearch, getKibanaServer, stopElasticsearch } from './servers';
 export { fileToJson, jsonToFile } from './json';
