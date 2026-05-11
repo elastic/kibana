@@ -376,10 +376,6 @@ export function EpisodeDetailsPage() {
               type="responsiveColumn"
               listItems={[
                 {
-                  title: i18n.EPISODE_ID_LABEL,
-                  description: episodeId ?? '—',
-                },
-                {
                   title: i18n.GROUPING_LABEL,
                   description: <AlertEpisodeGroupingFields fields={rule?.grouping?.fields ?? []} />,
                 },
