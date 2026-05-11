@@ -101,4 +101,5 @@ export const tags = {
     ];
   },
   performance: ['@perf'],
+  qualityGate: ['@quality_gate'],
 };
