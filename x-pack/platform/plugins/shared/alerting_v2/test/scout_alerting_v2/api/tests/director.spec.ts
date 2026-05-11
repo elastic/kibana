@@ -15,13 +15,11 @@
 
 /* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
-import { setTimeout as wait } from 'timers/promises';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { apiTest, buildCreateRuleData, testData } from '../fixtures';
 
-const { LOOKBACK_WINDOW, POLL_INTERVAL_MS, POLL_TIMEOUT_MS, SCHEDULE_INTERVAL, WAIT_TIME_MS } =
-  testData;
+const { LOOKBACK_WINDOW, POLL_INTERVAL_MS, POLL_TIMEOUT_MS, SCHEDULE_INTERVAL } = testData;
 
 /**
  * Integration tests for the alerting_v2 director component.
@@ -140,7 +138,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
   apiTest(
     'preserves the same episode id across pending -> active -> recovering -> inactive',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -181,11 +179,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       });
 
       // Stop breaching so the recovery side of the lifecycle is exercised.
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-episode-id-stable' } },
-        refresh: true,
-        wait_for_completion: true,
       });
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
@@ -208,7 +204,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
   apiTest(
     'generates a new episode id when a previously inactive group breaches again',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -251,11 +247,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       expect(firstEpisodeId).toBeDefined();
 
       // 2) Stop breaching and wait for inactive.
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-new-lifecycle' } },
-        refresh: true,
-        wait_for_completion: true,
       });
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
@@ -295,7 +289,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
   apiTest(
     'uses the basic strategy when state_transition is omitted (no status_count is ever set)',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -333,11 +327,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         episodeStatus: 'active',
       });
 
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-basic-strategy' } },
-        refresh: true,
-        wait_for_completion: true,
       });
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
@@ -358,7 +350,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
   apiTest(
     'uses the basic strategy when state_transition is an empty object',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -394,11 +386,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         episodeStatus: 'active',
       });
 
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-basic-strategy-empty-object' } },
-        refresh: true,
-        wait_for_completion: true,
       });
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
@@ -528,7 +518,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
   apiTest(
     'starts a new pending lifecycle at status_count 1 after the previous lifecycle reached inactive',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -576,11 +566,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
       // 2) Stop breaching while still pending — the episode goes
       //    pending -> inactive directly.
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-pending-reset' } },
-        refresh: true,
-        wait_for_completion: true,
       });
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
@@ -618,69 +606,64 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
     }
   );
 
-  apiTest(
-    'does not write status_count on inactive episode events',
-    async ({ apiServices, esClient }) => {
-      await apiServices.alertingV2.sourceIndex.indexDocs({
-        index: SOURCE_INDEX,
-        docs: [
-          {
-            '@timestamp': new Date().toISOString(),
-            'host.name': 'host-inactive-no-count',
-            severity: 'high',
-            value: 1,
+  apiTest('does not write status_count on inactive episode events', async ({ apiServices }) => {
+    await apiServices.alertingV2.sourceIndex.indexDocs({
+      index: SOURCE_INDEX,
+      docs: [
+        {
+          '@timestamp': new Date().toISOString(),
+          'host.name': 'host-inactive-no-count',
+          severity: 'high',
+          value: 1,
+        },
+      ],
+    });
+
+    // pending_count=0 + recovering_count=0 sends the episode straight to
+    // active and then straight to inactive on recovery, which lets us
+    // observe a clean inactive event whose status_count must be unset.
+    const rule = await apiServices.alertingV2.rules.create(
+      buildCreateRuleData({
+        metadata: { name: 'director-inactive-no-count' },
+        time_field: '@timestamp',
+        schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+        evaluation: {
+          query: {
+            base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-inactive-no-count" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
-        ],
-      });
+        },
+        recovery_policy: { type: 'no_breach' },
+        grouping: { fields: ['host.name'] },
+        state_transition: { pending_count: 0, recovering_count: 0 },
+      })
+    );
 
-      // pending_count=0 + recovering_count=0 sends the episode straight to
-      // active and then straight to inactive on recovery, which lets us
-      // observe a clean inactive event whose status_count must be unset.
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({
-          metadata: { name: 'director-inactive-no-count' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-inactive-no-count" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-            },
-          },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
-        })
-      );
+    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      episodeStatus: 'active',
+    });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
-        episodeStatus: 'active',
-      });
+    await apiServices.alertingV2.sourceIndex.deleteDocs({
+      index: SOURCE_INDEX,
+      query: { term: { 'host.name': 'host-inactive-no-count' } },
+    });
 
-      await esClient.deleteByQuery({
-        index: SOURCE_INDEX,
-        query: { term: { 'host.name': 'host-inactive-no-count' } },
-        refresh: true,
-        wait_for_completion: true,
-      });
+    await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
+      episodeStatus: 'inactive',
+    });
 
-      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
-        episodeStatus: 'inactive',
-      });
+    const inactiveEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+      episodeStatus: 'inactive',
+    });
 
-      const inactiveEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
-        episodeStatus: 'inactive',
-      });
-
-      expect(inactiveEvents.length).toBeGreaterThanOrEqual(1);
-      for (const event of inactiveEvents) {
-        expect(event.episode?.status_count).toBeUndefined();
-      }
+    expect(inactiveEvents.length).toBeGreaterThanOrEqual(1);
+    for (const event of inactiveEvents) {
+      expect(event.episode?.status_count).toBeUndefined();
     }
-  );
+  });
 
   apiTest(
     'keeps episode in recovering until recovering_count threshold is met',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -716,11 +699,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         episodeStatus: 'active',
       });
 
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-recovering-threshold' } },
-        refresh: true,
-        wait_for_completion: true,
       });
 
       // The episode must reach inactive eventually (after threshold is met).
@@ -746,7 +727,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
   apiTest(
     'recovering_count: 0 skips the recovering status and goes straight to inactive',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -781,20 +762,19 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         episodeStatus: 'active',
       });
 
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-skip-recovering' } },
-        refresh: true,
-        wait_for_completion: true,
       });
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
         episodeStatus: 'inactive',
       });
 
-      // Give the executor extra time so a regression that *did* emit a
-      // recovering event would have surfaced by now.
-      await wait(WAIT_TIME_MS);
+      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+        ruleId: rule.id,
+        runs: 2,
+      });
 
       const recoveringEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         episodeStatus: 'recovering',
@@ -842,9 +822,10 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         episodeStatus: 'active',
       });
 
-      // Give the executor extra time so a regression that *did* emit a
-      // pending event would have surfaced by now.
-      await wait(WAIT_TIME_MS);
+      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+        ruleId: rule.id,
+        runs: 2,
+      });
 
       const pendingEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
         episodeStatus: 'pending',
@@ -856,7 +837,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
   apiTest(
     'transitions recovering -> active when the group breaches again',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -897,11 +878,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       });
       const initialActiveEpisodeId = activeEventsBefore[0].episode?.id;
 
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-rebreach' } },
-        refresh: true,
-        wait_for_completion: true,
       });
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
@@ -963,7 +942,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
   apiTest(
     'transitions pending -> inactive when a group recovers before the pending threshold is met',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -999,11 +978,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
       });
 
       // Stop breaching while the episode is still pending.
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-pending-to-inactive' } },
-        refresh: true,
-        wait_for_completion: true,
       });
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
@@ -1023,116 +1000,111 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
     }
   );
 
-  apiTest(
-    'tracks episode id and status_count independently per group',
-    async ({ apiServices, esClient }) => {
-      // Two groups breach simultaneously. We give each a different number of
-      // pending ticks so their status_counts cannot accidentally line up.
-      await apiServices.alertingV2.sourceIndex.indexDocs({
-        index: SOURCE_INDEX,
-        docs: [
-          {
-            '@timestamp': new Date().toISOString(),
-            'host.name': 'host-multi-group-a',
-            severity: 'high',
-            value: 1,
+  apiTest('tracks episode id and status_count independently per group', async ({ apiServices }) => {
+    // Two groups breach simultaneously. We give each a different number of
+    // pending ticks so their status_counts cannot accidentally line up.
+    await apiServices.alertingV2.sourceIndex.indexDocs({
+      index: SOURCE_INDEX,
+      docs: [
+        {
+          '@timestamp': new Date().toISOString(),
+          'host.name': 'host-multi-group-a',
+          severity: 'high',
+          value: 1,
+        },
+        {
+          '@timestamp': new Date().toISOString(),
+          'host.name': 'host-multi-group-b',
+          severity: 'high',
+          value: 1,
+        },
+      ],
+    });
+
+    const rule = await apiServices.alertingV2.rules.create(
+      buildCreateRuleData({
+        metadata: { name: 'director-multi-group' },
+        time_field: '@timestamp',
+        schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
+        evaluation: {
+          query: {
+            base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-group-a", "host-multi-group-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
           },
-          {
-            '@timestamp': new Date().toISOString(),
-            'host.name': 'host-multi-group-b',
-            severity: 'high',
-            value: 1,
-          },
-        ],
-      });
+        },
+        recovery_policy: { type: 'no_breach' },
+        grouping: { fields: ['host.name'] },
+        // pending_count is high so neither group transitions to active
+        // during the test, keeping host-b in pending while host-a is
+        // recovered to inactive.
+        state_transition: { pending_count: 100 },
+      })
+    );
 
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({
-          metadata: { name: 'director-multi-group' },
-          time_field: '@timestamp',
-          schedule: { every: SCHEDULE_INTERVAL, lookback: LOOKBACK_WINDOW },
-          evaluation: {
-            query: {
-              base: `FROM ${SOURCE_INDEX} | WHERE host.name IN ("host-multi-group-a", "host-multi-group-b") | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
-            },
-          },
-          recovery_policy: { type: 'no_breach' },
-          grouping: { fields: ['host.name'] },
-          // pending_count is high so neither group transitions to active
-          // during the test, keeping host-b in pending while host-a is
-          // recovered to inactive.
-          state_transition: { pending_count: 100 },
-        })
-      );
+    // Wait until both groups have produced pending events.
+    await expect
+      .poll(
+        async () => {
+          const states = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
+          return Array.from(states.values())
+            .map((event) => event.episode?.status)
+            .sort();
+        },
+        { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
+      )
+      .toStrictEqual(['pending', 'pending']);
 
-      // Wait until both groups have produced pending events.
-      await expect
-        .poll(
-          async () => {
-            const states = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
-            return Array.from(states.values())
-              .map((event) => event.episode?.status)
-              .sort();
-          },
-          { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
-        )
-        .toStrictEqual(['pending', 'pending']);
+    const initialStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
+    const groupHashByHost = new Map(
+      Array.from(initialStates.values()).map((event) => [
+        event.data['host.name'] as string,
+        event.group_hash,
+      ])
+    );
 
-      const initialStates = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
-      const groupHashByHost = new Map(
-        Array.from(initialStates.values()).map((event) => [
-          event.data['host.name'] as string,
-          event.group_hash,
-        ])
-      );
+    const groupHashA = groupHashByHost.get('host-multi-group-a');
+    const groupHashB = groupHashByHost.get('host-multi-group-b');
+    expect(groupHashA).toBeDefined();
+    expect(groupHashB).toBeDefined();
 
-      const groupHashA = groupHashByHost.get('host-multi-group-a');
-      const groupHashB = groupHashByHost.get('host-multi-group-b');
-      expect(groupHashA).toBeDefined();
-      expect(groupHashB).toBeDefined();
+    // Drop only host-a so its episode transitions to inactive while
+    // host-b keeps incrementing status_count in pending.
+    await apiServices.alertingV2.sourceIndex.deleteDocs({
+      index: SOURCE_INDEX,
+      query: { term: { 'host.name': 'host-multi-group-a' } },
+    });
 
-      // Drop only host-a so its episode transitions to inactive while
-      // host-b keeps incrementing status_count in pending.
-      await esClient.deleteByQuery({
-        index: SOURCE_INDEX,
-        query: { term: { 'host.name': 'host-multi-group-a' } },
-        refresh: true,
-        wait_for_completion: true,
-      });
+    await expect
+      .poll(
+        async () => {
+          const states = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
+          return {
+            a: states.get(groupHashA!)?.episode?.status,
+            b: states.get(groupHashB!)?.episode?.status,
+          };
+        },
+        { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
+      )
+      .toStrictEqual({ a: 'inactive', b: 'pending' });
 
-      await expect
-        .poll(
-          async () => {
-            const states = await apiServices.alertingV2.ruleEvents.getLatestEpisodeStates(rule.id);
-            return {
-              a: states.get(groupHashA!)?.episode?.status,
-              b: states.get(groupHashB!)?.episode?.status,
-            };
-          },
-          { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
-        )
-        .toStrictEqual({ a: 'inactive', b: 'pending' });
+    const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
+    const eventsA = events.filter((event) => event.group_hash === groupHashA);
+    const eventsB = events.filter((event) => event.group_hash === groupHashB);
+    expect(eventsA.length).toBeGreaterThan(0);
+    expect(eventsB.length).toBeGreaterThan(0);
+    expect(eventsA.some((event) => event.episode?.status === 'inactive')).toBe(true);
+    expect(eventsB.some((event) => event.episode?.status === 'inactive')).toBe(false);
 
-      const events = await apiServices.alertingV2.ruleEvents.find(rule.id);
-      const eventsA = events.filter((event) => event.group_hash === groupHashA);
-      const eventsB = events.filter((event) => event.group_hash === groupHashB);
-      expect(eventsA.length).toBeGreaterThan(0);
-      expect(eventsB.length).toBeGreaterThan(0);
-      expect(eventsA.some((event) => event.episode?.status === 'inactive')).toBe(true);
-      expect(eventsB.some((event) => event.episode?.status === 'inactive')).toBe(false);
+    const idsA = new Set(eventsA.map((event) => event.episode?.id));
+    const idsB = new Set(eventsB.map((event) => event.episode?.id));
 
-      const idsA = new Set(eventsA.map((event) => event.episode?.id));
-      const idsB = new Set(eventsB.map((event) => event.episode?.id));
-
-      // Each group sticks to a single episode id throughout — and the two
-      // groups must have DIFFERENT ids.
-      expect(idsA.size).toBe(1);
-      expect(idsB.size).toBe(1);
-      const [idA] = idsA;
-      const [idB] = idsB;
-      expect(idA).not.toBe(idB);
-    }
-  );
+    // Each group sticks to a single episode id throughout — and the two
+    // groups must have DIFFERENT ids.
+    expect(idsA.size).toBe(1);
+    expect(idsB.size).toBe(1);
+    const [idA] = idsA;
+    const [idB] = idsB;
+    expect(idA).not.toBe(idB);
+  });
 
   apiTest(
     'transitions pending -> active via pending_timeframe even when pending_count is unreachable',
@@ -1198,7 +1170,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
   apiTest(
     'transitions recovering -> inactive via recovering_timeframe when recovering_operator is OR',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -1238,11 +1210,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         episodeStatus: 'active',
       });
 
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-recovering-timeframe-or' } },
-        refresh: true,
-        wait_for_completion: true,
       });
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, {
@@ -1269,7 +1239,7 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
 
   apiTest(
     'keeps the latest episode in recovering when only recovering_timeframe is met under recovering_operator AND',
-    async ({ apiServices, esClient }) => {
+    async ({ apiServices }) => {
       await apiServices.alertingV2.sourceIndex.indexDocs({
         index: SOURCE_INDEX,
         docs: [
@@ -1311,11 +1281,9 @@ apiTest.describe('Director', { tag: tags.stateful.classic }, () => {
         episodeStatus: 'active',
       });
 
-      await esClient.deleteByQuery({
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-recovering-timeframe-and' } },
-        refresh: true,
-        wait_for_completion: true,
       });
 
       await expect
