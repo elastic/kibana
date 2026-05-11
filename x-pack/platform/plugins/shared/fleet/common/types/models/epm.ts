@@ -323,7 +323,6 @@ export enum RegistryInputKeys {
   description = 'description',
   template_path = 'template_path',
   template_paths = 'template_paths',
-  condition = 'condition',
   input_group = 'input_group',
   required_vars = 'required_vars',
   vars = 'vars',
@@ -347,7 +346,6 @@ export interface RegistryInput {
   [RegistryInputKeys.description]: string;
   [RegistryInputKeys.template_path]?: string;
   [RegistryInputKeys.template_paths]?: string[];
-  [RegistryInputKeys.condition]?: string;
   [RegistryInputKeys.input_group]?: RegistryInputGroup;
   [RegistryInputKeys.required_vars]?: RegistryRequiredVars;
   [RegistryInputKeys.vars]?: RegistryVarsEntry[];
