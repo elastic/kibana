@@ -58,31 +58,32 @@ export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
   const daysUsed = TRIAL_TOTAL_DAYS - trialDaysLeft;
   const hasPopoverContent = trialDaysLeft > 0 || billingUrl;
 
+  const trialLabel = i18n.translate('xpack.searchSharedUI.trialUsageBadge.trialLabel', {
+    defaultMessage: 'TRIAL',
+  });
+
+  if (!hasPopoverContent) {
+    return (
+      <EuiBadge color={euiTheme.colors.primary} data-test-subj="trialUsageBadge">
+        {trialLabel}
+      </EuiBadge>
+    );
+  }
+
   const badge = (
     <EuiBadge
       color={euiTheme.colors.primary}
-      {...(hasPopoverContent
-        ? {
-            onClick: () => setIsPopoverOpen((prev) => !prev),
-            onClickAriaLabel: i18n.translate(
-              'xpack.searchSharedUI.trialUsageBadge.toggleAriaLabel',
-              { defaultMessage: 'Toggle trial usage details' }
-            ),
-            iconType: 'arrowDown',
-            iconSide: 'right' as const,
-          }
-        : {})}
+      onClick={() => setIsPopoverOpen((prev) => !prev)}
+      onClickAriaLabel={i18n.translate('xpack.searchSharedUI.trialUsageBadge.toggleAriaLabel', {
+        defaultMessage: 'Toggle trial usage details',
+      })}
+      iconType="arrowDown"
+      iconSide="right"
       data-test-subj="trialUsageBadge"
     >
-      {i18n.translate('xpack.searchSharedUI.trialUsageBadge.trialLabel', {
-        defaultMessage: 'TRIAL',
-      })}
+      {trialLabel}
     </EuiBadge>
   );
-
-  if (!hasPopoverContent) {
-    return badge;
-  }
 
   return (
     <EuiPopover
