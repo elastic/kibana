@@ -26,6 +26,7 @@ evaluate.describe('Alerts RAG', { tag: tags.stateful.classic }, () => {
         path: ELASTIC_ASSISTANT_CAPABILITIES_PATH,
         method: 'GET',
         retries: 0,
+        headers: { 'elastic-api-version': '1' },
       });
       log.info('[alerts-rag] beforeAll: Security AI Assistant API is reachable');
     } catch (error) {
