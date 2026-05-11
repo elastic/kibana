@@ -143,6 +143,7 @@ dependsOn:
   - '@kbn/core-analytics-server'
   - '@kbn/security-solution-side-nav'
   - '@kbn/ml-anomaly-utils'
+  - '@kbn/ml-server-schemas'
   - '@kbn/discover-plugin'
   - '@kbn/field-formats-plugin'
   - '@kbn/expressions-plugin'
@@ -255,6 +256,7 @@ dependsOn:
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/agent-builder-server'
   - '@kbn/object-utils'
+  - '@kbn/ml-common-types'
   - '@kbn/control-group-renderer'
   - '@kbn/react-query'
   - '@kbn/core-chrome-layout-constants'
@@ -306,6 +308,7 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - test/scout/**/*
+    - test/scout_cps_local/**/*
     - test/scout_security_attacks_alignment/**/*
     - common/**/*.json
     - server/**/*.json

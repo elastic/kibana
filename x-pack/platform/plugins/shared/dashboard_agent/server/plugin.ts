@@ -52,7 +52,7 @@ export class DashboardAgentPlugin
         getDashboardClient,
       }) as Parameters<typeof setupDeps.agentBuilder.attachments.registerType>[0]
     );
-    setupDeps.agentBuilder.sml.registerType(createDashboardSmlType({ getDashboardClient }));
+    setupDeps.agentContextLayer.registerType(createDashboardSmlType({ getDashboardClient }));
     registerSkills(setupDeps.agentBuilder);
     return {};
   }

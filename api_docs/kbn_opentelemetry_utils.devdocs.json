@@ -26,7 +26,14 @@
         "tags": [],
         "label": "flattenToAttributes",
         "description": [
-          "\nFlattens a structured object in a way that is consistent with\nhow OpenTelemetry defines {@link Attributes}"
+          "\nFlattens a structured object in a way that is consistent with\nhow OpenTelemetry defines ",
+          {
+            "pluginId": "@kbn/opentelemetry-utils",
+            "scope": "common",
+            "docId": "kibKbnOpentelemetryUtilsPluginApi",
+            "section": "def-common.Attributes",
+            "text": "Attributes"
+          }
         ],
         "signature": [
           "(obj: Record<string, any>, parentKey: string) => ",
@@ -52,6 +59,7 @@
             "lineNumber": 17,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -147,6 +155,7 @@
             "lineNumber": 12,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "SpanContext",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -190,6 +199,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }

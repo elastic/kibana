@@ -15,6 +15,7 @@ import {
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
 import type { Filter } from '@kbn/es-query';
 import type { HasSerializableState } from '@kbn/presentation-publishing';
+import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 import { act, render, waitFor } from '@testing-library/react';
 
 import { BehaviorSubject } from 'rxjs';
@@ -63,6 +64,7 @@ const mockGetCreationOptions = jest
 
 describe('control group renderer', () => {
   beforeAll(() => {
+    setStubKibanaServices();
     registerEmbeddablePublicDefinition('test_control', getTestEmbeddableFactory);
   });
 

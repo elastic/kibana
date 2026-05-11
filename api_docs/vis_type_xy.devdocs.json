@@ -81,6 +81,7 @@
             "lineNumber": 21,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "TruncateLabelsOptionProps",
             "trackAdoption": false,
             "isRequired": true
           }

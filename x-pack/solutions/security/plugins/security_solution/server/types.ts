@@ -42,7 +42,6 @@ import type { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk
 import type { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
 import type { IDetectionRulesClient } from './lib/detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
 import type { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
-import type { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_data_client';
 import type { PrivilegeMonitoringDataClient } from './lib/entity_analytics/privilege_monitoring/engine/data_client';
 import type { ApiKeyManager as EntityStoreApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
 import type { ApiKeyManager as PrivilegedUsersApiKeyManager } from './lib/entity_analytics/privilege_monitoring/auth/api_key';
@@ -91,7 +90,6 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getPadPackageInstallationClient: () => PadPackageInstallationClient;
   siemMigrations: SiemMigrationClients;
   getInferenceClient: () => InferenceClient;
-  getAssetInventoryClient: () => AssetInventoryDataClient;
   getProductFeatureService: () => ProductFeaturesService;
   getMlAuthz: () => MlAuthz;
   getRulesAuthz: () => DetectionRulesAuthz;

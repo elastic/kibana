@@ -25,7 +25,15 @@
         "tags": [],
         "label": "DedicatedTaskRunnerConfig",
         "description": [
-          "\nStatic helpers for the split UI / background-tasks Kibana processes used in tests.\nThe FTR service class {@link DedicatedTaskRunner} in `@kbn/test` wraps these helpers\nwith runtime state (port, URL, KbnClient, etc.)."
+          "\nStatic helpers for the split UI / background-tasks Kibana processes used in tests.\nThe FTR service class ",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.DedicatedTaskRunner",
+            "text": "DedicatedTaskRunner"
+          },
+          " in `@kbn/test` wraps these helpers\nwith runtime state (port, URL, KbnClient, etc.)."
         ],
         "path": "src/platform/packages/shared/kbn-test-kibana-server/src/dedicated_task_runner.ts",
         "lineNumber": 10,
@@ -513,6 +521,7 @@
             "lineNumber": 40,
             "columnNumber": 39,
             "deprecated": false,
+            "docsReferencedTypeName": "RunKibanaServerOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -529,7 +538,15 @@
         "tags": [],
         "label": "KibanaTestServerLaunchConfig",
         "description": [
-          "\nMinimal config surface used to spawn Kibana (and optional dedicated task runner) for tests.\nSatisfied by the FTR {@link Config} type and Scout server configs."
+          "\nMinimal config surface used to spawn Kibana (and optional dedicated task runner) for tests.\nSatisfied by the FTR ",
+          {
+            "pluginId": "@kbn/test-kibana-server",
+            "scope": "common",
+            "docId": "kibKbnTestKibanaServerPluginApi",
+            "section": "def-common.Config",
+            "text": "Config"
+          },
+          " type and Scout server configs."
         ],
         "path": "src/platform/packages/shared/kbn-test-kibana-server/src/kibana_test_server_launch_config.ts",
         "lineNumber": 10,

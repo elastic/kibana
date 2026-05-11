@@ -12,6 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const security = getService('security');
 
+  // https://github.com/elastic/kibana/issues/266002: All upgrade assistant tests are skipped in main until we have a way to test them
   describe.skip('Elasticsearch deprecations', function () {
     describe('GET /api/upgrade_assistant/es_deprecations', () => {
       describe('error handling', () => {

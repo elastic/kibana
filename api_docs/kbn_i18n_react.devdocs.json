@@ -91,6 +91,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -147,6 +148,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -199,6 +201,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -266,6 +269,7 @@
             "lineNumber": 25,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "FormattedRelativeProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -306,6 +310,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -360,6 +365,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -472,6 +478,7 @@
             "lineNumber": 34,
             "columnNumber": 192,
             "deprecated": false,
+            "docsReferencedTypeName": "Opts",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -531,6 +538,7 @@
             "lineNumber": 37,
             "columnNumber": 232,
             "deprecated": false,
+            "docsReferencedTypeName": "Opts",
             "trackAdoption": false,
             "isRequired": false
           }

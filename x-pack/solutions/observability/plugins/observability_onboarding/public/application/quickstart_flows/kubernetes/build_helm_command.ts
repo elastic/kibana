@@ -44,6 +44,7 @@ export function buildHelmCommand({
 
   return `
     helm repo add elastic https://helm.elastic.co/ && \
+    helm repo update elastic && \
     helm install elastic-agent elastic/elastic-agent --version ${elasticAgentVersionInfo.agentBaseVersion} \
       -n kube-system \
       --set outputs.default.url=${escapedElasticsearchUrl} \

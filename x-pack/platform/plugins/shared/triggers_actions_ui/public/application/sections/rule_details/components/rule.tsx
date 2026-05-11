@@ -15,7 +15,6 @@ import type { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { ALERT_RULE_UUID, ALERT_STATUS } from '@kbn/rule-data-utils';
 import type { PublicAlertStatus } from '@kbn/rule-data-utils';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { DEFAULT_CONTROLS } from '@kbn/alerts-ui-shared/src/alert_filter_controls/constants';
 import { defaultAlertsTableColumns } from '@kbn/response-ops-alerts-table/configuration';
 import type { AlertsTable as AlertsTableType } from '@kbn/response-ops-alerts-table';
 import type { AlertDetailsNavigation, CasesService } from '@kbn/response-ops-alerts-table/types';
@@ -41,6 +40,7 @@ import {
 } from '../../rules_list/translations';
 import { RuleAlertActionsCell } from './rule_alert_actions_cell';
 import { RuleAlertSearchBar } from './rule_alert_search_bar';
+import { RULE_DETAILS_FILTER_CONTROLS } from '../../alerts_search_bar/constants';
 import { AlertSummaryWidget } from '../../alert_summary_widget';
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
@@ -257,7 +257,7 @@ export function RuleComponent({
       setAlertSummaryWidgetTimeRange(getDefaultAlertSummaryTimeRange());
       setSelectedTabId(ALERT_LIST_TAB);
 
-      const controlConfigs = DEFAULT_CONTROLS.map((control) => {
+      const controlConfigs = RULE_DETAILS_FILTER_CONTROLS.map((control) => {
         if (control.field_name === ALERT_STATUS) {
           return {
             ...control,

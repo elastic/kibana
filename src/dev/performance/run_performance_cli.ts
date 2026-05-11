@@ -55,6 +55,7 @@ const journeyTargetGroups: JourneyTargetGroups = {
     'many_fields_transform',
     'tsdb_logs_data_visualizer',
     'many_fields_esql_editor',
+    'metrics_experience_grid',
   ],
   crud: ['tags_listing_page', 'dashboard_listing_page'],
   dashboard: [

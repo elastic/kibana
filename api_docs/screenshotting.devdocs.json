@@ -547,6 +547,7 @@
               "lineNumber": 180,
               "columnNumber": 18,
               "deprecated": false,
+              "docsReferencedTypeName": "PngScreenshotOptions",
               "trackAdoption": false
             }
           ]

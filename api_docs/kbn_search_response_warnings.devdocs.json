@@ -115,6 +115,7 @@
             "lineNumber": 12,
             "columnNumber": 61,
             "deprecated": false,
+            "docsReferencedTypeName": "SearchResponseWarning",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -152,6 +153,7 @@
             "lineNumber": 21,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -189,6 +191,7 @@
             "lineNumber": 29,
             "columnNumber": 59,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -226,6 +229,7 @@
             "lineNumber": 20,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -263,6 +267,7 @@
             "lineNumber": 21,
             "columnNumber": 51,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -300,6 +305,7 @@
             "lineNumber": 22,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -337,7 +343,15 @@
         "tags": [],
         "label": "WarningHandlerCallback",
         "description": [
-          "\nA callback function which can intercept warnings when passed to {@link showWarnings}. Pass `true` from the\nfunction to prevent the search service from showing warning notifications by default."
+          "\nA callback function which can intercept warnings when passed to ",
+          {
+            "pluginId": "@kbn/search-response-warnings",
+            "scope": "public",
+            "docId": "kibKbnSearchResponseWarningsPluginApi",
+            "section": "def-public.showWarnings",
+            "text": "showWarnings"
+          },
+          ". Pass `true` from the\nfunction to prevent the search service from showing warning notifications by default."
         ],
         "signature": [
           "(warning: ",
@@ -371,6 +385,7 @@
             "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SearchResponseWarning",
             "trackAdoption": false
           },
           {

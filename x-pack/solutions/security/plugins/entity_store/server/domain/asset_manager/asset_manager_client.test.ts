@@ -131,6 +131,9 @@ describe('AssetManagerClient', () => {
         mockEngineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
       globalStateClient:
         mockGlobalStateClient as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
+      ccsLogExtractionStateClient: {
+        delete: jest.fn().mockResolvedValue(undefined),
+      } as unknown as import('../saved_objects/ccs_log_extraction_state').CcsLogExtractionStateClient,
       namespace,
       isServerless: false,
       logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
@@ -160,5 +163,108 @@ describe('AssetManagerClient', () => {
     expect(mockEngineDescriptorClient.init).toHaveBeenCalledWith('host');
     expect(mockInstallIndicesAndDataStreams).not.toHaveBeenCalled();
     expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+  });
+
+  describe('logsExtraction resolution on install', () => {
+    const existingLogsExtraction = {
+      additionalIndexPatterns: ['existing-*'],
+      fieldHistoryLength: 99,
+      lookbackPeriod: '12h',
+      delay: '5m',
+      docsLimit: 1234,
+      maxLogsPerPage: 5678,
+      timeout: '60s',
+      frequency: '2m',
+    };
+
+    it('fresh install with no params applies defaults', async () => {
+      mockGlobalStateClient.find.mockResolvedValue(undefined);
+
+      await client.init({} as KibanaRequest, ['host']);
+
+      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logsExtraction: expect.objectContaining({
+            additionalIndexPatterns: [],
+            fieldHistoryLength: 10,
+            lookbackPeriod: '3h',
+            delay: '1m',
+            frequency: '1m',
+            docsLimit: 10000,
+            maxLogsPerPage: 40000,
+            timeout: '59s',
+          }),
+        })
+      );
+    });
+
+    it('fresh install with params merges params with defaults', async () => {
+      mockGlobalStateClient.find.mockResolvedValue(undefined);
+
+      await client.init({} as KibanaRequest, ['host'], { delay: '2m', frequency: '1m' });
+
+      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logsExtraction: expect.objectContaining({
+            delay: '2m',
+            frequency: '1m',
+            lookbackPeriod: '3h',
+            fieldHistoryLength: 10,
+            additionalIndexPatterns: [],
+            docsLimit: 10000,
+            maxLogsPerPage: 40000,
+          }),
+        })
+      );
+    });
+
+    it('re-install with no params preserves existing config', async () => {
+      mockGlobalStateClient.find.mockResolvedValue({
+        historySnapshot: {},
+        logsExtraction: existingLogsExtraction,
+      });
+
+      await client.init({} as KibanaRequest, ['host']);
+
+      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
+        expect.objectContaining({ logsExtraction: existingLogsExtraction })
+      );
+    });
+
+    it('re-install with empty params object preserves existing config', async () => {
+      mockGlobalStateClient.find.mockResolvedValue({
+        historySnapshot: {},
+        logsExtraction: existingLogsExtraction,
+      });
+
+      await client.init({} as KibanaRequest, ['host'], {});
+
+      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
+        expect.objectContaining({ logsExtraction: existingLogsExtraction })
+      );
+    });
+
+    it('re-install with params overwrites existing config with parsed params', async () => {
+      mockGlobalStateClient.find.mockResolvedValue({
+        historySnapshot: {},
+        logsExtraction: existingLogsExtraction,
+      });
+
+      await client.init({} as KibanaRequest, ['host'], { delay: '2m' });
+
+      expect(mockGlobalStateClient.init).toHaveBeenCalledWith(
+        expect.objectContaining({
+          logsExtraction: expect.objectContaining({
+            delay: '2m',
+            frequency: '1m',
+            lookbackPeriod: '3h',
+            fieldHistoryLength: 10,
+            additionalIndexPatterns: [],
+            docsLimit: 10000,
+            maxLogsPerPage: 40000,
+          }),
+        })
+      );
+    });
   });
 });

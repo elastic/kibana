@@ -23,7 +23,9 @@ export const EDGE_OPBEANS_JAVA_TO_POSTGRESQL = `${SERVICE_OPBEANS_JAVA}~>${DEPEN
 export const SERVICE_GO = 'service-go';
 export const SERVICE_NODE = 'service-node';
 export const OPBEANS_JAVA_INSTANCE = 'opbeans-java-prod-1';
+export const ENVIRONMENT_ALL = 'ENVIRONMENT_ALL';
 export const PRODUCTION_ENVIRONMENT = 'production';
+export const METRICS_ENVIRONMENT = 'metrics';
 
 // Service map multi-environment test data
 export const SERVICE_MAP_TEST_SERVICE = 'service-map-test';
@@ -48,6 +50,8 @@ export const SERVICE_SYNTH_GO = 'synth-go-1';
 export const SERVICE_SYNTH_GO_2 = 'synth-go-2';
 export const SERVICE_SYNTH_NODE_1 = 'synth-node-1';
 
+export { APM_METRICS_SERVICE_NAMES } from '@kbn/synthtrace/src/scenarios/helpers/apm_metrics_dashboards';
+
 export const PRODUCT_TRANSACTION_NAME = 'GET /api/product';
 export const APPLE_TRANSACTION_NAME = 'GET /apple 🍎';
 export const PRODUCT_BY_ID_TRANSACTION_NAME = 'GET /api/product/:id';
@@ -55,6 +59,13 @@ export const PRODUCT_BY_ID_TRANSACTION_NAME = 'GET /api/product/:id';
 export const ERROR_MESSAGE = '[MockError] Foo';
 export const ERROR_GROUPING_KEY = generateLongIdWithSeed(ERROR_MESSAGE);
 export const ERROR_GROUPING_KEY_SHORT = ERROR_GROUPING_KEY.slice(0, 5);
+
+// Trace waterfall flyout test services (distributed trace)
+export const SERVICE_WATERFALL_RUM = 'apm-waterfall-rum';
+export const SERVICE_WATERFALL_NODE = 'apm-waterfall-node';
+export const WATERFALL_RUM_TRANSACTION_NAME = 'GET /products';
+export const WATERFALL_NODE_TRANSACTION_NAME = 'GET /api/products';
+export const WATERFALL_NODE_DB_SPAN_NAME = 'SELECT * FROM products';
 
 // Span links test data dates
 export const SPAN_LINKS_START_DATE = '2022-01-01T00:00:00.000Z';
