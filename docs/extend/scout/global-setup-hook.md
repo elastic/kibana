@@ -1,10 +1,14 @@
 ---
-navigation_title: Global setup hook
+navigation_title: Global setup and teardown
 ---
 
-# Global setup hook [scout-global-setup-hook]
+# Global setup and teardown [scout-global-setup-hook]
 
-Use a global setup hook to run code **once** before any tests start (even with multiple workers). This is most useful for [parallel suites](./parallelism.md), where you want shared data/setup to exist before workers begin. It is also supported by non-parallel test suites.
+Use the global setup and teardown hooks to run code **once** before any tests start and/or after all workers finish — even with multiple workers. They are most useful for [parallel suites](./parallelism.md), where shared data/setup must exist before workers begin and suite-wide state may need to be reset afterwards. Both hooks are also supported by non-parallel test suites.
+
+## Global setup hook [global-setup-hook]
+
+Use `globalSetupHook(...)` in `global.setup.ts` to run code once before any tests start.
 
 ### When to use [when-to-use]
 
@@ -25,7 +29,7 @@ For **suite-wide** state that's shared across spec files (data ingested in `glob
 `esArchiver.loadIfNeeded()` is idempotent: only the first call ingests data; subsequent calls do a fast index-exists check and skip. For **sequential runs**, keeping it in `beforeAll` is fine (no benefit from global setup). For **parallel runs**, move it to global setup so ES isn't handling ingestion while workers are running (ingestion can affect Kibana performance).
 ::::::
 
-## Enable it [enable-global-setup-hook]
+### Enable it [enable-global-setup-hook]
 
 :::::::::::{stepper}
 
