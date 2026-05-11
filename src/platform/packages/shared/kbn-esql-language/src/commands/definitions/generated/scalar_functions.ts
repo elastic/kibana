@@ -4927,7 +4927,7 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
@@ -4958,7 +4958,7 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
@@ -4989,7 +4989,7 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
@@ -5020,7 +5020,7 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
@@ -5051,7 +5051,7 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
@@ -5082,7 +5082,7 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
@@ -5113,7 +5113,7 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
@@ -5144,7 +5144,38 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+          optional: true,
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'unsigned_long',
+          optional: false,
+          description: 'The input value to apply decay scoring to.',
+        },
+        {
+          name: 'origin',
+          type: 'unsigned_long',
+          optional: false,
+          description: 'Central point from which the distances are calculated.',
+        },
+        {
+          name: 'scale',
+          type: 'unsigned_long',
+          optional: false,
+          description: 'Distance from the origin where the function returns the decay value.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
@@ -5233,6 +5264,7 @@ const embeddingDefinition: FunctionDefinition = {
             'Identifier of an existing inference endpoint that will generate the embeddings. The inference endpoint must have the `embedding` task type and should use the same model that was used to embed your indexed data.',
           hint: {
             entityType: 'inference_endpoint',
+            kind: 'entity',
             constraints: {
               task_type: 'embedding',
             },
@@ -19712,6 +19744,7 @@ const textEmbeddingDefinition: FunctionDefinition = {
             'Identifier of an existing inference endpoint that will generate the embeddings. The inference endpoint must have the `text_embedding` task type and should use the same model that was used to embed your indexed data.',
           hint: {
             entityType: 'inference_endpoint',
+            kind: 'entity',
             constraints: {
               task_type: 'text_embedding',
             },
