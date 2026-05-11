@@ -106,11 +106,11 @@ const consumeKeyboardEvent = (event: KeyboardEvent) => {
 const getScreenReaderShortcutKeyLabel = (key: string) => {
   switch (key) {
     case 'ArrowLeft':
-      return i18n.translate('discover.tabsView.shortcut.screenReaderArrowLeftLabel', {
+      return i18n.translate('unifiedShortcuts.leaderKeyShortcuts.screenReaderArrowLeftLabel', {
         defaultMessage: 'left arrow',
       });
     case 'ArrowRight':
-      return i18n.translate('discover.tabsView.shortcut.screenReaderArrowRightLabel', {
+      return i18n.translate('unifiedShortcuts.leaderKeyShortcuts.screenReaderArrowRightLabel', {
         defaultMessage: 'right arrow',
       });
     default:
@@ -122,7 +122,7 @@ const getScreenReaderShortcutDescription = ({
   key,
   description,
 }: Pick<LeaderKeyShortcut, 'key' | 'description'>) => {
-  return i18n.translate('discover.tabsView.shortcut.screenReaderShortcutDescription', {
+  return i18n.translate('unifiedShortcuts.leaderKeyShortcuts.screenReaderShortcutDescription', {
     defaultMessage: '{key} for {description}',
     values: {
       key: getScreenReaderShortcutKeyLabel(key),
@@ -197,7 +197,7 @@ export const LeaderKeyShortcuts = ({
     setIsVisible(false);
   }, [instanceId]);
   const screenReaderHint = useMemo(() => {
-    return i18n.translate('discover.tabsView.shortcut.screenReaderHint', {
+    return i18n.translate('unifiedShortcuts.leaderKeyShortcuts.screenReaderHint', {
       defaultMessage: 'Press {leaderKey} for {leaderKeyDescription} shortcuts.',
       values: {
         leaderKeyDescription,
@@ -206,7 +206,7 @@ export const LeaderKeyShortcuts = ({
     });
   }, [leaderKey, leaderKeyDescription]);
   const screenReaderAnnouncement = useMemo(() => {
-    return i18n.translate('discover.tabsView.shortcut.screenReaderAnnouncement', {
+    return i18n.translate('unifiedShortcuts.leaderKeyShortcuts.screenReaderAnnouncement', {
       defaultMessage:
         '{leaderKeyDescription} shortcuts available. {shortcutDescriptions}. Press Escape to exit.',
       values: {
@@ -325,7 +325,7 @@ export const LeaderKeyShortcuts = ({
             <LeaderKeyDivider />
 
             <EuiBadge>
-              {i18n.translate('discover.tabsView.shortcut.escapeLabel', {
+              {i18n.translate('unifiedShortcuts.leaderKeyShortcuts.escapeLabel', {
                 defaultMessage: 'esc',
               })}
             </EuiBadge>
