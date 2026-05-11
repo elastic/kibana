@@ -13,7 +13,7 @@ import type {
   AgentFormattedAttachment,
 } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { ESQL_QUERY_RESULTS_ATTACHMENT_TYPE } from '../../common/agent_builder';

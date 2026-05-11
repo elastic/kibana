@@ -13,7 +13,7 @@ import { OnboardingStep } from '@kbn/streams-schema';
 import dedent from 'dedent';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../../routes/types';
-import { classifyError } from '../error_utils';
+import { classifyError } from '../../utils/error_utils';
 import { startKiIdentificationToolHandler } from './handler';
 
 export const STREAMS_KI_IDENTIFICATION_START_TOOL_ID =

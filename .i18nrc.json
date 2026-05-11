@@ -25,6 +25,7 @@
     "controls": "src/platform/plugins/shared/controls",
     "data": "src/platform/plugins/shared/data",
     "observabilityAlertDetails": "x-pack/solutions/observability/packages/alert-details",
+    "dashboardMarkdown": "src/platform/plugins/shared/dashboard_markdown",
     "dataViews": "src/platform/plugins/shared/data_views",
     "defaultNavigation": [
       "packages/default-nav",
@@ -38,7 +39,6 @@
     ],
     "savedSearch": "src/platform/plugins/shared/saved_search",
     "embeddableApi": "src/platform/plugins/shared/embeddable",
-    "presentationPanel": "src/platform/plugins/private/presentation_panel",
     "embeddableExamples": "examples/embeddable_examples",
     "esQuery": "src/platform/packages/shared/kbn-es-query/src",
     "kbnGridLayout": "src/platform/packages/private/kbn-grid-layout",
@@ -172,7 +172,6 @@
     "visDefaultEditor": "src/platform/plugins/private/vis_default_editor",
     "visTypeGauge": "src/platform/plugins/private/vis_types/gauge",
     "visTypeHeatmap": "src/platform/plugins/private/vis_types/heatmap",
-    "visTypeMarkdown": "src/platform/plugins/private/vis_type_markdown",
     "visTypeMetric": "src/platform/plugins/private/vis_types/metric",
     "visTypePie": "src/platform/plugins/private/vis_types/pie",
     "visTypeTable": "src/platform/plugins/private/vis_types/table",

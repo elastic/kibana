@@ -17,7 +17,8 @@ export type AlertingV2BreadcrumbPage =
   | 'action_policy_create'
   | 'action_policy_edit'
   | 'episodes_list'
-  | 'episode_details';
+  | 'episode_details'
+  | 'rule_doctor';
 
 export const getAlertingV2Breadcrumb = (
   page: AlertingV2BreadcrumbPage,
@@ -79,6 +80,12 @@ export const getAlertingV2Breadcrumb = (
     case 'episode_details':
       return {
         text: options?.ruleName ?? '',
+      };
+    case 'rule_doctor':
+      return {
+        text: i18n.translate('xpack.alertingV2.breadcrumbs.ruleDoctorTitle', {
+          defaultMessage: 'Rule Doctor',
+        }),
       };
   }
 };

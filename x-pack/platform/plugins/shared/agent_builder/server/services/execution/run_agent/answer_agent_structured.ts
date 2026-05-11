@@ -75,6 +75,7 @@ export const createAnswerAgentStructured = ({
       const prompt = await promptFactory.getStructuredAnswerPrompt({
         actions: state.mainActions,
         answerActions: state.answerActions,
+        cycleLimit: state.cycleLimit,
       });
 
       let response = await structuredModel.invoke(prompt);

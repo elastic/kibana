@@ -27,7 +27,6 @@ const INITIAL_VALUE: ErrorsByTraceId = {
 
 export function useFetchErrorsByTraceId({ traceId, docId }: { traceId: string; docId?: string }) {
   const { discoverShared, data } = getUnifiedDocViewerServices();
-  const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
 
   const fetchErrors = discoverShared.features.registry.getById('observability-traces-fetch-errors');
 
@@ -36,6 +35,8 @@ export function useFetchErrorsByTraceId({ traceId, docId }: { traceId: string; d
       if (!fetchErrors) {
         return null;
       }
+
+      const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
 
       return fetchErrors.fetchErrorsByTraceId(
         {
@@ -47,7 +48,7 @@ export function useFetchErrorsByTraceId({ traceId, docId }: { traceId: string; d
         signal
       );
     },
-    [fetchErrors, traceId, docId, timeFilter.from, timeFilter.to]
+    [fetchErrors, traceId, docId, data.query.timefilter.timefilter]
   );
 
   return { loading, error, response: value || INITIAL_VALUE };

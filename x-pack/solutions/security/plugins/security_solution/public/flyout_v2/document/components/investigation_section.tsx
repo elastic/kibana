@@ -14,7 +14,7 @@ import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
-import { alertFlyoutHistoryKey } from '../constants/flyout_history';
+import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
 import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { EventKind } from '../constants/event_kinds';
 import { FLYOUT_STORAGE_KEYS } from '../constants/local_storage';
@@ -65,7 +65,7 @@ export const InvestigationSection = memo(
     const store = useStore();
     const history = useHistory();
     const isInSecurityApp = useIsInSecurityApp();
-    const historyKey = isInSecurityApp ? alertFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,

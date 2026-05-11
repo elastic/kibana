@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import {
   INITIALIZATION_FLOW_CREATE_LIST_INDICES,
   INITIALIZATION_FLOW_STATUS_READY,
 } from '../../../../../common/api/initialization';
-import type { InitializationFlowContext, InitializationFlowDefinition } from '../../types';
-import type { CreateListIndicesInitializationFlowContext } from './types';
-import { FlowInitializationError } from '../../flow_registry';
+import type {
+  InitializationFlowContext,
+  InitializationFlowDefinition,
+  InitializationFlowResult,
+} from '../../types';
 
 const ignoreResourceAlreadyExistsError = async (runFn: () => Promise<void>): Promise<void> => {
   try {
@@ -26,63 +27,55 @@ const ignoreResourceAlreadyExistsError = async (runFn: () => Promise<void>): Pro
   }
 };
 
-export const createListIndicesInitializationFlow: InitializationFlowDefinition<CreateListIndicesInitializationFlowContext> =
-  {
-    id: INITIALIZATION_FLOW_CREATE_LIST_INDICES,
-    resolveProvisionContext: async (
-      initializationContext: InitializationFlowContext
-    ): Promise<CreateListIndicesInitializationFlowContext> => {
-      const listsContext = await initializationContext.requestHandlerContext.lists;
+export const createListIndicesInitializationFlow: InitializationFlowDefinition<null> = {
+  id: INITIALIZATION_FLOW_CREATE_LIST_INDICES,
+  spaceAware: true,
+  runFlow: async (context: InitializationFlowContext): Promise<InitializationFlowResult<null>> => {
+    const listsContext = await context.requestHandlerContext.lists;
 
-      if (!listsContext) {
-        throw new FlowInitializationError('lists plugin is not available');
-      }
+    if (!listsContext) {
+      throw new Error('lists plugin is not available');
+    }
 
-      return {
-        internalListClient: listsContext.getInternalListClient(),
-      };
-    },
-    provision: async (
-      { internalListClient }: CreateListIndicesInitializationFlowContext,
-      logger: Logger
-    ) => {
-      const listDataStreamExists = await internalListClient.getListDataStreamExists();
-      const listItemDataStreamExists = await internalListClient.getListItemDataStreamExists();
+    const internalListClient = listsContext.getInternalListClient();
 
-      const templateListExists = await internalListClient.getListTemplateExists();
-      const templateListItemsExists = await internalListClient.getListItemTemplateExists();
+    const listDataStreamExists = await internalListClient.getListDataStreamExists();
+    const listItemDataStreamExists = await internalListClient.getListItemDataStreamExists();
 
-      if (!templateListExists || !listDataStreamExists) {
-        await internalListClient.setListTemplate();
-      }
+    const templateListExists = await internalListClient.getListTemplateExists();
+    const templateListItemsExists = await internalListClient.getListItemTemplateExists();
 
-      if (!templateListItemsExists || !listItemDataStreamExists) {
-        await internalListClient.setListItemTemplate();
-      }
+    if (!templateListExists || !listDataStreamExists) {
+      await internalListClient.setListTemplate();
+    }
 
-      if (listDataStreamExists && listItemDataStreamExists) {
-        return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
-      }
+    if (!templateListItemsExists || !listItemDataStreamExists) {
+      await internalListClient.setListItemTemplate();
+    }
 
-      if (!listDataStreamExists) {
-        await ignoreResourceAlreadyExistsError(async () => {
-          const listIndexExists = await internalListClient.getListIndexExists();
-          await (listIndexExists
-            ? internalListClient.migrateListIndexToDataStream()
-            : internalListClient.createListDataStream());
-        });
-      }
-
-      if (!listItemDataStreamExists) {
-        await ignoreResourceAlreadyExistsError(async () => {
-          const listItemIndexExists = await internalListClient.getListItemIndexExists();
-          await (listItemIndexExists
-            ? internalListClient.migrateListItemIndexToDataStream()
-            : internalListClient.createListItemDataStream());
-        });
-      }
-
-      logger.info('List indices initialized successfully');
+    if (listDataStreamExists && listItemDataStreamExists) {
       return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
-    },
-  };
+    }
+
+    if (!listDataStreamExists) {
+      await ignoreResourceAlreadyExistsError(async () => {
+        const listIndexExists = await internalListClient.getListIndexExists();
+        await (listIndexExists
+          ? internalListClient.migrateListIndexToDataStream()
+          : internalListClient.createListDataStream());
+      });
+    }
+
+    if (!listItemDataStreamExists) {
+      await ignoreResourceAlreadyExistsError(async () => {
+        const listItemIndexExists = await internalListClient.getListItemIndexExists();
+        await (listItemIndexExists
+          ? internalListClient.migrateListItemIndexToDataStream()
+          : internalListClient.createListItemDataStream());
+      });
+    }
+
+    context.logger.info('List indices initialized successfully');
+    return { status: INITIALIZATION_FLOW_STATUS_READY, payload: null };
+  },
+};

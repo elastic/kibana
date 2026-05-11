@@ -10,7 +10,7 @@ import React, { type FC, type PropsWithChildren, type ReactElement, useMemo } fr
 import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useRuleDetailsLink } from '../../../flyout/document_details/shared/hooks/use_rule_details_link';
+import { useRuleDetailsLink } from '../../rule/hooks/use_rule_details_link';
 import { SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID, SESSION_PREVIEW_TEST_ID } from './test_ids';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { useProcessData } from '../hooks/use_process_data';

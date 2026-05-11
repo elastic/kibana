@@ -35,12 +35,18 @@ const sortByOrder = <T extends { order: number }>(items: T[]): T[] =>
 /**
  * Calculate how many items can be displayed.
  * When overflow is needed, one slot is reserved for the overflow button.
+ *
+ * @param hasStaticItems - Whether there are static items that will be appended to the overflow menu.
+ *   When true, the overflow button is always shown, so a slot must be reserved for it.
  */
-export const getDisplayedItemsAllowedAmount = (config: AppMenuConfig) => {
+export const getDisplayedItemsAllowedAmount = (
+  config: AppMenuConfig,
+  hasStaticItems: boolean = false
+) => {
   const totalItems = config.items?.length ?? 0;
   const hasForcedOverflowItems = config.items?.some((item) => item.overflow) ?? false;
 
-  if (!hasForcedOverflowItems && totalItems <= APP_MENU_ITEM_LIMIT) {
+  if (!hasForcedOverflowItems && !hasStaticItems && totalItems <= APP_MENU_ITEM_LIMIT) {
     return APP_MENU_ITEM_LIMIT;
   }
   // Reserve one slot for the overflow button
@@ -71,7 +77,13 @@ export const getShouldOverflow = ({
 /**
  * Split the items into displayed and overflow based on the configuration.
  */
-export const getAppMenuItems = ({ config }: { config?: AppMenuConfig }) => {
+export const getAppMenuItems = ({
+  config,
+  hasStaticItems = false,
+}: {
+  config?: AppMenuConfig;
+  hasStaticItems?: boolean;
+}) => {
   if (!config || !config.items) {
     return {
       displayedItems: [],
@@ -80,8 +92,9 @@ export const getAppMenuItems = ({ config }: { config?: AppMenuConfig }) => {
     };
   }
 
-  const displayedItemsAllowedAmount = getDisplayedItemsAllowedAmount(config);
-  const shouldOverflow = getShouldOverflow({ config, displayedItemsAllowedAmount });
+  const displayedItemsAllowedAmount = getDisplayedItemsAllowedAmount(config, hasStaticItems);
+  const shouldOverflow =
+    getShouldOverflow({ config, displayedItemsAllowedAmount }) || hasStaticItems;
 
   const sortedItems = sortByOrder(config.items);
   const nonOverflowItems = sortedItems.filter((item) => !item.overflow);
@@ -163,7 +176,7 @@ export const mapAppMenuItemToPanelItem = (
       return;
     }
 
-    const shouldClosePopover = !item?.href && childPanelId === undefined && onClose;
+    const shouldClosePopover = childPanelId === undefined && onClose;
 
     const triggerElement = event.currentTarget as HTMLElement;
     item.run?.({

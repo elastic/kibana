@@ -61,7 +61,9 @@ export type LangSmithEvaluationOptions = z.infer<typeof LangSmithEvaluationOptio
 /**
  * The vendor identifier.
  */
-export const SiemMigrationVendor = lazySchema(() => z.enum(['splunk', 'qradar']));
+export const SiemMigrationVendor = lazySchema(() =>
+  z.enum(['splunk', 'qradar', 'microsoft-sentinel'])
+);
 export type SiemMigrationVendor = z.infer<typeof SiemMigrationVendor>;
 export type SiemMigrationVendorEnum = typeof SiemMigrationVendor.enum;
 export const SiemMigrationVendorEnum = SiemMigrationVendor.enum;
