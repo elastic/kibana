@@ -64,11 +64,7 @@ export const pciComplianceAutonomousSkill = defineSkillType({
     'with confidence bands, and field mapping for non-ECS data. Returns pass / fail / not-assessable ' +
     'verdicts with QSA-ready explanations. Use when the user asks about PCI DSS compliance, ' +
     'cardholder data environment scope, or compliance audits against the v4.0.1 standard.',
-  content: `# PCI DSS v4.0.1 Compliance Skill (autonomous variant)
-
-> Authored by the autonomous skill architect (cycle-17). Citations track every claim — every
-> sentence below traces either to web-research corroborated by ≥2 sources, or to model-knowledge
-> reconciled against research via Jaccard similarity (rule 13b enforcement).
+  content: `# PCI DSS v4.0.1 Compliance Skill
 
 ## When to Use This Skill
 
@@ -86,86 +82,51 @@ Use this skill when the user asks about any of:
 
 Do **not** use this skill when:
 
-- The user wants threat hunting (use \`threat-hunting\` instead — proactive hypothesis-driven
-  threat discovery, not regulatory compliance).
-- The user wants alert triage (use \`alert-analysis\` — alerts are reactive investigations,
-  PCI checks are scheduled audits).
-- The user wants to create or modify detection rules (use \`detection-rule-edit\` — detections
-  are continuous, PCI checks are point-in-time evaluations).
-- The user asks about SOC 2, HIPAA, GDPR, NIST, or ISO 27001 (those are sibling frameworks
-  with different control catalogues — defer to a future framework-specific skill rather than
-  answering here, to prevent activation drift).
+- The user is asking about general security threats unrelated to PCI compliance.
+- The user needs threat hunting or attack investigation (use security alerts tools instead).
+- The user is asking about SOC 2, HIPAA, GDPR, NIST, ISO 27001, or other non-PCI compliance
+  frameworks — defer to a more appropriate skill rather than answering here, to prevent
+  activation drift.
 
 ## Available Tools
 
-This skill exposes the consolidated PCI tool set. Use them in this canonical order:
-
-- **${PCI_SCOPE_DISCOVERY_TOOL_ID}** — Inventory PCI-relevant indices and classify them by scope
-  area (network, identity, endpoint, cloud, application). Always call this **first** before
-  running checks; the \`scopeClaim\` it returns is the provenance record for everything that
-  follows.
+- **${PCI_SCOPE_DISCOVERY_TOOL_ID}** — Inventory PCI-relevant indices and classify them by
+  scope area (network, identity, endpoint, cloud, application). The \`scopeClaim\` it returns
+  is the provenance record for every check that follows.
 - **${PCI_COMPLIANCE_TOOL_ID}** — Unified PCI DSS evaluation. Pass \`mode: "check"\` for
   per-requirement violation detection with evidence; pass \`mode: "report"\` for a scorecard
-  roll-up across requirements. The autonomous architect's blueprint originally proposed two
-  separate tools (\`pci_run_compliance_check\` + \`pci_generate_scorecard_report\`) — the
-  consolidated tool with a \`mode\` parameter achieves the same conceptual separation while
-  staying inside the 5-tool selection cap.
-- **${PCI_FIELD_MAPPER_TOOL_ID}** — When scope discovery reports low ECS coverage on an index,
-  call this to suggest ECS mappings (e.g. \`username\` → \`user.name\`, \`src_ip\` →
+  roll-up across requirements.
+- **${PCI_FIELD_MAPPER_TOOL_ID}** — Inspect non-ECS fields and suggest ECS mappings when scope
+  discovery reports low ECS coverage (e.g. \`username\` → \`user.name\`, \`src_ip\` →
   \`source.ip\`, \`cve\` → \`vulnerability.id\`).
-- **${platformCoreTools.generateEsql}** / **${platformCoreTools.executeEsql}** — Generate and
-  run adapted ES|QL when mapped fields differ from ECS, or to satisfy bespoke evidence requests.
+- **${platformCoreTools.generateEsql}** — Generate ES|QL queries for adapted compliance checks
+  when mapped fields differ from ECS.
+- **${platformCoreTools.executeEsql}** — Execute ES|QL queries against discovered data.
 
 ## Compliance Assessment Workflow
 
-1. **Discover scope first.** Call ${PCI_SCOPE_DISCOVERY_TOOL_ID} with the user's index pattern.
-   Read the \`scopeClaim\` to confirm which indices were evaluated and which categories they
-   map to.
-2. **Reduce scope before running checks.** If the discovered CDE is too broad, propose
-   scope-reduction levers — **tokenisation** (removes PAN entirely), **P2PE** (removes PAN
-   from the merchant environment), and **network segmentation** (reduces in-scope systems).
-   These are the three canonical levers in priority order; applying them shrinks the audit
-   surface dramatically before any check runs.
-3. **Classify each requirement as technical or process-based.**
-   - **Technical** (1, 2, 4, 6, 7, 8, 10, 11) — verifiable from telemetry; run ${PCI_COMPLIANCE_TOOL_ID}.
-   - **Process-based** (3, 5, 9, 12) — cannot be passed/failed from telemetry alone; mark as
-     "needs human attestation" and explain why automated evidence is input to a formal
-     assessment, not a substitute for it.
-4. **Run the checks.** Call ${PCI_COMPLIANCE_TOOL_ID} with \`mode: "check"\` for individual
-   requirement queries, or \`mode: "report"\` for executive-summary scorecards.
-5. **Handle non-ECS data.** If scope discovery reports low ECS coverage, call
-   ${PCI_FIELD_MAPPER_TOOL_ID} first, then ${platformCoreTools.generateEsql} with the suggested
-   field map.
-6. **Surface the QSA disclaimer.** Every response must include the non-attestation disclaimer:
-   automated evidence supports but does not replace a Qualified Security Assessor's formal
-   assessment.
+**Always call the dedicated PCI tools** (\`${PCI_SCOPE_DISCOVERY_TOOL_ID}\`,
+\`${PCI_COMPLIANCE_TOOL_ID}\`, \`${PCI_FIELD_MAPPER_TOOL_ID}\`). Do **not** improvise raw ES|QL
+queries against PCI indices when one of these tools applies. The tools encode requirement-
+specific detection logic (default-account patterns, weak-TLS regex sets, brute-force thresholds,
+field-mapping heuristics, requirement → category classification) that ad-hoc ES|QL will miss.
 
-## Domain Knowledge Notes
-
-These observations come from the autonomous architect's training corpus and are reconciled
-against the research hints (rule 13b enforcement — partial overlaps marked corroborated, full
-overlaps dropped).
-
-- **PCI SAQ taxonomy.** v4.0.1 defines 9 distinct SAQ types: A (full e-commerce outsourcing),
-  A-EP (partial outsourcing with payment redirect), B, B-IP, C, C-VT, D-MER (merchants
-  storing PAN), P2PE-HW, D-SP (service providers). **Selecting the wrong SAQ is the most
-  common audit-scoping error** — picking the right one removes ~70% of irrelevant requirements
-  before any check runs. Surface the user's SAQ classification when they describe their
-  business model and use it to filter requirements.
-- **v3.2.1 → v4.0.1 deltas.** Three requirements are net-new in v4.0 and most-missed by tools
-  trained on v3-era guidance: **3.4.1** (PAN masking on display), **8.4.2** (MFA for ALL CDE
-  access including non-console admin), and **11.4.1** (continuous monitoring of CDE network).
-  When the user mentions migrating from v3, surface these explicitly.
-- **v4.0.1 clarifications.** The June 2024 limited revision introduced no new requirements but
-  clarified: req 6.3.3 30-day patching applies to **critical-severity only** (not high);
-  req 8.4.2 MFA required for **ALL CDE access**, not just administrative; phishing-resistant
-  auth (FIDO2/WebAuthn) can substitute for traditional MFA for non-admin CDE access.
+1. **Discover available data.** Call \`${PCI_SCOPE_DISCOVERY_TOOL_ID}\` to identify indices and
+   data coverage. Inspect \`scopeClaim\` in the response to verify which indices were evaluated.
+2. **Run checks or reports.** Call \`${PCI_COMPLIANCE_TOOL_ID}\`. Use \`mode: "check"\` when the
+   user wants per-requirement findings with evidence, or \`mode: "report"\` when they want a
+   posture snapshot or executive summary. Pass the user's index pattern via the \`indices\`
+   parameter and any specific requirement IDs via the \`requirements\` parameter.
+3. **Handle non-ECS data.** If \`${PCI_SCOPE_DISCOVERY_TOOL_ID}\` reports low ECS coverage on an
+   index, call \`${PCI_FIELD_MAPPER_TOOL_ID}\` to discover field mappings, then use
+   \`${platformCoreTools.generateEsql}\` with those mappings.
+4. **Surface the QSA disclaimer** in every audit-facing response: automated evidence supports
+   but does not replace a Qualified Security Assessor's formal assessment.
 
 ## Tiered Status Vocabulary
 
-Surface compliance verdicts using the standard tiered status (RED / AMBER / GREEN) so the
-consumer can route by severity. This is established practice across PCI tooling (e.g. Splunk
-App for PCI Compliance).
+Surface compliance verdicts using the standard tiered status (RED / AMBER / GREEN /
+NOT_ASSESSABLE) so the consumer can route by severity.
 
 | Tier | Meaning | Recommended Remediation SLA |
 |---|---|---|
@@ -194,6 +155,34 @@ query structure.
 Each check has a recommended lookback (e.g. 7 days for brute-force detection, 365 days for
 stale-account checks). User-supplied \`timeRange\` overrides defaults. Time range values are
 bound as ES|QL parameters, not string-interpolated.
+
+## Background reference
+
+The notes below are domain context. **Do not consult them before calling the tools** — the
+tools encode the same knowledge operationally. Use this section only when you need to explain
+a finding back to the user.
+
+- **PCI SAQ taxonomy.** v4.0.1 defines 9 distinct SAQ types: A (full e-commerce outsourcing),
+  A-EP (partial outsourcing with payment redirect), B, B-IP, C, C-VT, D-MER (merchants
+  storing PAN), P2PE-HW, D-SP (service providers). **Selecting the wrong SAQ is the most
+  common audit-scoping error** — picking the right one removes ~70% of irrelevant requirements
+  before any check runs. Surface the user's SAQ classification when they describe their
+  business model and use it to filter requirements.
+- **v3.2.1 → v4.0.1 deltas.** Three requirements are net-new in v4.0 and most-missed by tools
+  trained on v3-era guidance: **3.4.1** (PAN masking on display), **8.4.2** (MFA for ALL CDE
+  access including non-console admin), and **11.4.1** (continuous monitoring of CDE network).
+  When the user mentions migrating from v3, surface these explicitly.
+- **v4.0.1 clarifications.** The June 2024 limited revision introduced no new requirements but
+  clarified: req 6.3.3 30-day patching applies to **critical-severity only** (not high);
+  req 8.4.2 MFA required for **ALL CDE access**, not just administrative; phishing-resistant
+  auth (FIDO2/WebAuthn) can substitute for traditional MFA for non-admin CDE access.
+- **Scope-reduction levers** (in priority order): **tokenisation** (removes PAN entirely),
+  **P2PE** (removes PAN from the merchant environment), **network segmentation** (reduces
+  in-scope systems).
+- **Requirement classification.** Technical requirements (1, 2, 4, 6, 7, 8, 10, 11) are
+  verifiable from telemetry; process-based requirements (3, 5, 9, 12) require human
+  attestation. \`${PCI_COMPLIANCE_TOOL_ID}\` handles this distinction internally — surface
+  the verdict it returns rather than redoing the classification.
 `,
   getRegistryTools: () => [...PCI_COMPLIANCE_AUTONOMOUS_SKILL_TOOL_IDS],
 });

@@ -62,7 +62,7 @@
 </p>
 
 <div class="pillrow">
-  <span class="pill">generated: 2026-05-11T13:11:16.131Z</span>
+  <span class="pill">generated: 2026-05-11T15:25:17.742Z</span>
   <span class="pill">hand-written by: <strong>Smriti</strong> (PR #256060)</span>
   <span class="pill">autonomous by: <strong>skill.architect</strong> (cycle-17)</span>
   <span class="pill">eval suite: <code>@kbn/evals-suite-pci-compliance</code> (8 scenarios)</span>
@@ -76,13 +76,13 @@
     <div class="value">4,135 chars</div>
     <div class="footnote">58 lines · 8 sections · 20 bullets</div></div>
   <div class="kpi"><div class="label">Autonomous content</div>
-    <div class="value">8,062 chars</div>
-    <div class="footnote">131 lines · 8 sections · 19 bullets</div></div>
+    <div class="value">7,430 chars</div>
+    <div class="footnote">120 lines · 8 sections · 19 bullets</div></div>
   <div class="kpi"><div class="label">v4.0.1 anchors</div>
     <div class="value">HW: 3 / Auto: 5</div>
     <div class="footnote">Both pin to v4.0.1 (June 2024 limited revision).</div></div>
   <div class="kpi"><div class="label">Do-not-use boundaries</div>
-    <div class="value">HW: 3 / Auto: 4</div>
+    <div class="value">HW: 3 / Auto: 3</div>
     <div class="footnote">More boundaries → less activation drift on adjacent topics.</div></div>
   <div class="kpi"><div class="label">Skill-contract tests</div>
     <div class="value">HW: 11 / Auto: 16</div>
@@ -109,13 +109,13 @@
 <table>
   <thead><tr><th>Metric</th><th>Hand-written</th><th>Autonomous</th><th>Δ</th></tr></thead>
   <tbody>
-    <tr><td>Total characters</td><td class="num">4135</td><td class="num">8062</td><td class="num delta-positive">+3927</td></tr>
-    <tr><td>Total lines</td><td class="num">58</td><td class="num">131</td><td class="num delta-positive">+73</td></tr>
+    <tr><td>Total characters</td><td class="num">4135</td><td class="num">7430</td><td class="num delta-positive">+3295</td></tr>
+    <tr><td>Total lines</td><td class="num">58</td><td class="num">120</td><td class="num delta-positive">+62</td></tr>
     <tr><td>## sections</td><td class="num">8</td><td class="num">8</td><td class="num ">0</td></tr>
     <tr><td>### sub-sections</td><td class="num">0</td><td class="num">0</td><td class="num ">0</td></tr>
     <tr><td>Bullet items</td><td class="num">20</td><td class="num">19</td><td class="num delta-negative">-1</td></tr>
     <tr><td>Code/table fences</td><td class="num">0</td><td class="num">0</td><td class="num ">0</td></tr>
-    <tr><td>Do-not-use bullets</td><td class="num">3</td><td class="num">4</td><td class="num delta-positive">+1</td></tr>
+    <tr><td>Do-not-use bullets</td><td class="num">3</td><td class="num">3</td><td class="num ">0</td></tr>
     <tr><td>v4.0.1 mentions</td><td class="num">3</td><td class="num">5</td><td class="num delta-positive">+2</td></tr>
     <tr><td>Requirement-N mentions</td><td class="num">1</td><td class="num">1</td><td class="num ">0</td></tr>
   </tbody>
@@ -148,20 +148,20 @@
   numeric scores (0..1) from the <em>PCI Criteria</em> evaluator.
 </p>
 <div class="banner banner-info">
-<strong>Live result:</strong> the hand-written skill outperformed the autonomous variant on both models — by 14.3 pts on Claude 4.7 Opus (0.977 vs 0.834) and 12.8 pts on Claude 4.6 Sonnet (0.989 vs 0.860). The autonomous architect's broader domain framing (SAQ taxonomy, v3→v4 deltas, scope-reduction levers — §3) <em>did not</em> translate into a better LLM-judge score on this evaluator. The hand-written contract is shorter (4,135 vs 8,062 chars) and lines up more tightly with the eval's scoring rubric — that tight coupling is the deciding factor here.
+<strong>Live result:</strong> the hand-written skill outperformed the autonomous variant on both models — by 14.3 pts on Claude 4.7 Opus (0.977 vs 0.834) and 12.8 pts on Claude 4.6 Sonnet (0.989 vs 0.860). Trace inspection showed the autonomous variant <em>never</em> called the dedicated PCI tools (<code>security.pci_compliance</code>, <code>security.pci_scope_discovery</code>, <code>security.pci_field_mapper</code>) — 0 calls vs 17-23 for the hand-written variant across 16 scenarios — and instead improvised raw ES|QL via <code>platform.core.execute_esql</code> (36 calls vs 0), losing rubric points for both "did not call the tool" criteria and downstream substantive misses. After the postmortem fixes — (a) registering the PCI tools whenever <em>either</em> feature flag is on (the original gate excluded the autonomous variant entirely), and (b) restructuring the skill content tool-first with theory at the bottom and an explicit "always call the dedicated PCI tools, do not improvise raw ES|QL" injunction — Auto v3 closed to <strong>0.955</strong> on Sonnet 4.6, 3.4 pts behind the hand-written variant (down from 12.8 pts). See <code>POSTMORTEM.md</code> for the full analysis.
 </div>
 <table>
-<thead><tr><th>Scenario</th><th>HW · Claude 4.7 Opus</th><th>Auto · Claude 4.7 Opus</th><th>HW · Claude 4.6 Sonnet</th><th>Auto · Claude 4.6 Sonnet</th></tr></thead>
+<thead><tr><th>Scenario</th><th>HW · Claude 4.7 Opus</th><th>Auto · Claude 4.7 Opus</th><th>HW · Claude 4.6 Sonnet</th><th>Auto v1 · Claude 4.6 Sonnet</th><th>Auto v3 · Claude 4.6 Sonnet (after fix)</th></tr></thead>
 <tbody>
-<tr><td>pci-compliance: field mapping</td><td class="num">0.818</td><td class="num">0.727</td><td class="num">0.909</td><td class="num">0.818</td></tr>
-<tr><td>pci-compliance: full report</td><td class="num">1.000</td><td class="num">0.818</td><td class="num">1.000</td><td class="num">0.818</td></tr>
-<tr><td>pci-compliance: no matching data</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">0.750</td></tr>
-<tr><td>pci-compliance: requirement 2.2.4 default accounts</td><td class="num">1.000</td><td class="num">0.571</td><td class="num">1.000</td><td class="num">0.857</td></tr>
-<tr><td>pci-compliance: requirement 4.1 weak TLS</td><td class="num">1.000</td><td class="num">0.889</td><td class="num">1.000</td><td class="num">1.000</td></tr>
-<tr><td>pci-compliance: requirement 8.3.4 brute force</td><td class="num">1.000</td><td class="num">0.778</td><td class="num">1.000</td><td class="num">1.000</td></tr>
-<tr><td>pci-compliance: scope discovery</td><td class="num">1.000</td><td class="num">0.889</td><td class="num">1.000</td><td class="num">0.889</td></tr>
-<tr><td>pci-compliance: scoped to auth index</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">0.750</td></tr>
-<tr><td><strong>Mean</strong></td><td class="num delta-positive"><strong>0.977</strong></td><td class="num "><strong>0.834</strong></td><td class="num delta-positive"><strong>0.989</strong></td><td class="num "><strong>0.860</strong></td></tr><tr><td class="footnote">scenarios scored</td><td class="num footnote">8</td><td class="num footnote">8</td><td class="num footnote">8</td><td class="num footnote">8</td></tr>
+<tr><td>pci-compliance: field mapping</td><td class="num">0.818</td><td class="num">0.727</td><td class="num">0.909</td><td class="num">0.818</td><td class="num">0.909</td></tr>
+<tr><td>pci-compliance: full report</td><td class="num">1.000</td><td class="num">0.818</td><td class="num">1.000</td><td class="num">0.818</td><td class="num">0.727</td></tr>
+<tr><td>pci-compliance: no matching data</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">0.750</td><td class="num">1.000</td></tr>
+<tr><td>pci-compliance: requirement 2.2.4 default accounts</td><td class="num">1.000</td><td class="num">0.571</td><td class="num">1.000</td><td class="num">0.857</td><td class="num">1.000</td></tr>
+<tr><td>pci-compliance: requirement 4.1 weak TLS</td><td class="num">1.000</td><td class="num">0.889</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td></tr>
+<tr><td>pci-compliance: requirement 8.3.4 brute force</td><td class="num">1.000</td><td class="num">0.778</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td></tr>
+<tr><td>pci-compliance: scope discovery</td><td class="num">1.000</td><td class="num">0.889</td><td class="num">1.000</td><td class="num">0.889</td><td class="num">1.000</td></tr>
+<tr><td>pci-compliance: scoped to auth index</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">0.750</td><td class="num">1.000</td></tr>
+<tr><td><strong>Mean</strong></td><td class="num delta-positive"><strong>0.977</strong></td><td class="num "><strong>0.834</strong></td><td class="num delta-positive"><strong>0.989</strong></td><td class="num "><strong>0.860</strong></td><td class="num delta-positive"><strong>0.955</strong></td></tr><tr><td class="footnote">scenarios scored</td><td class="num footnote">8</td><td class="num footnote">8</td><td class="num footnote">8</td><td class="num footnote">8</td><td class="num footnote">8</td></tr>
 </tbody>
 </table>
 
@@ -186,7 +186,8 @@
 <pre>opus47-handwritten    : x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/opus47-handwritten/results.json
 opus47-autonomous     : x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/opus47-autonomous/results.json
 sonnet46-handwritten  : x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/sonnet46-handwritten/results.json
-sonnet46-autonomous   : x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/sonnet46-autonomous/results.json</pre>
+sonnet46-autonomous   : x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/sonnet46-autonomous/results.json
+sonnet46-autonomous-v3: x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/sonnet46-autonomous-v3-full/results.json</pre>
 </details>
 
 <h2>5 · Reasoning — what each skill is optimised for</h2>
@@ -245,7 +246,7 @@ EVAL_PCI_VARIANT=autonomous node scripts/evals start --suite pci-compliance-auto
   <li>Hand-written skill source: <code>x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/pci_compliance/pci_compliance_skill.ts</code></li>
   <li>Autonomous skill source: <code>x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/pci_compliance_autonomous/pci_compliance_autonomous_skill.ts</code></li>
   <li>Eval spec: <code>x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/evals/pci_compliance/pci_compliance.spec.ts</code></li>
-  <li>Live results (when present): <code>x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/opus47-handwritten/results.json</code> &amp; <code>x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/opus47-autonomous/results.json</code></li>
+  <li>Live results (when present): <code>x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/handwritten/results.json</code> &amp; <code>x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/autonomous/results.json</code></li>
 </ul>
 
 <h2>8 · Bedrock connector fix (Claude Opus 4.7 enablement)</h2>

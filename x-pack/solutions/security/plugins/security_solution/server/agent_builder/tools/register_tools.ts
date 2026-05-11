@@ -21,8 +21,13 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_c
 /**
  * Registers all security agent builder tools with the agentBuilder plugin.
  *
- * PCI compliance tools are gated behind `experimentalFeatures.pciComplianceAgentBuilder` so
- * the feature can ship dark and be enabled per environment.
+ * PCI compliance tools are gated behind `experimentalFeatures.pciComplianceAgentBuilder` OR
+ * `experimentalFeatures.pciComplianceAutonomousAgentBuilder`. Either flag enables the same
+ * underlying tool implementations — the two flags select which *skill content* the agent
+ * router sees (hand-written vs autonomous variant), but both variants delegate to the same
+ * tools. Gating the tool registration on the hand-written flag alone meant the autonomous
+ * scout config (which disables the hand-written flag to isolate the variant comparison)
+ * shipped without any PCI tools registered, forcing the agent to fall back to raw ES|QL.
  */
 export const registerTools = async (
   agentBuilder: AgentBuilderPluginSetup,
@@ -38,7 +43,10 @@ export const registerTools = async (
   agentBuilder.tools.register(getEntityTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
 
-  if (experimentalFeatures.pciComplianceAgentBuilder) {
+  if (
+    experimentalFeatures.pciComplianceAgentBuilder ||
+    experimentalFeatures.pciComplianceAutonomousAgentBuilder
+  ) {
     agentBuilder.tools.register(pciScopeDiscoveryTool(core, logger));
     agentBuilder.tools.register(pciComplianceTool(core, logger));
     agentBuilder.tools.register(pciFieldMapperTool(core, logger));

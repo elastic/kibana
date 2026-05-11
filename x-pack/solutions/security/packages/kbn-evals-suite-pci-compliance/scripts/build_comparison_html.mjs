@@ -491,7 +491,8 @@ ${
           ['opus47-handwritten', 'HW · Claude 4.7 Opus'],
           ['opus47-autonomous', 'Auto · Claude 4.7 Opus'],
           ['sonnet46-handwritten', 'HW · Claude 4.6 Sonnet'],
-          ['sonnet46-autonomous', 'Auto · Claude 4.6 Sonnet'],
+          ['sonnet46-autonomous', 'Auto v1 · Claude 4.6 Sonnet'],
+          ['sonnet46-autonomous-v3', 'Auto v3 · Claude 4.6 Sonnet (after fix)'],
         ].filter(([k]) => multiRuns[k]?.populated);
         const allScenarios = new Set();
         for (const [k] of ORDER) for (const s of multiRuns[k].scenarios) allScenarios.add(s.scenario);
@@ -541,10 +542,15 @@ ${
         const auOpus = sums[ORDER.findIndex(([k]) => k === 'opus47-autonomous')]?.mean ?? NaN;
         const hwSonnet = sums[ORDER.findIndex(([k]) => k === 'sonnet46-handwritten')]?.mean ?? NaN;
         const auSonnet = sums[ORDER.findIndex(([k]) => k === 'sonnet46-autonomous')]?.mean ?? NaN;
+        const auSonnetV3 = sums[ORDER.findIndex(([k]) => k === 'sonnet46-autonomous-v3')]?.mean ?? NaN;
         const opusDelta = hwOpus - auOpus;
         const sonnetDelta = hwSonnet - auSonnet;
+        const sonnetDeltaV3 = Number.isFinite(auSonnetV3) ? hwSonnet - auSonnetV3 : NaN;
+        const verdictV3 = Number.isFinite(auSonnetV3)
+          ? ` After the postmortem fixes — (a) registering the PCI tools whenever <em>either</em> feature flag is on (the original gate excluded the autonomous variant entirely), and (b) restructuring the skill content tool-first with theory at the bottom and an explicit "always call the dedicated PCI tools, do not improvise raw ES|QL" injunction — Auto v3 closed to <strong>${auSonnetV3.toFixed(3)}</strong> on Sonnet 4.6, ${(sonnetDeltaV3 * 100).toFixed(1)} pts behind the hand-written variant (down from ${(sonnetDelta * 100).toFixed(1)} pts). See <code>POSTMORTEM.md</code> for the full analysis.`
+          : '';
         const verdict = `<div class="banner ${hwOpus > auOpus && hwSonnet > auSonnet ? 'banner-info' : 'banner-warn'}">
-<strong>Live result:</strong> the hand-written skill outperformed the autonomous variant on both models — by ${(opusDelta * 100).toFixed(1)} pts on Claude 4.7 Opus (${hwOpus.toFixed(3)} vs ${auOpus.toFixed(3)}) and ${(sonnetDelta * 100).toFixed(1)} pts on Claude 4.6 Sonnet (${hwSonnet.toFixed(3)} vs ${auSonnet.toFixed(3)}). The autonomous architect's broader domain framing (SAQ taxonomy, v3→v4 deltas, scope-reduction levers — §3) <em>did not</em> translate into a better LLM-judge score on this evaluator. The hand-written contract is shorter (${handwrittenMetrics.chars.toLocaleString()} vs ${autonomousMetrics.chars.toLocaleString()} chars) and lines up more tightly with the eval's scoring rubric — that tight coupling is the deciding factor here.
+<strong>Live result:</strong> the hand-written skill outperformed the autonomous variant on both models — by ${(opusDelta * 100).toFixed(1)} pts on Claude 4.7 Opus (${hwOpus.toFixed(3)} vs ${auOpus.toFixed(3)}) and ${(sonnetDelta * 100).toFixed(1)} pts on Claude 4.6 Sonnet (${hwSonnet.toFixed(3)} vs ${auSonnet.toFixed(3)}). Trace inspection showed the autonomous variant <em>never</em> called the dedicated PCI tools (<code>security.pci_compliance</code>, <code>security.pci_scope_discovery</code>, <code>security.pci_field_mapper</code>) — 0 calls vs 17-23 for the hand-written variant across 16 scenarios — and instead improvised raw ES|QL via <code>platform.core.execute_esql</code> (36 calls vs 0), losing rubric points for both "did not call the tool" criteria and downstream substantive misses.${verdictV3}
 </div>`;
         return `<p class="lead">
   Both variants ran through the same ${specScenarioCount}-scenario suite end-to-end
