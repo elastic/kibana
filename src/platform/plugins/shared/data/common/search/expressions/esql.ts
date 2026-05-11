@@ -179,22 +179,21 @@ function mapResponseToDatatable(
       fieldName: timeField,
     });
 
-  if (rows.length && timeFilter) {
-    let firstEntry = new Date(rows[0][timeField!]);
+  if (rows.length && timeFilter && timeField) {
+    let firstEntry = new Date(rows[0][timeField]);
     const fromRange = new Date(timeFilter.query.range[timeField].gte);
-    const lastEntry = new Date(rows[rows.length - 1][timeField!]);
+    const lastEntry = new Date(rows[rows.length - 1][timeField]);
     const toRange = new Date(timeFilter.query.range[timeField].lte);
 
     const step =
-      new Date(rows[rows.length - 1][timeField!]) - new Date(rows[rows.length - 2][timeField!]);
+      new Date(rows[rows.length - 1][timeField]).getTime() -
+      new Date(rows[rows.length - 2][timeField]).getTime();
     const end = new Date(lastEntry.getTime() + step);
-    const startLatest = new Date(fromRange.getTime() + step);
-    const endLatest = new Date(toRange.getTime() - step);
 
     if (partialRows === false) {
       while (fromRange > firstEntry) {
         rows.shift();
-        firstEntry = new Date(rows[0][timeField!]);
+        firstEntry = new Date(rows[0][timeField]);
       }
       if (end > toRange) rows.pop();
     }
