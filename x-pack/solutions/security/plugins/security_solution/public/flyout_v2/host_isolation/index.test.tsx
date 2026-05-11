@@ -12,8 +12,6 @@ import { HostIsolation } from '.';
 import {
   HOST_ISOLATION_INTEGRATION_TEST_ID as mockHostIsolationIntegrationTestId,
   HOST_ISOLATION_PANEL_TEST_ID as mockHostIsolationPanelTestId,
-  HOST_ISOLATION_INTEGRATION_TEST_ID,
-  HOST_ISOLATION_PANEL_TEST_ID,
   HOST_ISOLATION_TITLE_TEST_ID,
 } from './test_ids';
 import { endpointAlertDataMock } from '../../common/mock/endpoint';
@@ -59,8 +57,8 @@ describe('<HostIsolation />', () => {
     );
 
     expect(getByTestId(HOST_ISOLATION_TITLE_TEST_ID)).toHaveTextContent('Isolate host');
-    expect(getByTestId(HOST_ISOLATION_INTEGRATION_TEST_ID)).toHaveTextContent('endpoint');
-    expect(getByTestId(HOST_ISOLATION_PANEL_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(mockHostIsolationIntegrationTestId)).toHaveTextContent('endpoint');
+    expect(getByTestId(mockHostIsolationPanelTestId)).toBeInTheDocument();
   });
 
   it('renders the release title when action is unisolateHost', () => {
