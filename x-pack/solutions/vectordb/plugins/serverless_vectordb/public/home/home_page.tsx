@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { Redirect } from 'react-router-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -25,7 +24,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { hasSeenOnboarding } from '@kbn/vectordb-onboarding';
 import { useKibana } from '../hooks/use_kibana';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { formatBytes, formatNumber, useDeploymentStats } from './use_deployment_stats';
@@ -51,11 +49,6 @@ export const HomePage: React.FC = () => {
   } = useKibana();
   const { stats, isLoading } = useDeploymentStats();
   const elasticsearchUrl = stats.elasticsearchUrl ?? '';
-
-  // First visit: send the user through the onboarding wizard once.
-  if (!hasSeenOnboarding()) {
-    return <Redirect to="/onboarding" />;
-  }
 
   const goToApiKeys = () =>
     application.navigateToApp('management', { path: '/security/api_keys/create' });

@@ -13,6 +13,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import {
+  hasSeenOnboarding,
   IngestStep,
   OnboardingApiPathsProvider,
   PathStep,
@@ -29,7 +30,11 @@ const ONBOARDING_API_PATHS = {
 
 const App: React.FC = () => (
   <Routes>
-    <Route exact path="/" component={HomePage} />
+    <Route
+      exact
+      path="/"
+      render={() => (hasSeenOnboarding() ? <HomePage /> : <Redirect to="/onboarding" />)}
+    />
     <Route exact path="/onboarding" component={PathStep} />
     <Route exact path="/onboarding/ingest" component={IngestStep} />
     <Route exact path="/onboarding/search" component={SearchStep} />
