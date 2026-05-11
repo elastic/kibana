@@ -20,6 +20,7 @@ import type {
   I18nStart,
   AppMountParameters,
 } from '@kbn/core/public';
+import type { HotkeysStart } from '@kbn/core-hotkeys-browser';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -55,6 +56,7 @@ export interface HomeKibanaServices {
   tutorialService: TutorialService;
   addDataService: AddDataService;
   welcomeService: WelcomeService;
+  hotkeys: HotkeysStart;
   cloud: CloudSetup;
   cloudStart: CloudStart;
   overlays: OverlayStart;
