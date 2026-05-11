@@ -28,9 +28,23 @@ export const RULE_ADD_FAILURE = i18n.translate(
   }
 );
 
+export const BOOTSTRAP_PREBUILT_RULES_PACKAGE_FAILURE = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.bootstrapPrebuiltRulesPackageFailure',
+  {
+    defaultMessage: 'Failed to install prebuilt rules package',
+  }
+);
+
 export const BOOTSTRAP_PREBUILT_RULES_FAILURE = i18n.translate(
   'xpack.securitySolution.containers.detectionEngine.bootstrapPrebuiltRulesFailure',
   {
     defaultMessage: 'Failed to bootstrap prebuilt rules',
+  }
+);
+
+export const BOOTSTRAP_EASE_RULES_FAILURE = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.bootstrapEaseRulesFailure',
+  {
+    defaultMessage: 'Failed to bootstrap EASE rules',
   }
 );

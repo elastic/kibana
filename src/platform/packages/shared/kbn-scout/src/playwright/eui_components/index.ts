@@ -8,6 +8,7 @@
  */
 
 import { EuiComboBoxWrapper } from './combo_box';
+import type { ComboBoxInputOptions } from './combo_box';
 import { EuiSelectableWrapper } from './selectable';
 import { EuiCheckBoxWrapper } from './check_box';
 import { EuiDataGridWrapper } from './data_grid';
@@ -16,6 +17,7 @@ import { EuiFieldTextWrapper } from './field_text';
 import { EuiCodeBlockWrapper } from './code_block';
 import { EuiSuperSelectWrapper } from './super_select';
 
+export type { ComboBoxInputOptions };
 export {
   EuiComboBoxWrapper,
   EuiSelectableWrapper,
