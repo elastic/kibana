@@ -101,6 +101,11 @@ const parseFilterParts = (children: ReactNode): ParsedPart[] => {
  *
  * `WeakMap` keys are weakly held, so wrappers are garbage-collected once the
  * underlying `Component` becomes unreachable.
+ *
+ * TODO(https://github.com/elastic/eui/issues/9647): drop this cache and the
+ * wrapping entirely once `EuiSearchBar` surfaces a change source on its
+ * top-level `onChange` (typing vs custom-filter), so the toolbar can branch
+ * directly in `handleSearchChange` without intercepting per-component.
  */
 const wrapperCache = new WeakMap<
   ComponentType<CustomFilterComponentProps>,
