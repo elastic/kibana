@@ -8,7 +8,7 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
-import { useFetchAlertSummary } from './use_fetch_alert_summary';
+import { useFetchDocumentSummary } from './use_fetch_document_summary';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
@@ -29,7 +29,7 @@ const createWrapper = () => {
 const mockAlertSummary = {
   summary: "CPU utilization for host 'prod-web-01' exceeded 90% threshold, reaching 95%.",
 };
-describe('useFetchAlertSummary', () => {
+describe('useFetchDocumentSummary', () => {
   const mockHttp = {
     fetch: jest.fn(),
   };
@@ -53,7 +53,7 @@ describe('useFetchAlertSummary', () => {
       prompt: 'Generate an alert summary!',
     });
 
-    const { result } = renderHook(() => useFetchAlertSummary(args), {
+    const { result } = renderHook(() => useFetchDocumentSummary(args), {
       wrapper: createWrapper(),
     });
     expect(mockHttp.fetch).toHaveBeenCalledWith(

@@ -11,7 +11,8 @@ import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID = 'alert-flyout-ai-summary-anonymize-toggle';
+export const DOCUMENT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID =
+  'document-flyout-ai-summary-anonymize-toggle';
 
 /**
  * Conditionally wrap a component
@@ -31,7 +32,7 @@ export interface AnonymizationSwitchProps {
    * If true, the switch is enabled. If false, the switch is wrapped with a
    * tooltip explaining why it is disabled.
    */
-  hasAlertSummary: boolean;
+  hasSummary: boolean;
   /**
    * Current value of the anonymization toggle. When `undefined` (the active
    * Kibana space id has not yet been resolved) the switch is not rendered,
@@ -56,11 +57,7 @@ export interface AnonymizationSwitchProps {
  * surface the AI summary section.
  */
 export const AnonymizationSwitch = memo(
-  ({
-    hasAlertSummary,
-    showAnonymizedValues,
-    setShowAnonymizedValues,
-  }: AnonymizationSwitchProps) => {
+  ({ hasSummary, showAnonymizedValues, setShowAnonymizedValues }: AnonymizationSwitchProps) => {
     const onChangeShowAnonymizedValues = useCallback(
       (e: EuiSwitchEvent) => {
         setShowAnonymizedValues(e.target.checked);
@@ -76,7 +73,7 @@ export const AnonymizationSwitch = memo(
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <ConditionalWrap
-            condition={!hasAlertSummary}
+            condition={!hasSummary}
             wrap={(children) => (
               <EuiToolTip
                 position="top"
@@ -93,10 +90,10 @@ export const AnonymizationSwitch = memo(
             )}
           >
             <EuiSwitch
-              data-test-subj={ALERT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID}
+              data-test-subj={DOCUMENT_SUMMARY_ANONYMIZE_TOGGLE_TEST_ID}
               checked={showAnonymizedValues}
               compressed
-              disabled={!hasAlertSummary}
+              disabled={!hasSummary}
               label={i18n.translate('xpack.securitySolution.flyout.settings.anonymizeValues', {
                 defaultMessage: 'Show anonymized values',
               })}

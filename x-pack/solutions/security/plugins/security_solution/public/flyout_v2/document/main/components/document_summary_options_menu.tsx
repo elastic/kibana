@@ -10,22 +10,22 @@ import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiToolTip } from 
 import { i18n } from '@kbn/i18n';
 import { AnonymizationSwitch } from './anonymization_switch';
 
-export const ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID =
-  'alert-flyout-ai-summary-options-menu-button';
-export const ALERT_SUMMARY_OPTIONS_MENU_PANELS_TEST_ID =
-  'alert-flyout-ai-summary-options-menu-panels';
+export const DOCUMENT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID =
+  'document-flyout-ai-summary-options-menu-button';
+export const DOCUMENT_SUMMARY_OPTIONS_MENU_PANELS_TEST_ID =
+  'document-flyout-ai-summary-options-menu-panels';
 
 const OPTIONS_MENU = i18n.translate('xpack.securitySolution.flyout.alertSummary.optionsMenuTitle', {
   defaultMessage: 'Options',
 });
 
-export interface AlertSummaryOptionsMenuProps {
+export interface DocumentSummaryOptionsMenuProps {
   /**
-   * Whether the alert currently has an AI summary. Forwarded to the
+   * Whether the document currently has an AI summary. Forwarded to the
    * anonymization switch so the toggle is disabled (with a tooltip) when no
    * summary has been generated yet.
    */
-  hasAlertSummary: boolean;
+  hasSummary: boolean;
   /**
    * Current value of the anonymization toggle.
    */
@@ -41,12 +41,12 @@ export interface AlertSummaryOptionsMenuProps {
  * `extraAction` slot of an `ExpandableSection` host). Currently exposes a
  * single option that toggles the display of anonymized values.
  */
-export const AlertSummaryOptionsMenu = memo(
+export const DocumentSummaryOptionsMenu = memo(
   ({
-    hasAlertSummary,
+    hasSummary,
     showAnonymizedValues,
     setShowAnonymizedValues,
-  }: AlertSummaryOptionsMenuProps) => {
+  }: DocumentSummaryOptionsMenuProps) => {
     const [isPopoverOpen, setPopover] = useState(false);
     const togglePopover = useCallback(() => setPopover((open) => !open), []);
 
@@ -55,7 +55,7 @@ export const AlertSummaryOptionsMenu = memo(
         <EuiToolTip content={OPTIONS_MENU} disableScreenReaderOutput>
           <EuiButtonIcon
             aria-label={OPTIONS_MENU}
-            data-test-subj={ALERT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID}
+            data-test-subj={DOCUMENT_SUMMARY_OPTIONS_MENU_BUTTON_TEST_ID}
             color="text"
             iconType="boxesVertical"
             onClick={togglePopover}
@@ -72,7 +72,7 @@ export const AlertSummaryOptionsMenu = memo(
           content: (
             <EuiPanel paddingSize="s">
               <AnonymizationSwitch
-                hasAlertSummary={hasAlertSummary}
+                hasSummary={hasSummary}
                 showAnonymizedValues={showAnonymizedValues}
                 setShowAnonymizedValues={setShowAnonymizedValues}
               />
@@ -80,7 +80,7 @@ export const AlertSummaryOptionsMenu = memo(
           ),
         },
       ],
-      [hasAlertSummary, showAnonymizedValues, setShowAnonymizedValues]
+      [hasSummary, showAnonymizedValues, setShowAnonymizedValues]
     );
     return (
       <EuiPopover
@@ -92,7 +92,7 @@ export const AlertSummaryOptionsMenu = memo(
         anchorPosition="downLeft"
       >
         <EuiContextMenu
-          data-test-subj={ALERT_SUMMARY_OPTIONS_MENU_PANELS_TEST_ID}
+          data-test-subj={DOCUMENT_SUMMARY_OPTIONS_MENU_PANELS_TEST_ID}
           initialPanelId={0}
           panels={panels}
         />
@@ -101,4 +101,4 @@ export const AlertSummaryOptionsMenu = memo(
   }
 );
 
-AlertSummaryOptionsMenu.displayName = 'AlertSummaryOptionsMenu';
+DocumentSummaryOptionsMenu.displayName = 'DocumentSummaryOptionsMenu';

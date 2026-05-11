@@ -14,17 +14,17 @@ import { AI_SUMMARY_SECTION_TEST_ID } from './test_ids';
 import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';
 import { getRawData } from '../../../../assistant/helpers';
 
-const MOCK_ALERT_SUMMARY_SECTION_STUB_TEST_ID = 'alert-summary-section-stub';
+const MOCK_DOCUMENT_SUMMARY_SECTION_STUB_TEST_ID = 'document-summary-section-stub';
 
-const mockAlertSummarySection = jest.fn();
+const mockDocumentSummarySection = jest.fn();
 
-jest.mock('../../../../flyout/shared/alert_summary', () => ({
-  AlertSummarySection: (props: Record<string, unknown>) => {
-    mockAlertSummarySection(props);
+jest.mock('./document_summary_section', () => ({
+  DocumentSummarySection: (props: Record<string, unknown>) => {
+    mockDocumentSummarySection(props);
     return (
       <div
         data-test-subj={
-          (props['data-test-subj'] as string) ?? MOCK_ALERT_SUMMARY_SECTION_STUB_TEST_ID
+          (props['data-test-subj'] as string) ?? MOCK_DOCUMENT_SUMMARY_SECTION_STUB_TEST_ID
         }
       />
     );
@@ -52,14 +52,17 @@ const mockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
   },
 ];
 
-const createMockHit = (): DataTableRecord =>
+const createMockHit = (overrides: Record<string, unknown> = {}): DataTableRecord =>
   ({
     id: 'event-id-1',
     raw: {
       _id: 'event-id-1',
       _index: 'alerts-index',
     },
-    flattened: {},
+    flattened: {
+      'event.kind': 'signal',
+      ...overrides,
+    },
     isAnchor: false,
   } as unknown as DataTableRecord);
 
@@ -79,7 +82,7 @@ describe('AISummarySection', () => {
     });
   });
 
-  it('renders the shared AlertSummarySection with the wrapper data-test-subj', () => {
+  it('renders the shared DocumentSummarySection for an alert with the wrapper data-test-subj', () => {
     const { getByTestId } = render(<AISummarySection hit={createMockHit()} />);
 
     expect(getByTestId(AI_SUMMARY_SECTION_TEST_ID)).toBeInTheDocument();
@@ -89,8 +92,8 @@ describe('AISummarySection', () => {
     const hit = createMockHit();
     render(<AISummarySection hit={hit} />);
 
-    expect(mockAlertSummarySection).toHaveBeenCalledTimes(1);
-    const props = mockAlertSummarySection.mock.calls[0][0];
+    expect(mockDocumentSummarySection).toHaveBeenCalledTimes(1);
+    const props = mockDocumentSummarySection.mock.calls[0][0];
 
     expect(props.alertId).toBe(hit.raw._id);
     expect(props['data-test-subj']).toBe(AI_SUMMARY_SECTION_TEST_ID);
@@ -114,7 +117,16 @@ describe('AISummarySection', () => {
 
     render(<AISummarySection hit={createMockHit()} />);
 
-    const props = mockAlertSummarySection.mock.calls[0][0];
+    const props = mockDocumentSummarySection.mock.calls[0][0];
     await expect(props.getPromptContext()).resolves.toEqual({});
+  });
+
+  it('renders nothing when the document is not an alert', () => {
+    const eventHit = createMockHit({ 'event.kind': 'event' });
+
+    const { queryByTestId } = render(<AISummarySection hit={eventHit} />);
+
+    expect(queryByTestId(AI_SUMMARY_SECTION_TEST_ID)).not.toBeInTheDocument();
+    expect(mockDocumentSummarySection).not.toHaveBeenCalled();
   });
 });

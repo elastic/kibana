@@ -18,29 +18,29 @@ import type {
 } from '@kbn/elastic-assistant-common/impl/schemas';
 import { useAssistantContext } from '@kbn/elastic-assistant';
 
-interface BulkUpdateAlertSummaryProps {
+interface BulkUpdateDocumentSummaryProps {
   alertSummary: PerformAlertSummaryBulkActionRequestBody;
 }
 
-interface UseBulkUpdateAlertSummary {
+interface UseBulkUpdateDocumentSummary {
   abortStream: () => void;
   isLoading: boolean;
   bulkUpdate: (
-    props: BulkUpdateAlertSummaryProps
+    props: BulkUpdateDocumentSummaryProps
   ) => Promise<PerformAlertSummaryBulkActionResponse | void>;
 }
 
-export const useBulkUpdateAlertSummary = (): UseBulkUpdateAlertSummary => {
+export const useBulkUpdateDocumentSummary = (): UseBulkUpdateDocumentSummary => {
   const { http, toasts } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
   const abortController = useRef(new AbortController());
 
   const bulkUpdate = useCallback(
-    async ({ alertSummary }: BulkUpdateAlertSummaryProps) => {
+    async ({ alertSummary }: BulkUpdateDocumentSummaryProps) => {
       setIsLoading(true);
 
       try {
-        return await bulkUpdateAlertSummary({
+        return await bulkUpdateDocumentSummary({
           http,
           alertSummary,
           toasts,
@@ -68,7 +68,7 @@ export const useBulkUpdateAlertSummary = (): UseBulkUpdateAlertSummary => {
   return { isLoading, bulkUpdate, abortStream: cancelRequest };
 };
 
-const bulkUpdateAlertSummary = async ({
+const bulkUpdateDocumentSummary = async ({
   alertSummary,
   http,
   signal,

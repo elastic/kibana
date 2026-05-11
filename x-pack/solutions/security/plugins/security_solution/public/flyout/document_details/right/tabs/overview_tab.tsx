@@ -13,7 +13,6 @@ import { InvestigationSection } from '../components/investigation_section';
 import { AboutSection } from '../components/about_section';
 import { InsightsSection } from '../components/insights_section';
 import { VisualizationsSection } from '../components/visualizations_section';
-import { AISummarySection } from '../components/ai_summary_section';
 
 /**
  * Overview view displayed in the document details expandable flyout right section
@@ -29,8 +28,6 @@ export const OverviewTab = memo(() => {
         { defaultMessage: 'Overview' }
       )}
     >
-      <AISummarySection />
-      <EuiHorizontalRule margin="m" />
       <AboutSection />
       <EuiHorizontalRule margin="m" />
       <InvestigationSection />
@@ -38,6 +35,7 @@ export const OverviewTab = memo(() => {
       <VisualizationsSection />
       <EuiHorizontalRule margin="m" />
       <InsightsSection />
+      <EuiHorizontalRule margin="m" />
       <ResponseSection />
     </EuiPanel>
   );

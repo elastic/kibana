@@ -25,13 +25,14 @@ import { AiButton } from '@kbn/shared-ux-ai-components';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { ConnectorMissingCallout } from './connector_missing_callout';
-import { useAlertSummary } from '../hooks/use_alert_summary';
+import { useDocumentSummary } from '../hooks/use_document_summary';
 
-export const ALERT_SUMMARY_TEST_ID = 'alert-flyout-ai-summary';
-export const GENERATE_INSIGHTS_BUTTON_TEST_ID = 'alert-flyout-ai-summary-generate-insights-button';
+export const DOCUMENT_SUMMARY_TEST_ID = 'document-flyout-ai-summary';
+export const GENERATE_INSIGHTS_BUTTON_TEST_ID =
+  'document-flyout-ai-summary-generate-insights-button';
 export const REGENERATE_INSIGHTS_BUTTON_TEST_ID =
-  'alert-flyout-ai-summary-regenerate-insights-button';
-export const COPY_INSIGHTS_BUTTON_TEST_ID = 'alert-flyout-ai-summary-copy-insights-button';
+  'document-flyout-ai-summary-regenerate-insights-button';
+export const COPY_INSIGHTS_BUTTON_TEST_ID = 'document-flyout-ai-summary-copy-insights-button';
 
 const RECOMMENDED_ACTIONS = i18n.translate(
   'xpack.securitySolution.alertSummary.recommendedActions',
@@ -67,7 +68,7 @@ const generatedAtLabel = (timestamp: string) =>
     values: { timestamp },
   });
 
-export interface AlertSummaryProps {
+export interface DocumentSummaryProps {
   /**
    * Id of the alert for which we will generate the summary
    */
@@ -87,7 +88,7 @@ export interface AlertSummaryProps {
   /**
    * Callback to set the value to the parent to be able to control the menu options
    */
-  setHasAlertSummary: React.Dispatch<React.SetStateAction<boolean>>;
+  setHasSummary: React.Dispatch<React.SetStateAction<boolean>>;
   /**
    * If true we'll show anonymized values
    */
@@ -127,25 +128,25 @@ const formatTextToCopy = (summary: string, recommendedActions: string | undefine
  * flyout. Stateless w.r.t. flyout context — all required values are
  * passed in as props by the host wrapper.
  */
-export const AlertSummary = memo(
+export const DocumentSummary = memo(
   ({
     alertId,
     canSeeAdvancedSettings,
     defaultConnectorId,
     promptContext,
-    setHasAlertSummary,
+    setHasSummary,
     showAnonymizedValues,
-  }: AlertSummaryProps) => {
+  }: DocumentSummaryProps) => {
     const {
-      alertSummary,
+      summary,
       generatedAt,
       recommendedActions,
-      hasAlertSummary,
+      hasSummary,
       fetchAISummary,
       isConnectorMissing,
       isLoading,
       messageAndReplacements,
-    } = useAlertSummary({
+    } = useDocumentSummary({
       alertId,
       defaultConnectorId: defaultConnectorId || '',
       promptContext,
@@ -153,19 +154,19 @@ export const AlertSummary = memo(
     });
 
     useEffect(() => {
-      setHasAlertSummary(hasAlertSummary);
-    }, [hasAlertSummary, setHasAlertSummary]);
+      setHasSummary(hasSummary);
+    }, [hasSummary, setHasSummary]);
 
     const textToCopy = useMemo(
-      () => formatTextToCopy(alertSummary, recommendedActions),
-      [alertSummary, recommendedActions]
+      () => formatTextToCopy(summary, recommendedActions),
+      [summary, recommendedActions]
     );
 
     if (!defaultConnectorId) {
       return <ConnectorMissingCallout canSeeAdvancedSettings={canSeeAdvancedSettings} />;
     }
 
-    if (!hasAlertSummary) {
+    if (!hasSummary) {
       return (
         <EuiPanel hasBorder={true}>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
@@ -193,7 +194,7 @@ export const AlertSummary = memo(
     if (isLoading) {
       return (
         <EuiPanel hasBorder={true}>
-          <EuiText size="xs" color="subdued" data-test-subj={ALERT_SUMMARY_TEST_ID}>
+          <EuiText size="xs" color="subdued" data-test-subj={DOCUMENT_SUMMARY_TEST_ID}>
             {GENERATING}
           </EuiText>
           <EuiSpacer size="xs" />
@@ -211,7 +212,7 @@ export const AlertSummary = memo(
           </>
         )}
         <EuiPanel hasBorder={true}>
-          <EuiMarkdownFormat textSize="xs">{alertSummary}</EuiMarkdownFormat>
+          <EuiMarkdownFormat textSize="xs">{summary}</EuiMarkdownFormat>
           {recommendedActions && (
             <>
               <EuiHorizontalRule margin="m" />
@@ -273,4 +274,4 @@ export const AlertSummary = memo(
   }
 );
 
-AlertSummary.displayName = 'AlertSummary';
+DocumentSummary.displayName = 'DocumentSummary';

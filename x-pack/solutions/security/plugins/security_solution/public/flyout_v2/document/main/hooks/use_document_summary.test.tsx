@@ -6,19 +6,19 @@
  */
 
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { useAlertSummary } from './use_alert_summary';
+import { useDocumentSummary } from './use_document_summary';
 import type { PromptContext } from '@kbn/elastic-assistant';
 import { useFetchAnonymizationFields } from '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields';
 import { useChatComplete } from '@kbn/elastic-assistant/impl/assistant/api/chat_complete/use_chat_complete';
-import { useFetchAlertSummary } from './use_fetch_alert_summary';
-import { useBulkUpdateAlertSummary } from './use_bulk_update_alert_summary';
+import { useFetchDocumentSummary } from './use_fetch_document_summary';
+import { useBulkUpdateDocumentSummary } from './use_bulk_update_document_summary';
 
 jest.mock('@kbn/elastic-assistant/impl/assistant/api/chat_complete/use_chat_complete');
 jest.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields'
 );
-jest.mock('./use_fetch_alert_summary');
-jest.mock('./use_bulk_update_alert_summary');
+jest.mock('./use_fetch_document_summary');
+jest.mock('./use_bulk_update_document_summary');
 const promptContext: PromptContext = {
   category: 'alert',
   description: 'Alert summary',
@@ -30,10 +30,10 @@ const promptContext: PromptContext = {
   tooltip: '_tooltip',
   replacements: { 'host.name': '12345' },
 };
-describe('useAlertSummary', () => {
+describe('useDocumentSummary', () => {
   const mockSendMessage = jest.fn();
   const mockAbortStream = jest.fn();
-  const mockRefetchAlertSummary = jest.fn();
+  const mockRefetchSummary = jest.fn();
   const mockBulkUpdate = jest.fn();
 
   beforeEach(() => {
@@ -49,20 +49,20 @@ describe('useAlertSummary', () => {
       isFetched: true,
     });
 
-    (useFetchAlertSummary as jest.Mock).mockReturnValue({
+    (useFetchDocumentSummary as jest.Mock).mockReturnValue({
       data: { data: [] },
-      refetch: mockRefetchAlertSummary,
+      refetch: mockRefetchSummary,
       isFetched: true,
     });
 
-    (useBulkUpdateAlertSummary as jest.Mock).mockReturnValue({
+    (useBulkUpdateDocumentSummary as jest.Mock).mockReturnValue({
       bulkUpdate: mockBulkUpdate,
     });
   });
 
   it('should initialize with default values', () => {
     const { result } = renderHook(() =>
-      useAlertSummary({
+      useDocumentSummary({
         alertId: 'test-alert-id',
         defaultConnectorId: 'test-connector-id',
         promptContext,
@@ -70,21 +70,21 @@ describe('useAlertSummary', () => {
       })
     );
 
-    expect(result.current.alertSummary).toBe('No summary available');
-    expect(result.current.hasAlertSummary).toBe(false);
+    expect(result.current.summary).toBe('No summary available');
+    expect(result.current.hasSummary).toBe(false);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.messageAndReplacements).toBeNull();
     expect(result.current.recommendedActions).toBeUndefined();
   });
 
   it('should fetch AI summary when fetchAISummary is called', async () => {
-    (useFetchAlertSummary as jest.Mock)
+    (useFetchDocumentSummary as jest.Mock)
       .mockReturnValueOnce({
         data: {
           data: [{ id: 'summary-id', summary: '', replacements: {} }],
           prompt: 'Generate an alert summary!',
         },
-        refetch: mockRefetchAlertSummary,
+        refetch: mockRefetchSummary,
         isFetched: true,
       })
       .mockReturnValue({
@@ -99,7 +99,7 @@ describe('useAlertSummary', () => {
           ],
           prompt: 'Generate an alert summary!',
         },
-        refetch: mockRefetchAlertSummary,
+        refetch: mockRefetchSummary,
         isFetched: true,
       });
 
@@ -112,7 +112,7 @@ describe('useAlertSummary', () => {
     };
 
     const { result } = renderHook(() =>
-      useAlertSummary({
+      useDocumentSummary({
         alertId: 'test-alert-id',
         defaultConnectorId: 'test-connector-id',
         promptContext,
@@ -153,14 +153,14 @@ describe('useAlertSummary', () => {
       },
     });
 
-    expect(mockRefetchAlertSummary).toHaveBeenCalled();
-    expect(result.current.alertSummary).toBe('Generated summary');
+    expect(mockRefetchSummary).toHaveBeenCalled();
+    expect(result.current.summary).toBe('Generated summary');
     expect(result.current.recommendedActions).toBe('Generated actions');
   });
 
   it('should abort stream on unmount', () => {
     const { unmount } = renderHook(() =>
-      useAlertSummary({
+      useDocumentSummary({
         alertId: 'test-alert-id',
         defaultConnectorId: 'test-connector-id',
         promptContext,
