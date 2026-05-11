@@ -86,13 +86,25 @@ export const StepIcon = React.memo(
     } else if (BASE_TYPE_AGGREGATE_ICONS[stepType]) {
       iconType = BASE_TYPE_AGGREGATE_ICONS[stepType];
     } else {
+      // EuiIcon's `color` prop tints monochrome icons but is ignored by multi-color
+      // logos — so we can pass it on every path without harming logos.
+      const statusIconColor = shouldApplyColorToIcon
+        ? getExecutionStatusColors(euiTheme, executionStatus).color
+        : undefined;
+
       const stepDefinition =
         workflowsExtensions.getStepDefinition(stepType) ??
         findStepDefinitionByBaseType(stepType, workflowsExtensions);
       if (stepDefinition?.icon) {
         return withTooltip(
           <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-            <EuiIcon type={stepDefinition.icon} size="m" {...rest} aria-hidden={true} />
+            <EuiIcon
+              type={stepDefinition.icon}
+              size="m"
+              color={statusIconColor}
+              {...rest}
+              aria-hidden={true}
+            />
           </Suspense>,
           title
         );
@@ -102,7 +114,13 @@ export const StepIcon = React.memo(
       if (actionTypeIcon) {
         return withTooltip(
           <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-            <EuiIcon type={actionTypeIcon} size="m" {...rest} aria-hidden={true} />
+            <EuiIcon
+              type={actionTypeIcon}
+              size="m"
+              color={statusIconColor}
+              {...rest}
+              aria-hidden={true}
+            />
           </Suspense>,
           title
         );

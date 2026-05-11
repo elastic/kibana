@@ -89,12 +89,20 @@ describe('JsonDataCode', () => {
     );
   });
 
-  it('passes an empty onEditorDidMount callback', () => {
+  it('wires onEditorDidMount to the editor content size to size the editor', () => {
     render(<JsonDataCode json={{ key: 'value' }} />);
 
     const { onEditorDidMount } = mockJSONCodeEditorCommonMemoized.mock.calls[0][0];
     expect(typeof onEditorDidMount).toBe('function');
-    // Should not throw when called
-    expect(() => onEditorDidMount()).not.toThrow();
+
+    // The mount callback uses Monaco's `getContentHeight` and subscribes to
+    // `onDidContentSizeChange` to keep the editor sized to its rendered content.
+    const fakeEditor = {
+      getContentHeight: jest.fn(() => 200),
+      onDidContentSizeChange: jest.fn(),
+    };
+    expect(() => onEditorDidMount(fakeEditor)).not.toThrow();
+    expect(fakeEditor.getContentHeight).toHaveBeenCalled();
+    expect(fakeEditor.onDidContentSizeChange).toHaveBeenCalled();
   });
 });

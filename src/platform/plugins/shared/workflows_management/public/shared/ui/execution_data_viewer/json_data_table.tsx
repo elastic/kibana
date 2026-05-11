@@ -58,9 +58,11 @@ export interface JSONDataTableProps {
   searchTerm?: string;
   /** Optional prefix for the field path actions, such as the copy the field path to the clipboard. */
   fieldPathActionsPrefix?: string;
+  /** Initial page size. Defaults to 20. */
+  defaultPageSize?: 10 | 20 | 50 | 100 | 200;
 }
 export const JSONDataTable = React.memo<JSONDataTableProps>(
-  ({ data, title = 'JSON Data', searchTerm, fieldPathActionsPrefix }) => {
+  ({ data, title = 'JSON Data', searchTerm, fieldPathActionsPrefix, defaultPageSize = 20 }) => {
     const styles = useMemoCss(componentStyles);
     const containerRef = useRef<HTMLDivElement | null>(null);
     const dataGridRef = useRef<EuiDataGridRefProps | null>(null);
@@ -119,7 +121,7 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
 
     const { width: containerWidth } = useResizeObserver(containerRef.current);
     const { curPageIndex, pageSize, changePageIndex, changePageSize } = usePager({
-      initialPageSize: 20,
+      initialPageSize: defaultPageSize,
       totalItems: filteredRecords.length,
     });
 
@@ -206,7 +208,7 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
 
     const pagination: EuiDataGridProps['pagination'] = useMemo(
       () => ({
-        pageSizeOptions: [20, 50, 100, 200],
+        pageSizeOptions: [10, 20, 50, 100, 200],
         pageIndex: curPageIndex,
         pageSize,
         onChangeItemsPerPage: changePageSize,

@@ -49,11 +49,27 @@ export interface ExecutionDataViewerProps {
   title?: string;
   /** Optional prefix for the field path actions, such as the copy the field path to the clipboard. */
   fieldPathActionsPrefix?: string;
+  /** Initial page size for table view. Defaults to 20. */
+  defaultPageSize?: 10 | 20 | 50 | 100 | 200;
+  /** Initial view mode. Defaults to 'table'. */
+  initialViewMode?: 'table' | 'json';
+  /** Hide the search/view-mode toolbar. */
+  hideToolbar?: boolean;
+  /** Maximum height for the JSON code view before requiring expansion. Pass undefined for full height. */
+  jsonClampLines?: number;
 }
 
 export const ExecutionDataViewer = React.memo<ExecutionDataViewerProps>(
-  ({ data, title, fieldPathActionsPrefix }) => {
-    const [selectedViewMode, setSelectedViewMode] = useState<'table' | 'json'>('table');
+  ({
+    data,
+    title,
+    fieldPathActionsPrefix,
+    defaultPageSize,
+    initialViewMode = 'table',
+    hideToolbar = false,
+    jsonClampLines,
+  }) => {
+    const [selectedViewMode, setSelectedViewMode] = useState<'table' | 'json'>(initialViewMode);
 
     const [storedSearchTerm, setStoredSearchTerm] = useLocalStorage(SearchTermStorageKey, '');
     const [searchTerm, setSearchTerm] = useState(storedSearchTerm ?? '');
@@ -84,57 +100,62 @@ export const ExecutionDataViewer = React.memo<ExecutionDataViewerProps>(
         responsive={false}
         style={{ height: '100%' }}
       >
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup responsive={false} gutterSize="s">
-            {selectedViewMode === 'table' && (
-              <EuiFlexItem>
-                <EuiFieldSearch
-                  compressed
-                  fullWidth
-                  placeholder="Filter by field, value"
-                  value={searchTerm}
-                  onChange={handleSearchTermChange}
-                  isClearable
-                  aria-label={i18n.translate('workflows.jsonDataTable.searchAriaLabel', {
-                    defaultMessage: 'Search fields and values',
+        {!hideToolbar && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup responsive={false} gutterSize="s">
+              {selectedViewMode === 'table' && (
+                <EuiFlexItem>
+                  <EuiFieldSearch
+                    compressed
+                    fullWidth
+                    placeholder="Filter by field, value"
+                    value={searchTerm}
+                    onChange={handleSearchTermChange}
+                    isClearable
+                    aria-label={i18n.translate('workflows.jsonDataTable.searchAriaLabel', {
+                      defaultMessage: 'Search fields and values',
+                    })}
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem
+                grow={false}
+                css={{
+                  justifySelf: 'flex-end',
+                  marginLeft: 'auto',
+                }}
+              >
+                <EuiButtonGroup
+                  isIconOnly
+                  buttonSize="compressed"
+                  color="primary"
+                  type="single"
+                  idSelected={selectedViewMode}
+                  legend={i18n.translate('workflows.jsonDataTable.viewMode', {
+                    defaultMessage: 'View mode',
                   })}
+                  onChange={handleViewModeChange}
+                  options={ViewModeOptions}
                 />
               </EuiFlexItem>
-            )}
-            <EuiFlexItem
-              grow={false}
-              css={{
-                justifySelf: 'flex-end',
-                marginLeft: 'auto',
-              }}
-            >
-              <EuiButtonGroup
-                isIconOnly
-                buttonSize="compressed"
-                color="primary"
-                type="single"
-                idSelected={selectedViewMode}
-                legend={i18n.translate('workflows.jsonDataTable.viewMode', {
-                  defaultMessage: 'View mode',
-                })}
-                onChange={handleViewModeChange}
-                options={ViewModeOptions}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
 
-        <EuiFlexItem grow={true} css={{ overflow: 'hidden', minHeight: 0 }}>
-          <EuiSpacer size="s" />
+        <EuiFlexItem grow={hideToolbar ? false : true} css={{ overflow: 'hidden', minHeight: 0 }}>
+          {!hideToolbar && <EuiSpacer size="s" />}
           {selectedViewMode === 'table' && data && (
             <JSONDataTable
               data={data}
               title={title}
               searchTerm={searchTerm}
               fieldPathActionsPrefix={fieldPathActionsPrefix}
+              defaultPageSize={defaultPageSize}
             />
           )}
-          {selectedViewMode === 'json' && <JsonDataCode json={data} />}
+          {selectedViewMode === 'json' && (
+            <JsonDataCode json={data} clampLines={jsonClampLines} hideToolbar={hideToolbar} />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
