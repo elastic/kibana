@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiResizeObserver } from '@elastic/eui';
-import { UnifiedTabs, type UnifiedTabsProps, type UnifiedTabsRef } from '@kbn/unified-tabs';
+import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
-import { LeaderKeyShortcuts, type LeaderKeyShortcut } from './leader_key_shortcuts';
+import { LeaderKeyShortcuts } from './leader_key_shortcuts';
 import {
   createTabItem,
   internalStateActions,
@@ -27,6 +27,7 @@ import {
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { usePreviewData } from './use_preview_data';
 import { useAppMenuData } from './use_app_menu_data';
+import { useTabShortcuts } from './use_tab_shortcuts';
 
 const MAX_TABS_COUNT = 25;
 const SHORTCUTS_LEADER_KEY = 't';
@@ -54,6 +55,8 @@ export const TabsView = (props: SingleTabViewProps) => {
     topNavMenuItems,
   } = useAppMenuData({ currentDataView });
 
+  const { unifiedTabsRef, shortcuts } = useTabShortcuts();
+
   const onEvent: UnifiedTabsProps['onEBTEvent'] = useCallback(
     (event) => {
       void scopedEbtManager.trackTabsEvent(event);
@@ -79,83 +82,6 @@ export const TabsView = (props: SingleTabViewProps) => {
   const renderContent: UnifiedTabsProps['renderContent'] = useCallback(
     () => <SingleTabView key={currentTabId} {...props} />,
     [currentTabId, props]
-  );
-
-  const unifiedTabsRef = useRef<UnifiedTabsRef | null>(null);
-  const shortcuts = useMemo<LeaderKeyShortcut[]>(
-    () => [
-      {
-        key: 'n',
-        label: 'n',
-        description: i18n.translate('discover.tabsView.shortcut.newTab', {
-          defaultMessage: 'New',
-        }),
-        onTrigger: () => {
-          void unifiedTabsRef.current?.add();
-        },
-      },
-      {
-        key: 'x',
-        label: 'x',
-        description: i18n.translate('discover.tabsView.shortcut.closeCurrentTab', {
-          defaultMessage: 'Close',
-        }),
-        onTrigger: () => {
-          void unifiedTabsRef.current?.closeSelected();
-        },
-      },
-      {
-        key: 'u',
-        label: 'u',
-        description: i18n.translate('discover.tabsView.shortcut.restoreLastClosedTab', {
-          defaultMessage: 'Reopen',
-        }),
-        onTrigger: () => {
-          void unifiedTabsRef.current?.restoreLastClosed();
-        },
-      },
-      {
-        key: 'ArrowLeft',
-        label: '←',
-        description: i18n.translate('discover.tabsView.shortcut.previousTab', {
-          defaultMessage: 'Previous',
-        }),
-        onTrigger: () => {
-          void unifiedTabsRef.current?.selectPrevious();
-        },
-      },
-      {
-        key: 'ArrowRight',
-        label: '→',
-        description: i18n.translate('discover.tabsView.shortcut.nextTab', {
-          defaultMessage: 'Next',
-        }),
-        onTrigger: () => {
-          void unifiedTabsRef.current?.selectNext();
-        },
-      },
-      {
-        key: 'd',
-        label: 'd',
-        description: i18n.translate('discover.tabsView.shortcut.duplicateCurrentTab', {
-          defaultMessage: 'Duplicate',
-        }),
-        onTrigger: () => {
-          void unifiedTabsRef.current?.duplicateSelected();
-        },
-      },
-      {
-        key: 'r',
-        label: 'r',
-        description: i18n.translate('discover.tabsView.shortcut.renameCurrentTab', {
-          defaultMessage: 'Rename',
-        }),
-        onTrigger: () => {
-          unifiedTabsRef.current?.enterRenamingMode();
-        },
-      },
-    ],
-    []
   );
 
   return (
