@@ -51,7 +51,9 @@ beforeAll(() => {
 import {
   buildKeyValueHints,
   buildOverwriteWarning,
+  computeKvMinSamples,
   getStepWriteTargets,
+  isBlockedKvField,
   isExtractionStepOnField,
   runExtractFieldsFlow,
   stepWritesOrRemovesField,
@@ -129,17 +131,170 @@ describe('isExtractionStepOnField', () => {
     ).toBe(false);
   });
 
-  it('returns false for non-objects and condition blocks', () => {
+  it('returns false for non-objects', () => {
     expect(isExtractionStepOnField(null, 'body.text')).toBe(false);
     expect(isExtractionStepOnField('grok', 'body.text')).toBe(false);
-    // Condition blocks are intentionally not introspected — false-positives there
-    // would be misleading.
+  });
+
+  it('returns false for an empty condition block', () => {
     expect(
       isExtractionStepOnField(
         { condition: { field: 'severity_text', eq: 'ERROR', steps: [] } },
         'body.text'
       )
     ).toBe(false);
+  });
+
+  it('recurses into a condition block and detects a nested grok on the source field', () => {
+    expect(
+      isExtractionStepOnField(
+        {
+          condition: {
+            field: 'severity_text',
+            eq: 'ERROR',
+            steps: [{ action: 'grok', from: 'body.text', patterns: ['%{IP:client.ip}'] }],
+          },
+        },
+        'body.text'
+      )
+    ).toBe(true);
+  });
+
+  it('recurses into a condition `else` branch and detects a nested dissect on the source field', () => {
+    expect(
+      isExtractionStepOnField(
+        {
+          condition: {
+            field: 'severity_text',
+            eq: 'ERROR',
+            steps: [{ action: 'set', to: 'attributes.priority', value: 'high' }],
+            else: [{ action: 'dissect', from: 'body.text', pattern: '%{a} %{b}' }],
+          },
+        },
+        'body.text'
+      )
+    ).toBe(true);
+  });
+
+  it('returns false when the nested step targets a different field', () => {
+    expect(
+      isExtractionStepOnField(
+        {
+          condition: {
+            field: 'severity_text',
+            eq: 'ERROR',
+            steps: [{ action: 'grok', from: 'message', patterns: ['%{IP:client.ip}'] }],
+          },
+        },
+        'body.text'
+      )
+    ).toBe(false);
+  });
+
+  it('recurses through nested condition blocks', () => {
+    expect(
+      isExtractionStepOnField(
+        {
+          condition: {
+            field: 'severity_text',
+            eq: 'ERROR',
+            steps: [
+              {
+                condition: {
+                  field: 'event.kind',
+                  eq: 'event',
+                  steps: [{ action: 'grok', from: 'body.text', patterns: ['%{NUMBER:n}'] }],
+                },
+              },
+            ],
+          },
+        },
+        'body.text'
+      )
+    ).toBe(true);
+  });
+});
+
+describe('isBlockedKvField', () => {
+  // The KV hint generator must skip fields whose values legitimately contain
+  // `=` for reasons unrelated to a refinable `prefix=value` shape — URL
+  // query strings, HTTP/Kafka header values, free-text messages, etc.
+  // False positives here mean the agent suggests a destructive refinement
+  // against real data; false negatives just miss a useful hint.
+
+  it('matches the canonical universal fields', () => {
+    expect(isBlockedKvField('@timestamp')).toBe(true);
+    expect(isBlockedKvField('stream.name')).toBe(true);
+    expect(isBlockedKvField('message')).toBe(true);
+    expect(isBlockedKvField('body.text')).toBe(true);
+  });
+
+  it('matches OTel structured-body and original-message fields', () => {
+    expect(isBlockedKvField('body.structured.message')).toBe(true);
+    expect(isBlockedKvField('attributes.original_message')).toBe(true);
+  });
+
+  it('matches URL-shaped fields at any nesting depth', () => {
+    expect(isBlockedKvField('url.path')).toBe(true);
+    expect(isBlockedKvField('url.full')).toBe(true);
+    expect(isBlockedKvField('url.original')).toBe(true);
+    expect(isBlockedKvField('url.query')).toBe(true);
+    expect(isBlockedKvField('attributes.url.path')).toBe(true);
+    expect(isBlockedKvField('resource.attributes.http.url.full')).toBe(true);
+  });
+
+  it('matches headers fields under any common namespace', () => {
+    expect(isBlockedKvField('attributes.headers.cookie')).toBe(true);
+    expect(isBlockedKvField('attributes.headers.authorization')).toBe(true);
+    expect(isBlockedKvField('headers.x-request-id')).toBe(true);
+  });
+
+  it('matches host attribute fields', () => {
+    expect(isBlockedKvField('host.name')).toBe(true);
+    expect(isBlockedKvField('resource.attributes.host.name')).toBe(true);
+    expect(isBlockedKvField('resource.attributes.host.id')).toBe(true);
+  });
+
+  it('does NOT match unrelated ID-shaped fields', () => {
+    expect(isBlockedKvField('attributes.user.id')).toBe(false);
+    expect(isBlockedKvField('attributes.session.id')).toBe(false);
+    expect(isBlockedKvField('resource.attributes.service.name')).toBe(false);
+  });
+
+  it('does NOT match fields whose name merely contains "url" as a substring', () => {
+    // Guard against an over-broad suffix match: `attributes.curlVersion`
+    // ends with `url` lexically but is not a URL field.
+    expect(isBlockedKvField('attributes.curlVersion')).toBe(false);
+    expect(isBlockedKvField('attributes.urlencoded')).toBe(false);
+  });
+
+  it('does NOT match fields whose name merely starts with "host" or "headers"', () => {
+    // Prefix matchers all include a trailing dot so `hostname` and
+    // `headersize` are safe.
+    expect(isBlockedKvField('hostname')).toBe(false);
+    expect(isBlockedKvField('headersize')).toBe(false);
+  });
+});
+
+describe('computeKvMinSamples', () => {
+  // Adaptive minimum-samples threshold for the KV hint generator. Lets
+  // sparse streams (few parsed docs) still get hints, with a hard floor
+  // below which "100% agreement" is too easily coincidental.
+
+  it('returns the preferred minimum when there are plenty of parsed documents', () => {
+    expect(computeKvMinSamples(100)).toBe(5);
+    expect(computeKvMinSamples(5)).toBe(5);
+  });
+
+  it('scales the threshold down for small populations but never below the floor', () => {
+    expect(computeKvMinSamples(4)).toBe(4);
+    expect(computeKvMinSamples(3)).toBe(3);
+  });
+
+  it('stays at the floor when the parsed-document count drops below the floor', () => {
+    expect(computeKvMinSamples(2)).toBe(3);
+    expect(computeKvMinSamples(1)).toBe(3);
+    expect(computeKvMinSamples(0)).toBe(3);
   });
 });
 
@@ -623,14 +778,18 @@ describe('buildKeyValueHints', () => {
   const docs = (...rows: Array<Record<string, unknown>>): FlattenRecord[] =>
     rows as FlattenRecord[];
 
-  it('returns no hints below the minimum sample threshold', () => {
-    // KV_MIN_SAMPLES is 5; four populated values is not enough.
+  it('returns no hints when fewer than KV_MIN_SAMPLES populated values exist in a large population', () => {
+    // With 6 parsed docs the effective threshold is the full
+    // KV_MIN_SAMPLES (5). Only 4 populate the captured field → not
+    // enough signal.
     const hints = buildKeyValueHints(
       docs(
         { 'attributes.user.id': 'user=u-1' },
         { 'attributes.user.id': 'user=u-2' },
         { 'attributes.user.id': 'user=u-3' },
-        { 'attributes.user.id': 'user=u-4' }
+        { 'attributes.user.id': 'user=u-4' },
+        { 'attributes.other.field': 'unrelated' },
+        { 'attributes.other.field': 'unrelated' }
       )
     );
     expect(hints).toEqual([]);
@@ -697,6 +856,87 @@ describe('buildKeyValueHints', () => {
         { '@timestamp': 'k=v', 'stream.name': 'k=v' },
         { '@timestamp': 'k=v', 'stream.name': 'k=v' },
         { '@timestamp': 'k=v', 'stream.name': 'k=v' }
+      )
+    );
+    expect(hints).toEqual([]);
+  });
+
+  it('skips URL paths even when every value contains `=` (query-string false positives)', () => {
+    // attributes.url.path values can legitimately contain `=` as part of
+    // path matrix params or URL-encoded fragments — suggesting a prefix
+    // strip would destroy real data.
+    const hints = buildKeyValueHints(
+      docs(
+        { 'attributes.url.path': '/api/users;jsessionid=abc' },
+        { 'attributes.url.path': '/api/users;jsessionid=def' },
+        { 'attributes.url.path': '/api/users;jsessionid=ghi' },
+        { 'attributes.url.path': '/api/users;jsessionid=jkl' },
+        { 'attributes.url.path': '/api/users;jsessionid=mno' }
+      )
+    );
+    expect(hints).toEqual([]);
+  });
+
+  it('skips headers fields even when every value shares a prefix', () => {
+    // attributes.headers.cookie typically contains `name=value` shapes
+    // that are meaningful as-is.
+    const hints = buildKeyValueHints(
+      docs(
+        { 'attributes.headers.cookie': 'session=s-1' },
+        { 'attributes.headers.cookie': 'session=s-2' },
+        { 'attributes.headers.cookie': 'session=s-3' },
+        { 'attributes.headers.cookie': 'session=s-4' },
+        { 'attributes.headers.cookie': 'session=s-5' }
+      )
+    );
+    expect(hints).toEqual([]);
+  });
+
+  it('skips host attribute fields', () => {
+    const hints = buildKeyValueHints(
+      docs(
+        { 'resource.attributes.host.name': 'host=h-1' },
+        { 'resource.attributes.host.name': 'host=h-2' },
+        { 'resource.attributes.host.name': 'host=h-3' },
+        { 'resource.attributes.host.name': 'host=h-4' },
+        { 'resource.attributes.host.name': 'host=h-5' }
+      )
+    );
+    expect(hints).toEqual([]);
+  });
+
+  it('emits a hint for a small parsed-document population (3 docs) when every value agrees', () => {
+    // The adaptive threshold lets sparse streams still benefit from
+    // refinement hints — 3 docs, all agreeing on the same `user=` prefix,
+    // is the minimum signal that's still trustworthy.
+    const hints = buildKeyValueHints(
+      docs(
+        { 'attributes.user.id': 'user=u-1' },
+        { 'attributes.user.id': 'user=u-2' },
+        { 'attributes.user.id': 'user=u-3' }
+      )
+    );
+    expect(hints).toHaveLength(1);
+    expect(hints[0]).toContain('attributes.user.id');
+  });
+
+  it('does NOT emit a hint for a parsed-document population below the absolute floor', () => {
+    // 2 docs is below KV_MIN_SAMPLES_FLOOR — even unanimous agreement is
+    // too easily coincidental to surface.
+    const hints = buildKeyValueHints(
+      docs({ 'attributes.user.id': 'user=u-1' }, { 'attributes.user.id': 'user=u-2' })
+    );
+    expect(hints).toEqual([]);
+  });
+
+  it('still requires every populated value to agree for a small population', () => {
+    // 3 docs is at the floor, but only 2 of them populate the field — the
+    // generator should treat that as insufficient signal.
+    const hints = buildKeyValueHints(
+      docs(
+        { 'attributes.user.id': 'user=u-1' },
+        { 'attributes.user.id': 'user=u-2' },
+        { 'attributes.other.field': 'unrelated' }
       )
     );
     expect(hints).toEqual([]);

@@ -409,9 +409,11 @@ export const runExtractFieldsFlow = async (
         isExtractionStepOnField(step, fieldName)
       );
       if (conflictingExistingStep) {
-        const conflictingAction = (conflictingExistingStep as { action?: string }).action ?? 'step';
+        const conflictingLabel = isConditionBlock(conflictingExistingStep)
+          ? 'inside a condition block'
+          : (conflictingExistingStep as { action?: string }).action ?? 'step';
         warnings.push(
-          `An existing step already extracts from field "${fieldName}" (${conflictingAction}). The new extraction may duplicate work — confirm with the user before applying.`
+          `An existing step already extracts from field "${fieldName}" (${conflictingLabel}). The new extraction may duplicate work — confirm with the user before applying.`
         );
       }
       const overwriteWarning = buildOverwriteWarning(existingSteps, fieldChanges);
@@ -484,12 +486,20 @@ export const runExtractFieldsFlow = async (
  * user) when running heuristic extraction would duplicate or conflict with
  * pre-existing parsing on the same field.
  *
- * Condition blocks are intentionally not recursed into: they often gate
- * extraction by content (e.g. "if log.level == error then grok…"), and
- * surfacing a false positive there would be more confusing than helpful.
+ * Condition blocks recurse into their nested `steps` and `else` branches:
+ * a duplicate extraction hidden inside `if log.level == error then grok…`
+ * is still worth surfacing to the user. The downstream warning marks the
+ * match as "inside a condition block" so the user can judge whether the
+ * predicate scopes the duplication.
  */
 export const isExtractionStepOnField = (step: unknown, fieldName: string): boolean => {
   if (typeof step !== 'object' || step === null) return false;
+  if (isConditionBlock(step as StreamlangStep)) {
+    const inner = (step as { condition: { steps?: unknown[]; else?: unknown[] } }).condition;
+    return [...(inner.steps ?? []), ...(inner.else ?? [])].some((nested) =>
+      isExtractionStepOnField(nested, fieldName)
+    );
+  }
   const obj = step as { action?: unknown; from?: unknown };
   return (obj.action === 'grok' || obj.action === 'dissect') && obj.from === fieldName;
 };
@@ -699,17 +709,60 @@ export const buildOverwriteWarning = (
 };
 
 /**
- * Minimum number of non-null sample values required to consider a key=value
- * pattern genuine. Avoids false positives on fields with very few populated
- * values.
+ * Preferred minimum number of non-null sample values required to consider a
+ * key=value pattern genuine. Avoids false positives on fields with very few
+ * populated values. The effective threshold may be lowered for streams with
+ * a small parsed-document population — see {@link computeKvMinSamples}.
  */
 const KV_MIN_SAMPLES = 5;
+
+/**
+ * Hard absolute floor on the number of populated values we'll consider —
+ * below this, "100% agreement on a prefix" is too easily coincidental to
+ * report. Streams with fewer than 3 parsed documents always skip the hint.
+ */
+const KV_MIN_SAMPLES_FLOOR = 3;
+
+/**
+ * Effective minimum-samples threshold for a given parsed-document count.
+ * Scales `KV_MIN_SAMPLES` down for small populations while never going
+ * below `KV_MIN_SAMPLES_FLOOR`. This lets the hint generator work for
+ * sparse streams where, say, only 3 docs ever populate the captured
+ * field — without that, the heuristic effectively disables itself for
+ * the streams that most benefit from a refinement suggestion.
+ */
+export const computeKvMinSamples = (parsedDocumentCount: number): number =>
+  Math.min(KV_MIN_SAMPLES, Math.max(KV_MIN_SAMPLES_FLOOR, parsedDocumentCount));
 
 /**
  * Fields that are known system/identity fields — skip them even if they
  * happen to contain `=`.
  */
-const KV_FIELD_BLOCKLIST = new Set(['@timestamp', 'stream.name', 'body.text', 'message']);
+const KV_FIELD_BLOCKLIST_LITERAL = new Set([
+  '@timestamp',
+  'stream.name',
+  'body.text',
+  'body.structured.message',
+  'message',
+  'attributes.original_message',
+  'host.name',
+]);
+
+const KV_FIELD_BLOCKLIST_URL_SUFFIXES = ['url.path', 'url.full', 'url.original', 'url.query'];
+
+const KV_FIELD_BLOCKLIST_PREFIXES = [
+  'attributes.headers.',
+  'headers.',
+  'resource.attributes.host.',
+];
+
+export const isBlockedKvField = (fieldName: string): boolean => {
+  if (KV_FIELD_BLOCKLIST_LITERAL.has(fieldName)) return true;
+  if (KV_FIELD_BLOCKLIST_PREFIXES.some((prefix) => fieldName.startsWith(prefix))) return true;
+  return KV_FIELD_BLOCKLIST_URL_SUFFIXES.some(
+    (suffix) => fieldName === suffix || fieldName.endsWith(`.${suffix}`)
+  );
+};
 
 /**
  * Scans parsed documents for fields where every non-null value follows a
@@ -735,7 +788,7 @@ export const buildKeyValueHints = (
   for (const doc of parsedDocuments) {
     if (!doc) continue;
     for (const [fieldName, value] of Object.entries(doc)) {
-      if (KV_FIELD_BLOCKLIST.has(fieldName)) continue;
+      if (isBlockedKvField(fieldName)) continue;
       if (survivingFields && !survivingFields.has(fieldName)) continue;
       if (typeof value !== 'string') continue;
       if (!fieldValues.has(fieldName)) {
@@ -748,10 +801,11 @@ export const buildKeyValueHints = (
     }
   }
 
+  const minSamples = computeKvMinSamples(parsedDocuments.length);
   const hints: string[] = [];
 
   for (const [fieldName, values] of fieldValues) {
-    if (values.length < KV_MIN_SAMPLES) continue;
+    if (values.length < minSamples) continue;
 
     const valuesWithEq = values.filter((v) => v.includes('='));
     if (valuesWithEq.length !== values.length) continue;
