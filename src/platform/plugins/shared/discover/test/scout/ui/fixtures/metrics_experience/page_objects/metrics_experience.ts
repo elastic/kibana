@@ -62,6 +62,17 @@ export class MetricsExperiencePage {
   }
 
   /**
+   * Waits until the first chart card matches the expected id (pagination/query updates replace cards
+   * asynchronously). Call before `expect(cards).toHaveCount(...)` so the count is not asserted
+   * against a stale page.
+   */
+  public async waitForFirstCard(expectedFirstCardId: string, timeoutMs = 30_000): Promise<void> {
+    await this.grid
+      .locator(`[data-chart-index="0"][id="${expectedFirstCardId}"]`)
+      .waitFor({ state: 'visible', timeout: timeoutMs });
+  }
+
+  /**
    * Returns quick actions scoped to a specific card by index.
    * Quick actions (like Explore) are rendered in the hover bar inside the card.
    * Use this instead of global locators to avoid strict mode violations

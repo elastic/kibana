@@ -26,9 +26,6 @@ import {
 
 const { PAGE_SIZE, TOTAL_PAGES, LAST_PAGE_CARDS } = PAGINATION;
 
-// Longer than default `expect` (10s) for `should paginate through metrics` only, may be slow CI/late card mount.
-const PAGINATE_METRICS_CARDS_TIMEOUT_MS = 30_000;
-
 const SEARCH_METRIC_NAME = DEFAULT_CONFIG.metrics[0].name;
 const FIRST_DIMENSION = DEFAULT_CONFIG.dimensions[0].name;
 const SECOND_DIMENSION = DEFAULT_CONFIG.dimensions[1].name;
@@ -69,44 +66,32 @@ spaceTest.describe(
       await spaceTest.step('pagination is visible', async () => {
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.pagination.container).toBeVisible();
-        await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE, {
-          timeout: PAGINATE_METRICS_CARDS_TIMEOUT_MS,
-        });
+        await metricsExperience.waitForFirstCard(FIRST_CARD_PAGE_1);
+        await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
       });
 
       await spaceTest.step('navigate to last page and grid updates', async () => {
         await metricsExperience.pagination.getPageButton(TOTAL_PAGES - 1).click();
         await expect(metricsExperience.grid).toBeVisible();
-        await expect(metricsExperience.cards).toHaveCount(LAST_PAGE_CARDS, {
-          timeout: PAGINATE_METRICS_CARDS_TIMEOUT_MS,
-        });
-        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute(
-          'id',
-          FIRST_CARD_LAST_PAGE
-        );
+        await metricsExperience.waitForFirstCard(FIRST_CARD_LAST_PAGE);
+        await expect(metricsExperience.cards).toHaveCount(LAST_PAGE_CARDS);
       });
 
       await spaceTest.step('navigate using next and prev arrows', async () => {
         await metricsExperience.pagination.getPageButton(0).click();
         await expect(metricsExperience.grid).toBeVisible();
-        await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE, {
-          timeout: PAGINATE_METRICS_CARDS_TIMEOUT_MS,
-        });
-        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_PAGE_1);
+        await metricsExperience.waitForFirstCard(FIRST_CARD_PAGE_1);
+        await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
 
         await metricsExperience.pagination.nextButton.click();
         await expect(metricsExperience.grid).toBeVisible();
-        await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE, {
-          timeout: PAGINATE_METRICS_CARDS_TIMEOUT_MS,
-        });
-        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_PAGE_2);
+        await metricsExperience.waitForFirstCard(FIRST_CARD_PAGE_2);
+        await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
 
         await metricsExperience.pagination.prevButton.click();
         await expect(metricsExperience.grid).toBeVisible();
-        await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE, {
-          timeout: PAGINATE_METRICS_CARDS_TIMEOUT_MS,
-        });
-        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_PAGE_1);
+        await metricsExperience.waitForFirstCard(FIRST_CARD_PAGE_1);
+        await expect(metricsExperience.cards).toHaveCount(PAGE_SIZE);
       });
     });
 
