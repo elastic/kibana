@@ -44,12 +44,12 @@ While the deployment-agnostic testing approach is beneficial, it should not comp
 
 ### Multi-Node Cache Settlement
 
-Stateful deployment-agnostic runs may execute against a multi-node Kibana deployment and may run into cross-node cache settlement delays. For example, a test can write `uiSettings` on one Kibana node and then send the next request to another node whose shared `uiSettings` cache has not expired yet.
+Stateful deployment-agnostic runs may execute against a multi-node Kibana deployment and may run into cross-node cache settlement delays. For example, a test can write `uiSettings` on one Kibana node and then send the next request to another node whose shared `uiSettings` cache has not refreshed yet.
 
 If a test updates advanced settings and then immediately exercises server-side behavior that depends on those settings, use the `kibanaServer.uiSettings` client and wait for the eventual cache refresh window before asserting behavior:
 
 ```ts
-await kibanaServer.uiSettings.update({
+await kibanaServer.uiSettings.update({ // or .unset, .replace .updateGlobal
   'myPlugin:mySetting': true,
 });
 await kibanaServer.uiSettings.waitForEventualCacheRefresh();
