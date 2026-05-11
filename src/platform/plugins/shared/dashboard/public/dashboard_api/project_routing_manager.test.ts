@@ -199,7 +199,7 @@ describe('projectRouting', () => {
   });
 
   describe('anyStateChange$', () => {
-    test('anyStateChange$ should not emit on subscribe and emit when any state changes', (done) => {
+    test('should not emit on subscribe and emit when any state changes', (done) => {
       const { manager } = initManager(true, '_alias:_origin');
 
       let emitCount = 0;
