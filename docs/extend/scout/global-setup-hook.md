@@ -79,7 +79,7 @@ The global setup hook only has access to **worker-scoped** fixtures. It cannot u
 
 ::::::::::{step} Run tests
 
-Run tests as usual via [Run Scout tests](./run-tests.md). The global setup hook will execute first—check console logs to verify it ran successfully.
+Run tests as usual via [Run Scout tests](./run-tests.md). The global setup hook runs first — check console logs to verify it ran successfully.
 
 ::::::::::::
 
@@ -89,7 +89,7 @@ When `runGlobalSetup: true` is set, Scout also wires up an optional `globalTeard
 
 ### Enable it
 
-Add `global.teardown.ts` next to `global.setup.ts` in your `testDir` and call `globalTeardownHook(...)`. No extra config flag — `runGlobalSetup: true` is already enough; if the file is absent, the project is silently skipped.
+Add `global.teardown.ts` next to `global.setup.ts` in your `testDir` and call `globalTeardownHook(...)`. No extra config flag — `runGlobalSetup: true` is already enough. If the file is absent, the project is silently skipped.
 
 ```text
 test/scout/ui/
@@ -99,7 +99,7 @@ test/scout/ui/
     └── some_suite.spec.ts
 ```
 
-### Example: reset shared state
+### Example: Reset shared state
 
 ```ts
 import { globalTeardownHook } from '@kbn/scout';
@@ -138,7 +138,7 @@ globalTeardownHook(
 ::::::{warning}
 **`esArchiver` is intentionally not exposed in `globalTeardownHook`.** Scout's `esArchiver` fixture only ever exposed `loadIfNeeded` — by design, there is no archive-driven unload. Removing archives that way is slow and unnecessary: leftover indexes in the cluster don't break Scout tests (setup is idempotent via `loadIfNeeded`), so there's no reason to spend time deleting them at the end of every run.
 
-For state that **does** need resetting (server-wide feature-flag overrides, global UI settings, hand-indexed data that breaks redirect/navigation logic for other configs sharing the cluster), use targeted `esClient.indices.delete` / `indices.deleteDataStream` / `deleteByQuery`, `kbnClient.uiSettings.unset(...)`, or `apiServices.core.settings(...)`.
+For state that **does** need resetting (server-wide feature-flag overrides, global UI settings, hand-indexed data that breaks redirect or navigation logic for other configs sharing the cluster), use targeted `esClient.indices.delete`, `esClient.indices.deleteDataStream`, `esClient.deleteByQuery`, `kbnClient.uiSettings.unset`, or `apiServices.core.settings`.
 ::::::
 
 ### Cautions
@@ -146,4 +146,4 @@ For state that **does** need resetting (server-wide feature-flag overrides, glob
 - **Don't load new data here.** Teardown is for resetting state, not setting up new data. Data loading belongs in `globalSetupHook` (which is idempotent via `esArchiver.loadIfNeeded`).
 - **Per-test/per-suite cleanup still belongs in `afterEach`/`afterAll`.** The global teardown is for state shared across the whole suite — typically state seeded by `global.setup.ts` itself, or anything that other Scout configs sharing the cluster would inherit.
 - **Same fixture-scope limitation as setup**: only worker-scoped fixtures are available — no `page`, `browserAuth`, or `pageObjects`.
-- **Runs even when tests fail.** Wired via Playwright's per-project `teardown` field, so the hook runs after the setup project AND every project depending on it has finished, including on failure. Use this to your advantage (always-clean cluster) but write the teardown defensively (use `ignore_unavailable: true`, `.catch(() => undefined)`, etc.) so a partial setup doesn't break cleanup.
+- **Runs even when tests fail.** Wired via Playwright's per-project `teardown` field, so the hook runs after the setup project AND every project depending on it has finished, including on failure. Use this to your advantage (always-clean cluster) but write the teardown defensively — pass `ignore_unavailable: true` on Elasticsearch deletes and swallow expected `404`s on optional resources — so a partial setup doesn't break cleanup.
