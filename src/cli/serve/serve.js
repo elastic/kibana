@@ -126,6 +126,8 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
         opts,
         extraCliOptions
       );
+    } else {
+      tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions);
     }
 
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
@@ -314,8 +316,10 @@ export default function (program) {
       // We can tell users they only have to run with `yarn start --run-examples` to get those
       // local links to work.  Similar to what we do for "View in Console" links in our
       // elastic.co links.
-      // We also want to run without base path when running in serverless mode so that Elasticsearch can
-      // connect to Kibana's mock identity provider.
+      // For Serverless SAML Mock IdP we also disable the base path because Serverless does not
+      // support a custom `server.basePath`. The stateful SAML Mock IdP path keeps the base path
+      // proxy enabled and pins it to a fixed value via `server.basePath` (see
+      // `tryConfigureStatefulSamlProvider`), so SP/ACS endpoints stay aligned with Kibana's URL.
       basePath: opts.runExamples || isServerlessSamlSupported ? false : !!opts.basePath,
       optimize: !!opts.optimize,
       disableOptimizer: !opts.optimizer,
@@ -357,6 +361,61 @@ function mergeAndReplaceArrays(objValue, srcValue) {
 }
 
 /**
+ * Inspects the configured authentication providers across rawConfig and extraCliOptions to detect
+ * whether the SAML Mock IdP provider can be safely added. Returns either a conflict (with reason
+ * already logged) or the result indicating whether basic/token is already configured.
+ *
+ * @param rawConfig Full configuration object.
+ * @param extraCliOptions Extra CLI options.
+ * @param mockIdpRealmName The realm name reserved for the SAML Mock IdP.
+ * @param providerLabel Human-readable label used in conflict warnings (e.g. "serverless SAML" or "SAML").
+ * @returns {{conflict: boolean, hasBasicOrTokenProviderConfigured: boolean}}
+ */
+function checkSamlProviderConflicts(rawConfig, extraCliOptions, mockIdpRealmName, providerLabel) {
+  let hasBasicOrTokenProviderConfigured = false;
+  for (const configSource of [rawConfig, extraCliOptions]) {
+    const providersConfig = _.get(configSource, 'xpack.security.authc.providers', {});
+    for (const [providerType, providers] of Object.entries(providersConfig)) {
+      if (providerType === 'basic' || providerType === 'token') {
+        hasBasicOrTokenProviderConfigured = true;
+      }
+
+      for (const [providerName, provider] of Object.entries(providers)) {
+        if (provider.order === 0) {
+          console.warn(
+            `The ${providerLabel} authentication provider won't be configured because the order "0" is already used by the custom authentication provider "${providerType}/${providerName}". ` +
+              `Please update the custom provider to use a different order or remove it to allow the ${providerLabel} provider to be configured.`
+          );
+          return { conflict: true, hasBasicOrTokenProviderConfigured };
+        }
+
+        if (providerType === 'saml' && providerName === mockIdpRealmName) {
+          console.warn(
+            `The ${providerLabel} authentication provider won't be configured because the SAML provider with "${mockIdpRealmName}" name is already configured.`
+          );
+          return { conflict: true, hasBasicOrTokenProviderConfigured };
+        }
+      }
+    }
+  }
+  return { conflict: false, hasBasicOrTokenProviderConfigured };
+}
+
+/**
+ * Returns true if the user has explicitly disabled the Mock IdP plugin via config or CLI overrides.
+ * When disabled, the SAML auto-configuration in `serve` is skipped so Kibana can be run against an
+ * Elasticsearch cluster without the SAML realm (e.g. with a `basic` license).
+ */
+function isMockIdpExplicitlyDisabled(rawConfig, extraCliOptions) {
+  for (const configSource of [rawConfig, extraCliOptions]) {
+    if (_.get(configSource, 'mockIdpPlugin.enabled') === false) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Tries to configure SAML provider in serverless mode and applies the necessary configuration.
  * @param rawConfig Full configuration object.
  * @param opts CLI options.
@@ -365,6 +424,13 @@ function mergeAndReplaceArrays(objValue, srcValue) {
  */
 function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
   if (!MOCK_IDP_PLUGIN_SUPPORTED || opts.ssl === false) {
+    return false;
+  }
+
+  if (isMockIdpExplicitlyDisabled(rawConfig, extraCliOptions)) {
+    console.info(
+      'Skipping SAML Mock IdP auto-configuration because `mockIdpPlugin.enabled` is set to `false`.'
+    );
     return false;
   }
 
@@ -380,31 +446,14 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
   // Check if there are any custom authentication providers already configured with the order `0` reserved for the
   // Serverless SAML provider or if there is an existing SAML provider with the name MOCK_IDP_REALM_NAME. We check
   // both rawConfig and extraCliOptions because the latter can be used to override the former.
-  let hasBasicOrTokenProviderConfigured = false;
-  for (const configSource of [rawConfig, extraCliOptions]) {
-    const providersConfig = _.get(configSource, 'xpack.security.authc.providers', {});
-    for (const [providerType, providers] of Object.entries(providersConfig)) {
-      if (providerType === 'basic' || providerType === 'token') {
-        hasBasicOrTokenProviderConfigured = true;
-      }
-
-      for (const [providerName, provider] of Object.entries(providers)) {
-        if (provider.order === 0) {
-          console.warn(
-            `The serverless SAML authentication provider won't be configured because the order "0" is already used by the custom authentication provider "${providerType}/${providerName}".` +
-              `Please update the custom provider to use a different order or remove it to allow the serverless SAML provider to be configured.`
-          );
-          return false;
-        }
-
-        if (providerType === 'saml' && providerName === MOCK_IDP_REALM_NAME) {
-          console.warn(
-            `The serverless SAML authentication provider won't be configured because the SAML provider with "${MOCK_IDP_REALM_NAME}" name is already configured".`
-          );
-          return false;
-        }
-      }
-    }
+  const { conflict, hasBasicOrTokenProviderConfigured } = checkSamlProviderConflicts(
+    rawConfig,
+    extraCliOptions,
+    MOCK_IDP_REALM_NAME,
+    'serverless SAML'
+  );
+  if (conflict) {
+    return false;
   }
 
   if (_.has(rawConfig, 'server.basePath')) {
@@ -487,6 +536,92 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
         'local-dev:ZG9ja2VyLmludGVybmFsOjkyMDAkaG9zdDo5MjAwJGtpYmFuYTo5MjAw'
       );
     }
+  }
+
+  return true;
+}
+
+/**
+ * Tries to configure SAML provider in stateful (traditional) mode and applies the necessary configuration.
+ * @param rawConfig Full configuration object.
+ * @param opts CLI options.
+ * @param extraCliOptions Extra CLI options.
+ * @returns {boolean} True if SAML provider was successfully configured.
+ */
+function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
+  if (!MOCK_IDP_PLUGIN_SUPPORTED) {
+    return false;
+  }
+
+  if (isMockIdpExplicitlyDisabled(rawConfig, extraCliOptions)) {
+    console.info(
+      'Skipping SAML Mock IdP auto-configuration because `mockIdpPlugin.enabled` is set to `false`. ' +
+        'Use this when running Kibana against a `basic` license cluster or any setup without the SAML realm.'
+    );
+    return false;
+  }
+
+  // Ensure the plugin is loaded in dynamically to exclude from production build
+  const {
+    MOCK_IDP_KIBANA_BASE_PATH,
+    MOCK_IDP_REALM_NAME,
+    MOCK_IDP_UIAM_ORGANIZATION_ID, // eslint-disable-next-line import/no-dynamic-require
+  } = require(MOCK_IDP_PLUGIN_PATH);
+
+  // Check if there are any custom authentication providers already configured with the order `0` reserved for the
+  // SAML provider or if there is an existing SAML provider with the name MOCK_IDP_REALM_NAME. We check
+  // both rawConfig and extraCliOptions because the latter can be used to override the former.
+  const { conflict, hasBasicOrTokenProviderConfigured } = checkSamlProviderConflicts(
+    rawConfig,
+    extraCliOptions,
+    MOCK_IDP_REALM_NAME,
+    'SAML'
+  );
+  if (conflict) {
+    return false;
+  }
+
+  console.info(
+    'Kibana will be configured with SAML Mock IdP for stateful development. ' +
+      'Make sure Elasticsearch is started with SAML realm configured.'
+  );
+
+  // Make SAML provider the first in the provider chain
+  lodashSet(rawConfig, `xpack.security.authc.providers.saml.${MOCK_IDP_REALM_NAME}`, {
+    order: 0,
+    realm: MOCK_IDP_REALM_NAME,
+    icon: 'user',
+    description: 'Continue as Test User',
+    hint: 'Allows testing stateful user roles',
+  });
+
+  // Disable login selector to automatically trigger SAML authentication, unless it's explicitly enabled.
+  if (!_.has(rawConfig, 'xpack.security.authc.selector.enabled')) {
+    lodashSet(rawConfig, 'xpack.security.authc.selector.enabled', false);
+  }
+
+  // Since we explicitly configured SAML authentication provider, default Basic provider won't be automatically
+  // configured, and we have to do it manually instead unless other Basic or Token provider was already configured.
+  if (!hasBasicOrTokenProviderConfigured) {
+    lodashSet(rawConfig, 'xpack.security.authc.providers.basic.basic', {
+      order: Number.MAX_SAFE_INTEGER,
+    });
+  }
+
+  // Set a fake cloud.id so that the cloud plugin is activated (required by the mockIdpPlugin).
+  if (!_.has(rawConfig, 'xpack.cloud.id')) {
+    lodashSet(rawConfig, 'xpack.cloud.id', 'ftr_fake_cloud_id');
+  }
+
+  if (!_.has(rawConfig, 'xpack.cloud.organization_id')) {
+    lodashSet(rawConfig, 'xpack.cloud.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
+  }
+
+  // Pin Kibana to a fixed base path so SP/ACS endpoints in Elasticsearch's SAML realm stay aligned
+  // with Kibana's URL across restarts (the dev proxy otherwise generates a random one each run).
+  // Skipped when the user passed `--no-base-path` or already configured a custom value.
+  if (opts.basePath !== false && !_.has(rawConfig, 'server.basePath')) {
+    lodashSet(rawConfig, 'server.basePath', MOCK_IDP_KIBANA_BASE_PATH);
   }
 
   return true;

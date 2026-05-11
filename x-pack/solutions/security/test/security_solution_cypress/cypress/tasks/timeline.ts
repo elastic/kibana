@@ -38,7 +38,6 @@ import {
   OPEN_TIMELINE_ICON,
   PIN_EVENT,
   QUERY_EVENT_COUNT,
-  QUERY_TAB_BUTTON,
   RESET_FIELDS,
   SAVE_DATA_PROVIDER_BTN,
   SAVE_FILTER_BTN,
@@ -83,6 +82,7 @@ import {
   TIMELINE_TITLE,
   TIMELINE_TITLE_BY_ID,
   TIMELINE_TITLE_INPUT,
+  TIMELINE_WRAPPER,
   TOGGLE_DATA_PROVIDER_BTN,
 } from '../screens/timeline';
 
@@ -292,7 +292,12 @@ export const attachTimelineToExistingCase = () => {
 
 export const closeTimeline = () => {
   cy.get(CLOSE_TIMELINE_BTN).click();
-  cy.get(QUERY_TAB_BUTTON).should('not.be.visible');
+  // Assert on the CSS class that directly applies `display: none` to the overlay mask.
+  // This is more reliable than any visibility check because:
+  // - The class is applied synchronously by React (not affected by CSS animations/opacity)
+  // - Works regardless of how many events the timeline contains
+  // - Not affected by other elements (flyouts, etc.) covering the badge
+  cy.get(TIMELINE_WRAPPER).should('have.class', 'timeline-portal-overlay-mask--hidden');
 };
 
 export const createNewTimeline = () => {
