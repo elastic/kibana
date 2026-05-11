@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -24,13 +24,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import useUnmount from 'react-use/lib/useUnmount';
 import {
   commandPaletteOptionMatcher,
   type CommandPaletteOption,
 } from './command_palette_fuzzy_search';
-import { consumeKeyboardEvent, isPrimaryModifierOnly } from './shortcut_utils';
+import { isPrimaryModifierOnly } from './shortcut_utils';
 import { useShortcutsContext } from './shortcuts_provider';
+import { useShortcutsLayer } from './use_shortcuts_layer';
 
 const COMMAND_PALETTE_TRIGGER_CODE = 'Period';
 
@@ -51,10 +51,7 @@ const renderOption: NonNullable<EuiSelectableProps<CommandPaletteOption>['render
 
 export const CommandPalette = () => {
   const { euiTheme } = useEuiTheme();
-  const { registeredLeaderKeyGroups, releaseShortcutsLock, tryAcquireShortcutsLock } =
-    useShortcutsContext();
-  const [instanceId] = useState(() => Symbol('command-palette'));
-  const [isVisible, setIsVisible] = useState(false);
+  const { registeredLeaderKeyGroups } = useShortcutsContext();
   const options = useMemo<CommandPaletteOption[]>(() => {
     return registeredLeaderKeyGroups
       .toSorted((left, right) =>
@@ -70,25 +67,20 @@ export const CommandPalette = () => {
         }));
       });
   }, [registeredLeaderKeyGroups]);
-  const open = useCallback(() => {
-    if (options.length === 0 || isVisible) {
-      return options.length > 0;
-    }
-
-    const lockAcquired = tryAcquireShortcutsLock(instanceId);
-
-    if (lockAcquired) {
-      setIsVisible(true);
-    }
-
-    return lockAcquired;
-  }, [instanceId, isVisible, options.length, tryAcquireShortcutsLock]);
-  const close = useCallback(() => {
-    if (isVisible) {
-      releaseShortcutsLock(instanceId);
-      setIsVisible(false);
-    }
-  }, [instanceId, isVisible, releaseShortcutsLock]);
+  const shouldOpen = useCallback(
+    (event: KeyboardEvent) => {
+      return (
+        options.length > 0 &&
+        isPrimaryModifierOnly(event) &&
+        event.code === COMMAND_PALETTE_TRIGGER_CODE
+      );
+    },
+    [options.length]
+  );
+  const { isVisible, close } = useShortcutsLayer({
+    instanceIdLabel: 'command-palette',
+    shouldOpen,
+  });
   const onChange = useCallback<NonNullable<EuiSelectableProps<CommandPaletteOption>['onChange']>>(
     (newOptions) => {
       const selectedCommand = newOptions.find(({ checked }) => checked === 'on');
@@ -100,33 +92,6 @@ export const CommandPalette = () => {
     },
     [close]
   );
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (isVisible) {
-        if (event.key === 'Escape') {
-          consumeKeyboardEvent(event);
-          close();
-        }
-
-        return;
-      }
-
-      if (isPrimaryModifierOnly(event) && event.code === COMMAND_PALETTE_TRIGGER_CODE && open()) {
-        consumeKeyboardEvent(event);
-      }
-    };
-
-    document.addEventListener('keydown', onKeyDown, true);
-
-    return () => {
-      document.removeEventListener('keydown', onKeyDown, true);
-    };
-  }, [close, isVisible, open]);
-
-  useUnmount(() => {
-    releaseShortcutsLock(instanceId);
-  });
 
   if (!isVisible) {
     return null;

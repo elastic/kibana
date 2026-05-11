@@ -12,8 +12,6 @@ import React, {
   type ReactNode,
   forwardRef,
   isValidElement,
-  useCallback,
-  useEffect,
   useImperativeHandle,
   useState,
 } from 'react';
@@ -29,9 +27,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import useUnmount from 'react-use/lib/useUnmount';
-import { consumeKeyboardEvent } from './shortcut_utils';
-import { useShortcutsContext } from './shortcuts_provider';
+import { useShortcutsLayer } from './use_shortcuts_layer';
 
 /**
  * Ref methods for {@link ShortcutsOverlay}.
@@ -84,69 +80,23 @@ const ShortcutsOverlayFlexItem = ({ children }: PropsWithChildren) => {
  */
 export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlayProps>(
   ({ items, screenReaderHint, screenReaderAnnouncement, shouldOpen, runAction }, ref) => {
-    const { tryAcquireShortcutsLock, releaseShortcutsLock } = useShortcutsContext();
     const { euiTheme } = useEuiTheme();
-    const [isVisible, setIsVisible] = useState(false);
-    const [instanceId] = useState(() => Symbol('shortcuts-overlay'));
     const [liveAnnouncement, setLiveAnnouncement] = useState<string | undefined>(
       () => screenReaderHint
     );
-    const open = useCallback(() => {
-      if (isVisible) {
-        return true;
-      }
-
-      const lockAcquired = tryAcquireShortcutsLock(instanceId);
-
-      if (lockAcquired) {
+    const { isVisible, open } = useShortcutsLayer({
+      instanceIdLabel: 'shortcuts-overlay',
+      shouldOpen,
+      runAction,
+      onOpen: () => {
         setLiveAnnouncement(screenReaderAnnouncement);
-        setIsVisible(true);
-      }
-
-      return lockAcquired;
-    }, [instanceId, isVisible, screenReaderAnnouncement, tryAcquireShortcutsLock]);
-    const close = useCallback(() => {
-      if (isVisible) {
-        releaseShortcutsLock(instanceId);
+      },
+      onClose: () => {
         setLiveAnnouncement(undefined);
-        setIsVisible(false);
-      }
-    }, [instanceId, isVisible, releaseShortcutsLock]);
+      },
+    });
 
     useImperativeHandle(ref, () => ({ open }), [open]);
-
-    useEffect(() => {
-      const onKeyDown = (event: KeyboardEvent) => {
-        if (isVisible) {
-          consumeKeyboardEvent(event);
-          close();
-
-          if (event.key !== 'Escape') {
-            runAction(event);
-          }
-        } else if (shouldOpen(event) && open()) {
-          consumeKeyboardEvent(event);
-        }
-      };
-
-      const onPointerDown = () => {
-        if (isVisible) {
-          close();
-        }
-      };
-
-      document.addEventListener('keydown', onKeyDown, true);
-      document.addEventListener('pointerdown', onPointerDown, true);
-
-      return () => {
-        document.removeEventListener('keydown', onKeyDown, true);
-        document.removeEventListener('pointerdown', onPointerDown, true);
-      };
-    }, [close, isVisible, open, runAction, shouldOpen]);
-
-    useUnmount(() => {
-      releaseShortcutsLock(instanceId);
-    });
 
     return (
       <>
