@@ -28,7 +28,5 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/workflows-extensions",
-    "@kbn/workflows",
-    "@kbn/zod"
   ]
 }
