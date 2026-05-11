@@ -23,7 +23,13 @@ export class EntityStoreGlobalStateClient {
 
   async find(): Promise<EntityStoreGlobalState | undefined> {
     const response = await this.findSO();
-    return response.total === 0 ? undefined : response.saved_objects[0].attributes;
+    if (response.total === 0) {
+      return undefined;
+    }
+    // Apply zod defaults to the persisted attributes so that fields added in newer Kibana
+    // versions (e.g. `maxTimeWindowSize`) are populated for SOs that were written before the
+    // field existed. This avoids `undefined` reaching consumers like `parseDurationToMs`.
+    return EntityStoreGlobalState.parse(response.saved_objects[0].attributes);
   }
 
   async findOrThrow(): Promise<EntityStoreGlobalState> {

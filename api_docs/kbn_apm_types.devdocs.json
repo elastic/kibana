@@ -3810,7 +3810,7 @@
           "\"ruby\" | \"opentelemetry\" | \"dotnet\" | \"go\" | \"iOS/swift\" | \"java\" | \"js-base\" | \"nodejs\" | \"php\" | \"python\" | \"rum-js\" | \"android/java\" | \"otlp\" | `opentelemetry/${string}` | `otlp/${string}` | \"ios/swift\""
         ],
         "path": "src/platform/packages/shared/kbn-elastic-agent-utils/src/agent_names.ts",
-        "lineNumber": 108,
+        "lineNumber": 112,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4849,7 +4849,7 @@
           "(params: { traceId: string; docId: string; errorCount: number; errorDocId?: string | undefined; docIndex?: string | undefined; }) => void"
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
-        "lineNumber": 21,
+        "lineNumber": 26,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -4866,7 +4866,7 @@
               "{ traceId: string; docId: string; errorCount: number; errorDocId?: string | undefined; docIndex?: string | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
-            "lineNumber": 21,
+            "lineNumber": 26,
             "columnNumber": 47,
             "deprecated": false,
             "trackAdoption": false
@@ -4890,7 +4890,7 @@
             "section": "def-common.FullTraceWaterfallOnErrorClick",
             "text": "FullTraceWaterfallOnErrorClick"
           },
-          " | undefined; } & FullTraceWaterfallScrollProps"
+          " | undefined; ebt: { row: { element: string; }; errorBadge: { element: string; }; serviceBadge: { element: string; }; }; } & FullTraceWaterfallScrollProps"
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/full_trace_waterfall.ts",
         "lineNumber": 11,
