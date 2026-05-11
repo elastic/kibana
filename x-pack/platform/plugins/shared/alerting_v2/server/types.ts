@@ -37,6 +37,10 @@ export type AlertingServerSetup = void;
 
 export interface AlertingServerStart {
   getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
+  getRulesClientWithRequestInSpace(
+    request: KibanaRequest,
+    spaceId: string
+  ): Promise<RulesClientApi>;
 }
 
 export interface AlertingServerSetupDependencies {

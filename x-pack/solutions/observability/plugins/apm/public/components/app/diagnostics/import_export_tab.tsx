@@ -43,7 +43,7 @@ function ExportCard() {
   return (
     <EuiCard
       isDisabled={isImported}
-      icon={<EuiIcon size="xxl" type="download" />}
+      icon={<EuiIcon size="xxl" type="download" aria-hidden={true} />}
       title="Export"
       description="Export the diagnostics report in order to provide it to Elastic Support"
       footer={
@@ -87,7 +87,7 @@ function ImportCard() {
   });
   return (
     <EuiCard
-      icon={<EuiIcon size="xxl" type="upload" />}
+      icon={<EuiIcon size="xxl" type="upload" aria-hidden={true} />}
       title="Import diagnostics report"
       description={
         isImported

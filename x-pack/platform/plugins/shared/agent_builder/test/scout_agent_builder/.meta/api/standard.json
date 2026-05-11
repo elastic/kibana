@@ -1,0 +1,2145 @@
+{
+  "sha1": "64003e2957c03f8d61d1908399ddf7038fdb30c9",
+  "tests": [
+    {
+      "id": "bff1cb9c45e581b-d652b9eb526a6ea",
+      "title": "Agent Builder — agents API POST /api/agent_builder/agents creates agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-66a25b5420cc16a",
+      "title": "Agent Builder — agents API POST /api/agent_builder/agents validates agent ID format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 61,
+        "column": 12
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-29d37819c9b45b7",
+      "title": "Agent Builder — agents API POST /api/agent_builder/agents requires required fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 75,
+        "column": 12
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-ea023663f4fa6fe",
+      "title": "Agent Builder — agents API POST /api/agent_builder/agents validates tool configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 83,
+        "column": 12
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-a94a1d5e0090347",
+      "title": "Agent Builder — agents API POST /api/agent_builder/agents defaults visibility to public with created_by",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 103,
+        "column": 12
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-d2cfd5e00890479",
+      "title": "Agent Builder — agents API GET /api/agent_builder/agents/:id retrieves existing agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 119,
+        "column": 12
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-f67fd75b4c665d1",
+      "title": "Agent Builder — agents API GET /api/agent_builder/agents/:id returns 404 for missing agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 141,
+        "column": 12
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-77d810bda84ba68",
+      "title": "Agent Builder — agents API GET /api/agent_builder/agents lists agents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 153,
+        "column": 12
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-0a02c82376a1870",
+      "title": "Agent Builder — agents API PUT /api/agent_builder/agents/:id updates agent fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 179,
+        "column": 12
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-3e32582d5b384d9",
+      "title": "Agent Builder — agents API PUT /api/agent_builder/agents/:id updates configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 200,
+        "column": 12
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-f7676ab885fb2c4",
+      "title": "Agent Builder — agents API PUT /api/agent_builder/agents/:id returns 404 for missing agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 219,
+        "column": 12
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-6ee79680b9f3db0",
+      "title": "Agent Builder — agents API DELETE /api/agent_builder/agents/:id deletes agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 230,
+        "column": 12
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-f058ad74f81629d",
+      "title": "Agent Builder — agents API DELETE /api/agent_builder/agents/:id returns 404 for missing agent",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 249,
+        "column": 12
+      }
+    },
+    {
+      "id": "2beeca8c68780a0-f370e79e23c9074",
+      "title": "Agent Builder — agents visibility API POST allows explicit private visibility",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_visibility_api.spec.ts",
+        "line": 36,
+        "column": 12
+      }
+    },
+    {
+      "id": "2beeca8c68780a0-dbb4b75aeab0077",
+      "title": "Agent Builder — agents visibility API PUT updates visibility explicitly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_visibility_api.spec.ts",
+        "line": 47,
+        "column": 12
+      }
+    },
+    {
+      "id": "2beeca8c68780a0-3e667e492409f16",
+      "title": "Agent Builder — agents visibility API PUT rejects visibility change for default agent (404)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_visibility_api.spec.ts",
+        "line": 66,
+        "column": 12
+      }
+    },
+    {
+      "id": "6b50f506b8ab92c-c503fd972778af9",
+      "title": "Agent Builder — conversation attachments API PUT origin updates attachment",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/attachments_api.spec.ts",
+        "line": 87,
+        "column": 12
+      }
+    },
+    {
+      "id": "6b50f506b8ab92c-c2fb133aa666fa5",
+      "title": "Agent Builder — conversation attachments API GET list attachments reflects origin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/attachments_api.spec.ts",
+        "line": 107,
+        "column": 12
+      }
+    },
+    {
+      "id": "6b50f506b8ab92c-7e128ae3628bb61",
+      "title": "Agent Builder — conversation attachments API stale check for text without origin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/attachments_api.spec.ts",
+        "line": 130,
+        "column": 12
+      }
+    },
+    {
+      "id": "6b50f506b8ab92c-c893158514d02e6",
+      "title": "Agent Builder — conversation attachments API stale check empty when no attachments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/attachments_api.spec.ts",
+        "line": 146,
+        "column": 12
+      }
+    },
+    {
+      "id": "908082c6d828973-6ddd6b9a8a0348d",
+      "title": "Agent Builder — conversations API GET /conversations lists conversations with expected shape",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 87,
+        "column": 12
+      }
+    },
+    {
+      "id": "908082c6d828973-d18ffddc72632be",
+      "title": "Agent Builder — conversations API GET /conversations includes created conversations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 110,
+        "column": 12
+      }
+    },
+    {
+      "id": "908082c6d828973-0d0a41b9729ce9a",
+      "title": "Agent Builder — conversations API GET /conversations filters by agent_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 128,
+        "column": 12
+      }
+    },
+    {
+      "id": "908082c6d828973-2de084e147b177e",
+      "title": "Agent Builder — conversations API GET /conversations returns empty when filtering unknown agent_id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 154,
+        "column": 12
+      }
+    },
+    {
+      "id": "908082c6d828973-4a01bcedc48a1cd",
+      "title": "Agent Builder — conversations API GET /conversations/:id returns conversation with rounds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 171,
+        "column": 12
+      }
+    },
+    {
+      "id": "908082c6d828973-7a976f5b597784d",
+      "title": "Agent Builder — conversations API GET /conversations/:id includes round messages",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 188,
+        "column": 12
+      }
+    },
+    {
+      "id": "908082c6d828973-c10af7f6e206d2a",
+      "title": "Agent Builder — conversations API GET /conversations/:id returns 404 for missing id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 216,
+        "column": 12
+      }
+    },
+    {
+      "id": "908082c6d828973-63326cb859ac2a0",
+      "title": "Agent Builder — conversations API DELETE /conversations/:id deletes then GET 404",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 225,
+        "column": 12
+      }
+    },
+    {
+      "id": "908082c6d828973-e718505f8f720bf",
+      "title": "Agent Builder — conversations API DELETE /conversations/:id returns 404 when missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 245,
+        "column": 12
+      }
+    },
+    {
+      "id": "908082c6d828973-ee26fe1683143b3",
+      "title": "Agent Builder — conversations API DELETE cannot delete same conversation twice",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 254,
+        "column": 12
+      }
+    },
+    {
+      "id": "908082c6d828973-2819ff389f29579",
+      "title": "Agent Builder — conversations API conversation lifecycle: create, list, get, delete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 273,
+        "column": 12
+      }
+    },
+    {
+      "id": "2182526e4be1def-80b2570c588b8a3",
+      "title": "Agent Builder — converse attachments API [local] rejects unknown attachment type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
+        "line": 52,
+        "column": 14
+      }
+    },
+    {
+      "id": "2182526e4be1def-a51876655ed541f",
+      "title": "Agent Builder — converse attachments API [local] rejects invalid attachment payload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
+        "line": 68,
+        "column": 14
+      }
+    },
+    {
+      "id": "2182526e4be1def-bfaac4b5fcb49a0",
+      "title": "Agent Builder — converse attachments API [local] accepts data-only text attachment for model",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
+        "line": 84,
+        "column": 14
+      }
+    },
+    {
+      "id": "2182526e4be1def-f53c31ae702bf30",
+      "title": "Agent Builder — converse attachments API [local] rejects attachment without data or origin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
+        "line": 111,
+        "column": 14
+      }
+    },
+    {
+      "id": "2182526e4be1def-23784a2bb5e4adb",
+      "title": "Agent Builder — converse attachments API [local] rejects origin-only for text attachments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
+        "line": 127,
+        "column": 14
+      }
+    },
+    {
+      "id": "2182526e4be1def-c6dfd489ed6c839",
+      "title": "Agent Builder — converse attachments API [local] prefers inline data when both data and origin provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
+        "line": 143,
+        "column": 14
+      }
+    },
+    {
+      "id": "2182526e4be1def-7d89288520791c6",
+      "title": "Agent Builder — converse attachments API [local] persists conversation-level attachments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
+        "line": 179,
+        "column": 14
+      }
+    },
+    {
+      "id": "2182526e4be1def-ef1371e3bd6f930",
+      "title": "Agent Builder — converse attachments API [task_manager] rejects unknown attachment type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
+        "line": 52,
+        "column": 14
+      }
+    },
+    {
+      "id": "2182526e4be1def-8df15fcc00cff07",
+      "title": "Agent Builder — converse attachments API [task_manager] rejects invalid attachment payload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
+        "line": 68,
+        "column": 14
+      }
+    },
+    {
+      "id": "2182526e4be1def-204a2026a972681",
+      "title": "Agent Builder — converse attachments API [task_manager] accepts data-only text attachment for model",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
+        "line": 84,
+        "column": 14
+      }
+    },
+    {
+      "id": "2182526e4be1def-a7c40321e3629b5",
+      "title": "Agent Builder — converse attachments API [task_manager] rejects attachment without data or origin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
+        "line": 111,
+        "column": 14
+      }
+    },
+    {
+      "id": "2182526e4be1def-20bcf4b1ee3ad32",
+      "title": "Agent Builder — converse attachments API [task_manager] rejects origin-only for text attachments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
+        "line": 127,
+        "column": 14
+      }
+    },
+    {
+      "id": "2182526e4be1def-66c217395e9cf34",
+      "title": "Agent Builder — converse attachments API [task_manager] prefers inline data when both data and origin provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
+        "line": 143,
+        "column": 14
+      }
+    },
+    {
+      "id": "2182526e4be1def-fe373e6c78e84cb",
+      "title": "Agent Builder — converse attachments API [task_manager] persists conversation-level attachments",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
+        "line": 179,
+        "column": 14
+      }
+    },
+    {
+      "id": "d3d876b33745ef6-fb56864d913a72f",
+      "title": "Agent Builder — converse error handling & regenerate API [local] recovers when answer agent calls unavailable tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_regenerate_api.spec.ts",
+        "line": 62,
+        "column": 14
+      }
+    },
+    {
+      "id": "d3d876b33745ef6-0658c3547592be9",
+      "title": "Agent Builder — converse error handling & regenerate API [local] regenerate replaces last round",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_regenerate_api.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "d3d876b33745ef6-1ffcb8597cdfa5d",
+      "title": "Agent Builder — converse error handling & regenerate API [local] regenerate preserves prior rounds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_regenerate_api.spec.ts",
+        "line": 167,
+        "column": 14
+      }
+    },
+    {
+      "id": "d3d876b33745ef6-c048266328e0f47",
+      "title": "Agent Builder — converse error handling & regenerate API [local] regenerate without conversation_id returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_regenerate_api.spec.ts",
+        "line": 235,
+        "column": 14
+      }
+    },
+    {
+      "id": "d3d876b33745ef6-998f2752830d1e9",
+      "title": "Agent Builder — converse error handling & regenerate API [task_manager] recovers when answer agent calls unavailable tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_regenerate_api.spec.ts",
+        "line": 62,
+        "column": 14
+      }
+    },
+    {
+      "id": "d3d876b33745ef6-120f6f3067a50b9",
+      "title": "Agent Builder — converse error handling & regenerate API [task_manager] regenerate replaces last round",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_regenerate_api.spec.ts",
+        "line": 106,
+        "column": 14
+      }
+    },
+    {
+      "id": "d3d876b33745ef6-d88f7e73b81e1cf",
+      "title": "Agent Builder — converse error handling & regenerate API [task_manager] regenerate preserves prior rounds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_regenerate_api.spec.ts",
+        "line": 167,
+        "column": 14
+      }
+    },
+    {
+      "id": "d3d876b33745ef6-8acce603c3cdafb",
+      "title": "Agent Builder — converse error handling & regenerate API [task_manager] regenerate without conversation_id returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_error_regenerate_api.spec.ts",
+        "line": 235,
+        "column": 14
+      }
+    },
+    {
+      "id": "8848135e0a52b50-f35e0e11e25fd7b",
+      "title": "Agent Builder — converse simple & multi-round API [local] simple conversation persists title and response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_simple_multi_api.spec.ts",
+        "line": 48,
+        "column": 14
+      }
+    },
+    {
+      "id": "8848135e0a52b50-cebe45d8f5e57cd",
+      "title": "Agent Builder — converse simple & multi-round API [local] multi-round conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_simple_multi_api.spec.ts",
+        "line": 78,
+        "column": 14
+      }
+    },
+    {
+      "id": "8848135e0a52b50-404f745bbf271f2",
+      "title": "Agent Builder — converse simple & multi-round API [local] invalid converse payload returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_simple_multi_api.spec.ts",
+        "line": 130,
+        "column": 14
+      }
+    },
+    {
+      "id": "8848135e0a52b50-b6457688b8bed55",
+      "title": "Agent Builder — converse simple & multi-round API [task_manager] simple conversation persists title and response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_simple_multi_api.spec.ts",
+        "line": 48,
+        "column": 14
+      }
+    },
+    {
+      "id": "8848135e0a52b50-19be2e31efda0e1",
+      "title": "Agent Builder — converse simple & multi-round API [task_manager] multi-round conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_simple_multi_api.spec.ts",
+        "line": 78,
+        "column": 14
+      }
+    },
+    {
+      "id": "8848135e0a52b50-e6ef844a508942f",
+      "title": "Agent Builder — converse simple & multi-round API [task_manager] invalid converse payload returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_simple_multi_api.spec.ts",
+        "line": 130,
+        "column": 14
+      }
+    },
+    {
+      "id": "ccb917c05a8c23e-d856e86368deee2",
+      "title": "Agent Builder — converse tool calling API [local] single tool call (search with esql)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tool_calling_api.spec.ts",
+        "line": 80,
+        "column": 14
+      }
+    },
+    {
+      "id": "ccb917c05a8c23e-a3869ffa33b920a",
+      "title": "Agent Builder — converse tool calling API [local] parallel tool calls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tool_calling_api.spec.ts",
+        "line": 144,
+        "column": 14
+      }
+    },
+    {
+      "id": "ccb917c05a8c23e-9c28eead7f3112d",
+      "title": "Agent Builder — converse tool calling API [task_manager] single tool call (search with esql)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tool_calling_api.spec.ts",
+        "line": 80,
+        "column": 14
+      }
+    },
+    {
+      "id": "ccb917c05a8c23e-93f6f1fb2e7860e",
+      "title": "Agent Builder — converse tool calling API [task_manager] parallel tool calls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tool_calling_api.spec.ts",
+        "line": 144,
+        "column": 14
+      }
+    },
+    {
+      "id": "238a406144a8aa4-72848fc3099b974",
+      "title": "Agent Builder — plugin installation API install from remote zip URL lifecycle",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/plugins_installation_api.spec.ts",
+        "line": 62,
+        "column": 12
+      }
+    },
+    {
+      "id": "62cab5b8d50c6be-21aeb146533bb2d",
+      "title": "Agent Builder — RBAC minimal_read: can GET agents, agent by id, tools, tool by id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/rbac_api.spec.ts",
+        "line": 275,
+        "column": 12
+      }
+    },
+    {
+      "id": "62cab5b8d50c6be-a7e0b739a73f8ec",
+      "title": "Agent Builder — RBAC minimal_read: cannot mutate agents or tools",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/rbac_api.spec.ts",
+        "line": 312,
+        "column": 12
+      }
+    },
+    {
+      "id": "62cab5b8d50c6be-405db2d55ba6c4f",
+      "title": "Agent Builder — RBAC manage_agents: can CRUD agent; cannot mutate tools",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/rbac_api.spec.ts",
+        "line": 356,
+        "column": 12
+      }
+    },
+    {
+      "id": "62cab5b8d50c6be-326a0de4973f82c",
+      "title": "Agent Builder — RBAC manage_tools: can CRUD tool; cannot mutate agents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/rbac_api.spec.ts",
+        "line": 409,
+        "column": 12
+      }
+    },
+    {
+      "id": "62cab5b8d50c6be-ba5317dfa3101d2",
+      "title": "Agent Builder — RBAC agentBuilder all: can create and delete agent and tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/rbac_api.spec.ts",
+        "line": 459,
+        "column": 12
+      }
+    },
+    {
+      "id": "aca0cb2f2b53015-5d1be80172d7a30",
+      "title": "Agent Builder — skills CRUD API (stateful) GET lists built-in visualization-creation skill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_crud_api.spec.ts",
+        "line": 33,
+        "column": 12
+      }
+    },
+    {
+      "id": "aca0cb2f2b53015-57e6f6384c763cf",
+      "title": "Agent Builder — skills CRUD API (stateful) GET list includes user-created skills",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_crud_api.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "aca0cb2f2b53015-3a84cded12d1ee9",
+      "title": "Agent Builder — skills CRUD API (stateful) POST creates skill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_crud_api.spec.ts",
+        "line": 63,
+        "column": 12
+      }
+    },
+    {
+      "id": "aca0cb2f2b53015-29a7aebc22e9446",
+      "title": "Agent Builder — skills CRUD API (stateful) GET retrieves user skill and built-in skill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_crud_api.spec.ts",
+        "line": 79,
+        "column": 12
+      }
+    },
+    {
+      "id": "aca0cb2f2b53015-22e0de25a11662b",
+      "title": "Agent Builder — skills CRUD API (stateful) PUT updates skill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_crud_api.spec.ts",
+        "line": 100,
+        "column": 12
+      }
+    },
+    {
+      "id": "aca0cb2f2b53015-e2f407bce0d66aa",
+      "title": "Agent Builder — skills CRUD API (stateful) DELETE removes user skill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_crud_api.spec.ts",
+        "line": 122,
+        "column": 12
+      }
+    },
+    {
+      "id": "cff713e5f00cac2-d40a3f335c2a9b9",
+      "title": "Agent Builder — skills validation API (stateful) POST rejects invalid skill id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_validation_api.spec.ts",
+        "line": 26,
+        "column": 12
+      }
+    },
+    {
+      "id": "cff713e5f00cac2-2a4d44530156257",
+      "title": "Agent Builder — skills validation API (stateful) POST rejects duplicate skill id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_validation_api.spec.ts",
+        "line": 41,
+        "column": 12
+      }
+    },
+    {
+      "id": "cff713e5f00cac2-2b42f37e133b495",
+      "title": "Agent Builder — skills validation API (stateful) PUT rejects updating built-in skill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_validation_api.spec.ts",
+        "line": 68,
+        "column": 12
+      }
+    },
+    {
+      "id": "cff713e5f00cac2-fbea0f2c58cddf7",
+      "title": "Agent Builder — skills validation API (stateful) PUT rejects updating missing skill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_validation_api.spec.ts",
+        "line": 84,
+        "column": 12
+      }
+    },
+    {
+      "id": "cff713e5f00cac2-c8479370a5702ff",
+      "title": "Agent Builder — skills validation API (stateful) DELETE rejects built-in skill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_validation_api.spec.ts",
+        "line": 97,
+        "column": 12
+      }
+    },
+    {
+      "id": "cff713e5f00cac2-62ec8ba09181ec9",
+      "title": "Agent Builder — skills validation API (stateful) DELETE rejects missing skill",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/skills_validation_api.spec.ts",
+        "line": 105,
+        "column": 12
+      }
+    },
+    {
+      "id": "1b65711126013c6-7ec29fa26d8296c",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search autocomplete",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
+        "line": 89,
+        "column": 10
+      }
+    },
+    {
+      "id": "1b65711126013c6-97dacc2fc7b0e11",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search wildcard returns expected item fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
+        "line": 105,
+        "column": 10
+      }
+    },
+    {
+      "id": "1b65711126013c6-730fa95c6745993",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search omits content when skip_content is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
+        "line": 128,
+        "column": 10
+      }
+    },
+    {
+      "id": "1b65711126013c6-ff0990d6a368fe5",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search rejects empty query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
+        "line": 145,
+        "column": 10
+      }
+    },
+    {
+      "id": "1b65711126013c6-fff0a042e90bc4e",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_attach returns 404 when conversation missing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
+        "line": 154,
+        "column": 10
+      }
+    },
+    {
+      "id": "1b65711126013c6-cf6d7f8e78a8ae4",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_attach attaches chunk and persists attachment refs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
+        "line": 174,
+        "column": 10
+      }
+    },
+    {
+      "id": "c70b3415ff2c90e-38cd963f9e6df30",
+      "title": "Agent Builder — spaces API lists tools in space default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/spaces_api.spec.ts",
+        "line": 106,
+        "column": 12
+      }
+    },
+    {
+      "id": "c70b3415ff2c90e-84c283e024962e2",
+      "title": "Agent Builder — spaces API lists agents in space default",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/spaces_api.spec.ts",
+        "line": 121,
+        "column": 12
+      }
+    },
+    {
+      "id": "c70b3415ff2c90e-8a137a8bc21f80b",
+      "title": "Agent Builder — spaces API lists tools in space spaces-api-test-1",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/spaces_api.spec.ts",
+        "line": 139,
+        "column": 14
+      }
+    },
+    {
+      "id": "c70b3415ff2c90e-725ca1076908952",
+      "title": "Agent Builder — spaces API lists agents in space spaces-api-test-1",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/spaces_api.spec.ts",
+        "line": 156,
+        "column": 14
+      }
+    },
+    {
+      "id": "c70b3415ff2c90e-7544b7f66df642c",
+      "title": "Agent Builder — spaces API lists tools in space spaces-api-test-2",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/spaces_api.spec.ts",
+        "line": 139,
+        "column": 14
+      }
+    },
+    {
+      "id": "c70b3415ff2c90e-54279794e73c884",
+      "title": "Agent Builder — spaces API lists agents in space spaces-api-test-2",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/spaces_api.spec.ts",
+        "line": 156,
+        "column": 14
+      }
+    },
+    {
+      "id": "801c4966029710a-15723b6942a6cd2",
+      "title": "Agent Builder — builtin tools API DELETE read-only builtin tool returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_builtin_api.spec.ts",
+        "line": 18,
+        "column": 12
+      }
+    },
+    {
+      "id": "801c4966029710a-59d73ef453d6253",
+      "title": "Agent Builder — builtin tools API PUT builtin tool returns 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_builtin_api.spec.ts",
+        "line": 29,
+        "column": 12
+      }
+    },
+    {
+      "id": "801c4966029710a-ccc56147a03ff9f",
+      "title": "Agent Builder — builtin tools API POST cannot create tool with builtin id namespace",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_builtin_api.spec.ts",
+        "line": 41,
+        "column": 12
+      }
+    },
+    {
+      "id": "801c4966029710a-b2feec900b09dc6",
+      "title": "Agent Builder — builtin tools API POST /tools/_execute runs builtin list_indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_builtin_api.spec.ts",
+        "line": 61,
+        "column": 12
+      }
+    },
+    {
+      "id": "d02d6fecd648b30-d1e19d19f2a34a3",
+      "title": "Agent Builder — builtin tools internal API POST /internal/tools/_bulk_delete rejects builtin tools",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_builtin_internal_api.spec.ts",
+        "line": 30,
+        "column": 12
+      }
+    },
+    {
+      "id": "d02d6fecd648b30-c6e8a63c01be192",
+      "title": "Agent Builder — builtin tools internal API POST /internal/tools/_bulk_delete mixed builtin and custom",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_builtin_internal_api.spec.ts",
+        "line": 47,
+        "column": 12
+      }
+    },
+    {
+      "id": "ee78d30659df971-24942d9ceee0197",
+      "title": "Agent Builder — tool delete force API DELETE public: unused tool without force succeeds",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_delete_force_api.spec.ts",
+        "line": 70,
+        "column": 12
+      }
+    },
+    {
+      "id": "ee78d30659df971-85c4b029801aeeb",
+      "title": "Agent Builder — tool delete force API DELETE public: in-use tool without force returns 409",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_delete_force_api.spec.ts",
+        "line": 104,
+        "column": 12
+      }
+    },
+    {
+      "id": "ee78d30659df971-ae543272896a0d5",
+      "title": "Agent Builder — tool delete force API DELETE public: force=true deletes in-use tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_delete_force_api.spec.ts",
+        "line": 114,
+        "column": 12
+      }
+    },
+    {
+      "id": "ee78d30659df971-3584a3db488b931",
+      "title": "Agent Builder — tool delete force API POST internal bulk_delete without force returns 409",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_delete_force_api.spec.ts",
+        "line": 128,
+        "column": 12
+      }
+    },
+    {
+      "id": "ee78d30659df971-1ecfa10df82ec15",
+      "title": "Agent Builder — tool delete force API POST internal bulk_delete with force deletes tools",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_delete_force_api.spec.ts",
+        "line": 164,
+        "column": 12
+      }
+    },
+    {
+      "id": "56be79c46ed300f-7a06f41211de3a0",
+      "title": "Agent Builder — ES|QL tools API POST creates ES|QL tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "56be79c46ed300f-783bf8720a13aac",
+      "title": "Agent Builder — ES|QL tools API POST accepts all supported parameter types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
+        "line": 47,
+        "column": 12
+      }
+    },
+    {
+      "id": "56be79c46ed300f-0e22531e77daa82",
+      "title": "Agent Builder — ES|QL tools API POST validates tool id format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
+        "line": 77,
+        "column": 12
+      }
+    },
+    {
+      "id": "56be79c46ed300f-07a2833787dcd2d",
+      "title": "Agent Builder — ES|QL tools API POST requires required fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
+        "line": 86,
+        "column": 12
+      }
+    },
+    {
+      "id": "56be79c46ed300f-250dd9bde378877",
+      "title": "Agent Builder — ES|QL tools API POST validates parameter types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
+        "line": 94,
+        "column": 12
+      }
+    },
+    {
+      "id": "56be79c46ed300f-94a3866cbe23338",
+      "title": "Agent Builder — ES|QL tools API POST /tools/_execute with indexed ES|QL data POST /tools/_execute executes indexed ES|QL tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
+        "line": 164,
+        "column": 14
+      }
+    },
+    {
+      "id": "56be79c46ed300f-3d931711e347594",
+      "title": "Agent Builder — ES|QL tools API GET returns existing ES|QL tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
+        "line": 174,
+        "column": 12
+      }
+    },
+    {
+      "id": "56be79c46ed300f-64ef68b425973bd",
+      "title": "Agent Builder — ES|QL tools API GET returns 404 for missing tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
+        "line": 190,
+        "column": 12
+      }
+    },
+    {
+      "id": "56be79c46ed300f-4ebd99cf095183f",
+      "title": "Agent Builder — ES|QL tools API GET lists tools",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
+        "line": 198,
+        "column": 12
+      }
+    },
+    {
+      "id": "56be79c46ed300f-2b825be1113e161",
+      "title": "Agent Builder — ES|QL tools API PUT updates ES|QL tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
+        "line": 214,
+        "column": 12
+      }
+    },
+    {
+      "id": "56be79c46ed300f-640faa110647dd4",
+      "title": "Agent Builder — ES|QL tools API PUT returns 404 for missing tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
+        "line": 230,
+        "column": 12
+      }
+    },
+    {
+      "id": "56be79c46ed300f-714750b159b0d67",
+      "title": "Agent Builder — ES|QL tools API DELETE removes ES|QL tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
+        "line": 238,
+        "column": 12
+      }
+    },
+    {
+      "id": "56be79c46ed300f-0dbdafe78b84918",
+      "title": "Agent Builder — ES|QL tools API DELETE missing tool returns expected 404 body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_api.spec.ts",
+        "line": 256,
+        "column": 12
+      }
+    },
+    {
+      "id": "cc7bb1c45b1a6d8-7470ad9c7b112ef",
+      "title": "Agent Builder — ES|QL tools internal API bulk delete removes created tools",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_internal_api.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "cc7bb1c45b1a6d8-d2b40129bb2ddda",
+      "title": "Agent Builder — ES|QL tools internal API bulk delete handles mix of existing and missing ids",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_internal_api.spec.ts",
+        "line": 75,
+        "column": 12
+      }
+    },
+    {
+      "id": "cc7bb1c45b1a6d8-da7cbbae3d7912f",
+      "title": "Agent Builder — ES|QL tools internal API bulk delete rejects empty ids",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_esql_internal_api.spec.ts",
+        "line": 101,
+        "column": 12
+      }
+    },
+    {
+      "id": "63e918d1803a04e-777ad23db4d8f84",
+      "title": "Agent Builder — index search tools API POST creates index search tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "63e918d1803a04e-55bc4717fd0bcc2",
+      "title": "Agent Builder — index search tools API POST validates tool id format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
+        "line": 53,
+        "column": 12
+      }
+    },
+    {
+      "id": "63e918d1803a04e-0ebf05cf4871815",
+      "title": "Agent Builder — index search tools API POST requires required fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
+        "line": 62,
+        "column": 12
+      }
+    },
+    {
+      "id": "63e918d1803a04e-66aed19205dda3c",
+      "title": "Agent Builder — index search tools API POST requires pattern in configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
+        "line": 70,
+        "column": 12
+      }
+    },
+    {
+      "id": "63e918d1803a04e-c63ea23a7b3f797",
+      "title": "Agent Builder — index search tools API POST validates index pattern exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
+        "line": 82,
+        "column": 12
+      }
+    },
+    {
+      "id": "63e918d1803a04e-ad1a36223d1f153",
+      "title": "Agent Builder — index search tools API POST validates row_limit is numeric",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
+        "line": 97,
+        "column": 12
+      }
+    },
+    {
+      "id": "63e918d1803a04e-d59dd758d021c14",
+      "title": "Agent Builder — index search tools API POST validates row_limit minimum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
+        "line": 109,
+        "column": 12
+      }
+    },
+    {
+      "id": "63e918d1803a04e-7b17e4ad0ff5b9f",
+      "title": "Agent Builder — index search tools API GET retrieves index search tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
+        "line": 121,
+        "column": 12
+      }
+    },
+    {
+      "id": "63e918d1803a04e-a166c2c1102afd0",
+      "title": "Agent Builder — index search tools API GET returns 404 for missing tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
+        "line": 137,
+        "column": 12
+      }
+    },
+    {
+      "id": "63e918d1803a04e-abd71e67a41fbc2",
+      "title": "Agent Builder — index search tools API GET lists includes index search tools",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
+        "line": 145,
+        "column": 12
+      }
+    },
+    {
+      "id": "63e918d1803a04e-11a30442cd04d30",
+      "title": "Agent Builder — index search tools API PUT updates PUT updates description",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
+        "line": 181,
+        "column": 14
+      }
+    },
+    {
+      "id": "63e918d1803a04e-60f2df775c0b147",
+      "title": "Agent Builder — index search tools API PUT updates PUT updates configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
+        "line": 190,
+        "column": 14
+      }
+    },
+    {
+      "id": "63e918d1803a04e-d5a9719bfb4d156",
+      "title": "Agent Builder — index search tools API PUT returns 404 for missing tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
+        "line": 208,
+        "column": 12
+      }
+    },
+    {
+      "id": "63e918d1803a04e-ac8ffa22a9ed89f",
+      "title": "Agent Builder — index search tools API DELETE removes index search tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
+        "line": 216,
+        "column": 12
+      }
+    },
+    {
+      "id": "63e918d1803a04e-c84ed0ee9683113",
+      "title": "Agent Builder — index search tools API DELETE missing tool returns expected message",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_index_search_api.spec.ts",
+        "line": 234,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fb92a52d5f0ccf-6bdeeb038d88b84",
+      "title": "Agent Builder — legacy ES|QL tool type migration API GET migrates legacy types for single tool",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_legacy_migration_api.spec.ts",
+        "line": 93,
+        "column": 12
+      }
+    },
+    {
+      "id": "4fb92a52d5f0ccf-0cb44e1330cd973",
+      "title": "Agent Builder — legacy ES|QL tool type migration API GET list includes migrated legacy tool params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_legacy_migration_api.spec.ts",
+        "line": 130,
+        "column": 12
+      }
+    }
+  ]
+}
