@@ -87,7 +87,10 @@ interface BaseSavedObjectFinder {
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
   extraItems?: {
     metaData: Array<SavedObjectMetaData<FinderAttributes>>;
-    get: () => Promise<SavedObjectCommon<FinderAttributes>[]>;
+    get: (search: {
+      query?: string;
+      perPage?: number;
+    }) => Promise<SavedObjectCommon<FinderAttributes>[]>;
   };
   showFilter?: boolean;
   leftChildren?: ReactElement | ReactElement[];
@@ -141,6 +144,7 @@ class SavedObjectFinderUiClass extends React.Component<
       .map(({ type }) => ({
         contentTypeId: type,
       }));
+    const fetchLimit = uiSettings.get(LISTING_LIMIT_SETTING); // TODO: support pagination,
     const response = await Promise.all([
       contentTypes.length
         ? contentClient.mSearch<SavedObjectCommon<FinderAttributes>>({
@@ -148,11 +152,14 @@ class SavedObjectFinderUiClass extends React.Component<
             query: {
               text: queryText ? `${queryText}*` : undefined,
               ...(includeTags?.length ? { tags: { included: includeTags } } : {}),
-              limit: uiSettings.get(LISTING_LIMIT_SETTING), // TODO: support pagination,
+              limit: fetchLimit,
             },
           })
         : new Promise<{ hits: never[] }>((resolve) => resolve({ hits: [] })),
-      this.props.extraItems?.get() ?? new Promise<never[]>((resolve) => resolve([])),
+      this.props.extraItems?.get({
+        query: queryText,
+        perPage: fetchLimit,
+      }) ?? new Promise<never[]>((resolve) => resolve([])),
     ]);
 
     const savedObjects = [
@@ -357,6 +364,7 @@ class SavedObjectFinderUiClass extends React.Component<
       ...(tagColumn ? [tagColumn] : []),
     ];
     const pagination = {
+      pageIndex: this.pageIndex,
       initialPageSize: !!this.props.fixedPageSize ? this.props.fixedPageSize : pageSize ?? 10,
       pageSize: !!this.props.fixedPageSize ? undefined : pageSize,
       pageSizeOptions: PAGE_SIZE_OPTIONS,

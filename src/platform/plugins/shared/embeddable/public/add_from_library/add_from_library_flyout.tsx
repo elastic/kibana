@@ -97,8 +97,11 @@ export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps)
       })}
       extraItems={{
         metaData: typesWithoutCM,
-        get: async () => {
-          const getPromises = typesWithoutCM.map(({ getSavedObjects }) => getSavedObjects!());
+        get: async (searchRequest) => {
+          const { perPage, ...rest } = searchRequest;
+          const getPromises = typesWithoutCM.map(({ getSavedObjects }) =>
+            getSavedObjects!({ ...rest, per_page: perPage })
+          );
           return (await Promise.all(getPromises)).flat();
         },
       }}

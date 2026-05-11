@@ -20,7 +20,9 @@ export type RegistryItem<TSavedObjectAttributes extends FinderAttributes = Finde
   ) => void;
   savedObjectMetaData: SavedObjectMetaData & {
     /* If the saved object is not in content management, provide a getter for it */
-    getSavedObjects?: () => Promise<SavedObjectCommon<FinderAttributes>[]>;
+    getSavedObjects?: (search?: {
+      query?: string;
+    }) => Promise<SavedObjectCommon<FinderAttributes>[]>;
   };
 };
 
@@ -45,7 +47,7 @@ export const registerAddFromLibraryType = <TSavedObjectAttributes extends Finder
   getIconForSavedObject: (savedObject: SavedObjectCommon<TSavedObjectAttributes>) => IconType;
   getSavedObjectSubType?: (savedObject: SavedObjectCommon<TSavedObjectAttributes>) => string;
   getTooltipForSavedObject?: (savedObject: SavedObjectCommon<TSavedObjectAttributes>) => string;
-  getSavedObjects?: () => Promise<SavedObjectCommon<FinderAttributes>[]>;
+  getSavedObjects?: RegistryItem['savedObjectMetaData']['getSavedObjects'];
 }) => {
   if (registry.has(savedObjectType)) {
     throw new Error(
