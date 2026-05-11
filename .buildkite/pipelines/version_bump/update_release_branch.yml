@@ -1,0 +1,4 @@
+steps:
+  - name: 'Update release branch config'
+    key: update-release-branch
+    command: .buildkite/scripts/steps/version_bump/update_release_branch.sh

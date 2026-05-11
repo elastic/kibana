@@ -20,6 +20,7 @@ Review only **Scout test code and the building blocks tests consume**:
 - Files under `**/kbn-scout*/**`: only specs, page objects, API services, fixtures, and test utilities.
 
 Skip everything else, including internal `kbn-scout` framework implementation. If no matching files changed, conclude with no comments. Do not post flaky test runner nudges — a separate agent handles that.
+Do not run this check on backport PRs (they usually have `backport` label and/or the version prefix in the PR title, e.g.: "[9.x] <PR title here>")
 
 ## Review instructions
 
@@ -35,7 +36,9 @@ These rules must be verified on every applicable Scout test file (UI and API). D
 
 ## Output
 
-### Inline comments (primary output)
+Inline comments are the **only** output of this review. Do not post a top-level review body, issue comment, or summary of any kind. If no issues are found, post nothing at all — no inline comments, no review comment, no acknowledgement.
+
+### Inline comments
 
 Post detailed findings as inline PR comments on the offending line. Each inline comment must use a collapsible section to keep the PR readable. Structure:
 
@@ -49,12 +52,14 @@ Post detailed findings as inline PR comments on the offending line. Each inline 
 
 <Details: full explanation, concrete fix, code blocks, before and after examples, or anything else that would overwhelm the inline view.>
 
+<sup>Share feedback in the [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3) channel.</sup>
+
 </details>
 ​```
 
 - **Rule link (optional).** If a best-practices section genuinely matches, state the rule as a **Markdown link** whose text is the section heading and whose URL is the section-scoped URL (see routing below). If no section matches, or if a match would feel forced or contrived (e.g. making the heading fit a finding it doesn't really describe), **omit the rule link line entirely** and start the comment with the overview prose. Do not invent a match, do not reuse a vaguely-related section, and do not fall back to a doc-root link. A finding without a rule link is fine when the overview alone is self-explanatory.
 - **Overview:** plain prose, no code. A developer skimming the PR should grasp what's wrong and whether to act on it without expanding.
-- **Details:** everything else — reasoning, code snippets, suggested diffs, links to related rules.
+- **Details:** everything else — reasoning, code snippets, suggested diffs, links to related rules. Always end the details block with the `#appex-qa` feedback line shown above.
 
 If the finding genuinely fits in one line (e.g. a nit about a typo'd constant name), you can skip the `<details>` block. Use judgment — the goal is a scannable PR, not rigid formatting.
 
@@ -80,31 +85,10 @@ Format the citation as a Markdown link using the section heading text as the lin
 
 Do **not** use bare parenthetical labels like `(best practices)` or `(ui best practices)`, do **not** link to the doc root, and do **not** force-fit a loosely-related section just to have a link. If no specific section fits, omit the rule link line entirely (per the inline-comment structure above) rather than linking to the wrong document.
 
-### Review body (compact, one line + footer)
-
-The summary lives in the **PR review body** — not in a separate top-level issue comment. Do **not** post an additional issue comment summarizing the review; the review body is the only summary surface.
-
-Keep the review body compact: a single bolded label line stating the current status, followed by the footer. No heading (`##`), no review log, no severity breakdown, no per-commit history.
-
-**Review body template (use verbatim):**
-
-​```markdown
-**Scout Test Review**: <current status>
-
-<sup>Share feedback in the [#appex-qa](https://elastic.slack.com/archives/C04HT4P1YS3) channel.</sup>
-​```
-
-**Current status** is one short clause. Examples:
-
-- `found 3 issues. See inline comments for details.`
-- `found 1 issue. See inline comments for details.`
-
-Do not add finding counts by severity, per-commit review logs, experimental disclaimers, or any other text to the review body.
-
 ### Re-run behavior
 
 On each re-run:
 
 1. **Update the status**: if an inline comment was addressed in a recent commit, update and resolve the comment.
-2. **Do not post an additional top-level issue comment** for re-runs — even to acknowledge new commits or say "no new issues found". Silence on re-runs with nothing new to add is the correct behavior.
+2. **Do not post any top-level issue comment or review body** — not on the first run, not on re-runs, not to acknowledge new commits, not to say "no new issues found". Inline comments are the only surface. Silence with nothing new to add is the correct behavior.
 3. **Do not duplicate inline comments** on lines you've already commented on, unless the code on that line has changed (update the existing comment).

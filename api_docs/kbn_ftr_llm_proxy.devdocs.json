@@ -165,6 +165,7 @@
                 "lineNumber": 44,
                 "columnNumber": 46,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToolingLog",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -360,6 +361,7 @@
                         "lineNumber": 30,
                         "columnNumber": 10,
                         "deprecated": false,
+                        "docsReferencedTypeName": "ChatCompletionStreamParams",
                         "trackAdoption": false
                       }
                     ]
@@ -477,6 +479,7 @@
             "lineNumber": 21,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "LlmProxy",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -536,6 +539,7 @@
             "lineNumber": 242,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "ToolingLog",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -575,6 +579,7 @@
             "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Array",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -680,6 +685,7 @@
             "lineNumber": 58,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "LLMMessage",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -736,6 +742,7 @@
             "lineNumber": 15,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }

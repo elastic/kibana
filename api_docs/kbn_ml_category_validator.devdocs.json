@@ -111,6 +111,7 @@
             "lineNumber": 34,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "IScopedClusterClient",
             "trackAdoption": false,
             "isRequired": true
           }

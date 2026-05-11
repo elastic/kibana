@@ -55,6 +55,7 @@
                 "lineNumber": 41,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "BulkResolveFn",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -342,7 +343,15 @@
         "tags": [],
         "label": "ContentListProvider",
         "description": [
-          "\nMain provider component for content list functionality, including data fetching\n(via React Query), sorting, search, and tags filtering.\n\nProps like `dataSource`, `features`, and `services` should be stable references to avoid\nunnecessary re-renders. Configuration from `features.sorting`, `features.pagination`, and\n`features.search` is read once at mount; use a `key` prop to remount if you need to change\ninitial state dynamically.\n\nService-dependent features wrap children with the appropriate context provider:\n\n- **Tags** (`services.tags`): wraps with `ContentManagementTagsProvider`, enabling tag\n  display and filtering. The service's `parseSearchQuery` (if present) is passed through\n  to support extracting tag filters from the search bar query text.\n- **Favorites** (`services.favorites`): wraps with `FavoritesContextProvider`, enabling\n  star buttons and starred filtering.\n- **User profiles** (`services.userProfiles`): wraps with `ProfileCacheContext.Provider`,\n  providing a shared {@link ProfileCache} for synchronous profile resolution."
+          "\nMain provider component for content list functionality, including data fetching\n(via React Query), sorting, search, and tags filtering.\n\nProps like `dataSource`, `features`, and `services` should be stable references to avoid\nunnecessary re-renders. Configuration from `features.sorting`, `features.pagination`, and\n`features.search` is read once at mount; use a `key` prop to remount if you need to change\ninitial state dynamically.\n\nService-dependent features wrap children with the appropriate context provider:\n\n- **Tags** (`services.tags`): wraps with `ContentManagementTagsProvider`, enabling tag\n  display and filtering. The service's `parseSearchQuery` (if present) is passed through\n  to support extracting tag filters from the search bar query text.\n- **Favorites** (`services.favorites`): wraps with `FavoritesContextProvider`, enabling\n  star buttons and starred filtering.\n- **User profiles** (`services.userProfiles`): wraps with `ProfileCacheContext.Provider`,\n  providing a shared ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ProfileCache",
+            "text": "ProfileCache"
+          },
+          " for synchronous profile resolution."
         ],
         "signature": [
           "({ children, dataSource, labels, item, isReadOnly, id, queryKeyScope: queryKeyScopeProp, features, services, profileCache, }: ",
@@ -381,6 +390,7 @@
             "lineNumber": 85,
             "columnNumber": 37,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentListProviderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -395,7 +405,15 @@
         "tags": [],
         "label": "DeleteConfirmationComponent",
         "description": [
-          "\nPresentational confirmation modal for delete operations.\n\nStateless — all data and callbacks are provided via props.\nUse {@link DeleteConfirmationModal} for the connected version that\nreads from content list context."
+          "\nPresentational confirmation modal for delete operations.\n\nStateless — all data and callbacks are provided via props.\nUse ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.DeleteConfirmationModal",
+            "text": "DeleteConfirmationModal"
+          },
+          " for the connected version that\nreads from content list context."
         ],
         "signature": [
           "({ items, entityName, entityNamePlural, isDeleting, error, onCancel, onConfirm, }: ",
@@ -434,6 +452,7 @@
             "lineNumber": 42,
             "columnNumber": 45,
             "deprecated": false,
+            "docsReferencedTypeName": "DeleteConfirmationComponentProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -448,7 +467,15 @@
         "tags": [],
         "label": "DeleteConfirmationModal",
         "description": [
-          "\nConnected confirmation modal for delete operations.\n\nReads `item.onDelete` and entity labels from the provider config, calls\n`refetch` on success, and manages `isDeleting`/`error` locally.\nDelegates rendering to {@link DeleteConfirmationComponent}.\n"
+          "\nConnected confirmation modal for delete operations.\n\nReads `item.onDelete` and entity labels from the provider config, calls\n`refetch` on success, and manages `isDeleting`/`error` locally.\nDelegates rendering to ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.DeleteConfirmationComponent",
+            "text": "DeleteConfirmationComponent"
+          },
+          ".\n"
         ],
         "signature": [
           "({ items, onClose }: ",
@@ -487,6 +514,125 @@
             "lineNumber": 44,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "DeleteConfirmationModalProps",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.derivePhase",
+        "type": "Function",
+        "tags": [],
+        "label": "derivePhase",
+        "description": [
+          "\nPure derivation of the render phase from Content List state.\n\nExported separately from the hook for straightforward unit testing and\nfor reuse in tests that want to assert phase behavior without a React\ntree.\n\nPrecedence (earliest match wins):\n1. `isLoading` → `'initialLoad'`.\n2. `hasNoItems` → `'empty'`.\n3. `hasNoResults` → `'filtered'`.\n4. `isFetching && hasActiveQuery` → `'filtering'`.\n5. Otherwise → `'populated'`.\n\n`hasNoItems` and `hasNoResults` are derived from the latest **settled**\nquery data and held stable during background refetches (`keepPreviousData`),\nso they do not reset on every in-flight fetch. The `'filtering'` branch is\ntherefore reachable when the user has applied a filter/search and the\nupdated results have not yet resolved — the previous data is still showing\nand neither empty-state condition applies to it."
+        ],
+        "signature": [
+          "(input: ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.DerivePhaseInput",
+            "text": "DerivePhaseInput"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListPhase",
+            "text": "ContentListPhase"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.derivePhase.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "input",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.DerivePhaseInput",
+                "text": "DerivePhaseInput"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+            "lineNumber": 56,
+            "columnNumber": 29,
+            "deprecated": false,
+            "docsReferencedTypeName": "DerivePhaseInput",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.derivePhaseFromState",
+        "type": "Function",
+        "tags": [],
+        "label": "derivePhaseFromState",
+        "description": [
+          "\nConvenience adapter: derive a phase directly from a ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListState",
+            "text": "ContentListState"
+          },
+          "."
+        ],
+        "signature": [
+          "(state: ",
+          "ContentListState",
+          ") => ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListPhase",
+            "text": "ContentListPhase"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+        "lineNumber": 75,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.derivePhaseFromState.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "ContentListState"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+            "lineNumber": 75,
+            "columnNumber": 38,
+            "deprecated": false,
+            "docsReferencedTypeName": "ContentListState",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -501,7 +647,23 @@
         "tags": [],
         "label": "getCreatorKey",
         "description": [
-          "\nResolve the effective creator key for an item.\n\nMaps `managed` items to {@link MANAGED_USER_FILTER} and items without a\n`createdBy` to {@link NO_CREATOR_USER_FILTER}. All other items return\ntheir `createdBy` UID. Direct `ContentListProvider` consumers should use\nthis when implementing `findItems` filtering against `createdBy` values,\nwhich may contain sentinel keys."
+          "\nResolve the effective creator key for an item.\n\nMaps `managed` items to ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.MANAGED_USER_FILTER",
+            "text": "MANAGED_USER_FILTER"
+          },
+          " and items without a\n`createdBy` to ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.NO_CREATOR_USER_FILTER",
+            "text": "NO_CREATOR_USER_FILTER"
+          },
+          ". All other items return\ntheir `createdBy` UID. Direct `ContentListProvider` consumers should use\nthis when implementing `findItems` filtering against `createdBy` values,\nwhich may contain sentinel keys."
         ],
         "signature": [
           "(item: { managed?: boolean | undefined; createdBy?: string | undefined; }) => string"
@@ -570,7 +732,15 @@
         "tags": [],
         "label": "getIncludeExcludeFlag",
         "description": [
-          "\nReturns the filter value as {@link IncludeExcludeFlag} if it has a `state` field;\notherwise `undefined`."
+          "\nReturns the filter value as ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.IncludeExcludeFlag",
+            "text": "IncludeExcludeFlag"
+          },
+          " if it has a `state` field;\notherwise `undefined`."
         ],
         "signature": [
           "(value: string | ",
@@ -649,7 +819,15 @@
         "tags": [],
         "label": "isFilterFacetConfig",
         "description": [
-          "\nType guard to check if a filter feature config is a {@link FilterFacetConfig} object (not boolean)."
+          "\nType guard to check if a filter feature config is a ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.FilterFacetConfig",
+            "text": "FilterFacetConfig"
+          },
+          " object (not boolean)."
         ],
         "signature": [
           "(value?: boolean | ",
@@ -671,7 +849,7 @@
           "<unknown>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-        "lineNumber": 65,
+        "lineNumber": 66,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -695,7 +873,7 @@
               "<unknown> | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 66,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -712,7 +890,15 @@
         "tags": [],
         "label": "isPaginationConfig",
         "description": [
-          "\nType guard to check if pagination config is a {@link PaginationConfig} object (not boolean)."
+          "\nType guard to check if pagination config is a ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.PaginationConfig",
+            "text": "PaginationConfig"
+          },
+          " object (not boolean)."
         ],
         "signature": [
           "(pagination?: boolean | ",
@@ -733,7 +919,7 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-        "lineNumber": 144,
+        "lineNumber": 150,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -757,7 +943,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 145,
+            "lineNumber": 151,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -774,7 +960,15 @@
         "tags": [],
         "label": "isSearchConfig",
         "description": [
-          "\nType guard to check if search config is a {@link SearchConfig} object (not boolean)."
+          "\nType guard to check if search config is a ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.SearchConfig",
+            "text": "SearchConfig"
+          },
+          " object (not boolean)."
         ],
         "signature": [
           "(search: boolean | ",
@@ -795,7 +989,7 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-        "lineNumber": 153,
+        "lineNumber": 159,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -819,8 +1013,78 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 153,
+            "lineNumber": 159,
             "columnNumber": 32,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.isSelectionConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "isSelectionConfig",
+        "description": [
+          "\nType guard for ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.SelectionConfig",
+            "text": "SelectionConfig"
+          },
+          ".\n\nReturns `true` only for plain, non-array objects whose `selectable` and\n`selectableMessage` properties (when present) are functions. `boolean`\nvalues follow the legacy on/off behavior."
+        ],
+        "signature": [
+          "(selection: boolean | ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.SelectionConfig",
+            "text": "SelectionConfig"
+          },
+          " | undefined) => selection is ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.SelectionConfig",
+            "text": "SelectionConfig"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/selection/config.ts",
+        "lineNumber": 47,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.isSelectionConfig.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "selection",
+            "description": [],
+            "signature": [
+              "boolean | ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.SelectionConfig",
+                "text": "SelectionConfig"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/selection/config.ts",
+            "lineNumber": 48,
+            "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -836,7 +1100,15 @@
         "tags": [],
         "label": "isSortingConfig",
         "description": [
-          "\nType guard to check if sorting config is a {@link SortingConfig} object (not boolean)."
+          "\nType guard to check if sorting config is a ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.SortingConfig",
+            "text": "SortingConfig"
+          },
+          " object (not boolean)."
         ],
         "signature": [
           "(sorting?: boolean | ",
@@ -857,7 +1129,7 @@
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-        "lineNumber": 137,
+        "lineNumber": 143,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -881,7 +1153,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 137,
+            "lineNumber": 143,
             "columnNumber": 33,
             "deprecated": false,
             "trackAdoption": false,
@@ -898,7 +1170,23 @@
         "tags": [],
         "label": "toFindItemsFilters",
         "description": [
-          "\nConvert a {@link ContentListQueryModel} to the {@link ActiveFilters} shape\nexpected by `findItems`.\n\nMaps:\n- `model.search` → `filters.search`\n- `model.flags[key]` → `filters[key]` as `IncludeExcludeFlag`\n- `model.filters[field]` → `filters[field]` as `IncludeExcludeFilter`"
+          "\nConvert a ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListQueryModel",
+            "text": "ContentListQueryModel"
+          },
+          " to the ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ActiveFilters",
+            "text": "ActiveFilters"
+          },
+          " shape\nexpected by `findItems`.\n\nMaps:\n- `model.search` → `filters.search`\n- `model.flags[key]` → `filters[key]` as `IncludeExcludeFlag`\n- `model.filters[field]` → `filters[field]` as `IncludeExcludeFilter`"
         ],
         "signature": [
           "(model: ",
@@ -944,6 +1232,7 @@
             "lineNumber": 22,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentListQueryModel",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -967,7 +1256,7 @@
           "ContentListProviderContextValue"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/context/provider.tsx",
-        "lineNumber": 207,
+        "lineNumber": 210,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1003,7 +1292,15 @@
         "trackAdoption": false,
         "children": [],
         "returnComment": [
-          "A {@link UseContentListFiltersReturn } object."
+          "A ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.UseContentListFiltersReturn",
+            "text": "UseContentListFiltersReturn"
+          },
+          " object."
         ],
         "initialIsOpen": false
       },
@@ -1027,16 +1324,16 @@
             "section": "def-public.ContentListItem",
             "text": "ContentListItem"
           },
-          "<Record<string, unknown>>[]; totalItems: number; isLoading: boolean; isFetching: boolean; error: Error | undefined; refetch: () => Promise<void>; }"
+          "<Record<string, unknown>>[]; totalItems: number; isLoading: boolean; isFetching: boolean; error: Error | undefined; hasNoItems: boolean; hasNoResults: boolean; hasActiveQuery: boolean; refetch: () => Promise<void>; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/state/use_content_list_items.ts",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
         "returnComment": [
-          "Object containing items, totalItems, isLoading, isFetching, error, and refetch."
+          "Object containing items, totalItems, isLoading, isFetching, error,\nhasNoItems, hasNoResults, hasActiveQuery, and refetch."
         ],
         "initialIsOpen": false
       },
@@ -1074,12 +1371,52 @@
       },
       {
         "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.useContentListPhase",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "useContentListPhase",
+        "description": [
+          "\nHook to access the current render phase of the Content List.\n\nUse this to decide what a section renders without chaining multiple\n`isLoading` / `isFetching` / `hasNoItems` / `hasNoResults` checks.\n"
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListPhase",
+            "text": "ContentListPhase"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/use_content_list_phase.ts",
+        "lineNumber": 32,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [
+          "The current phase; one of\n`'initialLoad' | 'empty' | 'filtering' | 'filtered' | 'populated'`."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
         "id": "def-public.useContentListSearch",
         "type": "Function",
         "tags": [],
         "label": "useContentListSearch",
         "description": [
-          "\nHook to access and control the search query.\n\n`queryText` is the source of truth — read directly from state.\nThe structured model ({@link ContentListQueryModel}) is derived on-demand\nby consumers that need it (via `useQueryModel`)."
+          "\nHook to access and control the search query.\n\n`queryText` is the source of truth — read directly from state.\nThe structured model (",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListQueryModel",
+            "text": "ContentListQueryModel"
+          },
+          ") is derived on-demand\nby consumers that need it (via `useQueryModel`)."
         ],
         "signature": [
           "() => ",
@@ -1197,7 +1534,15 @@
         "tags": [],
         "label": "useCreatedByFilterToggle",
         "description": [
-          "Convenience wrapper around {@link useFilterToggle} for the `createdBy` field."
+          "Convenience wrapper around ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.useFilterToggle",
+            "text": "useFilterToggle"
+          },
+          " for the `createdBy` field."
         ],
         "signature": [
           "() => (id: string, type?: \"exclude\" | \"include\") => void"
@@ -1218,7 +1563,15 @@
         "tags": [],
         "label": "useDeleteConfirmation",
         "description": [
-          "\nEncapsulates the open/close state for a {@link DeleteConfirmationModal}.\n\nConsumers call `requestDelete(items)` to open the modal and render\n`deleteModal` in their JSX. The modal handles confirmation, deletion\n(via the provider's `onDelete`), loading, and error display internally.\n"
+          "\nEncapsulates the open/close state for a ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.DeleteConfirmationModal",
+            "text": "DeleteConfirmationModal"
+          },
+          ".\n\nConsumers call `requestDelete(items)` to open the modal and render\n`deleteModal` in their JSX. The modal handles confirmation, deletion\n(via the provider's `onDelete`), loading, and error display internally.\n"
         ],
         "signature": [
           "(options?: ",
@@ -1265,6 +1618,7 @@
             "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UseDeleteConfirmationOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -1279,7 +1633,23 @@
         "tags": [],
         "label": "useFilterFacets",
         "description": [
-          "\nReact Query hook that calls a filter feature's `getFacets` callback.\n\nReturns display-ready {@link FilterFacet} arrays for filter popovers.\nThe `T` parameter carries through to the facet `data` field so renderers\nreceive typed payloads without casting.\n\nDisabled when the feature is `true` (no config) or `false` — only fires\nwhen a {@link FilterFacetConfig} with `getFacets` is provided.\n\nCall with `enabled: isPopoverOpen` so it fires lazily on popover open.\n"
+          "\nReact Query hook that calls a filter feature's `getFacets` callback.\n\nReturns display-ready ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.FilterFacet",
+            "text": "FilterFacet"
+          },
+          " arrays for filter popovers.\nThe `T` parameter carries through to the facet `data` field so renderers\nreceive typed payloads without casting.\n\nDisabled when the feature is `true` (no config) or `false` — only fires\nwhen a ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.FilterFacetConfig",
+            "text": "FilterFacetConfig"
+          },
+          " with `getFacets` is provided.\n\nCall with `enabled: isPopoverOpen` so it fires lazily on popover open.\n"
         ],
         "signature": [
           "<T = unknown>(filterId: string, opts?: { enabled?: boolean | undefined; } | undefined) => ",
@@ -1363,7 +1733,23 @@
         "tags": [],
         "label": "useFilterToggle",
         "description": [
-          "\nGeneric hook for toggling a value in any field filter via EUI Query mutations.\n\nParses the current `queryText` → mutates the EUI Query → dispatches the\nnew text. Same pattern as `useFieldQueryFilter` in the toolbar, but works\nfrom outside EuiSearchBar (e.g., avatar clicks, tag badge clicks).\n\nFor known filters, prefer the convenience wrappers\n{@link useTagFilterToggle} and {@link useCreatedByFilterToggle}.\n"
+          "\nGeneric hook for toggling a value in any field filter via EUI Query mutations.\n\nParses the current `queryText` → mutates the EUI Query → dispatches the\nnew text. Same pattern as `useFieldQueryFilter` in the toolbar, but works\nfrom outside EuiSearchBar (e.g., avatar clicks, tag badge clicks).\n\nFor known filters, prefer the convenience wrappers\n",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.useTagFilterToggle",
+            "text": "useTagFilterToggle"
+          },
+          " and ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.useCreatedByFilterToggle",
+            "text": "useCreatedByFilterToggle"
+          },
+          ".\n"
         ],
         "signature": [
           "(fieldName: string) => (id: string, type?: \"exclude\" | \"include\") => void"
@@ -1397,6 +1783,111 @@
         "returnComment": [
           "A toggle callback `(id, type?) => void`."
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.useIsEmpty",
+        "type": "Function",
+        "tags": [],
+        "label": "useIsEmpty",
+        "description": [
+          "\n`true` when the content type has zero objects and no filter is active.\nMost sections return `null` in this phase so the empty state can take\nover the region."
+        ],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/use_content_list_phase.ts",
+        "lineNumber": 48,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.useIsFiltered",
+        "type": "Function",
+        "tags": [],
+        "label": "useIsFiltered",
+        "description": [
+          "\n`true` when a filter or search is active and returned zero matches. The\ntable renders its built-in \"no items message\"; footer hides; toolbar\nstays visible."
+        ],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/use_content_list_phase.ts",
+        "lineNumber": 62,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.useIsFiltering",
+        "type": "Function",
+        "tags": [],
+        "label": "useIsFiltering",
+        "description": [
+          "\n`true` when a filter or search is active and a fetch is currently in\nflight. Toolbar typically shows a subtle loading indicator; the table\nkeeps stale rows and passes `loading` to its `EuiBasicTable`."
+        ],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/use_content_list_phase.ts",
+        "lineNumber": 55,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.useIsInitialLoad",
+        "type": "Function",
+        "tags": [],
+        "label": "useIsInitialLoad",
+        "description": [
+          "\n`true` when no fetch has completed yet. Sections typically render a\nskeleton in this phase."
+        ],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/use_content_list_phase.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.useIsPopulated",
+        "type": "Function",
+        "tags": [],
+        "label": "useIsPopulated",
+        "description": [
+          "\n`true` when items are loaded and the list is in its normal state."
+        ],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/use_content_list_phase.ts",
+        "lineNumber": 67,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -1453,7 +1944,15 @@
         "tags": [],
         "label": "useProfileCache",
         "description": [
-          "\nGet the {@link ProfileCache} instance (stable, never changes identity).\n\nReturns `undefined` when user profiles are not configured."
+          "\nGet the ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ProfileCache",
+            "text": "ProfileCache"
+          },
+          " instance (stable, never changes identity).\n\nReturns `undefined` when user profiles are not configured."
         ],
         "signature": [
           "() => ",
@@ -1503,7 +2002,15 @@
         "tags": [],
         "label": "useQueryModel",
         "description": [
-          "\nParse `queryText` into a {@link ContentListQueryModel}.\n\nThis is a memoized view — the model is recomputed only when `queryText`\nor field/flag definitions change. It is never stored in state."
+          "\nParse `queryText` into a ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListQueryModel",
+            "text": "ContentListQueryModel"
+          },
+          ".\n\nThis is a memoized view — the model is recomputed only when `queryText`\nor field/flag definitions change. It is never stored in state."
         ],
         "signature": [
           "(queryText: string) => ",
@@ -1549,7 +2056,15 @@
         "tags": [],
         "label": "useTagFilterToggle",
         "description": [
-          "Convenience wrapper around {@link useFilterToggle} for the `tag` field."
+          "Convenience wrapper around ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.useFilterToggle",
+            "text": "useFilterToggle"
+          },
+          " for the `tag` field."
         ],
         "signature": [
           "() => (id: string, type?: \"exclude\" | \"include\") => void"
@@ -1572,7 +2087,39 @@
         "tags": [],
         "label": "ActiveFilters",
         "description": [
-          "\nActive filters applied to the content list.\n\nFilter dimensions (e.g. `tag`, `type`, `lastResponse`) are keyed by their\n`fieldName` and hold an {@link IncludeExcludeFilter}. Boolean flag filters\n(e.g. `starred`) use {@link IncludeExcludeFlag}. The index signature is\nrequired to allow arbitrary filter dimensions, but note:\n\n- The `search` key is always `string | undefined` — access it directly.\n- Use {@link getIncludeExcludeFilter} to narrow to `IncludeExcludeFilter`.\n- Use {@link getIncludeExcludeFlag} to narrow to `IncludeExcludeFlag`."
+          "\nActive filters applied to the content list.\n\nFilter dimensions (e.g. `tag`, `type`, `lastResponse`) are keyed by their\n`fieldName` and hold an ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.IncludeExcludeFilter",
+            "text": "IncludeExcludeFilter"
+          },
+          ". Boolean flag filters\n(e.g. `starred`) use ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.IncludeExcludeFlag",
+            "text": "IncludeExcludeFlag"
+          },
+          ". The index signature is\nrequired to allow arbitrary filter dimensions, but note:\n\n- The `search` key is always `string | undefined` — access it directly.\n- Use ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.getIncludeExcludeFilter",
+            "text": "getIncludeExcludeFilter"
+          },
+          " to narrow to `IncludeExcludeFilter`.\n- Use ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.getIncludeExcludeFlag",
+            "text": "getIncludeExcludeFlag"
+          },
+          " to narrow to `IncludeExcludeFlag`."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
         "lineNumber": 33,
@@ -1643,7 +2190,7 @@
           "\nFeature configuration for enabling/customizing content list capabilities."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-        "lineNumber": 72,
+        "lineNumber": 73,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1669,7 +2216,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 76,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1695,7 +2242,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 78,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1721,7 +2268,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 80,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1733,13 +2280,29 @@
             "tags": [],
             "label": "selection",
             "description": [
-              "\nSelection configuration.\nWhen `true` (default), row selection checkboxes are shown and bulk\nactions are enabled. Set to `false` to disable selection entirely.\nSelection is automatically disabled when `isReadOnly` is `true`."
+              "\nSelection configuration.\n\n- `true` (default): row checkboxes and bulk actions are enabled.\n- `false`: selection is disabled entirely.\n- ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.SelectionConfig",
+                "text": "SelectionConfig"
+              },
+              ": selection is enabled with per-row gating (e.g.\n  `selectable`, `selectableMessage`).\n\nSelection is automatically disabled when `isReadOnly` is `true`,\nregardless of the value passed here."
             ],
             "signature": [
-              "boolean | undefined"
+              "boolean | ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.SelectionConfig",
+                "text": "SelectionConfig"
+              },
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 82,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1765,7 +2328,7 @@
               "<unknown> | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 89,
+            "lineNumber": 95,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1783,7 +2346,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 98,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1809,7 +2372,7 @@
               "<unknown> | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 106,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1834,7 +2397,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 115,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1859,7 +2422,7 @@
               "[] | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 125,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1929,6 +2492,7 @@
                 "lineNumber": 108,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ContentListItem",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1982,6 +2546,7 @@
                 "lineNumber": 119,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "ContentListItem",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2035,6 +2600,7 @@
                 "lineNumber": 130,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "ContentListItem",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2141,6 +2707,7 @@
                 "lineNumber": 148,
                 "columnNumber": 16,
                 "deprecated": false,
+                "docsReferencedTypeName": "ContentListItem",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2318,6 +2885,83 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.ContentListQueryData.hasNoItems",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasNoItems",
+            "description": [
+              "\n`true` when the content type has no objects in Elasticsearch and no query\nis active. Use this to render a full-page CTA prompt (\"Create your first\n{entity}\"). Mutually exclusive with ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.hasNoResults",
+                "text": "hasNoResults"
+              },
+              ".\n\nDerived from the latest **settled** query data and held stable during\nbackground refetches (`keepPreviousData`). It does not reset to `false`\non every in-flight fetch — only when the newly resolved result contains\nitems or an active query is detected."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/state/types.ts",
+            "lineNumber": 99,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.ContentListQueryData.hasNoResults",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasNoResults",
+            "description": [
+              "\n`true` when a search or filter is active and returned zero hits. Use this\nto render a \"no matching results\" message inside the table. Mutually\nexclusive with ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.hasNoItems",
+                "text": "hasNoItems"
+              },
+              ".\n\nLike ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.hasNoItems",
+                "text": "hasNoItems"
+              },
+              ", this is derived from settled data and held stable\nduring background refetches. It transitions to `false` only when the\nresolved result contains hits or the query is cleared."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/state/types.ts",
+            "lineNumber": 110,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.ContentListQueryData.hasActiveQuery",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasActiveQuery",
+            "description": [
+              "\n`true` when at least one search term, flag, or field filter is active.\n\nDerived from the parsed `activeFilters` rather than `queryText` so it is\nnot confused by whitespace or formatting variations. Drives the\n`'filtering'` branch in ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.derivePhase",
+                "text": "derivePhase"
+              },
+              "."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/state/types.ts",
+            "lineNumber": 120,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2329,7 +2973,15 @@
         "tags": [],
         "label": "ContentListQueryModel",
         "description": [
-          "\nThe query model — single source of truth for search, filters, and flags.\n\n- `search`: free text (no field syntax).\n- `filters`: field-based include/exclude filters, keyed by field name.\n  Values are internal IDs (e.g., tag IDs, user UIDs). Display values\n  (tag names, emails) are resolved via {@link FieldDefinition}.\n- `flags`: boolean toggles (e.g., `starred`). Rendered as `is:flagName`\n  in query text.\n\nThis object is JSON-serializable and UI-independent."
+          "\nThe query model — single source of truth for search, filters, and flags.\n\n- `search`: free text (no field syntax).\n- `filters`: field-based include/exclude filters, keyed by field name.\n  Values are internal IDs (e.g., tag IDs, user UIDs). Display values\n  (tag names, emails) are resolved via ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          ".\n- `flags`: boolean toggles (e.g., `starred`). Rendered as `is:flagName`\n  in query text.\n\nThis object is JSON-serializable and UI-independent."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/query_model/types.ts",
         "lineNumber": 28,
@@ -2531,7 +3183,7 @@
           "\nResolved feature support flags.\n\nThese flags represent the **effective** availability of features after evaluating:\n- Explicit configuration (e.g., `features.sorting: true` or `features.sorting: { ... }`)\n- Implicit enablement (e.g., providing required services enabling a feature)\n- Explicit disablement (e.g., `features.sorting: false` overrides defaults)\n- Implicit disablement (e.g., missing services)\n\nUse these flags to conditionally render UI elements or enable functionality based on\nwhat's actually available, rather than checking raw configuration values.\n"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-        "lineNumber": 157,
+        "lineNumber": 163,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2546,7 +3198,7 @@
               "Whether sorting is supported."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 182,
+            "lineNumber": 188,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2561,7 +3213,7 @@
               "Whether pagination is supported."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 184,
+            "lineNumber": 190,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2576,7 +3228,7 @@
               "Whether search is supported."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 186,
+            "lineNumber": 192,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2591,7 +3243,7 @@
               "Whether item selection and bulk actions are supported."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 188,
+            "lineNumber": 194,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2606,7 +3258,7 @@
               "Whether tags filtering and display is supported."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 190,
+            "lineNumber": 196,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2621,7 +3273,7 @@
               "Whether starring items is supported."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 192,
+            "lineNumber": 198,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2636,7 +3288,7 @@
               "Whether user profile filtering (createdBy) is supported."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 194,
+            "lineNumber": 200,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2651,7 +3303,15 @@
         "tags": [],
         "label": "ContentListUserProfilesServices",
         "description": [
-          "\nUser profiles service for user-based filtering (createdBy, updatedBy, etc.).\n\nProvides async methods for fetching user profiles. The provider manages\na shared {@link ProfileCache} so that all consumers (field definitions,\nfilter popovers, table cells) read synchronously from a single cache."
+          "\nUser profiles service for user-based filtering (createdBy, updatedBy, etc.).\n\nProvides async methods for fetching user profiles. The provider manages\na shared ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ProfileCache",
+            "text": "ProfileCache"
+          },
+          " so that all consumers (field definitions,\nfilter popovers, table cells) read synchronously from a single cache."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/services/types.ts",
         "lineNumber": 43,
@@ -2778,6 +3438,7 @@
                 "lineNumber": 134,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "FindItemsParams",
                 "trackAdoption": false
               }
             ]
@@ -2789,7 +3450,15 @@
             "tags": [],
             "label": "debounceMs",
             "description": [
-              "\nDebounce delay in milliseconds applied to query-parameter changes before\na new `findItems` request is issued.\n\nDefaults to {@link DEFAULT_DEBOUNCE_MS} (300 ms), matching the Table List\nView's built-in fetch debounce. Set to `0` to disable debouncing."
+              "\nDebounce delay in milliseconds applied to query-parameter changes before\na new `findItems` request is issued.\n\nDefaults to ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.DEFAULT_DEBOUNCE_MS",
+                "text": "DEFAULT_DEBOUNCE_MS"
+              },
+              " (300 ms), matching the Table List\nView's built-in fetch debounce. Set to `0` to disable debouncing."
             ],
             "signature": [
               "number | undefined"
@@ -2886,6 +3555,7 @@
                 "lineNumber": 173,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "FindItemsResult",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2902,7 +3572,15 @@
         "tags": [],
         "label": "DeleteConfirmationComponentProps",
         "description": [
-          "\nProps for the presentational {@link DeleteConfirmationComponent}."
+          "\nProps for the presentational ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.DeleteConfirmationComponent",
+            "text": "DeleteConfirmationComponent"
+          },
+          "."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/delete_confirmation.component.tsx",
         "lineNumber": 15,
@@ -3048,7 +3726,15 @@
         "tags": [],
         "label": "DeleteConfirmationModalProps",
         "description": [
-          "\nProps for the connected {@link DeleteConfirmationModal}."
+          "\nProps for the connected ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.DeleteConfirmationModal",
+            "text": "DeleteConfirmationModal"
+          },
+          "."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/delete_confirmation.tsx",
         "lineNumber": 17,
@@ -3100,6 +3786,107 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.DerivePhaseInput",
+        "type": "Interface",
+        "tags": [],
+        "label": "DerivePhaseInput",
+        "description": [
+          "\nInputs used to derive the render phase. A subset of ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListState",
+            "text": "ContentListState"
+          },
+          "\nso this function can be tested without constructing a full state object."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DerivePhaseInput.isLoading",
+            "type": "boolean",
+            "tags": [],
+            "label": "isLoading",
+            "description": [
+              "`true` only on the first fetch before any data has been received."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DerivePhaseInput.isFetching",
+            "type": "boolean",
+            "tags": [],
+            "label": "isFetching",
+            "description": [
+              "`true` during any fetch, including background refetches."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DerivePhaseInput.hasNoItems",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasNoItems",
+            "description": [
+              "`true` when the content type has zero objects and no query is active."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DerivePhaseInput.hasNoResults",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasNoResults",
+            "description": [
+              "`true` when a search or filter is active and returned zero hits."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.DerivePhaseInput.hasActiveQuery",
+            "type": "boolean",
+            "tags": [],
+            "label": "hasActiveQuery",
+            "description": [
+              "\n`true` when at least one search term, flag, or field filter is active.\n\nComputed once from the parsed `activeFilters` so phase derivation does\nnot have to re-interpret raw `queryText`."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/derive_phase.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3271,7 +4058,7 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-        "lineNumber": 16,
+        "lineNumber": 17,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3286,7 +4073,7 @@
               "Unique key identifying this facet (e.g. user UID, tag ID)."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 24,
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3301,7 +4088,7 @@
               "Human-readable display label."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 26,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3319,7 +4106,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3337,7 +4124,7 @@
               "T | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3352,7 +4139,15 @@
         "tags": [],
         "label": "FilterFacetConfig",
         "description": [
-          "\nProvider that supplies display-ready facets for a filter popover.\n\nThe `T` parameter flows through to each {@link FilterFacet} returned by\n`getFacets`, keeping the `data` payload typed end-to-end.\n\nHow the implementation accesses the item set is provider-specific:\n- Client provider: captures `getItems()` from the strategy via closure.\n- Server provider: calls a server aggregation endpoint, ignoring items."
+          "\nProvider that supplies display-ready facets for a filter popover.\n\nThe `T` parameter flows through to each ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.FilterFacet",
+            "text": "FilterFacet"
+          },
+          " returned by\n`getFacets`, keeping the `data` payload typed end-to-end.\n\nHow the implementation accesses the item set is provider-specific:\n- Client provider: captures `getItems()` from the strategy via closure.\n- Server provider: calls a server aggregation endpoint, ignoring items."
         ],
         "signature": [
           {
@@ -3365,7 +4160,7 @@
           "<T>"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-        "lineNumber": 44,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3399,7 +4194,7 @@
               "<T>[]>"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3421,9 +4216,10 @@
                   }
                 ],
                 "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-                "lineNumber": 59,
+                "lineNumber": 60,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "FilterFacetParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -3440,10 +4236,18 @@
         "tags": [],
         "label": "FilterFacetParams",
         "description": [
-          "\nParameters passed to {@link FilterFacetConfig.getFacets}."
+          "\nParameters passed to ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.FilterFacetConfig.getFacets",
+            "text": "FilterFacetConfig.getFacets"
+          },
+          "."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-        "lineNumber": 34,
+        "lineNumber": 35,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -3467,7 +4271,7 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3485,7 +4289,7 @@
               "AbortSignal | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/types.ts",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3530,7 +4334,31 @@
             "tags": [],
             "label": "filters",
             "description": [
-              "\nActive filters (includes the raw `search` text and any structured filters).\n\nThe `createdBy` dimension may contain sentinel keys ({@link MANAGED_USER_FILTER},\n{@link NO_CREATOR_USER_FILTER}) in addition to real user UIDs. Use\n{@link getCreatorKey} to map items to matching keys when implementing\nclient-side filtering."
+              "\nActive filters (includes the raw `search` text and any structured filters).\n\nThe `createdBy` dimension may contain sentinel keys (",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.MANAGED_USER_FILTER",
+                "text": "MANAGED_USER_FILTER"
+              },
+              ",\n",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.NO_CREATOR_USER_FILTER",
+                "text": "NO_CREATOR_USER_FILTER"
+              },
+              ") in addition to real user UIDs. Use\n",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.getCreatorKey",
+                "text": "getCreatorKey"
+              },
+              " to map items to matching keys when implementing\nclient-side filtering."
             ],
             "signature": [
               {
@@ -3786,7 +4614,15 @@
             "tags": [],
             "label": "initialPageSize",
             "description": [
-              "Initial number of items per page. Defaults to {@link DEFAULT_PAGE_SIZE}."
+              "Initial number of items per page. Defaults to ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.DEFAULT_PAGE_SIZE",
+                "text": "DEFAULT_PAGE_SIZE"
+              },
+              "."
             ],
             "signature": [
               "number | undefined"
@@ -3804,7 +4640,15 @@
             "tags": [],
             "label": "pageSizeOptions",
             "description": [
-              "Available page size options. Defaults to {@link DEFAULT_PAGE_SIZE_OPTIONS}."
+              "Available page size options. Defaults to ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.DEFAULT_PAGE_SIZE_OPTIONS",
+                "text": "DEFAULT_PAGE_SIZE_OPTIONS"
+              },
+              "."
             ],
             "signature": [
               "number[] | undefined"
@@ -3904,6 +4748,157 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.SelectionConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "SelectionConfig",
+        "description": [
+          "\nOptional configuration for row-level selection behavior.\n\nProvide a ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.SelectionConfig",
+            "text": "SelectionConfig"
+          },
+          " as `features.selection` when you need to\ngate which rows can be ticked (e.g. permission checks, item-state guards).\nPass a plain `boolean` when global enable/disable is enough."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/selection/config.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.SelectionConfig.selectable",
+            "type": "Function",
+            "tags": [],
+            "label": "selectable",
+            "description": [
+              "\nPer-row predicate forwarded to `EuiBasicTable`'s `selection.selectable`.\n\nReturn `false` to disable the checkbox for a row. When omitted, every\nrow is selectable. The predicate must be referentially stable to avoid\nresetting the table's controlled selection on every render — wrap it in\n`useCallback` if it depends on dynamic data."
+            ],
+            "signature": [
+              "((item: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>) => boolean) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/selection/config.ts",
+            "lineNumber": 20,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider",
+                "id": "def-public.SelectionConfig.selectable.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.ContentListItem",
+                    "text": "ContentListItem"
+                  },
+                  "<Record<string, unknown>>"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/selection/config.ts",
+                "lineNumber": 28,
+                "columnNumber": 17,
+                "deprecated": false,
+                "docsReferencedTypeName": "ContentListItem",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider",
+            "id": "def-public.SelectionConfig.selectableMessage",
+            "type": "Function",
+            "tags": [],
+            "label": "selectableMessage",
+            "description": [
+              "\nOptional tooltip describing why a row's checkbox is disabled.\n\nForwarded to `EuiBasicTable`'s `selection.selectableMessage`. The\nsignature mirrors EUI's: return a string to show as the tooltip, or\n`undefined` when the row is selectable. Implementations can decide\nbased on both the resolved `selectable` verdict and the row data."
+            ],
+            "signature": [
+              "((selectable: boolean, item: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>) => string | undefined) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/selection/config.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider",
+                "id": "def-public.SelectionConfig.selectableMessage.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "selectable",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/selection/config.ts",
+                "lineNumber": 37,
+                "columnNumber": 24,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-list-provider",
+                "id": "def-public.SelectionConfig.selectableMessage.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.ContentListItem",
+                    "text": "ContentListItem"
+                  },
+                  "<Record<string, unknown>>"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/selection/config.ts",
+                "lineNumber": 37,
+                "columnNumber": 45,
+                "deprecated": false,
+                "docsReferencedTypeName": "ContentListItem",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4151,7 +5146,15 @@
         "tags": [],
         "label": "UseContentListFiltersReturn",
         "description": [
-          "\nReturn type for the {@link useContentListFilters} hook."
+          "\nReturn type for the ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.useContentListFilters",
+            "text": "useContentListFilters"
+          },
+          " hook."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/filtering/types.ts",
         "lineNumber": 12,
@@ -4213,7 +5216,15 @@
         "tags": [],
         "label": "UseContentListPaginationReturn",
         "description": [
-          "\nReturn type for the {@link useContentListPagination} hook."
+          "\nReturn type for the ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.useContentListPagination",
+            "text": "useContentListPagination"
+          },
+          " hook."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/pagination/use_content_list_pagination.ts",
         "lineNumber": 19,
@@ -4400,7 +5411,15 @@
         "tags": [],
         "label": "UseContentListSearchReturn",
         "description": [
-          "\nReturn type for the {@link useContentListSearch} hook."
+          "\nReturn type for the ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.useContentListSearch",
+            "text": "useContentListSearch"
+          },
+          " hook."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/search/use_content_list_search.ts",
         "lineNumber": 17,
@@ -4457,6 +5476,7 @@
                 "lineNumber": 27,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "Query",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -4544,7 +5564,15 @@
         "tags": [],
         "label": "UseContentListSelectionReturn",
         "description": [
-          "\nReturn type for the {@link useContentListSelection} hook."
+          "\nReturn type for the ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.useContentListSelection",
+            "text": "useContentListSelection"
+          },
+          " hook."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/selection/types.ts",
         "lineNumber": 12,
@@ -4867,7 +5895,15 @@
         "tags": [],
         "label": "UseDeleteConfirmationOptions",
         "description": [
-          "\nOptions for {@link useDeleteConfirmation}."
+          "\nOptions for ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.useDeleteConfirmation",
+            "text": "useDeleteConfirmation"
+          },
+          "."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/use_delete_confirmation.tsx",
         "lineNumber": 15,
@@ -4905,7 +5941,15 @@
         "tags": [],
         "label": "UseDeleteConfirmationReturn",
         "description": [
-          "\nReturn value of {@link useDeleteConfirmation}."
+          "\nReturn value of ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.useDeleteConfirmation",
+            "text": "useDeleteConfirmation"
+          },
+          "."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/components/delete/use_delete_confirmation.tsx",
         "lineNumber": 26,
@@ -4994,7 +6038,31 @@
         "tags": [],
         "label": "UserProfileEntry",
         "description": [
-          "\nA user profile entry for filtering and display.\n\nCarries the full {@link UserProfileUserInfo} and optional {@link UserProfileAvatarData}\nso that consumers (e.g. table cells) can use `UserAvatarTip` from\n`@kbn/user-profile-components` without issuing their own per-row fetches.\n\nThe `email` and `fullName` convenience fields exist for query-bar resolution\n(display↔ID mapping in {@link FieldDefinition}) and are derived from `user`."
+          "\nA user profile entry for filtering and display.\n\nCarries the full ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.UserProfileUserInfo",
+            "text": "UserProfileUserInfo"
+          },
+          " and optional ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.UserProfileAvatarData",
+            "text": "UserProfileAvatarData"
+          },
+          "\nso that consumers (e.g. table cells) can use `UserAvatarTip` from\n`@kbn/user-profile-components` without issuing their own per-row fetches.\n\nThe `email` and `fullName` convenience fields exist for query-bar resolution\n(display↔ID mapping in ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          ") and are derived from `user`."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/services/types.ts",
         "lineNumber": 14,
@@ -5206,6 +6274,25 @@
       },
       {
         "parentPluginId": "@kbn/content-list-provider",
+        "id": "def-public.ContentListPhase",
+        "type": "Type",
+        "tags": [],
+        "label": "ContentListPhase",
+        "description": [
+          "\nMutually-exclusive render phase for a Content List.\n\nEvery Content List is in exactly one phase at a time. Sections (toolbar,\ntable, footer, custom children) branch on the phase to decide what to\nrender: skeletons during `'initialLoad'`, `null` during `'empty'`, normal\nUI during `'populated'`, and nuanced in-flight / no-match variants during\n`'filtering'` / `'filtered'`.\n\nPhase transitions:\n- `'initialLoad'` → `'empty' | 'filtered' | 'populated'` (first fetch completes).\n- `'populated'` ↔ `'filtering'` (user applies a filter/search).\n- `'filtering'` → `'filtered' | 'populated'` (filtered fetch completes).\n- `'filtered'` → `'filtering' | 'populated' | 'empty'` (filter changes or\n  is cleared).\n\nA refetch that does not involve a filter change stays in the current\nphase; it does NOT re-enter `'initialLoad'`."
+        ],
+        "signature": [
+          "\"empty\" | \"initialLoad\" | \"filtering\" | \"filtered\" | \"populated\""
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/phase/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider",
         "id": "def-public.ContentListProviderProps",
         "type": "Type",
         "tags": [],
@@ -5354,6 +6441,7 @@
             "lineNumber": 134,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "FindItemsParams",
             "trackAdoption": false
           }
         ],
@@ -5404,7 +6492,15 @@
         "tags": [],
         "label": "MANAGED_USER_LABEL",
         "description": [
-          "Display label for the {@link MANAGED_USER_FILTER} sentinel."
+          "Display label for the ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.MANAGED_USER_FILTER",
+            "text": "MANAGED_USER_FILTER"
+          },
+          " sentinel."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
         "lineNumber": 35,
@@ -5439,7 +6535,15 @@
         "tags": [],
         "label": "NO_CREATOR_USER_LABEL",
         "description": [
-          "Display label for the {@link NO_CREATOR_USER_FILTER} sentinel."
+          "Display label for the ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.NO_CREATOR_USER_FILTER",
+            "text": "NO_CREATOR_USER_FILTER"
+          },
+          " sentinel."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/item/types.ts",
         "lineNumber": 41,
@@ -5614,6 +6718,7 @@
                 "lineNumber": 39,
                 "columnNumber": 34,
                 "deprecated": false,
+                "docsReferencedTypeName": "Omit",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5746,6 +6851,7 @@
                 "lineNumber": 57,
                 "columnNumber": 59,
                 "deprecated": false,
+                "docsReferencedTypeName": "ActiveFilters",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5801,7 +6907,9 @@
             "type": "string",
             "tags": [],
             "label": "field",
-            "description": [],
+            "description": [
+              "\nDefault initial sort used when sorting is enabled but no explicit `initialSort` is configured.\n\nSorts by `title` ascending (A-Z), matching `TableListView` behavior.\nConsumers that prefer \"newest first\" can set `initialSort: { field: 'updatedAt', direction: 'desc' }`."
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/features/sorting/types.ts",
             "lineNumber": 91,
             "columnNumber": 3,
@@ -5814,7 +6922,9 @@
             "type": "string",
             "tags": [],
             "label": "direction",
-            "description": [],
+            "description": [
+              "\nDefault initial sort used when sorting is enabled but no explicit `initialSort` is configured.\n\nSorts by `title` ascending (A-Z), matching `TableListView` behavior.\nConsumers that prefer \"newest first\" can set `initialSort: { field: 'updatedAt', direction: 'desc' }`."
+            ],
             "signature": [
               "\"asc\""
             ],
@@ -5848,7 +6958,9 @@
             "type": "string",
             "tags": [],
             "label": "search",
-            "description": [],
+            "description": [
+              "Empty query model."
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/query_model/types.ts",
             "lineNumber": 74,
             "columnNumber": 3,
@@ -5861,7 +6973,9 @@
             "type": "Object",
             "tags": [],
             "label": "filters",
-            "description": [],
+            "description": [
+              "Empty query model."
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/query_model/types.ts",
             "lineNumber": 75,
             "columnNumber": 3,
@@ -5875,7 +6989,9 @@
             "type": "Object",
             "tags": [],
             "label": "flags",
-            "description": [],
+            "description": [
+              "Empty query model."
+            ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/query_model/types.ts",
             "lineNumber": 76,
             "columnNumber": 3,
@@ -5889,7 +7005,9 @@
             "type": "Object",
             "tags": [],
             "label": "referencedFields",
-            "description": [],
+            "description": [
+              "Empty query model."
+            ],
             "signature": [
               "ReadonlySet<string>"
             ],
@@ -5905,7 +7023,9 @@
             "type": "Object",
             "tags": [],
             "label": "unresolvedFields",
-            "description": [],
+            "description": [
+              "Empty query model."
+            ],
             "signature": [
               "ReadonlySet<string>"
             ],
@@ -5925,7 +7045,15 @@
         "tags": [],
         "label": "ProfileCacheContext",
         "description": [
-          "\nReact context for the shared {@link ProfileCache}.\n\n`undefined` when user profiles are not configured."
+          "\nReact context for the shared ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ProfileCache",
+            "text": "ProfileCache"
+          },
+          ".\n\n`undefined` when user profiles are not configured."
         ],
         "signature": [
           "React.Context<",

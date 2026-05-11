@@ -12,6 +12,13 @@ const savedObjectReferenceSchema = schema.object({
   id: schema.string(),
 });
 
+const sortValueSchema = schema.oneOf([
+  schema.string(),
+  schema.number(),
+  schema.boolean(),
+  schema.literal(null),
+]);
+
 export const findRulesOptionsSchema = schema.object(
   {
     perPage: schema.maybe(schema.number()),
@@ -32,6 +39,8 @@ export const findRulesOptionsSchema = schema.object(
     ),
     ruleTypeIds: schema.maybe(schema.arrayOf(schema.string())),
     consumers: schema.maybe(schema.arrayOf(schema.string())),
+    searchAfter: schema.maybe(schema.arrayOf(sortValueSchema, { maxSize: 100 })),
+    aggs: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   },
   { unknowns: 'allow' }
 );

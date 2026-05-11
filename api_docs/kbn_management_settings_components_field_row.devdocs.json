@@ -10,7 +10,23 @@
         "tags": [],
         "label": "FieldRow",
         "description": [
-          "\nComponent for displaying a {@link FieldDefinition} in a form row, using a {@link FieldInput}."
+          "\nComponent for displaying a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          " in a form row, using a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldInput",
+            "text": "FieldInput"
+          },
+          "."
         ],
         "signature": [
           "(props: ",
@@ -51,6 +67,7 @@
             "lineNumber": 80,
             "columnNumber": 26,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldRowProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -65,7 +82,15 @@
         "tags": [],
         "label": "FieldRowKibanaProvider",
         "description": [
-          "\nKibana-specific Provider that maps Kibana plugins and services to a {@link FieldRowProvider}."
+          "\nKibana-specific Provider that maps Kibana plugins and services to a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldRowProvider",
+            "text": "FieldRowProvider"
+          },
+          "."
         ],
         "signature": [
           "({ children, docLinks, notifications, settings, }: React.PropsWithChildren<",
@@ -120,7 +145,15 @@
         "tags": [],
         "label": "FieldRowProvider",
         "description": [
-          "\nReact Provider that provides services to a {@link FieldRow} component and its dependents.\\"
+          "\nReact Provider that provides services to a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldRow",
+            "text": "FieldRow"
+          },
+          " component and its dependents.\\"
         ],
         "signature": [
           "({ children, ...services }: ",
@@ -159,6 +192,7 @@
             "lineNumber": 31,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldRowProviderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -175,7 +209,15 @@
         "tags": [],
         "label": "FieldRowProps",
         "description": [
-          "\nProps for a {@link FieldRow} component."
+          "\nProps for a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldRow",
+            "text": "FieldRow"
+          },
+          " component."
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/field_row.tsx",
         "lineNumber": 57,
@@ -190,7 +232,15 @@
             "tags": [],
             "label": "field",
             "description": [
-              "The {@link FieldDefinition} corresponding the setting."
+              "The ",
+              {
+                "pluginId": "@kbn/management-settings-components-field-row",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+                "section": "def-public.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              " corresponding the setting."
             ],
             "signature": [
               "{ id: string; type: ",
@@ -227,7 +277,15 @@
             "tags": [],
             "label": "onFieldChange",
             "description": [
-              "The {@link OnInputChangeFn} handler."
+              "The ",
+              {
+                "pluginId": "@kbn/management-settings-components-field-row",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+                "section": "def-public.OnInputChangeFn",
+                "text": "OnInputChangeFn"
+              },
+              " handler."
             ],
             "signature": [
               "(id: string, change?: ",
@@ -283,6 +341,7 @@
                 "lineNumber": 96,
                 "columnNumber": 3,
                 "deprecated": false,
+                "docsReferencedTypeName": "UnsavedFieldChange",
                 "trackAdoption": false
               }
             ]
@@ -334,7 +393,15 @@
             "tags": [],
             "label": "unsavedChange",
             "description": [
-              "The {@link UnsavedFieldChange} corresponding to any unsaved change to the field."
+              "The ",
+              {
+                "pluginId": "@kbn/management-settings-components-field-row",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+                "section": "def-public.UnsavedFieldChange",
+                "text": "UnsavedFieldChange"
+              },
+              " corresponding to any unsaved change to the field."
             ],
             "signature": [
               {
@@ -364,7 +431,15 @@
         "tags": [],
         "label": "FieldRowProviderProps",
         "description": [
-          "\nProps for {@link FieldRowProvider}."
+          "\nProps for ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldRowProvider",
+            "text": "FieldRowProvider"
+          },
+          "."
         ],
         "signature": [
           {
@@ -415,7 +490,15 @@
         "tags": [],
         "label": "KibanaDependencies",
         "description": [
-          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a {@link FieldRow} component."
+          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldRow",
+            "text": "FieldRow"
+          },
+          " component."
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
         "lineNumber": 29,
@@ -449,7 +532,15 @@
         "tags": [],
         "label": "Services",
         "description": [
-          "\nContextual services used by a {@link FieldRow} component."
+          "\nContextual services used by a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldRow",
+            "text": "FieldRow"
+          },
+          " component."
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_row/types.ts",
         "lineNumber": 17,
@@ -486,7 +577,15 @@
         "tags": [],
         "label": "FieldRowKibanaDependencies",
         "description": [
-          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a {@link FieldRow} component and its dependents."
+          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldRow",
+            "text": "FieldRow"
+          },
+          " component and its dependents."
         ],
         "signature": [
           {
@@ -519,7 +618,15 @@
         "tags": [],
         "label": "FieldRowServices",
         "description": [
-          "\nContextual services used by a {@link FieldRow} component and its dependents."
+          "\nContextual services used by a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-row",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
+            "section": "def-public.FieldRow",
+            "text": "FieldRow"
+          },
+          " component and its dependents."
         ],
         "signature": [
           {

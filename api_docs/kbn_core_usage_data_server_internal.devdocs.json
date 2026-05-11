@@ -63,6 +63,7 @@
                 "lineNumber": 97,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreContext",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -102,6 +103,7 @@
                 "lineNumber": 462,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "SetupDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -144,6 +146,7 @@
                 "lineNumber": 550,
                 "columnNumber": 9,
                 "deprecated": false,
+                "docsReferencedTypeName": "StartDeps",
                 "trackAdoption": false,
                 "isRequired": true
               }

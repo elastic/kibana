@@ -11,9 +11,9 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_co
 import type { RoleCredentials } from '../../services';
 
 const RULE_API_PATH = '/api/alerting/v2/rules';
-const NOTIFICATION_POLICY_API_PATH = '/api/alerting/v2/notification_policies';
+const ACTION_POLICY_API_PATH = '/api/alerting/v2/action_policies';
 const RULE_SO_TYPE = 'alerting_rule';
-const NOTIFICATION_POLICY_SO_TYPE = 'alerting_notification_policy';
+const ACTION_POLICY_SO_TYPE = 'alerting_action_policy';
 const TELEMETRY_TASK_ID = 'AlertingV2-alerting_v2_telemetry';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -29,7 +29,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     before(async () => {
       await kibanaServer.savedObjects.clean({
-        types: [RULE_SO_TYPE, NOTIFICATION_POLICY_SO_TYPE],
+        types: [RULE_SO_TYPE, ACTION_POLICY_SO_TYPE],
       });
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
 
@@ -94,11 +94,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .send({ ids: [rule3Id] });
       expect(disableResponse.status).to.be(200);
 
-      // Create notification policies
+      // Create action policies
       const policyResults = await Promise.all([
         // Policy 1: with matcher, groupBy, throttle
         supertestWithoutAuth
-          .post(NOTIFICATION_POLICY_API_PATH)
+          .post(ACTION_POLICY_API_PATH)
           .set(roleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .send({
@@ -111,7 +111,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           }),
         // Policy 2: different workflow, no matcher, different throttle
         supertestWithoutAuth
-          .post(NOTIFICATION_POLICY_API_PATH)
+          .post(ACTION_POLICY_API_PATH)
           .set(roleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .send({
@@ -129,7 +129,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.clean({
-        types: [RULE_SO_TYPE, NOTIFICATION_POLICY_SO_TYPE],
+        types: [RULE_SO_TYPE, ACTION_POLICY_SO_TYPE],
       });
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
@@ -206,14 +206,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(parsedState.executions_delay_p99_ms).to.not.be(undefined);
         expect(parsedState.dispatcher_executions_count_24hr).to.be.a('number');
 
-        // Notification policy stats
-        expect(parsedState.notification_policies_count).to.be(2);
-        expect(parsedState.notification_policies_unique_workflow_count).to.be(2);
-        expect(parsedState.notification_policies_count_with_matcher).to.be(1);
-        expect(parsedState.notification_policies_count_with_group_by).to.be(1);
-        expect(parsedState.notification_policies_avg_group_by_fields_count).to.be(2);
+        // Action policy stats
+        expect(parsedState.action_policies_count).to.be(2);
+        expect(parsedState.action_policies_unique_workflow_count).to.be(2);
+        expect(parsedState.action_policies_count_with_matcher).to.be(1);
+        expect(parsedState.action_policies_count_with_group_by).to.be(1);
+        expect(parsedState.action_policies_avg_group_by_fields_count).to.be(2);
         expect(
-          [...parsedState.notification_policies_count_by_throttle_interval].sort(
+          [...parsedState.action_policies_count_by_throttle_interval].sort(
             (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name)
           )
         ).to.eql([

@@ -83,7 +83,9 @@ kibana_vars=(
     elasticsearch.ssl.verificationMode
     elasticsearch.username
     externalUrl.policy
+    i18n.defaultLocale
     i18n.locale
+    i18n.locales
     interactiveSetup.enabled
     interactiveSetup.connectionCheck.interval
     kibana.autocompleteTerminateAfter

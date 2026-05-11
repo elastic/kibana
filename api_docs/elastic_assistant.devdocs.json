@@ -123,6 +123,7 @@
                 "lineNumber": 282,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "AssistantToolParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -177,6 +178,7 @@
                 "lineNumber": 283,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "AssistantToolParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1485,6 +1487,7 @@
                 "lineNumber": 308,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "Replacements",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -2144,7 +2147,15 @@
           "tags": [],
           "label": "registerFeatures",
           "description": [
-            "\nRegister features to be used by the elastic assistant.\n\nNote: Be sure to use the pluginName that is sent in the request headers by your plugin to ensure it is extracted\nand the correct features are available. See {@link getPluginNameFromRequest} for more details.\n"
+            "\nRegister features to be used by the elastic assistant.\n\nNote: Be sure to use the pluginName that is sent in the request headers by your plugin to ensure it is extracted\nand the correct features are available. See ",
+            {
+              "pluginId": "elasticAssistant",
+              "scope": "server",
+              "docId": "kibElasticAssistantPluginApi",
+              "section": "def-server.getPluginNameFromRequest",
+              "text": "getPluginNameFromRequest"
+            },
+            " for more details.\n"
           ],
           "signature": [
             "(pluginName: string, features: Partial<",
@@ -2206,6 +2217,7 @@
               "lineNumber": 110,
               "columnNumber": 42,
               "deprecated": false,
+              "docsReferencedTypeName": "Partial",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -2262,7 +2274,15 @@
           "tags": [],
           "label": "registerTools",
           "description": [
-            "\nRegister tools to be used by the elastic assistant.\n\nNote: Be sure to use the pluginName that is sent in the request headers by your plugin to ensure it is extracted\nand the correct tools are selected. See {@link getPluginNameFromRequest} for more details.\n"
+            "\nRegister tools to be used by the elastic assistant.\n\nNote: Be sure to use the pluginName that is sent in the request headers by your plugin to ensure it is extracted\nand the correct tools are selected. See ",
+            {
+              "pluginId": "elasticAssistant",
+              "scope": "server",
+              "docId": "kibElasticAssistantPluginApi",
+              "section": "def-server.getPluginNameFromRequest",
+              "text": "getPluginNameFromRequest"
+            },
+            " for more details.\n"
           ],
           "signature": [
             "(pluginName: string, tools: ",
@@ -2410,6 +2430,7 @@
               "lineNumber": 136,
               "columnNumber": 22,
               "deprecated": false,
+              "docsReferencedTypeName": "CallbackIds",
               "trackAdoption": false,
               "isRequired": true
             },
@@ -2427,6 +2448,7 @@
               "lineNumber": 136,
               "columnNumber": 47,
               "deprecated": false,
+              "docsReferencedTypeName": "Function",
               "trackAdoption": false,
               "isRequired": true
             }

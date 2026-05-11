@@ -213,6 +213,7 @@
                 "lineNumber": 14,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogRecord",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -398,6 +399,7 @@
                 "lineNumber": 76,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogRecord",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -534,6 +536,7 @@
                 "lineNumber": 19,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogRecord",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -604,6 +607,7 @@
                 "lineNumber": 15,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogRecord",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -674,6 +678,7 @@
                 "lineNumber": 15,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogRecord",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -744,6 +749,7 @@
                 "lineNumber": 20,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogRecord",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -814,6 +820,7 @@
                 "lineNumber": 15,
                 "columnNumber": 11,
                 "deprecated": false,
+                "docsReferencedTypeName": "LogRecord",
                 "trackAdoption": false,
                 "isRequired": true
               }

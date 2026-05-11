@@ -247,6 +247,10 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.missingOrFail('loadingSpinner', {
       timeout: this.defaultFindTimeout * 10,
     });
+    // does not show "Cancel" button, so we can use it to determine that searching has finished
+    await this.testSubjects.missingOrFail('queryCancelButton', {
+      timeout: this.defaultFindTimeout * 10,
+    });
   }
 
   public async waitUntilTabIsLoaded() {
@@ -294,10 +298,17 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async loadSavedSearch(searchName: string) {
+    const mode = await this.globalNav.getFirstBreadcrumb();
     await this.openLoadSavedSearchPanel();
     await this.savedObjectsFinder.filterEmbeddableNames(`"${searchName.replace('-', ' ')}"`);
     await this.testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
     await this.header.waitUntilLoadingHasFinished();
+    if (mode === 'Discover') {
+      await this.retry.waitFor(`saved search ${searchName} is loaded`, async () => {
+        const currentName = await this.getCurrentQueryName();
+        return currentName === searchName;
+      });
+    }
   }
 
   public async clickNewSearchButton({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {

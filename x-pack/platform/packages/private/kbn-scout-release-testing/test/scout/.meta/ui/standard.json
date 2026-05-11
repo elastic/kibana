@@ -1,9 +1,9 @@
 {
-  "sha1": "80280c123ad403e3dcd3f449d4ab69cec031b016",
+  "sha1": "e7dab6a2d3227f1613bb3ee3e19f534f77359860",
   "tests": [
     {
-      "id": "709f30ae5fb788f-05a1663c9e84f0e",
-      "title": "Dashboard app should create dashboard with ES|QL, Lens, and Custom visualization panels",
+      "id": "709f30ae5fb788f-58e2a4254283ea3",
+      "title": "Dashboard app should create dashboard with ES|QL, Lens, and Vega panels",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -16,8 +16,8 @@
       }
     },
     {
-      "id": "709f30ae5fb788f-5bc4d2dca5fe437",
-      "title": "Dashboard app should edit existing dashboard and add map and custom visualization panels",
+      "id": "709f30ae5fb788f-7ba6d85f303b46f",
+      "title": "Dashboard app should edit existing dashboard and add map and Vega panels",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 107,
+        "line": 105,
         "column": 7
       }
     },
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 134,
+        "line": 132,
         "column": 7
       }
     },
@@ -67,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 161,
+        "line": 159,
         "column": 7
       }
     },
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 185,
+        "line": 183,
         "column": 7
       }
     },
@@ -95,7 +95,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 225,
+        "line": 223,
         "column": 7
       }
     },
@@ -109,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 242,
+        "line": 240,
         "column": 7
       }
     },
@@ -123,7 +123,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 299,
+        "line": 297,
         "column": 7
       }
     },
@@ -137,7 +137,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 336,
+        "line": 334,
         "column": 7
       }
     },
@@ -151,7 +151,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 373,
+        "line": 371,
         "column": 7
       }
     },
@@ -165,7 +165,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 386,
+        "line": 384,
         "column": 7
       }
     },
@@ -179,7 +179,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 417,
+        "line": 415,
         "column": 7
       }
     },
@@ -193,7 +193,7 @@
       ],
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/dashboard/dashboard.spec.ts",
-        "line": 449,
+        "line": 447,
         "column": 7
       }
     },

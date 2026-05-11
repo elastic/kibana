@@ -8,28 +8,24 @@
  */
 
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { UnifiedHistogramFetchStatus } from '..';
-import { unifiedHistogramServicesMock } from '../__mocks__/services';
-import { lensAdaptersMock } from '../__mocks__/lens_adapters';
 import {
   getChartHidden,
   getTopPanelHeight,
   setChartHidden,
   setTopPanelHeight,
-} from '../utils/local_storage_utils';
+} from '@kbn/discover-utils';
+import { UnifiedHistogramFetchStatus } from '..';
+import { unifiedHistogramServicesMock } from '../__mocks__/services';
+import { lensAdaptersMock } from '../__mocks__/lens_adapters';
 import type { UnifiedHistogramState } from './state_service';
 import { createStateService } from './state_service';
 
-jest.mock('../utils/local_storage_utils', () => {
-  const originalModule = jest.requireActual('../utils/local_storage_utils');
-  return {
-    ...originalModule,
-    getChartHidden: jest.fn(originalModule.getChartHidden),
-    getTopPanelHeight: jest.fn(originalModule.getTopPanelHeight),
-    setChartHidden: jest.fn(originalModule.setChartHidden),
-    setTopPanelHeight: jest.fn(originalModule.setTopPanelHeight),
-  };
-});
+jest.mock('@kbn/discover-utils', () => ({
+  getChartHidden: jest.fn(),
+  getTopPanelHeight: jest.fn(),
+  setChartHidden: jest.fn(),
+  setTopPanelHeight: jest.fn(),
+}));
 
 describe('UnifiedHistogramStateService', () => {
   beforeEach(() => {
@@ -149,11 +145,6 @@ describe('UnifiedHistogramStateService', () => {
       chartHidden: true,
       topPanelHeight: 200,
     });
-    expect(setChartHidden as jest.Mock).toHaveBeenCalledWith(
-      unifiedHistogramServicesMock.storage,
-      localStorageKeyPrefix,
-      true
-    );
     expect(setTopPanelHeight as jest.Mock).toHaveBeenCalledWith(
       unifiedHistogramServicesMock.storage,
       localStorageKeyPrefix,

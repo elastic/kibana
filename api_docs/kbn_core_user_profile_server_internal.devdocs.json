@@ -58,6 +58,7 @@
                 "lineNumber": 21,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "InternalUserProfileServiceStart",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -76,6 +77,7 @@
                 "lineNumber": 22,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -194,6 +196,7 @@
                 "lineNumber": 25,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "CoreContext",
                 "trackAdoption": false,
                 "isRequired": true
               }

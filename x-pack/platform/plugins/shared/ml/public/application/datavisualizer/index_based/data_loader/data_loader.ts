@@ -11,7 +11,7 @@ import { OMIT_FIELDS } from '@kbn/ml-anomaly-utils';
 import { type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { IndexPatternTitle } from '../../../../../common/types/kibana';
+import type { IndexPatternTitle } from '@kbn/ml-common-types/kibana';
 import type { MlApi } from '../../../services/ml_api_service';
 
 import type { FieldHistogramRequestConfig } from '../common/request';

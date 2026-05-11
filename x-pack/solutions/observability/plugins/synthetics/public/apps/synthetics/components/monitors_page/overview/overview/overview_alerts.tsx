@@ -23,7 +23,7 @@ import {
   SYNTHETICS_TLS_RULE,
 } from '../../../../../../../common/constants/synthetics_alerts';
 import type { ClientPluginsStart } from '../../../../../../plugin';
-import { useGetUrlParams, useRefreshedRange } from '../../../../hooks';
+import { useGetUrlParams, useRefreshedRangeFromUrl } from '../../../../hooks';
 import { selectOverviewStatus } from '../../../../state/overview_status';
 import { AlertsLink } from '../../../common/links/view_alerts';
 import { useMonitorFilters } from '../../hooks/use_monitor_filters';
@@ -62,7 +62,10 @@ export const useMonitorQueryIds = () => {
 };
 
 export const OverviewAlerts = () => {
-  const { from, to } = useRefreshedRange(12, 'hours');
+  // Range now follows the page-level date picker (URL params). When the user
+  // hasn't touched the picker, this falls back to "now-24h → now" via the
+  // `now-24h` default in `getSupportedUrlParams`.
+  const { from, to } = useRefreshedRangeFromUrl();
 
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
@@ -153,5 +156,5 @@ const ALERTS_LABEL = i18n.translate('xpack.synthetics.detailsPanel.alerts', {
 });
 
 const headingText = i18n.translate('xpack.synthetics.overview.alerts.headingText', {
-  defaultMessage: 'Last 12 hours',
+  defaultMessage: 'Alerts',
 });

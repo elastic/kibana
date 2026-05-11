@@ -9,7 +9,7 @@ import type { TaskDefinitionRegistry } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
-import type { ReadOnlyConversationClient } from '@kbn/agent-builder-plugin/server';
+import type { ReadOnlyConversationClient } from '@kbn/agent-builder-server';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import type { TaskContext } from '.';
 import { cancellableTask } from '../cancellable_task';

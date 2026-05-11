@@ -50,3 +50,6 @@ post:
                     type:
                       type: string
                       description: The saved object type.
+          examples:
+            previewSwapDataViewResponse:
+              $ref: '../components/examples/preview_swap_data_view_response.yaml'

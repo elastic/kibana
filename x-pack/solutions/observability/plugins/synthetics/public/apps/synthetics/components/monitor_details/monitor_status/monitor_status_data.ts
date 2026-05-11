@@ -42,10 +42,12 @@ export interface MonitorStatusPanelProps {
    */
   to: string | number;
 
-  brushable: boolean; // Whether to allow brushing on the chart to allow zooming in on data.
-  periodCaption?: string; // e.g. Last 24 Hours
+  brushable: boolean;
+  periodCaption?: string;
   showViewHistoryButton?: boolean;
   onBrushed?: (timeBounds: { from: number; to: number; fromUtc: string; toUtc: string }) => void;
+  monitorId?: string;
+  locationLabel?: string;
 }
 
 export function getColorBands(euiTheme: EuiThemeComputed, colorMode: EuiThemeColorModeStandard) {

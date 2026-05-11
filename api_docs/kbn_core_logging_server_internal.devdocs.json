@@ -60,6 +60,7 @@
             "lineNumber": 19,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Duration",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -129,7 +130,23 @@
         "tags": [],
         "label": "appendersSchema",
         "description": [
-          "\nConfig schema for validting the shape of the `appenders` key in in {@link LoggerContextConfigType} or\n{@link LoggingConfigType}.\n"
+          "\nConfig schema for validting the shape of the `appenders` key in in ",
+          {
+            "pluginId": "@kbn/core-logging-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerInternalPluginApi",
+            "section": "def-server.LoggerContextConfigType",
+            "text": "LoggerContextConfigType"
+          },
+          " or\n",
+          {
+            "pluginId": "@kbn/core-logging-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerInternalPluginApi",
+            "section": "def-server.LoggingConfigType",
+            "text": "LoggingConfigType"
+          },
+          ".\n"
         ],
         "signature": [
           {
@@ -173,7 +190,23 @@
         "tags": [],
         "label": "loggerContextConfigSchema",
         "description": [
-          "\nConfig schema for validating the inputs to the {@link LoggingServiceStart.configure} API.\nSee {@link LoggerContextConfigType}.\n"
+          "\nConfig schema for validating the inputs to the ",
+          {
+            "pluginId": "@kbn/core-logging-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerInternalPluginApi",
+            "section": "def-server.LoggingServiceStart.configure",
+            "text": "LoggingServiceStart.configure"
+          },
+          " API.\nSee ",
+          {
+            "pluginId": "@kbn/core-logging-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerInternalPluginApi",
+            "section": "def-server.LoggerContextConfigType",
+            "text": "LoggerContextConfigType"
+          },
+          ".\n"
         ],
         "signature": [
           {
@@ -217,7 +250,23 @@
         "tags": [],
         "label": "loggerSchema",
         "description": [
-          "\nConfig schema for validating the `loggers` key in {@link LoggerContextConfigType} or {@link LoggingConfigType}.\n"
+          "\nConfig schema for validating the `loggers` key in ",
+          {
+            "pluginId": "@kbn/core-logging-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerInternalPluginApi",
+            "section": "def-server.LoggerContextConfigType",
+            "text": "LoggerContextConfigType"
+          },
+          " or ",
+          {
+            "pluginId": "@kbn/core-logging-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreLoggingServerInternalPluginApi",
+            "section": "def-server.LoggingConfigType",
+            "text": "LoggingConfigType"
+          },
+          ".\n"
         ],
         "signature": [
           {
