@@ -52,6 +52,7 @@ describe('useGetTemplate', () => {
     expect(apiMock.getTemplate).toHaveBeenCalledWith({
       templateId: 'template-1',
       version: undefined,
+      includeDeleted: false,
       signal: expect.any(AbortSignal),
     });
     expect(result.current.data).toEqual(mockTemplate);
@@ -73,6 +74,7 @@ describe('useGetTemplate', () => {
     expect(apiMock.getTemplate).toHaveBeenCalledWith({
       templateId: 'template-1',
       version: 2,
+      includeDeleted: false,
       signal: expect.any(AbortSignal),
     });
   });
@@ -96,6 +98,7 @@ describe('useGetTemplate', () => {
         'detail',
         'template-1',
         'latest',
+        false,
       ]);
     });
 
@@ -105,6 +108,7 @@ describe('useGetTemplate', () => {
         'detail',
         'template-1',
         2,
+        false,
       ]);
     });
   });

@@ -14,7 +14,6 @@ import { extractReferences } from '@kbn/data-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { SAVED_SEARCH_TYPE } from './constants';
 import type { SavedSearchCrudTypes } from '../../common/content_management';
-import { checkForDuplicateTitle } from './check_for_duplicate_title';
 import type { DiscoverSession } from '../../common';
 import type { DiscoverSessionAttributes } from '../../server';
 
@@ -25,8 +24,6 @@ export type SaveDiscoverSessionParams = Pick<
   Partial<Pick<DiscoverSession, 'id'>>;
 
 export interface SaveDiscoverSessionOptions {
-  onTitleDuplicate?: () => void;
-  isTitleDuplicateConfirmed?: boolean;
   copyOnSave?: boolean;
 }
 
@@ -69,19 +66,6 @@ export const saveDiscoverSession = async (
   savedObjectsTagging: SavedObjectsTaggingApi | undefined
 ): Promise<DiscoverSession | undefined> => {
   const isNew = options.copyOnSave || !discoverSession.id;
-
-  if (isNew) {
-    try {
-      await checkForDuplicateTitle({
-        title: discoverSession.title,
-        isTitleDuplicateConfirmed: options.isTitleDuplicateConfirmed,
-        onTitleDuplicate: options.onTitleDuplicate,
-        contentManagement,
-      });
-    } catch {
-      return;
-    }
-  }
 
   const tabReferences: SavedObjectReference[] = [];
 
