@@ -174,14 +174,14 @@ describe('getHistory()', () => {
     });
   });
 
-  test('forwards custom pagination and sort to the change tracking service', async () => {
+  test('forwards custom from/size and sort to the change tracking service', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
 
     await rulesClient.getHistory({
       module: 'security',
       ruleId: '1',
-      page: 3,
-      perPage: 50,
+      from: 100,
+      size: 50,
       sort: [{ '@timestamp': { order: 'asc' } }],
     });
 
@@ -211,7 +211,6 @@ describe('getHistory()', () => {
 
       await rulesClient.getHistory({ module: 'security', ruleId: '1' });
 
-      // authorize is called twice: once by getRule (Get) and once by getHistory (GetHistory).
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         entity: 'rule',
         consumer: 'rule-consumer',

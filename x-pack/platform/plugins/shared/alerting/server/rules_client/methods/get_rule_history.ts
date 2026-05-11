@@ -30,20 +30,20 @@ export interface GetRuleHistoryParams {
   module: RuleTypeSolution;
   /** Rule id to fetch history for. */
   ruleId: string;
-  /** 1-based page number. Defaults to 1. */
-  page?: number;
-  /** Page size. Defaults to 20. */
-  perPage?: number;
-  /** ES sort. Defaults to `[{ '@timestamp': { order: 'desc' } }]`. */
+  /** ES `from` offset. Defaults to 0. */
+  from?: number;
+  /** ES `size`. Defaults to 20. */
+  size?: number;
+  /** ES sort. When omitted, the underlying change-history client's default applies. */
   sort?: SortCombinations[];
 }
 
-const DEFAULT_PAGE = 1;
-const DEFAULT_PER_PAGE = 20;
+const DEFAULT_FROM = 0;
+const DEFAULT_SIZE = 20;
 
 export async function getRuleHistory(
   context: RulesClientContext,
-  { module, ruleId, page = DEFAULT_PAGE, perPage = DEFAULT_PER_PAGE, sort }: GetRuleHistoryParams
+  { module, ruleId, from = DEFAULT_FROM, size = DEFAULT_SIZE, sort }: GetRuleHistoryParams
 ): Promise<GetRuleHistoryResult> {
   if (!context.changeTrackingService) {
     throw new RuleChangeTrackingDisabledError();
@@ -79,11 +79,9 @@ export async function getRuleHistory(
     })
   );
 
-  const from = (page - 1) * perPage;
-
   const result = await context.changeTrackingService.getHistory(module, context.spaceId, ruleId, {
     from,
-    size: perPage,
+    size,
     sort,
   });
 

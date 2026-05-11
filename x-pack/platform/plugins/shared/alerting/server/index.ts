@@ -46,6 +46,10 @@ export type {
   GetRuleHistoryParams,
   RuleChangeTrackingDisabledError,
 } from './rules_client';
+export type {
+  RuleChangeHistoryDocument,
+  GetRuleHistoryResult,
+} from './rules_client/lib/change_tracking';
 export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration, isRuleSnoozed } from './lib';
