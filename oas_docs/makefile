@@ -69,7 +69,7 @@ api-docs-overlay: ## Apply all overlays
 	@./node_modules/.bin/bump overlay "output/kibana.tmp4.yaml" "overlays/streams.overlays.yaml" > "output/kibana.tmp5.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.tmp5.yaml" "overlays/dashboards.overlays.yaml" > "output/kibana.tmp6.yaml"
 	@./node_modules/.bin/bump overlay "output/kibana.tmp6.yaml" "overlays/visualizations.overlays.yaml" > "output/kibana.tmp7.yaml"
-	@./node_modules/.bin/redocly bundle output/kibana.serverless.tmp5.yaml --ext yaml -o output/kibana.serverless.yaml
+	@./node_modules/.bin/redocly bundle output/kibana.serverless.tmp7.yaml --ext yaml -o output/kibana.serverless.yaml
 	@./node_modules/.bin/redocly bundle output/kibana.tmp7.yaml --ext yaml -o output/kibana.yaml
 	rm -f output/kibana.tmp*.yaml
 	rm -f output/kibana.serverless.tmp*.yaml
