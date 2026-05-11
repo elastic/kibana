@@ -157,6 +157,10 @@ export {
   isCompactionStep,
   isBackgroundAgentCompleteStep,
   type BackgroundAgentCompleteStep,
+  isTodosStep,
+  findTodosStep,
+  type TodosStep,
+  carriedOverTodos,
   ChatEventType,
   ConversationRoundStatus,
   type ChatEventBase,
@@ -212,6 +216,9 @@ export {
   type BackgroundAgentCompleteEvent,
   type BackgroundAgentCompleteEventData,
   isBackgroundAgentCompleteEvent,
+  isTodosUpdatedEvent,
+  TODOS_UPDATED_UI_EVENT,
+  type TodosUpdatedUiEventData,
   type ConversationListOptions,
 } from './chat';
 export {
