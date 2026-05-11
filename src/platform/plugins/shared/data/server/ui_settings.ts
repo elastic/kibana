@@ -46,7 +46,7 @@ export function getUiSettings(
         defaultMessage:
           'Fields that exist outside of _source to merge into our document when displaying it',
       }),
-      schema: schema.arrayOf(schema.string(), { maxSize: 20 }),
+      schema: schema.arrayOf(schema.string(), { maxSize: 100 }),
     },
     [UI_SETTINGS.DOC_HIGHLIGHT]: {
       name: i18n.translate('data.advancedSettings.docTableHighlightTitle', {

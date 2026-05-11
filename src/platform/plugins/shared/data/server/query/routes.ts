@@ -12,6 +12,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
 import type { SavedQueryRouteHandlerContext } from './route_handler_context';
 import { SAVED_QUERY_BASE_URL } from '../../common/constants';
+import { FILTERS_SCHEMA } from '../saved_objects/schemas/query';
 
 const SAVED_QUERY_ID_CONFIG = schema.object({
   id: schema.string(),
@@ -23,7 +24,7 @@ const SAVED_QUERY_ATTRS_CONFIG = schema.object({
     query: schema.oneOf([schema.string(), schema.object({}, { unknowns: 'allow' })]),
     language: schema.string(),
   }),
-  filters: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 500 })),
+  filters: schema.maybe(FILTERS_SCHEMA),
   timefilter: schema.maybe(schema.any()),
 });
 

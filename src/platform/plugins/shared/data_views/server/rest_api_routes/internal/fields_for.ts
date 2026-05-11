@@ -86,7 +86,7 @@ export interface IQuery {
 
 export const querySchema = schema.object({
   pattern: schema.string(),
-  meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 20 })], {
+  meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
     defaultValue: [],
   }),
   type: schema.maybe(schema.string()),
@@ -147,8 +147,8 @@ export const validate: VersionedRouteValidation<any, any, any> = {
     200: {
       body: () =>
         schema.object({
-          fields: schema.arrayOf(FieldDescriptorSchema, { maxSize: 100_000 }),
-          indices: schema.arrayOf(schema.string(), { maxSize: 100_000 }),
+          fields: schema.arrayOf(FieldDescriptorSchema, { maxSize: 500_000 }),
+          indices: schema.arrayOf(schema.string(), { maxSize: 500_000 }),
         }),
     },
   },

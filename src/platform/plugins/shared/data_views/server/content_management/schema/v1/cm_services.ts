@@ -35,7 +35,7 @@ const dataViewAttributesSchema = schema.object(
         { maxSize: 1_000 }
       )
     ),
-    fields: schema.maybe(schema.arrayOf(fieldSpecSchema, { maxSize: 50_000 })),
+    fields: schema.maybe(schema.arrayOf(fieldSpecSchema, { maxSize: 500_000 })),
     typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     fieldFormatMap: schema.maybe(schema.recordOf(schema.string(), serializedFieldFormatSchema)),
     fieldAttrs: schema.maybe(
