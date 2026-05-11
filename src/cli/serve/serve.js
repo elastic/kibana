@@ -624,23 +624,20 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
 
   // Expose the proxy URL so the mock IdP stamps `Destination` correctly — the inner port from
   // `getServerInfo()` would mismatch the realm config.
-  const userCustomizedHttp =
-    _.has(rawConfig, 'server.host') ||
-    _.has(rawConfig, 'server.port') ||
-    _.get(rawConfig, 'server.ssl.enabled');
-  if (opts.basePath !== false && !_.has(rawConfig, 'server.publicBaseUrl') && !userCustomizedHttp) {
+  if (!_.has(rawConfig, 'server.publicBaseUrl')) {
+    const protocol = _.get(rawConfig, 'server.ssl.enabled') ? 'https' : 'http';
+    const host = _.get(rawConfig, 'server.host', 'localhost');
+    const port = _.get(rawConfig, 'server.port', 5601);
     const basePath = _.get(rawConfig, 'server.basePath', '');
-    lodashSet(rawConfig, 'server.publicBaseUrl', `http://localhost:5601${basePath}`);
+    lodashSet(rawConfig, 'server.publicBaseUrl', `${protocol}://${host}:${port}${basePath}`);
   }
 
-  if (
-    opts.basePath !== false &&
-    _.get(rawConfig, 'server.basePath') !== MOCK_IDP_KIBANA_BASE_PATH
-  ) {
-    const kibanaUrl = `http://localhost:5601${_.get(rawConfig, 'server.basePath')}`;
-
+  if (_.get(rawConfig, 'server.basePath') !== MOCK_IDP_KIBANA_BASE_PATH) {
     console.warn(
-      `Kibana is running with a non-default base path. Make sure to adjust the --kibanaUrl=${kibanaUrl} parameter while running the local ES cluster.`
+      `Kibana is running with a non-default base path. Make sure to adjust the --kibanaUrl=${_.get(
+        rawConfig,
+        'server.publicBaseUrl'
+      )} parameter while running the local ES cluster.`
     );
   }
 

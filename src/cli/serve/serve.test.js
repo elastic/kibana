@@ -166,7 +166,7 @@ describe('applyConfigOverrides', () => {
 
   it('omits the fixed base path in stateful dev mode when `--no-base-path` is passed', () => {
     const config = applyConfigOverrides({}, { dev: true, basePath: false }, {}, {});
-    expect(config.server).toBeUndefined();
+    expect(config.server).toEqual({ publicBaseUrl: 'http://localhost:5601' });
   });
 
   it('keeps a user-provided server.basePath in stateful dev mode and derives publicBaseUrl from it', () => {
@@ -177,14 +177,18 @@ describe('applyConfigOverrides', () => {
     });
   });
 
-  it('skips publicBaseUrl auto-set when the user customized server.port', () => {
+  it('derives publicBaseUrl from a user-customized server.port in stateful dev mode', () => {
     const config = applyConfigOverrides(
       { server: { basePath: '/custom', port: 5701 } },
       { dev: true },
       {},
       {}
     );
-    expect(config.server).toEqual({ basePath: '/custom', port: 5701 });
+    expect(config.server).toEqual({
+      basePath: '/custom',
+      port: 5701,
+      publicBaseUrl: 'http://localhost:5701/custom',
+    });
   });
 
   it('respects a user-provided server.publicBaseUrl in stateful dev mode', () => {
