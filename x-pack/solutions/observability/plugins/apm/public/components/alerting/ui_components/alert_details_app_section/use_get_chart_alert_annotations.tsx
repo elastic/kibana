@@ -23,6 +23,13 @@ interface UseGetChartAlertAnnotationsProps {
   alert: TopAlert;
   dateFormat: string;
   showAnnotations: boolean;
+  /**
+   * Controls whether the threshold rect/line is included in the returned annotations.
+   * Defaults to `showAnnotations` (legacy behavior). Set to `false` on charts whose Y axis
+   * isn't in the alert's threshold units (e.g. throughput chart on a latency alert) to
+   * avoid drawing a meaningless line.
+   */
+  showThresholdAnnotation?: boolean;
   customAlertEvaluationThreshold?: number;
   normalizeThreshold?: (value: number) => number;
 }
@@ -31,6 +38,7 @@ export const useGetChartAlertAnnotations = ({
   alert,
   dateFormat,
   showAnnotations,
+  showThresholdAnnotation,
   customAlertEvaluationThreshold,
   normalizeThreshold,
 }: UseGetChartAlertAnnotationsProps): ReactElement[] | undefined => {
@@ -38,7 +46,14 @@ export const useGetChartAlertAnnotations = ({
 
   if (!showAnnotations && customAlertEvaluationThreshold == null) return undefined;
 
+  // When the caller didn't explicitly opt-out, include threshold annotations whenever
+  // annotations are shown or a custom threshold is provided (legacy behavior).
+  const includeThreshold =
+    showThresholdAnnotation ?? (showAnnotations || customAlertEvaluationThreshold != null);
+
   const thresholdAnnotations = (() => {
+    if (!includeThreshold) return [];
+
     const alertEvalThreshold =
       customAlertEvaluationThreshold ?? alert.fields[ALERT_EVALUATION_THRESHOLD];
     const ruleTypeId = alert.fields[ALERT_RULE_TYPE_ID] as ApmRuleType;
