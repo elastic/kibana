@@ -12,6 +12,7 @@ import type {
   PackageInfo,
   InputsOverride,
   RegistryVarsEntry,
+  RegistryVarsMigrateFrom,
   RegistryStreamWithDataStream,
 } from '../../common/types';
 import type { NewPackagePolicy } from '../types';
@@ -104,14 +105,27 @@ export function applyInputLevelMigration(
 }
 
 /**
+ * Normalizes the var-level `migrate_from` field to the object form. Accepts either the current
+ * object shape (`{ name?, scope?, stream? }`) or the legacy string shorthand that named only the
+ * previous variable. Returns undefined when the field is absent.
+ */
+function normalizeVarMigrateFrom(
+  migrateFrom: RegistryVarsEntry['migrate_from']
+): RegistryVarsMigrateFrom | undefined {
+  if (!migrateFrom) return undefined;
+  if (typeof migrateFrom === 'string') return { name: migrateFrom };
+  return migrateFrom;
+}
+
+/**
  * Builds a rename map `{ newVarName: oldVarName }` from `RegistryVarsEntry` definitions that
- * declare `migrate_from.name`. Used by `migrateStreamVars` to alias old var values under new
- * names before the name-based `deepMergeVars` lookup runs.
+ * declare `migrate_from.name` (or the legacy string shorthand). Used by `migrateStreamVars` to
+ * alias old var values under new names before the name-based `deepMergeVars` lookup runs.
  */
 export function buildVarRenameMap(varDefs: RegistryVarsEntry[]): Record<string, string> {
   const map: Record<string, string> = {};
   for (const varDef of varDefs) {
-    const oldName = varDef.migrate_from?.name;
+    const oldName = normalizeVarMigrateFrom(varDef.migrate_from)?.name;
     if (oldName) {
       map[varDef.name] = oldName;
     }
@@ -301,7 +315,7 @@ export function applyVarScopeMigration(
   // Stream → input: an input-level var in the new schema was previously at stream scope.
   if (registryInputVarDefs && originalInput.streams.length > 0) {
     for (const varDef of registryInputVarDefs) {
-      const mf = varDef.migrate_from;
+      const mf = normalizeVarMigrateFrom(varDef.migrate_from);
       if (mf?.scope !== 'stream') continue;
 
       let sourceStream: NewPackagePolicyInputStream | undefined;
@@ -341,7 +355,7 @@ export function applyVarScopeMigration(
       if (!originalStream) continue;
 
       for (const varDef of registryStream.vars) {
-        const mf = varDef.migrate_from;
+        const mf = normalizeVarMigrateFrom(varDef.migrate_from);
         if (mf?.scope !== 'input') continue;
 
         const sourceKey = mf.name ?? varDef.name;

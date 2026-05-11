@@ -121,6 +121,14 @@ describe('buildVarRenameMap', () => {
     ]);
     expect(result).toEqual({ url: 'request_url', token: 'api_token' });
   });
+
+  it('accepts the legacy string shorthand form (backwards compat)', () => {
+    // Older Kibana code shipped a string-only var-level migrate_from. Even though the spec
+    // never accepted that form, treat any string we encounter as `{ name: <string> }` so
+    // packages built outside the validator still migrate cleanly.
+    const result = buildVarRenameMap([{ name: 'url', type: 'text', migrate_from: 'request_url' }]);
+    expect(result).toEqual({ url: 'request_url' });
+  });
 });
 
 describe('migrateStreamVars', () => {

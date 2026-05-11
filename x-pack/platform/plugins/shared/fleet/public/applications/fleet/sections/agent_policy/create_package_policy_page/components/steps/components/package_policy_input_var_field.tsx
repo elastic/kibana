@@ -186,7 +186,13 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     ) : undefined;
     const migrationTooltip =
       isUpgrade && varDef.migrate_from ? (
-        <VarMigrationTooltip migrateFrom={varDef.migrate_from} />
+        <VarMigrationTooltip
+          migrateFrom={
+            typeof varDef.migrate_from === 'string'
+              ? { name: varDef.migrate_from }
+              : varDef.migrate_from
+          }
+        />
       ) : undefined;
     const labelAppend = isOptional ? (
       <EuiText size="xs" color="subdued">

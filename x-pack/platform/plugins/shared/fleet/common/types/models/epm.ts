@@ -614,7 +614,10 @@ export interface RegistryVarsEntry {
   [RegistryVarsEntryKeys.max_duration]?: string;
   [RegistryVarsEntryKeys.url_allowed_schemes]?: string[];
   [RegistryVarsEntryKeys.deprecated]?: DeprecationInfo;
-  [RegistryVarsEntryKeys.migrate_from]?: RegistryVarsMigrateFrom;
+  // Accepts either the current object form or, for backwards compatibility, the original
+  // string-shorthand form that named only the previous variable. The string form is treated
+  // as `{ name: <string> }` at read time. New manifests should use the object form.
+  [RegistryVarsEntryKeys.migrate_from]?: RegistryVarsMigrateFrom | string;
   [RegistryVarsEntryKeys.section]?: string;
 }
 
