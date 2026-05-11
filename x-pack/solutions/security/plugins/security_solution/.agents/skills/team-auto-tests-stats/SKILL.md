@@ -1,6 +1,5 @@
 ---
 name: team-auto-tests-stats
-disable-model-invocation: true
 description: >
   Produces a markdown team report under `.agents/tmp/` (gitignored): **Ownership** (CODEOWNERS prefixes with tests
   only), **Test Cases** (Scout Playwright `--list`), FTR/Cypress/Scout rows, **Skipped**, **Execution phase**
