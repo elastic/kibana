@@ -89,7 +89,14 @@ const PackagePolicyStreamsSchema = {
   var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
   compiled_stream: schema.maybe(schema.any()),
-  condition: schema.maybe(schema.string()),
+  condition: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          '**Experimental.** EQL expression evaluated by Elastic Agent to conditionally apply this stream.',
+      },
+    })
+  ),
   deprecated: schema.maybe(DeprecationInfoSchema),
   migrate_from: schema.maybe(schema.string()),
 };
@@ -105,7 +112,14 @@ export const PackagePolicyInputsSchema = {
   var_group_selections: VarGroupSelectionsSchema,
   config: schema.maybe(ConfigRecordSchema),
   streams: schema.arrayOf(schema.object(PackagePolicyStreamsSchema), { maxSize: 1000 }),
-  condition: schema.maybe(schema.string()),
+  condition: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          '**Experimental.** EQL expression evaluated by Elastic Agent to conditionally apply this input.',
+      },
+    })
+  ),
   deprecated: schema.maybe(DeprecationInfoSchema),
   migrate_from: schema.maybe(schema.string()),
 };
@@ -267,7 +281,14 @@ export const PackagePolicyBaseSchema = {
     ])
   ),
   package_agent_version_condition: schema.maybe(schema.string()),
-  condition: schema.maybe(schema.string()),
+  condition: schema.maybe(
+    schema.string({
+      meta: {
+        description:
+          '**Experimental.** EQL expression evaluated by Elastic Agent to conditionally apply this integration to its inputs.',
+      },
+    })
+  ),
   // Only available for agentless integration policies.
   // On standard package policies this field is rejected by server-side validation.
   global_data_tags: schema.maybe(
