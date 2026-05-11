@@ -47,6 +47,7 @@ When updating index templates:
 - **Scout tests**: Prefer Scout for new API tests: `x-pack/platform/plugins/shared/alerting/test/scout/`
 - **Config changes**: When adding config options, add tests in `server/config.test.ts`
 - **UI tests**: Use React Testing Library (RTL). Never write new Enzyme tests.
+- **Edge cases**: Always test empty arrays, undefined values, and permission boundaries
 
 ## Key Utilities
 
@@ -57,3 +58,4 @@ Before creating new helpers, check whether one already exists:
 - `handleDisabledApiKeysError` — standard API key error handling
 - `validateInternalRuleType` — check if a rule type is internal before mutation
 - `countUsageOfPredefinedIds` — telemetry for predefined IDs
+- `SavedObjectsUtils.getName()` — always use for the `name` field in audit events

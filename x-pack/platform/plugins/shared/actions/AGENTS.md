@@ -6,6 +6,8 @@
 - **@kbn/connector-specs** (`src/platform/packages/shared/kbn-connector-specs/`) — Declarative single-file connector specs (preferred for new connectors)
 - **stack_connectors** (`x-pack/platform/plugins/shared/stack_connectors/`) — Legacy connector implementations; new connectors should use connector specs or the sub-action framework instead
 
+For registration paths, auth patterns, testing requirements, and key utilities, see the development skill at `.agents/skills/connector-development/SKILL.md`.
+
 ### Choosing a registration path
 
 - **Connector specs** (`@kbn/connector-specs`): preferred for new HTTP-based connectors. Single-file `ConnectorSpec` with Zod schemas, auto-generated UI, and automatic registration. See the package README.
@@ -30,6 +32,11 @@ This is the single most common source of review friction in connectors:
 - **Secrets**: Sensitive data encrypted at rest (passwords, API keys, tokens)
 - Never store secrets in config — they'll appear in API responses and logs
 
+### Security
+
+- OAuth URL validation must check against `xpack.actions.allowedHosts`
+- Don't thread security context through deep function argument chains — create a scoped service instead
+
 ### Testing
 
 - The actions plugin provides the execution framework but not connector implementations. Platform tests that need a connector should stub or register a test connector type — never import a specific connector from stack_connectors or connector specs into platform-level tests.
@@ -38,4 +45,10 @@ This is the single most common source of review friction in connectors:
 
 After making changes, run these validation steps before reporting completion:
 - `node scripts/jest <path-to-changed-test-files>` — run affected unit tests
-- `node scripts/eslint --fix <changed-files>` — lint and auto-fix only changed files
+- `node scripts/eslint --fix <changed-files>` — lint and auto-fix, then commit the result before pushing
+- If CI fails on an FTR config your PR doesn't touch, retry — it's likely a flaky infrastructure test
+
+### PR Guidelines
+
+- Target <500 lines changed and <20 files per PR. Split large features into schema → server logic → tests → UI.
+- Include a "why this approach" note in the PR description when there are multiple valid approaches

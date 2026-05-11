@@ -11,6 +11,7 @@ description: Working with the Kibana reporting plugin — export types, CSV/PNG/
 - **Integration tests**: Use `jest.integration.config.js` for tests that need ES
 - **Config changes**: When modifying `server/config/schema.ts`, add tests in the adjacent test file
 - **UI tests**: Use React Testing Library (RTL). Never write new Enzyme tests.
+- **Edge cases**: Test empty results, truncation boundaries, and permission errors
 
 ## Key Utilities
 

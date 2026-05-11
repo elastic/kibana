@@ -33,5 +33,6 @@ Key modules:
 
 After making changes, run these validation steps before reporting completion:
 - `node scripts/jest <path-to-changed-test-files>` — run affected unit tests
-- `node scripts/eslint --fix <changed-files>` — lint and auto-fix only changed files
-- `node scripts/check_mappings_update --fix` — if you touched mappings or field definitions
+- `node scripts/eslint --fix <changed-files>` — lint and auto-fix, then commit the result before pushing
+- `node scripts/check_mappings_update --fix` — required if you touched mappings or field definitions
+- If CI fails on an FTR config your PR doesn't touch, retry — it's likely a flaky infrastructure test

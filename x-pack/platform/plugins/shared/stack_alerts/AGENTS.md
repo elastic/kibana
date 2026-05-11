@@ -29,4 +29,5 @@ Each rule type has its own directory under `server/rule_types/{name}/` with its 
 
 After making changes, run these validation steps before reporting completion:
 - `node scripts/jest <path-to-changed-test-files>` — run affected unit tests
-- `node scripts/eslint --fix <changed-files>` — lint and auto-fix only changed files
+- `node scripts/eslint --fix <changed-files>` — lint and auto-fix, then commit the result before pushing
+- If CI fails on an FTR config your PR doesn't touch, retry — it's likely a flaky infrastructure test

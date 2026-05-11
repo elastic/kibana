@@ -5,33 +5,6 @@ description: Building UI components, hooks, forms, and tests in the triggers_act
 
 # Triggers Actions UI Development
 
-## Mock Patterns
-
-```typescript
-// Preferred: use jest.mocked() for typed mocks
-const mockUseKibana = jest.mocked(useKibana);
-
-// Preferred: shared mock factories
-const mockStartServices = createStartServicesMock();
-```
-
-- Use `as unknown as Type` when type narrowing is needed — never `as any`
-- Create reusable mock setup functions when the same mock appears in 3+ test files
-- One assertion per test when possible — makes failures more descriptive
-
-## Test IDs
-
-- Add `data-test-subj` to all interactive elements and key display elements
-- Prefer adding `data-test-subj` directly to the component prop — not via a wrapper div
-- Naming: `{componentName}-{element}` (e.g., `rulesList-table`, `connectorForm-submitBtn`)
-
-## EUI Components
-
-- Use `@elastic/eui` for all UI elements
-- Use Emotion (`@emotion/react`) for custom styling — not inline styles or CSS modules
-- Follow EUI's responsive patterns (flex, grid)
-- Use EUI's color tokens — don't hardcode colors
-
 ## Hooks
 
 - Keep hooks at the top level — no conditional hooks
@@ -55,3 +28,4 @@ const mockStartServices = createStartServicesMock();
 - Sections under `public/application/sections/` (rules_list, rule_details, actions_connectors_list)
 - Each section has `components/`, `hooks/`, and optionally `translations/`
 - Don't duplicate helper functions across files — extract to section-level utils or `public/common/`
+- If the same mock setup or test helper appears in 3+ files, extract it into a shared test util

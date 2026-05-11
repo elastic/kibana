@@ -21,13 +21,6 @@ For registering and scheduling tasks as a *consumer* of Task Manager, use the `t
 - For bulk operations, batch task claims rather than individual queries
 - Avoid holding task claims for extended periods
 
-## Code Style
-
-- Follow the existing pattern of using `partialTask` spreads instead of manually picking fields
-- Use the existing `createStartServicesMock()` for test setup
-- Constants for timeouts and intervals — no magic numbers
-- Prefer `optionalPlugin` over `requiredPlugin` when a dependency is not essential for core functionality
-
 ## Key Files
 
 - `server/task_scheduling.ts` — Entry point for scheduling operations

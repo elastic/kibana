@@ -50,10 +50,12 @@ Connectors support multiple auth types (basic, bearer, header-based, SSL):
 - Sub-action / legacy: auth configuration uses `auth_config.tsx` for the UI
 - Secret fields (passwords, tokens) go in `secrets` not `config`
 - The `hasAuth` boolean controls whether auth fields are shown/validated
+- OAuth URL validation must check against `xpack.actions.allowedHosts`
 
 ## Testing Requirements
 
 - **Unit tests**: Every connector needs tests for validation, execution, and error cases
+- **Edge case tests**: Test missing/undefined optional fields, empty arrays, allowlist being undefined, and permission boundaries
 - **Integration tests**: API integration tests in `x-pack/platform/test/alerting_api_integration/`
 - **Config tests**: Changes to `actions/server/config.ts` require tests in `config.test.ts`
 - **UI tests**: Use React Testing Library for all new component tests

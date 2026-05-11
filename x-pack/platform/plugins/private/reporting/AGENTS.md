@@ -22,8 +22,14 @@ Key modules:
 
 - Report generation is scheduled via Task Manager — follow Task Manager conventions for task registration (see the `task-manager-registration` skill)
 
+### Code Patterns Specific to This Plugin
+
+- Prefer returning values over passing `res` as a parameter — keep API boundaries clean
+- Group read errors by status code using lodash `partition` or `groupBy`
+
 ## Before Declaring Done
 
 After making changes, run these validation steps before reporting completion:
 - `node scripts/jest <path-to-changed-test-files>` — run affected unit tests
-- `node scripts/eslint --fix <changed-files>` — lint and auto-fix only changed files
+- `node scripts/eslint --fix <changed-files>` — lint and auto-fix, then commit the result before pushing
+- If CI fails on an FTR config your PR doesn't touch, retry — it's likely a flaky infrastructure test
