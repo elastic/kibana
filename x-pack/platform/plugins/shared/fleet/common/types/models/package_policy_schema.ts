@@ -327,6 +327,7 @@ export const PackagePolicySchemaV22 = NewPackagePolicySchema.extends(
     inputs: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 1000 })),
     package: schema.maybe(schema.any()),
     global_data_tags: undefined,
+    condition: undefined,
   },
   { unknowns: 'ignore' }
 );
@@ -346,10 +347,15 @@ export const PackagePolicySchemaV23 = PackagePolicySchemaV22.extends(
 
 /**
  * Snapshot of the package policy SO schema as of model version 10.24.0.
- * Inherits the integration-, input-, and stream-level `condition` field added
- * to the base schemas — no extends overrides needed.
+ * Re-introduces the `condition` field at the integration level — V22/V23 excluded it
+ * to preserve their hashes when `condition` was added to PackagePolicyBaseSchema.
  */
-export const PackagePolicySchemaV24 = PackagePolicySchemaV23.extends({}, { unknowns: 'ignore' });
+export const PackagePolicySchemaV24 = PackagePolicySchemaV23.extends(
+  {
+    condition: NewPackagePolicySchema.getPropSchemas().condition,
+  },
+  { unknowns: 'ignore' }
+);
 
 const CreatePackagePolicyProps = {
   ...PackagePolicyBaseSchema,
