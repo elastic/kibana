@@ -44,7 +44,6 @@
     "@kbn/features-plugin",
     "@kbn/server-route-repository-utils",
     "@kbn/es-query",
-    "@kbn/traced-es-client",
     "@kbn/zod-helpers",
     "@kbn/inference-common",
     "@kbn/inference-prompt-utils",
@@ -82,7 +81,6 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/core-ui-settings-server",
-    "@kbn/agent-builder-plugin",
     "@kbn/search-inference-endpoints",
     "@kbn/agent-builder-server",
     "@kbn/agent-builder-common",
@@ -94,6 +92,7 @@
     "@kbn/dev-cli-runner",
     "@kbn/core-security-server",
     "@kbn/workflows-management-plugin",
-    "@kbn/workflows"
+    "@kbn/workflows",
+    "@kbn/agent-builder-plugin"
   ]
 }

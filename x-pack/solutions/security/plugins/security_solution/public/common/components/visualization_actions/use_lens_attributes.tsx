@@ -16,10 +16,10 @@ import { inputsSelectors } from '../../store';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
 import type { LensAttributes, UseLensAttributesProps } from './types';
 import {
+  buildIndexFilters,
   fieldNameExistsFilter,
   getDetailsPageFilter,
   getESQLGlobalFilters,
-  getIndexFilters,
   getNetworkDetailsPageFilter,
   sourceOrDestinationIpExistsFilter,
 } from './utils';
@@ -38,6 +38,7 @@ export const useLensAttributes = ({
   title,
   esql,
   signalIndexName,
+  excludedPatterns,
 }: UseLensAttributesProps): LensAttributes | null => {
   const { euiTheme } = useEuiTheme();
   const {
@@ -137,7 +138,12 @@ export const useLensAttributes = ({
       return null;
     }
 
-    const indexFilters = hasAdHocDataViews ? [] : getIndexFilters(selectedPatterns);
+    const indexFilters = buildIndexFilters({
+      hasAdHocDataViews,
+      selectedPatterns,
+      excludedPatterns,
+      signalIndexName,
+    });
     const query = esql ? { esql } : globalQuery;
 
     const queryFilters = (() => {
@@ -175,6 +181,8 @@ export const useLensAttributes = ({
     stackByField,
     hasAdHocDataViews,
     selectedPatterns,
+    excludedPatterns,
+    signalIndexName,
     esql,
     globalQuery,
     globalFilterQuery,

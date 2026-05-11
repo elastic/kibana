@@ -74,6 +74,7 @@ steps:
         env:
           ES_ZONE_COUNT: 2
           ES_HOT_TIER_MEMORY_SIZE: 8192
+          KIBANA_MEMORY_SIZE: 8192
         label: 'Build and Deploy to Cloud'
         agents:
           provider: gcp
@@ -94,14 +95,14 @@ steps:
         label: 'Run Entity Store Performance Tests'
         env:
           # SECURITY_DOCS_GEN_BRANCH: branch-name # Optional: checkout a specific branch from security-documents-generator repo (default: main branch)
-          # SECURITY_DOCS_GEN_PR: 123 # Optional: checkout a specific PR from security-documents-generator repo (alternative to SECURITY_DOCS_GEN_BRANCH)
+          # SECURITY_DOCS_GEN_PR: 332 # Use security-documents-generator PR for Entity Store V2 support; remove when merged to main
           PERF_INTERVAL: 100
           PERF_COUNT: 1
           PERF_SAMPLING_INTERVAL: 1
           PERF_DATA_FILE: standard
-          # PERF_NO_TRANSFORMS: true # Optional: set to "true" to disable transforms (default: false)
+          PERF_NO_TRANSFORMS: 'true' # Entity Store V2 / ESQL flow (doc-gen enables and installs V2)
           # Optional: Baseline comparison configuration
-          PERF_BASELINE_FILE: baselines/baseline-v1_0 # Optional: specific baseline file to use
+          PERF_BASELINE_FILE: baselines/baseline-v2_0 # Optional: specific baseline file to use
           PERF_DEGRADATION_THRESHOLD: 35 # Optional: degradation threshold % (default: 25)
           PERF_WARNING_THRESHOLD: 25 # Optional: warning threshold % (default: 15)
           PERF_IMPROVEMENT_THRESHOLD: 30 # Optional: improvement threshold % (default: 15)

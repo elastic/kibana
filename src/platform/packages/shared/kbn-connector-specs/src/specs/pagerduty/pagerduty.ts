@@ -16,7 +16,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import type {
@@ -86,21 +86,23 @@ export const PagerdutyConnector: ConnectorSpec = {
     ],
   },
 
-  schema: z.object({
-    serverUrl: UISchemas.url()
-      .default(PAGERDUTY_MCP_SERVER_URL)
-      .describe('PagerDuty MCP Server URL')
-      .meta({
-        widget: 'text',
-        placeholder: 'https://mcp.pagerduty.com/mcp',
-        label: i18n.translate('connectorSpecs.pagerduty.config.serverUrl.label', {
-          defaultMessage: 'MCP Server URL',
+  schema: lazySchema(() =>
+    z.object({
+      serverUrl: UISchemas.url()
+        .default(PAGERDUTY_MCP_SERVER_URL)
+        .describe('PagerDuty MCP Server URL')
+        .meta({
+          widget: 'text',
+          placeholder: 'https://mcp.pagerduty.com/mcp',
+          label: i18n.translate('connectorSpecs.pagerduty.config.serverUrl.label', {
+            defaultMessage: 'MCP Server URL',
+          }),
+          helpText: i18n.translate('connectorSpecs.pagerduty.config.serverUrl.helpText', {
+            defaultMessage: 'The URL of the PagerDuty MCP server.',
+          }),
         }),
-        helpText: i18n.translate('connectorSpecs.pagerduty.config.serverUrl.helpText', {
-          defaultMessage: 'The URL of the PagerDuty MCP server.',
-        }),
-      }),
-  }),
+    })
+  ),
 
   validateUrls: {
     fields: ['serverUrl'],

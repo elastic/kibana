@@ -30,10 +30,12 @@ import {
 import { builderEnums } from '../enums';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
 import { objectUnion } from './utils/object_union';
+import { positionSchema } from '../alignments';
 
 const legendSchemaProps = {
   truncate_after_lines: legendTruncateAfterLinesSchema,
   visibility: baseLegendVisibilitySchema,
+  position: schema.maybe(positionSchema()),
   size: legendSizeSchema,
 };
 

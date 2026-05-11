@@ -7,6 +7,15 @@
 
 import type { Locator, ScoutPage } from '@kbn/scout';
 
+/** Serverless / cloud: primary chrome nav can lag behind Playwright defaults (gh-267186). */
+export const OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS = 45_000;
+
+/**
+ * Budget for app shells after sidenav navigations — bundles + async `data-test-subj` (ex. dashboards
+ * listing mounts `dashboardLandingPage` in an effect; gh-267186 comment).
+ */
+export const OBSERVABILITY_SPA_SHELL_TIMEOUT_MS = OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS;
+
 /** Chrome nav for Observability — locators and actions only; specs own `expect`. */
 export class ObservabilityNavigation {
   public readonly sidenav: Locator;
@@ -41,13 +50,24 @@ export class ObservabilityNavigation {
   }
 
   /** Waits on `primaryNav` (outer layout can be 0-width until CSS vars apply). */
-  async waitForLoad() {
-    await this.primaryNav.waitFor({ state: 'visible' });
+  async waitForLoad(options?: { timeout?: number }) {
+    await this.primaryNav.waitFor({
+      state: 'visible',
+      timeout: options?.timeout ?? OBSERVABILITY_PRIMARY_NAV_LOAD_TIMEOUT_MS,
+    });
   }
 
-  /** App root or `kbnNoDataPage` (Discover/Dashboards with no data views). */
+  /**
+   * App root or one of the shared no-data shells. Discover/Dashboards delegate to
+   * `KibanaNoDataPage`, which renders either `kbnNoDataPage` (cluster has no data) or
+   * `noDataViewsPrompt` (cluster has data but no user data view), depending on cluster
+   * state. The shells are mutually exclusive, so an `.or()` chain is enough — see gh-267186.
+   */
   pageOrNoData(testSubj: string): Locator {
-    return this.page.testSubj.locator(testSubj).or(this.page.testSubj.locator('kbnNoDataPage'));
+    return this.page.testSubj
+      .locator(testSubj)
+      .or(this.page.testSubj.locator('kbnNoDataPage'))
+      .or(this.page.testSubj.locator('noDataViewsPrompt'));
   }
 
   navItemInPrimaryByDeepLinkId(deepLinkId: string): Locator {

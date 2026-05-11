@@ -23,7 +23,7 @@ export type {
   ReadOnlyConversationClient,
 } from './types';
 
-export type { ConversationListOptions } from './services/conversation/client/types';
+export type { ConversationListOptions } from '@kbn/agent-builder-common';
 
 export type {
   SmlTypeDefinition,
