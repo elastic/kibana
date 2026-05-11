@@ -265,7 +265,7 @@ groups:
         datatype: string
         applies_to:
           - "stack: ga 9.5"
-          - "ech: unavailable"
+          - "ech: ga"
           - "self: ga"
 
       - setting: csp.report_uri
