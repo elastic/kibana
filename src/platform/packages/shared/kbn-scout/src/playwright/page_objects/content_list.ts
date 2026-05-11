@@ -31,6 +31,11 @@ export interface ContentListUrlState {
  * writes to the URL — `:`, `,`, `(`, `)`, etc. stay readable so the regex built
  * by {@link buildContentListUrlRegex} matches what the provider actually
  * produces.
+ *
+ * TODO(https://github.com/elastic/kibana/issues/268689): replace this local
+ * helper with the shared `encodeUriQuery` extracted from `kibana_utils` once
+ * it is promoted to a shared package. Kept in lockstep with `encodeQueryValue`
+ * in `@kbn/content-list-provider`'s `url_sync/url_codec.ts`.
  */
 const encodeContentListValue = (value: string): string =>
   encodeURIComponent(value)

@@ -196,6 +196,11 @@ export const parseSearch = (search: string): ParsedQuery =>
  *
  * `&` and `=` stay encoded because they delimit key-value pairs, and `+`
  * stays encoded so a literal `+` is never misread as a space.
+ *
+ * TODO(https://github.com/elastic/kibana/issues/268689): replace this local
+ * helper with the shared `encodeUriQuery` extracted from `kibana_utils` once
+ * it is promoted to a shared package. The same applies to the duplicate
+ * `encodeContentListValue` in `@kbn/scout`'s `page_objects/content_list.ts`.
  */
 const encodeQueryValue = (value: string): string =>
   encodeURIComponent(value)
