@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useForm, FormProvider } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -172,6 +172,12 @@ export const SecurityRuleForm = ({
 
   const meta = useMemo(() => ({ layout: 'page' as const }), []);
 
+  useEffect(() => {
+    if (ruleType === 'threshold' && generatedQuery) {
+      methods.setValue('evaluation.query.base', generatedQuery);
+    }
+  }, [ruleType, generatedQuery, methods]);
+
   const handleSubmit = useCallback(
     async (values: FormValues) => {
       const enriched: FormValues = {
@@ -224,7 +230,7 @@ export const SecurityRuleForm = ({
     <QueryClientProvider client={queryClient}>
       <RuleFormProvider services={services} meta={meta}>
         <FormProvider {...methods}>
-          <EuiFlexGroup gutterSize="l" alignItems="flexStart" key={`${ruleType}-${generatedQuery}`}>
+          <EuiFlexGroup gutterSize="l" alignItems="flexStart">
             <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
               <SecurityGuiRuleForm
                 onSubmit={handleSubmit}
