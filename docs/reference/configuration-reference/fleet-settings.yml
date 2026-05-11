@@ -544,7 +544,7 @@ groups:
         default: "1m"
         applies_to:
           stack: ga 9.4
-          ech: ga
+          ech: unavailable
           self: ga
 
       - setting: xpack.fleet.integrationRollbackTTL
@@ -554,7 +554,7 @@ groups:
         default: "7d"
         applies_to:
           stack: ga 9.3
-          ech: ga
+          ech: unavailable
           self: ga
 
       - setting: xpack.fleet.fleetPolicyRevisionsCleanup.maxRevisions

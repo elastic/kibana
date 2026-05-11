@@ -191,7 +191,7 @@ groups:
         default: "25000000 (25MB)"
         applies_to:
           stack: ga 9.3
-          ech: ga
+          ech: unavailable
           self: ga
 
       - setting: xpack.actions.email.services.ses.host

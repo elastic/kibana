@@ -223,5 +223,5 @@ groups:
         default: 'https://apm-agent-versions.elastic.co/versions.json'
         applies_to:
           stack: ga
-          ech: ga
+          ech: unavailable
           self: ga
