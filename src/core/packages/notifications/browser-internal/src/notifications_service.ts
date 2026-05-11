@@ -20,6 +20,7 @@ import { showErrorDialog, ToastsService } from './toasts';
 import { Coordinator, notificationCoordinator } from './notification_coordinator';
 import { FeedbackService } from './feedback';
 import { ToursService } from './tours';
+import { EventsService } from './events';
 
 export interface SetupDeps {
   analytics: AnalyticsServiceSetup;
@@ -39,6 +40,7 @@ export class NotificationsService {
   private readonly toasts: ToastsService;
   private readonly feedback: FeedbackService;
   private readonly tours: ToursService;
+  private readonly events: EventsService;
   private uiSettingsErrorSubscription?: Rx.Subscription;
   private targetDomElement?: HTMLElement;
   private readonly coordinator = notificationCoordinator.bind(new Coordinator());
@@ -47,6 +49,7 @@ export class NotificationsService {
     this.toasts = new ToastsService();
     this.feedback = new FeedbackService();
     this.tours = new ToursService();
+    this.events = new EventsService();
   }
 
   public setup({ uiSettings, analytics }: SetupDeps): NotificationsSetup {
@@ -93,6 +96,7 @@ export class NotificationsService {
         }),
       feedback: this.feedback.start({ settings }),
       tours: this.tours.start({ settings }),
+      events: this.events.start(),
     };
   }
 
