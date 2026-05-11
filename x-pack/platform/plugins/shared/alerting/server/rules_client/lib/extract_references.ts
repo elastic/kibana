@@ -6,7 +6,6 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { ActionResult, InMemoryConnector } from '@kbn/actions-plugin/server';
 import type { RuleTypeParams, Artifacts } from '../../types';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import type { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } from '../types';
@@ -23,8 +22,7 @@ export async function extractReferences<
   ruleType: UntypedNormalizedRuleType,
   ruleActions: NormalizedAlertActionWithGeneratedValues[],
   ruleParams: Params,
-  ruleArtifacts: Artifacts,
-  preFetchedActions?: Array<ActionResult | InMemoryConnector>
+  ruleArtifacts: Artifacts
 ): Promise<{
   actions: DenormalizedAction[];
   artifacts: Required<DenormalizedArtifacts>;
@@ -34,8 +32,7 @@ export async function extractReferences<
   const actionsClient = await context.getActionsClient();
   const { references: actionReferences, actions } = await denormalizeActions(
     actionsClient,
-    ruleActions,
-    preFetchedActions
+    ruleActions
   );
 
   const { artifacts, references: artifactReferences } = denormalizeArtifacts(ruleArtifacts);

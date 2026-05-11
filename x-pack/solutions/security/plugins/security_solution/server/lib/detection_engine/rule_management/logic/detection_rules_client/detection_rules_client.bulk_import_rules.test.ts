@@ -122,14 +122,14 @@ describe('detectionRulesClient.bulkImportRules', () => {
       taskIdsFailedToBeEnabled: [],
     });
 
-    const result = await subject.bulkImportRules({
+    const { responses } = await subject.bulkImportRules({
       allowMissingConnectorSecrets: false,
       overwriteRules: false,
       ruleSourceImporter: mockRuleSourceImporter,
       rules: [r1, r2],
     });
 
-    const conflicts = result.filter((r) => isRuleImportError(r) && r.error.type === 'conflict');
+    const conflicts = responses.filter((r) => isRuleImportError(r) && r.error.type === 'conflict');
     expect(conflicts).toHaveLength(1);
     expect(isRuleImportError(conflicts[0]) && conflicts[0].error.ruleId).toBe('existing-rule');
     expect(rulesClient.bulkCreateRules.mock.calls[0][0].rules).toHaveLength(1);
@@ -176,20 +176,20 @@ describe('detectionRulesClient.bulkImportRules', () => {
       };
     });
 
-    const result = await subject.bulkImportRules({
+    const { responses } = await subject.bulkImportRules({
       allowMissingConnectorSecrets: false,
       overwriteRules: false,
       ruleSourceImporter: mockRuleSourceImporter,
       rules: [ruleToImport],
     });
 
-    const errors = result.filter(isRuleImportError);
+    const errors = responses.filter(isRuleImportError);
     expect(errors).toHaveLength(1);
     expect(errors[0].error.ruleId).toBe(ruleToImport.rule_id);
     expect(errors[0].error.message).toBe('boom');
   });
 
-  it('taskIdsFailedToBeEnabled surfaces as a per-rule warning', async () => {
+  it('taskIdsFailedToBeEnabled surfaces as a per-rule warning (non-deferred mode)', async () => {
     const ruleToImport = { ...getImportRulesSchemaMock(), enabled: true };
     const created = getRuleMock(getQueryRuleParams());
     rulesClient.bulkCreateRules.mockImplementationOnce(async (args) => {
@@ -202,19 +202,48 @@ describe('detectionRulesClient.bulkImportRules', () => {
       };
     });
 
-    const result = await subject.bulkImportRules({
+    const { responses } = await subject.bulkImportRules({
       allowMissingConnectorSecrets: false,
       overwriteRules: false,
       ruleSourceImporter: mockRuleSourceImporter,
       rules: [ruleToImport],
     });
 
-    expect(result.length).toBeGreaterThanOrEqual(2);
-    const warnings = result.filter(
+    expect(responses.length).toBeGreaterThanOrEqual(2);
+    const warnings = responses.filter(
       (r) => isRuleImportError(r) && r.error.message.includes('task could not be enabled')
     );
     expect(warnings).toHaveLength(1);
     expect(isRuleImportError(warnings[0]) && warnings[0].error.ruleId).toBe(ruleToImport.rule_id);
+  });
+
+  it('skipTaskEnabling: passes flag through and returns pending task ids', async () => {
+    const ruleToImport = { ...getImportRulesSchemaMock(), enabled: true };
+    const created = getRuleMock(getQueryRuleParams());
+    rulesClient.bulkCreateRules.mockImplementationOnce(async (args) => {
+      const id = (args.rules[0].options as { id: string }).id;
+      return {
+        rules: [{ ...created, id }],
+        errors: [],
+        total: 1,
+        taskIdsFailedToBeEnabled: [id],
+      };
+    });
+
+    const { responses, taskIdsFailedToBeEnabled } = await subject.bulkImportRules({
+      allowMissingConnectorSecrets: false,
+      overwriteRules: false,
+      ruleSourceImporter: mockRuleSourceImporter,
+      rules: [ruleToImport],
+      skipTaskEnabling: true,
+    });
+
+    expect(rulesClient.bulkCreateRules.mock.calls[0][0].skipTaskEnabling).toBe(true);
+    expect(taskIdsFailedToBeEnabled).toHaveLength(1);
+    const warnings = responses.filter(
+      (r) => isRuleImportError(r) && r.error.message.includes('task could not be enabled')
+    );
+    expect(warnings).toHaveLength(0);
   });
 
   it('returns empty result for empty input without calling alerting/findRules', async () => {
@@ -225,7 +254,8 @@ describe('detectionRulesClient.bulkImportRules', () => {
       rules: [],
     });
 
-    expect(result).toEqual([]);
+    expect(result.responses).toEqual([]);
+    expect(result.taskIdsFailedToBeEnabled).toEqual([]);
     expect(rulesClient.bulkCreateRules).not.toHaveBeenCalled();
     expect(findRules).not.toHaveBeenCalled();
   });

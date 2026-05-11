@@ -21,6 +21,8 @@ import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { RuleAlertType } from '../../../rule_schema';
 import type { BulkCreatePrebuiltRulesResult } from './methods/bulk_create_prebuilt_rules';
+import type { BulkEnableTasksResult } from './methods/bulk_enable_tasks';
+import type { BulkImportRulesResult } from './methods/bulk_import_rules';
 
 export interface IDetectionRulesClient {
   getRuleCustomizationStatus: () => PrebuiltRulesCustomizationStatus;
@@ -37,7 +39,8 @@ export interface IDetectionRulesClient {
   revertPrebuiltRule: (args: RevertPrebuiltRuleArgs) => Promise<RuleResponse>;
   importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
   importRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportErrorObject>>;
-  bulkImportRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportErrorObject>>;
+  bulkImportRules: (args: BulkImportRulesArgs) => Promise<BulkImportRulesResult>;
+  bulkEnableTasks: (taskIds: string[]) => Promise<BulkEnableTasksResult>;
 }
 
 export interface CreateCustomRuleArgs {
@@ -94,4 +97,8 @@ export interface ImportRulesArgs {
   overwriteRules: boolean;
   ruleSourceImporter: IRuleSourceImporter;
   allowMissingConnectorSecrets?: boolean;
+}
+
+export interface BulkImportRulesArgs extends ImportRulesArgs {
+  skipTaskEnabling?: boolean;
 }

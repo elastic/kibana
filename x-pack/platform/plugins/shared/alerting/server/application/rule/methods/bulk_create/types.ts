@@ -19,11 +19,10 @@ export interface BulkCreateRulesItem<Params extends RuleParams = never> {
 
 export interface BulkCreateRulesParams<Params extends RuleParams = never> {
   rules: Array<BulkCreateRulesItem<Params>>;
+  // If true, skip Phase 5 (taskManager.bulkEnable);
+  skipTaskEnabling?: boolean;
 }
 
-/**
- * Lets callers branch on *why* a rule was created as disabled.
- */
 export type BulkCreateDisabledReason =
   | 'api_key_creation_failed'
   | 'schedule_limit_exceeded'

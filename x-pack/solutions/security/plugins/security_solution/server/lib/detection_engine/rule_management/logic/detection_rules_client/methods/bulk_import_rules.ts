@@ -45,113 +45,173 @@ interface BulkImportRulesOptions {
     overwriteRules: boolean;
     ruleSourceImporter: IRuleSourceImporter;
     allowMissingConnectorSecrets?: boolean;
+    skipTaskEnabling?: boolean;
   };
 }
 
-/**
- * KQL escape — `rule_id` is free-form (`RuleSignatureId`), not guaranteed to be
- * a UUID, so backslashes and double quotes need escaping when used as a
- * value in a KQL string.
- */
+export interface BulkImportRulesResult {
+  responses: Array<RuleResponse | RuleImportErrorObject>;
+  taskIdsFailedToBeEnabled: string[];
+}
+
+// Per-rule pre-checks (in-process, isolated try/catch). Output: only rules
+// that pass all checks proceed to classification.
+interface PreparedImport {
+  rule: RuleToImport;
+  immutable: boolean;
+  ruleSource: ReturnType<IRuleSourceImporter['calculateRuleSource']>['ruleSource'];
+  exceptionsList: RuleToImport['exceptions_list'];
+}
+
+// rule_id is free-form; escape backslashes and quotes for safe KQL interpolation.
 const escapeKql = (id: string) => id.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
-/**
- * Bulk-import rules in a single chunk. Performs per-rule pre-checks, a single
- * `findRules` lookup for `rule_id` conflicts, and one `rulesClient.bulkCreateRules`
- * call for new rules (mixed enabled/disabled). Existing rules with `overwriteRules`
- * still fall through to the per-rule `importRule` path under a small concurrency cap.
- */
+const emptyResult = (): BulkImportRulesResult => ({
+  responses: [],
+  taskIdsFailedToBeEnabled: [],
+});
+
+interface PrepareRuleArgs {
+  rule: RuleToImport;
+  mlAuthz: MlAuthz;
+  ruleSourceImporter: IRuleSourceImporter;
+  existingLists: Awaited<ReturnType<typeof getReferencedExceptionLists>>;
+  checkedTypes: Set<string>;
+  mlAuthErrorByType: Map<string, Error>;
+}
+
+interface PrepareRuleResult {
+  prepared?: PreparedImport;
+  errors: RuleImportErrorObject[];
+}
+
+const missingVersionError = (ruleId: string): RuleImportErrorObject =>
+  createRuleImportErrorObject({
+    ruleId,
+    message: i18n.translate(
+      'xpack.securitySolution.detectionEngine.rules.cannotImportPrebuiltRuleWithoutVersion',
+      {
+        defaultMessage:
+          'Prebuilt rules must specify a "version" to be imported. [rule_id: {ruleId}]',
+        values: { ruleId },
+      }
+    ),
+  });
+
+const cacheMlAuthError = async ({
+  rule,
+  mlAuthz,
+  checkedTypes,
+  mlAuthErrorByType,
+}: Pick<PrepareRuleArgs, 'rule' | 'mlAuthz' | 'checkedTypes' | 'mlAuthErrorByType'>): Promise<
+  Error | undefined
+> => {
+  if (!checkedTypes.has(rule.type)) {
+    checkedTypes.add(rule.type);
+    try {
+      await validateMlAuth(mlAuthz, rule.type);
+    } catch (e) {
+      mlAuthErrorByType.set(rule.type, e instanceof Error ? e : new Error(String(e)));
+    }
+  }
+  return mlAuthErrorByType.get(rule.type);
+};
+
+const prepareRuleForImport = async ({
+  rule,
+  mlAuthz,
+  ruleSourceImporter,
+  existingLists,
+  checkedTypes,
+  mlAuthErrorByType,
+}: PrepareRuleArgs): Promise<PrepareRuleResult> => {
+  if (!ruleSourceImporter.isPrebuiltRule(rule)) {
+    rule.version = rule.version ?? 1;
+  }
+  if (!ruleToImportHasVersion(rule)) {
+    return { errors: [missingVersionError(rule.rule_id)] };
+  }
+
+  const mlError = await cacheMlAuthError({ rule, mlAuthz, checkedTypes, mlAuthErrorByType });
+  if (mlError) {
+    return {
+      errors: [createRuleImportErrorObject({ ruleId: rule.rule_id, message: mlError.message })],
+    };
+  }
+
+  const [exceptionErrors, exceptionsList] = checkRuleExceptionReferences({ rule, existingLists });
+  const errors: RuleImportErrorObject[] = [...exceptionErrors];
+
+  let ruleSourceResult;
+  try {
+    ruleSourceResult = ruleSourceImporter.calculateRuleSource(rule);
+  } catch (e) {
+    errors.push(
+      createRuleImportErrorObject({
+        ruleId: rule.rule_id,
+        message: e instanceof Error ? e.message : String(e),
+      })
+    );
+  }
+
+  if (!ruleSourceResult) {
+    return { errors };
+  }
+
+  return {
+    errors,
+    prepared: {
+      rule,
+      immutable: ruleSourceResult.immutable,
+      ruleSource: ruleSourceResult.ruleSource,
+      exceptionsList,
+    },
+  };
+};
+
 export const bulkImportRules = async ({
   actionsClient,
   rulesClient,
   savedObjectsClient,
   mlAuthz,
   args,
-}: BulkImportRulesOptions): Promise<Array<RuleResponse | RuleImportErrorObject>> => {
-  const { rules, overwriteRules, ruleSourceImporter, allowMissingConnectorSecrets } = args;
-  if (rules.length === 0) return [];
+}: BulkImportRulesOptions): Promise<BulkImportRulesResult> => {
+  const {
+    rules,
+    overwriteRules,
+    ruleSourceImporter,
+    allowMissingConnectorSecrets,
+    skipTaskEnabling,
+  } = args;
+  if (rules.length === 0) return emptyResult();
 
   const responses: Array<RuleResponse | RuleImportErrorObject> = [];
 
   const existingLists = await getReferencedExceptionLists({ rules, savedObjectsClient });
   await ruleSourceImporter.setup(rules);
 
-  // Per-rule pre-checks (in-process, isolated try/catch). Output: only rules
-  // that pass all checks proceed to classification.
-  interface PreparedImport {
-    rule: RuleToImport;
-    immutable: boolean;
-    ruleSource: ReturnType<IRuleSourceImporter['calculateRuleSource']>['ruleSource'];
-    exceptionsList: RuleToImport['exceptions_list'];
-  }
   const prepared: PreparedImport[] = [];
   const checkedTypes = new Set<string>();
   const mlAuthErrorByType = new Map<string, Error>();
 
   for (const rule of rules) {
-    if (!ruleSourceImporter.isPrebuiltRule(rule)) {
-      rule.version = rule.version ?? 1;
-    }
-    if (!ruleToImportHasVersion(rule)) {
-      responses.push(
-        createRuleImportErrorObject({
-          ruleId: rule.rule_id,
-          message: i18n.translate(
-            'xpack.securitySolution.detectionEngine.rules.cannotImportPrebuiltRuleWithoutVersion',
-            {
-              defaultMessage:
-                'Prebuilt rules must specify a "version" to be imported. [rule_id: {ruleId}]',
-              values: { ruleId: rule.rule_id },
-            }
-          ),
-        })
-      );
-    } else {
-      if (!checkedTypes.has(rule.type)) {
-        checkedTypes.add(rule.type);
-        try {
-          await validateMlAuth(mlAuthz, rule.type);
-        } catch (e) {
-          mlAuthErrorByType.set(rule.type, e instanceof Error ? e : new Error(String(e)));
-        }
-      }
-      const mlError = mlAuthErrorByType.get(rule.type);
-      if (mlError) {
-        responses.push(
-          createRuleImportErrorObject({ ruleId: rule.rule_id, message: mlError.message })
-        );
-      } else {
-        const [exceptionErrors, exceptionsList] = checkRuleExceptionReferences({
-          rule,
-          existingLists,
-        });
-        responses.push(...exceptionErrors);
-
-        let ruleSourceResult;
-        try {
-          ruleSourceResult = ruleSourceImporter.calculateRuleSource(rule);
-        } catch (e) {
-          responses.push(
-            createRuleImportErrorObject({
-              ruleId: rule.rule_id,
-              message: e instanceof Error ? e.message : String(e),
-            })
-          );
-        }
-
-        if (ruleSourceResult) {
-          prepared.push({
-            rule,
-            immutable: ruleSourceResult.immutable,
-            ruleSource: ruleSourceResult.ruleSource,
-            exceptionsList,
-          });
-        }
-      }
+    const result = await prepareRuleForImport({
+      rule,
+      mlAuthz,
+      ruleSourceImporter,
+      existingLists,
+      checkedTypes,
+      mlAuthErrorByType,
+    });
+    responses.push(...result.errors);
+    if (result.prepared) {
+      prepared.push(result.prepared);
     }
   }
 
-  if (prepared.length === 0) return responses;
+  if (prepared.length === 0) {
+    return { responses, taskIdsFailedToBeEnabled: [] };
+  }
 
   // Bulk lookup for `rule_id` conflicts: single KQL parenthesized OR-list.
   const ruleIds = prepared.map((p) => p.rule.rule_id);
@@ -229,7 +289,9 @@ export const bulkImportRules = async ({
     responses.push(...overwriteResults);
   }
 
-  if (toBulkCreate.length === 0) return responses;
+  if (toBulkCreate.length === 0) {
+    return { responses, taskIdsFailedToBeEnabled: [] };
+  }
 
   // Bulk-create new rules in a single alerting call. Pre-assign uuids so we
   // can re-pair successes/failures back to the source `rule_id`.
@@ -254,13 +316,16 @@ export const bulkImportRules = async ({
     return { data, options: { id }, allowMissingConnectorSecrets };
   });
 
-  const bulkResult = await rulesClient.bulkCreateRules<RuleParams>({ rules: bulkInputs });
+  const result = await rulesClient.bulkCreateRules<RuleParams>({
+    rules: bulkInputs,
+    skipTaskEnabling,
+  });
 
-  bulkResult.rules.forEach((createdRule) => {
+  result.rules.forEach((createdRule) => {
     responses.push(convertAlertingRuleToRuleResponse(createdRule));
   });
 
-  bulkResult.errors.forEach((err) => {
+  result.errors.forEach((err) => {
     const source = inputById.get(err.rule.id);
     if (!source) return;
     responses.push(
@@ -271,10 +336,12 @@ export const bulkImportRules = async ({
     );
   });
 
-  // Surface task-enable failures as warnings: the rule was created but its
-  // task didn't start. We map back via id → rule_id and report a partial
-  // success so callers know to retry enabling.
-  bulkResult.taskIdsFailedToBeEnabled.forEach((taskId) => {
+  if (skipTaskEnabling) {
+    return { responses, taskIdsFailedToBeEnabled: result.taskIdsFailedToBeEnabled };
+  }
+
+  // Non-skip mode: alerting already ran bulkEnable; surface failures as warnings.
+  result.taskIdsFailedToBeEnabled.forEach((taskId) => {
     const source = inputById.get(taskId);
     if (!source) return;
     responses.push(
@@ -285,7 +352,7 @@ export const bulkImportRules = async ({
     );
   });
 
-  return responses;
+  return { responses, taskIdsFailedToBeEnabled: [] };
 };
 
 export { escapeKql as __testing_escapeKql };

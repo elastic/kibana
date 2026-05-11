@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { ActionResult, ActionsClient, InMemoryConnector } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import {
   preconfiguredConnectorActionRefPrefix,
   systemConnectorActionRefPrefix,
@@ -14,8 +14,7 @@ import type { DenormalizedAction, NormalizedAlertActionWithGeneratedValues } fro
 
 export async function denormalizeActions(
   actionsClient: ActionsClient,
-  alertActions: NormalizedAlertActionWithGeneratedValues[],
-  preFetchedActions?: Array<ActionResult | InMemoryConnector>
+  alertActions: NormalizedAlertActionWithGeneratedValues[]
 ): Promise<{ actions: DenormalizedAction[]; references: SavedObjectReference[] }> {
   const references: SavedObjectReference[] = [];
   const actions: DenormalizedAction[] = [];
@@ -23,12 +22,10 @@ export async function denormalizeActions(
   if (alertActions.length) {
     const actionIds = [...new Set(alertActions.map((alertAction) => alertAction.id))];
 
-    const actionResults =
-      preFetchedActions ??
-      (await actionsClient.getBulk({
-        ids: actionIds,
-        throwIfSystemAction: false,
-      }));
+    const actionResults = await actionsClient.getBulk({
+      ids: actionIds,
+      throwIfSystemAction: false,
+    });
 
     const actionTypeIds = [...new Set(actionResults.map((action) => action.actionTypeId))];
 

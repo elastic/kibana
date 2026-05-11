@@ -9,14 +9,12 @@ import pMap from 'p-map';
 import { withSpan } from '@kbn/apm-utils';
 import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import type { ActionResult, InMemoryConnector } from '@kbn/actions-plugin/server';
-
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { updateMeta } from '../../../../rules_client/lib';
 import { API_KEY_GENERATE_CONCURRENCY } from '../../../../rules_client/common/constants';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { tryToEnableTasks } from '../bulk_enable/bulk_enable_rules';
+import { bulkEnableTasks } from '../bulk_enable_tasks';
 import { bulkCreateRulesSo } from '../../../../data/rule';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
@@ -28,7 +26,6 @@ import {
   collectNewKeysToInvalidate,
   demotePreparedRules,
   flushKeysToInvalidate,
-  prefetchActions,
   prepareRule,
   toSanitizedRule,
 } from './utils';
@@ -56,16 +53,6 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
 
   logger.debug(`Bulk creating batch of ${total} rules`);
 
-  // Phase 0: single connector lookup for the whole batch.
-  // Pre-fetching actions collapses 2–3 ES round-trips per rule into 1 per batch.
-  // Soft-fail: if the call throws, we still do to per-rule fetches.
-  const actionsById: Map<string, ActionResult | InMemoryConnector> | undefined =
-    await prefetchActions({
-      actionsClient,
-      inputsWithIds,
-      logger,
-    });
-
   // Phase 1: per-rule prepare (validation + api key generation).
   // NOTE: in order to minimise external calls, the values below get mutated
   // at different stages in the process (ie if we fail schedule creation),
@@ -82,7 +69,6 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
       const { prepared, error } = await prepareRule({
         context,
         actionsClient,
-        actionsById,
         username,
         id,
         rule,
@@ -116,7 +102,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
         action: 'bulkCreate',
         rules: enabledIds.length,
       });
-      logger.warn(`Demoting ${enabledIds.length} rules -> disabled, schedule limit exceeded.`);
+      logger.debug(`Demoting ${enabledIds.length} rules -> disabled, schedule limit exceeded.`);
       demotePreparedRules({
         ids: enabledIds,
         reason: 'schedule_limit_exceeded',
@@ -296,12 +282,10 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     }
   }
 
-  // Phase 5: enable tasks for successfully persisted enabled rules.
-  const taskIdsFailedToBeEnabled = await tryToEnableTasks({
-    taskIdsToEnable,
-    logger,
-    taskManager: context.taskManager,
-  });
+  // Phase 5: enable scheduled tasks. If skipTaskEnabling, caller enables them later.
+  const taskIdsFailedToBeEnabled = params.skipTaskEnabling
+    ? [...taskIdsToEnable]
+    : (await bulkEnableTasks(context, { taskIds: taskIdsToEnable })).taskIdsFailedToBeEnabled;
 
   // Single end-of-function flush for all collected key invalidations.
   await flushKeysToInvalidate(keysToInvalidate, context);
@@ -315,6 +299,6 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     rules: sanitizedRules,
     errors,
     total,
-    taskIdsFailedToBeEnabled, // <-- same as bulkEnableRules().
+    taskIdsFailedToBeEnabled,
   };
 }

@@ -215,4 +215,114 @@ describe('importRules', () => {
       { rule_id: successfulRuleId, status_code: 200 },
     ]);
   });
+
+  describe('bulk path (skipTaskEnabling)', () => {
+    const experimentalFeatures = { bulkCreateRulesEnabled: true } as never;
+
+    it('dispatches every chunk with skipTaskEnabling: true and bulkEnables once at the end', async () => {
+      detectionRulesClient.bulkImportRules
+        .mockResolvedValueOnce({
+          responses: [getRulesSchemaMock()],
+          taskIdsFailedToBeEnabled: ['task-a', 'task-b'],
+        })
+        .mockResolvedValueOnce({
+          responses: [getRulesSchemaMock()],
+          taskIdsFailedToBeEnabled: ['task-c'],
+        });
+
+      await importRules({
+        ruleChunks: [[ruleToImport], [ruleToImport]],
+        overwriteRules: false,
+        detectionRulesClient,
+        ruleSourceImporter: mockRuleSourceImporter,
+        experimentalFeatures,
+      });
+
+      expect(detectionRulesClient.bulkImportRules).toHaveBeenCalledTimes(2);
+      for (const call of detectionRulesClient.bulkImportRules.mock.calls) {
+        expect(call[0].skipTaskEnabling).toBe(true);
+      }
+      expect(detectionRulesClient.bulkEnableTasks).toHaveBeenCalledTimes(1);
+      expect(detectionRulesClient.bulkEnableTasks).toHaveBeenCalledWith([
+        'task-a',
+        'task-b',
+        'task-c',
+      ]);
+    });
+
+    it('reports post-loop bulkEnable per-task failures by task id', async () => {
+      detectionRulesClient.bulkImportRules.mockResolvedValueOnce({
+        responses: [getRulesSchemaMock()],
+        taskIdsFailedToBeEnabled: ['task-a', 'task-b'],
+      });
+      detectionRulesClient.bulkEnableTasks.mockResolvedValueOnce({
+        taskIdsFailedToBeEnabled: ['task-b'],
+      });
+
+      const result = await importRules({
+        ruleChunks: [[ruleToImport]],
+        overwriteRules: false,
+        detectionRulesClient,
+        ruleSourceImporter: mockRuleSourceImporter,
+        experimentalFeatures,
+      });
+
+      const enableErrors = result.filter(
+        (r) =>
+          'error' in r &&
+          typeof r.error.message === 'string' &&
+          r.error.message.includes('please retry enable')
+      );
+      expect(enableErrors).toHaveLength(1);
+      expect((enableErrors[0] as { rule_id: string }).rule_id).toBe('task-b');
+    });
+
+    it('a throwing chunk does not abort the loop and prior chunks still get enabled', async () => {
+      detectionRulesClient.bulkImportRules
+        .mockResolvedValueOnce({
+          responses: [getRulesSchemaMock()],
+          taskIdsFailedToBeEnabled: ['task-a'],
+        })
+        .mockRejectedValueOnce(new Error('boom'))
+        .mockResolvedValueOnce({
+          responses: [getRulesSchemaMock()],
+          taskIdsFailedToBeEnabled: ['task-c'],
+        });
+
+      const r1 = { ...ruleToImport, rule_id: 'r1' };
+      const r2 = { ...ruleToImport, rule_id: 'r2' };
+      const r3 = { ...ruleToImport, rule_id: 'r3' };
+
+      const result = await importRules({
+        ruleChunks: [[r1], [r2], [r3]],
+        overwriteRules: false,
+        detectionRulesClient,
+        ruleSourceImporter: mockRuleSourceImporter,
+        experimentalFeatures,
+      });
+
+      expect(detectionRulesClient.bulkImportRules).toHaveBeenCalledTimes(3);
+      expect(detectionRulesClient.bulkEnableTasks).toHaveBeenCalledWith(['task-a', 'task-c']);
+      const boomErrors = result.filter((r) => 'error' in r && r.error.message === 'boom');
+      expect(boomErrors).toHaveLength(1);
+      expect((boomErrors[0] as { rule_id: string }).rule_id).toBe('r2');
+    });
+
+    it('skips bulkEnableTasks when no pending task ids accumulate', async () => {
+      detectionRulesClient.bulkImportRules.mockResolvedValueOnce({
+        responses: [getRulesSchemaMock()],
+        taskIdsFailedToBeEnabled: [],
+      });
+
+      await importRules({
+        ruleChunks: [[ruleToImport]],
+        overwriteRules: false,
+        detectionRulesClient,
+        ruleSourceImporter: mockRuleSourceImporter,
+        experimentalFeatures,
+      });
+
+      expect(detectionRulesClient.bulkEnableTasks).not.toHaveBeenCalled();
+    });
+  });
 });

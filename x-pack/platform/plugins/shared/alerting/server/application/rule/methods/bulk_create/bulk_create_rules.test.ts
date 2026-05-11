@@ -232,6 +232,73 @@ describe('bulkCreateRules', () => {
     expect(result.taskIdsFailedToBeEnabled).toEqual([]);
   });
 
+  describe('skipTaskEnabling', () => {
+    test('skips taskManager.bulkEnable and returns enabled task ids in taskIdsFailedToBeEnabled', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+        buildBulkResponse([{ id: 'mock-id-1' }, { id: 'mock-id-2' }])
+      );
+
+      const result = await rulesClient.bulkCreateRules({
+        rules: [
+          { data: baseRule({ name: 'a', enabled: true }) },
+          { data: baseRule({ name: 'b', enabled: true }) },
+        ],
+        skipTaskEnabling: true,
+      });
+
+      expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkEnable).not.toHaveBeenCalled();
+      expect(result.taskIdsFailedToBeEnabled).toEqual(['mock-id-1', 'mock-id-2']);
+    });
+
+    test('returns empty taskIdsFailedToBeEnabled when no rule is enabled', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+        buildBulkResponse([{ id: 'mock-id-1' }])
+      );
+
+      const result = await rulesClient.bulkCreateRules({
+        rules: [{ data: baseRule({ name: 'a' }) }],
+        skipTaskEnabling: true,
+      });
+
+      expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+      expect(taskManager.bulkEnable).not.toHaveBeenCalled();
+      expect(result.taskIdsFailedToBeEnabled).toEqual([]);
+    });
+
+    test('excludes per-row SO failure ids from taskIdsFailedToBeEnabled', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+        buildBulkResponse([
+          { id: 'mock-id-1' },
+          { id: 'mock-id-2', error: { message: '409', statusCode: 409 } },
+        ])
+      );
+
+      const result = await rulesClient.bulkCreateRules({
+        rules: [
+          { data: baseRule({ name: 'a', enabled: true }) },
+          { data: baseRule({ name: 'b', enabled: true }) },
+        ],
+        skipTaskEnabling: true,
+      });
+
+      expect(taskManager.bulkEnable).not.toHaveBeenCalled();
+      expect(result.taskIdsFailedToBeEnabled).toEqual(['mock-id-1']);
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0].rule.id).toBe('mock-id-2');
+    });
+
+    test('empty-input early return returns standard shape', async () => {
+      const result = await rulesClient.bulkCreateRules({ rules: [], skipTaskEnabling: true });
+      expect(result).toEqual({
+        rules: [],
+        errors: [],
+        total: 0,
+        taskIdsFailedToBeEnabled: [],
+      });
+    });
+  });
+
   test('mixed enabled+disabled happy path', async () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
       buildBulkResponse([{ id: 'mock-id-1' }, { id: 'mock-id-2' }])
@@ -549,100 +616,7 @@ describe('bulkCreateRules', () => {
     );
   });
 
-  test('Phase 0 batched connector pre-fetch: single actionsClient.getBulk for the union of action ids across the batch', async () => {
-    actionsClient.getBulk.mockReset();
-    actionsClient.getBulk.mockResolvedValue([
-      createMockConnector({ id: '1', actionTypeId: 'test', name: 'a' }),
-      createMockConnector({ id: '2', actionTypeId: 'test2', name: 'b' }),
-    ]);
-    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
-      buildBulkResponse([{ id: 'mock-id-1' }, { id: 'mock-id-2' }, { id: 'mock-id-3' }])
-    );
-
-    await rulesClient.bulkCreateRules({
-      rules: [
-        {
-          data: baseRule({
-            name: 'a',
-            actions: [{ group: 'default', id: '1', params: {} }],
-          }),
-        },
-        {
-          data: baseRule({
-            name: 'b',
-            actions: [{ group: 'default', id: '1', params: {} }],
-          }),
-        },
-        {
-          data: baseRule({
-            name: 'c',
-            actions: [{ group: 'default', id: '2', params: {} }],
-          }),
-        },
-      ],
-    });
-
-    // Single batched call: union of distinct connector ids, not one call per rule.
-    expect(actionsClient.getBulk).toHaveBeenCalledTimes(1);
-    const [{ ids, throwIfSystemAction }] = actionsClient.getBulk.mock.calls[0] as [
-      { ids: string[]; throwIfSystemAction: boolean }
-    ];
-    expect([...ids].sort()).toEqual(['1', '2']);
-    expect(throwIfSystemAction).toBe(false);
-  });
-
-  test('Phase 0 batched connector pre-fetch: skipped entirely when no rule references any action', async () => {
-    actionsClient.getBulk.mockReset();
-    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
-      buildBulkResponse([{ id: 'mock-id-1' }, { id: 'mock-id-2' }])
-    );
-
-    await rulesClient.bulkCreateRules({
-      rules: [{ data: baseRule({ name: 'a' }) }, { data: baseRule({ name: 'b' }) }],
-    });
-
-    expect(actionsClient.getBulk).not.toHaveBeenCalled();
-  });
-
-  test('Phase 0 batched connector pre-fetch: soft-fails to per-rule fetches when the batched call throws', async () => {
-    // First call (Phase 0) throws; subsequent fallback calls (per-rule
-    // validateActions + extractReferences) resolve normally.
-    actionsClient.getBulk.mockReset();
-    actionsClient.getBulk.mockRejectedValueOnce(new Error('connector lookup failed'));
-    actionsClient.getBulk.mockResolvedValue([
-      createMockConnector({ id: '1', actionTypeId: 'test', name: 'a' }),
-    ]);
-    unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
-      buildBulkResponse([{ id: 'mock-id-1' }, { id: 'mock-id-2' }])
-    );
-
-    const result = await rulesClient.bulkCreateRules({
-      rules: [
-        {
-          data: baseRule({
-            name: 'a',
-            actions: [{ group: 'default', id: '1', params: {} }],
-          }),
-        },
-        {
-          data: baseRule({
-            name: 'b',
-            actions: [{ group: 'default', id: '1', params: {} }],
-          }),
-        },
-      ],
-    });
-
-    // Phase 0 (1 throwing call) + per-rule fallback in validateActions and
-    // extractReferences for each of the 2 rules = at least 2 calls beyond the
-    // failed one. The exact count is intentionally a lower bound so this stays
-    // robust to internal helper refactors.
-    expect(actionsClient.getBulk.mock.calls.length).toBeGreaterThan(1);
-    // The batch still completes successfully — soft-fail must not abort.
-    expect(result.errors).toEqual([]);
-    expect(result.rules).toHaveLength(2);
-    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
-  });
+  // Caller-side chunking is covered by import_rules.test.ts; bulkCreateRules handles one batch per call.
 
   test('emits per-rule CREATE audit event for surviving rules and ENABLE for the enabled subset', async () => {
     unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(

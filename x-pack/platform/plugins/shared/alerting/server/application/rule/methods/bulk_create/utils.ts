@@ -120,20 +120,6 @@ export const prefetchActions = async <Params extends RuleParams>({
   }
 };
 
-const sliceActionsById = (
-  actionsById: Map<string, ActionResult | InMemoryConnector> | undefined,
-  actions: ReadonlyArray<{ id: string }>
-): Array<ActionResult | InMemoryConnector> | undefined => {
-  if (!actionsById || actions.length === 0) return undefined;
-  const subset: Array<ActionResult | InMemoryConnector> = [];
-  for (const { id } of actions) {
-    const found = actionsById.get(id);
-    if (found) subset.push(found);
-  }
-  // Returns in the same order as input `actions`
-  return subset;
-};
-
 export const buildTaskInstance = (
   context: RulesClientContext,
   prepared: PreparedRule
@@ -188,7 +174,6 @@ export const toSanitizedRule = <Params extends RuleParams = never>(
 interface PrepareRuleArgs<Params extends RuleParams> {
   context: RulesClientContext;
   actionsClient: Awaited<ReturnType<RulesClientContext['getActionsClient']>>;
-  actionsById?: Map<string, ActionResult | InMemoryConnector>;
   username: string | null;
   id: string;
   rule: BulkCreateRulesItem<Params>;
@@ -200,7 +185,6 @@ interface PrepareRuleArgs<Params extends RuleParams> {
 export const prepareRule = async <Params extends RuleParams>({
   context,
   actionsClient,
-  actionsById,
   username,
   id,
   rule,
@@ -255,21 +239,14 @@ export const prepareRule = async <Params extends RuleParams>({
     context.ruleTypeRegistry.ensureRuleTypeEnabled(data.alertTypeId);
     const ruleType = context.ruleTypeRegistry.get(data.alertTypeId);
     const validatedRuleTypeParams = validateRuleTypeParams(data.params, ruleType.validate.params);
-    const actions = sliceActionsById(actionsById, data.actions);
-    const systemActions = sliceActionsById(actionsById, data.systemActions ?? []);
-    const allActionsPrefetched =
-      actionsById !== undefined && (actions || systemActions)
-        ? [...(actions ?? []), ...(systemActions ?? [])]
-        : undefined;
 
-    await validateActions(context, ruleType, data, allowMissingConnectorSecrets, actions);
+    await validateActions(context, ruleType, data, allowMissingConnectorSecrets);
     await validateAndAuthorizeSystemActions({
       actionsClient,
       actionsAuthorization: context.actionsAuthorization,
       connectorAdapterRegistry: context.connectorAdapterRegistry,
       systemActions: data.systemActions ?? [],
       rule: { consumer: data.consumer, producer: ruleType.producer },
-      preFetchedActions: systemActions,
     });
 
     const intervalInMs = parseDuration(data.schedule.interval);
@@ -335,14 +312,7 @@ export const prepareRule = async <Params extends RuleParams>({
       params: updatedParams,
       actions: actionsWithRefs,
       artifacts: artifactsWithRefs,
-    } = await extractReferences(
-      context,
-      ruleType,
-      allActions,
-      validatedRuleTypeParams,
-      artifacts,
-      allActionsPrefetched
-    );
+    } = await extractReferences(context, ruleType, allActions, validatedRuleTypeParams, artifacts);
 
     const createTime = Date.now();
     const lastRunTimestamp = new Date();
