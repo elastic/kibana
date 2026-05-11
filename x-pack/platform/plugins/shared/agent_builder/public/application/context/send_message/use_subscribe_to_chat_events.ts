@@ -20,6 +20,7 @@ import {
   isCompactionStartedEvent,
   isCompactionCompletedEvent,
   isBackgroundAgentCompleteEvent,
+  isTodosUpdatedEvent,
   ConversationRoundStepType,
 } from '@kbn/agent-builder-common';
 import {
@@ -162,6 +163,8 @@ export const subscribeToChatEvents = ({
           ...event.data.execution,
         },
       });
+    } else if (isTodosUpdatedEvent(event)) {
+      conversationActions.addOrUpdateTodosStep({ todos: event.data.data.todos });
     }
   };
 
