@@ -20,7 +20,6 @@ import {
   EuiSpacer,
   EuiText,
   type EuiSelectableProps,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -30,9 +29,11 @@ import {
 } from './command_palette_fuzzy_search';
 import { isPrimaryModifierOnly } from './shortcut_utils';
 import { useShortcutsContext } from './shortcuts_provider';
+import { useCommandPaletteLayout } from './use_command_palette_layout';
 import { useShortcutsLayer } from './use_shortcuts_layer';
 
 const COMMAND_PALETTE_TRIGGER_CODE = 'Period';
+const COMMAND_PALETTE_MAX_WIDTH = '56rem';
 
 const renderOption: NonNullable<EuiSelectableProps<CommandPaletteOption>['renderOption']> = (
   option
@@ -50,7 +51,6 @@ const renderOption: NonNullable<EuiSelectableProps<CommandPaletteOption>['render
 };
 
 export const CommandPalette = () => {
-  const { euiTheme } = useEuiTheme();
   const { registeredLeaderKeyGroups } = useShortcutsContext();
   const options = useMemo<CommandPaletteOption[]>(() => {
     return registeredLeaderKeyGroups
@@ -77,6 +77,7 @@ export const CommandPalette = () => {
     },
     [options.length]
   );
+  const { screenPadding, topOffset, listHeight } = useCommandPaletteLayout();
   const { isVisible, close } = useShortcutsLayer({
     instanceIdLabel: 'command-palette',
     shouldOpen,
@@ -99,16 +100,14 @@ export const CommandPalette = () => {
 
   return (
     <EuiPortal>
-      <EuiOverlayMask
-        css={css`
-          padding: ${euiTheme.size.l};
-        `}
-      >
+      <EuiOverlayMask style={`padding: ${screenPadding}px;`}>
         <EuiOutsideClickDetector onOutsideClick={close}>
           <EuiPanel
             paddingSize="m"
+            style={{ marginTop: topOffset }}
             css={css`
-              max-width: 56rem;
+              max-width: ${COMMAND_PALETTE_MAX_WIDTH};
+              align-self: flex-start;
             `}
           >
             <EuiSelectable<CommandPaletteOption>
@@ -117,7 +116,7 @@ export const CommandPalette = () => {
               })}
               searchable
               singleSelection={true}
-              height={320}
+              height={listHeight}
               options={options}
               onChange={onChange}
               optionMatcher={commandPaletteOptionMatcher}
