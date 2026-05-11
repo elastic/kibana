@@ -134,7 +134,7 @@ export class EntityAnalyticsManagementPage {
     // proceed to `click()`, which then races the actionability check against
     // re-renders. Waiting for `visible` and explicitly asserting enabled state
     // keeps the wait deterministic. See https://github.com/elastic/kibana/issues/259664.
-    await this.entityAnalyticsSwitch.waitFor({ state: 'visible' });
+    await this.entityAnalyticsSwitch.waitFor();
     await expect(this.entityAnalyticsSwitch).toBeEnabled();
     await this.entityAnalyticsSwitch.click();
   }

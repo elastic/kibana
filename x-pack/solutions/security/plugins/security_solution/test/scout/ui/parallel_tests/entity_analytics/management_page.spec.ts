@@ -31,7 +31,7 @@ spaceTest.describe(
         name: `${RISK_SCORE_RULE.name}_${scoutSpace.id}_${Date.now()}`,
       });
 
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPlatformEngineer();
     });
 
     spaceTest.afterEach(async ({ apiServices }) => {
