@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { EuiWindowEvent, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { SuppressChromeBackButton } from '@kbn/app-header';
+import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { isMac } from '@kbn/shared-ux-utility';
+import { useKibana } from '../../hooks/use_kibana';
 
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -32,13 +33,21 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     services: { analytics },
   } = useKibana();
   const [isCondensed, setIsCondensed] = useState(false);
+  const {
+    services: { hotkeys },
+  } = useKibana();
 
-  const onKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (
-        (event.code === 'Period' || event.key === '.') &&
-        (isMac ? event.metaKey : event.ctrlKey)
-      ) {
+  useEffect(() => {
+    const handle = hotkeys.register(
+      {
+        id: 'agentBuilder:toggleCondensedSidebar',
+        keys: 'Mod+.',
+        scope: 'global',
+        label: i18n.translate('xpack.agentBuilder.layout.toggleCondensedSidebarShortcutLabel', {
+          defaultMessage: 'Toggle condensed sidebar',
+        }),
+      },
+      (event) => {
         event.preventDefault();
         const nextIsCondensed = !isCondensed;
         analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
@@ -51,9 +60,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         });
         setIsCondensed(nextIsCondensed);
       }
-    },
-    [analytics, isCondensed]
-  );
+    );
+    return handle.unregister;
+  }, [hotkeys, isCondensed, analytics]);
 
   const sidebarStyles = css`
     @media (max-width: ${euiTheme.breakpoint.m - 1}px) {
@@ -69,7 +78,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   return (
     <>
       <SuppressChromeBackButton />
-      <EuiWindowEvent event="keydown" handler={onKeyDown} />
       <KibanaPageTemplate
         paddingSize="none"
         restrictWidth={false}
