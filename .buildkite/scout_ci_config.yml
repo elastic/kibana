@@ -17,6 +17,7 @@ plugins:
     - data_views
     - discover
     - discover_enhanced
+    - contentManagementExamples
     - entity_store
     - error_boundary_example
     - exploratory_view
