@@ -61,13 +61,13 @@ http.request.body.content: "null pointer"
 -------------------
 
 Certain characters must be escaped by a backslash (unless surrounded by quotes).
-For example, to search for documents where `http.request.referrer` is https://example.com,
+For example, to search for documents where `http.request.referrer` is `https://<example-url>`,
 use either of the following queries:
 
 [source,yaml]
 -------------------
-http.request.referrer: "https://example.com"
-http.request.referrer: https\://example.com
+http.request.referrer: "https://<example-url>"
+http.request.referrer: https\://<example-url>
 -------------------
 
 You must escape following characters:
