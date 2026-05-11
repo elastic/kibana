@@ -63,9 +63,12 @@ export {
 } from './utils/rule_request_mappers';
 export type { RuleRequestCommon } from './utils/rule_request_mappers';
 
-export { ConditionFieldGroup } from './field_groups/condition_field_group';
+// Field groups — for composing custom form layouts
 export { RuleDetailsFieldGroup } from './field_groups/rule_details_field_group';
+export { ConditionFieldGroup } from './field_groups/condition_field_group';
 export { RuleExecutionFieldGroup } from './field_groups/rule_execution_field_group';
+export { AlertConditionsFieldGroup } from './field_groups/alert_conditions_field_group';
+export { KindField } from './fields/kind_field';
 export { RulePreviewPanel } from './fields/rule_preview_panel';
 export { GroupFieldSelect } from './fields/group_field_select';
 export { SubmissionButtons } from './components/submission_buttons';
