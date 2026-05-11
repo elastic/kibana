@@ -175,7 +175,7 @@ export const useSendMessageMutation = ({
           throw new Error('Message is required');
         }
         setPendingMessage(vars.conversationId, vars.message);
-        streamActions.addOptimisticRound({
+        await streamActions.addOptimisticRound({
           userMessage: vars.message,
           attachments: vars.attachments ?? [],
           agentId: vars.agentId,

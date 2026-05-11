@@ -80,8 +80,12 @@ interface AlertsByStatusProps {
   additionalFilters?: ESBoolQuery[];
   applyGlobalQueriesAndFilters?: boolean;
   identityFields?: Record<string, string>;
+  // Fallback source for entity identifiers when `identityFields` is not provided; resolved into KQL/alert filters.
   entityFilter?: Filter;
+  // Entity store V2: selects which EUID definition to use when building the KQL filter from `entityRecord`.
   entityType?: string;
+  // Entity store V2: source document used by the EUID API to derive the KQL filter scoping alerts to this entity.
+  // Prefer using this when available
   entityRecord?: EntityStoreRecord | null;
   signalIndexName: string | null;
 }
