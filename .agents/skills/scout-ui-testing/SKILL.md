@@ -53,7 +53,7 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 - Use `spaceTest` so you can access `scoutSpace` for worker-isolated saved objects + UI settings.
 - Pre-ingest shared ES data in `parallel_tests/global.setup.ts` via `globalSetupHook(...)`.
   - Only **worker** fixtures are available there (no `page`, `browserAuth`, `pageObjects`).
-- Reset Elasticsearch/Kibana state once after the suite via `globalTeardownHook(...)` in `parallel_tests/global.teardown.ts` (optional, opt-in by file presence). `esArchiver` is intentionally not on the teardown fixture surface — Scout doesn't support archive unloading (slow, unnecessary; leftover indexes don't break tests with idempotent `loadIfNeeded`). For state that does need resetting, use `esClient`/`kbnClient`/`apiServices`. See `references/scout-ui-parallelism.md`.
+- Reset Elasticsearch/Kibana state once after the suite via `globalTeardownHook(...)` in `parallel_tests/global.teardown.ts` (optional, opt-in by file presence). For state that does need resetting, use `esClient`/`kbnClient`/`apiServices`. See `references/scout-ui-parallelism.md`.
 - Cleanup space-scoped mutations in `afterAll` (`scoutSpace.savedObjects.cleanStandardList()`, unset UI settings you set).
 
 ## Extending fixtures
