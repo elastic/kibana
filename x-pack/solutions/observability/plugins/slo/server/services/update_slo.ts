@@ -31,6 +31,7 @@ import { retryTransientEsErrors } from '../utils/retry';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import type { TransformManager } from './transform_manager';
+import { TYPE as ORPHAN_CLEANUP_TASK_TYPE } from './tasks/orphan_summary_cleanup_task/orphan_summary_cleanup_task';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 
 export class UpdateSLO {
@@ -208,8 +209,15 @@ export class UpdateSLO {
 
       await Promise.all([this.deleteRollupData(slo), this.deleteSummaryData(slo)]);
     } catch (err) {
-      // Any errors here should not prevent moving forward.
-      // Worst case we keep rolling up data for the previous revision number.
+      // Don't block the update on cleanup failures, but surface them in logs so
+      // stale transforms and orphan summary documents become diagnosable.
+      // SDH #6202.
+      this.logger.error(
+        `Failed to clean up resources for previous revision of SLO ` +
+          `[id=${slo.id}, revision=${slo.revision}]. ` +
+          `Old transforms may continue producing stale summary documents ` +
+          `until the ${ORPHAN_CLEANUP_TASK_TYPE} task runs. ${err}`
+      );
     }
   }
 
