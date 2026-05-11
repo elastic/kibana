@@ -8,6 +8,10 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
+import {
+  AGENT_BUILDER_UI_EBT_ELEMENT,
+  AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION,
+} from '../../../agent_builder_ui_ebt';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { LibraryPanel } from '../common/library_panel';
@@ -71,6 +75,8 @@ export const ToolLibraryPanel: React.FC<ToolLibraryPanelProps> = ({
       flyoutTitleId="toolLibraryFlyoutTitle"
       libraryLabels={libraryLabels}
       manageLibraryPath={appPaths.tools.list}
+      manageLibraryDataEbtElement={AGENT_BUILDER_UI_EBT_ELEMENT.LIBRARY_TOOLS}
+      manageLibraryDataEbtAction={AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION.MANAGE_LIBRARY_LINK}
       disabledItemIdSet={disabledItemIdSet}
       readOnlyItemIdSet={readOnlyItemIdSet}
     />

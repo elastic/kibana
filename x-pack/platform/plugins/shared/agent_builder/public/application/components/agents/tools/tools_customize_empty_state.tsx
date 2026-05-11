@@ -17,6 +17,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  AGENT_BUILDER_UI_EBT_ELEMENT,
+  AGENT_BUILDER_UI_EBT_ENTITY_TYPE,
+  AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION,
+  AGENT_BUILDER_UI_EBT_MANAGE_GLOBAL_ACTION,
+  AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION,
+} from '../../../agent_builder_ui_ebt';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -47,7 +54,14 @@ export const ToolsCustomizeEmptyState: React.FC<ToolsCustomizeEmptyStateProps> =
         skills: (
           <EuiLink
             data-test-subj="agentToolsCustomizeEmptyStateLinkSkills"
-            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))}
+            href={createAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))}
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              navigateToAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }));
+            }}
+            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_TOOLS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION.CROSS_NAVIGATE}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT_ENTITY_TYPE.SKILL}
           >
             Skills
           </EuiLink>
@@ -55,7 +69,14 @@ export const ToolsCustomizeEmptyState: React.FC<ToolsCustomizeEmptyStateProps> =
         plugins: (
           <EuiLink
             data-test-subj="agentToolsCustomizeEmptyStateLinkPlugins"
-            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))}
+            href={createAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))}
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              navigateToAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }));
+            }}
+            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_TOOLS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION.CROSS_NAVIGATE}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT_ENTITY_TYPE.PLUGIN}
           >
             Plugins
           </EuiLink>
@@ -70,7 +91,14 @@ export const ToolsCustomizeEmptyState: React.FC<ToolsCustomizeEmptyStateProps> =
         skills: (
           <EuiLink
             data-test-subj="agentToolsCustomizeEmptyStateLinkSkills"
-            onClick={() => navigateToAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))}
+            href={createAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))}
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              navigateToAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }));
+            }}
+            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_TOOLS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION.CROSS_NAVIGATE}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT_ENTITY_TYPE.SKILL}
           >
             Skills
           </EuiLink>
@@ -110,13 +138,20 @@ export const ToolsCustomizeEmptyState: React.FC<ToolsCustomizeEmptyStateProps> =
             iconType="plus"
             iconSide="left"
             onClick={onOpenLibrary}
+            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_TOOLS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION.ENTITY_ADD_FROM_LIBRARY}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT_ENTITY_TYPE.TOOL}
           >
             {labels.agentTools.emptyStateAddButton}
           </EuiButton>
         ) : undefined
       }
       secondaryAction={
-        <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.tools)}>
+        <EuiButtonEmpty
+          href={createAgentBuilderUrl(appPaths.manage.tools)}
+          data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_TOOLS}
+          data-ebt-action={AGENT_BUILDER_UI_EBT_MANAGE_GLOBAL_ACTION.MANAGE_ENTITY_LIST_VIEW}
+        >
           {labels.agentTools.manageAllTools}
         </EuiButtonEmpty>
       }
