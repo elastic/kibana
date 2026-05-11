@@ -22,6 +22,7 @@ export type RegistryItem<TSavedObjectAttributes extends FinderAttributes = Finde
     /* If the saved object is not in content management, provide a getter for it */
     getSavedObjects?: (search?: {
       query?: string;
+      per_page?: number;
     }) => Promise<SavedObjectCommon<FinderAttributes>[]>;
   };
 };
