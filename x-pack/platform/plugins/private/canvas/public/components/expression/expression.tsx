@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiPanel,
@@ -22,9 +22,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 
-// @ts-expect-error
-import { Shortcuts } from 'react-shortcuts';
-
 import type {
   ExpressionInputEditorRef,
   OnExpressionInputEditorDidMount,
@@ -33,6 +30,11 @@ import { ExpressionInput } from '../expression_input';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
 import type { ExpressionFunction } from '../../../types';
 import type { FormState } from '.';
+import { coreServices } from '../../services/kibana_services';
+import { ShortcutStrings } from '../../../i18n/shortcuts';
+
+const shortcutHelp = ShortcutStrings.getShortcutHelp();
+const namespaceDisplayNames = ShortcutStrings.getNamespaceDisplayNames();
 
 const strings = {
   getCancelButtonLabel: () =>
@@ -65,21 +67,6 @@ const strings = {
     }),
 };
 
-const shortcut = (ref: ExpressionInputEditorRef, cmd: string, callback: () => void) => (
-  <Shortcuts
-    name="EXPRESSION"
-    handler={(command: string) => {
-      const isInputActive = ref.current && ref.current && ref.current.hasTextFocus();
-      if (isInputActive && command === cmd) {
-        callback();
-      }
-    }}
-    targetNodeSelector="body"
-    global
-    stopPropagation
-  />
-);
-
 interface Props {
   functionDefinitions: ExpressionFunction[];
   formState: FormState;
@@ -103,6 +90,30 @@ export const Expression: FC<Props> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const refExpressionInput: ExpressionInputEditorRef = useRef(null);
+  const propsRef = useRef({ formState, setExpression, error, isCompact, toggleCompactView });
+  propsRef.current = { formState, setExpression, error, isCompact, toggleCompactView };
+
+  useEffect(() => {
+    const handle = coreServices.hotkeys.register(
+      {
+        id: 'canvas:expression.run',
+        keys: 'Mod+Enter',
+        label: shortcutHelp.RUN,
+        scope: 'context',
+        group: namespaceDisplayNames.EXPRESSION,
+      },
+      (event) => {
+        const isInputActive =
+          refExpressionInput.current && refExpressionInput.current.hasTextFocus();
+        if (!isInputActive) return;
+        event.preventDefault();
+        if (!propsRef.current.error) {
+          propsRef.current.setExpression(propsRef.current.formState.expression);
+        }
+      }
+    );
+    return handle.unregister;
+  }, []);
 
   const settingsStyles = useMemo(
     () =>
@@ -145,12 +156,6 @@ export const Expression: FC<Props> = ({
       }`}
       paddingSize="none"
     >
-      {shortcut(refExpressionInput, 'RUN', () => {
-        if (!error) {
-          setExpression(formState.expression);
-        }
-      })}
-
       {/* Error code below is to pass a non breaking space so the editor does not jump */}
 
       <ExpressionInput

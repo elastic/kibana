@@ -121,19 +121,19 @@ export const keymap: KeyMap = {
   },
   EDITOR: {
     displayName: namespaceDisplayNames.EDITOR,
-    // added for documentation purposes, not handled by `react-shortcuts`
+    // added for documentation purposes only (mouse interactions, not keyboard shortcuts)
     MULTISELECT: getShortcuts('click', { modifiers: 'shift', help: shortcutHelp.MULTISELECT }),
-    // added for documentation purposes, not handled by `react-shortcuts`
+    // added for documentation purposes only (mouse interactions, not keyboard shortcuts)
     RESIZE_FROM_CENTER: getShortcuts('drag', {
       modifiers: 'alt',
       help: shortcutHelp.RESIZE_FROM_CENTER,
     }),
-    // added for documentation purposes, not handled by `react-shortcuts`
+    // added for documentation purposes only (mouse interactions, not keyboard shortcuts)
     IGNORE_SNAP: getShortcuts('drag', {
       modifiers: 'ctrl',
       help: shortcutHelp.IGNORE_SNAP,
     }),
-    // added for documentation purposes, not handled by `react-shortcuts`
+    // added for documentation purposes only (mouse interactions, not keyboard shortcuts)
     SELECT_BEHIND: getShortcuts('click', {
       modifiers: 'ctrl',
       help: shortcutHelp.SELECT_BEHIND,

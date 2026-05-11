@@ -85,7 +85,8 @@
     "@kbn/core-http-browser",
     "@kbn/scout",
     "@kbn/rison",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/core-hotkeys-browser"
   ],
   "exclude": ["target/**/*"]
 }
