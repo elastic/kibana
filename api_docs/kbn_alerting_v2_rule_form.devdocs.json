@@ -5,6 +5,67 @@
     "functions": [
       {
         "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.AlertConditionsFieldGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "AlertConditionsFieldGroup",
+        "description": [
+          "\nAlert conditions field group for configuring alert and recovery policies.\n\nDisplays:\n- Alert delay (pending state transition: immediate / breaches / duration)\n- A dropdown to select recovery type (no_breach vs. custom query)\n- When `query` type is selected:\n    uses RecoveryBaseQueryOnlyField (full ES|QL editor with \"not same as eval\" validation)\n- Recovery delay (recovering state transition: immediate / recoveries / duration)"
+        ],
+        "signature": [
+          "() => React.JSX.Element | null"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/field_groups/alert_conditions_field_group.tsx",
+        "lineNumber": 31,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.ConditionFieldGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "ConditionFieldGroup",
+        "description": [
+          "\nCondition field group for configuring alert trigger conditions.\n\nThis component displays:\n- An editable ES|QL query editor (when includeBase is true) OR a read-only view of the base query\n\nThe full ES|QL query defines what data is being evaluated, including any\ntrigger condition (e.g. a trailing WHERE clause)."
+        ],
+        "signature": [
+          "({ includeBase }: ConditionFieldGroupProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/field_groups/condition_field_group.tsx",
+        "lineNumber": 36,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.ConditionFieldGroup.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ includeBase = false }",
+            "description": [],
+            "signature": [
+              "ConditionFieldGroupProps"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/field_groups/condition_field_group.tsx",
+            "lineNumber": 36,
+            "columnNumber": 37,
+            "deprecated": false,
+            "docsReferencedTypeName": "ConditionFieldGroupProps",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
         "id": "def-public.deriveAlertDelayModeFromStateTransition",
         "type": "Function",
         "tags": [],
@@ -200,6 +261,44 @@
             "columnNumber": 39,
             "deprecated": false,
             "docsReferencedTypeName": "DynamicRuleFormFlyoutProps",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.KindField",
+        "type": "Function",
+        "tags": [],
+        "label": "KindField",
+        "description": [],
+        "signature": [
+          "({ disabled, compact }: KindFieldProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/fields/kind_field.tsx",
+        "lineNumber": 25,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-v2-rule-form",
+            "id": "def-public.KindField.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ disabled = false, compact = false }",
+            "description": [],
+            "signature": [
+              "KindFieldProps"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/fields/kind_field.tsx",
+            "lineNumber": 25,
+            "columnNumber": 27,
+            "deprecated": false,
+            "docsReferencedTypeName": "KindFieldProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -556,6 +655,44 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.RuleDetailsFieldGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "RuleDetailsFieldGroup",
+        "description": [],
+        "signature": [
+          "() => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/field_groups/rule_details_field_group.tsx",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-v2-rule-form",
+        "id": "def-public.RuleExecutionFieldGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "RuleExecutionFieldGroup",
+        "description": [],
+        "signature": [
+          "() => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/form/field_groups/rule_execution_field_group.tsx",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },

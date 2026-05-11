@@ -16,6 +16,7 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import {
   extractMigrationInfo,
+  normalizeForHash,
   type SavedObjectTypeMigrationInfo,
   type ModelVersionSummary,
 } from './extract_migration_info';
@@ -122,7 +123,7 @@ const getModelVersionHash = (
   modelVersion: SavedObjectsModelVersion | SavedObjectsFullModelVersion
 ) => {
   const hash = createHash('sha256');
-  const modelVersionData = JSON.stringify(modelVersion);
+  const modelVersionData = JSON.stringify(normalizeForHash(modelVersion));
   return `${hash.update(modelVersionData).digest('hex')}`;
 };
 
