@@ -93,6 +93,7 @@ export interface RulesListTableProps {
   /** Row action callbacks */
   onNavigateToDetails: (rule: RuleApiResponse) => void;
   onExpand: (rule: RuleApiResponse) => void;
+  onQuickEdit: (rule: RuleApiResponse) => void;
   onEdit: (rule: RuleApiResponse) => void;
   onClone: (rule: RuleApiResponse) => void;
   onDelete: (rule: RuleApiResponse) => void;
@@ -125,6 +126,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
   onBulkDelete,
   onNavigateToDetails,
   onExpand,
+  onQuickEdit,
   onEdit,
   onClone,
   onDelete,
@@ -352,16 +354,36 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
             defaultMessage="Actions"
           />
         ),
-        width: '6%',
+        width: '8%',
         align: 'right',
         render: (rule: RuleApiResponse) => (
-          <RuleActionsMenu
-            rule={rule}
-            onEdit={onEdit}
-            onClone={onClone}
-            onDelete={onDelete}
-            onToggleEnabled={onToggleEnabled}
-          />
+          <EuiFlexGroup
+            gutterSize="xs"
+            alignItems="center"
+            responsive={false}
+            justifyContent="flexEnd"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="pencil"
+                color="text"
+                onClick={() => onQuickEdit(rule)}
+                aria-label={i18n.translate('xpack.alertingV2.rulesList.action.quickEdit', {
+                  defaultMessage: 'Quick edit rule',
+                })}
+                data-test-subj={`quickEditRule-${rule.id}`}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <RuleActionsMenu
+                rule={rule}
+                onEdit={onEdit}
+                onClone={onClone}
+                onDelete={onDelete}
+                onToggleEnabled={onToggleEnabled}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
       },
     ],
@@ -372,6 +394,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
       onSelectRow,
       onNavigateToDetails,
       onExpand,
+      onQuickEdit,
       onEdit,
       onClone,
       onDelete,
