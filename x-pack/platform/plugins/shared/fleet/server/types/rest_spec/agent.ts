@@ -511,6 +511,35 @@ export const PostBulkAgentUnenrollRequestSchema = {
   }),
 };
 
+export const PostRemoveCollectorRequestSchema = {
+  params: schema.object({
+    agentId: schema.string({ meta: { description: 'The collector agent ID' } }),
+  }),
+};
+
+export const PostBulkRemoveCollectorsRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([
+      schema.arrayOf(
+        schema.string({
+          meta: { description: 'list of collector agent IDs' },
+        }),
+        { maxSize: 10000 }
+      ),
+      schema.string({
+        meta: { description: 'KQL query string, leave empty to action all collectors' },
+      }),
+    ]),
+    includeInactive: schema.maybe(
+      schema.boolean({
+        meta: {
+          description: 'When passing collectors by KQL query, removes inactive collectors too',
+        },
+      })
+    ),
+  }),
+};
+
 function validateVersion(s: string) {
   if (!semverIsValid(s)) {
     return 'not a valid semver';

@@ -29,6 +29,7 @@ import { SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentUnenrollAgentModal,
+  AgentRemoveCollectorModal,
   AgentUpgradeAgentModal,
   FleetServerCloudUnhealthyCallout,
   FleetServerMissingEncryptionKeyCallout,
@@ -99,6 +100,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [agentToViewJson, setAgentToViewJson] = useState<Agent | undefined>(undefined);
   const [agentToViewPolicy, setAgentToViewPolicy] = useState<Agent | undefined>(undefined);
   const [agentToRollback, setAgentToRollback] = useState<Agent | undefined>(undefined);
+  const [agentToRemoveCollector, setAgentToRemoveCollector] = useState<Agent | undefined>(
+    undefined
+  );
 
   const [isAddCollectorFlyoutOpen, setAddCollectorFlyoutOpen] = useState(false);
 
@@ -232,6 +236,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onViewAgentJsonClick={() => setAgentToViewJson(agent)}
         onViewAgentPolicyClick={() => setAgentToViewPolicy(agent)}
         onRollbackClick={() => setAgentToRollback(agent)}
+        onRemoveCollectorClick={() => setAgentToRemoveCollector(agent)}
       />
     );
   };
@@ -388,6 +393,18 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             }}
             useForceUnenroll={agentToUnenroll.status === 'unenrolling'}
             hasFleetServer={agentToUnenrollHasFleetServer}
+          />
+        </EuiPortal>
+      )}
+      {agentToRemoveCollector && (
+        <EuiPortal>
+          <AgentRemoveCollectorModal
+            agents={[agentToRemoveCollector]}
+            agentCount={1}
+            onClose={() => {
+              setAgentToRemoveCollector(undefined);
+              refreshAgents();
+            }}
           />
         </EuiPortal>
       )}

@@ -25,6 +25,8 @@ import {
   DeleteAgentRequestSchema,
   PostAgentUnenrollRequestSchema,
   PostBulkAgentUnenrollRequestSchema,
+  PostRemoveCollectorRequestSchema,
+  PostBulkRemoveCollectorsRequestSchema,
   GetAgentStatusRequestSchema,
   GetAgentDataRequestSchema,
   PostNewAgentActionRequestSchema,
@@ -103,6 +105,10 @@ import {
   postCancelActionHandlerBuilder,
 } from './actions_handlers';
 import { postAgentUnenrollHandler, postBulkAgentsUnenrollHandler } from './unenroll_handler';
+import {
+  postBulkRemoveCollectorsHandler,
+  postRemoveCollectorHandler,
+} from './remove_collector_handler';
 import { postAgentUpgradeHandler, postBulkAgentsUpgradeHandler } from './upgrade_handler';
 import {
   bulkRequestDiagnosticsHandler,
@@ -225,6 +231,64 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           },
         },
         getAgentEffectiveConfigHandler
+      );
+
+    // Remove collector (single)
+    router.versioned
+      .post({
+        path: AGENT_API_ROUTES.REMOVE_COLLECTOR_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
+        },
+        summary: `Remove an OpAMP collector`,
+        description: `Remove a specific OpAMP collector from the Fleet agents list. Marks the collector as unenrolled; does not invalidate API keys, so the collector can reconnect on its own.`,
+        options: {
+          tags: ['oas-tag:Elastic Agent actions'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: { request: PostRemoveCollectorRequestSchema, response: {} },
+        },
+        postRemoveCollectorHandler
+      );
+
+    // Bulk remove collectors
+    router.versioned
+      .post({
+        path: AGENT_API_ROUTES.BULK_REMOVE_COLLECTORS_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.ALL],
+          },
+        },
+        summary: `Bulk remove OpAMP collectors`,
+        description: `Remove multiple OpAMP collectors from the Fleet agents list. Marks the collectors as unenrolled; does not invalidate API keys.`,
+        options: {
+          tags: ['oas-tag:Elastic Agent actions'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: PostBulkRemoveCollectorsRequestSchema,
+            response: {
+              200: {
+                description: 'OK: A successful request.',
+                body: () => PostBulkActionResponseSchema,
+              },
+              400: {
+                description: 'A bad request.',
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        postBulkRemoveCollectorsHandler
       );
   }
 

@@ -44,6 +44,9 @@ import type {
   PostBulkAgentUnenrollRequest,
   PostBulkAgentUnenrollResponse,
   PostAgentUnenrollResponse,
+  PostBulkRemoveCollectorsRequest,
+  PostBulkRemoveCollectorsResponse,
+  PostRemoveCollectorResponse,
   PostAgentReassignRequest,
   PostAgentReassignResponse,
   PostBulkAgentReassignRequest,
@@ -223,6 +226,28 @@ export function sendPostBulkAgentUnenroll(
 ) {
   return sendRequest<PostBulkAgentUnenrollResponse>({
     path: agentRouteService.getBulkUnenrollPath(),
+    method: 'post',
+    body,
+    version: API_VERSIONS.public.v1,
+    ...options,
+  });
+}
+
+export function sendPostRemoveCollector(agentId: string, options?: RequestOptions) {
+  return sendRequest<PostRemoveCollectorResponse>({
+    path: agentRouteService.getRemoveCollectorPath(agentId),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    ...options,
+  });
+}
+
+export function sendPostBulkRemoveCollectors(
+  body: PostBulkRemoveCollectorsRequest['body'],
+  options?: RequestOptions
+) {
+  return sendRequest<PostBulkRemoveCollectorsResponse>({
+    path: agentRouteService.getBulkRemoveCollectorsPath(),
     method: 'post',
     body,
     version: API_VERSIONS.public.v1,

@@ -13,6 +13,7 @@ import { ExperimentalFeaturesService } from '../../../../services';
 import type { Agent, AgentPolicy } from '../../../../types';
 import {
   AgentReassignAgentPolicyModal,
+  AgentRemoveCollectorModal,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
   HierarchicalActionsMenu,
@@ -96,6 +97,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   const [isAgentPrivilegeChangeModalOpen, setIsAgentPrivilegeChangeModalOpen] =
     useState<boolean>(false);
   const [isRollbackModalOpen, setIsRollbackModalOpen] = useState<boolean>(false);
+  const [isRemoveCollectorModalOpen, setIsRemoveCollectorModalOpen] = useState<boolean>(false);
 
   // update the query removing the "managed" agents in any state (unenrolled, offline, etc)
   const selectionQuery = useMemo(() => {
@@ -190,7 +192,26 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
       : false;
 
     if (hasOpAMPAgents) {
-      return [exportMenuItem];
+      const items: MenuItem[] = [exportMenuItem];
+      if (authz.fleet.allAgents) {
+        items.push({
+          id: 'remove-collectors',
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.agentBulkActions.removeCollectors"
+              defaultMessage="Remove {agentCount, plural, one {# collector} other {# collectors}}"
+              values={{ agentCount }}
+            />
+          ),
+          icon: 'trash',
+          iconColor: 'danger',
+          onClick: () => {
+            setIsRemoveCollectorModalOpen(true);
+          },
+          'data-test-subj': 'agentBulkActionsRemoveCollectors',
+        });
+      }
+      return items;
     }
 
     const items: MenuItem[] = [
@@ -412,6 +433,18 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
             onClose={() => {
               setIsUnenrollModalOpen(false);
               refreshAgents({ refreshTags: true });
+            }}
+          />
+        </EuiPortal>
+      )}
+      {isRemoveCollectorModalOpen && (
+        <EuiPortal>
+          <AgentRemoveCollectorModal
+            agents={agents}
+            agentCount={agentCount}
+            onClose={() => {
+              setIsRemoveCollectorModalOpen(false);
+              refreshAgents();
             }}
           />
         </EuiPortal>
