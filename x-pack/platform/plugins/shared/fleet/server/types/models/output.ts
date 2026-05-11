@@ -57,6 +57,24 @@ const secretRefSchema = schema.oneOf([
 ]);
 
 /**
+ * Shared sub-schemas (extracted to avoid type explosion when variants become named components)
+ */
+
+const OutputSslSchema = schema.object({
+  certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
+  certificate: schema.maybe(schema.string()),
+  key: schema.maybe(schema.string()),
+  verification_mode: schema.maybe(
+    schema.oneOf([
+      schema.literal(kafkaVerificationModes.Full),
+      schema.literal(kafkaVerificationModes.None),
+      schema.literal(kafkaVerificationModes.Certificate),
+      schema.literal(kafkaVerificationModes.Strict),
+    ])
+  ),
+});
+
+/**
  * Base schemas
  */
 
@@ -71,24 +89,8 @@ const BaseSchema = {
   ca_trusted_fingerprint: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   otel_exporter_config_yaml: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-  ssl: schema.maybe(
-    schema.oneOf([
-      schema.literal(null),
-      schema.object({
-        certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
-        certificate: schema.maybe(schema.string()),
-        key: schema.maybe(schema.string()),
-        verification_mode: schema.maybe(
-          schema.oneOf([
-            schema.literal(kafkaVerificationModes.Full),
-            schema.literal(kafkaVerificationModes.None),
-            schema.literal(kafkaVerificationModes.Certificate),
-            schema.literal(kafkaVerificationModes.Strict),
-          ])
-        ),
-      }),
-    ])
-  ),
+  otel_disable_beatsauth: schema.maybe(schema.oneOf([schema.literal(null), schema.boolean()])),
+  ssl: schema.maybe(schema.oneOf([schema.literal(null), OutputSslSchema])),
   proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   shipper: schema.maybe(
     schema.oneOf([

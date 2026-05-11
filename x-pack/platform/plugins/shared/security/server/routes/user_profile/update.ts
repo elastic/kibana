@@ -19,6 +19,7 @@ import { createLicensedRouteHandler } from '../licensed_route_handler';
 const ALLOWED_KEYS_UPDATE_CLOUD = [
   'userSettings.darkMode',
   'userSettings.contrastMode',
+  'userSettings.agentBuilderAnnouncementModalSeen',
   'userSettings.agentBuilderAnnouncementModalSeenBySpaceJson',
 ];
 
@@ -50,6 +51,7 @@ const userProfileUpdateSchema = schema.object({
       contrastMode: schema.maybe(
         schema.oneOf([schema.literal('system'), schema.literal('standard'), schema.literal('high')])
       ),
+      agentBuilderAnnouncementModalSeen: schema.maybe(schema.boolean()),
       agentBuilderAnnouncementModalSeenBySpaceJson: schema.maybe(
         schema.string({ maxLength: MAX_AGENT_BUILDER_ANNOUNCEMENT_SPACE_JSON_CHARS })
       ),

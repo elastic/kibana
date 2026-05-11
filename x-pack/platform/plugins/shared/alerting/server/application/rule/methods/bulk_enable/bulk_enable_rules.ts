@@ -7,6 +7,7 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
+import { omit } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type {
@@ -28,6 +29,7 @@ import {
   retryIfBulkOperationConflicts,
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
+  API_KEY_ATTRIBUTES_TO_STRIP,
 } from '../../../../rules_client/common';
 import type { SanitizedRule } from '../../../../../common';
 import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -237,15 +239,22 @@ const bulkEnableRulesWithOCC = async (
             }
 
             const nowIso = new Date().toISOString();
-            const updatedAttributes = updateMetaAttributes(context, {
-              ...rule.attributes,
-              ...(!rule.attributes.apiKey &&
-                (await createNewAPIKeySet(context, {
+            const newApiKeyAttributes = !rule.attributes.apiKey
+              ? await createNewAPIKeySet(context, {
                   id: rule.attributes.alertTypeId,
                   ruleName,
                   username,
                   shouldUpdateApiKey: true,
-                }))),
+                })
+              : undefined;
+
+            const updatedAttributes = updateMetaAttributes(context, {
+              ...(newApiKeyAttributes
+                ? {
+                    ...omit(rule.attributes, API_KEY_ATTRIBUTES_TO_STRIP),
+                    ...newApiKeyAttributes,
+                  }
+                : rule.attributes),
               enabled: true,
               updatedBy: username,
               updatedAt: nowIso,

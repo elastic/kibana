@@ -1,19 +1,17 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AccessAgreementPage renders as expected when state is available 1`] = `
-<ReactMarkdown
-  transformLinkUri={[Function]}
->
+<Markdown>
   <p
-    key="p-1-1-0"
+    key="p-0"
   >
     This is 
     <a
       href="../link"
-      key="a-1-9-1"
+      key="a-0"
     >
       link
     </a>
   </p>
-</ReactMarkdown>
+</Markdown>
 `;

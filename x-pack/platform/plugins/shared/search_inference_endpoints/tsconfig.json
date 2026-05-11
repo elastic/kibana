@@ -45,7 +45,8 @@
     "@kbn/core-security-server",
     "@kbn/inference-common",
     "@kbn/inference-plugin",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/search-api-panels"
   ],
   "exclude": [
     "target/**/*"

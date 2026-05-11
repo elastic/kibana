@@ -11,11 +11,11 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { once } from 'lodash';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { getRouteConfig } from '../get_route_config';
 import { getCreateRequestBodySchema, getCreateResponseBodySchema } from './schemas';
 import { create } from './create';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
-import { telemetryHandler } from '../telemetry_handler';
 import { writeErrorHandler } from '../write_error_handler';
 
 export function registerCreateRoute(
@@ -28,6 +28,7 @@ export function registerCreateRoute(
     path: basePath,
     summary: 'Create a dashboard',
     ...routeConfig,
+    description: 'Creates a new dashboard and returns its ID, full state, and metadata.',
   });
 
   // Do not call getDashboardStateSchema when registering route.

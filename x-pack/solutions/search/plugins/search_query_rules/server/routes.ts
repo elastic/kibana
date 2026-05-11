@@ -129,11 +129,12 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
                   schema.object({
                     type: schema.string(),
                     metadata: schema.maybe(schema.string()),
-                    values: schema.maybe(schema.arrayOf(schema.string())),
-                  })
+                    values: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+                  }),
+                  { maxSize: 100 }
                 ),
                 actions: schema.object({
-                  ids: schema.maybe(schema.arrayOf(schema.string())),
+                  ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
                   docs: schema.maybe(
                     schema.arrayOf(
                       schema.object({
@@ -144,7 +145,8 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
                     )
                   ),
                 }),
-              })
+              }),
+              { maxSize: 100 }
             ),
           })
         ),

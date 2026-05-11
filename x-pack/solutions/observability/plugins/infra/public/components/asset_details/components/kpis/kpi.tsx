@@ -6,7 +6,7 @@
  */
 import React, { useMemo } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfig } from '@kbn/lens-embeddable-utils';
 import { METRICS_TOOLTIP, KPI_CHART_HEIGHT } from '../../../../common/visualizations';
 import { LensChart, TooltipContent } from '../../../lens';
 

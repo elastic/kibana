@@ -9,11 +9,9 @@ import { useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { LensPublicStart, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { TimeRange } from '@kbn/es-query';
 import useAsync from 'react-use/lib/useAsync';
-
-const DEFAULT_TIME_RANGE: TimeRange = { from: 'now-24h', to: 'now' };
 
 interface Params {
   dataViews: DataViewsServicePublic;
@@ -33,9 +31,6 @@ export function useLensInput({ dataViews, lens, lensConfig, timeRange }: Params)
   const lensHelpersAsync = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
-
-  const resolvedTimeRange = timeRange ?? DEFAULT_TIME_RANGE;
-
   // convert lens config to lens attributes
   const lensResult = useMemo(() => {
     try {
@@ -50,7 +45,7 @@ export function useLensInput({ dataViews, lens, lensConfig, timeRange }: Params)
       ? {
           attributes: lensResult.attributes,
           id: uuidv4(),
-          timeRange: resolvedTimeRange,
+          timeRange,
         }
       : undefined
   );

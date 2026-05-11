@@ -59,7 +59,7 @@ export type RunChatAgentFn = (
 /*
  * Max number of agent cycles allowed before forcing an answer.
  */
-const CYCLE_LIMIT = 15;
+const CYCLE_LIMIT = 30;
 
 /**
  * Create the handler function for the default agentBuilder agent.
@@ -370,6 +370,6 @@ const createInitializerCommand = ({
 
 const getRecursionLimit = (cycleLimit: number): number => {
   // langchain's recursionLimit is basically the number of nodes we can traverse before hitting a recursion limit error
-  // we have two steps per cycle (agent node + tool call node), and then a few other steps (prepare + answering), and some extra buffer
-  return cycleLimit * 2 + 8;
+  // in practice we have three steps per cycle (agent node + tool call node + background work), and then a few other steps (prepare + answering), and some extra buffer
+  return Math.ceil(cycleLimit * 3.5 + 20);
 };

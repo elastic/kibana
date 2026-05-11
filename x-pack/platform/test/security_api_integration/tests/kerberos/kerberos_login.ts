@@ -598,5 +598,67 @@ export default function ({ getService }: FtrProviderContext) {
       expect(minimalResponse.body.principal).to.not.have.property('authentication_realm');
       expect(defaultResponse.body).to.have.property('authentication_realm');
     });
+
+    it('should support minimal authentication even when access token is expired', async function () {
+      this.timeout(60000);
+
+      const response = await supertest
+        .get('/security/account')
+        .set('Authorization', `Negotiate ${spnegoToken}`)
+        .expect(200);
+
+      const sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
+      checkCookieIsSet(sessionCookie);
+
+      // Access token expiration is set to 15s for API integration tests.
+      // Let's wait for 20s to make sure token expires.
+      await setTimeoutAsync(20000);
+
+      // Access the minimal auth endpoint with the session cookie. The minimal route relies on
+      // Elasticsearch for credentials validation (e.g., via `_has_privileges` call), so the
+      // expired access token must be transparently refreshed via the re-authentication flow.
+      const minimalResponse = await supertest
+        .get('/authentication/fast/me')
+        .set('Cookie', sessionCookie.cookieString())
+        .expect(200);
+
+      expect(minimalResponse.body.principal.username).to.eql('tester@TEST.ELASTIC.CO');
+      expect(minimalResponse.body.principal.authentication_provider).to.eql({
+        type: 'kerberos',
+        name: 'kerberos',
+      });
+    });
+
+    it('should support minimal authentication with `kbn-auth-full` header forcing full authentication', async () => {
+      const response = await supertest
+        .get('/security/account')
+        .set('Authorization', `Negotiate ${spnegoToken}`)
+        .expect(200);
+
+      const sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
+      checkCookieIsSet(sessionCookie);
+
+      // Access the minimal auth endpoint with the `kbn-auth-full` header set to `true` to force
+      // full authentication even on a route that otherwise supports the minimal authentication mode.
+      const fullAuthResponse = await supertest
+        .get('/authentication/fast/me')
+        .set('Cookie', sessionCookie.cookieString())
+        .set('kbn-auth-full', 'true')
+        .expect(200);
+
+      expect(fullAuthResponse.body.principal.username).to.eql('tester@TEST.ELASTIC.CO');
+      expect(fullAuthResponse.body.principal.authentication_provider).to.eql({
+        type: 'kerberos',
+        name: 'kerberos',
+      });
+
+      // When `kbn-auth-full` header is set, Kibana calls ES `_authenticate` API, so full user
+      // information (including `authentication_realm`) should be available.
+      expect(fullAuthResponse.body.principal).to.have.property('authentication_realm');
+      expect(fullAuthResponse.body.principal.authentication_realm).to.eql({
+        name: 'kerb1',
+        type: 'kerberos',
+      });
+    });
   });
 }

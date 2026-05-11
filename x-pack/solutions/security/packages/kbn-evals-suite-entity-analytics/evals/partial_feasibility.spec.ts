@@ -151,9 +151,9 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
-                      `The response uses security.ml.jobs and at least one of: ${[
+                      `The response uses find.security.ml.jobs and at least one of: ${[
                         ...padJobIds,
                         ...lmdJobIds,
                       ]
@@ -176,9 +176,9 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.ml.jobs',
+                    id: 'find.security.ml.jobs',
                     criteria: [
-                      `The response uses security.ml.jobs with PAD or privileged-access job IDs (e.g. ${padJobIds
+                      `The response uses find.security.ml.jobs with PAD or privileged-access job IDs (e.g. ${padJobIds
                         .slice(0, 2)
                         .join(', ')}), or explains that ML jobs are required.`,
                     ],

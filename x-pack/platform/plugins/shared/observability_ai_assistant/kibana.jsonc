@@ -27,7 +27,7 @@
       "usageCollection",
       "agentBuilder"
     ],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "aiAssistantManagementSelection"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "runtimePluginDependencies": ["ml"],
     "extraPublicDirs": []
   }

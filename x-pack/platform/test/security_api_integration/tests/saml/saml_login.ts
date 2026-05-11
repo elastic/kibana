@@ -1017,5 +1017,67 @@ export default function ({ getService }: FtrProviderContext) {
       expect(minimalResponse.body.principal).to.not.have.property('authentication_realm');
       expect(defaultResponse.body).to.have.property('authentication_realm');
     });
+
+    it('should support minimal authentication even when access token is expired', async function () {
+      this.timeout(60000);
+
+      // Authenticate via IdP initiated SAML login.
+      const samlAuthenticationResponse = await supertest
+        .post('/api/security/saml/callback')
+        .send({ SAMLResponse: await createSAMLResponse() })
+        .expect(302);
+
+      const sessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
+
+      // Access token expiration is set to 15s for API integration tests.
+      // Let's wait for 20s to make sure token expires.
+      await setTimeoutAsync(20000);
+
+      // Access the minimal auth endpoint with the session cookie. The minimal route relies on
+      // Elasticsearch for credentials validation (e.g., via `_has_privileges` call), so the
+      // expired access token must be transparently refreshed via the re-authentication flow.
+      const minimalResponse = await supertest
+        .get('/authentication/fast/me')
+        .set('Cookie', sessionCookie.cookieString())
+        .expect(200);
+
+      expect(minimalResponse.body.principal.username).to.eql('a@b.c');
+      expect(minimalResponse.body.principal.authentication_provider).to.eql({
+        type: 'saml',
+        name: 'saml',
+      });
+    });
+
+    it('should support minimal authentication with `kbn-auth-full` header forcing full authentication', async () => {
+      // Authenticate via IdP initiated SAML login.
+      const samlAuthenticationResponse = await supertest
+        .post('/api/security/saml/callback')
+        .send({ SAMLResponse: await createSAMLResponse() })
+        .expect(302);
+
+      const sessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
+
+      // Access the minimal auth endpoint with the `kbn-auth-full` header set to `true` to force
+      // full authentication even on a route that otherwise supports the minimal authentication mode.
+      const fullAuthResponse = await supertest
+        .get('/authentication/fast/me')
+        .set('Cookie', sessionCookie.cookieString())
+        .set('kbn-auth-full', 'true')
+        .expect(200);
+
+      expect(fullAuthResponse.body.principal.username).to.eql('a@b.c');
+      expect(fullAuthResponse.body.principal.authentication_provider).to.eql({
+        type: 'saml',
+        name: 'saml',
+      });
+
+      // When `kbn-auth-full` header is set, Kibana calls ES `_authenticate` API, so full user
+      // information (including `authentication_realm`) should be available.
+      expect(fullAuthResponse.body.principal).to.have.property('authentication_realm');
+      expect(fullAuthResponse.body.principal.authentication_realm).to.eql({
+        name: 'saml1',
+        type: 'saml',
+      });
+    });
   });
 }

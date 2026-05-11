@@ -26,7 +26,7 @@ export interface SpanFlyoutContentProps {
 }
 
 export function SpanFlyoutContent({ hit, dataView, activeSection }: SpanFlyoutContentProps) {
-  const { indexes } = useDataSourcesContext();
+  const { indexes, profileId } = useDataSourcesContext();
   const [flyoutRef, setFlyoutRef] = useState<OverviewApi | null>(null);
   const actions = useDocViewerExtensionActionsContext();
 
@@ -42,6 +42,7 @@ export function SpanFlyoutContent({ hit, dataView, activeSection }: SpanFlyoutCo
       docViewActions={actions}
       hit={hit}
       indexes={indexes}
+      profileId={profileId}
       showWaterfall={false}
       showActions={false}
       dataView={dataView}

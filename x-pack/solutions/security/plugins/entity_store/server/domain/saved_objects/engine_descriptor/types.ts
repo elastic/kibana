@@ -218,11 +218,62 @@ const version4: SavedObjectsFullModelVersion = {
   },
 };
 
+const logExtractionRuntimeStateSchemaV5 = schema.object({
+  paginationTimestamp: schema.nullable(schema.string()),
+  paginationId: schema.nullable(schema.string()),
+  lastExecutionTimestamp: schema.nullable(schema.string()),
+  logsPageCursorStartTimestamp: schema.nullable(schema.string()),
+  logsPageCursorStartId: schema.nullable(schema.string()),
+  logsPageCursorEndTimestamp: schema.nullable(schema.string()),
+  logsPageCursorEndId: schema.nullable(schema.string()),
+});
+
+const engineDescriptorSchemaV5 = schema.object({
+  ...engineDescriptorAttributesSchemaV1,
+  logExtractionState: logExtractionRuntimeStateSchemaV5,
+  error: schema.nullable(
+    schema.object({
+      message: schema.string(),
+      action: schema.string(),
+    })
+  ),
+});
+
+const version5: SavedObjectsFullModelVersion = {
+  changes: [
+    {
+      type: 'data_backfill' as const,
+      backfillFn: (document) => {
+        const { logExtractionState, error } = document.attributes;
+        return {
+          attributes: {
+            logExtractionState: {
+              paginationTimestamp: logExtractionState?.paginationTimestamp ?? null,
+              paginationId: logExtractionState?.paginationId ?? null,
+              lastExecutionTimestamp: logExtractionState?.lastExecutionTimestamp ?? null,
+              logsPageCursorStartTimestamp:
+                logExtractionState?.logsPageCursorStartTimestamp ?? null,
+              logsPageCursorStartId: logExtractionState?.logsPageCursorStartId ?? null,
+              logsPageCursorEndTimestamp: logExtractionState?.logsPageCursorEndTimestamp ?? null,
+              logsPageCursorEndId: logExtractionState?.logsPageCursorEndId ?? null,
+            },
+            error: error ?? null,
+          },
+        };
+      },
+    },
+  ],
+  schemas: {
+    create: engineDescriptorSchemaV5,
+    forwardCompatibility: engineDescriptorSchemaV5.extends({}, { unknowns: 'ignore' }),
+  },
+};
+
 export const EngineDescriptorType: SavedObjectsType = {
   name: EngineDescriptorTypeName,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: EngineDescriptorTypeMappings,
-  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4 },
+  modelVersions: { 1: version1, 2: version2, 3: version3, 4: version4, 5: version5 },
   hiddenFromHttpApis: true,
 };

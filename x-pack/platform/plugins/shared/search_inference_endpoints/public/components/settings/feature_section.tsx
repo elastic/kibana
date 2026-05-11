@@ -18,13 +18,14 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import * as translations from '../../../common/translations';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
 import { SubFeatureCard } from './sub_feature_card';
 
 interface FeatureSettingItem {
   endpointIds: string[];
   feature: InferenceFeatureConfig;
+  hasSavedObject: boolean;
+  isFeatureDirty: boolean;
 }
 
 interface FeatureSectionProps {
@@ -36,6 +37,7 @@ interface FeatureSectionProps {
   invalidEndpointIds: Set<string>;
   isTechPreview?: boolean;
   isBeta?: boolean;
+  globalDefaultId: string;
 }
 
 export const FeatureSection: React.FC<FeatureSectionProps> = ({
@@ -47,6 +49,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
   invalidEndpointIds,
   isTechPreview = false,
   isBeta = false,
+  globalDefaultId,
 }) => {
   return (
     <EuiFlexGroup gutterSize="m" direction="column">
@@ -91,7 +94,9 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
         {features.length > 0 && (
           <EuiFlexItem grow={false}>
             <EuiLink onClick={onReset} data-test-subj={`reset-${parentName}`}>
-              {translations.SETTINGS_RESET_DEFAULTS}
+              {i18n.translate('xpack.searchInferenceEndpoints.settings.resetDefaults', {
+                defaultMessage: 'Reset all to defaults',
+              })}
             </EuiLink>
           </EuiFlexItem>
         )}
@@ -108,7 +113,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
           </EuiText>
         ) : (
           <EuiFlexGroup direction="column" gutterSize="xl">
-            {features.map(({ endpointIds, feature }) => (
+            {features.map(({ endpointIds, feature, hasSavedObject, isFeatureDirty }) => (
               <EuiFlexItem key={feature.featureId} grow={false}>
                 <SubFeatureCard
                   featureId={feature.featureId}
@@ -116,6 +121,9 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
                   endpointIds={endpointIds}
                   onEndpointsChange={onEndpointsChange}
                   invalidEndpointIds={invalidEndpointIds}
+                  globalDefaultId={globalDefaultId}
+                  hasSavedObject={hasSavedObject}
+                  isFeatureDirty={isFeatureDirty}
                 />
               </EuiFlexItem>
             ))}

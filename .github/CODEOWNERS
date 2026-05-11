@@ -348,6 +348,9 @@ src/core/packages/user-settings/server-mocks @elastic/kibana-security
 src/core/test-helpers/kbn-server @elastic/kibana-core
 src/core/test-helpers/model-versions @elastic/kibana-core
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
+src/platform/packages/private/dashboard/dashboard-navigation-options-common @elastic/kibana-presentation
+src/platform/packages/private/dashboard/dashboard-navigation-options-components @elastic/kibana-presentation
+src/platform/packages/private/dashboard/dashboard-navigation-options-schema @elastic/kibana-presentation
 src/platform/packages/private/kbn-ambient-common-types @elastic/kibana-operations
 src/platform/packages/private/kbn-ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/private/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
@@ -425,6 +428,7 @@ src/platform/packages/shared/as-code/filters-constants @elastic/kibana-presentat
 src/platform/packages/shared/as-code/filters-schema @elastic/kibana-presentation
 src/platform/packages/shared/as-code/filters-transforms @elastic/kibana-presentation
 src/platform/packages/shared/as-code/shared-schemas @elastic/kibana-presentation
+src/platform/packages/shared/as-code/shared-telemetry @elastic/kibana-presentation
 src/platform/packages/shared/as-code/shared-transforms @elastic/kibana-presentation
 src/platform/packages/shared/chart-expressions-common @elastic/kibana-visualizations
 src/platform/packages/shared/chart-test-jest-helpers @elastic/kibana-visualizations
@@ -502,6 +506,7 @@ src/platform/packages/shared/kbn-cleanup-before-exit @elastic/observability-ui
 src/platform/packages/shared/kbn-coloring @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-config @elastic/kibana-core
 src/platform/packages/shared/kbn-config-schema @elastic/kibana-core
+src/platform/packages/shared/kbn-connector-cli @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-schemas @elastic/response-ops
 src/platform/packages/shared/kbn-connector-specs @elastic/response-ops
 src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-discovery
@@ -967,7 +972,6 @@ x-pack/platform/packages/shared/agent-builder/agent-builder-common @elastic/work
 x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/agent-builder-server @elastic/workchat-eng
 x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder @elastic/workchat-eng
-x-pack/platform/packages/shared/ai-assistant/ai-agent-confirmation-modal @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/ai-assistant-cta @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
@@ -1179,7 +1183,6 @@ x-pack/platform/test/alerting_api_integration/common/plugins/alerts @elastic/res
 x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/packages/helpers @elastic/response-ops
-x-pack/platform/test/api_integration_deployment_agnostic/plugins/alerting_v2_fixture @elastic/response-ops
 x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/core-analysis
 x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/kibana-cases
 x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/kibana-cases
@@ -1339,6 +1342,8 @@ x-pack/solutions/workplaceai/test @elastic/workchat-eng
 
 packages/kbn-generate/src/commands/user_activity_actions_docs_command.ts @elastic/kibana-core
 
+src/platform/plugins/private/ftr_apis/server/routes/task_manager @elastic/response-ops
+
 /x-pack/solutions/observability/test/api_integration/apis/metrics_ui @elastic/obs-presentation-team
 x-pack/platform/test/serverless/api_integration/test_suites/platform_security @elastic/kibana-security
 /src/platform/test/functional/apps/management @elastic/kibana-management
@@ -1476,8 +1481,6 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /x-pack/platform/test/functional/page_objects/lens_page.ts @elastic/kibana-visualizations
 /x-pack/platform/test/fixtures/es_archives/lens @elastic/kibana-visualizations
 /x-pack/platform/test/examples/embedded_lens @elastic/kibana-visualizations
-/x-pack/platform/test/api_integration/fixtures/kbn_archives/lens/ @elastic/kibana-visualizations
-/x-pack/platform/test/api_integration/apis/lens @elastic/kibana-visualizations
 /src/platform/test/plugin_functional/test_suites/custom_visualizations @elastic/kibana-visualizations
 /src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-visualizations
 /x-pack/platform/test/functional/fixtures/kbn_archives/visualize @elastic/kibana-visualizations
@@ -1491,7 +1494,6 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /x-pack/platform/test/accessibility/apps/group2/lens.ts @elastic/kibana-visualizations
 /x-pack/platform/test/functional/apps/visualize @elastic/kibana-visualizations
 /x-pack/platform/test/functional/apps/lens @elastic/kibana-visualizations
-/x-pack/platform/test/api_integration/apis/lens/ @elastic/kibana-visualizations
 /src/platform/test/functional/apps/visualize/ @elastic/kibana-visualizations
 /x-pack/platform/test/functional/apps/graph @elastic/kibana-visualizations
 /src/platform/test/api_integration/apis/event_annotations @elastic/kibana-visualizations
@@ -1929,7 +1931,6 @@ x-pack/platform/plugins/shared/streams/server/routes/internal/sig_events @elasti
 /x-pack/platform/test/functional/page_objects/geo_file_upload.ts @elastic/kibana-presentation
 /x-pack/platform/test/functional/page_objects/gis_page.ts @elastic/kibana-presentation
 /x-pack/platform/test/upgrade/apps/maps @elastic/kibana-presentation
-/x-pack/platform/test/api_integration/apis/maps/ @elastic/kibana-presentation
 /x-pack/platform/test/functional/apps/maps/ @elastic/kibana-presentation
 /x-pack/platform/test/fixtures/es_archives/maps/ @elastic/kibana-presentation
 /x-pack/platform/plugins/shared/stack_alerts/server/rule_types/geo_containment @elastic/kibana-presentation
@@ -1996,7 +1997,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/roles.yml @elastic/appex-qa
 /src/platform/packages/shared/kbn-es/src/serverless_resources/project_roles/security/search_ai_lake/roles.yml @elastic/appex-qa
 /x-pack/platform/test/common/ftr_provider_context.ts @elastic/appex-qa
-/x-pack/platform/plugins/shared/maps/test/scout @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/test/scout/ @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
 /x-pack/platform/plugins/private/painless_lab/test/scout @elastic/appex-qa # temporarily
@@ -2674,6 +2674,17 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/sou
 
 /x-pack/solutions/security/packages/test-api-clients/supertest/detections.gen.ts @elastic/security-detection-engine @elastic/security-detection-rule-management
 
+# Security Solution initialization
+/x-pack/solutions/security/plugins/security_solution/common/api/initialization @elastic/security-detection-engine @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/public/common/components/initialization @elastic/security-detection-engine @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization @elastic/security-detection-engine @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/create_list_indices @elastic/security-detection-engine
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/initialize_security_data_views @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/init_prebuilt_rules @elastic/security-detection-rule-management
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/init_endpoint_protection @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/init_ai_prompts @elastic/security-generative-ai
+/x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/init_detection_rule_monitoring @elastic/security-detection-rule-management
+
 # Security Solution sub teams
 
 ## Security Solution sub teams - security-engineering-productivity
@@ -3173,7 +3184,6 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 /x-pack/platform/test/functional/services/pipeline_* @elastic/logstash
 /x-pack/platform/test/functional/page_objects/logstash_page.ts @elastic/logstash
 /x-pack/platform/test/functional/apps/logstash @elastic/logstash
-/x-pack/platform/test/api_integration/apis/logstash @elastic/logstash
 #CC# /x-pack/platform/plugins/private/logstash/ @elastic/logstash
 
 # EUI team

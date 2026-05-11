@@ -19,6 +19,7 @@ import {
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { Field, HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { i18n } from '@kbn/i18n';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { toSlugIdentifier, isValidSlugIdentifier } from '@kbn/std';
 import { useKibana } from '../../../common/lib/kibana';
 import { checkConnectorIdAvailability } from '../../lib/action_connector_api';
@@ -42,6 +43,29 @@ const CONNECTOR_ID_EXISTS_ERROR = i18n.translate(
   }
 );
 
+const CONNECTOR_ID_NETWORK_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.sections.actionConnectorForm.error.connectorIdNetworkError',
+  {
+    defaultMessage:
+      'Unable to verify connector ID availability due to network connectivity issues.',
+  }
+);
+
+const CONNECTOR_ID_SERVER_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.sections.actionConnectorForm.error.connectorIdServerError',
+  {
+    defaultMessage:
+      'Unable to verify connector ID availability. The server is temporarily unavailable.',
+  }
+);
+
+const CONNECTOR_ID_AUTH_ERROR = i18n.translate(
+  'xpack.triggersActionsUI.sections.actionConnectorForm.error.connectorIdAuthError',
+  {
+    defaultMessage: 'Unable to verify connector ID availability. User is not authenticated.',
+  }
+);
+
 const CONNECTOR_ID_CHECK_FAILED_ERROR = i18n.translate(
   'xpack.triggersActionsUI.sections.actionConnectorForm.error.connectorIdCheckFailed',
   {
@@ -50,6 +74,23 @@ const CONNECTOR_ID_CHECK_FAILED_ERROR = i18n.translate(
 );
 
 const CONNECTOR_ID_MAX_LENGTH = 36;
+
+const getAvailabilityCheckErrorMessage = (error: unknown): string => {
+  if (isHttpFetchError(error)) {
+    const status = error.response?.status;
+    if (!status) {
+      return CONNECTOR_ID_NETWORK_ERROR;
+    }
+    if (status === 401 || status === 403) {
+      return CONNECTOR_ID_AUTH_ERROR;
+    }
+    if (status >= 500) {
+      return CONNECTOR_ID_SERVER_ERROR;
+    }
+  }
+
+  return CONNECTOR_ID_CHECK_FAILED_ERROR;
+};
 
 const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
   label: i18n.translate('xpack.triggersActionsUI.sections.actionConnectorForm.nameFieldLabel', {
@@ -132,8 +173,8 @@ const createIdConfig = (
             try {
               const { isAvailable } = await checkConnectorIdAvailability({ http, id: value });
               resolve(isAvailable ? undefined : { message: CONNECTOR_ID_EXISTS_ERROR });
-            } catch {
-              resolve({ message: CONNECTOR_ID_CHECK_FAILED_ERROR });
+            } catch (error) {
+              resolve({ message: getAvailabilityCheckErrorMessage(error) });
             }
           }, 500);
 

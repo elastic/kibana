@@ -38,7 +38,7 @@ import { isObject } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
-import { isLensAPIFormat } from '@kbn/lens-embeddable-utils/config_builder/utils';
+import { isLensAPIFormat } from '@kbn/lens-embeddable-utils';
 
 import type { StrippedLensState } from '../../common/transforms/helpers';
 import { isFlattenedAPIConfig, unflattenAPIConfig } from '../../common/transforms/utils';

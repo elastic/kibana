@@ -503,7 +503,7 @@ export const getEndpointConsoleCommands = ({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const runscriptCommand = consoleCommands.find((command) => command.name === 'runscript')!;
 
-    runscriptCommand.helpDisabled = false;
+    runscriptCommand.helpDisabled = !doesEndpointSupportCommand('runscript');
     runscriptCommand.mustHaveArgs = true;
     runscriptCommand.exampleUsage = (
       enteredCommand?: Command<
@@ -785,7 +785,9 @@ export const getEndpointConsoleCommands = ({
       mustHaveArgs: true,
       args: {
         process: {
-          about: CONSOLE_COMMANDS.memoryDump.processArgAbout,
+          about:
+            CONSOLE_COMMANDS.memoryDump.processArgAbout +
+            (endpointSupportsProcessDump ? '' : ` ${CONSOLE_COMMANDS.memoryDump.argNotSupported}`),
           required: false,
           allowMultiples: false,
           mustHaveValue: false,
@@ -799,7 +801,9 @@ export const getEndpointConsoleCommands = ({
           },
         },
         kernel: {
-          about: CONSOLE_COMMANDS.memoryDump.kernelArgAbout,
+          about:
+            CONSOLE_COMMANDS.memoryDump.kernelArgAbout +
+            (endpointSupportsKernelDump ? '' : ` ${CONSOLE_COMMANDS.memoryDump.argNotSupported}`),
           required: false,
           allowMultiples: false,
           mustHaveValue: false,

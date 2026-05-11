@@ -14,35 +14,41 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const AlertsSortCombinations = lazySchema(() =>
+  z.union([z.string(), z.object({}).catchall(z.unknown())])
+);
 export type AlertsSortCombinations = z.infer<typeof AlertsSortCombinations>;
-export const AlertsSortCombinations = z.union([z.string(), z.object({}).catchall(z.unknown())]);
 
+export const AlertsSort = lazySchema(() =>
+  z.union([AlertsSortCombinations, z.array(AlertsSortCombinations)])
+);
 export type AlertsSort = z.infer<typeof AlertsSort>;
-export const AlertsSort = z.union([AlertsSortCombinations, z.array(AlertsSortCombinations)]);
 
+export const QueryAlertsBodyParams = lazySchema(() =>
+  z.object({
+    query: z.object({}).catchall(z.unknown()).optional(),
+    aggs: z.object({}).catchall(z.unknown()).optional(),
+    size: z.number().int().min(0).optional(),
+    track_total_hits: z.boolean().optional(),
+    _source: z.union([z.boolean(), z.string(), z.array(z.string())]).optional(),
+    fields: z.array(z.string()).optional(),
+    runtime_mappings: z.object({}).catchall(z.unknown()).optional(),
+    sort: AlertsSort.optional(),
+  })
+);
 export type QueryAlertsBodyParams = z.infer<typeof QueryAlertsBodyParams>;
-export const QueryAlertsBodyParams = z.object({
-  query: z.object({}).catchall(z.unknown()).optional(),
-  aggs: z.object({}).catchall(z.unknown()).optional(),
-  size: z.number().int().min(0).optional(),
-  track_total_hits: z.boolean().optional(),
-  _source: z.union([z.boolean(), z.string(), z.array(z.string())]).optional(),
-  fields: z.array(z.string()).optional(),
-  runtime_mappings: z.object({}).catchall(z.unknown()).optional(),
-  sort: AlertsSort.optional(),
-});
 
 /**
  * Elasticsearch query and aggregation request
  */
+export const SearchAlertsRequestBody = lazySchema(() => QueryAlertsBodyParams);
 export type SearchAlertsRequestBody = z.infer<typeof SearchAlertsRequestBody>;
-export const SearchAlertsRequestBody = QueryAlertsBodyParams;
 export type SearchAlertsRequestBodyInput = z.input<typeof SearchAlertsRequestBody>;
 
 /**
  * Elasticsearch search response
  */
+export const SearchAlertsResponse = lazySchema(() => z.object({}).catchall(z.unknown()));
 export type SearchAlertsResponse = z.infer<typeof SearchAlertsResponse>;
-export const SearchAlertsResponse = z.object({}).catchall(z.unknown());

@@ -47,6 +47,7 @@ describe('getEsqlFn', () => {
       inspectorAdapters: {},
       getKibanaRequest: jest.fn(),
       getSearchSessionId: jest.fn(),
+      getExecutionContext: jest.fn(),
     } as unknown as ExecutionContext;
 
     const result = await esqlFn.fn(input, args, context).toPromise();

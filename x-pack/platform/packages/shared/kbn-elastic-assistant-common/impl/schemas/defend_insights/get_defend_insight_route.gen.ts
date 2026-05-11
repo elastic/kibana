@@ -14,21 +14,25 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { NonEmptyString } from '../common_attributes.gen';
 import { DefendInsightsResponse } from './common_attributes.gen';
 
+export const DefendInsightGetRequestParams = lazySchema(() =>
+  z.object({
+    /**
+     * The Defend insight id
+     */
+    id: NonEmptyString,
+  })
+);
 export type DefendInsightGetRequestParams = z.infer<typeof DefendInsightGetRequestParams>;
-export const DefendInsightGetRequestParams = z.object({
-  /**
-   * The Defend insight id
-   */
-  id: NonEmptyString,
-});
 export type DefendInsightGetRequestParamsInput = z.input<typeof DefendInsightGetRequestParams>;
 
+export const DefendInsightGetResponse = lazySchema(() =>
+  z.object({
+    data: DefendInsightsResponse.nullable().optional(),
+  })
+);
 export type DefendInsightGetResponse = z.infer<typeof DefendInsightGetResponse>;
-export const DefendInsightGetResponse = z.object({
-  data: DefendInsightsResponse.nullable().optional(),
-});

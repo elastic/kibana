@@ -47,6 +47,17 @@ describe('escapeAndPreserveHighlightTags', () => {
       `${ES_PRE}test${ES_POST}`
     );
   });
+
+  it('preserves ffArray__highlight spans for array-valued fields', () => {
+    const SPAN = '<span class="ffArray__highlight">';
+    const CLOSE = '</span>';
+    const input = `${SPAN}[${CLOSE}elastic-agent-service${SPAN},${CLOSE} filebeat${SPAN}]${CLOSE}`;
+    expect(escapeAndPreserveHighlightTags(input)).toBe(input);
+  });
+
+  it('escapes orphaned </span> that has no matching ffArray__highlight opening tag', () => {
+    expect(escapeAndPreserveHighlightTags('foo</span>bar')).toBe('foo&lt;/span&gt;bar');
+  });
 });
 
 describe('getHighlightedFieldValue', () => {

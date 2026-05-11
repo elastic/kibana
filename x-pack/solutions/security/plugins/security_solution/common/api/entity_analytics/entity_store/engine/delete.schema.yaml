@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
   title: Delete an Entity Engine
-  version: '2023-10-31'
+  version: '1'
 paths:
-  /api/entity_store/engines:
+  /internal/entity_store/engines:
     delete:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
@@ -42,17 +42,19 @@ paths:
                     still_running: ['generic', 'user', 'service']
               schema:
                 type: object
-                properties:      
+                properties:
                   deleted:
                     type: array
+                    description: Entity types whose engines were successfully deleted.
                     items:
                       $ref: '../common.schema.yaml#/components/schemas/EntityType'
                   still_running:
                     type: array
+                    description: Entity types whose engines are still running.
                     items:
                       $ref: '../common.schema.yaml#/components/schemas/EntityType'
 
-  /api/entity_store/engines/{entityType}:
+  /internal/entity_store/engines/{entityType}:
     delete:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
@@ -93,7 +95,8 @@ paths:
                     deleted: true
               schema:
                 type: object
-                properties:      
+                properties:
                   deleted:
                     type: boolean
+                    description: Whether the engine was successfully deleted.
                  

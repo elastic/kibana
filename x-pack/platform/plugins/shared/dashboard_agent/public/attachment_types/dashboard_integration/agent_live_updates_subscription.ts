@@ -9,12 +9,14 @@ import { filter, type Subscription } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
 import { ATTACHMENT_REF_OPERATION, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { DashboardAttachment } from '@kbn/dashboard-agent-common';
 import { attachmentDataToDashboardState, isDashboardAttachment } from '@kbn/dashboard-agent-common';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 
 export interface AgentLiveUpdatesSubscriptionParams {
   agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
+  setAttachments: (attachments: DashboardAttachment[]) => void;
 }
 
 /**
@@ -24,26 +26,39 @@ export interface AgentLiveUpdatesSubscriptionParams {
 export const createAgentLiveUpdatesSubscription = ({
   agentBuilder,
   api,
+  setAttachments,
 }: AgentLiveUpdatesSubscriptionParams): Subscription =>
   agentBuilder.events.chat$.pipe(filter(isRoundCompleteEvent)).subscribe((event) => {
-    const incomingAttachments = event.data.attachments
-      ?.filter(isDashboardAttachment)
-      .filter((attachment) => {
-        return (
-          event.data.round.input.attachment_refs?.some(
-            (ref) =>
-              ref.attachment_id === attachment.id &&
-              (ref.operation === ATTACHMENT_REF_OPERATION.updated ||
-                ref.operation === ATTACHMENT_REF_OPERATION.created)
-          ) === true
-        );
-      });
+    const dashboardAttachments = event.data.attachments?.filter(isDashboardAttachment) ?? [];
+    const incomingAttachments = dashboardAttachments.filter((attachment) => {
+      return (
+        event.data.round.input.attachment_refs?.some(
+          (ref) =>
+            ref.attachment_id === attachment.id &&
+            (ref.operation === ATTACHMENT_REF_OPERATION.updated ||
+              ref.operation === ATTACHMENT_REF_OPERATION.created)
+        ) === true
+      );
+    });
 
-    if (!incomingAttachments) {
-      return;
-    }
-    // TODO: handle multiple attachments in the future
-    const incomingAttachment = incomingAttachments.at(0);
+    setAttachments(
+      dashboardAttachments
+        .map((attachment): DashboardAttachment | undefined => {
+          const latestVersionData = getLatestVersion(attachment)?.data;
+          return latestVersionData
+            ? {
+                id: attachment.id,
+                type: attachment.type,
+                data: latestVersionData,
+                origin: attachment.origin,
+              }
+            : undefined;
+        })
+        .filter((attachment): attachment is DashboardAttachment => attachment !== undefined)
+    );
+
+    // TODO: we're assuming only one attachment is coming in at a time
+    const incomingAttachment = incomingAttachments?.at(0);
     if (!incomingAttachment) {
       return;
     }

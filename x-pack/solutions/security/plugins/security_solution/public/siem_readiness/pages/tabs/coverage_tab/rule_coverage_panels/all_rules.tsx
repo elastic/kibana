@@ -188,6 +188,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
               options={enabledIntegrationsOptions}
               statusMap={enabledIntegrationsStatusMap}
               disabled={enabledIntegrationsOptions.length === 0}
+              telemetrySource="all_rules_enabled"
             />
           );
         } else {
@@ -196,6 +197,7 @@ export const AllRuleCoveragePanel: React.FC = () => {
               options={missingOrDisabledIntegrationsOptions}
               statusMap={missingOrDisabledStatusMap}
               disabled={missingOrDisabledIntegrationsOptions.length === 0}
+              telemetrySource="all_rules_missing"
             />
           );
         }
@@ -287,12 +289,11 @@ export const AllRuleCoveragePanel: React.FC = () => {
                     {
                       groupByRollup: (d: (typeof DONUT_CHART_DATA)[0]) => d.status,
                       shape: {
-                        fillColor: (key, sortIndex) => {
-                          const colors = [
-                            euiTheme.colors.vis.euiColorVis0,
-                            euiTheme.colors.vis.euiColorVis6,
-                          ];
-                          return colors[sortIndex % colors.length];
+                        fillColor: (key) => {
+                          if (key === 'Rules with enabled integrations') {
+                            return euiTheme.colors.vis.euiColorVis0; // Always green for enabled
+                          }
+                          return euiTheme.colors.vis.euiColorVis6; // Always orange for missing/disabled
                         },
                       },
                     },

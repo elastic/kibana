@@ -174,4 +174,72 @@ steps:
       key: 'message',
     });
   });
+
+  it('should use empty context.values when selection has no dependsOnValues', () => {
+    const yaml = `
+name: test-workflow
+steps:
+  - name: run-agent
+    type: run-agent
+    extra: x
+`;
+    const { workflowLookup, yamlLineCounter } = performComputation(yaml.trim());
+    const selectionHandler = {
+      search: jest.fn(),
+      resolve: jest.fn(),
+      getDetails: jest.fn(),
+    };
+    const getPropertyHandler = jest.fn(
+      (stepType: string, scope: 'config' | 'input', key: string) => {
+        if (stepType === 'run-agent' && scope === 'config' && key === 'extra') {
+          return { selection: selectionHandler };
+        }
+        return null;
+      }
+    );
+    const customPropertyItems = collectAllCustomPropertyItems(
+      workflowLookup!,
+      yamlLineCounter!,
+      getPropertyHandler
+    );
+    expect(customPropertyItems[0].context.values).toEqual({ config: {}, input: {} });
+  });
+
+  it('should pass filtered context.values when dependsOnValues is set', () => {
+    const yaml = `
+name: test-workflow
+steps:
+  - name: run-agent
+    type: run-agent
+    proxy:
+      id: p1
+      ssl: true
+    other: ignored
+`;
+    const { workflowLookup, yamlLineCounter } = performComputation(yaml.trim());
+    const selectionHandler = {
+      dependsOnValues: ['config.proxy.ssl', 'config.other'] as any,
+      search: jest.fn(),
+      resolve: jest.fn(),
+      getDetails: jest.fn(),
+    };
+    const getPropertyHandler = jest.fn(
+      (stepType: string, scope: 'config' | 'input', key: string) => {
+        if (stepType === 'run-agent' && scope === 'config' && key === 'proxy.id') {
+          return { selection: selectionHandler };
+        }
+        return null;
+      }
+    );
+    const customPropertyItems = collectAllCustomPropertyItems(
+      workflowLookup!,
+      yamlLineCounter!,
+      getPropertyHandler
+    );
+    expect(customPropertyItems).toHaveLength(1);
+    expect(customPropertyItems[0].context.values).toEqual({
+      config: { other: 'ignored', proxy: { ssl: true } },
+      input: {},
+    });
+  });
 });

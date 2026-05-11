@@ -75,6 +75,11 @@ const nonSignalMockHit = createMockHit({
   'event.kind': 'event',
 });
 
+const remoteAlertMockHit = createMockHit({
+  'event.kind': 'signal',
+  _index: 'remote-cluster:index-name',
+});
+
 const mockRenderCellActions = jest.fn(({ children }: { children: React.ReactNode }) => (
   <>{children}</>
 ));
@@ -180,6 +185,25 @@ describe('InvestigationSection', () => {
           <Router history={history}>
             <InvestigationSection
               hit={nonSignalMockHit}
+              renderCellActions={mockRenderCellActions}
+            />
+          </Router>
+        </Provider>
+      </IntlProvider>
+    );
+
+    expect(queryByTestId('investigationGuideMock')).not.toBeInTheDocument();
+  });
+
+  it('does not render investigation guide for a remote alert', () => {
+    mockUseExpandSection.mockReturnValue(true);
+
+    const { queryByTestId } = render(
+      <IntlProvider locale="en">
+        <Provider store={store}>
+          <Router history={history}>
+            <InvestigationSection
+              hit={remoteAlertMockHit}
               renderCellActions={mockRenderCellActions}
             />
           </Router>

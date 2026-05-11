@@ -81,8 +81,84 @@ describe('RuleConditions', () => {
     expect(screen.getByTestId('alertingV2RuleDetailsSchedule')).toHaveTextContent('Every 5m');
     expect(screen.getByTestId('alertingV2RuleDetailsLookback')).toHaveTextContent('10m');
     expect(screen.getByTestId('alertingV2RuleDetailsMode')).toHaveTextContent('Alerting');
-    expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('After 3');
+    expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent(
+      'After 3 matches or 5m'
+    );
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('-');
     expect(screen.getByTestId('alertingV2RuleDetailsNoDataConfig')).toHaveTextContent('No data');
+  });
+
+  it('renders Immediate for alert and recovery delay when counts are zero', () => {
+    renderConditions({
+      ...alertRule,
+      state_transition: { pending_count: 0, recovering_count: 0 },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('Immediate');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('Immediate');
+  });
+
+  it('renders alert delay with count when pending_count is set', () => {
+    renderConditions({
+      ...alertRule,
+      state_transition: { pending_count: 3, recovering_count: 0 },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('After 3');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('Immediate');
+  });
+
+  it('renders recovery delay with count when recovering_count is set', () => {
+    renderConditions({
+      ...alertRule,
+      state_transition: { pending_count: 0, recovering_count: 5 },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('Immediate');
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('After 5');
+  });
+
+  it('renders alert delay with timeframe only', () => {
+    renderConditions({
+      ...alertRule,
+      state_transition: { pending_timeframe: '10m', recovering_count: 0 },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent('After 10m');
+  });
+
+  it('renders recovery delay with timeframe only', () => {
+    renderConditions({
+      ...alertRule,
+      state_transition: { pending_count: 0, recovering_timeframe: '15m' },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent('After 15m');
+  });
+
+  it('renders alert delay with count and timeframe using AND operator', () => {
+    renderConditions({
+      ...alertRule,
+      state_transition: {
+        pending_count: 3,
+        pending_timeframe: '5m',
+        pending_operator: 'AND',
+        recovering_count: 0,
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsAlertDelay')).toHaveTextContent(
+      'After 3 matches and 5m'
+    );
+  });
+
+  it('renders recovery delay with count and timeframe using OR operator', () => {
+    renderConditions({
+      ...alertRule,
+      state_transition: {
+        pending_count: 0,
+        recovering_count: 4,
+        recovering_timeframe: '20m',
+        recovering_operator: 'OR',
+      },
+    });
+    expect(screen.getByTestId('alertingV2RuleDetailsRecoveryDelay')).toHaveTextContent(
+      'After 4 recoveries or 20m'
+    );
   });
 
   it('renders fallback values for missing optional fields', () => {

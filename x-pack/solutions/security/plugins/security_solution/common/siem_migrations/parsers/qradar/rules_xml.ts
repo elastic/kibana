@@ -6,32 +6,10 @@
  */
 
 import xml2js from 'xml2js';
+import he from 'he';
 import type { XmlElement } from '../xml/xml';
 import { XmlParser } from '../xml/xml';
 import type { QradarRule, ResourceDetailType, ResourceTypeMap } from './types';
-
-// Matches double-encoded entities (e.g. &amp;quot;) first, then single-encoded.
-// Longer patterns must come first so the regex engine prefers them over the
-// shorter &amp; match, decoding both layers in a single atomic pass.
-const ENTITY_PATTERN = /&amp;(?:lt|gt|amp|quot|apos|#39);|&(?:lt|gt|amp|quot|apos|#39);/g;
-const ENTITY_MAP: Record<string, string> = {
-  '&amp;lt;': '<',
-  '&amp;gt;': '>',
-  '&amp;amp;': '&',
-  '&amp;quot;': '"',
-  '&amp;#39;': "'",
-  '&amp;apos;': "'",
-  '&lt;': '<',
-  '&gt;': '>',
-  '&amp;': '&',
-  '&quot;': '"',
-  '&#39;': "'",
-  '&apos;': "'",
-};
-
-const decodeEntities = (text: string): string => {
-  return text.replace(ENTITY_PATTERN, (match) => ENTITY_MAP[match] ?? match);
-};
 
 export class QradarRulesXmlParser extends XmlParser {
   private async processRuleXml(qradarRule: XmlElement): Promise<QradarRule | undefined> {
@@ -39,15 +17,21 @@ export class QradarRulesXmlParser extends XmlParser {
       this.findDeep(qradarRule, 'rule_data') as string | Array<string>
     );
     let decodedRuleData: string;
+    let sanitizedRuleData: string;
+
     try {
       decodedRuleData = Buffer.from(ruleData, 'base64').toString('utf-8');
-      // Sanitize HTML content within <text> tags
-      decodedRuleData = this.sanitizeTextTagsInRuleData(decodedRuleData);
     } catch (error) {
-      throw new Error(`Failed to decode rule_data from base64: ${error.message}`);
+      throw new Error(`Failed to decode rule_data from base64: ${this.getErrorMessage(error)}`);
     }
 
-    const parsedRuleData = await this.parseRuleData(decodedRuleData);
+    try {
+      sanitizedRuleData = await this.sanitizeTextTagsInRuleData(decodedRuleData);
+    } catch (error) {
+      throw new Error(`Failed to sanitize decoded rule_data XML: ${this.getErrorMessage(error)}`);
+    }
+
+    const parsedRuleData = await this.parseRuleData(sanitizedRuleData);
 
     const id = this.findDeepValue(parsedRuleData, 'rule', 'id') as string;
     const name = this.findDeep(parsedRuleData, 'name') as string | Array<string>;
@@ -65,7 +49,7 @@ export class QradarRulesXmlParser extends XmlParser {
         title,
         description,
         rule_type: isBuildingBlock ? 'building_block' : 'default',
-        rule_data: decodedRuleData,
+        rule_data: sanitizedRuleData,
       };
     }
   }
@@ -132,21 +116,18 @@ export class QradarRulesXmlParser extends XmlParser {
    * @returns Sanitized plain text
    */
   private sanitizeHtmlText(text: string): string {
-    // A single atomic regex decodes all entities in one pass, avoiding the
-    // chained-replace ordering issue where one replacement feeds into the next.
-    let decoded = decodeEntities(text);
-
-    // Remove all HTML tags, looping until stable to handle crafted
-    // nested fragments that could survive a single pass
-    let previous;
-    do {
-      previous = decoded;
-      decoded = decoded.replace(/<[^>]*>/g, '');
-    } while (decoded !== previous);
-
-    decoded = decoded.replace(/\s+/g, ' ').trim();
-
-    return decoded;
+    return (
+      he
+        .decode(text)
+        // Convert non-breaking spaces to standard ASCII spaces.
+        .replace(/\u00A0/g, ' ')
+        // Remove HTML/XML tags while preserving word separation.
+        .replace(/<[^>]*>/g, ' ')
+        // Collapse repeated whitespace (spaces, tabs, newlines) to one space.
+        .replace(/\s+/g, ' ')
+        // Remove leading/trailing whitespace introduced by normalization.
+        .trim()
+    );
   }
 
   /**
@@ -157,12 +138,40 @@ export class QradarRulesXmlParser extends XmlParser {
    * @param ruleData - The decoded XML rule data string
    * @returns The rule data with sanitized text content
    */
-  private sanitizeTextTagsInRuleData(ruleData: string): string {
-    // Find all <text>...</text> patterns and sanitize their content
-    return ruleData.replace(/<text>([\s\S]*?)<\/text>/g, (match, content) => {
-      const sanitizedContent = this.sanitizeHtmlText(content);
-      return `<text>${sanitizedContent}</text>`;
+  private async sanitizeTextTagsInRuleData(ruleData: string): Promise<string> {
+    const parsedRuleData = await this.parseRuleData(ruleData);
+    this.transformAllDeep(parsedRuleData, 'text', (value) => this.sanitizeTextNodeValue(value));
+
+    const xmlBuilder = new xml2js.Builder({
+      headless: true,
+      renderOpts: { pretty: false },
     });
+
+    return xmlBuilder.buildObject(parsedRuleData);
+  }
+
+  private sanitizeTextNodeValue(value: unknown): unknown {
+    if (typeof value === 'string') {
+      return this.sanitizeHtmlText(value);
+    }
+
+    if (Array.isArray(value)) {
+      return value.map((item) => this.sanitizeTextNodeValue(item));
+    }
+
+    if (value !== null && typeof value === 'object') {
+      const textElement = value as Record<string, unknown>;
+      if (typeof textElement._ === 'string') {
+        textElement._ = this.sanitizeHtmlText(textElement._);
+      }
+      return textElement;
+    }
+
+    return value;
+  }
+
+  private getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
   }
 
   /**

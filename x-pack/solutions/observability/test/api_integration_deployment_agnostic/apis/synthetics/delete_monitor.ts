@@ -51,6 +51,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       return monitorTestService.deleteMonitor(editorUser, monitorId, statusCode, 'default');
     };
 
+    const requireDeleteResponse = <T extends { body: unknown; status?: number }>(
+      res: T | undefined
+    ): T => {
+      if (res === undefined) {
+        throw new Error('Expected synthetics monitor delete response');
+      }
+      return res;
+    };
+
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await testPrivateLocations.installSyntheticsPackage();
@@ -73,7 +82,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('deletes monitor by id', async () => {
       const { id: monitorId } = await saveMonitor(httpMonitorJson as MonitorFields);
 
-      const deleteResponse = await deleteMonitor(monitorId);
+      const deleteResponse = requireDeleteResponse(await deleteMonitor(monitorId));
 
       expect(deleteResponse.body).eql([{ id: monitorId, deleted: true }]);
 
@@ -88,11 +97,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('deletes monitor by param id', async () => {
       const { id: monitorId } = await saveMonitor(httpMonitorJson as MonitorFields);
 
-      const deleteResponse = await monitorTestService.deleteMonitorByIdParam(
-        editorUser,
-        monitorId,
-        200,
-        'default'
+      const deleteResponse = requireDeleteResponse(
+        await monitorTestService.deleteMonitorByIdParam(editorUser, monitorId, 200, 'default')
       );
 
       expect(deleteResponse.body).eql([{ id: monitorId, deleted: true }]);
@@ -121,7 +127,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         name: 'another -2',
       } as MonitorFields);
 
-      const deleteResponse = await deleteMonitor([monitorId2, monitorId]);
+      const deleteResponse = requireDeleteResponse(await deleteMonitor([monitorId2, monitorId]));
 
       expect(
         deleteResponse.body.sort((a: { id: string }, b: { id: string }) => (a.id > b.id ? 1 : -1))
@@ -144,7 +150,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const invalidMonitorId = 'invalid-id';
       const expected404Message = `Monitor id ${invalidMonitorId} not found!`;
 
-      const deleteResponse = await deleteMonitor(invalidMonitorId);
+      const deleteResponse = requireDeleteResponse(await deleteMonitor(invalidMonitorId));
 
       expect(deleteResponse.status).eql(200);
       expect(deleteResponse.body).eql([

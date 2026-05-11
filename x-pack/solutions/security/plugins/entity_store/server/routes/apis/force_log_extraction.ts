@@ -28,6 +28,9 @@ export function registerForceLogExtraction(router: EntityStorePluginRouter) {
     .post({
       path: ENTITY_STORE_ROUTES.internal.FORCE_LOG_EXTRACTION,
       access: 'internal',
+      summary: 'Force log extraction',
+      description:
+        'Trigger an immediate log extraction run for the specified entity type and date range.',
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },

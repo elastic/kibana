@@ -14,7 +14,6 @@ import { useTimefilter } from '../../../../hooks/use_timefilter';
 
 interface StreamsFetchResult {
   streams: ListStreamDetail[];
-  canReadFailureStore: boolean;
 }
 
 export function useFetchStreams(

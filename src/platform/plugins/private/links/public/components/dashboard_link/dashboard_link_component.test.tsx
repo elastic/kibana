@@ -21,7 +21,7 @@ import type { ResolvedLink } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { EuiThemeProvider } from '@elastic/eui';
-import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-plugin/public';
+import { DEFAULT_DASHBOARD_NAVIGATION_OPTIONS } from '@kbn/dashboard-navigation-options-common';
 
 function createMockLinksParent({
   initialQuery,

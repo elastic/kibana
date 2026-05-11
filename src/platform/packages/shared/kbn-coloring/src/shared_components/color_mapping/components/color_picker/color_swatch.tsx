@@ -71,6 +71,9 @@ export const ColorSwatch = ({
   const euiTheme = useEuiTheme();
   return assignmentColor.type !== 'gradient' ? (
     <EuiPopover
+      aria-label={i18n.translate('coloring.colorMapping.colorPicker.popoverAriaLabel', {
+        defaultMessage: 'Color picker',
+      })}
       panelPaddingSize="none"
       isOpen={colorPickerVisible}
       repositionOnScroll={true}

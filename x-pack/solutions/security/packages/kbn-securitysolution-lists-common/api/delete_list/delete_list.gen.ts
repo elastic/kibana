@@ -14,25 +14,27 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import { ListId } from '../model/list_common.gen';
 import { List } from '../model/list_schemas.gen';
 
+export const DeleteListRequestQuery = lazySchema(() =>
+  z.object({
+    id: ListId,
+    /**
+     * Determines whether exception items referencing this value list should be deleted.
+     */
+    deleteReferences: BooleanFromString.optional().default(false),
+    /**
+     * Determines whether to delete value list without performing any additional checks of where this list may be utilized.
+     */
+    ignoreReferences: BooleanFromString.optional().default(false),
+  })
+);
 export type DeleteListRequestQuery = z.infer<typeof DeleteListRequestQuery>;
-export const DeleteListRequestQuery = z.object({
-  id: ListId,
-  /**
-   * Determines whether exception items referencing this value list should be deleted.
-   */
-  deleteReferences: BooleanFromString.optional().default(false),
-  /**
-   * Determines whether to delete value list without performing any additional checks of where this list may be utilized.
-   */
-  ignoreReferences: BooleanFromString.optional().default(false),
-});
 export type DeleteListRequestQueryInput = z.input<typeof DeleteListRequestQuery>;
 
+export const DeleteListResponse = lazySchema(() => List);
 export type DeleteListResponse = z.infer<typeof DeleteListResponse>;
-export const DeleteListResponse = List;

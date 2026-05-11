@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
@@ -99,7 +99,7 @@ export const CorrelationsDetailsView = memo(
       showSuppressedAlerts;
 
     return (
-      <EuiPanel color="transparent">
+      <>
         {canShowAtLeastOneInsight ? (
           <EuiFlexGroup gutterSize="l" direction="column">
             {showSuppressedAlerts && (
@@ -165,7 +165,7 @@ export const CorrelationsDetailsView = memo(
             defaultMessage="No correlations data available."
           />
         )}
-      </EuiPanel>
+      </>
     );
   }
 );

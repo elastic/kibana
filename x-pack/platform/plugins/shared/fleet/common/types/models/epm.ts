@@ -272,6 +272,7 @@ export enum RegistryPolicyTemplateKeys {
   dynamic_signal_types = 'dynamic_signal_types',
   var_groups = 'var_groups',
   deprecated = 'deprecated',
+  sections = 'sections',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -300,6 +301,7 @@ export interface RegistryPolicyInputOnlyTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.required_vars]?: RegistryRequiredVars;
   [RegistryPolicyTemplateKeys.vars]?: RegistryVarsEntry[];
   [RegistryPolicyTemplateKeys.var_groups]?: RegistryVarGroup[];
+  [RegistryPolicyTemplateKeys.sections]?: RegistrySection[];
   [RegistryPolicyTemplateKeys.dynamic_signal_types]?: boolean;
 }
 
@@ -324,6 +326,8 @@ export enum RegistryInputKeys {
   deprecated = 'deprecated',
   migrate_from = 'migrate_from',
   dynamic_signal_types = 'dynamic_signal_types',
+  show_divider = 'show_divider',
+  sections = 'sections',
 }
 
 export type RegistryInputGroup = 'logs' | 'metrics';
@@ -347,6 +351,9 @@ export interface RegistryInput {
   [RegistryInputKeys.migrate_from]?: string;
   /** When true the data stream signal type (logs/metrics/traces) is determined at runtime by the agent. Valid for OTel collector inputs in composable integrations. */
   [RegistryInputKeys.dynamic_signal_types]?: boolean;
+  /** When false, suppresses the automatic horizontal divider rendered after the input-level config section. Defaults to true. */
+  [RegistryInputKeys.show_divider]?: boolean;
+  [RegistryInputKeys.sections]?: RegistrySection[];
 }
 
 export enum RegistryStreamKeys {
@@ -362,6 +369,7 @@ export enum RegistryStreamKeys {
   var_groups = 'var_groups',
   deprecated = 'deprecated',
   migrate_from = 'migrate_from',
+  sections = 'sections',
 }
 
 export interface RegistryStream {
@@ -377,6 +385,7 @@ export interface RegistryStream {
   [RegistryStreamKeys.var_groups]?: RegistryVarGroup[];
   [RegistryStreamKeys.deprecated]?: DeprecationInfo;
   [RegistryStreamKeys.migrate_from]?: string;
+  [RegistryStreamKeys.sections]?: RegistrySection[];
 }
 
 export type RegistryStreamWithDataStream = RegistryStream & { data_stream: RegistryDataStream };
@@ -552,6 +561,12 @@ export type RegistryVarType =
   | 'textarea'
   | 'duration'
   | 'url';
+
+export interface RegistrySection {
+  name: string;
+  title: string;
+  description?: string;
+}
 export enum RegistryVarsEntryKeys {
   name = 'name',
   title = 'title',
@@ -570,6 +585,8 @@ export enum RegistryVarsEntryKeys {
   max_duration = 'max_duration',
   url_allowed_schemes = 'url_allowed_schemes',
   deprecated = 'deprecated',
+  migrate_from = 'migrate_from',
+  section = 'section',
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -597,6 +614,8 @@ export interface RegistryVarsEntry {
   [RegistryVarsEntryKeys.max_duration]?: string;
   [RegistryVarsEntryKeys.url_allowed_schemes]?: string[];
   [RegistryVarsEntryKeys.deprecated]?: DeprecationInfo;
+  [RegistryVarsEntryKeys.migrate_from]?: string;
+  [RegistryVarsEntryKeys.section]?: string;
 }
 
 // Deprecated as part of the removing public references to saved object schemas

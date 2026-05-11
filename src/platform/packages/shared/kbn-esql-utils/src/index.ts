@@ -8,6 +8,7 @@
  */
 
 export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adhoc_dataview';
+export { getESQLTimeFieldFromQuery } from './utils/get_esql_time_field_from_query';
 export { getInitialESQLQuery } from './utils/get_initial_esql_query';
 export { getESQLWithSafeLimit } from './utils/get_esql_with_safe_limit';
 export {
@@ -73,7 +74,7 @@ export {
 } from './utils/cascaded_documents_helpers/utils';
 export { getProjectRoutingFromEsqlQuery } from './utils/set_instructions_helpers';
 export { isComputedColumn, getQuerySummary } from './utils/get_query_summary';
-export { getEsqlControls } from './utils/get_esql_controls';
+export { getAllEsqlControls, getEsqlControls } from './utils/get_esql_controls';
 
 // Callback functions
 export * from './utils/callbacks';

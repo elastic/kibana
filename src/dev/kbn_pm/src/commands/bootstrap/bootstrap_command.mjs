@@ -52,6 +52,9 @@ export const command = {
     --no-vscode          By default bootstrap updates the .vscode directory to include commonly useful vscode
                           settings for local development. Disable this process either pass this flag or set
                           the KBN_BOOTSTRAP_NO_VSCODE=true environment variable.
+    --no-prebuilt        Skip building shared webpack bundles (ui-shared-deps, monaco). Use when a
+                          subsequent distribution build will rebuild them in production mode anyway.
+                          Also settable via KBN_BOOTSTRAP_NO_PREBUILT=true.
     --allow-root         Required supplementary flag if you're running bootstrap as root.
     --quiet              Prevent logging more than basic success/error messages
   `,
@@ -66,6 +69,8 @@ export const command = {
     const vscodeConfig =
       !IS_CI && (args.getBooleanValue('vscode') ?? !process.env.KBN_BOOTSTRAP_NO_VSCODE);
     const forceInstall = args.getBooleanValue('force-install');
+    const skipPrebuilt =
+      args.getBooleanValue('prebuilt') === false || !!process.env.KBN_BOOTSTRAP_NO_PREBUILT;
     const shouldInstall =
       forceInstall || !(await areNodeModulesPresent()) || !(await checkYarnIntegrity(log));
 
@@ -110,19 +115,41 @@ export const command = {
       }
     });
 
+    if (skipPrebuilt) {
+      log.info('skipping pre-built webpack bundles (--no-prebuilt)');
+    }
+
     await Promise.all([
-      time('prepare webpack bundles for packages', async () => {
-        log.info('pre-build webpack bundles');
-        await moonRun([':build-webpack'], {
-          pipe: !quiet,
-          quiet,
-          noCache: forceInstall,
-        });
-        log.success('relevant versions extracted for packages and shared webpack bundles built');
-      }),
+      skipPrebuilt
+        ? undefined
+        : time('prepare webpack bundles for packages', async () => {
+            log.info('pre-build webpack bundles');
+            await moonRun([':build-webpack'], {
+              pipe: !quiet,
+              quiet,
+              noCache: forceInstall,
+            });
+            log.success(
+              'relevant versions extracted for packages and shared webpack bundles built'
+            );
+          }),
       shouldInstall
         ? time('run install scripts', async () => {
             await runInstallScripts(log, { quiet });
+          })
+        : undefined,
+      shouldInstall
+        ? time('apply node_modules patches', async () => {
+            log.info('applying node_modules patches via patch-package');
+            // The patch-package command is used to apply patches to the node_modules directory.
+            // At the time of writing, the following packages are patched:
+            // - zod@4.3.6 => memory regression introduced in 4.x (see https://github.com/colinhacks/zod/issues/5760)
+            // The libraries above should not be updated, as doing so would break the patches.
+            await run('node', ['node_modules/.bin/patch-package', '--error-on-fail'], {
+              pipe: !quiet,
+              description: 'patch-package',
+            });
+            log.success('node_modules patches applied');
           })
         : undefined,
     ]);

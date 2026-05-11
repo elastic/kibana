@@ -16,7 +16,6 @@ import type {
 import { panelGridSchema, sectionGridSchema } from '@kbn/dashboard-agent-common';
 import type { Logger } from '@kbn/core/server';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
-import { toEmbeddablePanel } from '@kbn/dashboard-agent-common';
 import {
   appendPanelsToDashboard,
   findPanelById,
@@ -31,7 +30,13 @@ import type { VisualizationFailure } from './utils';
 
 export const setMetadataOperationSchema = z.object({
   operation: z.literal('set_metadata'),
-  title: z.string().optional(),
+  title: z
+    .string()
+    .min(1)
+    .optional()
+    .describe(
+      "Non-empty dashboard title. If the current title is empty, missing, or a placeholder, invent one from the dashboard's contents."
+    ),
   description: z.string().optional(),
 });
 
@@ -202,7 +207,7 @@ export const dashboardOperationSchema = z.discriminatedUnion('operation', [
 export type DashboardOperation = z.infer<typeof dashboardOperationSchema>;
 
 interface ExecuteDashboardOperationsParams {
-  dashboardData: DashboardAttachmentData;
+  dashboardData?: DashboardAttachmentData;
   operations: DashboardOperation[];
   logger: Logger;
   resolvePanelsFromAttachments: (
@@ -368,15 +373,23 @@ const materializeResolvedVisualizationPanels = ({
 
     successfulPanels.push({
       request,
-      panel: toEmbeddablePanel({
-        ...resolvedPanel.visContent,
+      panel: {
+        id: uuidv4(),
+        type: resolvedPanel.visContent.type,
+        config: resolvedPanel.visContent.config,
         grid: request.panelInput.grid,
-      }),
+      },
     });
   }
 
   return successfulPanels;
 };
+
+const createEmptyDashboardData = (): DashboardAttachmentData => ({
+  title: 'User Dashboard',
+  description: undefined,
+  panels: [],
+});
 
 export const executeDashboardOperations = async ({
   dashboardData,
@@ -388,7 +401,7 @@ export const executeDashboardOperations = async ({
   dashboardData: DashboardAttachmentData;
   failures: VisualizationFailure[];
 }> => {
-  let nextDashboardData = structuredClone(dashboardData);
+  let nextDashboardData = structuredClone(dashboardData ?? createEmptyDashboardData());
   const failures: VisualizationFailure[] = [];
   const visualizationCreationRequests = collectVisualizationCreationRequests(operations);
   const resolvedVisualizationCreationRequests = await resolveVisualizationCreationRequests({
@@ -416,11 +429,12 @@ export const executeDashboardOperations = async ({
       }
 
       case 'add_markdown': {
-        const markdownPanel = toEmbeddablePanel({
+        const markdownPanel = {
           type: MARKDOWN_EMBEDDABLE_TYPE,
           config: { content: operation.markdownContent },
           grid: operation.grid,
-        });
+          id: uuidv4(),
+        };
         nextDashboardData = appendPanelsToDashboard({
           dashboardData: nextDashboardData,
           panelsToAdd: [markdownPanel],
@@ -511,10 +525,10 @@ export const executeDashboardOperations = async ({
             dashboardData: nextDashboardData,
             panelId: panelInput.panelId,
             transformPanel: (panel) => ({
-              ...toEmbeddablePanel({
+              ...{
                 ...panel,
                 ...resolvedPanel.visContent,
-              }),
+              },
             }),
           });
 

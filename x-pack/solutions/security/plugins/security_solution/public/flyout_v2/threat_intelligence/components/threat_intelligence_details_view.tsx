@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { groupBy, isEmpty } from 'lodash';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { EnrichmentSection } from './threat_details_view_enrichment_section';
@@ -55,7 +55,7 @@ export const ThreatIntelligenceDetailsView = memo(({ hit }: ThreatIntelligenceDe
   }
 
   return (
-    <EuiPanel hasShadow={false} hasBorder={false}>
+    <>
       <EnrichmentSection
         dataTestSubj={THREAT_INTELLIGENCE_DETAILS_ENRICHMENTS_TEST_ID}
         enrichments={indicatorMatches}
@@ -91,7 +91,7 @@ export const ThreatIntelligenceDetailsView = memo(({ hit }: ThreatIntelligenceDe
           />
         </>
       ) : null}
-    </EuiPanel>
+    </>
   );
 });
 

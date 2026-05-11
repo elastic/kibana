@@ -46,16 +46,11 @@ test.describe(
         await serviceMapPage.waitForServiceNodeToLoad(SERVICE_OPBEANS_JAVA);
         const node = serviceMapPage.getServiceNode(SERVICE_OPBEANS_JAVA);
         await node.focus();
-        const isFocused = await page.evaluate((name: string) => {
-          const focused = document.activeElement;
-          return (
-            focused?.getAttribute('aria-label')?.toLowerCase().includes(name.toLowerCase()) ?? false
-          );
-        }, SERVICE_OPBEANS_JAVA);
-        expect(isFocused).toBe(true);
+        await expect(node).toBeFocused();
       });
 
       await test.step('zoom controls are keyboard accessible', async () => {
+        await serviceMapPage.clickFitView();
         await expect(serviceMapPage.zoomInBtnControl).toBeVisible();
         await expect(serviceMapPage.zoomOutBtnControl).toBeVisible();
         await expect(serviceMapPage.fitViewBtn).toBeVisible();

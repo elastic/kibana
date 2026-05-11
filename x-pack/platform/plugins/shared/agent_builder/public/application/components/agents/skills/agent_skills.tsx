@@ -259,7 +259,7 @@ export const AgentSkills: React.FC = () => {
             />
           </div>
 
-          <div css={styles.scrollableList}>
+          <EuiFlexGroup direction="column" gutterSize="xs" css={styles.scrollableList}>
             {filteredActiveSkills.length === 0 ? (
               <EuiText size="s" color="subdued" textAlign="center">
                 <p>
@@ -270,18 +270,19 @@ export const AgentSkills: React.FC = () => {
               </EuiText>
             ) : (
               filteredActiveSkills.map((skill) => (
-                <ActiveSkillRow
-                  key={skill.id}
-                  skill={skill}
-                  isSelected={selectedSkillId === skill.id}
-                  onSelect={(s) => setSelectedSkillId(s.id)}
-                  onRemove={handleRemoveSkill}
-                  isAutoIncluded={enableElasticCapabilities && skill.readonly}
-                  canEditAgent={canEditAgent}
-                />
+                <EuiFlexItem key={skill.id} grow={false}>
+                  <ActiveSkillRow
+                    skill={skill}
+                    isSelected={selectedSkillId === skill.id}
+                    onSelect={(s) => setSelectedSkillId(s.id)}
+                    onRemove={handleRemoveSkill}
+                    isAutoIncluded={enableElasticCapabilities && skill.readonly}
+                    canEditAgent={canEditAgent}
+                  />
+                </EuiFlexItem>
               ))
             )}
-          </div>
+          </EuiFlexGroup>
         </EuiFlexItem>
 
         <EuiFlexItem css={styles.detailPanelWrapper}>

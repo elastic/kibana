@@ -226,12 +226,13 @@ export function ValueControlForm({
 
   const setSuggestedQuery = useCallback(async () => {
     const indexPattern = getIndexPatternFromESQLQuery(queryString);
-    const encodedQuery = encodeURIComponent(`FROM ${indexPattern}`);
-    const response = (await core.http?.get(`${TIMEFIELD_ROUTE}${encodedQuery}`).catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error('Failed to fetch the timefield', error);
-      return undefined;
-    })) as { timeField?: string } | undefined;
+    const response = (await core.http
+      ?.post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query: `FROM ${indexPattern}` }) })
+      .catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error('Failed to fetch the timefield', error);
+        return undefined;
+      })) as { timeField?: string } | undefined;
 
     const timeField = response?.timeField;
     const timeFilter = Boolean(timeField)

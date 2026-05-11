@@ -17,6 +17,7 @@ describe('parseServerFlags', () => {
       arch: 'agentic',
       domain: 'security_complete',
       logToFile: false,
+      preserveEsData: false,
       headed: false,
     });
 
@@ -32,6 +33,7 @@ describe('parseServerFlags', () => {
       domain: 'observability_complete',
       headed: false,
       logToFile: false,
+      preserveEsData: false,
       serverConfigSet: 'default',
     });
     const result = parseServerFlags(flags);
@@ -40,6 +42,7 @@ describe('parseServerFlags', () => {
       esFrom: undefined,
       installDir: undefined,
       logsDir: undefined,
+      preserveEsData: false,
       serverConfigSet: 'default',
       testTarget: {
         arch: 'serverless',
@@ -56,6 +59,7 @@ describe('parseServerFlags', () => {
       domain: 'observability_complete',
       esFrom: 'snapshot',
       logToFile: false,
+      preserveEsData: false,
       serverConfigSet: 'default',
     });
     const result = parseServerFlags(flags);
@@ -64,6 +68,7 @@ describe('parseServerFlags', () => {
       esFrom: 'snapshot',
       installDir: undefined,
       logsDir: undefined,
+      preserveEsData: false,
       serverConfigSet: 'default',
       testTarget: {
         arch: 'stateful',
@@ -79,6 +84,7 @@ describe('parseServerFlags', () => {
       arch: 'stateful',
       domain: 'classic',
       logToFile: false,
+      preserveEsData: false,
       serverConfigSet: 'uiam_local',
     });
     const result = parseServerFlags(flags);
@@ -87,11 +93,37 @@ describe('parseServerFlags', () => {
       esFrom: undefined,
       installDir: undefined,
       logsDir: undefined,
+      preserveEsData: false,
       serverConfigSet: 'uiam_local',
       testTarget: {
         arch: 'stateful',
         domain: 'classic',
         location: 'cloud',
+      },
+    });
+  });
+
+  it(`should parse preserveEsData flag`, () => {
+    const flags = new FlagsReader({
+      location: 'local',
+      arch: 'serverless',
+      domain: 'security_complete',
+      logToFile: false,
+      preserveEsData: true,
+      serverConfigSet: 'default',
+    });
+    const result = parseServerFlags(flags);
+
+    expect(result).toEqual({
+      esFrom: undefined,
+      installDir: undefined,
+      logsDir: undefined,
+      preserveEsData: true,
+      serverConfigSet: 'default',
+      testTarget: {
+        arch: 'serverless',
+        domain: 'security_complete',
+        location: 'local',
       },
     });
   });

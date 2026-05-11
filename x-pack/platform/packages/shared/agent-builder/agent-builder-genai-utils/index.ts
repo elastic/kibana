@@ -16,6 +16,7 @@ export {
   getFieldsFromFieldCaps,
   getIndexFields,
   type IndexFieldsResult,
+  type IndexFieldType,
   type MappingField,
 } from './tools/utils';
 export {

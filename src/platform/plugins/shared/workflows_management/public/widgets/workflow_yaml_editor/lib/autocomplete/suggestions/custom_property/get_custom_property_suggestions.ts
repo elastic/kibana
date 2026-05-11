@@ -11,9 +11,12 @@ import { monaco } from '@kbn/monaco';
 import {
   isBuiltInStepProperty,
   isBuiltInStepType,
+  type PropertySelectionHandler,
   type SelectionContext,
   type StepPropertyHandler,
+  type StepSelectionValues,
 } from '@kbn/workflows';
+import type { StepInfo } from '../../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import {
   buildStepSelectionValues,
   getValueFromValueNode,
@@ -64,11 +67,10 @@ export async function getCustomPropertySuggestions(
     return [];
   }
 
-  const propertyHandler = getPropertyHandler(
-    focusedStepInfo.stepType,
-    isInConfig ? 'config' : 'input',
-    composedKey
-  );
+  const scope = isInConfig ? 'config' : 'input';
+  const { stepType } = focusedStepInfo;
+
+  const propertyHandler = getPropertyHandler(stepType, scope, composedKey);
   if (!propertyHandler || !propertyHandler.selection?.search) {
     return [];
   }
@@ -85,15 +87,13 @@ export async function getCustomPropertySuggestions(
   };
 
   const input = sanitizeSearchInput(currentValue);
-  const context: SelectionContext = {
-    stepType: focusedStepInfo.stepType,
-    scope: isInConfig ? 'config' : 'input',
-    propertyKey: composedKey,
-    values: buildStepSelectionValues(focusedStepInfo),
-  };
-  const options = await propertyHandler.selection.search(input, context);
+  const selection = propertyHandler.selection;
+  const values = getContextValues(selection, focusedStepInfo);
 
-  cacheSearchOptions(focusedStepInfo.stepType, context.scope, composedKey, options);
+  const context: SelectionContext = { stepType, scope, propertyKey: composedKey, values };
+  const options = await selection.search(input, context);
+
+  cacheSearchOptions(focusedStepInfo.stepType, context.scope, composedKey, options, values);
 
   return options.map(
     (option): monaco.languages.CompletionItem => ({
@@ -115,4 +115,14 @@ function sanitizeSearchInput(input: unknown): string {
   }
   const strInput = String(input);
   return strInput.trim().replace(/^['"]|['"]$/g, '');
+}
+
+function getContextValues(
+  selection: PropertySelectionHandler,
+  focusedStepInfo: StepInfo
+): StepSelectionValues {
+  if (!selection.dependsOnValues || selection.dependsOnValues.length === 0) {
+    return { config: {}, input: {} };
+  }
+  return buildStepSelectionValues(focusedStepInfo, selection.dependsOnValues);
 }

@@ -11,6 +11,7 @@ import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { Runner, HooksServiceStart } from '@kbn/agent-builder-server';
@@ -41,6 +42,7 @@ export interface RunnerFactoryDeps {
   trackingService?: TrackingService;
   analyticsService?: AnalyticsService;
   hooks: HooksServiceStart;
+  searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 
 export interface RunnerFactory {

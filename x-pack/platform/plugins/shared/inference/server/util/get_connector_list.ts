@@ -93,6 +93,8 @@ export const getConnectorList = async (
       taskType: ep.taskType,
       service: ep.service,
       serviceSettings: ep.serviceSettings,
+      // temporary any until types are propagated in ES client
+      modelCreator: (ep.metadata as Record<string, any>)?.display?.model_creator,
     },
     capabilities: {},
     isInferenceEndpoint: true,

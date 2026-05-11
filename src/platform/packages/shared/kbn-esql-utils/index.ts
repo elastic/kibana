@@ -9,6 +9,7 @@
 
 export {
   getESQLAdHocDataview,
+  getESQLTimeFieldFromQuery,
   getIndexPatternFromESQLQuery,
   getSourceCommandFromESQLQuery,
   hasTransformationalCommand,
@@ -71,6 +72,7 @@ export {
   isComputedColumn,
   getQuerySummary,
   getEsqlControls,
+  getAllEsqlControls,
   type ESQLStatsQueryMeta,
 } from './src';
 

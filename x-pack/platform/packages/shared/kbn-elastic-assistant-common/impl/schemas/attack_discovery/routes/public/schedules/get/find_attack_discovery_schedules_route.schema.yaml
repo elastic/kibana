@@ -16,8 +16,8 @@ paths:
              --header "Content-Type: application/json"
       x-labels: [ess, serverless]
       operationId: FindAttackDiscoverySchedules
-      summary: Finds Attack discovery schedules that match the search criteria
-      description: Finds Attack discovery schedules that match the search criteria. Supports pagination and sorting by various fields.
+      summary: Find Attack Discovery schedules that match the search criteria
+      description: Find Attack Discovery schedules that match the search criteria. Supports pagination and sorting by various fields.
       parameters:
         - name: page
           description: Page number to return (used for pagination). Defaults to 1.
@@ -27,7 +27,7 @@ paths:
             type: number
           example: 1
         - name: per_page
-          description: Number of Attack discovery schedules to return per page (used for pagination). Defaults to 10.
+          description: Number of Attack Discovery schedules to return per page (used for pagination). Defaults to 10.
           in: query
           required: false
           schema:
@@ -52,7 +52,7 @@ paths:
           example: "asc"
       responses:
         200:
-          description: Successful response
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -71,14 +71,38 @@ paths:
                     description: Number of items requested per page.
                   total:
                     type: number
-                    description: Total number of Attack discovery schedules matching the query (across all pages).
+                    description: Total number of Attack Discovery schedules matching the query (across all pages).
                   data:
                     type: array
-                    description: Array of matched Attack discovery schedule objects.
+                    description: Array of matched Attack Discovery schedule objects.
                     items:
                       $ref: '../schedules_api.schema.yaml#/components/schemas/AttackDiscoveryApiSchedule'
+              example:
+                page: 1
+                per_page: 10
+                total: 1
+                data:
+                  - id: "12345678-1234-1234-1234-123456789012"
+                    name: "Daily Security Analysis"
+                    created_by: "elastic"
+                    updated_by: "elastic"
+                    created_at: "2023-10-31T10:00:00.000Z"
+                    updated_at: "2023-10-31T10:00:00.000Z"
+                    enabled: true
+                    params:
+                      alerts_index_pattern: ".alerts-security.alerts-default"
+                      api_config:
+                        actionTypeId: "bedrock"
+                        connectorId: "my-bedrock-connector"
+                        name: "Claude 3.5 Sonnet"
+                      size: 100
+                      start: "now-24h"
+                      end: "now"
+                    schedule:
+                      interval: "24h"
+                    actions: []
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -95,4 +119,8 @@ paths:
                   message:
                     type: string
                     description: Human-readable error message
-                    example: "Invalid request payload"
+                    example: "Invalid request payload."
+              example:
+                status_code: 400
+                error: "Bad Request"
+                message: "Invalid request payload."

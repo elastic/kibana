@@ -103,7 +103,7 @@ describe(
         cy.getBySel('add-to-timeline').click();
         cy.contains(timelineRegex);
         cy.getBySel('securitySolutionFlyoutNavigationCollapseDetailButton').click();
-        cy.getBySel('timeline-bottom-bar').contains('Untitled timeline').click();
+        cy.getBySel('timeline-bottom-bar').contains('Untitled Timeline').click();
         cy.contains(filterRegex);
       }
     );

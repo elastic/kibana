@@ -26,6 +26,15 @@ import {
  * Storage settings for Significant Events queries.
  * Note: The index name ".kibana_streams_assets" is kept for backwards compatibility,
  * but this index is only used to store query assets (Significant Events queries linked to streams).
+ *
+ * The base settings use `semantic_text()` with no explicit `inference_id`,
+ * which causes ES to use the cluster default at index-creation time.
+ * For existing indices that already have a `semantic_text` mapping with a
+ * specific `inference_id`, use `getQueryStorageSettings(existingId)` so that
+ * the schema hash and putMapping payload stay compatible with the index.
+ * Sending a bare `semantic_text()` to putMapping on such an index would resolve
+ * to the cluster default (potentially a different model) and fail with
+ * illegal_argument_exception when the models are incompatible.
  */
 export const queryStorageSettings = {
   name: '.kibana_streams_assets',
@@ -42,6 +51,7 @@ export const queryStorageSettings = {
       [QUERY_SEVERITY_SCORE]: types.long(),
       [RULE_BACKED]: types.boolean(),
       [RULE_ID]: types.keyword(),
+      [QUERY_SEARCH_EMBEDDING]: types.semantic_text(),
       experimental: types.object({ enabled: false }),
     },
   },
@@ -49,15 +59,17 @@ export const queryStorageSettings = {
 
 export type QueryStorageSettings = typeof queryStorageSettings;
 
-export const getQueryStorageSettings = (inferenceId: string): IndexStorageSettings => ({
-  name: queryStorageSettings.name,
-  schema: {
-    properties: {
-      ...queryStorageSettings.schema.properties,
-      // The semantic_text field is always declared in the mapping regardless of
-      // inference availability — ES does not validate the inference_id at mapping
-      // time, so this is safe even when ML is disabled or ELSER is not deployed.
-      [QUERY_SEARCH_EMBEDDING]: types.semantic_text({ inference_id: inferenceId }),
+export function getQueryStorageSettings(inferenceId?: string): IndexStorageSettings {
+  if (!inferenceId) {
+    return queryStorageSettings;
+  }
+  return {
+    name: queryStorageSettings.name,
+    schema: {
+      properties: {
+        ...queryStorageSettings.schema.properties,
+        [QUERY_SEARCH_EMBEDDING]: types.semantic_text({ inference_id: inferenceId }),
+      },
     },
-  },
-});
+  };
+}

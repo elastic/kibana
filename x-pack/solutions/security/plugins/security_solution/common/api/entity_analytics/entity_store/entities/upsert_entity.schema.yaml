@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
-  version: '2023-10-31'
+  version: '1'
   title: Entity Store - Update or Create Entity
 paths:
-  /api/entity_store/entities/{entityType}:
+  /internal/entity_store/entities/{entityType}:
     put:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
@@ -32,12 +32,14 @@ paths:
           required: true
           schema:
             $ref: '../common.schema.yaml#/components/schemas/EntityType'
+          example: user
         - name: force
           in: query
           required: false
           schema:
             type: boolean
             default: false
+          description: When true, allows updating protected fields.
       requestBody:
         description: Schema for the updating a single entity
         required: true

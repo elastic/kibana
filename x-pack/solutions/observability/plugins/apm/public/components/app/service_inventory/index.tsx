@@ -303,7 +303,7 @@ export function ServiceInventory() {
     <>
       <EuiFlexGroup direction="column" gutterSize="m">
         {displayMlCallout && mlCallout}
-        <EuiFlexItem>
+        <EuiFlexItem style={{ minWidth: 0 }}>
           <ApmServicesTable
             status={mainStatisticsStatus}
             items={mainStatisticsData.items}

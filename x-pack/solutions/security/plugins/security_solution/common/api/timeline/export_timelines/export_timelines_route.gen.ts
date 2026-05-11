@@ -14,19 +14,23 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const ExportTimelinesRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * The name of the file to export
+     */
+    file_name: z.string(),
+  })
+);
 export type ExportTimelinesRequestQuery = z.infer<typeof ExportTimelinesRequestQuery>;
-export const ExportTimelinesRequestQuery = z.object({
-  /**
-   * The name of the file to export
-   */
-  file_name: z.string(),
-});
 export type ExportTimelinesRequestQueryInput = z.input<typeof ExportTimelinesRequestQuery>;
 
+export const ExportTimelinesRequestBody = lazySchema(() =>
+  z.object({
+    ids: z.array(z.string()).min(1).max(1000).nullable().optional(),
+  })
+);
 export type ExportTimelinesRequestBody = z.infer<typeof ExportTimelinesRequestBody>;
-export const ExportTimelinesRequestBody = z.object({
-  ids: z.array(z.string()).min(1).max(1000).nullable().optional(),
-});
 export type ExportTimelinesRequestBodyInput = z.input<typeof ExportTimelinesRequestBody>;

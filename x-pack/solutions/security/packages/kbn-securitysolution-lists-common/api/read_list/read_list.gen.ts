@@ -14,16 +14,18 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { ListId } from '../model/list_common.gen';
 import { List } from '../model/list_schemas.gen';
 
+export const ReadListRequestQuery = lazySchema(() =>
+  z.object({
+    id: ListId,
+  })
+);
 export type ReadListRequestQuery = z.infer<typeof ReadListRequestQuery>;
-export const ReadListRequestQuery = z.object({
-  id: ListId,
-});
 export type ReadListRequestQueryInput = z.input<typeof ReadListRequestQuery>;
 
+export const ReadListResponse = lazySchema(() => List);
 export type ReadListResponse = z.infer<typeof ReadListResponse>;
-export const ReadListResponse = List;

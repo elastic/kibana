@@ -266,8 +266,3 @@ export {
 } from './interfaces/containers/publishes_settings';
 
 export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/can_focus_panel';
-
-export {
-  apiSupportsPassThroughContext,
-  type PassThroughContext,
-} from './interfaces/containers/pass_through_context';

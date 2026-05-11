@@ -11,14 +11,12 @@ import type { StepSelectionValues } from '@kbn/workflows';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
 import { z } from '@kbn/zod/v4';
 
-import { validateCustomProperties } from './validate_custom_properties';
-import { stepSchemas } from '../../../../common/step_schemas';
 import {
-  getCachedOption,
-  getCachedSearchOption,
-  getCacheKeyForValue,
-  setCachedOption,
-} from '../../../shared/lib/custom_property_selection_cache';
+  clearCustomPropertyValidationOutcomeCache,
+  validateCustomProperties,
+} from './validate_custom_properties';
+import { stepSchemas } from '../../../../common/step_schemas';
+import * as customPropertySelectionCache from '../../../shared/lib/custom_property_selection_cache';
 import type { CustomPropertyItem } from '../model/types';
 
 // Mock the dependencies
@@ -32,13 +30,15 @@ jest.mock('@kbn/workflows/common/utils/zod/get_schema_at_path', () => ({
   getSchemaAtPath: jest.fn(),
 }));
 
-jest.mock('../../../shared/lib/custom_property_selection_cache', () => ({
-  clearCache: jest.fn(),
-  getCachedOption: jest.fn(),
-  getCachedSearchOption: jest.fn(),
-  getCacheKeyForValue: jest.fn(),
-  setCachedOption: jest.fn(),
-}));
+jest.mock('../../../shared/lib/custom_property_selection_cache', () => {
+  const actual = jest.requireActual<
+    typeof import('../../../shared/lib/custom_property_selection_cache')
+  >('../../../shared/lib/custom_property_selection_cache');
+  return {
+    ...actual,
+    getCachedSearchOption: jest.fn(actual.getCachedSearchOption),
+  };
+});
 
 const EMPTY_VALUES: StepSelectionValues = { config: {}, input: {} };
 
@@ -46,25 +46,19 @@ const mockGetAllConnectorsMapCache = stepSchemas.getAllConnectorsMapCache as jes
   typeof stepSchemas.getAllConnectorsMapCache
 >;
 const mockGetSchemaAtPath = getSchemaAtPath as jest.MockedFunction<typeof getSchemaAtPath>;
-const mockGetCachedOption = getCachedOption as jest.MockedFunction<typeof getCachedOption>;
-const mockGetCachedSearchOption = getCachedSearchOption as jest.MockedFunction<
-  typeof getCachedSearchOption
->;
-const mockGetCacheKeyForValue = getCacheKeyForValue as jest.MockedFunction<
-  typeof getCacheKeyForValue
->;
-const mockSetCachedOption = setCachedOption as jest.MockedFunction<typeof setCachedOption>;
+const mockGetCachedSearchOption =
+  customPropertySelectionCache.getCachedSearchOption as jest.MockedFunction<
+    typeof customPropertySelectionCache.getCachedSearchOption
+  >;
 
 describe('validateCustomProperties', () => {
   beforeEach(() => {
+    clearCustomPropertyValidationOutcomeCache();
     jest.clearAllMocks();
-    // Default mock implementations
-    mockGetCachedOption.mockReturnValue(null);
-    mockGetCachedSearchOption.mockReturnValue(null);
-    mockGetCacheKeyForValue.mockImplementation(
-      (stepType, scope, propertyKey, value) =>
-        `${stepType}:${scope}:${propertyKey}:${String(value)}`
-    );
+    const actual = jest.requireActual<
+      typeof import('../../../shared/lib/custom_property_selection_cache')
+    >('../../../shared/lib/custom_property_selection_cache');
+    mockGetCachedSearchOption.mockImplementation(actual.getCachedSearchOption);
   });
 
   it('should return error when resolve returns null and getDetails returns error message', async () => {
@@ -87,6 +81,7 @@ describe('validateCustomProperties', () => {
     const customPropertyItems: CustomPropertyItem[] = [
       {
         id: '1',
+        stepId: 'step-1',
         startLineNumber: 1,
         startColumn: 1,
         endLineNumber: 1,
@@ -161,6 +156,7 @@ describe('validateCustomProperties', () => {
     const customPropertyItems: CustomPropertyItem[] = [
       {
         id: '2',
+        stepId: 'step-2',
         startLineNumber: 1,
         startColumn: 1,
         endLineNumber: 1,
@@ -209,10 +205,9 @@ describe('validateCustomProperties', () => {
       afterMessage: null,
       hoverMessage: 'Valid',
     });
-    expect(mockSetCachedOption).toHaveBeenCalledWith('2:input:2:2', resolvedOption);
   });
 
-  it('should use cached option when available', async () => {
+  it('should use cached search option when available (resolve skipped)', async () => {
     const cachedOption = {
       value: '3',
       label: 'Cached Option',
@@ -226,7 +221,7 @@ describe('validateCustomProperties', () => {
       }),
     };
 
-    mockGetCachedOption.mockReturnValue(cachedOption);
+    mockGetCachedSearchOption.mockReturnValue(cachedOption);
 
     const mockConnector = {
       type: '3',
@@ -238,6 +233,7 @@ describe('validateCustomProperties', () => {
     const customPropertyItems: CustomPropertyItem[] = [
       {
         id: '3',
+        stepId: 'step-3',
         startLineNumber: 1,
         startColumn: 1,
         endLineNumber: 1,
@@ -282,76 +278,6 @@ describe('validateCustomProperties', () => {
     });
   });
 
-  it('should use cached search option when available', async () => {
-    const cachedSearchOption = {
-      value: '4',
-      label: 'Search Option',
-      description: 'Search Description',
-    };
-    const selectionHandler = {
-      search: jest.fn(),
-      resolve: jest.fn(),
-      getDetails: jest.fn().mockResolvedValue({
-        message: 'Valid',
-      }),
-    };
-
-    mockGetCachedSearchOption.mockReturnValue(cachedSearchOption);
-
-    const mockConnector = {
-      type: '4',
-      paramsSchema: z.object({ '4': z.string() }),
-    };
-    mockGetAllConnectorsMapCache.mockReturnValue(new Map([['4', mockConnector as any]]));
-    mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: '4' });
-
-    const customPropertyItems: CustomPropertyItem[] = [
-      {
-        id: '4',
-        startLineNumber: 1,
-        startColumn: 1,
-        endLineNumber: 1,
-        endColumn: 1,
-        yamlPath: ['4'],
-        key: '4',
-        selectionHandler,
-        context: {
-          stepType: '4',
-          scope: 'input',
-          propertyKey: '4',
-          values: EMPTY_VALUES,
-        },
-        propertyValue: '4',
-        propertyKey: '4',
-        stepType: '4',
-        scope: 'input',
-        type: 'custom-property',
-      },
-    ];
-
-    const validationResults = await validateCustomProperties(customPropertyItems);
-
-    expect(selectionHandler.resolve).not.toHaveBeenCalled();
-    expect(selectionHandler.getDetails).toHaveBeenCalledWith(
-      '4',
-      {
-        stepType: '4',
-        scope: 'input',
-        propertyKey: '4',
-        values: EMPTY_VALUES,
-      },
-      cachedSearchOption
-    );
-    expect(validationResults).toHaveLength(1);
-    expect(validationResults[0]).toMatchObject({
-      id: '4',
-      severity: null,
-      message: null,
-      beforeMessage: '✓ Search Option',
-      afterMessage: null,
-    });
-  });
-
   it('should skip validation when schema validation fails', async () => {
     const selectionHandler = {
       search: jest.fn(),
@@ -369,6 +295,7 @@ describe('validateCustomProperties', () => {
     const customPropertyItems: CustomPropertyItem[] = [
       {
         id: '5',
+        stepId: 'step-5',
         startLineNumber: 1,
         startColumn: 1,
         endLineNumber: 1,
@@ -414,6 +341,7 @@ describe('validateCustomProperties', () => {
     const customPropertyItems: CustomPropertyItem[] = [
       {
         id: '6a',
+        stepId: 'step-6a',
         startLineNumber: 1,
         startColumn: 1,
         endLineNumber: 1,
@@ -454,6 +382,7 @@ describe('validateCustomProperties', () => {
     const customPropertyItems: CustomPropertyItem[] = [
       {
         id: '6',
+        stepId: 'step-6',
         startLineNumber: 1,
         startColumn: 1,
         endLineNumber: 1,
@@ -524,6 +453,7 @@ describe('validateCustomProperties', () => {
     const customPropertyItems: CustomPropertyItem[] = [
       {
         id: '1',
+        stepId: 'multi-step-a',
         startLineNumber: 1,
         startColumn: 1,
         endLineNumber: 1,
@@ -545,6 +475,7 @@ describe('validateCustomProperties', () => {
       },
       {
         id: '2',
+        stepId: 'multi-step-b',
         startLineNumber: 1,
         startColumn: 1,
         endLineNumber: 1,
@@ -583,5 +514,51 @@ describe('validateCustomProperties', () => {
       afterMessage: null,
       hoverMessage: 'Valid',
     });
+  });
+
+  it('should skip resolve and getDetails on a second validation when semantic inputs are unchanged', async () => {
+    const selectionHandler = {
+      search: jest.fn(),
+      resolve: jest.fn().mockResolvedValue(null),
+      getDetails: jest.fn().mockResolvedValue({
+        message: 'Unresolved',
+      }),
+    };
+
+    const mockConnector = {
+      type: 'cache-test',
+      configSchema: z.object({ field: z.string() }),
+    };
+    mockGetAllConnectorsMapCache.mockReturnValue(new Map([['cache-test', mockConnector as any]]));
+    mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: 'field' });
+
+    const item: CustomPropertyItem = {
+      id: 'cache-test-item',
+      stepId: 'cache-step',
+      startLineNumber: 2,
+      startColumn: 1,
+      endLineNumber: 2,
+      endColumn: 5,
+      yamlPath: ['field'],
+      key: 'field',
+      selectionHandler,
+      context: {
+        stepType: 'cache-test',
+        scope: 'config',
+        propertyKey: 'field',
+        values: EMPTY_VALUES,
+      },
+      propertyValue: 'missing-id',
+      propertyKey: 'field',
+      stepType: 'cache-test',
+      scope: 'config',
+      type: 'custom-property',
+    };
+
+    await validateCustomProperties([item]);
+    await validateCustomProperties([item]);
+
+    expect(selectionHandler.resolve).toHaveBeenCalledTimes(1);
+    expect(selectionHandler.getDetails).toHaveBeenCalledTimes(1);
   });
 });

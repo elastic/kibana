@@ -23,8 +23,8 @@ export const listEntityEnginesRoute = (
 ) => {
   router.versioned
     .get({
-      access: 'public',
-      path: '/api/entity_store/engines',
+      access: 'internal',
+      path: '/internal/entity_store/engines',
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -33,7 +33,7 @@ export const listEntityEnginesRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {},
       },
 

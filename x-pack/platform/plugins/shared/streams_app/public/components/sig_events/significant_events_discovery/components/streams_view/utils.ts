@@ -191,6 +191,7 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
     stream: node.stream,
     effective_lifecycle: node.effective_lifecycle,
     data_stream: node.data_stream,
+    privileges: node.privileges,
     nameSortKey,
     documentsCount: 0,
     retentionMs,

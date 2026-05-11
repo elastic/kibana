@@ -348,7 +348,7 @@ $$$ai-anonymization-settings$$$`ai:anonymizationSettings` {applies_to}`stack: pr
     :::
 
 $$$observability-log-sources$$$`observability:logSources` {applies_to}`stack: ga` {applies_to}`observability: ga`
-:   Sources to use for logs data. If the data of these indices is not logs data, you can experience degraded functionality. Changes to this setting can potentially impact the sources queried in Log Threshold rules. `logs-*-*, logs-*, filebeat-*` by default.
+:   Sources to use for logs data. If the data of these indices is not logs data, you can experience degraded functionality. Changes to this setting can potentially impact the sources queried in Log Threshold rules. `logs*, -logstash*, filebeat-*` by default.
 
 $$$observability-streams-enable-content-packs$$$`observability:streamsEnableContentPacks` {applies_to}`stack: preview` {applies_to}`observability: preview`
 :   Enable Streams content packs. `false` by default.

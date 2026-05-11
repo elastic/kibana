@@ -11,6 +11,12 @@ import type { LeadDataClient } from './lead_data_client';
 import { getLeadsIndexName } from '../../../../common/entity_analytics/lead_generation/constants';
 import type { Lead } from '../../../../common/entity_analytics/lead_generation/types';
 
+const makeEsSecurityException = () => ({
+  statusCode: 403,
+  body: { error: { type: 'security_exception', reason: 'access denied' } },
+  meta: { body: { error: { type: 'security_exception', reason: 'access denied' } } },
+});
+
 const makeTestLead = (overrides: Partial<Lead> = {}): Lead => ({
   id: 'lead-1',
   title: 'Test Lead',
@@ -103,7 +109,7 @@ describe('LeadDataClient', () => {
       expect(esClient.deleteByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: adhocIndex,
-          query: { bool: { must_not: [{ term: { 'execution_uuid.keyword': 'exec-1' } }] } },
+          query: { bool: { must_not: [{ term: { execution_uuid: 'exec-1' } }] } },
         })
       );
     });
@@ -162,6 +168,21 @@ describe('LeadDataClient', () => {
       ).resolves.toBeUndefined();
 
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to persist leads'));
+    });
+
+    it('re-throws when ES returns security_exception so callers can surface the 403', async () => {
+      const securityException = makeEsSecurityException();
+      esClient.bulk.mockRejectedValueOnce(securityException);
+
+      await expect(
+        client.createLeads({
+          leads: [makeTestLead()],
+          executionId: 'exec-5',
+          sourceType: 'adhoc',
+        })
+      ).rejects.toBe(securityException);
+
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 
@@ -237,7 +258,7 @@ describe('LeadDataClient', () => {
       const searchCall = esClient.search.mock.calls[0];
       expect(searchCall).toBeDefined();
       expect((searchCall[0] as Record<string, unknown>).query).toEqual({
-        bool: { filter: [{ term: { 'status.keyword': 'dismissed' } }] },
+        bool: { filter: [{ term: { status: 'dismissed' } }] },
       });
     });
 
@@ -246,6 +267,25 @@ describe('LeadDataClient', () => {
 
       const result = await client.findLeads({});
       expect(result).toEqual({ leads: [], total: 0, page: 1, perPage: 20 });
+    });
+
+    it('returns empty results when error type is index_not_found_exception', async () => {
+      const indexNotFound = {
+        statusCode: 404,
+        body: { error: { type: 'index_not_found_exception', reason: 'no such index' } },
+        meta: { body: { error: { type: 'index_not_found_exception', reason: 'no such index' } } },
+      };
+      esClient.search.mockRejectedValueOnce(indexNotFound);
+
+      const result = await client.findLeads({});
+      expect(result).toEqual({ leads: [], total: 0, page: 1, perPage: 20 });
+    });
+
+    it('re-throws when ES returns security_exception so the route can return 403', async () => {
+      const securityException = makeEsSecurityException();
+      esClient.search.mockRejectedValueOnce(securityException);
+
+      await expect(client.findLeads({})).rejects.toBe(securityException);
     });
   });
 
@@ -265,7 +305,7 @@ describe('LeadDataClient', () => {
       expect(esClient.updateByQuery).toHaveBeenCalledWith(
         expect.objectContaining({
           index: allIndices,
-          query: { term: { 'id.keyword': 'lead-1' } },
+          query: { term: { id: 'lead-1' } },
         })
       );
     });
@@ -298,7 +338,7 @@ describe('LeadDataClient', () => {
       expect(count).toBe(3);
 
       const [call] = esClient.updateByQuery.mock.calls;
-      expect(call[0].query).toEqual({ terms: { 'id.keyword': ['a', 'b', 'c'] } });
+      expect(call[0].query).toEqual({ terms: { id: ['a', 'b', 'c'] } });
       expect(call[0].script).toEqual(
         expect.objectContaining({
           params: { status: 'dismissed' },
@@ -356,6 +396,25 @@ describe('LeadDataClient', () => {
         lastRun: null,
       });
     });
+
+    it('returns defaults for any generic ES error', async () => {
+      esClient.search.mockRejectedValueOnce(new Error('cluster timeout'));
+
+      const status = await client.getStatus();
+      expect(status).toEqual({
+        isEnabled: false,
+        indexExists: false,
+        totalLeads: 0,
+        lastRun: null,
+      });
+    });
+
+    it('re-throws when ES returns security_exception so the route can return 403', async () => {
+      const securityException = makeEsSecurityException();
+      esClient.search.mockRejectedValueOnce(securityException);
+
+      await expect(client.getStatus()).rejects.toBe(securityException);
+    });
   });
 
   describe('deleteAllLeads', () => {
@@ -376,6 +435,15 @@ describe('LeadDataClient', () => {
           query: { match_all: {} },
         })
       );
+    });
+
+    it('re-throws when ES returns security_exception so the disable route can return 403', async () => {
+      const securityException = makeEsSecurityException();
+      esClient.deleteByQuery.mockRejectedValueOnce(securityException);
+
+      await expect(client.deleteAllLeads()).rejects.toBe(securityException);
+
+      expect(logger.warn).not.toHaveBeenCalled();
     });
   });
 });

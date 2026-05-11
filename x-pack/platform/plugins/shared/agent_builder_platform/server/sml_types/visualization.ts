@@ -6,11 +6,11 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/agent-builder-plugin/server';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
 import {
   LensConfigBuilder,
-  type LensApiSchemaType,
-} from '@kbn/lens-embeddable-utils/config_builder';
+  type LensApiConfig,
+  type LensAttributes,
+} from '@kbn/lens-embeddable-utils';
 
 const VISUALIZATION_SML_TYPE = 'visualization';
 
@@ -43,7 +43,7 @@ const toLensAttributes = (
   references: references ?? attributes.references ?? [],
 });
 
-const toLensApiConfig = (attributes: LensAttributes): LensApiSchemaType =>
+const toLensApiConfig = (attributes: LensAttributes): LensApiConfig =>
   new LensConfigBuilder().toAPIFormat(attributes);
 
 export const visualizationSmlType: SmlTypeDefinition = {

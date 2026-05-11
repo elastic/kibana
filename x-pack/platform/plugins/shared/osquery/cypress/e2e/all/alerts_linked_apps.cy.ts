@@ -64,7 +64,7 @@ describe(
     });
 
     it('should be able to run live query and add to timeline', () => {
-      const TIMELINE_NAME = 'Untitled timeline';
+      const TIMELINE_NAME = 'Untitled Timeline';
       cy.getBySel('expand-event').first().click();
       cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click();
       cy.getBySel('osquery-action-item').click();

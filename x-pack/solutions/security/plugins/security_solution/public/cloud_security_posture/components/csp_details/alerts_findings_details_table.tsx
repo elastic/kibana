@@ -153,7 +153,7 @@ export const AlertsDetailsTable = memo(
       },
     });
 
-    const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+    const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
     const entityTypeResolved: 'host' | 'user' =
       entityType ?? (field === 'user.name' ? 'user' : 'host');
 

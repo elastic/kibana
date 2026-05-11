@@ -17,9 +17,10 @@ interface Props {
   locations: ServiceLocations;
   monitorId: string;
   overviewStatus: OverviewStatusState | null;
+  spaces?: string[];
 }
 
-export const MonitorLocations = ({ locations, monitorId, overviewStatus }: Props) => {
+export const MonitorLocations = ({ locations, monitorId, overviewStatus, spaces }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const locationsToDisplay = locations.map((loc) => {
@@ -45,6 +46,11 @@ export const MonitorLocations = ({ locations, monitorId, overviewStatus }: Props
   });
 
   return (
-    <LocationStatusBadges configId={monitorId} locations={locationsToDisplay} loading={false} />
+    <LocationStatusBadges
+      configId={monitorId}
+      locations={locationsToDisplay}
+      loading={false}
+      spaces={spaces}
+    />
   );
 };

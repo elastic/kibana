@@ -10,7 +10,7 @@
 import React from 'react';
 
 import {
-  registerReactEmbeddableFactory,
+  registerEmbeddablePublicDefinition,
   type EmbeddableFactory,
 } from '@kbn/embeddable-plugin/public/react_embeddable_system';
 import type { Filter } from '@kbn/es-query';
@@ -38,7 +38,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 
 const getTestEmbeddableFactory = () =>
   Promise.resolve({
-    type: 'testControl',
+    type: 'test_control',
     buildEmbeddable: async ({ initialState, finalizeApi }) => {
       const api = finalizeApi({
         serializeState: () => ({
@@ -63,7 +63,7 @@ const mockGetCreationOptions = jest
 
 describe('control group renderer', () => {
   beforeAll(() => {
-    registerReactEmbeddableFactory('testControl', getTestEmbeddableFactory);
+    registerEmbeddablePublicDefinition('test_control', getTestEmbeddableFactory);
   });
 
   const mountControlGroupRenderer = async (
@@ -93,7 +93,7 @@ describe('control group renderer', () => {
         initialState: {
           initialChildControlState: {
             test: {
-              type: 'testControl',
+              type: 'test_control',
             },
           },
         },
@@ -107,7 +107,7 @@ describe('control group renderer', () => {
       api.updateInput({
         initialChildControlState: {
           test: {
-            type: 'testControl',
+            type: 'test_control',
             selection: 'test selection',
           },
         } as unknown as ControlPanelsState,
@@ -115,7 +115,7 @@ describe('control group renderer', () => {
     );
 
     expect(applySpy).toBeCalledWith({
-      type: 'testControl',
+      type: 'test_control',
       selection: 'test selection',
     });
   });

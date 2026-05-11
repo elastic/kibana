@@ -14,19 +14,21 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { MonitoredUserUpdateDoc, MonitoredUserDoc } from './common.gen';
 
+export const UpdatePrivMonUserRequestParams = lazySchema(() =>
+  z.object({
+    id: z.string(),
+  })
+);
 export type UpdatePrivMonUserRequestParams = z.infer<typeof UpdatePrivMonUserRequestParams>;
-export const UpdatePrivMonUserRequestParams = z.object({
-  id: z.string(),
-});
 export type UpdatePrivMonUserRequestParamsInput = z.input<typeof UpdatePrivMonUserRequestParams>;
 
+export const UpdatePrivMonUserRequestBody = lazySchema(() => MonitoredUserUpdateDoc);
 export type UpdatePrivMonUserRequestBody = z.infer<typeof UpdatePrivMonUserRequestBody>;
-export const UpdatePrivMonUserRequestBody = MonitoredUserUpdateDoc;
 export type UpdatePrivMonUserRequestBodyInput = z.input<typeof UpdatePrivMonUserRequestBody>;
 
+export const UpdatePrivMonUserResponse = lazySchema(() => MonitoredUserDoc);
 export type UpdatePrivMonUserResponse = z.infer<typeof UpdatePrivMonUserResponse>;
-export const UpdatePrivMonUserResponse = MonitoredUserDoc;

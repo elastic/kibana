@@ -15,9 +15,10 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 
 import { SetAlertAssigneesBody } from '../model/set_alert_assignees_body.gen';
 
+export const SetAlertAssigneesRequestBody = lazySchema(() => SetAlertAssigneesBody);
 export type SetAlertAssigneesRequestBody = z.infer<typeof SetAlertAssigneesRequestBody>;
-export const SetAlertAssigneesRequestBody = SetAlertAssigneesBody;
 export type SetAlertAssigneesRequestBodyInput = z.input<typeof SetAlertAssigneesRequestBody>;

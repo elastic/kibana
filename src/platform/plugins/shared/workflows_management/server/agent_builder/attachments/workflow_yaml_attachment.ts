@@ -140,7 +140,7 @@ const createWorkflowYamlAttachmentType = (api: WorkflowsManagementApi) => ({
     `- Render the updated workflow with <render_attachment id="{attachmentId}" version="{attachmentVersion}"/> — the version attribute is required so the UI shows the latest content\n` +
     `- Edit tools auto-validate the result and return a \`validation\` field — no need to call ${workflowTools.validateWorkflow} separately after edits.\n` +
     `- Prefer surgical edits (${workflowTools.modifyStep}, ${workflowTools.modifyStepProperty}) over ${workflowTools.setYaml}\n` +
-    `- **ALWAYS call ${workflowTools.getStepDefinitions} to verify the exact step type ID before changing a step's type or inserting a new step.** Step types have specific IDs (e.g. \`kibana.createCase\`, not \`kibana\`).\n` +
+    `- **ALWAYS call ${workflowTools.getStepDefinitions} to verify the exact step type ID before changing a step's type or inserting a new step.** Step types have specific IDs (e.g. \`kibana.createCase\`, not \`kibana\`). Deprecated steps are excluded from discovery by default; use an exact \`stepType\` lookup or \`includeDeprecated: true\` when maintaining legacy workflows.\n` +
     `- Use ${workflowTools.getExamples} to find working workflow patterns\n\n` +
     `## Rendering\n\n` +
     `- The ${WORKFLOW_YAML_ATTACHMENT_TYPE} attachment is rendered in chat as a YAML code preview with a Save button.\n` +

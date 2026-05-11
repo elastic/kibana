@@ -15,7 +15,7 @@ import {
   validateEsqlQueryForStreamOrThrow,
 } from '../../../lib/sig_events/validate_esql_query';
 import { createServerRoute } from '../../create_server_route';
-import { assertEnterpriseLicense } from '../../utils/assert_enterprise_license';
+import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
 export interface ListQueriesResponse {
   queries: StreamQuery[];
@@ -53,9 +53,11 @@ const listQueriesRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  async handler({ params, request, getScopedClients }): Promise<ListQueriesResponse> {
-    const { getQueryClient, streamsClient, licensing } = await getScopedClients({ request });
-    await assertEnterpriseLicense(licensing);
+  async handler({ params, request, getScopedClients, server }): Promise<ListQueriesResponse> {
+    const { getQueryClient, streamsClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
     await streamsClient.ensureStream(params.path.name);
 
     const {
@@ -94,13 +96,15 @@ const upsertQueryRoute = createServerRoute({
     }),
     body: upsertStreamQueryRequestSchema,
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<UpsertQueryResponse> => {
-    const { streamsClient, getQueryClient, licensing } = await getScopedClients({ request });
+  handler: async ({ params, request, getScopedClients, server }): Promise<UpsertQueryResponse> => {
+    const { streamsClient, getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
     const {
       path: { name: streamName, queryId },
       body,
     } = params;
-    await assertEnterpriseLicense(licensing);
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const definition = await streamsClient.getStream(streamName);
 
@@ -147,11 +151,17 @@ const deleteQueryRoute = createServerRoute({
       queryId: z.string(),
     }),
   }),
-  handler: async ({ params, request, getScopedClients, logger }): Promise<DeleteQueryResponse> => {
-    const { streamsClient, getQueryClient, licensing } = await getScopedClients({
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    logger,
+    server,
+  }): Promise<DeleteQueryResponse> => {
+    const { streamsClient, getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
       request,
     });
-    await assertEnterpriseLicense(licensing);
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { queryId, name: streamName },
@@ -213,9 +223,12 @@ const bulkQueriesRoute = createServerRoute({
     request,
     getScopedClients,
     logger,
+    server,
   }): Promise<BulkUpdateAssetsResponse> => {
-    const { streamsClient, getQueryClient, licensing } = await getScopedClients({ request });
-    await assertEnterpriseLicense(licensing);
+    const { streamsClient, getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
+      request,
+    });
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const {
       path: { name: streamName },

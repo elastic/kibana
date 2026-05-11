@@ -15,10 +15,7 @@ import * as statusByLocation from '../../../../hooks/use_status_by_location';
 import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_locator';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import {
-  OBSERVABILITY_AGENT_ID,
-  OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,
-} from '@kbn/observability-agent-builder-plugin/public';
+import { OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 
@@ -225,7 +222,6 @@ describe('Monitor Detail Flyout', () => {
       );
 
       expect(mockSetChatConfig).toHaveBeenCalledWith({
-        agentId: OBSERVABILITY_AGENT_ID,
         attachments: [
           {
             type: OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID,

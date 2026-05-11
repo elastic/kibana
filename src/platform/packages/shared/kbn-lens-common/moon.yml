@@ -61,7 +61,6 @@ dependsOn:
   - '@kbn/usage-collection-plugin'
   - '@kbn/saved-objects-plugin'
   - '@kbn/i18n'
-  - '@kbn/chart-icons'
   - '@kbn/alerts-ui-shared'
   - '@kbn/cps'
   - '@kbn/kql'

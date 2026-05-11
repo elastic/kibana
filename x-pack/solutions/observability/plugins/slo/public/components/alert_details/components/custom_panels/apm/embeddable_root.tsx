@@ -18,11 +18,9 @@ import { apmTransactionDurationIndicatorSchema } from '@kbn/slo-schema';
 import type { BurnRateAlert, BurnRateRule, TimeRange } from '../../../types';
 
 type EmbeddableId =
-  | 'APM_THROUGHPUT_CHART_EMBEDDABLE'
-  | 'APM_LATENCY_CHART_EMBEDDABLE'
-  | 'APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE'
-  | 'APM_ALERTING_LATENCY_CHART_EMBEDDABLE'
-  | 'APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE';
+  | 'apm_alerting_failed_transactions_chart'
+  | 'apm_alerting_latency_chart'
+  | 'apm_alerting_throughput_chart';
 
 export type APMTransactionDurationSLOResponse = GetSLOResponse & {
   indicator: APMTransactionDurationIndicator;

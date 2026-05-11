@@ -125,12 +125,13 @@ function convertDataLayerToAPI(
           }
           const yConfig = yConfigMap.get(accessor);
 
+          const onAxis = resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left');
           return {
             ...apiOperation,
             color: breakdown_by
               ? undefined // if there is a breakdown, the color is applied to the breakdown
               : fromStaticColorLensStateToAPI(yConfig?.color) ?? AUTO_COLOR,
-            axis_id: resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left'),
+            ...(onAxis !== 'y' ? { axis: onAxis } : {}),
           };
         })
         .filter(nonNullable) ?? [];
@@ -169,10 +170,11 @@ function convertDataLayerToAPI(
       : undefined;
   const y = visualization.accessors?.map((accessor) => {
     const { color: yColor } = yConfigMap.get(accessor) || {};
+    const axis = resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left');
     return {
       ...getValueApiColumn(accessor, layer),
       color: breakdown_by ? undefined : fromStaticColorLensStateToAPI(yColor) ?? AUTO_COLOR,
-      axis_id: resolveAxisId(yAccessorModesMap.get(accessor) ?? 'left'),
+      ...(axis !== 'y' ? { axis } : {}),
     };
   });
 
@@ -274,12 +276,13 @@ function convertReferenceLinesDecorationsToAPIFormat(
   resolveAxisId: ResolveAxisId
 ): Pick<
   ReferenceLineDef,
-  'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'position' | 'fill' | 'axis_id' | 'text'
+  'color' | 'stroke_dash' | 'stroke_width' | 'icon' | 'position' | 'fill' | 'axis' | 'text'
 > {
-  const resolvedAxisId = (): ReferenceLineDef['axis_id'] | undefined => {
+  const resolvedOnAxis = (): ReferenceLineDef['axis'] | undefined => {
     if (!yConfig.axisMode || yConfig.axisMode === 'auto') return undefined;
     if (yConfig.axisMode === 'bottom') return 'x';
-    return resolveAxisId(yConfig.axisMode);
+    const axisId = resolveAxisId(yConfig.axisMode);
+    return axisId !== 'y' ? axisId : undefined;
   };
   return stripUndefined({
     color: fromStaticColorLensStateToAPI(yConfig.color) ?? AUTO_COLOR,
@@ -291,7 +294,7 @@ function convertReferenceLinesDecorationsToAPIFormat(
         : undefined,
     position: yConfig.iconPosition,
     fill: yConfig.fill && yConfig.fill !== 'none' ? yConfig.fill : undefined,
-    axis_id: resolvedAxisId(),
+    axis: resolvedOnAxis(),
     text: yConfig.textVisibility != null ? { visible: yConfig.textVisibility } : undefined,
   });
 }

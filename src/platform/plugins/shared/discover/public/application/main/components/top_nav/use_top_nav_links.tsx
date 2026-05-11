@@ -125,7 +125,10 @@ export const useTopNavLinks = ({
       items.push(inspectAppMenuItem);
     }
 
-    if (services.triggersActionsUi && discoverParams.authorizedRuleTypeIds.length) {
+    const hasV1AlertsAccess = discoverParams.authorizedRuleTypeIds.length > 0;
+    const shouldShowAlertsMenu = hasV1AlertsAccess || showCreateRuleV2;
+
+    if (services.triggersActionsUi && shouldShowAlertsMenu) {
       const alertsAppMenuItem = getAlertsAppMenuItem({
         discoverParams,
         services,
@@ -297,11 +300,16 @@ export const useTopNavLinks = ({
             runtimeStateManager,
             onSaveCb: isEmbeddedEditor
               ? (saveState) => {
-                  const action = saveState
-                    ? TransferAction.SaveSession
-                    : TransferAction.SaveByValue;
-
-                  services.embeddableEditor.transferBackToEditor(action, { state: saveState });
+                  if (saveState) {
+                    services.embeddableEditor.transferBackToEditor(TransferAction.SaveByValue, {
+                      state: {
+                        byValueState: saveState,
+                        controlGroupState: currentTab.attributes.controlGroupState,
+                      },
+                    });
+                  } else {
+                    services.embeddableEditor.transferBackToEditor(TransferAction.SaveSession);
+                  }
                 }
               : undefined,
           });
@@ -389,6 +397,7 @@ export const useTopNavLinks = ({
     hasUnsavedChanges,
     transitionFromDataViewToESQL,
     persistedDiscoverSession,
+    currentTab.attributes.controlGroupState,
   ]);
 
   return useMemo((): AppMenuConfig => {

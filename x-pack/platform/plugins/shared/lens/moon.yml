@@ -152,6 +152,7 @@ dependsOn:
   - '@kbn/calculate-auto'
   - '@kbn/esql-language'
   - '@kbn/as-code-shared-schemas'
+  - '@kbn/as-code-shared-telemetry'
   - '@kbn/core-http-browser'
 tags:
   - plugin

@@ -13,7 +13,6 @@ import {
   EuiLink,
   EuiText,
   EuiToolTip,
-  useEuiTheme,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import type { GapFillStatus } from '@kbn/alerting-plugin/common';
@@ -517,8 +516,6 @@ const GapFillStatusTooltip = ({
 };
 
 export const useGapStatusColumn = (): TableColumn => {
-  const { euiTheme } = useEuiTheme();
-
   return useMemo(
     () => ({
       field: 'gap_info',
@@ -533,19 +530,19 @@ export const useGapStatusColumn = (): TableColumn => {
 
         const byStatus: Record<GapFillStatus, { color: string; label: string }> = {
           [gapFillStatus.FILLED]: {
-            color: euiTheme.colors.vis.euiColorVis0,
+            color: 'success',
             label: GAP_STATUS_FILLED_LABEL,
           },
           [gapFillStatus.IN_PROGRESS]: {
-            color: euiTheme.colors.vis.euiColorVis2,
+            color: 'primary',
             label: GAP_STATUS_IN_PROGRESS_LABEL,
           },
           [gapFillStatus.UNFILLED]: {
-            color: euiTheme.colors.vis.euiColorVis6,
+            color: 'danger',
             label: GAP_STATUS_UNFILLED_LABEL,
           },
           [gapFillStatus.ERROR]: {
-            color: euiTheme.colors.vis.euiColorVis8,
+            color: 'warning',
             label: GAP_STATUS_ERROR_LABEL,
           },
         };
@@ -576,12 +573,7 @@ export const useGapStatusColumn = (): TableColumn => {
       width: '7em',
       maxWidth: '9em',
     }),
-    [
-      euiTheme.colors.vis.euiColorVis0,
-      euiTheme.colors.vis.euiColorVis2,
-      euiTheme.colors.vis.euiColorVis6,
-      euiTheme.colors.vis.euiColorVis8,
-    ]
+    []
   );
 };
 

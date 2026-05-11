@@ -37,8 +37,8 @@ export const initEntityEngineRoute = (
 ) => {
   router.versioned
     .post({
-      access: 'public',
-      path: '/api/entity_store/engines/{entityType}/init',
+      access: 'internal',
+      path: '/internal/entity_store/engines/{entityType}/init',
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
@@ -47,7 +47,7 @@ export const initEntityEngineRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             params: buildRouteValidationWithZod(InitEntityEngineRequestParams),

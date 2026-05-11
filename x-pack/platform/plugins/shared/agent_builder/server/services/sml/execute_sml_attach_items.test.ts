@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SmlDocument, SmlService } from './types';
 import { resolveSmlAttachItems } from './execute_sml_attach_items';
+
+const createMockScopedClient = (): IScopedClusterClient =>
+  ({
+    asInternalUser: { search: jest.fn() } as unknown as ElasticsearchClient,
+    asCurrentUser: { search: jest.fn() } as unknown as ElasticsearchClient,
+  } as unknown as IScopedClusterClient);
 
 const mockCheckItemsAccess = jest.fn();
 const mockGetDocuments = jest.fn();
@@ -40,7 +46,7 @@ const mockLogger = loggerMock.create();
 
 const baseParams = {
   sml: createSmlService(),
-  esClient: {} as ElasticsearchClient,
+  esClient: createMockScopedClient(),
   request: {} as KibanaRequest,
   spaceId: 'default',
   savedObjectsClient: {} as SavedObjectsClientContract,
@@ -195,8 +201,65 @@ describe('resolveSmlAttachItems', () => {
         type: 'visualization',
         data: { layers: [] },
         origin: 'custom-origin',
+        description: 'visualization/Test Viz',
       });
       expect(results[0].chunk_id).toBe('chunk-1');
+    }
+  });
+
+  it('uses toAttachment description when provided', async () => {
+    const smlDoc = createSmlDoc({ origin_id: 'so-1' });
+    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
+    mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
+    mockGetTypeDefinition.mockReturnValue({
+      id: 'visualization',
+      list: jest.fn(),
+      getSmlData: jest.fn(),
+      toAttachment: jest.fn().mockResolvedValue({
+        type: 'visualization',
+        data: { x: 1 },
+        description: 'My asset',
+      }),
+    });
+    const results = await resolveSmlAttachItems({
+      ...baseParams,
+      chunkIds: ['chunk-1'],
+    });
+    expect(results[0].success).toBe(true);
+    if (results[0].success) {
+      expect(results[0].attachment).toEqual({
+        type: 'visualization',
+        data: { x: 1 },
+        origin: 'so-1',
+        description: 'My asset',
+      });
+    }
+  });
+
+  it('falls back to smlDoc type/title when toAttachment omits description', async () => {
+    const smlDoc = createSmlDoc({
+      type: 'connector',
+      title: 'My Drive',
+      origin_id: 'so-1',
+    });
+    mockCheckItemsAccess.mockResolvedValue(new Map([['chunk-1', true]]));
+    mockGetDocuments.mockResolvedValue(new Map([['chunk-1', smlDoc]]));
+    mockGetTypeDefinition.mockReturnValue({
+      id: 'connector',
+      list: jest.fn(),
+      getSmlData: jest.fn(),
+      toAttachment: jest.fn().mockResolvedValue({
+        type: 'connector',
+        data: { connector_id: 'c1' },
+      }),
+    });
+    const results = await resolveSmlAttachItems({
+      ...baseParams,
+      chunkIds: ['chunk-1'],
+    });
+    expect(results[0].success).toBe(true);
+    if (results[0].success) {
+      expect(results[0].attachment.description).toBe('connector/My Drive');
     }
   });
 
@@ -217,6 +280,7 @@ describe('resolveSmlAttachItems', () => {
     expect(results[0].success).toBe(true);
     if (results[0].success) {
       expect(results[0].attachment.origin).toBe('fallback-origin');
+      expect(results[0].attachment.description).toBe('visualization/Test Viz');
     }
   });
 
@@ -268,6 +332,7 @@ describe('resolveSmlAttachItems', () => {
         type: 'visualization',
         data: {},
         origin: 'r-ok',
+        description: 'visualization/Test Viz',
       });
     }
   });

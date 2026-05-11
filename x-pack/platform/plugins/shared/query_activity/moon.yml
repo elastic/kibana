@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/data-plugin'
   - '@kbn/discover-utils'
+  - '@kbn/management-settings-ids'
 tags:
   - plugin
   - prod

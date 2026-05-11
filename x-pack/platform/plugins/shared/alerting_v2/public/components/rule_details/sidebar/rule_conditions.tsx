@@ -13,7 +13,7 @@ import React from 'react';
 import type { RuleApiResponse } from '../../../services/rules_api';
 import { ItemValueRuleSummary } from '../item_value_rule_summary';
 import { RecoveryPolicy } from '../recovery_policy';
-import { EMPTY_VALUE, formatAlertDelay } from '../utils';
+import { EMPTY_VALUE, formatAlertDelay, formatRecoveryDelay } from '../utils';
 
 export interface RuleConditionsProps {
   rule: RuleApiResponse;
@@ -130,6 +130,17 @@ export const RuleConditions: React.FunctionComponent<RuleConditionsProps> = ({ r
               <ItemValueRuleSummary
                 data-test-subj="alertingV2RuleDetailsAlertDelay"
                 itemValue={formatAlertDelay(rule.state_transition)}
+              />
+            ),
+          },
+          {
+            title: i18n.translate('xpack.alertingV2.ruleDetails.recoveryDelay', {
+              defaultMessage: 'Recovery delay',
+            }),
+            description: (
+              <ItemValueRuleSummary
+                data-test-subj="alertingV2RuleDetailsRecoveryDelay"
+                itemValue={formatRecoveryDelay(rule.state_transition)}
               />
             ),
           },

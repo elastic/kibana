@@ -70,7 +70,7 @@ export const AnalyzerGraph = memo(
         <EuiFlyoutHeader
           hasBorder
           css={css`
-            padding-block-end: ${euiTheme.size.m} !important;
+            padding-block: ${euiTheme.size.s} !important;
           `}
         >
           <ToolsFlyoutHeader

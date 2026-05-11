@@ -15,7 +15,7 @@ import { getEntityAnalyticsSkill } from './entity_analytics';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
-import { getSecurityMlJobsSkill } from './security_ml_jobs';
+import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -54,7 +54,7 @@ export const registerSkills = async ({
 
   agentBuilder.skills.register(getDetectionRuleEditSkill());
   await agentBuilder.skills.register(
-    getSecurityMlJobsSkill({ getStartServices, isEntityStoreV2Enabled, logger, ml })
+    findSecurityMlJobsSkill({ getStartServices, isEntityStoreV2Enabled, logger, ml })
   );
 
   await agentBuilder.skills.register(threatHuntingSkill);

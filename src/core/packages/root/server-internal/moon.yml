@@ -92,6 +92,7 @@ dependsOn:
   - '@kbn/core-data-streams-server-internal'
   - '@kbn/tracing-utils'
   - '@kbn/core-user-activity-server-internal'
+  - '@kbn/zod'
 tags:
   - shared-server
   - package

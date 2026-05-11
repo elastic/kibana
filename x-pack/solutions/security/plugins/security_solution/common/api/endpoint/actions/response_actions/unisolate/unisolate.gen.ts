@@ -14,18 +14,18 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { BaseActionSchema } from '../../../model/schema/common.gen';
 
+export const UnisolateRouteResponse = lazySchema(() => z.object({}));
 export type UnisolateRouteResponse = z.infer<typeof UnisolateRouteResponse>;
-export const UnisolateRouteResponse = z.object({});
 
+export const EndpointUnisolateActionRequestBody = lazySchema(() => BaseActionSchema);
 export type EndpointUnisolateActionRequestBody = z.infer<typeof EndpointUnisolateActionRequestBody>;
-export const EndpointUnisolateActionRequestBody = BaseActionSchema;
 export type EndpointUnisolateActionRequestBodyInput = z.input<
   typeof EndpointUnisolateActionRequestBody
 >;
 
+export const EndpointUnisolateActionResponse = lazySchema(() => UnisolateRouteResponse);
 export type EndpointUnisolateActionResponse = z.infer<typeof EndpointUnisolateActionResponse>;
-export const EndpointUnisolateActionResponse = UnisolateRouteResponse;

@@ -36,7 +36,7 @@ paths:
             items:
               type: string
         - name: 'enable_field_rendering'
-          description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack discovery views within Kibana. Defaults to `false`.
+          description: Enables a markdown syntax used to render pivot fields, for example `{{ user.name james }}`. When disabled, the same example would be rendered as `james`. This is primarily used for Attack Discovery views within Kibana. Defaults to `false`.
           in: query
           required: false
           schema:
@@ -148,7 +148,7 @@ paths:
           example: true
       responses:
         200:
-          description: Successful response
+          description: Indicates a successful call.
           content:
             application/json:
               schema:
@@ -188,8 +188,19 @@ paths:
                   - per_page
                   - total
                   - unique_alert_ids_count
+              example:
+                connector_names:
+                  - "GPT-5 Chat"
+                data:
+                  - id: "c0c8a8bbb4a6561856a974ee9e461f0c82e673a1f0d83f86c5a8d80fc8de4c4f"
+                    title: "Suspicious process execution on host-01"
+                    connector_name: "GPT-5 Chat"
+                page: 1
+                per_page: 10
+                total: 1
+                unique_alert_ids_count: 0
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -207,10 +218,14 @@ paths:
                     type: string
                     description: Human-readable error message
                     example: "Invalid request payload."
+              example:
+                status_code: 400
+                error: "Bad Request"
+                message: "Invalid request payload."
 components:
   schemas:
     AttackDiscoveryFindSortField:
       type: string
-      description: Allowed field names to sort Attack discovery results by. Clients should only pass one of the listed values.
+      description: Allowed field names to sort Attack Discovery results by. Clients should only pass one of the listed values.
       enum:
         - '@timestamp'

@@ -29,6 +29,7 @@ export class RunnerFactoryImpl implements RunnerFactory {
       uiSettings,
       hooks,
       savedObjects,
+      searchInferenceEndpoints,
       ...otherDeps
     } = this.deps;
     return {
@@ -43,6 +44,7 @@ export class RunnerFactoryImpl implements RunnerFactory {
         trackingService,
         uiSettings,
         savedObjects,
+        searchInferenceEndpoints,
       }),
     };
   }

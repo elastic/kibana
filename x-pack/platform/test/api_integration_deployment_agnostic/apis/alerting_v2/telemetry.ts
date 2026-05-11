@@ -137,10 +137,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('should retrieve telemetry data in the expected format', async () => {
       // Request the telemetry task to run immediately
       await supertestWithoutAuth
-        .post('/api/alerting_v2_fixture_telemetry/run_soon')
+        .post(`/internal/ftr/task_manager/${TELEMETRY_TASK_ID}/run_soon`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
-        .send({ taskId: TELEMETRY_TASK_ID })
         .expect(200);
 
       // Wait for the task to complete and verify the state

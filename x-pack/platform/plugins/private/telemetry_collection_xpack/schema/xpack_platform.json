@@ -357,6 +357,96 @@
             }
           }
         },
+        "skills": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of persisted skills (custom + plugin-bundled)"
+              }
+            },
+            "custom": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of user-created custom skills"
+              }
+            },
+            "plugin": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of plugin-bundled skills"
+              }
+            }
+          }
+        },
+        "plugins": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of installed plugins"
+              }
+            }
+          }
+        },
+        "skill_invocations": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total skill invocations across all origins"
+              }
+            },
+            "by_origin": {
+              "properties": {
+                "builtin": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Skill invocations from built-in skills"
+                  }
+                },
+                "custom": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Skill invocations from user-created skills"
+                  }
+                },
+                "plugin": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Skill invocations from plugin-bundled skills"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "plugin_imports": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total plugin imports across all source types"
+              }
+            },
+            "by_source": {
+              "properties": {
+                "url": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Plugins imported via URL"
+                  }
+                },
+                "upload": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Plugins imported via file upload"
+                  }
+                }
+              }
+            }
+          }
+        },
         "conversations": {
           "properties": {
             "total": {

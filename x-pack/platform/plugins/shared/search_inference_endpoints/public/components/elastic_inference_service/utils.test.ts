@@ -238,6 +238,57 @@ describe('utils', () => {
 
       expect(groupEndpointsByModel(endpoints)[0].categories).toEqual([]);
     });
+
+    it('merges user-created endpoint (no metadata) with pre-configured endpoint (with metadata) sharing the same model_id', () => {
+      // Pre-configured endpoint has display metadata; user-created one does not.
+      // Both reference the same underlying model via model_id.
+      const preconfigured = {
+        ...makeEndpoint({
+          inference_id: '.eis-elastic-elser-sparse_embedding',
+          task_type: 'sparse_embedding' as const,
+          service_settings: { model_id: 'elastic-elser-v2' },
+        }),
+        metadata: { display: { name: 'Elastic ELSER v2', model_creator: 'Elastic' } },
+      } as EisInferenceEndpoint;
+
+      const userCreated = makeEndpoint({
+        inference_id: 'my-eis-elser-endpoint',
+        task_type: 'sparse_embedding' as const,
+        service_settings: { model_id: 'elastic-elser-v2' },
+      });
+
+      const result = groupEndpointsByModel([preconfigured, userCreated]);
+
+      // Both endpoints must be in the same group — no duplicate card.
+      expect(result).toHaveLength(1);
+      expect(result[0].endpoints).toHaveLength(2);
+      expect(result[0].modelName).toBe('Elastic ELSER v2');
+      expect(result[0].modelCreator).toBe('Elastic');
+    });
+
+    it('prefers metadata display name/creator when user-created endpoint is processed first', () => {
+      const userCreated = makeEndpoint({
+        inference_id: 'my-eis-elser-endpoint',
+        task_type: 'sparse_embedding' as const,
+        service_settings: { model_id: 'elastic-elser-v2' },
+      });
+
+      const preconfigured = {
+        ...makeEndpoint({
+          inference_id: '.eis-elastic-elser-sparse_embedding',
+          task_type: 'text_embedding' as const,
+          service_settings: { model_id: 'elastic-elser-v2' },
+        }),
+        metadata: { display: { name: 'Elastic ELSER v2', model_creator: 'Elastic' } },
+      } as EisInferenceEndpoint;
+
+      const result = groupEndpointsByModel([userCreated, preconfigured]);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].endpoints).toHaveLength(2);
+      expect(result[0].modelName).toBe('Elastic ELSER v2');
+      expect(result[0].modelCreator).toBe('Elastic');
+    });
   });
 
   describe('getProviderOptions', () => {

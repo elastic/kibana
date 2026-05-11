@@ -21,6 +21,7 @@ interface RunElasticsearchOptions {
   log: ToolingLog;
   esFrom?: string;
   esServerlessImage?: string;
+  preserveEsData?: boolean;
   config: Config;
   onEarlyExit?: (msg: string) => void;
   logsDir?: string;
@@ -83,6 +84,7 @@ export async function runElasticsearch(
     name: name ?? 'scout',
     logsDir,
     config,
+    preserveEsData: options.preserveEsData,
   });
 
   // Start linked cluster for Cross Project Search after origin is ready
@@ -93,7 +95,7 @@ export async function runElasticsearch(
       dataPath: `stateless-cluster-${name ?? 'scout'}`,
       ...config.esServerlessOptions,
       port: config.port,
-      clean: true,
+      clean: !options.preserveEsData,
       background: true,
       files: config.files,
       ssl: config.ssl,
@@ -115,12 +117,14 @@ async function startEsNode({
   config,
   onEarlyExit,
   logsDir,
+  preserveEsData,
 }: {
   log: ToolingLog;
   name: string;
   config: EsConfig & { transportPort?: number };
   onEarlyExit?: (msg: string) => void;
   logsDir?: string;
+  preserveEsData?: boolean;
 }) {
   const cluster = createTestEsCluster({
     clusterName: `cluster-${name}`,
@@ -144,6 +148,7 @@ async function startEsNode({
     transportPort: config.transportPort,
     onEarlyExit,
     serverless: config.serverless,
+    clean: config.serverless ? !preserveEsData : undefined,
     files: config.files,
     secureFiles: config.secureFiles,
   });
