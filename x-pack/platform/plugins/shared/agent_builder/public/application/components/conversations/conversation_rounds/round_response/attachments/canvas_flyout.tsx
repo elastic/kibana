@@ -164,6 +164,8 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
               attachment,
               isSidebar,
               openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+              version: canvasState.version,
+              versionCount: canvasState.versionCount,
             },
             {
               registerActionButtons,

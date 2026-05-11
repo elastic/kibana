@@ -25,9 +25,12 @@ import {
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import {
   ActionButtonType,
+  type ActionButton,
   type AttachmentRenderProps,
   type AttachmentUIDefinition,
 } from '@kbn/agent-builder-browser/attachments';
+import type { SkillReferencedContent } from '@kbn/agent-builder-common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   SKILL_DRAFT_ATTACHMENT_TYPE,
   type SkillDraftAttachment,
@@ -43,12 +46,13 @@ import {
 const SKILLS_CREATE_API_PATH = '/api/agent_builder/skills';
 
 const PREVIEW_MAX_LINES = 30;
+const PREVIEW_MAX_HEIGHT_PX = 240;
 
 /**
  * Trim a multi-line markdown body to a preview suitable for the inline card.
  * The agent's `content` can be hundreds of lines; we show the first chunk
- * inline and let the user open the full skill in the editor (or scroll the
- * code block) for the rest.
+ * inline and let the user open the full skill in the canvas flyout for the
+ * rest.
  */
 const previewContent = (content: string): { preview: string; truncated: boolean } => {
   const lines = content.split('\n');
@@ -61,71 +65,80 @@ const previewContent = (content: string): { preview: string; truncated: boolean 
   };
 };
 
-interface SkillDraftCardProps extends AttachmentRenderProps<SkillDraftAttachment> {
+const SkillDraftBadges = ({
+  hasMultipleVersions,
+  isLatestVersion,
+  isCreated,
+  skillId,
+}: {
+  hasMultipleVersions: boolean;
+  isLatestVersion: boolean;
   isCreated: boolean;
-}
-
-const SkillDraftCard: React.FC<SkillDraftCardProps> = ({ attachment, isCreated }) => {
-  const { euiTheme } = useEuiTheme();
-  const data = attachment.data;
-  const { preview, truncated } = previewContent(data.content);
-
+  skillId: string;
+}) => {
   return (
-    <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m">
-      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
+      <EuiFlexItem grow={false}>
+        <EuiBadge color="hollow">{skillId}</EuiBadge>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiBadge color={isCreated ? 'success' : 'primary'}>
+          {isCreated ? (
+            <FormattedMessage
+              id="xpack.agentBuilderPlatform.attachments.skillDraft.createdBadge"
+              defaultMessage="Created"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.agentBuilderPlatform.attachments.skillDraft.draftBadge"
+              defaultMessage="Draft"
+            />
+          )}
+        </EuiBadge>
+      </EuiFlexItem>
+      {hasMultipleVersions && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type="bullseye" size="l" color={euiTheme.colors.primary} />
+          <EuiBadge color={isLatestVersion ? 'accent' : 'warning'}>
+            {isLatestVersion ? (
+              <FormattedMessage
+                id="xpack.agentBuilderPlatform.attachments.skillDraft.latestVersionBadge"
+                defaultMessage="Latest"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.agentBuilderPlatform.attachments.skillDraft.outdatedVersionBadge"
+                defaultMessage="Outdated"
+              />
+            )}
+          </EuiBadge>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h3>{data.name}</h3>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">{data.id}</EuiBadge>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color={isCreated ? 'success' : 'primary'}>
-                    {isCreated
-                      ? i18n.translate(
-                          'xpack.agentBuilderPlatform.attachments.skillDraft.createdBadge',
-                          { defaultMessage: 'Created' }
-                        )
-                      : i18n.translate(
-                          'xpack.agentBuilderPlatform.attachments.skillDraft.draftBadge',
-                          { defaultMessage: 'Draft' }
-                        )}
-                  </EuiBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      )}
+    </EuiFlexGroup>
+  );
+};
 
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
-        <p>{data.description}</p>
-      </EuiText>
-
-      <EuiHorizontalRule margin="m" />
-
+const SkillDraftToolsAndReferencedFiles = ({
+  toolIds,
+  referencedContent,
+}: {
+  toolIds: string[];
+  referencedContent: SkillReferencedContent[] | undefined;
+}) => {
+  return (
+    <>
       <EuiFlexGroup gutterSize="m" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.agentBuilderPlatform.attachments.skillDraft.toolsLabel', {
-                  defaultMessage: 'Tools',
-                })}
+                <FormattedMessage
+                  id="xpack.agentBuilderPlatform.attachments.skillDraft.toolsLabel"
+                  defaultMessage="Tools"
+                />
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiNotificationBadge color="subdued">{data.tool_ids.length}</EuiNotificationBadge>
+              <EuiNotificationBadge color="subdued">{toolIds.length}</EuiNotificationBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -133,25 +146,26 @@ const SkillDraftCard: React.FC<SkillDraftCardProps> = ({ attachment, isCreated }
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.agentBuilderPlatform.attachments.skillDraft.filesLabel', {
-                  defaultMessage: 'Referenced files',
-                })}
+                <FormattedMessage
+                  id="xpack.agentBuilderPlatform.attachments.skillDraft.filesLabel"
+                  defaultMessage="Referenced files"
+                />
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiNotificationBadge color="subdued">
-                {data.referenced_content?.length ?? 0}
+                {referencedContent?.length ?? 0}
               </EuiNotificationBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {data.tool_ids.length > 0 && (
+      {toolIds.length > 0 && (
         <>
           <EuiSpacer size="xs" />
           <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
-            {data.tool_ids.map((toolId) => (
+            {toolIds.map((toolId) => (
               <EuiFlexItem grow={false} key={toolId}>
                 <EuiBadge color="hollow">{toolId}</EuiBadge>
               </EuiFlexItem>
@@ -159,41 +173,149 @@ const SkillDraftCard: React.FC<SkillDraftCardProps> = ({ attachment, isCreated }
           </EuiFlexGroup>
         </>
       )}
+    </>
+  );
+};
 
-      <EuiSpacer size="m" />
+const fullContentInstructionsStyles = css`
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+`;
+const previewInstructionsStyles = css`
+  width: 100%;
+  & pre {
+    margin-block-end: 0;
+  }
+`;
+const SkillDraftInstructions = ({
+  showFullContent,
+  content,
+}: {
+  showFullContent: boolean;
+  content: string;
+}) => {
+  let shownContent = content;
+  let truncated = false;
+  if (!showFullContent) {
+    ({ preview: shownContent, truncated } = previewContent(content));
+  }
+  return (
+    <>
       <EuiText size="xs" color="subdued">
         <strong>
-          {i18n.translate('xpack.agentBuilderPlatform.attachments.skillDraft.instructionsLabel', {
-            defaultMessage: 'Instructions preview',
-          })}
+          {showFullContent ? (
+            <FormattedMessage
+              id="xpack.agentBuilderPlatform.attachments.skillDraft.instructionsFullLabel"
+              defaultMessage="Instructions"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.agentBuilderPlatform.attachments.skillDraft.instructionsLabel"
+              defaultMessage="Instructions preview"
+            />
+          )}
         </strong>
       </EuiText>
       <EuiSpacer size="xs" />
       <EuiCodeBlock
         language="markdown"
         fontSize="s"
-        overflowHeight={240}
-        css={css`
-          width: 100%;
-          & pre {
-            margin-block-end: 0;
-          }
-        `}
+        overflowHeight={showFullContent ? '100%' : PREVIEW_MAX_HEIGHT_PX}
+        isCopyable={showFullContent}
+        css={showFullContent ? fullContentInstructionsStyles : previewInstructionsStyles}
       >
-        {preview}
+        {shownContent}
       </EuiCodeBlock>
-      {truncated && (
+      {!showFullContent && truncated && (
         <>
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.agentBuilderPlatform.attachments.skillDraft.previewTruncated', {
-              defaultMessage:
-                'Preview truncated to the first {lineCount} lines. The full instructions will be saved when you click Create.',
-              values: { lineCount: PREVIEW_MAX_LINES },
-            })}
+            <FormattedMessage
+              id="xpack.agentBuilderPlatform.attachments.skillDraft.previewTruncated"
+              defaultMessage='Preview truncated to the first {lineCount} lines. Use "View full skill" to see the complete instructions.'
+              values={{ lineCount: PREVIEW_MAX_LINES }}
+            />
           </EuiText>
         </>
       )}
+    </>
+  );
+};
+
+interface SkillDraftCardProps extends AttachmentRenderProps<SkillDraftAttachment> {
+  isCreated: boolean;
+  isCanvas?: boolean;
+}
+
+const fullContentPanelStyles = css`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+`;
+
+const SkillDraftCard: React.FC<SkillDraftCardProps> = ({
+  attachment,
+  isCreated,
+  isCanvas,
+  version,
+  versionCount,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const {
+    content,
+    description,
+    id: skillId,
+    name: skillName,
+    tool_ids: toolIds,
+    referenced_content: referencedContent,
+  } = attachment.data;
+  const showFullContent = isCanvas === true;
+  const hasMultipleVersions = (versionCount ?? 0) > 1;
+  const isLatestVersion = version !== undefined && version === versionCount;
+
+  return (
+    <EuiPanel
+      hasShadow={false}
+      hasBorder={false}
+      paddingSize="m"
+      css={showFullContent && fullContentPanelStyles}
+    >
+      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="bullseye" size="l" color={euiTheme.colors.primary} aria-hidden={true} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h3>{skillName}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SkillDraftBadges
+                skillId={skillId}
+                isCreated={isCreated}
+                hasMultipleVersions={hasMultipleVersions}
+                isLatestVersion={isLatestVersion}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued">
+        <p>{description}</p>
+      </EuiText>
+
+      <EuiHorizontalRule margin="m" />
+
+      <SkillDraftToolsAndReferencedFiles toolIds={toolIds} referencedContent={referencedContent} />
+
+      <EuiSpacer size="m" />
+
+      <SkillDraftInstructions showFullContent={showFullContent} content={content} />
     </EuiPanel>
   );
 };
@@ -208,6 +330,11 @@ const SkillDraftCard: React.FC<SkillDraftCardProps> = ({ attachment, isCreated }
 const SkillDraftInlineContent: React.FC<AttachmentRenderProps<SkillDraftAttachment>> = (props) => {
   const isCreated = Boolean(props.attachment.origin);
   return <SkillDraftCard {...props} isCreated={isCreated} />;
+};
+
+const SkillDraftCanvasContent: React.FC<AttachmentRenderProps<SkillDraftAttachment>> = (props) => {
+  const isCreated = Boolean(props.attachment.origin);
+  return <SkillDraftCard {...props} isCreated={isCreated} isCanvas />;
 };
 
 interface CreateSkillDraftDeps {
@@ -248,60 +375,75 @@ export const createSkillDraftAttachmentDefinition = ({
       }),
     getIcon: () => 'bullseye',
     renderInlineContent: (props) => <SkillDraftInlineContent {...props} />,
-    getActionButtons: ({ attachment, updateOrigin }) => {
+    renderCanvasContent: (props) => <SkillDraftCanvasContent {...props} />,
+    getActionButtons: ({ attachment, updateOrigin, openCanvas, isCanvas }) => {
       const isCreated = Boolean(attachment.origin);
+      const actionButtons: ActionButton[] = [];
 
-      return [
-        {
-          label: isCreated
-            ? i18n.translate(
-                'xpack.agentBuilderPlatform.attachments.skillDraft.createdButtonLabel',
-                { defaultMessage: 'Created' }
-              )
-            : i18n.translate('xpack.agentBuilderPlatform.attachments.skillDraft.createButtonLabel', {
-                defaultMessage: 'Create skill',
-              }),
-          icon: isCreated ? 'check' : 'save',
-          type: ActionButtonType.PRIMARY,
-          disabled: isCreated || !canCreate,
-          disabledReason: !canCreate
-            ? i18n.translate(
-                'xpack.agentBuilderPlatform.attachments.skillDraft.createDisabledReason',
-                {
-                  defaultMessage:
-                    'You do not have permission to manage skills in this space.',
-                }
-              )
-            : undefined,
-          handler: async () => {
-            try {
-              const response = await http.post<{ id: string; name: string }>(
-                SKILLS_CREATE_API_PATH,
-                {
-                  body: JSON.stringify(attachment.data satisfies SkillDraftAttachmentData),
-                }
-              );
-              await updateOrigin(response.id);
-              notifications.toasts.addSuccess({
-                title: i18n.translate(
-                  'xpack.agentBuilderPlatform.attachments.skillDraft.createSuccessToast',
-                  {
-                    defaultMessage: 'Skill "{skillId}" created.',
-                    values: { skillId: response.id },
-                  }
-                ),
-              });
-            } catch (error) {
-              notifications.toasts.addError(error as Error, {
-                title: i18n.translate(
-                  'xpack.agentBuilderPlatform.attachments.skillDraft.createErrorToast',
-                  { defaultMessage: 'Could not create skill from draft' }
-                ),
-              });
-            }
+      if (!isCanvas && openCanvas) {
+        // As long as the canvas for the skill is not currently open, show the button
+        const viewFullSkillButton = {
+          label: i18n.translate(
+            'xpack.agentBuilderPlatform.attachments.skillDraft.viewFullSkillButtonLabel',
+            { defaultMessage: 'View full skill' }
+          ),
+          icon: 'expand',
+          type: ActionButtonType.SECONDARY,
+          handler: () => {
+            openCanvas();
           },
+        };
+        actionButtons.push(viewFullSkillButton);
+      }
+
+      const createButton: ActionButton = {
+        label: isCreated
+          ? i18n.translate('xpack.agentBuilderPlatform.attachments.skillDraft.createdButtonLabel', {
+              defaultMessage: 'Created',
+            })
+          : i18n.translate('xpack.agentBuilderPlatform.attachments.skillDraft.createButtonLabel', {
+              defaultMessage: 'Create skill',
+            }),
+        icon: isCreated ? 'check' : 'save',
+        type: ActionButtonType.PRIMARY,
+        disabled: isCreated || !canCreate,
+        disabledReason: !canCreate
+          ? i18n.translate(
+              'xpack.agentBuilderPlatform.attachments.skillDraft.createDisabledReason',
+              {
+                defaultMessage: 'You do not have permission to manage skills in this space.',
+              }
+            )
+          : undefined,
+        handler: async () => {
+          try {
+            const response = await http.post<{ id: string; name: string }>(SKILLS_CREATE_API_PATH, {
+              body: JSON.stringify(attachment.data satisfies SkillDraftAttachmentData),
+            });
+            await updateOrigin(response.id);
+            notifications.toasts.addSuccess({
+              title: i18n.translate(
+                'xpack.agentBuilderPlatform.attachments.skillDraft.createSuccessToast',
+                {
+                  defaultMessage: 'Skill "{skillId}" created.',
+                  values: { skillId: response.id },
+                }
+              ),
+            });
+          } catch (error) {
+            notifications.toasts.addError(error as Error, {
+              title: i18n.translate(
+                'xpack.agentBuilderPlatform.attachments.skillDraft.createErrorToast',
+                { defaultMessage: 'Could not create skill from draft' }
+              ),
+            });
+          }
         },
-      ];
+      };
+
+      actionButtons.push(createButton);
+
+      return actionButtons;
     },
   };
 };

@@ -160,6 +160,7 @@ export const createRenderAttachmentRenderer = ({
         isSidebar={isSidebar}
         screenContext={screenContext}
         version={versionToUse}
+        versionCount={attachment.versions.length}
       />
     );
   };

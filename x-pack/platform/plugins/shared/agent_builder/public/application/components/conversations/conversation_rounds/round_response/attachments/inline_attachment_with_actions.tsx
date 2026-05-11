@@ -28,6 +28,8 @@ interface InlineAttachmentWithActionsProps {
   screenContext?: ScreenContextAttachmentData;
   /** Version number of the attachment being rendered, used for canvas preview comparison */
   version?: number;
+  /** Total number of versions for this attachment in the conversation. */
+  versionCount?: number;
   /**
    * Shared preview state for header actions/badges.
    */
@@ -44,6 +46,7 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   conversationId,
   screenContext,
   version,
+  versionCount,
   previewBadgeState,
 }) => {
   const {
@@ -56,8 +59,8 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   const { updatePersistedConversationId } = usePersistedConversationId({});
 
   const openCanvas = useCallback(() => {
-    openCanvasContext(attachment, isSidebar, version);
-  }, [openCanvasContext, attachment, isSidebar, version]);
+    openCanvasContext(attachment, isSidebar, version, versionCount);
+  }, [openCanvasContext, attachment, isSidebar, version, versionCount]);
 
   const updateOrigin = useCallback(
     async (origin: string) => {
@@ -136,6 +139,8 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
           isSidebar,
           screenContext,
           openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+          version,
+          versionCount,
         })}
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>

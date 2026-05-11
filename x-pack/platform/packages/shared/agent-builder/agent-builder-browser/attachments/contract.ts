@@ -33,6 +33,10 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
   screenContext?: ScreenContextAttachmentData;
   /** Callback to open the agent builder sidebar with the current conversation loaded. Undefined when already in the sidebar. */
   openSidebarConversation?: () => void;
+  /** The version number being rendered. Undefined when version metadata is unavailable. */
+  version?: number;
+  /** Total number of versions for this attachment in the conversation. Undefined when version metadata is unavailable. */
+  versionCount?: number;
 }
 
 /**

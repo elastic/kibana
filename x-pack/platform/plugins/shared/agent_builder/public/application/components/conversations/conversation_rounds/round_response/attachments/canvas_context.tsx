@@ -12,6 +12,7 @@ interface CanvasState {
   attachment: UnknownAttachment;
   isSidebar: boolean;
   version?: number;
+  versionCount?: number;
 }
 
 export const getAttachmentPreviewKey = (attachmentId: string, version?: number) =>
@@ -20,7 +21,12 @@ export const getAttachmentPreviewKey = (attachmentId: string, version?: number) 
 interface CanvasContextValue {
   canvasState: CanvasState | null;
   previewedAttachmentKey: string | null;
-  openCanvas: (attachment: UnknownAttachment, isSidebar: boolean, version?: number) => void;
+  openCanvas: (
+    attachment: UnknownAttachment,
+    isSidebar: boolean,
+    version?: number,
+    versionCount?: number
+  ) => void;
   closeCanvas: () => void;
   setCanvasAttachmentOrigin: (origin: string) => void;
   setPreviewedAttachmentKey: (attachmentKey: string | null) => void;
@@ -37,8 +43,13 @@ export const CanvasProvider: React.FC<CanvasProviderProps> = ({ children }) => {
   const [previewedAttachmentKey, setPreviewedAttachmentKey] = useState<string | null>(null);
 
   const openCanvas = useCallback(
-    (attachment: UnknownAttachment, isSidebar: boolean, version?: number) => {
-      setCanvasState({ attachment, isSidebar, version });
+    (
+      attachment: UnknownAttachment,
+      isSidebar: boolean,
+      version?: number,
+      versionCount?: number
+    ) => {
+      setCanvasState({ attachment, isSidebar, version, versionCount });
       setPreviewedAttachmentKey(getAttachmentPreviewKey(attachment.id, version));
     },
     []
