@@ -28,7 +28,7 @@ export interface LeaderKeyShortcut {
   onTrigger: () => void;
 }
 
-interface LeaderKeyShortcutsProps {
+export interface LeaderKeyShortcutsProps {
   leaderKey: string;
   leaderKeyDescription: string;
   shortcuts: LeaderKeyShortcut[];

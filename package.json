@@ -1216,6 +1216,7 @@
     "@kbn/unified-field-list-examples-plugin": "link:examples/unified_field_list_examples",
     "@kbn/unified-histogram": "link:src/platform/packages/shared/kbn-unified-histogram",
     "@kbn/unified-search-plugin": "link:src/platform/plugins/shared/unified_search",
+    "@kbn/unified-shortcuts": "link:src/platform/packages/shared/kbn-unified-shortcuts",
     "@kbn/unified-tabs": "link:src/platform/packages/shared/kbn-unified-tabs",
     "@kbn/unified-tabs-examples-plugin": "link:examples/unified_tabs_examples",
     "@kbn/unsaved-changes-prompt": "link:src/platform/packages/shared/kbn-unsaved-changes-prompt",

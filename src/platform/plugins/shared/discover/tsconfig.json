@@ -98,6 +98,7 @@
     "@kbn/response-ops-rule-form",
     "@kbn/shared-ux-page-analytics-no-data-types",
     "@kbn/rison",
+    "@kbn/unified-shortcuts",
     "@kbn/unified-tabs",
     "@kbn/unified-histogram",
     "@kbn/alerts-ui-shared",

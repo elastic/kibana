@@ -10,10 +10,10 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiResizeObserver } from '@elastic/eui';
+import { LeaderKeyShortcuts } from '@kbn/unified-shortcuts';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
-import { LeaderKeyShortcuts } from './leader_key_shortcuts';
 import {
   createTabItem,
   internalStateActions,

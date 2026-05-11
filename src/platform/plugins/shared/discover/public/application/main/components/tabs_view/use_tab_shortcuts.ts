@@ -9,8 +9,8 @@
 
 import { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { LeaderKeyShortcut } from '@kbn/unified-shortcuts';
 import type { UnifiedTabsRef } from '@kbn/unified-tabs';
-import type { LeaderKeyShortcut } from './leader_key_shortcuts';
 
 export const useTabShortcuts = () => {
   const unifiedTabsRef = useRef<UnifiedTabsRef | null>(null);
