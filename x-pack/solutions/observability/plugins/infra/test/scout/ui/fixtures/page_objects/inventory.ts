@@ -283,6 +283,7 @@ export class InventoryPage {
     await expect(queryBar).toHaveValue('');
     await queryBar.fill(query);
     await expect(queryBar).toHaveValue(query);
+    await queryBar.press('Escape');
     await queryBar.press('Enter');
     await this.waitForNodesToLoad();
   }
