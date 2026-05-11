@@ -20,7 +20,8 @@ export async function create(
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   createBody: DashboardCreateRequestBody,
   serverTiming?: RequestTiming,
-  isDashboardAppRequest: boolean = false
+  isDashboardAppRequest: boolean = false,
+  id?: string
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const { access_control: accessControl, ...restOfData } = createBody;
@@ -38,6 +39,7 @@ export async function create(
     DASHBOARD_SAVED_OBJECT_TYPE,
     soAttributes,
     {
+      ...(id !== undefined && { id }),
       references: soReferences,
       ...(accessControl?.access_mode &&
         supportsAccessControl && {

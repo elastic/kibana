@@ -8,6 +8,7 @@
  */
 
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { RequestTiming } from '@kbn/core-http-server';
 import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
@@ -18,8 +19,24 @@ import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './types';
 import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
+import { create } from '../create';
+import type { DashboardCreateResponseBody } from '../create';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
+import type { Operation } from '../types';
 
+/**
+ * Upserts a dashboard by id — creates it if it doesn't exist, or updates it if it does.
+ *
+ * @remarks
+ * This cannot use a simple `client.update({ upsert })` because the Saved Objects `update` API
+ * does not accept `accessControl` options. To explicitly set `accessControl` on a new document,
+ * or to change the access mode of an existing document, we must use `create()` and
+ * `changeAccessMode()` respectively.
+ *
+ * The create path also handles a race condition: between detecting the document is missing and
+ * calling `create()`, another request may create it. We catch the resulting `ConflictError` and
+ * fall through to the update path.
+ */
 export async function update(
   requestCtx: RequestHandlerContext,
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
@@ -27,7 +44,10 @@ export async function update(
   updateBody: DashboardUpdateRequestBody,
   serverTiming?: RequestTiming,
   isDashboardAppRequest: boolean = false
-): Promise<DashboardUpdateResponseBody> {
+): Promise<{
+  body: DashboardCreateResponseBody | DashboardUpdateResponseBody;
+  operation: Operation;
+}> {
   const { core } = await requestCtx.resolve(['core']);
 
   const { access_control: accessControl, ...restOfBody } = updateBody;
@@ -37,27 +57,6 @@ export async function update(
     serverTiming
   );
 
-  let isCreateRequest = false;
-  let existingAccessMode: SavedObjectAccessControl['accessMode'] | undefined;
-  try {
-    const resolved = await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
-      DASHBOARD_SAVED_OBJECT_TYPE,
-      id
-    );
-    existingAccessMode = resolved.saved_object.accessControl?.accessMode;
-  } catch (resolveError) {
-    if (resolveError.isBoom && resolveError.output.statusCode === 404) {
-      isCreateRequest = true;
-    } else {
-      throw resolveError;
-    }
-  }
-
-  // Validate id at handler level for create requests
-  if (isCreateRequest) {
-    asCodeIdSchema.validate(id);
-  }
-
   const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(
     DASHBOARD_SAVED_OBJECT_TYPE
   );
@@ -66,46 +65,52 @@ export async function update(
     throw Boom.badRequest('Dashboard does not support access control.');
   }
 
-  if (isCreateRequest) {
-    try {
-      const savedObject = await core.savedObjects.client.create<DashboardSavedObjectAttributes>(
-        DASHBOARD_SAVED_OBJECT_TYPE,
-        soAttributes,
-        {
-          id,
-          references: soReferences,
-          ...(accessControl?.access_mode &&
-            supportsAccessControl && {
-              accessControl: {
-                accessMode: accessControl.access_mode,
-              },
-            }),
-        }
-      );
+  let existingAccessMode: SavedObjectAccessControl['accessMode'] | undefined;
+  let isNewDocument = false;
 
-      return getDashboardCRUResponseBody(
-        savedObject,
-        'create',
+  // Determine whether the document already exists.
+  try {
+    const existing = await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
+      DASHBOARD_SAVED_OBJECT_TYPE,
+      id
+    );
+    existingAccessMode = existing.accessControl?.accessMode;
+  } catch (e) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      throw e;
+    }
+    isNewDocument = true;
+  }
+
+  // Create path
+  if (isNewDocument) {
+    asCodeIdSchema.validate(id);
+
+    try {
+      const body = await create(
+        requestCtx,
         dashboardStateSchema,
+        updateBody,
+        serverTiming,
         isDashboardAppRequest,
-        serverTiming
+        id
       );
+      return { body, operation: 'create' };
     } catch (e) {
-      // If the document was created between the resolve check and the create call
-      // fall back to the update flow.
-      if (e.isBoom && e.output.statusCode === 409) {
-        const resolved = await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
-          DASHBOARD_SAVED_OBJECT_TYPE,
-          id
-        );
-        existingAccessMode = resolved.saved_object.accessControl?.accessMode;
-        isCreateRequest = false;
-      } else {
+      if (!SavedObjectsErrorHelpers.isConflictError(e)) {
         throw e;
       }
+      // Race condition: the document was created between the get check and the create call.
+      // Fetch it and fall through to the update path.
+      const existing = await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
+        DASHBOARD_SAVED_OBJECT_TYPE,
+        id
+      );
+      existingAccessMode = existing.accessControl?.accessMode;
     }
   }
 
+  // Update path (existing document)
   const desiredAccessMode = accessControl?.access_mode;
   const currentAccessMode = existingAccessMode ?? 'default';
   const shouldChangeAccessMode =
@@ -119,9 +124,8 @@ export async function update(
       }
     );
 
-    const [result] = changeAccessModeResponse.objects;
-    if (result?.error) {
-      throw result.error;
+    if (changeAccessModeResponse.objects[0]?.error) {
+      throw changeAccessModeResponse.objects[0].error;
     }
   }
 
@@ -154,17 +158,19 @@ export async function update(
     throw e;
   }
 
-  const { saved_object: updated } =
-    await core.savedObjects.client.resolve<DashboardSavedObjectAttributes>(
-      DASHBOARD_SAVED_OBJECT_TYPE,
-      savedObject.id
-    );
-
-  return getDashboardCRUResponseBody(
-    updated,
-    'update',
-    dashboardStateSchema,
-    isDashboardAppRequest,
-    serverTiming
+  const updated = await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
+    DASHBOARD_SAVED_OBJECT_TYPE,
+    savedObject.id
   );
+
+  return {
+    body: getDashboardCRUResponseBody(
+      updated,
+      'update',
+      dashboardStateSchema,
+      isDashboardAppRequest,
+      serverTiming
+    ),
+    operation: 'update',
+  };
 }

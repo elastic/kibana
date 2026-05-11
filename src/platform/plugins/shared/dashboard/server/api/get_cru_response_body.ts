@@ -12,7 +12,7 @@ import type { SavedObject, SavedObjectsUpdateResponse } from '@kbn/core-saved-ob
 import type { RequestTiming } from '@kbn/core-http-server';
 import { getMeta } from '@kbn/as-code-shared-schemas';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
-import type { DashboardState } from './types';
+import type { DashboardState, Operation } from './types';
 import { transformDashboardOut } from './transforms';
 import type { getDashboardStateSchema } from './dashboard_state_schemas';
 import { stripUnmappedKeys } from './scope_tooling';
@@ -23,7 +23,7 @@ export function getDashboardCRUResponseBody(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
     | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>,
-  operation: 'create' | 'read' | 'update' | 'search',
+  operation: Operation,
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   isDashboardAppRequest: boolean = false,
   serverTiming?: RequestTiming

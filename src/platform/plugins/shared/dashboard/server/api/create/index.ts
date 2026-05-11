@@ -8,4 +8,5 @@
  */
 
 export type { DashboardCreateRequestBody, DashboardCreateResponseBody } from './types';
+export { create } from './create';
 export { registerCreateRoute } from './register_create_route';

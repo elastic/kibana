@@ -71,7 +71,7 @@ export function registerUpdateRoute(
     async (ctx, req, res) =>
       telemetryHandler(req, usageCounter, async () => {
         try {
-          const result = await update(
+          const { body, operation } = await update(
             ctx,
             getCachedDashboardStateSchema(),
             req.params.id,
@@ -79,9 +79,7 @@ export function registerUpdateRoute(
             req.serverTiming,
             isDashboardAppRequest
           );
-          return result.meta.updated_at === result.meta.created_at
-            ? res.created({ body: result })
-            : res.ok({ body: result });
+          return operation === 'create' ? res.created({ body }) : res.ok({ body });
         } catch (e) {
           return writeErrorHandler(e, res);
         }
