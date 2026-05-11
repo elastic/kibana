@@ -17,7 +17,6 @@ import {
   type EuiDataGridControlColumn,
   type EuiDataGridColumnSortingConfig,
 } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils';

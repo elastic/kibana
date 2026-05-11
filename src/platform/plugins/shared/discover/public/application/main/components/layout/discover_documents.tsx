@@ -397,11 +397,12 @@ function DiscoverDocumentsComponent({
   );
   const cellRendererParams: CellRenderersExtensionParams = useMemo(
     () => ({
+      actions: { addFilter: onAddFilter },
       dataView,
       density: cellRendererDensity,
       rowHeight: cellRendererRowHeight,
     }),
-    [dataView, cellRendererDensity, cellRendererRowHeight]
+    [onAddFilter, dataView, cellRendererDensity, cellRendererRowHeight]
   );
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
@@ -471,7 +472,7 @@ function DiscoverDocumentsComponent({
   const {
     availableCascadeGroups,
     selectedCascadeGroups,
-    columnsMeta: cascadedColumnsMeta,
+    dataSource: cascadedDataSource,
   } = useCurrentTabSelector((tab) => tab.cascadedDocumentsState);
   const setSelectedCascadeGroups = useCurrentTabAction(
     internalStateActions.setSelectedCascadeGroups
@@ -494,7 +495,7 @@ function DiscoverDocumentsComponent({
       cascadedDocumentsFetcher,
       availableCascadeGroups,
       selectedCascadeGroups,
-      cascadedColumnsMeta,
+      cascadedDataSource,
       esqlQuery: query,
       esqlVariables,
       timeRange: requestParams.timeRangeAbsolute,
@@ -519,7 +520,7 @@ function DiscoverDocumentsComponent({
   }, [
     availableCascadeGroups,
     cascadedDocumentsFetcher,
-    cascadedColumnsMeta,
+    cascadedDataSource,
     dispatch,
     esqlVariables,
     expandedDoc$,
@@ -539,14 +540,12 @@ function DiscoverDocumentsComponent({
     viewModeToggle,
   ]);
 
-  // Cascaded documents haven't migrated to `DataSource` yet, so their columns metadata
-  // is passed explicitly to the flyout; the default owner's is derived from `dataSource`.
-  const flyoutColumnsMeta = useMemo(() => {
+  const flyoutDataSource = useMemo(() => {
     if (!expandedDocOwner || expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER) {
-      return undefined;
+      return currentDataSource;
     }
-    return cascadedColumnsMeta;
-  }, [expandedDocOwner, cascadedColumnsMeta]);
+    return cascadedDataSource;
+  }, [expandedDocOwner, currentDataSource, cascadedDataSource]);
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
@@ -642,8 +641,7 @@ function DiscoverDocumentsComponent({
           hits={renderDocumentViewMeta.displayedRows}
           // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
           columns={renderDocumentViewMeta.displayedColumns}
-          dataSource={currentDataSource}
-          columnsMeta={flyoutColumnsMeta}
+          dataSource={flyoutDataSource}
           savedSearchId={persistedDiscoverSession?.id!}
           query={query}
           initialTabId={initialDocViewerTabId}

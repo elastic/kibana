@@ -35,7 +35,10 @@ export const getSummaryColumn = (
   );
 };
 
-const createGetShouldShowFieldHandler = (dataView: DataView) => {
+const createGetShouldShowFieldHandler = (dataView: DataView | undefined) => {
+  if (!dataView) {
+    return () => true;
+  }
   const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
   return getShouldShowFieldHandler(dataViewFields, dataView, true);
 };

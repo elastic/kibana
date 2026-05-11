@@ -91,6 +91,7 @@
     "@kbn/charts-plugin",
     "@kbn/unified-data-table",
     "@kbn/unified-histogram",
+    "@kbn/data-source",
     "@kbn/cell-actions",
     "@kbn/discover-utils",
     "@kbn/shared-ux-page-kibana-template",

@@ -21,7 +21,7 @@ import type { CellAction, CellActionExecutionContext, CellActionsData } from '@k
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type {
   ChartSectionProps,
   UnifiedHistogramTopPanelHeightContext,
@@ -268,9 +268,18 @@ export interface ModifiedVisAttributesExtensionParams {
  */
 export interface CellRenderersExtensionParams {
   /**
-   * The current data view
+   * Available actions for cell renderers
    */
-  dataView: DataView;
+  actions: {
+    /**
+     * Adds a filter to the current search in data view mode, or a where clause in ESQL mode
+     */
+    addFilter?: DocViewFilterFn;
+  };
+  /**
+   * The current data view. Optional because ES|QL mode may not carry a persisted DataView.
+   */
+  dataView?: DataView;
   /**
    * The current density applied to the data grid component
    */

@@ -9,6 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   DEFAULT_PAGINATION_MODE,
   renderCustomToolbar,
@@ -25,6 +26,12 @@ import {
 } from '../../application/main/components/layout/cascaded_documents';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
+  /**
+   * DSL-only. For ES|QL queries the {@link UnifiedDataTable} works from the
+   * `dataSource` alone — leave this undefined. Used here only for row indicator
+   * and row leading controls profile accessors.
+   */
+  dataView?: DataView;
   query?: DiscoverAppState['query'];
   cascadedDocumentsContext?: CascadedDocumentsContext;
 }
@@ -40,18 +47,21 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     externalAdditionalControls: customExternalAdditionalControls,
     rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
     onFullScreenChange,
+    dataView,
     ...props
   }) => {
-    const { dataView } = props;
+    const { setExpandedDoc, renderDocumentView } = props;
     const getRowIndicatorProvider = useProfileAccessor('getRowIndicatorProvider');
     const getRowIndicator = useMemo(() => {
-      return getRowIndicatorProvider(() => undefined)({ dataView: props.dataView });
-    }, [getRowIndicatorProvider, props.dataView]);
+      if (!dataView) return undefined;
+      return getRowIndicatorProvider(() => undefined)({ dataView });
+    }, [getRowIndicatorProvider, dataView]);
 
     const getRowAdditionalLeadingControlsAccessor = useProfileAccessor(
       'getRowAdditionalLeadingControls'
     );
     const rowAdditionalLeadingControls = useMemo(() => {
+      if (!dataView) return customRowAdditionalLeadingControls;
       return getRowAdditionalLeadingControlsAccessor(() => customRowAdditionalLeadingControls)({
         dataView,
         query,
@@ -121,7 +131,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           columns={props.columns}
           dataGridDensityState={props.dataGridDensityState}
           showTimeCol={props.showTimeCol}
-          dataView={props.dataView}
+          dataView={dataView}
           showKeyboardShortcuts={props.showKeyboardShortcuts}
           externalCustomRenderers={props.externalCustomRenderers}
           onUpdateDataGridDensity={props.onUpdateDataGridDensity}

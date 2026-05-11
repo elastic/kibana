@@ -29,10 +29,10 @@ export function canPrependTimeFieldColumn(
 
 export function getVisibleColumns(
   columns: string[],
-  dataView: DataView,
+  dataView: DataView | undefined,
   shouldPrependTimeFieldColumn: boolean
 ) {
-  const timeFieldName = dataView.timeFieldName;
+  const timeFieldName = dataView?.timeFieldName;
 
   if (
     shouldPrependTimeFieldColumn &&

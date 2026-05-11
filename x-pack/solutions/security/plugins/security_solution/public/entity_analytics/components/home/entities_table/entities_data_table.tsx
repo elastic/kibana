@@ -21,6 +21,7 @@ import {
   type DataGridCellValueElementProps,
   type UnifiedDataTableRenderCustomToolbar,
 } from '@kbn/unified-data-table';
+import { IndexPatternSource } from '@kbn/data-source';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import {
   SHOW_MULTIFIELDS,
@@ -314,6 +315,10 @@ export const EntitiesDataTable = ({
   }, [persistedSettings]);
 
   const { dataView, dataViewIsLoading } = useContext(DataViewContext);
+  const dataSource = useMemo(
+    () => (dataView ? new IndexPatternSource(dataView) : undefined),
+    [dataView]
+  );
 
   const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(() => {
     const columnsConfig: CustomGridColumnsConfiguration = {
@@ -640,7 +645,7 @@ export const EntitiesDataTable = ({
             className={styles.gridStyle}
             ariaLabelledBy={ROW_TYPE_LABEL}
             columns={currentColumns}
-            dataView={dataView}
+            dataSource={dataSource}
             loadingState={loadingState}
             onFilter={
               config.supportsFieldFiltering !== false ? (onAddFilter as DocViewFilterFn) : undefined

@@ -87,6 +87,7 @@
     "@kbn/tooling-log",
     "@kbn/user-profile-components",
     "@kbn/unified-data-table",
+    "@kbn/data-source",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/discover-utils",
     "@kbn/cell-actions",

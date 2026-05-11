@@ -12,6 +12,7 @@ import React, { Fragment, useCallback, useMemo } from 'react';
 import { EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { IndexPatternSource } from '@kbn/data-source';
 import { SortDirection } from '@kbn/data-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -144,6 +145,7 @@ export function ContextAppContent({
     (hit: DataTableRecord, displayedRows: DataTableRecord[], displayedColumns: string[]) => (
       <DiscoverGridFlyout
         dataView={dataView}
+        dataSource={currentDataSource}
         hit={hit}
         hits={displayedRows}
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
@@ -180,6 +182,7 @@ export function ContextAppContent({
   const cellRenderers = useMemo(() => {
     const getCellRenderers = getCellRenderersAccessor(() => ({}));
     return getCellRenderers({
+      actions: { addFilter },
       dataView,
       density: getDataGridDensity(services.storage, 'discover'),
       rowHeight: getRowHeight({
@@ -188,9 +191,10 @@ export function ContextAppContent({
         configRowHeight,
       }),
     });
-  }, [configRowHeight, dataView, getCellRenderersAccessor, services.storage]);
+  }, [addFilter, configRowHeight, dataView, getCellRenderersAccessor, services.storage]);
 
   const dataSource = useMemo(() => createDataSource({ dataView, query: undefined }), [dataView]);
+  const currentDataSource = useMemo(() => new IndexPatternSource(dataView), [dataView]);
   const { filters } = useQuerySubscriber({ data: services.data });
   const timeRange = useObservable(
     services.timefilter.getTimeUpdate$().pipe(map(() => services.timefilter.getTime())),
@@ -241,6 +245,7 @@ export function ContextAppContent({
             columns={columns}
             rows={rows}
             dataView={dataView}
+            dataSource={currentDataSource}
             expandedDoc={expandedDoc}
             loadingState={isAnchorLoading ? DataLoadingState.loading : DataLoadingState.loaded}
             sampleSizeState={0}

@@ -13,6 +13,7 @@ import type {
   UnifiedDataTableSettingsColumn,
 } from '@kbn/unified-data-table';
 import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
+import { IndexPatternSource } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type {
   EuiDataGridControlColumn,
@@ -123,6 +124,10 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     leadingControlColumns,
     onUpdatePageIndex,
   }) {
+    const dataSource = useMemo(
+      () => (dataView ? new IndexPatternSource(dataView) : undefined),
+      [dataView]
+    );
     const dispatch = useDispatch();
 
     // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
@@ -460,7 +465,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             columns={columnIds}
             expandedDoc={expandedDoc}
             gridStyleOverride={tableStylesOverride}
-            dataView={dataView}
+            dataSource={dataSource}
             showColumnTokens={true}
             loadingState={dataLoadingState}
             onFilter={onFilter}
