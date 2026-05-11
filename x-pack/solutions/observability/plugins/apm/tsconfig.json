@@ -162,7 +162,8 @@
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",
     "@kbn/presentation-util",
-    "@kbn/apm-api-shared"
+    "@kbn/apm-api-shared",
+    "@kbn/apm-agent-configuration"
   ],
   "exclude": ["target/**/*"]
 }

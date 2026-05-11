@@ -4822,6 +4822,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/apm-agent-configuration@link:src/platform/packages/shared/kbn-apm-agent-configuration":
+  version "0.0.0"
+  uid ""
+
 "@kbn/apm-api-shared@link:src/platform/packages/shared/kbn-apm-api-shared":
   version "0.0.0"
   uid ""
@@ -12407,6 +12411,7 @@
   integrity sha512-9FC/6ho8uFa8fV50+FPy/ngWN53jaUu4GRXlAjcxIRrzhltJnpKkBG2Tp0IDraFJeWrOpk84RJ9EMEEYzaI1Bw==
 
 "@redocly/ajv@^8.11.2", "@redocly/ajv@^8.18.0", "ajv@npm:@redocly/ajv@8.18.0":
+  name ajv
   version "8.18.0"
   resolved "https://registry.yarnpkg.com/@redocly/ajv/-/ajv-8.18.0.tgz#e6c7ba549111838baa950bc31acbc84b06f0239f"
   integrity sha512-F+LMD2IDIXuHxgpLJh3nkLj9+tSaEzoUWd+7fONGq5pe2169FUDjpEkOfEpoGLz1sbZni/69p07OsecNfAOpqA==

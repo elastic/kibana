@@ -10,7 +10,7 @@ import type { SearchHit } from '@kbn/es-types';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
 import * as t from 'io-ts';
-import type { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
+import type { AgentConfiguration } from '@kbn/apm-agent-configuration';
 import {
   agentConfigurationIntakeRt,
   serviceRt,
