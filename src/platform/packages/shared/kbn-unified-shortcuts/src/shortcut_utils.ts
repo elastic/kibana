@@ -18,7 +18,6 @@ const editableTargetSelector = [
   '.ace_editor',
   '.monaco-editor',
 ].join(', ');
-const leaderShortcutPickerTriggerCode = 'Quote';
 
 export const normalizeShortcutKey = (key: string) => key.toLowerCase();
 
@@ -47,8 +46,4 @@ export const isPrimaryModifierOnly = (event: KeyboardEvent) => {
   return isMac
     ? event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey
     : event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey;
-};
-
-export const isLeaderShortcutPickerTrigger = (event: KeyboardEvent) => {
-  return isPrimaryModifierOnly(event) && event.code === leaderShortcutPickerTriggerCode;
 };

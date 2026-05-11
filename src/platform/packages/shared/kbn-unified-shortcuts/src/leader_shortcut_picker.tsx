@@ -9,7 +9,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useShortcutsContext } from './shortcuts_provider';
-import { isLeaderShortcutPickerTrigger, normalizeShortcutKey } from './shortcut_utils';
+import { isPrimaryModifierOnly, normalizeShortcutKey } from './shortcut_utils';
 import { ShortcutsOverlay, ShortcutsOverlayItem } from './shortcuts_overlay';
 
 export const LeaderShortcutPicker = () => {
@@ -33,7 +33,11 @@ export const LeaderShortcutPicker = () => {
   }, [sortedLeaderKeyShortcuts]);
   const shouldOpen = useCallback(
     (event: KeyboardEvent) => {
-      return sortedLeaderKeyShortcuts.length > 0 && isLeaderShortcutPickerTrigger(event);
+      return (
+        sortedLeaderKeyShortcuts.length > 0 &&
+        isPrimaryModifierOnly(event) &&
+        event.code === 'Quote'
+      );
     },
     [sortedLeaderKeyShortcuts.length]
   );

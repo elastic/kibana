@@ -52,7 +52,7 @@ const ShortcutsContext = createContext<ShortcutsContextValue | undefined>(undefi
  * Provides shared keyboard shortcut coordination state to shortcut primitives.
  */
 export const ShortcutsProvider = ({ children }: ShortcutsProviderProps) => {
-  const activeLeaderKeyInstanceRef = useRef<symbol | undefined>();
+  const activeLeaderKeyInstanceRef = useRef<symbol>();
   const [leaderKeyShortcuts, setLeaderKeyShortcuts] = useState<LeaderKeyShortcutsRegistry>({});
   const actions = useMemo<ShortcutsContextActions>(() => {
     return {
@@ -74,16 +74,14 @@ export const ShortcutsProvider = ({ children }: ShortcutsProviderProps) => {
         const normalizedLeaderKey = normalizeShortcutKey(registration.leaderKey);
         const registrationToken = Symbol(`leader-key-shortcut:${normalizedLeaderKey}`);
 
-        setLeaderKeyShortcuts((currentLeaderKeyShortcuts) => {
-          return {
-            ...currentLeaderKeyShortcuts,
-            [normalizedLeaderKey]: {
-              ...registration,
-              leaderKey: normalizedLeaderKey,
-              registrationToken,
-            },
-          };
-        });
+        setLeaderKeyShortcuts((currentLeaderKeyShortcuts) => ({
+          ...currentLeaderKeyShortcuts,
+          [normalizedLeaderKey]: {
+            ...registration,
+            leaderKey: normalizedLeaderKey,
+            registrationToken,
+          },
+        }));
 
         return () => {
           setLeaderKeyShortcuts((currentLeaderKeyShortcuts) => {
