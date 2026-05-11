@@ -20,7 +20,7 @@ export const getTagsByName = async ({
   savedObjectsTaggingClient,
   tagName,
 }: {
-  savedObjectsTaggingClient?: ITagsClient;
+  savedObjectsTaggingClient: ITagsClient | undefined;
   tagName: string;
 }): Promise<TagResponse[] | null> => {
   const tag = await savedObjectsTaggingClient?.findByName(tagName, { exact: true });
