@@ -8,6 +8,7 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getChartTypeConfigPromptContent } from './chart_type_guidance';
+import { getColorPalettesPromptContent } from './color_palettes';
 
 export const createGenerateConfigPrompt = ({
   nlQuery,
@@ -27,6 +28,7 @@ export const createGenerateConfigPrompt = ({
   additionalContext?: string;
 }): BaseMessageLike[] => {
   const chartTypeConfigPromptContent = getChartTypeConfigPromptContent(chartType);
+  const colorPalettesPromptContent = getColorPalettesPromptContent(chartType);
 
   return [
     [
@@ -68,6 +70,7 @@ NUMBER FORMAT RULES:
 - When column names or the user query hint at a unit (e.g. "cpu", "percent", "bytes_in", "disk_used", "latency_ms"), infer the correct format even if the user did not explicitly ask for it.
 - Do NOT apply a format when the metric is a plain count, rate, or when the unit is ambiguous.
 
+${colorPalettesPromptContent ? `${colorPalettesPromptContent}\n` : ''}
 ${chartTypeConfigPromptContent ? `${chartTypeConfigPromptContent}` : ''}
 
 ${additionalChartConfigInstructions ?? ''}

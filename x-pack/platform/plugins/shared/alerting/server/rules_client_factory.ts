@@ -369,7 +369,11 @@ export class RulesClientFactory {
           return false;
         }
         const user = securityService.authc.getCurrentUser(request);
-        return user && user.authentication_type ? user.authentication_type === 'api_key' : false;
+        if (user?.authentication_type) {
+          return user.authentication_type === 'api_key';
+        }
+        const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
+        return authorizationHeader?.scheme.toLowerCase() === 'apikey';
       },
       getAuthenticationAPIKey(name: string) {
         const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
