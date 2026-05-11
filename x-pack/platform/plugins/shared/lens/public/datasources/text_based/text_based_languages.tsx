@@ -880,6 +880,8 @@ export function getTextBasedDatasource({
         return acc;
       }, []);
     },
+
+    toESQL: () => null,
   };
 
   return TextBasedDatasource;
