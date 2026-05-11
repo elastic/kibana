@@ -9,14 +9,14 @@
 
 import { useMemo, useCallback, useEffect, useState, useRef } from 'react';
 import {
-  apiCanBeRelatedPanelsIndicator,
   apiCanIndicateRelatedPanels,
   apiHasParentApi,
   apiHasUniqueId,
+  apiPublishesRelatedPanels,
   apiPublishesViewMode,
 } from '@kbn/presentation-publishing';
 import type { Subscription } from 'rxjs';
-import { combineLatest, distinctUntilChanged, map, debounceTime } from 'rxjs';
+import { combineLatest } from 'rxjs';
 
 export const useIndicateRelatedPanelsSelector = (
   api: unknown,
@@ -34,26 +34,22 @@ export const useIndicateRelatedPanelsSelector = (
   const [indicateRelatedPanelsId, setIndicateRelatedPanelsId] = useState<string | undefined>(
     parentApiLoaded?.indicateRelatedPanelsId$.value
   );
+  const [relatedPanels, setRelatedPanels] = useState<string[]>([]);
+
   const parentApiSubscription = useRef<Subscription | undefined>();
-  const [numberOfRelatedPanels, setNumberOfRelatedPanels] = useState<number | undefined>();
 
   useEffect(() => {
     // Don't trigger expensive subscriptions if the API can't indicate related panels
-    if (!parentApiLoaded || !apiCanBeRelatedPanelsIndicator(api)) return;
+    if (!parentApiLoaded || !apiPublishesRelatedPanels(api)) return;
     if (!parentApiSubscription.current) {
-      const numberOfRelatedPanels$ = parentApiLoaded.getRelatedPanelIds$(id ?? '').pipe(
-        debounceTime(skipDebounce ? 0 : 250), // Prevent a flash of 0 related panels on initial load
-        distinctUntilChanged(),
-        map((relatedPanelIds) => relatedPanelIds.length)
-      );
       const sub = combineLatest([
         parentApiLoaded.viewMode$,
         parentApiLoaded.indicateRelatedPanelsId$,
-        numberOfRelatedPanels$,
-      ]).subscribe(([vm, indicateId, numberRelated]) => {
+        api.relatedPanels$,
+      ]).subscribe(([vm, indicateId, relatedPanelIds]) => {
         setViewMode(vm);
         setIndicateRelatedPanelsId(indicateId);
-        setNumberOfRelatedPanels(numberRelated);
+        setRelatedPanels(relatedPanelIds);
       });
       parentApiSubscription.current = sub;
     }
@@ -61,24 +57,18 @@ export const useIndicateRelatedPanelsSelector = (
   }, [parentApiLoaded, id, api, skipDebounce]);
 
   const canIndicateRelatedPanels = useMemo(
-    () =>
-      Boolean(
-        viewMode === 'edit' &&
-          api &&
-          id &&
-          apiCanBeRelatedPanelsIndicator(api) &&
-          api.canBeRelatedPanelsIndicator
-      ),
+    () => Boolean(viewMode === 'edit' && id && apiPublishesRelatedPanels(api)),
     [api, viewMode, id]
   );
+  const numberOfRelatedPanels = useMemo(() => relatedPanels.length, [relatedPanels]);
   const isIndicatingRelatedPanels = useMemo(
-    () => canIndicateRelatedPanels && indicateRelatedPanelsId === id,
-    [indicateRelatedPanelsId, canIndicateRelatedPanels, id]
+    () => indicateRelatedPanelsId === id,
+    [indicateRelatedPanelsId, id]
   );
   const onToggleIndicateRelatedPanels = useCallback(() => {
-    if (canIndicateRelatedPanels && apiCanIndicateRelatedPanels(parentApi))
+    if (apiCanIndicateRelatedPanels(parentApi))
       parentApi.setIndicateRelatedPanelsId(isIndicatingRelatedPanels ? undefined : id);
-  }, [id, parentApi, canIndicateRelatedPanels, isIndicatingRelatedPanels]);
+  }, [parentApi, isIndicatingRelatedPanels, id]);
 
   return {
     canIndicateRelatedPanels,

@@ -250,10 +250,6 @@ export function getPageApi() {
       applySerializedState,
       timeRange$,
       hasUnsavedChanges$,
-      getRelatedPanelIds$: () => new BehaviorSubject<string[]>([]),
-      arePanelsRelated$: new BehaviorSubject((a: string, b: string) => false),
-      setIndicateRelatedPanelsId: () => {},
-      indicateRelatedPanelsId$: new BehaviorSubject(undefined),
     } as PageApi,
   };
 }

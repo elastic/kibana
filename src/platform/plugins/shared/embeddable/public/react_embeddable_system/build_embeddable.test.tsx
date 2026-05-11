@@ -52,7 +52,6 @@ it('should return Component and componentApi', async () => {
   expect(componentApi).toMatchInlineSnapshot(`
     Object {
       "applySerializedState": [MockFunction],
-      "canBeRelatedPanelsIndicator": false,
       "hasLockedHoverActions$": BehaviorSubject {
         "_value": false,
         "closed": false,
@@ -112,7 +111,6 @@ it('should handle factory error', async () => {
         "observers": Array [],
         "thrownError": null,
       },
-      "canBeRelatedPanelsIndicator": false,
       "hasLockedHoverActions$": BehaviorSubject {
         "_value": false,
         "closed": false,

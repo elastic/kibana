@@ -33,17 +33,4 @@ export interface IsPinnable {
 export const apiCanBePinned = (unknownApi: unknown | null): unknownApi is IsPinnable =>
   Boolean((unknownApi as IsPinnable).isPinnable);
 
-export interface CanBeRelatedPanelsIndicator {
-  canBeRelatedPanelsIndicator: boolean;
-}
-
-export const apiCanBeRelatedPanelsIndicator = (
-  unknownApi: unknown | null
-): unknownApi is CanBeRelatedPanelsIndicator =>
-  Boolean((unknownApi as CanBeRelatedPanelsIndicator).canBeRelatedPanelsIndicator);
-
-export type HasPanelCapabilities = IsExpandable &
-  IsCustomizable &
-  IsDuplicable &
-  IsPinnable &
-  CanBeRelatedPanelsIndicator;
+export type HasPanelCapabilities = IsExpandable & IsCustomizable & IsDuplicable & IsPinnable;

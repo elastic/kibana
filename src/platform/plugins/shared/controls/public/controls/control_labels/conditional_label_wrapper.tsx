@@ -43,6 +43,7 @@ export const ConditionalLabelWrapper = ({
     onToggleIndicateRelatedPanels,
     numberOfRelatedPanels,
   } = useIndicateRelatedPanelsSelector(api);
+
   const enableIndicateRelatedPanels = Boolean(canIndicateRelatedPanels && numberOfRelatedPanels);
 
   const linkTextRef = useRef<HTMLSpanElement>(null);

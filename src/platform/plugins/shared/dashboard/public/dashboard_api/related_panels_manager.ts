@@ -11,13 +11,17 @@ import type {
   ViewMode,
   PanelRelationshipComparator,
 } from '@kbn/presentation-publishing';
-import { apiAppliesFilters, apiHasUseGlobalFiltersSetting } from '@kbn/presentation-publishing';
-import type { Observable, Subscription } from 'rxjs';
+import {
+  apiAppliesFilters,
+  apiHasUseGlobalFiltersSetting,
+  apiPublishesESQLQuery,
+  apiPublishesRelatedPanels,
+} from '@kbn/presentation-publishing';
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, filter, map, of, switchMap } from 'rxjs';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariable } from '@kbn/esql-types';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import type { AggregateQuery } from '@kbn/es-query';
 import type { PublishesSavedObjectId } from '@kbn/presentation-publishing';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeTrackPanel } from './track_panel';
@@ -35,19 +39,6 @@ const getBlankSectionFilterEntry = () =>
     appliesFilters: new Set(),
     doesNotApplyFilters: new Set(),
   } as SectionFilterEntry);
-
-interface PublishesESQLQuery {
-  query$: PublishingSubject<AggregateQuery>;
-}
-/**
- * Type guard to check if an embeddable publishes an ES|QL query.
- * Some embeddables publish `query$` but the value may be undefined or a non-ES|QL query object.
- * The `in` operator throws if the right-hand side is not an object, so we must guard against that.
- */
-const apiPublishesESQLQuery = (api: unknown): api is PublishesESQLQuery => {
-  const query = (api as PublishesESQLQuery).query$?.value;
-  return Boolean(query) && typeof query === 'object' && 'esql' in query;
-};
 
 export const initializeRelatedPanelsManager = ({
   trackPanel,
@@ -102,6 +93,8 @@ export const initializeRelatedPanelsManager = ({
       > = [];
       const esqlQueryChildrenByUUID: Array<Observable<{ uuid: string; esql: string }>> = [];
 
+      const childrenPublishingRelatedPanels: Map<string, PublishingSubject<string[]>> = new Map();
+
       for (const child of Object.values(children)) {
         // Group all panels by section ID based on whether or not they apply filters
         const layoutPanel = getDashboardPanelFromId(child.uuid);
@@ -110,29 +103,34 @@ export const initializeRelatedPanelsManager = ({
         const nextSectionEntry =
           childrenBySectionAndFilterApplication.get(sectionId) ?? getBlankSectionFilterEntry();
 
-        if (apiAppliesFilters(child)) {
-          nextSectionEntry.appliesFilters.add(child.uuid);
-          if (apiHasUseGlobalFiltersSetting(child) && child.useGlobalFilters$.value)
-            uuidsUsingGlobalFilters.add(child.uuid);
+        if (apiPublishesRelatedPanels(child)) {
+          childrenPublishingRelatedPanels.set(child.uuid, child.relatedPanels$);
         } else {
-          nextSectionEntry.doesNotApplyFilters.add(child.uuid);
-        }
-        childrenBySectionAndFilterApplication.set(sectionId, nextSectionEntry);
+          if (apiAppliesFilters(child)) {
+            nextSectionEntry.appliesFilters.add(child.uuid);
+            if (apiHasUseGlobalFiltersSetting(child) && child.useGlobalFilters$.value)
+              uuidsUsingGlobalFilters.add(child.uuid);
+          } else {
+            nextSectionEntry.doesNotApplyFilters.add(child.uuid);
+          }
+          childrenBySectionAndFilterApplication.set(sectionId, nextSectionEntry);
 
-        // Determine which panels publish ES|QL variables or queries
-        if (apiPublishesESQLQuery(child)) {
-          esqlQueryChildrenByUUID.push(
-            child.query$.pipe(map(({ esql }) => ({ esql, uuid: child.uuid })))
-          );
-        }
-        if (apiPublishesESQLVariable(child)) {
-          esqlVariableChildrenByUUID.push(
-            child.esqlVariable$.pipe(map((variable) => ({ variable, uuid: child.uuid })))
-          );
+          // Determine which panels publish ES|QL variables or queries
+          if (apiPublishesESQLQuery(child)) {
+            esqlQueryChildrenByUUID.push(
+              child.query$.pipe(map(({ esql }) => ({ esql, uuid: child.uuid })))
+            );
+          }
+          if (apiPublishesESQLVariable(child)) {
+            esqlVariableChildrenByUUID.push(
+              child.esqlVariable$.pipe(map((variable) => ({ variable, uuid: child.uuid })))
+            );
+          }
         }
       }
 
       return combineLatest([
+        of(childrenPublishingRelatedPanels),
         of(
           getRelatedPanelsByAppliedFilters({
             childrenBySectionAndFilterApplication,
@@ -148,30 +146,27 @@ export const initializeRelatedPanelsManager = ({
   );
 
   const relatedPanelSubscription = childUUIDsIndexed$.subscribe(
-    ([filterRelatedPanels, esqlVariablesWithUUIDs, esqlQueriesWithUUIDs]) => {
-      const { esqlRelatedPanels, esqlVariableDependentPanels } = getRelatedPanelsByESQL({
+    ([
+      publishedRelatedPanels,
+      filterRelatedPanels,
+      esqlVariablesWithUUIDs,
+      esqlQueriesWithUUIDs,
+    ]) => {
+      const esqlRelatedPanels = getRelatedPanelsByESQL({
         esqlVariablesWithUUIDs,
         esqlQueriesWithUUIDs,
       });
 
-      const byFilter = (a: string, b: string) => {
-        const relatedPanelUUIDs = new Set([...(filterRelatedPanels.get(b) ?? [])]);
+      arePanelsRelated$.next((a, b) => {
+        // If one of the panels publishes related panels, use this
+        if (publishedRelatedPanels.has(a)) return publishedRelatedPanels.get(a)!.value.includes(b);
+        if (publishedRelatedPanels.has(b)) return publishedRelatedPanels.get(b)!.value.includes(a);
+        // Otherwise determine relation from the indexed child UUIDs
+        const relatedPanelUUIDs = new Set([
+          ...(filterRelatedPanels.get(b) ?? []),
+          ...(esqlRelatedPanels.get(b) ?? []),
+        ]);
         return relatedPanelUUIDs.has(a);
-      };
-      const byESQL = (a: string, b: string) => {
-        const relatedPanelUUIDs = new Set([...(esqlRelatedPanels.get(b) ?? [])]);
-        return relatedPanelUUIDs.has(a);
-      };
-      const byBoth = (a: string, b: string) => byFilter(a, b) || byESQL(a, b);
-
-      const byESQLVariable = (a: string, b: string) => {
-        const relatedPanelUUIDs = new Set([...(esqlVariableDependentPanels.get(b) ?? [])]);
-        return relatedPanelUUIDs.has(a);
-      };
-
-      arePanelsRelated$.next((a, b, options) => {
-        if (options?.byESQLVariableConsumers) return byESQLVariable(a, b);
-        return byBoth(a, b);
       });
     }
   );
@@ -181,36 +176,14 @@ export const initializeRelatedPanelsManager = ({
     backupService.setIndicateRelatedPanelsId(savedObjectId$.value, panelId);
   };
 
-  const relatedPanelIdSubscriptions = new Set<Subscription>();
-  const getRelatedPanelIds$ = (panelId: string) => {
-    const relatedPanelIds$ = new BehaviorSubject<string[]>([]);
-
-    const subscription = combineLatest([arePanelsRelated$, children$])
-      .pipe(
-        map(([arePanelsRelated, children]) => {
-          return Object.keys(children).filter(
-            (id) =>
-              // Only panels related by ESQL variables can currently be indicated
-              id !== panelId && arePanelsRelated(id, panelId, { byESQLVariableConsumers: true })
-          );
-        })
-      )
-      .subscribe((next) => relatedPanelIds$.next(next));
-    relatedPanelIdSubscriptions.add(subscription);
-    hasRelatedPanelIdSubscriptions$.next(true);
-    return relatedPanelIds$;
-  };
-
   return {
     api: {
       indicateRelatedPanelsId$,
       setIndicateRelatedPanelsId,
-      getRelatedPanelIds$,
       arePanelsRelated$,
     },
     cleanup: () => {
       relatedPanelSubscription.unsubscribe();
-      relatedPanelIdSubscriptions.forEach((sub) => sub.unsubscribe());
     },
   };
 };
@@ -271,12 +244,7 @@ function getRelatedPanelsByESQL({
   esqlQueriesWithUUIDs?: Array<{ uuid: string; esql: string }>;
 }) {
   const nextESQLRelatedPanels: Map<string, string[]> = new Map();
-  const nextESQLVariableDependentPanels: Map<string, string[]> = new Map();
-  if (!esqlVariablesWithUUIDs || !esqlQueriesWithUUIDs)
-    return {
-      esqlRelatedPanels: nextESQLRelatedPanels,
-      esqlVariableDependentPanels: nextESQLVariableDependentPanels,
-    };
+  if (!esqlVariablesWithUUIDs || !esqlQueriesWithUUIDs) return nextESQLRelatedPanels;
 
   // For each panel with an ES|QL query, check if it has any variables, then create a map of which
   // panels publish these corresponding variables
@@ -296,21 +264,9 @@ function getRelatedPanelsByESQL({
           ...(nextESQLRelatedPanels.get(relatedUUID) ?? []),
           uuid,
         ]);
-        // Only add to dependentPanels if the consumer is not the publisher itself
-        // (a chained control that publishes a variable and consumes another should not
-        // list its own variable's publisher as its dependent)
-        if (relatedUUID !== uuid) {
-          nextESQLVariableDependentPanels.set(relatedUUID, [
-            ...(nextESQLVariableDependentPanels.get(relatedUUID) ?? []),
-            uuid,
-          ]);
-        }
       }
     }
   }
 
-  return {
-    esqlRelatedPanels: nextESQLRelatedPanels,
-    esqlVariableDependentPanels: nextESQLVariableDependentPanels,
-  };
+  return nextESQLRelatedPanels;
 }

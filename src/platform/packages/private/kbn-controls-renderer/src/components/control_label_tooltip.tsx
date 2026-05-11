@@ -20,19 +20,21 @@ interface RelatedPanelProps {
 // Prevents us from e.g. setting canIndicateRelatedPanels to true and forgetting to pass isIndicatingRelatedPanels
 type AllRelatedPanelPropsOrNone = RelatedPanelProps | { [K in keyof RelatedPanelProps]?: never };
 
-type Props = Partial<EuiToolTipProps> & {
+type Props = Omit<Partial<EuiToolTipProps>, 'children'> & {
   panelLabel?: string;
   panelTooltipLabel?: string;
+  children: EuiToolTipProps['children'];
 } & AllRelatedPanelPropsOrNone;
 
-export const ControlLabelTooltip: React.FC<Props> = ({
+export const ControlLabelTooltip = ({
   canIndicateRelatedPanels,
   isIndicatingRelatedPanels,
   numberOfRelatedPanels,
   panelLabel,
   panelTooltipLabel,
+  children,
   ...rest
-}) => {
+}: Props) => {
   const relatedPanelCountBadge =
     canIndicateRelatedPanels && numberOfRelatedPanels !== undefined ? (
       <EuiBadge color="hollow">
@@ -69,5 +71,9 @@ export const ControlLabelTooltip: React.FC<Props> = ({
       }
     : { content: panelTooltipLabel ?? panelLabel };
 
-  return <EuiToolTip {...tooltipProps} {...rest} id={rest.id} />;
+  return (
+    <EuiToolTip {...tooltipProps} {...rest} id={rest.id}>
+      {children}
+    </EuiToolTip>
+  );
 };

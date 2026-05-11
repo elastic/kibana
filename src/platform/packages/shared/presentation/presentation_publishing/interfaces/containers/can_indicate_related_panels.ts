@@ -9,13 +9,7 @@
 
 import type { BehaviorSubject } from 'rxjs';
 
-export type PanelRelationshipComparator = (
-  a: string,
-  b: string,
-  options?: {
-    byESQLVariableConsumers: boolean;
-  }
-) => boolean;
+export type PanelRelationshipComparator = (a: string, b: string) => boolean;
 /**
  * This API can indicate panels related to a certain child panel. We are calling this "indicating" because "highlight" refers to something else and
  * "callout" is a kind of EUI element and naming things is the second hardest problem in computer science.
@@ -24,7 +18,6 @@ export interface CanIndicateRelatedPanels {
   setIndicateRelatedPanelsId: (panelId?: string) => void;
   indicateRelatedPanelsId$: BehaviorSubject<string | undefined>;
   arePanelsRelated$: BehaviorSubject<PanelRelationshipComparator>;
-  getRelatedPanelIds$: (panelId: string) => BehaviorSubject<string[]>;
 }
 
 /**
@@ -33,7 +26,6 @@ export interface CanIndicateRelatedPanels {
 export const apiCanIndicateRelatedPanels = (api: unknown): api is CanIndicateRelatedPanels => {
   return (
     typeof (api as CanIndicateRelatedPanels)?.setIndicateRelatedPanelsId === 'function' &&
-    typeof (api as CanIndicateRelatedPanels)?.indicateRelatedPanelsId$ !== 'undefined' &&
-    typeof (api as CanIndicateRelatedPanels)?.getRelatedPanelIds$ === 'function'
+    typeof (api as CanIndicateRelatedPanels)?.indicateRelatedPanelsId$ !== 'undefined'
   );
 };

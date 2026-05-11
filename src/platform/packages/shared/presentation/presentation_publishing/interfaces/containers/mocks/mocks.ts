@@ -18,7 +18,6 @@ export const getMockPresentationContainer = (): PresentationContainer => {
     getPanelCount: jest.fn(),
     children$: new BehaviorSubject<{ [key: string]: unknown }>({}),
     setIndicateRelatedPanelsId: jest.fn(),
-    getRelatedPanelIds$: jest.fn() as unknown as PresentationContainer['getRelatedPanelIds$'],
     arePanelsRelated$: jest.fn() as unknown as PresentationContainer['arePanelsRelated$'],
     indicateRelatedPanelsId$: new BehaviorSubject<string | undefined>(undefined),
   };

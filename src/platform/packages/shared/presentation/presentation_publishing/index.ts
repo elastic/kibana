@@ -143,6 +143,11 @@ export {
 } from './interfaces/publishes_phase_events';
 export { apiPublishesRendered, type PublishesRendered } from './interfaces/publishes_rendered';
 export {
+  apiPublishesRelatedPanels,
+  type PublishesRelatedPanels,
+} from './interfaces/publishes_related_panels';
+
+export {
   apiPublishesSavedObjectId,
   type PublishesSavedObjectId,
 } from './interfaces/publishes_saved_object_id';
@@ -230,12 +235,10 @@ export {
   apiCanBeCustomized,
   apiCanBeExpanded,
   apiCanBePinned,
-  apiCanBeRelatedPanelsIndicator,
   type IsDuplicable,
   type IsExpandable,
   type IsCustomizable,
   type IsPinnable,
-  type CanBeRelatedPanelsIndicator,
   type HasPanelCapabilities,
 } from './interfaces/containers/panel_capabilities';
 
@@ -272,3 +275,5 @@ export {
 } from './interfaces/containers/publishes_settings';
 
 export { apiCanFocusPanel, type CanFocusPanel } from './interfaces/containers/can_focus_panel';
+
+export { apiPublishesESQLQuery, type PublishesESQLQuery } from './interfaces/publishes_esql_query';

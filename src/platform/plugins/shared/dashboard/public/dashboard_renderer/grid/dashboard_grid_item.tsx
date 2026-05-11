@@ -88,8 +88,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     const indicatePanel =
       viewMode === 'edit' &&
       indicateRelatedPanelsId !== undefined &&
-      // Only panels related by ESQL variables can currently be indicated
-      arePanelsRelated(id, indicateRelatedPanelsId, { byESQLVariableConsumers: true });
+      arePanelsRelated(id, indicateRelatedPanelsId);
     const focusPanel =
       isIndicatingRelatedPanels ||
       indicatePanel ||
