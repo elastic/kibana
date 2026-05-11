@@ -464,7 +464,10 @@ export const runExtractFieldsFlow = async (
         }),
         hints: [
           `Seed parsing was discovered automatically using ${winning.type} heuristics on field "${fieldName}".`,
-          ...buildKeyValueHints(parsedDocuments),
+          ...buildKeyValueHints(
+            parsedDocuments,
+            new Set(fieldChanges.map((change) => change.field))
+          ),
         ],
         samples_info: samplesInfo,
       },
@@ -714,14 +717,26 @@ const KV_FIELD_BLOCKLIST = new Set(['@timestamp', 'stream.name', 'body.text', 'm
  * that the agent surfaces to the user — the user decides whether stripping
  * the prefix is appropriate. No automatic rewriting happens; this keeps
  * destructive value changes under human control.
+ *
+ * `survivingFields`, when provided, scopes the analysis to fields that
+ * actually appear in the final pipeline's output. The seed processor's
+ * captures (`parsedDocuments`) may include fields the post-parse sub-agent
+ * later renamed or dropped — emitting a hint that names a field no longer
+ * present in the proposed pipeline would just mislead the user. Pass
+ * `undefined` (or omit) to skip the filter entirely (used by unit tests
+ * that exercise the extraction logic in isolation).
  */
-export const buildKeyValueHints = (parsedDocuments: FlattenRecord[]): string[] => {
+export const buildKeyValueHints = (
+  parsedDocuments: FlattenRecord[],
+  survivingFields?: ReadonlySet<string>
+): string[] => {
   const fieldValues = new Map<string, string[]>();
 
   for (const doc of parsedDocuments) {
     if (!doc) continue;
     for (const [fieldName, value] of Object.entries(doc)) {
       if (KV_FIELD_BLOCKLIST.has(fieldName)) continue;
+      if (survivingFields && !survivingFields.has(fieldName)) continue;
       if (typeof value !== 'string') continue;
       if (!fieldValues.has(fieldName)) {
         fieldValues.set(fieldName, []);
@@ -755,7 +770,9 @@ export const buildKeyValueHints = (parsedDocuments: FlattenRecord[]): string[] =
     hints.push(
       `Field "${fieldName}" has values like "${values[0]}" — all share a "${prefix}=" prefix. ` +
         `If only the part after "=" is meaningful, ask the user whether to refine the extraction. ` +
-        `To refine: call design_pipeline with extract_fields: false and a complete description of ALL fields to extract (use field_changes from this result), specifying that this field should be extracted without the prefix.`
+        `To refine: call refine_extracted_field with field: "${fieldName}", action: "drop_prefix", prefix: "${prefix}", ` +
+        `and pipeline_steps: <the \`steps\` array from THIS result> (since this pipeline is still a proposal and not yet applied). ` +
+        `This appends a single deterministic step that strips the prefix in-place; no other fields are affected.`
     );
   }
 

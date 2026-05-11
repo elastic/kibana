@@ -650,7 +650,12 @@ describe('buildKeyValueHints', () => {
     expect(hints).toHaveLength(1);
     expect(hints[0]).toContain('attributes.user.id');
     expect(hints[0]).toContain('user=');
-    expect(hints[0]).toContain('extract_fields: false');
+
+    expect(hints[0]).toContain('refine_extracted_field');
+    expect(hints[0]).toContain('action: "drop_prefix"');
+    expect(hints[0]).toContain('prefix: "user"');
+
+    expect(hints[0]).toContain('pipeline_steps');
   });
 
   it('does NOT emit a hint when only some values carry the prefix', () => {
@@ -709,6 +714,50 @@ describe('buildKeyValueHints', () => {
     expect(
       hints.some((h) => h.includes('resource.attributes.service.name') && h.includes('service='))
     ).toBe(true);
+  });
+
+  describe('survivingFields scoping', () => {
+    const fiveSamples = (fieldName: string, prefix: string) =>
+      docs(
+        { [fieldName]: `${prefix}=v1` },
+        { [fieldName]: `${prefix}=v2` },
+        { [fieldName]: `${prefix}=v3` },
+        { [fieldName]: `${prefix}=v4` },
+        { [fieldName]: `${prefix}=v5` }
+      );
+
+    it('skips a field that does not survive into the final pipeline', () => {
+      const survivingFields = new Set(['user.id']);
+      const hints = buildKeyValueHints(fiveSamples('attributes.user.id', 'user'), survivingFields);
+
+      expect(hints).toEqual([]);
+    });
+
+    it('emits the hint for a field that does survive into the final pipeline', () => {
+      const survivingFields = new Set(['attributes.user.id']);
+      const hints = buildKeyValueHints(fiveSamples('attributes.user.id', 'user'), survivingFields);
+
+      expect(hints).toHaveLength(1);
+      expect(hints[0]).toContain('attributes.user.id');
+    });
+
+    it('treats an empty surviving set as "nothing survives" and emits no hints', () => {
+      // Defensive: the post-parse sub-agent could in principle wipe every
+      // captured field. The filter must NOT degrade silently to "no
+      // filter" in that case — an empty set means "no field qualifies".
+      const hints = buildKeyValueHints(fiveSamples('attributes.user.id', 'user'), new Set());
+
+      expect(hints).toEqual([]);
+    });
+
+    it('falls back to today unscoped behaviour when survivingFields is omitted', () => {
+      // Unit tests for the extraction logic (and any future caller that
+      // legitimately doesn\'t have a surviving-field set) must keep
+      // working. Passing `undefined` opts out of the filter.
+      const hints = buildKeyValueHints(fiveSamples('attributes.user.id', 'user'));
+
+      expect(hints).toHaveLength(1);
+    });
   });
 });
 
@@ -1260,11 +1309,6 @@ describe('runExtractFieldsFlow', () => {
     });
 
     it('warns when an existing step writes to a field the new extraction also creates', async () => {
-      // The seed grok captures `attributes.source.ip` (see
-      // `grokCandidateProcessor` + `succeededSimulation` `detected_fields`).
-      // An existing `set` writes a constant to the same field — depending on
-      // step order one will silently overwrite the other. The agent must
-      // surface this so the user decides which step takes precedence.
       const existingSet = {
         action: 'set',
         to: 'attributes.source.ip',

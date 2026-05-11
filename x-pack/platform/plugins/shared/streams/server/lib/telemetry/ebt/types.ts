@@ -51,7 +51,7 @@ interface StreamsProcessingPipelineSuggestedProps {
   stream_name: string;
   stream_type: StreamType;
   source: 'ui' | 'agent';
-  flow?: 'extract_fields' | 'nl_to_streamlang';
+  flow?: 'extract_fields' | 'nl_to_streamlang' | 'refine_extracted_field';
   extract_fields_fallback_reason?: string;
 }
 

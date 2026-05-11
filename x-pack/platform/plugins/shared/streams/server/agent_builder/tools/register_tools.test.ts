@@ -7,6 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
+import { isAllowedBuiltinTool } from '@kbn/agent-builder-server/allow_lists';
 import { registerAgentBuilderTools } from './register_tools';
 import { STREAMS_READ_TOOL_IDS, STREAMS_WRITE_TOOL_IDS } from './tool_ids';
 import { STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID } from './register_tools';
@@ -67,6 +68,24 @@ describe('registerAgentBuilderTools', () => {
       expect(tool).toHaveProperty('schema');
       expect((tool as { schema: unknown }).schema).toBeDefined();
     }
+  });
+
+  it('every registered tool id is in the agent-builder allowlist', () => {
+    const agentBuilder = agentBuilderMocks.createSetup();
+    const { getScopedClients } = createMockGetScopedClients();
+
+    registerAgentBuilderTools({
+      agentBuilder,
+      getScopedClients,
+      server: createMockServer() as StreamsServer,
+      logger: loggerMock.create(),
+      telemetry,
+    });
+
+    const registeredIds = agentBuilder.tools.register.mock.calls.map((call) => call[0].id);
+    const missing = registeredIds.filter((id) => !isAllowedBuiltinTool(id));
+
+    expect(missing).toEqual([]);
   });
 
   it('does not register any tools when agentBuilder is falsy', () => {

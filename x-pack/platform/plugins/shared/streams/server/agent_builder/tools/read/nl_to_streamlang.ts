@@ -822,7 +822,7 @@ const normalizeConditionBlocks = (obj: { steps: unknown[] }): { steps: unknown[]
   };
 };
 
-const stripIgnoreFailure = (steps: StreamlangStep[]): StreamlangStep[] => {
+export const stripIgnoreFailure = (steps: StreamlangStep[]): StreamlangStep[] => {
   return steps.map((step) => {
     if (isConditionBlock(step)) {
       return {
@@ -846,7 +846,7 @@ const stripIgnoreFailure = (steps: StreamlangStep[]): StreamlangStep[] => {
  * `step_changes`, and any drop warnings — so silent overwrites become
  * impossible.
  */
-const annotateWithDiff = (
+export const annotateWithDiff = (
   result: Omit<NlToStreamlangResult, 'existing_steps' | 'step_changes'>,
   existingSteps: StreamlangStep[]
 ): NlToStreamlangResult => {

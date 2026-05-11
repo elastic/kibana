@@ -24,6 +24,7 @@ import { createDiagnoseStreamTool } from './read/diagnose_stream';
 import { createQueryDocumentsTool } from './read/query_documents';
 import { createDesignPipelineTool } from './read/design_pipeline';
 import { createListIlmPoliciesTool } from './read/list_ilm_policies';
+import { createRefineExtractedFieldTool } from './read/refine_extracted_field';
 import { createSuggestPartitionsTool } from './read/suggest_partitions';
 import {
   createSearchKnowledgeIndicatorsTool,
@@ -42,6 +43,7 @@ export {
   STREAMS_QUERY_DOCUMENTS_TOOL_ID,
   STREAMS_DESIGN_PIPELINE_TOOL_ID,
   STREAMS_LIST_ILM_POLICIES_TOOL_ID,
+  STREAMS_REFINE_EXTRACTED_FIELD_TOOL_ID,
   STREAMS_SUGGEST_PARTITIONS_TOOL_ID,
   STREAMS_UPDATE_STREAM_TOOL_ID,
   STREAMS_CREATE_PARTITION_TOOL_ID,
@@ -91,6 +93,11 @@ export function registerAgentBuilderTools({
       telemetry,
     }),
     createListIlmPoliciesTool({ getScopedClients, isServerless: server.isServerless }),
+    createRefineExtractedFieldTool({
+      getScopedClients,
+      logger: logger.get('refine_extracted_field'),
+      telemetry,
+    }),
     createSuggestPartitionsTool({
       getScopedClients,
       logger: logger.get('suggest_partitions'),

@@ -245,7 +245,7 @@ const streamsProcessingPipelineSuggestedSchema: RootSchema<StreamsProcessingPipe
       type: 'keyword',
       _meta: {
         description:
-          'Which engine produced the result (agent source only): "extract_fields" for the heuristic + reasoning agent, "nl_to_streamlang" for the direct LLM completion path',
+          'Which engine produced the result (agent source only): "extract_fields" for the heuristic + reasoning agent, "nl_to_streamlang" for the direct LLM completion path, "refine_extracted_field" for the deterministic prefix-stripping refinement tool',
         optional: true,
       },
     },
