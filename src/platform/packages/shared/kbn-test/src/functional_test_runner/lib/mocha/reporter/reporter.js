@@ -14,7 +14,12 @@ import { ToolingLogTextWriter } from '@kbn/tooling-log';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import moment from 'moment';
 
-import { recordLog, snapshotLogsForRunnable, setupJUnitReportGeneration } from '../../../../mocha';
+import {
+  recordLog,
+  snapshotLogsForRunnable,
+  getSnapshotOfRunnableLogs,
+  setupJUnitReportGeneration,
+} from '../../../../mocha';
 import * as colors from './colors';
 import * as symbols from './symbols';
 import { ms } from './ms';
@@ -215,6 +220,18 @@ export function MochaReporterProvider({ getService }) {
       // failed hooks trigger the `onFail(runnable)` callback, so we snapshot the logs for
       // them here. Tests will re-capture the snapshot in `onTestEnd()`
       snapshotLogsForRunnable(runnable);
+
+      // When captureLogOutput is on, buffered debug logs would otherwise only reach CI stats; flush them to stdout on failure too.
+      if (originalLogWriters) {
+        const captured = getSnapshotOfRunnableLogs(runnable);
+        if (captured) {
+          process.stdout.write(
+            `\n${colors.fail(
+              `debug logs leading up to failure of: ${runnable.fullTitle()}`
+            )}\n${captured}\n`
+          );
+        }
+      }
     };
 
     onEnd = () => {
