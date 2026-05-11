@@ -16,14 +16,6 @@ export const LOOKBACK_WINDOW = '1m';
 export const POLL_TIMEOUT_MS = 45_000;
 export const POLL_INTERVAL_MS = 1_000;
 
-/**
- * Time we let the executor run between assertions when verifying that no new
- * events are produced (e.g. disabled / deleted / no-match rules, or asserting
- * a status holds steady). At least one task manager tick (~3-5s) plus margin
- * so a slow tick still fires.
- */
-export const WAIT_TIME_MS = 12_000;
-
 export {
   ALERTING_V2_RULE_API_PATH as RULE_API_PATH,
   ALERTING_V2_RULE_DOCTOR_INSIGHTS_API_PATH as INSIGHTS_API_PATH,

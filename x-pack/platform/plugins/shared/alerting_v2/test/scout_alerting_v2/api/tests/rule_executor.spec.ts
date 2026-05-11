@@ -21,7 +21,7 @@ import { tags } from '@kbn/scout';
 import type { AlertEvent } from '../../../../server/resources/datastreams/alert_events';
 import { apiTest, buildCreateRuleData, testData } from '../fixtures';
 
-const { LOOKBACK_WINDOW, SCHEDULE_INTERVAL, WAIT_TIME_MS } = testData;
+const { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } = testData;
 
 /**
  * Index a list of alert events by their `data['host.name']` value.
@@ -40,6 +40,16 @@ const groupEventsByHost = (events: AlertEvent[]): Record<string, AlertEvent> =>
  */
 apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
   const SOURCE_INDEX = 'test-alerting-v2-rule-executor-source';
+  /**
+   * Time-based wait used only by tests that assert the *absence* of events from
+   * a disabled or deleted rule, where there is no positive condition to poll
+   * for (the executor is no longer scheduled, so no `task-run` events will
+   * appear). All other negative assertions wait for executor ticks via
+   * `taskExecutions.waitForExecutorRuns`. This buffer covers ~2 task manager
+   * ticks (SCHEDULE_INTERVAL is 5s) so a regression that incorrectly executed
+   * disabled rules would have time to manifest.
+   */
+  const WAIT_TIME_MS = 12_000;
 
   apiTest.beforeAll(async ({ apiServices }) => {
     await apiServices.alertingV2.sourceIndex.create({
