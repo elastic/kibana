@@ -378,7 +378,7 @@
           "({ onChangeAccessMode, getActiveSpace, getCurrentUser, accessControlClient, contentTypeId, accessControl, createdBy, }: Props) => React.JSX.Element | null"
         ],
         "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/components/access_mode_container.tsx",
-        "lineNumber": 83,
+        "lineNumber": 84,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -394,7 +394,7 @@
               "Props"
             ],
             "path": "src/platform/packages/shared/content-management/access_control/access_control_public/src/components/access_mode_container.tsx",
-            "lineNumber": 83,
+            "lineNumber": 84,
             "columnNumber": 37,
             "deprecated": false,
             "docsReferencedTypeName": "Props",
