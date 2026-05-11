@@ -8,3 +8,4 @@
  */
 
 export { PanelsToggle, type PanelsToggleProps } from './panels_toggle';
+export { usePanelsToggleActions } from './use_panels_toggle_actions';
