@@ -62,7 +62,7 @@ export function ClassicStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
 
   const {
-    features: { attachments, queryStreams },
+    features: { queryStreams },
   } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
@@ -169,14 +169,12 @@ export function ClassicStreamDetailManagement({
     ),
   };
 
-  if (attachments.enabled) {
-    tabs.attachments = {
-      content: <StreamDetailAttachments definition={definition} />,
-      label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
-        defaultMessage: 'Attachments',
-      }),
-    };
-  }
+  tabs.attachments = {
+    content: <StreamDetailAttachments definition={definition} />,
+    label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
+      defaultMessage: 'Attachments',
+    }),
+  };
 
   if (otherTabs.significantEvents) {
     tabs.significantEvents = otherTabs.significantEvents;

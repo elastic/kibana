@@ -13,13 +13,16 @@ import { queryKeys } from '../query_keys';
 
 export interface UseFetchEpisodeActionsOptions {
   episodeIds: string[];
-  services: { expressions: ExpressionsStart };
+  expressions: ExpressionsStart;
 }
 
-export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisodeActionsOptions) =>
+export const useFetchEpisodeActions = ({
+  episodeIds,
+  expressions,
+}: UseFetchEpisodeActionsOptions) =>
   useQuery({
     queryKey: queryKeys.actions(episodeIds),
-    queryFn: ({ signal }) => fetchEpisodeActions({ episodeIds, abortSignal: signal, services }),
+    queryFn: ({ signal }) => fetchEpisodeActions({ episodeIds, abortSignal: signal, expressions }),
     enabled: episodeIds.length > 0,
     keepPreviousData: true,
     select: (rows) => {

@@ -60,7 +60,6 @@ describe('yaml_form_utils', () => {
         kind: 'alert',
         metadata: {
           name: 'Test Rule',
-          enabled: true,
           description: 'A test rule',
           owner: 'test-owner',
           tags: ['label1', 'label2'],
@@ -109,7 +108,6 @@ describe('yaml_form_utils', () => {
         kind: 'signal',
         metadata: {
           name: 'Minimal Rule',
-          enabled: false,
         },
         time_field: '@timestamp',
         schedule: {
@@ -124,6 +122,59 @@ describe('yaml_form_utils', () => {
       });
       expect(result).not.toHaveProperty('grouping');
       expect((result.metadata as Record<string, unknown>).description).toBeUndefined();
+    });
+
+    it('serializes state_transition when present', () => {
+      const formValues: FormValues = {
+        ...defaultTestFormValues,
+        evaluation: { query: { base: 'FROM logs-*' } },
+        stateTransition: { pendingCount: 3, recoveringCount: 1 },
+      };
+
+      const result = formValuesToYamlObject(formValues);
+
+      expect(result.state_transition).toEqual({
+        pending_count: 3,
+        recovering_count: 1,
+      });
+    });
+
+    it('excludes state_transition when not present', () => {
+      const formValues: FormValues = {
+        ...defaultTestFormValues,
+        evaluation: { query: { base: 'FROM logs-*' } },
+      };
+
+      const result = formValuesToYamlObject(formValues);
+
+      expect(result).not.toHaveProperty('state_transition');
+    });
+
+    it('serializes recovery_policy with type no_breach', () => {
+      const formValues: FormValues = {
+        ...defaultTestFormValues,
+        evaluation: { query: { base: 'FROM logs-*' } },
+        recoveryPolicy: { type: 'no_breach' },
+      };
+
+      const result = formValuesToYamlObject(formValues);
+
+      expect(result.recovery_policy).toEqual({ type: 'no_breach' });
+    });
+
+    it('serializes recovery_policy with type query and base', () => {
+      const formValues: FormValues = {
+        ...defaultTestFormValues,
+        evaluation: { query: { base: 'FROM logs-*' } },
+        recoveryPolicy: { type: 'query', query: { base: 'FROM logs-* | WHERE status = "ok"' } },
+      };
+
+      const result = formValuesToYamlObject(formValues);
+
+      expect(result.recovery_policy).toEqual({
+        type: 'query',
+        query: { base: 'FROM logs-* | WHERE status = "ok"' },
+      });
     });
 
     it('excludes empty grouping fields array', () => {
@@ -197,6 +248,7 @@ describe('yaml_form_utils', () => {
           { id: 'artifact-1', type: 'host', value: 'host-a' },
           { id: 'artifact-2', type: 'service', value: 'service-a' },
         ],
+        recoveryPolicy: { type: 'no_breach' },
         stateTransitionAlertDelayMode: 'immediate',
         stateTransitionRecoveryDelayMode: 'immediate',
       });
@@ -409,6 +461,50 @@ describe('yaml_form_utils', () => {
       expect(result.values?.stateTransitionRecoveryDelayMode).toBe('duration');
     });
 
+    it('parses recovery_policy with type no_breach', () => {
+      const yaml = dump({
+        metadata: { name: 'Rule with recovery' },
+        evaluation: { query: { base: 'FROM logs-*' } },
+        recovery_policy: { type: 'no_breach' },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.recoveryPolicy).toEqual({ type: 'no_breach' });
+    });
+
+    it('parses recovery_policy with type query', () => {
+      const yaml = dump({
+        metadata: { name: 'Rule with query recovery' },
+        evaluation: { query: { base: 'FROM logs-*' } },
+        recovery_policy: {
+          type: 'query',
+          query: { base: 'FROM logs-* | WHERE status = "ok"' },
+        },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.recoveryPolicy).toEqual({
+        type: 'query',
+        query: { base: 'FROM logs-* | WHERE status = "ok"' },
+      });
+    });
+
+    it('defaults recovery_policy to no_breach when not present', () => {
+      const yaml = dump({
+        metadata: { name: 'No recovery policy' },
+        evaluation: { query: { base: 'FROM logs-*' } },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.recoveryPolicy).toEqual({ type: 'no_breach' });
+    });
+
     it('defaults both modes to immediate when no state_transition is present', () => {
       const yaml = dump({
         metadata: { name: 'No delay' },
@@ -445,6 +541,46 @@ describe('yaml_form_utils', () => {
       expect(yaml).toContain('name: Test');
       // js-yaml uses single quotes for strings containing special characters
       expect(yaml).toContain("time_field: '@timestamp'");
+    });
+  });
+
+  describe('round-trip stability', () => {
+    // The blur-sync flow relies on parse(serialize(form)) preserving the
+    // structural content. This guards against silent data loss when the
+    // YAML buffer is regenerated from form state after a YAML edit.
+    it('parse(serialize(values)) preserves the same FormValues structure', () => {
+      const original: FormValues = {
+        kind: 'alert',
+        metadata: { name: 'Round-trip rule', enabled: true, description: 'desc' },
+        timeField: '@timestamp',
+        schedule: { every: '5m', lookback: '10m' },
+        evaluation: {
+          query: { base: 'FROM logs-* | STATS count = COUNT(*) BY host.name | WHERE count > 5' },
+        },
+        stateTransition: { pendingCount: 2, recoveringCount: 2 },
+        recoveryPolicy: { type: 'no_breach' },
+        stateTransitionAlertDelayMode: 'breaches',
+        stateTransitionRecoveryDelayMode: 'recoveries',
+      };
+
+      const yaml = serializeFormToYaml(original);
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values).toBeDefined();
+      expect(result.values?.kind).toBe(original.kind);
+      expect(result.values?.metadata.name).toBe(original.metadata.name);
+      expect(result.values?.timeField).toBe(original.timeField);
+      expect(result.values?.evaluation.query.base).toBe(original.evaluation.query.base);
+      expect(result.values?.schedule.every).toBe(original.schedule.every);
+      expect(result.values?.schedule.lookback).toBe(original.schedule.lookback);
+      expect(result.values?.stateTransition?.pendingCount).toBe(
+        original.stateTransition?.pendingCount
+      );
+      expect(result.values?.stateTransition?.recoveringCount).toBe(
+        original.stateTransition?.recoveringCount
+      );
+      expect(result.values?.recoveryPolicy).toEqual(original.recoveryPolicy);
     });
   });
 });

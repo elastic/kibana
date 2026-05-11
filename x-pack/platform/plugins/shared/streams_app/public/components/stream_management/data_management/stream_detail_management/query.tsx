@@ -11,7 +11,6 @@ import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
-import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { QueryStreamSchemaEditor } from '../../../query_streams/query_stream_schema_editor';
 import { QueryStreamsAdvancedView } from '../../../query_streams/query_streams_advanced_view';
@@ -52,10 +51,6 @@ export function QueryStreamDetailManagement({
   } = useStreamsAppParams('/{key}/management/{tab}');
   const { rangeFrom, rangeTo } = useTimeRange();
 
-  const {
-    features: { attachments },
-  } = useStreamsPrivileges();
-
   const { euiTheme } = useEuiTheme();
 
   const { significantEvents } = useStreamsDetailManagementTabs({
@@ -90,14 +85,12 @@ export function QueryStreamDetailManagement({
     }),
   };
 
-  if (attachments?.enabled) {
-    tabs.attachments = {
-      content: <StreamDetailAttachments definition={definition} />,
-      label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
-        defaultMessage: 'Attachments',
-      }),
-    };
-  }
+  tabs.attachments = {
+    content: <StreamDetailAttachments definition={definition} />,
+    label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
+      defaultMessage: 'Attachments',
+    }),
+  };
 
   if (significantEvents) {
     tabs.significantEvents = significantEvents;

@@ -6,10 +6,9 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { type Streams, isRoot, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
+import { type Streams, isRoot, isDraftStream, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
-import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { RedirectTo } from '../../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
@@ -60,10 +59,6 @@ export function WiredStreamDetailManagement({
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
 
-  const {
-    features: { attachments },
-  } = useStreamsPrivileges();
-
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
     refreshDefinition,
@@ -107,7 +102,9 @@ export function WiredStreamDetailManagement({
   const isNewRootStream =
     isRoot(definition.stream.name) && definition.stream.name !== LOGS_ROOT_STREAM_NAME;
 
-  if (!definition.data_stream_exists && !isNewRootStream) {
+  const isDraft = isDraftStream(definition.stream);
+
+  if (!definition.data_stream_exists && !isNewRootStream && !isDraft) {
     return (
       <>
         <StreamsAppPageTemplate.Header
@@ -167,26 +164,33 @@ export function WiredStreamDetailManagement({
         defaultMessage: 'Overview',
       }),
     },
-    retention: {
-      content: (
-        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
-            defaultMessage:
-              'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
-          })}
-        >
-          <span data-test-subj="retentionTab" tabIndex={0}>
-            {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-              defaultMessage: 'Retention',
-            })}
-          </span>
-        </EuiToolTip>
-      ),
-    },
+    ...(!isDraft
+      ? {
+          retention: {
+            content: (
+              <StreamDetailLifecycle
+                definition={definition}
+                refreshDefinition={refreshDefinition}
+              />
+            ),
+            label: (
+              <EuiToolTip
+                position="top"
+                content={i18n.translate('xpack.streams.managementTab.lifecycle.tooltip', {
+                  defaultMessage:
+                    'Control how long data stays in this stream. Set a custom duration or apply a shared policy.',
+                })}
+              >
+                <span data-test-subj="retentionTab" tabIndex={0}>
+                  {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+                    defaultMessage: 'Retention',
+                  })}
+                </span>
+              </EuiToolTip>
+            ),
+          },
+        }
+      : {}),
     partitioning: {
       content: (
         <StreamDetailRouting definition={definition} refreshDefinition={refreshDefinition} />
@@ -204,40 +208,47 @@ export function WiredStreamDetailManagement({
         defaultMessage: 'Schema',
       }),
     },
-    dataQuality: {
-      content: (
-        <StreamDetailDataQuality definition={definition} refreshDefinition={refreshDefinition} />
-      ),
-      label: (
-        <EuiToolTip
-          content={i18n.translate('xpack.streams.managementTab.dataQuality.wired.tooltip', {
-            defaultMessage: 'View details about this stream’s data quality',
-          })}
-        >
-          <span data-test-subj="dataQualityTab" tabIndex={0}>
-            {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
-              defaultMessage: 'Data quality',
-            })}
-          </span>
-        </EuiToolTip>
-      ),
-    },
-    ...(attachments.enabled
+    ...(!isDraft
       ? {
-          attachments: {
-            content: <StreamDetailAttachments definition={definition} />,
-            label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
-              defaultMessage: 'Attachments',
-            }),
+          dataQuality: {
+            content: (
+              <StreamDetailDataQuality
+                definition={definition}
+                refreshDefinition={refreshDefinition}
+              />
+            ),
+            label: (
+              <EuiToolTip
+                content={i18n.translate('xpack.streams.managementTab.dataQuality.wired.tooltip', {
+                  defaultMessage: "View details about this stream's data quality",
+                })}
+              >
+                <span data-test-subj="dataQualityTab" tabIndex={0}>
+                  {i18n.translate('xpack.streams.streamDetailView.qualityTab', {
+                    defaultMessage: 'Data quality',
+                  })}
+                </span>
+              </EuiToolTip>
+            ),
           },
         }
       : {}),
+    attachments: {
+      content: <StreamDetailAttachments definition={definition} />,
+      label: i18n.translate('xpack.streams.streamDetailView.attachmentsTab', {
+        defaultMessage: 'Attachments',
+      }),
+    },
     ...otherTabs,
     ...(definition.privileges.manage
       ? {
           advanced: {
             content: (
-              <WiredAdvancedView definition={definition} refreshDefinition={refreshDefinition} />
+              <WiredAdvancedView
+                definition={definition}
+                refreshDefinition={refreshDefinition}
+                isDraft={isDraft}
+              />
             ),
             label: i18n.translate('xpack.streams.streamDetailView.advancedTab', {
               defaultMessage: 'Advanced',
@@ -259,6 +270,12 @@ export function WiredStreamDetailManagement({
 
   if (isValidManagementSubTab(tab)) {
     return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
+  }
+
+  if (isDraft && (tab === 'retention' || tab === 'dataQuality')) {
+    return (
+      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'partitioning' } }} />
+    );
   }
 
   if (isLoading) {
