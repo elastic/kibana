@@ -19,6 +19,7 @@ import {
 import { CommandNames, esqlCommandRegistry, TRANSFORMATIONAL_COMMANDS } from '@kbn/esql-language';
 
 import type {
+  ESQLAstItem,
   ESQLSource,
   ESQLFunction,
   ESQLColumn,
@@ -535,31 +536,47 @@ export const getCategorizeColumns = (esql: string): string[] => {
 
 export const getSparklineColumns = (esql: string): string[] => {
   const { root } = Parser.parse(esql);
-  const statsCommand = root.commands.find(({ name }) => name === 'stats');
-  if (!statsCommand) {
+  // SPARKLINE can appear in both STATS and INLINE STATS commands
+  const statsCommands = root.commands.filter(
+    ({ name }) => name === 'stats' || name === 'inline stats'
+  );
+  if (statsCommands.length === 0) {
     return [];
   }
   const columns: string[] = [];
 
-  for (const arg of statsCommand.args) {
-    if ((arg as ESQLCommandOption).type === 'option') {
-      continue;
-    }
+  const collectFromArg = (arg: ESQLAstItem): void => {
     if (!isFunctionExpression(arg)) {
-      continue;
+      return;
+    }
+    if (arg.name === 'where') {
+      // Aggregate inline WHERE filter: "sparkline = SPARKLINE(...) WHERE condition"
+      // is a 'where' function expression where args[0] is the aggregate expression
+      collectFromArg(arg.args[0]);
+      return;
     }
     if (arg.name === 'sparkline') {
-      // STATS SPARKLINE(field)
+      // STATS/INLINE STATS SPARKLINE(field) — bare, unaliased
       columns.push(arg.text);
-      continue;
+      return;
     }
     if (
       arg.name === '=' &&
       isColumn(arg.args[0]) &&
       Walker.match(arg, { type: 'function', name: 'sparkline' })
     ) {
-      // STATS col = SPARKLINE(...) — Walker finds the call regardless of RHS shape (e.g. array-wrapped)
+      // STATS/INLINE STATS col = SPARKLINE(...) — Walker finds the call regardless of RHS shape
       columns.push((arg.args[0] as ESQLColumn).name);
+    }
+  };
+
+  for (const statsCommand of statsCommands) {
+    for (const arg of statsCommand.args) {
+      if ((arg as ESQLCommandOption).type === 'option') {
+        // Skip BY and other command options (grouping, not aggregates)
+        continue;
+      }
+      collectFromArg(arg);
     }
   }
 
