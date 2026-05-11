@@ -312,6 +312,7 @@ describe('OTelComponentDetail', () => {
       />
     );
 
+    fireEvent.click(result.getByTestId('otelComponentDetailTab-config'));
     const docLink = result.getByTestId('otelComponentDocLink');
     expect(docLink).toBeInTheDocument();
     expect(docLink.getAttribute('href')).toBe(
@@ -347,6 +348,7 @@ describe('OTelComponentDetail', () => {
       />
     );
 
+    fireEvent.click(result.getByTestId('otelComponentDetailTab-config'));
     const docLink = result.getByTestId('otelComponentDocLink');
     expect(docLink).toBeInTheDocument();
     expect(docLink.getAttribute('href')).toBe(
