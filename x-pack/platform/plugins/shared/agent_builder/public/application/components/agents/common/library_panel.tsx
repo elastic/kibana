@@ -52,6 +52,8 @@ export interface LibraryPanelProps<T extends LibraryItem> {
   flyoutTitleId: string;
   libraryLabels: LibraryPanelLabels;
   manageLibraryPath: string;
+  manageLibraryDataEbtElement?: string;
+  manageLibraryDataEbtAction?: string;
   getItemName?: (item: T) => string;
   getSearchableText?: (item: T) => string[];
   disabledItemIdSet?: Set<string>;
@@ -69,6 +71,8 @@ export const LibraryPanel = <T extends LibraryItem>({
   flyoutTitleId,
   libraryLabels,
   manageLibraryPath,
+  manageLibraryDataEbtElement,
+  manageLibraryDataEbtAction,
   getItemName = defaultGetItemName,
   getSearchableText,
   disabledItemIdSet,
@@ -118,6 +122,12 @@ export const LibraryPanel = <T extends LibraryItem>({
                 margin-top: ${euiTheme.size.m};
                 font-size: ${euiTheme.size.m};
               `}
+              {...(manageLibraryDataEbtElement != null
+                ? { 'data-ebt-element': manageLibraryDataEbtElement }
+                : {})}
+              {...(manageLibraryDataEbtAction != null
+                ? { 'data-ebt-action': manageLibraryDataEbtAction }
+                : {})}
             >
               {libraryLabels.manageLibraryLink}
             </EuiLink>

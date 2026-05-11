@@ -15,6 +15,10 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import {
+  AGENT_BUILDER_UI_EBT_ELEMENT,
+  AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION,
+} from '../../../agent_builder_ui_ebt';
 import { labels } from '../../../utils/i18n';
 import { useSkill } from '../../../hooks/skills/use_skills';
 import { DetailPanelLayout } from '../common/detail_panel_layout';
@@ -73,6 +77,7 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
         headerActions={(openConfirmRemove) => (
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <SkillHeaderActions
+              skillId={skillId}
               openConfirmRemove={openConfirmRemove}
               canEditAgent={canEditAgent}
               isAutoIncluded={isAutoIncluded}
@@ -103,12 +108,14 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
 };
 
 const SkillHeaderActions = ({
+  skillId,
   openConfirmRemove,
   canEditAgent,
   isAutoIncluded,
   isReadOnly,
   onEdit,
 }: {
+  skillId: string;
   openConfirmRemove: () => void;
   canEditAgent: boolean;
   isAutoIncluded: boolean;
@@ -130,13 +137,28 @@ const SkillHeaderActions = ({
     <>
       {!isReadOnly && (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="pencil" size="xs" onClick={onEdit}>
+          <EuiButtonEmpty
+            iconType="pencil"
+            size="xs"
+            onClick={onEdit}
+            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_SKILLS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION.ENTITY_EDIT_FROM_AGENT}
+            data-ebt-detail={skillId}
+          >
             {labels.skills.editSkillButtonLabel}
           </EuiButtonEmpty>
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty iconType="cross" size="xs" color="danger" onClick={openConfirmRemove}>
+        <EuiButtonEmpty
+          iconType="cross"
+          size="xs"
+          color="danger"
+          onClick={openConfirmRemove}
+          data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_SKILLS}
+          data-ebt-action={AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION.ENTITY_REMOVE}
+          data-ebt-detail={skillId}
+        >
           {labels.agentSkills.removeSkillButtonLabel}
         </EuiButtonEmpty>
       </EuiFlexItem>

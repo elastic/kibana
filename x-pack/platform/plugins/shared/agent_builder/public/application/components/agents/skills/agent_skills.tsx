@@ -32,6 +32,13 @@ import { useQueryState } from '../../../hooks/use_query_state';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 import { queryKeys } from '../../../query_keys';
 import { searchParamNames } from '../../../search_param_names';
+import {
+  AGENT_BUILDER_UI_EBT_ELEMENT,
+  AGENT_BUILDER_UI_EBT_ENTITY_TYPE,
+  AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION,
+  AGENT_BUILDER_UI_EBT_MANAGE_GLOBAL_ACTION,
+  AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION,
+} from '../../../agent_builder_ui_ebt';
 import { appPaths } from '../../../utils/app_paths';
 import { labels } from '../../../utils/i18n';
 import { PageWrapper } from '../common/page_wrapper';
@@ -233,7 +240,13 @@ export const AgentSkills: React.FC = () => {
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty href={createAgentBuilderUrl(appPaths.manage.skills)}>
+                    <EuiButtonEmpty
+                      href={createAgentBuilderUrl(appPaths.manage.skills)}
+                      data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_SKILLS}
+                      data-ebt-action={
+                        AGENT_BUILDER_UI_EBT_MANAGE_GLOBAL_ACTION.MANAGE_ENTITY_LIST_VIEW
+                      }
+                    >
                       {labels.agentSkills.manageAllSkills}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
@@ -247,6 +260,8 @@ export const AgentSkills: React.FC = () => {
                             iconType="plusInCircle"
                             iconSide="left"
                             onClick={() => setIsAddMenuOpen((prev) => !prev)}
+                            data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_SKILLS}
+                            data-ebt-action={AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION.OPEN_ADD_MENU}
                           >
                             {labels.agentSkills.addSkillButton}
                           </EuiButton>
@@ -262,6 +277,11 @@ export const AgentSkills: React.FC = () => {
                               key="importFromLibrary"
                               icon="importAction"
                               onClick={handleImportFromLibrary}
+                              data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_SKILLS}
+                              data-ebt-action={
+                                AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION.ENTITY_ADD_FROM_LIBRARY
+                              }
+                              data-ebt-detail={AGENT_BUILDER_UI_EBT_ENTITY_TYPE.SKILL}
                             >
                               {labels.agentSkills.importFromLibraryMenuItem}
                             </EuiContextMenuItem>,
@@ -271,6 +291,11 @@ export const AgentSkills: React.FC = () => {
                                     key="createSkill"
                                     icon="pencil"
                                     onClick={handleOpenCreateFlyout}
+                                    data-ebt-element={AGENT_BUILDER_UI_EBT_ELEMENT.CUSTOMIZE_SKILLS}
+                                    data-ebt-action={
+                                      AGENT_BUILDER_UI_EBT_LAYER2_CRUD_ACTION.ENTITY_CREATE_NEW
+                                    }
+                                    data-ebt-detail={AGENT_BUILDER_UI_EBT_ENTITY_TYPE.SKILL}
                                   >
                                     {labels.agentSkills.createSkillMenuItem}
                                   </EuiContextMenuItem>,
