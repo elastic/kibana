@@ -166,7 +166,7 @@ deployment:
 When {{kib}} runs on {{ech}} or Elastic Cloud Serverless, outbound connector HTTP requests include an Elastic Cloud deployment or serverless project identifier in the `User-Agent` header. On self-managed or on-premises deployments, connector requests **do not** add this fragment. The `User-Agent` stays at the default HTTP client value (for example, `axios/1.7.2`).
 :::
 
-For every outbound HTTP request made by a connector (for example, to Slack, Google Workspace, or PagerDuty), {{kib}} sets a `User-Agent` header that includes an identifier for the Elastic Cloud deployment or serverless project that originated the traffic. This is automatic and does not require connector configuration, networking settings, or other admin action.
+For every outbound HTTP request made by a connector (for example, to Slack, Google Workspace, or PagerDuty), {{kib}} sets a `User-Agent` header that includes an identifier for the Elastic Cloud deployment or serverless project that originated the traffic. On {{ech}}, this requires {{kib}} 9.5 or later. This is automatic and does not require connector configuration, networking settings, or other admin action.
 
 IT and information security teams can use this value to correlate traffic recorded in third-party audit or access logs with a specific Elastic Cloud deployment or project. For example, when investigating incidents or working with a vendor that contacts Elastic about suspicious activity.
 
