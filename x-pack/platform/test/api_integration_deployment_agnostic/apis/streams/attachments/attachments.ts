@@ -55,6 +55,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: true,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
 
       await indexDocument(esClient, 'logs.otel', {
         '@timestamp': '2024-01-01T00:00:10.000Z',
@@ -67,6 +68,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: false,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     describe('List attachments', () => {
@@ -783,6 +785,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           { space: TEST_SPACE_ID }
         );
+        await kibanaServer.uiSettings.waitForEventualCacheRefresh();
 
         // Load dashboards and rules in the test space
         await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, TEST_SPACE_ID);
@@ -952,6 +955,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           { space: TEST_SPACE_ID }
         );
+        await kibanaServer.uiSettings.waitForEventualCacheRefresh();
 
         // Load dashboards and rules only in test space
         // The tests will link from test space and try to unlink from default space
@@ -1124,6 +1128,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await kibanaServer.uiSettings.update({
           [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: false,
         });
+        await kibanaServer.uiSettings.waitForEventualCacheRefresh();
       });
 
       after(async () => {
