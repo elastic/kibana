@@ -14,6 +14,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { isOfQueryType, type Query, type AggregateQuery, type Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { NoResultsSuggestionDefault } from './no_results_suggestion_default';
 import type { NoResultsSuggestionWhenFiltersProps } from './no_results_suggestion_when_filters';
 import { NoResultsSuggestionWhenFilters } from './no_results_suggestion_when_filters';
@@ -88,7 +89,10 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
     }
   }, [fetch, setTimeRangeExtendingStatus, timefilter, toastNotifications]);
 
-  const canAdjustSearchCriteria = isTimeBased || hasFilters || hasQuery;
+  const canSuggestTimeRangeAdjustments =
+    (dataView.type === ESQL_TYPE && isTimeBased) || (isTimeBased && dataView.getTimeField());
+
+  const canAdjustSearchCriteria = canSuggestTimeRangeAdjustments || hasFilters || hasQuery;
 
   const body = canAdjustSearchCriteria ? (
     <>
@@ -102,7 +106,7 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
           display: inline-block;
         `}
       >
-        {isTimeBased && (
+        {canSuggestTimeRangeAdjustments && (
           <li>
             <NoResultsSuggestionWhenTimeRange timeRangeExtendingStatus={timeRangeExtendingStatus} />
           </li>
