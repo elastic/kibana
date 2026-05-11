@@ -8,6 +8,10 @@
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
+import {
+  AGENT_BUILDER_UI_EBT_ELEMENT,
+  AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION,
+} from '../../../agent_builder_ui_ebt';
 import { labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { LibraryPanel } from '../common/library_panel';
@@ -66,6 +70,8 @@ export const PluginLibraryPanel: React.FC<PluginLibraryPanelProps> = ({
       flyoutTitleId="pluginLibraryFlyoutTitle"
       libraryLabels={libraryLabels}
       manageLibraryPath={appPaths.plugins.list}
+      manageLibraryDataEbtElement={AGENT_BUILDER_UI_EBT_ELEMENT.LIBRARY_PLUGINS}
+      manageLibraryDataEbtAction={AGENT_BUILDER_UI_EBT_UI_CHROME_ACTION.MANAGE_LIBRARY_LINK}
       getItemName={getPluginName}
       disabledItemIdSet={autoPluginIdSet}
       readOnlyItemIdSet={readOnlyItemIdSet}
