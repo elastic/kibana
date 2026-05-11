@@ -111,10 +111,7 @@ describe('computeGlobalActiveErrorIds', () => {
       timestamp: '2026-05-07T10:05:00.000Z',
     });
 
-    const ids = computeGlobalActiveErrorIds(
-      [errUsEastOld, errUsEastLatest, errEuWestLatest],
-      []
-    );
+    const ids = computeGlobalActiveErrorIds([errUsEastOld, errUsEastLatest, errEuWestLatest], []);
 
     expect(ids.has(activeKey(errUsEastLatest))).toBe(true);
     expect(ids.has(activeKey(errEuWestLatest))).toBe(true);
