@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiShowFor, EuiToolTip, EuiWindowEvent, type EuiToolTipRef } from '@elastic/eui';
+import { EuiShowFor, EuiToolTip, type EuiToolTipRef } from '@elastic/eui';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -13,20 +13,20 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { isMac } from '@kbn/shared-ux-utility';
 import type { ChromeStart } from '@kbn/core/public';
+import type { HotkeysStart } from '@kbn/core-hotkeys-browser';
 import type { AgentBuilderPluginStart, AgentBuilderStartDependencies } from '../../types';
 import { useUiPrivileges } from '../../application/hooks/use_ui_privileges';
-
-const isSemicolon = (event: KeyboardEvent) => event.code === 'Semicolon' || event.key === ';';
 
 interface AgentBuilderNavControlServices {
   agentBuilder: AgentBuilderPluginStart;
   aiAssistantManagementSelection: AgentBuilderStartDependencies['aiAssistantManagementSelection'];
   chrome: ChromeStart;
+  hotkeys: HotkeysStart;
 }
 
 export function AgentBuilderNavControl() {
   const {
-    services: { agentBuilder, aiAssistantManagementSelection, chrome },
+    services: { agentBuilder, aiAssistantManagementSelection, chrome, hotkeys },
   } = useKibana<AgentBuilderNavControlServices>();
 
   const { show: hasShowPrivilege } = useUiPrivileges();
@@ -75,19 +75,43 @@ export function AgentBuilderNavControl() {
     };
   }, [hasShowPrivilege, agentBuilder, aiAssistantManagementSelection]);
 
-  const onKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (isSemicolon(event) && (isMac ? event.metaKey : event.ctrlKey)) {
+  useEffect(() => {
+    if (!hasShowPrivilege) return;
+    const handle = hotkeys.register(
+      {
+        id: 'agentBuilder:toggleChat',
+        keys: 'Mod+;',
+        scope: 'global',
+        label: i18n.translate('xpack.agentBuilder.navControl.toggleChatShortcutLabel', {
+          defaultMessage: 'Open or close Agent Builder',
+        }),
+      },
+      (event) => {
         event.preventDefault();
         handleClick();
       }
-      if (event.key === 'Escape' && isSidebarOpen) {
+    );
+    return handle.unregister;
+  }, [hotkeys, hasShowPrivilege, handleClick]);
+
+  useEffect(() => {
+    if (!isSidebarOpen) return;
+    const handle = hotkeys.register(
+      {
+        id: 'agentBuilder:closeSidebar',
+        keys: 'Escape',
+        scope: 'context',
+        label: i18n.translate('xpack.agentBuilder.navControl.closeSidebarShortcutLabel', {
+          defaultMessage: 'Close Agent Builder',
+        }),
+      },
+      () => {
         setTooltipVisible(true);
         buttonRef.current?.focus();
       }
-    },
-    [handleClick, isSidebarOpen]
-  );
+    );
+    return handle.unregister;
+  }, [hotkeys, isSidebarOpen]);
 
   if (!hasShowPrivilege) {
     return null;
@@ -134,7 +158,6 @@ export function AgentBuilderNavControl() {
 
   return (
     <>
-      <EuiWindowEvent event="keydown" handler={onKeyDown} />
       <EuiShowFor sizes={['m', 'l', 'xl']}>
         {showTooltip ? (
           <EuiToolTip content={shortcutLabel} ref={tooltipRef}>

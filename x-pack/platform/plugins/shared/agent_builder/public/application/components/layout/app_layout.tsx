@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { EuiWindowEvent, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { isMac } from '@kbn/shared-ux-utility';
+import { useKibana } from '../../hooks/use_kibana';
 
 import {
   CONDENSED_SIDEBAR_WIDTH,
@@ -25,13 +26,27 @@ interface AppLayoutProps {
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
   const [isCondensed, setIsCondensed] = useState(false);
+  const {
+    services: { hotkeys },
+  } = useKibana();
 
-  const onKeyDown = useCallback((event: KeyboardEvent) => {
-    if ((event.code === 'Period' || event.key === '.') && (isMac ? event.metaKey : event.ctrlKey)) {
-      event.preventDefault();
-      setIsCondensed((v) => !v);
-    }
-  }, []);
+  useEffect(() => {
+    const handle = hotkeys.register(
+      {
+        id: 'agentBuilder:toggleCondensedSidebar',
+        keys: 'Mod+.',
+        scope: 'global',
+        label: i18n.translate('xpack.agentBuilder.layout.toggleCondensedSidebarShortcutLabel', {
+          defaultMessage: 'Toggle condensed sidebar',
+        }),
+      },
+      (event) => {
+        event.preventDefault();
+        setIsCondensed((v) => !v);
+      }
+    );
+    return handle.unregister;
+  }, [hotkeys]);
 
   const sidebarStyles = css`
     @media (max-width: ${euiTheme.breakpoint.m - 1}px) {
@@ -46,7 +61,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <>
-      <EuiWindowEvent event="keydown" handler={onKeyDown} />
       <KibanaPageTemplate
         paddingSize="none"
         restrictWidth={false}
