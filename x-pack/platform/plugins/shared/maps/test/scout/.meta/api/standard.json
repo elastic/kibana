@@ -1,5 +1,5 @@
 {
-  "sha1": "ff6f501dc0b12c212170a6b103dd779b2d2a4461",
+  "sha1": "56ac4aa5be360f157097370eda7ec120f4447c7d",
   "tests": [
     {
       "id": "79abdadc4886132-c537aed5c2bba8c",
@@ -473,7 +473,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/maps/test/scout/api/tests/search_esql.spec.ts",
-        "line": 41,
+        "line": 39,
         "column": 10
       }
     },

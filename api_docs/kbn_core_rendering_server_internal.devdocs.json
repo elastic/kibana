@@ -19,10 +19,10 @@
         "label": "Fonts",
         "description": [],
         "signature": [
-          "({ url }: Props) => React.JSX.Element"
+          "({ url, optimizeFontLoading }: Props) => React.JSX.Element"
         ],
         "path": "src/core/packages/rendering/server-internal/src/views/fonts.tsx",
-        "lineNumber": 222,
+        "lineNumber": 223,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -32,13 +32,13 @@
             "id": "def-server.Fonts.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ url }",
+            "label": "{ url, optimizeFontLoading }",
             "description": [],
             "signature": [
               "Props"
             ],
             "path": "src/core/packages/rendering/server-internal/src/views/fonts.tsx",
-            "lineNumber": 222,
+            "lineNumber": 223,
             "columnNumber": 49,
             "deprecated": false,
             "trackAdoption": false,

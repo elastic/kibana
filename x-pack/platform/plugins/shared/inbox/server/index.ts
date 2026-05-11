@@ -13,7 +13,6 @@ import type {
   InboxSetupDependencies,
   InboxStartDependencies,
 } from './types';
-import { InboxPlugin } from './plugin';
 
 export type {
   InboxPluginSetup,
@@ -35,7 +34,9 @@ export const plugin: PluginInitializer<
   InboxPluginStart,
   InboxSetupDependencies,
   InboxStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext<InboxConfig>) =>
-  new InboxPlugin(pluginInitializerContext);
+> = async (pluginInitializerContext: PluginInitializerContext<InboxConfig>) => {
+  const { InboxPlugin } = await import('./plugin');
+  return new InboxPlugin(pluginInitializerContext);
+};
 
 export { config } from './config';

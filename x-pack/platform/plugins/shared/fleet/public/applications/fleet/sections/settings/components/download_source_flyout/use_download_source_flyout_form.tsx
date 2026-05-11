@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -159,6 +159,27 @@ export function useDowloadSourceFlyoutForm(onSuccess: () => void, downloadSource
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
+
+  const { setErrors: setUsernameErrors } = usernameInput;
+  const { setErrors: setPasswordErrors } = passwordInput;
+  const { cancelEdit: cancelPasswordSecretEdit } = passwordSecretInput;
+  const { setErrors: setApiKeyErrors } = apiKeyInput;
+  const { cancelEdit: cancelApiKeySecretEdit } = apiKeySecretInput;
+
+  useEffect(() => {
+    setUsernameErrors(undefined);
+    setPasswordErrors(undefined);
+    cancelPasswordSecretEdit();
+    setApiKeyErrors(undefined);
+    cancelApiKeySecretEdit();
+  }, [
+    authTypeInput.value,
+    setUsernameErrors,
+    setPasswordErrors,
+    cancelPasswordSecretEdit,
+    setApiKeyErrors,
+    cancelApiKeySecretEdit,
+  ]);
 
   const validate = useCallback(() => {
     const nameInputValid = nameInput.validate();

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { type Observable, combineLatest, ReplaySubject, firstValueFrom, startWith } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import type { PackageInfo } from '@kbn/config';
@@ -100,7 +101,9 @@ export const registerStatusRoute = ({
         tags: ['api', 'security:acceptJWT', 'oas-tag:system'],
         access: 'public', // needs to be public to allow access from "system" users like k8s readiness probes.
         summary: `Get Kibana's current status`,
+        description: `Returns Kibana's overall operational status and a per-service breakdown for Elasticsearch, Saved Objects, and registered plugins. The endpoint is intended for liveness and readiness checks (for example, by Kubernetes probes) and for operators monitoring a Kibana deployment. Unauthenticated callers receive a redacted response that exposes only the overall status level.`,
         excludeFromRateLimiter: true,
+        oasOperationObject: () => path.resolve(__dirname, './status.examples.yaml'),
       },
       validate: {
         request: {

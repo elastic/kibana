@@ -166,11 +166,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         const toastMessageElement = await toasts.getElementByIndex();
         expect(toastMessageElement).to.be.ok();
-        const toastMessageTitle = await toastMessageElement.findByTestSubject(
-          'csp:toast-success-title'
-        );
 
-        expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
+        await retry.try(async () => {
+          const toastMessageTitle = await toastMessageElement.findByTestSubject(
+            'csp:toast-success-title'
+          );
+          expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
+        });
 
         expect(
           await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-alert-count')
@@ -200,8 +202,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const toastMessage = await toasts.getElementByIndex();
         expect(toastMessage).to.be.ok();
 
-        const toastMessageTitle = await toastMessage.findByTestSubject('csp:toast-success-title');
-        expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
+        await retry.try(async () => {
+          const toastMessageTitle = await toastMessage.findByTestSubject('csp:toast-success-title');
+          expect(await toastMessageTitle.getVisibleText()).to.be(ruleName1);
+        });
 
         expect(
           await misconfigurationsFlyout.getVisibleText('csp:findings-flyout-alert-count')

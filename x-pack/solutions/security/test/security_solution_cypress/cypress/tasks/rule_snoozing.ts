@@ -69,6 +69,7 @@ export function expectRuleSnoozedInTable({
 export function unsnoozeRule(): void {
   cy.get(SNOOZED_BADGE).click();
   cy.get(SNOOZE_POPOVER_CANCEL_BUTTON).click();
+  cy.get(UNSNOOZED_BADGE).should('exist');
 }
 
 export function expectUnsnoozeSuccessToast(): void {

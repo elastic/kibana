@@ -9,14 +9,11 @@ import React, { useMemo, memo } from 'react';
 import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import { useEuiTheme, EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { getAgentIcon } from '@kbn/custom-icons';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { getSeverity, getSeverityColor } from '../../../../common/anomaly_detection';
 import type { ServiceNodeData } from '../../../../common/service_map';
-import {
-  getServiceHealthStatusColor,
-  getServiceHealthStatusLabel,
-  ServiceHealthStatus,
-} from '../../../../common/service_health_status';
 import {
   NODE_BORDER_WIDTH_DEFAULT,
   NODE_BORDER_WIDTH_SELECTED,
@@ -42,27 +39,32 @@ export const ServiceNode = memo(
     const navigateToAlertsTab = useServiceMapAlertsTabNavigate(data.label);
     const isDarkMode = colorMode === 'DARK';
 
-    const borderColor = useMemo(() => {
-      if (data.serviceAnomalyStats?.healthStatus) {
-        return getServiceHealthStatusColor(euiTheme, data.serviceAnomalyStats.healthStatus);
-      }
-      if (selected) {
-        return euiTheme.colors.primary;
-      }
-      return euiTheme.colors.mediumShade;
-    }, [data.serviceAnomalyStats?.healthStatus, selected, euiTheme]);
+    const { borderColor, borderWidth, borderStyle } = useMemo(() => {
+      const score = data.serviceAnomalyStats?.anomalyScore;
 
-    const borderWidth = useMemo(() => {
-      const status = data.serviceAnomalyStats?.healthStatus;
-      if (status === ServiceHealthStatus.critical) return `${NODE_BORDER_WIDTH_SELECTED}px`;
-      return selected ? `${NODE_BORDER_WIDTH_SELECTED}px` : `${NODE_BORDER_WIDTH_DEFAULT}px`;
-    }, [data.serviceAnomalyStats?.healthStatus, selected]);
+      if (score !== undefined) {
+        const severity = getSeverity(score);
+        const isHighSeverity =
+          severity === ML_ANOMALY_SEVERITY.CRITICAL || severity === ML_ANOMALY_SEVERITY.MAJOR;
 
-    const borderStyle = useMemo(() => {
-      const status = data.serviceAnomalyStats?.healthStatus;
-      if (status === ServiceHealthStatus.critical) return 'double';
-      return 'solid';
-    }, [data.serviceAnomalyStats?.healthStatus]);
+        return {
+          borderColor: getSeverityColor(score),
+          borderWidth:
+            isHighSeverity || selected
+              ? `${NODE_BORDER_WIDTH_SELECTED}px`
+              : `${NODE_BORDER_WIDTH_DEFAULT}px`,
+          borderStyle: isHighSeverity ? ('double' as const) : ('solid' as const),
+        };
+      }
+
+      return {
+        borderColor: selected ? euiTheme.colors.primary : euiTheme.colors.mediumShade,
+        borderWidth: selected
+          ? `${NODE_BORDER_WIDTH_SELECTED}px`
+          : `${NODE_BORDER_WIDTH_DEFAULT}px`,
+        borderStyle: 'solid' as const,
+      };
+    }, [data.serviceAnomalyStats, selected, euiTheme]);
 
     const iconUrl = useMemo(() => {
       if (data.agentName) {
@@ -89,21 +91,17 @@ export const ServiceNode = memo(
         );
       }
 
-      if (data.serviceAnomalyStats?.healthStatus) {
+      if (data.serviceAnomalyStats?.anomalyScore !== undefined) {
         parts.push(
-          i18n.translate('xpack.apm.serviceMap.serviceNode.healthInfo', {
-            defaultMessage: 'Health status: {status}',
-            values: {
-              status: getServiceHealthStatusLabel(
-                data.serviceAnomalyStats.healthStatus
-              ).toLowerCase(),
-            },
+          i18n.translate('xpack.apm.serviceMap.serviceNode.anomalySeverityInfo', {
+            defaultMessage: 'Machine learning anomaly severity: {severity}',
+            values: { severity: getSeverity(data.serviceAnomalyStats.anomalyScore) },
           })
         );
       }
 
       return parts.join('. ');
-    }, [data.label, data.agentName, data.serviceAnomalyStats?.healthStatus]);
+    }, [data.label, data.agentName, data.serviceAnomalyStats?.anomalyScore]);
 
     const containerStyles = css`
       position: relative;
