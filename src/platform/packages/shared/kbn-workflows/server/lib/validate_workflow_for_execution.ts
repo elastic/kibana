@@ -8,6 +8,7 @@
  */
 
 import type { WorkflowDetailDto } from '../..';
+import { WorkflowDisabledError } from '../../common/errors';
 
 /**
  * Validates that a workflow is in a runnable state before execution.
@@ -36,8 +37,6 @@ export function validateWorkflowForExecution(
   }
 
   if (!workflow.enabled) {
-    const error = new Error(`Workflow is disabled: ${workflowId}. Enable the workflow to run it.`);
-    (error as Error & { isUserError: boolean }).isUserError = true;
-    throw error;
+    throw new WorkflowDisabledError(workflowId);
   }
 }
