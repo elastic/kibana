@@ -22,7 +22,7 @@
       "licensing",
       "searchInferenceEndpoints"
     ],
-    "optionalPlugins": ["ml", "spaces"],
+    "optionalPlugins": ["ml", "spaces", "cloud"],
     "requiredBundles": ["kibanaReact", "kibanaUtils"],
     "extraPublicDirs": []
   }

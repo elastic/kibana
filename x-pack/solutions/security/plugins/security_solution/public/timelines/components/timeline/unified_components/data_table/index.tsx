@@ -22,7 +22,7 @@ import type {
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useHistory } from 'react-router-dom';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
-import { alertFlyoutHistoryKey } from '../../../../../flyout_v2/document/constants/flyout_history';
+import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
 import { cellActionRenderer } from '../../../../../flyout_v2/shared/components/cell_actions';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
@@ -204,7 +204,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             }),
             {
               ...defaultFlyoutProperties,
-              historyKey: alertFlyoutHistoryKey,
+              historyKey: documentFlyoutHistoryKey,
               session: 'start',
             }
           );
