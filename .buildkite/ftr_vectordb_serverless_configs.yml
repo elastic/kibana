@@ -1,6 +1,15 @@
-# VectorDB project FTR configs.
-# Placeholder — fill in once vectordb-specific FTR configs exist.
-# Reference: ftr_workplace_ai_serverless_configs.yml
-disabled: []
+disabled:
+  # Base config files, only necessary to inform config finding script
+  - x-pack/platform/test/serverless/functional/config.vectordb.base.ts
+
+  # Empty configs
+  - x-pack/solutions/vectordb/test/serverless/functional/configs/config.feature_flags.ts
+  - x-pack/solutions/vectordb/test/serverless/api_integration/configs/config.feature_flags.ts
+
 defaultQueue: 'n2-4-spot'
-enabled: []
+enabled:
+  - x-pack/solutions/vectordb/test/serverless/api_integration/configs/config.ts
+  - x-pack/platform/test/serverless/api_integration/configs/vectordb/config.group1.ts
+  - x-pack/solutions/vectordb/test/serverless/functional/configs/config.ts
+  - x-pack/platform/test/serverless/functional/configs/vectordb/config.config_compat_mode.ts
+  - x-pack/platform/test/serverless/functional/configs/vectordb/config.group1.ts
