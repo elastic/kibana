@@ -6,7 +6,7 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { mockCreateCallApmApiV2 } from '@kbn/apm-api-shared';
+import { mockCreateCallApmApiV2 } from '@kbn/apm-api-shared/src/mock_create_call_apm_api';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { Meta, StoryObj } from '@storybook/react';

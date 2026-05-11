@@ -8,7 +8,7 @@
 import type { ComponentProps } from 'react';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import { mockCreateCallApmApiV2 } from '@kbn/apm-api-shared';
+import { mockCreateCallApmApiV2 } from '@kbn/apm-api-shared/src/mock_create_call_apm_api';
 import { createCallApmApi } from '../../../../../services/rest/create_call_apm_api';
 import { LinkPreview } from './link_preview';
 import { setApmInternalServices } from '../../../../../plugin';
