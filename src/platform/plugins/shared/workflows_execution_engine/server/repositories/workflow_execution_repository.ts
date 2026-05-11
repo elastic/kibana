@@ -394,10 +394,8 @@ export class WorkflowExecutionRepository {
         },
       });
     }
-    const response = await this.esClient.search<void>({
+    const response = await this.esClient.count({
       index: this.indexName,
-      size: 0,
-      track_total_hits: true,
       query: {
         bool: {
           filter: filterClauses,
@@ -405,8 +403,7 @@ export class WorkflowExecutionRepository {
       },
     });
 
-    const rawTotal = response.hits.total;
-    return typeof rawTotal === 'number' ? rawTotal : rawTotal?.value ?? 0;
+    return response.count;
   }
 
   /**

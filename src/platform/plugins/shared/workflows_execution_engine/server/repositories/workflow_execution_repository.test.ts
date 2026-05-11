@@ -21,6 +21,7 @@ describe('WorkflowExecutionRepository', () => {
     index: jest.Mock;
     update: jest.Mock;
     search: jest.Mock;
+    count: jest.Mock;
     get: jest.Mock;
     bulk: jest.Mock;
     indices: { exists: jest.Mock; create: jest.Mock };
@@ -31,6 +32,7 @@ describe('WorkflowExecutionRepository', () => {
       index: jest.fn(),
       update: jest.fn(),
       search: jest.fn(),
+      count: jest.fn(),
       get: jest.fn(),
       bulk: jest.fn(),
       indices: {
@@ -1018,6 +1020,39 @@ describe('WorkflowExecutionRepository', () => {
 
       expect(result.results).toEqual(['exec-a', 'exec-b']);
       expect(result.nextSearchAfter).toBeUndefined();
+    });
+  });
+
+  describe('countExecutionsByConcurrencyGroupAndStatuses', () => {
+    it('issues _count with the same bool filter query and returns count', async () => {
+      esClient.count.mockResolvedValue({ count: 4 });
+
+      const result = await repository.countExecutionsByConcurrencyGroupAndStatuses(
+        'group-a',
+        'default',
+        [ExecutionStatus.PENDING, ExecutionStatus.RUNNING],
+        'exclude-id'
+      );
+
+      expect(esClient.count).toHaveBeenCalledWith({
+        index: WORKFLOWS_EXECUTIONS_INDEX,
+        query: {
+          bool: {
+            filter: [
+              { term: { concurrencyGroupKey: 'group-a' } },
+              { term: { spaceId: 'default' } },
+              { terms: { status: [ExecutionStatus.PENDING, ExecutionStatus.RUNNING] } },
+              {
+                bool: {
+                  must_not: [{ term: { id: 'exclude-id' } }],
+                },
+              },
+            ],
+          },
+        },
+      });
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(result).toBe(4);
     });
   });
 
