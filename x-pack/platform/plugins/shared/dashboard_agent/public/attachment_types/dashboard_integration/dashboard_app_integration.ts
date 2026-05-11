@@ -17,7 +17,6 @@ import {
   DASHBOARD_ATTACHMENT_TYPE,
 } from '@kbn/dashboard-agent-common';
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
-import { createManualChangesSubscription } from './manual_changes_subscription';
 import { createNewAttachmentIdRegenerationSubscription } from './new_attachment_id_regeneration_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
 import type { IdGenerator } from '..';
@@ -133,10 +132,7 @@ export const registerDashboardAppIntegration = ({
     updateOrigin: (id: string, origin: string) => getUpdateOrigin(id)?.(origin),
   });
 
-  const manualChangesSubscription = createManualChangesSubscription({
-    api,
-    onManualChanges: addAttachmentFromDashboard,
-  });
+  const manualChangesSubscription = api.anyStateChange$.subscribe(addAttachmentFromDashboard);
 
   return () => {
     agentLiveUpdatesSubscription.unsubscribe();

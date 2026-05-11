@@ -36,13 +36,14 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
   defaultState?: Partial<StateType>;
   onReset?: (lastSavedPanelState?: StateType) => MaybePromise<void>;
   checkRefEquality?: boolean;
-}): PublishesUnsavedChanges & Pick<HasSerializableState<StateType>, 'applySerializedState'> => {
+}): PublishesUnsavedChanges & Pick<HasSerializableState<StateType>, 'anyStateChange$' | 'applySerializedState'> => {
   const applySerializedState = async (state?: StateType) => {
     await onReset?.(state);
   };
 
   if (!apiHasLastSavedChildState<StateType>(parentApi)) {
     return {
+      anyStateChange$,
       applySerializedState,
       hasUnsavedChanges$: of(false),
     };
@@ -72,5 +73,5 @@ export const initializeUnsavedChanges = <StateType extends object = object>({
     })
   );
 
-  return { applySerializedState, hasUnsavedChanges$ };
+  return { anyStateChange$, applySerializedState, hasUnsavedChanges$ };
 };

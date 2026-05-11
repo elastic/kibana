@@ -8,7 +8,7 @@
  */
 
 import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, merge, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
@@ -187,6 +187,12 @@ export function getDashboardApi({
     ...timesliceManager.api,
     ...pauseFetchManager.api,
     ...initializeTrackContentfulRender(),
+    anyStateChange$: merge(
+      settingsManager.internalApi.anyStateChange$,
+      unifiedSearchManager.internalApi.anyStateChange$,
+      layoutManager.internalApi.anyStateChange$,
+      ...(projectRoutingManager ? [projectRoutingManager.internalApi.anyStateChange$] : [])
+    ),
     executionContext: {
       type: 'dashboard',
       description: settingsManager.api.title$.value,

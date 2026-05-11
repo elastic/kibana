@@ -289,6 +289,14 @@ export function initializeUnifiedSearchManager(
     };
   };
 
+  const anyStateChange$ = combineLatest([
+    asCodeFilters$,
+    asCodeQuery$,
+    refreshInterval$,
+    timeRange$,
+    timeRestore$,
+  ]);
+
   return {
     api: {
       reload$,
@@ -304,17 +312,11 @@ export function initializeUnifiedSearchManager(
       timeslice$,
     },
     internalApi: {
+      anyStateChange$,
       unifiedSearchFilters$,
       startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return combineLatest([
-          asCodeFilters$,
-          asCodeQuery$,
-          refreshInterval$,
-          timeRange$,
-          timeRestore$,
-        ]).pipe(
+        return anyStateChange$.pipe(
           debounceTime(COMPARE_DEBOUNCE),
-
           map(([filters, query, refresh_interval, time_range]) => {
             return {
               filters,

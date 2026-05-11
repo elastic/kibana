@@ -72,14 +72,17 @@ export function initializeProjectRoutingManager(
     };
   };
 
+  const anyStateChange$ = projectRouting$.pipe(map(() => undefined));
+
   return {
     api: {
       projectRouting$,
       setProjectRouting,
     },
     internalApi: {
+      anyStateChange$,
       startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return projectRouting$.pipe(
+        return anyStateChange$.pipe(
           debounceTime(COMPARE_DEBOUNCE),
           map(() => getState()),
           combineLatestWith(lastSavedState$),

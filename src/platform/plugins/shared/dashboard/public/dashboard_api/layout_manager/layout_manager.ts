@@ -72,6 +72,7 @@ import {
   type DashboardLayoutPanel,
   type DashboardPinnablePanel,
 } from './types';
+import { anyChildrenChanges$ } from './any_children_changes';
 
 export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
@@ -501,13 +502,15 @@ export function initializeLayoutManager(
 
   return {
     internalApi: {
+      anyStateChange$: merge(layout$, children$, anyChildrenChanges$(children$)).pipe(
+        map(() => undefined)
+      ),
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       gridLayout$,
       childrenLoading$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
-
       startComparing: (
         lastSavedState$: BehaviorSubject<DashboardState>
       ): Observable<{

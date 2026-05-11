@@ -173,6 +173,7 @@ export type DashboardApi = CanExpandPanels &
   TrackContentfulRender &
   TracksOverlays &
   PublishesOnSave & {
+    anyStateChange$: Observable<void>;
     asyncResetToLastSavedState: () => Promise<void>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
