@@ -79,7 +79,12 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
       ? {
           cps_scope_expression: ruleInfo.cpsData.resolvedExpression,
           cps_scope_linked_projects: ruleInfo.cpsData.linkedProjects.length
-            ? ruleInfo.cpsData.linkedProjects
+            ? ruleInfo.cpsData.linkedProjects.map(({ id, alias, type, organization }) => ({
+                id,
+                alias,
+                type,
+                organization,
+              }))
             : undefined,
         }
       : {};
