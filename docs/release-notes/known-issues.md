@@ -8,6 +8,25 @@ For Elastic {{observability}} known issues, refer to [Elastic Observability know
 
 For Elastic Security known issues, refer to [Elastic Security known issues](docs-content://release-notes/elastic-security/known-issues.md).
 
+::::{dropdown} Stack alerts remain active instead of transitioning to recovered
+
+Applies to: {{stack}} 9.2.7, 9.2.8, 9.3.2, 9.3.3
+
+**Details**
+
+Some Stack alerts send recovery notifications (for example, Slack, email, or webhook) but remain `active` in {{kib}} instead of transitioning to `recovered`.
+
+**Action**
+
+Manually untrack stale alerts or upgrade to {{stack}} 9.3.4 or 9.4.0.
+
+**Resolved**
+
+This issue is resolved in {{stack}} 9.3.4 and 9.4.0.
+
+::::
+
+
 ::::{dropdown} Dashboards with controls might fail to open
 
 Applies to: {{stack}} 9.4.0

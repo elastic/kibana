@@ -299,6 +299,7 @@ For the Elastic Security 9.4.0 release information, refer to [Elastic Security S
 ### Fixes [kibana-9.4.0-fixes]
 
 **Alerting**:
+* Fixes an issue where Stack alerts sent recovery notifications but remained `active` in {{kib}} instead of transitioning to `recovered` [#261012]({{kib-pull}}261012).
 * Fixes stale `uiamApiKey` leaking through object spread in rule updates [#263887]({{kib-pull}}263887).
 * Fixes OpenAPI alerting rule params schemas missing accepted keys for burn-rate windows and Elasticsearch query `sourceFields` [#263634]({{kib-pull}}263634).
 * Fixes an index template update failing due to system-managed fields [#262534]({{kib-pull}}262534).
@@ -573,6 +574,7 @@ For the Elastic Security 9.3.4 release information, refer to [Elastic Security R
 ### Fixes [kibana-9.3.4-fixes]
 
 **Alerting**:
+* Fixes an issue where Stack alerts sent recovery notifications but remained `active` in {{kib}} instead of transitioning to `recovered` [#261012]({{kib-pull}}261012).
 * Adds the `application/x-zip-compressed` MIME type as an accepted value for case file attachments [#262414]({{kib-pull}}262414).
 * Fixes the "Failed to check if maintenance windows are active" error [#261048]({{kib-pull}}261048).
 
