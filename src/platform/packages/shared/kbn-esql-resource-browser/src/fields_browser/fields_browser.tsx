@@ -318,6 +318,7 @@ export const FieldsBrowser: React.FC<FieldsBrowserProps> = ({
       searchValue={searchValue}
       setSearchValue={setSearchValue}
       isMultiSelect={false}
+      dataTestSubj="esqlFieldsBrowser"
     />
   );
 };

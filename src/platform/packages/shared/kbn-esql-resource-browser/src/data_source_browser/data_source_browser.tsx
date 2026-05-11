@@ -385,6 +385,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       isLoading={isLoading}
       searchValue={searchValue}
       setSearchValue={setSearchValue}
+      dataTestSubj="esqlDataSourceBrowser"
     />
   );
 };
