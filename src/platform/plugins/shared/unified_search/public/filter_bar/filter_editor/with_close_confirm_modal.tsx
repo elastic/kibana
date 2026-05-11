@@ -68,6 +68,7 @@ export function withCloseFilterEditorConfirmModal<
             (!isQueryDslFilter(updatedFilter) &&
               !compareFilters(originalFilter.filter, updatedFilter, {
                 index: true,
+                negate: true,
                 alias: true,
               })));
         if (filtersAreNotEqual) {

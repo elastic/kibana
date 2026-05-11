@@ -190,9 +190,27 @@ describe('withCloseFilterEditorConfirmModal', () => {
     expect(screen.queryByTestId('editor-open')).not.toBeInTheDocument();
   });
 
-  // Regression guard for the trap-stuck bug — without `reArmFocusTrap`,
-  // `onCloseFilterPopover` was never invoked on the second click because
-  // EuiPopover's focus trap had latched after the first one.
+  // Regression guard: only `meta.negate` changes between original and edited
+  // filter (e.g. `exists` → `does not exist`, `is X` → `is not X`). The
+  // comparator must include `negate: true` to detect this.
+  it('shows the modal when only meta.negate is toggled', async () => {
+    const negated: Filter = {
+      ...original,
+      meta: { ...original.meta, negate: true },
+    };
+    render(<Driver filter={original} editedFilter={negated} />);
+
+    fireEvent.click(screen.getByTestId('open'));
+    await flush();
+    fireEvent.click(screen.getByTestId('edit'));
+    await flush();
+    fireEvent.click(screen.getByTestId('click-outside'));
+    await flush();
+
+    expect(screen.getByTestId(CONFIRM_MODAL)).toBeInTheDocument();
+    expect(screen.getByTestId('editor-open')).toBeInTheDocument();
+  });
+
   it('re-shows the modal on subsequent outside clicks after "Keep editing"', async () => {
     render(<Driver filter={original} editedFilter={edited} />);
 
