@@ -9,11 +9,11 @@
 
 import type { StackFrame } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 
 export interface WorkflowExecutionDriverInit {
-  workflowExecutionState: WorkflowExecutionState;
+  nodeId?: string;
+  stackFrames?: StackFrame[];
   workflowExecutionGraph: WorkflowGraph;
 }
 
@@ -26,14 +26,16 @@ export class WorkflowExecutionDriver {
   private readonly workflowGraph: WorkflowGraph;
   private currentNodeId: string | undefined;
   private nextNodeId: string | undefined;
-  private executing = false;
+  private executing = true;
   private currentScopeStack: WorkflowScopeStack = WorkflowScopeStack.fromStackFrames([]);
-  // private nextScopeStack: WorkflowScopeStack = WorkflowScopeStack.fromStackFrames([]);
   private currentScopeId: string | undefined;
 
   constructor(init: WorkflowExecutionDriverInit) {
     this.workflowGraph = init.workflowExecutionGraph;
-    this.currentNodeId = this.workflowGraph.topologicalOrder[0];
+    this.currentNodeId = init.nodeId || this.workflowGraph.topologicalOrder[0];
+    this.currentScopeStack = init.stackFrames
+      ? WorkflowScopeStack.fromStackFrames(init.stackFrames)
+      : WorkflowScopeStack.fromStackFrames([]);
   }
 
   public get isExecuting(): boolean {
@@ -65,8 +67,6 @@ export class WorkflowExecutionDriver {
   }
 
   handleEndOfCycle(): void {
-    // this.currentScopeStack = this.nextScopeStack;
-
     if (this.currentNode?.type.startsWith('enter-')) {
       this.currentScopeStack = this.currentScopeStack.enterScope({
         nodeId: this.currentNode.id,
@@ -76,13 +76,7 @@ export class WorkflowExecutionDriver {
       });
     }
 
-    if (!this.nextNodeId) {
-      this.currentNodeId = undefined;
-      return;
-    }
-
     this.currentNodeId = this.nextNodeId;
-    this.nextNodeId = undefined;
     this.currentScopeId = undefined;
   }
 
@@ -123,50 +117,6 @@ export class WorkflowExecutionDriver {
   public get currentStackFrames(): StackFrame[] {
     // prevents consumer from modifying the stack frames in the current scope stack
     return WorkflowScopeStack.fromStackFrames(this.currentScopeStack.stackFrames).stackFrames;
-  }
-
-  /**
-   * Enters a new scope in the workflow execution context.
-   *
-   * This method creates a new scope frame and pushes it onto the scope stack, establishing
-   * a new execution context for nested workflow operations. Scopes are used to track
-   * hierarchical execution contexts such as loops, conditionals, or sub-workflows.
-   *
-   * @param subScopeId - Optional identifier for the sub-scope being entered
-   *
-   * @remarks
-   * This method includes a guard condition that prevents scope entry if the current node
-   * is not an appropriate "enter" node. The scope update will be silently ignored if:
-   * - The current node type does not start with 'enter' (e.g., 'enter-foreach', 'enter-if', etc)
-   *
-   * This guard ensures that scopes are only created at the correct workflow execution points,
-   * maintaining the integrity of the execution context hierarchy.
-   */
-  public enterScope(subScopeId?: string): void {
-    // this.currentScopeId = subScopeId;
-    // if (!this.currentNode?.type.startsWith('enter-')) {
-    //   return;
-    // }
-    // this.nextScopeStack = this.currentScopeStack.enterScope({
-    //   nodeId: this.currentNode.id,
-    //   nodeType: this.currentNode.type,
-    //   stepId: this.currentNode.stepId,
-    //   scopeId: subScopeId,
-    // });
-  }
-
-  public exitScope(): void {
-    // if (!this.currentNode?.type.startsWith('exit-')) {
-    //   return;
-    // }
-    // if (this.currentScopeStack.isEmpty()) {
-    //   return;
-    // }
-    // const entered = this.currentNode.type.replace(/^exit-/, 'enter-');
-    // if (entered !== this.currentScopeStack.getCurrentScope().nodeType) {
-    //   return;
-    // }
-    // this.nextScopeStack = this.currentScopeStack.exitScope();
   }
 
   public setCurrentScopeId(scopeId?: string): void {

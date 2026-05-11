@@ -118,8 +118,9 @@ export async function setupDependencies(
   const telemetryClient = new WorkflowExecutionTelemetryClient(coreStart.analytics, logger);
 
   const workflowExecutionDriver = new WorkflowExecutionDriver({
-    workflowExecutionState,
     workflowExecutionGraph,
+    nodeId: workflowExecution.currentNodeId,
+    stackFrames: workflowExecution.scopeStack,
   });
 
   // Create workflow runtime first (simpler, fewer dependencies)

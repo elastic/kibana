@@ -74,5 +74,7 @@ export async function handleExecutionDelay(
       resumeAt,
       fakeRequest: params.fakeRequest,
     });
+    // Execution loop should stop here so the workflow can be resumed later
+    params.workflowExecutionDriver.stop();
   }
 }
