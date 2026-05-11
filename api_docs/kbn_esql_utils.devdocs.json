@@ -1120,6 +1120,57 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getDatasets",
+        "type": "Function",
+        "tags": [],
+        "label": "getDatasets",
+        "description": [
+          "\nFetches all ES|QL datasets from the cluster (GET _query/dataset)."
+        ],
+        "signature": [
+          "(this: void | { forceRefresh?: boolean | undefined; } | undefined, http: ",
+          "HttpSetup",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/esql-types",
+            "scope": "common",
+            "docId": "kibKbnEsqlTypesPluginApi",
+            "section": "def-common.EsqlDatasetsResult",
+            "text": "EsqlDatasetsResult"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/datasets.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [
+          "A promise that resolves to the datasets list."
+        ],
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getDatasets.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/callbacks/utils/cache.ts",
+            "lineNumber": 90,
+            "columnNumber": 73,
+            "deprecated": false,
+            "docsReferencedTypeName": "Args",
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.getEditorExtensions",
         "type": "Function",
         "tags": [],
