@@ -41,6 +41,8 @@ describe('getElementUnder', () => {
       left: 0,
       toJSON: () => ({}),
     } as DOMRect,
+    scrollX: 0,
+    scrollY: 0,
   });
 
   it('should return a regular HTML element', () => {

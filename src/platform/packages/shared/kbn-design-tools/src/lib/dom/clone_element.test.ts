@@ -44,7 +44,7 @@ describe('cloneElement', () => {
     expect(rect.top).toBe(10);
   });
 
-  it('should set the clone to fixed position at the original rect', () => {
+  it('should set the clone to fixed position at the original viewport coordinates', () => {
     const { clone } = cloneElement(target, 9001);
 
     expect(clone.style.position).toBe('fixed');

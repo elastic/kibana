@@ -69,6 +69,8 @@ export const startDragFromElement = (
       dh: 0,
       originalTransform: target.style.transform || '',
       originalRect: target.getBoundingClientRect(),
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
     });
   } else if (existing.clone) {
     existing.clone.remove();

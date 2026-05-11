@@ -380,6 +380,19 @@ export const EditOverlay = ({
     setCursor((prev) => (prev === 'grab' ? prev : 'grab'));
   }, []);
 
+  // Re-sync clone positions on scroll. Clones use position:fixed (viewport-
+  // relative) but the originals live inside scrollable containers. On scroll,
+  // read the original's current getBoundingClientRect and update the clone's
+  // left/top so it tracks the document position, not the viewport.
+  const handleScroll = useCallback(() => {
+    for (const entry of movedElements.current) {
+      if (!entry.clone) continue;
+      const rect = entry.el.getBoundingClientRect();
+      entry.clone.style.left = `${rect.left}px`;
+      entry.clone.style.top = `${rect.top}px`;
+    }
+  }, []);
+
   // Reset hover/drag state when deactivated (e.g. Escape exits edit mode)
   useEffect(() => {
     if (!isActive) {
@@ -426,6 +439,13 @@ export const EditOverlay = ({
     resetAll,
     abortDrag,
   ]);
+
+  // Keep scroll listener active independently of edit mode so clones that
+  // remain on-screen after exiting edit mode still track their originals.
+  useEffect(() => {
+    document.addEventListener('scroll', handleScroll, true);
+    return () => document.removeEventListener('scroll', handleScroll, true);
+  }, [handleScroll]);
 
   const hoverOutline = useMemo(() => {
     if (!hoverTarget || dragging.current || resizing.current) return null;

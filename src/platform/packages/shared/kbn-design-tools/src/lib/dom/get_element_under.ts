@@ -21,6 +21,9 @@ export interface ElementOffset {
   dh: number;
   originalTransform: string;
   originalRect: DOMRect;
+  /** Window scroll position when the clone was created. */
+  scrollX: number;
+  scrollY: number;
 }
 
 /**
