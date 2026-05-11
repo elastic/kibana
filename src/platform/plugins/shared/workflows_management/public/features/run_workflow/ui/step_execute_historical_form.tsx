@@ -24,6 +24,7 @@ import { useSelector } from 'react-redux';
 import { CodeEditor, monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
+import { WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import type { z } from '@kbn/zod/v4';
 import { InputValidationCallout } from './input_validation_callout';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
@@ -33,7 +34,6 @@ import { formatDuration } from '../../../shared/lib/format_duration';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 import { buildContextOverrideFromExecution } from '../../../shared/utils/build_step_context_override/build_step_context_override';
-import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 import { useStepExecution } from '../../workflow_execution_detail/model/use_step_execution';
 
 export const NOT_READY_SENTINEL = '__step_historical_not_ready__';

@@ -207,6 +207,9 @@ export const AnomaliesTable: React.FunctionComponent<{
     <>
       <LoadingOverlayWrapper isLoading={isLoading}>
         <EuiBasicTable
+          tableCaption={i18n.translate('xpack.infra.logs.analysis.anomaliesTableCaption', {
+            defaultMessage: 'Log entry anomalies',
+          })}
           items={tableItems}
           itemId="id"
           itemIdToExpandedRowMap={expandedIdsRowContents}
