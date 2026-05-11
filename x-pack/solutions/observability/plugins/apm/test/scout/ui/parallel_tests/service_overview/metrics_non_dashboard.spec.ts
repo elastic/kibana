@@ -115,7 +115,7 @@ test.describe(
       });
 
       await test.step('Serverless summary is visible', async () => {
-        await expect(metricsTab.serverlessSummaryFeedbackLink).toBeVisible({
+        await expect(metricsTab.serverlessSummary).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
       });
@@ -135,7 +135,7 @@ test.describe(
           'Memory usage avg.',
         ]) {
           await expect(
-            metricsTab.serverlessSummaryFeedbackLink.getByText(label, { exact: true })
+            metricsTab.serverlessSummary.getByText(label, { exact: true })
           ).toBeVisible();
         }
       });
