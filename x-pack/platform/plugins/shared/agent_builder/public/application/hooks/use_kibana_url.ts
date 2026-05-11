@@ -19,16 +19,14 @@ export const useKibanaUrl = () => {
   } = useKibana();
 
   const kibanaUrl = useMemo(() => {
-    const configuredUrl = http.basePath.publicBaseUrl ?? cloud?.kibanaUrl;
-    if (configuredUrl) {
-      return addSpaceIdToPath(configuredUrl, http.spaceId);
-    }
-    return `${window.location.origin}${http.basePath.get()}`;
+    const baseUrl = http.basePath.publicBaseUrl ?? cloud?.kibanaUrl ?? getFallbackKibanaUrl(http);
+    return addSpaceIdToPath(baseUrl, http.spaceId);
   }, [cloud, http]);
 
   return { kibanaUrl };
 };
 
 export function getFallbackKibanaUrl(http: HttpSetup) {
-  return `${window.location.origin}${http.basePath.get()}`;
+  // serverBasePath, not basePath.get() — caller adds /s/<id> explicitly via addSpaceIdToPath.
+  return `${window.location.origin}${http.basePath.serverBasePath}`;
 }
