@@ -1,5 +1,5 @@
 {
-  "sha1": "90bd13f6210737e4784c51c7176f13a07fcd1b80",
+  "sha1": "5b62889419950add2740848b3c222567be213509",
   "tests": [
     {
       "id": "405beff6794306f-a54347ac1e57e7e",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_no_setup.spec.ts",
-        "line": 28,
+        "line": 29,
         "column": 12
       }
     },
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_no_setup.spec.ts",
-        "line": 42,
+        "line": 43,
         "column": 12
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 28,
+        "line": 34,
         "column": 12
       }
     },
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 43,
+        "line": 49,
         "column": 12
       }
     },
@@ -67,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_data.spec.ts",
-        "line": 23,
+        "line": 34,
         "column": 10
       }
     },
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_data.spec.ts",
-        "line": 37,
+        "line": 48,
         "column": 10
       }
     },
@@ -95,7 +95,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_integrations.spec.ts",
-        "line": 24,
+        "line": 78,
         "column": 10
       }
     },
@@ -109,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_integrations.spec.ts",
-        "line": 52,
+        "line": 101,
         "column": 10
       }
     }

@@ -10,6 +10,7 @@
 import { readFileSync } from 'fs';
 import globby from 'globby';
 import * as path from 'path';
+import type ts from 'typescript';
 import { parseUsageCollection } from './ts_parser';
 import type { TelemetryRC } from './config';
 import { createKibanaProgram, getAllSourceFiles } from './ts_program';
@@ -40,8 +41,7 @@ export async function getProgramPaths({
   );
 
   if (filePaths.length === 0) {
-    return []; // Temporarily accept empty directories while https://github.com/elastic/kibana-team/issues/1066 is completed
-    // throw Error(`No files found in ${root}`);
+    return [];
   }
 
   const fullPaths = filePaths
@@ -55,11 +55,12 @@ export async function getProgramPaths({
   return fullPaths;
 }
 
+export function filterCollectorPaths(fullPaths: string[]): string[] {
+  return fullPaths.filter((p) => COLLECTOR_RE.test(readFileSync(p, 'utf-8')));
+}
+
 export function* extractCollectors(fullPaths: string[], tsConfig: any) {
-  // Pre-filter to only files that reference collector APIs so TS doesn't
-  // parse thousands of unrelated source files (36K → ~70 root files).
-  // TS still resolves transitive imports needed for type-checking.
-  const collectorPaths = fullPaths.filter((p) => COLLECTOR_RE.test(readFileSync(p, 'utf-8')));
+  const collectorPaths = filterCollectorPaths(fullPaths);
 
   if (collectorPaths.length === 0) {
     return;
@@ -68,6 +69,16 @@ export function* extractCollectors(fullPaths: string[], tsConfig: any) {
   const program = createKibanaProgram(collectorPaths, tsConfig);
   const sourceFiles = getAllSourceFiles(collectorPaths, program);
 
+  for (const sourceFile of sourceFiles) {
+    yield* parseUsageCollection(sourceFile, program);
+  }
+}
+
+export function* extractCollectorsWithProgram(collectorPaths: string[], program: ts.Program) {
+  if (collectorPaths.length === 0) {
+    return;
+  }
+  const sourceFiles = getAllSourceFiles(collectorPaths, program);
   for (const sourceFile of sourceFiles) {
     yield* parseUsageCollection(sourceFile, program);
   }

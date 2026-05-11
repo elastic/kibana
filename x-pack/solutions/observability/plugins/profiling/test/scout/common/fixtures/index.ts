@@ -12,7 +12,7 @@ import { COLLECTOR_PACKAGE_POLICY_NAME, SYMBOLIZER_PACKAGE_POLICY_NAME } from '.
 export interface ProfilingHelper {
   installPolicies: () => Promise<void>;
   cleanupPolicies: () => Promise<void>;
-  getPoliciyIds: () => Promise<{ collectorId?: string; symbolizerId?: string }>;
+  getPolicyIds: () => Promise<{ collectorId?: string; symbolizerId?: string }>;
 }
 
 const APM_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
@@ -48,14 +48,14 @@ export const apiTest = base.extend<{}, { profilingHelper: ProfilingHelper }>({
       const cleanupPolicies = async (): Promise<void> => {
         log.info('Cleaning up profiling resources...');
 
-        const res = await apiServices.fleet.package_policies.get();
+        const res = await apiServices.fleet.package_policies.get({ perPage: 1000 });
         const policies: PackagePolicy[] = res.data.items;
 
         const collectorId = policies.find(
-          (item) => item.name === 'elastic-universal-profiling-collector'
+          (item) => item.name === COLLECTOR_PACKAGE_POLICY_NAME
         )?.id;
         const symbolizerId = policies.find(
-          (item) => item.name === 'elastic-universal-profiling-symbolizer'
+          (item) => item.name === SYMBOLIZER_PACKAGE_POLICY_NAME
         )?.id;
 
         await Promise.all([
@@ -66,8 +66,8 @@ export const apiTest = base.extend<{}, { profilingHelper: ProfilingHelper }>({
         ]);
       };
 
-      const getPoliciyIds = async (): Promise<{ collectorId?: string; symbolizerId?: string }> => {
-        const res = await apiServices.fleet.package_policies.get();
+      const getPolicyIds = async (): Promise<{ collectorId?: string; symbolizerId?: string }> => {
+        const res = await apiServices.fleet.package_policies.get({ perPage: 1000 });
         const policies: PackagePolicy[] = res.data.items;
 
         const collector = policies.find((item) => item.name === COLLECTOR_PACKAGE_POLICY_NAME);
@@ -81,7 +81,7 @@ export const apiTest = base.extend<{}, { profilingHelper: ProfilingHelper }>({
       await use({
         installPolicies,
         cleanupPolicies,
-        getPoliciyIds,
+        getPolicyIds,
       });
     },
     { scope: 'worker' },
