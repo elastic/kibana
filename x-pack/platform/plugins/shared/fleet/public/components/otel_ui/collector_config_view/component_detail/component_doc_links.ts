@@ -5,4 +5,14 @@
  * 2.0.
  */
 
-export { getComponentDocUrl, type ComponentDocLink } from './component_doc_links.generated';
+import type { OTelComponentType } from '../graph_view/constants';
+
+const OTEL_COMPONENT_DOC_URLS: Partial<Record<OTelComponentType, string>> = {
+  receiver: 'https://opentelemetry.io/docs/collector/components/receiver/',
+  processor: 'https://opentelemetry.io/docs/collector/components/processor/',
+  exporter: 'https://opentelemetry.io/docs/collector/components/exporter/',
+  connector: 'https://opentelemetry.io/docs/collector/components/connector/',
+};
+
+export const getComponentDocUrl = (componentType: OTelComponentType): string | undefined =>
+  OTEL_COMPONENT_DOC_URLS[componentType];

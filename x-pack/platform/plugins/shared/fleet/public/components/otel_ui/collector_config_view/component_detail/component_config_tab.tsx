@@ -26,10 +26,7 @@ export const ComponentConfigTab: React.FunctionComponent<ComponentConfigTabProps
   componentConfig,
   componentType,
 }) => {
-  const docLink = useMemo(
-    () => getComponentDocUrl(componentType, componentId),
-    [componentType, componentId]
-  );
+  const docUrl = getComponentDocUrl(componentType);
 
   const yamlContent = useMemo(() => {
     if (componentConfig == null) {
@@ -50,14 +47,9 @@ export const ComponentConfigTab: React.FunctionComponent<ComponentConfigTabProps
 
   return (
     <>
-      {docLink && (
+      {docUrl && (
         <>
-          <EuiLink
-            href={docLink.url}
-            target="_blank"
-            external
-            data-test-subj="otelComponentDocLink"
-          >
+          <EuiLink href={docUrl} target="_blank" external data-test-subj="otelComponentDocLink">
             {i18n.translate('xpack.fleet.otelUi.componentDetail.viewDocumentation', {
               defaultMessage: 'View component documentation',
             })}

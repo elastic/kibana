@@ -316,7 +316,9 @@ describe('OTelComponentDetail', () => {
 
     const docLink = result.getByTestId('otelComponentDocLink');
     expect(docLink).toBeInTheDocument();
-    expect(docLink.getAttribute('href')).toContain('otlpreceiver/README.md');
+    expect(docLink.getAttribute('href')).toBe(
+      'https://opentelemetry.io/docs/collector/components/receiver/'
+    );
   });
 
   it('does not render a documentation link for pipeline type', () => {
@@ -332,7 +334,7 @@ describe('OTelComponentDetail', () => {
     expect(result.queryByTestId('otelComponentDocLink')).not.toBeInTheDocument();
   });
 
-  it('does not render a documentation link for an unknown component', () => {
+  it('renders a documentation link for any component of a supported type', () => {
     const unknownConfig: OTelCollectorConfig = {
       receivers: { unknown_nonexistent: { endpoint: 'localhost:1234' } },
       service: { pipelines: {} },
@@ -347,6 +349,10 @@ describe('OTelComponentDetail', () => {
       />
     );
 
-    expect(result.queryByTestId('otelComponentDocLink')).not.toBeInTheDocument();
+    const docLink = result.getByTestId('otelComponentDocLink');
+    expect(docLink).toBeInTheDocument();
+    expect(docLink.getAttribute('href')).toBe(
+      'https://opentelemetry.io/docs/collector/components/receiver/'
+    );
   });
 });
