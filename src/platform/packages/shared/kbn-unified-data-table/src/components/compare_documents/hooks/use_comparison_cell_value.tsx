@@ -11,9 +11,9 @@ import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { formatFieldValueReact } from '@kbn/discover-utils';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { getFieldIconProps } from '@kbn/field-utils';
+import { getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
 import { FieldIcon } from '@kbn/react-field';
 import classNames from 'classnames';
 import { isEqual, memoize } from 'lodash';
@@ -40,6 +40,7 @@ export interface UseComparisonCellValueProps {
   diffMode: DocumentDiffMode | undefined;
   fieldFormats: FieldFormatsStart;
   getDocById: (id: string) => DataTableRecord | undefined;
+  columnsMeta?: DataTableColumnsMeta;
 }
 
 export const useComparisonCellValue = ({
@@ -50,6 +51,7 @@ export const useComparisonCellValue = ({
   diffMode,
   fieldFormats,
   getDocById,
+  columnsMeta,
 }: UseComparisonCellValueProps) => {
   const baseDocId = selectedDocIds[0];
   const baseDoc = useMemo(() => getDocById(baseDocId)?.flattened, [baseDocId, getDocById]);
@@ -67,6 +69,7 @@ export const useComparisonCellValue = ({
           diffMode={diffMode}
           fieldFormats={fieldFormats}
           getDocById={getDocById}
+          columnsMeta={columnsMeta}
           {...props}
         />
       </DiffProvider>
@@ -75,6 +78,7 @@ export const useComparisonCellValue = ({
       baseDoc,
       baseDocId,
       calculateDiffMemoized,
+      columnsMeta,
       comparisonFields,
       dataView,
       diffMode,
@@ -89,17 +93,21 @@ type CellValueProps = Omit<UseComparisonCellValueProps, 'selectedDocIds'> &
   EuiDataGridCellValueElementProps & {
     baseDocId: string;
     baseDoc: DataTableRecord['flattened'] | undefined;
+    columnsMeta?: DataTableColumnsMeta;
   };
 
 const EMPTY_VALUE = '-';
 
 const CellValue = (props: CellValueProps) => {
-  const { dataView, comparisonFields, fieldColumnId, rowIndex, columnId, getDocById } = props;
+  const { dataView, comparisonFields, fieldColumnId, rowIndex, columnId, getDocById, columnsMeta } =
+    props;
   const fieldName = comparisonFields[rowIndex];
   const field = useMemo(() => dataView.fields.getByName(fieldName), [dataView.fields, fieldName]);
   const comparisonDoc = useMemo(() => getDocById(columnId), [columnId, getDocById]);
   if (columnId === fieldColumnId) {
-    return <FieldCellValue field={field} fieldName={fieldName} />;
+    return (
+      <FieldCellValue field={field} fieldName={fieldName} columnMeta={columnsMeta?.[fieldName]} />
+    );
   }
 
   if (!comparisonDoc) {
@@ -114,16 +122,21 @@ const CellValue = (props: CellValueProps) => {
 interface FieldCellValueProps {
   field: DataViewField | undefined;
   fieldName: string;
+  columnMeta?: DataTableColumnsMeta[string];
 }
 
-const FieldCellValue = ({ field, fieldName }: FieldCellValueProps) => {
+const FieldCellValue = ({ field, fieldName, columnMeta }: FieldCellValueProps) => {
+  const iconNode = useMemo(() => {
+    if (field) {
+      return <FieldIcon {...getFieldIconProps(field)} />;
+    }
+    const iconType = columnMeta ? getTextBasedColumnIconType(columnMeta) : undefined;
+    return <FieldIcon type={iconType ?? 'unknown'} />;
+  }, [field, columnMeta]);
+
   return (
     <EuiFlexGroup responsive={false} gutterSize="s">
-      {field && (
-        <EuiFlexItem grow={false}>
-          <FieldIcon {...getFieldIconProps(field)} />
-        </EuiFlexItem>
-      )}
+      {iconNode && <EuiFlexItem grow={false}>{iconNode}</EuiFlexItem>}
       <EuiFlexItem>
         <EuiText
           size="relative"

@@ -1432,6 +1432,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 forceShowAllFields={defaultColumns}
                 showFullScreenButton={showFullScreenButton}
                 fieldFormats={fieldFormats}
+                columnsMeta={columnsMeta}
                 getDocById={getDocById}
                 replaceSelectedDocs={replaceSelectedDocs}
                 setIsCompareActive={setIsCompareActive}

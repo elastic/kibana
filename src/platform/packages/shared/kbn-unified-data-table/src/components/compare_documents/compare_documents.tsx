@@ -18,7 +18,7 @@ import type {
 } from '@elastic/eui';
 import { EuiDataGrid, useGeneratedHtmlId } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { memoize } from 'lodash';
 import React, { useMemo, useState } from 'react';
@@ -45,6 +45,7 @@ export interface CompareDocumentsProps {
   forceShowAllFields: boolean;
   showFullScreenButton?: boolean;
   fieldFormats: FieldFormatsStart;
+  columnsMeta?: DataTableColumnsMeta;
   getDocById: (id: string) => DataTableRecord | undefined;
   replaceSelectedDocs: (docIds: string[]) => void;
   setIsCompareActive: (isCompareActive: boolean) => void;
@@ -74,6 +75,7 @@ const CompareDocuments = ({
   forceShowAllFields,
   showFullScreenButton,
   fieldFormats,
+  columnsMeta,
   getDocById,
   replaceSelectedDocs,
   setIsCompareActive,
@@ -195,6 +197,7 @@ const CompareDocuments = ({
     diffMode: showDiff ? diffMode : undefined,
     fieldFormats,
     getDocById: memoizedGetDocById,
+    columnsMeta,
   });
   const comparisonCss = useComparisonCss({
     diffMode: showDiff ? diffMode : undefined,
