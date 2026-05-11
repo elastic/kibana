@@ -65,6 +65,9 @@ export function registerUpdateRoute(
           403: {
             description: 'forbidden',
           },
+          409: {
+            description: 'conflict',
+          },
         },
       }),
     },

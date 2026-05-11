@@ -33,9 +33,6 @@ import type { DashboardState, Operation } from '../types';
  * or to change the access mode of an existing document, we must use `create()` and
  * `changeAccessMode()` respectively.
  *
- * The create path also handles a race condition: between detecting the document is missing and
- * calling `create()`, another request may create it. We catch the resulting `ConflictError` and
- * fall through to the update path.
  */
 export async function update(
   requestCtx: RequestHandlerContext,
@@ -86,28 +83,15 @@ export async function update(
   if (isNewDocument) {
     asCodeIdSchema.validate(id);
 
-    try {
-      const body = await create(
-        requestCtx,
-        dashboardStateSchema,
-        updateBody,
-        serverTiming,
-        isDashboardAppRequest,
-        id
-      );
-      return { body, operation: 'create' };
-    } catch (e) {
-      if (!SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw e;
-      }
-      // Race condition: the document was created between the get check and the create call.
-      // Fetch it and fall through to the update path.
-      const existing = await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
-        DASHBOARD_SAVED_OBJECT_TYPE,
-        id
-      );
-      existingAccessMode = existing.accessControl?.accessMode;
-    }
+    const body = await create(
+      requestCtx,
+      dashboardStateSchema,
+      updateBody,
+      serverTiming,
+      isDashboardAppRequest,
+      id
+    );
+    return { body, operation: 'create' };
   }
 
   // Update path (existing document)
