@@ -18,6 +18,8 @@ import {
 } from './shortcut_utils';
 import { ShortcutsOverlay, ShortcutsOverlayItem } from './shortcuts_overlay';
 
+const LEADER_SHORTCUT_PICKER_TRIGGER_CODE = 'Quote';
+
 export const LeaderShortcutPicker = () => {
   const { registeredLeaderKeyGroups } = useShortcutsContext();
   const sortedLeaderKeyGroups = useMemo(() => {
@@ -63,7 +65,9 @@ export const LeaderShortcutPicker = () => {
   const shouldOpen = useCallback(
     (event: KeyboardEvent) => {
       return (
-        sortedLeaderKeyGroups.length > 0 && isPrimaryModifierOnly(event) && event.code === 'Quote'
+        sortedLeaderKeyGroups.length > 0 &&
+        isPrimaryModifierOnly(event) &&
+        event.code === LEADER_SHORTCUT_PICKER_TRIGGER_CODE
       );
     },
     [sortedLeaderKeyGroups.length]
