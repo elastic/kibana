@@ -62,6 +62,12 @@ jest.mock('../../host_isolation', () => ({
   ),
 }));
 
+const mockGoBack = jest.fn();
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  getFlyoutManagerStore: () => ({ goBack: mockGoBack }),
+}));
+
 const mockUseExploreActions = jest.fn().mockReturnValue({ exploreActionItems: [] });
 jest.mock('../hooks/use_explore_actions', () => ({
   useExploreActions: (...args: unknown[]) => mockUseExploreActions(...args),
@@ -734,7 +740,7 @@ describe('<TakeActionButton />', () => {
       );
     });
 
-    it('should close the system flyout when HostIsolation calls onClose', () => {
+    it('should dispatch goBack on the EUI flyout manager when HostIsolation calls onClose', () => {
       let captured: ((action: 'isolateHost' | 'unisolateHost') => void) | undefined;
       mockUseHostIsolationAction.mockImplementation(
         ({ onAddIsolationStatusClick }: { onAddIsolationStatusClick: typeof captured }) => {
@@ -756,7 +762,11 @@ describe('<TakeActionButton />', () => {
       render(element);
       fireEvent.click(getByTestId('hostIsolationMock-isolateHost'));
 
-      expect(mockOverlayClose).toHaveBeenCalled();
+      // goBack pops the host isolation session and restores the underlying alert details
+      // flyout; the previous behavior of hard-closing the host isolation flyout left no
+      // alert details visible.
+      expect(mockGoBack).toHaveBeenCalled();
+      expect(mockOverlayClose).not.toHaveBeenCalled();
     });
   });
 });

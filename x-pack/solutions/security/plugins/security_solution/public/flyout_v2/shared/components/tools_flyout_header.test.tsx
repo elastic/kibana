@@ -73,4 +73,16 @@ describe('<ToolsFlyoutHeader />', () => {
     expect(getByTestId('mockTimestamp')).toBeInTheDocument();
     expect(getByTestId('mockTimestamp')).toHaveAttribute('data-hit-id', 'hit-1');
   });
+
+  it('should render belowTitle content when provided', () => {
+    const { getByTestId } = renderHeader({
+      belowTitle: <div data-test-subj="mockBelowTitle">{'extra'}</div>,
+    });
+    expect(getByTestId('mockBelowTitle')).toHaveTextContent('extra');
+  });
+
+  it('should not render belowTitle content when omitted', () => {
+    const { queryByTestId } = renderHeader();
+    expect(queryByTestId('mockBelowTitle')).toBeNull();
+  });
 });

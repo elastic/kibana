@@ -10,6 +10,8 @@ import { render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { HostIsolation } from '.';
 import {
+  HOST_ISOLATION_INTEGRATION_TEST_ID as mockHostIsolationIntegrationTestId,
+  HOST_ISOLATION_PANEL_TEST_ID as mockHostIsolationPanelTestId,
   HOST_ISOLATION_INTEGRATION_TEST_ID,
   HOST_ISOLATION_PANEL_TEST_ID,
   HOST_ISOLATION_TITLE_TEST_ID,
@@ -17,7 +19,7 @@ import {
 import { endpointAlertDataMock } from '../../common/mock/endpoint';
 
 jest.mock('./components/host_isolation_view', () => ({
-  HostIsolationView: () => <div data-test-subj={HOST_ISOLATION_PANEL_TEST_ID} />,
+  HostIsolationView: () => <div data-test-subj={mockHostIsolationPanelTestId} />,
 }));
 
 jest.mock('../shared/components/tools_flyout_title', () => ({
@@ -32,11 +34,9 @@ jest.mock('../../common/hooks/endpoint/use_alert_response_actions_support', () =
 
 jest.mock('../../common/components/endpoint/agents/agent_type_integration', () => ({
   AgentTypeIntegration: ({ agentType }: { agentType: string }) => (
-    <div data-test-subj={HOST_ISOLATION_INTEGRATION_TEST_ID}>{agentType}</div>
+    <div data-test-subj={mockHostIsolationIntegrationTestId}>{agentType}</div>
   ),
 }));
-
-const HOST_ISOLATION_PANEL_TEST_ID_REQUIRED = HOST_ISOLATION_PANEL_TEST_ID;
 
 const hit: DataTableRecord = {
   id: 'doc-1',
@@ -60,7 +60,7 @@ describe('<HostIsolation />', () => {
 
     expect(getByTestId(HOST_ISOLATION_TITLE_TEST_ID)).toHaveTextContent('Isolate host');
     expect(getByTestId(HOST_ISOLATION_INTEGRATION_TEST_ID)).toHaveTextContent('endpoint');
-    expect(getByTestId(HOST_ISOLATION_PANEL_TEST_ID_REQUIRED)).toBeInTheDocument();
+    expect(getByTestId(HOST_ISOLATION_PANEL_TEST_ID)).toBeInTheDocument();
   });
 
   it('renders the release title when action is unisolateHost', () => {

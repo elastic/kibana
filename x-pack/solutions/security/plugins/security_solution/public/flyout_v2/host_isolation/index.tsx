@@ -8,15 +8,7 @@
 import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiSpacer,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { AgentTypeIntegration } from '../../common/components/endpoint/agents/agent_type_integration';
@@ -25,8 +17,7 @@ import {
   ISOLATE_HOST,
   UNISOLATE_HOST,
 } from '../../common/components/endpoint/host_isolation/from_alerts/translations';
-import { ToolsFlyoutTitle } from '../shared/components/tools_flyout_title';
-import { noopCellActionRenderer } from '../shared/components/cell_actions';
+import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
 import { HostIsolationView } from './components/host_isolation_view';
 import { HOST_ISOLATION_INTEGRATION_TEST_ID, HOST_ISOLATION_TITLE_TEST_ID } from './test_ids';
 
@@ -72,27 +63,17 @@ export const HostIsolation: FC<HostIsolationProps> = memo(
             padding-block: ${euiTheme.size.s} !important;
           `}
         >
-          <EuiFlexGroup
-            justifyContent="spaceBetween"
-            alignItems="center"
-            gutterSize="m"
-            responsive={false}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h4 data-test-subj={HOST_ISOLATION_TITLE_TEST_ID}>{title}</h4>
-              </EuiTitle>
-              <EuiSpacer size="s" />
+          <ToolsFlyoutHeader
+            hit={hit}
+            title={<span data-test-subj={HOST_ISOLATION_TITLE_TEST_ID}>{title}</span>}
+            belowTitle={
               <AgentTypeIntegration
                 agentType={agentType}
                 layout="horizontal"
                 data-test-subj={HOST_ISOLATION_INTEGRATION_TEST_ID}
               />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <ToolsFlyoutTitle hit={hit} renderCellActions={noopCellActionRenderer} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            }
+          />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <HostIsolationView

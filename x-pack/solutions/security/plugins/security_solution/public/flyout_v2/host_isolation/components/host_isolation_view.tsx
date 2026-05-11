@@ -46,7 +46,7 @@ export const HostIsolationView: FC<HostIsolationViewProps> = ({
   isolateAction,
   onClose,
 }) => {
-  const alertId = getFieldValue(hit, '_id') as string;
+  const alertId = hit.raw._id as string;
   const hostName = getFieldValue(hit, 'host.name') as string;
   const caseDetailsRefresh = useWithCaseDetailsRefresh();
   const [isSuccess, setIsSuccess] = useState(false);

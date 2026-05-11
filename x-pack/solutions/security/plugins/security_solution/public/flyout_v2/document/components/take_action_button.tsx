@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
-import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import { EuiButton, EuiContextMenu, EuiPopover, getFlyoutManagerStore } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
@@ -14,7 +14,6 @@ import { isNonLocalIndexName } from '@kbn/es-query';
 import { ALERT_WORKFLOW_STATUS, EVENT_KIND } from '@kbn/rule-data-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { useStore } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
@@ -101,15 +100,16 @@ export const TakeActionButton = memo(
     const { overlays } = services;
     const store = useStore();
     const history = useHistory();
-    const hostIsolationFlyoutRef = useRef<OverlayRef | null>(null);
 
     const openHostIsolation = useCallback(
       (isolateAction: 'isolateHost' | 'unisolateHost') => {
         const historyKey = isInSecurityApp
           ? documentFlyoutHistoryKey
           : DOC_VIEWER_FLYOUT_HISTORY_KEY;
-        const closeHostIsolation = () => hostIsolationFlyoutRef.current?.close();
-        hostIsolationFlyoutRef.current = overlays.openSystemFlyout(
+        // Dispatch the same action EUI's built-in back arrow dispatches so the previous
+        // flyout (alert details) is restored when the user cancels or finishes the action.
+        const closeHostIsolation = () => getFlyoutManagerStore().goBack();
+        overlays.openSystemFlyout(
           flyoutProviders({
             services,
             store,
