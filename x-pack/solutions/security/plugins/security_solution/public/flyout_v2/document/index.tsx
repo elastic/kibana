@@ -21,7 +21,11 @@ import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts
 import { EventKind } from './constants/event_kinds';
 import { Footer } from './footer';
 import { Header } from './header';
+import { getTabsDisplayed, validTabIds } from './tabs';
+import type { TabId } from './tabs';
 import { OverviewTab } from './tabs/overview_tab';
+import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
+import { useTabs } from '../shared/hooks/use_tabs';
 import { NotesDetails } from '../notes';
 import { useKibana } from '../../common/lib/kibana';
 import { flyoutProviders } from '../shared/components/flyout_provider';
@@ -62,6 +66,16 @@ export const DocumentFlyout = memo(
     const { hasAlertsRead, loading } = useAlertsPrivileges();
     const missingAlertsPrivilege = !loading && !hasAlertsRead && isAlert;
 
+    const { selectedTabId, setSelectedTabId } = useTabs<TabId>({
+      validTabIds,
+      storageKey: FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS,
+    });
+
+    const tabs = useMemo(
+      () => getTabsDisplayed({ hit, renderCellActions, onAlertUpdated }),
+      [hit, renderCellActions, onAlertUpdated]
+    );
+
     const onShowNotes = useCallback(() => {
       overlays.openSystemFlyout(
         flyoutProviders({
@@ -94,14 +108,23 @@ export const DocumentFlyout = memo(
             renderCellActions={renderCellActions}
             onAlertUpdated={onAlertUpdated}
             onShowNotes={onShowNotes}
+            tabs={isSecurityApp ? tabs : []}
+            selectedTabId={selectedTabId}
+            setSelectedTabId={setSelectedTabId}
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <OverviewTab
-            hit={hit}
-            renderCellActions={renderCellActions}
-            onAlertUpdated={onAlertUpdated}
-          />
+          {isSecurityApp ? (
+            <div css={{ height: '100%' }}>
+              {tabs.find((tab) => tab.id === selectedTabId)?.content}
+            </div>
+          ) : (
+            <OverviewTab
+              hit={hit}
+              renderCellActions={renderCellActions}
+              onAlertUpdated={onAlertUpdated}
+            />
+          )}
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <Footer hit={hit} onAlertUpdated={onAlertUpdated} onShowNotes={onShowNotes} />

@@ -16,11 +16,13 @@ import { OverviewTab } from './tabs/overview_tab';
 import { TableTab } from './tabs/table_tab';
 import { JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID } from './components/test_ids';
 
-export type RightPanelPaths = 'overview' | 'table' | 'json';
+export type TabId = 'overview' | 'table' | 'json';
 
-export interface RightPanelTabType {
+export const validTabIds: readonly TabId[] = ['overview', 'table', 'json'];
+
+export interface TabType {
   /** Unique identifier for the tab, used to track the selected tab. */
-  id: RightPanelPaths;
+  id: TabId;
   /** Rendered tab label shown in the tab bar. */
   name: ReactElement;
   /** Content rendered when this tab is selected. */
@@ -51,7 +53,7 @@ export const getTabsDisplayed = ({
   hit,
   renderCellActions,
   onAlertUpdated,
-}: GetTabsDisplayedOptions): RightPanelTabType[] => [
+}: GetTabsDisplayedOptions): TabType[] => [
   {
     id: 'overview',
     'data-test-subj': OVERVIEW_TAB_TEST_ID,

@@ -19,12 +19,12 @@ import {
   IOC_DETAILS_JSON_TAB_TEST_ID,
 } from './test_ids';
 
-export type RightPanelPaths = 'overview' | 'table' | 'json';
+export type TabId = 'overview' | 'table' | 'json';
 
-export const validTabIds: readonly RightPanelPaths[] = ['overview', 'table', 'json'];
+export const validTabIds: readonly TabId[] = ['overview', 'table', 'json'];
 
-export interface RightPanelTabType {
-  id: RightPanelPaths;
+export interface TabType {
+  id: TabId;
   name: ReactElement;
   content: React.ReactElement;
   'data-test-subj': string;
@@ -52,7 +52,7 @@ export const getTabsDisplayed = ({
   indicator,
   onViewAllFieldsInTable,
   renderCellActions,
-}: GetTabsDisplayedOptions): RightPanelTabType[] => [
+}: GetTabsDisplayedOptions): TabType[] => [
   {
     id: 'overview',
     'data-test-subj': IOC_DETAILS_OVERVIEW_TAB_TEST_ID,

@@ -17,7 +17,7 @@ import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
 import { useTabs } from '../shared/hooks/use_tabs';
-import { getTabsDisplayed, validTabIds, type RightPanelPaths } from './tabs';
+import { getTabsDisplayed, validTabIds, type TabId } from './tabs';
 import { FLYOUT_STORAGE_KEYS } from './constants/local_storage';
 
 /**
@@ -54,7 +54,7 @@ export const IOCDetails: FC<IOCDetailsProps> = memo(({ hit, renderCellActions })
     [hit]
   );
 
-  const { selectedTabId, setSelectedTabId } = useTabs<RightPanelPaths>({
+  const { selectedTabId, setSelectedTabId } = useTabs<TabId>({
     validTabIds,
     storageKey: FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS,
   });

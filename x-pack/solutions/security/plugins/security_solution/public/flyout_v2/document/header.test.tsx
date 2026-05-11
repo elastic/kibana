@@ -106,13 +106,27 @@ const eventHit = createMockHit({
   'kibana.alert.risk_score': 21,
 });
 
-const defaultHeaderProps: Pick<Parameters<typeof Header>[0], 'onAlertUpdated' | 'onShowNotes'> = {
+const defaultHeaderProps: Pick<
+  Parameters<typeof Header>[0],
+  'onAlertUpdated' | 'onShowNotes' | 'tabs' | 'selectedTabId' | 'setSelectedTabId'
+> = {
   onAlertUpdated: jest.fn(),
   onShowNotes: jest.fn(),
+  tabs: [],
+  selectedTabId: 'overview',
+  setSelectedTabId: jest.fn(),
 };
 
-type RenderHeaderProps = Omit<Parameters<typeof Header>[0], 'onAlertUpdated' | 'onShowNotes'> &
-  Partial<Pick<Parameters<typeof Header>[0], 'onAlertUpdated' | 'onShowNotes'>>;
+type RenderHeaderProps = Omit<
+  Parameters<typeof Header>[0],
+  'onAlertUpdated' | 'onShowNotes' | 'tabs' | 'selectedTabId' | 'setSelectedTabId'
+> &
+  Partial<
+    Pick<
+      Parameters<typeof Header>[0],
+      'onAlertUpdated' | 'onShowNotes' | 'tabs' | 'selectedTabId' | 'setSelectedTabId'
+    >
+  >;
 
 const renderHeader = (props: RenderHeaderProps) =>
   render(
