@@ -8,15 +8,18 @@
 /**
  * Autonomously-architected PCI scope discovery tool.
  *
- * This tool is part of the `pci-compliance-autonomous` skill's tool bundle. It is registered
- * under a distinct ID (`core.security.pci_autonomous_scope_discovery`) so the autonomous skill
- * never sees the hand-written variant's tool surface — this is the end-to-end isolation
- * required to validate the architect's full skill+tool blueprint (cycle-17).
+ * Part of the `pci-compliance-autonomous` skill's tool bundle. Registered under a distinct
+ * ID (`core.security.pci_autonomous_scope_discovery`) so the autonomous skill never sees the
+ * hand-written variant's tool surface — full skill+tool isolation per the autonomous
+ * architect blueprint.
  *
- * The handler delegates to the same domain helpers (field-caps fan-out, ECS scope-rule
- * heuristics) as the hand-written variant. The architectural artefact under test here is the
- * agent-facing surface — tool IDs, descriptions, schemas, decomposition — not the PCI DSS
- * spec itself, which is shared domain truth.
+ * INDEPENDENCE CLAIM (see comparison.html §1.5, v6 deep autonomy): scope-rule heuristics
+ * (`SCOPE_RULES`, `ALL_FIELD_HINTS`, `detectCategories`, `calculateCoverage`,
+ * `fetchFieldsByIndex`) are authored locally in this file rather than imported from the
+ * hand-written variant; the PCI requirement catalog is the autonomously-authored
+ * `pci_autonomous_requirements.ts`. The CI test
+ * `pci_autonomous_modules_no_handwritten_imports.test.ts` enforces zero imports from
+ * `pci_compliance_*` across the whole `pci_autonomous_tools/` tree.
  */
 
 import { z } from '@kbn/zod';

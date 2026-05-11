@@ -50,13 +50,14 @@
  *
  *   7. Holdout-aware default-account list — includes Windows-style
  *      (`Administrator`, `Guest`) and generic service accounts
- *      (`service_acct_*`) by pattern, not just Unix shorthand. Cycle-17 web
- *      research surfaced these as the most-commonly-missed defaults across
- *      enterprise environments.
+ *      (`service_acct_*`) by pattern, not just Unix shorthand. Sourced from
+ *      public assessor guidance on the most-commonly-missed defaults across
+ *      enterprise PCI environments.
+ *
+ * The catalog/schema sync invariant (every key here matches
+ * `pciAutonomousRequirementIdSchema`) is enforced at runtime by
+ * `pci_autonomous_requirements.test.ts`, not by a compile-time pseudo-anchor.
  */
-
-import type { z } from '@kbn/zod';
-import type { pciAutonomousRequirementIdSchema } from './pci_autonomous_schemas';
 
 // ──────────────────────────────────────────────────────────────────────────
 // Public types
@@ -69,11 +70,7 @@ export type AutonomousComplianceStatus =
   | 'NOT_APPLICABLE'
   | 'NOT_ASSESSABLE';
 
-export type AutonomousComplianceConfidence =
-  | 'HIGH'
-  | 'MEDIUM'
-  | 'LOW'
-  | 'NOT_ASSESSABLE';
+export type AutonomousComplianceConfidence = 'HIGH' | 'MEDIUM' | 'LOW' | 'NOT_ASSESSABLE';
 
 /**
  * A `detect_violations` requirement returns ROWS when something is WRONG
@@ -121,14 +118,15 @@ export interface AutonomousRequirementDef {
  * params array at execution time. NEVER interpolated into the query string —
  * that would be the moral equivalent of SQL string concatenation.
  */
-export const AUTONOMOUS_TIME_WINDOW =
-  '@timestamp >= ?_window_start AND @timestamp <= ?_window_end';
+export const AUTONOMOUS_TIME_WINDOW = '@timestamp >= ?_window_start AND @timestamp <= ?_window_end';
 
+// `STATS` with no `BY` clause already collapses to a single row, so no LIMIT
+// clause is appended. Keeping the query short makes the logged ES|QL easier
+// for auditors to read.
 const presenceQuery = (indexPattern: string, whereClause: string): string =>
   `FROM ${indexPattern} ` +
   `| WHERE ${AUTONOMOUS_TIME_WINDOW} AND ${whereClause} ` +
-  `| STATS observed_events = COUNT(*) ` +
-  `| LIMIT 1`;
+  `| STATS observed_events = COUNT(*)`;
 
 // ──────────────────────────────────────────────────────────────────────────
 // Default index patterns
@@ -142,11 +140,7 @@ const presenceQuery = (indexPattern: string, whereClause: string): string =>
  * PCI assessments evaluate authentication / network / vulnerability events,
  * not infra metrics; adding it just dilutes the field-caps preflight signal.
  */
-export const AUTONOMOUS_DEFAULT_INDEX_PATTERNS = [
-  'logs-*',
-  'endgame-*',
-  'winlogbeat-*',
-] as const;
+export const AUTONOMOUS_DEFAULT_INDEX_PATTERNS = ['logs-*', 'endgame-*', 'winlogbeat-*'] as const;
 
 // ──────────────────────────────────────────────────────────────────────────
 // Default accounts list — pattern-derived, not just Unix
@@ -156,7 +150,7 @@ export const AUTONOMOUS_DEFAULT_INDEX_PATTERNS = [
  * Default-account literals checked for compliance with PCI DSS 2.2.4.
  * Covers Unix shorthand, Windows built-ins, common database superusers, and
  * a flag for any user matching `service_acct_*` (catches the holdout
- * dataset's pattern). Authored from cycle-17 web research on the most
+ * dataset's pattern). Sourced from public assessor guidance on the most
  * commonly-missed default accounts in enterprise PCI assessments.
  */
 export const AUTONOMOUS_DEFAULT_ACCOUNT_LITERALS = [
@@ -179,7 +173,14 @@ export const AUTONOMOUS_DEFAULT_ACCOUNT_LITERALS = [
 // Catalog — grouped by PCI scope category
 // ──────────────────────────────────────────────────────────────────────────
 
-export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDef> = {
+/**
+ * Catalog is typed as `Partial<Record<string, …>>` so any `string`-keyed
+ * lookup yields `AutonomousRequirementDef | undefined`. Callers must
+ * narrow before use — accidental access of a non-existent requirement
+ * ID is caught by TypeScript rather than producing an undefined-property
+ * access at runtime.
+ */
+export const AUTONOMOUS_PCI_REQUIREMENTS: Partial<Record<string, AutonomousRequirementDef>> = {
   // ════════════════════════════════════════════════════════════════════════
   // Top-level coverage requirements (1-12)
   // ════════════════════════════════════════════════════════════════════════
@@ -202,7 +203,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
-      rationale: 'Telemetry-baseline window — 30 days of observed network events is sufficient to verify coverage.',
+      rationale:
+        'Telemetry-baseline window — 30 days of observed network events is sufficient to verify coverage.',
     },
     recommendations: [
       'Centralise NSC change events from firewalls, security groups, and network ACLs.',
@@ -225,7 +227,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
-      rationale: 'Configuration drift typically surfaces over weeks; 30-day window captures baseline.',
+      rationale:
+        'Configuration drift typically surfaces over weeks; 30-day window captures baseline.',
     },
     recommendations: [
       'Track configuration drift per host against a documented hardening baseline.',
@@ -233,10 +236,7 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     ],
     queries: {
       coverage: (i) =>
-        presenceQuery(
-          i,
-          'event.category == "configuration" OR event.action LIKE "*config*"'
-        ),
+        presenceQuery(i, 'event.category == "configuration" OR event.action LIKE "*config*"'),
     },
   },
 
@@ -261,10 +261,7 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     ],
     queries: {
       coverage: (i) =>
-        presenceQuery(
-          i,
-          'event.category == "database" OR event.action LIKE "*data*access*"'
-        ),
+        presenceQuery(i, 'event.category == "database" OR event.action LIKE "*data*access*"'),
     },
   },
 
@@ -287,11 +284,7 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
       'Alert on plaintext HTTP carrying anything resembling card data.',
     ],
     queries: {
-      coverage: (i) =>
-        presenceQuery(
-          i,
-          'tls.version IS NOT NULL OR network.protocol IS NOT NULL'
-        ),
+      coverage: (i) => presenceQuery(i, 'tls.version IS NOT NULL OR network.protocol IS NOT NULL'),
     },
   },
 
@@ -307,7 +300,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
-      rationale: 'Malware-defence telemetry should be present continuously; 30-day window confirms coverage.',
+      rationale:
+        'Malware-defence telemetry should be present continuously; 30-day window confirms coverage.',
     },
     recommendations: [
       'Verify endpoint-protection telemetry reaches the SIEM for every in-scope host.',
@@ -315,10 +309,7 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     ],
     queries: {
       coverage: (i) =>
-        presenceQuery(
-          i,
-          'event.category == "malware" OR event.module == "endpoint"'
-        ),
+        presenceQuery(i, 'event.category == "malware" OR event.module == "endpoint"'),
     },
   },
 
@@ -334,7 +325,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
-      rationale: 'Vulnerability scanning typically completes weekly; 30 days captures multiple cycles.',
+      rationale:
+        'Vulnerability scanning typically completes weekly; 30 days captures multiple cycles.',
     },
     recommendations: [
       'Track 30-day remediation SLA for critical vulnerabilities (post-v4.0.1 narrowing).',
@@ -342,10 +334,7 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     ],
     queries: {
       coverage: (i) =>
-        presenceQuery(
-          i,
-          'vulnerability.id IS NOT NULL OR event.action LIKE "*patch*"'
-        ),
+        presenceQuery(i, 'vulnerability.id IS NOT NULL OR event.action LIKE "*patch*"'),
     },
   },
 
@@ -361,7 +350,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
-      rationale: 'Role-assignment events are episodic; 30-day window catches multiple change-windows.',
+      rationale:
+        'Role-assignment events are episodic; 30-day window catches multiple change-windows.',
     },
     recommendations: [
       'Review privilege grants quarterly against documented job classifications.',
@@ -388,7 +378,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
-      rationale: 'Authentication telemetry should be continuous; 30-day window captures normal patterns.',
+      rationale:
+        'Authentication telemetry should be continuous; 30-day window captures normal patterns.',
     },
     recommendations: [
       'Ensure MFA challenge / verify / enrol events are ingested — Req 8.4.2 hinges on observability.',
@@ -396,10 +387,7 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     ],
     queries: {
       coverage: (i) =>
-        presenceQuery(
-          i,
-          'event.category == "authentication" OR event.action LIKE "*login*"'
-        ),
+        presenceQuery(i, 'event.category == "authentication" OR event.action LIKE "*login*"'),
     },
   },
 
@@ -415,7 +403,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
-      rationale: 'Physical-access events are typically continuous; 30-day window confirms feed health.',
+      rationale:
+        'Physical-access events are typically continuous; 30-day window confirms feed health.',
     },
     recommendations: [
       'Integrate badge / camera systems where feasible for end-to-end traceability.',
@@ -423,10 +412,7 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     ],
     queries: {
       coverage: (i) =>
-        presenceQuery(
-          i,
-          'event.category == "physical_access" OR event.action LIKE "*badge*"'
-        ),
+        presenceQuery(i, 'event.category == "physical_access" OR event.action LIKE "*badge*"'),
     },
   },
 
@@ -465,7 +451,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
-      rationale: 'Security testing produces episodic events; 30-day window catches at least one cycle.',
+      rationale:
+        'Security testing produces episodic events; 30-day window catches at least one cycle.',
     },
     recommendations: [
       'Track recurring security-test cadence and unresolved high-risk findings.',
@@ -473,10 +460,7 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     ],
     queries: {
       coverage: (i) =>
-        presenceQuery(
-          i,
-          'event.category == "intrusion_detection" OR vulnerability.id IS NOT NULL'
-        ),
+        presenceQuery(i, 'event.category == "intrusion_detection" OR vulnerability.id IS NOT NULL'),
     },
   },
 
@@ -499,10 +483,7 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     ],
     queries: {
       coverage: (i) =>
-        presenceQuery(
-          i,
-          'event.action LIKE "*policy*" OR event.category == "configuration"'
-        ),
+        presenceQuery(i, 'event.action LIKE "*policy*" OR event.category == "configuration"'),
     },
   },
 
@@ -558,18 +539,15 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'detect_violations',
     defaultLookback: {
       days: 30,
-      rationale: 'Network-flow telemetry baseline; weak crypto should be rare so 30 days captures normal use.',
+      rationale:
+        'Network-flow telemetry baseline; weak crypto should be rare so 30 days captures normal use.',
     },
     recommendations: [
       'Disable TLS 1.0 and TLS 1.1 on all systems processing cardholder data.',
       'Upgrade to TLS 1.2 or 1.3 with strong cipher-suite restrictions.',
     ],
     queries: {
-      coverage: (i) =>
-        presenceQuery(
-          i,
-          'tls.version IS NOT NULL OR network.protocol IS NOT NULL'
-        ),
+      coverage: (i) => presenceQuery(i, 'tls.version IS NOT NULL OR network.protocol IS NOT NULL'),
       violation: (i) =>
         `FROM ${i} ` +
         `| WHERE ${AUTONOMOUS_TIME_WINDOW} ` +
@@ -598,7 +576,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'detect_violations',
     defaultLookback: {
       days: 90,
-      rationale: 'Default-account use is rare so a longer window improves signal — 90 days catches infrequent successful sign-ins.',
+      rationale:
+        'Default-account use is rare so a longer window improves signal — 90 days catches infrequent successful sign-ins.',
     },
     recommendations: [
       'Remove or disable all default and vendor-supplied accounts before deploying systems.',
@@ -606,15 +585,14 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     ],
     queries: {
       coverage: (i) =>
-        presenceQuery(
-          i,
-          'event.category == "authentication" AND event.outcome == "success"'
-        ),
+        presenceQuery(i, 'event.category == "authentication" AND event.outcome == "success"'),
       violation: (i) =>
         `FROM ${i} ` +
         `| WHERE ${AUTONOMOUS_TIME_WINDOW} ` +
         `| WHERE event.category == "authentication" AND event.outcome == "success" ` +
-        `| WHERE user.name IN (${AUTONOMOUS_DEFAULT_ACCOUNT_LITERALS.map((u) => `"${u}"`).join(', ')}) ` +
+        `| WHERE user.name IN (${AUTONOMOUS_DEFAULT_ACCOUNT_LITERALS.map((u) => `"${u}"`).join(
+          ', '
+        )}) ` +
         `OR user.name LIKE "service_acct_*" ` +
         `| STATS successful_logins = COUNT(*), unique_sources = COUNT_DISTINCT(source.ip) BY user.name, source.ip ` +
         `| SORT successful_logins DESC ` +
@@ -634,7 +612,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
-      rationale: 'Privilege-assignment changes are episodic; 30-day window captures normal change-window activity.',
+      rationale:
+        'Privilege-assignment changes are episodic; 30-day window captures normal change-window activity.',
     },
     recommendations: [
       'Review privilege grants quarterly to confirm least-privilege alignment.',
@@ -670,7 +649,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'detect_violations',
     defaultLookback: {
       days: 365,
-      rationale: 'Spec-mandated — inactivity is defined relative to the most recent successful login over 12 months.',
+      rationale:
+        'Spec-mandated — inactivity is defined relative to the most recent successful login over 12 months.',
     },
     recommendations: [
       'Disable or remove any account with no successful authentication in 90+ days.',
@@ -678,10 +658,7 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     ],
     queries: {
       coverage: (i) =>
-        presenceQuery(
-          i,
-          'event.category == "authentication" AND event.outcome == "success"'
-        ),
+        presenceQuery(i, 'event.category == "authentication" AND event.outcome == "success"'),
       violation: (i) =>
         `FROM ${i} ` +
         `| WHERE ${AUTONOMOUS_TIME_WINDOW} ` +
@@ -706,7 +683,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'detect_violations',
     defaultLookback: {
       days: 7,
-      rationale: 'Spec aligns the lockout threshold with a short bursty window — 7 days surfaces password-spray and brute-force patterns.',
+      rationale:
+        'Spec aligns the lockout threshold with a short bursty window — 7 days surfaces password-spray and brute-force patterns.',
     },
     recommendations: [
       'Configure account lockout after no more than 10 invalid login attempts (Req 8.3.4).',
@@ -714,10 +692,7 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     ],
     queries: {
       coverage: (i) =>
-        presenceQuery(
-          i,
-          'event.category == "authentication" AND event.outcome == "failure"'
-        ),
+        presenceQuery(i, 'event.category == "authentication" AND event.outcome == "failure"'),
       violation: (i) =>
         `FROM ${i} ` +
         `| WHERE ${AUTONOMOUS_TIME_WINDOW} ` +
@@ -742,7 +717,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
-      rationale: 'Password-policy events surface around policy roll-outs and resets — 30 days captures monthly cycles.',
+      rationale:
+        'Password-policy events surface around policy roll-outs and resets — 30 days captures monthly cycles.',
     },
     recommendations: [
       'Enforce ≥12-character passwords with mixed numeric+alphabetic characters (Req 8.3.6).',
@@ -803,7 +779,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
-      rationale: 'MFA telemetry should be continuous; 30-day window confirms it is present and flowing.',
+      rationale:
+        'MFA telemetry should be continuous; 30-day window confirms it is present and flowing.',
     },
     recommendations: [
       'Enforce MFA for ALL interactive CDE access — Req 8.4.2 broadened beyond admin-only.',
@@ -838,7 +815,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'verify_presence',
     defaultLookback: {
       days: 30,
-      rationale: 'Malware-defence telemetry baseline; 30 days catches at least one scan cycle per host.',
+      rationale:
+        'Malware-defence telemetry baseline; 30 days catches at least one scan cycle per host.',
     },
     recommendations: [
       'Verify every in-scope endpoint reports anti-malware telemetry.',
@@ -871,7 +849,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'detect_violations',
     defaultLookback: {
       days: 30,
-      rationale: 'Spec-mandated 30-day SLA — checking for critical vulnerabilities still open within that window.',
+      rationale:
+        'Spec-mandated 30-day SLA — checking for critical vulnerabilities still open within that window.',
     },
     recommendations: [
       'Prioritise critical-severity remediation within 30 days (Req 6.3.3 post-v4.0.1).',
@@ -904,7 +883,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'detect_violations',
     defaultLookback: {
       days: 30,
-      rationale: 'Log-tampering events are rare and high-signal — 30 days catches both planned maintenance pauses and unauthorised stops.',
+      rationale:
+        'Log-tampering events are rare and high-signal — 30 days catches both planned maintenance pauses and unauthorised stops.',
     },
     recommendations: [
       'Investigate every audit-log stop, pause, or deletion event immediately.',
@@ -935,7 +915,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'verify_presence',
     defaultLookback: {
       days: 7,
-      rationale: 'Admin actions should be continuous — a short window quickly surfaces gaps in coverage.',
+      rationale:
+        'Admin actions should be continuous — a short window quickly surfaces gaps in coverage.',
     },
     recommendations: [
       'Ensure all administrative actions (config changes, user mgmt, system modifications) are logged.',
@@ -963,18 +944,15 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'verify_presence',
     defaultLookback: {
       days: 7,
-      rationale: 'Field-fill-rate is most accurate on recent data; a short window avoids historical ingestion-quirk noise.',
+      rationale:
+        'Field-fill-rate is most accurate on recent data; a short window avoids historical ingestion-quirk noise.',
     },
     recommendations: [
       'Audit field-fill rates for user.name, event.action, and event.outcome across all log sources.',
       'Investigate sources whose fill rate is below 90% for required audit-trail fields.',
     ],
     queries: {
-      coverage: (i) =>
-        presenceQuery(
-          i,
-          'event.category IS NOT NULL AND user.name IS NOT NULL'
-        ),
+      coverage: (i) => presenceQuery(i, 'event.category IS NOT NULL AND user.name IS NOT NULL'),
       violation: (i) =>
         `FROM ${i} ` +
         `| WHERE ${AUTONOMOUS_TIME_WINDOW} ` +
@@ -995,7 +973,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'verify_presence',
     defaultLookback: {
       days: 365,
-      rationale: 'Spec-mandated 12-month retention — query spans the full index window to find the oldest entry.',
+      rationale:
+        'Spec-mandated 12-month retention — query spans the full index window to find the oldest entry.',
     },
     recommendations: [
       'Configure ILM / retention so audit logs are kept ≥12 months total, with the most recent 3 months online.',
@@ -1029,7 +1008,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'detect_violations',
     defaultLookback: {
       days: 7,
-      rationale: 'IDS/IPS alerts are time-sensitive — short window surfaces active incidents rather than historical noise.',
+      rationale:
+        'IDS/IPS alerts are time-sensitive — short window surfaces active incidents rather than historical noise.',
     },
     recommendations: [
       'Triage active IDS/IPS alerts promptly; aged alerts are the highest-risk gap.',
@@ -1058,7 +1038,8 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
     verdict: 'detect_violations',
     defaultLookback: {
       days: 7,
-      rationale: 'Payment-page integrity events are bursty and time-sensitive — short window surfaces real incidents.',
+      rationale:
+        'Payment-page integrity events are bursty and time-sensitive — short window surfaces real incidents.',
     },
     recommendations: [
       'Implement Content Security Policy (CSP) and Subresource Integrity (SRI) on all payment pages.',
@@ -1095,7 +1076,19 @@ export const AUTONOMOUS_PCI_REQUIREMENTS: Record<string, AutonomousRequirementDe
  */
 export const requirementCategory = (
   requirementId: string
-): 'network' | 'identity' | 'data' | 'crypto' | 'malware' | 'vulnerability' | 'access' | 'authentication' | 'physical' | 'logging' | 'testing' | 'governance' => {
+):
+  | 'network'
+  | 'identity'
+  | 'data'
+  | 'crypto'
+  | 'malware'
+  | 'vulnerability'
+  | 'access'
+  | 'authentication'
+  | 'physical'
+  | 'logging'
+  | 'testing'
+  | 'governance' => {
   const top = requirementId.split('.')[0];
   switch (top) {
     case '1':
@@ -1213,8 +1206,7 @@ export const resolveAutonomousRequirementIds = (requirements?: string[]): string
  * Resolve a comma-joined ES|QL index pattern from a caller's index list.
  */
 export const getAutonomousIndexPattern = (indices?: string[]): string => {
-  const selected =
-    indices && indices.length > 0 ? indices : [...AUTONOMOUS_DEFAULT_INDEX_PATTERNS];
+  const selected = indices && indices.length > 0 ? indices : [...AUTONOMOUS_DEFAULT_INDEX_PATTERNS];
   return selected.join(',');
 };
 
@@ -1227,22 +1219,12 @@ export const getAutonomousIndexList = (indices?: string[]): string[] =>
     : [...AUTONOMOUS_DEFAULT_INDEX_PATTERNS];
 
 // ──────────────────────────────────────────────────────────────────────────
-// Schema cross-check (compile-time)
+// Schema/catalog cross-check
 // ──────────────────────────────────────────────────────────────────────────
-
-/**
- * Compile-time anchor: ensures the requirement-ID input type from the schema
- * module accepts every catalog key. Forces the schema regex and the catalog
- * to stay in sync at refactor time. The variable is intentionally not
- * exported — it exists only for its type-check side effect.
- */
-type _AutonomousRequirementIdsAreCatalogKeys = z.infer<
-  typeof pciAutonomousRequirementIdSchema
->;
-// Touch every catalog key so the type system sees them.
-const _CATALOG_KEYS: readonly _AutonomousRequirementIdsAreCatalogKeys[] = [
-  'all',
-  ...(Object.keys(AUTONOMOUS_PCI_REQUIREMENTS) as _AutonomousRequirementIdsAreCatalogKeys[]),
-];
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _CATALOG_KEYS_COUNT = _CATALOG_KEYS.length;
+//
+// The earlier `Record<string, …>` typing produced a `z.infer`-based compile-
+// time anchor that didn't actually constrain anything — the regex behind
+// `pciAutonomousRequirementIdSchema` is a runtime check that TypeScript
+// can't see. The real invariant ("every catalog key parses cleanly through
+// the schema") is asserted in `pci_autonomous_requirements.test.ts`, which
+// runs the schema's `.parse()` on every key and on the literal `"all"`.

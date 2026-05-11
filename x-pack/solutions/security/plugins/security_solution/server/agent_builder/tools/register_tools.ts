@@ -35,14 +35,16 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_c
  *    `pci_field_mapper`.
  *  - `pciComplianceAutonomousAgentBuilder` → autonomous variant: `pci_autonomous_scope_discovery`,
  *    `pci_autonomous_compliance_check`, `pci_autonomous_scorecard_report`,
- *    `pci_autonomous_field_mapper` (per the cycle-17 architect blueprint that splits check
- *    and report into two specialised tools).
+ *    `pci_autonomous_field_mapper` (per the autonomous architect's blueprint that splits
+ *    check and report into two specialised tools).
  *
- * The two bundles share underlying domain helpers (PCI DSS requirement catalog, ES|QL
- * evaluator, ECS field-mapping heuristics) — those are domain truth, not architectural
- * artefacts. The tool IDs, schemas, descriptions, decomposition, and skill bindings are
- * fully independent so the autonomous variant can be evaluated as a true end-to-end
- * skill+tool autonomous stack.
+ * The two bundles are fully independent at every layer (v6 deep autonomy, see
+ * comparison.html §1.5): tool IDs, schemas, descriptions, decomposition, the PCI DSS
+ * requirement catalog, the ES|QL evaluator pipeline, and the ECS field-mapping heuristics
+ * are each authored separately in `pci_autonomous_tools/` rather than imported from the
+ * hand-written sibling. The CI test
+ * `pci_autonomous_modules_no_handwritten_imports.test.ts` enforces zero
+ * `pci_compliance_*` imports from the autonomous bundle.
  */
 export const registerTools = async (
   agentBuilder: AgentBuilderPluginSetup,

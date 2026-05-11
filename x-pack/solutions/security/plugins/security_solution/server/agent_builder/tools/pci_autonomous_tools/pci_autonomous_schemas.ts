@@ -23,8 +23,9 @@
  *      controls, no FROM-injection metacharacters) but a different encoding.
  *   2. Time-range refinement uses an inclusive `from <= to` guard but rejects
  *      future-dated `to` (>2 days ahead of now) — the hand-written sibling does
- *      not. Auditors flagged this in cycle-17 web research: a future `to` makes
- *      no sense for telemetry windows and almost always indicates a bug.
+ *      not. Auditor guidance documents this as a common QSA-report error: a
+ *      future `to` makes no sense for telemetry windows and almost always
+ *      indicates a clock-skew bug or a fabricated value.
  *   3. ScopeClaim carries an explicit `provenance` block recording that the
  *      autonomous skill produced this claim. This makes the autonomy auditable
  *      in any trace that captures tool output (e.g. LangSmith).
@@ -89,8 +90,8 @@ export const pciAutonomousIndexPatternSchema = z
  * Time-range schema. Both endpoints must be ISO-8601 with offset. The
  * autonomous variant additionally clamps `to` so it cannot be more than 48
  * hours in the future — anything beyond that almost always indicates a clock
- * bug or a fabricated value (cycle-17 web research finding on common QSA
- * report errors).
+ * bug or a fabricated value (common QSA-report error documented in public
+ * assessor guidance).
  */
 export const pciAutonomousTimeRangeSchema = z
   .object({
@@ -126,7 +127,10 @@ export const pciAutonomousTimeRangeSchema = z
  * The accepted shape is: `"all"`, a top-level ID (`"1"` .. `"12"`), or a
  * dotted sub-requirement (e.g. `"8.3.4"`, `"10.2.1"`).
  */
-const REQUIREMENT_ID_PATTERN = /^(all|1[0-2]|[1-9])(\.[0-9]+){0,2}$/;
+// `all` is the only non-numeric token accepted, and it must stand alone —
+// dotted variants like `all.1` are nonsense and would otherwise slip past
+// the regex if the suffix group were left outside the alternation.
+const REQUIREMENT_ID_PATTERN = /^(all|(1[0-2]|[1-9])(\.[0-9]+){0,2})$/;
 
 export const pciAutonomousRequirementIdSchema = z
   .string()
@@ -136,9 +140,7 @@ export const pciAutonomousRequirementIdSchema = z
       'like "8.3.4". Letters and other punctuation are not accepted.'
   );
 
-export type PciAutonomousRequirementIdInput = z.infer<
-  typeof pciAutonomousRequirementIdSchema
->;
+export type PciAutonomousRequirementIdInput = z.infer<typeof pciAutonomousRequirementIdSchema>;
 
 /**
  * ScopeClaim — the audit-trail payload returned by every autonomous PCI tool.

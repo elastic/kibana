@@ -8,9 +8,9 @@
 /**
  * Autonomous PCI compliance tool bundle — fully-autonomous v6.
  *
- * Per the cycle-17 architect blueprint, the `pci-compliance-autonomous` skill operates
- * over an independent set of 4 tools (vs the hand-written variant's 3-tool consolidated
- * layout):
+ * Per the autonomous architect's blueprint, the `pci-compliance-autonomous` skill
+ * operates over an independent set of 4 tools (vs the hand-written variant's 3-tool
+ * consolidated layout):
  *
  *   1. pci_autonomous_scope_discovery
  *   2. pci_autonomous_compliance_check

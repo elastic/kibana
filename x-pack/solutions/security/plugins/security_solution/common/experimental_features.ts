@@ -232,10 +232,14 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables the autonomously-architected variant of the PCI DSS v4.0.1 Compliance skill,
-   * authored by the `skill.architect` orchestrator (cycle 17). Reuses the same backing tools
-   * as `pciComplianceAgentBuilder` — only the skill content differs. Used for side-by-side
-   * eval comparison via `@kbn/evals-suite-pci-compliance` with `EVAL_PCI_VARIANT=autonomous`.
-   * Off by default; enable per Scout config set or per environment for the comparison run.
+   * authored by the `skill.architect` orchestrator. Independently authored at every layer
+   * (v6 deep autonomy, see comparison.html §1.5): the skill content, the 4 backing tools
+   * (`pci_autonomous_*`), and the underlying engine modules (`pci_autonomous_requirements`,
+   * `pci_autonomous_evaluator`, `pci_autonomous_schemas`) all sit under
+   * `tools/pci_autonomous_tools/` with zero imports from the hand-written sibling. Used for
+   * side-by-side eval comparison via `@kbn/evals-suite-pci-compliance` with
+   * `EVAL_PCI_VARIANT=autonomous`. Off by default; enable per Scout config set or per
+   * environment for the comparison run.
    */
   pciComplianceAutonomousAgentBuilder: false,
 

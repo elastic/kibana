@@ -8,7 +8,7 @@
 /**
  * Autonomously-architected PCI DSS compliance check tool.
  *
- * Per the cycle-17 architect's blueprint, the autonomous variant splits the consolidated
+ * Per the autonomous architect's blueprint, the autonomous variant splits the consolidated
  * `pci_compliance` tool into two specialised tools: this one (check mode only) and the
  * sibling `pci_autonomous_scorecard_report` tool. The argument was that two narrow tools
  * are easier for the LLM to route between than a single tool with a `mode` parameter that
@@ -92,7 +92,9 @@ export const PCI_AUTONOMOUS_COMPLIANCE_CHECK_TOOL_ID = securityTool(
   'pci_autonomous_compliance_check'
 );
 
-const rollupConfidence = (rows: AutonomousEvaluatedRequirement[]): AutonomousComplianceConfidence => {
+const rollupConfidence = (
+  rows: AutonomousEvaluatedRequirement[]
+): AutonomousComplianceConfidence => {
   if (rows.length === 0) return 'NOT_ASSESSABLE';
   const counts = rows.reduce((acc, r) => {
     acc[r.confidence] = (acc[r.confidence] ?? 0) + 1;
@@ -104,7 +106,9 @@ const rollupConfidence = (rows: AutonomousEvaluatedRequirement[]): AutonomousCom
   return 'MEDIUM';
 };
 
-const rollupOverallStatus = (rows: AutonomousEvaluatedRequirement[]): AutonomousComplianceStatus => {
+const rollupOverallStatus = (
+  rows: AutonomousEvaluatedRequirement[]
+): AutonomousComplianceStatus => {
   const counts = rows.reduce((acc, r) => {
     acc[r.status] = (acc[r.status] ?? 0) + 1;
     return acc;
@@ -187,10 +191,15 @@ export const pciAutonomousComplianceCheckTool = (
         });
       });
 
-      const rows = await runAutonomousWithConcurrency(tasks, AUTONOMOUS_PCI_REQUIREMENT_CONCURRENCY);
+      const rows = await runAutonomousWithConcurrency(
+        tasks,
+        AUTONOMOUS_PCI_REQUIREMENT_CONCURRENCY
+      );
 
       const requiredFieldsChecked = Array.from(
-        new Set(requirementIds.flatMap((id) => AUTONOMOUS_PCI_REQUIREMENTS[id]?.requiredFields ?? []))
+        new Set(
+          requirementIds.flatMap((id) => AUTONOMOUS_PCI_REQUIREMENTS[id]?.requiredFields ?? [])
+        )
       );
 
       const resolvedTimeRange =

@@ -8,10 +8,15 @@
 /**
  * Autonomously-architected PCI field mapper tool.
  *
- * Part of the autonomous skill's 4-tool bundle (per the cycle-17 architect blueprint). The
- * handler reuses the shared ECS field-mapping heuristics (FIELD_MAPPING_HINTS, sensitive-
- * field detection) — those encode domain knowledge about ECS itself, not architectural
- * choices. The tool ID, description, and schema are this variant's own contribution.
+ * Part of the autonomous skill's 4-tool bundle.
+ *
+ * INDEPENDENCE CLAIM (see comparison.html §1.5, v6 deep autonomy): the ECS field-mapping
+ * heuristics (`FIELD_MAPPING_HINTS`, `SENSITIVE_FIELD_PATTERNS`, `matchFieldToEcs`) are
+ * authored locally in this file rather than imported from the hand-written variant.
+ * The tool ID, description, schema, and engine modules it consumes
+ * (`pci_autonomous_schemas`) are likewise independent. The CI test
+ * `pci_autonomous_modules_no_handwritten_imports.test.ts` enforces zero imports from
+ * `pci_compliance_*` across the whole `pci_autonomous_tools/` tree.
  */
 
 import { z } from '@kbn/zod';

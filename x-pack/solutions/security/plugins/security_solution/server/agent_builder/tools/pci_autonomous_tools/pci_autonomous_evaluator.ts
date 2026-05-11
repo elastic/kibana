@@ -129,10 +129,14 @@ const SCORE_TABLE: Record<
   NOT_ASSESSABLE: { HIGH: 25, MEDIUM: 25, LOW: 25, NOT_ASSESSABLE: 25 },
 };
 
+// The table is exhaustive over `AutonomousComplianceStatus ×
+// AutonomousComplianceConfidence`; TypeScript proves every cell exists, so
+// no fallback is needed. If a future contributor expands either union, the
+// `Record<…>` constraint above forces them to populate the new cells.
 const scoreFor = (
   status: AutonomousComplianceStatus,
   confidence: AutonomousComplianceConfidence
-): number => SCORE_TABLE[status]?.[confidence] ?? 0;
+): number => SCORE_TABLE[status][confidence];
 
 // ──────────────────────────────────────────────────────────────────────────
 // Number coercion (ES|QL returns mixed types for COUNT projections)
@@ -355,12 +359,8 @@ async function runFieldCapsPreflight(
     });
 
     const present = new Set(Object.keys(fieldCaps.fields ?? {}));
-    const missing = definition.requiredFields.filter(
-      (f) => f !== '@timestamp' && !present.has(f)
-    );
-    const requiredExcludingTimestamp = definition.requiredFields.filter(
-      (f) => f !== '@timestamp'
-    );
+    const missing = definition.requiredFields.filter((f) => f !== '@timestamp' && !present.has(f));
+    const requiredExcludingTimestamp = definition.requiredFields.filter((f) => f !== '@timestamp');
 
     if (requiredExcludingTimestamp.length === 0 || missing.length === 0) {
       return { kind: 'fully_covered' };
@@ -390,7 +390,9 @@ function preflightToVerdict(
         {
           check: `${definition.id} — required fields missing`,
           status: 'NOT_ASSESSABLE',
-          detail: `Required field(s) are not present in the index: ${preflight.missing.join(', ')}.`,
+          detail: `Required field(s) are not present in the index: ${preflight.missing.join(
+            ', '
+          )}.`,
         },
       ],
       evidenceCount: 0,
@@ -502,7 +504,9 @@ function composeEvaluatedRequirement(
     pciReference: definition.pciReference,
     status: verdict.status,
     confidence: verdict.confidence,
-    summary: `Requirement ${definition.id} is ${statusToHumanLabel(verdict.status)} (confidence: ${verdict.confidence}).`,
+    summary: `Requirement ${definition.id} is ${statusToHumanLabel(verdict.status)} (confidence: ${
+      verdict.confidence
+    }).`,
     caveats,
     findings,
     recommendations: definition.recommendations,
@@ -534,9 +538,7 @@ export async function evaluateAutonomousRequirement({
 }: EvaluateAutonomousRequirementArgs): Promise<AutonomousEvaluatedRequirement> {
   const definition = AUTONOMOUS_PCI_REQUIREMENTS[requirementId];
   if (!definition) {
-    throw new Error(
-      `evaluateAutonomousRequirement: unknown requirement id "${requirementId}".`
-    );
+    throw new Error(`evaluateAutonomousRequirement: unknown requirement id "${requirementId}".`);
   }
   const params = buildAutonomousTimeWindowParams({ from, to });
 
@@ -613,8 +615,17 @@ export const AUTONOMOUS_PCI_REQUIREMENT_CONCURRENCY = 4;
 /**
  * Run an ordered list of tasks with a fixed concurrency limit. Output array
  * preserves input order (i-th result corresponds to i-th task). Uses a
- * manual ring rather than the `Promise.race(new Set())` pattern — equivalent
- * semantics, different implementation, easier to reason about under failure.
+ * manual work-stealing ring rather than the `Promise.race(new Set())`
+ * pattern — equivalent semantics, different implementation.
+ *
+ * Failure semantics: every task is awaited even if a sibling rejects. After
+ * all workers drain, the first observed rejection is re-thrown so the
+ * caller still sees an error. Successful tasks remain in their slots in
+ * the returned array; rejected slots stay as the `Array(n)` default
+ * (`undefined`). This guarantees no in-flight promise is silently orphaned
+ * — important because the evaluator's tasks issue ES|QL and field-caps
+ * round-trips, and dropping them mid-flight would leak load against the
+ * cluster.
  */
 export async function runAutonomousWithConcurrency<T>(
   tasks: Array<() => Promise<T>>,
@@ -625,17 +636,23 @@ export async function runAutonomousWithConcurrency<T>(
   }
   const results: T[] = new Array(tasks.length);
   let nextIndex = 0;
+  let firstError: unknown;
 
   const worker = async (): Promise<void> => {
     while (true) {
       const i = nextIndex;
       nextIndex += 1;
       if (i >= tasks.length) return;
-      results[i] = await tasks[i]();
+      try {
+        results[i] = await tasks[i]();
+      } catch (err) {
+        if (firstError === undefined) firstError = err;
+      }
     }
   };
 
   const workers = Array.from({ length: Math.min(limit, tasks.length) }, () => worker());
   await Promise.all(workers);
+  if (firstError !== undefined) throw firstError;
   return results;
 }

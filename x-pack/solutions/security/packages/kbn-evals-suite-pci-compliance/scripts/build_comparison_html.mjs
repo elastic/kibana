@@ -51,13 +51,22 @@ function repoRelative(absPath) {
 }
 
 // ─── argv ──────────────────────────────────────────────────────────────────
-// Two run shapes are supported:
+// Three run shapes are supported:
 //   - Single-model mode (legacy): --handwritten <dir> --autonomous <dir>
 //   - Multi-model mode:           --runs <label>=<dir>,<label>=<dir>,...
 //     where each <label> matches one of the known variant×model cells, e.g.
 //       opus47-handwritten, opus47-autonomous, sonnet46-handwritten, sonnet46-autonomous.
 //     When --runs is provided the legacy --handwritten / --autonomous values
 //     still feed §2-§3 (structural metrics) but §4 renders the full grid.
+//   - Combined-run mode:          --combined-run <label>=<dir>,...
+//     where each directory's results.json contains BOTH the iteration scenarios
+//     (`pci-compliance: …` datasets) AND the holdout scenarios (`pci-holdout: …`
+//     datasets) from a single evaluation pass. The loader splits the docs by
+//     dataset-name prefix and registers the iteration half under `--runs` and
+//     the holdout half under `--holdout-runs` keyed by the same label. This is
+//     the only path that lets a future contributor regenerate the v6
+//     deep-autonomy report from a single committed results.json — no external
+//     split-by-hand step required.
 const args = (() => {
   const out = {
     handwritten: resolve(PKG_DIR, 'runs/handwritten'),
@@ -69,6 +78,7 @@ const args = (() => {
     // suite. Each label (e.g. `sonnet46-autonomous`) is expected to also appear
     // in --runs so the gap section can pair them.
     holdoutRuns: null,
+    combinedRuns: null,
   };
   const argv = process.argv.slice(2);
   for (let i = 0; i < argv.length; i += 1) {
@@ -76,8 +86,11 @@ const args = (() => {
     if (a === '--handwritten') out.handwritten = resolve(argv[++i]);
     else if (a === '--autonomous') out.autonomous = resolve(argv[++i]);
     else if (a === '--out') out.out = resolve(argv[++i]);
-    else if (a === '--runs' || a === '--holdout-runs') {
-      const target = a === '--holdout-runs' ? 'holdoutRuns' : 'runs';
+    else if (a === '--runs' || a === '--holdout-runs' || a === '--combined-run') {
+      let target;
+      if (a === '--holdout-runs') target = 'holdoutRuns';
+      else if (a === '--combined-run') target = 'combinedRuns';
+      else target = 'runs';
       out[target] = out[target] ?? {};
       for (const pair of argv[++i].split(',')) {
         const [label, dir] = pair.split('=');
@@ -87,7 +100,11 @@ const args = (() => {
     } else if (a === '-h' || a === '--help') {
       process.stdout.write(
         'Usage: build_comparison_html.mjs --handwritten <dir> --autonomous <dir> --out <html>\n' +
-          '   or: build_comparison_html.mjs --runs <label>=<dir>,... --out <html>\n'
+          '   or: build_comparison_html.mjs --runs <label>=<dir>,... [--holdout-runs <label>=<dir>,...] --out <html>\n' +
+          '   or: build_comparison_html.mjs --combined-run <label>=<dir>,... --out <html>\n' +
+          '       (combined-run inputs point at a results.json containing both\n' +
+          '        pci-compliance: and pci-holdout: dataset rows; they are split\n' +
+          '        by prefix and registered under --runs and --holdout-runs.)\n'
       );
       // eslint-disable-next-line no-process-exit
       process.exit(0);
@@ -182,6 +199,38 @@ function loadVariantResults(dir) {
 }
 
 /**
+ * Split a combined results directory (one results.json that contains BOTH
+ * `pci-compliance: …` iteration rows and `pci-holdout: …` holdout rows from
+ * the same evaluation pass) into the two halves the rest of the report
+ * expects.
+ *
+ * Returns `{ iteration, holdout }` where each side has the same shape as
+ * `loadVariantResults` — `populated: false` if no scenarios fell into that
+ * bucket, so the caller can decide whether to surface a section for it.
+ */
+function loadCombinedRun(dir) {
+  const base = loadVariantResults(dir);
+  if (!base.populated) {
+    return { iteration: base, holdout: base };
+  }
+  const iteration = [];
+  const holdout = [];
+  for (const sc of base.scenarios) {
+    const name = typeof sc?.scenario === 'string' ? sc.scenario : '';
+    if (name.startsWith('pci-holdout:')) holdout.push(sc);
+    else iteration.push(sc);
+  }
+  const make = (scenarios) => ({
+    populated: scenarios.length > 0,
+    dir: base.dir,
+    file: base.file,
+    scenarios,
+    tried: base.tried,
+  });
+  return { iteration: make(iteration), holdout: make(holdout) };
+}
+
+/**
  * Normalise diverse @kbn/evals output shapes into a flat array of:
  *   { scenario, score, criteria: [{name, score, rationale}], errors,
  *     skill_invoked_label, tool_call_total, pci_skill_tool_calls }
@@ -262,21 +311,43 @@ const autonomousResults = loadVariantResults(args.autonomous);
 const liveResultsAvailable = handwrittenResults.populated && autonomousResults.populated;
 
 // Multi-model results, keyed by label (e.g. "opus47-handwritten"). Each value
-// is the same shape as loadVariantResults's return.
-const multiRuns = args.runs
+// is the same shape as loadVariantResults's return. `let` because combined-run
+// inputs (handled just below) may extend the map after this initial population.
+let multiRuns = args.runs
   ? Object.fromEntries(Object.entries(args.runs).map(([k, dir]) => [k, loadVariantResults(dir)]))
   : null;
-const multiRunsAvailable =
-  multiRuns && Object.values(multiRuns).every((r) => r.populated);
 
 // Holdout runs share the same label vocabulary as the iteration runs above —
 // the pairing is by label. A label that appears in BOTH `args.runs` and
 // `args.holdoutRuns` contributes one row to the generalisation-gap table in §5.
-const holdoutRuns = args.holdoutRuns
+let holdoutRuns = args.holdoutRuns
   ? Object.fromEntries(
       Object.entries(args.holdoutRuns).map(([k, dir]) => [k, loadVariantResults(dir)])
     )
   : null;
+
+// Combined-run inputs are split by dataset-name prefix and folded into
+// `multiRuns` (the `pci-compliance: …` half) and `holdoutRuns` (the
+// `pci-holdout: …` half) under the same caller-supplied label. A label
+// already present in either map is NOT overwritten — explicit --runs /
+// --holdout-runs entries win, so an operator who wants to mix sources can
+// still do so without surprises.
+if (args.combinedRuns) {
+  for (const [label, dir] of Object.entries(args.combinedRuns)) {
+    const split = loadCombinedRun(dir);
+    if (split.iteration.populated) {
+      multiRuns = multiRuns ?? {};
+      if (!multiRuns[label]?.populated) multiRuns[label] = split.iteration;
+    }
+    if (split.holdout.populated) {
+      holdoutRuns = holdoutRuns ?? {};
+      if (!holdoutRuns[label]?.populated) holdoutRuns[label] = split.holdout;
+    }
+  }
+}
+
+const multiRunsAvailable =
+  multiRuns && Object.values(multiRuns).every((r) => r.populated);
 const holdoutRunsAvailable =
   holdoutRuns && Object.values(holdoutRuns).every((r) => r.populated);
 

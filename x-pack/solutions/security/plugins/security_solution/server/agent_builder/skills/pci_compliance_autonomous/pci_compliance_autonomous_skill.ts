@@ -24,7 +24,7 @@ import {
  * architected autonomously, the resulting skill+tool bundle must work without leaning on a
  * pre-existing hand-written variant's surface.
  *
- * The autonomous variant follows the cycle-17 architect's blueprint of a 4-security-tool
+ * The autonomous variant follows the autonomous architect's blueprint of a 4-security-tool
  * decomposition with **check** and **report** as *separate* tools (rather than one tool with
  * a `mode` parameter). The architect's argument was that two narrow tools are easier for the
  * LLM to route between than one mode-parameterised tool whose behaviour branches at runtime.
@@ -43,8 +43,8 @@ export const PCI_COMPLIANCE_AUTONOMOUS_SKILL_ID = 'pci-compliance-autonomous';
 /**
  * PCI DSS v4.0.1 Compliance — autonomously architected variant.
  *
- * Skill content authored by the `skill.architect` orchestrator (`elastic-agent-builder-skill-dev`,
- * cycle 17) using:
+ * Skill content authored by the `skill.architect` orchestrator (`elastic-agent-builder-skill-dev`)
+ * during the autonomous-skill-validation experiment using:
  *   - autonomous web research (10 corroborated hints, 46 web-research citations)
  *   - LLM training-corpus knowledge (5 surviving model-knowledge citations including
  *     SAQ taxonomy, v3→v4 deltas, scope-reduction levers, technical-vs-process classification)
