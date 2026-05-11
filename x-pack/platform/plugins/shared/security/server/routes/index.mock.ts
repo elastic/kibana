@@ -11,6 +11,7 @@ import {
   coreMock,
   httpResourcesMock,
   httpServiceMock,
+  i18nServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { getDocLinks } from '@kbn/doc-links';
@@ -56,6 +57,7 @@ export const routeDefinitionParamsMock = {
       analyticsService: analyticsServiceMock.createSetup(),
       buildFlavor: 'traditional',
       docLinks: { links: getDocLinks({ kibanaBranch: 'main', buildFlavor: 'traditional' }) },
+      i18n: i18nServiceMock.createSetupContract(),
     } as unknown as DeeplyMockedKeys<RouteDefinitionParams>;
   },
 };

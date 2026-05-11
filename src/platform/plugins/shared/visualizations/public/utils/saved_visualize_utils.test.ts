@@ -20,7 +20,6 @@ import {
 } from './saved_visualize_utils';
 import type { VisTypeAlias, TypesStart } from '../vis_types';
 import type { VisSavedObject } from '../types';
-import { noop } from 'lodash';
 
 let visTypes = [] as VisTypeAlias[];
 const mockGetAliases = jest.fn(() => visTypes);
@@ -97,16 +96,7 @@ jest.mock('./saved_visualization_references', () => ({
   extractReferences: jest.fn((arg) => mockExtractReferences(arg)),
 }));
 
-let isTitleDuplicateConfirmed = true;
-const mockCheckForDuplicateTitle = jest.fn(() => {
-  if (!isTitleDuplicateConfirmed) {
-    throw new Error();
-  }
-});
 const mockSaveWithConfirmation = jest.fn(() => ({ item: { id: 'test-after-confirm' } }));
-jest.mock('./saved_objects_utils/check_for_duplicate_title', () => ({
-  checkForDuplicateTitle: jest.fn(() => mockCheckForDuplicateTitle()),
-}));
 jest.mock('./saved_objects_utils/save_with_confirmation', () => ({
   saveWithConfirmation: jest.fn(() => mockSaveWithConfirmation()),
 }));
@@ -277,48 +267,6 @@ describe('saved_visualize_utils', () => {
         expect(mockCreateContent).not.toHaveBeenCalled();
         expect(mockSaveWithConfirmation).toHaveBeenCalled();
         expect(savedVisId).toBe('test-after-confirm');
-      });
-    });
-
-    describe('isTitleDuplicateConfirmed', () => {
-      it('as false we should not save vis with duplicated title', async () => {
-        isTitleDuplicateConfirmed = false;
-        try {
-          const savedVisId = await saveVisualization(
-            vis,
-            { isTitleDuplicateConfirmed, onTitleDuplicate: noop },
-            coreStart
-          );
-          expect(savedVisId).toBe('');
-        } catch {
-          // ignore
-        }
-        expect(mockCreateContent).not.toHaveBeenCalled();
-        expect(mockSaveWithConfirmation).not.toHaveBeenCalled();
-        expect(mockCheckForDuplicateTitle).toHaveBeenCalled();
-        expect(vis.id).toBeUndefined();
-      });
-
-      it('as false we should save vis with duplicated title if onTitleDuplicate is not defined', async () => {
-        isTitleDuplicateConfirmed = false;
-        const savedVisId = await saveVisualization(
-          vis,
-          { isTitleDuplicateConfirmed, onTitleDuplicate: undefined },
-          coreStart
-        );
-        expect(mockCheckForDuplicateTitle).toHaveBeenCalled();
-        expect(mockCreateContent).toHaveBeenCalled();
-        expect(savedVisId).toBe('test');
-        expect(vis.id).toBe('test');
-      });
-
-      it('as true we should save vis with duplicated title', async () => {
-        isTitleDuplicateConfirmed = true;
-        const savedVisId = await saveVisualization(vis, { isTitleDuplicateConfirmed }, coreStart);
-        expect(mockCheckForDuplicateTitle).toHaveBeenCalled();
-        expect(mockCreateContent).toHaveBeenCalled();
-        expect(savedVisId).toBe('test');
-        expect(vis.id).toBe('test');
       });
     });
   });

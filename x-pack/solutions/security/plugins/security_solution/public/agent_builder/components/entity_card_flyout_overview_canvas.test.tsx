@@ -30,7 +30,7 @@ jest.mock('../attachment_types/entity_attachment/use_entity_for_attachment', () 
   useEntityForAttachment: jest.fn(),
 }));
 
-jest.mock('../../flyout/shared/components/flyout_loading', () => ({
+jest.mock('../../flyout_v2/shared/components/flyout_loading', () => ({
   FlyoutLoading: () => <div data-test-subj="flyoutLoadingMock" />,
 }));
 

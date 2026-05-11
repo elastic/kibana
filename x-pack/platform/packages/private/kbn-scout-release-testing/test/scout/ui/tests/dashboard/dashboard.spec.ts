@@ -46,7 +46,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await removeLogsSampleData({ apiServices, kbnClient });
   });
 
-  test('should create dashboard with ES|QL, Lens, and Custom visualization panels', async ({
+  test('should create dashboard with ES|QL, Lens, and Vega panels', async ({
     page,
     pageObjects,
   }) => {
@@ -68,8 +68,8 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
       await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
     });
 
-    await test.step('add Custom visualization panel', async () => {
-      await pageObjects.dashboard.addNewPanel('Custom visualization');
+    await test.step('add Vega panel', async () => {
+      await pageObjects.dashboard.addNewPanel('Vega');
       await pageObjects.dashboard.clickVisualizeSaveAndReturn();
       await pageObjects.dashboard.expectPanelCount(3);
     });
@@ -79,9 +79,7 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
     await expect(heading).toHaveText('Editing ' + dashboardName);
   });
 
-  test('should edit existing dashboard and add map and custom visualization panels', async ({
-    pageObjects,
-  }) => {
+  test('should edit existing dashboard and add map and Vega panels', async ({ pageObjects }) => {
     const logsDashboardTitle = '[Logs] Web Traffic';
 
     await pageObjects.dashboard.clickDashboardTitleLink(logsDashboardTitle);
@@ -95,8 +93,8 @@ test.describe('Dashboard app', { tag: tags.stateful.classic }, () => {
       await pageObjects.dashboard.expectPanelCount(13);
     });
 
-    await test.step('add a Custom visualization panel', async () => {
-      await pageObjects.dashboard.addNewPanel('Custom visualization');
+    await test.step('add a Vega panel', async () => {
+      await pageObjects.dashboard.addNewPanel('Vega');
       await pageObjects.dashboard.clickVisualizeSaveAndReturn();
       await pageObjects.dashboard.expectPanelCount(14);
     });

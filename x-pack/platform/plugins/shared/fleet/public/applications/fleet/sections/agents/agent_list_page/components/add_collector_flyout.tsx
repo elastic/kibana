@@ -170,7 +170,7 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   const [collectorGroupOverridden, setCollectorGroupOverridden] = useState(false);
   const [serviceName, setServiceName] = useState('otel-collector-group');
   const [serviceNameOverridden, setServiceNameOverridden] = useState(false);
-  const [collectorDisplayName, setCollectorDisplayName] = useState('${HOSTNAME}');
+  const [collectorDisplayName, setCollectorDisplayName] = useState('${env:HOSTNAME}');
   const [configDescription, setConfigDescription] = useState('');
   const [tags, setTags] = useState('');
   const [environment, setEnvironment] = useState('');

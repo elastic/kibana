@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isWellKnownWorkflowTriggerSource } from '@kbn/workflows';
+import { isWellKnownWorkflowTriggerSource, WORKFLOW_EVENTS_VALUES_SET } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import { parseWorkflowYamlForAutocomplete } from '@kbn/workflows-yaml';
 
@@ -26,6 +26,44 @@ function isConnectorStep(step: unknown): boolean {
 }
 
 const ON_FAILURE_KEYS = ['on-failure', 'iteration-on-failure'] as const;
+
+/**
+ * Reads `on.workflowEvents` from triggers. Only known enum strings count (matches runtime scheduling).
+ */
+function extractWorkflowEventsTelemetry(triggers: unknown[]): {
+  hasTriggerWorkflowEventsIgnore: boolean;
+  hasTriggerWorkflowEventsAllow: boolean;
+  hasTriggerWorkflowEventsAvoidLoop: boolean;
+} {
+  let hasTriggerWorkflowEventsIgnore = false;
+  let hasTriggerWorkflowEventsAllow = false;
+  let hasTriggerWorkflowEventsAvoidLoop = false;
+
+  for (const trigger of triggers) {
+    if (trigger && typeof trigger === 'object' && 'on' in trigger) {
+      const on = (trigger as { on?: unknown }).on;
+      if (on && typeof on === 'object') {
+        const rec = on as Record<string, unknown>;
+        const raw = rec.workflowEvents;
+        if (typeof raw === 'string' && WORKFLOW_EVENTS_VALUES_SET.has(raw)) {
+          if (raw === 'ignore') {
+            hasTriggerWorkflowEventsIgnore = true;
+          } else if (raw === 'allow-all') {
+            hasTriggerWorkflowEventsAllow = true;
+          } else if (raw === 'avoid-loop') {
+            hasTriggerWorkflowEventsAvoidLoop = true;
+          }
+        }
+      }
+    }
+  }
+
+  return {
+    hasTriggerWorkflowEventsIgnore,
+    hasTriggerWorkflowEventsAllow,
+    hasTriggerWorkflowEventsAvoidLoop,
+  };
+}
 
 function getFallbackSteps(step: Record<string, unknown>): Array<WorkflowYaml['steps']> {
   const result: Array<WorkflowYaml['steps']> = [];
@@ -89,6 +127,18 @@ export interface WorkflowTelemetryMetadata {
    */
   hasTriggerConditions: boolean;
   /**
+   * Whether any trigger sets `on.workflowEvents: ignore`.
+   */
+  hasTriggerWorkflowEventsIgnore: boolean;
+  /**
+   * Whether any trigger sets `on.workflowEvents: allow-all`.
+   */
+  hasTriggerWorkflowEventsAllow: boolean;
+  /**
+   * Whether any trigger explicitly sets `on.workflowEvents: avoid-loop` (omitted field defaults to avoid-loop at runtime but is not counted here).
+   */
+  hasTriggerWorkflowEventsAvoidLoop: boolean;
+  /**
    * Maximum concurrent runs if concurrency is configured
    */
   concurrencyMax?: number;
@@ -142,6 +192,9 @@ export function extractWorkflowMetadata(
     constCount: 0,
     triggerCount: 0,
     hasTriggerConditions: false,
+    hasTriggerWorkflowEventsIgnore: false,
+    hasTriggerWorkflowEventsAllow: false,
+    hasTriggerWorkflowEventsAvoidLoop: false,
     settingsUsed: [],
     hasDescription: false,
     tagCount: 0,
@@ -217,6 +270,12 @@ export function extractWorkflowMetadata(
     return typeof condition === 'string' && condition.trim().length > 0;
   });
 
+  const {
+    hasTriggerWorkflowEventsIgnore,
+    hasTriggerWorkflowEventsAllow,
+    hasTriggerWorkflowEventsAvoidLoop,
+  } = extractWorkflowEventsTelemetry(triggers);
+
   // Count inputs
   const inputCount = Array.isArray(workflow.inputs) ? workflow.inputs.length : 0;
 
@@ -249,6 +308,9 @@ export function extractWorkflowMetadata(
     constCount,
     triggerCount: triggers.length,
     hasTriggerConditions,
+    hasTriggerWorkflowEventsIgnore,
+    hasTriggerWorkflowEventsAllow,
+    hasTriggerWorkflowEventsAvoidLoop,
     ...(concurrencyMax !== undefined && { concurrencyMax }),
     ...(concurrencyStrategy && { concurrencyStrategy }),
     settingsUsed,

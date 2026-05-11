@@ -9,7 +9,6 @@
     "@kbn/core",
     "@kbn/logging",
     "@kbn/config-schema",
-    "@kbn/workflows-management-plugin",
     "@kbn/agent-builder-server",
     "@kbn/lens-embeddable-utils",
     "@kbn/agent-builder-genai-utils",
@@ -29,10 +28,11 @@
     "@kbn/core-http-server-mocks",
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/share-plugin",
-    "@kbn/workflows",
     "@kbn/core-logging-server-mocks",
     "@kbn/connector-specs",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/agent-context-layer-plugin",
+    "@kbn/actions-plugin"
   ]
 }

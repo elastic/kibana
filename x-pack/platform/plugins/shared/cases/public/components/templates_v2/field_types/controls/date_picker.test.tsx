@@ -76,6 +76,20 @@ describe('DatePicker', () => {
 
       expect(screen.getByRole('textbox')).toBeInTheDocument();
     });
+
+    it('shows Optional label when isRequired is false', () => {
+      const onSubmitResult = jest.fn();
+      render(<FormWrapper isRequired={false} onSubmitResult={onSubmitResult} />);
+
+      expect(screen.getByText('Optional')).toBeInTheDocument();
+    });
+
+    it('does not show Optional label when isRequired is true', () => {
+      const onSubmitResult = jest.fn();
+      render(<FormWrapper isRequired onSubmitResult={onSubmitResult} />);
+
+      expect(screen.queryByText('Optional')).not.toBeInTheDocument();
+    });
   });
 
   describe('isRequired validation', () => {
