@@ -25,7 +25,7 @@ import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { mockCreateCallApmApiV2 } from '@kbn/apm-api-shared';
+import { mockCreateCallApmApiV2 } from '@kbn/apm-api-shared/src/mock_create_call_apm_api';
 import type { ConfigSchema } from '../..';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
