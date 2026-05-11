@@ -71,7 +71,7 @@ export class LinksPlugin
             {
               panelType: LINKS_EMBEDDABLE_TYPE,
               serializedState: {
-                savedObjectId: savedObject.id,
+                ref_id: savedObject.id,
               },
             },
             {
@@ -84,7 +84,7 @@ export class LinksPlugin
         getIconForSavedObject: () => APP_ICON,
       });
 
-      plugins.embeddable.registerReactEmbeddableFactory(LINKS_EMBEDDABLE_TYPE, async () => {
+      plugins.embeddable.registerEmbeddablePublicDefinition(LINKS_EMBEDDABLE_TYPE, async () => {
         const { getLinksEmbeddableFactory } = await import('./embeddable/links_embeddable');
         return getLinksEmbeddableFactory();
       });
@@ -120,11 +120,11 @@ export class LinksPlugin
                 id,
                 title,
                 editor: {
-                  onEdit: async (savedObjectId: string) => {
+                  onEdit: async (refId: string) => {
                     const { onVisualizationsEdit } = await import(
                       './editor/on_visualizations_edit'
                     );
-                    onVisualizationsEdit(savedObjectId);
+                    onVisualizationsEdit(refId);
                   },
                 },
                 description,

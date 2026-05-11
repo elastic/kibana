@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import {
@@ -23,45 +23,53 @@ import {
   ExceptionListItemHumanId,
 } from '../model/exception_list_common.gen';
 
+export const ExceptionListsImportBulkError = lazySchema(() =>
+  z.object({
+    error: z.object({
+      status_code: z.number().int(),
+      message: z.string(),
+    }),
+    id: ExceptionListId.optional(),
+    list_id: ExceptionListHumanId.optional(),
+    item_id: ExceptionListItemHumanId.optional(),
+  })
+);
 export type ExceptionListsImportBulkError = z.infer<typeof ExceptionListsImportBulkError>;
-export const ExceptionListsImportBulkError = z.object({
-  error: z.object({
-    status_code: z.number().int(),
-    message: z.string(),
-  }),
-  id: ExceptionListId.optional(),
-  list_id: ExceptionListHumanId.optional(),
-  item_id: ExceptionListItemHumanId.optional(),
-});
 
+export const ExceptionListsImportBulkErrorArray = lazySchema(() =>
+  z.array(ExceptionListsImportBulkError)
+);
 export type ExceptionListsImportBulkErrorArray = z.infer<typeof ExceptionListsImportBulkErrorArray>;
-export const ExceptionListsImportBulkErrorArray = z.array(ExceptionListsImportBulkError);
 
-export type ImportExceptionListRequestQuery = z.infer<typeof ImportExceptionListRequestQuery>;
-export const ImportExceptionListRequestQuery = z.object({
-  /**
+export const ImportExceptionListRequestQuery = lazySchema(() =>
+  z.object({
+    /**
       * Determines whether existing exception lists with the same `list_id` are overwritten.
 If any exception items have the same `item_id`, those are also overwritten.
 
       */
-  overwrite: BooleanFromString.optional().default(false),
-  /**
+    overwrite: BooleanFromString.optional().default(false),
+    /**
       * Determines whether the list being imported will have a new `list_id` generated.
 Additional `item_id`'s are generated for each exception item. Both the exception
 list and its items are overwritten.
 
       */
-  as_new_list: BooleanFromString.optional().default(false),
-});
+    as_new_list: BooleanFromString.optional().default(false),
+  })
+);
+export type ImportExceptionListRequestQuery = z.infer<typeof ImportExceptionListRequestQuery>;
 export type ImportExceptionListRequestQueryInput = z.input<typeof ImportExceptionListRequestQuery>;
 
+export const ImportExceptionListResponse = lazySchema(() =>
+  z.object({
+    errors: ExceptionListsImportBulkErrorArray,
+    success: z.boolean(),
+    success_count: z.number().int().min(0),
+    success_exception_lists: z.boolean(),
+    success_count_exception_lists: z.number().int().min(0),
+    success_exception_list_items: z.boolean(),
+    success_count_exception_list_items: z.number().int().min(0),
+  })
+);
 export type ImportExceptionListResponse = z.infer<typeof ImportExceptionListResponse>;
-export const ImportExceptionListResponse = z.object({
-  errors: ExceptionListsImportBulkErrorArray,
-  success: z.boolean(),
-  success_count: z.number().int().min(0),
-  success_exception_lists: z.boolean(),
-  success_count_exception_lists: z.number().int().min(0),
-  success_exception_list_items: z.boolean(),
-  success_count_exception_list_items: z.number().int().min(0),
-});

@@ -68,7 +68,7 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { registerSyntheticsEmbeddables } from './apps/embeddables/register_embeddables';
 import { kibanaService } from './utils/kibana_service';
 import { PLUGIN } from '../common/constants/plugin';
@@ -165,12 +165,16 @@ export class SyntheticsPlugin
     registerSyntheticsRoutesWithNavigation(coreSetup, plugins);
 
     coreSetup.getStartServices().then(([coreStart, clientPluginsStart]) => {
+      const browserConfig = this.initContext.config.get<{
+        experimental?: { ccs?: { enabled?: boolean } };
+      }>();
       kibanaService.init({
         coreSetup,
         coreStart,
         startPlugins: clientPluginsStart,
         isDev: this.initContext.env.mode.dev,
         isServerless: this._isServerless,
+        isCCSEnabled: !this._isServerless && (browserConfig.experimental?.ccs?.enabled ?? false),
       });
     });
 

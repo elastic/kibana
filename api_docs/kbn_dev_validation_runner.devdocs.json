@@ -54,6 +54,7 @@
             "lineNumber": 88,
             "columnNumber": 40,
             "deprecated": false,
+            "docsReferencedTypeName": "BuildValidationCliArgsOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -107,6 +108,7 @@
             "lineNumber": 80,
             "columnNumber": 50,
             "deprecated": false,
+            "docsReferencedTypeName": "ValidationBaseContext",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -160,6 +162,7 @@
             "lineNumber": 48,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "ValidationBaseContext",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -201,6 +204,7 @@
             "lineNumber": 111,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "DescribeValidationScopingOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -338,6 +342,7 @@
             "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ValidationRunFlagsReader",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -387,6 +392,7 @@
             "lineNumber": 186,
             "columnNumber": 57,
             "deprecated": false,
+            "docsReferencedTypeName": "ResolveValidationAffectedProjectsOptions",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -436,6 +442,7 @@
             "lineNumber": 147,
             "columnNumber": 52,
             "deprecated": false,
+            "docsReferencedTypeName": "ResolveValidationBaseContextOptions",
             "trackAdoption": false,
             "isRequired": true
           }

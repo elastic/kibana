@@ -72,6 +72,7 @@ const renderDashboardSaveModal = (
     <DashboardSaveModal
       onSave={mockSave}
       onClose={mockClose}
+      lastSavedTitle="dash title"
       title="dash title"
       description="dash description"
       timeRestore={false}

@@ -399,6 +399,7 @@
                 "lineNumber": 43,
                 "columnNumber": 24,
                 "deprecated": false,
+                "docsReferencedTypeName": "DataViewEditorOptions",
                 "trackAdoption": false,
                 "isRequired": true
               }

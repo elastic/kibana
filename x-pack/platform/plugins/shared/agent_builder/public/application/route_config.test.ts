@@ -6,15 +6,21 @@
  */
 
 import { agentBuilderViewIds } from './agent_builder_view_ids';
+import type { RouteAccessConfig } from './route_config';
 import {
   allRoutes,
   getAgentIdFromPath,
   getEnabledRoutes,
+  getPathWithSwitchedAgent,
   getSidebarViewForRoute,
   getViewIdForPathname,
 } from './route_config';
 
-const enabledRoutesWithExperimental = getEnabledRoutes({ experimental: true });
+const allEnabled: RouteAccessConfig = {
+  featureFlags: { experimental: true },
+  capabilities: { isUIAMEnabled: true },
+};
+const enabledRoutesWithExperimental = getEnabledRoutes(allEnabled);
 
 describe('route_config', () => {
   describe('getSidebarViewForRoute', () => {
@@ -61,6 +67,7 @@ describe('route_config', () => {
         expect(getSidebarViewForRoute('/manage/tools/new')).toBe('manage');
         expect(getSidebarViewForRoute('/manage/tools/tool-123')).toBe('manage');
         expect(getSidebarViewForRoute('/manage/tools/bulk_import_mcp')).toBe('manage');
+        expect(getSidebarViewForRoute('/manage/tools/mcp_clients')).toBe('manage');
       });
 
       it('returns "manage" for manage skills routes', () => {
@@ -106,6 +113,43 @@ describe('route_config', () => {
     });
   });
 
+  describe('getPathWithSwitchedAgent', () => {
+    const next = 'other-agent';
+
+    it('preserves overview, skills, tools, and plugins paths', () => {
+      expect(getPathWithSwitchedAgent('/agents/agent-a/overview', next)).toBe(
+        '/agents/other-agent/overview'
+      );
+      expect(getPathWithSwitchedAgent('/agents/agent-a/skills', next)).toBe(
+        '/agents/other-agent/skills'
+      );
+      expect(getPathWithSwitchedAgent('/agents/agent-a/tools', next)).toBe(
+        '/agents/other-agent/tools'
+      );
+      expect(getPathWithSwitchedAgent('/agents/agent-a/plugins', next)).toBe(
+        '/agents/other-agent/plugins'
+      );
+    });
+
+    it('preserves agent root', () => {
+      expect(getPathWithSwitchedAgent('/agents/agent-a', next)).toBe('/agents/other-agent');
+    });
+
+    it('opens a new chat when switching from any conversation route', () => {
+      expect(getPathWithSwitchedAgent('/agents/agent-a/conversations/new', next)).toBe(
+        '/agents/other-agent/conversations/new'
+      );
+      expect(getPathWithSwitchedAgent('/agents/agent-a/conversations/conv-uuid', next)).toBe(
+        '/agents/other-agent/conversations/new'
+      );
+    });
+
+    it('falls back to agent root when not on an agent-scoped path', () => {
+      expect(getPathWithSwitchedAgent('/', next)).toBe('/agents/other-agent');
+      expect(getPathWithSwitchedAgent('/manage/tools', next)).toBe('/agents/other-agent');
+    });
+  });
+
   describe('getViewIdForPathname', () => {
     it('returns the TrackApplicationView viewId for agent tools', () => {
       expect(
@@ -128,8 +172,41 @@ describe('route_config', () => {
       );
     });
 
+    it('returns the MCP clients viewId for /manage/tools/mcp_clients (not the :toolId catch-all)', () => {
+      expect(getViewIdForPathname('/manage/tools/mcp_clients', enabledRoutesWithExperimental)).toBe(
+        agentBuilderViewIds.manageMcpClients
+      );
+    });
+
     it('returns undefined when no enabled route matches', () => {
       expect(getViewIdForPathname('/unknown', enabledRoutesWithExperimental)).toBeUndefined();
+    });
+  });
+
+  describe('MCP clients route gating', () => {
+    const mcpClientsPath = '/manage/tools/mcp_clients';
+    const findMcpRoute = (routes: ReturnType<typeof getEnabledRoutes>) =>
+      routes.find((r) => r.path === mcpClientsPath);
+
+    const config = (experimental: boolean, isUIAMEnabled: boolean): RouteAccessConfig => ({
+      featureFlags: { experimental },
+      capabilities: { isUIAMEnabled },
+    });
+
+    it('includes MCP clients route when both experimental and UIAM are enabled', () => {
+      expect(findMcpRoute(getEnabledRoutes(config(true, true)))).toBeDefined();
+    });
+
+    it('excludes MCP clients route when UIAM is disabled', () => {
+      expect(findMcpRoute(getEnabledRoutes(config(true, false)))).toBeUndefined();
+    });
+
+    it('excludes MCP clients route when experimental is disabled', () => {
+      expect(findMcpRoute(getEnabledRoutes(config(false, true)))).toBeUndefined();
+    });
+
+    it('excludes MCP clients route when both are disabled', () => {
+      expect(findMcpRoute(getEnabledRoutes(config(false, false)))).toBeUndefined();
     });
   });
 

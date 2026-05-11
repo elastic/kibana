@@ -16,6 +16,7 @@ import { createClient } from './create_client';
 import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
 import type { InferenceAnonymizationOptions } from './anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
+import type { TokenUsageLogger } from '../token_usage';
 
 export interface CreateChatModelOptions {
   request: KibanaRequest;
@@ -30,6 +31,8 @@ export interface CreateChatModelOptions {
   endpointIdCache: InferenceEndpointIdCache;
   callbacks?: InferenceCallbacks;
   anonymization?: InferenceAnonymizationOptions;
+  tokenUsageLogger?: TokenUsageLogger;
+  isTokenUsageTrackingEnabled?: () => Promise<boolean>;
 }
 
 export const createChatModel = async ({
@@ -45,6 +48,8 @@ export const createChatModel = async ({
   endpointIdCache,
   callbacks,
   anonymization,
+  tokenUsageLogger,
+  isTokenUsageTrackingEnabled,
 }: CreateChatModelOptions): Promise<InferenceChatModel> => {
   const client = createClient({
     actions,
@@ -57,6 +62,8 @@ export const createChatModel = async ({
     logger,
     callbacks,
     anonymization,
+    tokenUsageLogger,
+    isTokenUsageTrackingEnabled,
   });
   const connector = await getConnectorById({ connectorId, actions, request, esClient, logger });
   return new InferenceChatModel({

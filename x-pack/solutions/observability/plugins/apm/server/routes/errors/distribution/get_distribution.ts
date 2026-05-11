@@ -30,19 +30,23 @@ export async function getErrorDistribution({
   kuery,
   serviceName,
   groupId,
+  transactionName,
   apmEventClient,
   start,
   end,
   offset,
+  bucketSizeInSeconds,
 }: {
   environment: string;
   kuery: string;
   serviceName: string;
   groupId?: string;
+  transactionName?: string;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
   offset?: string;
+  bucketSizeInSeconds?: number;
 }): Promise<ErrorDistributionResponse> {
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
@@ -50,16 +54,16 @@ export async function getErrorDistribution({
     offset,
   });
 
-  const bucketSize = getBucketSize({
-    start: startWithOffset,
-    end: endWithOffset,
-  });
+  const bucketSize = bucketSizeInSeconds
+    ? bucketSizeInSeconds * 1000
+    : getBucketSize({ start: startWithOffset, end: endWithOffset });
 
   const commonProps = {
     environment,
     kuery,
     serviceName,
     groupId,
+    transactionName,
     apmEventClient,
     bucketSize,
   };

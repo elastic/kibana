@@ -87,6 +87,41 @@ describe('createClientStrategy', () => {
       expect(result.total).toBe(2);
     });
 
+    it('transforms tags, managed, and audit metadata from UserContentCommonSchema', async () => {
+      const richItem: UserContentCommonSchema = {
+        id: 'rich-1',
+        type: 'dashboard',
+        updatedAt: '2024-06-15T12:00:00.000Z',
+        updatedBy: 'user-2',
+        createdAt: '2024-01-01T00:00:00.000Z',
+        createdBy: 'user-1',
+        managed: true,
+        references: [
+          { type: 'tag', id: 'tag-1', name: 'tag-ref-tag-1' },
+          { type: 'tag', id: 'tag-2', name: 'tag-ref-tag-2' },
+          { type: 'index-pattern', id: 'ip-1', name: 'some-pattern' },
+        ],
+        attributes: { title: 'Rich Dashboard', description: 'Has all fields' },
+      };
+      const mockFindItems = createMockFindItems([richItem]);
+      const { findItems } = createClientStrategy(mockFindItems);
+
+      const result = await findItems(createParams());
+
+      expect(result.items[0]).toEqual({
+        id: 'rich-1',
+        title: 'Rich Dashboard',
+        description: 'Has all fields',
+        type: 'dashboard',
+        updatedAt: new Date('2024-06-15T12:00:00.000Z'),
+        tags: ['tag-1', 'tag-2'],
+        createdAt: '2024-01-01T00:00:00.000Z',
+        createdBy: 'user-1',
+        updatedBy: 'user-2',
+        managed: true,
+      });
+    });
+
     it('handles empty results', async () => {
       const mockFindItems = createMockFindItems([]);
       const { findItems } = createClientStrategy(mockFindItems);

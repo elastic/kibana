@@ -15,3 +15,5 @@ export * from './network_events';
 export * from './monitor_management';
 export * from './monitor_management/synthetics_private_locations';
 export * from './monitor_health';
+export * from './ccs_settings';
+export * from './remote';

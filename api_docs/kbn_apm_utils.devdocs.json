@@ -63,6 +63,7 @@
             "lineNumber": 28,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "Labels",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -80,6 +81,7 @@
             "lineNumber": 28,
             "columnNumber": 47,
             "deprecated": false,
+            "docsReferencedTypeName": "AddLabelsOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -106,7 +108,7 @@
           ", opts?: AddLabelsOptions | undefined) => void"
         ],
         "path": "src/platform/packages/shared/kbn-apm-utils/src/add_labels.ts",
-        "lineNumber": 33,
+        "lineNumber": 36,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -128,9 +130,10 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/add_labels.ts",
-            "lineNumber": 33,
+            "lineNumber": 36,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Labels",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -145,9 +148,10 @@
               "AddLabelsOptions | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-apm-utils/src/add_labels.ts",
-            "lineNumber": 33,
+            "lineNumber": 36,
             "columnNumber": 54,
             "deprecated": false,
+            "docsReferencedTypeName": "AddLabelsOptions",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -405,6 +409,7 @@
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "Logger",
             "trackAdoption": false,
             "isRequired": false
           }

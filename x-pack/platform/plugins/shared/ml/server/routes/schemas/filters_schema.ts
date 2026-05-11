@@ -10,13 +10,13 @@ import { schema } from '@kbn/config-schema';
 export const createFilterSchema = schema.object({
   filterId: schema.string(),
   description: schema.maybe(schema.string()),
-  items: schema.arrayOf(schema.string()),
+  items: schema.arrayOf(schema.string(), { maxSize: 10000 }),
 });
 
 export const updateFilterSchema = schema.object({
   description: schema.maybe(schema.string()),
-  addItems: schema.maybe(schema.arrayOf(schema.string())),
-  removeItems: schema.maybe(schema.arrayOf(schema.string())),
+  addItems: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
+  removeItems: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10000 })),
 });
 
 export const filterIdSchema = schema.object({

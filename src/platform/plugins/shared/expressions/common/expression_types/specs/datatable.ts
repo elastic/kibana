@@ -54,6 +54,7 @@ export type DatatableColumnType =
   | 'object'
   | 'nested'
   | 'histogram'
+  | 'flattened'
   | 'null';
 
 /**

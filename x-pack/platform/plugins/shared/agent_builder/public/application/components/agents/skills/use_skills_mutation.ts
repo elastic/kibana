@@ -21,10 +21,14 @@ export const useSkillsMutation = ({ agent }: { agent: AgentDefinition | null }) 
   const { agentService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const { addSuccessToast, addErrorToast } = useToasts();
-  const { id: agentId, configuration } = agent ?? {};
-  const { skill_ids: agentSkillIds } = configuration ?? {};
+  const agentId = agent?.id;
 
   const agentQueryKey = queryKeys.agentProfiles.byId(agentId);
+
+  const getCurrentSkillIds = useCallback((): string[] => {
+    const currentAgent = queryClient.getQueryData<AgentDefinition>(agentQueryKey);
+    return currentAgent?.configuration?.skill_ids ?? [];
+  }, [queryClient, agentQueryKey]);
 
   const updateSkillsMutation = useMutation({
     mutationFn: (newSkillIds: string[]) => {
@@ -68,7 +72,7 @@ export const useSkillsMutation = ({ agent }: { agent: AgentDefinition | null }) 
       skill: PublicSkillSummary | PublicSkillDefinition,
       { onSuccess }: { onSuccess?: (skillId: string) => void } = {}
     ) => {
-      const currentIds = agentSkillIds ?? [];
+      const currentIds = getCurrentSkillIds();
       if (currentIds.includes(skill.id)) return;
       const newIds = [...currentIds, skill.id];
 
@@ -79,12 +83,12 @@ export const useSkillsMutation = ({ agent }: { agent: AgentDefinition | null }) 
         },
       });
     },
-    [agentSkillIds, updateSkillsMutation, addSuccessToast]
+    [getCurrentSkillIds, updateSkillsMutation, addSuccessToast]
   );
 
   const handleRemoveSkill = useCallback(
     (skill: PublicSkillSummary) => {
-      const currentIds = agentSkillIds ?? [];
+      const currentIds = getCurrentSkillIds();
       const newIds = currentIds.filter((id) => id !== skill.id);
       updateSkillsMutation.mutate(newIds, {
         onSuccess: () => {
@@ -92,7 +96,7 @@ export const useSkillsMutation = ({ agent }: { agent: AgentDefinition | null }) 
         },
       });
     },
-    [agentSkillIds, updateSkillsMutation, addSuccessToast]
+    [getCurrentSkillIds, updateSkillsMutation, addSuccessToast]
   );
 
   const handlers = useMemo(

@@ -141,6 +141,11 @@ function _buildSource(
     ) {
       emit('offline');
     } else if (
+      ${field('last_checkin_status')}.size() > 0 &&
+      ${field('last_checkin_status')}.value.toLowerCase() == 'disconnected'
+    ) {
+      emit('offline');
+    } else if (
       ${field('policy_revision_idx')}.size() == 0 || (
         ${field('upgrade_started_at')}.size() > 0 &&
         ${field('upgraded_at')}.size() == 0

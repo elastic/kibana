@@ -14,17 +14,19 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const SearchPrivilegesIndicesRequestQuery = lazySchema(() =>
+  z.object({
+    searchQuery: z.string().optional(),
+  })
+);
 export type SearchPrivilegesIndicesRequestQuery = z.infer<
   typeof SearchPrivilegesIndicesRequestQuery
 >;
-export const SearchPrivilegesIndicesRequestQuery = z.object({
-  searchQuery: z.string().optional(),
-});
 export type SearchPrivilegesIndicesRequestQueryInput = z.input<
   typeof SearchPrivilegesIndicesRequestQuery
 >;
 
+export const SearchPrivilegesIndicesResponse = lazySchema(() => z.array(z.string()));
 export type SearchPrivilegesIndicesResponse = z.infer<typeof SearchPrivilegesIndicesResponse>;
-export const SearchPrivilegesIndicesResponse = z.array(z.string());

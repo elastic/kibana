@@ -62,6 +62,7 @@
                 "lineNumber": 25,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "HTMLElement",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -94,6 +95,7 @@
                 "lineNumber": 26,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "Vis",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -112,6 +114,7 @@
                 "lineNumber": 27,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "EventEmitter",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -135,6 +138,7 @@
                 "lineNumber": 28,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "VisualizeEmbeddableContract",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -185,6 +189,7 @@
                 "lineNumber": 31,
                 "columnNumber": 10,
                 "deprecated": false,
+                "docsReferencedTypeName": "EditorRenderProps",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -296,6 +301,7 @@
             "lineNumber": 28,
             "columnNumber": 22,
             "deprecated": false,
+            "docsReferencedTypeName": "ColorRangesProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -333,6 +339,7 @@
             "lineNumber": 33,
             "columnNumber": 29,
             "deprecated": false,
+            "docsReferencedTypeName": "ColorSchemaOptionsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -395,6 +402,7 @@
             "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TGroupBy",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -414,6 +422,7 @@
             "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TLabelName",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -431,6 +440,7 @@
             "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TKeyName",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -470,6 +480,7 @@
             "lineNumber": 62,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "LegendSizeSettingsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -509,6 +520,7 @@
             "lineNumber": 26,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "LongLegendOptionsProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -563,6 +575,7 @@
             "lineNumber": 34,
             "columnNumber": 54,
             "deprecated": false,
+            "docsReferencedTypeName": "NumberInputOptionProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -603,6 +616,7 @@
             "lineNumber": 28,
             "columnNumber": 57,
             "deprecated": false,
+            "docsReferencedTypeName": "PalettePickerProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -642,6 +656,7 @@
             "lineNumber": 29,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "PercentageModeOptionProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -679,6 +694,7 @@
             "lineNumber": 28,
             "columnNumber": 48,
             "deprecated": false,
+            "docsReferencedTypeName": "RangeOptionProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -716,6 +732,7 @@
             "lineNumber": 57,
             "columnNumber": 28,
             "deprecated": false,
+            "docsReferencedTypeName": "RangesParamEditorProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -755,6 +772,7 @@
             "lineNumber": 34,
             "columnNumber": 62,
             "deprecated": false,
+            "docsReferencedTypeName": "NumberInputOptionProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -792,6 +810,7 @@
             "lineNumber": 28,
             "columnNumber": 91,
             "deprecated": false,
+            "docsReferencedTypeName": "SelectOptionProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -829,6 +848,7 @@
             "lineNumber": 24,
             "columnNumber": 49,
             "deprecated": false,
+            "docsReferencedTypeName": "SwitchOptionProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -866,6 +886,7 @@
             "lineNumber": 23,
             "columnNumber": 52,
             "deprecated": false,
+            "docsReferencedTypeName": "TextInputOptionProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1144,6 +1165,7 @@
                 "lineNumber": 25,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "ParamName",
                 "trackAdoption": false,
                 "isRequired": true
               },
@@ -1363,6 +1385,7 @@
             "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "T",
             "trackAdoption": false
           },
           {
@@ -1440,6 +1463,7 @@
                 "lineNumber": 14,
                 "columnNumber": 13,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseEuiTheme",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1480,6 +1504,7 @@
                 "lineNumber": 23,
                 "columnNumber": 17,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseEuiTheme",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1520,6 +1545,7 @@
                 "lineNumber": 30,
                 "columnNumber": 29,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseEuiTheme",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1560,6 +1586,7 @@
                 "lineNumber": 34,
                 "columnNumber": 36,
                 "deprecated": false,
+                "docsReferencedTypeName": "UseEuiTheme",
                 "trackAdoption": false,
                 "isRequired": true
               }

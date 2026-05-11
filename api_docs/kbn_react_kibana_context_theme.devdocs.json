@@ -51,7 +51,7 @@
             "id": "def-common.KibanaThemeProvider.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n  theme,\n  userProfile,\n  children,\n  ...props\n}",
             "description": [],
             "signature": [
               {
@@ -66,6 +66,7 @@
             "lineNumber": 77,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "KibanaThemeProviderProps",
             "trackAdoption": false
           }
         ],
@@ -161,6 +162,7 @@
             "lineNumber": 23,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "ThemeServiceStart",
             "trackAdoption": false,
             "isRequired": true
           },
@@ -179,6 +181,7 @@
             "lineNumber": 24,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "UserProfileService",
             "trackAdoption": false,
             "isRequired": false
           }
@@ -333,7 +336,9 @@
             "type": "boolean",
             "tags": [],
             "label": "darkMode",
-            "description": [],
+            "description": [
+              "\nThe default `KibanaTheme` for use in Storybook, Jest, or initialization.  At\nruntime, the theme should always be provided by the `ThemeService`."
+            ],
             "signature": [
               "false"
             ],
@@ -349,7 +354,9 @@
             "type": "string",
             "tags": [],
             "label": "name",
-            "description": [],
+            "description": [
+              "\nThe default `KibanaTheme` for use in Storybook, Jest, or initialization.  At\nruntime, the theme should always be provided by the `ThemeService`."
+            ],
             "path": "src/platform/packages/shared/react/kibana_context/common/index.ts",
             "lineNumber": 22,
             "columnNumber": 3,

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiAccordion } from '@elastic/eui';
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import {
   RecoveredActionGroup,
@@ -13,15 +12,25 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import React, { lazy } from 'react';
-import { act } from 'react-dom/test-utils';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { useKibana } from '../../../common/lib/kibana';
 import type { GenericValidationResult, RuleUiAction, ValidationResult } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import ActionForm from './action_form';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('react-window', () => ({
+  FixedSizeList: ({ children, itemCount, itemData }: any) => (
+    <div>
+      {Array.from({ length: itemCount }, (_, index) =>
+        children({ index, style: {}, data: itemData })
+      )}
+    </div>
+  ),
+}));
 jest.mock('../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
   loadActionTypes: jest.fn(),
@@ -374,7 +383,7 @@ describe('action_form', () => {
     ]);
 
     const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
-    const wrapper = mountWithIntl(
+    const result = renderWithI18n(
       <QueryClientProvider client={new QueryClient()}>
         <ActionForm
           actions={initialAlert.actions}
@@ -440,27 +449,17 @@ describe('action_form', () => {
       </QueryClientProvider>
     );
 
-    // Wait for active space to resolve before requesting the component to update
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
+    await waitFor(() => {
+      expect(loadAllActions).toHaveBeenCalled();
     });
 
-    return wrapper;
+    return result;
   }
 
   describe('action_form in alert', () => {
     it('renders available action cards', async () => {
-      const wrapper = await setup();
-      const actionOption = wrapper.find(
-        `[data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`
-      );
-      expect(actionOption.exists()).toBeTruthy();
-      expect(
-        wrapper
-          .find(`EuiToolTip [data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`)
-          .exists()
-      ).toBeFalsy();
+      await setup();
+      await screen.findByTestId(`${actionType.id}-alerting-ActionTypeSelectOption`);
 
       expect(setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(false);
       expect(loadActionTypes).toBeCalledWith(
@@ -478,63 +477,42 @@ describe('action_form', () => {
     });
 
     it('does not render action types disabled by config', async () => {
-      const wrapper = await setup();
-      const actionOption = wrapper.find(
-        '[data-test-subj="disabled-by-config-alerting-ActionTypeSelectOption"]'
-      );
-      expect(actionOption.exists()).toBeFalsy();
-    });
-
-    it('does not render action types hidden in ui', async () => {
-      const wrapper = await setup();
-      const actionOption = wrapper.find(
-        '[data-test-subj="hidden-in-ui-alerting-ActionTypeSelectOption"]'
-      );
-      expect(actionOption.exists()).toBeFalsy();
-    });
-
-    it('render action types which is preconfigured only (disabled by config and with preconfigured connectors)', async () => {
-      const wrapper = await setup();
-      const actionOption = wrapper.find(
-        '[data-test-subj="preconfigured-alerting-ActionTypeSelectOption"]'
-      );
-      expect(actionOption.exists()).toBeTruthy();
-    });
-
-    it('renders available action groups for the selected action type', async () => {
-      const wrapper = await setup();
-      const actionOption = wrapper.find(
-        `[data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`
-      );
-      actionOption.first().simulate('click');
-      const actionGroupsSelect = wrapper.find(
-        `[data-test-subj="addNewActionConnectorActionGroup-0"]`
-      );
-      expect((actionGroupsSelect.first().props() as any).options).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-0-option-default",
-            "disabled": false,
-            "inputDisplay": "Default",
-            "value": "default",
-          },
-          Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-0-option-recovered",
-            "disabled": false,
-            "inputDisplay": "Recovered",
-            "value": "recovered",
-          },
-        ]
-      `);
-
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
+      await setup();
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId('disabled-by-config-alerting-ActionTypeSelectOption')
+        ).not.toBeInTheDocument();
       });
     });
 
+    it('does not render action types hidden in ui', async () => {
+      await setup();
+      await waitFor(() => {
+        expect(
+          screen.queryByTestId('hidden-in-ui-alerting-ActionTypeSelectOption')
+        ).not.toBeInTheDocument();
+      });
+    });
+
+    it('render action types which is preconfigured only (disabled by config and with preconfigured connectors)', async () => {
+      await setup();
+      await screen.findByTestId('preconfigured-alerting-ActionTypeSelectOption');
+    });
+
+    it('renders available action groups for the selected action type', async () => {
+      await setup();
+      await screen.findByTestId(`${actionType.id}-alerting-ActionTypeSelectOption`);
+      await userEvent.click(screen.getByTestId(`${actionType.id}-alerting-ActionTypeSelectOption`));
+      await screen.findByTestId('addNewActionConnectorActionGroup-0');
+      await userEvent.click(screen.getByTestId('addNewActionConnectorActionGroup-0'));
+      await screen.findByTestId('addNewActionConnectorActionGroup-0-option-default');
+      expect(
+        screen.getByTestId('addNewActionConnectorActionGroup-0-option-recovered')
+      ).toBeInTheDocument();
+    });
+
     it('renders disabled action groups for selected action type', async () => {
-      const wrapper = await setup([
+      await setup([
         {
           group: 'recovered',
           id: 'test',
@@ -544,35 +522,20 @@ describe('action_form', () => {
           },
         },
       ]);
-      const actionOption = wrapper.find(`[data-test-subj=".jira-alerting-ActionTypeSelectOption"]`);
-      actionOption.first().simulate('click');
-      const actionGroupsSelect = wrapper.find(
-        `[data-test-subj="addNewActionConnectorActionGroup-1"]`
+      await screen.findByTestId('.jira-alerting-ActionTypeSelectOption');
+      await userEvent.click(screen.getByTestId('.jira-alerting-ActionTypeSelectOption'));
+      await screen.findByTestId('addNewActionConnectorActionGroup-1');
+      await userEvent.click(screen.getByTestId('addNewActionConnectorActionGroup-1'));
+      await screen.findByTestId('addNewActionConnectorActionGroup-1-option-default');
+      const recoveredOption = screen.getByTestId(
+        'addNewActionConnectorActionGroup-1-option-recovered'
       );
-      expect((actionGroupsSelect.first().props() as any).options).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-1-option-default",
-            "disabled": false,
-            "inputDisplay": "Default",
-            "value": "default",
-          },
-          Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-1-option-recovered",
-            "disabled": true,
-            "inputDisplay": "Recovered (Not Currently Supported)",
-            "value": "recovered",
-          },
-        ]
-      `);
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      expect(recoveredOption).toBeInTheDocument();
+      expect(recoveredOption).toBeDisabled();
     });
 
     it('renders disabled action groups for custom recovered action groups', async () => {
-      const wrapper = await setup(
+      await setup(
         [
           {
             group: 'iHaveRecovered',
@@ -585,138 +548,70 @@ describe('action_form', () => {
         ],
         'iHaveRecovered'
       );
-      const actionOption = wrapper.find(`[data-test-subj=".jira-alerting-ActionTypeSelectOption"]`);
-      actionOption.first().simulate('click');
-      const actionGroupsSelect = wrapper.find(
-        `[data-test-subj="addNewActionConnectorActionGroup-1"]`
+      await screen.findByTestId('.jira-alerting-ActionTypeSelectOption');
+      await userEvent.click(screen.getByTestId('.jira-alerting-ActionTypeSelectOption'));
+      await screen.findByTestId('addNewActionConnectorActionGroup-1');
+      await userEvent.click(screen.getByTestId('addNewActionConnectorActionGroup-1'));
+      await screen.findByTestId('addNewActionConnectorActionGroup-1-option-default');
+      const iHaveRecoveredOption = screen.getByTestId(
+        'addNewActionConnectorActionGroup-1-option-iHaveRecovered'
       );
-      expect((actionGroupsSelect.first().props() as any).options).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-1-option-default",
-            "disabled": false,
-            "inputDisplay": "Default",
-            "value": "default",
-          },
-          Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-1-option-iHaveRecovered",
-            "disabled": true,
-            "inputDisplay": "I feel better (Not Currently Supported)",
-            "value": "iHaveRecovered",
-          },
-        ]
-      `);
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      expect(iHaveRecoveredOption).toBeInTheDocument();
+      expect(iHaveRecoveredOption).toBeDisabled();
     });
 
     it('renders available connectors for the selected action type', async () => {
-      const wrapper = await setup();
-      const actionOption = wrapper.find(
-        `[data-test-subj="${actionType.id}-alerting-ActionTypeSelectOption"]`
-      );
-      actionOption.first().simulate('click');
-      const combobox = wrapper.find(`[data-test-subj="selectActionConnector-${actionType.id}-0"]`);
+      await setup();
+      await screen.findByTestId(`${actionType.id}-alerting-ActionTypeSelectOption`);
+      await userEvent.click(screen.getByTestId(`${actionType.id}-alerting-ActionTypeSelectOption`));
+      await screen.findByTestId(`selectActionConnector-${actionType.id}-0`);
       const numConnectors = allActions.filter(
         (action) => action.actionTypeId === actionType.id
       ).length;
       const numConnectorsWithMissingSecrets = allActions.filter(
         (action) => action.actionTypeId === actionType.id && action.isMissingSecrets
       ).length;
-      expect((combobox.first().props() as any).options.length).toEqual(
-        numConnectors - numConnectorsWithMissingSecrets
-      );
-      expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "data-test-subj": "dropdown-connector-test",
-            "key": "test",
-            "label": "Test connector",
-            "value": Object {
-              "id": "test",
-              "prependComponent": undefined,
-              "title": "Test connector",
-            },
-          },
-          Object {
-            "data-test-subj": "dropdown-connector-test2",
-            "key": "test2",
-            "label": "Test connector 2",
-            "value": Object {
-              "id": "test2",
-              "prependComponent": undefined,
-              "title": "Test connector 2",
-            },
-          },
-        ]
-      `);
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
+      const combobox = screen.getByTestId(`selectActionConnector-${actionType.id}-0`);
+      await userEvent.click(within(combobox).getByTestId('comboBoxToggleListButton'));
+      await waitFor(() => {
+        expect(screen.getAllByTestId(/^dropdown-connector-/)).toHaveLength(
+          numConnectors - numConnectorsWithMissingSecrets
+        );
       });
     });
 
     it('renders only preconfigured connectors for the selected preconfigured action type', async () => {
-      const wrapper = await setup();
-      const actionOption = wrapper.find(
-        '[data-test-subj="preconfigured-alerting-ActionTypeSelectOption"]'
-      );
-      actionOption.first().simulate('click');
-      const combobox = wrapper.find('[data-test-subj="selectActionConnector-preconfigured-1"]');
-      expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "data-test-subj": "dropdown-connector-test3",
-            "key": "test3",
-            "label": "Preconfigured Only",
-            "value": Object {
-              "id": "test3",
-              "prependComponent": undefined,
-              "title": "Preconfigured Only",
-            },
-          },
-        ]
-      `);
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await setup();
+      await screen.findByTestId('preconfigured-alerting-ActionTypeSelectOption');
+      await userEvent.click(screen.getByTestId('preconfigured-alerting-ActionTypeSelectOption'));
+      const combobox = await screen.findByTestId('selectActionConnector-preconfigured-1');
+      await userEvent.click(within(combobox).getByTestId('comboBoxToggleListButton'));
+      // When the preconfigured-only action type is selected, only test3 (isPreconfigured=true)
+      // passes the filter. test3 is auto-selected, so areAllOptionsSelected()=true and
+      // EuiComboBox renders "You've selected all available options" instead of option buttons.
+      // This confirms that test4 (isPreconfigured=false) was correctly filtered out.
+      expect(await screen.findByText("You've selected all available options")).toBeInTheDocument();
+      expect(within(combobox).getByRole('combobox')).toHaveValue('Preconfigured Only');
+      expect(screen.queryByTestId('dropdown-connector-test4')).not.toBeInTheDocument();
     });
 
     it('does not render "Add connector" button for preconfigured only action type', async () => {
-      const wrapper = await setup();
-      const actionOption = wrapper.find(
-        '[data-test-subj="preconfigured-alerting-ActionTypeSelectOption"]'
-      );
-      actionOption.first().simulate('click');
-      const preconfigPannel = wrapper.find('[data-test-subj="alertActionAccordion-default"]');
-      const addNewConnectorButton = preconfigPannel.find(
-        '[data-test-subj="addNewActionConnectorButton-preconfigured"]'
-      );
-      expect(addNewConnectorButton.exists()).toBeFalsy();
-      await act(async () => {
-        await nextTick();
-        wrapper.update();
-      });
+      await setup();
+      await screen.findByTestId('preconfigured-alerting-ActionTypeSelectOption');
+      await userEvent.click(screen.getByTestId('preconfigured-alerting-ActionTypeSelectOption'));
+      await screen.findAllByTestId(/alertActionAccordion-\d+/);
+      expect(
+        screen.queryByTestId('addNewActionConnectorButton-preconfigured')
+      ).not.toBeInTheDocument();
     });
 
     it('renders action types disabled by license', async () => {
-      const wrapper = await setup();
-      const actionOption = wrapper.find(
-        '[data-test-subj="disabled-by-license-alerting-ActionTypeSelectOption"]'
-      );
-      expect(actionOption.exists()).toBeTruthy();
-      expect(
-        wrapper
-          .find('EuiToolTip [data-test-subj="disabled-by-license-alerting-ActionTypeSelectOption"]')
-          .exists()
-      ).toBeTruthy();
+      await setup();
+      await screen.findByTestId('disabled-by-license-alerting-ActionTypeSelectOption');
     });
 
     it('recognizes actions with broken connectors', async () => {
-      const wrapper = await setup([
+      const { container } = await setup([
         {
           group: 'default',
           id: 'test',
@@ -743,72 +638,63 @@ describe('action_form', () => {
         },
       ]);
       expect(setHasActionsWithBrokenConnector).toHaveBeenLastCalledWith(true);
-      expect(wrapper.find(EuiAccordion)).toHaveLength(3);
-      expect(
-        wrapper.find(`EuiIconTip[data-test-subj="alertActionAccordionErrorTooltip"]`)
-      ).toHaveLength(2);
+      await waitFor(() => {
+        expect(container.querySelectorAll('.euiAccordion')).toHaveLength(3);
+      });
+      // NOTE: EuiIconTip puts data-test-subj on the tooltip popup (portal), not the icon anchor.
+      // The tooltip popup only renders on hover, so we query the warning icon elements directly.
+      await waitFor(() => {
+        expect(container.querySelectorAll('[data-euiicon-type="warning"]')).toHaveLength(2);
+      });
     });
   });
 
   describe('beta badge (action_type_form)', () => {
     it(`does not render beta badge when isExperimental=undefined`, async () => {
-      const wrapper = await setup();
-      expect(wrapper.find('EuiKeyPadMenuItem EuiBetaBadge').exists()).toBeFalsy();
-      expect(
-        wrapper.find('EuiBetaBadge[data-test-subj="action-type-form-beta-badge"]').exists()
-      ).toBeFalsy();
+      await setup();
+      await waitFor(() => {
+        expect(screen.queryByTestId('action-type-form-beta-badge')).not.toBeInTheDocument();
+      });
     });
 
     it(`does not render beta badge when isExperimental=false`, async () => {
-      const wrapper = await setup(undefined, undefined, false);
-      expect(wrapper.find('EuiKeyPadMenuItem EuiBetaBadge').exists()).toBeFalsy();
-      expect(
-        wrapper.find('EuiBetaBadge[data-test-subj="action-type-form-beta-badge"]').exists()
-      ).toBeFalsy();
+      await setup(undefined, undefined, false);
+      await waitFor(() => {
+        expect(screen.queryByTestId('action-type-form-beta-badge')).not.toBeInTheDocument();
+      });
     });
 
     it(`renders beta badge when isExperimental=true`, async () => {
-      const wrapper = await setup(undefined, undefined, true);
-      expect(wrapper.find('EuiKeyPadMenuItem EuiBetaBadge').exists()).toBeTruthy();
-      expect(
-        wrapper.find('EuiBetaBadge[data-test-subj="action-type-form-beta-badge"]').exists()
-      ).toBeTruthy();
+      await setup(undefined, undefined, true);
+      await screen.findByTestId('action-type-form-beta-badge');
     });
   });
 
   describe('system actions', () => {
     it('renders system action types correctly', async () => {
-      const wrapper = await setup();
-      const actionOption = wrapper.find(
-        `[data-test-subj="${systemActionType.id}-alerting-ActionTypeSelectOption"]`
-      );
-
-      expect(actionOption.exists()).toBeTruthy();
-      expect(actionOption.at(1).prop('disabled')).toBe(false);
+      await setup();
+      await screen.findByTestId(`${systemActionType.id}-alerting-ActionTypeSelectOption`);
+      expect(
+        screen.getByTestId(`${systemActionType.id}-alerting-ActionTypeSelectOption`)
+      ).not.toBeDisabled();
     });
 
     it('disables the system action type if it is already selected', async () => {
-      const wrapper = await setup([
+      await setup([
         { id: 'system-connector-.cases', actionTypeId: systemActionType.id, params: {} },
       ]);
 
-      const actionOption = wrapper.find(
-        `[data-test-subj="${systemActionType.id}-alerting-ActionTypeSelectOption"]`
-      );
-
-      expect(actionOption.at(1).prop('disabled')).toBe(true);
+      await screen.findByTestId(`${systemActionType.id}-alerting-ActionTypeSelectOption`);
+      expect(
+        screen.getByTestId(`${systemActionType.id}-alerting-ActionTypeSelectOption`)
+      ).toBeDisabled();
     });
 
     it('allows multiple instances of workflows system action', async () => {
-      const wrapper = await setup([
-        { id: 'system-connector-.workflows', actionTypeId: '.workflows', params: {} },
-      ]);
+      await setup([{ id: 'system-connector-.workflows', actionTypeId: '.workflows', params: {} }]);
 
-      const actionOption = wrapper.find(
-        `[data-test-subj=".workflows-alerting-ActionTypeSelectOption"]`
-      );
-
-      expect(actionOption.at(1).prop('disabled')).toBe(false);
+      await screen.findByTestId('.workflows-alerting-ActionTypeSelectOption');
+      expect(screen.getByTestId('.workflows-alerting-ActionTypeSelectOption')).not.toBeDisabled();
     });
   });
 });

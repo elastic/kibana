@@ -7,6 +7,9 @@
 
 import type { CreateRuleRequestBody } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
 import type { ErrorCountRuleParams } from '@kbn/response-ops-rule-params/error_count';
+import type { TransactionDurationRuleParams } from '@kbn/response-ops-rule-params/transaction_duration';
+
+export type TransactionDurationAggregationType = TransactionDurationRuleParams['aggregationType'];
 
 export interface GcsConfig {
   bucket: string;
@@ -19,9 +22,11 @@ export interface ErrorQuery {
 }
 
 export type ApmErrorCountRuleCreateRequest = CreateRuleRequestBody<ErrorCountRuleParams>;
+export type ApmTransactionDurationRuleCreateRequest =
+  CreateRuleRequestBody<TransactionDurationRuleParams>;
 
 export interface AlertRuleConfig {
-  ruleParams: ApmErrorCountRuleCreateRequest;
+  ruleParams: ApmErrorCountRuleCreateRequest | ApmTransactionDurationRuleCreateRequest;
   alertsIndex: string;
 }
 
@@ -43,4 +48,14 @@ export interface ApmErrorIdSearchFields {
 
 export interface AlertScenario extends BaseScenario {
   alertRule: AlertRuleConfig;
+}
+
+export interface LogQuery {
+  messagePattern: string;
+  serviceName: string;
+  index: string;
+}
+
+export interface LogScenario extends BaseScenario {
+  logQuery: LogQuery;
 }

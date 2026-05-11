@@ -78,4 +78,32 @@ describe('<DocumentSeverity />', () => {
 
     expect(container).toBeEmptyDOMElement();
   });
+
+  it('should render children after the badge', () => {
+    const hit = createMockHit({ 'kibana.alert.severity': 'low' });
+
+    const { getByText } = render(
+      <TestProviders>
+        <DocumentSeverity hit={hit}>
+          <div>{'test'}</div>
+        </DocumentSeverity>
+      </TestProviders>
+    );
+
+    expect(getByText('test')).toBeInTheDocument();
+  });
+
+  it('should not render children when severity is absent', () => {
+    const hit = createMockHit({});
+
+    const { queryByText } = render(
+      <TestProviders>
+        <DocumentSeverity hit={hit}>
+          <div>{'test'}</div>
+        </DocumentSeverity>
+      </TestProviders>
+    );
+
+    expect(queryByText('test')).not.toBeInTheDocument();
+  });
 });

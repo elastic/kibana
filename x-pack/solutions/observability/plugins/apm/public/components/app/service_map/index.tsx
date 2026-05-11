@@ -7,9 +7,8 @@
 
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
-import type { AgentName } from '@kbn/elastic-agent-utils';
 import type { ReactNode } from 'react';
-import React, { useLayoutEffect, useMemo, useRef, useState, useCallback } from 'react';
+import React, { useLayoutEffect, useRef, useState, useCallback } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { cx } from '@emotion/css';
 import {
@@ -19,11 +18,7 @@ import {
 import { SERVICE_MAP_WRAPPER_FULL_SCREEN_CLASS, SERVICE_MAP_FULL_SCREEN_CLASS } from './constants';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
-import {
-  invalidLicenseMessage,
-  isServiceNodeData,
-  SERVICE_MAP_TIMEOUT_ERROR,
-} from '../../../../common/service_map';
+import { invalidLicenseMessage, SERVICE_MAP_TIMEOUT_ERROR } from '../../../../common/service_map';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useLicenseContext } from '../../../context/license/use_license_context';
 import { LicensePrompt } from '../../shared/license_prompt';
@@ -36,8 +31,7 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
-import { SloOverviewFlyout } from '../../shared/slo_overview_flyout';
-import { mergeServiceMapNodesWithBadges } from './merge_service_map_nodes_with_badges';
+import { SloOverviewFlyout, useSloOverviewFlyout } from '../../shared/slo_overview_flyout';
 import { useServiceMap } from './use_service_map';
 import { useServiceMapBadges } from './use_service_map_badges';
 import { ServiceMapGraph } from './graph';
@@ -168,18 +162,8 @@ export function ServiceMap({
     });
   }, []);
 
-  const [sloOverviewFlyout, setSloOverviewFlyout] = useState<{
-    serviceName: string;
-    agentName?: AgentName;
-  } | null>(null);
-
-  const openSloOverviewFlyout = useCallback((name: string, agent?: AgentName) => {
-    setSloOverviewFlyout({ serviceName: name, agentName: agent });
-  }, []);
-
-  const closeSloOverviewFlyout = useCallback(() => {
-    setSloOverviewFlyout(null);
-  }, []);
+  const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
+    useSloOverviewFlyout();
 
   useLayoutEffect(() => {
     if (isFullscreen) {
@@ -191,38 +175,14 @@ export function ServiceMap({
     }
   }, [isFullscreen, bodyClassesToToggle]);
 
-  const serviceNamesForBadges = useMemo(() => {
-    const names = new Set<string>();
-    for (const node of data.nodes) {
-      if (isServiceNodeData(node.data)) {
-        names.add(node.data.label);
-      }
-    }
-    return [...names].sort();
-  }, [data.nodes]);
-
-  const badgesFetchEnabled =
-    !!license &&
-    isActivePlatinumLicense(license) &&
-    config.serviceMapEnabled &&
-    status === FETCH_STATUS.SUCCESS &&
-    serviceNamesForBadges.length > 0;
-
-  const { data: badgesData, status: badgesStatus } = useServiceMapBadges({
-    serviceNames: serviceNamesForBadges,
+  const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({
     environment,
     start,
     end,
     kuery,
-    enabled: badgesFetchEnabled ?? false,
+    nodes: data.nodes,
+    nodesStatus: status,
   });
-
-  const nodesForGraph = useMemo(() => {
-    if (badgesStatus !== FETCH_STATUS.SUCCESS || !badgesData) {
-      return data.nodes;
-    }
-    return mergeServiceMapNodesWithBadges(data.nodes, badgesData);
-  }, [badgesData, badgesStatus, data.nodes]);
 
   if (!license) {
     return null;
@@ -280,6 +240,8 @@ export function ServiceMap({
     });
   }
 
+  const isLoading = status === FETCH_STATUS.LOADING || badgesStatus === FETCH_STATUS.LOADING;
+
   return (
     <ServiceMapSloFlyoutProvider onSloBadgeClick={openSloOverviewFlyout}>
       <div
@@ -299,12 +261,13 @@ export function ServiceMap({
             }}
             ref={ref}
           >
-            {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
+            {isLoading && <LoadingSpinner />}
             <ServiceMapGraph
               height={mapHeight}
-              nodes={nodesForGraph}
-              edges={data.edges}
+              nodes={isLoading ? [] : nodesForGraph}
+              edges={isLoading ? [] : data.edges}
               serviceName={serviceName}
+              highlightedServiceName={serviceName}
               environment={environment}
               kuery={kuery}
               start={start}

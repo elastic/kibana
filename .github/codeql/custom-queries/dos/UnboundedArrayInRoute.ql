@@ -4,8 +4,8 @@
  *              which could lead to Denial of Service (DoS) vulnerabilities
  *              when used to validate untrusted input.
  * @kind problem
- * @problem.severity warning
- * @security-severity 6.5
+ * @problem.severity error
+ * @security-severity 7.5
  * @precision medium
  * @id js/kibana/unbounded-array-in-schema
  * @tags security

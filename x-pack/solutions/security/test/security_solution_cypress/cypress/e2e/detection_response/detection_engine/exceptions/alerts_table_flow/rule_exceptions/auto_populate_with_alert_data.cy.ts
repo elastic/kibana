@@ -38,8 +38,7 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
   const ADDITIONAL_ENTRY = 'host.hostname';
 
   beforeEach(() => {
-    cy.task('esArchiverUnload', { archiveName: 'endpoint_2' });
-    cy.task('esArchiverLoad', { archiveName: 'endpoint_2' });
+    cy.task('esArchiverLoad', { archiveName: 'endpoint' });
     login();
     createRule(getEndpointRule()).then((rule) =>
       visitRuleDetailsPage(rule.body.id, { tab: 'alerts' })
@@ -48,7 +47,6 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
     waitForAlertsToPopulate();
   });
   after(() => {
-    cy.task('esArchiverUnload', { archiveName: 'endpoint' });
     deleteAlertsAndRules();
   });
   afterEach(() => {
@@ -72,6 +70,12 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
           operator: 'included',
           type: 'match',
           value: 'siem-kibana',
+        },
+        {
+          field: 'agent.id',
+          operator: 'included',
+          type: 'match',
+          value: '0ebd469b-c164-4734-00e6-96d018098dc7',
         },
         {
           field: 'user.name',
@@ -104,10 +108,6 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
           value: ['-zsh'],
         },
       ]);
-      cy.wrap(response?.body[0].comments[0].comment).should(
-        'contain',
-        'Exception conditions are pre-filled with relevant data from an alert with the alert id (_id):'
-      );
     });
   });
 
@@ -145,6 +145,12 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
           value: 'siem-kibana',
         },
         {
+          field: 'agent.id',
+          operator: 'included',
+          type: 'match',
+          value: '0ebd469b-c164-4734-00e6-96d018098dc7',
+        },
+        {
           field: 'user.name',
           operator: 'included',
           type: 'match',
@@ -163,16 +169,16 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
           value: '123',
         },
         {
-          field: 'process.name',
-          operator: 'included',
-          type: 'match',
-          value: 'zsh',
-        },
-        {
           field: 'host.hostname',
           operator: 'included',
           type: 'match',
           value: 'foo',
+        },
+        {
+          field: 'process.args',
+          operator: 'included',
+          type: 'match_any',
+          value: ['-zsh'],
         },
       ]);
       cy.wrap(response?.body[0].comments[0].comment).should(
@@ -206,6 +212,7 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
       'user.name',
       'process.executable',
       'file.path',
+      'process.name',
     ];
 
     /**

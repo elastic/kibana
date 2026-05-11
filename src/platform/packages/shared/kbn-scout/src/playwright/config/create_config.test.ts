@@ -62,6 +62,7 @@ describe('createPlaywrightConfig', () => {
       testIdAttribute: 'data-test-subj',
       trace: 'on-first-retry',
       timezoneId: 'GMT',
+      ignoreHTTPSErrors: true,
     });
     expect(config.globalSetup).toBeUndefined();
     expect(config.globalTeardown).toBeUndefined();

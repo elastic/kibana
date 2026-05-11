@@ -374,6 +374,8 @@ describe('EditPipelineFlyout', () => {
 
       expect(mockReportPipelineEdited).toHaveBeenCalledWith(
         expect.objectContaining({
+          integrationId: 'integration-123',
+          dataStreamId: 'ds-1',
           linesAdded: expect.any(Number),
           linesRemoved: expect.any(Number),
           netLineChange: expect.any(Number),
@@ -388,7 +390,12 @@ describe('EditPipelineFlyout', () => {
       const copyButton = screen.getByTestId('code-editor-copy');
       await userEvent.click(copyButton);
 
-      expect(mockReportCodeEditorCopyClicked).toHaveBeenCalledWith();
+      expect(mockReportCodeEditorCopyClicked).toHaveBeenCalledWith(
+        expect.objectContaining({
+          integrationId: 'integration-123',
+          dataStreamId: 'ds-1',
+        })
+      );
     });
   });
 

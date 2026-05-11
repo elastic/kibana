@@ -10,14 +10,18 @@ import { i18n } from '@kbn/i18n';
 import type { Index } from '../../../../common';
 import { reloadIndices as request } from '../../services';
 import { loadIndices } from './load_indices';
-import { notificationService } from '../../services/notification';
 import type { AppDispatch } from '../types';
 import { toHttpError } from '../http_error';
+import type { AppDependencies } from '../../app_context';
 
 export const reloadIndicesSuccess = createAction('INDEX_MANAGEMENT_RELOAD_INDICES_SUCCESS');
 export const reloadIndices =
   (indexNames: string[], options?: { asSystemRequest?: boolean }) =>
-  async (dispatch: AppDispatch) => {
+  async (
+    dispatch: AppDispatch,
+    _getState: () => unknown,
+    { notificationService }: AppDependencies['services']
+  ) => {
     let indices: Index[] | undefined;
     try {
       indices = await request(indexNames, options);

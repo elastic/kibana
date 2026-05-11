@@ -95,6 +95,7 @@ describe('transform rule for export', () => {
           apiKey: null,
           apiKeyOwner: null,
           apiKeyCreatedByUser: null,
+          uiamApiKey: null,
           scheduledTaskId: null,
           legacyId: null,
           executionStatus: {
@@ -105,5 +106,48 @@ describe('transform rule for export', () => {
         },
       }))
     );
+  });
+
+  it('should clear uiamApiKey when present on the rule', () => {
+    const ruleWithUiamKey = [
+      {
+        id: '3',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          enabled: true,
+          name: 'rule-with-uiam',
+          tags: [],
+          alertTypeId: '789',
+          consumer: 'alert-consumer',
+          schedule: { interval: '5m' },
+          actions: [],
+          params: {},
+          createdBy: 'me',
+          updatedBy: 'me',
+          createdAt: date,
+          updatedAt: date,
+          apiKey: 'some-es-key',
+          apiKeyOwner: 'me',
+          apiKeyCreatedByUser: false,
+          uiamApiKey: 'some-uiam-key',
+          throttle: null,
+          legacyId: null,
+          notifyWhen: 'onActionGroupChange',
+          muteAll: false,
+          mutedInstanceIds: [],
+          executionStatus: {
+            status: 'active',
+            lastExecutionDate: '2020-08-20T19:23:38Z',
+            error: null,
+          },
+          scheduledTaskId: 'task-1',
+        },
+        references: [],
+      },
+    ];
+
+    const exported = transformRulesForExport(ruleWithUiamKey);
+    expect(exported[0].attributes.uiamApiKey).toBeNull();
+    expect(exported[0].attributes.apiKey).toBeNull();
   });
 });

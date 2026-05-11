@@ -83,10 +83,21 @@ const useStyles = (euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']) => ({
       min-width: 32px;
       padding-inline: ${euiTheme.size.s};
     }
+    @container (max-width: 160px) {
+      .euiIcon {
+        display: none;
+      }
+    }
   `,
   ctaButtonText: css`
     @container (max-width: 160px) {
       display: none;
+    }
+  `,
+  ctaButtonTextShort: css`
+    display: none;
+    @container (max-width: 160px) {
+      display: inline;
     }
   `,
 });
@@ -186,6 +197,12 @@ export const CreateIntegrationSideCardButton = React.memo(() => {
               <FormattedMessage
                 id="xpack.automaticImport.createIntegrationButton"
                 defaultMessage="Create integration"
+              />
+            </span>
+            <span css={styles.ctaButtonTextShort}>
+              <FormattedMessage
+                id="xpack.automaticImport.createIntegrationButtonShort"
+                defaultMessage="Create"
               />
             </span>
           </EuiButton>

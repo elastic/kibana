@@ -95,7 +95,9 @@ function validateRow(row: Record<string, string>): ValidRow | InvalidRow {
   if (!type || !VALID_ENTITY_TYPES.has(type)) {
     return {
       valid: false,
-      error: `Invalid entity type: '${type ?? ''}'. Must be one of: user, host, service, generic`,
+      error: `Invalid entity type: '${
+        type ?? ''
+      }'. Must be one of: ${RESOLUTION_CSV_VALID_ENTITY_TYPES.join(', ')}`,
     };
   }
 

@@ -1,0 +1,72 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        installDefaultExample:
+          summary: "Install with default entity types"
+          description: "Install the Entity Store for all entity types with default log extraction settings."
+          value:
+            entityTypes:
+              - user
+              - host
+              - service
+              - generic
+            logExtraction: {}
+        installWithCustomSettingsExample:
+          summary: "Install with custom log extraction"
+          description: "Install the Entity Store for host entities only with a custom lookback period and field history length."
+          value:
+            entityTypes:
+              - host
+            logExtraction:
+              lookbackPeriod: "12h"
+              frequency: "5m"
+              delay: "2m"
+              fieldHistoryLength: 20
+responses:
+  201:
+    description: "Indicates the Entity Store was successfully installed."
+    content:
+      application/json:
+        examples:
+          installSuccessExample:
+            summary: "Entity Store installed"
+            description: "The Entity Store was installed and engines are being created."
+            value:
+              ok: true
+  200:
+    description: "Indicates all requested entity types are already installed."
+    content:
+      application/json:
+        examples:
+          alreadyInstalledExample:
+            summary: "Already installed"
+            description: "All requested entity types were already installed."
+            value:
+              ok: true
+  403:
+    description: "Insufficient privileges."
+    content:
+      application/json:
+        examples:
+          forbiddenExample:
+            summary: "Insufficient privileges"
+            description: "The user does not have the required Elasticsearch privileges."
+            value:
+              statusCode: 403
+              error: "Forbidden"
+              message: "User 'analyst' has insufficient privileges"
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+        -H "Content-Type: application/json" \
+        -d '{"entityTypes":["user","host","service","generic"],"logExtraction":{}}' \
+        "${KIBANA_URL}/api/security/entity_store/install"
+  - lang: Console
+    source: |
+      POST kbn://api/security/entity_store/install
+      {
+        "entityTypes": ["user", "host", "service", "generic"],
+        "logExtraction": {}
+      }

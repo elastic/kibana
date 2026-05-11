@@ -41,7 +41,7 @@ interface Props {
 }
 
 export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isCloudEnabled }) => {
-  const { trackUiMetric, addDataService } = getServices();
+  const { trackUiMetric, addDataService, notifications } = getServices();
   const euiBreakpointM = useEuiMinBreakpoint('m');
   const euiBreakpointL = useEuiMinBreakpoint('l');
   const styles = ({ euiTheme }: UseEuiTheme) =>
@@ -66,10 +66,12 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
     useCloudConnectStatus();
 
   const canAccessIntegrations = application.capabilities.navLinks.integrations;
+  const hideAnnouncements = !notifications.tours.isEnabled();
   const hasCloudConnectPermission = Boolean(
     application.capabilities.cloudConnect?.show || application.capabilities.cloudConnect?.configure
   );
-  const shouldShowCloudConnectCallout = hasCloudConnectPermission && !isAlreadyConnected;
+  const shouldShowCloudConnectCallout =
+    hasCloudConnectPermission && !isAlreadyConnected && !hideAnnouncements;
   if (canAccessIntegrations) {
     return (
       <KibanaPageTemplate.Section

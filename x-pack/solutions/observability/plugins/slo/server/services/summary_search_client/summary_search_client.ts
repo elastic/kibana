@@ -6,7 +6,7 @@
  */
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
@@ -195,7 +195,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
 }
 
 function getRemoteClusterName(index: string) {
-  if (isCCSRemoteIndexName(index)) {
+  if (isNonLocalIndexName(index)) {
     return index.substring(0, index.indexOf(':'));
   }
 }

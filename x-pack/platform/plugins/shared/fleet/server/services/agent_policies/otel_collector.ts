@@ -440,31 +440,72 @@ function mergeOtelcolConfigs(otelConfigs: OTelCollectorConfig[]): OTelCollectorC
   });
 }
 
-function buildBeatsauthConfig(output: Output, proxy?: FleetProxy): Record<string, unknown> {
+function buildBeatsauthConfig(
+  output: Output,
+  proxy?: FleetProxy,
+  logger?: Logger
+): Record<string, unknown> {
+  // Start with any ssl/proxy/transport params from the Advanced YAML config_yaml field.
+  // Structured output fields (set via the form UI) take precedence over YAML values.
+  const yamlConfig = parseOutputConfigYaml(output.config_yaml);
+
   const config: Record<string, unknown> = {};
 
-  const ssl: Record<string, unknown> = {};
+  // Include timeout and idle_connection_timeout from YAML if present
+  if (yamlConfig.timeout !== undefined) config.timeout = yamlConfig.timeout;
+  if (yamlConfig.idle_connection_timeout !== undefined)
+    config.idle_connection_timeout = yamlConfig.idle_connection_timeout;
+
+  // Merge SSL: start from YAML, then overwrite with structured output fields
+  const yamlSsl =
+    yamlConfig.ssl !== null && typeof yamlConfig.ssl === 'object' && !Array.isArray(yamlConfig.ssl)
+      ? (yamlConfig.ssl as Record<string, unknown>)
+      : {};
+  const ssl: Record<string, unknown> = { ...yamlSsl };
+
   if (output.ca_trusted_fingerprint) ssl.ca_trusted_fingerprint = output.ca_trusted_fingerprint;
   if (output.ca_sha256) ssl.ca_sha256 = output.ca_sha256;
   if (output.ssl?.certificate_authorities?.length)
     ssl.certificate_authorities = output.ssl.certificate_authorities;
   if (output.ssl?.certificate) ssl.certificate = output.ssl.certificate;
-  // Prefer the secrets-stored key over the plain-text key, mirroring full_agent_policy.ts behaviour
-  if (output.ssl?.key && !output.secrets?.ssl?.key) ssl.key = output.ssl.key;
+
+  if (output.secrets?.ssl?.key) {
+    // Secret key takes highest precedence: remove any plain key that came from config_yaml or
+    // the structured ssl field, and store it under the secrets namespace instead.
+    delete ssl.key;
+    config.secrets = { ssl: { key: output.secrets.ssl.key } };
+  } else if (output.ssl?.key) {
+    // No secret — use the plain structured key (overwrites any key from config_yaml)
+    ssl.key = output.ssl.key;
+  }
+  // If neither is set, any ssl.key from config_yaml remains (user explicitly provided it)
+
   if (output.ssl?.verification_mode) ssl.verification_mode = output.ssl.verification_mode;
   if (Object.keys(ssl).length > 0) config.ssl = ssl;
 
-  // If the SSL key is stored as a Kibana secret, include it under the secrets namespace
-  if (output.secrets?.ssl?.key) {
-    config.secrets = { ssl: { key: output.secrets.ssl.key } };
-  }
-
+  // Merge proxy: structured FleetProxy takes precedence over YAML proxy fields
   if (proxy) {
     config.proxy_url = proxy.url;
     if (proxy.proxy_headers) config.proxy_headers = proxy.proxy_headers;
+  } else {
+    if (yamlConfig.proxy_url !== undefined) config.proxy_url = yamlConfig.proxy_url;
+    if (yamlConfig.proxy_headers !== undefined) config.proxy_headers = yamlConfig.proxy_headers;
   }
 
   return config;
+}
+
+function parseOutputConfigYaml(yaml: string | null | undefined): Record<string, unknown> {
+  if (!yaml) return {};
+  try {
+    const parsed = load(yaml);
+    if (parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed as Record<string, unknown>;
+    }
+    return {};
+  } catch (e) {
+    throw new FleetError(`Failed to parse output config_yaml for beatsauth: ${e.message}`);
+  }
 }
 
 function attachOtelcolExporter(
@@ -557,13 +598,28 @@ function generateOtelcolExporter(
   switch (dataOutput.type) {
     case outputType.Elasticsearch: {
       const outputID = getOutputIdForAgentPolicy(dataOutput);
-      const beatsauthConfig = buildBeatsauthConfig(dataOutput, proxy);
-      const hasBeatsauthConfig = Object.keys(beatsauthConfig).length > 0;
-      const beatsauthID = `beatsauth/${outputID}`;
       const extraExporterConfig = parseOtelExporterConfigYaml(
         dataOutput.otel_exporter_config_yaml,
         logger
       );
+
+      // When otel_disable_beatsauth is set, skip the beatsauth extension entirely and
+      // pass only the endpoint + any user-supplied exporter YAML to the ES exporter.
+      if (dataOutput.otel_disable_beatsauth) {
+        return {
+          extensions: {},
+          exporters: {
+            [`elasticsearch/${outputID}`]: {
+              ...extraExporterConfig,
+              endpoints: dataOutput.hosts,
+            },
+          },
+        };
+      }
+
+      const beatsauthConfig = buildBeatsauthConfig(dataOutput, proxy, logger);
+      const hasBeatsauthConfig = Object.keys(beatsauthConfig).length > 0;
+      const beatsauthID = `beatsauth/${outputID}`;
       return {
         extensions: hasBeatsauthConfig ? { [beatsauthID]: beatsauthConfig } : {},
         exporters: {

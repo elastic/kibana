@@ -45,6 +45,7 @@ export interface AttachmentViewObject<Props = {}> {
   timelineAvatar?: EuiCommentProps['timelineAvatar'];
   getActions?: (props: Props) => AttachmentAction[];
   event?: EuiCommentProps['event'];
+  eventColor?: EuiCommentProps['eventColor'];
   children?: React.LazyExoticComponent<React.FC<Props>>;
   hideDefaultActions?: boolean;
   deleteSuccessTitle?: string;
@@ -116,6 +117,7 @@ export interface AttachmentType<Props> {
   getAttachmentTabViewObject?: (
     props?: CommonAttachmentTabViewProps
   ) => AttachmentTabViewObject<CommonAttachmentTabViewProps>;
+  schemaValidator?: (data: unknown) => void;
 }
 
 export type ExternalReferenceAttachmentType = AttachmentType<ExternalReferenceAttachmentViewProps>;

@@ -6,20 +6,26 @@
  */
 
 export const PAGE_TITLE = '[data-test-subj="entityAnalyticsHomePage"]';
+/** Shown on entity_analytics_home_page while data view / page deps resolve (EuiLoadingSpinner) */
+export const ENTITY_ANALYTICS_HOME_PAGE_LOADER = '[data-test-subj="entityAnalyticsHomePageLoader"]';
 export const COMBINED_RISK_DONUT_CHART = '[data-test-subj="risk-score-donut-chart"]';
 export const ANOMALIES_PLACEHOLDER_PANEL = '[data-test-subj="recent-anomalies-panel"]';
 
 export const ENTITIES_TABLE_GRID = '[data-test-subj="entity-analytics-test-subj-grid-wrapper"]';
 export const ENTITIES_TABLE_EMPTY = '[data-test-subj="entity-analytics-empty-state"]';
+export const ENTITY_STORE_DISABLED_EMPTY_PROMPT =
+  '[data-test-subj="entityStoreDisabledEmptyPrompt"]';
 
 export const DATAGRID_HEADER = '[data-test-subj="dataGridHeader"]';
 export const DATAGRID_COLUMN_SELECTOR = '[data-test-subj="dataGridColumnSelectorButton"]';
 export const DATAGRID_SORTING_SELECTOR = '[data-test-subj="dataGridColumnSortingButton"]';
+export const DATA_GRID_ROW_CELL = '[data-test-subj="dataGridRowCell"]';
+export const dataGridRowCellByColumn = (columnId: string) =>
+  `${DATA_GRID_ROW_CELL}[data-gridcell-column-id="${columnId}"]`;
 
 export const EXPAND_ROW_BUTTON = '[data-test-subj="docTableExpandToggleColumn"]';
 
 export const TIMELINE_ACTION = '[data-test-subj="entity-analytics-home-timeline-icon"]';
-export const AI_ACTION = '[data-test-subj="entity-analytics-home-ai-action-icon"]';
 
 export const FIELDS_SELECTOR_BUTTON = '[data-test-subj="entityAnalyticsFieldsSelectorOpenButton"]';
 export const FIELDS_SELECTOR_MODAL = '[data-test-subj="entityAnalyticsFieldsSelectorModal"]';

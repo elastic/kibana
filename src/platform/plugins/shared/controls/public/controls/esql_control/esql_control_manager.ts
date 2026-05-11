@@ -242,7 +242,9 @@ export function initializeESQLControlManager(
     .pipe(debounceTime(50))
     .subscribe(([searchString, availableOptions]) => {
       const displayOptions =
-        availableOptions?.filter((option) => option.includes(searchString)) ?? [];
+        availableOptions?.filter((option) =>
+          option.toLowerCase().includes(searchString.toLowerCase())
+        ) ?? [];
       displayedAvailableOptions$.next(displayOptions.map((value) => ({ value })));
       totalCardinality$.next(displayOptions.length);
     });

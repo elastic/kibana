@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { buildVisualizationConfig } from '@kbn/agent-builder-genai-utils';
+import { buildVisualizationConfig } from '@kbn/agent-builder-tools-base';
 import type { ModelProvider, ToolEventEmitter } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { createVisualizationResolver } from './inline_visualization';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
-jest.mock('@kbn/agent-builder-genai-utils', () => ({
+jest.mock('@kbn/agent-builder-tools-base', () => ({
   buildVisualizationConfig: jest.fn(),
 }));
 
@@ -96,7 +96,7 @@ describe('createVisualizationResolver', () => {
       existingPanel: {
         id: 'panel-1',
         type: LENS_EMBEDDABLE_TYPE,
-        config: { attributes: { type: 'bar' } },
+        config: { type: 'bar' },
         grid: { w: 24, h: 12, x: 0, y: 0 },
       },
     });

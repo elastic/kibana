@@ -25,8 +25,21 @@ jest.mock('../src/diff/run_oasdiff', () => ({
   runOasdiff: jest.fn(),
 }));
 
+jest.mock('../src/diff/run_oasdiff_structural', () => ({
+  runOasdiffStructural: jest.fn(),
+}));
+
 jest.mock('../src/diff/parse_oasdiff', () => ({
   parseOasdiff: jest.fn(),
+}));
+
+jest.mock('../src/input/load_oas', () => ({
+  loadOas: jest.fn().mockResolvedValue({
+    openapi: '3.0.0',
+    info: { title: 't', version: '1' },
+    paths: {},
+    components: { schemas: {} },
+  }),
 }));
 
 jest.mock('../src/terraform/check_terraform_impact', () => ({
@@ -55,8 +68,9 @@ jest.mock('../src/report/format_failure', () => ({
 
 import { execSync } from 'child_process';
 import { writeFileSync, rmSync } from 'fs';
-import { runOasdiff, parseOasdiff, applyAllowlist } from '../src/diff';
+import { runOasdiff, runOasdiffStructural, parseOasdiff, applyAllowlist } from '../src/diff';
 import type { BreakingChange } from '../src/diff';
+import { loadOas } from '../src/input/load_oas';
 import { checkTerraformImpact } from '../src/terraform/check_terraform_impact';
 import { loadAllowlist } from '../src/allowlist/load_allowlist';
 import { formatFailure } from '../src/report/format_failure';
@@ -65,7 +79,11 @@ const mockRun = jest.requireMock('@kbn/dev-cli-runner').run as jest.Mock;
 const mockExecSync = execSync as jest.MockedFunction<typeof execSync>;
 const mockWriteFileSync = writeFileSync as jest.MockedFunction<typeof writeFileSync>;
 const mockRunOasdiff = runOasdiff as jest.MockedFunction<typeof runOasdiff>;
+const mockRunOasdiffStructural = runOasdiffStructural as jest.MockedFunction<
+  typeof runOasdiffStructural
+>;
 const mockParseOasdiff = parseOasdiff as jest.MockedFunction<typeof parseOasdiff>;
+const mockLoadOas = loadOas as jest.MockedFunction<typeof loadOas>;
 const mockCheckTerraformImpact = checkTerraformImpact as jest.MockedFunction<
   typeof checkTerraformImpact
 >;
@@ -98,6 +116,12 @@ describe('check_contracts', () => {
       error: jest.fn(),
     };
     mockExecSync.mockReturnValue('openapi: 3.0.0\npaths: {}');
+    mockLoadOas.mockResolvedValue({
+      openapi: '3.0.0',
+      info: { title: 't', version: '1' },
+      paths: {},
+      components: { schemas: {} },
+    });
   });
 
   const defaultFlags = {
@@ -423,5 +447,89 @@ describe('check_contracts', () => {
     await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow();
 
     expect(mockLog.info).toHaveBeenCalledWith('1 allowlisted change(s) ignored');
+  });
+
+  describe('additionalProperties tightening (E2E reverse-index path)', () => {
+    const realParseOasdiff = jest.requireActual('../src/diff/parse_oasdiff')
+      .parseOasdiff as typeof parseOasdiff;
+
+    it('surfaces a synthetic component-level entry exactly once for the consumer endpoint', async () => {
+      const consumerPath = '/api/data_views/data_view';
+      const componentName = 'Data_views_create_data_view_request_object';
+
+      mockLoadOas.mockResolvedValue({
+        openapi: '3.0.0',
+        info: { title: 't', version: '1' },
+        paths: {
+          [consumerPath]: {
+            post: {
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: { $ref: `#/components/schemas/${componentName}` },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            [componentName]: { type: 'object' },
+          },
+        },
+      });
+
+      mockRunOasdiff.mockReturnValue([]);
+      mockRunOasdiffStructural.mockReturnValue({
+        components: {
+          schemas: {
+            modified: {
+              [componentName]: {
+                additionalPropertiesAllowed: { from: null, to: false },
+              },
+            },
+          },
+        },
+      });
+
+      // Use the real parseOasdiff so the synthetic entry flows through the
+      // same parse pipeline as oasdiff entries; pass-through applyAllowlist so
+      // nothing is filtered out.
+      mockParseOasdiff.mockImplementation(realParseOasdiff);
+      mockApplyAllowlist.mockImplementation((changes) => ({
+        breakingChanges: changes,
+        allowlistedChanges: [],
+      }));
+
+      mockCheckTerraformImpact.mockImplementation((changes) => ({
+        hasImpact: changes.length > 0,
+        impactedChanges: changes.map((change) => ({
+          change,
+          terraformResource: 'elasticstack_kibana_data_view',
+          owners: ['@elastic/kibana-data-discovery'],
+        })),
+      }));
+      mockLoadAllowlist.mockReturnValue({ entries: [] });
+      mockFormatFailure.mockReturnValue('FAILURE REPORT');
+
+      await expect(runCallback({ flags: defaultFlags, log: mockLog })).rejects.toThrow(
+        'Found 1 breaking change(s)'
+      );
+
+      expect(mockFormatFailure).toHaveBeenCalledTimes(1);
+      const breakingChanges = mockFormatFailure.mock.calls[0][0];
+      expect(breakingChanges).toEqual([
+        {
+          type: 'request_body_tightened',
+          path: consumerPath,
+          method: 'POST',
+          reason:
+            'Request body schema disallows extra fields (additionalProperties: false). Clients sending unknown keys will now receive 400.',
+          oasdiffId: 'kbn:request-additional-properties-tightened',
+          source: `/components/schemas/${componentName}`,
+        },
+      ]);
+    });
   });
 });

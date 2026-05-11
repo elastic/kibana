@@ -19,6 +19,10 @@ interface ReportDataStreamCreationCompleteParams {
   integrationName: string;
   dataStreamId: string;
   dataStreamName: string;
+  connectorId: string;
+  modelName?: string;
+  connectorType?: string;
+  connectorName?: string;
   durationMs: number;
   success: boolean;
   errorMessage?: string;
@@ -64,6 +68,7 @@ describe('TaskManagerService telemetry', () => {
         integrationName: 'My Integration',
         dataStreamId: 'ds-1',
         dataStreamName: 'My DataStream',
+        connectorId: 'conn-1',
         durationMs: 1234,
         success: true,
       });
@@ -88,6 +93,7 @@ describe('TaskManagerService telemetry', () => {
         integrationName: 'My Integration',
         dataStreamId: 'ds-1',
         dataStreamName: 'My DataStream',
+        connectorId: 'conn-1',
         durationMs: 500,
         success: false,
         errorMessage: 'Something went wrong',
@@ -108,12 +114,54 @@ describe('TaskManagerService telemetry', () => {
         integrationName: 'My Integration',
         dataStreamId: 'ds-1',
         dataStreamName: 'My DataStream',
+        connectorId: 'conn-1',
         durationMs: 100,
         success: true,
       });
 
       const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1];
       expect(payload).not.toHaveProperty('errorMessage');
+    });
+
+    it('includes modelName, connectorType, and connectorName when provided', () => {
+      reportDataStreamCreationComplete({
+        integrationId: 'int-1',
+        integrationName: 'My Integration',
+        dataStreamId: 'ds-1',
+        dataStreamName: 'My DataStream',
+        connectorId: 'conn-1',
+        modelName: 'claude-3-5-sonnet-20241022',
+        connectorType: '.bedrock',
+        connectorName: 'My Bedrock Connector',
+        durationMs: 100,
+        success: true,
+      });
+
+      expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+        AutomaticImportTelemetryEventType.DataStreamCreationComplete,
+        expect.objectContaining({
+          modelName: 'claude-3-5-sonnet-20241022',
+          connectorType: '.bedrock',
+          connectorName: 'My Bedrock Connector',
+        })
+      );
+    });
+
+    it('omits modelName, connectorType, connectorName when undefined', () => {
+      reportDataStreamCreationComplete({
+        integrationId: 'int-1',
+        integrationName: 'My Integration',
+        dataStreamId: 'ds-1',
+        dataStreamName: 'My DataStream',
+        connectorId: 'conn-1',
+        durationMs: 100,
+        success: true,
+      });
+
+      const payload = (mockAnalytics.reportEvent as jest.Mock).mock.calls[0][1];
+      expect(payload).not.toHaveProperty('modelName');
+      expect(payload).not.toHaveProperty('connectorType');
+      expect(payload).not.toHaveProperty('connectorName');
     });
 
     it('does not throw when analytics.reportEvent throws', () => {
@@ -127,6 +175,7 @@ describe('TaskManagerService telemetry', () => {
           integrationName: 'My Integration',
           dataStreamId: 'ds-1',
           dataStreamName: 'My DataStream',
+          connectorId: 'conn-1',
           durationMs: 100,
           success: true,
         })

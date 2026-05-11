@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   PackName,
@@ -25,74 +25,47 @@ import {
   ObjectQueries,
 } from '../model/schema/common_attributes.gen';
 
+export const UpdatePacksRequestBody = lazySchema(() =>
+  z.object({
+    name: PackName.optional(),
+    description: PackDescriptionOrUndefined.optional(),
+    enabled: EnabledOrUndefined.optional(),
+    policy_ids: PolicyIdsOrUndefined.optional(),
+    shards: Shards.optional(),
+    queries: ObjectQueries.optional(),
+  })
+);
 export type UpdatePacksRequestBody = z.infer<typeof UpdatePacksRequestBody>;
-export const UpdatePacksRequestBody = z.object({
-  name: PackName.optional(),
-  description: PackDescriptionOrUndefined.optional(),
-  enabled: EnabledOrUndefined.optional(),
-  policy_ids: PolicyIdsOrUndefined.optional(),
-  shards: Shards.optional(),
-  queries: ObjectQueries.optional(),
-});
 
 /**
  * The response for updating a pack.
  */
+export const UpdatePacksResponse = lazySchema(() =>
+  z.object({
+    data: z
+      .object({
+        /**
+         * The saved object ID of the pack.
+         */
+        saved_object_id: z.string().optional(),
+        name: PackName.optional(),
+        description: PackDescriptionOrUndefined.optional(),
+        queries: ObjectQueries.optional(),
+        /**
+         * The pack version number.
+         */
+        version: z.number().int().optional(),
+        enabled: EnabledOrUndefined.optional(),
+        created_at: z.string().datetime().optional(),
+        created_by: z.string().nullable().optional(),
+        created_by_profile_uid: z.string().optional(),
+        updated_at: z.string().datetime().optional(),
+        updated_by: z.string().nullable().optional(),
+        updated_by_profile_uid: z.string().optional(),
+        policy_ids: PolicyIdsOrUndefined.optional(),
+        shards: Shards.optional(),
+      })
+      .optional(),
+  })
+);
 export type UpdatePacksResponse = z.infer<typeof UpdatePacksResponse>;
-export const UpdatePacksResponse = z.object({
-  /**
-   * The updated pack.
-   */
-  data: z
-    .object({
-      /**
-       * The saved object ID of the pack.
-       */
-      saved_object_id: z.string().optional(),
-      /**
-       * The pack name.
-       */
-      name: z.string().optional(),
-      /**
-       * The pack description.
-       */
-      description: z.string().optional(),
-      /**
-       * The queries in the pack.
-       */
-      queries: z.object({}).optional(),
-      /**
-       * The pack version.
-       */
-      version: z.number().int().optional(),
-      /**
-       * Whether the pack is enabled.
-       */
-      enabled: z.boolean().optional(),
-      /**
-       * The creation timestamp.
-       */
-      created_at: z.string().optional(),
-      /**
-       * The user who created the pack.
-       */
-      created_by: z.string().optional(),
-      /**
-       * The last update timestamp.
-       */
-      updated_at: z.string().optional(),
-      /**
-       * The user who last updated the pack.
-       */
-      updated_by: z.string().optional(),
-      /**
-       * A list of agent policy IDs associated with the pack.
-       */
-      policy_ids: z.array(z.string()).optional(),
-      /**
-       * Shard configuration for the pack.
-       */
-      shards: z.object({}).optional(),
-    })
-    .optional(),
-});

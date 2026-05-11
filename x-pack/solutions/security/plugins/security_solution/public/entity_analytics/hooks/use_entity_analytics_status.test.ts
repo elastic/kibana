@@ -190,6 +190,17 @@ describe('deriveEntityAnalyticsStatus', () => {
   describe('entity store v2 (entity store is sole status driver)', () => {
     const v2Base = { ...base, isEntityStoreV2Enabled: true };
 
+    it('returns enabled when V2 is enabled and store=running even if V1 feature flag is disabled', () => {
+      expect(
+        deriveEntityAnalyticsStatus({
+          ...v2Base,
+          isEntityStoreFeatureFlagDisabled: true,
+          riskEngineStatus: RiskEngineStatusEnum.NOT_INSTALLED,
+          entityStoreStatus: 'running',
+        })
+      ).toBe('enabled');
+    });
+
     it('returns enabled when store=running regardless of risk engine status', () => {
       expect(
         deriveEntityAnalyticsStatus({

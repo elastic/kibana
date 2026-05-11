@@ -210,8 +210,7 @@ const dashboardEditModeConfig: AppMenuConfig = {
     popoverWidth: 150,
     splitButtonProps: {
       secondaryButtonAriaLabel: 'Save options',
-      secondaryButtonIcon: 'chevronSingleDown',
-      notifcationIndicatorTooltipContent: 'You have unsaved changes',
+      notificationIndicatorTooltipContent: 'You have unsaved changes',
       showNotificationIndicator: true,
       items: [
         {
@@ -325,5 +324,68 @@ export const OverflowAndOrdering: Story = {
   name: 'Overflow and ordering',
   args: {
     config: overflowAndOrderingConfig,
+  },
+};
+
+const staticItem: AppMenuWrapperProps['staticItems'] = [
+  {
+    id: 'feedback',
+    order: 1,
+    label: 'Feedback',
+    run: action('feedback-clicked'),
+    iconType: 'comment',
+    testId: 'feedbackButton',
+  },
+];
+
+const threeItemsWithStaticItemConfig: AppMenuConfig = {
+  items: [
+    {
+      id: 'item1',
+      order: 1,
+      label: 'Item 1',
+      run: action('item-1-clicked'),
+      iconType: 'gear',
+      testId: 'item1Button',
+    },
+    {
+      id: 'item2',
+      order: 2,
+      label: 'Item 2',
+      run: action('item-2-clicked'),
+      iconType: 'gear',
+      testId: 'item2Button',
+    },
+    {
+      id: 'item3',
+      order: 3,
+      label: 'Item 3',
+      run: action('item-3-clicked'),
+      iconType: 'gear',
+      testId: 'item3Button',
+    },
+  ],
+};
+
+export const StandaloneStaticItem: Story = {
+  name: 'Static items - standalone',
+  args: {
+    staticItems: staticItem,
+  },
+};
+
+export const StaticItemWithConfig: Story = {
+  name: 'Static items with config',
+  args: {
+    config: threeItemsWithStaticItemConfig,
+    staticItems: staticItem,
+  },
+};
+
+export const DashboardEditModeWithStaticItems: Story = {
+  name: 'Dashboard edit mode with static items',
+  args: {
+    config: dashboardEditModeConfig,
+    staticItems: staticItem,
   },
 };

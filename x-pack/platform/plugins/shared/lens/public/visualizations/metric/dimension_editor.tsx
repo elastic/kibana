@@ -741,6 +741,8 @@ function PrimaryMetricEditor({ state, setState, datasource, accessor, frame }: S
       {showStaticColorControl ? (
         <StaticColorControl getColor={getColor} setColor={setColor} />
       ) : null}
+
+      {/* TODO: remove this in favor of global style settings */}
       <EuiFormRow
         display="columnCompressed"
         fullWidth

@@ -53,6 +53,7 @@ import {
   checkIntegrationFipsLooseCompatibility,
   hasMultipleEnabledPolicyTemplates,
   getInputEffectiveName,
+  getRegistryStreamWithDataStreamForInputType,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -301,9 +302,10 @@ export async function getCompiledVersionsForAgentPolicy(
   const savedObjectType = await getPackagePolicySavedObjectType();
   const packagePolicySOs = await soClient.find<PackagePolicySOAttributes>({
     type: savedObjectType,
-    filter: `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(
-      agentPolicyId
-    )} AND ${savedObjectType}.attributes.latest_revision:true`,
+    filter: buildCurrentRevisionFilter(
+      savedObjectType,
+      `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(agentPolicyId)}`
+    ),
     perPage: SO_SEARCH_LIMIT,
   });
 
@@ -314,6 +316,15 @@ export async function getCompiledVersionsForAgentPolicy(
     }
   }
   return [...versionKeys];
+}
+
+/**
+ * Returns a kuery string that excludes package policies with latest_revision:false,
+ * optionally AND-ing with an additional kuery clause.
+ */
+export function buildCurrentRevisionFilter(savedObjectType: string, kuery?: string): string {
+  const base = `NOT ${savedObjectType}.attributes.latest_revision:false`;
+  return kuery ? `${base} AND (${kuery})` : base;
 }
 
 export function _normalizePackagePolicyKuery(savedObjectType: string, kuery: string) {
@@ -561,6 +572,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           ? 'agentless'
           : 'default',
         basePkgInfo
+      );
+    }
+
+    if (
+      packagePolicy.global_data_tags?.length &&
+      !(
+        agentPolicies.every((policy) => policy?.supports_agentless) ||
+        packagePolicy.supports_agentless
+      )
+    ) {
+      throw new PackagePolicyValidationError(
+        '`global_data_tags` can only be set on agentless integration policies'
       );
     }
 
@@ -1245,9 +1268,10 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const packagePolicySO = await soClient
       .find<PackagePolicySOAttributes>({
         type: savedObjectType,
-        filter: `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(
-          agentPolicyId
-        )} AND ${savedObjectType}.attributes.latest_revision:true`,
+        filter: buildCurrentRevisionFilter(
+          savedObjectType,
+          `${savedObjectType}.attributes.policy_ids:${escapeSearchQueryPhrase(agentPolicyId)}`
+        ),
         perPage: SO_SEARCH_LIMIT,
         namespaces: isSpacesEnabled ? options.spaceIds : undefined,
       })
@@ -1369,9 +1393,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
-      kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
-        : `${savedObjectType}.attributes.latest_revision:true`
+      buildCurrentRevisionFilter(savedObjectType, kuery)
     );
 
     const packagePolicies = await soClient
@@ -1391,7 +1413,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
-        name: packagePolicy.attributes.name,
+        name: packagePolicy.attributes?.name,
         savedObjectType,
       });
     }
@@ -1430,9 +1452,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
-      kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
-        : `${savedObjectType}.attributes.latest_revision:true`
+      buildCurrentRevisionFilter(savedObjectType, kuery)
     );
 
     const packagePolicies = await soClient
@@ -1452,7 +1472,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
-        name: packagePolicy.attributes.name,
+        name: packagePolicy.attributes?.name,
         savedObjectType,
       });
     }
@@ -1638,6 +1658,16 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       if (packagePolicy.supports_agentless && !isAgentlessIntegration(pkgInfo)) {
         throw new PackagePolicyValidationError(
           `Package "${pkgInfo.name}" does not support agentless deployment mode`
+        );
+      }
+
+      // Validate that global_data_tags is only set on agentless package policies
+      if (
+        packagePolicy.global_data_tags?.length &&
+        !(packagePolicy.supports_agentless || agentPolicy?.supports_agentless)
+      ) {
+        throw new PackagePolicyValidationError(
+          '`global_data_tags` can only be set on agentless integration policies'
         );
       }
 
@@ -3035,9 +3065,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
-      kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
-        : `${savedObjectType}.attributes.latest_revision:true`
+      buildCurrentRevisionFilter(savedObjectType, kuery)
     );
 
     return createSoFindIterable<{}>({
@@ -3083,9 +3111,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const filter = _normalizePackagePolicyKuery(
       savedObjectType,
-      kuery
-        ? `${savedObjectType}.attributes.latest_revision:true AND (${kuery})`
-        : `${savedObjectType}.attributes.latest_revision:true`
+      buildCurrentRevisionFilter(savedObjectType, kuery)
     );
 
     return createSoFindIterable<PackagePolicySOAttributes>({
@@ -3805,12 +3831,13 @@ function _compilePackageStream(
 
   stream = _applyIndexPrivileges(packageDataStream, streamIn);
 
+  const effectiveInputName = getInputEffectiveName(input);
   const streamFromPkg = (packageDataStream.streams || []).find(
-    (pkgStream) => pkgStream.input === input.type
+    (pkgStream) => pkgStream.input === effectiveInputName
   );
   if (!streamFromPkg) {
     throw new StreamNotFoundError(
-      `Stream template not found, unable to find stream for input ${input.type}`
+      `Stream template not found, unable to find stream for input ${effectiveInputName} (type: ${input.type})`
     );
   }
 
@@ -4010,6 +4037,24 @@ export function updatePackageInputs(
   for (const update of inputsUpdated) {
     let originalInput: NewPackagePolicyInput | undefined;
 
+    // Pre-compute registry definitions for this input type so var-level migrate_from renaming
+    // can be applied in both Path A and Path B migration calls below.
+    const updateType = (update as NewPackagePolicyInput).type;
+    const registryStreams = updateType
+      ? getRegistryStreamWithDataStreamForInputType(updateType, packageInfo)
+      : undefined;
+    const registryInputVarDefs = updateType
+      ? (update.policy_template
+          ? packageInfo.policy_templates?.filter((pt) => pt.name === update.policy_template)
+          : packageInfo.policy_templates
+        )
+          ?.flatMap((pt) => getNormalizedInputs(pt))
+          .find(
+            (ri) =>
+              getInputEffectiveName(ri) === getInputEffectiveName(update as NewPackagePolicyInput)
+          )?.vars
+      : undefined;
+
     if (update.policy_template) {
       // If the updated value defines a policy template, try to find an original input
       // with the same policy template value. Match by name ?? type on both sides
@@ -4043,9 +4088,15 @@ export function updatePackageInputs(
       const originalInputToMigrate = applyInputLevelMigration(
         update,
         basePackagePolicy.inputs,
-        inputs
+        inputs,
+        registryInputVarDefs
       );
-      applyStreamLevelMigration(update, originalInputToMigrate, basePackagePolicy.inputs);
+      applyStreamLevelMigration(
+        update,
+        originalInputToMigrate,
+        basePackagePolicy.inputs,
+        registryStreams
+      );
 
       // Do not enable new inputs for limited packages
       if (limitedPackage) {
@@ -4078,6 +4129,13 @@ export function updatePackageInputs(
     originalInput.deprecated = update.deprecated;
     originalInput.migrate_from = update.migrate_from;
 
+    // Snapshot the stored input-level vars before deepMergeVars mutates them (it modifies the
+    // vars object in place via a shared reference). Used later by the Path B stream migration
+    // block to determine which vars the user actually configured on this input vs package defaults.
+    const storedInputVars = originalInput.vars
+      ? Object.fromEntries(Object.entries(originalInput.vars).map(([k, v]) => [k, { ...v }]))
+      : undefined;
+
     if (update.vars || originalInput.vars) {
       const indexOfInput = inputs.indexOf(originalInput);
       const mergedVars = deepMergeVars(originalInput, update, true) as NewPackagePolicyInput;
@@ -4094,6 +4152,10 @@ export function updatePackageInputs(
       // Per-source-type counters for positional stream matching when a stream declares
       // migrate_from. Shared across iterations so each source stream is consumed once.
       const streamMigrateFromCounters: Record<string, number> = {};
+      // Track whether any stream successfully migrated from an old input type, and which
+      // old input was the source. Used to carry enabled state and input-level vars over.
+      let streamMigratedFromOldInput = false;
+      let oldSourceInput: NewPackagePolicyInput | undefined;
       for (const stream of update.streams) {
         let originalStream = originalInput?.streams.find(
           (s) => s.data_stream.dataset === stream.data_stream.dataset
@@ -4124,9 +4186,19 @@ export function updatePackageInputs(
             );
             const oldStream = oldInputForStream?.streams[counter];
             if (oldStream) {
-              originalInput.streams.push(
-                migrateStreamVars(stream as InputsOverride, oldStream, oldInputForStream?.vars)
+              const registryStream = registryStreams?.find(
+                (rs) => rs.data_stream.dataset === stream.data_stream.dataset
               );
+              originalInput.streams.push(
+                migrateStreamVars(
+                  stream as InputsOverride,
+                  oldStream,
+                  oldInputForStream?.vars,
+                  registryStream?.vars
+                )
+              );
+              streamMigratedFromOldInput = true;
+              if (!oldSourceInput) oldSourceInput = oldInputForStream;
               continue;
             }
           }
@@ -4151,6 +4223,52 @@ export function updatePackageInputs(
           originalInput.streams[indexOfStream] = filteredVars;
           originalStream = originalInput.streams[indexOfStream];
         }
+      }
+      // When stream-level migrate_from succeeded: mirror what applyStreamLevelMigration does
+      // for Path A — carry the old source input's enabled state and input-level vars to the
+      // existing input. This covers the partial-migration case where the new input (cel) already
+      // existed in the old policy alongside the old input (httpjson), but was disabled and had
+      // empty vars because the user only ever configured the httpjson side.
+      if (streamMigratedFromOldInput && oldSourceInput) {
+        const indexOfInput = inputs.indexOf(originalInput);
+        let updatedInput = originalInput;
+
+        if (!limitedPackage) {
+          updatedInput = {
+            ...updatedInput,
+            enabled: oldSourceInput.enabled ?? updatedInput.enabled,
+          };
+        }
+
+        if (oldSourceInput.vars && (update.vars || updatedInput.vars)) {
+          const oldSourceVars = oldSourceInput.vars;
+          const storedCelVars = storedInputVars ?? {};
+          // Start with httpjson vars as the base — the migrate_from declaration signals that
+          // httpjson is the authoritative source for these vars.
+          const seededVars: typeof storedCelVars = { ...oldSourceVars };
+          // Merge in the new input's own stored vars:
+          // - For keys NOT in the old source: always keep the stored value (new-input-only var).
+          // - For shared keys: keep the stored value when it was explicitly set by the user
+          //   (non-null, non-empty). This handles the case where both the old and new inputs
+          //   existed in the policy and the user had independently configured the new input
+          //   (e.g. m365_defender CEL vulnerability credentials differ from httpjson alert creds).
+          //   When the stored value is null/empty, the old source wins so its vars seed the new
+          //   input for the common case where the new input was unconfigured before migration.
+          for (const [key, celEntry] of Object.entries(storedCelVars)) {
+            if (!(key in oldSourceVars) || (celEntry?.value != null && celEntry.value !== '')) {
+              seededVars[key] = celEntry;
+            }
+          }
+          const merged = deepMergeVars(
+            { ...updatedInput, vars: seededVars },
+            update,
+            true
+          ) as NewPackagePolicyInput;
+          updatedInput = removeStaleVars<NewPackagePolicyInput>(merged, update);
+        }
+
+        inputs[indexOfInput] = updatedInput;
+        originalInput = inputs[indexOfInput];
       }
     }
     // Filter all stream that have been removed from the input

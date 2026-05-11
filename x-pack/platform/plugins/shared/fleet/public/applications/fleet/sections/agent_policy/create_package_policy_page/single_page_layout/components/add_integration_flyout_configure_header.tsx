@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiLink, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { PackageIcon } from '../../../../../components';
@@ -24,61 +25,52 @@ export const AddIntegrationFlyoutConfigureHeader: React.FC<Props> = ({
   pkgLabel,
   integration,
 }) => {
+  const theme = useEuiTheme();
   return (
     <>
-      <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem>
-          <EuiText size="m" color="subdued">
-            <FormattedMessage
-              id="xpack.fleet.addIntegrationFlyout.configureIntegrationDesc"
-              defaultMessage="Edit the necessary fields to configure your selected integration:"
-            />
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow fullWidth>
-            <EuiFlexGroup direction="row" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <PackageIcon
-                  packageName={pkgName}
-                  version={pkgVersion || ''}
-                  integrationName={integration}
-                  size="l"
-                  tryApi={true}
+      <EuiText size="m" color="subdued">
+        <FormattedMessage
+          id="xpack.fleet.addIntegrationFlyout.configureIntegrationDesc"
+          defaultMessage="Edit the necessary fields to configure your selected integration:"
+        />
+      </EuiText>
+      <EuiSpacer size="s" />
+      <PackageIcon
+        packageName={pkgName}
+        version={pkgVersion || ''}
+        integrationName={integration}
+        size="l"
+        tryApi={true}
+        css={css`
+          margin-right: ${theme.euiTheme.size.s};
+        `}
+      />
+      <EuiText size="m" component="span">
+        {pkgLabel}
+      </EuiText>
+      <EuiText size="m" component="span" color="subdued">
+        <FormattedMessage
+          id="xpack.fleet.addIntegrationFlyout.needMoreInfoText"
+          defaultMessage=" - Need more info? {readMoreLink}"
+          values={{
+            readMoreLink: (
+              <EuiLink
+                href={`https://www.elastic.co/docs/reference/integrations/${pkgName}${
+                  integration ? '/' + integration : ''
+                }`}
+                external
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.addIntegrationFlyout.integrationInfoLink"
+                  defaultMessage="Read more about {pkgLabel}"
+                  values={{ pkgLabel }}
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="m">{pkgLabel}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="m" color="subdued">
-                  <FormattedMessage
-                    id="xpack.fleet.addIntegrationFlyout.needMoreInfoText"
-                    defaultMessage=" - Need more info? {readMoreLink}"
-                    values={{
-                      readMoreLink: (
-                        <EuiLink
-                          href={`https://www.elastic.co/docs/reference/integrations/${pkgName}${
-                            integration ? '/' + integration : ''
-                          }`}
-                          external
-                          target="_blank"
-                        >
-                          <FormattedMessage
-                            id="xpack.fleet.addIntegrationFlyout.integrationInfoLink"
-                            defaultMessage="Read more about {pkgLabel}"
-                            values={{ pkgLabel }}
-                          />
-                        </EuiLink>
-                      ),
-                    }}
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiText>
       <EuiSpacer size="l" />
     </>
   );

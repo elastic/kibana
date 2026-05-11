@@ -51,6 +51,7 @@
             "lineNumber": 41,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "CLIParams",
             "trackAdoption": false,
             "isRequired": true
           }

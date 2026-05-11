@@ -213,6 +213,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     muteAll: esRule.muteAll,
     notifyWhen: esRule.notifyWhen,
     mutedInstanceIds: esRule.mutedInstanceIds,
+    ...(esRule.snoozedInstances !== undefined ? { snoozedInstances: esRule.snoozedInstances } : {}),
     ...(executionStatus
       ? { executionStatus: transformEsExecutionStatus(logger, id, executionStatus) }
       : {}),

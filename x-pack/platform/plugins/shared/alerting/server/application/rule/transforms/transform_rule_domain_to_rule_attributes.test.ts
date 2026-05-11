@@ -193,4 +193,50 @@ describe('transformRuleDomainToRuleAttributes', () => {
       }
     `);
   });
+
+  test('should preserve snoozedInstances alongside mutedInstanceIds', () => {
+    const snoozedInstances = [
+      {
+        instanceId: 'alert-1',
+        expiresAt: '2025-01-01T00:00:00.000Z',
+        conditions: [
+          { type: 'field_change' as const, field: 'kibana.alert.status' },
+          { type: 'severity_change' as const },
+        ],
+        conditionOperator: 'all' as const,
+        snoozeSnapshot: {
+          'kibana.alert.status': 'active',
+        },
+        snoozedAt: '2024-12-31T00:00:00.000Z',
+        snoozedBy: 'elastic',
+      },
+    ];
+
+    const result = transformRuleDomainToRuleAttributes({
+      rule: {
+        ...rule,
+        mutedInstanceIds: ['muted-instance-1'],
+        snoozedInstances,
+      },
+      actionsWithRefs: [
+        {
+          group: 'default',
+          actionRef: 'action_0',
+          actionTypeId: 'test',
+          uuid: 'test-uuid',
+          params: {},
+        },
+      ],
+      artifactsWithRefs: {
+        dashboards: [{ refId: 'dashboard_0' }],
+      },
+      params: {
+        legacyId: 'test',
+        paramsWithRefs: {},
+      },
+    });
+
+    expect(result.mutedInstanceIds).toEqual(['muted-instance-1']);
+    expect(result.snoozedInstances).toEqual(snoozedInstances);
+  });
 });

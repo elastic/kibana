@@ -132,7 +132,7 @@
               "\nlevels:\n- warning: will not break deployment upon upgrade\n- critical: needs to be addressed before upgrade.\n- fetch_error: Deprecations service failed to grab the deprecation details for the domain."
             ],
             "signature": [
-              "\"warning\" | \"critical\" | \"fetch_error\""
+              "\"critical\" | \"warning\" | \"fetch_error\""
             ],
             "path": "src/core/packages/deprecations/common/src/types.ts",
             "lineNumber": 31,

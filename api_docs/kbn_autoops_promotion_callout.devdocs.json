@@ -63,6 +63,7 @@
             "lineNumber": 24,
             "columnNumber": 41,
             "deprecated": false,
+            "docsReferencedTypeName": "AutoOpsPromotionCalloutProps",
             "trackAdoption": false,
             "isRequired": true
           }
