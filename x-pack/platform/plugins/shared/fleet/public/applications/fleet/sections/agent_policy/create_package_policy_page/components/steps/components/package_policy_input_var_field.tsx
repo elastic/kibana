@@ -37,6 +37,7 @@ import type { DataStream, RegistryVarsEntry } from '../../../../../../types';
 
 import { MultiTextInput } from './multi_text_input';
 import { DatasetComponent } from './dataset_component';
+import { VarMigrationTooltip } from './package_policy_input_panel';
 
 const FixedHeightDiv = styled.div`
   height: 300px;
@@ -64,6 +65,7 @@ export interface InputFieldProps {
   datastreams?: DataStream[];
   isEditPage?: boolean;
   isRequiredByVarGroup?: boolean;
+  isUpgrade?: boolean;
 }
 
 type InputComponentProps = InputFieldProps & {
@@ -88,6 +90,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     datastreams = [],
     isEditPage = false,
     isRequiredByVarGroup = false,
+    isUpgrade = false,
   }) => {
     const fleetStatus = useFleetStatus();
     const [isDirty, setIsDirty] = useState<boolean>(false);
@@ -181,6 +184,10 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     const deprecatedIcon = isDeprecated ? (
       <EuiIconTip type="warning" color="warning" position="top" content={deprecationTooltip} />
     ) : undefined;
+    const migrationTooltip =
+      isUpgrade && varDef.migrate_from ? (
+        <VarMigrationTooltip migrateFrom={varDef.migrate_from} />
+      ) : undefined;
     const labelAppend = isOptional ? (
       <EuiText size="xs" color="subdued">
         <FormattedMessage
@@ -199,6 +206,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
         labelAppend={
           <>
             {deprecatedIcon}&nbsp;
+            {migrationTooltip}&nbsp;
             {labelAppend}
           </>
         }

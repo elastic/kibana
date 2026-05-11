@@ -118,6 +118,50 @@ export const MigrationTooltip = ({
   </EuiFlexItem>
 );
 
+export const VarMigrationTooltip = ({
+  migrateFrom,
+}: {
+  migrateFrom: { name?: string; scope?: 'input' | 'stream'; stream?: string };
+}) => {
+  const { name, scope } = migrateFrom;
+  let content: string;
+  if (name && scope) {
+    content = i18n.translate(
+      'xpack.fleet.createPackagePolicy.stepConfigure.varMigratedNameAndScopeTooltip',
+      {
+        defaultMessage:
+          'This variable was previously named {name} at {scope} level. Its value was carried over from the previous package version.',
+        values: { name, scope },
+      }
+    );
+  } else if (scope) {
+    content = i18n.translate(
+      'xpack.fleet.createPackagePolicy.stepConfigure.varMigratedScopeTooltip',
+      {
+        defaultMessage:
+          'This variable was previously at {scope} level. Its value was carried over from the previous package version.',
+        values: { scope },
+      }
+    );
+  } else if (name) {
+    content = i18n.translate(
+      'xpack.fleet.createPackagePolicy.stepConfigure.varMigratedNameTooltip',
+      {
+        defaultMessage:
+          'This variable was previously named {name}. Its value was carried over from the previous package version.',
+        values: { name },
+      }
+    );
+  } else {
+    return null;
+  }
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiIconTip type="info" color="subdued" content={content} />
+    </EuiFlexItem>
+  );
+};
+
 /**
  * Automatically apply the use_apm var to the stream state
  *  if it is not already defined in the package schema and it qualifies for use.
@@ -575,6 +619,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               showDescriptionColumn={!isSingleInputAndStreams}
               streamAdvancedVars={consolidatedStreamAdvancedVars}
               sections={packageInput.sections}
+              isUpgrade={isUpgrade}
             />
             {hasInputStreams &&
             !shouldConsolidateAdvancedSections &&
