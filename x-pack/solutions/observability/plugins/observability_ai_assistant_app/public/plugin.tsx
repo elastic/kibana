@@ -23,7 +23,7 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { observabilityAppId } from '@kbn/observability-plugin/common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { firstValueFrom, type Subscription } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import type {
   ObservabilityAIAssistantAppPluginSetupDependencies,
   ObservabilityAIAssistantAppPluginStartDependencies,
@@ -49,7 +49,6 @@ export class ObservabilityAIAssistantAppPlugin
   logger: Logger;
   appService: AIAssistantAppService | undefined;
   isServerless: boolean;
-  private chatExperienceActionTypeSubscription: Subscription | undefined;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -182,25 +181,19 @@ export class ObservabilityAIAssistantAppPlugin
       )
     );
 
-    const chatExperience$ =
-      coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+    const chatExperience = coreStart.settings.client.get<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
     const isObservabilityAIAssistantEnabled = service.isEnabled();
-    this.chatExperienceActionTypeSubscription = chatExperience$.subscribe((chatExperience) => {
-      if (chatExperience === AIChatExperience.Classic && isObservabilityAIAssistantEnabled) {
-        pluginsStart.triggersActionsUi.actionTypeRegistry.register(
-          getObsAIAssistantConnectorType(service)
-        );
-      }
-    });
+    if (chatExperience === AIChatExperience.Classic && isObservabilityAIAssistantEnabled) {
+      pluginsStart.triggersActionsUi.actionTypeRegistry.register(
+        getObsAIAssistantConnectorType(service)
+      );
+    }
 
     return {
       RootCauseAnalysisContainer: LazilyLoadedRootCauseAnalysisContainer,
     };
   }
 
-  stop() {
-    this.chatExperienceActionTypeSubscription?.unsubscribe();
-    this.chatExperienceActionTypeSubscription = undefined;
-  }
+  stop() {}
 }
