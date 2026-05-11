@@ -8,6 +8,7 @@
  */
 
 import { stringify } from 'querystring';
+import { Readable } from 'stream';
 import type { Env, IConfigService } from '@kbn/config';
 import { schema, ValidationError } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/repo-info';
@@ -160,6 +161,45 @@ export class CoreAppsService {
     const httpSetup = coreSetup.http;
     const router = httpSetup.createRouter<InternalCoreAppsServiceRequestHandlerContext>('');
     const resources = coreSetup.httpResources.createRegistrar(router);
+
+    router.get(
+      {
+        path: '/api/slow',
+        validate: {},
+        security: {
+          authz: {
+            enabled: false,
+            reason: '',
+          },
+          authc: {
+            enabled: false,
+            reason: '',
+          },
+        },
+        options: {
+          access: 'public',
+        },
+      },
+      (context, req, res) => {
+        async function* generate() {
+          const chunk = Buffer.alloc(65536, '0');
+
+          for (let i = 0; i < 512; i++) {
+            await new Promise((resolve) => setTimeout(resolve, 5));
+            yield chunk;
+          }
+        }
+
+        return res.custom({
+          statusCode: 200,
+          headers: {
+            'Content-Type': 'application/octet-stream',
+            'Content-Disposition': 'attachment; filename="blob.bin"',
+          },
+          body: Readable.from(generate(), { objectMode: false }),
+        });
+      }
+    );
 
     router.get(
       {
