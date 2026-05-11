@@ -3,6 +3,7 @@ pageLoadAssetSize:
   advancedSettings: 6196
   agentBuilder: 52831
   agentBuilderPlatform: 8737
+  agentBuilderWorkflows: 25000
   agentContextLayer: 1883
   aiAssistantManagementSelection: 11569
   aiops: 15227
@@ -104,7 +105,7 @@ pageLoadAssetSize:
   kibanaUtils: 54084
   kql: 15428
   kubernetesSecurity: 6807
-  lens: 95000
+  lens: 99147
   licenseManagement: 8193
   licensing: 10073
   links: 8620
