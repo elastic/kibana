@@ -11,6 +11,7 @@ import { find, getOr } from 'lodash/fp';
 import type { Alert } from '@kbn/alerting-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import { EmulationBadge, ALERT_EMULATION_ID } from '../../components/emulation';
 import { useKibana } from '../../../common/lib/kibana';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
@@ -134,6 +135,11 @@ export const CellValue = memo(function RenderCellValue({
     return ecsSuppressionCount ? parseInt(ecsSuppressionCount, 10) : dataSuppressionCount;
   }, [ecsAlert, legacyAlert]);
 
+  const emulationId = useMemo(
+    () => find({ field: ALERT_EMULATION_ID }, legacyAlert)?.value?.[0] as string | undefined,
+    [legacyAlert]
+  );
+
   const myHeader = useMemo(
     () => header ?? ({ id: columnId, ...browserFieldsByName[columnId] } as ColumnHeaderOptions),
     [browserFieldsByName, columnId, header]
@@ -192,15 +198,22 @@ export const CellValue = memo(function RenderCellValue({
     userProfiles,
   ]);
 
-  return columnId === SIGNAL_RULE_NAME_FIELD_NAME && actualSuppressionCount ? (
-    <EuiFlexGroup gutterSize="xs">
-      <EuiFlexItem grow={false}>
-        <EuiIconTip
-          content={SUPPRESSED_ALERT_TOOLTIP(actualSuppressionCount)}
-          position="top"
-          type="layers"
-        />
-      </EuiFlexItem>
+  return columnId === SIGNAL_RULE_NAME_FIELD_NAME && (actualSuppressionCount || emulationId) ? (
+    <EuiFlexGroup gutterSize="xs" alignItems="center">
+      {actualSuppressionCount ? (
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            content={SUPPRESSED_ALERT_TOOLTIP(actualSuppressionCount)}
+            position="top"
+            type="layers"
+          />
+        </EuiFlexItem>
+      ) : null}
+      {emulationId ? (
+        <EuiFlexItem grow={false}>
+          <EmulationBadge emulationId={emulationId} />
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem grow={false}>{CellRenderer}</EuiFlexItem>
     </EuiFlexGroup>
   ) : (

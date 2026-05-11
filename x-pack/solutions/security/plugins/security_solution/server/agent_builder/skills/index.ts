@@ -10,4 +10,6 @@ export { threatHuntingSkill } from './threat_hunting';
 export { createAutomaticTroubleshootingSkill } from './automatic_troubleshooting';
 export { pciComplianceSkill } from './pci_compliance';
 export { getDetectionRuleEditSkill } from './detection_rule_edit';
+export { getDetectionEmulationSkill } from './detection_emulation';
+export type { DetectionEmulationSkillContext } from './detection_emulation';
 export { registerSkills } from './register_skills';
