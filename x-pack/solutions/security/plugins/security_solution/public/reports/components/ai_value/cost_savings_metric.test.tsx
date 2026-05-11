@@ -104,13 +104,13 @@ describe('CostSavingsMetric', () => {
 
   describe('sample variant', () => {
     it('renders the sample metric and skips the live Lens visualization', () => {
-      render(<CostSavingsMetric isSample={true} />);
+      render(<CostSavingsMetric {...defaultProps} isSample={true} />);
       expect(VisualizationEmbeddable).not.toHaveBeenCalled();
       expect(screen.getByText(i18n.COST_SAVINGS_TITLE)).toBeInTheDocument();
     });
 
     it('does not call useMetricAnimation in sample variant', () => {
-      render(<CostSavingsMetric isSample={true} />);
+      render(<CostSavingsMetric {...defaultProps} isSample={true} />);
       expect(useMetricAnimationMock).not.toHaveBeenCalled();
     });
   });

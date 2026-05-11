@@ -135,7 +135,7 @@ export const AIValueReport: React.FC<Props> = (props) => {
     );
   }
 
-  if (!data.hasEverUsedAttackDiscovery) {
+  if (data.hasEverUsedAttackDiscovery && data.valueMetrics.attackDiscoveryCount === 0) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem

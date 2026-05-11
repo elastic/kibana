@@ -30,6 +30,7 @@ const mockFormatPercent = formatPercent as jest.MockedFunction<typeof formatPerc
 const mockGetTimeRangeAsDays = getTimeRangeAsDays as jest.MockedFunction<typeof getTimeRangeAsDays>;
 
 const defaultProps = {
+  isSample: false as const,
   attackAlertIds: ['alert-1', 'alert-2', 'alert-3'],
   filteredAlertsPerc: 75.5,
   filteredAlertsPercCompare: 60.0,

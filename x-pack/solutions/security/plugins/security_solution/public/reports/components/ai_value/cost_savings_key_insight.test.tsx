@@ -165,7 +165,6 @@ describe('CostSavingsKeyInsight', () => {
     await waitFor(() => {
       expect(screen.getByTestId('alertProcessingKeyInsightsContainer')).toBeInTheDocument();
       expect(screen.getByTestId('alertProcessingKeyInsightsGreetingGroup')).toBeInTheDocument();
-      expect(screen.getByTestId('alertProcessingKeyInsightsLogo')).toBeInTheDocument();
       expect(screen.getByTestId('alertProcessingKeyInsightsGreeting')).toBeInTheDocument();
       expect(screen.getByRole('progressbar')).toBeInTheDocument();
       expect(mockUseKibana).toHaveBeenCalled();
@@ -364,7 +363,6 @@ describe('CostSavingsKeyInsight', () => {
         await waitFor(() => {
           expect(screen.getByTestId('alertProcessingKeyInsightsContainer')).toBeInTheDocument();
           expect(screen.getByTestId('alertProcessingKeyInsightsGreetingGroup')).toBeInTheDocument();
-          expect(screen.getByTestId('alertProcessingKeyInsightsLogo')).toBeInTheDocument();
           expect(screen.getByTestId('alertProcessingKeyInsightsGreeting')).toBeInTheDocument();
           expect(screen.getByRole('progressbar')).toBeInTheDocument();
           expect(mockUseKibana).toHaveBeenCalled();

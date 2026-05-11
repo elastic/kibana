@@ -63,6 +63,7 @@ describe('AlertProcessing', () => {
 
     expect(mockAlertProcessingDonut).toHaveBeenCalledWith(
       {
+        isSample: defaultProps.isSample,
         attackAlertIds: defaultProps.attackAlertIds,
         from: defaultProps.from,
         to: defaultProps.to,

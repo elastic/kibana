@@ -51,7 +51,6 @@ describe('AlertProcessingKeyInsight', () => {
   [
     'alertProcessingKeyInsightsContainer',
     'alertProcessingKeyInsightsGreetingGroup',
-    'alertProcessingKeyInsightsLogo',
     'alertProcessingKeyInsightsGreeting',
   ].forEach((testId) => {
     it(`returns the ${testId} element`, () => {

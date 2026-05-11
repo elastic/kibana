@@ -199,7 +199,7 @@ describe('ThreatsDetectedMetric', () => {
 
   describe('sample variant', () => {
     it('renders the sample metric and skips the live Lens visualization', () => {
-      render(<ThreatsDetectedMetric isSample={true} />);
+      render(<ThreatsDetectedMetric {...defaultProps} isSample={true} />);
       expect(VisualizationEmbeddable).not.toHaveBeenCalled();
       expect(screen.getByText(i18n.THREATS_DETECTED)).toBeInTheDocument();
     });

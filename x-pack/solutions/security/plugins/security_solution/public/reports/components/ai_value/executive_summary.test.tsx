@@ -85,12 +85,12 @@ describe('ExecutiveSummary', () => {
     expect(screen.getByTestId('mockFilteringRate')).toBeInTheDocument();
   });
 
-  it('renders no attacks message when isSample is true', () => {
+  it('renders the same layout with sample data when isSample is true', () => {
     render(<ExecutiveSummary {...defaultProps} isSample={true} />);
-    expect(screen.getByTestId('executiveSummaryNoAttacks').textContent).toMatch(
-      /no attack discoveries/i
-    );
-    expect(screen.queryByTestId('executiveSummaryStatsList')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('executiveSummarySideStats')).not.toBeInTheDocument();
+    expect(screen.getByTestId('executiveSummaryContainer')).toBeInTheDocument();
+    expect(screen.getByTestId('executiveSummarySideStats')).toBeInTheDocument();
+    expect(screen.getByTestId('mockCostSavings')).toBeInTheDocument();
+    expect(screen.getByTestId('mockTimeSaved')).toBeInTheDocument();
+    expect(screen.getByTestId('mockFilteringRate')).toBeInTheDocument();
   });
 });

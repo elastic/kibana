@@ -28,6 +28,7 @@ jest.mock('./metrics', () => ({
 const mockGetTimeRangeAsDays = getTimeRangeAsDays as jest.MockedFunction<typeof getTimeRangeAsDays>;
 
 const defaultProps = {
+  isSample: false as const,
   attackDiscoveryCount: 25,
   attackDiscoveryCountCompare: 20,
   from: '2023-01-01T00:00:00.000Z',
