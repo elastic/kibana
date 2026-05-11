@@ -45,7 +45,9 @@ export const prefetchConnectors = async ({
   const summaries: ConnectorSummary[] = [];
 
   for (const [actionTypeId, info] of Object.entries(connectorTypes)) {
-    if (info.enabled === false) continue;
+    if (info.enabled === false) {
+      continue;
+    }
     const baseStepType = actionTypeId.replace(/^\./, '');
     const stepTypes =
       info.subActions && info.subActions.length > 0
@@ -86,7 +88,9 @@ export const prefetchStepDefinitions = async ({
   const allConnectorIds = new Set<string>();
   const allConnectorSummaries: StepDefinitionSummary[] = [];
   for (const c of allConnectors) {
-    if (builtInIds.has(c.type) || c.deprecation) continue;
+    if (builtInIds.has(c.type) || c.deprecation) {
+      continue;
+    }
     allConnectorIds.add(c.type);
     allConnectorSummaries.push(toConnectorSummary(c));
   }
@@ -98,7 +102,9 @@ export const prefetchStepDefinitions = async ({
   const dynamicSummaries: StepDefinitionSummary[] = [];
 
   for (const [actionTypeId, info] of Object.entries(connectorTypes)) {
-    if (info.enabled === false) continue;
+    if (info.enabled === false) {
+      continue;
+    }
 
     const baseType = actionTypeId.replace(/^\./, '');
     const stepTypes =

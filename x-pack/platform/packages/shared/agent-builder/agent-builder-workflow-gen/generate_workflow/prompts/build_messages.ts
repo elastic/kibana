@@ -66,13 +66,12 @@ export const buildMessagesFromActions = (state: StateType): BaseMessage[] => {
           toolCallId: action.toolCallId,
           content: {
             success: action.success,
-            ...(action.error !== undefined ? { error: action.error } : {}),
-            ...(action.data !== undefined ? { data: action.data } : {}),
-            ...(action.currentYaml !== undefined
-              ? { currentWorkflowYaml: action.currentYaml }
-              : {}),
-            ...(action.validation !== undefined ? { validation: action.validation } : {}),
+            error: action.error,
+            data: action.data,
+            currentWorkflowYaml: action.currentYaml,
+            validation: action.validation,
           },
+          wrapToolResult: false,
         })
       );
     } else if (isValidateAction(action) && !action.valid) {

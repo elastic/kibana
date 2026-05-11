@@ -68,14 +68,17 @@ export const validateAction = ({
  * Type guards — mirror the pattern used in generate_esql/actions.ts.
  */
 
-export const isAgentStepAction = (action: Action): action is AgentStepAction =>
-  action.type === 'agent_step';
+export const isAgentStepAction = (action: Action): action is AgentStepAction => {
+  return action.type === 'agent_step';
+};
 
-export const isToolResultAction = (action: Action): action is ToolResultAction =>
-  action.type === 'tool_result';
+export const isToolResultAction = (action: Action): action is ToolResultAction => {
+  return action.type === 'tool_result';
+};
 
-export const isValidateAction = (action: Action): action is ValidateAction =>
-  action.type === 'validate';
+export const isValidateAction = (action: Action): action is ValidateAction => {
+  return action.type === 'validate';
+};
 
 /**
  * Find the most recent agent_step action in the action log.
@@ -83,7 +86,9 @@ export const isValidateAction = (action: Action): action is ValidateAction =>
 export const findLastAgentStep = (actions: Action[]): AgentStepAction | undefined => {
   for (let i = actions.length - 1; i >= 0; i--) {
     const a = actions[i];
-    if (isAgentStepAction(a)) return a;
+    if (isAgentStepAction(a)) {
+      return a;
+    }
   }
   return undefined;
 };

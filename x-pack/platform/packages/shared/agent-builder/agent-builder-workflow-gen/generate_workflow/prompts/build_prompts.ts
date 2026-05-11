@@ -37,10 +37,8 @@ ${getWorkflowBaseDocumentation()}
 ${formatStepDefinitionsBlock(prefetched.stepDefinitions)}
 
 Use \`get_step_definitions\` to fetch more details:
-- pass \`stepType="<id>"\` for the full schema of a specific step (input params,
-  config params, examples) before emitting steps you have not used recently.
-- for collapsed families shown above as \`<prefix>.*\`, pass \`search="<prefix>"\`
-  to enumerate the sub-actions.
+- pass \`stepType="<id>"\` for the full schema of a specific step (input params, config params, examples) before emitting steps you have not used recently.
+- for collapsed families shown above as \`<prefix>.*\`, pass \`search="<prefix>"\` to enumerate the sub-actions.
 
 ## Available trigger types
 
@@ -67,8 +65,7 @@ ${formatConnectorsBlock(prefetched.connectors)}
 - Use \`{{ event }}\`, \`{{ inputs.* }}\`, \`{{ steps.<name>.output.* }}\` for
   Liquid templating. NEVER use \`{{ triggers.event }}\` or \`{{ trigger.event }}\`.
 
-- Prefer connector-based steps over raw HTTP for integrations like Slack, Jira,
-  PagerDuty, etc.
+- Prefer connector-based steps over raw HTTP for integrations like Slack, Jira, PagerDuty, etc.
 
 ## Providing your final response
 
@@ -93,8 +90,12 @@ export const createUserPrompt = ({
   return `Generate a valid workflow definition based on the following information:
 
 <user-query>\n${nlQuery}\n</user-query>
-${additionalContext ? `\n<additional-context>\n${additionalContext}\n</additional-context>` : ''}
-${workflowDefinition ? `\n<workflow-to-edit>\n${workflowDefinition.yaml}\n</workflow-to-edit>` : ''}
+${
+  workflowDefinition
+    ? `\n\n<workflow-to-edit>\n${workflowDefinition.yaml}\n</workflow-to-edit>`
+    : ''
+}
+${additionalContext ? `\n\n<additional-context>\n${additionalContext}\n</additional-context>` : ''}
 `;
 };
 

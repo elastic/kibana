@@ -33,7 +33,7 @@ export interface CreateGraphArgs {
 
 export const createGenerateWorkflowGraph = ({ model, api, request, spaceId }: CreateGraphArgs) => {
   const tools = buildBoundTools();
-  const modelWithTools = model.chatModel.bindTools!(tools);
+  const modelWithTools = model.chatModel.bindTools(tools);
   const dispatchDeps = { api, spaceId, request };
 
   const prefetchNode = async (_state: StateType): Promise<Partial<StateType>> => {
@@ -77,10 +77,8 @@ export const createGenerateWorkflowGraph = ({ model, api, request, spaceId }: Cr
     for (const call of lastAgentStep.toolCalls) {
       const result = await dispatchToolCall({ yaml }, call, dispatchDeps);
 
-      // Detect whether this dispatch mutated the YAML. set_yaml replaces it
-      // entirely; insert/modify/delete return a new yaml on success. We
-      // surface the post-edit YAML and a fresh validation result so the
-      // LLM sees its own progress turn-by-turn.
+      // Detect whether this dispatch mutated the YAML. We surface the post-edit YAML
+      // and a fresh validation result so the LLM sees its own progress turn-by-turn.
       const yamlChanged = result.yaml !== undefined && result.yaml !== yaml;
       if (result.yaml !== undefined) {
         yaml = result.yaml;

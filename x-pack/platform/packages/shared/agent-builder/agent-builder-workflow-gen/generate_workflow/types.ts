@@ -99,19 +99,11 @@ export interface ValidationResult {
 /**
  * Recorded actions. This is the single source of truth for the graph's
  * history — the LangChain message list passed to the model is reconstructed
- * from this array on each cycle (mirrors the pattern used in generate_esql
- * and other agentic graphs).
+ * from this array on each cycle.
  *
  * Note: `AgentStepAction.toolCalls[].id` and `ToolResultAction.toolCallId`
  * are required to satisfy provider tool-call/tool-result pairing rules
- * (Anthropic, OpenAI).
- *
- * Reasoning/thinking blocks are NOT captured here. If/when extended thinking
- * is enabled for this graph, `AgentStepAction` must grow to carry the
- * structured assistant content blocks so providers can replay them on
- * subsequent turns.
  */
-
 export interface AgentStepAction {
   type: 'agent_step';
   toolCalls: ToolCall[];
