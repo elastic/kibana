@@ -22,16 +22,29 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+/**
+ * Describes a single follow-up key that can be pressed after a leader key sequence is opened.
+ */
 export interface LeaderKeyShortcut {
+  /** The key that triggers this shortcut once the leader key overlay is active. */
   key: string;
+  /** The short label rendered in the shortcut badge. */
   label: string;
+  /** The human-readable description shown in the overlay and announced to assistive tech. */
   description: string;
+  /** Runs when the shortcut key is pressed while this leader key menu is active. */
   onTrigger: () => void;
 }
 
+/**
+ * Props for {@link LeaderKeyShortcuts}.
+ */
 export interface LeaderKeyShortcutsProps {
+  /** The key that opens this shortcut group. */
   leaderKey: string;
+  /** The label shown for the leader key in the overlay and accessibility text. */
   leaderKeyDescription: string;
+  /** The follow-up shortcuts available after the leader key is pressed. */
   shortcuts: LeaderKeyShortcut[];
 }
 
@@ -155,6 +168,13 @@ const ShortcutDisplay = ({
   );
 };
 
+/**
+ * Renders a leader-key shortcut overlay and handles the two-step key sequence used to trigger
+ * the provided shortcuts.
+ *
+ * Multiple instances can be mounted at once. The component coordinates those instances so only
+ * one leader-key menu can own the active sequence at a time.
+ */
 export const LeaderKeyShortcuts = ({
   leaderKey,
   leaderKeyDescription,
