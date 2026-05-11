@@ -7,6 +7,7 @@
 
 import type {
   ActionPolicyBulkAction,
+  ActionPolicyDestinationType,
   ActionPolicyResponse,
   CreateActionPolicyData,
   UpdateActionPolicyData,
@@ -51,7 +52,7 @@ export interface FindActionPoliciesParams {
   page?: number;
   perPage?: number;
   search?: string;
-  destinationType?: string;
+  destinationType?: ActionPolicyDestinationType;
   createdBy?: string;
   enabled?: boolean;
   tags?: string[];

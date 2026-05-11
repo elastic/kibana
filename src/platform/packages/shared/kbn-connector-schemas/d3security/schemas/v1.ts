@@ -7,27 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { D3SecuritySeverity } from '../constants';
 
 // Connector schema
-export const D3SecurityConfigSchema = z
-  .object({
-    url: z.string(),
-  })
-  .strict();
+export const D3SecurityConfigSchema = lazySchema(() =>
+  z
+    .object({
+      url: z.string(),
+    })
+    .strict()
+);
 
-export const D3SecuritySecretsSchema = z.object({ token: z.string() }).strict();
+export const D3SecuritySecretsSchema = lazySchema(() => z.object({ token: z.string() }).strict());
 
 // Run action schema
-export const D3SecurityRunActionParamsSchema = z
-  .object({
-    body: z.string().optional(),
-    severity: z.string().default(D3SecuritySeverity.EMPTY).optional(),
-    eventType: z.string().default('').optional(),
-  })
-  .strict();
+export const D3SecurityRunActionParamsSchema = lazySchema(() =>
+  z
+    .object({
+      body: z.string().optional(),
+      severity: z.string().default(D3SecuritySeverity.EMPTY).optional(),
+      eventType: z.string().default('').optional(),
+    })
+    .strict()
+);
 
-export const D3SecurityRunActionResponseSchema = z.object({
-  refid: z.string(),
-});
+export const D3SecurityRunActionResponseSchema = lazySchema(() =>
+  z.object({
+    refid: z.string(),
+  })
+);
