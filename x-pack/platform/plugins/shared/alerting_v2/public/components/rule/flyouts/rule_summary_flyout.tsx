@@ -84,21 +84,19 @@ export const RuleSummaryFlyout = ({
             responsive={false}
             alignItems="center"
           >
-            {
-              onQuickEdit && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType="pencil"
-                    color="text"
-                    onClick={() => onQuickEdit(rule)}
-                    aria-label={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.quickEdit', {
-                      defaultMessage: 'Quick edit rule',
-                    })}
-                    data-test-subj="ruleSummaryFlyoutQuickEditButton"
-                  />
-                </EuiFlexItem>
-              )
-            }
+            {onQuickEdit && (
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="pencil"
+                  color="text"
+                  onClick={() => onQuickEdit(rule)}
+                  aria-label={i18n.translate('xpack.alertingV2.ruleSummaryFlyout.quickEdit', {
+                    defaultMessage: 'Quick edit rule',
+                  })}
+                  data-test-subj="ruleSummaryFlyoutQuickEditButton"
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <RuleActionsMenu
                 rule={rule}
