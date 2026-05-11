@@ -3,11 +3,12 @@ pageLoadAssetSize:
   advancedSettings: 1981
   agentBuilder: 254
   agentBuilderPlatform: 4152
+  agentBuilderWorkflows: 13383
   agentContextLayer: 292
   aiAssistantManagementSelection: 355
   aiops: 317
   alerting: 8789
-  alertingVTwo: 8551
+  alertingVTwo: 8509
   apm: 16978
   apmSourcesAccess: 779
   automaticImport: 13257
@@ -33,7 +34,7 @@ pageLoadAssetSize:
   customIntegrations: 636
   dashboard: 452
   dashboardAgent: 3074
-  dashboardMarkdown: 4081
+  dashboardMarkdown: 2058
   data: 11799
   dataQuality: 5836
   datasetQuality: 41081
@@ -87,7 +88,7 @@ pageLoadAssetSize:
   home: 9251
   imageEmbeddable: 1732
   inbox: 935
-  indexLifecycleManagement: 32333
+  indexLifecycleManagement: 29229
   indexManagement: 316
   inference: 5751
   infra: 45673
@@ -120,7 +121,7 @@ pageLoadAssetSize:
   ml: 663
   mockIdpPlugin: 4203
   monitoring: 22416
-  navigation: 10095
+  navigation: 8671
   newsfeed: 9707
   noDataPage: 630
   observability: 3614
@@ -129,7 +130,7 @@ pageLoadAssetSize:
   observabilityAIAssistantApp: 6377
   observabilityAiAssistantManagement: 2011
   observabilityLogsExplorer: 1083
-  observabilityOnboarding: 7766
+  observabilityOnboarding: 7767
   observabilityShared: 7496
   osquery: 13046
   painlessLab: 2282
@@ -182,7 +183,7 @@ pageLoadAssetSize:
   snapshotRestore: 16909
   spaces: 22966
   stackAlerts: 1717
-  stackConnectors: 65112
+  stackConnectors: 67445
   streams: 6521
   streamsApp: 56877
   synthetics: 18443
@@ -192,10 +193,10 @@ pageLoadAssetSize:
   transform: 8828
   triggersActionsUi: 3033
   uiActions: 454
-  unifiedDocViewer: 627
+  unifiedDocViewer: 568
   unifiedSearch: 511
   upgradeAssistant: 1822
-  uptime: 37803
+  uptime: 37818
   urlDrilldown: 1267
   urlForwarding: 1412
   usageCollection: 223
