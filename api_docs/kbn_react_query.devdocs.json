@@ -14596,6 +14596,10 @@
                 "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/knowledge_base/knowledge_base_settings_management/use_index_mappings.ts"
               },
               {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/run_workflow/ui/workflow_execute_modal.tsx"
+              },
+              {
                 "plugin": "maintenanceWindows",
                 "path": "x-pack/platform/plugins/shared/maintenance_windows/public/hooks/use_find_maintenance_windows.ts"
               },
@@ -14762,10 +14766,6 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/solutions/observability/plugins/infra/public/hooks/use_metrics_explorer_views.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/features/run_workflow/ui/workflow_execute_modal.tsx"
               },
               {
                 "plugin": "searchPlayground",
