@@ -1330,6 +1330,228 @@ describe('ActionPolicyClient', () => {
     });
   });
 
+  describe('upsertActionPolicy', () => {
+    const baseUpsertData = {
+      name: 'upsert-policy',
+      description: 'upsert-policy description',
+      destinations: [{ type: 'workflow' as const, id: 'wf-upsert' }],
+    };
+
+    describe('create action policy (id does not exist)', () => {
+      beforeEach(() => {
+        mockSavedObjectsClient.get.mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createGenericNotFoundError(
+            ACTION_POLICY_SAVED_OBJECT_TYPE,
+            'policy-id-upsert-new'
+          )
+        );
+      });
+
+      it('creates the policy with a fresh API key and audit fields', async () => {
+        mockSavedObjectsClient.create.mockResolvedValueOnce({
+          id: 'policy-id-upsert-new',
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {} as ActionPolicySavedObjectAttributes,
+          references: [],
+          version: 'WzEsMV0=',
+        });
+
+        const res = await client.upsertActionPolicy({
+          id: 'policy-id-upsert-new',
+          data: baseUpsertData,
+        });
+
+        expect(apiKeyService.create).toHaveBeenCalledWith('Action Policy: upsert-policy');
+        expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          expect.objectContaining({
+            name: 'upsert-policy',
+            enabled: true,
+            auth: {
+              apiKey: 'encoded-es-api-key',
+              owner: 'test-user',
+              createdByUser: false,
+            },
+            createdBy: 'elastic_profile_uid',
+            createdAt: '2025-01-01T00:00:00.000Z',
+            updatedBy: 'elastic_profile_uid',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+          }),
+          { id: 'policy-id-upsert-new', overwrite: false }
+        );
+        expect(res).toEqual({
+          created: true,
+          policy: expect.objectContaining({
+            id: 'policy-id-upsert-new',
+            name: 'upsert-policy',
+            enabled: true,
+            snoozedUntil: null,
+          }),
+        });
+        expect(res.policy.auth).not.toHaveProperty('apiKey');
+        expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
+      });
+
+      it('invalidates the new API key and throws 409 when another caller wins the race', async () => {
+        mockSavedObjectsClient.create.mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createConflictError(
+            ACTION_POLICY_SAVED_OBJECT_TYPE,
+            'policy-id-upsert-new'
+          )
+        );
+
+        await expect(
+          client.upsertActionPolicy({ id: 'policy-id-upsert-new', data: baseUpsertData })
+        ).rejects.toMatchObject({
+          output: { statusCode: 409 },
+        });
+
+        expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith([
+          'encoded-es-api-key',
+        ]);
+      });
+    });
+
+    describe('replace action policy (id exists)', () => {
+      const existingAttributes: ActionPolicySavedObjectAttributes = {
+        name: 'before',
+        description: 'before description',
+        enabled: false,
+        destinations: [{ type: 'workflow', id: 'wf-before' }],
+        matcher: 'env: production',
+        groupBy: ['host.name'],
+        snoozedUntil: '2099-01-01T00:00:00.000Z',
+        auth: {
+          apiKey: 'old-api-key',
+          owner: 'old-user',
+          createdByUser: false,
+        },
+        createdBy: 'previous_creator_uid',
+        createdByUsername: 'previous_creator',
+        createdAt: '2024-06-01T00:00:00.000Z',
+        updatedBy: 'previous_updater_uid',
+        updatedByUsername: 'previous_updater',
+        updatedAt: '2024-06-01T00:00:00.000Z',
+      };
+
+      beforeEach(() => {
+        // upsertActionPolicy reads the existing policy twice — once for the
+        // existence check and again to load the immutable/audit context — so
+        // both `get` calls must resolve to the same SO.
+        const existingDoc = {
+          id: 'policy-id-update-1',
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          references: [],
+          version: 'WzEsMV0=',
+          attributes: existingAttributes,
+        };
+        mockSavedObjectsClient.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+      });
+
+      it('replaces create-schema fields, preserves audit + operational state, rotates the API key', async () => {
+        mockSavedObjectsClient.update.mockResolvedValueOnce({
+          id: 'policy-id-update-1',
+          type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {} as ActionPolicySavedObjectAttributes,
+          references: [],
+          version: 'WzIsMV0=',
+        });
+
+        const res = await client.upsertActionPolicy({
+          id: 'policy-id-update-1',
+          data: {
+            name: 'after',
+            description: 'after description',
+            destinations: baseUpsertData.destinations,
+          },
+        });
+
+        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-id-update-1',
+          expect.objectContaining({
+            // Replaced fields take new values from the body.
+            name: 'after',
+            description: 'after description',
+            destinations: [{ type: 'workflow', id: 'wf-upsert' }],
+            // Operational state is preserved.
+            enabled: false,
+            snoozedUntil: '2099-01-01T00:00:00.000Z',
+            // Audit metadata is preserved on the create side.
+            createdBy: 'previous_creator_uid',
+            createdByUsername: 'previous_creator',
+            createdAt: '2024-06-01T00:00:00.000Z',
+            // Audit metadata advances on the update side.
+            updatedBy: 'elastic_profile_uid',
+            updatedByUsername: 'elastic',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+            // API key is the freshly minted one.
+            auth: {
+              apiKey: 'encoded-es-api-key',
+              owner: 'test-user',
+              createdByUser: false,
+            },
+          }),
+          { version: 'WzEsMV0=' }
+        );
+
+        // Old key invalidated AFTER successful SO update.
+        expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith(['old-api-key']);
+        expect(res.created).toBe(false);
+        expect(res.policy.auth).not.toHaveProperty('apiKey');
+      });
+
+      it('invalidates the new API key and throws 409 when version is stale', async () => {
+        mockSavedObjectsClient.update.mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createConflictError(
+            ACTION_POLICY_SAVED_OBJECT_TYPE,
+            'policy-id-update-1'
+          )
+        );
+
+        await expect(
+          client.upsertActionPolicy({ id: 'policy-id-update-1', data: baseUpsertData })
+        ).rejects.toMatchObject({
+          output: { statusCode: 409 },
+        });
+
+        // The freshly minted key is invalidated, the old key is not (it's still in use).
+        expect(apiKeyService.markApiKeysForInvalidation).toHaveBeenCalledWith([
+          'encoded-es-api-key',
+        ]);
+        expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalledWith(['old-api-key']);
+      });
+    });
+
+    it('rethrows non-not-found errors from the existing-policy lookup', async () => {
+      mockSavedObjectsClient.get.mockRejectedValueOnce(new Error('elasticsearch unavailable'));
+
+      await expect(
+        client.upsertActionPolicy({ id: 'policy-id-upsert-fatal', data: baseUpsertData })
+      ).rejects.toThrow('elasticsearch unavailable');
+
+      expect(apiKeyService.create).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
+    it('throws 400 when the body is invalid', async () => {
+      await expect(
+        client.upsertActionPolicy({
+          id: 'policy-id-upsert-bad',
+          data: { ...baseUpsertData, destinations: [] },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+      });
+
+      expect(mockSavedObjectsClient.get).not.toHaveBeenCalled();
+      expect(apiKeyService.create).not.toHaveBeenCalled();
+    });
+  });
+
   describe('updateActionPolicyApiKey', () => {
     const existingAttributes: ActionPolicySavedObjectAttributes = {
       name: 'existing-policy',
