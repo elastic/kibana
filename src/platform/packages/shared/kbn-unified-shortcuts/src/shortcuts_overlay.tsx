@@ -28,6 +28,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import useUnmount from 'react-use/lib/useUnmount';
 import { consumeKeyboardEvent, hasModifierKey } from './shortcut_utils';
 import { useShortcutsContext } from './shortcuts_provider';
 
@@ -126,28 +127,16 @@ export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlay
     useEffect(() => {
       const onKeyDown = (event: KeyboardEvent) => {
         if (isVisible) {
-          if (hasModifierKey(event)) {
-            close();
-            return;
-          }
-
-          consumeKeyboardEvent(event);
-
-          if (event.key === 'Escape') {
-            close();
-            return;
+          if (!hasModifierKey(event)) {
+            consumeKeyboardEvent(event);
           }
 
           close();
-          runAction(event);
-          return;
-        }
 
-        if (hasOtherActiveLeaderKeyInstance(instanceId)) {
-          return;
-        }
-
-        if (shouldOpen(event) && open()) {
+          if (event.key !== 'Escape') {
+            runAction(event);
+          }
+        } else if (!hasOtherActiveLeaderKeyInstance(instanceId) && shouldOpen(event) && open()) {
           consumeKeyboardEvent(event);
         }
       };
@@ -175,11 +164,9 @@ export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlay
       shouldOpen,
     ]);
 
-    useEffect(() => {
-      return () => {
-        releaseActiveLeaderKeyInstance(instanceId);
-      };
-    }, [instanceId, releaseActiveLeaderKeyInstance]);
+    useUnmount(() => {
+      releaseActiveLeaderKeyInstance(instanceId);
+    });
 
     return (
       <EuiPortal>
