@@ -51,7 +51,6 @@ steps:
         /internal/streams/_extraction/_eligible?maxScheduledStreams={{ inputs.maxScheduledStreams }}&lookbackHours={{ inputs.lookbackHours }}
         {%- if inputs.extractionIntervalHours != null %}&extractionIntervalHours={{ inputs.extractionIntervalHours }}{% endif -%}
         {%- if inputs.excludedStreamPatterns %}&excludedStreamPatterns={{ inputs.excludedStreamPatterns }}{% endif -%}
-      use_server_info: true
       headers:
         x-elastic-internal-origin: "kibana"
     on-failure:
@@ -110,7 +109,6 @@ steps:
                 with:
                   method: GET
                   path: "/internal/streams/{{ foreach.item.streamName }}/onboarding/_execution"
-                  use_server_info: true
                   headers:
                     x-elastic-internal-origin: "kibana"
               - name: delay
