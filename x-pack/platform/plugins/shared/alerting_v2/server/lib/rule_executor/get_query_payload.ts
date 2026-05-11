@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import { hasStartEndParams } from '@kbn/esql-utils';
 import type { EsqlESQLParam, EsqlQueryRequest } from '@elastic/elasticsearch/lib/api/types';
+import { RESERVED_ESQL_PARAMS } from '@kbn/alerting-v2-constants';
 import { parseDurationToMs } from '../duration';
 
 export interface GetQueryPayloadParams {
@@ -64,16 +58,11 @@ export function getQueryPayload({
     return { dateStart, dateEnd, filter };
   }
 
-  const params: EsqlQueryRequest['params'] = [];
-
-  if (/\?_tstart/i.test(query)) {
-    // TODO: wait until client is fixed: https://github.com/elastic/elasticsearch-specification/issues/5083
-    params.push({ _tstart: dateStart } as unknown as EsqlESQLParam);
-  }
-  if (/\?_tend/i.test(query)) {
-    // TODO: wait until client is fixed: https://github.com/elastic/elasticsearch-specification/issues/5083
-    params.push({ _tend: dateEnd } as unknown as EsqlESQLParam);
-  }
+  const paramValues: Record<string, string> = { _tstart: dateStart, _tend: dateEnd };
+  // TODO: wait until client is fixed: https://github.com/elastic/elasticsearch-specification/issues/5083
+  const params: EsqlQueryRequest['params'] = RESERVED_ESQL_PARAMS.filter((name) =>
+    new RegExp(`\\?${name}`, 'i').test(query)
+  ).map((name) => ({ [name]: paramValues[name] } as unknown as EsqlESQLParam));
 
   return { dateStart, dateEnd, filter, ...(params.length ? { params } : {}) };
 }

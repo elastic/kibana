@@ -13,6 +13,13 @@ export const PAGE_TITLE_NEW_INTEGRATION = i18n.translate(
   }
 );
 
+export const PAGE_TITLE_EDIT_INTEGRATION = i18n.translate(
+  'xpack.automaticImport.integrationManagement.pageTitleEditIntegration',
+  {
+    defaultMessage: 'Edit Integration',
+  }
+);
+
 export const INTEGRATION_NOT_FOUND_TITLE = i18n.translate(
   'xpack.automaticImport.integrationManagement.integrationNotFoundTitle',
   {

@@ -8,8 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import pMap from 'p-map';
 import type { IKibanaResponse, RequestHandler } from '@kbn/core/server';
-import { ExecutionStatus } from '@kbn/agent-builder-plugin/server';
-import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, ExecutionStatus } from '@kbn/agent-builder-common';
 import { ENDPOINT_WORKFLOW_INSIGHTS_SCAN_TRIGGERED_EVENT } from '../../../lib/telemetry/event_based/events';
 import type { CreateWorkflowInsightRequestBody } from '../../../../common/api/endpoint/workflow_insights';
 import { CreateWorkflowInsightRequestSchema } from '../../../../common/api/endpoint/workflow_insights/workflow_insights';

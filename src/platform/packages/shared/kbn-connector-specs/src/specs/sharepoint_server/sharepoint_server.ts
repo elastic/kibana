@@ -22,7 +22,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import {
   CallRestApiInputSchema,
@@ -55,18 +55,20 @@ export const SharepointServer: ConnectorSpec = {
     types: ['basic'],
   },
 
-  schema: z.object({
-    siteUrl: z
-      .string()
-      .url()
-      .transform((val) => val.replace(/\/+$/, ''))
-      .describe('SharePoint Server site URL')
-      .meta({
-        label: 'Site URL',
-        widget: 'text',
-        placeholder: 'https://sharepoint.company.com/sites/mysite',
-      }),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      siteUrl: z
+        .string()
+        .url()
+        .transform((val) => val.replace(/\/+$/, ''))
+        .describe('SharePoint Server site URL')
+        .meta({
+          label: 'Site URL',
+          widget: 'text',
+          placeholder: 'https://sharepoint.company.com/sites/mysite',
+        }),
+    })
+  ),
 
   actions: {
     getWeb: {

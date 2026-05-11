@@ -47,12 +47,12 @@ export const AppMenuPopoverActionButtons = ({
       direction="column"
       justifyContent="center"
       gutterSize="m"
-      alignItems="center"
+      alignItems="stretch"
       css={containerCss}
       data-test-subj="app-menu-popover-action-buttons-container"
     >
       {primaryActionItem && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <AppMenuActionButton
             {...primaryActionItem}
             run={(params) => {
@@ -65,6 +65,7 @@ export const AppMenuPopoverActionButtons = ({
             }}
             onPopoverClose={handleOnPopoverClose}
             onCloseOverflowButton={onCloseOverflowButton}
+            fullWidth
           />
         </EuiFlexItem>
       )}
