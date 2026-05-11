@@ -114,12 +114,18 @@ function validateEmailAddress_(
 
   for (const emailAddress of emailAddresses) {
     if (emailAddress.type === 'mailbox') {
-      if (!hasValidLocalPart(emailAddress.local, address) || !hasValidDomainLabels(emailAddress.domain)) {
+      if (
+        !hasValidLocalPart(emailAddress.local, address) ||
+        !hasValidDomainLabels(emailAddress.domain)
+      ) {
         return { address, valid: false, reason: InvalidEmailReason.invalid };
       }
     } else if (emailAddress.type === 'group') {
       for (const groupAddress of emailAddress.addresses) {
-        if (!hasValidLocalPart(groupAddress.local, address) || !hasValidDomainLabels(groupAddress.domain)) {
+        if (
+          !hasValidLocalPart(groupAddress.local, address) ||
+          !hasValidDomainLabels(groupAddress.domain)
+        ) {
           return { address, valid: false, reason: InvalidEmailReason.invalid };
         }
       }
