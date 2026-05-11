@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
-import { CreateRulePanel } from '../rules_list_page/create_rule_panel';
+import { CreateRulePanel } from '../../components/rule_create_options/create_rule_panel';
 
-export const RuleMethodSelectorPage = () => {
-  useBreadcrumbs('rule_method_selector');
+export const RuleCreateOptionsPage = () => {
+  useBreadcrumbs('rule_create_options');
 
   return (
     <div>

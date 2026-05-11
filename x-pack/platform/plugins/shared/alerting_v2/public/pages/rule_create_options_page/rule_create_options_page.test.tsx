@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { RuleMethodSelectorPage } from './rule_method_selector_page';
+import { RuleCreateOptionsPage } from './rule_create_options_page';
 
 jest.mock('../../application/breadcrumb_context', () => ({
   useSetBreadcrumbs: () => jest.fn(),
@@ -30,11 +30,11 @@ jest.mock('@kbn/core-di-browser', () => ({
 const renderPage = () =>
   render(
     <I18nProvider>
-      <RuleMethodSelectorPage />
+      <RuleCreateOptionsPage />
     </I18nProvider>
   );
 
-describe('RuleMethodSelectorPage', () => {
+describe('RuleCreateOptionsPage', () => {
   it('renders the page title', () => {
     renderPage();
 

@@ -60,8 +60,8 @@ export const CreateRulePanel: React.FC = () => {
               titleElement="h3"
               titleSize="xs"
               hasBorder={true}
-              title={i18n.translate('xpack.alertingV2.createRulePanel.createWithEsqlTitle', {
-                defaultMessage: 'Create with ES|QL',
+              title={i18n.translate('xpack.alertingV2.createRulePanel.createEsqlRuleTitle', {
+                defaultMessage: 'Create ES|QL rule',
               })}
               description={i18n.translate(
                 'xpack.alertingV2.createRulePanel.createWithEsqlDescription',
@@ -81,6 +81,7 @@ export const CreateRulePanel: React.FC = () => {
                   defaultMessage: 'Coming soon',
                 }),
                 color: 'hollow',
+                size: 'm',
               }}
               layout="horizontal"
               titleElement="h3"
@@ -128,16 +129,21 @@ export const CreateRulePanel: React.FC = () => {
             />
           </h3>
         </EuiTitle>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
         <EuiFlexGroup>
           {/* TODO: Add the other rule builders here and change to the correct link */}
           <EuiFlexItem>
             <EuiCard
+              betaBadgeProps={{
+                label: i18n.translate('xpack.alertingV2.createRulePanel.comingSoonLabel', {
+                  defaultMessage: 'Coming soon',
+                }),
+                color: 'hollow',
+                size: 'm',
+              }}
               layout="horizontal"
-              display="plain"
               titleElement="h3"
               titleSize="xs"
-              hasBorder={true}
               title={i18n.translate('xpack.alertingV2.createRulePanel.thresholdAlertTitle', {
                 defaultMessage: 'Threshold Alert',
               })}
@@ -148,38 +154,16 @@ export const CreateRulePanel: React.FC = () => {
                     'Monitor one or more metrics and alert when they cross a threshold. Multi-condition support with custom aggregations.',
                 }
               )}
-              href={basePath.prepend(paths.ruleCreate)}
               icon={<EuiIcon type="chartThreshold" color="text" size="l" aria-hidden={true} />}
+              aria-disabled={true}
+              display="subdued"
+              css={{
+                cursor: 'default',
+                pointerEvents: 'none',
+                width: '50%',
+              }}
             />
           </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner color="subdued" paddingSize="l">
-        <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="m">
-          <EuiText size="s" color="subdued" textAlign="center">
-            <p>
-              <FormattedMessage
-                id="xpack.alertingV2.createRulePanel.learnMoreDescription"
-                defaultMessage="Want to learn more?"
-              />
-            </p>
-          </EuiText>
-          {/* TODO: Add the correct link here */}
-          <EuiLink
-            href="https://www.elastic.co/guide/en/elasticsearch/reference/current/alerting-rule-types.html"
-            target="_blank"
-            external
-            data-test-subj="createRulePanelDocumentationLink"
-            aria-label={i18n.translate(
-              'xpack.alertingV2.createRulePanel.documentationLinkAriaLabel',
-              { defaultMessage: 'Read documentation' }
-            )}
-          >
-            <FormattedMessage
-              id="xpack.alertingV2.createRulePanel.documentationLinkText"
-              defaultMessage="Read documentation"
-            />
-          </EuiLink>
         </EuiFlexGroup>
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>

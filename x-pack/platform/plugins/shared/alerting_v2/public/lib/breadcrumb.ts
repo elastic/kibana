@@ -16,7 +16,7 @@ export type AlertingV2BreadcrumbPage =
   | 'action_policies_list'
   | 'action_policy_create'
   | 'action_policy_edit'
-  | 'rule_method_selector'
+  | 'rule_create_options'
   | 'episodes_list'
   | 'episode_details'
   | 'rule_doctor';
@@ -54,7 +54,7 @@ export const getAlertingV2Breadcrumb = (
       return {
         text: options?.ruleName ?? '',
       };
-    case 'rule_method_selector':
+    case 'rule_create_options':
       return {
         text: i18n.translate('xpack.alertingV2.breadcrumbs.ruleMethodSelectorTitle', {
           defaultMessage: 'Create rule',

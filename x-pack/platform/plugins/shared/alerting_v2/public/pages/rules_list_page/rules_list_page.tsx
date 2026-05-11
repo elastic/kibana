@@ -34,7 +34,7 @@ import { ModeFilterPopover } from '../../components/rule/popovers/mode_filter_po
 import { StatusFilterPopover } from '../../components/rule/popovers/status_filter_popover';
 import { TagsFilterPopover } from '../../components/rule/popovers/tag_filter_popover';
 import { buildRulesListFilter } from './utils';
-import { CreateRulePanel } from './create_rule_panel';
+import { CreateRulePanel } from '../../components/rule_create_options/create_rule_panel';
 
 const DEFAULT_PER_PAGE = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
