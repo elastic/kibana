@@ -7,12 +7,13 @@
 
 import { LENS_METRIC_STATE_DEFAULTS } from '@kbn/lens-common';
 
+import { LENS_API_VERSION, LENS_VIS_API_PATH } from '../../../../common/constants';
 import type { LensCreateRequestBody } from '../../../../server/api/routes/visualizations/types';
 
-/** Public Lens visualizations API path. Mirrors `LENS_VIS_API_PATH`. */
-export const LENS_API_PATH = '/api/visualizations';
-/** Lens public API version. Mirrors `LENS_API_VERSION`. */
-export const LENS_API_VERSION = '2023-10-31';
+/** Lens visualizations API path. Mirrors `LENS_VIS_API_PATH`. */
+export const LENS_API_PATH = LENS_VIS_API_PATH;
+/** Lens API version. Mirrors `LENS_API_VERSION`. */
+export { LENS_API_VERSION };
 
 /**
  * Common headers for every Lens public-API request.
