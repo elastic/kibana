@@ -12,3 +12,4 @@ export {
   type LeaderKeyShortcutsProps,
   type LeaderKeyShortcut,
 } from './src/leader_key_shortcuts';
+export { ShortcutsProvider, type ShortcutsProviderProps } from './src/shortcuts_provider';

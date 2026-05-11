@@ -21,6 +21,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useShortcutsContext } from './shortcuts_provider';
 
 /**
  * Describes a single follow-up key that can be pressed after a leader key sequence is opened.
@@ -65,22 +66,6 @@ const editableTargetSelector = [
 ].join(', ');
 
 const normalizeShortcutKey = (key: string) => key.toLowerCase();
-
-let activeLeaderKeyInstance: symbol | undefined;
-
-const claimLeaderKeyInstance = (instanceId: symbol) => {
-  activeLeaderKeyInstance = instanceId;
-};
-
-const releaseLeaderKeyInstance = (instanceId: symbol) => {
-  if (activeLeaderKeyInstance === instanceId) {
-    activeLeaderKeyInstance = undefined;
-  }
-};
-
-const hasOtherActiveLeaderKeyInstance = (instanceId: symbol) => {
-  return activeLeaderKeyInstance !== undefined && activeLeaderKeyInstance !== instanceId;
-};
 
 const hasModifierKey = (event: KeyboardEvent) => {
   return event.altKey || event.ctrlKey || event.metaKey || event.shiftKey;
@@ -180,6 +165,11 @@ export const LeaderKeyShortcuts = ({
   leaderKeyDescription,
   shortcuts,
 }: LeaderKeyShortcutsProps) => {
+  const {
+    claimActiveLeaderKeyInstance,
+    releaseActiveLeaderKeyInstance,
+    hasOtherActiveLeaderKeyInstance,
+  } = useShortcutsContext();
   const [isVisible, setIsVisible] = useState(false);
   const [instanceId] = useState(() => Symbol(`leader-key-shortcuts:${leaderKey}`));
   const { euiTheme } = useEuiTheme();
@@ -213,15 +203,15 @@ export const LeaderKeyShortcuts = ({
     () => screenReaderHint
   );
   const openShortcuts = useCallback(() => {
-    claimLeaderKeyInstance(instanceId);
+    claimActiveLeaderKeyInstance(instanceId);
     setLiveAnnouncement(screenReaderAnnouncement);
     setIsVisible(true);
-  }, [instanceId, screenReaderAnnouncement]);
+  }, [claimActiveLeaderKeyInstance, instanceId, screenReaderAnnouncement]);
   const closeShortcuts = useCallback(() => {
-    releaseLeaderKeyInstance(instanceId);
+    releaseActiveLeaderKeyInstance(instanceId);
     setLiveAnnouncement(undefined);
     setIsVisible(false);
-  }, [instanceId]);
+  }, [instanceId, releaseActiveLeaderKeyInstance]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -272,10 +262,18 @@ export const LeaderKeyShortcuts = ({
       document.removeEventListener('keydown', onKeyDown, true);
       document.removeEventListener('pointerdown', onPointerDown, true);
     };
-  }, [closeShortcuts, instanceId, isVisible, normalizedLeaderKey, openShortcuts, shortcutsByKey]);
+  }, [
+    closeShortcuts,
+    hasOtherActiveLeaderKeyInstance,
+    instanceId,
+    isVisible,
+    normalizedLeaderKey,
+    openShortcuts,
+    shortcutsByKey,
+  ]);
 
   useUnmount(() => {
-    releaseLeaderKeyInstance(instanceId);
+    releaseActiveLeaderKeyInstance(instanceId);
   });
 
   return (

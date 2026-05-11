@@ -14,6 +14,7 @@ import React, { useEffect, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { ShortcutsProvider } from '@kbn/unified-shortcuts';
 import useLatest from 'react-use/lib/useLatest';
 import { i18n } from '@kbn/i18n';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -87,18 +88,20 @@ export const DiscoverMainRoute = ({
 
   return (
     <DiscoverCustomizationContextProvider value={customizationContext}>
-      <RuntimeStateManagerProvider value={runtimeStateManager}>
-        <InternalStateProvider store={internalState}>
-          <DiscoverMainRouteContent
-            customizationContext={customizationContext}
-            customizationCallbacks={customizationCallbacks}
-            urlStateStorage={urlStateStorage}
-            internalState={internalState}
-            runtimeStateManager={runtimeStateManager}
-            searchSessionManager={searchSessionManager}
-          />
-        </InternalStateProvider>
-      </RuntimeStateManagerProvider>
+      <ShortcutsProvider>
+        <RuntimeStateManagerProvider value={runtimeStateManager}>
+          <InternalStateProvider store={internalState}>
+            <DiscoverMainRouteContent
+              customizationContext={customizationContext}
+              customizationCallbacks={customizationCallbacks}
+              urlStateStorage={urlStateStorage}
+              internalState={internalState}
+              runtimeStateManager={runtimeStateManager}
+              searchSessionManager={searchSessionManager}
+            />
+          </InternalStateProvider>
+        </RuntimeStateManagerProvider>
+      </ShortcutsProvider>
     </DiscoverCustomizationContextProvider>
   );
 };

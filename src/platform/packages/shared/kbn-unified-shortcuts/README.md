@@ -11,6 +11,20 @@ across apps.
 
 ## Components
 
+### `ShortcutsProvider`
+
+Provides shared shortcut coordination state to shortcut primitives rendered beneath it. It must wrap all shortcut components rendered throughout an app, and typically lives high in the app tree at a common ancestor.
+
+#### Usage
+
+```tsx
+import { ShortcutsProvider } from '@kbn/unified-shortcuts';
+
+export const MainApp = () => {
+  return <ShortcutsProvider>{/* app and shortcut components go here */}</ShortcutsProvider>;
+};
+```
+
 ### `LeaderKeyShortcuts`
 
 Renders a leader-key shortcut overlay and handles the keyboard interaction for one shortcut group.
@@ -41,7 +55,11 @@ It provides:
 #### Usage
 
 ```tsx
-import { LeaderKeyShortcuts, type LeaderKeyShortcut } from '@kbn/unified-shortcuts';
+import {
+  LeaderKeyShortcuts,
+  ShortcutsProvider,
+  type LeaderKeyShortcut,
+} from '@kbn/unified-shortcuts';
 
 const shortcuts: LeaderKeyShortcut[] = [
   {
@@ -63,7 +81,11 @@ const shortcuts: LeaderKeyShortcut[] = [
 ];
 
 export const TabShortcuts = () => {
-  return <LeaderKeyShortcuts leaderKey="t" leaderKeyDescription="Tab" shortcuts={shortcuts} />;
+  return (
+    <ShortcutsProvider>
+      <LeaderKeyShortcuts leaderKey="t" leaderKeyDescription="Tab" shortcuts={shortcuts} />
+    </ShortcutsProvider>
+  );
 };
 ```
 
