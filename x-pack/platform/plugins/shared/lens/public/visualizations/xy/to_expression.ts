@@ -140,6 +140,7 @@ const simplifiedLayerExpression = {
     ...layer,
     simpleView: true,
   }),
+  [LayerTypes.ESQL]: (layer: XYDataLayerConfig) => ({ ...layer, simpleView: true }),
 };
 
 export function toPreviewExpression(
