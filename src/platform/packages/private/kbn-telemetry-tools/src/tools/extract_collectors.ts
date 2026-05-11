@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { readFileSync } from 'fs';
 import globby from 'globby';
 import * as path from 'path';
 import { parseUsageCollection } from './ts_parser';
 import type { TelemetryRC } from './config';
 import { createKibanaProgram, getAllSourceFiles } from './ts_program';
+
+const COLLECTOR_RE = /makeUsageCollector|makeStatsCollector/;
 
 export async function getProgramPaths({
   root,
@@ -53,8 +56,17 @@ export async function getProgramPaths({
 }
 
 export function* extractCollectors(fullPaths: string[], tsConfig: any) {
-  const program = createKibanaProgram(fullPaths, tsConfig);
-  const sourceFiles = getAllSourceFiles(fullPaths, program);
+  // Pre-filter to only files that reference collector APIs so TS doesn't
+  // parse thousands of unrelated source files (36K → ~70 root files).
+  // TS still resolves transitive imports needed for type-checking.
+  const collectorPaths = fullPaths.filter((p) => COLLECTOR_RE.test(readFileSync(p, 'utf-8')));
+
+  if (collectorPaths.length === 0) {
+    return;
+  }
+
+  const program = createKibanaProgram(collectorPaths, tsConfig);
+  const sourceFiles = getAllSourceFiles(collectorPaths, program);
 
   for (const sourceFile of sourceFiles) {
     yield* parseUsageCollection(sourceFile, program);
