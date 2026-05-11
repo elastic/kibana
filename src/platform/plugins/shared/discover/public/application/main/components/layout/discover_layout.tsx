@@ -72,10 +72,18 @@ import { DiscoverHistogramLayout } from './discover_histogram_layout';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
+import { useJumpShortcuts } from './use_jump_shortcuts';
 import { useViewShortcuts } from './use_view_shortcuts';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
+const JUMP_SHORTCUTS_LEADER_KEY = 'j';
+const JUMP_SHORTCUTS_LEADER_KEY_DESCRIPTION = i18n.translate(
+  'discover.jumpShortcuts.jumpModeLabel',
+  {
+    defaultMessage: 'Jump',
+  }
+);
 const VIEW_SHORTCUTS_LEADER_KEY = 'v';
 const VIEW_SHORTCUTS_LEADER_KEY_DESCRIPTION = i18n.translate(
   'discover.viewShortcuts.viewModeLabel',
@@ -384,6 +392,7 @@ export function DiscoverLayout() {
   const [sidebarToggleState$] = useState<BehaviorSubject<SidebarToggleState>>(
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
+  const jumpShortcuts = useJumpShortcuts({ sidebarToggleState$ });
   const viewShortcuts = useViewShortcuts({ currentDataView: dataView, sidebarToggleState$ });
 
   const mainDisplay = useMemo(() => {
@@ -561,6 +570,11 @@ export function DiscoverLayout() {
           />
         </div>
       </EuiPageBody>
+      <LeaderKeyShortcuts
+        leaderKey={JUMP_SHORTCUTS_LEADER_KEY}
+        leaderKeyDescription={JUMP_SHORTCUTS_LEADER_KEY_DESCRIPTION}
+        shortcuts={jumpShortcuts}
+      />
       <LeaderKeyShortcuts
         leaderKey={VIEW_SHORTCUTS_LEADER_KEY}
         leaderKeyDescription={VIEW_SHORTCUTS_LEADER_KEY_DESCRIPTION}

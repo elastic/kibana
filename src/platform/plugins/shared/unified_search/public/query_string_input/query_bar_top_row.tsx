@@ -1197,7 +1197,7 @@ export const QueryBarTopRow = React.memo(
               })
             }
             isDisabled={props.isDisabled}
-            data-test-subj="unifiedTextLangEditor"
+            dataTestSubj="unifiedTextLangEditor"
             isLoading={props.isLoading}
             initialState={props.esqlEditorInitialState}
             onInitialStateChange={props.onEsqlEditorInitialStateChange}
