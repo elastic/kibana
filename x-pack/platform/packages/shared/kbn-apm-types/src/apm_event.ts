@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export type {
-  ExitSpanFields,
-  ServiceMapDiagnosticResponse,
-  DiagnosticNodeSelection,
-  ServiceMapDiagnosticRequest,
-} from '@kbn/apm-types';
+export interface ApmEvent {
+  legacy?: boolean;
+  name: string;
+  kuery: string;
+  index: string[];
+  docCount: number;
+  intervals?: Record<string, { metricDocCount: number; eventDocCount: number }>;
+}

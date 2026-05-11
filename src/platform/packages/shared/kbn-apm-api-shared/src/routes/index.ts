@@ -37,6 +37,7 @@ import { mobileRouteDefinitions } from './mobile';
 import { mobileErrorsRouteDefinitions } from './mobile_errors';
 import { mobileCrashesRouteDefinitions } from './mobile_crashes';
 import { dataViewRouteDefinitions } from './data_view';
+import { diagnosticsRouteDefinitions } from './diagnostics';
 import type { BuildGroupedRepository } from './types';
 
 export const routeDefinitions = {
@@ -71,6 +72,7 @@ export const routeDefinitions = {
   mobileErrors: mobileErrorsRouteDefinitions,
   mobileCrashes: mobileCrashesRouteDefinitions,
   dataView: dataViewRouteDefinitions,
+  diagnostics: diagnosticsRouteDefinitions,
 };
 
 export type SharedAPMRouteRepository = BuildGroupedRepository<typeof routeDefinitions>;
