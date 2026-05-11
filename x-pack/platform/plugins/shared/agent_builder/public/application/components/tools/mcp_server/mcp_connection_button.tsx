@@ -17,6 +17,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
+import { useIsUIAMEnabled } from '../../../hooks/use_is_uiam_enabled';
 import { useKibanaUrl } from '../../../hooks/use_kibana_url';
 import { MCP_SERVER_PATH } from '../../../../../common/mcp';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -26,6 +28,9 @@ export const McpConnectionButton = () => {
   const { createAgentBuilderUrl } = useNavigation();
   const { kibanaUrl } = useKibanaUrl();
   const { docLinksService } = useAgentBuilderServices();
+  const experimental = useExperimentalFeatures();
+  const isUIAMEnabled = useIsUIAMEnabled();
+  const showMcpClientManagement = experimental && isUIAMEnabled;
 
   const [isContextOpen, toggleContextOpen] = useToggle(false);
 
@@ -77,6 +82,20 @@ export const McpConnectionButton = () => {
               defaultMessage: 'Bulk import MCP tools',
             })}
           </EuiContextMenuItem>,
+          ...(showMcpClientManagement
+            ? [
+                <EuiContextMenuItem
+                  key="manageMcpClients"
+                  icon="gear"
+                  href={createAgentBuilderUrl(appPaths.manage.mcpClients)}
+                  data-test-subj="agentBuilderManageMcpClientsMenuItem"
+                >
+                  {i18n.translate('xpack.agentBuilder.tools.manageMcpClientsButton', {
+                    defaultMessage: 'Manage MCP clients (OAuth)',
+                  })}
+                </EuiContextMenuItem>,
+              ]
+            : []),
           <EuiContextMenuItem
             key="documentation"
             icon="documentation"
