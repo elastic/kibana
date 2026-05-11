@@ -158,7 +158,7 @@ const ApiEndpointCard: React.FC<ApiEndpointCardProps> = ({
   const apiKeysSectionTitle = i18n.translate(
     'xpack.observability_onboarding.version2ApiEndpoints.apiKeysSectionTitle',
     {
-      defaultMessage: 'API Keys',
+      defaultMessage: 'API key',
     }
   );
   const enrollmentTokenSectionTitle = i18n.translate(
