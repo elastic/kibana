@@ -29,6 +29,8 @@ import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
 import { ComposeDiscoverFlyout } from '@kbn/alerting-v2-rule-form';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
+import { useCreateRule } from '../../hooks/use_create_rule';
+import { useUpdateRule } from '../../hooks/use_update_rule';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 
@@ -62,7 +64,10 @@ export const RulesListPage = () => {
   useBreadcrumbs('rules_list');
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
+  const [editRule, setEditRule] = useState<RuleApiResponse | null>(null);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
+  const createRuleMutation = useCreateRule();
+  const updateRuleMutation = useUpdateRule();
   const ruleFormServices = useMemo(
     () => ({ http, data, dataViews, notifications, application, lens }),
     [http, data, dataViews, notifications, application, lens]
@@ -214,8 +219,17 @@ export const RulesListPage = () => {
       {flyoutOpen && (
         <ComposeDiscoverFlyout
           historyKey={historyKey}
-          onClose={() => setFlyoutOpen(false)}
+          mode={editRule ? 'edit' : 'create'}
+          rule={editRule ?? undefined}
+          onClose={() => { setFlyoutOpen(false); setEditRule(null); }}
           services={ruleFormServices}
+          onCreateRule={(payload) =>
+            createRuleMutation.mutate(payload, { onSuccess: () => { setFlyoutOpen(false); } })
+          }
+          onUpdateRule={(id, payload) =>
+            updateRuleMutation.mutate({ id, payload }, { onSuccess: () => { setFlyoutOpen(false); setEditRule(null); } })
+          }
+          isSaving={createRuleMutation.isLoading || updateRuleMutation.isLoading}
         />
       )}
     </div>
