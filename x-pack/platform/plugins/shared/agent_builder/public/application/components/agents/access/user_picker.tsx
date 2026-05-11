@@ -5,9 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiComboBox, type EuiComboBoxOptionOption, EuiHighlight, EuiText } from '@elastic/eui';
-import { useSuggestUsers, type SuggestedUser } from '../../../hooks/use_suggest_users';
+import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
+import {
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  type EuiComboBoxOptionOption,
+} from '@elastic/eui';
+import {
+  UserAvatar,
+  getUserDisplayName,
+  type UserProfileWithAvatar,
+} from '@kbn/user-profile-components';
+import { useDebouncedValue } from '@kbn/react-hooks';
+import { useSuggestUsers } from '../../../hooks/use_suggest_users';
 import { accessFlyoutAddPeoplePlaceholder } from './access_i18n';
 
 interface UserPickerProps {
@@ -18,68 +31,86 @@ interface UserPickerProps {
 }
 
 interface UserOption extends EuiComboBoxOptionOption<string> {
-  user: SuggestedUser;
+  profile: UserProfileWithAvatar;
 }
 
-const userToOption = (user: SuggestedUser): UserOption => ({
-  label: user.full_name ? `${user.full_name} (${user.username})` : user.username,
-  value: user.username,
-  key: user.username,
-  user,
+const SEARCH_DEBOUNCE_MS = 200;
+
+const profileToOption = (profile: UserProfileWithAvatar): UserOption => ({
+  label: getUserDisplayName(profile.user),
+  value: profile.user.username,
+  key: profile.user.username,
+  profile,
 });
 
 export const UserPicker: React.FC<UserPickerProps> = ({ excludedUsernames, onAdd, isDisabled }) => {
-  const { data: users, isLoading } = useSuggestUsers();
+  const [searchValue, setSearchValue] = useState('');
+  const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS);
+
+  const { data: profiles, isFetching } = useSuggestUsers(debouncedSearch);
   const excludedSet = useMemo(() => new Set(excludedUsernames), [excludedUsernames]);
 
-  const options = useMemo(
-    () => (users ?? []).filter((u) => !excludedSet.has(u.username)).map(userToOption),
-    [users, excludedSet]
+  const options = useMemo<UserOption[]>(
+    () => (profiles ?? []).filter((p) => !excludedSet.has(p.user.username)).map(profileToOption),
+    [profiles, excludedSet]
   );
 
   const onChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<string>>) => {
       const next = selected[0]?.value;
-      if (next) onAdd(next);
+      if (next) {
+        onAdd(next);
+        setSearchValue('');
+      }
     },
     [onAdd]
   );
-  const renderOption = useCallback(
-    (option: EuiComboBoxOptionOption<string>, searchValue: string) => {
-      const { user } = option as UserOption;
-      const primary = user.full_name ?? user.username;
-      const secondary = user.full_name ? user.username : user.email;
-      return (
-        <div>
-          <EuiText size="s">
-            <EuiHighlight search={searchValue}>{primary}</EuiHighlight>
-          </EuiText>
-          {secondary ? (
+
+  const renderOption = useCallback((option: EuiComboBoxOptionOption<string>) => {
+    const { profile } = option as UserOption;
+    const displayName = getUserDisplayName(profile.user);
+    const secondary = profile.user.email ?? profile.user.username;
+    const showSecondary = secondary && secondary !== displayName;
+    return (
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <UserAvatar user={profile.user} avatar={profile.data?.avatar} size="s" />
+        </EuiFlexItem>
+        <EuiFlexItem grow>
+          <EuiText size="s">{displayName}</EuiText>
+          {showSecondary ? (
             <EuiText size="xs" color="subdued">
-              <EuiHighlight search={searchValue}>{secondary}</EuiHighlight>
+              {secondary}
             </EuiText>
           ) : null}
-        </div>
-      );
-    },
-    []
-  );
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }, []);
 
   return (
-    <EuiComboBox<string>
-      placeholder={accessFlyoutAddPeoplePlaceholder}
-      prepend="Add"
-      options={options}
-      selectedOptions={[]}
-      onChange={onChange}
-      singleSelection={{ asPlainText: true }}
-      isLoading={isLoading}
-      isDisabled={isDisabled}
-      isClearable={false}
-      compressed
-      renderOption={renderOption}
-      rowHeight={44}
-      data-test-subj="agentBuilderAclUserPicker"
-    />
+    <div
+      css={css`
+        position: relative;
+      `}
+    >
+      <EuiComboBox<string>
+        placeholder={accessFlyoutAddPeoplePlaceholder}
+        prepend="Add"
+        options={options}
+        selectedOptions={[]}
+        onChange={onChange}
+        onSearchChange={setSearchValue}
+        singleSelection={{ asPlainText: true }}
+        isLoading={isFetching}
+        isDisabled={isDisabled}
+        isClearable={false}
+        compressed
+        renderOption={renderOption}
+        rowHeight={48}
+        async
+        data-test-subj="agentBuilderAclUserPicker"
+      />
+    </div>
   );
 };

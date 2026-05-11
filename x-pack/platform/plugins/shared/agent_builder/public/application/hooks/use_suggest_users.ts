@@ -6,46 +6,35 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useKibana } from './use_kibana';
 import { queryKeys } from '../query_keys';
 
-export interface SuggestedUser {
-  username: string;
-  full_name?: string;
-  email?: string;
-}
+const SUGGEST_PATH = '/internal/agent_builder/_suggest_user_profiles';
+const DEFAULT_SIZE = 20;
+const AVATAR_DATA_PATH = 'avatar';
 
-interface KibanaUserListItem {
-  username: string;
-  full_name?: string | null;
-  email?: string | null;
-  enabled?: boolean;
-}
-
-/**
- * Fetches the full list of Kibana users (filtered to enabled accounts).
- *
- * Uses `/internal/security/users`, which returns the entire user directory. We filter
- * client-side so the combobox can do incremental search without an extra round trip per
- * keystroke. This pattern matches what other Kibana picker UIs use against this endpoint.
- */
-export const useSuggestUsers = ({ enabled = true }: { enabled?: boolean } = {}) => {
+export const useSuggestUsers = (
+  searchTerm: string,
+  { enabled = true }: { enabled?: boolean } = {}
+) => {
   const { services } = useKibana();
-  const http = services.http;
 
-  return useQuery({
-    queryKey: queryKeys.security.users,
-    enabled: enabled && Boolean(http),
-    queryFn: async (): Promise<SuggestedUser[]> => {
-      if (!http) return [];
-      const response = await http.get<KibanaUserListItem[]>('/internal/security/users');
-      return response
-        .filter((user) => user.enabled !== false)
-        .map((user) => ({
-          username: user.username,
-          full_name: user.full_name ?? undefined,
-          email: user.email ?? undefined,
-        }));
+  return useQuery<UserProfileWithAvatar[]>({
+    queryKey: queryKeys.security.suggestUsers(searchTerm),
+    enabled: enabled && Boolean(services.userProfile),
+    keepPreviousData: true,
+    queryFn: async () => {
+      if (!services.userProfile) return [];
+      const profiles = await services.userProfile.suggest<UserProfileWithAvatar['data']>(
+        SUGGEST_PATH,
+        {
+          name: searchTerm,
+          size: DEFAULT_SIZE,
+          dataPath: AVATAR_DATA_PATH,
+        }
+      );
+      return profiles;
     },
   });
 };

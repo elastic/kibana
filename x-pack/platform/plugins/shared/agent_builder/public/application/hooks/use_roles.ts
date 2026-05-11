@@ -12,19 +12,15 @@ import { queryKeys } from '../query_keys';
 export interface KibanaRole {
   name: string;
   description?: string;
-  metadata?: Record<string, unknown>;
 }
 
-interface KibanaRoleApiItem {
+interface PredefinedRoleApiItem {
   name: string;
-  description?: string | null;
-  metadata?: Record<string, unknown>;
-  // Roles flagged with `_reserved: true` in metadata are predefined and not deletable.
+  description?: string;
 }
 
-/**
- * Fetches the list of Kibana roles. Used to populate the ACL role-grant picker.
- */
+const PREDEFINED_ROLES_PATH = '/internal/agent_builder/predefined_roles';
+
 export const useRoles = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const { services } = useKibana();
   const http = services.http;
@@ -34,12 +30,15 @@ export const useRoles = ({ enabled = true }: { enabled?: boolean } = {}) => {
     enabled: enabled && Boolean(http),
     queryFn: async (): Promise<KibanaRole[]> => {
       if (!http) return [];
-      const response = await http.get<KibanaRoleApiItem[]>('/api/security/role');
-      return response.map((role) => ({
-        name: role.name,
-        description: role.description ?? undefined,
-        metadata: role.metadata,
-      }));
+      try {
+        const response = await http.get<PredefinedRoleApiItem[]>(PREDEFINED_ROLES_PATH);
+        return response.map((role) => ({
+          name: role.name,
+          description: role.description,
+        }));
+      } catch {
+        return [];
+      }
     },
   });
 };

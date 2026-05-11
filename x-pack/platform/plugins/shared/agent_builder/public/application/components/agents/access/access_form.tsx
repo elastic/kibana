@@ -13,7 +13,6 @@ import { selectableRolesForVisibility } from './role_to_capabilities';
 import { PrincipalRow } from './principal_row';
 import { UserPicker } from './user_picker';
 import { RolePicker } from './role_picker';
-import { useSuggestUsers } from '../../../hooks/use_suggest_users';
 import { useRoles } from '../../../hooks/use_roles';
 import {
   accessFlyoutNoPeople,
@@ -85,15 +84,10 @@ const Section: React.FC<SectionProps> = ({ title, helpText, children }) => {
 export const AccessForm: React.FC<AccessFormProps> = ({ agent, entries, isDisabled, onChange }) => {
   const { euiTheme } = useEuiTheme();
   const visibility = agent.visibility;
-  const { data: knownUsers } = useSuggestUsers();
   const { data: knownRoles } = useRoles();
 
   const { users, roles } = useMemo(() => partitionEntries(entries), [entries]);
 
-  const knownUsernames = useMemo(
-    () => new Set((knownUsers ?? []).map((u) => u.username)),
-    [knownUsers]
-  );
   const knownRoleNames = useMemo(
     () => new Set((knownRoles ?? []).map((r) => r.name)),
     [knownRoles]
@@ -137,7 +131,7 @@ export const AccessForm: React.FC<AccessFormProps> = ({ agent, entries, isDisabl
                 key={`user:${entry.name}`}
                 entry={entry}
                 visibility={visibility}
-                missing={knownUsers != null && !knownUsernames.has(entry.name)}
+                missing={false}
                 isDisabled={isDisabled}
                 onChangeRole={(role) => handleChangeRole(entry, role)}
                 onRemove={() => handleRemove(entry)}
