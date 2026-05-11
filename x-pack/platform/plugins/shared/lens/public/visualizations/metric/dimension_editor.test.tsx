@@ -1299,7 +1299,7 @@ describe('dimension editor', () => {
           expect(applyColorToOptions.background).toHaveAttribute('aria-pressed', 'true');
         });
 
-        it('should select the apply color to `None` when `applyColorTo` is unset', () => {
+        it('should select the apply color to `None` when `applyColorTo` is unset and no color or palette is set', () => {
           const { applyColorToOptions, colorModeGroup, colorControls } =
             renderAdditionalSectionEditor({
               state: {
@@ -1307,6 +1307,8 @@ describe('dimension editor', () => {
                 showBar: false,
                 maxAccessor: undefined,
                 applyColorTo: undefined,
+                color: undefined,
+                palette: undefined,
               },
             });
           expect(applyColorToOptions.none).toHaveAttribute('aria-pressed', 'true');
@@ -1364,7 +1366,12 @@ describe('dimension editor', () => {
           const { clickOnApplyColorToOption } = renderAdditionalSectionEditor({ state: mockState });
           mockSetState.mockClear();
           await clickOnApplyColorToOption('none');
-          expect(mockSetState).toHaveBeenCalledWith({ ...mockState, applyColorTo: undefined });
+          expect(mockSetState).toHaveBeenCalledWith({
+            ...mockState,
+            color: undefined,
+            palette: undefined,
+            applyColorTo: undefined,
+          });
         });
 
         it('should show help message when color mode static, supporting visualization is none, apply color to value', () => {

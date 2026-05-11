@@ -224,7 +224,7 @@ export const toExpression = (
     color: state.color ?? getDefaultColor(state, isMetricNumeric),
     icon: hasMetricIcon ? state.icon : undefined,
     palette:
-      state.applyColorTo && isMetricNumeric && state.palette?.params
+      isMetricNumeric && state.palette?.params
         ? [
             paletteService
               .get(CUSTOM_PALETTE)
@@ -237,7 +237,7 @@ export const toExpression = (
     secondaryLabelPosition:
       state.secondaryLabelPosition ?? LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
     applyColorTo:
-      state.applyColorTo === undefined && state.color
+      state.applyColorTo === undefined && (Boolean(state.color) || Boolean(state.palette))
         ? LENS_METRIC_STATE_DEFAULTS.applyColorTo
         : state.applyColorTo,
   });

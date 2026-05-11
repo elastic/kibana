@@ -1007,7 +1007,7 @@ export function DimensionEditorAdditionalSection({
 
   const colorMode = state.palette ? 'dynamic' : 'static';
   const applyColorTo =
-    state.applyColorTo === undefined && state.color
+    state.applyColorTo === undefined && (Boolean(state.color) || Boolean(state.palette))
       ? LENS_METRIC_STATE_DEFAULTS.applyColorTo
       : state.applyColorTo;
   const colorControlsSectionVisible =
@@ -1192,6 +1192,7 @@ export function DimensionEditorAdditionalSection({
                 ...state,
                 applyColorTo: newApplyColorTo === 'none' ? undefined : newApplyColorTo,
                 color: newApplyColorTo === 'none' ? undefined : state.color,
+                palette: newApplyColorTo === 'none' ? undefined : state.palette,
               });
 
               scrollToColorControls();
@@ -1245,6 +1246,7 @@ export function DimensionEditorAdditionalSection({
 
                     setState({
                       ...state,
+                      applyColorTo,
                       ...(newColorMode === 'dynamic'
                         ? {
                             palette: {
@@ -1294,6 +1296,7 @@ export function DimensionEditorAdditionalSection({
                   setPalette={(newPalette) => {
                     setState({
                       ...state,
+                      applyColorTo,
                       palette: newPalette,
                     });
                   }}
