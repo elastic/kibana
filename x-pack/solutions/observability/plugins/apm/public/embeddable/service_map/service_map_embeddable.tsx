@@ -41,6 +41,23 @@ export interface ServiceMapEmbeddableProps {
   serviceGroupId?: string;
   core: CoreStart;
   onBlockingError?: (error: Error | undefined) => void;
+  /**
+   * Optional separate time range used for the per-service badges query (alert counts /
+   * SLO stats). Defaults to `[rangeFrom, rangeTo]`. Provide a wider range than the graph
+   * range when you need to guarantee that a specific alert's document `@timestamp` falls
+   * inside the badges window — e.g. in the alert details preview, where the graph range
+   * is intentionally capped for performance but the badges range mirrors the full alert
+   * lifecycle.
+   */
+  badgesRangeFrom?: string;
+  badgesRangeTo?: string;
+  /**
+   * Optional KQL applied only to the badges query. Defaults to `kuery`. Set to `""` to
+   * keep `kuery` scoping the graph while letting badges aggregate freely across every
+   * visible service — used by the alert details preview, where the graph is intentionally
+   * scoped to the alerting service/transaction but badges should appear on every neighbor.
+   */
+  badgesKuery?: string;
 }
 
 function LoadingSpinner() {
@@ -61,6 +78,9 @@ export function ServiceMapEmbeddable({
   serviceGroupId,
   core,
   onBlockingError,
+  badgesRangeFrom,
+  badgesRangeTo,
+  badgesKuery,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -89,6 +109,19 @@ export function ServiceMapEmbeddable({
     return { start: parsedStart ?? rangeFrom, end: parsedEnd ?? rangeTo };
   }, [rangeFrom, rangeTo]);
 
+  // Separate time range for badges. Falls back to the graph range when not provided,
+  // so dashboard/standalone callers (which only have one range) are unaffected.
+  const { start: badgesStart, end: badgesEnd } = useMemo(() => {
+    if (badgesRangeFrom == null || badgesRangeTo == null) {
+      return { start, end };
+    }
+    const { start: parsedStart, end: parsedEnd } = getDateRange({
+      rangeFrom: badgesRangeFrom,
+      rangeTo: badgesRangeTo,
+    });
+    return { start: parsedStart ?? badgesRangeFrom, end: parsedEnd ?? badgesRangeTo };
+  }, [badgesRangeFrom, badgesRangeTo, start, end]);
+
   const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
     useSloOverviewFlyout();
 
@@ -101,11 +134,16 @@ export function ServiceMapEmbeddable({
     serviceName,
   });
 
+  // Defaults to the graph `kuery` so dashboard/standalone callers keep applying the
+  // user's filter to both queries. Callers like the alert details preview pass `""` to
+  // keep their service-scoped topology filter while letting badges aggregate across
+  // every visible node (otherwise the focused-service kuery would exclude neighbors'
+  // alerts from the badges aggregation).
   const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({
     environment,
-    start,
-    end,
-    kuery,
+    start: badgesStart,
+    end: badgesEnd,
+    kuery: badgesKuery ?? kuery,
     nodes: data.nodes,
     nodesStatus: status,
   });

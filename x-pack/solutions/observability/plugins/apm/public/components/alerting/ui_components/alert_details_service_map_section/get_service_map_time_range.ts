@@ -8,34 +8,55 @@
 import moment from 'moment';
 
 const MINUTES_BEFORE_ALERT_START = 5;
-const MINUTES_AFTER_ALERT_START = 10;
-const MAX_ALERT_DURATION_MINUTES = 15;
+const MAX_MINUTES_AFTER_ALERT_START_FOR_GRAPH = 30;
 
 export interface ServiceMapTimeRange {
   from: string;
   to: string;
 }
 
+export interface AlertServiceMapTimeRanges {
+  /**
+   * Narrow, focused window that drives the service map graph query (services + edges).
+   * Always `[alertStart − 5m, min(alertEnd ?? now, alertStart + 30m)]` so the graph
+   * query stays cheap even for very long active alerts; service topology rarely
+   * changes within such a window so the preview is still meaningful.
+   */
+  graph: ServiceMapTimeRange;
+  /**
+   * Wider window that drives the per-service badges query (alert counts + SLO stats).
+   * Spans the full alert lifecycle: `[alertStart − 5m, alertEnd ?? now]`. This guarantees
+   * the alert's document `@timestamp` is inside the range so the symptomatic service
+   * always shows an alert badge — the badges query hits the (smaller) alerts index and
+   * is much cheaper than the graph query, so widening it here is essentially free.
+   */
+  badges: ServiceMapTimeRange;
+}
+
 /**
- * Returns a time range for the service map: 5 minutes before alert start and, for long
- * alerts (>15 min) or active alerts (no end), 10 minutes after alert start; for shorter
- * recovered alerts, through alert end. This keeps the preview focused on the period
- * the alert was firing so the symptomatic service appears as a node on the map.
+ * Computes both the graph- and badges-time ranges for the alert details service map
+ * preview. See {@link AlertServiceMapTimeRanges} for the rationale behind each.
+ *
+ * `nowMs` is parameterised purely so tests can pin the clock; production callers
+ * can omit it.
  */
-export function getServiceMapTimeRange(alertStart: string, alertEnd?: string): ServiceMapTimeRange {
+export function getServiceMapTimeRange(
+  alertStart: string,
+  alertEnd?: string,
+  nowMs: number = Date.now()
+): AlertServiceMapTimeRanges {
   const start = moment(alertStart);
   const from = start.clone().subtract(MINUTES_BEFORE_ALERT_START, 'minutes');
 
-  const endMoment = alertEnd ? moment(alertEnd) : null;
-  const durationMinutes = endMoment ? endMoment.diff(start, 'minutes', true) : Infinity;
+  const cap = start.clone().add(MAX_MINUTES_AFTER_ALERT_START_FOR_GRAPH, 'minutes');
+  const lifecycleEnd = alertEnd ? moment(alertEnd) : moment(nowMs);
 
-  const to =
-    durationMinutes > MAX_ALERT_DURATION_MINUTES
-      ? start.clone().add(MINUTES_AFTER_ALERT_START, 'minutes')
-      : endMoment ?? start.clone().add(MINUTES_AFTER_ALERT_START, 'minutes');
+  // Graph window is capped to keep the graph query fast even on multi-hour alerts;
+  // badges window mirrors the alert's lifecycle so the symptomatic service is included.
+  const graphTo = moment.min(lifecycleEnd, cap);
 
   return {
-    from: from.toISOString(),
-    to: to.toISOString(),
+    graph: { from: from.toISOString(), to: graphTo.toISOString() },
+    badges: { from: from.toISOString(), to: lifecycleEnd.toISOString() },
   };
 }

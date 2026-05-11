@@ -110,7 +110,7 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
   const alertStart = alert.fields[ALERT_START];
   const alertEnd = alert.fields[ALERT_END];
 
-  const timeRange = useMemo(() => {
+  const timeRanges = useMemo(() => {
     if (!alertStart) return null;
     return getServiceMapTimeRange(
       String(alertStart),
@@ -123,11 +123,12 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
 
   // Hide the panel entirely if we can't build a meaningful preview (e.g. alert is missing
   // a service or a start timestamp, or we don't have the APM embeddable deps in context).
-  if (!embeddableDeps || !serviceName || !timeRange) {
+  if (!embeddableDeps || !serviceName || !timeRanges) {
     return null;
   }
 
-  const { from: rangeFrom, to: rangeTo } = timeRange;
+  const { from: rangeFrom, to: rangeTo } = timeRanges.graph;
+  const { from: badgesRangeFrom, to: badgesRangeTo } = timeRanges.badges;
 
   const fullMapUrl = getServiceMapUrl(embeddableDeps.coreStart, {
     rangeFrom,
@@ -194,8 +195,13 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
               <ServiceMapEmbeddable
                 rangeFrom={rangeFrom}
                 rangeTo={rangeTo}
+                badgesRangeFrom={badgesRangeFrom}
+                badgesRangeTo={badgesRangeTo}
                 environment={environment}
                 kuery={kuery}
+                // Keep `kuery` scoping the graph, but let badges aggregate across all
+                // visible services so neighbors with their own active alerts also light up.
+                badgesKuery=""
                 serviceName={serviceName}
                 core={embeddableDeps.coreStart}
               />
