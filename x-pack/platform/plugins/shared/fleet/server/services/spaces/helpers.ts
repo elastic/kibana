@@ -23,9 +23,6 @@ export const PENDING_MIGRATION_TIMEOUT = 60 * 60 * 1000;
  * Return true if user optin for the space awareness feature.
  */
 export async function isSpaceAwarenessEnabled(): Promise<boolean> {
-  if (!appContextService.getExperimentalFeatures().useSpaceAwareness) {
-    return false;
-  }
   const cache = getIsSpaceAwarenessEnabledCache();
   if (typeof cache === 'boolean') {
     return cache;
@@ -44,10 +41,6 @@ export async function isSpaceAwarenessEnabled(): Promise<boolean> {
  * Return true if space awareness migration is currently running
  */
 export async function isSpaceAwarenessMigrationPending(): Promise<boolean> {
-  if (!appContextService.getExperimentalFeatures().useSpaceAwareness) {
-    return false;
-  }
-
   const settings = await getSettingsOrUndefined(appContextService.getInternalUserSOClient());
 
   if (

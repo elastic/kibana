@@ -11,7 +11,6 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import type { FleetAuthzRouter } from '../../services/security';
 import { APP_API_ROUTES } from '../../constants';
 import { ALL_SPACES_ID, API_VERSIONS } from '../../../common/constants';
@@ -168,10 +167,7 @@ export const GenerateServiceTokenResponseSchema = schema.object({
   value: schema.string(),
 });
 
-export const registerRoutes = (
-  router: FleetAuthzRouter,
-  experimentalFeatures: ExperimentalFeatures
-) => {
+export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: '/internal/fleet/telemetry/usage',
@@ -193,29 +189,27 @@ export const registerRoutes = (
       },
       getTelemetryUsageHandler
     );
-  if (experimentalFeatures.useSpaceAwareness) {
-    router.versioned
-      .post({
-        path: APP_API_ROUTES.SPACE_AWARENESS_MIGRATION,
-        access: 'internal',
-        security: {
-          authz: {
-            requiredPrivileges: [
-              FLEET_API_PRIVILEGES.AGENTS.ALL,
-              FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
-              FLEET_API_PRIVILEGES.SETTINGS.ALL,
-            ],
-          },
+  router.versioned
+    .post({
+      path: APP_API_ROUTES.SPACE_AWARENESS_MIGRATION,
+      access: 'internal',
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENTS.ALL,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+          ],
         },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.internal.v1,
-          validate: {},
-        },
-        postEnableSpaceAwarenessHandler
-      );
-  }
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {},
+      },
+      postEnableSpaceAwarenessHandler
+    );
   router.versioned
     .get({
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,

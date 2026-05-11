@@ -81,8 +81,6 @@ export async function getFullAgentPolicy(
 ): Promise<FullAgentPolicy | null> {
   const logger = appContextService.getLogger().get('getFullAgentPolicy');
 
-  const experimentalFeature = appContextService.getExperimentalFeatures();
-
   logger.debug(
     `Getting full policy for agent policy [${id}] using so scoped to [${soClient.getCurrentNamespace()}]`
   );
@@ -161,19 +159,16 @@ export async function getFullAgentPolicy(
     agentPolicy.has_agent_version_conditions
   );
 
-  let otelcolConfig;
-  if (experimentalFeature.enableOtelIntegrations) {
-    const dataOutputProxy = dataOutput?.proxy_id
-      ? proxies.find((p) => p.id === dataOutput.proxy_id)
-      : undefined;
-    otelcolConfig = generateOtelcolConfig({
-      inputs: agentInputs,
-      dataOutput,
-      packageInfoCache,
-      proxy: dataOutputProxy,
-      logger,
-    });
-  }
+  const dataOutputProxy = dataOutput?.proxy_id
+    ? proxies.find((p) => p.id === dataOutput.proxy_id)
+    : undefined;
+  const otelcolConfig = generateOtelcolConfig({
+    inputs: agentInputs,
+    dataOutput,
+    packageInfoCache,
+    proxy: dataOutputProxy,
+    logger,
+  });
 
   const inputs = agentInputs
     // filter out the otelcol inputs, they will be added at the root of the policy

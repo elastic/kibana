@@ -28,7 +28,7 @@ import type { InstalledPackageUIPackageListItem } from '../types';
 import { useViewPolicies } from '../hooks/use_url_filters';
 import { useInstalledIntegrationsActions } from '../hooks/use_installed_integrations_actions';
 
-import { doesPackageHaveIntegrations, ExperimentalFeaturesService } from '../../../../../services';
+import { doesPackageHaveIntegrations } from '../../../../../services';
 
 import {
   hasPreviousVersion,
@@ -78,7 +78,6 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
     },
     rollingbackIntegrations,
   } = useInstalledIntegrationsActions();
-  const { enablePackageRollback } = ExperimentalFeaturesService.get();
   const licenseService = useLicense();
   const { setPagination } = pagination;
   const handleTablePagination = React.useCallback(
@@ -413,70 +412,64 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
                   }
                 )
               ),
-              ...(enablePackageRollback
-                ? [
-                    wrapActionWithDisabledTooltip(
-                      {
-                        name: i18n.translate(
+              wrapActionWithDisabledTooltip(
+                {
+                  name: i18n.translate(
+                    'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationLabel',
+                    {
+                      defaultMessage: 'Rollback integration',
+                    }
+                  ),
+                  icon: 'return',
+                  type: 'icon',
+                  'data-test-subj': 'rollbackButton',
+                  onClick: (item) => bulkRollbackIntegrationsWithConfirmModal([item]),
+                  enabled: (item) => {
+                    const isAvailable = isRollbackAvailablePackages[item.name] ?? false;
+                    const isRollingBack =
+                      rollingbackIntegrations?.some((u) => u.name === item.name) ?? false;
+
+                    return isAvailable && !isRollingBack;
+                  },
+                  description: (item) =>
+                    !hasPreviousVersion(item)
+                      ? i18n.translate(
+                          'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsNoPreviousVersionLabel',
+                          {
+                            defaultMessage:
+                              "You can't rollback this integration because it does not have a previous version saved.",
+                          }
+                        )
+                      : !licenseService.isEnterprise()
+                      ? i18n.translate(
+                          'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsNoEnterpriseLabel',
+                          {
+                            defaultMessage: 'Rollback integrations requires an enterprise license.',
+                          }
+                        )
+                      : isRollbackTTLExpired(item)
+                      ? i18n.translate(
+                          'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsTTLExpiredLabel',
+                          {
+                            defaultMessage: 'Rollback is no longer allowed for this integration.',
+                          }
+                        )
+                      : i18n.translate(
                           'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationLabel',
                           {
                             defaultMessage: 'Rollback integration',
                           }
                         ),
-                        icon: 'return',
-                        type: 'icon',
-                        'data-test-subj': 'rollbackButton',
-                        onClick: (item) => bulkRollbackIntegrationsWithConfirmModal([item]),
-                        enabled: (item) => {
-                          const isAvailable = isRollbackAvailablePackages[item.name] ?? false;
-                          const isRollingBack =
-                            rollingbackIntegrations?.some((u) => u.name === item.name) ?? false;
-
-                          return isAvailable && !isRollingBack;
-                        },
-                        description: (item) =>
-                          !hasPreviousVersion(item)
-                            ? i18n.translate(
-                                'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsNoPreviousVersionLabel',
-                                {
-                                  defaultMessage:
-                                    "You can't rollback this integration because it does not have a previous version saved.",
-                                }
-                              )
-                            : !licenseService.isEnterprise()
-                            ? i18n.translate(
-                                'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsNoEnterpriseLabel',
-                                {
-                                  defaultMessage:
-                                    'Rollback integrations requires an enterprise license.',
-                                }
-                              )
-                            : isRollbackTTLExpired(item)
-                            ? i18n.translate(
-                                'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsTTLExpiredLabel',
-                                {
-                                  defaultMessage:
-                                    'Rollback is no longer allowed for this integration.',
-                                }
-                              )
-                            : i18n.translate(
-                                'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationLabel',
-                                {
-                                  defaultMessage: 'Rollback integration',
-                                }
-                              ),
-                      },
-                      !authz.integrations.installPackages,
-                      i18n.translate(
-                        'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsRequiredPermissionTooltip',
-                        {
-                          defaultMessage:
-                            "You don't have permissions to rollback integrations. Contact your administrator.",
-                        }
-                      )
-                    ),
-                  ]
-                : []),
+                },
+                !authz.integrations.installPackages,
+                i18n.translate(
+                  'xpack.fleet.epmInstalledIntegrations.rollbackIntegrationsRequiredPermissionTooltip',
+                  {
+                    defaultMessage:
+                      "You don't have permissions to rollback integrations. Contact your administrator.",
+                  }
+                )
+              ),
             ],
           },
         ]}

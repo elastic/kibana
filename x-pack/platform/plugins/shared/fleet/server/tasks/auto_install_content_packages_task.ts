@@ -123,12 +123,6 @@ export class AutoInstallContentPackagesTask {
   }
 
   public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
-    if (!appContextService.getExperimentalFeatures().enableAutoInstallContentPackages) {
-      this.logger.debug(
-        '[AutoInstallContentPackagesTask] Aborting runTask: auto install content packages feature is disabled'
-      );
-      return;
-    }
     if (!this.wasStarted) {
       this.logger.debug('[AutoInstallContentPackagesTask] runTask Aborted. Task not started yet');
       return;

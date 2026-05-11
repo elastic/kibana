@@ -117,7 +117,6 @@ export interface FleetConfigType {
   prereleaseEnabledByDefault?: boolean;
   hideDashboards?: boolean;
   integrationRollbackTTL?: string;
-  installIntegrationsKnowledge?: boolean;
   fleetPolicyRevisionsCleanup?: {
     maxRevisions: number;
     interval: string;

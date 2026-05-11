@@ -11,7 +11,10 @@ import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
 
-import { isValidExperimentalValue } from '../common/experimental_features';
+import {
+  isRemovedExperimentalFlag,
+  isValidExperimentalValue,
+} from '../common/experimental_features';
 
 import {
   PreconfiguredPackagesSchema,
@@ -123,16 +126,36 @@ export const config: PluginConfigDescriptor = {
 
       return fullConfig;
     },
-    // Log invalid experimental values listed in xpack.fleet.enableExperimental
+    // Log invalid experimental values listed in xpack.fleet.enableExperimental.
+    // Skip values that name a removed flag — they get a dedicated deprecation below.
     (fullConfig, fromPath, addDeprecation) => {
       for (const key of fullConfig?.xpack?.fleet?.enableExperimental ?? []) {
-        if (!isValidExperimentalValue(key)) {
+        if (!isValidExperimentalValue(key) && !isRemovedExperimentalFlag(key)) {
           addDeprecation({
             configPath: 'xpack.fleet.enableExperimental',
             message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.enableExperimental].`,
             correctiveActions: {
               manualSteps: [
                 `Use [xpack.fleet.enableExperimental] with an array of valid experimental features.`,
+              ],
+            },
+            level: 'warning',
+          });
+        }
+      }
+    },
+
+    // Warn when xpack.fleet.enableExperimental references a flag that has been
+    // graduated to a permanent default and removed.
+    (fullConfig, fromPath, addDeprecation) => {
+      for (const key of fullConfig?.xpack?.fleet?.enableExperimental ?? []) {
+        if (isRemovedExperimentalFlag(key)) {
+          addDeprecation({
+            configPath: 'xpack.fleet.enableExperimental',
+            message: `[${key}] is no longer an experimental feature and is now enabled by default. Remove it from [xpack.fleet.enableExperimental].`,
+            correctiveActions: {
+              manualSteps: [
+                `Remove [${key}] from [xpack.fleet.enableExperimental] in your kibana.yml.`,
               ],
             },
             level: 'warning',
@@ -157,16 +180,36 @@ export const config: PluginConfigDescriptor = {
       }
     },
 
-    // Log invalid experimental values listed in xpack.fleet.experimentalFeatures
+    // Log invalid experimental values listed in xpack.fleet.experimentalFeatures.
+    // Skip keys that name a removed flag — they get a dedicated deprecation below.
     (fullConfig, fromPath, addDeprecation) => {
       for (const key of Object.keys(fullConfig?.xpack?.fleet?.experimentalFeatures ?? {})) {
-        if (!isValidExperimentalValue(key)) {
+        if (!isValidExperimentalValue(key) && !isRemovedExperimentalFlag(key)) {
           addDeprecation({
             configPath: 'xpack.fleet.experimentalFeatures',
             message: `[${key}] is not a valid fleet experimental feature [xpack.fleet.experimentalFeatures].`,
             correctiveActions: {
               manualSteps: [
                 `Use [xpack.fleet.experimentalFeatures] with an object containing valid experimental features.`,
+              ],
+            },
+            level: 'warning',
+          });
+        }
+      }
+    },
+
+    // Warn when xpack.fleet.experimentalFeatures references a flag that has been
+    // graduated to a permanent default and removed.
+    (fullConfig, fromPath, addDeprecation) => {
+      for (const key of Object.keys(fullConfig?.xpack?.fleet?.experimentalFeatures ?? {})) {
+        if (isRemovedExperimentalFlag(key)) {
+          addDeprecation({
+            configPath: 'xpack.fleet.experimentalFeatures',
+            message: `[${key}] is no longer an experimental feature and is now enabled by default. Remove it from [xpack.fleet.experimentalFeatures].`,
+            correctiveActions: {
+              manualSteps: [
+                `Remove [${key}] from [xpack.fleet.experimentalFeatures] in your kibana.yml.`,
               ],
             },
             level: 'warning',
@@ -289,7 +332,6 @@ export const config: PluginConfigDescriptor = {
        *
        * @example
        * xpack.fleet.experimentalFeatures:
-       *   enableAgentStatusAlerting: false # Disable agent status alerting (enabled by default)
        *   enableAgentPrivilegeLevelChange: true # Enable agent privilege level change (disabled by default)
        */
       experimentalFeatures: schema.recordOf(schema.string(), schema.boolean(), {

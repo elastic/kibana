@@ -28,15 +28,11 @@ import { updateEsAssetReferences } from './es_assets_reference';
 import { getInstalledPackageWithAssets, getInstallation } from './get';
 
 /**
- * Returns true if any of the data stream's streams use the OTel collector input type
- * AND OTel integrations are enabled. Mirrors the check in `installTemplateForDataStream`.
+ * Returns true if any of the data stream's streams use the OTel collector input type.
+ * Mirrors the check in `installTemplateForDataStream`.
  */
 function isOtelDataStream(dataStream: RegistryDataStream): boolean {
-  const experimentalFeature = appContextService.getExperimentalFeatures();
-  return (
-    !!experimentalFeature?.enableOtelIntegrations &&
-    (dataStream?.streams || []).some((stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE)
-  );
+  return (dataStream?.streams || []).some((stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE);
 }
 
 /**

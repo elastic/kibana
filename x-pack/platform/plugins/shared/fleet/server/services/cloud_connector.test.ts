@@ -52,9 +52,6 @@ describe('CloudConnectorService', () => {
     // Setup mocks
     mockLogger = loggerMock.create();
     mockAppContextService.getLogger = jest.fn().mockReturnValue(mockLogger);
-    mockAppContextService.getExperimentalFeatures = jest.fn().mockReturnValue({
-      useSpaceAwareness: false,
-    });
 
     mockSoClient = createSavedObjectClientMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();

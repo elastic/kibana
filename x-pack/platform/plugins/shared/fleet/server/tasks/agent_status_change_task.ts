@@ -131,12 +131,6 @@ export class AgentStatusChangeTask {
     core: CoreSetup,
     abortController: AbortController
   ) => {
-    if (!appContextService.getExperimentalFeatures().enableAgentStatusAlerting) {
-      this.logger.debug(
-        '[AgentStatusChangeTask] Aborting runTask: agent status alerting feature is disabled'
-      );
-      return;
-    }
     if (!this.wasStarted) {
       this.logger.debug('[AgentStatusChangeTask] runTask Aborted. Task not started yet');
       return;

@@ -15,9 +15,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   const securitySolutionEnableExperimental: Array<keyof SecuritySolutionExperimentalFeatures> = [];
-  const fleetEnableExperimental: Partial<FleetExperimentalFeatures> = {
-    useSpaceAwareness: true,
-  };
+  const fleetEnableExperimental: Partial<FleetExperimentalFeatures> = {};
 
   return {
     ...functionalConfig.getAll(),

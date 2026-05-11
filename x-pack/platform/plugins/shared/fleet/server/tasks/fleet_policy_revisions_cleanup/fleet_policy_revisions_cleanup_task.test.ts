@@ -11,8 +11,6 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 
-import { appContextService } from '../../services';
-
 import {
   FleetPolicyRevisionsCleanupTask,
   TYPE,
@@ -20,8 +18,6 @@ import {
 } from './fleet_policy_revisions_cleanup_task';
 
 jest.mock('../../services');
-
-const mockAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 
 const expectedDeleteByQueryConfig = {
   conflicts: 'proceed',
@@ -69,11 +65,6 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
     });
 
     logFactory.get.mockReturnValue(logger);
-
-    // Setup app context service mocks
-    mockAppContextService.getExperimentalFeatures.mockReturnValue({
-      enableFleetPolicyRevisionsCleanupTask: true,
-    } as any);
 
     taskInstance = {
       id: `${TYPE}:${VERSION}`,
@@ -175,19 +166,6 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
   describe('runTask', () => {
     beforeEach(async () => {
       await mockTask.start({ taskManager: mockTaskManagerStart });
-    });
-
-    it('should skip execution when feature flag is disabled', async () => {
-      mockAppContextService.getExperimentalFeatures.mockReturnValue({
-        enableFleetPolicyRevisionsCleanupTask: false,
-      } as any);
-
-      await mockTask.runTask(taskInstance, mockCore, abortController);
-
-      expect(logger.debug).toHaveBeenCalledWith(
-        '[FleetPolicyRevisionsCleanupTask] Aborting runTask: fleet policy revision cleanup task feature is disabled'
-      );
-      expect(mockCore.getStartServices).not.toHaveBeenCalled();
     });
 
     it('should log errors if one is thrown', async () => {

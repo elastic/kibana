@@ -7,19 +7,12 @@
 
 const _allowedExperimentalValues = {
   showExperimentalShipperOptions: false,
-  useSpaceAwareness: true,
   enableAutomaticAgentUpgrades: true,
   enableSyncIntegrationsOnRemote: true,
   enableSSLSecrets: true,
   installedIntegrationsTabularUI: true,
   enabledUpgradeAgentlessDeploymentsTask: true,
-  enablePackageRollback: true,
-  enableAutoInstallContentPackages: true,
-  enableOtelIntegrations: true,
-  enableAgentStatusAlerting: true,
   enableAgentPrivilegeLevelChange: true,
-  installIntegrationsKnowledge: true,
-  enableFleetPolicyRevisionsCleanupTask: true,
   enableAgentRollback: true, // When enabled, agent upgrade rollback will be available in the API and UI.
   disableAgentlessLegacyAPI: false, // When enabled, it will disable creating agentless policies via agent or package policies API.
   enableEsqlViewInstall: false,
@@ -111,3 +104,22 @@ export const isValidExperimentalValue = (value: string): value is ExperimentalCo
 };
 
 export const getExperimentalAllowedValues = (): string[] => [...allowedKeys];
+
+/**
+ * Experimental flags that have been graduated to permanent defaults and removed from
+ * `_allowedExperimentalValues`. Users who still reference these names in `kibana.yml`
+ * (either in `xpack.fleet.enableExperimental` or `xpack.fleet.experimentalFeatures`)
+ * get a dedicated deprecation warning at startup so they know the setting is a no-op.
+ */
+export const REMOVED_EXPERIMENTAL_FLAGS = [
+  'useSpaceAwareness',
+  'enablePackageRollback',
+  'enableAutoInstallContentPackages',
+  'enableOtelIntegrations',
+  'enableAgentStatusAlerting',
+  'installIntegrationsKnowledge',
+  'enableFleetPolicyRevisionsCleanupTask',
+] as const;
+
+export const isRemovedExperimentalFlag = (value: string): boolean =>
+  (REMOVED_EXPERIMENTAL_FLAGS as readonly string[]).includes(value);

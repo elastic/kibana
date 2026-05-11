@@ -386,15 +386,9 @@ export class FleetPlugin
 
     core.status.set(this.fleetStatus$.asObservable());
 
-    const experimentalFeatures = parseExperimentalConfigValue(
-      config.enableExperimental ?? [],
-      config.experimentalFeatures || {}
-    );
-    const requireAllSpaces = experimentalFeatures.useSpaceAwareness ? false : true;
+    const requireAllSpaces = false;
 
-    registerSavedObjects(core.savedObjects, {
-      useSpaceAwareness: experimentalFeatures.useSpaceAwareness,
-    });
+    registerSavedObjects(core.savedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
     // Register feature

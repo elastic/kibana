@@ -20,8 +20,6 @@ import {
   USE_APM_VAR_NAME,
 } from '../../../common/constants';
 
-import { appContextService } from '../app_context';
-
 import { getNormalizedDataStreams } from '../../../common/services';
 
 import type {
@@ -76,7 +74,6 @@ export const AGENTLESS_INDEX_PERMISSIONS = [
  * index privileges, mirroring the EPM side (`getRegistryDataStreamAssetBaseName` with
  * `isOtelInputType`). Only applies when:
  *   - the source input is `otelcol`
- *   - `enableOtelIntegrations` is on (same gate as EPM)
  *   - the stream is not dynamic_dataset (wildcard already covers .otel)
  *   - the stream is not dataset_is_prefix (wildcard `<dataset>.*` already covers .otel)
  *   - the dataset doesn't already end in `.otel` (defensive against double-append)
@@ -90,7 +87,6 @@ function applyOtelDatasetSuffixIfNeeded(
   }
 ): string {
   if (!opts.isOtelInput) return dataset;
-  if (!appContextService.getExperimentalFeatures().enableOtelIntegrations) return dataset;
   if (opts.dynamicDataset) return dataset;
   if (opts.datasetIsPrefix) return dataset;
   if (dataset.endsWith(`.${OTEL_TEMPLATE_SUFFIX}`)) return dataset;

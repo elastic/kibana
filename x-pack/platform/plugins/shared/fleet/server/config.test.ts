@@ -170,7 +170,7 @@ describe('Config schema', () => {
 
     it('should only add one deprecation when enabling an existing experimental feature with enableExperimental', () => {
       const res = applyConfigDeprecations({
-        enableExperimental: ['useSpaceAwareness'],
+        enableExperimental: ['enableAgentRollback'],
       });
 
       expect(res.messages).toMatchInlineSnapshot(`
@@ -197,11 +197,38 @@ describe('Config schema', () => {
     it('should not add a deprecation when enabling an existing experimental feature with experimentalFeatures', () => {
       const res = applyConfigDeprecations({
         experimentalFeatures: {
-          useSpaceAwareness: true,
+          enableAgentRollback: true,
         },
       });
 
       expect(res.messages).toMatchInlineSnapshot(`Array []`);
+    });
+
+    it('should add a removed-flag deprecation when a removed experimental flag is listed in enableExperimental', () => {
+      const res = applyConfigDeprecations({
+        enableExperimental: ['useSpaceAwareness'],
+      });
+
+      expect(res.messages).toMatchInlineSnapshot(`
+        Array [
+          "[useSpaceAwareness] is no longer an experimental feature and is now enabled by default. Remove it from [xpack.fleet.enableExperimental].",
+          "Config key [xpack.fleet.enableExperimental] is deprecated. Please use [xpack.fleet.experimentalFeatures] instead.",
+        ]
+      `);
+    });
+
+    it('should add a removed-flag deprecation when a removed experimental flag is listed in experimentalFeatures', () => {
+      const res = applyConfigDeprecations({
+        experimentalFeatures: {
+          enablePackageRollback: true,
+        },
+      });
+
+      expect(res.messages).toMatchInlineSnapshot(`
+        Array [
+          "[enablePackageRollback] is no longer an experimental feature and is now enabled by default. Remove it from [xpack.fleet.experimentalFeatures].",
+        ]
+      `);
     });
   });
 });

@@ -1689,7 +1689,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     // If the package version has increased, save the previous package policy revision.
     if (
-      appContextService.getExperimentalFeatures().enablePackageRollback &&
       packagePolicy.package &&
       oldPackagePolicy.package &&
       semverGt(packagePolicy.package.version, oldPackagePolicy.package.version)
@@ -1965,7 +1964,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         // If the package version has increased, save the previous package policy revision.
         if (
-          appContextService.getExperimentalFeatures().enablePackageRollback &&
           packagePolicy.package &&
           oldPackagePolicy.package &&
           semverGt(packagePolicy.package.version, oldPackagePolicy.package.version) &&
@@ -2142,25 +2140,23 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     // Store previous revision.
-    if (appContextService.getExperimentalFeatures().enablePackageRollback) {
-      if (previousPolicyRevisionsToCreate.length > 0) {
-        await soClient
-          .bulkCreate<PackagePolicySOAttributes>(previousPolicyRevisionsToCreate)
-          .catch(
-            catchAndSetErrorStackTrace.withMessage(
-              'Saved objects bulk create of previous package policy revisions failed'
-            )
-          );
-      }
-      if (previousPolicyRevisionsToUpdate.length > 0) {
-        await soClient
-          .bulkUpdate<PackagePolicySOAttributes>(previousPolicyRevisionsToUpdate)
-          .catch(
-            catchAndSetErrorStackTrace.withMessage(
-              'Saved objects bulk update of previous package policy revisions failed'
-            )
-          );
-      }
+    if (previousPolicyRevisionsToCreate.length > 0) {
+      await soClient
+        .bulkCreate<PackagePolicySOAttributes>(previousPolicyRevisionsToCreate)
+        .catch(
+          catchAndSetErrorStackTrace.withMessage(
+            'Saved objects bulk create of previous package policy revisions failed'
+          )
+        );
+    }
+    if (previousPolicyRevisionsToUpdate.length > 0) {
+      await soClient
+        .bulkUpdate<PackagePolicySOAttributes>(previousPolicyRevisionsToUpdate)
+        .catch(
+          catchAndSetErrorStackTrace.withMessage(
+            'Saved objects bulk update of previous package policy revisions failed'
+          )
+        );
     }
 
     // Update package policies SO.

@@ -10,8 +10,6 @@ import { Redirect } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
-import { ExperimentalFeaturesService } from '../../../../../../../services';
-
 import type {
   EsAssetReference,
   AssetSOObject,
@@ -59,8 +57,6 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
   const { docLinks } = useStartServices();
   const { spaceId } = useFleetStatus();
   const config = useConfig();
-
-  const { useSpaceAwareness } = ExperimentalFeaturesService.get();
 
   const customAssetsExtension = useUIExtension(packageInfo.name, 'package-detail-assets');
 
@@ -262,13 +258,11 @@ export const AssetsPage = ({ packageInfo, refetchPackageInfo }: AssetsPanelProps
                 }}
               />
             </p>
-            {useSpaceAwareness ? (
-              <InstallKibanaAssetsButton
-                installInfo={pkgInstallationInfo}
-                title={packageInfo.title}
-                onSuccess={forceRefreshAssets}
-              />
-            ) : null}
+            <InstallKibanaAssetsButton
+              installInfo={pkgInstallationInfo}
+              title={packageInfo.title}
+              onSuccess={forceRefreshAssets}
+            />
           </EuiCallOut>
 
           <EuiSpacer size="m" />

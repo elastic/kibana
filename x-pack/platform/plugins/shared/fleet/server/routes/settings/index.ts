@@ -7,7 +7,6 @@
 
 import path from 'path';
 
-import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthzRouter } from '../../services/security';
 import { SETTINGS_API_ROUTES } from '../../constants';
@@ -33,87 +32,82 @@ import {
   putSpaceSettingsHandler,
 } from './settings_handler';
 
-export const registerRoutes = (
-  router: FleetAuthzRouter,
-  experimentalFeatures: ExperimentalFeatures
-) => {
-  if (experimentalFeatures.useSpaceAwareness) {
-    router.versioned
-      // @ts-ignore https://github.com/elastic/kibana/issues/203170
-      .get({
-        path: SETTINGS_API_ROUTES.SPACE_INFO_PATTERN,
-        fleetAuthz: (authz) => {
-          // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
-          return (
-            authz.fleet.readSettings ||
-            authz.integrations.writeIntegrationPolicies ||
-            authz.fleet.allAgentPolicies
-          );
+export const registerRoutes = (router: FleetAuthzRouter) => {
+  router.versioned
+    // @ts-ignore https://github.com/elastic/kibana/issues/203170
+    .get({
+      path: SETTINGS_API_ROUTES.SPACE_INFO_PATTERN,
+      fleetAuthz: (authz) => {
+        // TODO move to kibana authz https://github.com/elastic/kibana/issues/203170
+        return (
+          authz.fleet.readSettings ||
+          authz.integrations.writeIntegrationPolicies ||
+          authz.fleet.allAgentPolicies
+        );
+      },
+      summary: `Get space settings`,
+      description: `Get the Fleet settings for the current Kibana space.`,
+      options: {
+        availability: {
+          since: '9.1.0',
+          stability: 'stable',
         },
-        summary: `Get space settings`,
-        description: `Get the Fleet settings for the current Kibana space.`,
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
         options: {
-          availability: {
-            since: '9.1.0',
-            stability: 'stable',
-          },
+          oasOperationObject: () => path.join(__dirname, 'examples/get_space_settings.yaml'),
         },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.public.v1,
-          options: {
-            oasOperationObject: () => path.join(__dirname, 'examples/get_space_settings.yaml'),
-          },
-          validate: {
-            request: GetSpaceSettingsRequestSchema,
-            response: {
-              200: {
-                description: 'OK: A successful request.',
-                body: () => SpaceSettingsResponseSchema,
-              },
+        validate: {
+          request: GetSpaceSettingsRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => SpaceSettingsResponseSchema,
             },
           },
         },
-        getSpaceSettingsHandler
-      );
+      },
+      getSpaceSettingsHandler
+    );
 
-    router.versioned
-      .put({
-        path: SETTINGS_API_ROUTES.SPACE_UPDATE_PATTERN,
-        security: {
-          authz: {
-            requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
-          },
+  router.versioned
+    .put({
+      path: SETTINGS_API_ROUTES.SPACE_UPDATE_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
         },
-        summary: `Create space settings`,
-        description: `Create or update Fleet settings for the current Kibana space.`,
+      },
+      summary: `Create space settings`,
+      description: `Create or update Fleet settings for the current Kibana space.`,
+      options: {
+        availability: {
+          since: '9.1.0',
+          stability: 'stable',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
         options: {
-          availability: {
-            since: '9.1.0',
-            stability: 'stable',
-          },
+          oasOperationObject: () => path.join(__dirname, 'examples/put_space_settings.yaml'),
         },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.public.v1,
-          options: {
-            oasOperationObject: () => path.join(__dirname, 'examples/put_space_settings.yaml'),
-          },
-          validate: {
-            request: PutSpaceSettingsRequestSchema,
-            response: {
-              200: {
-                description: 'OK: A successful request.',
-                body: () => SpaceSettingsResponseSchema,
-              },
+        validate: {
+          request: PutSpaceSettingsRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => SpaceSettingsResponseSchema,
             },
           },
         },
-        putSpaceSettingsHandler
-      );
-  }
+      },
+      putSpaceSettingsHandler
+    );
 
   router.versioned
     .get({

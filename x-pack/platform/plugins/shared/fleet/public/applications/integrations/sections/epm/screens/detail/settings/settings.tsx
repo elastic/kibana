@@ -46,8 +46,6 @@ import { BulkActionContextProvider } from '../../installed_integrations/hooks/us
 import { KeepPoliciesUpToDateSwitch } from '../components';
 import { useChangelog } from '../hooks';
 
-import { ExperimentalFeaturesService } from '../../../../../services';
-
 import { DeprecationCallout, DeprecatedFeaturesCallout } from '../overview/deprecation_callout';
 
 import { wrapTitleWithDeprecated } from '../../../components/utils';
@@ -122,7 +120,6 @@ export const SettingsPage: React.FC<Props> = memo(
     const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
     const [isBreakingChangesUnderstood, setIsBreakingChangesUnderstood] = useState(false);
     const [isBreakingChangesFlyoutOpen, setIsBreakingChangesFlyoutOpen] = useState(false);
-    const { enablePackageRollback } = ExperimentalFeaturesService.get();
     const toggleChangelogModal = useCallback(() => {
       setIsChangelogModalOpen(!isChangelogModalOpen);
     }, [isChangelogModalOpen]);
@@ -496,39 +493,35 @@ export const SettingsPage: React.FC<Props> = memo(
                         </EuiFlexItem>
                       </EuiFlexGroup>
                       <EuiSpacer size="l" />
-                      {enablePackageRollback && (
-                        <>
-                          <EuiFlexGroup direction="column" gutterSize="m">
-                            <EuiFlexItem>
-                              <EuiTitle>
-                                <h4>
-                                  <FormattedMessage
-                                    id="xpack.fleet.integrations.settings.packageRollbackTitle"
-                                    defaultMessage="Rollback"
-                                  />
-                                </h4>
-                              </EuiTitle>
-                            </EuiFlexItem>
-                            <EuiFlexItem>
+                      <EuiFlexGroup direction="column" gutterSize="m">
+                        <EuiFlexItem>
+                          <EuiTitle>
+                            <h4>
                               <FormattedMessage
-                                id="xpack.fleet.integrations.settings.packageRollbackDescription"
-                                defaultMessage="Rollback integration to the previous version."
+                                id="xpack.fleet.integrations.settings.packageRollbackTitle"
+                                defaultMessage="Rollback"
                               />
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <div>
-                                <BulkActionContextProvider>
-                                  <RollbackButton
-                                    packageInfo={packageInfo}
-                                    isCustomPackage={isCustomPackage}
-                                  />
-                                </BulkActionContextProvider>
-                              </div>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                          <EuiSpacer size="l" />
-                        </>
-                      )}
+                            </h4>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <FormattedMessage
+                            id="xpack.fleet.integrations.settings.packageRollbackDescription"
+                            defaultMessage="Rollback integration to the previous version."
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <div>
+                            <BulkActionContextProvider>
+                              <RollbackButton
+                                packageInfo={packageInfo}
+                                isCustomPackage={isCustomPackage}
+                              />
+                            </BulkActionContextProvider>
+                          </div>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer size="l" />
                     </>
                   )}
                 </div>

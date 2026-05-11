@@ -18,7 +18,6 @@ import {
   OTEL_INPUTS_MINIMUM_VERSION,
   packageInfoHasOtelInputs,
 } from '../../../../../../../../common/services/otelcol_helpers';
-import { ExperimentalFeaturesService } from '../../../../../services';
 import { wrapTitleWithDeprecated } from '../../../components/utils';
 
 export const PrereleaseCallout: React.FC<{
@@ -26,7 +25,6 @@ export const PrereleaseCallout: React.FC<{
   latestGAVersion?: string;
 }> = ({ packageInfo, latestGAVersion }) => {
   const { getHref } = useLink();
-  const { enableOtelIntegrations } = ExperimentalFeaturesService.get();
   const { name, title } = packageInfo;
   const overviewPathLatestGA = getHref('integration_details_overview', {
     pkgkey: `${name}-${latestGAVersion}`,
@@ -34,7 +32,7 @@ export const PrereleaseCallout: React.FC<{
   const isPrerelease = isPackagePrerelease(packageInfo.version);
   if (!isPrerelease) return null;
 
-  if (enableOtelIntegrations && packageInfoHasOtelInputs(packageInfo)) {
+  if (packageInfoHasOtelInputs(packageInfo)) {
     return <OtelPackageCallout packageInfo={packageInfo} />;
   }
   return (

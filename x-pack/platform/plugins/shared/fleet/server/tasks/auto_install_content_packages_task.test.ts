@@ -133,9 +133,6 @@ describe('AutoInstallContentPackagesTask', () => {
           name: 'logs-system.test-default',
         } as any,
       ]);
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableAutoInstallContentPackages: true } as any);
       MockRegistry.fetchList.mockResolvedValue([
         {
           name: 'kubernetes_otel',

@@ -148,8 +148,6 @@ export async function getTemplateInputs(
   ignoreUnverified?: boolean,
   injectWiredStreamsRouting: boolean = false
 ) {
-  const experimentalFeature = appContextService.getExperimentalFeatures();
-
   const packageInfo = await getPackageInfo({
     savedObjectsClient: soClient,
     pkgName,
@@ -246,14 +244,11 @@ export async function getTemplateInputs(
     }
   }
 
-  let otelcolConfig;
-  if (experimentalFeature.enableOtelIntegrations) {
-    otelcolConfig = generateOtelcolConfig({
-      inputs,
-      logger,
-      defaultPackageInfo: packageInfo,
-    });
-  }
+  const otelcolConfig = generateOtelcolConfig({
+    inputs,
+    logger,
+    defaultPackageInfo: packageInfo,
+  });
   // filter out the otelcol inputs, they will be added at the root of the config
   const filteredInputs = inputs.filter((input) => input.type !== OTEL_COLLECTOR_INPUT_TYPE);
 

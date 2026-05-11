@@ -20,9 +20,6 @@ describe('getIntegrationKnowledgeSetting', () => {
   const mockSoClient = {} as jest.Mocked<SavedObjectsClientContract>;
 
   it('should return true if feature flag is enabled and no user setting', async () => {
-    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
-      installIntegrationsKnowledge: true,
-    });
     (getSettings as jest.Mock).mockResolvedValue({});
 
     const result = await getIntegrationKnowledgeSetting(mockSoClient);
@@ -35,9 +32,6 @@ describe('getIntegrationKnowledgeSetting', () => {
         integrationKnowledge: false,
       },
     });
-    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
-      installIntegrationsKnowledge: true,
-    });
     (getSettings as jest.Mock).mockResolvedValue({});
 
     const result = await getIntegrationKnowledgeSetting(mockSoClient);
@@ -45,9 +39,6 @@ describe('getIntegrationKnowledgeSetting', () => {
   });
 
   it('should return false if feature flag is enabled and user setting is disabled', async () => {
-    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
-      installIntegrationsKnowledge: true,
-    });
     (getSettings as jest.Mock).mockResolvedValue({
       integration_knowledge_enabled: false,
     });
@@ -61,9 +52,6 @@ describe('getIntegrationKnowledgeSetting', () => {
       experimentalFeatures: {
         integrationKnowledge: false,
       },
-    });
-    (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
-      installIntegrationsKnowledge: true,
     });
     (getSettings as jest.Mock).mockResolvedValue({
       integration_knowledge_enabled: true,

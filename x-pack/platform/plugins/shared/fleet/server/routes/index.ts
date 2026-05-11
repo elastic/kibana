@@ -43,7 +43,7 @@ export function registerRoutes(
     config.experimentalFeatures || {}
   );
   // Always register app routes for permissions checking
-  registerAppRoutes(fleetAuthzRouter, experimentalFeatures);
+  registerAppRoutes(fleetAuthzRouter);
 
   // The upload package route is only authorized for the superuser
   registerEPMRoutes(fleetAuthzRouter, config);
@@ -52,7 +52,7 @@ export function registerRoutes(
   registerAgentPolicyRoutes(fleetAuthzRouter, experimentalFeatures);
   registerPackagePolicyRoutes(fleetAuthzRouter);
   registerOutputRoutes(fleetAuthzRouter);
-  registerSettingsRoutes(fleetAuthzRouter, experimentalFeatures);
+  registerSettingsRoutes(fleetAuthzRouter);
   registerDataStreamRoutes(fleetAuthzRouter);
   registerPreconfigurationRoutes(fleetAuthzRouter);
   registerFleetServerHostRoutes(fleetAuthzRouter);

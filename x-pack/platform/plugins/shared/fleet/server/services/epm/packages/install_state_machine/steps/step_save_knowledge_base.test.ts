@@ -12,8 +12,9 @@ import type { ArchiveIterator, ArchiveEntry } from '../../../../../../common/typ
 import { saveKnowledgeBaseContentToIndex } from '../../knowledge_base_index';
 import type { InstallContext } from '../_state_machine_package_install';
 
-import { stepSaveKnowledgeBase, cleanupKnowledgeBaseStep } from './step_save_knowledge_base';
 import { getIntegrationKnowledgeSetting } from '../../get_integration_knowledge_setting';
+
+import { stepSaveKnowledgeBase, cleanupKnowledgeBaseStep } from './step_save_knowledge_base';
 
 // Mock the app context service
 jest.mock('../../../../app_context', () => ({
@@ -701,7 +702,7 @@ describe('stepSaveKnowledgeBase', () => {
       expect(optimisticallyAddEsAssetReferences).toHaveBeenCalled();
     });
 
-    it('should skip knowledge base processing when installIntegrationsKnowledge feature flag is disabled', async () => {
+    it('should skip knowledge base processing when integration knowledge setting is disabled', async () => {
       (getIntegrationKnowledgeSetting as jest.Mock).mockResolvedValueOnce(false);
 
       const entries: ArchiveEntry[] = [
@@ -724,7 +725,7 @@ describe('stepSaveKnowledgeBase', () => {
       expect(optimisticallyAddEsAssetReferences).not.toHaveBeenCalled();
     });
 
-    it('should process knowledge base when installIntegrationsKnowledge feature flag is enabled', async () => {
+    it('should process knowledge base when integration knowledge setting is enabled', async () => {
       const entries: ArchiveEntry[] = [
         {
           path: 'test-package-1.0.0/docs/knowledge_base/guide.md',

@@ -640,10 +640,9 @@ export function prepareTemplate({
     fieldAssetsMap,
     dataStream.path
   );
-  const experimentalFeature = appContextService.getExperimentalFeatures();
-  const isOtelInputType =
-    experimentalFeature.enableOtelIntegrations &&
-    (dataStream?.streams || []).some((stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE);
+  const isOtelInputType = (dataStream?.streams || []).some(
+    (stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE
+  );
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
     !!experimentalDataStreamFeature?.features.tsdb;

@@ -43,7 +43,6 @@ export default defineCypressConfig({
 
     specPattern: './cypress/e2e/**/*.cy.ts',
     supportFile: './cypress/support/e2e.ts',
-    excludeSpecPattern: './cypress/e2e/space_awareness/**/*.cy.ts',
 
     setupNodeEvents(on, config) {
       // eslint-disable-next-line @typescript-eslint/no-var-requires, @kbn/imports/uniform_imports

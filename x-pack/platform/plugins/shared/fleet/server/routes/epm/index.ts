@@ -14,7 +14,6 @@ import {
   RollbackAvailableCheckResponseSchema,
 } from '../../../common/types/rest_spec/epm';
 
-import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 import { API_VERSIONS } from '../../../common/constants';
 import type { FleetAuthz } from '../../../common';
 
@@ -167,11 +166,6 @@ export const READ_PACKAGE_INFO_SECURITY: RouteSecurity = {
 };
 
 export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
-  const experimentalFeatures = parseExperimentalConfigValue(
-    config.enableExperimental || [],
-    config.experimentalFeatures || {}
-  );
-
   router.versioned
     .get({
       path: EPM_API_ROUTES.CATEGORIES_PATTERN,
@@ -964,144 +958,142 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       postBulkUninstallPackagesHandler
     );
 
-  if (experimentalFeatures.enablePackageRollback) {
-    router.versioned
-      .post({
-        path: EPM_API_ROUTES.BULK_ROLLBACK_PATTERN,
-        security: INSTALL_PACKAGES_SECURITY,
-        summary: `Bulk rollback packages`,
-        description: `Rollback multiple packages to their previous versions.`,
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.BULK_ROLLBACK_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Bulk rollback packages`,
+      description: `Rollback multiple packages to their previous versions.`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
         options: {
-          tags: ['oas-tag:Elastic Package Manager (EPM)'],
-        },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.public.v1,
-          options: {
-            oasOperationObject: () => ({
-              requestBody: {
+          oasOperationObject: () => ({
+            requestBody: {
+              content: {
+                'application/json': {
+                  examples: {
+                    bulkRollbackRequest: {
+                      value: {
+                        packages: [{ name: 'system' }],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              200: {
                 content: {
                   'application/json': {
                     examples: {
-                      bulkRollbackRequest: {
+                      successResponse: {
                         value: {
-                          packages: [{ name: 'system' }],
+                          taskId: 'taskId',
                         },
                       },
                     },
                   },
                 },
-              },
-              responses: {
-                200: {
-                  content: {
-                    'application/json': {
-                      examples: {
-                        successResponse: {
-                          value: {
-                            taskId: 'taskId',
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-                400: {
-                  content: {
-                    'application/json': {
-                      examples: {
-                        badRequestResponse: {
-                          value: {
-                            message: 'Bad Request',
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            }),
-          },
-          validate: {
-            request: BulkRollbackPackagesRequestSchema,
-            response: {
-              200: {
-                body: () => BulkRollbackPackagesResponseSchema,
-                description: 'OK: A successful request.',
               },
               400: {
-                body: genericErrorResponse,
-                description: 'A bad request.',
+                content: {
+                  'application/json': {
+                    examples: {
+                      badRequestResponse: {
+                        value: {
+                          message: 'Bad Request',
+                        },
+                      },
+                    },
+                  },
+                },
               },
+            },
+          }),
+        },
+        validate: {
+          request: BulkRollbackPackagesRequestSchema,
+          response: {
+            200: {
+              body: () => BulkRollbackPackagesResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
             },
           },
         },
-        postBulkRollbackPackagesHandler
-      );
+      },
+      postBulkRollbackPackagesHandler
+    );
 
-    router.versioned
-      .get({
-        path: EPM_API_ROUTES.BULK_ROLLBACK_INFO_PATTERN,
-        security: INSTALL_PACKAGES_SECURITY,
-        summary: `Get Bulk rollback packages details`,
-        description: `Get the status and results of a bulk package rollback operation.`,
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.BULK_ROLLBACK_INFO_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Get Bulk rollback packages details`,
+      description: `Get the status and results of a bulk package rollback operation.`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
         options: {
-          tags: ['oas-tag:Elastic Package Manager (EPM)'],
-        },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.public.v1,
-          options: {
-            oasOperationObject: () => ({
-              responses: {
-                200: {
-                  content: {
-                    'application/json': {
-                      examples: {
-                        successResponse: {
-                          value: {
-                            status: 'success',
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-                400: {
-                  content: {
-                    'application/json': {
-                      examples: {
-                        badRequestResponse: {
-                          value: {
-                            message: 'Bad Request',
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            }),
-          },
-          validate: {
-            request: GetOneBulkOperationPackagesRequestSchema,
-            response: {
+          oasOperationObject: () => ({
+            responses: {
               200: {
-                body: () => GetOneBulkOperationPackagesResponseSchema,
-                description: 'OK: A successful request.',
+                content: {
+                  'application/json': {
+                    examples: {
+                      successResponse: {
+                        value: {
+                          status: 'success',
+                        },
+                      },
+                    },
+                  },
+                },
               },
               400: {
-                body: genericErrorResponse,
-                description: 'A bad request.',
+                content: {
+                  'application/json': {
+                    examples: {
+                      badRequestResponse: {
+                        value: {
+                          message: 'Bad Request',
+                        },
+                      },
+                    },
+                  },
+                },
               },
+            },
+          }),
+        },
+        validate: {
+          request: GetOneBulkOperationPackagesRequestSchema,
+          response: {
+            200: {
+              body: () => GetOneBulkOperationPackagesResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
             },
           },
         },
-        getOneBulkOperationPackagesHandler
-      );
-  }
+      },
+      getOneBulkOperationPackagesHandler
+    );
 
   router.versioned
     .post({
@@ -1673,198 +1665,196 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       deletePackageDatastreamAssetsHandler
     );
 
-  if (experimentalFeatures.enablePackageRollback) {
-    router.versioned
-      .post({
-        path: EPM_API_ROUTES.ROLLBACK_PATTERN,
-        security: INSTALL_PACKAGES_SECURITY,
-        summary: `Rollback a package to previous version`,
-        description: `Rollback a package to its previously installed version.`,
-        options: {
-          tags: ['oas-tag:Elastic Package Manager (EPM)'],
-          availability: {
-            since: '9.1.0',
-            stability: 'experimental',
-          },
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.ROLLBACK_PATTERN,
+      security: INSTALL_PACKAGES_SECURITY,
+      summary: `Rollback a package to previous version`,
+      description: `Rollback a package to its previously installed version.`,
+      options: {
+        tags: ['oas-tag:Elastic Package Manager (EPM)'],
+        availability: {
+          since: '9.1.0',
+          stability: 'experimental',
         },
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.public.v1,
-          options: {
-            oasOperationObject: () => ({
-              responses: {
-                200: {
-                  content: {
-                    'application/json': {
-                      examples: {
-                        successResponse: {
-                          value: {
-                            version: '1.0.0',
-                            success: true,
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-                400: {
-                  content: {
-                    'application/json': {
-                      examples: {
-                        badRequestResponse: {
-                          value: {
-                            message: 'Bad Request',
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            }),
-          },
-          validate: {
-            request: RollbackPackageRequestSchema,
-            response: {
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () => ({
+            responses: {
               200: {
-                description: 'OK: A successful request.',
-                body: () => RollbackPackageResponseSchema,
+                content: {
+                  'application/json': {
+                    examples: {
+                      successResponse: {
+                        value: {
+                          version: '1.0.0',
+                          success: true,
+                        },
+                      },
+                    },
+                  },
+                },
               },
               400: {
-                description: 'A bad request.',
-                body: genericErrorResponse,
+                content: {
+                  'application/json': {
+                    examples: {
+                      badRequestResponse: {
+                        value: {
+                          message: 'Bad Request',
+                        },
+                      },
+                    },
+                  },
+                },
               },
+            },
+          }),
+        },
+        validate: {
+          request: RollbackPackageRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => RollbackPackageResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
             },
           },
         },
-        rollbackPackageHandler
-      );
+      },
+      rollbackPackageHandler
+    );
 
-    router.versioned
-      .get({
-        path: EPM_API_ROUTES.ROLLBACK_AVAILABLE_CHECK_PATTERN,
-        security: READ_PACKAGE_INFO_SECURITY,
-        summary: `Check if rollback is available for a package`,
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.ROLLBACK_AVAILABLE_CHECK_PATTERN,
+      security: READ_PACKAGE_INFO_SECURITY,
+      summary: `Check if rollback is available for a package`,
+      options: {
+        tags: ['internal', 'oas-tag:Elastic Package Manager (EPM)'],
+      },
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
         options: {
-          tags: ['internal', 'oas-tag:Elastic Package Manager (EPM)'],
-        },
-        access: 'internal',
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.internal.v1,
-          options: {
-            oasOperationObject: () => ({
-              responses: {
-                200: {
-                  content: {
-                    'application/json': {
-                      examples: {
-                        successResponse: {
-                          value: {
-                            reason: 'reason',
-                            isAvailable: false,
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-                400: {
-                  content: {
-                    'application/json': {
-                      examples: {
-                        badRequestResponse: {
-                          value: {
-                            message: 'Bad Request',
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            }),
-          },
-          validate: {
-            request: RollbackPackageRequestSchema,
-            response: {
+          oasOperationObject: () => ({
+            responses: {
               200: {
-                description: 'OK: A successful request.',
-                body: () => RollbackAvailableCheckResponseSchema,
+                content: {
+                  'application/json': {
+                    examples: {
+                      successResponse: {
+                        value: {
+                          reason: 'reason',
+                          isAvailable: false,
+                        },
+                      },
+                    },
+                  },
+                },
               },
               400: {
-                description: 'A bad request.',
-                body: genericErrorResponse,
+                content: {
+                  'application/json': {
+                    examples: {
+                      badRequestResponse: {
+                        value: {
+                          message: 'Bad Request',
+                        },
+                      },
+                    },
+                  },
+                },
               },
+            },
+          }),
+        },
+        validate: {
+          request: RollbackPackageRequestSchema,
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => RollbackAvailableCheckResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
             },
           },
         },
-        rollbackAvailableCheckHandler
-      );
+      },
+      rollbackAvailableCheckHandler
+    );
 
-    router.versioned
-      .get({
-        path: EPM_API_ROUTES.BULK_ROLLBACK_AVAILABLE_CHECK_PATTERN,
-        security: READ_PACKAGE_INFO_SECURITY,
-        summary: `Check if rollback is available for installed packages`,
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.BULK_ROLLBACK_AVAILABLE_CHECK_PATTERN,
+      security: READ_PACKAGE_INFO_SECURITY,
+      summary: `Check if rollback is available for installed packages`,
+      options: {
+        tags: ['internal', 'oas-tag:Elastic Package Manager (EPM)'],
+      },
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
         options: {
-          tags: ['internal', 'oas-tag:Elastic Package Manager (EPM)'],
-        },
-        access: 'internal',
-      })
-      .addVersion(
-        {
-          version: API_VERSIONS.internal.v1,
-          options: {
-            oasOperationObject: () => ({
-              responses: {
-                200: {
-                  content: {
-                    'application/json': {
-                      examples: {
-                        successResponse: {
-                          value: {
-                            reason: 'reason',
-                            isAvailable: false,
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-                400: {
-                  content: {
-                    'application/json': {
-                      examples: {
-                        badRequestResponse: {
-                          value: {
-                            message: 'Bad Request',
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            }),
-          },
-          validate: {
-            request: {},
-            response: {
+          oasOperationObject: () => ({
+            responses: {
               200: {
-                description: 'OK: A successful request.',
-                body: () => BulkRollbackAvailableCheckResponseSchema,
+                content: {
+                  'application/json': {
+                    examples: {
+                      successResponse: {
+                        value: {
+                          reason: 'reason',
+                          isAvailable: false,
+                        },
+                      },
+                    },
+                  },
+                },
               },
               400: {
-                description: 'A bad request.',
-                body: genericErrorResponse,
+                content: {
+                  'application/json': {
+                    examples: {
+                      badRequestResponse: {
+                        value: {
+                          message: 'Bad Request',
+                        },
+                      },
+                    },
+                  },
+                },
               },
+            },
+          }),
+        },
+        validate: {
+          request: {},
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => BulkRollbackAvailableCheckResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
             },
           },
         },
-        bulkRollbackAvailableCheckHandler
-      );
-  }
+      },
+      bulkRollbackAvailableCheckHandler
+    );
 };

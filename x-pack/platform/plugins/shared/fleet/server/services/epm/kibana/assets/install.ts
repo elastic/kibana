@@ -412,13 +412,6 @@ function getKibanaAssetsArchiveIterator(packageInstallContext: PackageInstallCon
       }
 
       if (
-        soType === KibanaSavedObjectType.alertingRuleTemplate &&
-        !appContextService.getExperimentalFeatures().enableAgentStatusAlerting
-      ) {
-        return;
-      }
-
-      if (
         soType === KibanaSavedObjectType.sloTemplate &&
         !appContextService.getExperimentalFeatures().enableSloTemplates
       ) {

@@ -193,9 +193,6 @@ describe('settingsSetup', () => {
 
   it('should update integration_knowledge_enabled if feature flag is enabled', async () => {
     const soClientMock = savedObjectsClientMock.create();
-    mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-      installIntegrationsKnowledge: true,
-    } as any);
 
     mockedAppContextService.getConfig.mockReturnValue({
       enabled: false,
@@ -589,7 +586,10 @@ describe('createDefaultSettings', () => {
 
     const result = createDefaultSettings();
 
-    expect(result).toEqual({ prerelease_integrations_enabled: true });
+    expect(result).toEqual({
+      prerelease_integrations_enabled: true,
+      use_space_awareness_migration_status: 'success',
+    });
   });
 
   it('should return default settings with prerelease_integrations_enabled set to false if config.prereleaseEnabledByDefault is false', () => {
@@ -608,7 +608,10 @@ describe('createDefaultSettings', () => {
 
     const result = createDefaultSettings();
 
-    expect(result).toEqual({ prerelease_integrations_enabled: false });
+    expect(result).toEqual({
+      prerelease_integrations_enabled: false,
+      use_space_awareness_migration_status: 'success',
+    });
   });
 
   it('should return default settings with prerelease_integrations_enabled as false if config is not defined', () => {
@@ -616,31 +619,8 @@ describe('createDefaultSettings', () => {
 
     const result = createDefaultSettings();
 
-    expect(result).toEqual({ prerelease_integrations_enabled: false });
-  });
-
-  it('should return default settings with use_space_awareness_migration_status:success if feature flag is enabled', () => {
-    mockedAppContextService.getConfig.mockReturnValue({
-      prereleaseEnabledByDefault: true,
-      enabled: true,
-      agents: {
-        enabled: false,
-        elasticsearch: {
-          hosts: undefined,
-          ca_sha256: undefined,
-          ca_trusted_fingerprint: undefined,
-        },
-      },
-    });
-
-    mockedAppContextService.getExperimentalFeatures.mockReturnValueOnce({
-      useSpaceAwareness: true,
-    } as any);
-
-    const result = createDefaultSettings();
-
     expect(result).toEqual({
-      prerelease_integrations_enabled: true,
+      prerelease_integrations_enabled: false,
       use_space_awareness_migration_status: 'success',
     });
   });
@@ -659,15 +639,12 @@ describe('createDefaultSettings', () => {
       },
     });
 
-    mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-      installIntegrationsKnowledge: true,
-    } as any);
-
     const result = createDefaultSettings();
 
     expect(result).toEqual({
       integration_knowledge_enabled: true,
       prerelease_integrations_enabled: true,
+      use_space_awareness_migration_status: 'success',
     });
   });
 
@@ -693,6 +670,7 @@ describe('createDefaultSettings', () => {
     expect(result).toEqual({
       integration_knowledge_enabled: true,
       prerelease_integrations_enabled: true,
+      use_space_awareness_migration_status: 'success',
     });
   });
 });

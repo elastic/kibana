@@ -192,9 +192,6 @@ describe('getFullAgentPolicy', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
     jest.spyOn(appContextService, 'getMessageSigningService').mockReturnValue(undefined);
-    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
-      enableOtelIntegrations: true,
-    } as any);
 
     mockedGetFleetServerHostsForAgentPolicy.mockResolvedValue({
       name: 'default Fleet Server',
@@ -1769,7 +1766,7 @@ describe('getFullAgentPolicy', () => {
   });
 
   describe('OTel config generation', () => {
-    it('should call generateOtelcolConfig with packageInfoCache when enableOtelIntegrations is true', async () => {
+    it('should call generateOtelcolConfig with packageInfoCache', async () => {
       const packageInfo: PackageInfo = {
         name: 'otelpackage',
         version: '1.0.0',
@@ -1924,42 +1921,6 @@ describe('getFullAgentPolicy', () => {
         processors: mockOtelConfig.processors,
         service: mockOtelConfig.service,
       });
-    });
-
-    it('should not call generateOtelcolConfig when enableOtelIntegrations is false', async () => {
-      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
-        enableOtelIntegrations: false,
-      } as any);
-
-      mockAgentPolicy({
-        package_policies: [
-          {
-            id: 'package-policy-1',
-            name: 'otel-policy',
-            namespace: 'default',
-            enabled: true,
-            package: { name: 'otelpackage', version: '1.0.0', title: 'OTel Package' },
-            inputs: [
-              {
-                type: 'otelcol',
-                enabled: true,
-                streams: [],
-              },
-            ],
-            created_at: '',
-            updated_at: '',
-            created_by: '',
-            updated_by: '',
-            revision: 1,
-            policy_id: '',
-            policy_ids: [''],
-          },
-        ],
-      });
-
-      await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
-
-      expect(mockedGenerateOtelcolConfig).not.toHaveBeenCalled();
     });
 
     it('should pass the resolved proxy to generateOtelcolConfig when dataOutput has a proxy_id', async () => {

@@ -70,13 +70,6 @@ export async function installKibanaAssetsWithStreaming({
     }
 
     if (
-      soType === KibanaSavedObjectType.alertingRuleTemplate &&
-      !appContextService.getExperimentalFeatures().enableAgentStatusAlerting
-    ) {
-      return;
-    }
-
-    if (
       soType === KibanaSavedObjectType.sloTemplate &&
       !appContextService.getExperimentalFeatures().enableSloTemplates
     ) {

@@ -16,9 +16,9 @@ import {
  * related EPM naming) in the form `{type}-{dataset}`, optionally with an
  * OpenTelemetry suffix.
  *
- * When `isOtelInputType` is true (OTel `otelcol` data streams with
- * `enableOtelIntegrations`), Fleet appends `.{OTEL_TEMPLATE_SUFFIX}` (`otel`)
- * so patterns match bases such as `traces-generic.otel`. This applies only to
+ * When `isOtelInputType` is true (OTel `otelcol` data streams), Fleet appends
+ * `.{OTEL_TEMPLATE_SUFFIX}` (`otel`) so patterns match bases such as
+ * `traces-generic.otel`. This applies only to
  * **Elasticsearch asset naming at package install** — not to the
  * `data_stream.dataset` string stored on package policies or emitted in
  * generated OTel collector OTTL (see `generateOtelcolConfig` and

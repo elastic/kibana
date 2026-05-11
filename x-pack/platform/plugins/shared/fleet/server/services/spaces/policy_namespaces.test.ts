@@ -41,12 +41,6 @@ describe('validatePolicyNamespaceForSpace', () => {
     return client;
   }
 
-  beforeEach(() => {
-    jest
-      .mocked(appContextService.getExperimentalFeatures)
-      .mockReturnValue({ useSpaceAwareness: true } as any);
-  });
-
   it('should retrieve settings based on given spaceId', async () => {
     const soClient = createSavedsClientMock();
     await validatePolicyNamespaceForSpace({
@@ -110,18 +104,6 @@ describe('validatePolicyNamespaceForSpace', () => {
         namespace: 'notvalid',
       })
     ).rejects.toThrowError(/Invalid namespace, supported namespace prefixes: tata, test, toto/);
-  });
-
-  it('should not validate if feature flag is off', async () => {
-    jest
-      .mocked(appContextService.getExperimentalFeatures)
-      .mockReturnValue({ useSpaceAwareness: false } as any);
-    createSavedsClientMock({ allowed_namespace_prefixes: ['tata', 'test', 'toto'] });
-
-    await validatePolicyNamespaceForSpace({
-      spaceId: 'test1',
-      namespace: 'notvalid',
-    });
   });
 });
 

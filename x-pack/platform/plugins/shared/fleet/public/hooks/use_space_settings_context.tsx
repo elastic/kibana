@@ -7,8 +7,6 @@
 
 import React, { createContext, useContext } from 'react';
 
-import { ExperimentalFeaturesService } from '../services';
-
 import { useAuthz } from './use_authz';
 import { useGetSpaceSettings } from './use_request';
 
@@ -25,14 +23,13 @@ export const SpaceSettingsContextProvider: React.FC<{
   enabled?: boolean;
   children?: React.ReactNode;
 }> = ({ enabled = true, children }) => {
-  const useSpaceAwareness = ExperimentalFeaturesService.get()?.useSpaceAwareness ?? false;
   const authz = useAuthz();
   const isAllowed =
     authz.fleet.allAgentPolicies ||
     authz.fleet.allSettings ||
     authz.integrations.writeIntegrationPolicies;
   const spaceSettingsReq = useGetSpaceSettings({
-    enabled: useSpaceAwareness && enabled && isAllowed,
+    enabled: enabled && isAllowed,
   });
 
   const settings = React.useMemo(() => {

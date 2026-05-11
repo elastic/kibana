@@ -15,8 +15,6 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 
-import { appContextService } from '../../services';
-
 import { cleanupPolicyRevisions } from './cleanup_policy_revisions';
 
 export const TYPE = 'fleet:policy-revisions-cleanup-task';
@@ -122,14 +120,6 @@ export class FleetPolicyRevisionsCleanupTask {
     core: CoreSetup,
     abortController: AbortController
   ) => {
-    // Check if the feature flag is enabled
-    if (!appContextService.getExperimentalFeatures().enableFleetPolicyRevisionsCleanupTask) {
-      this.logger.debug(
-        '[FleetPolicyRevisionsCleanupTask] Aborting runTask: fleet policy revision cleanup task feature is disabled'
-      );
-      return;
-    }
-
     if (!this.wasStarted) {
       this.logger.debug('[FleetPolicyRevisionsCleanupTask] runTask Aborted. Task not started yet');
       return;

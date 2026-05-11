@@ -46,9 +46,6 @@ jest.mock('../hooks/use_rollback_available', () => ({
   isRollbackTTLExpired: jest.fn((item) => item.installationInfo?.is_rollback_ttl_expired ?? false),
 }));
 jest.mock('../../../../../services', () => ({
-  ExperimentalFeaturesService: {
-    get: jest.fn().mockReturnValue({ enablePackageRollback: true }),
-  },
   doesPackageHaveIntegrations: (pkg: any) => (pkg.policy_templates || []).length > 1,
 }));
 

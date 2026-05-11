@@ -23,9 +23,7 @@ jest.mock('./settings', () => ({
 jest.mock('./app_context', () => {
   return {
     appContextService: {
-      getExperimentalFeatures: () => ({
-        useSpaceAwareness: true,
-      }),
+      getExperimentalFeatures: () => ({}),
       getLogger: () => ({
         debug: jest.fn(),
       }),

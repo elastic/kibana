@@ -10,7 +10,6 @@ import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
 import { loadDatastreamsFieldsFromYaml } from '../../fields/field';
 import type { PackageInstallContext, RegistryDataStream } from '../../../../../common/types';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
 
 import { saveSettings } from '../../../settings';
@@ -38,11 +37,7 @@ const packageInstallContext = {
 
 describe('EPM index template install', () => {
   beforeEach(async () => {
-    appContextService.start(
-      createAppContextStartContractMock({}, undefined, undefined, {
-        enableOtelIntegrations: true,
-      } as ExperimentalFeatures)
-    );
+    appContextService.start(createAppContextStartContractMock());
 
     mockedLoadFieldsFromYaml.mockReturnValue([
       {
@@ -591,14 +586,9 @@ describe('EPM index template install', () => {
         archiveIterator: {},
       } as any as PackageInstallContext;
       appContextService.start(
-        createAppContextStartContractMock(
-          {
-            internal: { disableILMPolicies: false },
-          } as any,
-          undefined,
-          undefined,
-          { enableOtelIntegrations: true } as ExperimentalFeatures
-        )
+        createAppContextStartContractMock({
+          internal: { disableILMPolicies: false },
+        } as any)
       );
 
       const dataStream = {
@@ -742,14 +732,9 @@ describe('EPM index template install', () => {
         archiveIterator: {},
       } as any as PackageInstallContext;
       appContextService.start(
-        createAppContextStartContractMock(
-          {
-            internal: { disableILMPolicies: false },
-          } as any,
-          undefined,
-          undefined,
-          { enableOtelIntegrations: true } as ExperimentalFeatures
-        )
+        createAppContextStartContractMock({
+          internal: { disableILMPolicies: false },
+        } as any)
       );
 
       const dataStream = {

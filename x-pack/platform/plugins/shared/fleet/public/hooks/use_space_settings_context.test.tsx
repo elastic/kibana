@@ -8,7 +8,6 @@
 import React from 'react';
 
 import { createFleetTestRendererMock } from '../mock';
-import { ExperimentalFeaturesService } from '../services';
 
 import { useGetSpaceSettings } from './use_request';
 import {
@@ -29,9 +28,6 @@ describe('useSpaceSettingsContext', () => {
     );
   }
   beforeEach(() => {
-    jest.mocked(ExperimentalFeaturesService.get).mockReturnValue({
-      useSpaceAwareness: true,
-    } as any);
     jest.mocked(useGetSpaceSettings).mockReturnValue({} as any);
   });
   it('should return default defaultNamespace if no restrictions', () => {

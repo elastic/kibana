@@ -36,7 +36,7 @@ import {
   useGetOutputs,
   useDefaultOutput,
 } from '../../../../../hooks';
-import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../../services';
+import { pkgKeyFromPackageInfo } from '../../../../../services';
 
 import {
   OTEL_INPUTS_MINIMUM_VERSION,
@@ -83,7 +83,6 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   const { getHref } = useLink();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
   const [showAddIntegrationFlyout, setShowAddIntegrationFlyout] = React.useState(false);
-  const { enableOtelIntegrations } = ExperimentalFeaturesService.get();
 
   const permissionCheck = usePermissionCheck();
   const missingSecurityConfiguration =
@@ -173,7 +172,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                 ) : null}
               </EuiLink>
             </EuiFlexItem>
-            {enableOtelIntegrations && packagePolicyHasOtelInputs(packagePolicy?.inputs) && (
+            {packagePolicyHasOtelInputs(packagePolicy?.inputs) && (
               <EuiFlexItem grow={false}>
                 <EuiIconTip
                   type="warning"
@@ -390,7 +389,6 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
       canReadIntegrationPolicies,
       getHref,
       agentPolicy,
-      enableOtelIntegrations,
       canUseMultipleAgentPolicies,
       canReadAgentPolicies,
       getSharedPoliciesNumber,

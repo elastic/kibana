@@ -416,9 +416,6 @@ packageInfoCache.set('non_dynamic_pkg-1.0.0', {
 describe('storedPackagePoliciesToAgentPermissions()', () => {
   beforeEach(() => {
     appContextService.start(createAppContextStartContractMock());
-    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
-      enableOtelIntegrations: true,
-    } as any);
   });
 
   it('Returns `undefined` if there are no package policies', async () => {
@@ -1815,58 +1812,6 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
           indices: [
             {
               names: ['logs-generic.otel-default'],
-              privileges: ['auto_configure', 'create_doc'],
-            },
-          ],
-        },
-      });
-    });
-
-    it('does not append .otel when enableOtelIntegrations is false', async () => {
-      jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
-        enableOtelIntegrations: false,
-      } as any);
-
-      const packagePolicies: PackagePolicy[] = [
-        {
-          id: 'policy-otel-flag-off',
-          name: 'otel-flag-off',
-          namespace: 'default',
-          enabled: true,
-          package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
-          inputs: [
-            {
-              type: 'otelcol',
-              enabled: true,
-              streams: [
-                {
-                  id: 'stream-1',
-                  enabled: true,
-                  data_stream: { type: 'logs', dataset: 'myintegration' },
-                },
-              ],
-            },
-          ],
-          created_at: '',
-          updated_at: '',
-          created_by: '',
-          updated_by: '',
-          revision: 1,
-          policy_id: '',
-          policy_ids: [''],
-        },
-      ];
-
-      const permissions = await storedPackagePoliciesToAgentPermissions(
-        packageInfoCache,
-        'default',
-        packagePolicies
-      );
-      expect(permissions).toMatchObject({
-        'policy-otel-flag-off': {
-          indices: [
-            {
-              names: ['logs-myintegration-default'],
               privileges: ['auto_configure', 'create_doc'],
             },
           ],

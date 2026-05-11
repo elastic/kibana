@@ -48,12 +48,6 @@ jest.mock('../hooks', () => ({
   }),
 }));
 
-jest.mock('../../../../../services', () => ({
-  ExperimentalFeaturesService: {
-    get: jest.fn().mockReturnValue({ enablePackageRollback: true }),
-  },
-}));
-
 jest.mock('../../installed_integrations/hooks/use_installed_integrations_actions', () => ({
   useInstalledIntegrationsActions: jest.fn().mockReturnValue({
     actions: {

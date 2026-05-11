@@ -207,9 +207,6 @@ describe('Download Service', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
-    jest
-      .mocked(appContextService.getExperimentalFeatures)
-      .mockReturnValue({ useSpaceAwareness: true } as any);
     mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
       canEncrypt: true,
     } as any);

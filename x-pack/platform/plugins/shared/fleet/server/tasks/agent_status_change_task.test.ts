@@ -118,9 +118,6 @@ describe('AgentStatusChangeTask', () => {
     beforeEach(async () => {
       const [{ elasticsearch }] = await mockCore.getStartServices();
       esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableAgentStatusAlerting: true } as any);
     });
 
     afterEach(() => {
@@ -225,34 +222,6 @@ describe('AgentStatusChangeTask', () => {
 
     it('should do nothing when no agents changed status', async () => {
       const agents = [] as unknown as Agent[];
-      mockedFetchAllAgentsByKuery
-        .mockResolvedValueOnce(getMockFetchAllAgentsByKuery(agents))
-        .mockResolvedValue(getMockFetchAllAgentsByKuery([]));
-
-      await runTask();
-
-      expect(mockBulkUpdateAgents).not.toHaveBeenCalled();
-      expect(esClient.bulk).not.toHaveBeenCalled();
-    });
-
-    it('should do nothing when feature flag is disabled', async () => {
-      jest
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableAgentStatusAlerting: false } as any);
-      const agents = [
-        {
-          id: 'agent-3',
-          policy_id: 'agent-policy-3',
-          status: 'online',
-          namespaces: ['default'],
-          local_metadata: {
-            host: {
-              hostname: 'host3',
-            },
-          },
-          last_known_status: 'offline',
-        },
-      ] as unknown as Agent[];
       mockedFetchAllAgentsByKuery
         .mockResolvedValueOnce(getMockFetchAllAgentsByKuery(agents))
         .mockResolvedValue(getMockFetchAllAgentsByKuery([]));

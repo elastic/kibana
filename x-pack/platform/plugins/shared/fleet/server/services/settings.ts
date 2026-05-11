@@ -87,8 +87,7 @@ export async function settingsSetup(soClient: SavedObjectsClientContract) {
       updatedSettings.prerelease_integrations_enabled = config?.prereleaseEnabledByDefault;
     }
     if (
-      (config?.experimentalFeatures?.integrationKnowledge ??
-        appContextService.getExperimentalFeatures().installIntegrationsKnowledge) &&
+      (config?.experimentalFeatures?.integrationKnowledge ?? true) &&
       settings.integration_knowledge_enabled === undefined
     ) {
       updatedSettings.integration_knowledge_enabled = true;
@@ -192,16 +191,10 @@ export function createDefaultSettings(): BaseSettings {
   const config = appContextService.getConfig();
   const settings: BaseSettings = {
     prerelease_integrations_enabled: !!config?.prereleaseEnabledByDefault,
+    use_space_awareness_migration_status: 'success',
   };
 
-  if (appContextService.getExperimentalFeatures().useSpaceAwareness) {
-    settings.use_space_awareness_migration_status = 'success';
-  }
-
-  if (
-    config?.experimentalFeatures?.integrationKnowledge ??
-    appContextService.getExperimentalFeatures().installIntegrationsKnowledge
-  ) {
+  if (config?.experimentalFeatures?.integrationKnowledge ?? true) {
     settings.integration_knowledge_enabled = true;
   }
 
