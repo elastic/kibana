@@ -39,4 +39,4 @@ export const ruleTemplateResponseSchema = schema.object({
     })
   ),
   artifacts: ruleResponseSchemaV1.getPropSchemas().artifacts,
-});
+}, { meta: { id: 'rule_template_response' } });

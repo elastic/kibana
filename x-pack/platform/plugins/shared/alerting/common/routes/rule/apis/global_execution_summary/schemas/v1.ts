@@ -42,4 +42,4 @@ export const getGlobalExecutionSummaryResponseBodySchema = schema.object({
     failure: positiveNumber,
     warning: positiveNumber,
   }),
-});
+}, { meta: { id: 'global_execution_summary_response' } });

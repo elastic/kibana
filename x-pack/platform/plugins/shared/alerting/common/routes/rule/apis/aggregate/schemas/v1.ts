@@ -26,7 +26,7 @@ export const aggregateRulesRequestBodySchema = schema.object({
   filter: schema.maybe(schema.string()),
   rule_type_ids: schema.maybe(schema.arrayOf(schema.string())),
   consumers: schema.maybe(schema.arrayOf(schema.string())),
-});
+}, { meta: { id: 'aggregate_rules_request' } });
 
 export const aggregateRulesResponseBodySchema = schema.object({
   rule_execution_status: schema.recordOf(schema.string(), schema.number()),
@@ -43,4 +43,4 @@ export const aggregateRulesResponseBodySchema = schema.object({
     snoozed: schema.number(),
   }),
   rule_tags: schema.arrayOf(schema.string()),
-});
+}, { meta: { id: 'aggregate_rules_response' } });

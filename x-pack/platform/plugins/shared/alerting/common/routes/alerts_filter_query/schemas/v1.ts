@@ -62,4 +62,4 @@ export const alertsFilterQuerySchema = schema.object({
       },
     })
   ),
-});
+}, { meta: { id: 'alerts_filter_query' } });

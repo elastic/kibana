@@ -30,7 +30,7 @@ export const actionFrequencySchema = schema.object({
       },
     })
   ),
-});
+}, { meta: { id: 'new_rule_action_frequency' } });
 
 export const actionAlertsFilterSchema = schema.object(
   {
@@ -87,6 +87,7 @@ export const actionAlertsFilterSchema = schema.object(
   },
   {
     meta: {
+      id: 'new_rule_action_alerts_filter',
       description:
         'Conditions that affect whether the action runs. If you specify multiple conditions, all conditions must be met for the action to run. For example, if an alert occurs within the specified time frame and matches the query, the action runs.',
     },
@@ -129,7 +130,7 @@ export const actionSchema = schema.object(
     ),
   },
   {
-    meta: { description: 'An action that runs under defined conditions.' },
+    meta: { id: 'new_rule_action', description: 'An action that runs under defined conditions.' },
   }
 );
 
@@ -204,7 +205,7 @@ export const fallbackCreateBodySchema = schema.object({
     defaultValue: {},
     meta: { description: 'The parameters for the rule.' },
   }),
-});
+}, { meta: { id: 'new_rule' } });
 
 export const createBodySchema = schema.oneOf([knownCreateBodySchema, fallbackCreateBodySchema]);
 export const createParamsSchema = schema.object({

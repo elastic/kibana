@@ -17,4 +17,4 @@ export const bulkMuteUnmuteAlertsBodySchema = schema.object({
     }),
     { maxSize: MAX_MUTE_UNMUTE_INSTANCES }
   ),
-});
+}, { meta: { id: 'bulk_mute_unmute_alerts_request' } });

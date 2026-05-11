@@ -49,7 +49,7 @@ const intervalScheduleSchema = schema.object({
   interval: schema.string({
     meta: { description: 'The interval is specified in seconds, minutes, hours, or days.' },
   }),
-});
+}, { meta: { id: 'rule_interval_schedule' } });
 
 const actionFrequencySchema = schema.object({
   summary: schema.boolean({ meta: { description: 'Indicates whether the action is a summary.' } }),
@@ -61,7 +61,7 @@ const actionFrequencySchema = schema.object({
       },
     })
   ),
-});
+}, { meta: { id: 'rule_action_frequency' } });
 
 const actionAlertsFilterSchema = schema.object(
   {
@@ -108,6 +108,7 @@ const actionAlertsFilterSchema = schema.object(
   },
   {
     meta: {
+      id: 'rule_action_alerts_filter',
       description: 'Defines a period that limits whether the action runs.',
     },
   }
@@ -144,7 +145,7 @@ const actionSchema = schema.object({
       meta: { description: 'Indicates whether to use alert data as a template.' },
     })
   ),
-});
+}, { meta: { id: 'rule_action' } });
 
 export const ruleExecutionStatusSchema = schema.object({
   status: schema.oneOf(
@@ -222,7 +223,7 @@ export const ruleExecutionStatusSchema = schema.object({
       }),
     })
   ),
-});
+}, { meta: { id: 'rule_execution_status' } });
 
 export const outcome = schema.oneOf(
   [
@@ -320,7 +321,7 @@ export const ruleLastRunSchema = schema.object({
       )
     ),
   }),
-});
+}, { meta: { id: 'rule_last_run' } });
 
 export const monitoringSchema = schema.object(
   {
@@ -431,6 +432,7 @@ export const monitoringSchema = schema.object(
   },
   {
     meta: {
+      id: 'rule_monitoring',
       description: 'Monitoring details of the rule.',
     },
   }
@@ -459,7 +461,7 @@ export const ruleSnoozeScheduleSchema = schema.object({
       })
     )
   ),
-});
+}, { meta: { id: 'rule_snooze_schedule' } });
 
 export const alertDelaySchema = schema.object(
   {
@@ -469,6 +471,7 @@ export const alertDelaySchema = schema.object(
   },
   {
     meta: {
+      id: 'alert_delay',
       description:
         'Indicates that an alert occurs only when the specified number of consecutive runs met the rule conditions.',
     },
@@ -488,7 +491,7 @@ export const investigationGuideSchema = schema.object({
 export const artifactsSchema = schema.object({
   dashboards: schema.maybe(dashboardsSchema),
   investigation_guide: schema.maybe(investigationGuideSchema),
-});
+}, { meta: { id: 'rule_artifacts' } });
 
 export const ruleResponseSchema = schema.object({
   id: schema.string({
@@ -655,6 +658,6 @@ export const ruleResponseSchema = schema.object({
   alert_delay: schema.maybe(alertDelaySchema),
   flapping: schema.maybe(schema.nullable(flappingSchemaV2)),
   artifacts: schema.maybe(artifactsSchema),
-});
+}, { meta: { id: 'rule_response' } });
 
 export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));

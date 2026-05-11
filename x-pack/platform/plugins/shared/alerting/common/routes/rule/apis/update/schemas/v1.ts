@@ -30,7 +30,7 @@ export const actionFrequencySchema = schema.object({
       },
     })
   ),
-});
+}, { meta: { id: 'update_rule_action_frequency' } });
 
 export const actionAlertsFilterSchema = schema.object({
   query: schema.maybe(alertsFilterQuerySchemaV1),
@@ -83,7 +83,7 @@ export const actionAlertsFilterSchema = schema.object({
       { meta: { description: 'Defines a period that limits whether the action runs.' } }
     )
   ),
-});
+}, { meta: { id: 'update_rule_action_alerts_filter' } });
 
 export const actionSchema = schema.object(
   {
@@ -121,7 +121,7 @@ export const actionSchema = schema.object(
     ),
   },
   {
-    meta: { description: 'An action that runs under defined conditions.' },
+    meta: { id: 'update_rule_action', description: 'An action that runs under defined conditions.' },
   }
 );
 
@@ -165,7 +165,7 @@ export const updateBodySchema = schema.object({
   alert_delay: schema.maybe(alertDelaySchemaV1),
   flapping: schema.maybe(schema.nullable(flappingSchemaV2)),
   artifacts: schema.maybe(artifactsSchemaV1),
-});
+}, { meta: { id: 'update_rule' } });
 
 export const updateParamsSchema = schema.object({
   id: schema.string({

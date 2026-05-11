@@ -54,4 +54,4 @@ export const rRuleRequestSchema = schema.object({
   ),
   bymonthday: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 }), { minSize: 1 })),
   bymonth: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 12 }), { minSize: 1 })),
-});
+}, { meta: { id: 'r_rule_request' } });

@@ -44,4 +44,4 @@ export const getGapsSummaryByRuleIdsResponseSchema = schema.object({
       gap_fill_status: schema.maybe(schema.string()),
     })
   ),
-});
+}, { meta: { id: 'get_gaps_summary_by_rule_ids_response' } });

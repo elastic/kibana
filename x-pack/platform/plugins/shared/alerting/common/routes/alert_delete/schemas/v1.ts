@@ -55,11 +55,14 @@ const alertDeleteSettingsSchema = {
   ),
 };
 
-export const alertDeletePreviewQuerySchema = schema.object(alertDeleteSettingsSchema);
+export const alertDeletePreviewQuerySchema = schema.object(
+  alertDeleteSettingsSchema,
+  { meta: { id: 'alert_delete_preview_request' } }
+);
 
 export const alertDeletePreviewResponseSchema = schema.object({
   affected_alert_count: schema.number(),
-});
+}, { meta: { id: 'alert_delete_preview_response' } });
 
 export const alertDeleteScheduleQuerySchema = schema.object({
   ...alertDeleteSettingsSchema,
@@ -71,8 +74,8 @@ export const alertDeleteScheduleQuerySchema = schema.object({
       },
     })
   ),
-});
+}, { meta: { id: 'alert_delete_schedule_request' } });
 
 export const alertDeleteLastRunResponseSchema = schema.object({
   last_run: schema.maybe(schema.string()),
-});
+}, { meta: { id: 'alert_delete_last_run_response' } });

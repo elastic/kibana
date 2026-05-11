@@ -11,7 +11,7 @@ export const actionVariableSchema = schema.object({
   name: schema.string(),
   description: schema.string(),
   usesPublicBaseUrl: schema.maybe(schema.boolean()),
-});
+}, { meta: { id: 'rule_type_action_variable' } });
 
 export const actionGroupSchema = schema.object(
   {
@@ -20,6 +20,7 @@ export const actionGroupSchema = schema.object(
   },
   {
     meta: {
+      id: 'rule_type_action_group',
       description:
         'An action group to use when an alert goes from an active state to an inactive one.',
     },
@@ -189,7 +190,7 @@ export const typesRulesSchema = schema.object({
   }),
   recovery_action_group: actionGroupSchema,
   rule_task_timeout: schema.maybe(schema.string()),
-});
+}, { meta: { id: 'rule_type' } });
 
 export const typesRulesResponseBodySchema = schema.arrayOf(typesRulesSchema);
 

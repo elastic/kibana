@@ -178,4 +178,4 @@ export const rRuleResponseSchema = schema.object({
       )
     )
   ),
-});
+}, { meta: { id: 'r_rule' } });

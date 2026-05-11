@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 export const getScheduleFrequencyResponseBodySchema = schema.object({
   total_scheduled_per_minute: schema.number(),
   remaining_schedules_per_minute: schema.number(),
-});
+}, { meta: { id: 'get_schedule_frequency_response' } });
 
 export const getScheduleFrequencyResponseSchema = schema.object({
   body: getScheduleFrequencyResponseBodySchema,

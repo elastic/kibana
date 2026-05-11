@@ -55,7 +55,7 @@ export const backfillResponseSchema = schema.object({
       interval: schema.string(),
     })
   ),
-});
+}, { meta: { id: 'backfill_response' } });
 
 export const errorResponseSchema = schema.object({
   error: schema.object({
@@ -66,4 +66,4 @@ export const errorResponseSchema = schema.object({
       name: schema.maybe(schema.string()),
     }),
   }),
-});
+}, { meta: { id: 'backfill_error_response' } });

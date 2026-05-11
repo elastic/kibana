@@ -68,4 +68,4 @@ export const findRuleTemplatesRequestQuerySchema = schema.object({
       meta: { description: 'Filters the rule templates by tags.' },
     })
   ),
-});
+}, { meta: { id: 'find_rule_templates_request' } });

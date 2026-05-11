@@ -73,11 +73,11 @@ export const gapsSummarySchema = schema.object({
     filled: schema.number(),
     error: schema.number(),
   }),
-});
+}, { meta: { id: 'gaps_summary' } });
 
 export const getRuleIdsWithGapResponseSchema = schema.object({
   total: schema.number(),
   rule_ids: schema.arrayOf(schema.string()),
   latest_gap_timestamp: schema.maybe(schema.number()),
   summary: gapsSummarySchema,
-});
+}, { meta: { id: 'get_rules_with_gaps_response' } });

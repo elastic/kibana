@@ -18,7 +18,7 @@ export const gapStatusSchema = schema.oneOf([
 export const rangeSchema = schema.object({
   lte: schema.string(),
   gte: schema.string(),
-});
+}, { meta: { id: 'gap_range' } });
 
 export const rangeListSchema = schema.arrayOf(rangeSchema);
 
@@ -44,11 +44,11 @@ export const gapsResponseSchema = schema.object({
       ]),
     })
   ),
-});
+}, { meta: { id: 'gap_response' } });
 
 export const errorResponseSchema = schema.object({
   error: schema.object({
     message: schema.string(),
     status: schema.maybe(schema.number()),
   }),
-});
+}, { meta: { id: 'gap_error_response' } });

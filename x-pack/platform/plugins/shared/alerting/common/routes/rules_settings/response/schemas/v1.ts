@@ -13,7 +13,7 @@ export const queryDelaySettingsResponseBodySchema = schema.object({
   updated_by: schema.nullable(schema.string()),
   created_at: schema.string(),
   updated_at: schema.string(),
-});
+}, { meta: { id: 'query_delay_settings_response' } });
 
 export const queryDelaySettingsResponseSchema = schema.object({
   body: queryDelaySettingsResponseBodySchema,

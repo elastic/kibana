@@ -9,4 +9,4 @@ import { schema } from '@kbn/config-schema';
 
 export const updateQueryDelaySettingsBodySchema = schema.object({
   delay: schema.number(),
-});
+}, { meta: { id: 'update_query_delay_settings_request' } });
