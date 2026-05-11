@@ -6,6 +6,7 @@
  */
 
 import type { SavedObject } from '@kbn/core/server';
+import type { Observable } from '../../../common/types/domain';
 import type { CasePersistedAttributes } from '../../common/types/case';
 import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
 
@@ -47,11 +48,19 @@ export interface CaseAnalyticsDoc {
     time_to_resolve?: number | null;
     incremental_id?: number | null;
     template?: { id: string; version: number } | null;
-    observables?: unknown[];
-    custom_fields?: unknown[];
+    // `connector` and `external_service` are fully indexed (their sub-fields
+    // are searchable). `customFields` is a typed nested array per the SO
+    // shape. `settings` is opaque (mapped `enabled: false`).
     connector?: unknown;
     external_service?: unknown;
     settings?: unknown;
+    // Matches the SO's `customFields` (camelCase) — nested array of
+    // `{ key, type, value }`. The mapping indexes `value` with multi-fields
+    // for typed querying (number, boolean, string, date, ip). Pass-through.
+    customFields?: unknown[];
+    // **Denormalized** from the SO's nested `[{ typeKey, value, description }]`
+    // array to one keyword array per type. See `buildObservables` below.
+    observables?: Record<string, string[]>;
     extended_fields?: Record<string, unknown>;
   };
 }
@@ -138,13 +147,16 @@ export function buildCaseDoc(so: SavedObject<CasePersistedAttributes>): CaseAnal
       time_to_resolve: a.time_to_resolve,
       incremental_id: a.incremental_id,
       template: a.template,
-      // Free-form blobs — passed through opaque. The mapping has them as
-      // `enabled: false`, so ES stores but doesn't index them.
-      observables: a.observables,
-      custom_fields: a.customFields,
+      // `connector` and `external_service` are fully indexed per the mapping.
+      // No transformation needed — the SO shape is the analytics shape.
       connector: a.connector,
       external_service: a.external_service,
+      // `settings`: opaque (mapped `enabled: false`); `customFields`: nested
+      // array per SO shape. Both pass through unchanged.
       settings: a.settings,
+      customFields: a.customFields,
+      // Denormalize observables — see `buildObservables`.
+      observables: buildObservables(a.observables),
       extended_fields: a.extended_fields ?? undefined,
     },
   };
@@ -159,4 +171,39 @@ function toUserDoc(user: CasePersistedAttributes['created_by'] | null): CaseUser
     email: user.email,
     profile_uid: user.profile_uid,
   };
+}
+
+/**
+ * Regroup observables from the SO's array shape into per-type keyword arrays.
+ *
+ * Input (from SO):  `[{ typeKey: 'url', value: 'http://...', description: '...' },
+ *                     { typeKey: 'url', value: 'http://other' },
+ *                     { typeKey: 'ipv4', value: '1.2.3.4' }]`
+ * Output:           `{ url: ['http://...', 'http://other'], ipv4: ['1.2.3.4'] }`
+ *
+ * Returns `undefined` when there are no observables — keeps the doc small for
+ * the common case (most cases have none).
+ *
+ * `description` is dropped — see file-level mapping comment for the rationale.
+ */
+function buildObservables(
+  observables: Observable[] | undefined
+): Record<string, string[]> | undefined {
+  if (observables == null || observables.length === 0) return undefined;
+
+  const byType: Record<string, string[]> = {};
+  for (const obs of observables) {
+    const type = obs.typeKey;
+    // Skip observables missing a typeKey — shouldn't happen in practice, but
+    // we'd have nowhere to bucket them and we don't want to fail the whole
+    // doc build over malformed data.
+    if (type != null && obs.value != null) {
+      const bucket = byType[type] ?? (byType[type] = []);
+      bucket.push(String(obs.value));
+    }
+  }
+
+  // If every observable lacked a typeKey or value (shouldn't happen, but
+  // defensive), return undefined rather than an empty object.
+  return Object.keys(byType).length > 0 ? byType : undefined;
 }
