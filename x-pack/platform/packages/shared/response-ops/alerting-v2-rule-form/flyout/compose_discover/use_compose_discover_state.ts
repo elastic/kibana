@@ -20,7 +20,6 @@ const SAMPLE_QUERY = `FROM logs-*
 
 const createInitialState = (mode: ComposeDiscoverMode): ComposeDiscoverState => ({
   mode,
-  option: 'opt1',
   step: 0,
   tracking: false,
   fullQuery: mode === 'create' ? SAMPLE_QUERY : '',
@@ -49,8 +48,7 @@ const createInitialState = (mode: ComposeDiscoverMode): ComposeDiscoverState => 
  * Returns the ordered list of step titles for the current state.
  * Used for the stepper display and step routing in the form.
  */
-export function getStepTitles(state: Pick<ComposeDiscoverState, 'option' | 'tracking'>): string[] {
-  if (state.option === 'opt2') return ['Query Condition', 'Details & Artifacts', 'Notifications'];
+export function getStepTitles(state: Pick<ComposeDiscoverState, 'tracking'>): string[] {
   if (state.tracking)
     return ['Alert Condition', 'Recovery Condition', 'Details & Artifacts', 'Notifications'];
   return ['Alert Condition', 'Details & Artifacts', 'Notifications'];
@@ -62,22 +60,14 @@ export function getStepTitles(state: Pick<ComposeDiscoverState, 'option' | 'trac
  */
 export function getSandboxTabConfig(state: ComposeDiscoverState): SandboxTabConfig {
   if (state.yamlMode) return { type: 'all-three' };
-  // opt2: single editor until query is committed, then full 3-tab view
-  if (state.option === 'opt2') {
-    return state.queryCommitted ? { type: 'all-three' } : { type: 'single' };
-  }
 
-  // opt1: tab config depends on the current step
   const stepTitles = getStepTitles(state);
   const currentStepName = stepTitles[state.step] ?? '';
 
   if (currentStepName === 'Recovery Condition' && state.recoveryType === 'custom') {
     return { type: 'base-recovery' };
   }
-  if (
-    (currentStepName === 'Alert Condition' || currentStepName === 'Query Condition') &&
-    state.tracking
-  ) {
+  if (currentStepName === 'Alert Condition' && state.tracking) {
     return { type: 'base-alert' };
   }
   return { type: 'single' };
@@ -126,7 +116,7 @@ function reducer(
     }
     case 'ENABLE_TRACKING': {
       // If currently on recovery step, jump back to step 0
-      const steps = getStepTitles({ option: state.option, tracking: true });
+      const steps = getStepTitles({ tracking: true });
       const clampedStep = state.step < steps.length ? state.step : 0;
       return {
         ...state,
@@ -176,8 +166,6 @@ function reducer(
       };
     case 'SET_NOTIFICATIONS_ENABLED':
       return { ...state, notificationsEnabled: action.enabled };
-    case 'SET_OPTION':
-      return { ...state, option: action.option, step: 0 };
     case 'SET_STEP':
       return { ...state, step: action.step };
     case 'GO_NEXT': {
