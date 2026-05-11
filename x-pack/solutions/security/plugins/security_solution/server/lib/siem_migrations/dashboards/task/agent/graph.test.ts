@@ -46,7 +46,7 @@ let mockRetriever = new MockDashboardMigrationsRetriever();
 let mockEsqlKnowledgeBase = new MockEsqlKnowledgeBase();
 let mockTelemetryClient = new MockSiemMigrationTelemetryClient();
 const esClientMock =
-  elasticsearchServiceMock.createCustomClusterClient() as unknown as jest.MockedObjectDeep<IScopedClusterClient>;
+  elasticsearchServiceMock.createScopedClusterClient() as unknown as jest.MockedObjectDeep<IScopedClusterClient>;
 
 const setupAgent = (responses: NodeResponse[]) => {
   fakeLLM = new SiemMigrationFakeLLM({ nodeResponses: responses });
@@ -79,7 +79,7 @@ describe('getDashboardMigrationAgent', () => {
   });
 
   it('should run graph', async () => {
-    esClientMock.asInternalUser.indices.resolveIndex = jest.fn().mockResolvedValue({
+    esClientMock.asCurrentUser.indices.resolveIndex = jest.fn().mockResolvedValue({
       indices: [],
       aliases: [],
       data_streams: [],
