@@ -23,6 +23,9 @@ export {
 
 export {
   EditOverlay,
+  EditOutline,
+  ElementRegistry,
+  IDLE,
   startDragFromClone,
   startDragFromElement,
   findExistingClone,
@@ -35,4 +38,12 @@ export {
 
 export { MeasureButton, MeasureOverlay, SpacingMeasurement } from './measure';
 
-export type { EditOverlayHandle, DragState, ResizeState } from './edit';
+export type {
+  EditOverlayHandle,
+  ElementSession,
+  InteractionState,
+  IdleState,
+  HoverState,
+  DragState,
+  ResizeState,
+} from './edit';

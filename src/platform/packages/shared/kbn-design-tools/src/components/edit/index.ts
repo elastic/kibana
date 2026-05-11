@@ -8,6 +8,9 @@
  */
 
 export { EditOverlay } from './edit_overlay';
+export { EditOutline } from './outline';
+export { ElementRegistry } from './element_registry';
+export { IDLE } from './interaction_state';
 export { startDragFromClone, startDragFromElement, findExistingClone } from './drag_helpers';
 export {
   startResize,
@@ -17,6 +20,12 @@ export {
   getHandleMode,
 } from './resize_helpers';
 
-export type { ResizeState } from './resize_helpers';
-export type { DragState } from './drag_helpers';
+export type { ElementSession } from './element_registry';
+export type {
+  InteractionState,
+  IdleState,
+  HoverState,
+  DragState,
+  ResizeState,
+} from './interaction_state';
 export type { EditOverlayHandle } from './edit_overlay';

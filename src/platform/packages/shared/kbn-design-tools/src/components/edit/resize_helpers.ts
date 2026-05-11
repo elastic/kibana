@@ -9,25 +9,8 @@
 
 import { RESIZE_HANDLE_SIZE } from '../../lib/constants';
 import type { ResizeHandle } from '../../lib/constants';
-import type { ElementOffset } from '../../lib/dom/get_element_under';
-
-export interface ResizeState {
-  el: HTMLElement;
-  clone: HTMLElement;
-  handle: ResizeHandle;
-  startX: number;
-  startY: number;
-  /** Clone width at resize start (includes any prior dw). */
-  baseWidth: number;
-  /** Clone height at resize start (includes any prior dh). */
-  baseHeight: number;
-  /** Position offset at resize start (includes any prior dx). */
-  baseDx: number;
-  /** Position offset at resize start (includes any prior dy). */
-  baseDy: number;
-  /** The original element's rect — used for snap calculations. */
-  originalRect: DOMRect;
-}
+import type { ElementSession } from './element_registry';
+import type { ResizeState } from './interaction_state';
 
 /**
  * Calculate position and dimensions given a handle being dragged.
@@ -73,28 +56,29 @@ export const calcResizeDeltas = (
  * Start a resize operation from a handle.
  */
 export const startResize = (
-  entry: ElementOffset,
+  session: ElementSession,
   handle: ResizeHandle,
   clientX: number,
   clientY: number
 ): ResizeState => {
-  const clone = entry.clone!;
+  const clone = session.clone!;
   clone.style.pointerEvents = 'none';
   // Ensure transform-origin is top-left so scale grows predictably
   clone.style.transformOrigin = '0 0';
   clone.style.willChange = 'transform';
 
   return {
-    el: entry.el,
+    type: 'resize',
+    el: session.el,
     clone,
     handle,
     startX: clientX,
     startY: clientY,
-    baseWidth: entry.originalRect.width + entry.dw,
-    baseHeight: entry.originalRect.height + entry.dh,
-    baseDx: entry.dx,
-    baseDy: entry.dy,
-    originalRect: entry.originalRect,
+    baseWidth: session.originalRect.width + session.dw,
+    baseHeight: session.originalRect.height + session.dh,
+    baseDx: session.dx,
+    baseDy: session.dy,
+    originalRect: session.originalRect,
   };
 };
 

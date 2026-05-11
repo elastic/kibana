@@ -10,6 +10,18 @@
 import { DEVTOOL_CLONE_ATTR } from '../constants';
 import { isIgnoredElement } from './is_ignored_element';
 
+/**
+ * Minimal view of a tracked element needed for hit-testing.
+ */
+export interface TrackedElement {
+  el: HTMLElement;
+  clone: HTMLElement | null;
+}
+
+/**
+ * Extended tracked-element shape used by tests.
+ * Production code should prefer TrackedElement or ElementSession.
+ */
 export interface ElementOffset {
   el: HTMLElement;
   clone: HTMLElement | null;
@@ -21,9 +33,6 @@ export interface ElementOffset {
   dh: number;
   originalTransform: string;
   originalRect: DOMRect;
-  /** Window scroll position when the clone was created. */
-  scrollX: number;
-  scrollY: number;
 }
 
 /**
@@ -38,12 +47,12 @@ export interface ElementOffset {
 export const getElementUnder = (
   x: number,
   y: number,
-  movedElements: ElementOffset[]
+  movedElements: ReadonlyArray<TrackedElement>
 ): HTMLElement | null => {
   const elements = document.elementsFromPoint(x, y);
   for (const el of elements) {
     if (!(el instanceof HTMLElement)) continue;
-    // Skip ignored structural elements (spacers, etc.) everywhere, including inside clones
+    // Skip ignored elements (spacers, toolbar, overlays) everywhere including inside clones
     if (isIgnoredElement(el)) {
       // Tool UI elements (toolbar, overlay) block interaction — return null
       const isInsideClone = el.closest(`[${DEVTOOL_CLONE_ATTR}]`);
@@ -52,7 +61,7 @@ export const getElementUnder = (
       continue;
     }
     // Elements inside clones are valid targets — return the clone root so callers
-    // can match it against movedElements entries.
+    // can match it against registry entries.
     if (el.hasAttribute(DEVTOOL_CLONE_ATTR)) return el;
     const cloneAncestor = el.closest(`[${DEVTOOL_CLONE_ATTR}]`) as HTMLElement | null;
     if (cloneAncestor) return cloneAncestor;

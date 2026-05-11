@@ -34,8 +34,8 @@ const IGNORED_SELECTOR = [
   DEVTOOL_RESIZE_SELECTOR,
 ].join(',');
 
-// Emotion-generated class names that contain these labels are ignored.
-// E.g. EuiSpacer renders with a class like `css-xxxxx-euiSpacer`.
+// Class name substrings for purely structural components (e.g. EuiSpacer
+// renders with a class like `css-xxxxx-euiSpacer`).
 const IGNORED_CLASS_LABELS = ['euiSpacer'];
 
 // Class name prefixes for structural/chrome elements that should always be ignored.

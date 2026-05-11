@@ -9,58 +9,49 @@
 
 import { DEVTOOL_CLONE_ATTR } from '../../lib/constants';
 import { cloneElement } from '../../lib/dom/clone_element';
-import type { ElementOffset } from '../../lib/dom/get_element_under';
-
-export interface DragState {
-  el: HTMLElement;
-  clone: HTMLElement;
-  startX: number;
-  startY: number;
-  baseOffsetX: number;
-  baseOffsetY: number;
-  /** The original element's rect before any dragging — used for snap calculations. */
-  originalRect: DOMRect;
-}
+import type { ElementSession, ElementRegistry } from './element_registry';
+import type { DragState } from './interaction_state';
 
 /**
  * Begin dragging an existing clone (re-grab).
  * Disables pointer events on the clone so it doesn't interfere with hit-testing during drag.
  */
 export const startDragFromClone = (
-  entry: ElementOffset,
+  session: ElementSession,
   clientX: number,
   clientY: number
 ): DragState => {
-  const clone = entry.clone!;
+  const clone = session.clone!;
   clone.style.pointerEvents = 'none';
   clone.style.willChange = 'transform';
 
   return {
-    el: entry.el,
+    type: 'drag',
+    el: session.el,
     clone,
     startX: clientX,
     startY: clientY,
-    baseOffsetX: entry.dx,
-    baseOffsetY: entry.dy,
-    originalRect: entry.originalRect,
+    baseOffsetX: session.dx,
+    baseOffsetY: session.dy,
+    originalRect: session.originalRect,
   };
 };
 
 /**
  * Begin dragging a new element for the first time.
- * Creates a fixed-position clone, hides the original, and tracks it in movedElements.
+ * Creates a fixed-position clone, hides the original, and tracks it in the registry.
  */
 export const startDragFromElement = (
   target: HTMLElement,
-  movedElements: ElementOffset[],
+  registry: ElementRegistry,
   cloneZIndex: number,
   clientX: number,
   clientY: number
 ): DragState => {
-  const existing = movedElements.find((e) => e.el === target);
+  let session = registry.get(target);
 
-  if (!existing) {
-    movedElements.push({
+  if (!session) {
+    session = {
       el: target,
       clone: null,
       dx: 0,
@@ -69,49 +60,46 @@ export const startDragFromElement = (
       dh: 0,
       originalTransform: target.style.transform || '',
       originalRect: target.getBoundingClientRect(),
-      scrollX: window.scrollX,
-      scrollY: window.scrollY,
-    });
-  } else if (existing.clone) {
-    existing.clone.remove();
-    existing.clone = null;
+    };
+    registry.set(session);
+  } else if (session.clone) {
+    session.clone.remove();
+    registry.setClone(session, null);
   }
 
-  // Create a visual clone on document.body — always on top, no stacking context issues
+  // Clone lives on document.body so it's above all stacking contexts
   const { clone, rect } = cloneElement(target, cloneZIndex);
   // Set transform-origin for consistent scale behavior during resize
   clone.style.transformOrigin = '0 0';
   document.body.appendChild(clone);
 
-  // Hide the original (preserve layout space) and block pointer events
-  // so it doesn't trigger hover effects or the move overlay outline.
+  // Hide original but preserve layout space; block pointer events
+  // so it doesn't trigger hover or hit-testing.
   target.style.visibility = 'hidden';
   target.style.pointerEvents = 'none';
 
-  // Store the original element rect for consistent snap calculations across re-grabs
-  const entry = movedElements.find((e) => e.el === target);
-  if (entry) {
-    entry.originalRect = rect;
-  }
+  // Keep the original rect stable across re-grabs for snap calculations
+  session.originalRect = rect;
 
   return {
+    type: 'drag',
     el: target,
     clone,
     startX: clientX,
     startY: clientY,
-    baseOffsetX: entry?.dx ?? 0,
-    baseOffsetY: entry?.dy ?? 0,
+    baseOffsetX: session.dx,
+    baseOffsetY: session.dy,
     originalRect: rect,
   };
 };
 
 /**
- * Check if the target is an existing clone and find its tracked entry.
+ * Check if the target is an existing clone and find its tracked session.
  */
 export const findExistingClone = (
   target: HTMLElement,
-  movedElements: ElementOffset[]
-): ElementOffset | null => {
+  registry: ElementRegistry
+): ElementSession | null => {
   if (!target.hasAttribute(DEVTOOL_CLONE_ATTR)) return null;
-  return movedElements.find((e) => e.clone === target) ?? null;
+  return registry.getByClone(target) ?? null;
 };

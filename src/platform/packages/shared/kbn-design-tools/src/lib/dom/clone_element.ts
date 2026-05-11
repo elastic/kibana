@@ -34,8 +34,8 @@ const copyCanvasContent = (original: HTMLElement, clone: HTMLElement): void => {
   }
 };
 
-// CSS properties that are inherited by default and may be lost when the clone
-// is moved to document.body (away from its original parent context).
+// Inherited CSS properties that are lost when the clone is reparented to
+// document.body, because they no longer cascade from the original ancestors.
 const INHERITED_PROPS = [
   'color',
   'direction',
@@ -67,9 +67,9 @@ const INHERITED_PROPS = [
   'text-rendering',
 ];
 
-// Non-inherited visual properties that can be lost when the clone is moved
-// outside the original Emotion/EUI style scope (e.g. contextual selectors
-// or CSS variable chains that no longer resolve).
+// Non-inherited visual properties that can be lost when the clone leaves
+// the original style scope (e.g. contextual selectors or CSS variable
+// chains that no longer resolve).
 const NON_INHERITED_VISUAL_PROPS = [
   'background',
   'background-color',
@@ -91,7 +91,7 @@ const copyInheritedStyles = (target: HTMLElement, clone: HTMLElement): void => {
     clone.style.setProperty(prop, computed.getPropertyValue(prop));
   }
 
-  // Preserve Emotion/EUI visual styles that are not inherited
+  // Preserve non-inherited visual styles
   for (const prop of NON_INHERITED_VISUAL_PROPS) {
     clone.style.setProperty(prop, computed.getPropertyValue(prop));
   }
@@ -104,20 +104,17 @@ const copyInheritedStyles = (target: HTMLElement, clone: HTMLElement): void => {
   }
 };
 
-// EUI truncation utility classes that use !important and must be stripped from clones.
+// EUI truncation classes use !important and must be stripped so they don't
+// clip content that was visible in the original flex/grid context.
 const TRUNCATION_CLASSES = ['eui-textTruncate', 'eui-textBreakWord', 'eui-textBreakAll'];
 
 /**
- * Recursively walk both original and clone element trees, copying inherited
- * and custom properties at every node. This ensures descendants that relied
- * on values inherited from ancestors outside the cloned subtree render
- * correctly once the clone is moved to document.body.
+ * Recursively copy inherited and custom CSS properties from the original tree
+ * to the clone tree. Without this, descendants lose styles that cascaded from
+ * ancestors outside the cloned subtree.
  *
- * Also freezes layout dimensions on descendants using getBoundingClientRect()
- * (the actual rendered size) and strips EUI truncation classes so that
- * !important rules (e.g. eui-textTruncate with overflow:hidden !important +
- * text-overflow:ellipsis !important) cannot clip content that was visible
- * in the original flex/grid context.
+ * Also freezes layout dimensions on descendants (using their rendered size)
+ * and strips EUI truncation classes whose !important rules would clip content.
  */
 const copyInheritedStylesDeep = (
   original: HTMLElement,
@@ -126,7 +123,7 @@ const copyInheritedStylesDeep = (
 ): void => {
   copyInheritedStyles(original, clone);
 
-  // Strip EUI truncation classes — they use !important which beats inline style overrides.
+  // Strip EUI truncation classes — their !important rules override inline styles.
   let hadTruncationClass = false;
   for (const cls of TRUNCATION_CLASSES) {
     if (clone.classList.contains(cls)) {
@@ -135,10 +132,9 @@ const copyInheritedStylesDeep = (
     }
   }
 
-  // Freeze layout dimensions on descendants (not the root — that's handled by cloneElement).
-  // getBoundingClientRect gives the true rendered size including flex/grid distribution.
-  // Skip elements that had truncation classes: their original measured width reflects the
-  // constrained/truncated size, but the clone (with the class stripped) should size naturally.
+  // Freeze rendered dimensions on descendants (root is sized by cloneElement).
+  // Skip elements with stripped truncation classes — their measured width reflects
+  // the constrained size, but the clone should size naturally without the class.
   if (!isRoot && !hadTruncationClass) {
     const rect = original.getBoundingClientRect();
     clone.style.width = `${rect.width}px`;
@@ -158,8 +154,6 @@ const copyInheritedStylesDeep = (
   }
 };
 
-let pseudoCounter = 0;
-
 /**
  * If a pseudo-element (::before or ::after) has computed content, inject an
  * inline <style> rule that replicates its visual appearance on the clone.
@@ -178,7 +172,7 @@ const applyPseudoStyle = (
     return;
   }
 
-  const className = `__pseudo_${pseudoCounter++}`;
+  const className = `__pseudo_${Math.random().toString(36).slice(2, 8)}`;
   clone.classList.add(className);
 
   const rules: string[] = [`content: ${content};`];
@@ -216,8 +210,8 @@ const copyPseudoElements = (original: HTMLElement, clone: HTMLElement): void => 
 
 /**
  * Create a fixed-position clone of an element. The clone keeps its original
- * classes so Emotion/CSS rules apply naturally. Inherited CSS properties,
- * custom properties, and pseudo-elements are copied for the entire subtree.
+ * classes so CSS rules still apply. Inherited properties, custom properties,
+ * and pseudo-elements are copied for the entire subtree.
  */
 export const cloneElement = (
   target: HTMLElement,

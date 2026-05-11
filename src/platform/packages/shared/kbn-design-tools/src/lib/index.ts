@@ -35,7 +35,7 @@ export {
   snapToGrid,
 } from './dom';
 
-export type { SpacingLine, ElementOffset, SnapResult } from './dom';
+export type { SpacingLine, ElementOffset, TrackedElement, SnapResult } from './dom';
 
 export { getDefaultLayoutConfig, calculateColumnLayout, calculateRowLayout } from './layout';
 

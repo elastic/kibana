@@ -17,5 +17,5 @@ export { isIgnoredElement } from './is_ignored_element';
 export { snapToGrid } from './snap_to_grid';
 
 export type { SpacingLine } from './calculate_spacing';
-export type { ElementOffset } from './get_element_under';
+export type { ElementOffset, TrackedElement } from './get_element_under';
 export type { SnapResult } from './snap_to_grid';
