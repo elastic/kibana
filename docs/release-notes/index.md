@@ -24,6 +24,20 @@ To check for security updates, go to [Security announcements for the Elastic sta
 % FEATURES, ENHANCEMENTS, FIXES
 % Paste in index.md
 
+## 9.4.1 [kibana-9.4.1-release-notes]
+
+### Fixes [kibana-9.4.1-fixes]
+
+**Alerting**:
+* Fixes empty rule type fields, such as `kibana.alert.reason`, on active alert documents when a delayed alert graduates to active during a flapping hold without an executor report. [#266012]({{kib-pull}}266012)
+
+**Dashboards and Visualizations**:
+* Fixes a critical validation failure that occurred when dashboard controls had `null` titles. Control titles are now converted to `undefined` during transforms, allowing validation to pass [#268220]({{kib-pull}}268220).
+* Fixes a regression where the dashboard remained locked in an open-flyout state after closing the {{esql}} control edit flyout when editing an existing query-based control [#267605]({{kib-pull}}267605).
+
+**Elastic Security solution**:
+For the Elastic Security 9.4.1 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
 ## 9.4.0 [kibana-9.4.0-release-notes]
 
 :::{important} - New recommended {{kib}} instance minimum size of 2 GB

@@ -37,13 +37,13 @@ Some existing dashboards are failing to load when a pinned control has `"title":
 
 **Action**
 
-If you have existing dashboards with controls, do not upgrade to {{stack}} 9.4.0. Upgrade to {{stack}} 9.4.1 when it becomes available.
+If you have existing dashboards with controls, do not upgrade to {{stack}} 9.4.0. Upgrade to {{stack}} 9.4.1 instead.
 
 If you already upgraded to {{stack}} 9.4.0 and dashboards fail to open with this error, contact Elastic Support for remediation guidance.
 
-**Fix**
+**Resolved**
 
-A fix is planned for {{stack}} 9.4.1.
+This issue is resolved in {{stack}} 9.4.1.
 
 ::::
 
