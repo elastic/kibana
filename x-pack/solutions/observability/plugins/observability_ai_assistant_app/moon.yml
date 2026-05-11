@@ -94,6 +94,7 @@ dependsOn:
   - '@kbn/shared-ux-ai-components'
   - '@kbn/react-query'
   - '@kbn/search-inference-endpoints'
+  - '@kbn/actions-types'
 tags:
   - plugin
   - prod
