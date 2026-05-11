@@ -44,6 +44,7 @@ export type * from './src/routes/custom_links';
 export type * from './src/routes/anomaly_detection';
 export type * from './src/routes/mobile';
 export type * from './src/routes/mobile_errors';
+export type * from './src/routes/mobile_crashes';
 export { filterOptionsRt, payloadRt } from './src/routes/custom_links';
 export {
   rangeRt,

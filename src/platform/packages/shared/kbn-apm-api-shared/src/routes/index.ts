@@ -35,6 +35,7 @@ import { customLinksRouteDefinitions } from './custom_links';
 import { anomalyDetectionRouteDefinitions } from './anomaly_detection';
 import { mobileRouteDefinitions } from './mobile';
 import { mobileErrorsRouteDefinitions } from './mobile_errors';
+import { mobileCrashesRouteDefinitions } from './mobile_crashes';
 import type { BuildGroupedRepository } from './types';
 
 export const routeDefinitions = {
@@ -67,6 +68,7 @@ export const routeDefinitions = {
   anomalyDetection: anomalyDetectionRouteDefinitions,
   mobile: mobileRouteDefinitions,
   mobileErrors: mobileErrorsRouteDefinitions,
+  mobileCrashes: mobileCrashesRouteDefinitions,
 };
 
 export type SharedAPMRouteRepository = BuildGroupedRepository<typeof routeDefinitions>;
