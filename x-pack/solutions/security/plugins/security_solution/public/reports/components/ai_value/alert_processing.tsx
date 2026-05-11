@@ -14,18 +14,16 @@ import { formatPercent, type ValueMetrics } from './metrics';
 import * as i18n from './translations';
 import { AlertProcessingDonut } from './alert_processing_donut_lens';
 
-type Props =
-  | { renderSample: true; valueMetrics: ValueMetrics }
-  | {
-      renderSample: false;
-      valueMetrics: ValueMetrics;
-      attackAlertIds: string[];
-      from: string;
-      to: string;
-    };
+interface Props {
+  isSample: boolean;
+  valueMetrics: ValueMetrics;
+  attackAlertIds: string[];
+  from: string;
+  to: string;
+}
 
 export const AlertProcessing: React.FC<Props> = (props) => {
-  const { valueMetrics, renderSample } = props;
+  const { valueMetrics, isSample } = props;
   const {
     euiTheme: { size },
   } = useEuiTheme();
@@ -56,16 +54,12 @@ export const AlertProcessing: React.FC<Props> = (props) => {
             min-width: 300px;
           `}
         >
-          {renderSample ? (
-            <AlertProcessingDonut renderSample={true} />
-          ) : (
-            <AlertProcessingDonut
-              renderSample={false}
-              attackAlertIds={props.attackAlertIds}
-              from={props.from}
-              to={props.to}
-            />
-          )}
+          <AlertProcessingDonut
+            isSample={isSample}
+            attackAlertIds={props.attackAlertIds}
+            from={props.from}
+            to={props.to}
+          />
           <AlertsProcessingTable
             filteredAlerts={valueMetrics.filteredAlerts}
             escalatedAlerts={escalatedAlerts}

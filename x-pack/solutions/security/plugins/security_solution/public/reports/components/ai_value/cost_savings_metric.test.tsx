@@ -41,7 +41,7 @@ const useAIValueExportContextMock = useAIValueExportContext as jest.Mock;
 const useMetricAnimationMock = useMetricAnimation as jest.Mock;
 
 const defaultProps = {
-  renderSample: false as const,
+  isSample: false as const,
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-31T23:59:59.999Z',
   minutesPerAlert: 10,
@@ -104,13 +104,13 @@ describe('CostSavingsMetric', () => {
 
   describe('sample variant', () => {
     it('renders the sample metric and skips the live Lens visualization', () => {
-      render(<CostSavingsMetric renderSample={true} />);
+      render(<CostSavingsMetric isSample={true} />);
       expect(VisualizationEmbeddable).not.toHaveBeenCalled();
       expect(screen.getByText(i18n.COST_SAVINGS_TITLE)).toBeInTheDocument();
     });
 
     it('does not call useMetricAnimation in sample variant', () => {
-      render(<CostSavingsMetric renderSample={true} />);
+      render(<CostSavingsMetric isSample={true} />);
       expect(useMetricAnimationMock).not.toHaveBeenCalled();
     });
   });

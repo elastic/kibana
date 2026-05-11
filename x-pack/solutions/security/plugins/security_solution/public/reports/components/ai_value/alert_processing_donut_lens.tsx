@@ -28,6 +28,7 @@ import { DonutChartWrapper } from '../../../common/components/charts/donutchart'
 import { useThemes } from '../../../common/components/charts/common';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { SAMPLE_VALUE_METRICS } from './sample_data';
+import * as i18n from './translations';
 
 const ChartSize = 250;
 const visualizationIdPrefix = 'aiValueAlertProcessingDonut';
@@ -42,14 +43,12 @@ const donutTheme: PartialTheme = {
   },
 };
 
-type Props =
-  | { renderSample: true }
-  | {
-      renderSample: false;
-      attackAlertIds: string[];
-      from: string;
-      to: string;
-    };
+interface Props {
+  isSample: boolean;
+  attackAlertIds: string[];
+  from: string;
+  to: string;
+}
 
 const LiveAlertProcessingDonut: React.FC<{
   attackAlertIds: string[];
@@ -96,16 +95,16 @@ const SampleAlertProcessingDonut: React.FC = () => {
   const totalAlerts = SAMPLE_VALUE_METRICS.totalAlerts;
   const data = useMemo(
     () => [
-      { key: 'AI Filtered', value: SAMPLE_VALUE_METRICS.filteredAlerts },
+      { key: i18n.AI_FILTERED, value: SAMPLE_VALUE_METRICS.filteredAlerts },
       {
-        key: 'Escalated',
+        key: i18n.ESCALATED,
         value: SAMPLE_VALUE_METRICS.totalAlerts - SAMPLE_VALUE_METRICS.filteredAlerts,
       },
     ],
     []
   );
   const fillColor = (dataName: string) =>
-    dataName === 'Escalated' ? colors.vis.euiColorVis9 : colors.vis.euiColorVis0;
+    dataName === i18n.ESCALATED ? colors.vis.euiColorVis9 : colors.vis.euiColorVis0;
 
   return (
     <DonutChartWrapper
@@ -179,7 +178,7 @@ export const AlertProcessingDonut: React.FC<Props> = (props) => {
         }
       `}
     >
-      {props.renderSample ? (
+      {props.isSample ? (
         <SampleAlertProcessingDonut />
       ) : (
         <LiveAlertProcessingDonut

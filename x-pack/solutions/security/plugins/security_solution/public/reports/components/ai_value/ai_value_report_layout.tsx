@@ -12,55 +12,33 @@ import { ValueReportSettings } from './value_report_settings';
 import { CostSavingsTrend } from './cost_savings_trend';
 import { ExecutiveSummary } from './executive_summary';
 import { AlertProcessing } from './alert_processing';
-import type { ValueMetrics } from './metrics';
-import {
-  SAMPLE_FROM,
-  SAMPLE_TO,
-  SAMPLE_VALUE_METRICS,
-  SAMPLE_VALUE_METRICS_COMPARE,
-  SAMPLE_ANALYST_HOURLY_RATE,
-  SAMPLE_MINUTES_PER_ALERT,
-} from './sample_data';
+import type { ValueReportData } from '../../hooks/use_value_report_data';
 
-type Props =
-  | { renderSample: true }
-  | {
-      renderSample: false;
-      attackAlertIds: string[];
-      analystHourlyRate: number;
-      minutesPerAlert: number;
-      from: string;
-      to: string;
-      valueMetrics: ValueMetrics;
-      valueMetricsCompare: ValueMetrics;
-    };
+type Props = Pick<
+  ValueReportData,
+  | 'isSample'
+  | 'attackAlertIds'
+  | 'analystHourlyRate'
+  | 'minutesPerAlert'
+  | 'from'
+  | 'to'
+  | 'valueMetrics'
+  | 'valueMetricsCompare'
+>;
 
-export const AIValueReportLayout: React.FC<Props> = (props) => {
+export const AIValueReportLayout: React.FC<Props> = ({
+  isSample,
+  attackAlertIds,
+  analystHourlyRate,
+  minutesPerAlert,
+  from,
+  to,
+  valueMetrics,
+  valueMetricsCompare,
+}) => {
   const {
     euiTheme: { colors },
   } = useEuiTheme();
-  const { renderSample } = props;
-
-  // TODO: Consider moving the logic for determining what data to use (sample vs live) into a higher level component
-  const {
-    attackAlertIds,
-    analystHourlyRate,
-    minutesPerAlert,
-    from,
-    to,
-    valueMetrics,
-    valueMetricsCompare,
-  } = renderSample
-    ? {
-        attackAlertIds: [],
-        analystHourlyRate: SAMPLE_ANALYST_HOURLY_RATE,
-        minutesPerAlert: SAMPLE_MINUTES_PER_ALERT,
-        from: SAMPLE_FROM,
-        to: SAMPLE_TO,
-        valueMetrics: SAMPLE_VALUE_METRICS,
-        valueMetricsCompare: SAMPLE_VALUE_METRICS_COMPARE,
-      }
-    : props;
 
   return (
     <div
@@ -74,7 +52,7 @@ export const AIValueReportLayout: React.FC<Props> = (props) => {
       <ExecutiveSummary
         attackAlertIds={attackAlertIds}
         analystHourlyRate={analystHourlyRate}
-        renderSample={renderSample}
+        isSample={isSample}
         minutesPerAlert={minutesPerAlert}
         from={from}
         to={to}
@@ -88,24 +66,22 @@ export const AIValueReportLayout: React.FC<Props> = (props) => {
       >
         <EuiHorizontalRule />
       </div>
-      <>
-        <AlertProcessing
-          renderSample={renderSample}
-          attackAlertIds={attackAlertIds}
-          valueMetrics={valueMetrics}
-          from={from}
-          to={to}
-        />
-        <div
-          css={css`
-            padding: 0 16px;
-          `}
-        >
-          <EuiHorizontalRule />
-        </div>
-      </>
+      <AlertProcessing
+        isSample={isSample}
+        attackAlertIds={attackAlertIds}
+        valueMetrics={valueMetrics}
+        from={from}
+        to={to}
+      />
+      <div
+        css={css`
+          padding: 0 16px;
+        `}
+      >
+        <EuiHorizontalRule />
+      </div>
       <CostSavingsTrend
-        renderSample={renderSample}
+        isSample={isSample}
         analystHourlyRate={analystHourlyRate}
         minutesPerAlert={minutesPerAlert}
         from={from}

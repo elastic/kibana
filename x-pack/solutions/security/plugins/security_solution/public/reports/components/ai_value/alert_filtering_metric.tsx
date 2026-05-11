@@ -23,7 +23,7 @@ import { SAMPLE_VALUE_METRICS } from './sample_data';
 import { formatPercent } from './metrics';
 
 interface Props {
-  renderSample: boolean;
+  isSample: boolean;
   attackAlertIds: string[];
   from: string;
   to: string;
@@ -84,7 +84,7 @@ const SampleAlertFilteringMetricContent: React.FC = () => (
 );
 
 const AlertFilteringMetricComponent: React.FC<Props> = ({
-  renderSample,
+  isSample,
   attackAlertIds,
   from,
   to,
@@ -132,7 +132,7 @@ const AlertFilteringMetricComponent: React.FC<Props> = ({
         }
       `}
     >
-      {renderSample ? (
+      {isSample ? (
         <SampleAlertFilteringMetricContent />
       ) : (
         <LiveAlertFilteringMetricContent

@@ -76,7 +76,7 @@ const mockLensResponse = {
 } as unknown as VisualizationTablesWithMeta;
 
 const defaultProps = {
-  renderSample: false as const,
+  isSample: false as const,
   lensResponse: mockLensResponse,
 };
 
@@ -260,7 +260,7 @@ describe('CostSavingsKeyInsight', () => {
   });
 
   it('shows loading state when lensResponse is null', () => {
-    render(<CostSavingsKeyInsight renderSample={false} lensResponse={null} />, { wrapper });
+    render(<CostSavingsKeyInsight isSample={false} lensResponse={null} />, { wrapper });
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
@@ -299,7 +299,7 @@ describe('CostSavingsKeyInsight', () => {
       },
     };
 
-    rerender(<CostSavingsKeyInsight renderSample={false} lensResponse={newLensResponse} />);
+    rerender(<CostSavingsKeyInsight isSample={false} lensResponse={newLensResponse} />);
 
     await waitFor(() => {
       expect(mockChatComplete).toHaveBeenCalledTimes(2);
@@ -401,7 +401,7 @@ describe('CostSavingsKeyInsight', () => {
       });
 
       const { rerender } = render(
-        <CostSavingsKeyInsight renderSample={false} lensResponse={mockLensResponse} />,
+        <CostSavingsKeyInsight isSample={false} lensResponse={mockLensResponse} />,
         { wrapper }
       );
 
@@ -419,7 +419,7 @@ describe('CostSavingsKeyInsight', () => {
         shouldRegenerateInsight: false,
         setInsight: mockSetInsightInExportContext,
       });
-      rerender(<CostSavingsKeyInsight renderSample={false} lensResponse={mockLensResponse} />);
+      rerender(<CostSavingsKeyInsight isSample={false} lensResponse={mockLensResponse} />);
 
       await waitFor(() => {
         expect(container).toHaveAttribute('data-render-complete', 'true');

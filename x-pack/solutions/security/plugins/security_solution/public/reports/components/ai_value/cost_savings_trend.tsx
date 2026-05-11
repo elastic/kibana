@@ -34,15 +34,13 @@ import { SAMPLE_TREND_DATA } from './sample_data';
 import { useThemes } from '../../../common/components/charts/common';
 import { COST_SAVINGS_TITLE } from './translations';
 
-type Props =
-  | { renderSample: true }
-  | {
-      renderSample: false;
-      from: string;
-      to: string;
-      minutesPerAlert: number;
-      analystHourlyRate: number;
-    };
+interface Props {
+  isSample: boolean;
+  from: string;
+  to: string;
+  minutesPerAlert: number;
+  analystHourlyRate: number;
+}
 const ID = 'CostSavingsTrendQuery';
 
 const LiveTrendVisualization: React.FC<{
@@ -151,12 +149,10 @@ const CostSavingsTrendComponent: React.FC<Props> = (props) => {
       setLensResponse(data.tables);
     }
   }, []);
-  const liveFrom = !props.renderSample ? props.from : null;
-  const liveTo = !props.renderSample ? props.to : null;
   useEffect(() => {
     // when timerange changes, reset lens response
     setLensResponse(null);
-  }, [liveFrom, liveTo]);
+  }, [props.from, props.to]);
 
   return (
     <div
@@ -183,7 +179,7 @@ const CostSavingsTrendComponent: React.FC<Props> = (props) => {
         `}
       >
         <EuiFlexItem>
-          {props.renderSample ? (
+          {props.isSample ? (
             <SampleTrendVisualization />
           ) : (
             <LiveTrendVisualization
@@ -200,11 +196,7 @@ const CostSavingsTrendComponent: React.FC<Props> = (props) => {
             max-width: ${isSmall ? 'auto' : '600px'};
           `}
         >
-          {props.renderSample ? (
-            <CostSavingsKeyInsight renderSample={true} />
-          ) : (
-            <CostSavingsKeyInsight renderSample={false} lensResponse={lensResponse} />
-          )}
+          <CostSavingsKeyInsight isSample={props.isSample} lensResponse={lensResponse} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

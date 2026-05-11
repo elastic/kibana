@@ -24,15 +24,13 @@ import { SampleMetric } from './sample_metric';
 import { SAMPLE_VALUE_METRICS } from './sample_data';
 import { formatDollars } from './metrics';
 
-type Props =
-  | { renderSample: true }
-  | {
-      renderSample: false;
-      from: string;
-      to: string;
-      minutesPerAlert: number;
-      analystHourlyRate: number;
-    };
+interface Props {
+  isSample: boolean;
+  from: string;
+  to: string;
+  minutesPerAlert: number;
+  analystHourlyRate: number;
+}
 const ID = 'CostSavingsMetricQuery';
 
 const WithMetricAnimation = ({ children }: { children: React.ReactNode }) => {
@@ -125,7 +123,7 @@ const SampleCostSavingsMetricContent: React.FC = () => {
  * based on the number of AI filtered alerts, minutes saved per alert,
  * and analyst hourly rate for a given time range.
  *
- * When `renderSample` is true, renders a sample metric backed by `SAMPLE_VALUE_METRICS`.
+ * When `isSample` is true, renders a sample metric backed by `SAMPLE_VALUE_METRICS`.
  */
 const CostSavingsMetricComponent: React.FC<Props> = (props) => {
   const {
@@ -159,7 +157,7 @@ const CostSavingsMetricComponent: React.FC<Props> = (props) => {
         }
       `}
     >
-      {props.renderSample ? (
+      {props.isSample ? (
         <SampleCostSavingsMetricContent />
       ) : (
         <LiveCostSavingsMetricContent

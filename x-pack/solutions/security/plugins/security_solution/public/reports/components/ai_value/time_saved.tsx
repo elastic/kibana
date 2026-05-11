@@ -13,7 +13,7 @@ import * as i18n from './translations';
 import { TimeSavedMetric } from './time_saved_metric';
 
 interface Props {
-  renderSample: boolean;
+  isSample: boolean;
   hoursSaved: number;
   hoursSavedCompare: number;
   from: string;
@@ -22,7 +22,7 @@ interface Props {
 }
 
 export const TimeSaved: React.FC<Props> = ({
-  renderSample,
+  isSample,
   minutesPerAlert,
   hoursSaved,
   hoursSavedCompare,
@@ -37,12 +37,7 @@ export const TimeSaved: React.FC<Props> = ({
         min-height: 160px;
       `}
     >
-      <TimeSavedMetric
-        renderSample={renderSample}
-        minutesPerAlert={minutesPerAlert}
-        from={from}
-        to={to}
-      />
+      <TimeSavedMetric isSample={isSample} minutesPerAlert={minutesPerAlert} from={from} to={to} />
       <ComparePercentage
         positionForLens
         currentCount={hoursSaved}

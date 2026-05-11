@@ -92,12 +92,15 @@ describe('AIValueReport', () => {
   const createMockKibanaServices = (overrides: Partial<StartServices> = {}) =>
     ({
       services: {
-        uiSettings: {
-          get: jest.fn((key: string) => {
-            if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES) return 10;
-            if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE) return 50;
-            return null;
-          }),
+        settings: {
+          client: {
+            get: jest.fn((key: string) => {
+              if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES) return 10;
+              if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE) return 50;
+              return null;
+            }),
+            set: jest.fn(),
+          },
         },
         ...overrides,
       },
@@ -135,7 +138,7 @@ describe('AIValueReport', () => {
       expect.objectContaining({
         attackAlertIds: ['alert-1', 'alert-2'],
         analystHourlyRate: 50,
-        renderSample: false,
+        isSample: false,
         minutesPerAlert: 10,
         from: defaultProps.from,
         to: defaultProps.to,
@@ -223,10 +226,7 @@ describe('AIValueReport', () => {
     render(<AIValueReport {...defaultProps} />);
 
     expect(defaultProps.setHasAttackDiscoveries).toHaveBeenCalledWith(true);
-    expect(ExecutiveSummary).toHaveBeenCalledWith(
-      expect.objectContaining({ renderSample: false }),
-      {}
-    );
+    expect(ExecutiveSummary).toHaveBeenCalledWith(expect.objectContaining({ isSample: false }), {});
   });
 
   it('passes correct parameters to useValueMetrics hook', () => {
@@ -311,17 +311,19 @@ describe('AIValueReport', () => {
     });
   });
 
-  it('handles different uiSettings values correctly', () => {
+  it('handles different settings values correctly', () => {
     mockUseKibana.mockReturnValue(
       createMockKibanaServices({
-        uiSettings: {
-          // @ts-ignore
-          get: jest.fn((key: string) => {
-            if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES) return 5;
-            if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE) return 75;
-            return null;
-          }),
-        },
+        settings: {
+          client: {
+            get: jest.fn((key: string) => {
+              if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES) return 5;
+              if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE) return 75;
+              return null;
+            }),
+            set: jest.fn(),
+          },
+        } as unknown as StartServices['settings'],
       })
     );
 

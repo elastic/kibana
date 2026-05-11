@@ -28,9 +28,10 @@ import { useDefaultAIConnectorId } from '../../../common/hooks/use_default_ai_co
 import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 import { getSampleKeyInsightMarkdown } from './sample_data';
 
-type Props =
-  | { renderSample: true }
-  | { renderSample: false; lensResponse: VisualizationTablesWithMeta | null };
+interface Props {
+  isSample: boolean;
+  lensResponse: VisualizationTablesWithMeta | null;
+}
 
 const CostSavingsKeyInsightLoader: React.FC<{
   lensResponse: VisualizationTablesWithMeta | null;
@@ -169,7 +170,7 @@ export const CostSavingsKeyInsight: React.FC<Props> = (props) => {
   const exportContext = useAIValueExportContext();
   const Loading = useMemo(() => <CostSavingsKeyInsightView insight={''} />, []);
 
-  if (props.renderSample) {
+  if (props.isSample) {
     return <CostSavingsKeyInsightView insight={getSampleKeyInsightMarkdown()} />;
   }
 

@@ -13,7 +13,7 @@ import { formatPercent, getTimeRangeAsDays } from './metrics';
 import * as i18n from './translations';
 
 interface Props {
-  renderSample: boolean;
+  isSample: boolean;
   attackAlertIds: string[];
   filteredAlertsPerc: number;
   filteredAlertsPercCompare: number;
@@ -23,7 +23,7 @@ interface Props {
 }
 
 export const FilteringRate: React.FC<Props> = ({
-  renderSample,
+  isSample,
   attackAlertIds,
   filteredAlertsPerc,
   filteredAlertsPercCompare,
@@ -38,7 +38,7 @@ export const FilteringRate: React.FC<Props> = ({
       `}
     >
       <AlertFilteringMetric
-        renderSample={renderSample}
+        isSample={isSample}
         attackAlertIds={attackAlertIds}
         totalAlerts={totalAlerts}
         from={from}

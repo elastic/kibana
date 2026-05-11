@@ -92,7 +92,7 @@ export const getSampleKeyInsightMarkdown = (): string => {
       'xpack.securitySolution.reports.aiValue.sampleKeyInsightBullet2.descriptionDetail',
       {
         defaultMessage:
-          'Savings showed an **{trendValue}** in late March, with more {intervalRange} intervals emerging.',
+          'Savings showed an **{trendValue}**, with more {intervalRange} intervals emerging.',
         values: { trendValue, intervalRange: SAMPLE_KEY_INSIGHT_COST_RANGE },
       }
     )}`,

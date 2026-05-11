@@ -33,7 +33,7 @@ interface Props {
   attackAlertIds: string[];
   from: string;
   to: string;
-  renderSample: boolean;
+  isSample: boolean;
   valueMetrics: ValueMetrics;
   valueMetricsCompare: ValueMetrics;
   minutesPerAlert: number;
@@ -44,22 +44,22 @@ export const ExecutiveSummary: React.FC<Props> = ({
   attackAlertIds,
   minutesPerAlert,
   analystHourlyRate,
-  renderSample,
+  isSample,
   from,
   to,
   valueMetrics,
   valueMetricsCompare,
 }) => {
-  const { uiSettings } = useKibana().services;
+  const { settings } = useKibana().services;
   const [title, setTitle] = useState<string>(
-    uiSettings.get(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE)
+    settings.client.get(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE)
   );
   const updateTitle = useCallback(
     (newTitle: string) => {
-      uiSettings.set(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE, newTitle);
+      settings.client.set(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE, newTitle);
       setTitle(newTitle);
     },
-    [uiSettings]
+    [settings.client]
   );
   const onTitleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
@@ -168,7 +168,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
           data-test-subj="executiveSummarySideStats"
         >
           <CostSavings
-            renderSample={renderSample}
+            isSample={isSample}
             analystHourlyRate={analystHourlyRate}
             costSavings={valueMetrics.costSavings}
             costSavingsCompare={valueMetricsCompare.costSavings}
@@ -188,7 +188,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
           `}
         >
           <TimeSaved
-            renderSample={renderSample}
+            isSample={isSample}
             minutesPerAlert={minutesPerAlert}
             hoursSaved={valueMetrics.hoursSaved}
             hoursSavedCompare={valueMetricsCompare.hoursSaved}
@@ -203,7 +203,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
           `}
         >
           <FilteringRate
-            renderSample={renderSample}
+            isSample={isSample}
             attackAlertIds={attackAlertIds}
             totalAlerts={valueMetrics.totalAlerts}
             filteredAlertsPerc={valueMetrics.filteredAlertsPerc}
@@ -220,7 +220,7 @@ export const ExecutiveSummary: React.FC<Props> = ({
           `}
         >
           <ThreatsDetected
-            renderSample={renderSample}
+            isSample={isSample}
             attackDiscoveryCount={valueMetrics.attackDiscoveryCount}
             attackDiscoveryCountCompare={valueMetricsCompare.attackDiscoveryCount}
             from={from}

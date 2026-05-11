@@ -32,8 +32,11 @@ jest.mock('../../../common/components/visualization_actions/visualization_embedd
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
     services: {
-      uiSettings: {
-        get: jest.fn(() => 'mock-connector-id'),
+      settings: {
+        client: {
+          get: jest.fn(() => 'mock-connector-id'),
+          set: jest.fn(),
+        },
       },
     },
   }),
@@ -43,7 +46,7 @@ const defaultProps = {
   attackAlertIds: ['alert-1', 'alert-2', 'alert-3'],
   from: '2023-01-01T00:00:00Z',
   to: '2023-01-31T23:59:59Z',
-  renderSample: false,
+  isSample: false,
   valueMetrics: {
     costSavings: 1000,
     costSavingsCompare: 800,
@@ -82,8 +85,8 @@ describe('ExecutiveSummary', () => {
     expect(screen.getByTestId('mockFilteringRate')).toBeInTheDocument();
   });
 
-  it('renders no attacks message when renderSample is true', () => {
-    render(<ExecutiveSummary {...defaultProps} renderSample={true} />);
+  it('renders no attacks message when isSample is true', () => {
+    render(<ExecutiveSummary {...defaultProps} isSample={true} />);
     expect(screen.getByTestId('executiveSummaryNoAttacks').textContent).toMatch(
       /no attack discoveries/i
     );

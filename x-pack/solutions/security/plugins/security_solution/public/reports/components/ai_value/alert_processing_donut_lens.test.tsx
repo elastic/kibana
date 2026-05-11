@@ -36,7 +36,7 @@ const mockGetAlertProcessingDonutAttributes =
 const mockUseSpaceId = useSpaceId as jest.MockedFunction<typeof useSpaceId>;
 
 const defaultProps = {
-  renderSample: false as const,
+  isSample: false as const,
   attackAlertIds: ['alert-1', 'alert-2', 'alert-3'],
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-31T23:59:59.999Z',

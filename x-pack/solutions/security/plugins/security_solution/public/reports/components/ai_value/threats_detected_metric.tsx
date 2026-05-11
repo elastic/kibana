@@ -19,13 +19,11 @@ import { SampleMetric } from './sample_metric';
 import { SAMPLE_VALUE_METRICS } from './sample_data';
 import { formatThousands } from './metrics';
 
-type Props =
-  | { renderSample: true }
-  | {
-      renderSample: false;
-      from: string;
-      to: string;
-    };
+interface Props {
+  isSample: boolean;
+  from: string;
+  to: string;
+}
 const ID = 'ThreatsDetectedMetricQuery';
 
 interface LiveContentProps {
@@ -107,7 +105,7 @@ const ThreatsDetectedMetricComponent: React.FC<Props> = (props) => {
         }
       `}
     >
-      {props.renderSample ? (
+      {props.isSample ? (
         <SampleThreatsDetectedMetricContent />
       ) : (
         <LiveThreatsDetectedMetricContent from={props.from} to={props.to} />

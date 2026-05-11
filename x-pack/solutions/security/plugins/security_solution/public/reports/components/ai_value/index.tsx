@@ -24,8 +24,7 @@ import {
 import { css } from '@emotion/react';
 import analyticsSpeedAcceleration from './analytics_speed_acceleration.svg';
 import { AIValueReportLayout } from './ai_value_report_layout';
-import { useValueMetrics } from '../../hooks/use_value_metrics';
-import { useHasEverUsedAttackDiscovery } from '../../hooks/use_has_ever_used_attack_discovery';
+import { useValueReportData } from '../../hooks/use_value_report_data';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 import { PageLoader } from '../../../common/components/page_loader';
@@ -41,7 +40,7 @@ interface Props {
 
 export const AIValueReport: React.FC<Props> = (props) => {
   const { setHasReportData, isSourcererLoading } = props;
-  const { uiSettings } = useKibana().services;
+  const { settings } = useKibana().services;
   const exportContext = useAIValueExportContext();
   const setReportInputForExportContext = exportContext?.setReportInput;
 
@@ -66,75 +65,38 @@ export const AIValueReport: React.FC<Props> = (props) => {
 
   const { analystHourlyRate, minutesPerAlert } = useMemo(
     () => ({
-      minutesPerAlert: uiSettings.get<number>(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES),
-      analystHourlyRate: uiSettings.get<number>(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE),
+      minutesPerAlert: settings.client.get<number>(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES),
+      analystHourlyRate: settings.client.get<number>(SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE),
     }),
-    [uiSettings]
+    [settings.client]
   );
 
-  const { attackAlertIds, isLoading, valueMetrics, valueMetricsCompare } = useValueMetrics({
-    from,
-    to,
-    minutesPerAlert,
-    analystHourlyRate,
-  });
-
-  const { hasEverUsedAttackDiscovery, isLoading: isLoadingHasEverUsedAttackDiscovery } =
-    useHasEverUsedAttackDiscovery();
-
-  // Only show the sample/onboarding state when the user has never used the
-  // feature. If they used it before but produced no discoveries in the
-  // selected range, render the real (empty) report instead.
-  const renderSample = useMemo(
-    () => valueMetrics.attackDiscoveryCount === 0 && !hasEverUsedAttackDiscovery,
-    [valueMetrics.attackDiscoveryCount, hasEverUsedAttackDiscovery]
-  );
+  const data = useValueReportData({ from, to, minutesPerAlert, analystHourlyRate });
 
   useEffect(() => {
-    if (isLoading || !setReportInputForExportContext || isSourcererLoading) {
+    if (data.isLoading || data.isSample || !setReportInputForExportContext || isSourcererLoading) {
       return;
     }
     setReportInputForExportContext({
-      attackAlertIds,
-      valueMetrics,
-      valueMetricsCompare,
-      analystHourlyRate,
-      minutesPerAlert,
+      attackAlertIds: data.attackAlertIds,
+      valueMetrics: data.valueMetrics,
+      valueMetricsCompare: data.valueMetricsCompare,
+      analystHourlyRate: data.analystHourlyRate,
+      minutesPerAlert: data.minutesPerAlert,
     });
-  }, [
-    isLoading,
-    attackAlertIds,
-    valueMetrics,
-    valueMetricsCompare,
-    analystHourlyRate,
-    minutesPerAlert,
-    setReportInputForExportContext,
-    isSourcererLoading,
-  ]);
+  }, [data, setReportInputForExportContext, isSourcererLoading]);
 
   useEffect(() => {
-    setHasReportData(!renderSample && valueMetrics.attackDiscoveryCount > 0);
-  }, [renderSample, valueMetrics, setHasReportData]);
+    setHasReportData(!data.isSample && data.valueMetrics.attackDiscoveryCount > 0);
+  }, [data.isSample, data.valueMetrics, setHasReportData]);
 
-  if (isLoading || isLoadingHasEverUsedAttackDiscovery || isSourcererLoading) {
+  if (data.isLoading || isSourcererLoading) {
     return <PageLoader />;
   }
 
-  const layoutProps = {
-    attackAlertIds,
-    analystHourlyRate,
-    minutesPerAlert,
-    renderSample,
-    from,
-    to,
-    valueMetrics,
-    valueMetricsCompare,
-  };
-
-  if (renderSample) {
+  if (data.isSample) {
     // render sample report with default values if there are no attack discoveries
     // to show the full report layout and provide an example of how the metrics are calculated
-    // @ts-ignore
     return (
       <>
         {/*
@@ -167,14 +129,13 @@ export const AIValueReport: React.FC<Props> = (props) => {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="l" />
-          <AIValueReportLayout renderSample={renderSample} />
+          <AIValueReportLayout {...data} />
         </EuiPanel>
       </>
     );
   }
 
-  if (!hasEverUsedAttackDiscovery) {
-    // @ts-ignore
+  if (!data.hasEverUsedAttackDiscovery) {
     return (
       <EuiFlexGroup>
         <EuiFlexItem
@@ -194,5 +155,5 @@ export const AIValueReport: React.FC<Props> = (props) => {
     );
   }
 
-  return <AIValueReportLayout {...layoutProps} />;
+  return <AIValueReportLayout {...data} />;
 };

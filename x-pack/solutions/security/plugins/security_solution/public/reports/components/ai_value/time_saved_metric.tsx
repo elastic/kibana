@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { formatThousands } from './metrics';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 import {
@@ -22,14 +23,12 @@ import { useAIValueExportContext } from '../../providers/ai_value/export_provide
 import { SampleMetric } from './sample_metric';
 import { SAMPLE_VALUE_METRICS } from './sample_data';
 
-type Props =
-  | { renderSample: true }
-  | {
-      renderSample: false;
-      from: string;
-      to: string;
-      minutesPerAlert: number;
-    };
+interface Props {
+  isSample: boolean;
+  from: string;
+  to: string;
+  minutesPerAlert: number;
+}
 const ID = 'TimeSavedMetricQuery';
 
 interface LiveContentProps {
@@ -68,7 +67,7 @@ const SampleTimeSavedMetricContent: React.FC = () => (
     id={`${ID}-sample`}
     title={i18n.TIME_SAVED}
     value={SAMPLE_VALUE_METRICS.hoursSaved}
-    valueFormatter={(v) => `${v}`}
+    valueFormatter={formatThousands}
     icon="clock"
   />
 );
@@ -77,7 +76,7 @@ const SampleTimeSavedMetricContent: React.FC = () => (
  * Renders a Lens embeddable metric visualization showing the estimated time saved
  * based on the number of AI filtered alerts and minutes saved per alert for a given time range.
  *
- * When `renderSample` is true, renders a sample metric backed by `SAMPLE_VALUE_METRICS`.
+ * When `isSample` is true, renders a sample metric backed by `SAMPLE_VALUE_METRICS`.
  */
 const TimeSavedMetricComponent: React.FC<Props> = (props) => {
   const {
@@ -124,7 +123,7 @@ const TimeSavedMetricComponent: React.FC<Props> = (props) => {
         }
       `}
     >
-      {props.renderSample ? (
+      {props.isSample ? (
         <SampleTimeSavedMetricContent />
       ) : (
         <LiveTimeSavedMetricContent
