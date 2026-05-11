@@ -403,13 +403,17 @@ describe('bulkCreateRules', () => {
   });
 
   describe('background (after awaiting backgroundWork)', () => {
-    test('schedules tasks with enabled: true for all enabled persisted rules', async () => {
+    test('schedules tasks disabled, then bulkEnables them (runAt stagger) for all enabled persisted rules', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
         buildBulkResponse([
           { id: 'mock-id-1', enabled: true },
           { id: 'mock-id-2', enabled: true },
         ])
       );
+      taskManager.bulkEnable.mockResolvedValueOnce({
+        tasks: [{ id: 'mock-id-1' }, { id: 'mock-id-2' }],
+        errors: [],
+      } as never);
 
       const result = await rulesClient.bulkCreateRules({
         rules: [
@@ -426,10 +430,74 @@ describe('bulkCreateRules', () => {
         enabled: boolean;
       }>;
       expect(tasks.map((t) => t.id)).toEqual(['mock-id-1', 'mock-id-2']);
-      expect(tasks.every((t) => t.enabled === true)).toBe(true);
-      expect(taskManager.bulkEnable).not.toHaveBeenCalled();
+      // Tasks are created disabled so taskManager.bulkEnable can stagger
+      // their runAt and avoid stampeding the cluster.
+      expect(tasks.every((t) => t.enabled === false)).toBe(true);
+      expect(taskManager.bulkEnable).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkEnable.mock.calls[0][0]).toEqual(['mock-id-1', 'mock-id-2']);
       // No demotion = no SO update.
       expect(unsecuredSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    test('per-id bulkEnable failure: only the failed ids are demoted', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+        buildBulkResponse([
+          { id: 'mock-id-1', enabled: true },
+          { id: 'mock-id-2', enabled: true },
+        ])
+      );
+      taskManager.bulkEnable.mockResolvedValueOnce({
+        tasks: [{ id: 'mock-id-1' }],
+        errors: [{ id: 'mock-id-2', error: { message: 'enable failed' } }],
+      } as never);
+
+      const result = await rulesClient.bulkCreateRules({
+        rules: [
+          { data: baseRule({ name: 'kept', enabled: true }) },
+          { data: baseRule({ name: 'failed', enabled: true }) },
+        ],
+      });
+
+      await expect(result.backgroundWork).resolves.toEqual([
+        expect.objectContaining({
+          rule: expect.objectContaining({ id: 'mock-id-2' }),
+          disabledReason: 'task_enable_failed',
+        }),
+      ]);
+
+      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      const updateCall = unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0] as Array<{
+        id: string;
+      }>;
+      expect(updateCall.map((u) => u.id)).toEqual(['mock-id-2']);
+    });
+
+    test('whole-call bulkEnable throw: all scheduled ids are demoted', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
+        buildBulkResponse([
+          { id: 'mock-id-1', enabled: true },
+          { id: 'mock-id-2', enabled: true },
+        ])
+      );
+      taskManager.bulkEnable.mockRejectedValueOnce(new Error('TM down'));
+
+      const result = await rulesClient.bulkCreateRules({
+        rules: [
+          { data: baseRule({ name: 'a', enabled: true }) },
+          { data: baseRule({ name: 'b', enabled: true }) },
+        ],
+      });
+
+      const bgErrors = await result.backgroundWork;
+      expect(bgErrors).toHaveLength(2);
+      expect(bgErrors.every((e) => e.disabledReason === 'task_enable_failed')).toBe(true);
+      expect(bgErrors.every((e) => e.message.includes('TM down'))).toBe(true);
+
+      expect(unsecuredSavedObjectsClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      const updateCall = unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0] as Array<{
+        id: string;
+      }>;
+      expect(updateCall.map((u) => u.id).sort()).toEqual(['mock-id-1', 'mock-id-2']);
     });
 
     test('schedule-limit exceeded: bulkUpdate demotes all enabled persisted rules; result.errors[] unchanged', async () => {

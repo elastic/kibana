@@ -107,7 +107,9 @@ export const buildTaskInstance = (
     alertInstances: {},
   },
   scope: ['alerting'],
-  enabled: true,
+  // Created disabled (and enable later) to avoid stampede 
+  // @see https://github.com/elastic/kibana/pull/174656
+  enabled: false,
 });
 
 export const toSanitizedRule = <Params extends RuleParams = never>(
@@ -335,6 +337,49 @@ export const prepareRule = async <Params extends RuleParams>({
       rule: { id, name: rule.data?.name ?? 'n/a' },
     };
     return { error };
+  }
+};
+
+/**
+ * Enables freshly-scheduled tasks via `taskManager.bulkEnable`.
+ * Mutates `demotedIds` in place; never re-throws.
+ */
+export const bulkEnableScheduledTasks = async ({
+  context,
+  scheduledIds,
+  demotedIds,
+}: {
+  context: RulesClientContext;
+  scheduledIds: string[];
+  demotedIds: Map<string, DemotionEntry>;
+}): Promise<void> => {
+  if (scheduledIds.length === 0) return;
+
+  try {
+    const enableResult = await withSpan(
+      { name: 'taskManager.bulkEnable', type: 'tasks' },
+      () => context.taskManager.bulkEnable(scheduledIds)
+    );
+    const failedIds = enableResult?.errors?.map((e) => e.id) ?? [];
+    if (failedIds.length === 0) return;
+
+    context.logger.warn(`Demoting ${failedIds.length} rules -> disabled, task enable failed.`);
+    for (const id of failedIds) {
+      demotedIds.set(id, {
+        reason: 'task_enable_failed',
+        message: 'Failed to enable scheduled task',
+      });
+    }
+  } catch (error) {
+    context.logger.warn(
+      `Demoting ${scheduledIds.length} rules -> disabled, taskManager.bulkEnable threw.`
+    );
+    for (const id of scheduledIds) {
+      demotedIds.set(id, {
+        reason: 'task_enable_failed',
+        message: `Failed to enable scheduled tasks: ${error.message}`,
+      });
+    }
   }
 };
 

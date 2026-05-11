@@ -27,6 +27,7 @@ import type {
 } from './types';
 import {
   buildTaskInstance,
+  bulkEnableScheduledTasks,
   collectNewKeysToInvalidate,
   demotePersistedRules,
   flushKeysToInvalidate,
@@ -38,7 +39,9 @@ import type { ApiKeyEntry, DemotionEntry, PreparedRule } from './utils';
 /**
  * Persist-first bulk rule create. 2 parts:
  * 1. Foreground: SO bulkCreate, audit, return.
- * 2. Background (`result.backgroundWork`): Scheduling - limit checks, task scheduling, demotion / rule SO update (-> disabled), key invalidation.
+ * 2. Background (`result.backgroundWork`): Scheduling - limit checks,
+ *    task scheduling (created disabled), task enabling via
+ *    taskManager.bulkEnable, key invalidation.
  *
  * Returned `rules[]` reflect input intent; the background promise may
  * later demote rules to "disabled" if related tasks failed to schedule.
@@ -247,9 +250,12 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
             }
           }
         }
+
+        // Phase 4C: enable scheduled tasks via taskManager.bulkEnable. 
+        await bulkEnableScheduledTasks({ context, scheduledIds, demotedIds });
       }
 
-      // Phase 4C: persist demotions (bulkUpdate SOs to disabled).
+      // Phase 4D: persist demotions (bulkUpdate SOs to disabled).
       if (demotedIds.size > 0) {
         const demotionErrors = await demotePersistedRules({
           context,
@@ -262,7 +268,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
         bgErrors.push(...demotionErrors);
       }
 
-      // Phase 4D: flush queued API key invalidations.
+      // Phase 4E: flush queued API key invalidations.
       await flushKeysToInvalidate(keysToInvalidate, context);
     } catch (err) {
       logger.error(`bulkCreateRules background phases failed: ${err.message}`);

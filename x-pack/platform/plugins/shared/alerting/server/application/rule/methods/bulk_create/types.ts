@@ -28,7 +28,8 @@ export type BulkCreateDisabledReason =
   | 'api_key_creation_failed'
   | 'schedule_limit_exceeded'
   | 'task_schedule_failed'
-  | 'task_schedule_entry_failed';
+  | 'task_schedule_entry_failed'
+  | 'task_enable_failed';
 
 export interface BulkCreateOperationError extends BulkOperationError {
   disabledReason?: BulkCreateDisabledReason;
