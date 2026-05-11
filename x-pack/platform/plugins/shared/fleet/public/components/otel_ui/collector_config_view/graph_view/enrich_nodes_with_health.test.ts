@@ -186,4 +186,80 @@ describe('enrichNodesWithHealth', () => {
     expect(nodes[2].data.healthStatus).toBe('unknown');
     expect(nodes[3].data.healthStatus).toBe('unhealthy');
   });
+
+  it('uses pipeline-scoped health lookup when pipelineId is set', () => {
+    const nodes: Node[] = [
+      {
+        ...makeComponentNode('traces::otlp', 'otlp', 'receiver'),
+        parentId: 'pipeline::traces',
+        data: { label: 'otlp', componentType: 'receiver' as const, pipelineId: 'traces' },
+      },
+      {
+        ...makeComponentNode('metrics::otlp', 'otlp', 'receiver'),
+        parentId: 'pipeline::metrics',
+        data: { label: 'otlp', componentType: 'receiver' as const, pipelineId: 'metrics' },
+      },
+    ];
+
+    const health: ComponentHealth = {
+      healthy: false,
+      status: 'StatusRecoverableError',
+      component_health_map: {
+        'pipeline:traces': {
+          healthy: true,
+          status: 'StatusOK',
+          component_health_map: {
+            'receiver:otlp': { healthy: true, status: 'StatusOK' },
+          },
+        },
+        'pipeline:metrics': {
+          healthy: false,
+          status: 'StatusRecoverableError',
+          component_health_map: {
+            'receiver:otlp': { healthy: false, status: 'StatusRecoverableError' },
+          },
+        },
+      },
+    };
+
+    enrichNodesWithHealth(nodes, health);
+    expect(nodes[0].data.healthStatus).toBe('healthy');
+    expect(nodes[1].data.healthStatus).toBe('unhealthy');
+  });
+
+  it('computes healthCounts on pipeline group nodes', () => {
+    const groupId = 'pipeline::traces';
+    const nodes: Node[] = [
+      makePipelineGroupNode(groupId, 'traces'),
+      {
+        ...makeComponentNode('traces::otlp', 'otlp', 'receiver'),
+        parentId: groupId,
+      },
+      {
+        ...makeComponentNode('traces::batch', 'batch', 'processor'),
+        parentId: groupId,
+      },
+      {
+        ...makeComponentNode('traces::elasticsearch', 'elasticsearch', 'exporter'),
+        parentId: groupId,
+      },
+    ];
+
+    const health: ComponentHealth = {
+      healthy: false,
+      status: 'StatusRecoverableError',
+      component_health_map: {
+        'pipeline:traces': { healthy: false, status: 'StatusRecoverableError' },
+        'receiver:otlp': { healthy: true, status: 'StatusOK' },
+        'processor:batch': { healthy: true, status: 'StatusOK' },
+        'exporter:elasticsearch': { healthy: false, status: 'StatusFatalError' },
+      },
+    };
+
+    enrichNodesWithHealth(nodes, health);
+    expect((nodes[0].data as OTelPipelineGroupNodeData).healthCounts).toEqual({
+      healthy: 2,
+      total: 3,
+    });
+  });
 });
