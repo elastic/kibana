@@ -56,6 +56,7 @@ import { useDataState } from '../../hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
+import { useDiscoverCustomizationContext } from '../../../../customizations';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
@@ -75,6 +76,8 @@ import { isCascadedDocumentsVisible } from './cascaded_documents';
 
 const queryClient = new QueryClient();
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
+const DISCOVER_TOP_NAV_HEIGHT_OFFSET = '40px';
+const DISCOVER_INLINE_APP_HEADER_HEIGHT_OFFSET = '120px';
 
 const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
   // QueryClientProvider is used to allow querying the authorized rules api hook
@@ -96,7 +99,9 @@ export function DiscoverLayout() {
     observabilityAIAssistant,
     dataVisualizer: dataVisualizerService,
     fieldsMetadata,
+    chrome,
   } = useDiscoverServices();
+  const customizationContext = useDiscoverCustomizationContext();
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
@@ -445,6 +450,12 @@ export function DiscoverLayout() {
     },
     [dispatch, onDataViewCreatedAction]
   );
+  const fullBodyHeightOffset =
+    customizationContext.displayMode === 'standalone' &&
+    chrome.next.isEnabled &&
+    chrome.getChromeStyle() === 'project'
+      ? DISCOVER_INLINE_APP_HEADER_HEIGHT_OFFSET
+      : DISCOVER_TOP_NAV_HEIGHT_OFFSET;
 
   return (
     <EuiPage
@@ -456,7 +467,7 @@ export function DiscoverLayout() {
         styles.dscPage,
         css`
           ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-            ${kbnFullBodyHeightCss('40px')}
+            ${kbnFullBodyHeightCss(fullBodyHeightOffset)}
           }
         `,
       ]}

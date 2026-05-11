@@ -16,7 +16,7 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
 import { i18n } from '@kbn/i18n';
-import { DiscoverAppHeader } from '../../components/discover_app_header';
+import { AppHeader } from '@kbn/app-header';
 import { useTopNavMenuItems } from './components/top_nav/use_top_nav_menu_items';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
@@ -107,7 +107,7 @@ export const DiscoverMainRoute = ({
 
 const DiscoverMainAppHeader: React.FC<{ title: string }> = ({ title }) => {
   const appMenu = useTopNavMenuItems();
-  return <DiscoverAppHeader title={title} appMenu={appMenu} />;
+  return <AppHeader title={title} menu={appMenu} fallback={null} sticky={false} padding="m" />;
 };
 
 const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
