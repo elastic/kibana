@@ -277,13 +277,6 @@ export const ErrorsList = ({
         return resolvedState ? moment(resolvedState.state.started_at).valueOf() : 0;
       },
       render: (_value: string, item: PingState) => {
-        if (isActive(item)) {
-          return (
-            <EuiBadge color="danger" css={{ maxWidth: 'max-content' }}>
-              {ACTIVE_LABEL}
-            </EuiBadge>
-          );
-        }
         const resolvedState = getNextUpStateForResolvedError(item, upStates, isGlobalView ?? false);
         if (resolvedState) {
           return <EuiText size="s">{formatter(resolvedState.state.started_at)}</EuiText>;
