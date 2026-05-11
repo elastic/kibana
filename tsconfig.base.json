@@ -156,8 +156,6 @@
       "@kbn/app-link-test-plugin/*": ["src/platform/test/plugin_functional/plugins/app_link_test/*"],
       "@kbn/application-usage-test-plugin": ["x-pack/platform/test/usage_collection/plugins/application_usage_test"],
       "@kbn/application-usage-test-plugin/*": ["x-pack/platform/test/usage_collection/plugins/application_usage_test/*"],
-      "@kbn/argus-variant-bank-curation": ["x-pack/solutions/security/packages/argus-variant-bank-curation"],
-      "@kbn/argus-variant-bank-curation/*": ["x-pack/solutions/security/packages/argus-variant-bank-curation/*"],
       "@kbn/as-code-data-views-schema": ["src/platform/packages/shared/as-code/data-views-schema"],
       "@kbn/as-code-data-views-schema/*": ["src/platform/packages/shared/as-code/data-views-schema/*"],
       "@kbn/as-code-data-views-transforms": ["src/platform/packages/shared/as-code/data-views-transforms"],
