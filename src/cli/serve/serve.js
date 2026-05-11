@@ -635,11 +635,11 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
 
   if (_.get(rawConfig, 'server.basePath') !== MOCK_IDP_KIBANA_BASE_PATH) {
     const publicBaseUrl = _.get(rawConfig, 'server.publicBaseUrl');
-    const label = chalk.black.bgYellow(' saml-config-no-base-path ');
+    const label = chalk.black.bgYellow(' saml-mock-idp-no-base-path ');
     console.warn(label, '='.repeat(100));
     console.warn(
       label,
-      `Kibana is running with a non-default base path. Make sure to adjust the --kibanaUrl=${publicBaseUrl} parameter while running the local ES cluster.`
+      `Kibana is running with a non-default base path. Make sure to use the --kibanaUrl=${publicBaseUrl} parameter while running the local ES cluster.`
     );
     console.warn(label, '='.repeat(100));
   }
