@@ -82,7 +82,7 @@ export const BackButton = React.memo<BackButtonProps>(({ targets }) => {
       <EuiPopover
         aria-label={tooltip}
         button={
-          <EuiToolTip content={tooltip} delay="long">
+          <EuiToolTip content={tooltip}>
             {buttonIcon}
           </EuiToolTip>
         }
@@ -109,7 +109,7 @@ export const BackButton = React.memo<BackButtonProps>(({ targets }) => {
   }
 
   return (
-    <EuiToolTip content={tooltip} delay="long">
+    <EuiToolTip content={tooltip}>
       {buttonIcon}
     </EuiToolTip>
   );

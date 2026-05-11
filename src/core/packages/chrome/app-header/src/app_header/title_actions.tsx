@@ -70,7 +70,6 @@ export const TitleActions = React.memo<TitleActionsProps>(({ shareAction, favori
         <EuiToolTip
           content={shareTooltipContent}
           title={shareAction.tooltipTitle}
-          delay="long"
           {...(!hasCustomTooltip && { disableScreenReaderOutput: true })}
         >
           <EuiButtonIcon
