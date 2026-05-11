@@ -2092,6 +2092,25 @@
       },
       {
         "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.useWorkflowsMonacoTheme",
+        "type": "Function",
+        "tags": [],
+        "label": "useWorkflowsMonacoTheme",
+        "description": [],
+        "signature": [
+          "() => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_monaco_theme.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
         "id": "def-public.useWorkflowsUIEnabledSetting",
         "type": "Function",
         "tags": [],
@@ -4374,6 +4393,23 @@
         "description": [],
         "path": "src/platform/packages/shared/kbn-workflows-ui/src/components/workflow_selector/translations.ts",
         "lineNumber": 27,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows-ui",
+        "id": "def-public.WORKFLOWS_MONACO_EDITOR_THEME",
+        "type": "string",
+        "tags": [],
+        "label": "WORKFLOWS_MONACO_EDITOR_THEME",
+        "description": [],
+        "signature": [
+          "\"workflows-theme\""
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows-ui/src/hooks/use_workflows_monaco_theme.ts",
+        "lineNumber": 15,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
