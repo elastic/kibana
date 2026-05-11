@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLiveAnnouncer } from '@elastic/eui';
 import { hasModifierKey, isEditableTarget, normalizeShortcutKey } from './shortcut_utils';
 import {
   ShortcutsOverlay,
@@ -113,9 +112,6 @@ export const LeaderKeyShortcuts = ({
       },
     });
   }, [leaderKeyDescription, shortcuts]);
-  const [liveAnnouncement, setLiveAnnouncement] = useState<string | undefined>(
-    () => screenReaderHint
-  );
   const overlayItems = useMemo(
     () => [
       <ShortcutsOverlayItem
@@ -150,12 +146,6 @@ export const LeaderKeyShortcuts = ({
     },
     [shortcutsByKey]
   );
-  const handleOpen = useCallback(() => {
-    setLiveAnnouncement(screenReaderAnnouncement);
-  }, [screenReaderAnnouncement]);
-  const handleClose = useCallback(() => {
-    setLiveAnnouncement(undefined);
-  }, []);
 
   useEffect(() => {
     return registerLeaderKeyShortcut({
@@ -166,16 +156,13 @@ export const LeaderKeyShortcuts = ({
   }, [leaderKey, leaderKeyDescription, openShortcuts, registerLeaderKeyShortcut]);
 
   return (
-    <>
-      {liveAnnouncement ? <EuiLiveAnnouncer>{liveAnnouncement}</EuiLiveAnnouncer> : null}
-      <ShortcutsOverlay
-        ref={overlayRef}
-        items={overlayItems}
-        shouldOpen={shouldOpen}
-        runAction={runAction}
-        onOpen={handleOpen}
-        onClose={handleClose}
-      />
-    </>
+    <ShortcutsOverlay
+      ref={overlayRef}
+      items={overlayItems}
+      screenReaderHint={screenReaderHint}
+      screenReaderAnnouncement={screenReaderAnnouncement}
+      shouldOpen={shouldOpen}
+      runAction={runAction}
+    />
   );
 };

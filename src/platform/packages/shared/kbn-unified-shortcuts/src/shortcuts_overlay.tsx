@@ -22,6 +22,7 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLiveAnnouncer,
   EuiPanel,
   EuiPortal,
   EuiText,
@@ -44,10 +45,10 @@ export interface ShortcutsOverlayRef {
  */
 export interface ShortcutsOverlayProps {
   items: ReactNode[];
+  screenReaderHint?: string;
+  screenReaderAnnouncement?: string;
   shouldOpen: (event: KeyboardEvent) => boolean;
   runAction: (event: KeyboardEvent) => void;
-  onOpen?: () => void;
-  onClose?: () => void;
 }
 
 /**
@@ -82,7 +83,7 @@ const ShortcutsOverlayFlexItem = ({ children }: PropsWithChildren) => {
  * Renders the shared shortcuts overlay container and item layout.
  */
 export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlayProps>(
-  ({ items, shouldOpen, runAction, onOpen, onClose }, ref) => {
+  ({ items, screenReaderHint, screenReaderAnnouncement, shouldOpen, runAction }, ref) => {
     const {
       claimActiveLeaderKeyInstance,
       hasOtherActiveLeaderKeyInstance,
@@ -91,6 +92,9 @@ export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlay
     const { euiTheme } = useEuiTheme();
     const [isVisible, setIsVisible] = useState(false);
     const [instanceId] = useState(() => Symbol('shortcuts-overlay'));
+    const [liveAnnouncement, setLiveAnnouncement] = useState<string | undefined>(
+      () => screenReaderHint
+    );
     const open = useCallback(() => {
       if (isVisible) {
         return true;
@@ -101,7 +105,7 @@ export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlay
       }
 
       claimActiveLeaderKeyInstance(instanceId);
-      onOpen?.();
+      setLiveAnnouncement(screenReaderAnnouncement);
       setIsVisible(true);
 
       return true;
@@ -110,7 +114,7 @@ export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlay
       hasOtherActiveLeaderKeyInstance,
       instanceId,
       isVisible,
-      onOpen,
+      screenReaderAnnouncement,
     ]);
     const close = useCallback(() => {
       if (!isVisible) {
@@ -118,9 +122,9 @@ export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlay
       }
 
       releaseActiveLeaderKeyInstance(instanceId);
-      onClose?.();
+      setLiveAnnouncement(undefined);
       setIsVisible(false);
-    }, [instanceId, isVisible, onClose, releaseActiveLeaderKeyInstance]);
+    }, [instanceId, isVisible, releaseActiveLeaderKeyInstance]);
 
     useImperativeHandle(ref, () => ({ open }), [open]);
 
@@ -169,47 +173,50 @@ export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlay
     });
 
     return (
-      <EuiPortal>
-        <EuiPanel
-          aria-hidden="true"
-          paddingSize="m"
-          css={css`
-            position: fixed;
-            right: ${euiTheme.size.l};
-            bottom: ${euiTheme.size.l};
-            z-index: ${euiTheme.levels.toast};
-            pointer-events: none;
-            max-width: calc(100vw - ${euiTheme.size.l} * 2);
-            opacity: ${isVisible ? 1 : 0};
-            transform: translateY(${isVisible ? '0' : euiTheme.size.s});
-            transition: opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
-              transform ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
-            will-change: opacity, transform;
-          `}
-        >
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-            {items.map((item, index) => (
-              <ShortcutsOverlayFlexItem key={getOverlayItemKey(item, index)}>
-                {item}
-              </ShortcutsOverlayFlexItem>
-            ))}
+      <>
+        {liveAnnouncement ? <EuiLiveAnnouncer>{liveAnnouncement}</EuiLiveAnnouncer> : null}
+        <EuiPortal>
+          <EuiPanel
+            aria-hidden="true"
+            paddingSize="m"
+            css={css`
+              position: fixed;
+              right: ${euiTheme.size.l};
+              bottom: ${euiTheme.size.l};
+              z-index: ${euiTheme.levels.toast};
+              pointer-events: none;
+              max-width: calc(100vw - ${euiTheme.size.l} * 2);
+              opacity: ${isVisible ? 1 : 0};
+              transform: translateY(${isVisible ? '0' : euiTheme.size.s});
+              transition: opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance},
+                transform ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
+              will-change: opacity, transform;
+            `}
+          >
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
+              {items.map((item, index) => (
+                <ShortcutsOverlayFlexItem key={getOverlayItemKey(item, index)}>
+                  {item}
+                </ShortcutsOverlayFlexItem>
+              ))}
 
-            {items.length > 0 && (
+              {items.length > 0 && (
+                <ShortcutsOverlayFlexItem>
+                  <ShortcutsOverlayDivider />
+                </ShortcutsOverlayFlexItem>
+              )}
+
               <ShortcutsOverlayFlexItem>
-                <ShortcutsOverlayDivider />
+                <EuiBadge>
+                  {i18n.translate('unifiedShortcuts.shortcutsOverlay.escapeLabel', {
+                    defaultMessage: 'esc',
+                  })}
+                </EuiBadge>
               </ShortcutsOverlayFlexItem>
-            )}
-
-            <ShortcutsOverlayFlexItem>
-              <EuiBadge>
-                {i18n.translate('unifiedShortcuts.shortcutsOverlay.escapeLabel', {
-                  defaultMessage: 'esc',
-                })}
-              </EuiBadge>
-            </ShortcutsOverlayFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiPortal>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiPortal>
+      </>
     );
   }
 );
