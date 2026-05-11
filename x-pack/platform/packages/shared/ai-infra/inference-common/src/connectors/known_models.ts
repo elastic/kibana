@@ -12,6 +12,13 @@ export interface ModelDefinition {
   provider: ModelProvider;
   family: ModelFamily;
   contextWindow: number;
+  /**
+   * `false` for models that reject the `temperature` inference parameter
+   * (e.g. Bedrock surfaces `temperature is deprecated for this model` for
+   * Claude Opus 4.7). Treated as `true` when omitted to preserve existing
+   * behavior for models we have not explicitly classified.
+   */
+  supportsTemperature?: boolean;
 }
 
 /**
@@ -166,6 +173,17 @@ export const knownModels: ModelDefinition[] = [
     provider: ModelProvider.Anthropic,
     family: ModelFamily.Claude,
     contextWindow: 200000,
+  },
+  {
+    // Claude Opus 4.7 (released Nov 2025). On Bedrock the model returns
+    // `temperature is deprecated for this model` if the param is sent, so we
+    // mark it as not supporting temperature; downstream callers omit the
+    // parameter and let the provider default apply.
+    id: 'claude-opus-4-7',
+    provider: ModelProvider.Anthropic,
+    family: ModelFamily.Claude,
+    contextWindow: 200000,
+    supportsTemperature: false,
   },
   // OpenAI o-series reasoning models
   {

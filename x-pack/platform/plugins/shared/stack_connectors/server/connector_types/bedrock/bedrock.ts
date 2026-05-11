@@ -57,6 +57,7 @@ import type {
 } from '@kbn/connector-schemas/bedrock';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
+  bedrockModelSupportsTemperature,
   extractRegionId,
   formatBedrockBody,
   parseContent,
@@ -386,10 +387,19 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     }: InvokeAIRawActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<IncomingMessage> {
+    const effectiveModel = model ?? this.model;
     const res = (await this.streamApi(
       {
         body: JSON.stringify(
-          formatBedrockBody({ messages, stopSequences, system, temperature, tools, toolChoice })
+          formatBedrockBody({
+            messages,
+            stopSequences,
+            system,
+            temperature,
+            tools,
+            toolChoice,
+            model: effectiveModel,
+          })
         ),
         model,
         signal,
@@ -423,6 +433,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     }: InvokeAIActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIActionResponse> {
+    const effectiveModel = model ?? this.model;
     const res = (await this.runApi(
       {
         body: JSON.stringify(
@@ -434,6 +445,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
             maxTokens,
             tools,
             toolChoice,
+            model: effectiveModel,
           })
         ),
         model,
@@ -461,13 +473,17 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     }: InvokeAIRawActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<InvokeAIRawActionResponse> {
+    const effectiveModel = model ?? this.model;
+    // Newer Bedrock Claude variants (e.g. Opus 4.7) 400 when `temperature` is
+    // present in the payload — strip it for those model ids.
+    const includeTemperature = bedrockModelSupportsTemperature(effectiveModel);
     const res = await this.runApi(
       {
         body: JSON.stringify({
           messages,
           stop_sequences: stopSequences,
           system,
-          temperature,
+          ...(includeTemperature ? { temperature } : {}),
           max_tokens: maxTokens,
           tools,
           tool_choice: toolChoice,
@@ -550,10 +566,16 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
           }
         : undefined;
 
+    // Some Bedrock models (e.g. Claude Opus 4.7) reject `temperature`
+    // outright. The inference plugin omits the value via
+    // `getTemperatureIfValid`; for direct callers we also gate it here based
+    // on the connector's model id.
+    const includeTemperature =
+      temperature !== undefined && bedrockModelSupportsTemperature(modelId);
     const request: ConverseRequest = {
       messages,
       inferenceConfig: {
-        temperature,
+        ...(includeTemperature ? { temperature } : {}),
         stopSequences,
         maxTokens,
       },
@@ -605,10 +627,15 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
           }
         : undefined;
 
+    // See `_converse` for context — newer Claude models on Bedrock 400 if
+    // `temperature` is sent. Mirror the same conditional spread here so
+    // streaming and non-streaming paths stay aligned.
+    const includeTemperature =
+      temperature !== undefined && bedrockModelSupportsTemperature(modelId);
     const request: ConverseStreamRequest = {
       messages,
       inferenceConfig: {
-        temperature,
+        ...(includeTemperature ? { temperature } : {}),
         stopSequences,
         maxTokens,
       },

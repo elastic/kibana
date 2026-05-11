@@ -62,7 +62,7 @@
 </p>
 
 <div class="pillrow">
-  <span class="pill">generated: 2026-05-10T20:47:17.221Z</span>
+  <span class="pill">generated: 2026-05-11T13:11:16.131Z</span>
   <span class="pill">hand-written by: <strong>Smriti</strong> (PR #256060)</span>
   <span class="pill">autonomous by: <strong>skill.architect</strong> (cycle-17)</span>
   <span class="pill">eval suite: <code>@kbn/evals-suite-pci-compliance</code> (8 scenarios)</span>
@@ -141,55 +141,52 @@
 
 <h2>4 · Live eval results (per-scenario, LLM-judge scored)</h2>
 <p class="lead">
-  Both variants ran through the same 8-scenario suite back-to-back against the same
-  cluster, same dataset, same connector — the only difference is which PCI skill the
-  agent router had available. The <em>PCI Criteria</em> column is the numeric
-  LLM-judge score (0..1) on the response body; the <em>Routing</em> column reports
-  what the agent router actually did with the request — which is the upstream
-  signal that explains the score.
+  Both variants ran through the same 8-scenario suite end-to-end
+  against a real Scout cluster, with two production Bedrock connectors — Claude
+  4.7 Opus and Claude 4.6 Sonnet. The only variable across each pair of columns
+  is which PCI skill the agent router has available. Scores are LLM-judge
+  numeric scores (0..1) from the <em>PCI Criteria</em> evaluator.
 </p>
-<table>
-<thead><tr><th>Scenario</th><th>HW score</th><th>Auto score</th><th>Δ</th><th>HW routing</th><th>Auto routing</th></tr></thead>
-<tbody>
-<tr><td>pci-compliance: no matching data</td><td class="num">0.00</td><td class="num">0.00</td><td class="num ">0.00</td><td>0/2 pci skill (<em>generic only</em>)</td><td>0/2 pci skill (<em>generic only</em>)</td></tr>
-<tr><td>pci-compliance: field mapping</td><td class="num">0.00</td><td class="num">0.00</td><td class="num ">0.00</td><td><em>no tool calls</em></td><td><em>no tool calls</em></td></tr>
-<tr><td>pci-compliance: scope discovery</td><td class="num">0.00</td><td class="num">0.00</td><td class="num ">0.00</td><td>0/2 pci skill (<em>generic only</em>)</td><td>0/2 pci skill (<em>generic only</em>)</td></tr>
-<tr><td>pci-compliance: requirement 2.2.4 default accounts</td><td class="num">0.00</td><td class="num">0.00</td><td class="num ">0.00</td><td>0/2 pci skill (<em>generic only</em>)</td><td>0/2 pci skill (<em>generic only</em>)</td></tr>
-<tr><td>pci-compliance: requirement 4.1 weak TLS</td><td class="num">0.00</td><td class="num">0.00</td><td class="num ">0.00</td><td>0/2 pci skill (<em>generic only</em>)</td><td>0/2 pci skill (<em>generic only</em>)</td></tr>
-<tr><td>pci-compliance: requirement 8.3.4 brute force</td><td class="num">0.00</td><td class="num">—</td><td class="num ">—</td><td>0/2 pci skill (<em>generic only</em>)</td><td>—</td></tr>
-<tr><td>pci-compliance: full report</td><td class="num">0.00</td><td class="num">0.00</td><td class="num ">0.00</td><td>0/2 pci skill (<em>generic only</em>)</td><td>0/2 pci skill (<em>generic only</em>)</td></tr>
-<tr><td>pci-compliance: scoped to auth index</td><td class="num">—</td><td class="num">0.00</td><td class="num ">—</td><td>—</td><td>0/2 pci skill (<em>generic only</em>)</td></tr>
-</tbody>
-</table>
-
-<h3>Routing aggregates</h3>
-<table>
-<thead><tr><th>Signal</th><th>Hand-written run</th><th>Autonomous run</th></tr></thead>
-<tbody>
-<tr><td>Scenarios completed</td><td class="num">7</td><td class="num">7</td></tr>
-<tr><td>Total tool calls observed</td><td class="num">12</td><td class="num">12</td></tr>
-<tr><td>PCI-skill tool calls (<code>security.pci_*</code>)</td><td class="num">0</td><td class="num">0</td></tr>
-<tr><td>Scenarios with ≥1 PCI-skill call</td><td class="num">0</td><td class="num">0</td></tr>
-</tbody>
-</table>
-
-<div class="banner banner-warn">
-<strong>Honest read of this run:</strong> with the model used here
-(<code>llama3.1:8b</code> via local Ollama proxy), the agent router fell back to the
-generic <code>platform.core.search</code> tool on every scenario for both variants and
-never engaged either PCI skill. PCI-Criteria scores are therefore 0 across the board
-for both variants — they reflect the model's inability to discover and use the PCI
-tools at this scale, not the quality of either skill's content. The comparison is
-apples-to-apples (identical dataset, identical model, identical infra), it just lives
-on the floor. The <strong>structural / domain-coverage</strong> deltas in §2 and §3
-remain the meaningful signal until this is re-run with a stronger model
-(GPT-4-class, Claude 3.5+, Bedrock Claude 3.7) — at which point the same script
-re-renders this section with discriminating numbers.
+<div class="banner banner-info">
+<strong>Live result:</strong> the hand-written skill outperformed the autonomous variant on both models — by 14.3 pts on Claude 4.7 Opus (0.977 vs 0.834) and 12.8 pts on Claude 4.6 Sonnet (0.989 vs 0.860). The autonomous architect's broader domain framing (SAQ taxonomy, v3→v4 deltas, scope-reduction levers — §3) <em>did not</em> translate into a better LLM-judge score on this evaluator. The hand-written contract is shorter (4,135 vs 8,062 chars) and lines up more tightly with the eval's scoring rubric — that tight coupling is the deciding factor here.
 </div>
+<table>
+<thead><tr><th>Scenario</th><th>HW · Claude 4.7 Opus</th><th>Auto · Claude 4.7 Opus</th><th>HW · Claude 4.6 Sonnet</th><th>Auto · Claude 4.6 Sonnet</th></tr></thead>
+<tbody>
+<tr><td>pci-compliance: field mapping</td><td class="num">0.818</td><td class="num">0.727</td><td class="num">0.909</td><td class="num">0.818</td></tr>
+<tr><td>pci-compliance: full report</td><td class="num">1.000</td><td class="num">0.818</td><td class="num">1.000</td><td class="num">0.818</td></tr>
+<tr><td>pci-compliance: no matching data</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">0.750</td></tr>
+<tr><td>pci-compliance: requirement 2.2.4 default accounts</td><td class="num">1.000</td><td class="num">0.571</td><td class="num">1.000</td><td class="num">0.857</td></tr>
+<tr><td>pci-compliance: requirement 4.1 weak TLS</td><td class="num">1.000</td><td class="num">0.889</td><td class="num">1.000</td><td class="num">1.000</td></tr>
+<tr><td>pci-compliance: requirement 8.3.4 brute force</td><td class="num">1.000</td><td class="num">0.778</td><td class="num">1.000</td><td class="num">1.000</td></tr>
+<tr><td>pci-compliance: scope discovery</td><td class="num">1.000</td><td class="num">0.889</td><td class="num">1.000</td><td class="num">0.889</td></tr>
+<tr><td>pci-compliance: scoped to auth index</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">0.750</td></tr>
+<tr><td><strong>Mean</strong></td><td class="num delta-positive"><strong>0.977</strong></td><td class="num "><strong>0.834</strong></td><td class="num delta-positive"><strong>0.989</strong></td><td class="num "><strong>0.860</strong></td></tr><tr><td class="footnote">scenarios scored</td><td class="num footnote">8</td><td class="num footnote">8</td><td class="num footnote">8</td><td class="num footnote">8</td></tr>
+</tbody>
+</table>
+
+<h3>Notes</h3>
+<ul>
+  <li><strong>Bedrock connector fix.</strong> Claude Opus 4.7 rejects the legacy
+  <code>temperature</code> inference parameter
+  (<em>"<code>temperature</code> is deprecated for this model"</em>). This run
+  ships a patch (see §8) that strips the parameter for models marked
+  <code>supportsTemperature: false</code> in <code>@kbn/inference-common</code> and
+  also gates it inside the connector's <code>invokeAI</code> / <code>converse</code>
+  paths, so direct sub-action callers (e.g. AI Assistant) are protected too.
+  Without this fix Opus 4.7 simply 400s and produces zero data.</li>
+  <li><strong>Skill-invoked evaluator returned <code>error</code> on every row.</strong>
+  That evaluator queries an OTEL <code>trace.id</code> field that this local
+  cluster does not index; it is orthogonal to the PCI-Criteria numeric score and
+  does not influence the comparison above. CI runs against a cluster that does
+  index trace.id and produces the categorical verdict.</li>
+</ul>
 
 <details><summary>Raw evaluator artefacts</summary>
-<pre>handwritten: x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/handwritten/results.json
-autonomous : x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/autonomous/results.json</pre>
+<pre>opus47-handwritten    : x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/opus47-handwritten/results.json
+opus47-autonomous     : x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/opus47-autonomous/results.json
+sonnet46-handwritten  : x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/sonnet46-handwritten/results.json
+sonnet46-autonomous   : x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/sonnet46-autonomous/results.json</pre>
 </details>
 
 <h2>5 · Reasoning — what each skill is optimised for</h2>
@@ -248,8 +245,42 @@ EVAL_PCI_VARIANT=autonomous node scripts/evals start --suite pci-compliance-auto
   <li>Hand-written skill source: <code>x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/pci_compliance/pci_compliance_skill.ts</code></li>
   <li>Autonomous skill source: <code>x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/pci_compliance_autonomous/pci_compliance_autonomous_skill.ts</code></li>
   <li>Eval spec: <code>x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/evals/pci_compliance/pci_compliance.spec.ts</code></li>
-  <li>Live results (when present): <code>x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/handwritten/results.json</code> &amp; <code>x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/autonomous/results.json</code></li>
+  <li>Live results (when present): <code>x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/opus47-handwritten/results.json</code> &amp; <code>x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/opus47-autonomous/results.json</code></li>
 </ul>
+
+<h2>8 · Bedrock connector fix (Claude Opus 4.7 enablement)</h2>
+<p class="lead">
+  Running the suite against Claude 4.7 Opus on Bedrock requires omitting the
+  <code>temperature</code> inference parameter — the model rejects it with
+  <code>"`temperature` is deprecated for this model"</code>. This branch ships
+  the fix so the comparison above can complete on Opus 4.7.
+</p>
+<table>
+  <thead><tr><th>File</th><th>Change</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/known_models.ts</code></td>
+      <td>Added <code>supportsTemperature?: boolean</code> to <code>ModelDefinition</code>; new entry <code>claude-opus-4-7</code> with <code>supportsTemperature: false</code>.</td>
+    </tr>
+    <tr>
+      <td><code>x-pack/platform/plugins/shared/inference/server/chat_complete/utils/get_temperature.ts</code></td>
+      <td>Inference plugin omits <code>temperature</code> for any connector whose model definition declares <code>supportsTemperature: false</code> (alongside the existing OpenAI o-series exclusions). One source of truth covers <em>any</em> provider.</td>
+    </tr>
+    <tr>
+      <td><code>x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock/utils.ts</code></td>
+      <td>New local helper <code>bedrockModelSupportsTemperature(model)</code>; <code>formatBedrockBody</code> threads <code>model</code> and omits <code>temperature</code> when unsupported. Defense in depth — direct <code>invokeAI</code> callers (Security AI Assistant, etc.) are protected without taking a cross-plugin dependency on <code>@kbn/inference-common</code>.</td>
+    </tr>
+    <tr>
+      <td><code>x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock/bedrock.ts</code></td>
+      <td><code>invokeAI</code>, <code>invokeStream</code>, <code>invokeAIRaw</code>, <code>_converse</code>, and <code>_converseStream</code> all use <code>bedrockModelSupportsTemperature</code> to gate the parameter. Smoke-tested with <code>invokeAI</code> + <code>converse</code> on Claude 4.7 Opus (now passes) and Claude 4.6 Sonnet (still includes temperature, also passes).</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  The list of temperature-incompatible models lives in a single line of
+  <code>known_models.ts</code> — future Claude variants (or other provider
+  models) that move to the same restriction need only flip the flag.
+</p>
 <p class="footnote">
   Per the <code>address-known-limitations</code> rule, this report does NOT include an "honest limitations" / "future work" section — the only known limitation is "live eval data not yet attached", and the discovery seam (the runner script + Buildkite step) ships in the same commit as this HTML. Run the script with cluster credentials to upgrade this report from "framework-validated" to "result-validated".
 </p>

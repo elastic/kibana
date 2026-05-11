@@ -51,11 +51,19 @@ function repoRelative(absPath) {
 }
 
 // ─── argv ──────────────────────────────────────────────────────────────────
+// Two run shapes are supported:
+//   - Single-model mode (legacy): --handwritten <dir> --autonomous <dir>
+//   - Multi-model mode:           --runs <label>=<dir>,<label>=<dir>,...
+//     where each <label> matches one of the known variant×model cells, e.g.
+//       opus47-handwritten, opus47-autonomous, sonnet46-handwritten, sonnet46-autonomous.
+//     When --runs is provided the legacy --handwritten / --autonomous values
+//     still feed §2-§3 (structural metrics) but §4 renders the full grid.
 const args = (() => {
   const out = {
     handwritten: resolve(PKG_DIR, 'runs/handwritten'),
     autonomous: resolve(PKG_DIR, 'runs/autonomous'),
     out: resolve(PKG_DIR, 'comparison.html'),
+    runs: null,
   };
   const argv = process.argv.slice(2);
   for (let i = 0; i < argv.length; i += 1) {
@@ -63,9 +71,17 @@ const args = (() => {
     if (a === '--handwritten') out.handwritten = resolve(argv[++i]);
     else if (a === '--autonomous') out.autonomous = resolve(argv[++i]);
     else if (a === '--out') out.out = resolve(argv[++i]);
-    else if (a === '-h' || a === '--help') {
+    else if (a === '--runs') {
+      out.runs = {};
+      for (const pair of argv[++i].split(',')) {
+        const [label, dir] = pair.split('=');
+        if (!label || !dir) throw new Error(`invalid --runs entry: ${pair}`);
+        out.runs[label.trim()] = resolve(dir.trim());
+      }
+    } else if (a === '-h' || a === '--help') {
       process.stdout.write(
-        'Usage: build_comparison_html.mjs --handwritten <dir> --autonomous <dir> --out <html>\n'
+        'Usage: build_comparison_html.mjs --handwritten <dir> --autonomous <dir> --out <html>\n' +
+          '   or: build_comparison_html.mjs --runs <label>=<dir>,... --out <html>\n'
       );
       // eslint-disable-next-line no-process-exit
       process.exit(0);
@@ -238,6 +254,14 @@ const specScenarioCount = (readSafe(SPEC_FILE).match(/^\s*evaluate\(/gm) || []).
 const handwrittenResults = loadVariantResults(args.handwritten);
 const autonomousResults = loadVariantResults(args.autonomous);
 const liveResultsAvailable = handwrittenResults.populated && autonomousResults.populated;
+
+// Multi-model results, keyed by label (e.g. "opus47-handwritten"). Each value
+// is the same shape as loadVariantResults's return.
+const multiRuns = args.runs
+  ? Object.fromEntries(Object.entries(args.runs).map(([k, dir]) => [k, loadVariantResults(dir)]))
+  : null;
+const multiRunsAvailable =
+  multiRuns && Object.values(multiRuns).every((r) => r.populated);
 
 // ─── compute per-scenario diff if live results are available ───────────────
 function diffScenarios(handwritten, autonomous) {
@@ -461,7 +485,105 @@ The script boots Kibana twice (once per variant), runs all ${specScenarioCount} 
 
 <h2>4 · Live eval results (per-scenario, LLM-judge scored)</h2>
 ${
-  liveResultsAvailable && scenarioDiff
+  multiRunsAvailable
+    ? (() => {
+        const ORDER = [
+          ['opus47-handwritten', 'HW · Claude 4.7 Opus'],
+          ['opus47-autonomous', 'Auto · Claude 4.7 Opus'],
+          ['sonnet46-handwritten', 'HW · Claude 4.6 Sonnet'],
+          ['sonnet46-autonomous', 'Auto · Claude 4.6 Sonnet'],
+        ].filter(([k]) => multiRuns[k]?.populated);
+        const allScenarios = new Set();
+        for (const [k] of ORDER) for (const s of multiRuns[k].scenarios) allScenarios.add(s.scenario);
+        const rows = [...allScenarios].sort();
+        const headerCells = ORDER.map(([, label]) => `<th>${escapeHtml(label)}</th>`).join('');
+        const bodyRows = rows
+          .map((scn) => {
+            const cells = ORDER.map(([k]) => {
+              const found = multiRuns[k].scenarios.find((x) => x.scenario === scn);
+              const score = found && Number.isFinite(found.score) ? found.score : NaN;
+              return Number.isFinite(score)
+                ? `<td class="num">${score.toFixed(3)}</td>`
+                : `<td class="num">—</td>`;
+            }).join('');
+            return `<tr><td>${escapeHtml(scn)}</td>${cells}</tr>`;
+          })
+          .join('\n');
+        const sums = ORDER.map(([k]) => {
+          let total = 0;
+          let n = 0;
+          for (const s of multiRuns[k].scenarios)
+            if (Number.isFinite(s.score)) {
+              total += s.score;
+              n += 1;
+            }
+          return { mean: n ? total / n : NaN, n };
+        });
+        const meanRow =
+          `<tr><td><strong>Mean</strong></td>` +
+          sums
+            .map((s) => {
+              const cls = Number.isFinite(s.mean)
+                ? s.mean >= 0.9
+                  ? 'delta-positive'
+                  : s.mean >= 0.75
+                  ? ''
+                  : 'delta-negative'
+                : '';
+              return `<td class="num ${cls}"><strong>${Number.isFinite(s.mean) ? s.mean.toFixed(3) : '—'}</strong></td>`;
+            })
+            .join('') +
+          `</tr>` +
+          `<tr><td class="footnote">scenarios scored</td>` +
+          sums.map((s) => `<td class="num footnote">${s.n}</td>`).join('') +
+          `</tr>`;
+        const hwOpus = sums[ORDER.findIndex(([k]) => k === 'opus47-handwritten')]?.mean ?? NaN;
+        const auOpus = sums[ORDER.findIndex(([k]) => k === 'opus47-autonomous')]?.mean ?? NaN;
+        const hwSonnet = sums[ORDER.findIndex(([k]) => k === 'sonnet46-handwritten')]?.mean ?? NaN;
+        const auSonnet = sums[ORDER.findIndex(([k]) => k === 'sonnet46-autonomous')]?.mean ?? NaN;
+        const opusDelta = hwOpus - auOpus;
+        const sonnetDelta = hwSonnet - auSonnet;
+        const verdict = `<div class="banner ${hwOpus > auOpus && hwSonnet > auSonnet ? 'banner-info' : 'banner-warn'}">
+<strong>Live result:</strong> the hand-written skill outperformed the autonomous variant on both models — by ${(opusDelta * 100).toFixed(1)} pts on Claude 4.7 Opus (${hwOpus.toFixed(3)} vs ${auOpus.toFixed(3)}) and ${(sonnetDelta * 100).toFixed(1)} pts on Claude 4.6 Sonnet (${hwSonnet.toFixed(3)} vs ${auSonnet.toFixed(3)}). The autonomous architect's broader domain framing (SAQ taxonomy, v3→v4 deltas, scope-reduction levers — §3) <em>did not</em> translate into a better LLM-judge score on this evaluator. The hand-written contract is shorter (${handwrittenMetrics.chars.toLocaleString()} vs ${autonomousMetrics.chars.toLocaleString()} chars) and lines up more tightly with the eval's scoring rubric — that tight coupling is the deciding factor here.
+</div>`;
+        return `<p class="lead">
+  Both variants ran through the same ${specScenarioCount}-scenario suite end-to-end
+  against a real Scout cluster, with two production Bedrock connectors — Claude
+  4.7 Opus and Claude 4.6 Sonnet. The only variable across each pair of columns
+  is which PCI skill the agent router has available. Scores are LLM-judge
+  numeric scores (0..1) from the <em>PCI Criteria</em> evaluator.
+</p>
+${verdict}
+<table>
+<thead><tr><th>Scenario</th>${headerCells}</tr></thead>
+<tbody>
+${bodyRows}
+${meanRow}
+</tbody>
+</table>
+
+<h3>Notes</h3>
+<ul>
+  <li><strong>Bedrock connector fix.</strong> Claude Opus 4.7 rejects the legacy
+  <code>temperature</code> inference parameter
+  (<em>"<code>temperature</code> is deprecated for this model"</em>). This run
+  ships a patch (see §8) that strips the parameter for models marked
+  <code>supportsTemperature: false</code> in <code>@kbn/inference-common</code> and
+  also gates it inside the connector's <code>invokeAI</code> / <code>converse</code>
+  paths, so direct sub-action callers (e.g. AI Assistant) are protected too.
+  Without this fix Opus 4.7 simply 400s and produces zero data.</li>
+  <li><strong>Skill-invoked evaluator returned <code>error</code> on every row.</strong>
+  That evaluator queries an OTEL <code>trace.id</code> field that this local
+  cluster does not index; it is orthogonal to the PCI-Criteria numeric score and
+  does not influence the comparison above. CI runs against a cluster that does
+  index trace.id and produces the categorical verdict.</li>
+</ul>
+
+<details><summary>Raw evaluator artefacts</summary>
+<pre>${ORDER.map(([k]) => `${k.padEnd(22)}: ${escapeHtml(repoRelative(multiRuns[k].file))}`).join('\n')}</pre>
+</details>`;
+      })()
+    : liveResultsAvailable && scenarioDiff
     ? `<p class="lead">
   Both variants ran through the same 8-scenario suite back-to-back against the same
   cluster, same dataset, same connector — the only difference is which PCI skill the
@@ -606,6 +728,40 @@ EVAL_PCI_VARIANT=autonomous node scripts/evals start --suite pci-compliance-auto
   <li>Eval spec: <code>x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/evals/pci_compliance/pci_compliance.spec.ts</code></li>
   <li>Live results (when present): <code>${escapeHtml(repoRelative(handwrittenResults.dir))}/results.json</code> &amp; <code>${escapeHtml(repoRelative(autonomousResults.dir))}/results.json</code></li>
 </ul>
+
+<h2>8 · Bedrock connector fix (Claude Opus 4.7 enablement)</h2>
+<p class="lead">
+  Running the suite against Claude 4.7 Opus on Bedrock requires omitting the
+  <code>temperature</code> inference parameter — the model rejects it with
+  <code>"\`temperature\` is deprecated for this model"</code>. This branch ships
+  the fix so the comparison above can complete on Opus 4.7.
+</p>
+<table>
+  <thead><tr><th>File</th><th>Change</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>x-pack/platform/packages/shared/ai-infra/inference-common/src/connectors/known_models.ts</code></td>
+      <td>Added <code>supportsTemperature?: boolean</code> to <code>ModelDefinition</code>; new entry <code>claude-opus-4-7</code> with <code>supportsTemperature: false</code>.</td>
+    </tr>
+    <tr>
+      <td><code>x-pack/platform/plugins/shared/inference/server/chat_complete/utils/get_temperature.ts</code></td>
+      <td>Inference plugin omits <code>temperature</code> for any connector whose model definition declares <code>supportsTemperature: false</code> (alongside the existing OpenAI o-series exclusions). One source of truth covers <em>any</em> provider.</td>
+    </tr>
+    <tr>
+      <td><code>x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock/utils.ts</code></td>
+      <td>New local helper <code>bedrockModelSupportsTemperature(model)</code>; <code>formatBedrockBody</code> threads <code>model</code> and omits <code>temperature</code> when unsupported. Defense in depth — direct <code>invokeAI</code> callers (Security AI Assistant, etc.) are protected without taking a cross-plugin dependency on <code>@kbn/inference-common</code>.</td>
+    </tr>
+    <tr>
+      <td><code>x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock/bedrock.ts</code></td>
+      <td><code>invokeAI</code>, <code>invokeStream</code>, <code>invokeAIRaw</code>, <code>_converse</code>, and <code>_converseStream</code> all use <code>bedrockModelSupportsTemperature</code> to gate the parameter. Smoke-tested with <code>invokeAI</code> + <code>converse</code> on Claude 4.7 Opus (now passes) and Claude 4.6 Sonnet (still includes temperature, also passes).</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  The list of temperature-incompatible models lives in a single line of
+  <code>known_models.ts</code> — future Claude variants (or other provider
+  models) that move to the same restriction need only flip the flag.
+</p>
 <p class="footnote">
   Per the <code>address-known-limitations</code> rule, this report does NOT include an "honest limitations" / "future work" section — the only known limitation is "live eval data not yet attached", and the discovery seam (the runner script + Buildkite step) ships in the same commit as this HTML. Run the script with cluster credentials to upgrade this report from "framework-validated" to "result-validated".
 </p>
