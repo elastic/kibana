@@ -13,7 +13,12 @@ import type { FormValues } from '../types';
 import { useQueryColumns, type QueryColumn } from '../hooks/use_query_columns';
 import { useRuleFormServices, useRuleFormMeta } from '../contexts';
 
-export const GroupFieldSelect = () => {
+interface GroupFieldSelectProps {
+  /** Override the default "Group Fields" label. */
+  label?: string;
+}
+
+export const GroupFieldSelect = ({ label: labelOverride }: GroupFieldSelectProps = {}) => {
   const { data } = useRuleFormServices();
   const { layout } = useRuleFormMeta();
   const { control, setValue, getValues } = useFormContext<FormValues>();
@@ -56,7 +61,7 @@ export const GroupFieldSelect = () => {
         return (
           <EuiFormRow
             id={groupByRowId}
-            label={i18n.translate('xpack.alertingV2.ruleForm.groupingKeyLabel', {
+            label={labelOverride ?? i18n.translate('xpack.alertingV2.ruleForm.groupingKeyLabel', {
               defaultMessage: 'Group Fields',
             })}
             labelAppend={i18n.translate('xpack.alertingV2.ruleForm.groupingKeyOptional', {

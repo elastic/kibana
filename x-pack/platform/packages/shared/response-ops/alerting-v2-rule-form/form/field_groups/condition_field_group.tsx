@@ -22,6 +22,8 @@ interface ConditionFieldGroupProps {
    * When false, shows the base query as read-only (if available).
    */
   includeBase?: boolean;
+  /** Override the default "Group Fields" label on the group-by selector. */
+  groupFieldLabel?: string;
 }
 
 /**
@@ -33,7 +35,7 @@ interface ConditionFieldGroupProps {
  * The full ES|QL query defines what data is being evaluated, including any
  * trigger condition (e.g. a trailing WHERE clause).
  */
-export const ConditionFieldGroup = ({ includeBase = false }: ConditionFieldGroupProps) => {
+export const ConditionFieldGroup = ({ includeBase = false, groupFieldLabel }: ConditionFieldGroupProps) => {
   const { control } = useFormContext<FormValues>();
 
   // Read the base query from form state (initialized via useFormDefaults)
@@ -70,7 +72,7 @@ export const ConditionFieldGroup = ({ includeBase = false }: ConditionFieldGroup
         )
       )}
 
-      <GroupFieldSelect />
+      <GroupFieldSelect label={groupFieldLabel} />
       <TimeFieldSelect />
     </FieldGroup>
   );
