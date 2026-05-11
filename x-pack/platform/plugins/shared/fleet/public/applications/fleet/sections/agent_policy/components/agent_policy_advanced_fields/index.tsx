@@ -388,7 +388,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         <EuiFormRow
           fullWidth
           label={i18n.translate('xpack.fleet.agentPolicyForm.namespaceInputLabel', {
-            defaultMessage: 'Namespace',
+            defaultMessage: 'Default namespace',
           })}
           error={validation.namespace ? validation.namespace : null}
           isInvalid={Boolean(validation.namespace)}
