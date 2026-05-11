@@ -23,6 +23,7 @@ import type { StreamsSupertestRepositoryClient } from '../helpers/repository_cli
 import { createStreamsRepositoryAdminClient } from '../helpers/repository_client';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { loadDashboards, unloadDashboards } from '../helpers/dashboards';
+import { updateStreamsUiSettingsWithPropagation } from '../helpers/ui_settings';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -1104,8 +1105,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const QUERY_ATTACH_TEST_STREAM = 'query-attach-test-stream';
 
       before(async () => {
-        await kibanaServer.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
+        await updateStreamsUiSettingsWithPropagation({
+          kibanaServer,
+          updates: {
+            [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
+          },
+          description: 'streams query attachment uiSettings propagation',
         });
         await loadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
         await kibanaServer.importExport.load(RULE_ARCHIVE, { space: SPACE_ID });
@@ -1114,8 +1119,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       after(async () => {
         await unloadDashboards(kibanaServer, DASHBOARD_ARCHIVES, SPACE_ID);
         await kibanaServer.importExport.unload(RULE_ARCHIVE, { space: SPACE_ID });
-        await kibanaServer.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
+        await updateStreamsUiSettingsWithPropagation({
+          kibanaServer,
+          updates: {
+            [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
+          },
+          description: 'streams query attachment uiSettings cleanup',
         });
       });
 
@@ -1361,14 +1370,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         this.tags(['skipCloud', 'skipMKI', 'skipServerless']);
 
         before(async () => {
-          await kibanaServer.uiSettings.update({
-            [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
+          await updateStreamsUiSettingsWithPropagation({
+            kibanaServer,
+            updates: {
+              [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
+            },
+            description: 'streams query slo uiSettings propagation',
           });
         });
 
         after(async () => {
-          await kibanaServer.uiSettings.update({
-            [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
+          await updateStreamsUiSettingsWithPropagation({
+            kibanaServer,
+            updates: {
+              [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
+            },
+            description: 'streams query slo uiSettings cleanup',
           });
         });
 

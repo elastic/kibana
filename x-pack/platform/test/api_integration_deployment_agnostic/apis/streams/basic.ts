@@ -35,6 +35,7 @@ import {
   indexDocument,
   putStream,
 } from './helpers/requests';
+import { updateStreamsUiSettingsWithPropagation } from './helpers/ui_settings';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -126,8 +127,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .catch((err: { statusCode?: number }) => err?.statusCode === 404);
 
         if (viewsApiAvailable) {
-          await kibanaServer.uiSettings.update({
-            [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
+          await updateStreamsUiSettingsWithPropagation({
+            kibanaServer,
+            updates: {
+              [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
+            },
+            description: 'streams wired views uiSettings propagation',
           });
         }
       }
@@ -135,8 +140,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       if (!isServerless && viewsApiAvailable) {
-        await kibanaServer.uiSettings.update({
-          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
+        await updateStreamsUiSettingsWithPropagation({
+          kibanaServer,
+          updates: {
+            [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
+          },
+          description: 'streams wired views uiSettings cleanup',
         });
       }
     });

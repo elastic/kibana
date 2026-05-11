@@ -10,7 +10,6 @@ import { emptyAssets } from '@kbn/streams-schema';
 import type { Streams } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
 import { STREAMS_ESQL_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -22,6 +21,7 @@ import {
   putStream,
 } from './helpers/requests';
 import type { RoleCredentials } from '../../services';
+import { updateSignificantEventsSettingWithPropagation } from './helpers/ui_settings';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -57,17 +57,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
+      await updateSignificantEventsSettingWithPropagation({
+        kibanaServer,
+        apiClient,
+        enabled: true,
       });
     });
 
     after(async () => {
+      await updateSignificantEventsSettingWithPropagation({
+        kibanaServer,
+        apiClient,
+        enabled: false,
+      });
       await disableStreams(apiClient);
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
-      await kibanaServer.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-      });
     });
 
     beforeEach(async () => {

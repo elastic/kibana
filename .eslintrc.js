@@ -2937,6 +2937,16 @@ module.exports = {
         '@kbn/eslint/deployment_agnostic_test_context': 'error',
       },
     },
+    {
+      // Stateful deployment-agnostic tests that update uiSettings must account for multi-node cache propagation.
+      files: [
+        'x-pack/platform/test/api_integration_deployment_agnostic/apis/streams/**/*.{js,ts}',
+        'x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}',
+      ],
+      rules: {
+        '@kbn/eslint/ui_settings_require_propagation_delay': 'error',
+      },
+    },
 
     {
       // Restrict fs imports in production code (exclude test files, scripts, etc.)

@@ -22,6 +22,16 @@ interface UiSettingsApiResponse {
   };
 }
 
+export interface UiSettingsPropagationDelayOptions<T = void> {
+  assertion?: () => Promise<T>;
+  description?: string;
+  timeoutMs?: number;
+  retryIntervalMs?: number;
+}
+
+export const MAX_UI_SETTINGS_PROPAGATION_DELAY_MS = 12_000; // See https://github.com/elastic/kibana/issues/265720.
+const DEFAULT_UI_SETTINGS_PROPAGATION_RETRY_INTERVAL_MS = 1_000;
+
 export class KbnClientUiSettings {
   constructor(
     private readonly log: ToolingLog,
@@ -101,6 +111,50 @@ export class KbnClientUiSettings {
   }
 
   /**
+   * Wait for a uiSettings write to propagate across Kibana nodes in tests.
+   *
+   * Kibaan multi-node cluster can serve the next request from a different Kibana node than a test
+   * writes to, so dependent assertions may need to tolerate the shared uiSettings
+   * eventual-consistent cache window. See https://github.com/elastic/kibana/issues/265720.
+   *
+   * When `assertion` is provided, it is tried immediately and retried until it passes or the
+   * propagation window expires. When `assertion` is omitted, this waits for the full propagation
+   * window.
+   */
+  async withPropagationDelay<T>({
+    assertion,
+    description = 'uiSettings propagation',
+    timeoutMs = MAX_UI_SETTINGS_PROPAGATION_DELAY_MS,
+    retryIntervalMs = DEFAULT_UI_SETTINGS_PROPAGATION_RETRY_INTERVAL_MS,
+  }: UiSettingsPropagationDelayOptions<T> = {}): Promise<T | void> {
+    if (!assertion) {
+      await delay(timeoutMs);
+      return;
+    }
+
+    const deadline = Date.now() + timeoutMs;
+    let lastError: Error | undefined;
+
+    while (Date.now() <= deadline) {
+      try {
+        return await assertion();
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+      }
+
+      await delay(retryIntervalMs);
+    }
+
+    if (lastError) {
+      throw new Error(`Timed out waiting for ${description}: ${lastError.message}`, {
+        cause: lastError,
+      });
+    }
+
+    throw new Error(`Timed out waiting for ${description} within ${timeoutMs}ms`);
+  }
+
+  /**
    * Update UI settings globally (like setting 'hideAnnouncements', 'theme:darkMode', etc)
    */
   async updateGlobal(updates: UiSettingValues) {
@@ -125,3 +179,7 @@ export class KbnClientUiSettings {
     return data.settings;
   }
 }
+
+const delay = async (ms: number) => {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+};
