@@ -158,10 +158,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('No indices', () => {
       before(async () => {
         // Re-navigate so the editor is in a clean state. Earlier tests in
-        // this file (e.g. the triple-quotes parse cases) can leave the
-        // editor with invalid JSON, and setCodeEditorValue(..., 0) may
-        // target a stale Monaco model rather than the visible profiler
-        // editor, leading to a JSON parse error on profile.
+        // this suite can leave the editor with invalid JSON,
+        // and setCodeEditorValue(..., 0) may target a stale Monaco model,
+        // leading to a JSON parse error on profile.
         await PageObjects.common.navigateToApp('searchProfiler');
         expect(await PageObjects.searchProfiler.editorExists()).to.be(true);
 
