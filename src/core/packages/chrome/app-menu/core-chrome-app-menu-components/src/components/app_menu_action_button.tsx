@@ -151,7 +151,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
    */
   const button =
     showTooltip && !hasSplitItems ? (
-      <EuiToolTip content={content} title={title} delay="long">
+      <EuiToolTip content={content} title={title}>
         {buttonComponent}
       </EuiToolTip>
     ) : (

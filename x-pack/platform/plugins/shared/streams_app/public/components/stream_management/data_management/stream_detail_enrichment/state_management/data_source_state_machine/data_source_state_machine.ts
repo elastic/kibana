@@ -110,7 +110,8 @@ export const dataSourceMachine = setup({
     dataSource: input.dataSource,
     streamName: input.streamName,
     streamType: input.streamType,
-    simulationMode: getSimulationModeByDataSourceType(input.dataSource.type),
+    simulationMode: getSimulationModeByDataSourceType(input.dataSource.type, input.isDraft),
+    isDraft: input.isDraft,
   }),
   initial: 'determining',
   states: {
@@ -176,6 +177,7 @@ export const dataSourceMachine = setup({
               dataSource: context.dataSource,
               streamName: context.streamName,
               streamType: context.streamType,
+              isDraft: context.isDraft,
             }),
             onSnapshot: {
               guard: {
@@ -254,8 +256,13 @@ export const createDataSourceMachineImplementations = ({
 });
 
 const getSimulationModeByDataSourceType = (
-  dataSourceType: EnrichmentDataSourceWithUIAttributes['type']
+  dataSourceType: EnrichmentDataSourceWithUIAttributes['type'],
+  isDraft?: boolean
 ): DataSourceSimulationMode => {
+  // Draft streams have no ingest pipeline, so samples are always unprocessed.
+  // All processors must be included in the simulation regardless of data source type.
+  if (isDraft) return 'complete';
+
   switch (dataSourceType) {
     case 'latest-samples':
       return 'partial';
