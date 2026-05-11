@@ -180,20 +180,21 @@ function mapResponseToDatatable(
     });
 
   if (rows.length && timeFilter && timeField) {
-    let firstEntry = new Date(rows[0][timeField]);
-    const fromRange = new Date(timeFilter.query.range[timeField].gte);
-    const lastEntry = new Date(rows[rows.length - 1][timeField]);
-    const toRange = new Date(timeFilter.query.range[timeField].lte);
+    const tf = timeField;
+    let firstEntry = new Date(rows[0][tf] as string | number);
+    const fromRange = new Date(timeFilter.query.range[tf].gte);
+    const lastEntry = new Date(rows[rows.length - 1][tf] as string | number);
+    const toRange = new Date(timeFilter.query.range[tf].lte);
 
     const step =
-      new Date(rows[rows.length - 1][timeField]).getTime() -
-      new Date(rows[rows.length - 2][timeField]).getTime();
+      new Date(rows[rows.length - 1][tf] as string | number).getTime() -
+      new Date(rows[rows.length - 2][tf] as string | number).getTime();
     const end = new Date(lastEntry.getTime() + step);
 
     if (partialRows === false) {
       while (fromRange > firstEntry) {
         rows.shift();
-        firstEntry = new Date(rows[0][timeField]);
+        firstEntry = new Date(rows[0][tf] as string | number);
       }
       if (end > toRange) rows.pop();
     }
