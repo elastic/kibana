@@ -67,7 +67,7 @@ export class PackagePolicyService {
         })
       )
     );
-    return ids.flat();
+    return uniqBy(ids.flat(), 'id');
   }
 
   async bulkCreate({

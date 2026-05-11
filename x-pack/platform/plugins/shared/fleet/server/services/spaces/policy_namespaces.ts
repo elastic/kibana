@@ -21,6 +21,38 @@ import { PackagePolicyNameExistsError } from '../../errors';
 
 import { getSpaceSettings } from './space_settings';
 
+/**
+ * Returns the allowed namespace prefixes for the given Kibana space, or `null`
+ * if no restriction applies (space awareness disabled or no prefixes configured).
+ */
+export async function getAllowedNamespacePrefixesForSpace(
+  spaceId?: string
+): Promise<string[] | null> {
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+  if (!experimentalFeature.useSpaceAwareness) {
+    return null;
+  }
+  const settings = await getSpaceSettings(spaceId);
+  if (!settings.allowed_namespace_prefixes || settings.allowed_namespace_prefixes.length === 0) {
+    return null;
+  }
+  return settings.allowed_namespace_prefixes;
+}
+
+/**
+ * Returns true if the namespace is permitted by the given prefix list.
+ * `null` means no restriction (anything is permitted).
+ */
+export function isNamespaceAllowedByPrefixes(
+  namespace: string,
+  prefixes: string[] | null
+): boolean {
+  if (prefixes === null) {
+    return true;
+  }
+  return prefixes.some((prefix) => namespace.startsWith(prefix));
+}
+
 export async function validatePolicyNamespaceForSpace({
   namespace,
   spaceId,
