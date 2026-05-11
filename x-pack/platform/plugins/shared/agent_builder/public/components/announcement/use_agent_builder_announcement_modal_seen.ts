@@ -75,6 +75,13 @@ export async function getAnnouncementModalSeen(
 export async function setAnnouncementModalSeen(
   userProfile: UserProfileServiceStart
 ): Promise<void> {
+  try {
+    if (localStorage.getItem(ANNOUNCEMENT_MODAL_SEEN_STORAGE_KEY) === 'true') {
+      return;
+    }
+  } catch {
+    // ignore storage access errors
+  }
   const enabled = await firstValueFrom(userProfile.getEnabled$().pipe(take(1)));
   if (!enabled) {
     return;
