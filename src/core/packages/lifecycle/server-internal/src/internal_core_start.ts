@@ -52,5 +52,4 @@ export interface InternalCoreStart {
   injection: InternalCoreDiServiceStart;
   dataStreams: DataStreamsStart;
   userStorage: UserStorageServiceStart;
-  _plugins?: Map<string, any>;
 }
