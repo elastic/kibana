@@ -17,9 +17,10 @@ export const translateDashboardPanelState = Annotation.Root({
   parsed_panel: Annotation<ParsedPanel>(),
   description: Annotation<string>(),
   dashboard_description: Annotation<string>(),
-  resources: Annotation<MigrationResources>(),
+  resources: Annotation<MigrationResources>(), // The visualization panel object
   elastic_panel: Annotation<object | undefined>(),
   index_pattern: Annotation<string | undefined>(),
+  /** includes mapping and field stats for a given index */
   resolved_resource: Annotation<ResolvedResourceWithSampling | undefined>(),
   includes_ecs_mapping: Annotation<boolean>({
     reducer: (current, value) => value ?? current,
@@ -30,7 +31,7 @@ export const translateDashboardPanelState = Annotation.Root({
   esql_query_columns: Annotation<EsqlColumn[] | undefined>(),
   validation_errors: Annotation<ValidationErrors>({
     reducer: (current, value) => value ?? current,
-    default: () => ({ retries_left: 6 }),
+    default: () => ({ retries_left: 6 }), // Max self-healing ES|QL validation retries
   }),
   translation_result: Annotation<MigrationTranslationResult>({
     reducer: (current, value) => value ?? current,

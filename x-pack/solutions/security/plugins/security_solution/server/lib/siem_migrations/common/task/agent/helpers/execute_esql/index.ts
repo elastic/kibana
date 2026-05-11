@@ -12,7 +12,7 @@ export const executeEsqlQuery = async (
   params: TranslatePanelGraphParams
 ): Promise<string | undefined> => {
   try {
-    await params.esScopedClient.asInternalUser.esql.query({
+    await params.esScopedClient.asCurrentUser.esql.query({
       query,
       format: 'json',
     });
