@@ -27,12 +27,21 @@ import {
   getRangeFilter,
   getTimespanFilter,
 } from '../../../common/constants/client_defaults';
+import { isCCSEnabled, getRemoteMonitorInfo } from '../../lib/remote_result_utils';
 
 interface LocationStatusEntry {
   status: string;
   locationId: string;
   timestamp: string;
   monitorUrl?: string;
+  index?: string;
+  kibanaUrl?: string;
+  // Additional fields from ping docs, used to build metadata for remote-only monitors
+  monitorName?: string;
+  monitorType?: string;
+  monitorIntervalSeconds?: number;
+  configId?: string;
+  tags?: string[];
   // The latest error reason for the most recent final summary on this
   // (monitor, location). Only populated for down checks where the heartbeat
   // doc has an `error` object — `error.message` is `text` so we collect it
@@ -98,6 +107,7 @@ export class OverviewStatusService {
     const { spaceId, request } = this.routeContext;
     const params = request.query || {};
     const {
+      query,
       scopeStatusByLocation = true,
       tags,
       monitorTypes,
@@ -126,12 +136,44 @@ export class OverviewStatusService {
         },
       ];
     };
+    // Local pings must always honour the active space, otherwise a monitor in
+    // a different local space would surface as a remote-rendered entry on the
+    // Overview. Remote-cluster pings (with `_index` like
+    // "cluster1:.ds-synthetics-*") carry the *remote* cluster's
+    // `meta.space_id`, so applying the local space terms there would
+    // over-filter them — accept them regardless of space via a `wildcard`
+    // match on the cluster-alias prefix in `_index`. Note: `regexp` is not
+    // allowed on `_index`; `wildcard` is.
+    const ccsEnabled = isCCSEnabled(this.routeContext.server);
+    const skipSpaceFilter = showFromAllSpaces || !spaceId || spaceId === ALL_SPACES_ID;
+    const localSpaceTerms: QueryDslQueryContainer = {
+      terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] },
+    };
+    const spaceFilter: QueryDslQueryContainer = ccsEnabled
+      ? {
+          bool: {
+            should: [localSpaceTerms, { wildcard: { _index: '*:*' } }],
+            minimum_should_match: 1,
+          },
+        }
+      : localSpaceTerms;
+
     const filters: QueryDslQueryContainer[] = [
-      ...(showFromAllSpaces ? [] : [{ terms: { 'meta.space_id': [spaceId, ALL_SPACES_ID] } }]),
+      ...(skipSpaceFilter ? [] : [spaceFilter]),
       ...getTermFilter('monitor.type', monitorTypes),
       ...getTermFilter('tags', tags),
       ...getTermFilter('monitor.project.id', projects),
     ];
+
+    if (query) {
+      filters.push({
+        simple_query_string: {
+          query,
+          fields: ['monitor.name', 'tags', 'url.full', 'monitor.project.id'],
+          default_operator: 'OR',
+        },
+      });
+    }
 
     if (scopeStatusByLocation && !isEmpty(locationIds) && locationIds) {
       filters.push({
@@ -144,6 +186,8 @@ export class OverviewStatusService {
   }
 
   async getQueryResult() {
+    const ccsEnabled = isCCSEnabled(this.routeContext.server);
+
     return withApmSpan('monitor_status_data', async () => {
       const range = {
         // max monitor schedule period is 4 hours, 20 minute subtraction is to be on safe side
@@ -155,6 +199,28 @@ export class OverviewStatusService {
       const monitorByIds = new Map<string, LocationStatus>();
       let afterKey: any;
       let count = 0;
+
+      const topMetricsFields = [
+        { field: 'monitor.status' },
+        { field: 'url.full.keyword' },
+        // When CCS is enabled, retrieve additional fields to detect remote monitors,
+        // build deep links, and construct metadata for remote-only monitors
+        // (which have no local saved object).
+        // Note: _index is NOT included here because top_metrics does not support
+        // metadata fields. We use a separate terms sub-aggregation for _index instead.
+        // observer.geo.name is also excluded because it is a wildcard type field
+        // which top_metrics cannot collect. We fall back to locationId for remote monitors.
+        ...(ccsEnabled
+          ? [
+              { field: 'kibanaUrl' },
+              { field: 'monitor.name' },
+              { field: 'monitor.type' },
+              { field: 'monitor.interval' },
+              { field: 'config_id' },
+              { field: 'tags' },
+            ]
+          : []),
+      ];
 
       do {
         const result = await this.routeContext.syntheticsEsClient.search(
@@ -195,19 +261,26 @@ export class OverviewStatusService {
                 aggs: {
                   status: {
                     top_metrics: {
-                      metrics: [
-                        {
-                          field: 'monitor.status',
-                        },
-                        {
-                          field: 'url.full.keyword',
-                        },
-                      ],
+                      metrics: topMetricsFields,
                       sort: {
                         '@timestamp': 'desc',
                       },
                     },
                   },
+                  // _index is a metadata field not supported by top_metrics,
+                  // so we use a separate terms agg to determine the source index.
+                  // For a given monitor+location bucket the latest ping typically
+                  // comes from a single index, so size:1 is sufficient.
+                  ...(ccsEnabled
+                    ? {
+                        index_name: {
+                          terms: {
+                            field: '_index',
+                            size: 1,
+                          },
+                        },
+                      }
+                    : {}),
                   // `error.message` is mapped as `text` so it can't be pulled
                   // via `top_metrics`; fetch the latest final summary doc and
                   // grab `error` + `state` from its source.
@@ -252,11 +325,12 @@ export class OverviewStatusService {
         afterKey = data?.after_key;
 
         data?.buckets.forEach((bucket) => {
-          const { status: statusAgg, key: bKey } = bucket;
+          const { status: statusAgg, key: bKey, ...rest } = bucket;
           const monitorId = String(bKey.monitorId);
           const locationId = String(bKey.locationId);
-          const status = String(statusAgg.top?.[0].metrics?.['monitor.status']);
-          const rawMonitorUrl = statusAgg.top?.[0].metrics?.['url.full.keyword'];
+          const metrics = statusAgg.top?.[0].metrics;
+          const status = String(metrics?.['monitor.status']);
+          const rawMonitorUrl = metrics?.['url.full.keyword'];
 
           const timestamp = String(statusAgg.top[0].sort[0]);
 
@@ -293,11 +367,29 @@ export class OverviewStatusService {
           if (!monitorByIds.has(String(monitorId))) {
             monitorByIds.set(monitorId, []);
           }
+
+          // _index comes from the terms sub-agg, not top_metrics
+          const indexNameAgg = ccsEnabled ? (rest as any).index_name : undefined;
+          const indexName = indexNameAgg?.buckets?.[0]?.key;
+          const kibanaUrl = ccsEnabled ? metrics?.kibanaUrl : undefined;
+          const monitorName = ccsEnabled ? metrics?.['monitor.name'] : undefined;
+          const monitorType = ccsEnabled ? metrics?.['monitor.type'] : undefined;
+          const monitorInterval = ccsEnabled ? metrics?.['monitor.interval'] : undefined;
+          const configId = ccsEnabled ? metrics?.config_id : undefined;
+          const tags = ccsEnabled ? metrics?.tags : undefined;
+
           monitorByIds.get(monitorId)?.push({
             status,
             locationId,
             timestamp,
             monitorUrl: rawMonitorUrl != null ? String(rawMonitorUrl) : undefined,
+            ...(indexName ? { index: String(indexName) } : {}),
+            ...(kibanaUrl ? { kibanaUrl: String(kibanaUrl) } : {}),
+            ...(monitorName ? { monitorName: String(monitorName) } : {}),
+            ...(monitorType ? { monitorType: String(monitorType) } : {}),
+            ...(monitorInterval != null ? { monitorIntervalSeconds: Number(monitorInterval) } : {}),
+            ...(configId ? { configId: String(configId) } : {}),
+            ...(tags ? { tags: Array.isArray(tags) ? tags.map(String) : [String(tags)] } : {}),
             error:
               errorMessage || errorType ? { message: errorMessage, type: errorType } : undefined,
             downSince,
@@ -326,9 +418,13 @@ export class OverviewStatusService {
 
     const queryLocIds = this.filterData?.locationIds;
 
+    // Track which monitor IDs have been processed via local saved objects
+    const processedMonitorIds = new Set<string>();
+
     disabledMonitors.forEach((monitor) => {
       const monitorQueryId = monitor.attributes[ConfigKey.MONITOR_QUERY_ID];
       const meta = this.getMonitorMeta(monitor);
+      processedMonitorIds.add(monitorQueryId);
       monitor.attributes[ConfigKey.LOCATIONS]?.forEach((location) => {
         if (disabledConfigs[meta.configId]) {
           disabledConfigs[meta.configId].locations.push({
@@ -355,6 +451,7 @@ export class OverviewStatusService {
 
     enabledMonitors.forEach((monitor) => {
       const monitorId = monitor.attributes[ConfigKey.MONITOR_QUERY_ID];
+      processedMonitorIds.add(monitorId);
       const monitorStatus = statusData.get(monitorId);
 
       // discard any locations that are not in the monitorLocationsMap for the given monitor as well as those which are
@@ -367,6 +464,9 @@ export class OverviewStatusService {
         }
         const locData = monitorStatus?.find((loc) => loc.locationId === monLocation.id);
         const metaInfo = this.getMonitorMeta(monitor);
+        const remote = locData?.index
+          ? getRemoteMonitorInfo(locData.index, locData.kibanaUrl)
+          : undefined;
         const status = locData?.status || MONITOR_STATUS_ENUM.PENDING;
         // Only attach `error` / `downSince` when this location is currently
         // down — otherwise we'd carry stale error text from the previous
@@ -384,6 +484,7 @@ export class OverviewStatusService {
           monitorQueryId: monitorId,
           timestamp: locData?.timestamp,
           urls: monitor.attributes[ConfigKey.URLS] || locData?.monitorUrl,
+          ...(remote ? { remote } : {}),
           locations: [location],
           overallStatus: status,
         };
@@ -460,6 +561,73 @@ export class OverviewStatusService {
         upConfigs[id] = meta;
         delete pendingConfigs[id];
       }
+    }
+
+    // Process remote-only monitors: pings from CCS indices that have no local saved object.
+    // These monitors exist only on remote clusters and are discovered purely from ping data.
+    if (isCCSEnabled(this.routeContext.server)) {
+      statusData.forEach((locationStatuses, monitorId) => {
+        if (processedMonitorIds.has(monitorId)) {
+          return; // Already processed via local saved object
+        }
+
+        locationStatuses.forEach((locData) => {
+          const remote = locData.index
+            ? getRemoteMonitorInfo(locData.index, locData.kibanaUrl)
+            : undefined;
+
+          // Only include if this is actually a remote ping
+          if (!remote) {
+            return;
+          }
+
+          if (!isEmpty(queryLocIds) && !queryLocIds?.includes(locData.locationId)) {
+            return;
+          }
+
+          const configId = locData.configId || monitorId;
+          const status = locData.status;
+          // Mirror local-monitor handling: only attach `error` / `downSince`
+          // for currently-down locations to avoid surfacing stale failure
+          // text from a previous run.
+          const isDown = status === MONITOR_STATUS_ENUM.DOWN;
+          const location = {
+            id: locData.locationId,
+            label: locData.locationId,
+            status,
+            ...(isDown && locData.error ? { error: locData.error } : {}),
+            ...(isDown && locData.downSince ? { downSince: locData.downSince } : {}),
+          };
+          const meta: OverviewStatusMetaData = {
+            monitorQueryId: monitorId,
+            configId,
+            name: locData.monitorName || monitorId,
+            type: locData.monitorType || 'unknown',
+            schedule: locData.monitorIntervalSeconds
+              ? String(Math.round(locData.monitorIntervalSeconds / 60))
+              : '',
+            tags: locData.tags ?? [],
+            isEnabled: true,
+            isStatusAlertEnabled: false,
+            timestamp: locData.timestamp,
+            urls: locData.monitorUrl,
+            remote,
+            locations: [location],
+            overallStatus: status,
+          };
+
+          const monLocId = `${configId}-${locData.locationId}`;
+          if (status === MONITOR_STATUS_ENUM.DOWN) {
+            down += 1;
+            downConfigs[monLocId] = meta;
+          } else if (status === MONITOR_STATUS_ENUM.UP) {
+            up += 1;
+            upConfigs[monLocId] = meta;
+          } else {
+            pendingConfigs[monLocId] = { ...meta, overallStatus: MONITOR_STATUS_ENUM.PENDING };
+          }
+        });
+      });
     }
 
     return {

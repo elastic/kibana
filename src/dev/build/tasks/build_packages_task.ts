@@ -165,6 +165,17 @@ export const BuildPackages: Task = {
                 }
               }
 
+              // For plugins, exclude public/ source (bundled by the optimizer).
+              // Keep public/assets/ — served at runtime via registerStaticDir.
+              if (
+                pkg.isPlugin() &&
+                rec.source.rel.startsWith('public/') &&
+                rec.source.rel !== 'public/assets' &&
+                !rec.source.rel.startsWith('public/assets/')
+              ) {
+                return false;
+              }
+
               // ignore files selected by the package's "build.extraExcludes" config
               if (matchExtraExcludes && matchExtraExcludes(rec.source.rel)) {
                 return false;

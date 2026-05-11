@@ -19,6 +19,7 @@ export interface AgentStatusInfo {
   lastSeen: string; // ISO date
   pendingActions: Record<ResponseActionsApiCommandNames | string, number>;
   status: HostStatus;
+  error?: string;
 }
 
 export interface AgentStatusRecords {

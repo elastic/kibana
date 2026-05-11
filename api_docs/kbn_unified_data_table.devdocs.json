@@ -847,7 +847,7 @@
                     "section": "def-common.FieldFormatsRegistry",
                     "text": "FieldFormatsRegistry"
                   },
-                  ", \"register\" | \"init\"> & { deserialize: ",
+                  ", \"init\" | \"register\"> & { deserialize: ",
                   {
                     "pluginId": "fieldFormats",
                     "scope": "common",
@@ -2356,7 +2356,7 @@
           "CommonProps",
           " & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, \"type\" | \"disabled\" | \"onClick\"> & ",
           "EuiContextMenuItemProps",
-          ", \"onClick\"> & { onClick: (payload: { selectedDocIds: string[]; }) => void; label: string | React.ReactElement<any>; key: string; })[]"
+          ", \"onClick\"> & { onClick: (payload: { selectedDocIds: string[]; }) => void; isAvailable?: ((payload: { selectedDocIds: string[]; }) => boolean) | undefined; label: string | React.ReactElement<any>; key: string; })[]"
         ],
         "path": "src/platform/packages/shared/kbn-unified-data-table/src/types.ts",
         "lineNumber": 68,

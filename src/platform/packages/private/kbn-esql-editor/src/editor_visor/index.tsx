@@ -30,7 +30,6 @@ import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './vi
 import type { ESQLEditorDeps } from '../types';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
 
-export { NL_TO_ESQL_FLAG } from '../hooks/use_nl_to_esql_check';
 export { VisorMode } from './mode_selector';
 
 export interface QuickSearchVisorProps {

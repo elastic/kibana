@@ -23,6 +23,26 @@ import {
 import { createAgentBuilderApiClient, type ExecutionMode } from '../../utils/agent_builder_client';
 import type { AgentBuilderApiFtrProviderContext } from '../../../agent_builder/services/api';
 
+// Tool-result messages on the wire may be wrapped in a <tool_result> envelope and/or
+// a {response: "..."} layer added by inference-langchain when the inner content is
+// not valid JSON. Strip both so assertions can target the original {results: [...]} payload.
+const parseToolMessageContent = (raw: string): any => {
+  let payload: unknown = raw;
+  try {
+    payload = JSON.parse(raw);
+  } catch {
+    // raw is not JSON — likely a bare envelope string, fall through.
+  }
+  if (typeof payload === 'object' && payload !== null && 'response' in payload) {
+    payload = (payload as { response: unknown }).response;
+  }
+  if (typeof payload === 'string') {
+    const stripped = payload.replace(/^<tool_result>|<\/tool_result>$/g, '');
+    return JSON.parse(stripped);
+  }
+  return payload;
+};
+
 export function createToolCallingTests(executionMode: ExecutionMode) {
   return function ({ getService }: AgentBuilderApiFtrProviderContext) {
     const supertest = getService('supertest');
@@ -82,7 +102,7 @@ export function createToolCallingTests(executionMode: ExecutionMode) {
 
           expect(esqlToolCallMsg.role).to.eql('tool');
 
-          const toolCallContent = JSON.parse(esqlToolCallMsg?.content as string);
+          const toolCallContent = parseToolMessageContent(esqlToolCallMsg?.content as string);
           [queryResult, esqlResults] = toolCallContent.results as [QueryResult, EsqlResults];
         });
 

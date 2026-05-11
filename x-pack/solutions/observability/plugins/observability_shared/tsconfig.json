@@ -48,7 +48,7 @@
     "@kbn/charts-theme",
     "@kbn/deeplinks-observability",
     "@kbn/home-sample-data-tab",
-    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-browser",
     "@kbn/controls-constants",
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
