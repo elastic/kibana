@@ -11,12 +11,19 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import { i18n } from '@kbn/i18n';
 import { EuiLiveAnnouncer } from '@elastic/eui';
-import { useShortcutsContext } from './shortcuts_provider';
+import {
+  consumeKeyboardEvent,
+  hasModifierKey,
+  isEditableTarget,
+  normalizeShortcutKey,
+} from './shortcut_utils';
 import {
   ShortcutsOverlay,
   ShortcutsOverlayDivider,
   ShortcutsOverlayItem,
 } from './shortcuts_overlay';
+import { useShortcutsContext } from './shortcuts_provider';
+import { useShortcutsOverlaySession } from './use_shortcuts_overlay_session';
 
 /**
  * Describes a single follow-up key that can be pressed after a leader key sequence is opened.
@@ -43,39 +50,6 @@ export interface LeaderKeyShortcutsProps {
   /** The follow-up shortcuts available after the leader key is pressed. */
   shortcuts: LeaderKeyShortcut[];
 }
-
-const editableTargetSelector = [
-  'input',
-  'textarea',
-  'select',
-  '[contenteditable]:not([contenteditable="false"])',
-  '[role="textbox"]',
-  '.ace_editor',
-  '.monaco-editor',
-].join(', ');
-
-const normalizeShortcutKey = (key: string) => key.toLowerCase();
-
-const hasModifierKey = (event: KeyboardEvent) => {
-  return event.altKey || event.ctrlKey || event.metaKey || event.shiftKey;
-};
-
-const isEditableTarget = (target: EventTarget | null) => {
-  if (!(target instanceof Element)) {
-    return false;
-  }
-
-  return (
-    (target instanceof HTMLElement && target.isContentEditable) ||
-    Boolean(target.closest(editableTargetSelector))
-  );
-};
-
-const consumeKeyboardEvent = (event: KeyboardEvent) => {
-  event.preventDefault();
-  event.stopPropagation();
-  event.stopImmediatePropagation();
-};
 
 const getScreenReaderShortcutKeyLabel = (key: string) => {
   switch (key) {
@@ -119,6 +93,7 @@ export const LeaderKeyShortcuts = ({
 }: LeaderKeyShortcutsProps) => {
   const {
     claimActiveLeaderKeyInstance,
+    registerLeaderKeyShortcut,
     releaseActiveLeaderKeyInstance,
     hasOtherActiveLeaderKeyInstance,
   } = useShortcutsContext();
@@ -180,25 +155,31 @@ export const LeaderKeyShortcuts = ({
   }, [instanceId, releaseActiveLeaderKeyInstance]);
 
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (!isVisible) {
-        if (hasOtherActiveLeaderKeyInstance(instanceId)) {
-          return;
-        }
+    return registerLeaderKeyShortcut({
+      leaderKey,
+      leaderKeyDescription,
+      openShortcuts,
+    });
+  }, [leaderKey, leaderKeyDescription, openShortcuts, registerLeaderKeyShortcut]);
 
-        if (
-          normalizeShortcutKey(event.key) === normalizedLeaderKey &&
-          !hasModifierKey(event) &&
-          !isEditableTarget(event.target)
-        ) {
-          consumeKeyboardEvent(event);
-          openShortcuts();
-        }
-
+  useShortcutsOverlaySession({
+    isVisible,
+    onHiddenKeyDown: (event) => {
+      if (hasOtherActiveLeaderKeyInstance(instanceId)) {
         return;
       }
 
-      if (hasModifierKey(event) || isEditableTarget(event.target)) {
+      if (
+        normalizeShortcutKey(event.key) === normalizedLeaderKey &&
+        !hasModifierKey(event) &&
+        !isEditableTarget(event.target)
+      ) {
+        consumeKeyboardEvent(event);
+        openShortcuts();
+      }
+    },
+    onVisibleKeyDown: (event) => {
+      if (hasModifierKey(event)) {
         closeShortcuts();
         return;
       }
@@ -213,30 +194,9 @@ export const LeaderKeyShortcuts = ({
       const shortcut = shortcutsByKey.get(normalizeShortcutKey(event.key));
       shortcut?.onTrigger();
       closeShortcuts();
-    };
-
-    const onPointerDown = () => {
-      if (isVisible) {
-        closeShortcuts();
-      }
-    };
-
-    document.addEventListener('keydown', onKeyDown, true);
-    document.addEventListener('pointerdown', onPointerDown, true);
-
-    return () => {
-      document.removeEventListener('keydown', onKeyDown, true);
-      document.removeEventListener('pointerdown', onPointerDown, true);
-    };
-  }, [
-    closeShortcuts,
-    hasOtherActiveLeaderKeyInstance,
-    instanceId,
-    isVisible,
-    normalizedLeaderKey,
-    openShortcuts,
-    shortcutsByKey,
-  ]);
+    },
+    onVisiblePointerDown: closeShortcuts,
+  });
 
   useUnmount(() => {
     releaseActiveLeaderKeyInstance(instanceId);
