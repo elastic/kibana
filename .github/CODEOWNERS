@@ -28,6 +28,7 @@ examples/grid_example @elastic/kibana-presentation
 examples/hello_world @elastic/kibana-core
 examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
+examples/notification_center_example @elastic/appex-sharedux
 examples/partial_results_example @elastic/kibana-data-discovery
 examples/portable_dashboards_example @elastic/kibana-presentation
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
@@ -263,6 +264,7 @@ src/core/packages/node/server @elastic/kibana-core
 src/core/packages/node/server-internal @elastic/kibana-core
 src/core/packages/node/server-mocks @elastic/kibana-core
 src/core/packages/notifications/browser @elastic/kibana-core
+src/core/packages/notifications/browser-components @elastic/appex-sharedux
 src/core/packages/notifications/browser-hooks @elastic/appex-sharedux
 src/core/packages/notifications/browser-internal @elastic/kibana-core
 src/core/packages/notifications/browser-mocks @elastic/kibana-core

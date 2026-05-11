@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { NotificationEvent, type NotificationEventProps } from './notification_event';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/notifications/browser-components'],
+};
