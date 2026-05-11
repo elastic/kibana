@@ -46,7 +46,8 @@ export const useViewAction = () => {
   const action: DataFrameAnalyticsListAction = useMemo(
     () => ({
       isPrimary: true,
-      name: (item: DataFrameAnalyticsListRow) => <ViewButton item={item} />,
+      name: (item: DataFrameAnalyticsListRow) =>
+        getViewLinkStatus(item).disabled ? <ViewButton item={item} /> : viewActionButtonText,
       enabled: (item: DataFrameAnalyticsListRow) => !getViewLinkStatus(item).disabled,
       description: viewActionButtonText,
       icon: 'table',
