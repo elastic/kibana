@@ -138,3 +138,7 @@ export const getExamplesLoadError = (errorMessage: string) =>
     defaultMessage: 'Failed to load dataset examples: {errorMessage}',
     values: { errorMessage },
   });
+
+export const VIEW_ALL_RUNS_IN_BUILD = i18n.translate('xpack.evals.runDetail.viewAllRunsInBuild', {
+  defaultMessage: 'View all models in this build',
+});

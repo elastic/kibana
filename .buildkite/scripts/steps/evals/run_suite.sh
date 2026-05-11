@@ -18,9 +18,10 @@ fi
 # The value should be the platform-level `pluginId` use-case identifier.
 # `@kbn/evals` defaults this to `kbn_evals`, but you can override via KBN_EVALS_TELEMETRY_PLUGIN_ID.
 
-# Ensure a stable run id across steps/jobs in the same Buildkite build.
-# If unset, Scout will generate a random run id when Playwright loads configs,
-# which makes it hard to correlate results across suites and connectors.
+# Set a base run id from the Buildkite build. Each fan-out step appends its
+# connector id to produce a unique run_id per model (e.g. bk-<build>-<connector>).
+# Correlation across models in the same build uses ci.buildkite.build_id which
+# is populated automatically from BUILDKITE_BUILD_ID in score_repository.ts.
 if [[ -z "${TEST_RUN_ID:-}" ]] && [[ -n "${BUILDKITE_BUILD_ID:-}" ]]; then
   export TEST_RUN_ID="bk-${BUILDKITE_BUILD_ID}"
 fi
@@ -183,7 +184,7 @@ EOF
           EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
           EVAL_PROJECT: "${connector_id}"
           EVAL_FANOUT: "0"
-          TEST_RUN_ID: "${TEST_RUN_ID:-}"
+          TEST_RUN_ID: "${TEST_RUN_ID:+${TEST_RUN_ID}-}${connector_id}"
           EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
         timeout_in_minutes: ${timeout_in_minutes}
         concurrency_group: "kbn-evals-${group_key_safe}"

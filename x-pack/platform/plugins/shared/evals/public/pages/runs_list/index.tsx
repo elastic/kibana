@@ -24,7 +24,7 @@ import {
   type CriteriaWithPagination,
   type EuiTableSelectionType,
 } from '@elastic/eui';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import type { EvaluationRunSummary } from '@kbn/evals-common';
 import { useEvaluationRuns } from '../../hooks/use_evals_api';
 import { resolvePrUrl } from '../../utils/pr_url';
@@ -32,11 +32,15 @@ import * as i18n from './translations';
 
 export const RunsListPage: React.FC = () => {
   const history = useHistory();
+  const location = useLocation();
   const { euiTheme } = useEuiTheme();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
   const [searchText, setSearchText] = useState('');
   const [suiteIdFilter, setSuiteIdFilter] = useState('');
+  const [buildIdFilter, setBuildIdFilter] = useState(
+    () => new URLSearchParams(location.search).get('build_id') ?? ''
+  );
   const [selectedRuns, setSelectedRuns] = useState<EvaluationRunSummary[]>([]);
 
   const { data, isLoading, error, refetch } = useEvaluationRuns({
@@ -44,6 +48,7 @@ export const RunsListPage: React.FC = () => {
     perPage: pageSize,
     branch: searchText || undefined,
     suiteId: suiteIdFilter || undefined,
+    buildId: buildIdFilter || undefined,
   });
 
   const { data: suiteFilterData } = useEvaluationRuns({
@@ -116,6 +121,37 @@ export const RunsListPage: React.FC = () => {
         field: 'total_repetitions',
         name: i18n.COLUMN_REPS,
         width: '60px',
+      },
+      {
+        field: 'ci',
+        name: i18n.COLUMN_BUILD,
+        width: '120px',
+        render: (ci: EvaluationRunSummary['ci']) => {
+          const buildId = ci?.build_id;
+          if (!buildId) return '-';
+          return (
+            <span
+              onClick={(event) => event.stopPropagation()}
+              onKeyDown={(event) => event.stopPropagation()}
+              role="presentation"
+            >
+              <EuiToolTip content={i18n.BUILD_FILTER_TOOLTIP}>
+                <EuiBadge
+                  color="hollow"
+                  onClick={(event: React.MouseEvent) => {
+                    event.stopPropagation();
+                    setBuildIdFilter(buildId);
+                    setPageIndex(0);
+                    setSelectedRuns([]);
+                  }}
+                  onClickAriaLabel={i18n.BUILD_FILTER_TOOLTIP}
+                >
+                  {buildId.slice(0, 8)}
+                </EuiBadge>
+              </EuiToolTip>
+            </span>
+          );
+        },
       },
       {
         field: 'ci',
@@ -235,6 +271,23 @@ export const RunsListPage: React.FC = () => {
             }}
           />
         </EuiFlexItem>
+        {buildIdFilter && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge
+              color="primary"
+              iconType="cross"
+              iconSide="right"
+              iconOnClick={() => {
+                setBuildIdFilter('');
+                setPageIndex(0);
+                setSelectedRuns([]);
+              }}
+              iconOnClickAriaLabel={i18n.CLEAR_BUILD_FILTER}
+            >
+              {`Build: ${buildIdFilter.slice(0, 8)}`}
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
         {showCompareControls && (
           <EuiFlexItem grow={false}>
             <EuiToolTip

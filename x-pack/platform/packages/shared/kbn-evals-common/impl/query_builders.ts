@@ -20,6 +20,7 @@ interface RunsListingFilterOptions {
   branch?: string;
   datasetId?: string;
   datasetName?: string;
+  buildId?: string;
 }
 
 interface RunsListingPaginationOptions {
@@ -47,6 +48,7 @@ interface RunBucket {
   git_branch?: TermsBucket;
   git_commit_sha?: TermsBucket;
   total_repetitions?: { value?: number };
+  build_id?: TermsBucket;
   build_url?: TermsBucket;
   pull_request?: TermsBucket;
 }
@@ -68,7 +70,11 @@ export interface RunsListingResult {
     git_branch: string | null;
     git_commit_sha: string | null;
     total_repetitions: number;
-    ci: { build_url: string | undefined; pull_request: string | undefined };
+    ci: {
+      build_id: string | undefined;
+      build_url: string | undefined;
+      pull_request: string | undefined;
+    };
   }>;
   total: number;
 }
@@ -191,6 +197,9 @@ export const buildRunsListingFilterQuery = (
   if (options?.datasetName) {
     filters.push({ term: { 'example.dataset.name': options.datasetName } });
   }
+  if (options?.buildId) {
+    filters.push({ term: { 'ci.buildkite.build_id': options.buildId } });
+  }
   return {
     bool: {
       must_not: [{ term: { run_id: PREFLIGHT_RUN_ID } }],
@@ -232,6 +241,7 @@ export const buildRunsListingAggregation = ({ page, perPage }: RunsListingPagina
       git_branch: { terms: { field: 'run_metadata.git_branch', size: 1 } },
       git_commit_sha: { terms: { field: 'run_metadata.git_commit_sha', size: 1 } },
       total_repetitions: { max: { field: 'run_metadata.total_repetitions' } },
+      build_id: { terms: { field: 'ci.buildkite.build_id', size: 1 } },
       build_url: { terms: { field: 'ci.buildkite.build_url', size: 1 } },
       pull_request: { terms: { field: 'ci.buildkite.pull_request', size: 1 } },
     },
@@ -283,6 +293,7 @@ export const parseRunsListingResponse = (
       git_commit_sha: firstBucket(bucket.git_commit_sha) ?? null,
       total_repetitions: bucket.total_repetitions?.value ?? 1,
       ci: {
+        build_id: firstBucket(bucket.build_id),
         build_url: firstBucket(bucket.build_url),
         pull_request: firstBucket(bucket.pull_request),
       },

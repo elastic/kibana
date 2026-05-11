@@ -53,6 +53,10 @@ export const GetEvaluationRunsRequestQuery = lazySchema(() =>
      * Filter by dataset ID
      */
     dataset_id: z.string().optional(),
+    /**
+     * Filter by Buildkite build ID to view all runs from the same CI build
+     */
+    build_id: z.string().optional(),
     page: z.coerce.number().int().min(1).optional().default(1),
     per_page: z.coerce.number().int().min(1).max(100).optional().default(25),
   })
