@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import useUnmount from 'react-use/lib/useUnmount';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
@@ -51,6 +52,22 @@ const editableTargetSelector = [
 ].join(', ');
 
 const normalizeShortcutKey = (key: string) => key.toLowerCase();
+
+let activeLeaderKeyInstance: symbol | undefined;
+
+const claimLeaderKeyInstance = (instanceId: symbol) => {
+  activeLeaderKeyInstance = instanceId;
+};
+
+const releaseLeaderKeyInstance = (instanceId: symbol) => {
+  if (activeLeaderKeyInstance === instanceId) {
+    activeLeaderKeyInstance = undefined;
+  }
+};
+
+const hasOtherActiveLeaderKeyInstance = (instanceId: symbol) => {
+  return activeLeaderKeyInstance !== undefined && activeLeaderKeyInstance !== instanceId;
+};
 
 const hasModifierKey = (event: KeyboardEvent) => {
   return event.altKey || event.ctrlKey || event.metaKey || event.shiftKey;
@@ -144,12 +161,21 @@ export const LeaderKeyShortcuts = ({
   shortcuts,
 }: LeaderKeyShortcutsProps) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [instanceId] = useState(() => Symbol(`leader-key-shortcuts:${leaderKey}`));
   const { euiTheme } = useEuiTheme();
   const normalizedLeaderKey = normalizeShortcutKey(leaderKey);
   const shortcutsByKey = useMemo(
     () => new Map(shortcuts.map((shortcut) => [normalizeShortcutKey(shortcut.key), shortcut])),
     [shortcuts]
   );
+  const openShortcuts = useCallback(() => {
+    claimLeaderKeyInstance(instanceId);
+    setIsVisible(true);
+  }, [instanceId]);
+  const closeShortcuts = useCallback(() => {
+    releaseLeaderKeyInstance(instanceId);
+    setIsVisible(false);
+  }, [instanceId]);
   const screenReaderHint = useMemo(() => {
     return i18n.translate('discover.tabsView.shortcut.screenReaderHint', {
       defaultMessage: 'Press {leaderKey} for {leaderKeyDescription} shortcuts.',
@@ -175,38 +201,42 @@ export const LeaderKeyShortcuts = ({
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (!isVisible) {
+        if (hasOtherActiveLeaderKeyInstance(instanceId)) {
+          return;
+        }
+
         if (
           normalizeShortcutKey(event.key) === normalizedLeaderKey &&
           !hasModifierKey(event) &&
           !isEditableTarget(event.target)
         ) {
           consumeKeyboardEvent(event);
-          setIsVisible(true);
+          openShortcuts();
         }
 
         return;
       }
 
       if (hasModifierKey(event) || isEditableTarget(event.target)) {
-        setIsVisible(false);
+        closeShortcuts();
         return;
       }
 
       consumeKeyboardEvent(event);
 
       if (event.key === 'Escape') {
-        setIsVisible(false);
+        closeShortcuts();
         return;
       }
 
       const shortcut = shortcutsByKey.get(normalizeShortcutKey(event.key));
       shortcut?.onTrigger();
-      setIsVisible(false);
+      closeShortcuts();
     };
 
     const onPointerDown = () => {
       if (isVisible) {
-        setIsVisible(false);
+        closeShortcuts();
       }
     };
 
@@ -217,7 +247,11 @@ export const LeaderKeyShortcuts = ({
       document.removeEventListener('keydown', onKeyDown, true);
       document.removeEventListener('pointerdown', onPointerDown, true);
     };
-  }, [isVisible, normalizedLeaderKey, shortcutsByKey]);
+  }, [closeShortcuts, instanceId, isVisible, normalizedLeaderKey, openShortcuts, shortcutsByKey]);
+
+  useUnmount(() => {
+    releaseLeaderKeyInstance(instanceId);
+  });
 
   return (
     <>
