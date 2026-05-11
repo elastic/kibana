@@ -42,6 +42,7 @@ import { fleetRouteDefinitions } from './fleet';
 import { debugTelemetryRouteDefinitions } from './debug_telemetry';
 import { storageExplorerRouteDefinitions } from './storage_explorer';
 import { sourceMapsRouteDefinitions } from './source_maps';
+import { agentConfigurationRouteDefinitions } from './agent_configuration';
 import type { BuildGroupedRepository } from './types';
 
 export const routeDefinitions = {
@@ -81,6 +82,7 @@ export const routeDefinitions = {
   debugTelemetry: debugTelemetryRouteDefinitions,
   storageExplorer: storageExplorerRouteDefinitions,
   sourceMaps: sourceMapsRouteDefinitions,
+  agentConfiguration: agentConfigurationRouteDefinitions,
 };
 
 export type SharedAPMRouteRepository = BuildGroupedRepository<typeof routeDefinitions>;

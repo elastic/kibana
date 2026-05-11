@@ -23,7 +23,7 @@ export type ExtractResponse<T> = T extends WithResponse<infer R>
     : Record<string, never>
   : Record<string, never>;
 
-export function defineRoute<TResponse extends Record<string, any> | void>() {
+export function defineRoute<TResponse extends Record<string, any> | void | null>() {
   return <
     const TEndpoint extends string,
     TParams extends RouteParamsRT | undefined = undefined

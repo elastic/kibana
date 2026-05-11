@@ -25,7 +25,7 @@ export function AgentConfigurations() {
   } = useFetcher(
     (callApmApi) => callApmApi('GET /api/apm/settings/agent-configuration 2023-10-31'),
     [],
-    { preservePreviousData: false, showToastOnError: false }
+    { preservePreviousData: false, showToastOnError: false, useCallApmApiV2: true }
   );
 
   const hasConfigurations = !isEmpty(data.configurations);

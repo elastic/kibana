@@ -42,7 +42,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       }
     },
     [newConfig.service.name],
-    { preservePreviousData: false }
+    { preservePreviousData: false, useCallApmApiV2: true }
   );
 
   const { link } = useApmRouter();
@@ -66,7 +66,8 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
 
       setNewConfig((prev) => ({ ...prev, agent_name: agentName }));
     },
-    [newConfig.service.name, setNewConfig]
+    [newConfig.service.name, setNewConfig],
+    { useCallApmApiV2: true }
   );
 
   const ALREADY_CONFIGURED_TRANSLATED = i18n.translate(

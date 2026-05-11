@@ -6,8 +6,8 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import type { AgentConfigSearchParams } from '@kbn/apm-api-shared';
 import type { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import type { AgentConfigSearchParams } from './route';
 import { searchConfigurations } from './search_configurations';
 import { markError } from './mark_error';
 import { markAppliedByAgent } from './mark_applied_by_agent';
