@@ -70,32 +70,29 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
       const queryStartMs = Date.now();
       let rowCount = 0;
       let batchCount = 0;
-      let yielded = false;
+      let pendingBatch: ReadonlyArray<Record<string, unknown>> | undefined;
 
-      try {
-        for await (const batch of esqlRowBatchStream) {
-          yielded = true;
-          batchCount += 1;
-          rowCount += batch.length;
+      for await (const batch of esqlRowBatchStream) {
+        if (pendingBatch !== undefined) {
           yield {
             type: 'continue',
-            state: { ...state, queryPayload, esqlRowBatch: batch },
+            state: { ...state, queryPayload, esqlRowBatch: pendingBatch },
           };
         }
-
-        if (!yielded) {
-          yield {
-            type: 'continue',
-            state: { ...state, queryPayload, esqlRowBatch: [] },
-          };
-        }
-      } finally {
-        input.metrics.recordQuerySearch({
-          wallTimeMs: Date.now() - queryStartMs,
-          rowCount,
-          batchCount,
-        });
+        batchCount += 1;
+        rowCount += batch.length;
+        pendingBatch = batch;
       }
+
+      const annotations = {
+        querySearches: [{ wallTimeMs: Date.now() - queryStartMs, rowCount, batchCount }],
+      };
+
+      yield {
+        type: 'continue',
+        state: { ...state, queryPayload, esqlRowBatch: pendingBatch ?? [] },
+        annotations,
+      };
     });
   }
 }

@@ -63,17 +63,19 @@ export class DirectorStep implements RuleExecutionStep {
         else if (status === 'recovering') transitionedToRecovering += 1;
         else if (status === 'inactive') transitionedToInactive += 1;
       }
-      input.metrics.recordEpisodesTransitioned({
-        active: transitionedToActive,
-        recovering: transitionedToRecovering,
-        inactive: transitionedToInactive,
-      });
 
       yield {
         type: 'continue',
         state: {
           ...state,
           alertEventsBatch: directorResults.map(({ event }) => event),
+        },
+        annotations: {
+          episodesTransitioned: {
+            active: transitionedToActive,
+            recovering: transitionedToRecovering,
+            inactive: transitionedToInactive,
+          },
         },
       };
     });

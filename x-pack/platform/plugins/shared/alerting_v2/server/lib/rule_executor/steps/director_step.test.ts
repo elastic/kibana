@@ -200,13 +200,19 @@ describe('DirectorStep', () => {
       alertEventsBatch,
     });
 
-    await collectStreamResults(step.executeStream(createPipelineStream([state])));
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
-    const snapshot = input.metrics.snapshot();
-    expect(snapshot.episodes).toEqual({
-      transitioned_to_active: 0,
-      transitioned_to_recovering: 1,
-      transitioned_to_inactive: 0,
-    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        type: 'continue',
+        annotations: {
+          episodesTransitioned: {
+            active: 0,
+            recovering: 1,
+            inactive: 0,
+          },
+        },
+      })
+    );
   });
 });

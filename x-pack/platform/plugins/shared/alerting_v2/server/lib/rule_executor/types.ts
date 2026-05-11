@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { RecoveryPolicyType } from '@kbn/alerting-v2-schemas';
 import type { QueryPayload } from './get_query_payload';
 import type { RuleResponse } from '../rules_client';
 import type { AlertEvent } from '../../resources/datastreams/alert_events';
 import type { ExecutionContext } from '../execution_context';
-import type { RuleExecutionMetricsCollectorContract } from './metrics_collector';
 
 export interface RuleExecutorTaskParams {
   ruleId: string;
@@ -22,7 +22,6 @@ export interface RuleExecutionInput {
   readonly scheduledAt: string;
   readonly executionContext: ExecutionContext;
   readonly executionUuid: string;
-  readonly metrics: RuleExecutionMetricsCollectorContract;
 }
 
 export interface RulePipelineState {
@@ -35,8 +34,39 @@ export interface RulePipelineState {
 
 export type HaltReason = 'rule_deleted' | 'rule_disabled' | 'state_not_ready';
 
+export interface QuerySearchAnnotation {
+  readonly wallTimeMs: number;
+  readonly esTookMs?: number;
+  readonly rowCount: number;
+  readonly batchCount: number;
+}
+
+export interface EventsWrittenAnnotation {
+  readonly breached?: number;
+  readonly recovered?: number;
+  readonly no_data?: number;
+}
+
+export interface EpisodesTransitionedAnnotation {
+  readonly active?: number;
+  readonly recovering?: number;
+  readonly inactive?: number;
+}
+
+export interface RecoveryAnnotation {
+  readonly mode: RecoveryPolicyType;
+  readonly events_emitted: number;
+}
+
+export interface StepAnnotations {
+  readonly querySearches?: readonly QuerySearchAnnotation[];
+  readonly eventsWritten?: EventsWrittenAnnotation;
+  readonly episodesTransitioned?: EpisodesTransitionedAnnotation;
+  readonly recovery?: RecoveryAnnotation;
+}
+
 export type StepStreamResult =
-  | { type: 'continue'; state: RulePipelineState }
+  | { type: 'continue'; state: RulePipelineState; annotations?: StepAnnotations }
   | { type: 'halt'; reason: HaltReason; state: RulePipelineState };
 
 export type PipelineStateStream = AsyncIterableIterator<StepStreamResult>;

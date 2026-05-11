@@ -44,13 +44,16 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
         else if (event.status === 'recovered') recovered += 1;
         else if (event.status === 'no_data') noData += 1;
       }
-      state.input.metrics.recordEventsWritten({ breached, recovered, no_data: noData });
 
       this.logger.debug({
         message: `[${this.name}] Successfully stored alert events batch`,
       });
 
-      return { type: 'continue', state };
+      return {
+        type: 'continue',
+        state,
+        annotations: { eventsWritten: { breached, recovered, no_data: noData } },
+      };
     });
   }
 }

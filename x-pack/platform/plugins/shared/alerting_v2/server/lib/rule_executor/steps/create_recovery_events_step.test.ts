@@ -128,7 +128,11 @@ describe('CreateRecoveryEventsStep', () => {
         step.executeStream(createPipelineStream([state]))
       );
 
-      expect(result).toEqual({ type: 'continue', state });
+      expect(result).toEqual(expect.objectContaining({ type: 'continue', state }));
+      expect(result).toHaveProperty('annotations.recovery', {
+        mode: 'no_breach',
+        events_emitted: 0,
+      });
     });
 
     it('does not create recovery events for groups that are still breaching', async () => {

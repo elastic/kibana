@@ -6,12 +6,14 @@
  */
 
 import type { RuleExecutionStep, PipelineStateStream } from '../types';
+import type { RuleExecutionMetricsCollectorContract } from '../metrics_collector';
 
 /**
  * Context passed to middleware during step execution.
  */
 export interface RuleExecutionMiddlewareContext {
   readonly step: RuleExecutionStep;
+  readonly metrics?: RuleExecutionMetricsCollectorContract;
 }
 
 /**

@@ -6,30 +6,12 @@
  */
 
 import type { RecoveryPolicyType } from '@kbn/alerting-v2-schemas';
-
-export interface QuerySearchSample {
-  readonly wallTimeMs: number;
-  readonly esTookMs?: number;
-  readonly rowCount: number;
-  readonly batchCount: number;
-}
-
-export interface EventsWrittenSample {
-  readonly breached?: number;
-  readonly recovered?: number;
-  readonly no_data?: number;
-}
-
-export interface EpisodesTransitionedSample {
-  readonly active?: number;
-  readonly recovering?: number;
-  readonly inactive?: number;
-}
-
-export interface RecoverySample {
-  readonly mode: RecoveryPolicyType;
-  readonly events_emitted: number;
-}
+import type {
+  QuerySearchAnnotation,
+  EventsWrittenAnnotation,
+  EpisodesTransitionedAnnotation,
+  RecoveryAnnotation,
+} from './types';
 
 export interface RuleExecutionMetricsSnapshot {
   query?: {
@@ -57,10 +39,10 @@ export interface RuleExecutionMetricsSnapshot {
 }
 
 export interface RuleExecutionMetricsCollectorContract {
-  recordQuerySearch(sample: QuerySearchSample): void;
-  recordEventsWritten(sample: EventsWrittenSample): void;
-  recordEpisodesTransitioned(sample: EpisodesTransitionedSample): void;
-  recordRecovery(sample: RecoverySample): void;
+  recordQuerySearch(sample: QuerySearchAnnotation): void;
+  recordEventsWritten(sample: EventsWrittenAnnotation): void;
+  recordEpisodesTransitioned(sample: EpisodesTransitionedAnnotation): void;
+  recordRecovery(sample: RecoveryAnnotation): void;
   snapshot(): RuleExecutionMetricsSnapshot;
 }
 
@@ -76,9 +58,9 @@ export class RuleExecutionMetricsCollector implements RuleExecutionMetricsCollec
   private query: RuleExecutionMetricsSnapshot['query'];
   private eventsWritten: { breached: number; recovered: number; no_data: number } | undefined;
   private episodes: RuleExecutionMetricsSnapshot['episodes'];
-  private recovery: RecoverySample | undefined;
+  private recovery: RecoveryAnnotation | undefined;
 
-  public recordQuerySearch(sample: QuerySearchSample): void {
+  public recordQuerySearch(sample: QuerySearchAnnotation): void {
     this.query ??= {
       number_of_searches: 0,
       total_search_duration_ms: 0,
@@ -94,14 +76,14 @@ export class RuleExecutionMetricsCollector implements RuleExecutionMetricsCollec
     }
   }
 
-  public recordEventsWritten(sample: EventsWrittenSample): void {
+  public recordEventsWritten(sample: EventsWrittenAnnotation): void {
     this.eventsWritten ??= { breached: 0, recovered: 0, no_data: 0 };
     this.eventsWritten.breached += sample.breached ?? 0;
     this.eventsWritten.recovered += sample.recovered ?? 0;
     this.eventsWritten.no_data += sample.no_data ?? 0;
   }
 
-  public recordEpisodesTransitioned(sample: EpisodesTransitionedSample): void {
+  public recordEpisodesTransitioned(sample: EpisodesTransitionedAnnotation): void {
     this.episodes ??= {
       transitioned_to_active: 0,
       transitioned_to_recovering: 0,
@@ -112,7 +94,7 @@ export class RuleExecutionMetricsCollector implements RuleExecutionMetricsCollec
     this.episodes.transitioned_to_inactive += sample.inactive ?? 0;
   }
 
-  public recordRecovery(sample: RecoverySample): void {
+  public recordRecovery(sample: RecoveryAnnotation): void {
     this.recovery = sample;
   }
 

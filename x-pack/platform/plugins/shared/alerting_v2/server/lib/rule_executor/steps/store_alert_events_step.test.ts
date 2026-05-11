@@ -49,7 +49,12 @@ describe('StoreAlertEventsStep', () => {
         step.executeStream(createPipelineStream([state]))
       );
 
-      expect(result).toEqual({ type: 'continue', state });
+      expect(result).toEqual(expect.objectContaining({ type: 'continue', state }));
+      expect(result).toHaveProperty('annotations.eventsWritten', {
+        breached: 1,
+        recovered: 1,
+        no_data: 0,
+      });
       expect(mockEsClient.bulk).toHaveBeenCalledTimes(1);
 
       const bulkCall = mockEsClient.bulk.mock.calls[0][0];
@@ -83,7 +88,12 @@ describe('StoreAlertEventsStep', () => {
         step.executeStream(createPipelineStream([state]))
       );
 
-      expect(result).toEqual({ type: 'continue', state });
+      expect(result).toEqual(expect.objectContaining({ type: 'continue', state }));
+      expect(result).toHaveProperty('annotations.eventsWritten', {
+        breached: 0,
+        recovered: 0,
+        no_data: 0,
+      });
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
 

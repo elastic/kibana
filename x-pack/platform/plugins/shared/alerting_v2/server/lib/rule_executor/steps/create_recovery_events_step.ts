@@ -8,7 +8,12 @@
 import { inject, injectable } from 'inversify';
 import { stableStringify } from '@kbn/std';
 import { recoveryPolicyType } from '@kbn/alerting-v2-schemas';
-import type { PipelineStateStream, RuleExecutionStep, RulePipelineState } from '../types';
+import type {
+  PipelineStateStream,
+  RuleExecutionStep,
+  StepAnnotations,
+  QuerySearchAnnotation,
+} from '../types';
 import { buildRecoveryAlertEvents, buildQueryRecoveryAlertEvents } from '../build_alert_events';
 import { getQueryPayload } from '../get_query_payload';
 import {
@@ -25,6 +30,12 @@ import { guardedExpandStep } from '../stream_utils';
 import type { RuleResponse } from '../../rules_client';
 import type { AlertEvent } from '../../../resources/datastreams/alert_events';
 import type { ExecutionContext } from '../../execution_context';
+import type { RuleExecutionInput } from '../types';
+
+interface QueryRecoveryResult {
+  events: AlertEvent[];
+  queryAnnotation: QuerySearchAnnotation;
+}
 
 @injectable()
 export class CreateRecoveryEventsStep implements RuleExecutionStep {
@@ -59,30 +70,39 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
       );
 
       if (activeGroupHashes.length === 0) {
-        input.metrics.recordRecovery({ mode: recoveryMode, events_emitted: 0 });
         step.logger.debug({
           message: `[${step.name}] No active alerts to recover for rule ${input.ruleId}`,
         });
-        yield { type: 'continue', state };
+        yield {
+          type: 'continue',
+          state,
+          annotations: { recovery: { mode: recoveryMode, events_emitted: 0 } },
+        };
         return;
       }
 
-      const recoveryEvents =
-        recoveryType === recoveryPolicyType.query
-          ? await step.buildQueryRecovery({ rule, input, activeGroupHashes })
-          : buildRecoveryAlertEvents({
-              ruleId: rule.id,
-              ruleVersion: 1,
-              spaceId: input.spaceId,
-              activeGroupHashes,
-              breachedGroupHashes: new Set(alertEventsBatch.map((e) => e.group_hash)),
-              scheduledTimestamp: input.scheduledAt,
-            });
+      const annotations: StepAnnotations = {};
+      let recoveryEvents: AlertEvent[];
 
-      input.metrics.recordRecovery({
+      if (recoveryType === recoveryPolicyType.query) {
+        const result = await step.buildQueryRecovery({ rule, input, activeGroupHashes });
+        recoveryEvents = result.events;
+        annotations.querySearches = [result.queryAnnotation];
+      } else {
+        recoveryEvents = buildRecoveryAlertEvents({
+          ruleId: rule.id,
+          ruleVersion: 1,
+          spaceId: input.spaceId,
+          activeGroupHashes,
+          breachedGroupHashes: new Set(alertEventsBatch.map((e) => e.group_hash)),
+          scheduledTimestamp: input.scheduledAt,
+        });
+      }
+
+      annotations.recovery = {
         mode: recoveryMode,
         events_emitted: recoveryEvents.length,
-      });
+      };
 
       step.logger.debug({
         message: `[${step.name}] Created ${recoveryEvents.length} recovery events (${recoveryType}) for rule ${input.ruleId}`,
@@ -94,6 +114,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
           ...state,
           alertEventsBatch: [...alertEventsBatch, ...recoveryEvents],
         },
+        annotations,
       };
     });
   }
@@ -104,9 +125,9 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
     activeGroupHashes,
   }: {
     rule: RuleResponse;
-    input: RulePipelineState['input'];
+    input: RuleExecutionInput;
     activeGroupHashes: ActiveAlertGroupHash[];
-  }): Promise<AlertEvent[]> {
+  }): Promise<QueryRecoveryResult> {
     const effectiveQuery = rule.recovery_policy!.query!.base!.trimEnd();
     const lookbackWindow = rule.schedule.lookback ?? rule.schedule.every;
 
@@ -126,12 +147,6 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
     });
 
     const queryStartMs = Date.now();
-    const recordQuery = (rowCount: number, batchCount: number) =>
-      input.metrics.recordQuerySearch({
-        wallTimeMs: Date.now() - queryStartMs,
-        rowCount,
-        batchCount,
-      });
 
     let esqlResponse;
     try {
@@ -142,12 +157,16 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         abortSignal: input.executionContext.signal,
       });
     } catch (err) {
-      recordQuery(0, 0);
       throw err;
     }
-    recordQuery(esqlResponse.values.length, 1);
 
-    return buildQueryRecoveryAlertEvents({
+    const queryAnnotation: QuerySearchAnnotation = {
+      wallTimeMs: Date.now() - queryStartMs,
+      rowCount: esqlResponse.values.length,
+      batchCount: 1,
+    };
+
+    const events = buildQueryRecoveryAlertEvents({
       ruleId: rule.id,
       ruleVersion: 1,
       spaceId: input.spaceId,
@@ -156,6 +175,8 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
       esqlResponse,
       scheduledTimestamp: input.scheduledAt,
     });
+
+    return { events, queryAnnotation };
   }
 
   private async fetchActiveAlertGroupHashes(

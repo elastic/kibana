@@ -35,7 +35,7 @@ export interface RuleExecutionPipelineInput {
   readonly scheduledAt: string;
   readonly abortSignal: AbortSignal;
   readonly executionUuid: string;
-  readonly metrics: RuleExecutionMetricsCollectorContract;
+  readonly metrics?: RuleExecutionMetricsCollectorContract;
 }
 
 export interface RuleExecutionPipelineResult {
@@ -66,7 +66,6 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       scheduledAt: rawInput.scheduledAt,
       executionContext,
       executionUuid: rawInput.executionUuid,
-      metrics: rawInput.metrics,
     };
 
     let pipelineState: RulePipelineState = { input };
@@ -77,7 +76,7 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
 
     for (const step of this.steps) {
       this.logger.debug({ message: `RuleExecutor: Executing step: ${step.name}` });
-      stream = this.runMiddlewareChain({ step }, stream);
+      stream = this.runMiddlewareChain({ step, metrics: rawInput.metrics }, stream);
     }
 
     for await (const result of stream) {
