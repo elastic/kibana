@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   SecretConfiguration,
   SecretConfigurationSchemaValidation,
@@ -15,68 +15,72 @@ import { AuthConfiguration } from '../../common/auth';
 
 export const HTTP_METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const;
 
-export const HeadersSchema = z.record(z.string(), z.string());
+export const HeadersSchema = lazySchema(() => z.record(z.string(), z.string()));
 
-export const ConfigSchema = z
-  .object({
-    url: z.string().url(),
-    headers: HeadersSchema.nullable().default(null),
-    hasAuth: AuthConfiguration.hasAuth,
-    authType: AuthConfiguration.authType,
-    certType: AuthConfiguration.certType,
-    ca: AuthConfiguration.ca,
-    verificationMode: AuthConfiguration.verificationMode,
-    accessTokenUrl: AuthConfiguration.accessTokenUrl,
-    clientId: AuthConfiguration.clientId,
-    scope: AuthConfiguration.scope,
-    additionalFields: AuthConfiguration.additionalFields,
-    proxyUrl: z.string().url().nullable().default(null),
-    proxyVerificationMode: z.enum(['none', 'certificate', 'full']).optional(),
-    hasProxyAuth: z.boolean().default(false),
-  })
-  .strict();
+export const ConfigSchema = lazySchema(() =>
+  z
+    .object({
+      url: z.string().url(),
+      headers: HeadersSchema.nullable().default(null),
+      hasAuth: AuthConfiguration.hasAuth,
+      authType: AuthConfiguration.authType,
+      certType: AuthConfiguration.certType,
+      ca: AuthConfiguration.ca,
+      verificationMode: AuthConfiguration.verificationMode,
+      accessTokenUrl: AuthConfiguration.accessTokenUrl,
+      clientId: AuthConfiguration.clientId,
+      scope: AuthConfiguration.scope,
+      additionalFields: AuthConfiguration.additionalFields,
+      proxyUrl: z.string().url().nullable().default(null),
+      proxyVerificationMode: z.enum(['none', 'certificate', 'full']).optional(),
+      hasProxyAuth: z.boolean().default(false),
+    })
+    .strict()
+);
 
-export const SecretsSchema = z
-  .object({
-    ...SecretConfiguration,
-    proxyUsername: z.string().nullable().default(null),
-    proxyPassword: z.string().nullable().default(null),
-  })
-  .strict()
-  .superRefine((secrets, ctx) => {
-    const errorMessage = SecretConfigurationSchemaValidation.validate(secrets);
-    if (errorMessage) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: errorMessage,
-      });
-    }
-  });
+export const SecretsSchema = lazySchema(() =>
+  z
+    .object({
+      ...SecretConfiguration,
+      proxyUsername: z.string().nullable().default(null),
+      proxyPassword: z.string().nullable().default(null),
+    })
+    .strict()
+    .superRefine((secrets, ctx) => {
+      const errorMessage = SecretConfigurationSchemaValidation.validate(secrets);
+      if (errorMessage) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: errorMessage,
+        });
+      }
+    })
+);
 
-export const HttpMethodSchema = z.enum(HTTP_METHODS).default('GET');
+export const HttpMethodSchema = lazySchema(() => z.enum(HTTP_METHODS).default('GET'));
 
-export const HttpRequestBodySchema = z.union([
-  z.string(),
-  z.array(z.unknown()),
-  z.record(z.string(), z.unknown()),
-]);
+export const HttpRequestBodySchema = lazySchema(() =>
+  z.union([z.string(), z.array(z.unknown()), z.record(z.string(), z.unknown())])
+);
 
-export const ParamsSchema = z
-  .object({
-    url: z.string().url().optional(),
-    path: z.string().optional(),
-    method: HttpMethodSchema,
-    body: HttpRequestBodySchema.optional(),
-    query: z.record(z.string(), z.string()).optional(),
-    headers: z.record(z.string(), z.string()).optional(),
-    fetcher: z
-      .object({
-        skip_ssl_verification: z.boolean().optional(),
-        follow_redirects: z.boolean().optional(),
-        max_redirects: z.number().optional(),
-        keep_alive: z.boolean().optional(),
-        max_content_length: z.number().positive().finite().optional(),
-      })
-      .optional(),
-  })
-  .strict();
+export const ParamsSchema = lazySchema(() =>
+  z
+    .object({
+      url: z.string().url().optional(),
+      path: z.string().optional(),
+      method: HttpMethodSchema,
+      body: HttpRequestBodySchema.optional(),
+      query: z.record(z.string(), z.string()).optional(),
+      headers: z.record(z.string(), z.string()).optional(),
+      fetcher: z
+        .object({
+          skip_ssl_verification: z.boolean().optional(),
+          follow_redirects: z.boolean().optional(),
+          max_redirects: z.number().optional(),
+          keep_alive: z.boolean().optional(),
+          max_content_length: z.number().positive().finite().optional(),
+        })
+        .optional(),
+    })
+    .strict()
+);
