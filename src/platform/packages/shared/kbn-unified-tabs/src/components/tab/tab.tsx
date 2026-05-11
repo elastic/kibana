@@ -8,7 +8,15 @@
  */
 
 import type { MouseEvent, KeyboardEvent } from 'react';
-import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
+import React, {
+  forwardRef,
+  useCallback,
+  useState,
+  useRef,
+  useEffect,
+  useMemo,
+  useImperativeHandle,
+} from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -58,6 +66,10 @@ export interface TabProps {
   disableDragAndDrop?: boolean;
 }
 
+export interface TabApi {
+  enterRenamingMode: () => void;
+}
+
 const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
   defaultMessage: 'Close tab',
 });
@@ -66,7 +78,7 @@ const unsavedChangesIndicatorTitle = i18n.translate('unifiedTabs.unsavedChangesT
   defaultMessage: 'Unsaved changes',
 });
 
-export const Tab: React.FC<TabProps> = (props) => {
+export const Tab = forwardRef<TabApi, TabProps>((props, componentRef) => {
   const {
     item,
     isSelected,
@@ -157,6 +169,16 @@ export const Tab: React.FC<TabProps> = (props) => {
     // Wait for the selection to propagate before enabling edit mode
     setTimeout(() => onDoubleClick(), 0);
   }, [item, isSelected, onDoubleClick, onSelect]);
+
+  useImperativeHandle(
+    componentRef,
+    () => ({
+      enterRenamingMode: () => {
+        void onEnterRenaming();
+      },
+    }),
+    [onEnterRenaming]
+  );
 
   const onKeyDownEvent = useCallback(
     async (event: KeyboardEvent<HTMLDivElement>) => {
@@ -345,7 +367,9 @@ export const Tab: React.FC<TabProps> = (props) => {
       {tabWithBackground}
     </TabPreview>
   );
-};
+});
+
+Tab.displayName = 'Tab';
 
 function getTabContainerCss(
   euiTheme: EuiThemeComputed,
