@@ -325,79 +325,21 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             id: 'entity-fights-kafka',
             text: 'Must identify fights-kafka as a failing entity (evidence: rest-fights producer logs show fights-kafka broker disconnected, topic not present in metadata, and timeout exceptions)',
             score: 2,
-            // The intended criterion is "≥2 of these 4 Kafka symptoms co-occur in a
-            // rest-fights log line". `minimum_should_match: 2` is not supported by
-            // samplingFilterDslToKql today, so we expand the four clauses into their
-            // six pairwise `(A AND B)` `should` options — semantically equivalent and
-            // handled by the existing translator. Permanent fix tracked in
-            // https://github.com/elastic/streams-program/issues/1313.
             sampling_filters: [
               {
                 bool: {
                   filter: [{ term: { 'resource.attributes.app.keyword': 'rest-fights' } }],
                   should: [
+                    { match_phrase: { 'body.text': 'fights-kafka' } },
+                    { match_phrase: { 'body.text': 'disconnected' } },
+                    { match_phrase: { 'body.text': 'Topic fights not present in metadata' } },
                     {
-                      bool: {
-                        must: [
-                          { match_phrase: { 'body.text': 'fights-kafka' } },
-                          { match_phrase: { 'body.text': 'disconnected' } },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        must: [
-                          { match_phrase: { 'body.text': 'fights-kafka' } },
-                          { match_phrase: { 'body.text': 'Topic fights not present in metadata' } },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        must: [
-                          { match_phrase: { 'body.text': 'fights-kafka' } },
-                          {
-                            match_phrase: {
-                              'body.text': 'org.apache.kafka.common.errors.TimeoutException',
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        must: [
-                          { match_phrase: { 'body.text': 'disconnected' } },
-                          { match_phrase: { 'body.text': 'Topic fights not present in metadata' } },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        must: [
-                          { match_phrase: { 'body.text': 'disconnected' } },
-                          {
-                            match_phrase: {
-                              'body.text': 'org.apache.kafka.common.errors.TimeoutException',
-                            },
-                          },
-                        ],
-                      },
-                    },
-                    {
-                      bool: {
-                        must: [
-                          { match_phrase: { 'body.text': 'Topic fights not present in metadata' } },
-                          {
-                            match_phrase: {
-                              'body.text': 'org.apache.kafka.common.errors.TimeoutException',
-                            },
-                          },
-                        ],
+                      match_phrase: {
+                        'body.text': 'org.apache.kafka.common.errors.TimeoutException',
                       },
                     },
                   ],
-                  minimum_should_match: 1,
+                  minimum_should_match: 2,
                 },
               },
             ],

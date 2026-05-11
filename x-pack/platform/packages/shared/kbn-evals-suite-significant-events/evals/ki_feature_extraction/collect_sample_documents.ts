@@ -7,7 +7,7 @@
 
 import { esql } from '@elastic/esql';
 import type { Client } from '@elastic/elasticsearch';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getSampleDocumentsEsql } from '@kbn/ai-tools';
 import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '@kbn/streams-plugin/common/sig_events_tuning_config';
@@ -15,7 +15,6 @@ import {
   MANAGED_STREAM_SEARCH_PATTERN,
   type KIFeatureExtractionScenario,
 } from '../../src/datasets';
-import { samplingFilterDslToKql } from './sampling_filter_dsl_to_kql';
 
 const addUniqueHitsToSample = ({
   hits,
@@ -57,8 +56,12 @@ export const collectSampleDocuments = async ({
   log: ToolingLog;
   size?: number;
 }): Promise<Array<SearchHit<Record<string, unknown>>>> => {
-  const query = scenario.input.log_query_filter ?? [{ match_all: {} }];
-  const queryKql = combineKql(query.map(samplingFilterDslToKql));
+  // `scenario.input.log_query_filter` is fixture-authored Query DSL — forward
+  // it verbatim to `getSampleDocumentsEsql` via `dslFilter`, which ES|QL's
+  // `_query` endpoint applies through its native `filter` request parameter.
+  // No DSL → KQL translation is needed; ES handles `term`/`terms`/`match`/
+  // `match_phrase`/`exists`/`bool { should, minimum_should_match }` natively.
+  const baseDslFilter: QueryDslQueryContainer[] = scenario.input.log_query_filter ?? [];
 
   const docs: Array<SearchHit<Record<string, unknown>>> = [];
   const seen = new Set<string>();
@@ -76,7 +79,7 @@ export const collectSampleDocuments = async ({
           index: MANAGED_STREAM_SEARCH_PATTERN,
           start: 0,
           end: Date.now(),
-          kql: combineKql([queryKql, samplingFilterDslToKql(filter)]),
+          dslFilter: [...baseDslFilter, filter],
           size: 1,
         });
         return { hits, criterion: details, filter };
@@ -131,7 +134,7 @@ export const collectSampleDocuments = async ({
       index: MANAGED_STREAM_SEARCH_PATTERN,
       start: 0,
       end: Date.now(),
-      kql: queryKql,
+      dslFilter: baseDslFilter,
       whereCondition: unseenCondition,
       size: remaining,
     });
@@ -153,9 +156,3 @@ export const collectSampleDocuments = async ({
 
   return docs;
 };
-
-function combineKql(parts: Array<string | undefined>): string | undefined {
-  const activeParts = parts.filter((part): part is string => Boolean(part && part !== '*'));
-
-  return activeParts.length ? activeParts.join(' AND ') : undefined;
-}

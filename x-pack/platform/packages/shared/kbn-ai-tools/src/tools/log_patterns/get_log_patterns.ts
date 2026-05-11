@@ -11,7 +11,6 @@ import type {
   AggregationsDateHistogramAggregation,
   AggregationsMaxAggregation,
   AggregationsMinAggregation,
-  SearchHit,
   AggregationsTopHitsAggregation,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -27,6 +26,12 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import { pValueToLabel } from '../../utils/p_value_to_label';
+import {
+  buildPass2Query,
+  columnPath,
+  parsePass1Rows,
+  parsePass2Hits,
+} from '../../utils/esql_two_pass';
 
 const MAX_DOCS_TO_SAMPLE = 100_000;
 
@@ -599,10 +604,6 @@ function buildCountQuery({ index, kql }: { index: string | string[]; kql?: strin
   return query.pipe`STATS total = COUNT(*)`.print('basic');
 }
 
-function columnPath(field: string): string | string[] {
-  return field.includes('.') ? field.split('.') : field;
-}
-
 /**
  * SigEvents-only ES|QL categorization. Unlike getLogPatterns(), this helper does
  * not synthesize regex/highlight/metadata/timeseries/change-point output because
@@ -644,73 +645,4 @@ function buildPass1Query({
     .sort([['count'], 'DESC', ''])
     .limit(limit)
     .print('basic');
-}
-
-/**
- * Fetches coherent `_source` documents for the pass-1 representative keys. This
- * intentionally duplicates the diverse-sampling pass-2 shape instead of using
- * getSampleDocumentsEsql, whose parser discards `_index`.
- */
-function buildPass2Query(indices: string[], docKeys: string[]): string {
-  const query = esql.from(indices, ['_index', '_id', '_source'])
-    .pipe`EVAL doc_key = CONCAT(${esql.col('_index')}, ":", ${esql.col('_id')})`;
-
-  return query.pipe`WHERE doc_key IN (${docKeys.map((docKey) => esql.str(docKey))})`
-    .pipe`KEEP _index, _id, _source`
-    .limit(docKeys.length)
-    .print('basic');
-}
-
-function parsePass1Rows(
-  response: ESQLSearchResponse
-): Array<{ docKey: string; count: number; pattern: string }> {
-  const keyIndex = response.columns.findIndex((column) => column.name === 'representative_key');
-  const countIndex = response.columns.findIndex((column) => column.name === 'count');
-  const patternIndex = response.columns.findIndex((column) => column.name === 'pattern');
-
-  if (keyIndex === -1 || countIndex === -1 || patternIndex === -1) {
-    return [];
-  }
-
-  return response.values.flatMap((row) => {
-    const rawKey = row[keyIndex];
-    // Accept both scalar and single-item-array TOP responses; pass 1 still asks
-    // ES|QL for exactly one representative key.
-    const docKey = Array.isArray(rawKey) ? rawKey[0] : rawKey;
-    const count = row[countIndex];
-    const pattern = row[patternIndex];
-
-    if (typeof docKey !== 'string' || typeof count !== 'number' || typeof pattern !== 'string') {
-      return [];
-    }
-
-    return [{ docKey, count, pattern }];
-  });
-}
-
-function parsePass2Hits(response: ESQLSearchResponse): Array<SearchHit<Record<string, unknown>>> {
-  const indexIndex = response.columns.findIndex((column) => column.name === '_index');
-  const idIndex = response.columns.findIndex((column) => column.name === '_id');
-  const sourceIndex = response.columns.findIndex((column) => column.name === '_source');
-
-  if (indexIndex === -1 || idIndex === -1 || sourceIndex === -1) {
-    return [];
-  }
-
-  return response.values.flatMap((row) => {
-    const index = row[indexIndex];
-    const id = row[idIndex];
-
-    if (typeof index !== 'string' || typeof id !== 'string') {
-      return [];
-    }
-
-    return [
-      {
-        _index: index,
-        _id: id,
-        _source: (row[sourceIndex] as Record<string, unknown> | null) ?? {},
-      },
-    ];
-  });
 }

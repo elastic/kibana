@@ -33,6 +33,15 @@ interface GetSampleDocumentsEsqlParams {
   sampleSize?: number;
   whereCondition?: WhereCondition;
   loadUnmappedFields?: boolean;
+  /**
+   * Optional Query DSL filter clauses forwarded as the ES|QL `_query` request's
+   * `filter` parameter. ES applies these at the request layer (before the ES|QL
+   * pipeline runs), so callers can pass raw fixture-style DSL (`term`, `terms`,
+   * `match`, `match_phrase`, `exists`, `bool { should, minimum_should_match }`,
+   * ...) without translating to KQL. Multiple clauses are ANDed with the
+   * internal date-range filter.
+   */
+  dslFilter?: QueryDslQueryContainer | QueryDslQueryContainer[];
 }
 
 interface GetSampleDocumentsEsqlResponse {
@@ -137,9 +146,13 @@ export async function getSampleDocumentsEsql({
   sampleSize,
   whereCondition,
   loadUnmappedFields = false,
+  dslFilter,
 }: GetSampleDocumentsEsqlParams): Promise<GetSampleDocumentsEsqlResponse> {
   const indices = Array.isArray(index) ? index : [index];
-  const filter = { bool: { filter: dateRangeQuery(start, end) } };
+  const extraDslClauses = dslFilter ? castArray(dslFilter) : [];
+  const filter = {
+    bool: { filter: [...dateRangeQuery(start, end), ...extraDslClauses] },
+  };
 
   const whereExpression = buildWhereExpression({ kql, whereCondition });
   const printQuery = (query: ComposerQuery) => {

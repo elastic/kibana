@@ -11,6 +11,12 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { dateRangeQuery } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
+import {
+  buildPass2Query,
+  columnPath,
+  parsePass1Rows,
+  parsePass2Hits,
+} from '../../utils/esql_two_pass';
 import { getSampleDocumentsEsql } from './get_sample_documents';
 
 const MESSAGE_FIELD_CANDIDATES = ['message', 'body.text'];
@@ -166,10 +172,6 @@ async function runEsqlCount({
   return typeof total === 'number' ? total : 0;
 }
 
-function columnPath(field: string): string | string[] {
-  return field.includes('.') ? field.split('.') : field;
-}
-
 /**
  * Pass 1 categorizes the message field and returns only category metadata plus a
  * representative key. The key includes `_index` because `_id` is unique only
@@ -205,74 +207,4 @@ function buildPass1Query({
     .sort([['count'], 'DESC', ''])
     .limit(size + offset)
     .print('basic');
-}
-
-/**
- * Fetches `_source` for the exact composite keys chosen by pass 1. We do not use
- * getSampleDocumentsEsql here because that helper parses hits with `_index: ''`,
- * which would make a multi-index `_id` collision indistinguishable.
- */
-function buildPass2Query(indices: string[], docKeys: string[]): string {
-  const query = esql.from(indices, ['_index', '_id', '_source'])
-    .pipe`EVAL doc_key = CONCAT(${esql.col('_index')}, ":", ${esql.col('_id')})`;
-
-  return query.pipe`WHERE doc_key IN (${docKeys.map((docKey) => esql.str(docKey))})`
-    .pipe`KEEP _index, _id, _source`
-    .limit(docKeys.length)
-    .print('basic');
-}
-
-function parsePass1Rows(
-  response: ESQLSearchResponse
-): Array<{ docKey: string; count: number; pattern: string }> {
-  const keyIndex = response.columns.findIndex((column) => column.name === 'representative_key');
-  const countIndex = response.columns.findIndex((column) => column.name === 'count');
-  const patternIndex = response.columns.findIndex((column) => column.name === 'pattern');
-
-  if (keyIndex === -1 || countIndex === -1 || patternIndex === -1) {
-    return [];
-  }
-
-  return response.values.flatMap((row) => {
-    const rawKey = row[keyIndex];
-    // ES|QL currently returns TOP(..., 1) as a scalar, but accepting a single-item
-    // array makes this parser tolerant of response-shape differences across ES
-    // snapshots without changing the query contract.
-    const docKey = Array.isArray(rawKey) ? rawKey[0] : rawKey;
-    const count = row[countIndex];
-    const pattern = row[patternIndex];
-
-    if (typeof docKey !== 'string' || typeof count !== 'number' || typeof pattern !== 'string') {
-      return [];
-    }
-
-    return [{ docKey, count, pattern }];
-  });
-}
-
-function parsePass2Hits(response: ESQLSearchResponse): Array<SearchHit<Record<string, unknown>>> {
-  const indexIndex = response.columns.findIndex((column) => column.name === '_index');
-  const idIndex = response.columns.findIndex((column) => column.name === '_id');
-  const sourceIndex = response.columns.findIndex((column) => column.name === '_source');
-
-  if (indexIndex === -1 || idIndex === -1 || sourceIndex === -1) {
-    return [];
-  }
-
-  return response.values.flatMap((row) => {
-    const index = row[indexIndex];
-    const id = row[idIndex];
-
-    if (typeof index !== 'string' || typeof id !== 'string') {
-      return [];
-    }
-
-    return [
-      {
-        _index: index,
-        _id: id,
-        _source: (row[sourceIndex] as Record<string, unknown> | null) ?? {},
-      },
-    ];
-  });
 }
