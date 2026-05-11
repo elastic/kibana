@@ -16,10 +16,11 @@ export const evaluate = base.extend<
   }
 >({
   evaluateDataset: [
-    ({ executorClient, inferenceClient, log }, use) => {
+    ({ evaluators, executorClient, inferenceClient, log }, use) => {
       use(
         createEvaluateAlertsRagDataset({
           executorClient,
+          evaluators,
           inferenceClient,
           log,
         })

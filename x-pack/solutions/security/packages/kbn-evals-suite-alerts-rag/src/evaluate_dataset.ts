@@ -9,6 +9,7 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type {
   CorrectnessAnalysis,
+  DefaultEvaluators,
   EvalsExecutorClient,
   EvaluationDataset,
   Evaluator,
@@ -111,10 +112,12 @@ export const toDatasetExample = (ex: AlertsRagExample): AlertsRagDatasetExample 
 
 export const createEvaluateAlertsRagDataset = ({
   executorClient,
+  evaluators,
   inferenceClient,
   log,
 }: {
   executorClient: EvalsExecutorClient;
+  evaluators: DefaultEvaluators;
   inferenceClient: BoundInferenceClient;
   log: ToolingLog;
 }): EvaluateAlertsRagDataset => {
@@ -140,7 +143,7 @@ export const createEvaluateAlertsRagDataset = ({
       },
     }) as Array<Evaluator<AlertsRagDatasetExample, AlertsRagTaskOutput>>;
 
-    const evaluators: Array<Evaluator<AlertsRagDatasetExample, AlertsRagTaskOutput>> = [
+    const evalStack: Array<Evaluator<AlertsRagDatasetExample, AlertsRagTaskOutput>> = [
       ...ragEvaluators,
       createAlertsFaithfulnessEvaluator({ inferenceClient, log }),
       createAlertsCorrectnessEvaluator({ inferenceClient, log }),
@@ -193,7 +196,7 @@ export const createEvaluateAlertsRagDataset = ({
           return { answer: response.content, messages: [], correctnessAnalysis: null };
         },
       },
-      evaluators
+      evalStack
     );
   };
 };
