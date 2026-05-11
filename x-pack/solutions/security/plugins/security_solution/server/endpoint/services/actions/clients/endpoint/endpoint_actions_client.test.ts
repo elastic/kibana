@@ -669,6 +669,7 @@ describe('EndpointActionsClient', () => {
     it('should throw error if action is already complete', async () => {
       getActionDetailsByIdMock.mockResolvedValue({
         isCompleted: true,
+        agentType: 'endpoint',
       });
 
       await expect(
@@ -679,6 +680,25 @@ describe('EndpointActionsClient', () => {
           })
         )
       ).rejects.toThrow('Action [action-123] is already completed and cannot be canceled.');
+    });
+
+    it('should throw error if action to cancel does not have an agentType of endpoint', async () => {
+      getActionDetailsByIdMock.mockResolvedValue({
+        isCompleted: true,
+        agentType: 'sentinel_one',
+        command: 'runscript',
+      });
+
+      await expect(
+        endpointActionsClient.cancel(
+          responseActionsClientMock.createCancelActionOptions({
+            ...getCommonResponseActionOptions(),
+            parameters: { id: 'action-123' },
+          })
+        )
+      ).rejects.toThrow(
+        "Action ID [action-123 / runscript / sentinel_one] agent type is not 'endpoint'"
+      );
     });
   });
 
@@ -879,6 +899,11 @@ describe('EndpointActionsClient', () => {
             .getByIds as jest.Mock
         ).mockImplementation(async () => {
           throw new AgentNotFoundError('Agent some-id not found');
+        });
+        getActionDetailsByIdMock.mockResolvedValue({
+          isCompleted: false,
+          agentType: 'endpoint',
+          command: 'runscript',
         });
         const options = responseActionsClientMock.getOptionsForResponseActionMethod(methodName);
 
