@@ -43,5 +43,5 @@ const queryResultSchema = schema.object({
 });
 
 export const ruleQueryInspectorResponseSchema = schema.object({
-  queries: schema.arrayOf(queryResultSchema),
+  queries: schema.arrayOf(queryResultSchema, { maxSize: 1000 }),
 });

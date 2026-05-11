@@ -43,21 +43,4 @@ describe('RuleQueryInspectorRegistry', () => {
       expect(registry.get('not.registered')).toBeUndefined();
     });
   });
-
-  describe('getSupportedRuleTypes', () => {
-    it('returns an empty array when no handlers are registered', () => {
-      expect(registry.getSupportedRuleTypes()).toEqual([]);
-    });
-
-    it('returns all registered rule type IDs', () => {
-      registry.register('type.a', mockHandler);
-      registry.register('type.b', mockHandler);
-      registry.register('type.c', mockHandler);
-
-      expect(registry.getSupportedRuleTypes()).toEqual(
-        expect.arrayContaining(['type.a', 'type.b', 'type.c'])
-      );
-      expect(registry.getSupportedRuleTypes()).toHaveLength(3);
-    });
-  });
 });

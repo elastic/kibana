@@ -74,9 +74,6 @@ export const ruleQueryInspectorRoute = (
           return res.badRequest({
             body: {
               message: `Query inspection is not supported for rule type "${rule.alertTypeId}"`,
-              attributes: {
-                supportedRuleTypes: ruleQueryInspectorRegistry.getSupportedRuleTypes(),
-              },
             },
           });
         }

@@ -40,7 +40,6 @@ const createMockRegistry = (
   ({
     register: jest.fn(),
     get: jest.fn().mockReturnValue(handler),
-    getSupportedRuleTypes: jest.fn().mockReturnValue(['observability.rules.custom_threshold']),
   } as unknown as jest.Mocked<RuleQueryInspectorRegistry>);
 
 describe('ruleQueryInspectorRoute', () => {
@@ -105,9 +104,6 @@ describe('ruleQueryInspectorRoute', () => {
     expect(res.badRequest).toHaveBeenCalledWith({
       body: {
         message: `Query inspection is not supported for rule type "observability.rules.custom_threshold"`,
-        attributes: {
-          supportedRuleTypes: ['observability.rules.custom_threshold'],
-        },
       },
     });
   });

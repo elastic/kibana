@@ -22,8 +22,4 @@ export class RuleQueryInspectorRegistry {
   get(ruleTypeId: string): RuleQueryInspectorHandler | undefined {
     return this.handlers.get(ruleTypeId);
   }
-
-  getSupportedRuleTypes(): string[] {
-    return [...this.handlers.keys()];
-  }
 }
