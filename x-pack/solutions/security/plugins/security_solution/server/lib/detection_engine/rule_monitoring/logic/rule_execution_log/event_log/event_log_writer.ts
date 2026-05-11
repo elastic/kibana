@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsUtils } from '@kbn/core/server';
-import type { IEventLogService } from '@kbn/event-log-plugin/server';
+import type { IEvent, IEventLogService } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import type { CpsData } from '@kbn/alerting-plugin/server/types';
 import type {
@@ -74,9 +74,11 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
 
   let sequence = 0;
 
-  const getCpsFields = (ruleInfo: RuleInfo) =>
+  type EventKibana = NonNullable<NonNullable<IEvent>['kibana']>;
+
+  const getCpsFields = (ruleInfo: RuleInfo): Partial<EventKibana> =>
     ruleInfo.cpsData
-      ? {
+      ? ({
           cps_scope_expression: ruleInfo.cpsData.resolvedExpression,
           cps_scope_linked_projects: ruleInfo.cpsData.linkedProjects.length
             ? ruleInfo.cpsData.linkedProjects.map(({ id, alias, type, organization }) => ({
@@ -86,7 +88,7 @@ export const createEventLogWriter = (eventLogService: IEventLogService): IEventL
                 organization,
               }))
             : undefined,
-        }
+        } as Partial<EventKibana>)
       : {};
 
   return {
