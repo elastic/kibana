@@ -722,6 +722,21 @@ steps:
       expect(result.prompt.message).toContain('slack');
     });
 
+    it('falls back to the generated preview when confirmation_body is an empty string', async () => {
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+      const result = await invokePromptHandler(
+        registeredTool,
+        { stepName: 'send_slack', confirmation_body: '' },
+        context
+      );
+
+      expect(result.prompt.message).toContain('send_slack');
+      expect(result.prompt.message).toContain('slack');
+      expect(result.prompt.message).not.toBe('');
+    });
+
     it('executes the step after the user accepts the prompt', async () => {
       jest.useRealTimers();
       mockApi.testStep.mockResolvedValue('exec-slack-accepted');

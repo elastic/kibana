@@ -678,8 +678,10 @@ If the user declines a confirmation, do NOT retry the same step. Acknowledge the
                   defaultMessage: 'Execute step "{stepName}" ({stepType})',
                   values: { stepName, stepType: stepInfo.stepType },
                 }),
+            // `||` (not `??`) so empty-string `confirmation_body` falls back to
+            // the generated preview instead of rendering a blank dialog body.
             message:
-              confirmationBody ?? buildFallbackPreview(stepInfo, unsafeStep, contextOverride),
+              confirmationBody || buildFallbackPreview(stepInfo, unsafeStep, contextOverride),
             confirm_text: i18n.translate(
               'workflows.agentBuilder.executeStep.confirmation.confirmText',
               { defaultMessage: 'Run step' }
