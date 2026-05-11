@@ -427,8 +427,9 @@ export function LayerPanel(props: LayerPanelProps) {
       const newQuery = layerState!.layers[layerId].query;
       setQuery(newQuery);
     }
+    // Only sync when datasource state changes, not on user keystrokes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layerState, layerId, query]);
+  }, [layerState, layerId]);
 
   const [errors, _setErrors] = useState<Error[] | undefined>();
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
