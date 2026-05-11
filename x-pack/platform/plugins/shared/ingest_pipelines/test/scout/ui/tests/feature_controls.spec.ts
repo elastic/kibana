@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { ScoutPage } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 
 test.describe('Ingest pipelines feature controls', { tag: tags.stateful.classic }, () => {
-  const managementLanding = (page: any) =>
+  const managementLanding = (page: ScoutPage) =>
     page.testSubj
       .locator('cards-navigation-page')
       .or(page.testSubj.locator('managementHome'))

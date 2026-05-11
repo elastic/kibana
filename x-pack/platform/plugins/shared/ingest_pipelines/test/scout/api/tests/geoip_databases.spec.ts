@@ -15,6 +15,7 @@ apiTest.describe('Ingest pipelines GeoIP databases API', { tag: tags.stateful.cl
   const normalizedMaxmindDatabaseName = 'geoip2-anonymous-ip';
   const ipinfoDatabaseName = 'asn';
   const normalizedIpinfoDatabaseName = 'asn';
+  const databaseIdsToCleanup = new Set<string>();
   let adminCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
@@ -22,10 +23,7 @@ apiTest.describe('Ingest pipelines GeoIP databases API', { tag: tags.stateful.cl
   });
 
   apiTest.afterAll(async ({ esClient, log }) => {
-    const { databases } = await esClient.ingest.getGeoipDatabase();
-    const databaseIds = databases.map(({ id }) => id);
-
-    for (const databaseId of databaseIds) {
+    for (const databaseId of databaseIdsToCleanup) {
       try {
         await esClient.ingest.deleteGeoipDatabase({ id: databaseId });
       } catch (error) {
@@ -34,9 +32,8 @@ apiTest.describe('Ingest pipelines GeoIP databases API', { tag: tags.stateful.cl
     }
   });
 
-  apiTest(
-    'creates a MaxMind GeoIP database when using a correct database name',
-    async ({ apiClient }) => {
+  apiTest('creates, lists, and deletes GeoIP databases', async ({ apiClient }) => {
+    await apiTest.step('create a MaxMind database', async () => {
       const response = await apiClient.post(testData.DATABASES_API_BASE_PATH, {
         headers: {
           ...testData.COMMON_HEADERS,
@@ -50,16 +47,14 @@ apiTest.describe('Ingest pipelines GeoIP databases API', { tag: tags.stateful.cl
       });
 
       expect(response).toHaveStatusCode(200);
+      databaseIdsToCleanup.add(normalizedMaxmindDatabaseName);
       expect(response.body).toStrictEqual({
         name: maxmindDatabaseName,
         id: normalizedMaxmindDatabaseName,
       });
-    }
-  );
+    });
 
-  apiTest(
-    'creates an IPinfo GeoIP database when using a correct database name',
-    async ({ apiClient }) => {
+    await apiTest.step('create an IPinfo database', async () => {
       const response = await apiClient.post(testData.DATABASES_API_BASE_PATH, {
         headers: {
           ...testData.COMMON_HEADERS,
@@ -72,12 +67,61 @@ apiTest.describe('Ingest pipelines GeoIP databases API', { tag: tags.stateful.cl
       });
 
       expect(response).toHaveStatusCode(200);
+      databaseIdsToCleanup.add(normalizedIpinfoDatabaseName);
       expect(response.body).toStrictEqual({
         name: ipinfoDatabaseName,
         id: normalizedIpinfoDatabaseName,
       });
-    }
-  );
+    });
+
+    await apiTest.step('list existing databases', async () => {
+      const response = await apiClient.get(testData.DATABASES_API_BASE_PATH, {
+        headers: {
+          ...testData.COMMON_HEADERS,
+          ...adminCredentials.apiKeyHeader,
+        },
+      });
+
+      expect(response).toHaveStatusCode(200);
+      const databases = response.body as Array<{ id: string; name: string; type: string }>;
+      expect(databases.find(({ id }) => id === normalizedMaxmindDatabaseName)).toStrictEqual({
+        id: normalizedMaxmindDatabaseName,
+        name: maxmindDatabaseName,
+        type: 'maxmind',
+      });
+      expect(databases.find(({ id }) => id === normalizedIpinfoDatabaseName)).toStrictEqual({
+        id: normalizedIpinfoDatabaseName,
+        name: ipinfoDatabaseName,
+        type: 'ipinfo',
+      });
+    });
+
+    await apiTest.step('delete created databases', async () => {
+      const maxmindResponse = await apiClient.delete(
+        `${testData.DATABASES_API_BASE_PATH}/${normalizedMaxmindDatabaseName}`,
+        {
+          headers: {
+            ...testData.COMMON_HEADERS,
+            ...adminCredentials.apiKeyHeader,
+          },
+        }
+      );
+      const ipinfoResponse = await apiClient.delete(
+        `${testData.DATABASES_API_BASE_PATH}/${normalizedIpinfoDatabaseName}`,
+        {
+          headers: {
+            ...testData.COMMON_HEADERS,
+            ...adminCredentials.apiKeyHeader,
+          },
+        }
+      );
+
+      expect(maxmindResponse).toHaveStatusCode(200);
+      databaseIdsToCleanup.delete(normalizedMaxmindDatabaseName);
+      expect(ipinfoResponse).toHaveStatusCode(200);
+      databaseIdsToCleanup.delete(normalizedIpinfoDatabaseName);
+    });
+  });
 
   apiTest(
     'returns an error when creating a GeoIP database with an incorrect name',
@@ -97,51 +141,4 @@ apiTest.describe('Ingest pipelines GeoIP databases API', { tag: tags.stateful.cl
       expect(response).toHaveStatusCode(400);
     }
   );
-
-  apiTest('returns existing databases', async ({ apiClient }) => {
-    const response = await apiClient.get(testData.DATABASES_API_BASE_PATH, {
-      headers: {
-        ...testData.COMMON_HEADERS,
-        ...adminCredentials.apiKeyHeader,
-      },
-    });
-
-    expect(response).toHaveStatusCode(200);
-    expect(response.body).toStrictEqual([
-      {
-        id: normalizedMaxmindDatabaseName,
-        name: maxmindDatabaseName,
-        type: 'maxmind',
-      },
-      {
-        id: normalizedIpinfoDatabaseName,
-        name: ipinfoDatabaseName,
-        type: 'ipinfo',
-      },
-    ]);
-  });
-
-  apiTest('deletes a GeoIP database', async ({ apiClient }) => {
-    const maxmindResponse = await apiClient.delete(
-      `${testData.DATABASES_API_BASE_PATH}/${normalizedMaxmindDatabaseName}`,
-      {
-        headers: {
-          ...testData.COMMON_HEADERS,
-          ...adminCredentials.apiKeyHeader,
-        },
-      }
-    );
-    const ipinfoResponse = await apiClient.delete(
-      `${testData.DATABASES_API_BASE_PATH}/${normalizedIpinfoDatabaseName}`,
-      {
-        headers: {
-          ...testData.COMMON_HEADERS,
-          ...adminCredentials.apiKeyHeader,
-        },
-      }
-    );
-
-    expect(maxmindResponse).toHaveStatusCode(200);
-    expect(ipinfoResponse).toHaveStatusCode(200);
-  });
 });

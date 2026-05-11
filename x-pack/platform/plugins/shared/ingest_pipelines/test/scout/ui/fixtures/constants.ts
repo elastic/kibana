@@ -32,7 +32,9 @@ export const PIPELINE_CSV = {
 };
 
 export const MAXMIND_DATABASE_NAME = 'GeoIP2-Anonymous-IP';
+export const MAXMIND_DATABASE_ID = 'geoip2-anonymous-ip';
 export const IPINFO_DATABASE_NAME = 'Free IP to ASN';
+export const IPINFO_DATABASE_ID = 'asn';
 
 export const INGEST_PIPELINES_USER_ROLE = {
   elasticsearch: {

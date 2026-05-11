@@ -17,13 +17,11 @@ test.describe('Ingest pipelines Manage Processors', { tag: tags.stateful.classic
   });
 
   test.afterAll(async ({ esClient, log }) => {
-    const { databases } = await esClient.ingest.getGeoipDatabase();
-
-    for (const { id } of databases) {
+    for (const databaseId of [testData.MAXMIND_DATABASE_ID, testData.IPINFO_DATABASE_ID]) {
       try {
-        await esClient.ingest.deleteGeoipDatabase({ id });
+        await esClient.ingest.deleteGeoipDatabase({ id: databaseId });
       } catch (error) {
-        log.debug(`GeoIP database cleanup failed for ${id}: ${(error as Error).message}`);
+        log.debug(`GeoIP database cleanup failed for ${databaseId}: ${(error as Error).message}`);
       }
     }
   });
