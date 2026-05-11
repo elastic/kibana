@@ -9,6 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { LeaderKeyShortcutGroup } from './types';
 import {
   getScreenReaderShortcutDescription,
   hasModifierKey,
@@ -24,30 +25,9 @@ import {
 import { useShortcutsContext } from './shortcuts_provider';
 
 /**
- * Describes a single follow-up key that can be pressed after a leader key sequence is opened.
- */
-export interface LeaderKeyShortcut {
-  /** The key that triggers this shortcut once the leader key overlay is active. */
-  key: string;
-  /** The short label rendered in the shortcut badge. */
-  label: string;
-  /** The human-readable description shown in the overlay and announced to assistive tech. */
-  description: string;
-  /** Runs when the shortcut key is pressed while this leader key menu is active. */
-  onTrigger: () => void;
-}
-
-/**
  * Props for {@link LeaderKeyShortcuts}.
  */
-export interface LeaderKeyShortcutsProps {
-  /** The key that opens this shortcut group. */
-  leaderKey: string;
-  /** The label shown for the leader key in the overlay and accessibility text. */
-  leaderKeyDescription: string;
-  /** The follow-up shortcuts available after the leader key is pressed. */
-  shortcuts: LeaderKeyShortcut[];
-}
+export type LeaderKeyShortcutsProps = LeaderKeyShortcutGroup;
 
 /**
  * Renders a leader-key shortcut overlay and handles the two-step key sequence used to trigger
@@ -61,7 +41,7 @@ export const LeaderKeyShortcuts = ({
   leaderKeyDescription,
   shortcuts,
 }: LeaderKeyShortcutsProps) => {
-  const { registerLeaderKeyShortcut } = useShortcutsContext();
+  const { registerLeaderKeyGroup } = useShortcutsContext();
   const overlayRef = useRef<ShortcutsOverlayRef | null>(null);
   const normalizedLeaderKey = normalizeShortcutKey(leaderKey);
   const shortcutsByKey = useMemo(
@@ -125,12 +105,13 @@ export const LeaderKeyShortcuts = ({
   );
 
   useEffect(() => {
-    return registerLeaderKeyShortcut({
+    return registerLeaderKeyGroup({
       leaderKey,
       leaderKeyDescription,
       openShortcuts,
+      shortcuts,
     });
-  }, [leaderKey, leaderKeyDescription, openShortcuts, registerLeaderKeyShortcut]);
+  }, [leaderKey, leaderKeyDescription, openShortcuts, registerLeaderKeyGroup, shortcuts]);
 
   return (
     <ShortcutsOverlay

@@ -19,24 +19,24 @@ import {
 import { ShortcutsOverlay, ShortcutsOverlayItem } from './shortcuts_overlay';
 
 export const LeaderShortcutPicker = () => {
-  const { registeredLeaderKeyShortcuts } = useShortcutsContext();
-  const sortedLeaderKeyShortcuts = useMemo(() => {
-    return registeredLeaderKeyShortcuts.toSorted((left, right) =>
+  const { registeredLeaderKeyGroups } = useShortcutsContext();
+  const sortedLeaderKeyGroups = useMemo(() => {
+    return registeredLeaderKeyGroups.toSorted((left, right) =>
       left.leaderKeyDescription.localeCompare(right.leaderKeyDescription)
     );
-  }, [registeredLeaderKeyShortcuts]);
-  const leaderKeyShortcutsByKey = useMemo(() => {
-    return new Map(sortedLeaderKeyShortcuts.map((option) => [option.leaderKey, option]));
-  }, [sortedLeaderKeyShortcuts]);
+  }, [registeredLeaderKeyGroups]);
+  const leaderKeyGroupsByKey = useMemo(() => {
+    return new Map(sortedLeaderKeyGroups.map((option) => [option.leaderKey, option]));
+  }, [sortedLeaderKeyGroups]);
   const overlayItems = useMemo(() => {
-    return sortedLeaderKeyShortcuts.map(({ leaderKey, leaderKeyDescription }) => (
+    return sortedLeaderKeyGroups.map(({ leaderKey, leaderKeyDescription }) => (
       <ShortcutsOverlayItem
         key={leaderKey}
         badgeLabel={leaderKey.toUpperCase()}
         description={leaderKeyDescription}
       />
     ));
-  }, [sortedLeaderKeyShortcuts]);
+  }, [sortedLeaderKeyGroups]);
   const screenReaderHint = useMemo(() => {
     return i18n.translate('unifiedShortcuts.leaderShortcutPicker.screenReaderHint', {
       defaultMessage: 'Press {shortcut} to access all shortcuts.',
@@ -49,7 +49,7 @@ export const LeaderShortcutPicker = () => {
     return i18n.translate('unifiedShortcuts.leaderShortcutPicker.screenReaderAnnouncement', {
       defaultMessage: 'Shortcuts available. {shortcutDescriptions}. Press Escape to exit.',
       values: {
-        shortcutDescriptions: sortedLeaderKeyShortcuts
+        shortcutDescriptions: sortedLeaderKeyGroups
           .map(({ leaderKey, leaderKeyDescription }) =>
             getScreenReaderShortcutDescription({
               key: leaderKey,
@@ -59,22 +59,20 @@ export const LeaderShortcutPicker = () => {
           .join(', '),
       },
     });
-  }, [sortedLeaderKeyShortcuts]);
+  }, [sortedLeaderKeyGroups]);
   const shouldOpen = useCallback(
     (event: KeyboardEvent) => {
       return (
-        sortedLeaderKeyShortcuts.length > 0 &&
-        isPrimaryModifierOnly(event) &&
-        event.code === 'Quote'
+        sortedLeaderKeyGroups.length > 0 && isPrimaryModifierOnly(event) && event.code === 'Quote'
       );
     },
-    [sortedLeaderKeyShortcuts.length]
+    [sortedLeaderKeyGroups.length]
   );
   const runAction = useCallback(
     (event: KeyboardEvent) => {
-      leaderKeyShortcutsByKey.get(normalizeShortcutKey(event.key))?.openShortcuts();
+      leaderKeyGroupsByKey.get(normalizeShortcutKey(event.key))?.openShortcuts();
     },
-    [leaderKeyShortcutsByKey]
+    [leaderKeyGroupsByKey]
   );
 
   return (

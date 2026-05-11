@@ -15,18 +15,18 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { CommandPalette } from './command_palette';
+import type { LeaderKeyShortcutGroup } from './types';
 import { LeaderShortcutPicker } from './leader_shortcut_picker';
 import { normalizeShortcutKey } from './shortcut_utils';
 
-interface LeaderKeyShortcutRegistration {
-  leaderKey: string;
-  leaderKeyDescription: string;
+interface LeaderKeyGroupRegistration extends LeaderKeyShortcutGroup {
   openShortcuts: () => void;
 }
 
-type LeaderKeyShortcutsRegistry = Record<
+type LeaderKeyGroupRegistry = Record<
   string,
-  LeaderKeyShortcutRegistration & {
+  LeaderKeyGroupRegistration & {
     registrationToken: symbol;
   }
 >;
@@ -34,11 +34,11 @@ type LeaderKeyShortcutsRegistry = Record<
 interface ShortcutsContextValue {
   tryAcquireShortcutsLock: (instanceId: symbol) => boolean;
   releaseShortcutsLock: (instanceId: symbol) => void;
-  registerLeaderKeyShortcut: (registration: LeaderKeyShortcutRegistration) => () => void;
-  registeredLeaderKeyShortcuts: LeaderKeyShortcutRegistration[];
+  registerLeaderKeyGroup: (registration: LeaderKeyGroupRegistration) => () => void;
+  registeredLeaderKeyGroups: LeaderKeyGroupRegistration[];
 }
 
-type ShortcutsContextActions = Omit<ShortcutsContextValue, 'registeredLeaderKeyShortcuts'>;
+type ShortcutsContextActions = Omit<ShortcutsContextValue, 'registeredLeaderKeyGroups'>;
 
 /**
  * Props for {@link ShortcutsProvider}.
@@ -52,7 +52,7 @@ const ShortcutsContext = createContext<ShortcutsContextValue | undefined>(undefi
  */
 export const ShortcutsProvider = ({ children }: ShortcutsProviderProps) => {
   const shortcutsLockRef = useRef<symbol>();
-  const [leaderKeyShortcuts, setLeaderKeyShortcuts] = useState<LeaderKeyShortcutsRegistry>({});
+  const [leaderKeyGroups, setLeaderKeyGroups] = useState<LeaderKeyGroupRegistry>({});
   const actions = useMemo<ShortcutsContextActions>(() => {
     return {
       tryAcquireShortcutsLock: (instanceId) => {
@@ -70,12 +70,12 @@ export const ShortcutsProvider = ({ children }: ShortcutsProviderProps) => {
           shortcutsLockRef.current = undefined;
         }
       },
-      registerLeaderKeyShortcut: (registration) => {
+      registerLeaderKeyGroup: (registration) => {
         const normalizedLeaderKey = normalizeShortcutKey(registration.leaderKey);
-        const registrationToken = Symbol(`leader-key-shortcut:${normalizedLeaderKey}`);
+        const registrationToken = Symbol(`leader-key-group:${normalizedLeaderKey}`);
 
-        setLeaderKeyShortcuts((currentLeaderKeyShortcuts) => ({
-          ...currentLeaderKeyShortcuts,
+        setLeaderKeyGroups((currentLeaderKeyGroups) => ({
+          ...currentLeaderKeyGroups,
           [normalizedLeaderKey]: {
             ...registration,
             leaderKey: normalizedLeaderKey,
@@ -84,17 +84,17 @@ export const ShortcutsProvider = ({ children }: ShortcutsProviderProps) => {
         }));
 
         return () => {
-          setLeaderKeyShortcuts((currentLeaderKeyShortcuts) => {
-            const currentRegistration = currentLeaderKeyShortcuts[normalizedLeaderKey];
+          setLeaderKeyGroups((currentLeaderKeyGroups) => {
+            const currentRegistration = currentLeaderKeyGroups[normalizedLeaderKey];
 
             if (currentRegistration?.registrationToken !== registrationToken) {
-              return currentLeaderKeyShortcuts;
+              return currentLeaderKeyGroups;
             }
 
-            const { [normalizedLeaderKey]: removedRegistration, ...nextLeaderKeyShortcuts } =
-              currentLeaderKeyShortcuts;
+            const { [normalizedLeaderKey]: removedRegistration, ...nextLeaderKeyGroups } =
+              currentLeaderKeyGroups;
 
-            return nextLeaderKeyShortcuts;
+            return nextLeaderKeyGroups;
           });
         };
       },
@@ -103,17 +103,18 @@ export const ShortcutsProvider = ({ children }: ShortcutsProviderProps) => {
   const value = useMemo<ShortcutsContextValue>(
     () => ({
       ...actions,
-      registeredLeaderKeyShortcuts: Object.values(leaderKeyShortcuts).map(
-        ({ registrationToken, ...registeredLeaderKeyShortcut }) => registeredLeaderKeyShortcut
+      registeredLeaderKeyGroups: Object.values(leaderKeyGroups).map(
+        ({ registrationToken, ...registeredLeaderKeyGroup }) => registeredLeaderKeyGroup
       ),
     }),
-    [actions, leaderKeyShortcuts]
+    [actions, leaderKeyGroups]
   );
 
   return (
     <ShortcutsContext.Provider value={value}>
       {children}
       <LeaderShortcutPicker />
+      <CommandPalette />
     </ShortcutsContext.Provider>
   );
 };

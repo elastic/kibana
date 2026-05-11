@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  LeaderKeyShortcuts,
-  type LeaderKeyShortcutsProps,
-  type LeaderKeyShortcut,
-} from './src/leader_key_shortcuts';
+export { LeaderKeyShortcuts, type LeaderKeyShortcutsProps } from './src/leader_key_shortcuts';
+export type { LeaderKeyShortcut, LeaderKeyShortcutGroup } from './src/types';
 export { ShortcutsProvider, type ShortcutsProviderProps } from './src/shortcuts_provider';
