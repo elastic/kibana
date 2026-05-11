@@ -123,7 +123,10 @@ export const ActionTypeMenu = ({
   }, []);
   const registeredActionTypes = Object.entries(actionTypesIndex ?? [])
     .filter(([id, details]) => {
-      const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
+      if (!actionTypeRegistry.has(id)) {
+        return false;
+      }
+      const actionTypeModel = actionTypeRegistry.get(id);
       const shouldHideInUi = actionTypeModel?.getHideInUi?.(
         actionTypesIndex ? Object.values(actionTypesIndex) : []
       );
