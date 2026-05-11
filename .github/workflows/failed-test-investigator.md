@@ -19,7 +19,7 @@ permissions:
   checks: read
   models: read
 
-if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && !github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'failed-test')) }}"
+if: "${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.issue_number != '') || (github.event_name == 'issues' && !github.event.issue.pull_request && contains(github.event.issue.labels.*.name, 'failed-test') && (github.event.action != 'labeled' || github.event.label.name == 'failed-test')) }}"
 
 concurrency:
   group: "failed-test-investigator-${{ github.event.issue.number || github.event.inputs.issue_number }}"
@@ -64,6 +64,10 @@ safe-outputs:
     max: 1
     target: "*"
     hide-older-comments: true
+  add-labels:
+    allowed: [needs-flaky-fix]
+    max: 1
+    target: "triggering"
 
 strict: false
 timeout-minutes: 20
@@ -85,6 +89,7 @@ Your job is to determine:
 - the most likely root cause
 - whether the flakiness is more likely in the test, in the underlying product code, due to an external cause, or inconclusive
 - the smallest credible fix to try next
+- whether this failure is a good candidate for the **automated Flaky Test Auto-Fix** pipeline (the `fixability` field — see "Fixability classification" below). If yes, apply the `needs-flaky-fix` label so a downstream agent picks it up.
 
 ## What to inspect
 
@@ -109,6 +114,48 @@ Your job is to determine:
 - Classify as `external` when the failure appears to be caused by something outside the specific test and product code under investigation, such as CI instability, a downed dependency or service, environment provisioning failures, credentials, networking, storage, or other unrelated platform incidents.
 - Classify as `inconclusive` only when the available evidence does not support a defensible call.
 - Do not guess. Every classification must be tied to specific evidence.
+
+## Fixability classification
+
+Beyond the root-cause `classification` above, decide whether this failure should be picked up by the **Flaky Test Auto-Fix** pipeline. Set the `fixability` field to exactly one of:
+
+- `auto-fixable` — the Auto-Fix agent should attempt a patch. **All** of these must hold:
+  - `classification` is `test`
+  - `confidence` is `high` or `medium`
+  - You can identify a concrete test file path that currently exists on the default branch
+  - Test type is **Scout** (issue carries `scout-playwright` label) or **FTR** (FTR-style failure, no `scout-playwright` label, has a Buildkite FTR config path)
+  - Failure happened on a non-Cloud Buildkite pipeline (typically `kibana-on-merge` or `kibana-pull-request`)
+  - The proposed fix is small and test-side: timing/wait, selector, fixture, cleanup, intercept, retry, `data-test-subj`, `localStorage` sync, `.within()` → `.find()`, etc.
+  - No open PR already targets the same test file with a `flaky-fix:` label (search PRs to verify)
+  - The fix does **not** require deleting the test, migrating Cypress → Scout, changing test layer (E2E → API/unit), unskipping a test whose feature may have changed, or touching CI configs / lockfiles / `package.json` / secrets
+
+- `needs-human` — the failure looks test-side but the action requires human judgment:
+  - `classification` is `test` but `confidence` is `low`, OR
+  - Fix would require deleting a test, migrating layer, unskipping a test pending feature-validity check, OR
+  - Multiple plausible root causes with comparable confidence, OR
+  - A `flaky-fix:` PR already exists for this test and the new failure has the same stack trace
+
+- `not-a-flake` — this is a real product bug, not flakiness:
+  - `classification` is `code` with `confidence` `high` or `medium`
+  - Evidence points to a recent product-code commit, a feature-flag-exposed race in app code, or a consistent reproducible failure
+
+- `env-issue` — external / infrastructure / Cloud cause; Auto-Fix cannot help:
+  - `classification` is `external`, OR
+  - Failure reproduces only on Elastic Cloud / MKI (e.g., "primary shards not active", "no node found", credential rotation), OR
+  - Stale failure: no new failures in the last 2–3 weeks and no PR in flight
+
+- `inconclusive` — none of the above apply with enough confidence; evidence is missing.
+
+When `fixability` is `auto-fixable`, also emit a `flaky-runner-config` value: the exact `/flaky` argument the Auto-Fix agent will need to validate the fix later. Format examples:
+
+- Scout: `scoutConfig:<path/to/playwright.config.ts>:30`
+- FTR: `ftrConfig:<path/to/ftr-config.ts>:30`
+
+If you cannot determine the right config path, downgrade `fixability` to `needs-human` and explain in the comment.
+
+## Auto-fix label rule
+
+If and only if `fixability` is `auto-fixable`, add the label `needs-flaky-fix` to the triggering issue using the safe-output `add-labels` mechanism. Do not add this label in any other case. Do not add any other labels.
 
 ## Fix proposal rules
 
@@ -145,6 +192,7 @@ One short paragraph with the current best explanation.
 
 - `classification`: `test` | `code` | `external` | `inconclusive`
 - `confidence`: `high` | `medium` | `low`
+- `fixability`: `auto-fixable` | `needs-human` | `not-a-flake` | `env-issue` | `inconclusive`
 
 ### Suspected Root Cause
 
@@ -165,6 +213,28 @@ Use 2 to 5 bullets tied to evidence.
 ### Evidence Used
 
 List the key issue comments, file paths, commits, or links that drove the conclusion.
+
+### Machine-readable metadata footer
+
+After the human-readable sections above, append exactly this HTML-comment-wrapped block at the very end of the comment, with values filled in from your analysis. The Auto-Fix pipeline parses this block, so do not change the keys, casing, or wrappers.
+
+```
+<!-- flaky-fix:metadata -->
+- `classification`: <test|code|external|inconclusive>
+- `confidence`: <high|medium|low>
+- `fixability`: <auto-fixable|needs-human|not-a-flake|env-issue|inconclusive>
+- `test.type`: <scout|ftr|jest|unknown>
+- `test.file`: <repo-relative path or "unknown">
+- `flaky-runner-config`: <scoutConfig:...:30 | ftrConfig:...:30 | n/a>
+<!-- /flaky-fix:metadata -->
+```
+
+Rules for the footer:
+
+- Always emit the block, even when `fixability` is `inconclusive` or `not-a-flake`.
+- `flaky-runner-config` must be `n/a` unless `fixability` is `auto-fixable`.
+- `test.type` is `scout` if the issue carries the `scout-playwright` label, otherwise `ftr` for an FTR issue, `jest` for a Jest issue, or `unknown` if you cannot tell.
+- If `fixability` is `auto-fixable`, you must also apply the `needs-flaky-fix` label to the triggering issue via `add-labels`. Do not apply it in any other case.
 
 ## Constraints
 
