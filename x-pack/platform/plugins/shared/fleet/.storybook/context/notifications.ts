@@ -33,6 +33,12 @@ const notifications: NotificationsStart = {
   tours: {
     isEnabled: () => true,
   },
+  events: {
+    get$: () => of([]),
+    registerType: () => () => {},
+    notify: () => {},
+    markAsRead: () => {},
+  },
 };
 
 export const getNotifications = () => notifications;

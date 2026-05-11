@@ -56,6 +56,12 @@ const notifications: NotificationsStart = {
   tours: {
     isEnabled: () => true,
   },
+  events: {
+    get$: () => of([]),
+    registerType: () => () => {},
+    notify: () => {},
+    markAsRead: () => {},
+  },
 };
 
 const userProfile = { getUserProfile$: () => of(null) };
