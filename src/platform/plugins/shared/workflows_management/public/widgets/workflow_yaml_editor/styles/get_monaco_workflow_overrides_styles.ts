@@ -144,7 +144,7 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
     .monaco-editor.monaco-editor .margin-view-overlays .codicon-folding-manual-expanded {
       padding-left: ${euiTheme.size.s};
       padding-right: ${euiTheme.size.s};
-      margin-left: 0;
+      margin: 0;
     }
   `;
 };
