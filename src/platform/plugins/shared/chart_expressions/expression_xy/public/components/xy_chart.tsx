@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import type {
   ElementClickListener,
@@ -19,7 +19,7 @@ import type {
   XYChartElementEvent,
   XYChartSeriesIdentifier,
   SettingsProps,
-  Truncate,
+  AxisStyle,
 } from '@elastic/charts';
 import {
   Chart,
@@ -309,28 +309,6 @@ export function XYChart({
   );
 
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
-
-  const chartContainerRef = useRef<HTMLDivElement>(null);
-  const [chartContainerWidth, setChartContainerWidth] = useState(0);
-
-  useLayoutEffect(() => {
-    const element = chartContainerRef.current;
-    if (!element) {
-      return undefined;
-    }
-    const observer = new ResizeObserver((entries) => {
-      const width = entries[0]?.contentRect.width;
-      if (typeof width === 'number') {
-        setChartContainerWidth(width);
-      }
-    });
-    observer.observe(element);
-    setChartContainerWidth(element.getBoundingClientRect().width);
-    return () => {
-      observer.disconnect();
-    };
-  }, [dataLayers.length]);
-
   const isTimeViz = isTimeChart(dataLayers);
 
   useEffect(() => {
@@ -694,7 +672,7 @@ export function XYChart({
     strokeWidth: 1,
   };
 
-  const getYAxesStyle = (axis: AxisConfiguration) => {
+  const getYAxesStyle = (axis: AxisConfiguration): RecursivePartial<AxisStyle> => {
     const tickVisible = axis.showLabels;
     const position = getOriginalAxisPosition(axis.position, shouldRotate);
     const style = {
@@ -708,7 +686,7 @@ export function XYChart({
                 inner: linesPaddings[position],
               }
             : undefined,
-        truncation: axis.truncate ? { width: axis.truncate, position: 'end' as const } : undefined,
+        maxLength: axis.truncate,
       },
       axisTitle: {
         visible: axis.showTitle,
@@ -724,34 +702,16 @@ export function XYChart({
     return style;
   };
 
-  const getXAxisStyle = () => {
-    const DEFAULT_HORIZONTAL_BAR_X_AXIS_TICK_TRUNCATE_MIN_PX = 200;
-    const DEFAULT_HORIZONTAL_BAR_X_AXIS_TICK_TRUNCATE_WIDTH_RELATIVE = 0.3;
-
-    let truncateStyle: Truncate | undefined =
-      xAxisConfig?.truncate !== undefined
-        ? { width: xAxisConfig.truncate, position: 'end' }
-        : undefined;
-
-    if (truncateStyle === undefined && isHorizontalChart(dataLayers) && hasBars) {
-      const chartWidth =
-        Number.isFinite(chartContainerWidth) && chartContainerWidth > 0 ? chartContainerWidth : 0;
-
-      const value = Math.floor(
-        Math.max(
-          DEFAULT_HORIZONTAL_BAR_X_AXIS_TICK_TRUNCATE_MIN_PX,
-          DEFAULT_HORIZONTAL_BAR_X_AXIS_TICK_TRUNCATE_WIDTH_RELATIVE * chartWidth
-        )
-      );
-      truncateStyle = { width: value, position: 'middle' as const };
-    }
+  const getXAxisStyle = (): RecursivePartial<AxisStyle> => {
+    const isHorizontalBarChart = isHorizontalChart(dataLayers) && hasBars;
+    const MAX_LENGTH_FOR_HORIZONTAL_BAR_CHART = '40%';
 
     if (isHorizontalTimeAxis) {
       return {
         tickLabel: {
           visible: Boolean(xAxisConfig?.showLabels),
           fill: xAxisConfig?.labelColor,
-          truncation: truncateStyle,
+          maxLength: xAxisConfig?.truncate,
         },
         tickLine: {
           visible: Boolean(xAxisConfig?.showLabels),
@@ -768,7 +728,10 @@ export function XYChart({
         rotation: xAxisConfig?.labelsOrientation,
         padding: linesPaddings.bottom != null ? { inner: linesPaddings.bottom } : undefined,
         fill: xAxisConfig?.labelColor,
-        truncation: truncateStyle,
+        maxLength:
+          xAxisConfig?.truncate ??
+          (isHorizontalBarChart ? MAX_LENGTH_FOR_HORIZONTAL_BAR_CHART : undefined),
+        truncate: isHorizontalBarChart ? ('middle' as const) : undefined,
       },
       axisTitle: {
         visible: xAxisConfig?.showTitle,
@@ -817,7 +780,7 @@ export function XYChart({
   return (
     <>
       <GlobalXYChartStyles />
-      <div ref={chartContainerRef} css={chartContainerStyle}>
+      <div css={chartContainerStyle}>
         {showLegend !== undefined && uiState && (
           <LegendToggle
             onClick={toggleLegend}
