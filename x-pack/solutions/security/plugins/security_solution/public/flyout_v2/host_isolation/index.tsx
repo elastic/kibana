@@ -96,6 +96,7 @@ export const HostIsolation: FC<HostIsolationProps> = memo(
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <HostIsolationView
+            hit={hit}
             detailsData={detailsData}
             isolateAction={isolateAction}
             onClose={onClose}

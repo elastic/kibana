@@ -7,9 +7,17 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { HostIsolationView } from './host_isolation_view';
 import { HOST_ISOLATION_PANEL_TEST_ID } from '../test_ids';
 import { endpointAlertDataMock } from '../../../common/mock/endpoint';
+
+const hit: DataTableRecord = {
+  id: 'alert-1',
+  raw: { _id: 'alert-1', _index: '.alerts-security.alerts-default' },
+  flattened: { _id: 'alert-1', 'host.name': 'host-a' },
+  isAnchor: false,
+} as DataTableRecord;
 
 jest.mock('../../../common/components/endpoint/host_isolation', () => ({
   EndpointIsolateSuccess: ({ isolateAction }: { isolateAction: string }) => (
@@ -43,6 +51,7 @@ describe('<HostIsolationView />', () => {
   it('renders the panel without the success banner initially', () => {
     const { getByTestId, queryByTestId } = render(
       <HostIsolationView
+        hit={hit}
         detailsData={detailsData}
         isolateAction="isolateHost"
         onClose={jest.fn()}
@@ -56,6 +65,7 @@ describe('<HostIsolationView />', () => {
   it('shows the success banner after the form reports success', () => {
     const { getByTestId } = render(
       <HostIsolationView
+        hit={hit}
         detailsData={detailsData}
         isolateAction="isolateHost"
         onClose={jest.fn()}
@@ -71,6 +81,7 @@ describe('<HostIsolationView />', () => {
     const onClose = jest.fn();
     const { getByTestId } = render(
       <HostIsolationView
+        hit={hit}
         detailsData={detailsData}
         isolateAction="unisolateHost"
         onClose={onClose}
@@ -85,6 +96,7 @@ describe('<HostIsolationView />', () => {
   it('renders the release banner copy when action is unisolateHost', () => {
     const { getByTestId } = render(
       <HostIsolationView
+        hit={hit}
         detailsData={detailsData}
         isolateAction="unisolateHost"
         onClose={jest.fn()}

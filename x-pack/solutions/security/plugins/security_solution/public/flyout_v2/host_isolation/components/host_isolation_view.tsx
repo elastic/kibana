@@ -8,15 +8,20 @@
 import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { getFieldValue } from '@kbn/discover-utils';
 import {
   EndpointIsolateSuccess,
   HostIsolationPanel,
 } from '../../../common/components/endpoint/host_isolation';
 import { useWithCaseDetailsRefresh } from '../../../common/components/endpoint';
-import { useBasicDataFromDetailsData } from '../../../flyout/document_details/shared/hooks/use_basic_data_from_details_data';
 import { HOST_ISOLATION_PANEL_TEST_ID } from '../test_ids';
 
 export interface HostIsolationViewProps {
+  /**
+   * Discover-shaped document. Source of alert id and host name.
+   */
+  hit: DataTableRecord;
   /**
    * Field-browser shaped data for the alert. Drives the legacy isolate form.
    */
@@ -36,11 +41,13 @@ export interface HostIsolationViewProps {
  * form and a success banner once the action completes.
  */
 export const HostIsolationView: FC<HostIsolationViewProps> = ({
+  hit,
   detailsData,
   isolateAction,
   onClose,
 }) => {
-  const { alertId, hostName } = useBasicDataFromDetailsData(detailsData);
+  const alertId = getFieldValue(hit, '_id') as string;
+  const hostName = getFieldValue(hit, 'host.name') as string;
   const caseDetailsRefresh = useWithCaseDetailsRefresh();
   const [isSuccess, setIsSuccess] = useState(false);
 
