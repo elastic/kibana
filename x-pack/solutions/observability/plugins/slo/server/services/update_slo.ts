@@ -31,7 +31,6 @@ import { retryTransientEsErrors } from '../utils/retry';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import type { TransformManager } from './transform_manager';
-import { TYPE as ORPHAN_CLEANUP_TASK_TYPE } from './tasks/orphan_summary_cleanup_task/orphan_summary_cleanup_task';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 
 export class UpdateSLO {
