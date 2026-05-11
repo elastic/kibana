@@ -8,6 +8,7 @@
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type {
+  CorrectnessAnalysis,
   EvalsExecutorClient,
   EvaluationDataset,
   Evaluator,
@@ -58,6 +59,8 @@ export type AlertsRagDatasetExample = Example<
 
 export interface AlertsRagTaskOutput {
   answer: string;
+  messages: Array<{ message: string }>;
+  correctnessAnalysis: CorrectnessAnalysis | null;
 }
 
 export type EvaluateAlertsRagDataset = (options: {
@@ -149,7 +152,7 @@ export const createEvaluateAlertsRagDataset = ({
         task: async (example): Promise<AlertsRagTaskOutput> => {
           const input = example.input;
           if (!input) {
-            return { answer: '' };
+            return { answer: '', messages: [], correctnessAnalysis: null };
           }
           const { question, context } = input;
           const questionPreview = `${question.slice(0, 120)}${question.length > 120 ? '...' : ''}`;
@@ -187,7 +190,7 @@ export const createEvaluateAlertsRagDataset = ({
             response.content.length > 500 ? '...' : ''
           }`;
           log.info(`[alerts-rag] task response: answer="${answerPreview}"`);
-          return { answer: response.content };
+          return { answer: response.content, messages: [], correctnessAnalysis: null };
         },
       },
       evaluators
