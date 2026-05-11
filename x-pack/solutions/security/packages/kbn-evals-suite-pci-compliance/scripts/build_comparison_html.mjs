@@ -64,6 +64,11 @@ const args = (() => {
     autonomous: resolve(PKG_DIR, 'runs/autonomous'),
     out: resolve(PKG_DIR, 'comparison.html'),
     runs: null,
+    // Holdout runs are structurally identical to --runs entries — they point at
+    // a `results.json` from a Scout boot with `--grep HOLDOUT` against the same
+    // suite. Each label (e.g. `sonnet46-autonomous`) is expected to also appear
+    // in --runs so the gap section can pair them.
+    holdoutRuns: null,
   };
   const argv = process.argv.slice(2);
   for (let i = 0; i < argv.length; i += 1) {
@@ -71,12 +76,13 @@ const args = (() => {
     if (a === '--handwritten') out.handwritten = resolve(argv[++i]);
     else if (a === '--autonomous') out.autonomous = resolve(argv[++i]);
     else if (a === '--out') out.out = resolve(argv[++i]);
-    else if (a === '--runs') {
-      out.runs = {};
+    else if (a === '--runs' || a === '--holdout-runs') {
+      const target = a === '--holdout-runs' ? 'holdoutRuns' : 'runs';
+      out[target] = out[target] ?? {};
       for (const pair of argv[++i].split(',')) {
         const [label, dir] = pair.split('=');
-        if (!label || !dir) throw new Error(`invalid --runs entry: ${pair}`);
-        out.runs[label.trim()] = resolve(dir.trim());
+        if (!label || !dir) throw new Error(`invalid ${a} entry: ${pair}`);
+        out[target][label.trim()] = resolve(dir.trim());
       }
     } else if (a === '-h' || a === '--help') {
       process.stdout.write(
@@ -262,6 +268,58 @@ const multiRuns = args.runs
   : null;
 const multiRunsAvailable =
   multiRuns && Object.values(multiRuns).every((r) => r.populated);
+
+// Holdout runs share the same label vocabulary as the iteration runs above —
+// the pairing is by label. A label that appears in BOTH `args.runs` and
+// `args.holdoutRuns` contributes one row to the generalisation-gap table in §5.
+const holdoutRuns = args.holdoutRuns
+  ? Object.fromEntries(
+      Object.entries(args.holdoutRuns).map(([k, dir]) => [k, loadVariantResults(dir)])
+    )
+  : null;
+const holdoutRunsAvailable =
+  holdoutRuns && Object.values(holdoutRuns).every((r) => r.populated);
+
+/**
+ * Compute the mean score across an array of scenario rows, ignoring NaN /
+ * undefined entries (these come from rows the evaluator framework wrote with
+ * a non-`PCI Criteria` evaluator, e.g. the `Skill Invoked` categorical one).
+ */
+function meanScore(scenarios) {
+  let total = 0;
+  let n = 0;
+  for (const s of scenarios ?? []) {
+    if (Number.isFinite(s.score)) {
+      total += s.score;
+      n += 1;
+    }
+  }
+  return { mean: n ? total / n : NaN, n };
+}
+
+/**
+ * Verdict bands for the iteration−holdout gap.
+ *
+ *   gap < 0.05  → CLEAN. Iteration loop has stayed principled; the skill
+ *                 generalises across surface changes.
+ *   0.05 ≤ gap < 0.10 → CAUTION. Inspect the last few skill edits — anything
+ *                 referencing a specific fixture value, count, or index name
+ *                 is a candidate for rewording.
+ *   gap ≥ 0.10  → OVERFIT ALERT. Revert the last skill edit and re-author it
+ *                 as a general principle (e.g. "discover scope before issuing
+ *                 queries") rather than a patch.
+ *
+ * The thresholds are deliberately conservative — even a 5% drop on out-of-
+ * distribution data is meaningful when individual scenarios are scored on
+ * 5–7 criteria each.
+ */
+function gapVerdict(gap) {
+  if (!Number.isFinite(gap)) return { label: '—', cls: '' };
+  const abs = Math.abs(gap);
+  if (abs < 0.05) return { label: 'CLEAN — skill generalises', cls: 'delta-positive' };
+  if (abs < 0.10) return { label: 'CAUTION — audit last few edits', cls: '' };
+  return { label: 'OVERFIT ALERT — revert + reformulate', cls: 'delta-negative' };
+}
 
 // ─── compute per-scenario diff if live results are available ───────────────
 function diffScenarios(handwritten, autonomous) {
@@ -686,7 +744,175 @@ The handwritten variant is the existing <code>kbn-evals-weekly-pci-compliance</c
 </div>`
 }
 
-<h2>5 · Reasoning — what each skill is optimised for</h2>
+<h2>5 · Generalisation gap — iteration vs holdout</h2>
+${
+  holdoutRunsAvailable && multiRunsAvailable
+    ? (() => {
+        const PAIRS = [
+          ['sonnet46-handwritten', 'Hand-written · Sonnet 4.6'],
+          ['sonnet46-autonomous-v5', 'Autonomous v5 · Sonnet 4.6 (own tools)'],
+        ].filter(
+          ([k]) =>
+            holdoutRuns[k.replace('-v5', '')]?.populated ||
+            holdoutRuns[k]?.populated
+        );
+        // Per-variant rows.
+        const rows = PAIRS.map(([k, label]) => {
+          // The iteration label keeps the -v5 suffix to disambiguate iteration
+          // generations; the holdout was run once against the latest, so the
+          // holdout label drops the -v5 and matches the variant family.
+          const iterStats = meanScore(multiRuns[k]?.scenarios ?? []);
+          const holdoutKey = k.replace('-v5', '');
+          const holdoutStats = meanScore(holdoutRuns[holdoutKey]?.scenarios ?? []);
+          const gap = iterStats.mean - holdoutStats.mean;
+          const verdict = gapVerdict(gap);
+          return {
+            label,
+            iter: iterStats,
+            holdout: holdoutStats,
+            gap,
+            verdict,
+            holdoutScenarios: holdoutRuns[holdoutKey]?.scenarios ?? [],
+          };
+        });
+        const tableRows = rows
+          .map(
+            (r) =>
+              `<tr>
+  <td>${escapeHtml(r.label)}</td>
+  <td class="num">${Number.isFinite(r.iter.mean) ? r.iter.mean.toFixed(3) : '—'} <span class="footnote">(n=${r.iter.n})</span></td>
+  <td class="num">${Number.isFinite(r.holdout.mean) ? r.holdout.mean.toFixed(3) : '—'} <span class="footnote">(n=${r.holdout.n})</span></td>
+  <td class="num ${r.verdict.cls}">${Number.isFinite(r.gap) ? (r.gap >= 0 ? '+' : '') + r.gap.toFixed(3) : '—'}</td>
+  <td>${escapeHtml(r.verdict.label)}</td>
+</tr>`
+          )
+          .join('\n');
+
+        // Aggregate verdict — worst (most negative) gap drives the banner.
+        const worst = rows.reduce(
+          (acc, r) => (Number.isFinite(r.gap) && r.gap > acc.gap ? { gap: r.gap, label: r.label, verdict: r.verdict } : acc),
+          { gap: -Infinity, label: null, verdict: { label: '—', cls: '' } }
+        );
+        const bannerCls =
+          worst.verdict.cls === 'delta-positive'
+            ? 'banner-success'
+            : worst.verdict.cls === 'delta-negative'
+            ? 'banner-warn'
+            : 'banner-info';
+        const banner = Number.isFinite(worst.gap)
+          ? `<div class="banner ${bannerCls}">
+<strong>${worst.label} drives the worst gap: ${(worst.gap >= 0 ? '+' : '') + worst.gap.toFixed(3)} (${worst.verdict.label}).</strong>
+${
+  Math.abs(worst.gap) < 0.05
+    ? 'Both variants generalise from the iteration set to the holdout set. The iteration loop has stayed principled — fixes have been encoded as general PCI knowledge, not as patches that match the iteration fixtures.'
+    : Math.abs(worst.gap) < 0.1
+    ? 'The skill scores noticeably lower on the holdout than on the iteration set. Audit the last few skill edits for fixture-coupling: do any of them reference specific user names, IP addresses, exact counts, or index-naming patterns from the iteration set? Reformulate as general principles.'
+    : 'The skill has overfit to the iteration fixtures. Revert the last skill edit and re-author it as a general principle. Consider also whether the holdout dataset has revealed a genuinely new capability the skill lacks (in which case extend the skill to teach it, then re-measure).'
+}
+</div>`
+          : '';
+
+        // Per-scenario holdout details.
+        const holdoutScenarios = new Set();
+        for (const r of rows)
+          for (const s of r.holdoutScenarios) holdoutScenarios.add(s.scenario);
+        const holdoutDetailRows = [...holdoutScenarios].sort().map((scn) => {
+          const cells = rows
+            .map((r) => {
+              const found = r.holdoutScenarios.find((x) => x.scenario === scn);
+              const score = found?.score;
+              return Number.isFinite(score)
+                ? `<td class="num">${score.toFixed(3)}</td>`
+                : `<td class="num">—</td>`;
+            })
+            .join('');
+          return `<tr><td>${escapeHtml(scn)}</td>${cells}</tr>`;
+        });
+        const holdoutDetailHeader = rows
+          .map((r) => `<th>${escapeHtml(r.label)}</th>`)
+          .join('');
+
+        return `<p class="lead">
+  Section §4 above scores against the iteration dataset — the fixtures we
+  inspected while improving the skill. A high iteration score could mean the
+  skill is genuinely good at PCI, <em>or</em> it could mean the skill has
+  encoded the iteration fixtures into its content and is gaming the rubric.
+  To tell those apart, the same skill is run against a holdout dataset
+  (<code>pci_data_holdout.ts</code>) whose surface differs from the iteration
+  set on every memorisable axis while the PCI capabilities under test are the
+  same. The gap between iteration mean and holdout mean is the overfitting
+  measurement.
+</p>
+${banner}
+<table>
+  <thead>
+    <tr>
+      <th>Variant</th>
+      <th>Iteration mean</th>
+      <th>Holdout mean</th>
+      <th>Gap (iter − holdout)</th>
+      <th>Verdict</th>
+    </tr>
+  </thead>
+  <tbody>
+${tableRows}
+  </tbody>
+</table>
+
+<details>
+  <summary>Divergence axes between iteration and holdout</summary>
+  <table>
+    <thead><tr><th>Axis</th><th>Iteration dataset</th><th>Holdout dataset</th></tr></thead>
+    <tbody>
+      <tr><td>Index naming</td><td><code>logs-&lt;hex&gt;-{auth,network,vuln,endpoint,custom}</code></td><td><code>security-audit-identity-*</code>, <code>siem-flows-prod-*</code>, <code>pkginfo-cve-*</code>, <code>edr-processes-*</code>, <code>legacy-app-syslog-*</code></td></tr>
+      <tr><td>Brute-force volume</td><td>12 failures (ABOVE the 8.3.4 threshold of 10) → expect RED</td><td>8 failures (BELOW the threshold) → expect GREEN; tests false-positive resistance</td></tr>
+      <tr><td>Brute-force user</td><td><code>jdoe</code> from <code>192.168.1.100</code></td><td><code>pcompton</code> from <code>10.20.30.40</code></td></tr>
+      <tr><td>Default-account flavours</td><td>Unix <code>admin</code> + <code>root</code></td><td>Windows <code>Administrator</code> + service account <code>service_acct_42</code></td></tr>
+      <tr><td>Weak TLS signature</td><td>TLS 1.0 + TLS 1.1 + plain HTTP (kitchen sink)</td><td>TLS 1.1 alone (sub-version recognition test)</td></tr>
+      <tr><td>Non-ECS field names</td><td><code>username</code>, <code>src_ip</code>, <code>auth_result</code>, <code>operation</code>, <code>hostname</code>, …</td><td><code>actor_name</code>, <code>client_addr</code>, <code>action_status</code>, <code>event_verb</code>, <code>device_id</code>, …</td></tr>
+      <tr><td>CVE year</td><td>2024</td><td>2025</td></tr>
+      <tr><td>Time window</td><td>Last hour (~10–30 min)</td><td>Last 4 hours (events 30 min – 3 h ago)</td></tr>
+    </tbody>
+  </table>
+</details>
+
+<details>
+  <summary>Per-scenario holdout breakdown (${holdoutScenarios.size} scenarios)</summary>
+  <table>
+    <thead><tr><th>Holdout scenario</th>${holdoutDetailHeader}</tr></thead>
+    <tbody>
+${holdoutDetailRows.join('\n')}
+    </tbody>
+  </table>
+</details>
+
+<p class="footnote">
+  <strong>Anti-overfit lockdown.</strong> The autonomous skill test suite
+  (<code>pci_compliance_autonomous_skill.test.ts</code>) asserts that the skill
+  content contains <em>none</em> of the iteration- or holdout-set fixture
+  values (11 invariants, e.g. <code>jdoe</code>, <code>pcompton</code>,
+  <code>192.168.1.100</code>, <code>10.20.30.40</code>, <code>logs-&lt;hex&gt;-auth</code>).
+  This makes "memorise the fixture" overfitting impossible at the skill
+  content level — any future iteration must encode general PCI principles, not
+  fixture-specific patches. The holdout gap is the second layer: it catches
+  more subtle overfits (e.g. tool-name coupling, rubric-vocabulary mirroring)
+  that the lockdown test cannot see.
+</p>`;
+      })()
+    : `<div class="banner banner-info">
+<strong>Generalisation gap not yet measured.</strong> The holdout dataset
+(<code>pci_data_holdout.ts</code>) and spec (<code>pci_compliance_holdout.spec.ts</code>)
+are wired and ready. Populate this section by running one Scout pass per variant
+with <code>--grep HOLDOUT</code>:
+<pre>./x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/scripts/run-eval.sh \\
+    handwritten pmeClaudeV46SonnetUsEast1 sonnet46-handwritten-holdout HOLDOUT
+./x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/scripts/run-eval.sh \\
+    autonomous  pmeClaudeV46SonnetUsEast1 sonnet46-autonomous-holdout  HOLDOUT</pre>
+Then re-run this builder with both <code>--runs</code> and <code>--holdout-runs</code>.
+</div>`
+}
+
+<h2>6 · Reasoning — what each skill is optimised for</h2>
 <div class="twocol">
   <div>
     <h4>Hand-written (Smriti)</h4>
@@ -708,7 +934,7 @@ The handwritten variant is the existing <code>kbn-evals-weekly-pci-compliance</c
   </div>
 </div>
 
-<h2>6 · How to reproduce</h2>
+<h2>7 · How to reproduce</h2>
 <details open>
 <summary>The 30-second version</summary>
 <pre>cd kibana
@@ -736,7 +962,7 @@ EVAL_PCI_VARIANT=autonomous node scripts/evals start --suite pci-compliance-auto
 <p>The pipeline already contains both <code>kbn-evals-weekly-pci-compliance</code> and the new <code>kbn-evals-weekly-pci-compliance-autonomous</code> steps; results land in the standard <code>kbn-evals</code> Elasticsearch index for trace inspection.</p>
 </details>
 
-<h2>7 · Provenance &amp; honesty</h2>
+<h2>8 · Provenance &amp; honesty</h2>
 <p>This report is generated by <code>scripts/build_comparison_html.mjs</code> from:</p>
 <ul>
   <li>Hand-written skill source: <code>x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/pci_compliance/pci_compliance_skill.ts</code></li>
@@ -745,7 +971,7 @@ EVAL_PCI_VARIANT=autonomous node scripts/evals start --suite pci-compliance-auto
   <li>Live results (when present): <code>${escapeHtml(repoRelative(handwrittenResults.dir))}/results.json</code> &amp; <code>${escapeHtml(repoRelative(autonomousResults.dir))}/results.json</code></li>
 </ul>
 
-<h2>8 · Bedrock connector fix (Claude Opus 4.7 enablement)</h2>
+<h2>9 · Bedrock connector fix (Claude Opus 4.7 enablement)</h2>
 <p class="lead">
   Running the suite against Claude 4.7 Opus on Bedrock requires omitting the
   <code>temperature</code> inference parameter — the model rejects it with

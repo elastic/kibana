@@ -50,11 +50,14 @@ SCOUT_READ_DEV_CONFIG=true node scripts/scout.js start-server \
 SCOUT_PID=$!
 echo "[run-eval] scout pid=$SCOUT_PID"
 
-# Wait up to 6 min for scout to come up
+# Wait up to 15 min for scout to come up. The 6-min default is fine for cold
+# starts on a quiet machine, but Kibana initialisation with the full evals +
+# agent-builder feature flags routinely needs 8-10 min when the host is also
+# running an IDE + other long-lived processes.
 WAITED=0
 while ! grep -q "ready for functional testing" "$SCOUT_LOG" 2>/dev/null; do
-  if [ $WAITED -ge 360 ]; then
-    echo "[run-eval] scout never reported ready in 6 min; bailing" >&2
+  if [ $WAITED -ge 900 ]; then
+    echo "[run-eval] scout never reported ready in 15 min; bailing" >&2
     kill -KILL $SCOUT_PID 2>/dev/null || true
     exit 11
   fi

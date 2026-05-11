@@ -63,7 +63,7 @@
 </p>
 
 <div class="pillrow">
-  <span class="pill">generated: 2026-05-11T16:53:25.941Z</span>
+  <span class="pill">generated: 2026-05-11T18:07:51.609Z</span>
   <span class="pill">hand-written by: <strong>Smriti</strong> (PR #256060)</span>
   <span class="pill">autonomous by: <strong>skill.architect</strong> (cycle-17)</span>
   <span class="pill">eval suite: <code>@kbn/evals-suite-pci-compliance</code> (8 scenarios)</span>
@@ -86,7 +86,7 @@
     <div class="value">HW: 3 / Auto: 3</div>
     <div class="footnote">More boundaries → less activation drift on adjacent topics.</div></div>
   <div class="kpi"><div class="label">Skill-contract tests</div>
-    <div class="value">HW: 11 / Auto: 17</div>
+    <div class="value">HW: 11 / Auto: 18</div>
     <div class="footnote">Both lock in tool-id parity and v4.0.1 invariants.</div></div>
   <div class="kpi"><div class="label">Live eval scenarios</div>
     <div class="value">8</div>
@@ -193,7 +193,96 @@ sonnet46-autonomous-v3: x-pack/solutions/security/packages/kbn-evals-suite-pci-c
 sonnet46-autonomous-v5: x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/sonnet46-autonomous-v5-full/results.json</pre>
 </details>
 
-<h2>5 · Reasoning — what each skill is optimised for</h2>
+<h2>5 · Generalisation gap — iteration vs holdout</h2>
+<p class="lead">
+  Section §4 above scores against the iteration dataset — the fixtures we
+  inspected while improving the skill. A high iteration score could mean the
+  skill is genuinely good at PCI, <em>or</em> it could mean the skill has
+  encoded the iteration fixtures into its content and is gaming the rubric.
+  To tell those apart, the same skill is run against a holdout dataset
+  (<code>pci_data_holdout.ts</code>) whose surface differs from the iteration
+  set on every memorisable axis while the PCI capabilities under test are the
+  same. The gap between iteration mean and holdout mean is the overfitting
+  measurement.
+</p>
+<div class="banner banner-info">
+<strong>Autonomous v5 · Sonnet 4.6 (own tools) drives the worst gap: +0.062 (CAUTION — audit last few edits).</strong>
+The skill scores noticeably lower on the holdout than on the iteration set. Audit the last few skill edits for fixture-coupling: do any of them reference specific user names, IP addresses, exact counts, or index-naming patterns from the iteration set? Reformulate as general principles.
+</div>
+<table>
+  <thead>
+    <tr>
+      <th>Variant</th>
+      <th>Iteration mean</th>
+      <th>Holdout mean</th>
+      <th>Gap (iter − holdout)</th>
+      <th>Verdict</th>
+    </tr>
+  </thead>
+  <tbody>
+<tr>
+  <td>Hand-written · Sonnet 4.6</td>
+  <td class="num">0.989 <span class="footnote">(n=8)</span></td>
+  <td class="num">0.942 <span class="footnote">(n=6)</span></td>
+  <td class="num delta-positive">+0.047</td>
+  <td>CLEAN — skill generalises</td>
+</tr>
+<tr>
+  <td>Autonomous v5 · Sonnet 4.6 (own tools)</td>
+  <td class="num">0.989 <span class="footnote">(n=8)</span></td>
+  <td class="num">0.927 <span class="footnote">(n=6)</span></td>
+  <td class="num ">+0.062</td>
+  <td>CAUTION — audit last few edits</td>
+</tr>
+  </tbody>
+</table>
+
+<details>
+  <summary>Divergence axes between iteration and holdout</summary>
+  <table>
+    <thead><tr><th>Axis</th><th>Iteration dataset</th><th>Holdout dataset</th></tr></thead>
+    <tbody>
+      <tr><td>Index naming</td><td><code>logs-&lt;hex&gt;-{auth,network,vuln,endpoint,custom}</code></td><td><code>security-audit-identity-*</code>, <code>siem-flows-prod-*</code>, <code>pkginfo-cve-*</code>, <code>edr-processes-*</code>, <code>legacy-app-syslog-*</code></td></tr>
+      <tr><td>Brute-force volume</td><td>12 failures (ABOVE the 8.3.4 threshold of 10) → expect RED</td><td>8 failures (BELOW the threshold) → expect GREEN; tests false-positive resistance</td></tr>
+      <tr><td>Brute-force user</td><td><code>jdoe</code> from <code>192.168.1.100</code></td><td><code>pcompton</code> from <code>10.20.30.40</code></td></tr>
+      <tr><td>Default-account flavours</td><td>Unix <code>admin</code> + <code>root</code></td><td>Windows <code>Administrator</code> + service account <code>service_acct_42</code></td></tr>
+      <tr><td>Weak TLS signature</td><td>TLS 1.0 + TLS 1.1 + plain HTTP (kitchen sink)</td><td>TLS 1.1 alone (sub-version recognition test)</td></tr>
+      <tr><td>Non-ECS field names</td><td><code>username</code>, <code>src_ip</code>, <code>auth_result</code>, <code>operation</code>, <code>hostname</code>, …</td><td><code>actor_name</code>, <code>client_addr</code>, <code>action_status</code>, <code>event_verb</code>, <code>device_id</code>, …</td></tr>
+      <tr><td>CVE year</td><td>2024</td><td>2025</td></tr>
+      <tr><td>Time window</td><td>Last hour (~10–30 min)</td><td>Last 4 hours (events 30 min – 3 h ago)</td></tr>
+    </tbody>
+  </table>
+</details>
+
+<details>
+  <summary>Per-scenario holdout breakdown (6 scenarios)</summary>
+  <table>
+    <thead><tr><th>Holdout scenario</th><th>Hand-written · Sonnet 4.6</th><th>Autonomous v5 · Sonnet 4.6 (own tools)</th></tr></thead>
+    <tbody>
+<tr><td>pci-holdout: 4h scorecard</td><td class="num">0.900</td><td class="num">0.900</td></tr>
+<tr><td>pci-holdout: TLS 1.1 only</td><td class="num">1.000</td><td class="num">1.000</td></tr>
+<tr><td>pci-holdout: below-threshold brute force</td><td class="num">1.000</td><td class="num">1.000</td></tr>
+<tr><td>pci-holdout: default-account variants</td><td class="num">0.750</td><td class="num">0.750</td></tr>
+<tr><td>pci-holdout: field mapping new vocabulary</td><td class="num">1.000</td><td class="num">0.909</td></tr>
+<tr><td>pci-holdout: scope discovery non-standard naming</td><td class="num">1.000</td><td class="num">1.000</td></tr>
+    </tbody>
+  </table>
+</details>
+
+<p class="footnote">
+  <strong>Anti-overfit lockdown.</strong> The autonomous skill test suite
+  (<code>pci_compliance_autonomous_skill.test.ts</code>) asserts that the skill
+  content contains <em>none</em> of the iteration- or holdout-set fixture
+  values (11 invariants, e.g. <code>jdoe</code>, <code>pcompton</code>,
+  <code>192.168.1.100</code>, <code>10.20.30.40</code>, <code>logs-&lt;hex&gt;-auth</code>).
+  This makes "memorise the fixture" overfitting impossible at the skill
+  content level — any future iteration must encode general PCI principles, not
+  fixture-specific patches. The holdout gap is the second layer: it catches
+  more subtle overfits (e.g. tool-name coupling, rubric-vocabulary mirroring)
+  that the lockdown test cannot see.
+</p>
+
+<h2>6 · Reasoning — what each skill is optimised for</h2>
 <div class="twocol">
   <div>
     <h4>Hand-written (Smriti)</h4>
@@ -215,7 +304,7 @@ sonnet46-autonomous-v5: x-pack/solutions/security/packages/kbn-evals-suite-pci-c
   </div>
 </div>
 
-<h2>6 · How to reproduce</h2>
+<h2>7 · How to reproduce</h2>
 <details open>
 <summary>The 30-second version</summary>
 <pre>cd kibana
@@ -243,7 +332,7 @@ EVAL_PCI_VARIANT=autonomous node scripts/evals start --suite pci-compliance-auto
 <p>The pipeline already contains both <code>kbn-evals-weekly-pci-compliance</code> and the new <code>kbn-evals-weekly-pci-compliance-autonomous</code> steps; results land in the standard <code>kbn-evals</code> Elasticsearch index for trace inspection.</p>
 </details>
 
-<h2>7 · Provenance &amp; honesty</h2>
+<h2>8 · Provenance &amp; honesty</h2>
 <p>This report is generated by <code>scripts/build_comparison_html.mjs</code> from:</p>
 <ul>
   <li>Hand-written skill source: <code>x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/pci_compliance/pci_compliance_skill.ts</code></li>
@@ -252,7 +341,7 @@ EVAL_PCI_VARIANT=autonomous node scripts/evals start --suite pci-compliance-auto
   <li>Live results (when present): <code>x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/handwritten/results.json</code> &amp; <code>x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/autonomous/results.json</code></li>
 </ul>
 
-<h2>8 · Bedrock connector fix (Claude Opus 4.7 enablement)</h2>
+<h2>9 · Bedrock connector fix (Claude Opus 4.7 enablement)</h2>
 <p class="lead">
   Running the suite against Claude 4.7 Opus on Bedrock requires omitting the
   <code>temperature</code> inference parameter — the model rejects it with
