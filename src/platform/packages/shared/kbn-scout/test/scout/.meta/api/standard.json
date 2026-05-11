@@ -1,5 +1,5 @@
 {
-  "sha1": "81ca55edd8013ae20a5f35a456fde38025400418",
+  "sha1": "e8146a9b3e284afb91b1433d5fa1c5e67025e5a3",
   "tests": [
     {
       "id": "f44f18cc703276d-178a4921f7b18d0",
@@ -450,55 +450,7 @@
       }
     },
     {
-      "id": "1ac39428f850160-0db434f3b0a7c11",
-      "title": "Fleet Integration Management should install a custom integration",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 28,
-        "column": 12
-      }
-    },
-    {
-      "id": "1ac39428f850160-4fbf626746dcffc",
-      "title": "Fleet Integration Management should delete an integration and return status code",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 34,
-        "column": 12
-      }
-    },
-    {
-      "id": "1ac39428f850160-3f9dd1df7ce971d",
-      "title": "Fleet Integration Management should handle delete of non-existent integration",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 44,
-        "column": 12
-      }
-    },
-    {
-      "id": "1ac39428f850160-a1fbb9043d34cc7",
+      "id": "7e3a1855f5e081b-a1fbb9043d34cc7",
       "title": "Fleet Agent Policies Management should get agent policies with query parameters",
       "expectedStatus": "passed",
       "tags": [
@@ -508,13 +460,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 74,
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_agent_policies.spec.ts",
+        "line": 32,
         "column": 12
       }
     },
     {
-      "id": "1ac39428f850160-2993bae6be1562a",
+      "id": "7e3a1855f5e081b-2993bae6be1562a",
       "title": "Fleet Agent Policies Management should create an agent policy with additional parameters",
       "expectedStatus": "passed",
       "tags": [
@@ -524,13 +476,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 85,
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_agent_policies.spec.ts",
+        "line": 43,
         "column": 12
       }
     },
     {
-      "id": "1ac39428f850160-edd65cbcfec5424",
+      "id": "7e3a1855f5e081b-edd65cbcfec5424",
       "title": "Fleet Agent Policies Management should update an agent policy",
       "expectedStatus": "passed",
       "tags": [
@@ -540,13 +492,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 106,
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_agent_policies.spec.ts",
+        "line": 64,
         "column": 12
       }
     },
     {
-      "id": "1ac39428f850160-b897c3ef548d7b5",
+      "id": "7e3a1855f5e081b-b897c3ef548d7b5",
       "title": "Fleet Agent Policies Management should bulk get agent policies",
       "expectedStatus": "passed",
       "tags": [
@@ -556,13 +508,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 131,
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_agent_policies.spec.ts",
+        "line": 89,
         "column": 12
       }
     },
     {
-      "id": "1ac39428f850160-2633914e42ffea8",
+      "id": "7e3a1855f5e081b-2633914e42ffea8",
       "title": "Fleet Agent Policies Management should delete an agent policy",
       "expectedStatus": "passed",
       "tags": [
@@ -572,13 +524,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 151,
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_agent_policies.spec.ts",
+        "line": 109,
         "column": 12
       }
     },
     {
-      "id": "1ac39428f850160-1e4a39abe840169",
+      "id": "7e3a1855f5e081b-1e4a39abe840169",
       "title": "Fleet Agent Policies Management should delete an agent policy with force flag",
       "expectedStatus": "passed",
       "tags": [
@@ -588,125 +540,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 162,
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_agent_policies.spec.ts",
+        "line": 120,
         "column": 12
       }
     },
     {
-      "id": "1ac39428f850160-041513758093b5d",
-      "title": "Fleet Outputs Management should get all outputs",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 189,
-        "column": 12
-      }
-    },
-    {
-      "id": "1ac39428f850160-1ceeea1f4f18b0a",
-      "title": "Fleet Outputs Management should get a specific output by ID",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 197,
-        "column": 12
-      }
-    },
-    {
-      "id": "1ac39428f850160-57aec8b030a14c4",
-      "title": "Fleet Outputs Management should create an output with additional parameters",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 211,
-        "column": 12
-      }
-    },
-    {
-      "id": "1ac39428f850160-9b6ecdc71c30d07",
-      "title": "Fleet Outputs Management should delete an output",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 232,
-        "column": 12
-      }
-    },
-    {
-      "id": "1ac39428f850160-2045e266f5c3994",
-      "title": "Fleet Server Hosts Management should get fleet server hosts",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 267,
-        "column": 12
-      }
-    },
-    {
-      "id": "1ac39428f850160-0dd9cd554941f9e",
-      "title": "Fleet Server Hosts Management should create a fleet server host with parameters",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 273,
-        "column": 12
-      }
-    },
-    {
-      "id": "1ac39428f850160-6a7a56d10bb14d9",
-      "title": "Fleet Server Hosts Management should delete a fleet server host",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete",
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 290,
-        "column": 12
-      }
-    },
-    {
-      "id": "1ac39428f850160-e7f6e669552d63a",
+      "id": "8ce376d6660bf72-e7f6e669552d63a",
       "title": "Fleet Agent Management should setup fleet agents",
       "expectedStatus": "passed",
       "tags": [
@@ -716,13 +556,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 312,
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_agent.spec.ts",
+        "line": 17,
         "column": 12
       }
     },
     {
-      "id": "1ac39428f850160-015134015804081",
+      "id": "8ce376d6660bf72-015134015804081",
       "title": "Fleet Agent Management should get agents with query parameters",
       "expectedStatus": "passed",
       "tags": [
@@ -732,13 +572,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 318,
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_agent.spec.ts",
+        "line": 23,
         "column": 12
       }
     },
     {
-      "id": "1ac39428f850160-688642bba3fe0dc",
+      "id": "8ce376d6660bf72-688642bba3fe0dc",
       "title": "Fleet Agent Management should handle delete of non-existent agent",
       "expectedStatus": "passed",
       "tags": [
@@ -748,13 +588,13 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 328,
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_agent.spec.ts",
+        "line": 33,
         "column": 12
       }
     },
     {
-      "id": "1ac39428f850160-a28714e7d3e9305",
+      "id": "c07dcc95895330d-a28714e7d3e9305",
       "title": "Fleet API Error Handling should handle bulk get with non-existent policy IDs",
       "expectedStatus": "passed",
       "tags": [
@@ -764,8 +604,160 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet.spec.ts",
-        "line": 343,
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_error_handling.spec.ts",
+        "line": 17,
+        "column": 12
+      }
+    },
+    {
+      "id": "0f67876189b233a-0db434f3b0a7c11",
+      "title": "Fleet Integration Management should install a custom integration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_integration.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
+    {
+      "id": "0f67876189b233a-4fbf626746dcffc",
+      "title": "Fleet Integration Management should delete an integration and return status code",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_integration.spec.ts",
+        "line": 34,
+        "column": 12
+      }
+    },
+    {
+      "id": "0f67876189b233a-3f9dd1df7ce971d",
+      "title": "Fleet Integration Management should handle delete of non-existent integration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_integration.spec.ts",
+        "line": 44,
+        "column": 12
+      }
+    },
+    {
+      "id": "fcdc171162933c7-041513758093b5d",
+      "title": "Fleet Outputs Management should get all outputs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_outputs.spec.ts",
+        "line": 24,
+        "column": 10
+      }
+    },
+    {
+      "id": "fcdc171162933c7-1ceeea1f4f18b0a",
+      "title": "Fleet Outputs Management should get a specific output by ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_outputs.spec.ts",
+        "line": 32,
+        "column": 10
+      }
+    },
+    {
+      "id": "fcdc171162933c7-57aec8b030a14c4",
+      "title": "Fleet Outputs Management should create an output with additional parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_outputs.spec.ts",
+        "line": 46,
+        "column": 10
+      }
+    },
+    {
+      "id": "fcdc171162933c7-9b6ecdc71c30d07",
+      "title": "Fleet Outputs Management should delete an output",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_outputs.spec.ts",
+        "line": 67,
+        "column": 10
+      }
+    },
+    {
+      "id": "bd96592b595942b-2045e266f5c3994",
+      "title": "Fleet Server Hosts Management should get fleet server hosts",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_server_hosts.spec.ts",
+        "line": 28,
+        "column": 12
+      }
+    },
+    {
+      "id": "bd96592b595942b-0dd9cd554941f9e",
+      "title": "Fleet Server Hosts Management should create a fleet server host with parameters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_server_hosts.spec.ts",
+        "line": 34,
+        "column": 12
+      }
+    },
+    {
+      "id": "bd96592b595942b-6a7a56d10bb14d9",
+      "title": "Fleet Server Hosts Management should delete a fleet server host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete",
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/packages/shared/kbn-scout/test/scout/api/tests/api_services/fleet_server_hosts.spec.ts",
+        "line": 51,
         "column": 12
       }
     },

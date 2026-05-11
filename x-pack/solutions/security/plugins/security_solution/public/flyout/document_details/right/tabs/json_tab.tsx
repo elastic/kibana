@@ -84,6 +84,7 @@ export const JsonTab = memo(() => {
           json={searchHit as unknown as Record<string, unknown>}
           height={editorHeight}
           hasLineNumbers={true}
+          enableFindAction={true}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

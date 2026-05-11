@@ -39,5 +39,8 @@ export type DeleteEntityEngineRequestParamsInput = z.input<typeof DeleteEntityEn
 
 export type DeleteEntityEngineResponse = z.infer<typeof DeleteEntityEngineResponse>;
 export const DeleteEntityEngineResponse = z.object({
+  /**
+   * Whether the engine was successfully deleted.
+   */
   deleted: z.boolean().optional(),
 });

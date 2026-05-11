@@ -51,7 +51,8 @@ const getRoleWithoutResponseActionsHistory = () => {
   };
 };
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/263671
+describe.skip(
   'Automated Response Actions',
   {
     // skipped in serverless for now since custom roles are not yet supported, and this test relies on a custom role

@@ -1,11 +1,13 @@
 # Define which plugins and packages should be run or skipped in Kibana CI pipeline
 plugins:
   enabled:
+    - data
     - data_views
     - console
     - discover_enhanced
     - exploratory_view
     - index_management
+    - logstash
     - maps
     - observability_onboarding
     - painless_lab
@@ -24,6 +26,7 @@ plugins:
 
 packages:
   enabled:
+    - core
     - kbn-scout
   disabled:
     - kbn-scout-release-testing # Release tests will run separately as part of the release process

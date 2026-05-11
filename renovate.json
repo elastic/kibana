@@ -184,7 +184,6 @@
         "eventsource-parser",
         "fast-glob",
         "gpt-tokenizer",
-        "langsmith",
         "openai",
         "@types/json-schema",
         "table",
@@ -531,15 +530,9 @@
       "enabled": true
     },
     {
-      "matchDepNames": [
-        "react-fast-compare"
-      ],
-      "reviewers": [
-        "team:appex-sharedux"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["react-fast-compare"],
+      "reviewers": ["team:appex-sharedux"],
+      "matchBaseBranches": ["main"],
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
@@ -548,15 +541,9 @@
       "enabled": true
     },
     {
-      "matchDepNames": [
-        "react-use"
-      ],
-      "reviewers": [
-        "team:appex-sharedux"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["react-use"],
+      "reviewers": ["team:appex-sharedux"],
+      "matchBaseBranches": ["main"],
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
@@ -587,13 +574,9 @@
       "matchBaseBranches": [
         "main"
       ],
-      "labels": [
-        "Team:SharedUX",
-        "release_note:skip",
+      "labels": ["Team:SharedUX", "release_note:skip",
         "backport:all-open",
-        "effort:high",
-        "risk:high"
-      ],
+        "effort:high", "risk:high"],
       "enabled": true
     },
     {
@@ -2168,17 +2151,9 @@
     },
     {
       "groupName": "hjson",
-      "matchDepNames": [
-        "@types/hjson",
-        "hjson"
-      ],
-      "reviewers": [
-        "team:kibana-visualizations",
-        "team:fleet"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["@types/hjson", "hjson"],
+      "reviewers": ["team:kibana-visualizations", "team:fleet"],
+      "matchBaseBranches": ["main"],
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
@@ -3218,11 +3193,7 @@
       "matchBaseBranches": [
         "main"
       ],
-      "labels": [
-        "Team: SecuritySolution",
-        "backport:all-open",
-        "release_note:skip"
-      ],
+      "labels": ["Team: SecuritySolution", "backport:all-open", "release_note:skip"],
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -3880,11 +3851,7 @@
       ],
       "labels": [
         "release_note:skip",
-        "backport:all-open",
-        "ci:all-cypress-suites",
-        "effort:high",
-        "risk:high"
-      ],
+        "backport:all-open","ci:all-cypress-suites", "effort:high", "risk:high"],
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
@@ -3997,6 +3964,15 @@
         "backport:all-open"
       ],
       "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
+      "groupName": "langsmith",
+      "matchDepNames": ["langsmith"],
+      "reviewers": ["team:security-threat-hunting"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Threat Hunting"],
+      "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
@@ -4134,21 +4110,10 @@
     },
     {
       "groupName": "antlr4",
-      "matchDepNames": [
-        "antlr4"
-      ],
-      "reviewers": [
-        "team:appex-sharedux",
-        "team:kibana-esql"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
+      "matchDepNames": ["antlr4"],
+      "reviewers": ["team:appex-sharedux", "team:kibana-esql"],
+      "matchBaseBranches": ["main"],
+      "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
@@ -4468,15 +4433,9 @@
     },
     {
       "groupName": "Security Engineering Productivity",
-      "matchDepNames": [
-        "dotenv"
-      ],
-      "reviewers": [
-        "team:security-engineering-productivity"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
+      "matchDepNames": ["dotenv"],
+      "reviewers": ["team:security-engineering-productivity"],
+      "matchBaseBranches": ["main"],
       "labels": [
         "Team: Sec Eng Productivity",
         "release_note:skip",

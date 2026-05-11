@@ -1314,7 +1314,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/serverless/functional/services/ @elastic/observability-ui
 /x-pack/solutions/observability/test/serverless/functional/page_objects/ @elastic/observability-ui
 /x-pack/solutions/observability/test/serverless/functional/ftr_provider_context.d.ts @elastic/observability-ui
-/x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.logs_essentials.serverless.config.ts @elastic/observability-ui
 /x-pack/solutions/observability/test/kibana.jsonc @elastic/observability-ui
 /x-pack/solutions/observability/test/tsconfig.json @elastic/observability-ui
 /x-pack/solutions/observability/test/accessibility/ @elastic/observability-ui
@@ -1592,7 +1591,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/functional/page_objects/geo_file_upload.ts @elastic/kibana-presentation
 /x-pack/platform/test/functional/page_objects/gis_page.ts @elastic/kibana-presentation
 /x-pack/platform/test/upgrade/apps/maps @elastic/kibana-presentation
-/x-pack/platform/test/api_integration/apis/maps/ @elastic/kibana-presentation
 /x-pack/platform/test/functional/apps/maps/ @elastic/kibana-presentation
 /x-pack/platform/test/fixtures/es_archives/maps/ @elastic/kibana-presentation
 /x-pack/platform/plugins/shared/stack_alerts/server/rule_types/geo_containment @elastic/kibana-presentation
@@ -2649,7 +2647,6 @@ x-pack/solutions/security/plugins/security_solution/server/lib/security_integrat
 /x-pack/platform/test/functional/services/pipeline_* @elastic/logstash
 /x-pack/platform/test/functional/page_objects/logstash_page.ts @elastic/logstash
 /x-pack/platform/test/functional/apps/logstash @elastic/logstash
-/x-pack/platform/test/api_integration/apis/logstash @elastic/logstash
 #CC# /x-pack/platform/plugins/private/logstash/ @elastic/logstash
 
 # EUI team

@@ -71,6 +71,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/setup-node-env'
   - '@kbn/react-query'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

@@ -12,7 +12,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('apis', () => {
     loadTestFile(require.resolve('./console'));
-    loadTestFile(require.resolve('./core'));
     loadTestFile(require.resolve('./custom_integration'));
     loadTestFile(require.resolve('./general'));
     loadTestFile(require.resolve('./home'));
