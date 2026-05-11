@@ -7,6 +7,7 @@
 
 import { uniqBy } from 'lodash';
 import type { LensRuntimeState } from '@kbn/lens-common';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { getIndexPatternsObjects } from '../../utils';
 import type { LensEmbeddableStartServices } from '../types';
 
@@ -22,7 +23,10 @@ export async function getUsedDataViews(
       dataViews
     ),
 
-    ...Object.values(adHocDataViewsSpecs ?? {}).map((spec) => dataViews.create(spec)),
+    // Skip fetching fields for ES|QL data views: field metadata comes from the query result (columnsMeta).
+    ...Object.values(adHocDataViewsSpecs ?? {}).map((spec) =>
+      dataViews.create(spec, spec.type === ESQL_TYPE)
+    ),
   ]);
 
   return uniqBy(indexPatterns.concat(adHocDataViews), 'id');

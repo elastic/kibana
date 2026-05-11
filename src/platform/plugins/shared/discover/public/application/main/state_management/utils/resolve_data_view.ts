@@ -232,7 +232,8 @@ export const loadAndResolveDataView = async ({
   // If dataView is an ad hoc data view with no fields, refresh its field list.
   // This can happen when default profile data views are created without fields
   // to avoid unnecessary requests on startup.
-  if (!dataView.isPersisted() && !dataView.fields.length) {
+  // ES|QL dataviews never have fields.
+  if (!dataView.isPersisted() && !dataView.fields.length && !isEsqlMode) {
     await dataViews.refreshFields(dataView);
   }
 

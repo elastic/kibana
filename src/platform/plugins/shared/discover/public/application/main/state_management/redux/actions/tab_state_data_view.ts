@@ -15,6 +15,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   DEFAULT_COLUMNS_SETTING,
 } from '@kbn/discover-utils';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import {
   internalStateSlice,
   type TabActionPayload,
@@ -91,7 +92,11 @@ export const changeDataView: InternalStateThunkActionCreator<
       // If nextDataView is an ad hoc data view with no fields, refresh its field list.
       // This can happen when default profile data views are created without fields
       // to avoid unnecessary requests on startup.
-      if (!nextDataView.isPersisted() && !nextDataView.fields.length) {
+      if (
+        !nextDataView.isPersisted() &&
+        !nextDataView.fields.length &&
+        nextDataView.type !== ESQL_TYPE
+      ) {
         await dataViews.refreshFields(nextDataView);
       }
     } catch (e) {

@@ -23,6 +23,7 @@ import type {
   IndexPatternRef,
   TextBasedPersistedState,
 } from '@kbn/lens-common';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { documentField } from '../datasources/form_based/document_field';
 import { sortDataViewRefs } from '../utils';
 
@@ -265,7 +266,10 @@ export async function loadIndexPatterns({
 
   indexPatterns.push(
     ...(await Promise.all(
-      Object.values(adHocDataViews || {}).map((spec) => dataViews.create(spec))
+      Object.values(adHocDataViews || {}).map((spec) =>
+        // Skip fetching fields for ES|QL data views: field metadata comes from the query result (columnsMeta).
+        dataViews.create(spec, spec.type === ESQL_TYPE)
+      )
     ))
   );
 
