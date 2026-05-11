@@ -26,7 +26,10 @@ import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import type { EntityDetailsPath } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import {
+  EntityDetailsLeftPanelTab,
+  RiskScoreLeftPanelSubTab,
+} from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { ONE_WEEK_IN_HOURS } from '../../../flyout/entity_details/shared/constants';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
@@ -171,17 +174,31 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   }, [riskDataTimestamp]); // Update the timerange whenever the risk score timestamp changes to include new entries
 
   const goToEntityInsightsTab = useCallback(
-    () => openDetailsPanel({ tab: EntityDetailsLeftPanelTab.RISK_INPUTS }),
+    (subTab?: RiskScoreLeftPanelSubTab) =>
+      openDetailsPanel({ tab: EntityDetailsLeftPanelTab.RISK_INPUTS, subTab }),
     [openDetailsPanel]
   );
 
-  const link = useMemo(
+  const entityTabLink = useMemo(
     () => ({
-      callback: goToEntityInsightsTab,
+      callback: () => goToEntityInsightsTab(RiskScoreLeftPanelSubTab.ENTITY),
       tooltip: (
         <FormattedMessage
-          id="xpack.securitySolution.flyout.entityDetails.showAllRiskInputs"
-          defaultMessage="Show all risk inputs"
+          id="xpack.securitySolution.flyout.entityDetails.showAllEntityRiskInputs"
+          defaultMessage="Show all entity risk inputs"
+        />
+      ),
+    }),
+    [goToEntityInsightsTab]
+  );
+
+  const resolutionTabLink = useMemo(
+    () => ({
+      callback: () => goToEntityInsightsTab(RiskScoreLeftPanelSubTab.RESOLUTION),
+      tooltip: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.showAllResolutionRiskInputs"
+          defaultMessage="Show all resolution group risk inputs"
         />
       ),
     }),
@@ -285,9 +302,8 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
         <EuiTitle size="xs">
           <h3>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.title"
-              defaultMessage="{entity} risk summary"
-              values={{ entity: capitalize(entityType) }}
+              id="xpack.securitySolution.flyout.riskScore.title"
+              defaultMessage="Risk score"
             />
           </h3>
         </EuiTitle>
@@ -320,15 +336,15 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
       <EuiSpacer size="m" />
 
       <ExpandablePanel
-        data-test-subj="riskInputs"
+        data-test-subj="entityRiskInputs"
         header={{
           title: (
             <FormattedMessage
-              id="xpack.securitySolution.flyout.entityDetails.riskInputs"
-              defaultMessage="View risk contributions"
+              id="xpack.securitySolution.flyout.entityDetails.entityRiskInputs"
+              defaultMessage="Entity risk contributions"
             />
           ),
-          link: riskScoreData.loading ? undefined : link,
+          link: riskScoreData.loading ? undefined : entityTabLink,
           iconType: !isPreviewMode ? 'chevronLimitLeft' : undefined,
         }}
         expand={{
@@ -422,9 +438,26 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
             </InspectButtonContainer>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {showResolutionRiskSummary && (
-          <>
-            <EuiSpacer size="m" />
+      </ExpandablePanel>
+      {showResolutionRiskSummary && (
+        <>
+          <EuiSpacer size="m" />
+          <ExpandablePanel
+            data-test-subj="resolutionRiskInputs"
+            header={{
+              title: (
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.resolutionRiskInputs"
+                  defaultMessage="Resolution group risk contributions"
+                />
+              ),
+              link: resolutionRiskScoreData.loading ? undefined : resolutionTabLink,
+              iconType: !isPreviewMode ? 'chevronLimitLeft' : undefined,
+            }}
+            expand={{
+              expandable: false,
+            }}
+          >
             <EuiFlexGroup gutterSize="m" direction="row" wrap>
               <EuiFlexItem grow={1}>
                 <div
@@ -481,9 +514,9 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-          </>
-        )}
-      </ExpandablePanel>
+          </ExpandablePanel>
+        </>
+      )}
       <EuiSpacer size="s" />
     </EuiAccordion>
   );
