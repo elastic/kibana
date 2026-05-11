@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { getFieldValue } from '@kbn/discover-utils';
+import { getFieldValue, HOST_NAME_FIELD } from '@kbn/discover-utils';
 import {
   EndpointIsolateSuccess,
   HostIsolationPanel,
@@ -47,7 +47,7 @@ export const HostIsolationView: FC<HostIsolationViewProps> = ({
   onClose,
 }) => {
   const alertId = hit.raw._id as string;
-  const hostName = getFieldValue(hit, 'host.name') as string;
+  const hostName = getFieldValue(hit, HOST_NAME_FIELD) as string;
   const caseDetailsRefresh = useWithCaseDetailsRefresh();
   const [isSuccess, setIsSuccess] = useState(false);
 
