@@ -39,7 +39,7 @@ export function RuleQueryInspector({ ruleId, ruleTypeId, alertId }: RuleQueryIns
 
       const adapter = new RequestAdapter();
       for (const query of result.queries) {
-        const name = query.label ?? query.index;
+        const name = query.label ?? query.index ?? 'Query';
         const req = adapter.start(name);
         req.json(query.request);
         if (query.response) {
