@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
+import { expect } from '../../../../../ui';
 
 const PAGE_URL = 'security/entity_analytics_management';
 const OLD_ENTITY_STORE_URL = 'security/entity_analytics_entity_store';
@@ -134,6 +135,7 @@ export class EntityAnalyticsManagementPage {
     // re-renders. Waiting for `visible` and explicitly asserting enabled state
     // keeps the wait deterministic. See https://github.com/elastic/kibana/issues/259664.
     await this.entityAnalyticsSwitch.waitFor({ state: 'visible' });
+    await expect(this.entityAnalyticsSwitch).toBeEnabled();
     await this.entityAnalyticsSwitch.click();
   }
 
