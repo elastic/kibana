@@ -8,28 +8,32 @@
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import {
-  PCI_COMPLIANCE_TOOL_ID,
-  PCI_FIELD_MAPPER_TOOL_ID,
-  PCI_SCOPE_DISCOVERY_TOOL_ID,
+  PCI_AUTONOMOUS_COMPLIANCE_CHECK_TOOL_ID,
+  PCI_AUTONOMOUS_FIELD_MAPPER_TOOL_ID,
+  PCI_AUTONOMOUS_SCOPE_DISCOVERY_TOOL_ID,
+  PCI_AUTONOMOUS_SCORECARD_REPORT_TOOL_ID,
 } from '../../tools';
 
 /**
  * Registry-scoped tool IDs advertised by the autonomously-architected PCI compliance skill.
  *
- * IMPORTANT — same underlying tool implementations as the hand-written `pci-compliance` skill.
- * The autonomous skill experiment isolates the variable to **skill content / decomposition /
- * domain framing**, not tool implementation. Both skills delegate to the same ES|QL evidence
- * engine; the comparison is fair because the LLM has identical capabilities under each.
+ * IMPORTANT — these are a fully **independent** tool set from the hand-written `pci-compliance`
+ * skill. The autonomous variant does not reference, depend on, or know about the hand-written
+ * variant's `core.security.pci_compliance` / `pci_scope_discovery` / `pci_field_mapper` tool
+ * IDs. This validates the end-to-end autonomous-stack workflow: when a future domain is
+ * architected autonomously, the resulting skill+tool bundle must work without leaning on a
+ * pre-existing hand-written variant's surface.
  *
- * The cycle-17 architect's idealised tool decomposition (separate `pci_run_compliance_check` /
- * `pci_generate_scorecard_report`) is preserved as content guidance — the skill instructs the
- * LLM how to use the consolidated `pci_compliance` tool's `mode: "check" | "report"` parameter
- * to achieve the same separation conceptually.
+ * The autonomous variant follows the cycle-17 architect's blueprint of a 4-security-tool
+ * decomposition with **check** and **report** as *separate* tools (rather than one tool with
+ * a `mode` parameter). The architect's argument was that two narrow tools are easier for the
+ * LLM to route between than one mode-parameterised tool whose behaviour branches at runtime.
  */
 export const PCI_COMPLIANCE_AUTONOMOUS_SKILL_TOOL_IDS = [
-  PCI_SCOPE_DISCOVERY_TOOL_ID,
-  PCI_COMPLIANCE_TOOL_ID,
-  PCI_FIELD_MAPPER_TOOL_ID,
+  PCI_AUTONOMOUS_SCOPE_DISCOVERY_TOOL_ID,
+  PCI_AUTONOMOUS_COMPLIANCE_CHECK_TOOL_ID,
+  PCI_AUTONOMOUS_SCORECARD_REPORT_TOOL_ID,
+  PCI_AUTONOMOUS_FIELD_MAPPER_TOOL_ID,
   platformCoreTools.generateEsql,
   platformCoreTools.executeEsql,
 ] as const;
@@ -50,8 +54,11 @@ export const PCI_COMPLIANCE_AUTONOMOUS_SKILL_ID = 'pci-compliance-autonomous';
  * Gate score: 0.90. Provenance breakdown: 51 citations across 2 distinct provenance classes
  * (46 web-research + 5 model-knowledge), classDiversity 0.5.
  *
- * Sister skill `pci-compliance` (Smriti's hand-written variant) ships the same tool IDs.
- * Side-by-side eval comparison lives at `x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance`
+ * Sister skill `pci-compliance` (Smriti's hand-written variant) ships its own, separate tool
+ * IDs (`pci_scope_discovery` / `pci_compliance` / `pci_field_mapper`). The autonomous variant
+ * here intentionally does **not** share or reference those tool IDs — that isolation is the
+ * core property under test in the side-by-side eval comparison at
+ * `x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance`
  * (set `EVAL_PCI_VARIANT=autonomous` to evaluate this one).
  */
 export const pciComplianceAutonomousSkill = defineSkillType({
@@ -90,36 +97,50 @@ Do **not** use this skill when:
 
 ## Available Tools
 
-- **${PCI_SCOPE_DISCOVERY_TOOL_ID}** — Inventory PCI-relevant indices and classify them by
-  scope area (network, identity, endpoint, cloud, application). The \`scopeClaim\` it returns
-  is the provenance record for every check that follows.
-- **${PCI_COMPLIANCE_TOOL_ID}** — Unified PCI DSS evaluation. Pass \`mode: "check"\` for
-  per-requirement violation detection with evidence; pass \`mode: "report"\` for a scorecard
-  roll-up across requirements.
-- **${PCI_FIELD_MAPPER_TOOL_ID}** — Inspect non-ECS fields and suggest ECS mappings when scope
-  discovery reports low ECS coverage (e.g. \`username\` → \`user.name\`, \`src_ip\` →
-  \`source.ip\`, \`cve\` → \`vulnerability.id\`).
+- **${PCI_AUTONOMOUS_SCOPE_DISCOVERY_TOOL_ID}** — Inventory PCI-relevant indices and classify
+  them by scope area (network, identity, endpoint, cloud, application, vulnerability). The
+  \`scopeClaim\` it returns is the provenance record for every check that follows.
+- **${PCI_AUTONOMOUS_COMPLIANCE_CHECK_TOOL_ID}** — Run a PCI DSS v4.0.1 compliance CHECK for
+  one or more requirements. Returns per-requirement findings (RED / AMBER / GREEN /
+  NOT_ASSESSABLE) with ES|QL evidence and a scopeClaim. Use this when the user wants
+  actionable findings on specific requirements.
+- **${PCI_AUTONOMOUS_SCORECARD_REPORT_TOOL_ID}** — Produce a PCI DSS v4.0.1 posture SCORECARD
+  rolling up RED/AMBER/GREEN/NOT_ASSESSABLE verdicts across all 12 requirements with a
+  confidence-weighted overall score (0-100). Use this when the user wants an executive
+  posture snapshot.
+- **${PCI_AUTONOMOUS_FIELD_MAPPER_TOOL_ID}** — Inspect non-ECS fields and suggest ECS mappings
+  when scope discovery reports low ECS coverage (e.g. \`username\` → \`user.name\`, \`src_ip\`
+  → \`source.ip\`, \`cve\` → \`vulnerability.id\`).
 - **${platformCoreTools.generateEsql}** — Generate ES|QL queries for adapted compliance checks
   when mapped fields differ from ECS.
 - **${platformCoreTools.executeEsql}** — Execute ES|QL queries against discovered data.
 
 ## Compliance Assessment Workflow
 
-**Always call the dedicated PCI tools** (\`${PCI_SCOPE_DISCOVERY_TOOL_ID}\`,
-\`${PCI_COMPLIANCE_TOOL_ID}\`, \`${PCI_FIELD_MAPPER_TOOL_ID}\`). Do **not** improvise raw ES|QL
-queries against PCI indices when one of these tools applies. The tools encode requirement-
-specific detection logic (default-account patterns, weak-TLS regex sets, brute-force thresholds,
-field-mapping heuristics, requirement → category classification) that ad-hoc ES|QL will miss.
+**Always call the dedicated PCI tools** (\`${PCI_AUTONOMOUS_SCOPE_DISCOVERY_TOOL_ID}\`,
+\`${PCI_AUTONOMOUS_COMPLIANCE_CHECK_TOOL_ID}\`, \`${PCI_AUTONOMOUS_SCORECARD_REPORT_TOOL_ID}\`,
+\`${PCI_AUTONOMOUS_FIELD_MAPPER_TOOL_ID}\`). Do **not** improvise raw ES|QL queries against
+PCI indices when one of these tools applies. The tools encode requirement-specific detection
+logic (default-account patterns, weak-TLS regex sets, brute-force thresholds, field-mapping
+heuristics, requirement → category classification) that ad-hoc ES|QL will miss.
 
-1. **Discover available data.** Call \`${PCI_SCOPE_DISCOVERY_TOOL_ID}\` to identify indices and
-   data coverage. Inspect \`scopeClaim\` in the response to verify which indices were evaluated.
-2. **Run checks or reports.** Call \`${PCI_COMPLIANCE_TOOL_ID}\`. Use \`mode: "check"\` when the
-   user wants per-requirement findings with evidence, or \`mode: "report"\` when they want a
-   posture snapshot or executive summary. Pass the user's index pattern via the \`indices\`
-   parameter and any specific requirement IDs via the \`requirements\` parameter.
-3. **Handle non-ECS data.** If \`${PCI_SCOPE_DISCOVERY_TOOL_ID}\` reports low ECS coverage on an
-   index, call \`${PCI_FIELD_MAPPER_TOOL_ID}\` to discover field mappings, then use
-   \`${platformCoreTools.generateEsql}\` with those mappings.
+1. **Discover available data.** Call \`${PCI_AUTONOMOUS_SCOPE_DISCOVERY_TOOL_ID}\` to identify
+   indices and data coverage. Inspect \`scopeClaim\` in the response to verify which indices
+   were evaluated.
+2. **Run a check OR a report — pick one tool, not both.**
+   - For *per-requirement findings with evidence*, call
+     \`${PCI_AUTONOMOUS_COMPLIANCE_CHECK_TOOL_ID}\`. Pass specific requirement IDs via the
+     \`requirements\` parameter (e.g. \`["2.2.4"]\` or \`["8.3.4", "8.3.6"]\`). The findings
+     include ES|QL evidence rows; use them verbatim as audit evidence.
+   - For *an executive posture snapshot rolling up all 12 requirements*, call
+     \`${PCI_AUTONOMOUS_SCORECARD_REPORT_TOOL_ID}\` with \`format: "summary"\` (default),
+     \`"detailed"\`, or \`"executive"\`. The scorecard ships a confidence-weighted overall
+     score plus per-requirement rows.
+   These two tools are **siblings, not interchangeable** — the architect kept them separate so
+   the LLM does not need to encode mode-routing logic.
+3. **Handle non-ECS data.** If \`${PCI_AUTONOMOUS_SCOPE_DISCOVERY_TOOL_ID}\` reports low ECS
+   coverage on an index, call \`${PCI_AUTONOMOUS_FIELD_MAPPER_TOOL_ID}\` to discover field
+   mappings, then use \`${platformCoreTools.generateEsql}\` with those mappings.
 4. **Surface the QSA disclaimer** in every audit-facing response: automated evidence supports
    but does not replace a Qualified Security Assessor's formal assessment.
 
@@ -181,8 +202,9 @@ a finding back to the user.
   in-scope systems).
 - **Requirement classification.** Technical requirements (1, 2, 4, 6, 7, 8, 10, 11) are
   verifiable from telemetry; process-based requirements (3, 5, 9, 12) require human
-  attestation. \`${PCI_COMPLIANCE_TOOL_ID}\` handles this distinction internally — surface
-  the verdict it returns rather than redoing the classification.
+  attestation. \`${PCI_AUTONOMOUS_COMPLIANCE_CHECK_TOOL_ID}\` and
+  \`${PCI_AUTONOMOUS_SCORECARD_REPORT_TOOL_ID}\` handle this distinction internally — surface
+  the verdict they return rather than redoing the classification.
 `,
   getRegistryTools: () => [...PCI_COMPLIANCE_AUTONOMOUS_SKILL_TOOL_IDS],
 });

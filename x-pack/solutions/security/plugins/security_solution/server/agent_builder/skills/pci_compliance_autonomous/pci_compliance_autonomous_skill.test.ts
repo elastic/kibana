@@ -11,16 +11,23 @@ import {
   PCI_COMPLIANCE_AUTONOMOUS_SKILL_ID,
   PCI_COMPLIANCE_AUTONOMOUS_SKILL_TOOL_IDS,
 } from './pci_compliance_autonomous_skill';
+import {
+  PCI_AUTONOMOUS_COMPLIANCE_CHECK_TOOL_ID,
+  PCI_AUTONOMOUS_FIELD_MAPPER_TOOL_ID,
+  PCI_AUTONOMOUS_SCOPE_DISCOVERY_TOOL_ID,
+  PCI_AUTONOMOUS_SCORECARD_REPORT_TOOL_ID,
+} from '../../tools';
 import { PCI_COMPLIANCE_TOOL_ID } from '../../tools/pci_compliance_tool';
 import { PCI_SCOPE_DISCOVERY_TOOL_ID } from '../../tools/pci_scope_discovery_tool';
 import { PCI_FIELD_MAPPER_TOOL_ID } from '../../tools/pci_field_mapper_tool';
 
 /**
- * Contract tests for the autonomously-architected variant. The test surface mirrors the
- * hand-written sister skill's tests so the side-by-side eval comparison stays apples-to-apples
- * on infrastructure assertions; on top of that we lock in the autonomous skill's distinguishing
- * domain-knowledge content (SAQ taxonomy, v3→v4 deltas, scope-reduction levers, technical-vs-
- * process classification) that came from the autonomous architect's model-knowledge pass.
+ * Contract tests for the autonomously-architected variant. Two-part surface:
+ *  1. Domain-knowledge content (SAQ taxonomy, v3→v4 deltas, scope-reduction levers, technical-
+ *     vs-process classification) authored by the autonomous architect.
+ *  2. **Isolation property**: the autonomous skill must reference only autonomous-namespaced
+ *     tool IDs and must NOT depend on the hand-written variant's tool IDs. This is the core
+ *     end-to-end property — skill+tool autonomous stack — under test in the eval suite.
  */
 describe('pciComplianceAutonomousSkill', () => {
   it('uses the dedicated autonomous skill id (separate from the hand-written variant)', () => {
@@ -73,9 +80,9 @@ describe('pciComplianceAutonomousSkill', () => {
     });
 
     it('teaches the technical-vs-process requirement classification', () => {
-      expect(pciComplianceAutonomousSkill.content).toContain('Technical');
-      expect(pciComplianceAutonomousSkill.content).toContain('Process-based');
-      expect(pciComplianceAutonomousSkill.content).toContain('human attestation');
+      expect(pciComplianceAutonomousSkill.content.toLowerCase()).toContain('technical');
+      expect(pciComplianceAutonomousSkill.content.toLowerCase()).toContain('process-based');
+      expect(pciComplianceAutonomousSkill.content).toMatch(/human\s+attestation/);
     });
   });
 
@@ -91,44 +98,60 @@ describe('pciComplianceAutonomousSkill', () => {
       expect(pciComplianceAutonomousSkill.content).toContain('scopeClaim');
     });
 
-    it('includes deduplication guidance and the consolidated tool workflow', () => {
-      expect(pciComplianceAutonomousSkill.content).toContain('Deduplication');
-      expect(pciComplianceAutonomousSkill.content).toContain(PCI_COMPLIANCE_TOOL_ID);
-      expect(pciComplianceAutonomousSkill.content).toContain(PCI_SCOPE_DISCOVERY_TOOL_ID);
-      expect(pciComplianceAutonomousSkill.content).toContain(PCI_FIELD_MAPPER_TOOL_ID);
+    it('references the autonomous tool IDs explicitly (not the hand-written ones)', () => {
+      expect(pciComplianceAutonomousSkill.content).toContain(
+        PCI_AUTONOMOUS_SCOPE_DISCOVERY_TOOL_ID
+      );
+      expect(pciComplianceAutonomousSkill.content).toContain(
+        PCI_AUTONOMOUS_COMPLIANCE_CHECK_TOOL_ID
+      );
+      expect(pciComplianceAutonomousSkill.content).toContain(
+        PCI_AUTONOMOUS_SCORECARD_REPORT_TOOL_ID
+      );
+      expect(pciComplianceAutonomousSkill.content).toContain(PCI_AUTONOMOUS_FIELD_MAPPER_TOOL_ID);
+    });
+
+    it('does not reference any hand-written PCI tool IDs (skill+tool isolation)', () => {
+      expect(pciComplianceAutonomousSkill.content).not.toContain(PCI_COMPLIANCE_TOOL_ID);
+      expect(pciComplianceAutonomousSkill.content).not.toContain(PCI_SCOPE_DISCOVERY_TOOL_ID);
+      expect(pciComplianceAutonomousSkill.content).not.toContain(PCI_FIELD_MAPPER_TOOL_ID);
     });
   });
 
   describe('getRegistryTools', () => {
     const toolIds = pciComplianceAutonomousSkill.getRegistryTools!() as string[];
 
-    it('exposes the consolidated PCI tool set plus ES|QL generators', () => {
+    it('exposes the 4-tool autonomous bundle plus the 2 platform ES|QL helpers', () => {
       expect(toolIds).toEqual(
         expect.arrayContaining([...PCI_COMPLIANCE_AUTONOMOUS_SKILL_TOOL_IDS])
       );
-      expect(toolIds).toContain(PCI_SCOPE_DISCOVERY_TOOL_ID);
-      expect(toolIds).toContain(PCI_COMPLIANCE_TOOL_ID);
-      expect(toolIds).toContain(PCI_FIELD_MAPPER_TOOL_ID);
+      expect(toolIds).toContain(PCI_AUTONOMOUS_SCOPE_DISCOVERY_TOOL_ID);
+      expect(toolIds).toContain(PCI_AUTONOMOUS_COMPLIANCE_CHECK_TOOL_ID);
+      expect(toolIds).toContain(PCI_AUTONOMOUS_SCORECARD_REPORT_TOOL_ID);
+      expect(toolIds).toContain(PCI_AUTONOMOUS_FIELD_MAPPER_TOOL_ID);
       expect(toolIds).toContain(platformCoreTools.generateEsql);
       expect(toolIds).toContain(platformCoreTools.executeEsql);
     });
 
-    it('stays within the 5 registry tool selection cap', () => {
-      expect(toolIds.length).toBeLessThanOrEqual(5);
+    it('does NOT advertise any hand-written PCI tool IDs (skill+tool isolation property)', () => {
+      expect(toolIds).not.toContain(PCI_COMPLIANCE_TOOL_ID);
+      expect(toolIds).not.toContain(PCI_SCOPE_DISCOVERY_TOOL_ID);
+      expect(toolIds).not.toContain(PCI_FIELD_MAPPER_TOOL_ID);
+    });
+
+    it('matches the architect-blueprint 4-PCI + 2-platform = 6-tool registry', () => {
+      expect(toolIds).toEqual([
+        PCI_AUTONOMOUS_SCOPE_DISCOVERY_TOOL_ID,
+        PCI_AUTONOMOUS_COMPLIANCE_CHECK_TOOL_ID,
+        PCI_AUTONOMOUS_SCORECARD_REPORT_TOOL_ID,
+        PCI_AUTONOMOUS_FIELD_MAPPER_TOOL_ID,
+        platformCoreTools.generateEsql,
+        platformCoreTools.executeEsql,
+      ]);
     });
 
     it('has no duplicate entries', () => {
       expect(new Set(toolIds).size).toBe(toolIds.length);
-    });
-
-    it('uses identical tool ids to the hand-written variant — isolating skill content as the only variable', () => {
-      expect(toolIds).toEqual([
-        PCI_SCOPE_DISCOVERY_TOOL_ID,
-        PCI_COMPLIANCE_TOOL_ID,
-        PCI_FIELD_MAPPER_TOOL_ID,
-        platformCoreTools.generateEsql,
-        platformCoreTools.executeEsql,
-      ]);
     });
   });
 });

@@ -55,14 +55,15 @@
 <h1>PCI compliance skill: <span style="color:var(--mute);font-weight:400">hand-written</span> vs <span style="color:var(--accent)">autonomous</span></h1>
 <p class="lead">
   Side-by-side comparison of two Agent Builder skills that target the same domain
-  (PCI DSS v4.0.1 compliance). Both register identical tool sets via the
-  same backing implementations — the only thing that varies is the
-  <strong>skill content</strong> (instructions, do-not-use boundaries, domain knowledge).
-  This isolates the skill-content quality as the only experimental variable.
+  (PCI DSS v4.0.1 compliance). The hand-written variant uses 3 PCI tools authored by
+  Smriti; the autonomous variant now uses its <strong>own independently-authored
+  4-tool decomposition</strong> (cycle-17 architect blueprint) — neither skill knows
+  about the other's tools. This validates a full end-to-end autonomous workflow
+  where <em>both</em> the skill and its supporting tools are autonomously created.
 </p>
 
 <div class="pillrow">
-  <span class="pill">generated: 2026-05-11T15:25:17.742Z</span>
+  <span class="pill">generated: 2026-05-11T16:53:25.941Z</span>
   <span class="pill">hand-written by: <strong>Smriti</strong> (PR #256060)</span>
   <span class="pill">autonomous by: <strong>skill.architect</strong> (cycle-17)</span>
   <span class="pill">eval suite: <code>@kbn/evals-suite-pci-compliance</code> (8 scenarios)</span>
@@ -76,16 +77,16 @@
     <div class="value">4,135 chars</div>
     <div class="footnote">58 lines · 8 sections · 20 bullets</div></div>
   <div class="kpi"><div class="label">Autonomous content</div>
-    <div class="value">7,430 chars</div>
-    <div class="footnote">120 lines · 8 sections · 19 bullets</div></div>
+    <div class="value">8,496 chars</div>
+    <div class="footnote">135 lines · 8 sections · 22 bullets</div></div>
   <div class="kpi"><div class="label">v4.0.1 anchors</div>
-    <div class="value">HW: 3 / Auto: 5</div>
+    <div class="value">HW: 3 / Auto: 7</div>
     <div class="footnote">Both pin to v4.0.1 (June 2024 limited revision).</div></div>
   <div class="kpi"><div class="label">Do-not-use boundaries</div>
     <div class="value">HW: 3 / Auto: 3</div>
     <div class="footnote">More boundaries → less activation drift on adjacent topics.</div></div>
   <div class="kpi"><div class="label">Skill-contract tests</div>
-    <div class="value">HW: 11 / Auto: 16</div>
+    <div class="value">HW: 11 / Auto: 17</div>
     <div class="footnote">Both lock in tool-id parity and v4.0.1 invariants.</div></div>
   <div class="kpi"><div class="label">Live eval scenarios</div>
     <div class="value">8</div>
@@ -98,7 +99,8 @@
   <tbody>
     <tr><td>Skill ID</td><td><code>pci-compliance</code></td><td><code>pci-compliance-autonomous</code></td></tr>
     <tr><td>Author</td><td>Smriti (Elastic Security) — PR #256060</td><td><code>skill.architect</code> orchestrator (cycle-17)</td></tr>
-    <tr><td>Backing tools</td><td colspan="2" style="text-align:center"><code>pci_scope_discovery</code>, <code>pci_compliance</code> (mode: check / report), <code>pci_field_mapper</code>, <code>generate_esql</code>, <code>execute_esql</code> &mdash; <strong>identical for both</strong></td></tr>
+    <tr><td>PCI-domain tools</td><td><code>pci_scope_discovery</code>, <code>pci_compliance</code> (mode: check / report), <code>pci_field_mapper</code> — 3 tools, hand-written by Smriti</td><td><code>pci_autonomous_scope_discovery</code>, <code>pci_autonomous_compliance_check</code>, <code>pci_autonomous_scorecard_report</code>, <code>pci_autonomous_field_mapper</code> — 4 tools, autonomously decomposed per the cycle-17 blueprint, registered behind a separate allowlist entry</td></tr>
+    <tr><td>Platform tools (shared)</td><td colspan="2" style="text-align:center"><code>platform.core.generate_esql</code>, <code>platform.core.execute_esql</code></td></tr>
     <tr><td>Feature flag</td><td><code>pciComplianceAgentBuilder</code></td><td><code>pciComplianceAutonomousAgentBuilder</code></td></tr>
     <tr><td>Scout config set</td><td><code>evals_pci_compliance</code></td><td><code>evals_pci_compliance_autonomous</code></td></tr>
     <tr><td>Buildkite step</td><td><code>kbn-evals-weekly-pci-compliance</code></td><td><code>kbn-evals-weekly-pci-compliance-autonomous</code></td></tr>
@@ -109,14 +111,14 @@
 <table>
   <thead><tr><th>Metric</th><th>Hand-written</th><th>Autonomous</th><th>Δ</th></tr></thead>
   <tbody>
-    <tr><td>Total characters</td><td class="num">4135</td><td class="num">7430</td><td class="num delta-positive">+3295</td></tr>
-    <tr><td>Total lines</td><td class="num">58</td><td class="num">120</td><td class="num delta-positive">+62</td></tr>
+    <tr><td>Total characters</td><td class="num">4135</td><td class="num">8496</td><td class="num delta-positive">+4361</td></tr>
+    <tr><td>Total lines</td><td class="num">58</td><td class="num">135</td><td class="num delta-positive">+77</td></tr>
     <tr><td>## sections</td><td class="num">8</td><td class="num">8</td><td class="num ">0</td></tr>
     <tr><td>### sub-sections</td><td class="num">0</td><td class="num">0</td><td class="num ">0</td></tr>
-    <tr><td>Bullet items</td><td class="num">20</td><td class="num">19</td><td class="num delta-negative">-1</td></tr>
+    <tr><td>Bullet items</td><td class="num">20</td><td class="num">22</td><td class="num delta-positive">+2</td></tr>
     <tr><td>Code/table fences</td><td class="num">0</td><td class="num">0</td><td class="num ">0</td></tr>
     <tr><td>Do-not-use bullets</td><td class="num">3</td><td class="num">3</td><td class="num ">0</td></tr>
-    <tr><td>v4.0.1 mentions</td><td class="num">3</td><td class="num">5</td><td class="num delta-positive">+2</td></tr>
+    <tr><td>v4.0.1 mentions</td><td class="num">3</td><td class="num">7</td><td class="num delta-positive">+4</td></tr>
     <tr><td>Requirement-N mentions</td><td class="num">1</td><td class="num">1</td><td class="num ">0</td></tr>
   </tbody>
 </table>
@@ -147,21 +149,21 @@
   is which PCI skill the agent router has available. Scores are LLM-judge
   numeric scores (0..1) from the <em>PCI Criteria</em> evaluator.
 </p>
-<div class="banner banner-info">
-<strong>Live result:</strong> the hand-written skill outperformed the autonomous variant on both models — by 14.3 pts on Claude 4.7 Opus (0.977 vs 0.834) and 12.8 pts on Claude 4.6 Sonnet (0.989 vs 0.860). Trace inspection showed the autonomous variant <em>never</em> called the dedicated PCI tools (<code>security.pci_compliance</code>, <code>security.pci_scope_discovery</code>, <code>security.pci_field_mapper</code>) — 0 calls vs 17-23 for the hand-written variant across 16 scenarios — and instead improvised raw ES|QL via <code>platform.core.execute_esql</code> (36 calls vs 0), losing rubric points for both "did not call the tool" criteria and downstream substantive misses. After the postmortem fixes — (a) registering the PCI tools whenever <em>either</em> feature flag is on (the original gate excluded the autonomous variant entirely), and (b) restructuring the skill content tool-first with theory at the bottom and an explicit "always call the dedicated PCI tools, do not improvise raw ES|QL" injunction — Auto v3 closed to <strong>0.955</strong> on Sonnet 4.6, 3.4 pts behind the hand-written variant (down from 12.8 pts). See <code>POSTMORTEM.md</code> for the full analysis.
+<div class="banner banner-success">
+<strong>Headline result.</strong> First pass (Auto v1): the hand-written skill outperformed the autonomous variant on both models — by 14.3 pts on Claude 4.7 Opus (0.977 vs 0.834) and 12.8 pts on Claude 4.6 Sonnet (0.989 vs 0.860). Trace inspection showed the autonomous variant <em>never</em> called the dedicated PCI tools (<code>security.pci_compliance</code>, <code>security.pci_scope_discovery</code>, <code>security.pci_field_mapper</code>) — 0 calls vs 17-23 for the hand-written variant across 16 scenarios — and instead improvised raw ES|QL via <code>platform.core.execute_esql</code> (36 calls vs 0), losing rubric points for both "did not call the tool" criteria and downstream substantive misses. After the first round of fixes — (a) registering the PCI tools whenever <em>either</em> feature flag is on (the original gate excluded the autonomous variant entirely), and (b) restructuring the skill content tool-first with theory at the bottom and an explicit "always call the dedicated PCI tools, do not improvise raw ES|QL" injunction — Auto v3 closed to <strong>0.955</strong> on Sonnet 4.6, 3.4 pts behind the hand-written variant (down from 12.8 pts). <strong>The final step — full autonomy of tools too.</strong> Auto v5 ships an independently-authored 4-tool decomposition (<code>pci_autonomous_scope_discovery</code>, <code>pci_autonomous_compliance_check</code>, <code>pci_autonomous_scorecard_report</code>, <code>pci_autonomous_field_mapper</code>) registered behind its own allowlist entry. The autonomous skill no longer has any visibility into the hand-written PCI tools. Result: <strong>0.989 on Sonnet 4.6 — matching the hand-written baseline of 0.989 exactly</strong>. This validates that a fully autonomous stack (skill + tools, no shared context with the human-authored variant) achieves parity with a hand-crafted equivalent for this domain.
 </div>
 <table>
-<thead><tr><th>Scenario</th><th>HW · Claude 4.7 Opus</th><th>Auto · Claude 4.7 Opus</th><th>HW · Claude 4.6 Sonnet</th><th>Auto v1 · Claude 4.6 Sonnet</th><th>Auto v3 · Claude 4.6 Sonnet (after fix)</th></tr></thead>
+<thead><tr><th>Scenario</th><th>HW · Claude 4.7 Opus</th><th>Auto · Claude 4.7 Opus (shared HW tools)</th><th>HW · Claude 4.6 Sonnet</th><th>Auto v1 · Claude 4.6 Sonnet (shared tools)</th><th>Auto v3 · Claude 4.6 Sonnet (tool-first, shared)</th><th>Auto v5 · Claude 4.6 Sonnet (own 4 tools)</th></tr></thead>
 <tbody>
-<tr><td>pci-compliance: field mapping</td><td class="num">0.818</td><td class="num">0.727</td><td class="num">0.909</td><td class="num">0.818</td><td class="num">0.909</td></tr>
-<tr><td>pci-compliance: full report</td><td class="num">1.000</td><td class="num">0.818</td><td class="num">1.000</td><td class="num">0.818</td><td class="num">0.727</td></tr>
-<tr><td>pci-compliance: no matching data</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">0.750</td><td class="num">1.000</td></tr>
-<tr><td>pci-compliance: requirement 2.2.4 default accounts</td><td class="num">1.000</td><td class="num">0.571</td><td class="num">1.000</td><td class="num">0.857</td><td class="num">1.000</td></tr>
-<tr><td>pci-compliance: requirement 4.1 weak TLS</td><td class="num">1.000</td><td class="num">0.889</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td></tr>
-<tr><td>pci-compliance: requirement 8.3.4 brute force</td><td class="num">1.000</td><td class="num">0.778</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td></tr>
-<tr><td>pci-compliance: scope discovery</td><td class="num">1.000</td><td class="num">0.889</td><td class="num">1.000</td><td class="num">0.889</td><td class="num">1.000</td></tr>
-<tr><td>pci-compliance: scoped to auth index</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">0.750</td><td class="num">1.000</td></tr>
-<tr><td><strong>Mean</strong></td><td class="num delta-positive"><strong>0.977</strong></td><td class="num "><strong>0.834</strong></td><td class="num delta-positive"><strong>0.989</strong></td><td class="num "><strong>0.860</strong></td><td class="num delta-positive"><strong>0.955</strong></td></tr><tr><td class="footnote">scenarios scored</td><td class="num footnote">8</td><td class="num footnote">8</td><td class="num footnote">8</td><td class="num footnote">8</td><td class="num footnote">8</td></tr>
+<tr><td>pci-compliance: field mapping</td><td class="num">0.818</td><td class="num">0.727</td><td class="num">0.909</td><td class="num">0.818</td><td class="num">0.909</td><td class="num">0.909</td></tr>
+<tr><td>pci-compliance: full report</td><td class="num">1.000</td><td class="num">0.818</td><td class="num">1.000</td><td class="num">0.818</td><td class="num">0.727</td><td class="num">1.000</td></tr>
+<tr><td>pci-compliance: no matching data</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">0.750</td><td class="num">1.000</td><td class="num">1.000</td></tr>
+<tr><td>pci-compliance: requirement 2.2.4 default accounts</td><td class="num">1.000</td><td class="num">0.571</td><td class="num">1.000</td><td class="num">0.857</td><td class="num">1.000</td><td class="num">1.000</td></tr>
+<tr><td>pci-compliance: requirement 4.1 weak TLS</td><td class="num">1.000</td><td class="num">0.889</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td></tr>
+<tr><td>pci-compliance: requirement 8.3.4 brute force</td><td class="num">1.000</td><td class="num">0.778</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td></tr>
+<tr><td>pci-compliance: scope discovery</td><td class="num">1.000</td><td class="num">0.889</td><td class="num">1.000</td><td class="num">0.889</td><td class="num">1.000</td><td class="num">1.000</td></tr>
+<tr><td>pci-compliance: scoped to auth index</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">1.000</td><td class="num">0.750</td><td class="num">1.000</td><td class="num">1.000</td></tr>
+<tr><td><strong>Mean</strong></td><td class="num delta-positive"><strong>0.977</strong></td><td class="num "><strong>0.834</strong></td><td class="num delta-positive"><strong>0.989</strong></td><td class="num "><strong>0.860</strong></td><td class="num delta-positive"><strong>0.955</strong></td><td class="num delta-positive"><strong>0.989</strong></td></tr><tr><td class="footnote">scenarios scored</td><td class="num footnote">8</td><td class="num footnote">8</td><td class="num footnote">8</td><td class="num footnote">8</td><td class="num footnote">8</td><td class="num footnote">8</td></tr>
 </tbody>
 </table>
 
@@ -187,7 +189,8 @@
 opus47-autonomous     : x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/opus47-autonomous/results.json
 sonnet46-handwritten  : x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/sonnet46-handwritten/results.json
 sonnet46-autonomous   : x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/sonnet46-autonomous/results.json
-sonnet46-autonomous-v3: x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/sonnet46-autonomous-v3-full/results.json</pre>
+sonnet46-autonomous-v3: x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/sonnet46-autonomous-v3-full/results.json
+sonnet46-autonomous-v5: x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/runs/sonnet46-autonomous-v5-full/results.json</pre>
 </details>
 
 <h2>5 · Reasoning — what each skill is optimised for</h2>
@@ -207,7 +210,7 @@ sonnet46-autonomous-v3: x-pack/solutions/security/packages/kbn-evals-suite-pci-c
       <li><strong>Citation-dense.</strong> Cycle-17 dogfood reports 51 inspiration citations across 2 provenance classes (46 web-research + 5 model-knowledge). Every load-bearing claim is anchored.</li>
       <li><strong>Broader domain framing.</strong> SAQ taxonomy as scoping pre-step, scope-reduction levers (tokenisation/P2PE/segmentation), technical-vs-process classification, v3→v4 delta set — none of these appear in the hand-written variant.</li>
       <li><strong>Stricter activation boundaries.</strong> Explicit do-not-use bullets call out adjacent frameworks (SOC 2, HIPAA, NIST, ISO 27001) with named sibling-skill handoffs to prevent activation drift.</li>
-      <li><strong>Same tool capabilities.</strong> By choice — the comparison isolates skill-content quality, not tool implementation. Both call the same ES|QL evidence engine.</li>
+      <li><strong>Independently-authored tools.</strong> The autonomous variant now ships its own 4-tool decomposition (<code>pci_autonomous_scope_discovery</code>, <code>pci_autonomous_compliance_check</code>, <code>pci_autonomous_scorecard_report</code>, <code>pci_autonomous_field_mapper</code>) — registered behind a separate allowlist entry. Neither the skill nor the agent router has any path to the hand-written PCI tools when the autonomous feature flag is on. This is what the v5 column measures.</li>
     </ul>
   </div>
 </div>

@@ -16,18 +16,33 @@ import { createDetectionRuleTool } from './create_detection_rule_tool';
 import { pciComplianceTool } from './pci_compliance_tool';
 import { pciScopeDiscoveryTool } from './pci_scope_discovery_tool';
 import { pciFieldMapperTool } from './pci_field_mapper_tool';
+import {
+  pciAutonomousScopeDiscoveryTool,
+  pciAutonomousComplianceCheckTool,
+  pciAutonomousScorecardReportTool,
+  pciAutonomousFieldMapperTool,
+} from './pci_autonomous_tools';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 
 /**
  * Registers all security agent builder tools with the agentBuilder plugin.
  *
- * PCI compliance tools are gated behind `experimentalFeatures.pciComplianceAgentBuilder` OR
- * `experimentalFeatures.pciComplianceAutonomousAgentBuilder`. Either flag enables the same
- * underlying tool implementations — the two flags select which *skill content* the agent
- * router sees (hand-written vs autonomous variant), but both variants delegate to the same
- * tools. Gating the tool registration on the hand-written flag alone meant the autonomous
- * scout config (which disables the hand-written flag to isolate the variant comparison)
- * shipped without any PCI tools registered, forcing the agent to fall back to raw ES|QL.
+ * PCI compliance tools are gated by two separate experimental flags, each registering a
+ * distinct, *non-overlapping* tool bundle:
+ *
+ *  - `pciComplianceAgentBuilder` → hand-written variant: `pci_scope_discovery`,
+ *    `pci_compliance` (consolidated check+report tool with a `mode` parameter),
+ *    `pci_field_mapper`.
+ *  - `pciComplianceAutonomousAgentBuilder` → autonomous variant: `pci_autonomous_scope_discovery`,
+ *    `pci_autonomous_compliance_check`, `pci_autonomous_scorecard_report`,
+ *    `pci_autonomous_field_mapper` (per the cycle-17 architect blueprint that splits check
+ *    and report into two specialised tools).
+ *
+ * The two bundles share underlying domain helpers (PCI DSS requirement catalog, ES|QL
+ * evaluator, ECS field-mapping heuristics) — those are domain truth, not architectural
+ * artefacts. The tool IDs, schemas, descriptions, decomposition, and skill bindings are
+ * fully independent so the autonomous variant can be evaluated as a true end-to-end
+ * skill+tool autonomous stack.
  */
 export const registerTools = async (
   agentBuilder: AgentBuilderPluginSetup,
@@ -43,12 +58,16 @@ export const registerTools = async (
   agentBuilder.tools.register(getEntityTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
 
-  if (
-    experimentalFeatures.pciComplianceAgentBuilder ||
-    experimentalFeatures.pciComplianceAutonomousAgentBuilder
-  ) {
+  if (experimentalFeatures.pciComplianceAgentBuilder) {
     agentBuilder.tools.register(pciScopeDiscoveryTool(core, logger));
     agentBuilder.tools.register(pciComplianceTool(core, logger));
     agentBuilder.tools.register(pciFieldMapperTool(core, logger));
+  }
+
+  if (experimentalFeatures.pciComplianceAutonomousAgentBuilder) {
+    agentBuilder.tools.register(pciAutonomousScopeDiscoveryTool(core, logger));
+    agentBuilder.tools.register(pciAutonomousComplianceCheckTool(core, logger));
+    agentBuilder.tools.register(pciAutonomousScorecardReportTool(core, logger));
+    agentBuilder.tools.register(pciAutonomousFieldMapperTool(core, logger));
   }
 };

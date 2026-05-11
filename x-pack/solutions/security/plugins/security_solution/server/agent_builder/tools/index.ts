@@ -26,3 +26,13 @@ export {
 export { pciScopeDiscoveryTool, PCI_SCOPE_DISCOVERY_TOOL_ID } from './pci_scope_discovery_tool';
 export { pciComplianceTool, PCI_COMPLIANCE_TOOL_ID } from './pci_compliance_tool';
 export { pciFieldMapperTool, PCI_FIELD_MAPPER_TOOL_ID } from './pci_field_mapper_tool';
+export {
+  pciAutonomousScopeDiscoveryTool,
+  PCI_AUTONOMOUS_SCOPE_DISCOVERY_TOOL_ID,
+  pciAutonomousComplianceCheckTool,
+  PCI_AUTONOMOUS_COMPLIANCE_CHECK_TOOL_ID,
+  pciAutonomousScorecardReportTool,
+  PCI_AUTONOMOUS_SCORECARD_REPORT_TOOL_ID,
+  pciAutonomousFieldMapperTool,
+  PCI_AUTONOMOUS_FIELD_MAPPER_TOOL_ID,
+} from './pci_autonomous_tools';

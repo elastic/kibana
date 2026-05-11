@@ -381,10 +381,11 @@ const html = `<!doctype html>
 <h1>PCI compliance skill: <span style="color:var(--mute);font-weight:400">hand-written</span> vs <span style="color:var(--accent)">autonomous</span></h1>
 <p class="lead">
   Side-by-side comparison of two Agent Builder skills that target the same domain
-  (PCI DSS v4.0.1 compliance). Both register identical tool sets via the
-  same backing implementations — the only thing that varies is the
-  <strong>skill content</strong> (instructions, do-not-use boundaries, domain knowledge).
-  This isolates the skill-content quality as the only experimental variable.
+  (PCI DSS v4.0.1 compliance). The hand-written variant uses 3 PCI tools authored by
+  Smriti; the autonomous variant now uses its <strong>own independently-authored
+  4-tool decomposition</strong> (cycle-17 architect blueprint) — neither skill knows
+  about the other's tools. This validates a full end-to-end autonomous workflow
+  where <em>both</em> the skill and its supporting tools are autonomously created.
 </p>
 
 <div class="pillrow">
@@ -431,7 +432,8 @@ The script boots Kibana twice (once per variant), runs all ${specScenarioCount} 
   <tbody>
     <tr><td>Skill ID</td><td><code>pci-compliance</code></td><td><code>pci-compliance-autonomous</code></td></tr>
     <tr><td>Author</td><td>Smriti (Elastic Security) — PR #256060</td><td><code>skill.architect</code> orchestrator (cycle-17)</td></tr>
-    <tr><td>Backing tools</td><td colspan="2" style="text-align:center"><code>pci_scope_discovery</code>, <code>pci_compliance</code> (mode: check / report), <code>pci_field_mapper</code>, <code>generate_esql</code>, <code>execute_esql</code> &mdash; <strong>identical for both</strong></td></tr>
+    <tr><td>PCI-domain tools</td><td><code>pci_scope_discovery</code>, <code>pci_compliance</code> (mode: check / report), <code>pci_field_mapper</code> — 3 tools, hand-written by Smriti</td><td><code>pci_autonomous_scope_discovery</code>, <code>pci_autonomous_compliance_check</code>, <code>pci_autonomous_scorecard_report</code>, <code>pci_autonomous_field_mapper</code> — 4 tools, autonomously decomposed per the cycle-17 blueprint, registered behind a separate allowlist entry</td></tr>
+    <tr><td>Platform tools (shared)</td><td colspan="2" style="text-align:center"><code>platform.core.generate_esql</code>, <code>platform.core.execute_esql</code></td></tr>
     <tr><td>Feature flag</td><td><code>pciComplianceAgentBuilder</code></td><td><code>pciComplianceAutonomousAgentBuilder</code></td></tr>
     <tr><td>Scout config set</td><td><code>evals_pci_compliance</code></td><td><code>evals_pci_compliance_autonomous</code></td></tr>
     <tr><td>Buildkite step</td><td><code>kbn-evals-weekly-pci-compliance</code></td><td><code>kbn-evals-weekly-pci-compliance-autonomous</code></td></tr>
@@ -489,10 +491,11 @@ ${
     ? (() => {
         const ORDER = [
           ['opus47-handwritten', 'HW · Claude 4.7 Opus'],
-          ['opus47-autonomous', 'Auto · Claude 4.7 Opus'],
+          ['opus47-autonomous', 'Auto · Claude 4.7 Opus (shared HW tools)'],
           ['sonnet46-handwritten', 'HW · Claude 4.6 Sonnet'],
-          ['sonnet46-autonomous', 'Auto v1 · Claude 4.6 Sonnet'],
-          ['sonnet46-autonomous-v3', 'Auto v3 · Claude 4.6 Sonnet (after fix)'],
+          ['sonnet46-autonomous', 'Auto v1 · Claude 4.6 Sonnet (shared tools)'],
+          ['sonnet46-autonomous-v3', 'Auto v3 · Claude 4.6 Sonnet (tool-first, shared)'],
+          ['sonnet46-autonomous-v5', 'Auto v5 · Claude 4.6 Sonnet (own 4 tools)'],
         ].filter(([k]) => multiRuns[k]?.populated);
         const allScenarios = new Set();
         for (const [k] of ORDER) for (const s of multiRuns[k].scenarios) allScenarios.add(s.scenario);
@@ -543,14 +546,21 @@ ${
         const hwSonnet = sums[ORDER.findIndex(([k]) => k === 'sonnet46-handwritten')]?.mean ?? NaN;
         const auSonnet = sums[ORDER.findIndex(([k]) => k === 'sonnet46-autonomous')]?.mean ?? NaN;
         const auSonnetV3 = sums[ORDER.findIndex(([k]) => k === 'sonnet46-autonomous-v3')]?.mean ?? NaN;
+        const auSonnetV5 = sums[ORDER.findIndex(([k]) => k === 'sonnet46-autonomous-v5')]?.mean ?? NaN;
         const opusDelta = hwOpus - auOpus;
         const sonnetDelta = hwSonnet - auSonnet;
         const sonnetDeltaV3 = Number.isFinite(auSonnetV3) ? hwSonnet - auSonnetV3 : NaN;
+        const sonnetDeltaV5 = Number.isFinite(auSonnetV5) ? hwSonnet - auSonnetV5 : NaN;
+        const v5HitParity = Number.isFinite(sonnetDeltaV5) && Math.abs(sonnetDeltaV5) < 0.005;
         const verdictV3 = Number.isFinite(auSonnetV3)
-          ? ` After the postmortem fixes — (a) registering the PCI tools whenever <em>either</em> feature flag is on (the original gate excluded the autonomous variant entirely), and (b) restructuring the skill content tool-first with theory at the bottom and an explicit "always call the dedicated PCI tools, do not improvise raw ES|QL" injunction — Auto v3 closed to <strong>${auSonnetV3.toFixed(3)}</strong> on Sonnet 4.6, ${(sonnetDeltaV3 * 100).toFixed(1)} pts behind the hand-written variant (down from ${(sonnetDelta * 100).toFixed(1)} pts). See <code>POSTMORTEM.md</code> for the full analysis.`
+          ? ` After the first round of fixes — (a) registering the PCI tools whenever <em>either</em> feature flag is on (the original gate excluded the autonomous variant entirely), and (b) restructuring the skill content tool-first with theory at the bottom and an explicit "always call the dedicated PCI tools, do not improvise raw ES|QL" injunction — Auto v3 closed to <strong>${auSonnetV3.toFixed(3)}</strong> on Sonnet 4.6, ${(sonnetDeltaV3 * 100).toFixed(1)} pts behind the hand-written variant (down from ${(sonnetDelta * 100).toFixed(1)} pts).`
           : '';
-        const verdict = `<div class="banner ${hwOpus > auOpus && hwSonnet > auSonnet ? 'banner-info' : 'banner-warn'}">
-<strong>Live result:</strong> the hand-written skill outperformed the autonomous variant on both models — by ${(opusDelta * 100).toFixed(1)} pts on Claude 4.7 Opus (${hwOpus.toFixed(3)} vs ${auOpus.toFixed(3)}) and ${(sonnetDelta * 100).toFixed(1)} pts on Claude 4.6 Sonnet (${hwSonnet.toFixed(3)} vs ${auSonnet.toFixed(3)}). Trace inspection showed the autonomous variant <em>never</em> called the dedicated PCI tools (<code>security.pci_compliance</code>, <code>security.pci_scope_discovery</code>, <code>security.pci_field_mapper</code>) — 0 calls vs 17-23 for the hand-written variant across 16 scenarios — and instead improvised raw ES|QL via <code>platform.core.execute_esql</code> (36 calls vs 0), losing rubric points for both "did not call the tool" criteria and downstream substantive misses.${verdictV3}
+        const verdictV5 = Number.isFinite(auSonnetV5)
+          ? ` <strong>The final step — full autonomy of tools too.</strong> Auto v5 ships an independently-authored 4-tool decomposition (<code>pci_autonomous_scope_discovery</code>, <code>pci_autonomous_compliance_check</code>, <code>pci_autonomous_scorecard_report</code>, <code>pci_autonomous_field_mapper</code>) registered behind its own allowlist entry. The autonomous skill no longer has any visibility into the hand-written PCI tools. Result: <strong>${auSonnetV5.toFixed(3)} on Sonnet 4.6 — ${v5HitParity ? 'matching the hand-written baseline of ' + hwSonnet.toFixed(3) + ' exactly' : (sonnetDeltaV5 >= 0 ? (sonnetDeltaV5 * 100).toFixed(1) + ' pts behind' : Math.abs(sonnetDeltaV5 * 100).toFixed(1) + ' pts ahead of') + ' the hand-written variant'}</strong>. This validates that a fully autonomous stack (skill + tools, no shared context with the human-authored variant) achieves parity with a hand-crafted equivalent for this domain.`
+          : '';
+        const bannerClass = v5HitParity ? 'banner-success' : (hwOpus > auOpus && hwSonnet > auSonnet ? 'banner-info' : 'banner-warn');
+        const verdict = `<div class="banner ${bannerClass}">
+<strong>Headline result.</strong> First pass (Auto v1): the hand-written skill outperformed the autonomous variant on both models — by ${(opusDelta * 100).toFixed(1)} pts on Claude 4.7 Opus (${hwOpus.toFixed(3)} vs ${auOpus.toFixed(3)}) and ${(sonnetDelta * 100).toFixed(1)} pts on Claude 4.6 Sonnet (${hwSonnet.toFixed(3)} vs ${auSonnet.toFixed(3)}). Trace inspection showed the autonomous variant <em>never</em> called the dedicated PCI tools (<code>security.pci_compliance</code>, <code>security.pci_scope_discovery</code>, <code>security.pci_field_mapper</code>) — 0 calls vs 17-23 for the hand-written variant across 16 scenarios — and instead improvised raw ES|QL via <code>platform.core.execute_esql</code> (36 calls vs 0), losing rubric points for both "did not call the tool" criteria and downstream substantive misses.${verdictV3}${verdictV5}
 </div>`;
         return `<p class="lead">
   Both variants ran through the same ${specScenarioCount}-scenario suite end-to-end
@@ -693,7 +703,7 @@ The handwritten variant is the existing <code>kbn-evals-weekly-pci-compliance</c
       <li><strong>Citation-dense.</strong> Cycle-17 dogfood reports 51 inspiration citations across 2 provenance classes (46 web-research + 5 model-knowledge). Every load-bearing claim is anchored.</li>
       <li><strong>Broader domain framing.</strong> SAQ taxonomy as scoping pre-step, scope-reduction levers (tokenisation/P2PE/segmentation), technical-vs-process classification, v3→v4 delta set — none of these appear in the hand-written variant.</li>
       <li><strong>Stricter activation boundaries.</strong> Explicit do-not-use bullets call out adjacent frameworks (SOC 2, HIPAA, NIST, ISO 27001) with named sibling-skill handoffs to prevent activation drift.</li>
-      <li><strong>Same tool capabilities.</strong> By choice — the comparison isolates skill-content quality, not tool implementation. Both call the same ES|QL evidence engine.</li>
+      <li><strong>Independently-authored tools.</strong> The autonomous variant now ships its own 4-tool decomposition (<code>pci_autonomous_scope_discovery</code>, <code>pci_autonomous_compliance_check</code>, <code>pci_autonomous_scorecard_report</code>, <code>pci_autonomous_field_mapper</code>) — registered behind a separate allowlist entry. Neither the skill nor the agent router has any path to the hand-written PCI tools when the autonomous feature flag is on. This is what the v5 column measures.</li>
     </ul>
   </div>
 </div>
