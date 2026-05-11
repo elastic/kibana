@@ -228,7 +228,7 @@ export const getReadinessRetentionRoute = (
           let indexSettingsResponse: IndicesGetSettingsResponse = {};
           if (standaloneIndexNames.length > 0) {
             indexSettingsResponse = await esClient.indices.getSettings({
-              index: standaloneIndexNames,
+              index: '*',
               filter_path: '*.settings.index.lifecycle.name',
             });
           }
