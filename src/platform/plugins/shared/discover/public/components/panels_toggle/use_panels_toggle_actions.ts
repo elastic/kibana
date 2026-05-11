@@ -33,38 +33,34 @@ export const usePanelsToggleActions = ({ sidebarToggleState$ }: UsePanelsToggleA
   const sidebarToggleState = useObservable(sidebarToggleState$, sidebarToggleState$.getValue());
   const isSidebarHidden = sidebarToggleState.isCollapsed;
 
-  const disableHideChart = isTableHidden && !isChartHidden;
-  const disableHideTable = isChartHidden && !isTableHidden;
+  const setPanelVisibility = useCallback(
+    ({ hideChart, hideTable }: { hideChart: boolean; hideTable: boolean }) => {
+      setChartHidden(storage, 'discover', hideChart);
+      setTableHidden(storage, 'discover', hideTable);
+      dispatch(updateAppState({ appState: { hideChart, hideTable } }));
+    },
+    [dispatch, storage, updateAppState]
+  );
 
   const toggleChart = useCallback(() => {
     const hideChart = !isChartHidden;
+    const hideTable = hideChart && isTableHidden ? false : isTableHidden;
 
-    if (hideChart && isTableHidden) {
-      return;
-    }
-
-    setChartHidden(storage, 'discover', hideChart);
-    dispatch(updateAppState({ appState: { hideChart } }));
-  }, [dispatch, isChartHidden, isTableHidden, storage, updateAppState]);
+    setPanelVisibility({ hideChart, hideTable });
+  }, [isChartHidden, isTableHidden, setPanelVisibility]);
 
   const toggleTable = useCallback(() => {
     const hideTable = !isTableHidden;
+    const hideChart = hideTable && isChartHidden ? false : isChartHidden;
 
-    if (hideTable && isChartHidden) {
-      return;
-    }
-
-    setTableHidden(storage, 'discover', hideTable);
-    dispatch(updateAppState({ appState: { hideTable } }));
-  }, [dispatch, isChartHidden, isTableHidden, storage, updateAppState]);
+    setPanelVisibility({ hideChart, hideTable });
+  }, [isChartHidden, isTableHidden, setPanelVisibility]);
 
   const toggleSidebar = useCallback(() => {
     sidebarToggleState.toggle?.(!isSidebarHidden);
   }, [isSidebarHidden, sidebarToggleState]);
 
   return {
-    disableHideChart,
-    disableHideTable,
     isChartHidden,
     isSidebarHidden,
     isTableHidden,
