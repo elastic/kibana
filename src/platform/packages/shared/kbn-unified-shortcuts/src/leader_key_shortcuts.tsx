@@ -14,9 +14,9 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLiveAnnouncer,
   EuiPanel,
   EuiPortal,
-  EuiScreenReaderOnly,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -188,14 +188,6 @@ export const LeaderKeyShortcuts = ({
     () => new Map(shortcuts.map((shortcut) => [normalizeShortcutKey(shortcut.key), shortcut])),
     [shortcuts]
   );
-  const openShortcuts = useCallback(() => {
-    claimLeaderKeyInstance(instanceId);
-    setIsVisible(true);
-  }, [instanceId]);
-  const closeShortcuts = useCallback(() => {
-    releaseLeaderKeyInstance(instanceId);
-    setIsVisible(false);
-  }, [instanceId]);
   const screenReaderHint = useMemo(() => {
     return i18n.translate('unifiedShortcuts.leaderKeyShortcuts.screenReaderHint', {
       defaultMessage: 'Press {leaderKey} for {leaderKeyDescription} shortcuts.',
@@ -217,6 +209,19 @@ export const LeaderKeyShortcuts = ({
       },
     });
   }, [leaderKeyDescription, shortcuts]);
+  const [liveAnnouncement, setLiveAnnouncement] = useState<string | undefined>(
+    () => screenReaderHint
+  );
+  const openShortcuts = useCallback(() => {
+    claimLeaderKeyInstance(instanceId);
+    setLiveAnnouncement(screenReaderAnnouncement);
+    setIsVisible(true);
+  }, [instanceId, screenReaderAnnouncement]);
+  const closeShortcuts = useCallback(() => {
+    releaseLeaderKeyInstance(instanceId);
+    setLiveAnnouncement(undefined);
+    setIsVisible(false);
+  }, [instanceId]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -275,17 +280,7 @@ export const LeaderKeyShortcuts = ({
 
   return (
     <>
-      {isVisible ? (
-        <EuiScreenReaderOnly>
-          <p role="status" aria-live="polite" aria-atomic="true">
-            {screenReaderAnnouncement}
-          </p>
-        </EuiScreenReaderOnly>
-      ) : (
-        <EuiScreenReaderOnly>
-          <p>{screenReaderHint}</p>
-        </EuiScreenReaderOnly>
-      )}
+      {liveAnnouncement ? <EuiLiveAnnouncer>{liveAnnouncement}</EuiLiveAnnouncer> : null}
 
       <EuiPortal>
         <EuiPanel
