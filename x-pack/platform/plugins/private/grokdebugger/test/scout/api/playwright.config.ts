@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Grok Debugger', () => {
-    loadTestFile(require.resolve('./grok_debugger'));
-  });
-}
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
