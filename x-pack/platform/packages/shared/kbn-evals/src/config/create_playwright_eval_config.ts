@@ -24,17 +24,26 @@ export interface EvaluationTestOptions extends ScoutTestOptions {
  */
 export function createPlaywrightEvalsConfig({
   testDir,
+  testMatch,
   repetitions,
   timeout,
   runGlobalSetup,
 }: {
-  testDir: string;
+  testDir?: string;
+  testMatch?: RegExp | string | Array<RegExp | string>;
   repetitions?: number;
   timeout?: number;
   runGlobalSetup?: boolean;
 }): PlaywrightTestConfig<{}, EvaluationTestOptions> {
-  const { reporter, use, outputDir, projects, ...config } = createPlaywrightConfig({
-    testDir,
+  const {
+    reporter,
+    use,
+    outputDir,
+    projects,
+    testDir: _baseTestDir,
+    ...config
+  } = createPlaywrightConfig({
+    testDir: testDir ?? '',
     runGlobalSetup,
   });
 
@@ -93,6 +102,8 @@ export function createPlaywrightEvalsConfig({
 
   return defineConfig<{}, EvaluationTestOptions>({
     ...config,
+    ...(testMatch !== undefined ? { testMatch } : {}),
+    ...(testDir !== undefined ? { testDir } : {}),
     // some reports write to disk, which we don't need
     reporter: Array.isArray(reporter)
       ? reporter.filter(([name]) => {

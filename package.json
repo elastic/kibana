@@ -1740,6 +1740,7 @@
     "@kbn/evals-suite-attack-discovery": "link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery",
     "@kbn/evals-suite-endpoint": "link:x-pack/solutions/security/packages/kbn-evals-suite-endpoint",
     "@kbn/evals-suite-entity-analytics": "link:x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics",
+    "@kbn/evals-suite-esql-generation-regression": "link:x-pack/solutions/security/packages/kbn-evals-suite-esql-generation-regression",
     "@kbn/evals-suite-llm-tasks": "link:x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks",
     "@kbn/evals-suite-obs-ai-assistant": "link:x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant",
     "@kbn/evals-suite-observability-ai": "link:x-pack/solutions/observability/packages/kbn-evals-suite-observability-ai",
