@@ -669,7 +669,7 @@ describe('params validation', () => {
     }).toThrowError(/not valid emails/);
   });
 
-  test('params validation fails when email has single-label domain', () => {
+  test('params validation accepts email with single-label domain (on-prem MTA)', () => {
     const configUtils = getActionsConfigUtils({});
     expect(() => {
       validateParams(
@@ -683,7 +683,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).not.toThrowError();
   });
 
   test('params validation fails when email has path traversal characters', () => {

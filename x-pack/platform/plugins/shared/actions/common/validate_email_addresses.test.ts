@@ -389,11 +389,9 @@ describe('validate_email_address', () => {
       ]);
     });
 
-    test('rejects addresses with single-label domain (no dot)', () => {
+    test('accepts addresses with single-label domain (on-prem MTA)', () => {
       const result = validateEmailAddresses(null, ['user@localhost']);
-      expect(result).toEqual([
-        { address: 'user@localhost', valid: false, reason: InvalidEmailReason.invalid },
-      ]);
+      expect(result).toEqual([{ address: 'user@localhost', valid: true }]);
     });
 
     test('allows addresses with hyphens in the middle of local part', () => {
@@ -495,6 +493,11 @@ describe('validate_email_address', () => {
     test('accepts RFC 5322 quoted local part', () => {
       const result = validateEmailAddresses(null, ['"quoted"@example.com']);
       expect(result).toEqual([{ address: '"quoted"@example.com', valid: true }]);
+    });
+
+    test('accepts quoted local part with leading hyphen', () => {
+      const result = validateEmailAddresses(null, ['"-foo"@example.com']);
+      expect(result).toEqual([{ address: '"-foo"@example.com', valid: true }]);
     });
 
     test('accepts address with apostrophes in local part', () => {
