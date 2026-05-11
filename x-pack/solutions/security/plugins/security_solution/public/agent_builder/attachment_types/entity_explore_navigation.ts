@@ -15,7 +15,7 @@ import {
   readLastAgentBuilderAgentIdForSecuritySession,
 } from '../../../common/agent_builder_navigation_gate';
 
-import { SecurityPageName } from '../../../common/constants';
+import { SecurityPageName, ENTITY_ANALYTICS_HOME_PAGE_PATH } from '../../../common/constants';
 import {
   HostPanelKey,
   ServicePanelKey,
@@ -30,10 +30,9 @@ const INVALID_PLACEHOLDER_ENTITY_NAME = 'name';
 const USER_EUID_PREFIX = 'user:';
 
 const AGENT_BUILDER_SIDEBAR_APP_ID = 'agentBuilder' as const;
-const ENTITY_ANALYTICS_HOME_PATH = '/entity_analytics_home_page';
 
 const getEntityAnalyticsStateSearchParams = (): URLSearchParams => {
-  if (!window.location.pathname.includes(ENTITY_ANALYTICS_HOME_PATH)) {
+  if (!window.location.pathname.includes(ENTITY_ANALYTICS_HOME_PAGE_PATH)) {
     return new URLSearchParams();
   }
 
@@ -291,17 +290,26 @@ export const navigateToEntityAnalyticsWithFlyoutInApp = ({
     return;
   }
 
-  markPreserveAgentBuilderSessionDuringNextSecurityNavigation();
-  if (isAgentBuilderSidebarOpen(chrome) && agentBuilder?.toggleChat) {
-    agentBuilder.toggleChat();
+  // When already on the EA page we're doing an in-app URL update (same app,
+  // no remount), so the sidebar does not need to close and reopen.
+  const alreadyOnEaHomePage = window.location.pathname.includes(ENTITY_ANALYTICS_HOME_PAGE_PATH);
+  if (!alreadyOnEaHomePage) {
+    markPreserveAgentBuilderSessionDuringNextSecurityNavigation();
+    if (isAgentBuilderSidebarOpen(chrome) && agentBuilder?.toggleChat) {
+      agentBuilder.toggleChat();
+    }
+    clearSearchSessionBeforeSecurityNavigation(searchSession);
   }
-  clearSearchSessionBeforeSecurityNavigation(searchSession);
+
   application.navigateToApp(appId, {
     deepLinkId: SecurityPageName.entityAnalyticsHomePage,
     path,
     replace: true,
   });
-  scheduleReopenAgentBuilderAfterSecurityNavigation({ agentBuilder, openSidebarConversation });
+
+  if (!alreadyOnEaHomePage) {
+    scheduleReopenAgentBuilderAfterSecurityNavigation({ agentBuilder, openSidebarConversation });
+  }
 };
 
 export const navigateToEntityAnalyticsHomePageInApp = ({
@@ -337,17 +345,31 @@ export const navigateToEntityAnalyticsHomePageInApp = ({
   const query = params.toString();
   const path = query === '' ? undefined : `?${query}`;
 
-  markPreserveAgentBuilderSessionDuringNextSecurityNavigation();
-  if (isAgentBuilderSidebarOpen(chrome) && agentBuilder?.toggleChat) {
-    agentBuilder.toggleChat();
+  // Already on EA home page with no URL changes needed — nothing to do.
+  const alreadyOnEaHomePage = window.location.pathname.includes(ENTITY_ANALYTICS_HOME_PAGE_PATH);
+  if (alreadyOnEaHomePage && !path) {
+    return;
   }
-  clearSearchSessionBeforeSecurityNavigation(searchSession);
+
+  // When already on the EA page we're doing an in-app URL update (same app,
+  // no remount), so the sidebar does not need to close and reopen.
+  if (!alreadyOnEaHomePage) {
+    markPreserveAgentBuilderSessionDuringNextSecurityNavigation();
+    if (isAgentBuilderSidebarOpen(chrome) && agentBuilder?.toggleChat) {
+      agentBuilder.toggleChat();
+    }
+    clearSearchSessionBeforeSecurityNavigation(searchSession);
+  }
+
   application.navigateToApp(appId, {
     deepLinkId: SecurityPageName.entityAnalyticsHomePage,
     path,
     replace: true,
   });
-  scheduleReopenAgentBuilderAfterSecurityNavigation({ agentBuilder, openSidebarConversation });
+
+  if (!alreadyOnEaHomePage) {
+    scheduleReopenAgentBuilderAfterSecurityNavigation({ agentBuilder, openSidebarConversation });
+  }
 };
 
 /**
