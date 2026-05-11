@@ -12,6 +12,8 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
+import { isRuleExecutionCancellationError } from '../../execution_context';
+import { StepExecutionError, isStepExecutionError } from './step_execution_error';
 
 /**
  * Middleware that provides centralized error handling for all steps.
@@ -45,7 +47,14 @@ export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
           code: ctx.step.name,
         });
 
-        throw error;
+        // Cancellation errors are handled by CancellationBoundaryMiddleware.
+        // Already-wrapped step errors keep their original step name (the
+        // outermost middleware would otherwise overwrite it on every step).
+        if (isRuleExecutionCancellationError(error) || isStepExecutionError(error)) {
+          throw error;
+        }
+
+        throw new StepExecutionError(ctx.step.name, error);
       }
     })();
   }

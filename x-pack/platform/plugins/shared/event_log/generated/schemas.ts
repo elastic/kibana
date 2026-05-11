@@ -333,6 +333,74 @@ export const EventSchema = schema.maybe(
                 ),
               })
             ),
+            rule_executor: schema.maybe(
+              schema.object({
+                execution: schema.maybe(
+                  schema.object({
+                    uuid: ecsString(),
+                    status: ecsString(),
+                    metrics: schema.maybe(
+                      schema.object({
+                        total_run_duration_ms: ecsStringOrNumber(),
+                        query: schema.maybe(
+                          schema.object({
+                            number_of_searches: ecsStringOrNumber(),
+                            es_search_duration_ms: ecsStringOrNumber(),
+                            total_search_duration_ms: ecsStringOrNumber(),
+                            number_of_rows_returned: ecsStringOrNumber(),
+                            number_of_batches: ecsStringOrNumber(),
+                          })
+                        ),
+                        events_written: schema.maybe(
+                          schema.object({
+                            breached: ecsStringOrNumber(),
+                            recovered: ecsStringOrNumber(),
+                            no_data: ecsStringOrNumber(),
+                            total: ecsStringOrNumber(),
+                          })
+                        ),
+                        episodes: schema.maybe(
+                          schema.object({
+                            transitioned_to_active: ecsStringOrNumber(),
+                            transitioned_to_recovering: ecsStringOrNumber(),
+                            transitioned_to_inactive: ecsStringOrNumber(),
+                          })
+                        ),
+                        recovery: schema.maybe(
+                          schema.object({
+                            mode: ecsString(),
+                            events_emitted: ecsStringOrNumber(),
+                          })
+                        ),
+                      })
+                    ),
+                    cancelled: schema.maybe(
+                      schema.object({
+                        step: ecsString(),
+                        reason: ecsString(),
+                      })
+                    ),
+                    phase_errors: schema.maybe(
+                      schema.object({
+                        phase: ecsString(),
+                        code: ecsString(),
+                        message: ecsString(),
+                      })
+                    ),
+                  })
+                ),
+                rule: schema.maybe(
+                  schema.object({
+                    id: ecsString(),
+                    name: ecsString(),
+                    kind: ecsString(),
+                    version: ecsStringOrNumber(),
+                    tags: ecsStringMulti(),
+                    query: ecsStringMulti(),
+                  })
+                ),
+              })
+            ),
           })
         ),
       })

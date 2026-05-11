@@ -43,6 +43,7 @@ import {
   StorageService,
   type StorageServiceContract,
 } from '../../services/storage_service/storage_service';
+import { EventLogService } from '../../services/event_log_service/event_log_service';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { DispatcherService, type DispatcherServiceContract } from '../dispatcher';
 import { DispatcherPipeline } from '../execution_pipeline';
@@ -558,7 +559,7 @@ describe('DispatcherService integration tests', () => {
       new ApplyThrottlingStep(queryService, mockLoggerService),
       new DispatchStep(mockLoggerService, mockWfm),
       new StoreActionsStep(storageService),
-      new StoreExecutionHistoryStep(eventLogger),
+      new StoreExecutionHistoryStep(new EventLogService(eventLogger)),
     ]);
     dispatcherService = new DispatcherService(pipeline);
 

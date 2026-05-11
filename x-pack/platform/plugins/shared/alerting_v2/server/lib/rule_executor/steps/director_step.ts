@@ -51,6 +51,7 @@ export class DirectorStep implements RuleExecutionStep {
         rule,
         executionContext: input.executionContext,
         alertEvents: alertEventsBatch,
+        metrics: input.executionContext.metrics.director,
       });
 
       yield {

@@ -22,17 +22,28 @@ import {
 } from '../services/logger_service/logger_service';
 import { EsServiceInternalToken } from '../services/es_service/tokens';
 import { ALERT_EVENTS_DATA_STREAM } from '../../resources/datastreams/alert_events';
-import { createExecutionContext } from '../execution_context';
+import {
+  createExecutionContext,
+  noopExecutionMetricsRecorders,
+  type ExecutionMetricsRecorders,
+} from '../execution_context';
 
 /**
- * Raw input from the task runner.
- * The pipeline creates the ExecutionContext from the signal.
+ * Raw input from the task runner (or pipeline decorator).
+ *
+ * The pipeline builds the {@link ExecutionContext} from the abort signal and
+ * the optional metrics recorders bag. `executionUuid` and `metrics` are
+ * supplied by the {@link TelemetryRecorderDecorator}; when the pipeline is
+ * invoked directly (e.g. unit tests), they default to a fresh UUID-less
+ * placeholder and no-op recorders.
  */
 export interface RuleExecutionPipelineInput {
   readonly ruleId: string;
   readonly spaceId: string;
   readonly scheduledAt: string;
   readonly abortSignal: AbortSignal;
+  readonly executionUuid?: string;
+  readonly metrics?: ExecutionMetricsRecorders;
 }
 
 export interface RuleExecutionPipelineResult {
@@ -56,11 +67,15 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
   ) {}
 
   public async execute(rawInput: RuleExecutionPipelineInput): Promise<RuleExecutionPipelineResult> {
-    const executionContext = createExecutionContext(rawInput.abortSignal);
+    const executionContext = createExecutionContext(
+      rawInput.abortSignal,
+      rawInput.metrics ?? noopExecutionMetricsRecorders
+    );
     const input: RuleExecutionInput = {
       ruleId: rawInput.ruleId,
       spaceId: rawInput.spaceId,
       scheduledAt: rawInput.scheduledAt,
+      executionUuid: rawInput.executionUuid ?? '',
       executionContext,
     };
 

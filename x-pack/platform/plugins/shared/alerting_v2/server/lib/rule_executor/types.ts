@@ -19,6 +19,12 @@ export interface RuleExecutionInput {
   readonly ruleId: string;
   readonly spaceId: string;
   readonly scheduledAt: string;
+  /**
+   * UUID v4 generated immediately after task pickup. Identifies this rule
+   * execution end-to-end and joins the `execute-start` and `execute`
+   * event-log documents emitted for the same run.
+   */
+  readonly executionUuid: string;
   readonly executionContext: ExecutionContext;
 }
 

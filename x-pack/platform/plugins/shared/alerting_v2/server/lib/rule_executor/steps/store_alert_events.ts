@@ -34,6 +34,7 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
       await this.storageService.bulkIndexDocs({
         index: ALERT_EVENTS_DATA_STREAM,
         docs: state.alertEventsBatch,
+        metrics: state.input.executionContext.metrics.storage,
       });
 
       this.logger.debug({

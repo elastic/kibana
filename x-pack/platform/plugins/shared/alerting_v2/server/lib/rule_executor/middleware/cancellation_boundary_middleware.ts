@@ -7,7 +7,8 @@
 
 import { injectable } from 'inversify';
 import type { RuleExecutionMiddleware, RuleExecutionMiddlewareContext } from './types';
-import type { PipelineStateStream } from '../types';
+import type { PipelineStateStream, RulePipelineState } from '../types';
+import { isRuleExecutionCancellationError } from '../../execution_context';
 
 /**
  * Global middleware that enforces cancellation checks at step boundaries.
@@ -16,26 +17,38 @@ import type { PipelineStateStream } from '../types';
  * - Cancellation is detected before a step receives data.
  * - Cancellation is detected after a step yields data.
  *
+ * When a cancellation does fire, the middleware records the name of the step
+ * that was running into the per-execution metrics collector
+ * (`metrics.cancellation`). The telemetry recorder reads that value when it
+ * builds the `execute` event-log document so the operator dashboard can
+ * answer the "which step was cancelled?" question.
  */
 @injectable()
 export class CancellationBoundaryMiddleware implements RuleExecutionMiddleware {
   public readonly name = 'cancellation_boundary';
 
   public execute(
-    _ctx: RuleExecutionMiddlewareContext,
+    ctx: RuleExecutionMiddlewareContext,
     next: (input: PipelineStateStream) => PipelineStateStream,
     input: PipelineStateStream
   ): PipelineStateStream {
-    const guardedInput = this.guardStream(input);
+    const guardedInput = this.guardStream(input, ctx.step.name);
     const output = next(guardedInput);
-    return this.guardStream(output);
+    return this.guardStream(output, ctx.step.name);
   }
 
-  private guardStream(stream: PipelineStateStream): PipelineStateStream {
+  private guardStream(stream: PipelineStateStream, stepName: string): PipelineStateStream {
     return (async function* () {
       for await (const result of stream) {
         if (result.type === 'continue') {
-          result.state.input.executionContext.throwIfAborted();
+          try {
+            result.state.input.executionContext.throwIfAborted();
+          } catch (error) {
+            if (isRuleExecutionCancellationError(error)) {
+              recordCancellation(result.state, stepName);
+            }
+            throw error;
+          }
         }
 
         yield result;
@@ -47,3 +60,10 @@ export class CancellationBoundaryMiddleware implements RuleExecutionMiddleware {
     })();
   }
 }
+
+const recordCancellation = (state: RulePipelineState, stepName: string): void => {
+  state.input.executionContext.metrics.cancellation.recordCancellation({
+    step: stepName,
+    reason: 'cancelled_timeout',
+  });
+};
