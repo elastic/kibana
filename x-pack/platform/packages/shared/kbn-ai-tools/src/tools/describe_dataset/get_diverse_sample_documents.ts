@@ -12,6 +12,12 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { dateRangeQuery } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
+import {
+  buildPass1Query,
+  buildPass2Query,
+  parsePass1Rows,
+  parsePass2Hits,
+} from '../../utils/esql_two_pass';
 import { getSampleDocumentsEsql } from './get_sample_documents';
 
 const MESSAGE_FIELD_CANDIDATES = ['message', 'body.text'];
@@ -40,6 +46,7 @@ export async function getDiverseSampleDocuments({
   const filter = { bool: { filter: timeRangeFilter } };
   const indices = Array.isArray(index) ? index : [index];
 
+  // TODO: migrate this fieldCaps probe to ES|QL in https://github.com/elastic/streams-program/issues/1220.
   const [messageField, totalDocs] = await Promise.all([
     detectMessageField({ esClient, index, start, end }),
     runEsqlCount({ esClient, indices, filter }),
@@ -73,8 +80,16 @@ export async function getDiverseSampleDocuments({
   // only needs representative document diversity, not exact category counts.
   const samplingProbability =
     MAX_DOCS_TO_SAMPLE / totalDocs < 0.5 ? MAX_DOCS_TO_SAMPLE / totalDocs : 1;
+  // Ask pass 1 for size+offset rows so we can client-side slice the window
+  // [offset, offset+size] after sorting by count. SAMPLE-reduced counts are
+  // fine here because we only use them for internal sort/slice.
   const pass1Response = (await esClient.esql.query({
-    query: buildPass1Query({ indices, messageField, size, offset, samplingProbability }),
+    query: buildPass1Query({
+      indices,
+      field: messageField,
+      limit: size + offset,
+      samplingProbability,
+    }),
     filter,
     drop_null_columns: true,
   })) as unknown as ESQLSearchResponse;
@@ -158,115 +173,4 @@ async function runEsqlCount({
   const total = response.values[0]?.[0];
 
   return typeof total === 'number' ? total : 0;
-}
-
-function columnPath(field: string): string | string[] {
-  return field.includes('.') ? field.split('.') : field;
-}
-
-/**
- * Pass 1 categorizes the message field and returns only category metadata plus a
- * representative key. The key includes `_index` because `_id` is unique only
- * within an index, and Streams queries often span backing indices.
- */
-function buildPass1Query({
-  indices,
-  messageField,
-  size,
-  offset,
-  samplingProbability,
-}: {
-  indices: string[];
-  messageField: string;
-  size: number;
-  offset: number;
-  samplingProbability: number;
-}): string {
-  // `TOP(doc_key, 1, "desc")` intentionally means "any stable representative".
-  // Diverse sampling does not require newest/latest semantics; it only needs one
-  // coherent document per category.
-  let query = esql.from(indices, ['_index', '_id']).pipe`EVAL doc_key = CONCAT(${esql.col(
-    '_index'
-  )}, ":", ${esql.col('_id')})`;
-
-  if (samplingProbability < 1) {
-    query = query.pipe`SAMPLE ${esql.num(samplingProbability)}`;
-  }
-
-  return query.pipe`STATS representative_key = TOP(doc_key, 1, "desc"), count = COUNT(*) BY pattern = CATEGORIZE(${esql.col(
-    columnPath(messageField)
-  )})`
-    .sort([['count'], 'DESC', ''])
-    .limit(size + offset)
-    .print('basic');
-}
-
-/**
- * Fetches `_source` for the exact composite keys chosen by pass 1. We do not use
- * getSampleDocumentsEsql here because that helper parses hits with `_index: ''`,
- * which would make a multi-index `_id` collision indistinguishable.
- */
-function buildPass2Query(indices: string[], docKeys: string[]): string {
-  const query = esql.from(indices, ['_index', '_id', '_source'])
-    .pipe`EVAL doc_key = CONCAT(${esql.col('_index')}, ":", ${esql.col('_id')})`;
-
-  return query.pipe`WHERE doc_key IN (${docKeys.map((docKey) => esql.str(docKey))})`
-    .pipe`KEEP _index, _id, _source`
-    .limit(docKeys.length)
-    .print('basic');
-}
-
-function parsePass1Rows(
-  response: ESQLSearchResponse
-): Array<{ docKey: string; count: number; pattern: string }> {
-  const keyIndex = response.columns.findIndex((column) => column.name === 'representative_key');
-  const countIndex = response.columns.findIndex((column) => column.name === 'count');
-  const patternIndex = response.columns.findIndex((column) => column.name === 'pattern');
-
-  if (keyIndex === -1 || countIndex === -1 || patternIndex === -1) {
-    return [];
-  }
-
-  return response.values.flatMap((row) => {
-    const rawKey = row[keyIndex];
-    // ES|QL currently returns TOP(..., 1) as a scalar, but accepting a single-item
-    // array makes this parser tolerant of response-shape differences across ES
-    // snapshots without changing the query contract.
-    const docKey = Array.isArray(rawKey) ? rawKey[0] : rawKey;
-    const count = row[countIndex];
-    const pattern = row[patternIndex];
-
-    if (typeof docKey !== 'string' || typeof count !== 'number' || typeof pattern !== 'string') {
-      return [];
-    }
-
-    return [{ docKey, count, pattern }];
-  });
-}
-
-function parsePass2Hits(response: ESQLSearchResponse): Array<SearchHit<Record<string, unknown>>> {
-  const indexIndex = response.columns.findIndex((column) => column.name === '_index');
-  const idIndex = response.columns.findIndex((column) => column.name === '_id');
-  const sourceIndex = response.columns.findIndex((column) => column.name === '_source');
-
-  if (indexIndex === -1 || idIndex === -1 || sourceIndex === -1) {
-    return [];
-  }
-
-  return response.values.flatMap((row) => {
-    const index = row[indexIndex];
-    const id = row[idIndex];
-
-    if (typeof index !== 'string' || typeof id !== 'string') {
-      return [];
-    }
-
-    return [
-      {
-        _index: index,
-        _id: id,
-        _source: (row[sourceIndex] as Record<string, unknown> | null) ?? {},
-      },
-    ];
-  });
 }
