@@ -13,7 +13,6 @@ import type {
   SavedObjectsUpdateResponse,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
-import { intersection } from 'lodash';
 import {
   isLegacyAttachmentRequest,
   isUnifiedAttachmentRequest,
@@ -420,33 +419,62 @@ export class CaseCommentModel {
       }
 
       if (isEventAttachmentType(attachment.type)) {
-        const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
-
-        // filter out events already present in the case
-        if (intersection(Array.from(eventsAttachedToCase), ids).length) {
-          return;
-        }
-
         if (isLegacyAttachmentRequest(attachment) && isCommentRequestTypeEvent(attachment)) {
-          dedupedAttachments.push({
-            ...attachment,
-            eventId: ids,
-            index: indices,
-          });
-        } else if ('attachmentId' in attachment) {
-          const existingMetadata =
-            attachment.metadata && typeof attachment.metadata === 'object'
-              ? (attachment.metadata as Record<string, unknown>)
-              : {};
+          const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
+          const idPositionsThatAlreadyExistInCase: number[] = [];
 
-          dedupedAttachments.push({
-            ...attachment,
-            attachmentId: ids,
-            metadata: {
-              ...existingMetadata,
-              index: indices,
-            },
+          ids.forEach((id, index) => {
+            if (eventsAttachedToCase.has(id) || idsAlreadySeen.has(id)) {
+              idPositionsThatAlreadyExistInCase.push(index);
+            }
+
+            idsAlreadySeen.add(id);
           });
+
+          assertIdsAndIndicesHaveMatchingLengths(ids, indices);
+
+          const newIds = removeItemsByPosition(ids, idPositionsThatAlreadyExistInCase);
+          const newIndices = removeItemsByPosition(indices, idPositionsThatAlreadyExistInCase);
+
+          if (newIds.length > 0) {
+            dedupedAttachments.push({
+              ...attachment,
+              eventId: newIds,
+              index: newIndices,
+            });
+          }
+        } else if ('attachmentId' in attachment) {
+          const { ids, indices } = getIDsAndIndicesAsArrays(attachment);
+          const idPositionsThatAlreadyExistInCase: number[] = [];
+
+          ids.forEach((id, index) => {
+            if (eventsAttachedToCase.has(id) || idsAlreadySeen.has(id)) {
+              idPositionsThatAlreadyExistInCase.push(index);
+            }
+
+            idsAlreadySeen.add(id);
+          });
+
+          assertIdsAndIndicesHaveMatchingLengths(ids, indices);
+
+          const newIds = removeItemsByPosition(ids, idPositionsThatAlreadyExistInCase);
+          const newIndices = removeItemsByPosition(indices, idPositionsThatAlreadyExistInCase);
+
+          if (newIds.length > 0) {
+            const existingMetadata =
+              attachment.metadata && typeof attachment.metadata === 'object'
+                ? (attachment.metadata as Record<string, unknown>)
+                : {};
+
+            dedupedAttachments.push({
+              ...attachment,
+              attachmentId: newIds,
+              metadata: {
+                ...existingMetadata,
+                index: newIndices,
+              },
+            });
+          }
         }
 
         return;

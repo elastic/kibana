@@ -326,19 +326,20 @@ export class AttachmentGetter {
     const isCasesAttachmentsEnabled = this.context.config.attachments?.enabled;
     try {
       this.context.log.debug(`Attempting to GET all alerts ids for case id ${caseId}`);
-      const alertsFilter = buildFilter({
-        filters: [AttachmentType.alert],
-        field: 'type',
-        operator: 'or',
-        type: CASE_COMMENT_SAVED_OBJECT,
-      });
-
-      const res = await this.context.unsecuredSavedObjectsClient.find<unknown, AlertIdsAggsResult>({
+      const legacyFindPromise = this.context.unsecuredSavedObjectsClient.find<
+        unknown,
+        AlertIdsAggsResult
+      >({
         type: CASE_COMMENT_SAVED_OBJECT,
         hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
         sortField: 'created_at',
         sortOrder: 'asc',
-        filter: alertsFilter,
+        filter: buildFilter({
+          filters: [AttachmentType.alert],
+          field: 'type',
+          operator: 'or',
+          type: CASE_COMMENT_SAVED_OBJECT,
+        }),
         perPage: 0,
         aggs: {
           alertIds: {
@@ -350,43 +351,36 @@ export class AttachmentGetter {
         },
       });
 
-      const legacyAlertIds = res.aggregations?.alertIds.buckets.map((bucket) => bucket.key) ?? [];
-      const alertIds = new Set(legacyAlertIds);
-
-      if (isCasesAttachmentsEnabled) {
-        const unifiedAlertFilter = buildFilter({
-          filters: UNIFIED_ALERT_TYPES_ARRAY,
-          field: 'type',
-          operator: 'or',
-          type: CASE_ATTACHMENT_SAVED_OBJECT,
-        });
-
-        const unifiedRes = await this.context.unsecuredSavedObjectsClient.find<
-          unknown,
-          AlertIdsAggsResult
-        >({
-          type: CASE_ATTACHMENT_SAVED_OBJECT,
-          hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
-          filter: unifiedAlertFilter,
-          perPage: 0,
-          aggs: {
-            alertIds: {
-              terms: {
-                field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId`,
-                size: MAX_ALERTS_PER_CASE,
+      const unifiedFindPromise = isCasesAttachmentsEnabled
+        ? this.context.unsecuredSavedObjectsClient.find<unknown, AlertIdsAggsResult>({
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+            filter: buildFilter({
+              filters: UNIFIED_ALERT_TYPES_ARRAY,
+              field: 'type',
+              operator: 'or',
+              type: CASE_ATTACHMENT_SAVED_OBJECT,
+            }),
+            perPage: 0,
+            aggs: {
+              alertIds: {
+                terms: {
+                  field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.attachmentId`,
+                  size: MAX_ALERTS_PER_CASE,
+                },
               },
             },
-          },
-        });
+          })
+        : Promise.resolve(undefined);
 
-        const unifiedAlertIds =
-          unifiedRes.aggregations?.alertIds.buckets.map((bucket) => bucket.key) ?? [];
-        for (const id of unifiedAlertIds) {
-          alertIds.add(id);
-        }
-      }
+      const [legacyRes, unifiedRes] = await Promise.all([legacyFindPromise, unifiedFindPromise]);
 
-      return alertIds;
+      const legacyAlertIds =
+        legacyRes.aggregations?.alertIds.buckets.map((bucket) => bucket.key) ?? [];
+      const unifiedAlertIds =
+        unifiedRes?.aggregations?.alertIds.buckets.map((bucket) => bucket.key) ?? [];
+
+      return new Set([...legacyAlertIds, ...unifiedAlertIds]);
     } catch (error) {
       this.context.log.error(`Error on GET all alerts ids for case id ${caseId}: ${error}`);
       throw error;

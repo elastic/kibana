@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { AlertAttachmentAttributes } from '../../../common/types/domain';
+import type {
+  AlertAttachmentAttributes,
+  EventAttachmentAttributes,
+} from '../../../common/types/domain';
 import { AttachmentType, CaseStatuses } from '../../../common/types/domain';
 import type { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { createCasesClientMockArgs } from '../../client/mocks';
@@ -22,7 +25,10 @@ import {
   MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
-import { SECURITY_ALERT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import {
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import {
   commentExternalReference,
   commentFileExternalReference,
@@ -504,6 +510,115 @@ describe('CaseCommentModel', () => {
       // test-id-4 is omitted because it is returned by getAllAlertIds, see the top of this file
       expect(multipleAlertsCall.attributes.alertId).toEqual(['test-id-3', 'test-id-5']);
       expect(multipleAlertsCall.attributes.index).toEqual(['test-index-3', 'test-index-5']);
+    });
+
+    it('drops only matching event ids from a multi-id legacy event attachment', async () => {
+      clientArgs.services.attachmentService.getter.getAllEventIds.mockResolvedValueOnce(
+        new Set(['event-id-2'])
+      );
+
+      await model.bulkCreate({
+        attachments: [
+          {
+            id: 'comment-1',
+            type: AttachmentType.event,
+            owner: SECURITY_SOLUTION_OWNER,
+            eventId: ['event-id-1', 'event-id-2', 'event-id-3'],
+            index: ['idx-1', 'idx-2', 'idx-3'],
+          },
+        ],
+      });
+
+      const attachments =
+        clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
+
+      expect(attachments.length).toBe(1);
+      const eventCall = attachments[0] as SavedObject<EventAttachmentAttributes>;
+      expect(eventCall.attributes.eventId).toEqual(['event-id-1', 'event-id-3']);
+      expect(eventCall.attributes.index).toEqual(['idx-1', 'idx-3']);
+    });
+
+    it('dedupes event ids that repeat within the same bulk create batch', async () => {
+      await model.bulkCreate({
+        attachments: [
+          {
+            id: 'comment-1',
+            type: AttachmentType.event,
+            owner: SECURITY_SOLUTION_OWNER,
+            eventId: ['event-id-1', 'event-id-2'],
+            index: ['idx-1', 'idx-2'],
+          },
+          {
+            id: 'comment-2',
+            type: AttachmentType.event,
+            owner: SECURITY_SOLUTION_OWNER,
+            eventId: ['event-id-2', 'event-id-3'],
+            index: ['idx-2', 'idx-3'],
+          },
+        ],
+      });
+
+      const attachments =
+        clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
+
+      expect(attachments.length).toBe(2);
+      const first = attachments[0] as SavedObject<EventAttachmentAttributes>;
+      const second = attachments[1] as SavedObject<EventAttachmentAttributes>;
+
+      expect(first.attributes.eventId).toEqual(['event-id-1', 'event-id-2']);
+      expect(first.attributes.index).toEqual(['idx-1', 'idx-2']);
+      // event-id-2 is dropped from the second attachment because the first one already claimed it
+      expect(second.attributes.eventId).toEqual(['event-id-3']);
+      expect(second.attributes.index).toEqual(['idx-3']);
+    });
+
+    it('drops the legacy event attachment entirely when every id is already attached to the case', async () => {
+      clientArgs.services.attachmentService.getter.getAllEventIds.mockResolvedValueOnce(
+        new Set(['event-id-1', 'event-id-2'])
+      );
+
+      await model.bulkCreate({
+        attachments: [
+          {
+            id: 'comment-1',
+            type: AttachmentType.event,
+            owner: SECURITY_SOLUTION_OWNER,
+            eventId: ['event-id-1', 'event-id-2'],
+            index: ['idx-1', 'idx-2'],
+          },
+        ],
+      });
+
+      expect(clientArgs.services.attachmentService.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    it('drops only matching ids from a unified (v2) event attachment', async () => {
+      clientArgs.services.attachmentService.getter.getAllEventIds.mockResolvedValueOnce(
+        new Set(['event-id-2'])
+      );
+
+      const unifiedMultipleEvent = {
+        type: SECURITY_EVENT_ATTACHMENT_TYPE,
+        owner: SECURITY_SOLUTION_OWNER,
+        attachmentId: ['event-id-1', 'event-id-2', 'event-id-3'],
+        metadata: {
+          index: ['idx-1', 'idx-2', 'idx-3'],
+        },
+      };
+
+      await model.bulkCreate({
+        attachments: [{ id: 'comment-1', ...unifiedMultipleEvent } as never],
+      });
+
+      const attachments =
+        clientArgs.services.attachmentService.bulkCreate.mock.calls[0][0].attachments;
+
+      expect(attachments.length).toBe(1);
+      const unifiedCall = attachments[0] as unknown as {
+        attributes: { attachmentId: string[]; metadata: { index: string[] } };
+      };
+      expect(unifiedCall.attributes.attachmentId).toEqual(['event-id-1', 'event-id-3']);
+      expect(unifiedCall.attributes.metadata.index).toEqual(['idx-1', 'idx-3']);
     });
 
     it('does not remove alerts not attached to the case', async () => {

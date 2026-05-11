@@ -134,13 +134,13 @@ describe('common/attachments', () => {
     });
 
     it('returns event transformer for legacy and unified event types', () => {
-      const legacyEventTransformer = getAttachmentTypeTransformers(
+      const transformer = getAttachmentTypeTransformers(
         AttachmentType.event,
         SECURITY_SOLUTION_OWNER
       );
       expect(transformer).not.toBe(externalReferenceAttachmentTransformer);
       expect(
-        legacyEventTransformer.isType({
+        transformer.isType({
           type: AttachmentType.event,
           eventId: 'event-1',
           index: 'index-1',
