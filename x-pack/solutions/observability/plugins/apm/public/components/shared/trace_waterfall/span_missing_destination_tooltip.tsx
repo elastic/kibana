@@ -17,7 +17,7 @@ const content = i18n.translate(
   'xpack.apm.trace.barDetails.euiIconTip.spanMissingDestinationContent',
   {
     defaultMessage:
-      'This exit span is missing the span.destination.service.resource field. Without it, the service map and dependencies cannot link this call to its downstream service.',
+      'This exit span is missing the span.destination.service.resource field which might prevent linking it to downstream transactions on features that depend on this information. i.e.: Service map. Make sure the instrumentation of this exit span follows OTel Semantic Conventions',
   }
 );
 
@@ -30,6 +30,8 @@ export function SpanMissingDestinationTooltip() {
         'aria-label': title,
       }}
       type="warning"
+      color="danger"
+      size="s"
       title={title}
       content={content}
     />
