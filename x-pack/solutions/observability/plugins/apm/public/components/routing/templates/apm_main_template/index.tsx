@@ -78,7 +78,8 @@ export function ApmMainTemplate({
         return callApmApi('POST /internal/apm/data_view/static');
       }
     },
-    [application?.capabilities.savedObjectsManagement.edit]
+    [application?.capabilities.savedObjectsManagement.edit],
+    { useCallApmApiV2: true }
   );
 
   const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>

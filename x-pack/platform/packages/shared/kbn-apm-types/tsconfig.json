@@ -17,5 +17,6 @@
     "@kbn/i18n",
     "@kbn/es-query",
     "@kbn/io-ts-utils",
+    "@kbn/config-schema",
   ]
 }

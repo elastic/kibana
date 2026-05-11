@@ -47,3 +47,4 @@ export type * from './src/time_range_metadata';
 export * from './src/custom_link';
 export type * from './src/apm_ml_job';
 export * from './src/mobile_types';
+export * from './src/config_schema';
