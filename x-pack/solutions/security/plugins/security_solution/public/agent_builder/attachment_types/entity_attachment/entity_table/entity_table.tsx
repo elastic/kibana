@@ -21,10 +21,6 @@ import {
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { ISessionService } from '@kbn/data-plugin/public';
-import { APP_UI_ID, ENTITY_ANALYTICS_PATH } from '../../../../../common/constants';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { AssetCriticalityBadge } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_badge';
 import { RiskScoreCell } from '../../../../entity_analytics/components/home/entities_table/risk_score_cell';
@@ -36,26 +32,11 @@ import { useEntityForAttachment } from '../use_entity_for_attachment';
 import type { EntityForAttachment } from '../use_entity_for_attachment';
 import type { EntityAttachmentIdentifier } from '../types';
 import { formatEntitySource } from './entity_data_source_utils';
-import {
-  buildEntityRightPanel,
-  navigateToEntityAnalyticsHomePageInApp,
-  navigateToEntityAnalyticsWithFlyoutInApp,
-} from '../../entity_explore_navigation';
+import { buildEntityRightPanel } from '../../entity_explore_navigation';
+import { useEntityAnalyticsAgentNavigation } from '../../entity_analytics_agent_navigation_context';
 
 export interface EntityTableProps {
   entities: EntityAttachmentIdentifier[];
-  /**
-   * When provided, the Name column renders a per-row Explore icon that deep-links into the
-   * Security Solution Hosts/Users/Services page for that entity (mirrors the dashboard
-   * `EntityListTable`). Omit in tests or environments without Kibana routing.
-   */
-  application?: ApplicationStart;
-  /**
-   * Optional search session service. Forwarded to the shared `navigateTo…InApp` helpers so the
-   * active Agent Builder-tagged search session is cleared before the cross-app jump into the
-   * Entity Analytics flyout.
-   */
-  searchSession?: ISessionService;
 }
 
 interface EntityRow {
@@ -253,14 +234,8 @@ const EntityDataSourceBadges: React.FC<{
   );
 };
 
-export const EntityTable: React.FC<EntityTableProps> = ({
-  entities,
-  application,
-  searchSession,
-}) => {
-  const { services } = useKibana<{ application: ApplicationStart }>();
-  const exploreApplication = application ?? services.application;
-  const canExplorePerRow = exploreApplication != null;
+export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
+  const { canNavigate, navigateWithFlyout, navigateToHome } = useEntityAnalyticsAgentNavigation();
   const [pageIndex, setPageIndex] = useState(0);
   const [rowsByKey, setRowsByKey] = useState<Record<string, EntityRow>>({});
 
@@ -312,14 +287,15 @@ export const EntityTable: React.FC<EntityTableProps> = ({
   );
 
   const handleOpenEntityAnalytics = useCallback(() => {
-    services.application?.navigateToApp(APP_UI_ID, { path: ENTITY_ANALYTICS_PATH });
-  }, [services.application]);
+    navigateToHome();
+  }, [navigateToHome]);
 
   const handleOpenEntity = useCallback(
     (row: EntityRow) => {
-      if (!exploreApplication) {
+      if (!canNavigate) {
         return;
       }
+
       const entityStoreId = row.data?.entityId ?? row.identifier.entityStoreId;
       const displayName = row.data?.displayName ?? row.identifier.identifier;
       const rightPanel = buildEntityRightPanel({
@@ -328,21 +304,12 @@ export const EntityTable: React.FC<EntityTableProps> = ({
         entityStoreId,
       });
       if (rightPanel) {
-        navigateToEntityAnalyticsWithFlyoutInApp({
-          application: exploreApplication,
-          appId: APP_UI_ID,
-          flyout: { preview: [], right: rightPanel },
-          searchSession,
-        });
-        return;
+        navigateWithFlyout({ preview: [], right: rightPanel });
+      } else {
+        navigateToHome();
       }
-      navigateToEntityAnalyticsHomePageInApp({
-        application: exploreApplication,
-        appId: APP_UI_ID,
-        searchSession,
-      });
     },
-    [exploreApplication, searchSession]
+    [canNavigate, navigateWithFlyout, navigateToHome]
   );
 
   const columns = useMemo<Array<EuiBasicTableColumn<EntityRow>>>(
@@ -359,7 +326,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({
             ] ?? 'globe';
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              {canExplorePerRow && (
+              {canNavigate && (
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     iconType={icon}
@@ -447,7 +414,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({
         width: '140px',
       },
     ],
-    [canExplorePerRow, handleOpenEntity]
+    [canNavigate, handleOpenEntity]
   );
 
   /**
