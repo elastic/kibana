@@ -10,7 +10,7 @@
 import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
 import { diffComparators, initializeStateManager } from '@kbn/presentation-publishing';
 import type { BehaviorSubject } from 'rxjs';
-import { combineLatestWith, debounceTime, map } from 'rxjs';
+import { combineLatestWith, debounceTime, map, startWith } from 'rxjs';
 import type { DashboardState, DashboardOptions } from '../../server';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 
@@ -104,6 +104,9 @@ export function initializeSettingsManager(initialState: DashboardState) {
       serializeSettings,
       startComparing: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return stateManager.anyStateChange$.pipe(
+          // anyStateChange$ does not emit on subscribe
+          // use startWith to compare unsaved changes on subscribe
+          startWith(undefined),
           debounceTime(100),
           map(() => stateManager.getLatestState()),
           combineLatestWith(lastSavedState$.pipe(map((lastSaved) => deserializeState(lastSaved)))),

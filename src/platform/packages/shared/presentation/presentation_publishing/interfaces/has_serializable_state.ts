@@ -12,7 +12,8 @@ import { Observable } from 'rxjs';
 
 export interface HasSerializableState<SerializedState extends object = object> {
   /**
-   * Emit on any state change
+   * Emit on any state change.
+   * Must not emit on subscribe.
    */
   anyStateChange$: Observable<void>;
   
