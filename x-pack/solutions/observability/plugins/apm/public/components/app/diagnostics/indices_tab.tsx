@@ -84,7 +84,7 @@ export function DiagnosticsIndices() {
         return (
           <>
             {fieldMappings.isValid ? (
-              <EuiIcon type="check" />
+              <EuiIcon type="check" aria-hidden={true} />
             ) : (
               <EuiIconTip
                 content={`The field "service.name" should be mapped as keyword but is mapped as "${fieldMappings.invalidType}"`}

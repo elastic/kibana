@@ -28,11 +28,29 @@ import { MetadataListResponse } from './list_metadata.gen';
 
 export const GetEndpointMetadataListRequestQuery = lazySchema(() =>
   z.object({
+    /**
+     * The page number to return.
+     */
     page: Page.optional(),
+    /**
+     * The number of endpoints to return per page.
+     */
     pageSize: PageSize.optional(),
+    /**
+     * A KQL string to filter the endpoint metadata results.
+     */
     kuery: Kuery.optional(),
+    /**
+     * A set of host statuses to filter the results by (for example, `healthy`, `updating`).
+     */
     hostStatuses: HostStatuses,
+    /**
+     * The field used to sort the results.
+     */
     sortField: SortField.optional(),
+    /**
+     * The sort order, either `asc` or `desc`.
+     */
     sortDirection: SortDirection.optional(),
   })
 );

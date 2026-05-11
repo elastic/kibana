@@ -21,6 +21,7 @@ export const parseTemplate = (template: Template): ParsedTemplate => {
     name: template.name,
     owner: template.owner,
     definition: parsedDefinition,
+    definitionString: template.definition,
     templateVersion: template.templateVersion,
     deletedAt: template.deletedAt,
     description: template.description,

@@ -20,8 +20,8 @@ import {
   useEuiOverflowScroll,
 } from '@elastic/eui';
 
+import { PHASE_NAMES } from '@kbn/data-lifecycle-phases';
 import { IlmPhaseSelect } from '../../ilm_phase_select/ilm_phase_select';
-import { PHASE_LABELS } from '../constants';
 import { useStyles } from '../use_styles';
 
 export interface PhaseTabsRowProps {
@@ -84,7 +84,7 @@ export const PhaseTabsRow = ({
                 'xpack.streams.editIlmPhasesFlyout.phaseTabHasErrorsIconAriaLabel',
                 {
                   defaultMessage: '{phase} phase has errors',
-                  values: { phase: PHASE_LABELS[phaseName] },
+                  values: { phase: PHASE_NAMES[phaseName] },
                 }
               )}
             />
@@ -92,9 +92,9 @@ export const PhaseTabsRow = ({
         }
       >
         {tabHasErrors(phaseName) ? (
-          <EuiTextColor color="danger">{PHASE_LABELS[phaseName]}</EuiTextColor>
+          <EuiTextColor color="danger">{PHASE_NAMES[phaseName]}</EuiTextColor>
         ) : (
-          PHASE_LABELS[phaseName]
+          PHASE_NAMES[phaseName]
         )}
       </EuiTab>
     </span>
