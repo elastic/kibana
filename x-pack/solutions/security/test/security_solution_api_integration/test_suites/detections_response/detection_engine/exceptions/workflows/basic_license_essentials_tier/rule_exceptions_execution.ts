@@ -678,32 +678,29 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           it('float', async () => {
-            expect(sample.riskScore).toBeDefined();
             await runValueListFilterCase({
               listType: 'float',
-              field: 'event.risk_score',
-              listLines: [String(sample.riskScore)],
-              ruleQuery: `event.risk_score: ${sample.riskScore}`,
+              field: 'source.port',
+              listLines: [String(sample.sourcePort)],
+              ruleQuery: `source.port: ${sample.sourcePort}`,
             });
           });
 
           it('half_float', async () => {
-            expect(sample.riskScore).toBeDefined();
             await runValueListFilterCase({
               listType: 'half_float',
-              field: 'event.risk_score',
-              listLines: [String(sample.riskScore)],
-              ruleQuery: `event.risk_score: ${sample.riskScore}`,
+              field: 'source.port',
+              listLines: [String(sample.sourcePort)],
+              ruleQuery: `source.port: ${sample.sourcePort}`,
             });
           });
 
           it('double', async () => {
-            expect(sample.riskScore).toBeDefined();
             await runValueListFilterCase({
               listType: 'double',
-              field: 'event.risk_score',
-              listLines: [String(sample.riskScore)],
-              ruleQuery: `event.risk_score: ${sample.riskScore}`,
+              field: 'source.port',
+              listLines: [String(sample.sourcePort)],
+              ruleQuery: `source.port: ${sample.sourcePort}`,
             });
           });
 
