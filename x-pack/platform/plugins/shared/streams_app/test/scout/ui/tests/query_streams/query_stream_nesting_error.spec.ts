@@ -54,17 +54,17 @@ test.describe(
         PARENT_STREAM_NAME,
         `FROM $.logs.ecs | LIMIT 100`
       );
-      await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
 
       await pageObjects.streams.gotoStreamMainPage();
       await pageObjects.streams.clickStreamNameLink(PARENT_STREAM_NAME);
       await pageObjects.streams.gotoPartitioningTab(PARENT_STREAM_NAME);
       await pageObjects.streams.selectChildStreamType('Query');
       await pageObjects.streams.openCreateChildQueryStreamForm();
-      await pageObjects.streams.fillAndSaveChildQueryStream(
-        CHILD_STREAM_NAME,
+      await pageObjects.streams.fillRoutingRuleName(CHILD_STREAM_NAME);
+      await pageObjects.streams.kibanaMonacoEditor.setCodeEditorValue(
         'FROM $.wrong-parent | LIMIT 100'
       );
+      await pageObjects.streams.clickQueryStreamFormCreateButton();
 
       await expect(page.getByText(/must reference its parent stream/)).toBeVisible();
     });
