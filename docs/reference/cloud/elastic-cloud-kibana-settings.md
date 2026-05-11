@@ -244,7 +244,7 @@ stack: ga 9.1
 :   Set to `true` to enable the Endpoint application.
 
 `xpack.fleet.enabled`
-:   Set to `false` to disable the Fleet application. Also enables the EPM and Agents features. For details about using this application, check the blog post [Easier data onboarding with Elastic Agent and Ingest Manager](https://www.elastic.co/blog/introducing-elastic-agent-and-ingest-manager).
+:   Set to `false` to disable the Fleet application. Also enables the EPM and Agents features. For details about using this application, check the blog post [Easier data onboarding with Elastic Agent and Ingest Manager](https://www.elastic.co/blog/introducing-elastic-agent-and-ingest-manager). This setting is not present in Kibana's configuration schema and has no effect on Kibana behavior.
 
 `xpack.fleet.agents.enabled`
 :   Set to `false` to disable the Agents API & UI.
