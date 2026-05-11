@@ -7,12 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import STREAMS_KI_CONTINUOUS_EXTRACTION_YAML from './streams_ki_continuous_extraction.yaml';
 import STREAMS_KI_FEATURES_IDENTIFICATION_YAML from './streams_ki_features_identification.yaml';
 import STREAMS_KI_ONBOARDING_YAML from './streams_ki_onboarding.yaml';
 import STREAMS_KI_QUERIES_GENERATION_YAML from './streams_ki_queries_generation.yaml';
 import type { ManagedWorkflowDefinition } from './types';
 
 // ─── Streams KI Workflows ────────────────────────────────────────────────────
+
+export const STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW_ID =
+  'system-streams-ki-continuous-extraction';
+
+export const STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW: ManagedWorkflowDefinition = {
+  id: STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW_ID,
+  pluginId: 'streams',
+  yaml: STREAMS_KI_CONTINUOUS_EXTRACTION_YAML,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'restorable',
+  },
+};
 
 export const STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID =
   'system-streams-ki-features-identification';

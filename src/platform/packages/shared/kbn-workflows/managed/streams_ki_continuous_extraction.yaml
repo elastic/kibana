@@ -12,6 +12,7 @@
 
 version: "1"
 name: ".streams-continuous-ki-extraction"
+enabled: false
 description: "This workflow is used by the system and should not be modified."
 settings:
   # Timeout is 1 minute shorter than the schedule; the concurrency key

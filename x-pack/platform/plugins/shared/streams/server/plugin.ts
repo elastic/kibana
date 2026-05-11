@@ -14,6 +14,8 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type { FakeRawRequest } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { i18n } from '@kbn/i18n';
 import {
   OBSERVABILITY_STREAMS_ENABLE_MEMORY,
@@ -26,6 +28,7 @@ import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
+  STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW_ID,
   STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   STREAMS_KI_ONBOARDING_WORKFLOW_ID,
   STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,
@@ -75,10 +78,7 @@ import { registerSuggestionsInferenceFeatures } from './register_suggestions_inf
 import { PatternExtractionService } from './lib/pattern_extraction/pattern_extraction_service';
 import { registerFieldsMetadataExtractors } from './register_fields_metadata_extractors';
 import { createStreamsSettingsStorageClient } from './lib/streams/storage/streams_settings_storage_client';
-import {
-  createContinuousKiExtractionWorkflowService,
-  type ContinuousKiExtractionWorkflowService,
-} from './lib/workflows/continuous_extraction_workflow';
+import { ContinuousKiExtractionWorkflowService } from './lib/workflows/continuous_extraction_workflow';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -105,6 +105,7 @@ export class StreamsPlugin
   private managedWorkflowsClientPromise?: Promise<
     import('@kbn/workflows/server/types').PluginScopedManagedWorkflowsApi
   >;
+  private continuousKiExtractionWorkflowService?: ContinuousKiExtractionWorkflowService;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -286,10 +287,8 @@ export class StreamsPlugin
       plugins.workflowsExtensions.registerManagedWorkflowOwner('streams');
     }
 
-    let continuousKiExtractionWorkflowService: ContinuousKiExtractionWorkflowService | undefined;
-
     if (plugins.workflowsManagement) {
-      continuousKiExtractionWorkflowService = createContinuousKiExtractionWorkflowService(
+      this.continuousKiExtractionWorkflowService = new ContinuousKiExtractionWorkflowService(
         this.logger,
         plugins.workflowsManagement.management
       );
@@ -370,7 +369,7 @@ export class StreamsPlugin
         processorSuggestions: this.processorSuggestionsService,
         patternExtractionService: this.patternExtractionService,
         getScopedClients,
-        continuousKiExtractionWorkflowService,
+        continuousKiExtractionWorkflowService: this.continuousKiExtractionWorkflowService,
         workflowsManagementApi: plugins.workflowsManagement?.management,
         getManagedWorkflowsClient: () => {
           if (!this.managedWorkflowsClientPromise) {
@@ -565,11 +564,14 @@ export class StreamsPlugin
       this.managedWorkflowsClientPromise = plugins.workflowsExtensions
         .initManagedWorkflowsClient('streams')
         .then(async (managed) => {
-          const installOptions = { spaceId: GLOBAL_WORKFLOW_SPACE_ID };
+          const globalInstallOptions = { spaceId: GLOBAL_WORKFLOW_SPACE_ID };
           await Promise.all([
-            managed.install(STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID, installOptions),
-            managed.install(STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID, installOptions),
-            managed.install(STREAMS_KI_ONBOARDING_WORKFLOW_ID, installOptions),
+            managed.install(STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID, globalInstallOptions),
+            managed.install(STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID, globalInstallOptions),
+            managed.install(STREAMS_KI_ONBOARDING_WORKFLOW_ID, globalInstallOptions),
+            managed.install(STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW_ID, {
+              spaceId: DEFAULT_SPACE_ID,
+            }),
           ]);
           this.logger.info('Managed KI workflows installed successfully');
           return managed;
@@ -578,6 +580,27 @@ export class StreamsPlugin
           this.logger.error(`Failed to install managed KI workflows: ${(err as Error).message}`);
           throw err;
         });
+
+      // TODO: Using a fake request to call the management API at startup is not
+      // recommended. Investigate adding a request-free migration hook to the
+      // managed workflows service (e.g. `legacyWorkflowIds` on the definition)
+      // so this can be handled without a KibanaRequest.
+      if (this.continuousKiExtractionWorkflowService) {
+        const migrationLogger = this.logger.get('legacy-workflow-migration');
+        const { continuousKiExtractionWorkflowService: workflowService } = this;
+        this.managedWorkflowsClientPromise.then(async () => {
+          try {
+            const fakeRawRequest: FakeRawRequest = { headers: {}, path: '/' };
+            const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+            await workflowService.migrateLegacyWorkflowAtStartup(fakeRequest);
+          } catch (err) {
+            migrationLogger.error(
+              `Legacy workflow migration failed: ${(err as Error).message}. ` +
+                `Migration will be retried on the next settings interaction.`
+            );
+          }
+        });
+      }
     }
 
     return {};

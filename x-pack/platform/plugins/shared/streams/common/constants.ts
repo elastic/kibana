@@ -63,10 +63,15 @@ export const STREAMS_SETTINGS_DOCUMENT_ID = 'kibana_streams_settings';
  * A scheduled workflow that periodically identifies knowledge indicators (KI)
  * across eligible streams. It selects streams, schedules feature identification
  * tasks, and polls their status until completion or timeout.
+ *
+ * The canonical managed workflow ID is STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW_ID
+ * from `@kbn/workflows/managed`. The legacy ID below is kept only for migration
+ * (deleting pre-existing non-managed workflow documents).
  */
 
-// Workflow identity
-export const CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID = 'workflow-ad83678a-dba7-55d1-8caa-3010f6f46b81';
+/** @deprecated Use STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW_ID from `@kbn/workflows/managed`. */
+export const LEGACY_CONTINUOUS_KI_EXTRACTION_WORKFLOW_ID =
+  'workflow-ad83678a-dba7-55d1-8caa-3010f6f46b81';
 
 // Scheduling: the workflow runs every COORDINATOR_INTERVAL_MINUTES with a
 // timeout 1 minute shorter to avoid overlapping with the next run.

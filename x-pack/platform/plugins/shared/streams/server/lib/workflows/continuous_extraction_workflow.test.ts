@@ -5,15 +5,26 @@
  * 2.0.
  */
 
-import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  getManagedWorkflowDefinition,
+  STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW_ID,
+  STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import { COORDINATOR_INTERVAL_MINUTES, MAX_SCHEDULED_STREAMS } from '../../../common/constants';
-import WORKFLOW_YAML from './continuous_extraction_workflow.yaml';
+
+const definition = getManagedWorkflowDefinition(STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW_ID);
 
 const assertYamlContains = (expected: string) => {
-  expect(WORKFLOW_YAML).toContain(expected);
+  expect(definition?.yaml).toContain(expected);
 };
 
 describe('continuous_extraction_workflow.yaml stays in sync with constants', () => {
+  it('is registered as a managed workflow definition', () => {
+    expect(definition).toBeDefined();
+    expect(definition?.pluginId).toBe('streams');
+    expect(definition?.management.enablement).toBe('restorable');
+  });
+
   it('uses the correct timeout', () => {
     assertYamlContains(`timeout: "${COORDINATOR_INTERVAL_MINUTES - 1}m"`);
   });
@@ -34,12 +45,12 @@ describe('continuous_extraction_workflow.yaml stays in sync with constants', () 
 
   it('declares extractionIntervalHours as an optional input without default', () => {
     assertYamlContains('name: extractionIntervalHours\n    type: number\n    description:');
-    expect(WORKFLOW_YAML).not.toMatch(/name: extractionIntervalHours[\s\S]*?default:/m);
+    expect(definition?.yaml).not.toMatch(/name: extractionIntervalHours[\s\S]*?default:/m);
   });
 
   it('declares excludedStreamPatterns as an optional input without default', () => {
     assertYamlContains('name: excludedStreamPatterns\n    type: string\n    description:');
-    expect(WORKFLOW_YAML).not.toMatch(/name: excludedStreamPatterns[\s\S]*?default:/m);
+    expect(definition?.yaml).not.toMatch(/name: excludedStreamPatterns[\s\S]*?default:/m);
   });
 
   it('calls the eligibility endpoint with the correct query params', () => {
@@ -68,5 +79,9 @@ describe('continuous_extraction_workflow.yaml stays in sync with constants', () 
     assertYamlContains(
       'featuresRecencyThresholdHours: "${{ steps.get_eligible.output.resolvedIntervalHours }}"'
     );
+  });
+
+  it('defaults to enabled: false so the workflow starts dormant', () => {
+    assertYamlContains('enabled: false');
   });
 });
