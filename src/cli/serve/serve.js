@@ -619,7 +619,7 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
   }
 
   // Pin a stable base path so SP/ACS endpoints stay aligned with the SAML realm across restarts.
-  if (opts.basePath !== false && !_.has(rawConfig, 'server.basePath')) {
+  if (opts.basePath !== false && !opts.runExamples && !_.has(rawConfig, 'server.basePath')) {
     lodashSet(rawConfig, 'server.basePath', MOCK_IDP_KIBANA_BASE_PATH);
   }
 

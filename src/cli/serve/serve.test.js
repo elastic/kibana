@@ -169,6 +169,11 @@ describe('applyConfigOverrides', () => {
     expect(config.server).toEqual({ publicBaseUrl: 'http://localhost:5601' });
   });
 
+  it('omits the fixed base path in stateful dev mode when `--run-examples` is passed', () => {
+    const config = applyConfigOverrides({}, { dev: true, runExamples: true }, {}, {});
+    expect(config.server).toEqual({ publicBaseUrl: 'http://localhost:5601' });
+  });
+
   it('keeps a user-provided server.basePath in stateful dev mode and derives publicBaseUrl from it', () => {
     const config = applyConfigOverrides({ server: { basePath: '/custom' } }, { dev: true }, {}, {});
     expect(config.server).toEqual({
