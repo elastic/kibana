@@ -193,7 +193,6 @@ export const TakeActionButton: FC = () => {
           dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
           dataAsNestedObject={dataAsNestedObject}
           handleOnEventClosed={closeFlyout}
-          isHostIsolationPanelOpen={false}
           onAddEventFilterClick={onAddEventFilterClick}
           onAddExceptionTypeClick={onAddExceptionTypeClick}
           onAddIsolationStatusClick={openHostIsolation}

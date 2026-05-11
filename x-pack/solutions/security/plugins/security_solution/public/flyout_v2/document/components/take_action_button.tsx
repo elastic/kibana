@@ -136,7 +136,6 @@ export const TakeActionButton = memo(
     const hostIsolationActionItems = useHostIsolationAction({
       closePopover: closePopoverHandler,
       detailsData,
-      isHostIsolationPanelOpen: false,
       onAddIsolationStatusClick: openHostIsolation,
     });
 

@@ -76,10 +76,6 @@ export interface TakeActionDropdownProps {
    */
   handleOnEventClosed: () => void;
   /**
-   * Callback to let the parent know if the isolation panel is opened or closed
-   */
-  isHostIsolationPanelOpen: boolean;
-  /**
    * Callback to let parent know when the user interacts with the exception panel
    */
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
@@ -121,7 +117,6 @@ export const TakeActionDropdown = memo(
     dataFormattedForFieldBrowser,
     dataAsNestedObject,
     handleOnEventClosed,
-    isHostIsolationPanelOpen,
     onAddEventFilterClick,
     onAddExceptionTypeClick,
     onAddIsolationStatusClick,
@@ -205,7 +200,6 @@ export const TakeActionDropdown = memo(
       closePopover: closePopoverHandler,
       detailsData: dataFormattedForFieldBrowser,
       onAddIsolationStatusClick: handleOnAddIsolationStatusClick,
-      isHostIsolationPanelOpen,
     });
 
     // exception interaction

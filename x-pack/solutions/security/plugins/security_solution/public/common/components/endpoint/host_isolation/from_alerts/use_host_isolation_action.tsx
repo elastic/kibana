@@ -21,7 +21,6 @@ import { useGetAgentStatus } from '../../../../../management/hooks/agents/use_ge
 export interface UseHostIsolationActionProps {
   closePopover: () => void;
   detailsData: TimelineEventsDetailsItem[] | null;
-  isHostIsolationPanelOpen: boolean;
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
 }
 
@@ -30,7 +29,6 @@ const emptyArray: AlertTableContextMenuItem[] = [];
 export const useHostIsolationAction = ({
   closePopover,
   detailsData,
-  isHostIsolationPanelOpen,
   onAddIsolationStatusClick,
 }: UseHostIsolationActionProps): AlertTableContextMenuItem[] => {
   const {
@@ -85,7 +83,7 @@ export const useHostIsolationAction = ({
     const menuItem: AlertTableContextMenuItem = {
       key: 'isolate-host-action-item',
       'data-test-subj': 'isolate-host-action-item',
-      disabled: isHostAgentUnEnrolled || isHostIsolationPanelOpen,
+      disabled: isHostAgentUnEnrolled,
       onClick: isolateHostHandler,
       name: isHostIsolated ? UNISOLATE_HOST : ISOLATE_HOST,
     };
@@ -114,7 +112,6 @@ export const useHostIsolationAction = ({
     canUnIsolateHost,
     canIsolateHost,
     isHostAgentUnEnrolled,
-    isHostIsolationPanelOpen,
     isolateHostHandler,
     doesHostSupportIsolation,
     isLoading,
