@@ -169,17 +169,24 @@ Beyond the root-cause `classification` above, decide whether this failure should
 
 ## Comment format
 
-Post exactly one comment on the target issue. The comment has two parts: a short **TL;DR** at the top that tells the whole story in 2–3 sentences, followed by a single collapsed **More details** section that holds the rest.
+Post exactly one comment on the target issue. The comment has two parts: a short summary at the top that an engineer can read without clicking anything, and a single collapsed **More details** section that holds the long-form evidence.
 
-### TL;DR (top of the comment, always visible)
+### Top of the comment (always visible)
 
-Write 2–3 sentences, plain prose (no headings, no bullet lists), covering:
+Emit these elements in this order, with no other content between them:
 
-1. What broke and where (one specific sentence — name the test file or test name).
-2. The most likely root cause in one sentence.
-3. The recommended next action in one sentence (the proposed fix, or "needs human investigation because X", or "real product bug — not a flake", etc.).
+1. **A one-line headline**, bold, that tells the reader at a glance what kind of result this is and one identifying detail (test name or one-phrase root cause). Phrase it however reads best for the situation — it should be obviously consistent with the `fixability` value below, but you do not need to follow a template. Example: `**Likely flaky-test fix** — missing waitForAlertsToPopulate() in building_block_alerts.spec.ts`.
 
-Immediately after the TL;DR paragraph, emit the Flakiness Finding bullets so the structured metadata is visible without expanding the details. Emit exactly these five bullets, in this order, with one concrete value per bullet (no choice lists, no placeholders). Downstream tooling parses them directly, so keep the keys, casing, and `` - `key`: value `` shape exactly.
+2. **A 3–5 sentence narrative paragraph**, plain prose (no nested headings, no bullet lists), covering:
+   - what broke and where (name the test file or test name),
+   - the most likely root cause,
+   - any author attribution that follows the Attribution rules above (mention the implicated author with `@username` here so they get notified on first read, not after expanding the details).
+
+   Hard ceiling: at most 5 sentences. If you have more to say, put it in the More details section.
+
+3. **A one-line action hint** telling the reader what to do next — the proposed fix, the recommended action, what evidence is missing, etc. Phrase it however reads best for the situation. Skip the line entirely if everything that matters is already in the paragraph above.
+
+4. **The Flakiness Finding bullets**, so the structured metadata is visible without expanding the details. Emit exactly these five bullets, in this order, with one concrete value per bullet (no choice lists, no placeholders). Downstream tooling parses them directly, so keep the keys, casing, and `` - `key`: value `` shape exactly.
 
 - `classification`: one of `test`, `code`, `external`, `inconclusive`
 - `confidence`: one of `high`, `medium`, `low`
@@ -199,18 +206,18 @@ Wrap everything below in a single `<details>` block so the comment stays compact
 
 #### Suspected Root Cause
 
-2 to 5 bullets tied to evidence. If a recent commit appears causal, include the commit link and mention the author when justified.
+2 to 5 bullets tied to evidence. If a recent commit appears causal, include the commit link.
 
 #### Proposed Fix
+
+The expanded form of the one-line "Proposed fix" / "Recommended action" / "Missing evidence" line from the top. Skip this section entirely when the top action hint already says everything there is to say.
 
 - Provide one focused fix proposal when justified.
 - Include the exact file, function, assertion, wait condition, fixture, selector, API, or behavior that should change.
 - Include GitHub links to the most relevant files or commits.
-- State the exact change or investigation a human should make next.
 - Be specific enough that an engineer could begin implementing it without re-deriving the plan.
 - If you can justify a likely code change, include a small diff-style snippet showing the suggested edit.
 - Only include a diff when it is grounded in the evidence you collected.
-- If no credible fix is available, say that clearly and explain what evidence is missing.
 
 #### Evidence Used
 
@@ -219,7 +226,7 @@ The key issue comments, file paths, commits, or links that drove the conclusion.
 </details>
 ```
 
-Use `####` headings inside the details block (not `###`) so they nest below the comment's own structure.
+Use `####` headings inside the details block (not `###`) so they nest below the comment's own structure. Sections may be omitted when there is nothing meaningful to put in them — for example, drop `Proposed Fix` when `fixability` is `not-a-flake`, or `Suspected Root Cause` when `fixability` is `inconclusive`.
 
 ## Constraints
 
