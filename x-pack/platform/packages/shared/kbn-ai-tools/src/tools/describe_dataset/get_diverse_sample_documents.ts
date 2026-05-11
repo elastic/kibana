@@ -12,8 +12,8 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import { dateRangeQuery } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import {
+  buildPass1Query,
   buildPass2Query,
-  columnPath,
   parsePass1Rows,
   parsePass2Hits,
 } from '../../utils/esql_two_pass';
@@ -79,8 +79,16 @@ export async function getDiverseSampleDocuments({
   // only needs representative document diversity, not exact category counts.
   const samplingProbability =
     MAX_DOCS_TO_SAMPLE / totalDocs < 0.5 ? MAX_DOCS_TO_SAMPLE / totalDocs : 1;
+  // Ask pass 1 for size+offset rows so we can client-side slice the window
+  // [offset, offset+size] after sorting by count. SAMPLE-reduced counts are
+  // fine here because we only use them for internal sort/slice.
   const pass1Response = (await esClient.esql.query({
-    query: buildPass1Query({ indices, messageField, size, offset, samplingProbability }),
+    query: buildPass1Query({
+      indices,
+      field: messageField,
+      limit: size + offset,
+      samplingProbability,
+    }),
     filter,
     drop_null_columns: true,
   })) as unknown as ESQLSearchResponse;
@@ -172,39 +180,3 @@ async function runEsqlCount({
   return typeof total === 'number' ? total : 0;
 }
 
-/**
- * Pass 1 categorizes the message field and returns only category metadata plus a
- * representative key. The key includes `_index` because `_id` is unique only
- * within an index, and Streams queries often span backing indices.
- */
-function buildPass1Query({
-  indices,
-  messageField,
-  size,
-  offset,
-  samplingProbability,
-}: {
-  indices: string[];
-  messageField: string;
-  size: number;
-  offset: number;
-  samplingProbability: number;
-}): string {
-  // `TOP(doc_key, 1, "desc")` intentionally means "any stable representative".
-  // Diverse sampling does not require newest/latest semantics; it only needs one
-  // coherent document per category.
-  let query = esql.from(indices, ['_index', '_id']).pipe`EVAL doc_key = CONCAT(${esql.col(
-    '_index'
-  )}, ":", ${esql.col('_id')})`;
-
-  if (samplingProbability < 1) {
-    query = query.pipe`SAMPLE ${esql.num(samplingProbability)}`;
-  }
-
-  return query.pipe`STATS representative_key = TOP(doc_key, 1, "desc"), count = COUNT(*) BY pattern = CATEGORIZE(${esql.col(
-    columnPath(messageField)
-  )})`
-    .sort([['count'], 'DESC', ''])
-    .limit(size + offset)
-    .print('basic');
-}

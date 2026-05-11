@@ -32,6 +32,49 @@ export function columnPath(field: string): string | string[] {
 }
 
 /**
+ * Builds the pass-1 ES|QL categorization query: emit a composite `_index:_id`
+ * key per document, optionally apply a KQL filter, optionally SAMPLE for
+ * cost-bounded categorization on large populations, then `STATS … BY pattern =
+ * CATEGORIZE(field)` and return the top `limit` patterns by count along with
+ * one representative key per pattern.
+ *
+ * Both callers — diverse sampling and SigEvents log-patterns — use the same
+ * shape; only `kql` and the `limit` value differ. `TOP(doc_key, 1, "desc")`
+ * gives "any stable representative" (not "latest"); pass 2 fetches the
+ * `_source` for those keys via `buildPass2Query`.
+ */
+export function buildPass1Query({
+  indices,
+  field,
+  limit,
+  samplingProbability,
+  kql,
+}: {
+  indices: string[];
+  field: string;
+  limit: number;
+  samplingProbability: number;
+  kql?: string;
+}): string {
+  let query = esql.from(indices, ['_index', '_id'])
+    .pipe`EVAL doc_key = CONCAT(${esql.col('_index')}, ":", ${esql.col('_id')})`;
+
+  if (kql) {
+    query = query.where`KQL(${esql.str(kql)})`;
+  }
+  if (samplingProbability < 1) {
+    query = query.pipe`SAMPLE ${esql.num(samplingProbability)}`;
+  }
+
+  return query.pipe`STATS representative_key = TOP(doc_key, 1, "desc"), count = COUNT(*) BY pattern = CATEGORIZE(${esql.col(
+    columnPath(field)
+  )})`
+    .sort([['count'], 'DESC', ''])
+    .limit(limit)
+    .print('basic');
+}
+
+/**
  * Fetches `_source` for the exact composite (`_index:_id`) keys chosen by pass
  * 1. Used by both the diverse-sampling and SigEvents log-patterns helpers.
  *

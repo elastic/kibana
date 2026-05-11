@@ -26,8 +26,8 @@ import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
 import { pValueToLabel } from '../../utils/p_value_to_label';
 import {
+  buildPass1Query,
   buildPass2Query,
-  columnPath,
   parsePass1Rows,
   parsePass2Hits,
 } from '../../utils/esql_two_pass';
@@ -584,39 +584,3 @@ function buildCountQuery({ index }: { index: string | string[] }): string {
   );
 }
 
-/**
- * SigEvents-only ES|QL categorization. Unlike getLogPatterns(), this helper does
- * not synthesize regex/highlight/metadata/timeseries/change-point output because
- * the live SigEvents consumer only sends `{ field, pattern, count, sample }` to
- * the LLM. The full DSL helper remains in place for Observability RCA, where
- * change-point output is still consumed.
- */
-function buildPass1Query({
-  indices,
-  field,
-  samplingProbability,
-  limit,
-}: {
-  indices: string[];
-  field: string;
-  samplingProbability: number;
-  limit: number;
-}): string {
-  // `_index:_id` is the join key, not `_id` alone: stream names can expand to
-  // multiple backing indices, and Elasticsearch only guarantees `_id`
-  // uniqueness inside a single index.
-  let query = esql.from(indices, ['_index', '_id']).pipe`EVAL doc_key = CONCAT(${esql.col(
-    '_index'
-  )}, ":", ${esql.col('_id')})`;
-
-  if (samplingProbability < 1) {
-    query = query.pipe`SAMPLE ${esql.num(samplingProbability)}`;
-  }
-
-  return query.pipe`STATS representative_key = TOP(doc_key, 1, "desc"), count = COUNT(*) BY pattern = CATEGORIZE(${esql.col(
-    columnPath(field)
-  )})`
-    .sort([['count'], 'DESC', ''])
-    .limit(limit)
-    .print('basic');
-}
