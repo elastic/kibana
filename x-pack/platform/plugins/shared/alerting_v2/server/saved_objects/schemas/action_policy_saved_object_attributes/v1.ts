@@ -17,7 +17,7 @@ export const actionPolicySavedObjectAttributesSchema = schema.object(
     name: schema.string(),
     description: schema.string(),
     type: schema.oneOf([schema.literal('global'), schema.literal('single_rule')]),
-    ruleId: schema.maybe(schema.nullable(schema.string({ minLength: 1 }))),
+    ruleId: schema.maybe(schema.nullable(schema.string({ minLength: 1, maxLength: 256 }))),
     enabled: schema.boolean(),
     destinations: schema.arrayOf(actionPolicyDestinationSchema, { minSize: 1, maxSize: 20 }),
     matcher: schema.maybe(schema.nullable(schema.string())),
