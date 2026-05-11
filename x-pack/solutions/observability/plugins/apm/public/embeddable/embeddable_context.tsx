@@ -9,6 +9,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { createMemoryHistory } from 'history';
+import { mockCreateCallApmApiV2 } from '@kbn/apm-api-shared';
 import type { ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
 import { apmRouter } from '../components/routing/apm_route_config';
@@ -19,6 +20,7 @@ import type { EmbeddableDeps } from './types';
 import { LicenseProvider } from '../context/license/license_context';
 import { TimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
 import { ApmIndexSettingsContextProvider } from '../context/apm_index_settings/apm_index_settings_context';
+import { setApmInternalServices } from '../plugin';
 
 export interface ApmEmbeddableContextProps {
   deps: EmbeddableDeps;
@@ -73,6 +75,8 @@ export function ApmEmbeddableContext({
   } as ApmPluginContextValue;
 
   createCallApmApi(deps.coreStart);
+  const callApmApi = mockCreateCallApmApiV2(deps.coreStart);
+  setApmInternalServices({ callApmApi });
 
   return (
     <I18nProvider>

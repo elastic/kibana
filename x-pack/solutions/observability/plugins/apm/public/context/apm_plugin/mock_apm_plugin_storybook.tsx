@@ -27,6 +27,8 @@ import { MockTimeRangeContextProvider } from '../time_range_metadata/mock_time_r
 import { ApmTimeRangeMetadataContextProvider } from '../time_range_metadata/time_range_metadata_context';
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
+import { mockCreateCallApmApiV2 } from '../../../../../../../../src/platform/packages/shared/kbn-apm-api-shared';
+import { setApmInternalServices } from '../../plugin';
 
 const uiSettings: Record<string, unknown> = {
   [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
@@ -197,6 +199,8 @@ export function MockApmPluginStorybook({
 }) {
   const contextMock = merge({}, mockApmPluginContext, apmContext);
   createCallApmApi(contextMock.core);
+  const callApmApi = mockCreateCallApmApiV2(contextMock.core);
+  setApmInternalServices({ callApmApi });
   const KibanaReactContext = createKibanaReactContext(
     merge({}, contextMock.core, { telemetry: storybookTelemetry }) as unknown as Partial<CoreStart>
   );

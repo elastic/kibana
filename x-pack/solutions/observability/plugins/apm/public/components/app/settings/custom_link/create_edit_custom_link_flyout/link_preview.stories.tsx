@@ -8,8 +8,10 @@
 import type { ComponentProps } from 'react';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
+import { mockCreateCallApmApiV2 } from '@kbn/apm-api-shared';
 import { createCallApmApi } from '../../../../../services/rest/create_call_apm_api';
 import { LinkPreview } from './link_preview';
+import { setApmInternalServices } from '../../../../../plugin';
 
 export default {
   title: 'app/settings/CustomizeUI/CustomLink/CreateEditCustomLinkFlyout/LinkPreview',
@@ -25,6 +27,8 @@ export function Example({ filters, label, url }: ComponentProps<typeof LinkPrevi
   } as unknown as CoreStart;
 
   createCallApmApi(coreMock);
+  const callApmApi = mockCreateCallApmApiV2(coreMock);
+  setApmInternalServices({ callApmApi });
 
   return <LinkPreview filters={filters} label={label} url={url} />;
 }

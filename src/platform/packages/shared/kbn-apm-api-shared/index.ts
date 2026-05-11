@@ -67,3 +67,4 @@ export {
   OBSERVABILITY_APM_CPS_ENABLED_DEFAULT,
   OBSERVABILITY_APM_CPS_ENABLED_FEATURE_FLAG,
 } from './src/cps_feature_flag';
+export { mockCreateCallApmApiV2 } from './src/mock_create_call_apm_api';
