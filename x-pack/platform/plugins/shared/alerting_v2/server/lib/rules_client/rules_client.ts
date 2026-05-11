@@ -11,44 +11,37 @@ import {
   createRuleDataSchema,
   updateRuleDataSchema,
 } from '@kbn/alerting-v2-schemas';
-import { PluginStart } from '@kbn/core-di';
-import { CoreStart, Request } from '@kbn/core-di-server';
-import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
-import { inject, injectable } from 'inversify';
-
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
-import { ActionPolicyClient } from '../action_policy_client';
+import { type ActionPolicyClient } from '../action_policy_client';
+import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
-import { RulesSavedObjectServiceScopedToken } from '../services/rules_saved_object_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
-import { UserService } from '../services/user_service/user_service';
+import { buildRuleSoFilter } from './build_rule_filter';
+import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import type {
   BulkOperationError,
   BulkOperationResponse,
   BulkRulesParams,
   CreateRuleParams,
-  FindRulesSortField,
   FindRulesParams,
   FindRulesResponse,
+  FindRulesSortField,
   RuleResponse,
   UpdateRuleData,
 } from './types';
 import {
+  buildUpdateRuleAttributes,
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
-  buildUpdateRuleAttributes,
 } from './utils';
-import { buildRuleSoFilter } from './build_rule_filter';
-import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
-import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 
 const withApm = withApmDecorator('RulesClient');
 
@@ -77,23 +70,38 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
   return sortFieldMap[sortField];
 };
 
-@injectable()
+interface RulesClientParams {
+  services: {
+    request: KibanaRequest;
+    rulesSavedObjectService: RulesSavedObjectServiceContract;
+    taskManager: TaskManagerStartContract;
+    userService: UserServiceContract;
+    actionPolicyClient: ActionPolicyClient;
+  };
+  options: {
+    spaceId: string;
+  };
+}
+
 export class RulesClient {
-  constructor(
-    @inject(Request) private readonly request: KibanaRequest,
-    @inject(CoreStart('http')) private readonly http: HttpServiceStart,
-    @inject(RulesSavedObjectServiceScopedToken)
-    private readonly rulesSavedObjectService: RulesSavedObjectServiceContract,
-    @inject(PluginStart('taskManager')) private readonly taskManager: TaskManagerStartContract,
-    @inject(UserService) private readonly userService: UserServiceContract,
-    @inject(ActionPolicyClient) private readonly actionPolicyClient: ActionPolicyClient
-  ) {}
+  private readonly request: KibanaRequest;
+  private readonly rulesSavedObjectService: RulesSavedObjectServiceContract;
+  private readonly taskManager: TaskManagerStartContract;
+  private readonly userService: UserServiceContract;
+  private readonly actionPolicyClient: ActionPolicyClient;
+  private readonly spaceId: string;
+
+  constructor({ services, options }: RulesClientParams) {
+    this.request = services.request;
+    this.rulesSavedObjectService = services.rulesSavedObjectService;
+    this.taskManager = services.taskManager;
+    this.userService = services.userService;
+    this.actionPolicyClient = services.actionPolicyClient;
+    this.spaceId = options.spaceId;
+  }
 
   private getSpaceContext(): { spaceId: string } {
-    const requestBasePath = this.http.basePath.get(this.request);
-    const space = getSpaceIdFromPath(requestBasePath, this.http.basePath.serverBasePath);
-    const spaceId = space?.spaceId || 'default';
-    return { spaceId };
+    return { spaceId: this.spaceId };
   }
 
   @withApm

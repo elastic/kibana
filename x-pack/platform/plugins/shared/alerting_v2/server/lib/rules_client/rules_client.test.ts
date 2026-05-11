@@ -7,19 +7,19 @@
 
 import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
-import type { CreateRuleParams, UpdateRuleData } from './types';
-import type { UserService } from '../services/user_service/user_service';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { ActionPolicyClient } from '../action_policy_client';
-import { RulesClient } from './rules_client';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
+import type { UserService } from '../services/user_service/user_service';
 import { createUserService } from '../services/user_service/user_service.mock';
 import { createRuleSoAttributes } from '../test_utils';
+import { RulesClient } from './rules_client';
+import type { CreateRuleParams, UpdateRuleData } from './types';
 
 jest.mock('../rule_executor/schedule', () => ({
   ensureRuleExecutorTaskScheduled: jest.fn(),
@@ -58,7 +58,6 @@ const baseSoAttrs = createRuleSoAttributes({
 
 describe('RulesClient', () => {
   const request: KibanaRequest = httpServerMock.createKibanaRequest();
-  const http = httpServiceMock.createStartContract();
   const taskManager = taskManagerMock.createStart();
   let userService: UserService;
   const { rulesSavedObjectService, mockSavedObjectsClient } = createRulesSavedObjectService();
@@ -70,8 +69,6 @@ describe('RulesClient', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Default space
-    http.basePath.get.mockReturnValue('/s/space-1');
     ({ userService } = createUserService());
     mockSavedObjectsClient.create.mockResolvedValue({
       id: 'rule-id-default',
@@ -113,14 +110,11 @@ describe('RulesClient', () => {
         .fn()
         .mockResolvedValue({ processed: 0, total: 0, errors: [] }),
     } as unknown as ActionPolicyClient;
-    return new RulesClient(
-      request,
-      http,
-      rulesSavedObjectService,
-      taskManager,
-      userService,
-      actionPolicyClient
-    );
+
+    return new RulesClient({
+      services: { request, rulesSavedObjectService, taskManager, userService, actionPolicyClient },
+      options: { spaceId: 'space-1' },
+    });
   }
 
   describe('createRule', () => {

@@ -1471,6 +1471,7 @@
     "@timestamp",
     "entityId",
     "entityType",
+    "errorCode",
     "message",
     "status"
   ],

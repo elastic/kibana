@@ -7,19 +7,21 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { flyoutHeaderBlockStyles } from '../../../../flyout_v2/document/constants/styles';
+import {
+  FlyoutHeaderBlock,
+  flyoutHeaderBlockStyles,
+} from '../../../../flyout_v2/shared/components/flyout_header_block';
 import { useRefetchByScope } from '../../../../flyout_v2/document/hooks/use_refetch_by_scope';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
 import { Assignees } from '../../../../flyout_v2/document/components/assignees';
-import { Timestamp } from '../../../../flyout_v2/document/components/timestamp';
+import { Timestamp } from '../../../../flyout_v2/shared/components/timestamp';
 import { Notes } from '../../../../flyout_v2/shared/components/notes';
 import { RiskScore } from '../../../../flyout_v2/document/components/risk_score';
 import { DocumentSeverity } from '../../../../flyout_v2/document/components/severity';
-import { AlertHeaderBlock } from '../../../../flyout_v2/shared/components/alert_header_block';
 import { ALERT_SUMMARY_PANEL_TEST_ID } from '../../../../flyout_v2/shared/components/test_ids';
 import { LeftPanelNotesTab } from '../../left';
 import { STATUS_TITLE_TEST_ID } from './test_ids';
@@ -57,7 +59,7 @@ export const AlertHeaderTitle = memo(() => {
   const status = useMemo(
     () =>
       isRulePreview ? (
-        <AlertHeaderBlock
+        <FlyoutHeaderBlock
           hasBorder
           title={
             <FormattedMessage
@@ -68,7 +70,7 @@ export const AlertHeaderTitle = memo(() => {
           data-test-subj={STATUS_TITLE_TEST_ID}
         >
           {getEmptyTagValue()}
-        </AlertHeaderBlock>
+        </FlyoutHeaderBlock>
       ) : (
         <Status
           hit={hit}
@@ -84,9 +86,10 @@ export const AlertHeaderTitle = memo(() => {
       <DocumentSeverity hit={hit}>
         <EuiSpacer size="m" />
       </DocumentSeverity>
-      <Timestamp hit={hit}>
-        <EuiSpacer size="xs" />
-      </Timestamp>
+      <EuiText size="s">
+        <Timestamp hit={hit} />
+      </EuiText>
+      <EuiSpacer size="xs" />
       <Title hit={hit} hideLink={isRulePreview || !canReadRules} />
       <EuiSpacer size="m" />
       <EuiFlexGroup
