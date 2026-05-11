@@ -28,14 +28,6 @@ const getReviews = async ({ github, owner, repo, originalPrNumber }) => {
               author {
                 login
               }
-              onBehalfOf(first: 10) {
-                nodes {
-                  slug
-                  organization {
-                    login
-                  }
-                }
-              }
             }
           }
         }
@@ -53,19 +45,54 @@ const getReviews = async ({ github, owner, repo, originalPrNumber }) => {
     .sort((a, b) => Date.parse(b.submittedAt) - Date.parse(a.submittedAt));
 };
 
-const getReviewedTeams = (reviews) => {
-  const reviewedTeams = [];
+// Fetched in a separate query because `onBehalfOf` returns team `slug` and
+// `organization.login`, which require the `read:org` scope. Wrapping the call
+// in try/catch lets the workflow fall back to the last-approver reviewer when
+// the configured token cannot read org/team data.
+const getReviewedTeams = async ({ github, core, owner, repo, originalPrNumber }) => {
+  try {
+    const reviewHistory = await github.graphql(
+      `query($owner: String!, $repo: String!, $number: Int!) {
+        repository(owner: $owner, name: $repo) {
+          pullRequest(number: $number) {
+            reviews(first: 100) {
+              nodes {
+                onBehalfOf(first: 10) {
+                  nodes {
+                    slug
+                    organization {
+                      login
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }`,
+      {
+        owner,
+        repo,
+        number: originalPrNumber,
+      }
+    );
 
-  for (const review of reviews) {
-    for (const team of review.onBehalfOf.nodes ?? []) {
-      const combinedSlug = `${team.organization.login}/${team.slug}`;
-      if (!reviewedTeams.includes(combinedSlug)) {
-        reviewedTeams.push(combinedSlug);
+    const reviewedTeams = [];
+
+    for (const review of reviewHistory.repository.pullRequest?.reviews?.nodes ?? []) {
+      for (const team of review.onBehalfOf?.nodes ?? []) {
+        const combinedSlug = `${team.organization.login}/${team.slug}`;
+        if (!reviewedTeams.includes(combinedSlug)) {
+          reviewedTeams.push(combinedSlug);
+        }
       }
     }
-  }
 
-  return reviewedTeams;
+    return reviewedTeams;
+  } catch (error) {
+    core.warning(`Failed to query reviewed teams: ${error.message}`);
+    return [];
+  }
 };
 
 const getMatchedTeams = async ({ github, core, prAuthor, reviewedTeams }) => {
@@ -146,7 +173,13 @@ module.exports = async ({ github, context, core }) => {
   }
 
   const reviews = await getReviews({ github, owner, repo, originalPrNumber });
-  const reviewedTeams = getReviewedTeams(reviews);
+  const reviewedTeams = await getReviewedTeams({
+    github,
+    core,
+    owner,
+    repo,
+    originalPrNumber,
+  });
   const teamReviewers = await getMatchedTeams({
     github,
     core,
