@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { lastValueFrom } from 'rxjs';
+import { useQuery } from '@kbn/react-query';
 
 import { useStartServices } from '../../../hooks';
 
@@ -136,78 +137,41 @@ export const useErrorPatterns = ({
   serviceInstanceId: string;
   timeRange: TimeRange;
 }): UseErrorPatternsResult => {
-  const { data } = useStartServices();
+  const { data: dataService } = useStartServices();
 
-  const [errorPatterns, setErrorPatterns] = useState<ErrorPattern[]>([]);
-  const [warningPatterns, setWarningPatterns] = useState<ErrorPattern[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | undefined>();
+  const { data, isLoading, error } = useQuery(
+    ['errorPatterns', serviceInstanceId, timeRange],
+    async () => {
+      const now = Date.now();
+      const timeRangeMs = TIME_RANGE_TO_MS[timeRange];
 
-  const fetchPatterns = useCallback(
-    (abortSignal: AbortSignal, showLoading: boolean) => {
-      if (showLoading) {
-        setIsLoading(true);
-      }
-      setError(undefined);
+      const [errorResponse, warningResponse] = await Promise.all(
+        (['error', 'warning'] as const).map((level) =>
+          lastValueFrom(
+            dataService.search.search<
+              IKibanaSearchRequest,
+              IKibanaSearchResponse<{ aggregations?: ErrorPatternsAggregations }>
+            >(buildQuery(serviceInstanceId, level, now, timeRangeMs))
+          )
+        )
+      );
 
-      const run = async () => {
-        try {
-          const now = Date.now();
-          const timeRangeMs = TIME_RANGE_TO_MS[timeRange];
+      const errorBuckets = errorResponse.rawResponse.aggregations?.categories?.buckets ?? [];
+      const warningBuckets = warningResponse.rawResponse.aggregations?.categories?.buckets ?? [];
 
-          const [errorResponse, warningResponse] = await Promise.all(
-            (['error', 'warning'] as const).map((level) =>
-              lastValueFrom(
-                data.search.search<
-                  IKibanaSearchRequest,
-                  IKibanaSearchResponse<{ aggregations?: ErrorPatternsAggregations }>
-                >(buildQuery(serviceInstanceId, level, now, timeRangeMs), {
-                  abortSignal,
-                })
-              )
-            )
-          );
-
-          if (!abortSignal.aborted) {
-            const errorBuckets = errorResponse.rawResponse.aggregations?.categories?.buckets ?? [];
-            const warningBuckets =
-              warningResponse.rawResponse.aggregations?.categories?.buckets ?? [];
-
-            setErrorPatterns(mapBucketsToPatterns(errorBuckets));
-            setWarningPatterns(mapBucketsToPatterns(warningBuckets));
-            setIsLoading(false);
-          }
-        } catch (e) {
-          if (!abortSignal.aborted) {
-            setError(e instanceof Error ? e : new Error(String(e)));
-            setIsLoading(false);
-          }
-        }
+      return {
+        errorPatterns: mapBucketsToPatterns(errorBuckets),
+        warningPatterns: mapBucketsToPatterns(warningBuckets),
       };
-
-      run();
     },
-    [serviceInstanceId, timeRange, data.search]
+    {
+      enabled: !!serviceInstanceId,
+      refetchInterval: 30 * 1000, // 30 seconds
+      keepPreviousData: true,
+    }
   );
 
-  useEffect(() => {
-    if (!serviceInstanceId) {
-      setIsLoading(false);
-      return;
-    }
-
-    const abortController = new AbortController();
-    fetchPatterns(abortController.signal, true);
-
-    const interval = setInterval(() => {
-      fetchPatterns(abortController.signal, false);
-    }, 30_000);
-
-    return () => {
-      abortController.abort();
-      clearInterval(interval);
-    };
-  }, [fetchPatterns, serviceInstanceId]);
+  const { errorPatterns = [], warningPatterns = [] } = data ?? {};
 
   const totalLogCount = useMemo(
     () => [...errorPatterns, ...warningPatterns].reduce((sum, p) => sum + p.docCount, 0),
@@ -221,6 +185,6 @@ export const useErrorPatterns = ({
     warningCount: warningPatterns.length,
     totalLogCount,
     isLoading,
-    error,
+    error: error instanceof Error ? error : undefined,
   };
 };
