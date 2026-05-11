@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
   EuiButton,
@@ -41,6 +41,8 @@ export interface ComposeDiscoverFlyoutProps {
   mode?: ComposeDiscoverMode;
   /** The existing rule — provided when mode === 'edit'. Used to seed the RHF form. */
   rule?: Parameters<typeof mapRuleResponseToFormValues>[0];
+  /** The ID of the rule being edited. Required when mode === 'edit'. */
+  ruleId?: string;
   onClose: () => void;
   services: RuleFormServices;
   /** Called with the create payload when the user submits in create mode. */
@@ -71,6 +73,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   historyKey,
   mode = 'create',
   rule,
+  ruleId,
   onClose,
   services,
   onCreateRule,
@@ -116,11 +119,32 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const isLastStep = uiState.step === stepTitles.length - 1;
   const tabConfig = getSandboxTabConfig(uiState);
 
+  // Sync reducer-owned query fields into RHF whenever the user commits a query
+  // from the Discover Sandbox. This bridges the gap between the two state systems
+  // so that mapFormValuesToCreateRequest/UpdateRequest receives current values.
+  useEffect(() => {
+    if (uiState.queryCommitted && uiState.fullQuery) {
+      methods.setValue('evaluation', { query: { base: uiState.fullQuery } });
+    }
+  }, [uiState.fullQuery, uiState.queryCommitted, methods]);
+
+  // Sync time field and group fields from the reducer into RHF as they change.
+  useEffect(() => {
+    methods.setValue('timeField', uiState.timeField);
+  }, [uiState.timeField, methods]);
+
+  useEffect(() => {
+    methods.setValue(
+      'grouping',
+      uiState.groupFields.length > 0 ? { fields: uiState.groupFields } : undefined
+    );
+  }, [uiState.groupFields, methods]);
+
   const handleSubmit = methods.handleSubmit((values) => {
     if (isCreate) {
       onCreateRule(mapFormValuesToCreateRequest(values));
-    } else if (rule && onUpdateRule) {
-      onUpdateRule((rule as { id: string }).id, mapFormValuesToUpdateRequest(values));
+    } else if (ruleId && onUpdateRule) {
+      onUpdateRule(ruleId, mapFormValuesToUpdateRequest(values));
     }
   });
 

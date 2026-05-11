@@ -141,17 +141,33 @@ export const RulesListPage = () => {
           />
         }
         rightSideItems={[
-          <EuiButton
-            key="create-rule"
-            fill
-            onClick={() => setFlyoutOpen(true)}
-            data-test-subj="createRuleButton"
-          >
-            <FormattedMessage
-              id="xpack.alertingV2.rulesList.createRuleButton"
-              defaultMessage="Create rule"
-            />
-          </EuiButton>,
+          <EuiFlexGroup key="create-rule-group" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              {/* Primary create button — navigates to the full-page form (existing flow) */}
+              <EuiButton
+                fill
+                href="#/rules/new"
+                data-test-subj="createRuleButton"
+              >
+                <FormattedMessage
+                  id="xpack.alertingV2.rulesList.createRuleButton"
+                  defaultMessage="Create rule"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {/* Flyout create — opens the new stepped flyout experience */}
+              <EuiButton
+                onClick={() => setFlyoutOpen(true)}
+                data-test-subj="createRuleFlyoutButton"
+              >
+                <FormattedMessage
+                  id="xpack.alertingV2.rulesList.createRuleFlyoutButton"
+                  defaultMessage="Create in flyout"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>,
         ]}
       />
       <EuiSpacer size="m" />
@@ -213,6 +229,10 @@ export const RulesListPage = () => {
             sortDirection={sortDirection}
             isLoading={isLoading}
             onTableChange={onTableChange}
+            onEditInFlyout={(rule) => {
+              setEditRule(rule);
+              setFlyoutOpen(true);
+            }}
           />
         </>
       ) : null}
@@ -221,6 +241,7 @@ export const RulesListPage = () => {
           historyKey={historyKey}
           mode={editRule ? 'edit' : 'create'}
           rule={editRule ?? undefined}
+          ruleId={editRule?.id}
           onClose={() => { setFlyoutOpen(false); setEditRule(null); }}
           services={ruleFormServices}
           onCreateRule={(payload) =>

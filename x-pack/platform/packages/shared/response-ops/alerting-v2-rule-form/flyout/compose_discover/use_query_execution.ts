@@ -81,9 +81,6 @@ export const useQueryExecution = ({
 
     const queryWithTime = injectTimeFilter(executionQuery, executionTimeField);
 
-    // eslint-disable-next-line no-console
-    console.debug('[useQueryExecution] executing:', queryWithTime);
-
     const result = await getESQLResults({
       esqlQuery: queryWithTime,
       search: data.search.search,
@@ -121,9 +118,6 @@ export const useQueryExecution = ({
     const exec = execRef.current;
     const trimmed = q.trim();
     if (!trimmed) return;
-
-    // eslint-disable-next-line no-console
-    console.debug('[useQueryExecution] run() query:', trimmed);
 
     const rangeChanged = exec.timeRange?.from !== tr.from || exec.timeRange?.to !== tr.to;
     const fieldChanged = exec.timeField !== tf;

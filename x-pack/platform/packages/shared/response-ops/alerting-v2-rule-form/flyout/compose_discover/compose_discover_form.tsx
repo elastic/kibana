@@ -8,21 +8,17 @@
 import React, { useMemo } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import {
-  EuiBadge,
   EuiButton,
   EuiCallOut,
   EuiComboBox,
-  EuiFieldNumber,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiHorizontalRule,
   EuiPanel,
-  EuiRadioGroup,
   EuiSelect,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
@@ -152,22 +148,8 @@ function DetailsAndArtifactsStep({
 }) {
   return (
     <>
+      {/* Name, description, tags — connected to RHF via useFormContext() internally */}
       <RuleDetailsFieldGroup />
-
-      <EuiHorizontalRule margin="m" />
-
-      <EuiTitle size="xs">
-        <h3>No data behavior</h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-
-      <EuiFormRow
-        label="When no data is returned"
-        helpText="What to do when the query returns no results for the current evaluation window."
-        fullWidth
-      >
-        <EuiSelect options={NO_DATA_OPTIONS} value="no-longer-present" fullWidth />
-      </EuiFormRow>
 
       <EuiHorizontalRule margin="m" />
 
@@ -176,8 +158,9 @@ function DetailsAndArtifactsStep({
       </EuiTitle>
       <EuiSpacer size="s" />
 
+      {/* TODO (#268770): wire runbook URL and dashboard link to FormValues.artifacts */}
       <EuiFormRow label="Runbook URL" fullWidth labelAppend={<EuiText size="xs">Optional</EuiText>}>
-        <EuiFieldText fullWidth placeholder="https://..." />
+        <EuiFieldText fullWidth placeholder="https://..." disabled />
       </EuiFormRow>
 
       <EuiSpacer size="m" />
@@ -187,124 +170,33 @@ function DetailsAndArtifactsStep({
         fullWidth
         labelAppend={<EuiText size="xs">Optional</EuiText>}
       >
-        <EuiFieldText fullWidth placeholder="https://..." />
+        <EuiFieldText fullWidth placeholder="https://..." disabled />
       </EuiFormRow>
     </>
   );
 }
 
+// TODO (#268770): Notifications step — wire workflow selector and notification policy fields
+// to FormValues once the action policy API integration is in place.
 function NotificationsStep({
-  state,
-  dispatch,
+  state: _state,
+  dispatch: _dispatch,
 }: {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
 }) {
   return (
-    <>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>Notifications</h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge>Lite Policy</EuiBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="xs" />
-
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s" responsive={false}>
-        <EuiFlexItem>
-          <EuiText size="s" color="subdued">
-            Send a notification when this rule&apos;s alerts change status. A linked action policy
-            will be created with this rule.
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">Per-episode</EuiBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
-
-      <EuiSwitch
-        label="Enable notifications"
-        checked={state.notificationsEnabled}
-        onChange={(e) =>
-          dispatch({ type: 'SET_NOTIFICATIONS_ENABLED', enabled: e.target.checked })
-        }
-        data-test-subj="composeDiscoverNotificationsEnabled"
-      />
-
-      {state.notificationsEnabled && (
-        <>
-          <EuiSpacer size="m" />
-
-          <EuiFormRow
-            label="Workflow"
-            fullWidth
-            helpText="A single-step workflow that runs when this rule fires."
-          >
-            <EuiSelect
-              options={[{ value: 'new', text: '+ Create new workflow...' }]}
-              fullWidth
-            />
-          </EuiFormRow>
-
-          <EuiSpacer size="m" />
-
-          <EuiFormRow label="When to notify" fullWidth>
-            <EuiRadioGroup
-              options={[
-                {
-                  id: 'status-change',
-                  label: 'On status change — notify when an alert is created, recovers, or escalates.',
-                },
-                {
-                  id: 'throttle',
-                  label: 'On status change with throttle — suppress repeats within a window.',
-                },
-              ]}
-              idSelected="throttle"
-              onChange={() => {}}
-            />
-          </EuiFormRow>
-
-          <EuiSpacer size="s" />
-
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">Throttle for</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFieldNumber value={15} style={{ width: 60 }} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiSelect
-                options={[
-                  { value: 'm', text: 'minutes' },
-                  { value: 'h', text: 'hours' },
-                ]}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <EuiSpacer size="m" />
-
-          <EuiCallOut
-            title="Need more control?"
-            size="s"
-            iconType="questionInCircle"
-          >
-            <p>
-              You can add matchers, group-by fields, or extra triggers after creating the rule.
-            </p>
-          </EuiCallOut>
-        </>
-      )}
-    </>
+    <EuiCallOut
+      title="Notifications configuration coming soon"
+      iconType="clock"
+      color="primary"
+      size="s"
+    >
+      <p>
+        Notification policies will be configurable here. Rules are created without notifications
+        until this step is wired.
+      </p>
+    </EuiCallOut>
   );
 }
 
