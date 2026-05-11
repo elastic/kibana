@@ -55,7 +55,7 @@ describe('useSecretQueryParams', () => {
 
   it('fetches secret query params successfully', async () => {
     getMock.mockResolvedValue(['apiKey', 'token']);
-    const { result } = renderHook(() => useSecretQueryParams('connector1'), {
+    const { result } = renderHook(() => useSecretQueryParams('connector1', true), {
       wrapper: customWrapper(),
     });
 
@@ -69,7 +69,17 @@ describe('useSecretQueryParams', () => {
   });
 
   it('returns empty array if connectorId is undefined', async () => {
-    const { result } = renderHook(() => useSecretQueryParams(undefined), {
+    const { result } = renderHook(() => useSecretQueryParams(undefined, true), {
+      wrapper: customWrapper(),
+    });
+
+    expect(result.current.data).toEqual([]);
+    expect(getMock).not.toHaveBeenCalled();
+  });
+
+  it('does not fetch when isEdit is false', async () => {
+    getMock.mockResolvedValue(['apiKey']);
+    const { result } = renderHook(() => useSecretQueryParams('connector1', false), {
       wrapper: customWrapper(),
     });
 
@@ -81,7 +91,7 @@ describe('useSecretQueryParams', () => {
     const error = { body: { message: 'Failed' }, name: 'Error' };
     getMock.mockRejectedValue(error);
 
-    renderHook(() => useSecretQueryParams('connector1'), { wrapper: customWrapper() });
+    renderHook(() => useSecretQueryParams('connector1', true), { wrapper: customWrapper() });
 
     await waitFor(() => {
       expect(addErrorMock).toHaveBeenCalledWith(

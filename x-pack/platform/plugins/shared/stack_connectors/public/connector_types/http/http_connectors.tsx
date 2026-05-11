@@ -95,7 +95,7 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
     data: secretQueryParamKeys = [],
     isLoading: isLoadingQueryParams,
     isFetching: isFetchingQueryParams,
-  } = useSecretQueryParams(connectorId);
+  } = useSecretQueryParams(connectorId, isEdit);
 
   const loadingQueryParams = isLoadingQueryParams || isFetchingQueryParams;
   const queryParamsHydratedRef = useRef(false);
@@ -107,7 +107,12 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
   const hasQueryParams = __internal__?.hasQueryParams ?? false;
 
   useEffect(() => {
-    if (loadingQueryParams || queryParamsHydratedRef.current) return;
+    if (queryParamsHydratedRef.current) return;
+    if (!isEdit) {
+      queryParamsHydratedRef.current = true;
+      return;
+    }
+    if (!connectorId || loadingQueryParams) return;
 
     if (secretQueryParamKeys.length === 0) {
       queryParamsHydratedRef.current = true;
@@ -126,7 +131,14 @@ const HttpActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsPr
     });
 
     queryParamsHydratedRef.current = true;
-  }, [secretQueryParamKeys, loadingQueryParams, getFormData, updateFieldValues]);
+  }, [
+    secretQueryParamKeys,
+    loadingQueryParams,
+    connectorId,
+    isEdit,
+    getFormData,
+    updateFieldValues,
+  ]);
 
   const proxyAuthOptions = [
     {

@@ -78,7 +78,7 @@ export const formSerializer = (formData: HttpConnectorForm): ConnectorFormSchema
 
   const queryParams = formData?.__internal__?.queryParams ?? [];
   const secretQueryParams = queryParams.reduce<Record<string, string>>((acc, { key, value }) => {
-    if (key && value && key.trim() && value.trim()) {
+    if (key?.trim() && value?.trim()) {
       acc[key] = value;
     }
     return acc;

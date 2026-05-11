@@ -149,4 +149,24 @@ describe('QueryParamFields', () => {
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });
   });
+
+  it('disables add and remove buttons when readOnly is true', async () => {
+    const defaultValue = {
+      __internal__: {
+        queryParams: [{ key: 'apiKey', value: 'secret' }],
+      },
+    };
+
+    render(
+      <AuthFormTestProvider defaultValue={defaultValue} onSubmit={onSubmit}>
+        <QueryParamFields readOnly={true} />
+      </AuthFormTestProvider>
+    );
+
+    const addButton = await screen.findByTestId('httpAddQueryParamButton');
+    expect(addButton).toBeDisabled();
+
+    const deleteButton = await screen.findByTestId('httpRemoveQueryParamButton');
+    expect(deleteButton).toBeDisabled();
+  });
 });

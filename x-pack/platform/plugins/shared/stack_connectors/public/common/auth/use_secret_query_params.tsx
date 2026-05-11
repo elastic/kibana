@@ -15,6 +15,7 @@ type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useSecretQueryParams(
   connectorId?: string,
+  isEdit: boolean = false,
   queryOptions?: UseQueryOptions<string[], ServerError>
 ) {
   const {
@@ -30,7 +31,7 @@ export function useSecretQueryParams(
       );
     },
     {
-      enabled: Boolean(connectorId),
+      enabled: isEdit && Boolean(connectorId),
       initialData: [],
       refetchOnMount: 'always',
       onError: (error: ServerError) => {
