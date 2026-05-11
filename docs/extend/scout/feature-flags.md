@@ -53,7 +53,7 @@ globalTeardownHook('Revert feature flags', async ({ apiServices, log }) => {
   log.info('[teardown] Reverting my-feature-flag...');
   await apiServices.core.settings({
     'feature_flags.overrides': {
-      'my-plugin.my-feature-flag': 'false',
+      'my-plugin.my-feature-flag': false,
     },
   });
 });
