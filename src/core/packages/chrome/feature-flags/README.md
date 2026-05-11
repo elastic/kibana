@@ -14,3 +14,7 @@ import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 
 const nextChromeEnabled = isNextChrome(featureFlags);
 ```
+
+`NEXT_CHROME_SESSION_STORAGE_KEY` (`dev.core.chrome.next`) is used by the development toolbar
+toggle. The session override is only read after `core.chrome.next` is enabled, so it can disable
+Chrome Next locally during development but cannot enable Chrome Next when the rollout flag is off.
