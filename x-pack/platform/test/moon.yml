@@ -166,6 +166,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/product-doc-common'
   - '@kbn/alerting-v2-episodes-ui'
+  - '@kbn/inbox-common'
 tags:
   - test-helper
   - package

@@ -606,6 +606,17 @@ export class WorkflowsManagementApi {
     return workflowsExecutionEngine.resumeWorkflowExecution(executionId, spaceId, input, request);
   }
 
+  /**
+   * Cross-workflow listing of step executions currently blocked on
+   * `waitForInput`. Consumed by the Inbox plugin's workflows provider.
+   */
+  public async listWaitingForInputSteps(
+    spaceId: string,
+    params: { page?: number; perPage?: number } = {}
+  ): Promise<{ results: EsWorkflowStepExecution[]; total: number }> {
+    return this.workflowsService.listWaitingForInputSteps(spaceId, params);
+  }
+
   public async getWorkflowStats(spaceId: string, options?: { includeExecutionStats?: boolean }) {
     return this.workflowsService.getWorkflowStats(spaceId, options);
   }

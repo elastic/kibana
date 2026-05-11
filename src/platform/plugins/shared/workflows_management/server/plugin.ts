@@ -24,6 +24,7 @@ import {
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
 import { WorkflowsManagementFeatureConfig } from './features';
+import { createWorkflowsInboxProvider } from './inbox/workflows_inbox_provider';
 import type {
   WorkflowsRequestHandlerContext,
   WorkflowsServerPluginSetup,
@@ -86,6 +87,13 @@ export class WorkflowsPlugin
 
     const router = core.http.createRouter<WorkflowsRequestHandlerContext>();
     defineRoutes(router, api, this.logger, spaces, workflowsService);
+
+    if (plugins.inbox) {
+      this.logger.debug('Workflows Management: registering inbox provider');
+      plugins.inbox.registerActionProvider(
+        createWorkflowsInboxProvider({ api, logger: this.logger })
+      );
+    }
 
     return {
       management: api,

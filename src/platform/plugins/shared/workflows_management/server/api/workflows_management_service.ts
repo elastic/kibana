@@ -315,6 +315,14 @@ export class WorkflowsService {
     return this.executionQueryService.getWorkflowExecutions(params, spaceId);
   }
 
+  public async listWaitingForInputSteps(
+    spaceId: string,
+    pagination: { page?: number; perPage?: number } = {}
+  ): Promise<{ results: EsWorkflowStepExecution[]; total: number }> {
+    await this.ensureInitialized();
+    return this.executionQueryService.listWaitingForInputSteps(spaceId, pagination);
+  }
+
   public async getWorkflowExecutionHistory(
     executionId: string,
     spaceId: string
