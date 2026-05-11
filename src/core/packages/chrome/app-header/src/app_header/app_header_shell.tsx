@@ -19,6 +19,7 @@ export interface AppHeaderShellProps {
   title?: ReactNode;
   badges?: ReactNode;
   titleActions?: ReactNode;
+  titleAppend?: ReactNode;
   trailing?: ReactNode;
   tabs?: ReactNode;
   sticky?: boolean;
@@ -63,7 +64,8 @@ const resolveLayoutProps = (
 const useHeaderStyles = (
   sticky: boolean,
   padding: AppHeaderPadding | undefined,
-  hasTabs: boolean
+  hasTabs: boolean,
+  hasPrimaryContent: boolean
 ) => {
   const { euiTheme } = useEuiTheme();
 
@@ -138,6 +140,13 @@ const useHeaderStyles = (
     `;
 
     const titleClusterSpacer = css`
+      flex: ${hasPrimaryContent ? '0 0 auto' : '1 1 auto'};
+      min-width: 0;
+    `;
+
+    const titleAppend = css`
+      display: flex;
+      align-items: center;
       flex: 1 1 auto;
       min-width: 0;
     `;
@@ -163,15 +172,17 @@ const useHeaderStyles = (
       titleCluster,
       titleGroup,
       titleClusterSpacer,
+      titleAppend,
       titleActionsReveal,
       tabsRow,
     };
-  }, [euiTheme, sticky, padding, hasTabs]);
+  }, [euiTheme, sticky, padding, hasTabs, hasPrimaryContent]);
 };
 
 export const AppHeaderShell = React.memo<AppHeaderShellProps>(
-  ({ title, badges, titleActions, trailing, tabs, sticky = true, padding }) => {
-    const styles = useHeaderStyles(sticky, padding, !!tabs);
+  ({ title, badges, titleActions, titleAppend, trailing, tabs, sticky = true, padding }) => {
+    const hasTitleAppend = titleAppend != null;
+    const styles = useHeaderStyles(sticky, padding, !!tabs, hasTitleAppend);
 
     return (
       <div css={styles.root} data-test-subj="appHeader">
@@ -186,6 +197,7 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
                 </div>
               )}
             </div>
+            {hasTitleAppend && <div css={styles.titleAppend}>{titleAppend}</div>}
             <div css={styles.titleClusterSpacer} aria-hidden />
           </div>
           {trailing}

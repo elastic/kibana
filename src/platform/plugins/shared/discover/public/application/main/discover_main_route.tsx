@@ -271,7 +271,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
       <DiscoverTopNavMenuProvider customizationContext={customizationContext}>
         <>
-          {customizationContext.displayMode === 'standalone' && (
+          {customizationContext.displayMode === 'standalone' && !tabsEnabled && (
             <DiscoverMainAppHeader title={persistedDiscoverSession?.title || 'Discover'} />
           )}
           <h1 className="euiScreenReaderOnly" data-test-subj="discoverSavedSearchTitle">
@@ -294,7 +294,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
              * - If tabs are disabled and Discover is standalone, hide the tabs bar but show the app menu.
              */
             tabsEnabled ? (
-              <TabsView {...props} />
+              <TabsView {...props} headerTitle={persistedDiscoverSession?.title || 'Discover'} />
             ) : customizationContext.displayMode === 'embedded' ? (
               <SingleTabView {...props} />
             ) : (

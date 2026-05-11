@@ -29,13 +29,26 @@ export interface AppHeaderViewProps {
   menu?: AppMenuConfig;
   onShare?: () => void;
   favorite?: ReactNode;
+  titleAppend?: ReactNode;
   sticky?: boolean;
   padding?: AppHeaderPadding;
   docLink?: string;
 }
 
 export const AppHeaderView = React.memo<AppHeaderViewProps>(
-  ({ title, back, tabs, badges, menu, onShare, favorite, sticky, padding, docLink }) => {
+  ({
+    title,
+    back,
+    tabs,
+    badges,
+    menu,
+    onShare,
+    favorite,
+    titleAppend,
+    sticky,
+    padding,
+    docLink,
+  }) => {
     const hasLegacyActionMenu = useHasLegacyActionMenu();
     const shareAction = useShareAction(menu, onShare);
     const show =
@@ -44,6 +57,7 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
       !!tabs?.length ||
       !!badges?.length ||
       !!menu?.items?.length ||
+      titleAppend != null ||
       hasLegacyActionMenu;
 
     if (!show) {
@@ -55,8 +69,9 @@ export const AppHeaderView = React.memo<AppHeaderViewProps>(
         title={<TitleArea title={title} back={back} />}
         badges={<AppBadges badges={badges} />}
         titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
+        titleAppend={titleAppend}
         trailing={<AppMenu menu={menu} hasExplicitShare={!!onShare} docLink={docLink} />}
-        tabs={tabs?.length ? <AppTabs tabs={tabs} /> : undefined} 
+        tabs={tabs?.length ? <AppTabs tabs={tabs} /> : undefined}
         sticky={sticky}
         padding={padding}
       />

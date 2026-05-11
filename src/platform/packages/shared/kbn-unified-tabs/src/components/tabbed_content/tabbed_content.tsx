@@ -56,6 +56,7 @@ export interface TabbedContentProps
   services: TabsServices;
   hideTabsBar?: boolean;
   renderContent?: (selectedItem: TabItem) => React.ReactNode;
+  renderTabsBar?: (tabsBar: React.ReactNode) => React.ReactNode;
   createItem: () => TabItem;
   customNewTabButton?: React.ReactElement;
   onChanged: (state: TabbedContentState) => void;
@@ -97,6 +98,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   services,
   hideTabsBar = false,
   renderContent,
+  renderTabsBar,
   createItem,
   onChanged,
   tabContentIdOverride,
@@ -481,8 +483,10 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     </EuiFlexGroup>
   );
 
+  const renderedTabsBar = hideTabsBar ? null : tabsBar;
+
   if (!renderContent) {
-    return tabsBar;
+    return <>{renderTabsBar ? renderTabsBar(renderedTabsBar) : renderedTabsBar}</>;
   }
 
   return (
@@ -492,7 +496,11 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       gutterSize="none"
       className="eui-fullHeight"
     >
-      {!hideTabsBar && <EuiFlexItem grow={false}>{tabsBar}</EuiFlexItem>}
+      {renderTabsBar ? (
+        <EuiFlexItem grow={false}>{renderTabsBar(renderedTabsBar)}</EuiFlexItem>
+      ) : (
+        renderedTabsBar && <EuiFlexItem grow={false}>{renderedTabsBar}</EuiFlexItem>
+      )}
       {selectedItem ? (
         <EuiFlexItem
           data-test-subj="unifiedTabs_selectedTabContent"

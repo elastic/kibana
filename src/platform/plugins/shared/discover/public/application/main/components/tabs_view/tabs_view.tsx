@@ -10,6 +10,7 @@
 import React, { useCallback } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { UnifiedTabs, type UnifiedTabsProps } from '@kbn/unified-tabs';
+import { AppHeader } from '@kbn/app-header';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
 import { SingleTabView, type SingleTabViewProps } from '../single_tab_view';
 import {
@@ -28,13 +29,17 @@ import { useAppMenuData } from './use_app_menu_data';
 
 const MAX_TABS_COUNT = 25;
 
-export const TabsView = (props: SingleTabViewProps) => {
+interface TabsViewProps extends SingleTabViewProps {
+  headerTitle?: string;
+}
+
+export const TabsView = ({ headerTitle, ...singleTabViewProps }: TabsViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const items = useInternalStateSelector(selectAllTabs);
   const recentlyClosedItems = useInternalStateSelector(selectRecentlyClosedTabs);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
-  const { getPreviewData } = usePreviewData(props.runtimeStateManager);
+  const { getPreviewData } = usePreviewData(singleTabViewProps.runtimeStateManager);
   const hideTabsBar = useInternalStateSelector(selectIsTabsBarHidden);
   const unsavedTabIds = useInternalStateSelector((state) => state.tabs.unsavedIds);
   const currentDataView = useCurrentTabRuntimeState((tab) => tab.currentDataView$);
@@ -72,8 +77,22 @@ export const TabsView = (props: SingleTabViewProps) => {
   );
 
   const renderContent: UnifiedTabsProps['renderContent'] = useCallback(
-    () => <SingleTabView key={currentTabId} {...props} />,
-    [currentTabId, props]
+    () => <SingleTabView key={currentTabId} {...singleTabViewProps} />,
+    [currentTabId, singleTabViewProps]
+  );
+
+  const renderTabsBar = useCallback<NonNullable<UnifiedTabsProps['renderTabsBar']>>(
+    (tabsBar) => (
+      <AppHeader
+        title={headerTitle ?? 'Discover'}
+        menu={topNavMenuItems}
+        fallback={null}
+        sticky={false}
+        padding="m"
+        titleAppend={tabsBar}
+      />
+    ),
+    [headerTitle, topNavMenuItems]
   );
 
   return (
@@ -100,6 +119,7 @@ export const TabsView = (props: SingleTabViewProps) => {
             onClearRecentlyClosed={onClearRecentlyClosed}
             getTopTabMenuItems={getTopTabMenuItems}
             getAdditionalTabMenuItems={getAdditionalTabMenuItems}
+            renderTabsBar={isNextChrome ? renderTabsBar : undefined}
             appendRight={
               !isNextChrome ? (
                 <AppMenuComponent config={topNavMenuItems} isCollapsed={shouldCollapseAppMenu} />
