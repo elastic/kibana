@@ -212,11 +212,10 @@ export class UpdateSLO {
       // Don't block the update on cleanup failures, but surface them in logs so
       // stale transforms and orphan summary documents become diagnosable.
       // SDH #6202.
-      this.logger.error(
+      this.logger.warn(
         `Failed to clean up resources for previous revision of SLO ` +
           `[id=${slo.id}, revision=${slo.revision}]. ` +
-          `Old transforms may continue producing stale summary documents ` +
-          `until the ${ORPHAN_CLEANUP_TASK_TYPE} task runs. ${err}`
+          `Old resources may continue producing data. ${err}`
       );
     }
   }
