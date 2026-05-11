@@ -1,5 +1,5 @@
 {
-  "sha1": "797ab49d6973f4763ff89ca86eda20c939416632",
+  "sha1": "387d211614a5a1593a0ef464631f6bc41a18894d",
   "tests": [
     {
       "id": "b2eaaaa0cf33c26-d5cddc6b883a994",
@@ -406,7 +406,7 @@
     {
       "id": "5c91fe961842041-6824e65248ebe46",
       "title": "Workflow error trigger (workflows.failed) when a workflow fails, a workflow subscribed to workflows.failed runs and receives the event",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -425,14 +425,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 145,
+        "line": 181,
         "column": 14
       }
     },
     {
       "id": "5c91fe961842041-71ac8908c1a2400",
       "title": "Workflow error trigger (workflows.failed) filter by workflow name: handler runs when name matches condition",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -451,14 +451,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 177,
+        "line": 213,
         "column": 14
       }
     },
     {
       "id": "5c91fe961842041-0bf21c42a062476",
       "title": "Workflow error trigger (workflows.failed) filter by workflow name: handler does not run when name does not match",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -477,14 +477,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 195,
+        "line": 231,
         "column": 14
       }
     },
     {
       "id": "5c91fe961842041-73f60649b75b068",
       "title": "Workflow error trigger (workflows.failed) filter by failed step: handler runs when event.error.stepId matches condition",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -503,7 +503,33 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
-        "line": 227,
+        "line": 263,
+        "column": 14
+      }
+    },
+    {
+      "id": "5c91fe961842041-059edfdbb3b7651",
+      "title": "Workflow error trigger (workflows.failed) async: parent completes immediately while async child fails and emits workflows.failed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/api/tests/workflow_execution/workflow_error_trigger.spec.ts",
+        "line": 291,
         "column": 14
       }
     },
