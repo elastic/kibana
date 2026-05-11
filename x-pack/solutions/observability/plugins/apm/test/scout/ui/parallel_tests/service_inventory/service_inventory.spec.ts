@@ -35,6 +35,11 @@ test.describe(
         await expect(page.getByText(testData.SERVICE_OPBEANS_RUM)).toBeVisible();
       });
 
+      await test.step('shows a list of environments', async () => {
+        const environmentEntrySelector = page.locator(`td:has-text("${PRODUCTION_ENVIRONMENT}")`);
+        await expect(environmentEntrySelector).toHaveCount(9);
+      });
+
       await test.step('table has service rows', async () => {
         const count = await page.getByTestId('apmManagedTableActionsCellButton').count();
         expect(count).toBeGreaterThanOrEqual(3);
