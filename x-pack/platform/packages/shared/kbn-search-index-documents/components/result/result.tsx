@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiSplitPanel,
   EuiToolTip,
+  type EuiToolTipRef,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -67,7 +68,7 @@ export const Result: React.FC<ResultProps> = ({
 
   const showResultsFields = isExpanded ? fields.length > 0 : defaultVisibleFields > 0;
 
-  const tooltipRef = useRef<EuiToolTip>(null);
+  const tooltipRef = useRef<EuiToolTipRef>(null);
   return (
     <>
       <EuiSplitPanel.Outer hasBorder={true} data-test-subj="search-index-documents-result">
