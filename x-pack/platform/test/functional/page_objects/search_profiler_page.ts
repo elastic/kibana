@@ -53,7 +53,7 @@ export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
       return text.includes('Unable to profile');
     },
     async editorHasIndexNotFoundNotification(indexName: string) {
-      const notifications = await testSubjects.findAll('profilerErrorNotification');
+      const notifications = await testSubjects.findAll('errorToastMessage');
       const texts = await Promise.all(notifications.map((n) => n.getVisibleText()));
       return texts.some((text) => text.includes(`no such index [${indexName}]`));
     },

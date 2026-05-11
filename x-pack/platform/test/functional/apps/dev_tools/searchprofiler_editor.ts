@@ -187,19 +187,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           );
         });
       });
-    });
 
-    describe('No indices with _all index pattern', function () {
-      this.tags('skipFIPS');
+      describe('with _all index pattern', function () {
+        this.tags('skipFIPS');
 
-      it('returns error if profile is executed with no valid indices', async () => {
-        await PageObjects.searchProfiler.setIndexName('_all');
-        await PageObjects.searchProfiler.setQuery(testQuery);
+        it('returns error if profile is executed with no valid indices', async () => {
+          await PageObjects.searchProfiler.setIndexName('_all');
+          await PageObjects.searchProfiler.setQuery(testQuery);
 
-        await PageObjects.searchProfiler.clickProfileButton();
+          await PageObjects.searchProfiler.clickProfileButton();
 
-        await retry.waitFor('notification renders', async () => {
-          return await PageObjects.searchProfiler.editorHasErrorNotification();
+          await retry.waitFor('notification renders', async () => {
+            return await PageObjects.searchProfiler.editorHasErrorNotification();
+          });
         });
       });
     });
