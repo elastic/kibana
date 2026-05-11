@@ -142,7 +142,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
   }, [completedRounds, conversation?.id, getAddToDatasetAction]);
 
   const showAddToDatasetItem =
-    isExperimentalEnabled && getAddToDatasetAction != null && completedRounds.length > 0;
+    isExperimentalEnabled && plugins.evals?.canAddToDataset && completedRounds.length > 0;
 
   const closePopover = () => {
     setIsPopoverOpen(false);
