@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import useUnmount from 'react-use/lib/useUnmount';
-import { consumeKeyboardEvent, hasModifierKey } from './shortcut_utils';
+import { consumeKeyboardEvent } from './shortcut_utils';
 import { useShortcutsContext } from './shortcuts_provider';
 
 /**
@@ -117,13 +117,11 @@ export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlay
       screenReaderAnnouncement,
     ]);
     const close = useCallback(() => {
-      if (!isVisible) {
-        return;
+      if (isVisible) {
+        releaseActiveLeaderKeyInstance(instanceId);
+        setLiveAnnouncement(undefined);
+        setIsVisible(false);
       }
-
-      releaseActiveLeaderKeyInstance(instanceId);
-      setLiveAnnouncement(undefined);
-      setIsVisible(false);
     }, [instanceId, isVisible, releaseActiveLeaderKeyInstance]);
 
     useImperativeHandle(ref, () => ({ open }), [open]);
@@ -131,15 +129,12 @@ export const ShortcutsOverlay = forwardRef<ShortcutsOverlayRef, ShortcutsOverlay
     useEffect(() => {
       const onKeyDown = (event: KeyboardEvent) => {
         if (isVisible) {
-          if (!hasModifierKey(event)) {
-            consumeKeyboardEvent(event);
-
-            if (event.key !== 'Escape') {
-              runAction(event);
-            }
-          }
-
+          consumeKeyboardEvent(event);
           close();
+
+          if (event.key !== 'Escape') {
+            runAction(event);
+          }
         } else if (!hasOtherActiveLeaderKeyInstance(instanceId) && shouldOpen(event) && open()) {
           consumeKeyboardEvent(event);
         }
