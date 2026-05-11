@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, Fragment } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBadge,
@@ -13,6 +13,8 @@ import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
   EuiPopover,
@@ -33,7 +35,8 @@ import { linkToEditRepository, linkToAddRepository } from '../../../../services/
 interface Props {
   repositories: Repository[];
   managedRepository?: string;
-  defaultRepository?: string;
+  defaultRepository: string | null;
+  canSetDefaultRepository?: boolean;
   onSetDefaultRepository: (name: string) => Promise<any>;
   reload: UseRequestResponse['resendRequest'];
   openRepositoryDetailsUrl: (name: Repository['name']) => string;
@@ -44,6 +47,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
   repositories,
   managedRepository,
   defaultRepository,
+  canSetDefaultRepository = true,
   onSetDefaultRepository,
   reload,
   openRepositoryDetailsUrl,
@@ -56,6 +60,18 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
   const [pendingDefaultName, setPendingDefaultName] = useState<string | undefined>(undefined);
 
   const closeActionsMenu = () => setOpenActionsRowName(undefined);
+
+  // When the default repository changes, a previously selected row can become non-deletable.
+  // We proactively clear it from selection so the UI stays consistent
+  // and bulk delete can't include the newly protected repository.
+  useEffect(() => {
+    if (!selectedItems.length) return;
+
+    setSelectedItems((items) => {
+      if (!items.length) return items;
+      return items.filter(({ name }) => defaultRepository == null || name !== defaultRepository);
+    });
+  }, [defaultRepository, selectedItems.length]);
 
   const setDefaultWithToast = async (name: string) => {
     const response = await onSetDefaultRepository(name);
@@ -85,37 +101,45 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (name: Repository['name']) => {
+        const isDefault = defaultRepository != null && name === defaultRepository;
+        const isManaged = managedRepository === name;
+
         return (
-          <Fragment>
-            <EuiLink
-              {...reactRouterNavigate(history, openRepositoryDetailsUrl(name), () =>
-                uiMetricService.trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)
-              )}
-              data-test-subj="repositoryLink"
-            >
-              {name}
-            </EuiLink>
-            {name === defaultRepository && (
-              <EuiBadge style={{ marginLeft: 8 }}>
-                <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryList.table.defaultRepositoryBadgeLabel"
-                  defaultMessage="Default"
-                />
-              </EuiBadge>
-            )}
-            &nbsp;&nbsp;
-            {managedRepository === name ? (
-              <EuiIconTip
-                content={
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                {...reactRouterNavigate(history, openRepositoryDetailsUrl(name), () =>
+                  uiMetricService.trackUiMetric(UIM_REPOSITORY_SHOW_DETAILS_CLICK)
+                )}
+                data-test-subj="repositoryLink"
+              >
+                {name}
+              </EuiLink>
+            </EuiFlexItem>
+            {isDefault && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge>
                   <FormattedMessage
-                    id="xpack.snapshotRestore.repositoryList.table.managedRepositoryBadgeLabel"
-                    defaultMessage="This is a managed repository"
+                    id="xpack.snapshotRestore.repositoryList.table.defaultRepositoryBadgeLabel"
+                    defaultMessage="Default"
                   />
-                }
-                position="right"
-              />
-            ) : null}
-          </Fragment>
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+            {isManaged && (
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.repositoryList.table.managedRepositoryBadgeLabel"
+                      defaultMessage="This is a managed repository"
+                    />
+                  }
+                  position="right"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         );
       },
     },
@@ -159,7 +183,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                   iconType="pencil"
                   color="primary"
                   {...reactRouterNavigate(history, linkToEditRepository(name))}
-                  data-test-subj="editRepositoryButton"
+                  data-test-subj={`editRepositoryButton-${name}`}
                 />
               </EuiToolTip>
             );
@@ -167,7 +191,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
         },
         {
           render: ({ name }: Repository) => {
-            const isDefault = name === defaultRepository;
+            const isDefault = defaultRepository != null && name === defaultRepository;
             const isManaged = name === managedRepository;
 
             const actionsButton = (
@@ -184,7 +208,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                 onClick={() =>
                   setOpenActionsRowName(openActionsRowName === name ? undefined : name)
                 }
-                data-test-subj="repositoryActionsMenuButton"
+                data-test-subj={`repositoryActionsMenuButton-${name}`}
               />
             );
 
@@ -216,7 +240,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                             }
                           : undefined
                       }
-                      data-test-subj="setDefaultRepositoryButton"
+                      data-test-subj={`setDefaultRepositoryButton-${name}`}
                     >
                       <FormattedMessage
                         id="xpack.snapshotRestore.repositoryList.table.actionSetDefaultLabel"
@@ -251,7 +275,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                             }
                           : undefined
                       }
-                      data-test-subj="deleteRepositoryButton"
+                      data-test-subj={`deleteRepositoryButton-${name}`}
                     >
                       <FormattedMessage
                         id="xpack.snapshotRestore.repositoryList.table.actionRemoveLabel"
@@ -259,6 +283,11 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                       />
                     </EuiContextMenuItem>
                   );
+
+                  const items = [
+                    ...(canSetDefaultRepository ? [setAsDefaultItem] : []),
+                    removeItem,
+                  ];
 
                   return (
                     <EuiPopover
@@ -275,7 +304,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                       panelPaddingSize="none"
                       anchorPosition="downRight"
                     >
-                      <EuiContextMenuPanel items={[setAsDefaultItem, removeItem]} />
+                      <EuiContextMenuPanel items={items} />
                     </EuiPopover>
                   );
                 }}
@@ -302,8 +331,11 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
 
   const selection = {
     onSelectionChange: (newSelectedItems: Repository[]) => setSelectedItems(newSelectedItems),
+    selected: selectedItems,
     selectable: ({ name }: Repository) =>
-      Boolean(name !== managedRepository && name !== defaultRepository),
+      Boolean(
+        name !== managedRepository && (defaultRepository == null || name !== defaultRepository)
+      ),
     selectableMessage: (selectable: boolean, { name }: Repository) => {
       if (!selectable) {
         if (name === defaultRepository) {
@@ -376,11 +408,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
       </EuiButton>,
       <EuiButton
         key="registerRepo"
-        {...reactRouterNavigate(
-          history,
-          // @ts-expect-error
-          linkToAddRepository(name)
-        )}
+        {...reactRouterNavigate(history, linkToAddRepository())}
         fill
         iconType="plusCircle"
         data-test-subj="registerRepositoryButton"
@@ -419,7 +447,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
   };
 
   const renderConfirmDefaultModal = () => {
-    if (!pendingDefaultName) {
+    if (!pendingDefaultName || !defaultRepository) {
       return null;
     }
 

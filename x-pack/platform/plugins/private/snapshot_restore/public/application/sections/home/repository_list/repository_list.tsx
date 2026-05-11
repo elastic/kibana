@@ -8,7 +8,7 @@
 import React, { Fragment, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiPageTemplate } from '@elastic/eui';
+import { EuiButton, EuiPageTemplate, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -18,6 +18,7 @@ import { PageLoading, PageError, useExecutionContext } from '../../../../shared_
 import { useDecodedParams } from '../../../lib';
 import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';
 import { useAppContext, useServices } from '../../../app_context';
+import { useCanSetDefaultRepository } from '../../../services/authorization';
 import { useLoadRepositories } from '../../../services/http';
 import { useDefaultRepository } from '../../../services/use_default_repository';
 import { linkToAddRepository, linkToRepository } from '../../../services/navigation';
@@ -32,6 +33,7 @@ interface MatchParams {
 export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   history,
 }) => {
+  const canSetDefaultRepository = useCanSetDefaultRepository();
   const { repositoryName } = useDecodedParams<MatchParams>();
   const {
     error,
@@ -50,9 +52,12 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
   const {
     defaultRepository,
     isLoadingDefaultRepository,
+    defaultRepositoryStatus,
     reloadDefaultRepository,
     setDefaultRepository,
   } = useDefaultRepository();
+  const defaultRepositoryLoadError = defaultRepositoryStatus === 'error';
+  const canSetOrChangeDefaultRepository = canSetDefaultRepository && !defaultRepositoryLoadError;
 
   const reloadRepositoriesAndDefault = () => {
     reload();
@@ -150,10 +155,32 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
   } else {
     content = (
       <section data-test-subj="repositoryList">
+        {defaultRepositoryLoadError && (
+          <>
+            <EuiCallOut
+              announceOnMount={false}
+              color="warning"
+              iconType="warning"
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryList.defaultRepositoryLoadErrorCalloutTitle"
+                  defaultMessage="Default repository could not be loaded"
+                />
+              }
+            >
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryList.defaultRepositoryLoadErrorCalloutDescription"
+                defaultMessage="Try clicking Reload in the table or refresh the page."
+              />
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
         <RepositoryTable
           repositories={repositories || []}
           managedRepository={managedRepository?.name}
           defaultRepository={defaultRepository}
+          canSetDefaultRepository={canSetOrChangeDefaultRepository}
           onSetDefaultRepository={setDefaultRepository}
           reload={reloadRepositoriesAndDefault}
           openRepositoryDetailsUrl={openRepositoryDetailsUrl}

@@ -69,6 +69,7 @@ const emptyRepository = { name: '', type: null, settings: {} };
 
 const onSaveMock = jest.fn();
 const clearSaveErrorMock = jest.fn();
+const onCancelMock = jest.fn();
 
 const renderForm = (overrides: Record<string, unknown> = {}) => {
   return render(
@@ -79,6 +80,7 @@ const renderForm = (overrides: Record<string, unknown> = {}) => {
         saveError={undefined}
         clearSaveError={clearSaveErrorMock}
         onSave={onSaveMock}
+        onCancel={onCancelMock}
         {...overrides}
       />
     </I18nProvider>

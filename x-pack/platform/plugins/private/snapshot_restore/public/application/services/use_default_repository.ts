@@ -12,18 +12,26 @@ import {
   setDefaultRepository as setDefaultRepositoryRequest,
 } from './http/repository_requests';
 
+export type DefaultRepositoryStatus = 'loading' | 'loaded' | 'error';
+
 export const useDefaultRepository = () => {
-  const [defaultRepository, setDefaultRepositoryState] = useState<string | undefined>(undefined);
-  const [isLoadingDefaultRepository, setIsLoadingDefaultRepository] = useState<boolean>(true);
+  const [defaultRepository, setDefaultRepositoryState] = useState<string | null>(null);
+  const [defaultRepositoryStatus, setDefaultRepositoryStatus] =
+    useState<DefaultRepositoryStatus>('loading');
+  const [defaultRepositoryError, setDefaultRepositoryError] = useState<unknown | null>(null);
 
   const reloadDefaultRepository = useCallback(async () => {
-    setIsLoadingDefaultRepository(true);
+    setDefaultRepositoryStatus('loading');
+    setDefaultRepositoryError(null);
     const response = await getDefaultRepositoryRequest();
     const { data, error } = response;
-    if (!error) {
-      setDefaultRepositoryState(data?.repositoryName ?? undefined);
+    if (error) {
+      setDefaultRepositoryStatus('error');
+      setDefaultRepositoryError(error);
+      return response;
     }
-    setIsLoadingDefaultRepository(false);
+    setDefaultRepositoryState(data?.repositoryName ?? null);
+    setDefaultRepositoryStatus('loaded');
     return response;
   }, []);
 
@@ -35,13 +43,17 @@ export const useDefaultRepository = () => {
     const response = await setDefaultRepositoryRequest(name);
     if (!response.error) {
       setDefaultRepositoryState(name);
+      setDefaultRepositoryStatus('loaded');
+      setDefaultRepositoryError(null);
     }
     return response;
   }, []);
 
   return {
     defaultRepository,
-    isLoadingDefaultRepository,
+    isLoadingDefaultRepository: defaultRepositoryStatus === 'loading',
+    defaultRepositoryStatus,
+    defaultRepositoryError,
     reloadDefaultRepository,
     setDefaultRepository: setDefaultRepositoryName,
   };

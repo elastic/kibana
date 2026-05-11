@@ -8,7 +8,7 @@
 import '@kbn/code-editor-mock/jest_helper';
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import type { Repository } from '../../../../../../common/types';
@@ -87,12 +87,13 @@ describe('<RepositoryTable /> default repository actions', () => {
 
     const onSetDefaultRepository = props.onSetDefaultRepository ?? jest.fn().mockResolvedValue({});
 
-    render(
+    const renderResult = render(
       <I18nProvider>
         <RepositoryTable
           repositories={repositories}
-          defaultRepository={props.defaultRepository}
+          defaultRepository={props.defaultRepository ?? null}
           managedRepository={props.managedRepository}
+          canSetDefaultRepository={props.canSetDefaultRepository}
           onSetDefaultRepository={onSetDefaultRepository}
           reload={jest.fn()}
           openRepositoryDetailsUrl={(name) => `/repositories/${encodeURIComponent(name)}`}
@@ -101,7 +102,7 @@ describe('<RepositoryTable /> default repository actions', () => {
       </I18nProvider>
     );
 
-    return { repositories, onSetDefaultRepository };
+    return { repositories, onSetDefaultRepository, ...renderResult };
   };
 
   it('shows a "Default" badge for the default repository', () => {
@@ -113,9 +114,25 @@ describe('<RepositoryTable /> default repository actions', () => {
   it('disables removal of the default repository in the row actions', async () => {
     renderTable({ defaultRepository: 'repo1' });
 
-    fireEvent.click(screen.getByTestId('repositoryActionsMenuButton'));
+    fireEvent.click(screen.getByTestId('repositoryActionsMenuButton-repo1'));
 
-    expect(await screen.findByTestId('deleteRepositoryButton')).toBeDisabled();
+    expect(await screen.findByTestId('deleteRepositoryButton-repo1')).toBeDisabled();
+  });
+
+  it('hides "Set as default" action when missing privilege', async () => {
+    renderTable({
+      repositories: [
+        { name: 'repo1', type: 'fs', settings: { location: '/tmp' } } as any,
+        { name: 'repo2', type: 'fs', settings: { location: '/tmp' } } as any,
+      ],
+      defaultRepository: 'repo1',
+      canSetDefaultRepository: false,
+    });
+
+    fireEvent.click(screen.getByTestId('repositoryActionsMenuButton-repo2'));
+
+    expect(screen.queryByTestId('setDefaultRepositoryButton-repo2')).not.toBeInTheDocument();
+    expect(await screen.findByTestId('deleteRepositoryButton-repo2')).toBeInTheDocument();
   });
 
   it('confirms before changing the default repository from the table', async () => {
@@ -125,8 +142,8 @@ describe('<RepositoryTable /> default repository actions', () => {
       onSetDefaultRepository: jest.fn().mockResolvedValue({ data: null, error: null }),
     });
 
-    fireEvent.click(screen.getByTestId('repositoryActionsMenuButton'));
-    fireEvent.click(await screen.findByTestId('setDefaultRepositoryButton'));
+    fireEvent.click(screen.getByTestId('repositoryActionsMenuButton-repo2'));
+    fireEvent.click(await screen.findByTestId('setDefaultRepositoryButton-repo2'));
 
     expect(await screen.findByTestId('confirmDefaultRepositoryModal')).toBeInTheDocument();
 
@@ -135,6 +152,58 @@ describe('<RepositoryTable /> default repository actions', () => {
     await waitFor(() => {
       expect(onSetDefaultRepository).toHaveBeenCalledWith('repo2');
       expect(mockToastNotifications.addSuccess).toHaveBeenCalled();
+    });
+  });
+
+  it('disables multi-select for the default repository', () => {
+    renderTable({ defaultRepository: 'repo1' });
+
+    const table = screen.getByTestId('repositoryTable');
+    const checkboxes = within(table).getAllByRole('checkbox');
+    const rowCheckboxes = checkboxes.filter(
+      (el) => !/select all/i.test(el.getAttribute('aria-label') ?? '')
+    );
+
+    expect(rowCheckboxes.length).toBeGreaterThan(0);
+    expect(rowCheckboxes[0]).toBeDisabled();
+  });
+
+  it('clears an existing selection when the repository becomes the default', async () => {
+    const { rerender } = renderTable({ defaultRepository: null });
+
+    const table = screen.getByTestId('repositoryTable');
+    const checkboxes = within(table).getAllByRole('checkbox');
+    const rowCheckboxes = checkboxes.filter(
+      (el) => !/select all/i.test(el.getAttribute('aria-label') ?? '')
+    );
+
+    expect(rowCheckboxes[0]).not.toBeDisabled();
+    fireEvent.click(rowCheckboxes[0]);
+    expect(rowCheckboxes[0]).toBeChecked();
+
+    rerender(
+      <I18nProvider>
+        <RepositoryTable
+          repositories={[{ name: 'repo1', type: 'fs', settings: { location: '/tmp' } } as any]}
+          defaultRepository="repo1"
+          managedRepository={undefined}
+          onSetDefaultRepository={jest.fn().mockResolvedValue({})}
+          reload={jest.fn()}
+          openRepositoryDetailsUrl={(name) => `/repositories/${encodeURIComponent(name)}`}
+          onRepositoryDeleted={jest.fn()}
+        />
+      </I18nProvider>
+    );
+
+    await waitFor(() => {
+      const updatedTable = screen.getByTestId('repositoryTable');
+      const updatedCheckboxes = within(updatedTable).getAllByRole('checkbox');
+      const updatedRowCheckboxes = updatedCheckboxes.filter(
+        (el) => !/select all/i.test(el.getAttribute('aria-label') ?? '')
+      );
+
+      expect(updatedRowCheckboxes[0]).toBeDisabled();
+      expect(updatedRowCheckboxes[0]).not.toBeChecked();
     });
   });
 });

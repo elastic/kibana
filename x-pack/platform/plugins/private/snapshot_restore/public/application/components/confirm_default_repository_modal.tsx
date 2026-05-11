@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
 interface Props {
-  currentDefaultRepository?: string;
+  currentDefaultRepository: string;
   newDefaultRepository: string;
   onCancel: () => void;
   onConfirm: () => void;

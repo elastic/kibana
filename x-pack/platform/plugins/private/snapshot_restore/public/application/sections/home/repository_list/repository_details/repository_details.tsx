@@ -430,7 +430,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
           </EuiButtonEmpty>
         </EuiFlexItem>
 
-        {!isLoading ? (
+        {repositoryDetails && !isLoading ? (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>

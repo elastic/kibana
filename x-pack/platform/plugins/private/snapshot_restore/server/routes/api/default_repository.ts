@@ -79,7 +79,12 @@ export function registerDefaultRepositoryRoutes({
 
       try {
         // Ensure the repository exists before setting it as default.
-        await clusterClient.asCurrentUser.snapshot.getRepository({ name });
+        const repositoriesByName = await clusterClient.asCurrentUser.snapshot.getRepository({
+          name,
+        });
+        if (!repositoriesByName[name]) {
+          return res.notFound({ body: `Repository '${name}' does not exist.` });
+        }
 
         const response = await clusterClient.asCurrentUser.cluster.putSettings({
           persistent: {

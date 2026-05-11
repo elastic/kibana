@@ -21,6 +21,7 @@ import { RepositoryEdit } from './repository_edit';
 let mockDecodedRepositoryName = 'my-repo';
 
 const mockUseDefaultRepository = jest.fn();
+const mockUseCanSetDefaultRepository = jest.fn();
 const mockUseLoadRepository = jest.fn();
 const mockEditRepository = jest.fn();
 const mockToastNotifications = {
@@ -46,16 +47,18 @@ jest.mock('../../components/repository_form', () => ({
   }: {
     onSave: (repository: unknown) => void;
     saveError?: React.ReactNode;
-    onToggleDefault: (isDefault: boolean) => void;
+    onToggleDefault?: (isDefault: boolean) => void;
     isDefaultRepository?: boolean;
   }) => (
     <div>
-      <button
-        data-test-subj="repositoryFormToggleDefault"
-        onClick={() => onToggleDefault(!isDefaultRepository)}
-      >
-        toggle default
-      </button>
+      {onToggleDefault ? (
+        <button
+          data-test-subj="repositoryFormToggleDefault"
+          onClick={() => onToggleDefault(!isDefaultRepository)}
+        >
+          toggle default
+        </button>
+      ) : null}
       <button
         data-test-subj="repositoryFormSave"
         onClick={() =>
@@ -88,6 +91,10 @@ jest.mock('../../services/use_default_repository', () => ({
   useDefaultRepository: (...args: unknown[]) => mockUseDefaultRepository(...args),
 }));
 
+jest.mock('../../services/authorization', () => ({
+  useCanSetDefaultRepository: (...args: unknown[]) => mockUseCanSetDefaultRepository(...args),
+}));
+
 jest.mock('../../app_context', () => {
   const actual = jest.requireActual<typeof import('../../app_context')>('../../app_context');
 
@@ -110,6 +117,7 @@ describe('<RepositoryEdit />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockDecodedRepositoryName = 'my-repo';
+    mockUseCanSetDefaultRepository.mockReturnValue(true);
     mockUseLoadRepository.mockReturnValue({
       isLoading: false,
       error: null,
@@ -121,9 +129,94 @@ describe('<RepositoryEdit />', () => {
     });
     mockEditRepository.mockResolvedValue({ data: null, error: null });
     mockUseDefaultRepository.mockReturnValue({
-      defaultRepository: undefined,
+      defaultRepository: null,
       isLoadingDefaultRepository: false,
+      defaultRepositoryStatus: 'loaded',
       setDefaultRepository: jest.fn().mockResolvedValue({ data: null, error: null }),
+    });
+  });
+
+  it('SHOULD not show default toggle or attempt setting default when missing privilege', async () => {
+    mockUseCanSetDefaultRepository.mockReturnValue(false);
+
+    const setDefaultRepository = jest.fn().mockResolvedValue({ data: null, error: null });
+    mockUseDefaultRepository.mockReturnValue({
+      defaultRepository: 'old-default',
+      isLoadingDefaultRepository: false,
+      defaultRepositoryStatus: 'loaded',
+      setDefaultRepository,
+    });
+
+    const history = createMemoryHistory({
+      initialEntries: [`/edit_repository/${mockDecodedRepositoryName}`],
+    });
+    render(
+      <I18nProvider>
+        <Router history={history}>
+          <RepositoryEdit
+            history={history}
+            location={history.location}
+            match={{
+              params: { name: mockDecodedRepositoryName },
+              isExact: true,
+              path: '',
+              url: '',
+            }}
+          />
+        </Router>
+      </I18nProvider>
+    );
+
+    expect(screen.queryByTestId('repositoryFormToggleDefault')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('repositoryFormSave'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('confirmDefaultRepositoryModal')).not.toBeInTheDocument();
+      expect(mockEditRepository).toHaveBeenCalled();
+      expect(setDefaultRepository).not.toHaveBeenCalled();
+      expect(history.location.pathname).toBe('/repositories');
+    });
+  });
+
+  it('SHOULD not show default toggle or attempt setting default when default repository failed to load', async () => {
+    const setDefaultRepository = jest.fn().mockResolvedValue({ data: null, error: null });
+    mockUseDefaultRepository.mockReturnValue({
+      defaultRepository: null,
+      isLoadingDefaultRepository: false,
+      defaultRepositoryStatus: 'error',
+      setDefaultRepository,
+    });
+
+    const history = createMemoryHistory({
+      initialEntries: [`/edit_repository/${mockDecodedRepositoryName}`],
+    });
+    render(
+      <I18nProvider>
+        <Router history={history}>
+          <RepositoryEdit
+            history={history}
+            location={history.location}
+            match={{
+              params: { name: mockDecodedRepositoryName },
+              isExact: true,
+              path: '',
+              url: '',
+            }}
+          />
+        </Router>
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Default repository could not be loaded')).toBeInTheDocument();
+    expect(screen.queryByTestId('repositoryFormToggleDefault')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('repositoryFormSave'));
+
+    await waitFor(() => {
+      expect(mockEditRepository).toHaveBeenCalled();
+      expect(setDefaultRepository).not.toHaveBeenCalled();
+      expect(history.location.pathname).toBe('/repositories');
     });
   });
 
@@ -132,6 +225,7 @@ describe('<RepositoryEdit />', () => {
     mockUseDefaultRepository.mockReturnValue({
       defaultRepository: 'old-default',
       isLoadingDefaultRepository: false,
+      defaultRepositoryStatus: 'loaded',
       setDefaultRepository,
     });
 
@@ -176,6 +270,7 @@ describe('<RepositoryEdit />', () => {
     mockUseDefaultRepository.mockReturnValue({
       defaultRepository: 'old-default',
       isLoadingDefaultRepository: false,
+      defaultRepositoryStatus: 'loaded',
       setDefaultRepository,
     });
 
@@ -220,8 +315,9 @@ describe('<RepositoryEdit />', () => {
       error: { statusCode: 500, error: 'Internal Server Error', message: 'fail' },
     });
     mockUseDefaultRepository.mockReturnValue({
-      defaultRepository: undefined,
+      defaultRepository: null,
       isLoadingDefaultRepository: false,
+      defaultRepositoryStatus: 'loaded',
       setDefaultRepository,
     });
 

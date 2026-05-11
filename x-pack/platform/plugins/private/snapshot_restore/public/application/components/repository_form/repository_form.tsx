@@ -24,7 +24,7 @@ interface Props {
   saveError?: React.ReactNode;
   clearSaveError: () => void;
   onSave: (repository: Repository | EmptyRepository) => void;
-  onCancel?: () => void;
+  onCancel: () => void;
   isDefaultRepository?: boolean;
   isAlreadyDefaultRepository?: boolean;
   isFirstRepository?: boolean;
@@ -108,7 +108,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
     <RepositoryFormStepOne
       repository={repository}
       onNext={() => goToNextStep()}
-      onCancel={onCancel ?? (() => {})}
+      onCancel={onCancel}
       updateRepository={updateRepository}
       validation={validation}
     />

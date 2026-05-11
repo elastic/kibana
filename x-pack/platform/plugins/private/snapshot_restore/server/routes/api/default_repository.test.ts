@@ -68,7 +68,7 @@ describe('[Snapshot and Restore API Routes] Default repository', () => {
     };
 
     it('should set the default repository and return the name', async () => {
-      getRepositoryFn.mockResolvedValue({});
+      getRepositoryFn.mockResolvedValue({ [name]: {} });
       putSettingsFn.mockResolvedValue({ acknowledged: true });
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
@@ -81,10 +81,16 @@ describe('[Snapshot and Restore API Routes] Default repository', () => {
       });
     });
 
-    it('should throw when repository does not exist', async () => {
-      getRepositoryFn.mockRejectedValue(new Error('missing'));
+    it('should return not found when getRepository response does not contain exact name', async () => {
+      const req: RequestMock = {
+        method: 'put',
+        path: addBasePath('default_repository'),
+        query: { name: 'repoA' },
+      };
+      getRepositoryFn.mockResolvedValue({ repoB: {} });
 
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError('missing');
+      const response = await router.runRequest(req);
+      expect(response.status).toBe(404);
       expect(putSettingsFn).not.toHaveBeenCalled();
     });
   });

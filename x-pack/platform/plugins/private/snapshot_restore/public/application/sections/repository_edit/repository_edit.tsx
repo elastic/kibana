@@ -19,6 +19,7 @@ import type { Section } from '../../constants';
 import { BASE_PATH } from '../../constants';
 import { useServices, useToastNotifications } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
+import { useCanSetDefaultRepository } from '../../services/authorization';
 import { editRepository, useLoadRepository } from '../../services/http';
 import { useDefaultRepository } from '../../services/use_default_repository';
 import { useDecodedParams } from '../../lib';
@@ -32,6 +33,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
 }) => {
   const { i18n } = useServices();
   const toastNotifications = useToastNotifications();
+  const canSetDefaultRepository = useCanSetDefaultRepository();
   const { name } = useDecodedParams<MatchParams>();
   const section = 'repositories' as Section;
 
@@ -71,9 +73,13 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   const {
     defaultRepository,
     isLoadingDefaultRepository,
+    defaultRepositoryStatus,
     setDefaultRepository: setDefaultRepositoryRequest,
   } = useDefaultRepository();
+  const defaultRepositoryLoadError = defaultRepositoryStatus === 'error';
+  const canSetOrChangeDefaultRepository = canSetDefaultRepository && !defaultRepositoryLoadError;
   const isAlreadyDefaultRepository = defaultRepository === name;
+  const isDefaultRepositoryKnown = defaultRepositoryStatus === 'loaded';
 
   const onCancel = () => {
     history.push(`${BASE_PATH}/${encodeURIComponent(section)}`);
@@ -88,7 +94,8 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
     if (error) {
       setSaveError(error);
     } else {
-      const shouldSetDefault = isDefaultRepository && !isAlreadyDefaultRepository;
+      const shouldSetDefault =
+        canSetOrChangeDefaultRepository && isDefaultRepository && !isAlreadyDefaultRepository;
       if (shouldSetDefault) {
         const defaultResponse = await setDefaultRepositoryRequest(name);
         if (defaultResponse.error) {
@@ -112,9 +119,13 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   };
 
   const onSave = async (editedRepository: Repository | EmptyRepository) => {
-    const shouldSetDefault = isDefaultRepository && !isAlreadyDefaultRepository;
+    const shouldSetDefault =
+      canSetOrChangeDefaultRepository && isDefaultRepository && !isAlreadyDefaultRepository;
     const isChangingDefault =
-      shouldSetDefault && Boolean(defaultRepository) && defaultRepository !== name;
+      shouldSetDefault &&
+      isDefaultRepositoryKnown &&
+      defaultRepository !== null &&
+      defaultRepository !== name;
 
     if (isChangingDefault) {
       setPendingSave(editedRepository);
@@ -195,7 +206,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
 
   return (
     <EuiPageSection restrictWidth style={{ width: '100%' }}>
-      {pendingSave && (
+      {canSetOrChangeDefaultRepository && pendingSave && defaultRepository !== null && (
         <ConfirmDefaultRepositoryModal
           currentDefaultRepository={defaultRepository}
           newDefaultRepository={name}
@@ -218,6 +229,28 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
       />
 
       <EuiSpacer size="l" />
+
+      {defaultRepositoryLoadError && (
+        <>
+          <EuiCallOut
+            announceOnMount={false}
+            color="warning"
+            iconType="warning"
+            title={
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.defaultRepositoryLoadErrorCalloutTitle"
+                defaultMessage="Default repository could not be loaded"
+              />
+            }
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.defaultRepositoryLoadErrorCalloutDescription"
+              defaultMessage="You can still edit repositories, but you can’t set or change the default repository right now. Try refreshing the page."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="l" />
+        </>
+      )}
 
       {isManagedRepository ? (
         <>
@@ -248,7 +281,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
         onCancel={onCancel}
         isAlreadyDefaultRepository={isAlreadyDefaultRepository}
         isDefaultRepository={isAlreadyDefaultRepository ? true : isDefaultRepository}
-        onToggleDefault={setIsDefaultRepository}
+        onToggleDefault={canSetOrChangeDefaultRepository ? setIsDefaultRepository : undefined}
       />
     </EuiPageSection>
   );
