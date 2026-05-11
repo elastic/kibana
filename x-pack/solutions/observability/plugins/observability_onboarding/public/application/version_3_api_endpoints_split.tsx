@@ -8,6 +8,8 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -22,9 +24,10 @@ import { CardLogoIcon } from './pages/ingest_hub/ingest_hub_components';
 import { API_ENDPOINTS } from './pages/ingest_hub/ingest_hub_data';
 import { ApiEndpointCodeBlockWithStyledCopy } from './api_endpoint_code_block_with_styled_copy';
 import { ApiEndpointSecretCodeBlockWithToolbar } from './api_endpoint_secret_code_block_with_toolbar';
+import { Version2ApiEndpointsCreateApiKeyButton } from './version_2_api_endpoints_create_api_key_button';
 import type { Version2ApiEndpointsSplitProps } from './version_2_api_endpoints_split';
 
-/** Compact min height for `// Label` + value (two lines) inside each snippet block. */
+/** Base min height for snippet code blocks; endpoint/secret value rows tighten to one line in child CSS. */
 const API_ENDPOINT_SNIPPET_BLOCK_MIN_HEIGHT_PX = 46;
 
 /**
@@ -188,8 +191,6 @@ export const Version3ApiEndpointsSplit: React.FC<Version2ApiEndpointsSplitProps>
   const secretEmptyPlaceholder = isEnrollment ? 'No enrollment token yet' : 'No API key yet';
   const displayedSecret = secretValue ?? selected.sampleSecret ?? secretEmptyPlaceholder;
   const secretIsMissing = displayedSecret === secretEmptyPlaceholder;
-  const endpointFieldLabel = selected.id === 'endpoint-cloud-id' ? 'Cloud ID' : 'Endpoint';
-  const secretFieldLabel = isEnrollment ? 'Enrollment token' : 'API key';
   const fleetUrl = selected.openUrl?.(origin);
 
   const secretCodeSubduedCss = secretIsMissing
@@ -219,6 +220,48 @@ export const Version3ApiEndpointsSplit: React.FC<Version2ApiEndpointsSplitProps>
       defaultMessage: 'API key or enrollment snippet',
     }
   );
+  const apiKeysSectionTitle = i18n.translate(
+    'xpack.observability_onboarding.version3ApiEndpoints.apiKeysSectionTitle',
+    {
+      defaultMessage: 'API Keys',
+    }
+  );
+  const enrollmentTokenSectionTitle = i18n.translate(
+    'xpack.observability_onboarding.version3ApiEndpoints.enrollmentTokenSectionTitle',
+    {
+      defaultMessage: 'Enrollment token',
+    }
+  );
+  const secretCredentialsSectionTitle = isEnrollment ? enrollmentTokenSectionTitle : apiKeysSectionTitle;
+  const newKeyButtonLabel = i18n.translate(
+    'xpack.observability_onboarding.version3ApiEndpoints.newKeyButton',
+    {
+      defaultMessage: 'New key',
+    }
+  );
+  const newTokenButtonLabel = i18n.translate(
+    'xpack.observability_onboarding.version3ApiEndpoints.newTokenButton',
+    {
+      defaultMessage: 'New token',
+    }
+  );
+  const newCredentialButtonLabel = isEnrollment ? newTokenButtonLabel : newKeyButtonLabel;
+  const endpointSectionTitleEndpoint = i18n.translate(
+    'xpack.observability_onboarding.version3ApiEndpoints.endpointSectionTitle',
+    {
+      defaultMessage: 'Endpoint',
+    }
+  );
+  const endpointSectionTitleCloudId = i18n.translate(
+    'xpack.observability_onboarding.version3ApiEndpoints.cloudIdSectionTitle',
+    {
+      defaultMessage: 'Cloud ID',
+    }
+  );
+  const endpointSectionTitle =
+    selected.id === 'endpoint-cloud-id'
+      ? endpointSectionTitleCloudId
+      : endpointSectionTitleEndpoint;
 
   return (
     <EuiPanel
@@ -339,54 +382,131 @@ export const Version3ApiEndpointsSplit: React.FC<Version2ApiEndpointsSplitProps>
                 align-self: stretch;
                 width: 100%;
                 min-width: 0;
-                margin-top: 12px;
-                row-gap: ${euiTheme.size.s};
+                margin-top: 24px;
+                row-gap: 24px;
               `}
             >
               <div
+                data-test-subj={`${dataTestSubjPrefix}EndpointSection`}
                 css={css`
+                  display: flex;
+                  flex-direction: column;
+                  align-self: stretch;
+                  width: 100%;
                   min-width: 0;
-                  min-inline-size: 0;
-                  inline-size: 100%;
+                  row-gap: 8px;
                 `}
               >
-                <ApiEndpointCodeBlockWithStyledCopy
-                  copyValue={endpointUrl}
-                  lineCommentLabel={endpointFieldLabel}
-                  ariaLabel={endpointSnippetAriaLabel}
-                  dataTestSubj={`${dataTestSubjPrefix}EndpointCode`}
-                  copyDataTestSubj={`${dataTestSubjPrefix}EndpointCopy`}
-                  codeBlockShortCss={codeBlockShortCss}
-                />
+                <EuiTitle size="xxxs">
+                  <h4
+                    css={css`
+                      margin-block: 0;
+                    `}
+                  >
+                    {endpointSectionTitle}
+                  </h4>
+                </EuiTitle>
+                <div
+                  css={css`
+                    min-width: 0;
+                    min-inline-size: 0;
+                    inline-size: 100%;
+                  `}
+                >
+                  <ApiEndpointCodeBlockWithStyledCopy
+                    copyValue={endpointUrl}
+                    ariaLabel={endpointSnippetAriaLabel}
+                    dataTestSubj={`${dataTestSubjPrefix}EndpointCode`}
+                    copyDataTestSubj={`${dataTestSubjPrefix}EndpointCopy`}
+                    codeBlockShortCss={codeBlockShortCss}
+                  />
+                </div>
               </div>
               <div
+                data-test-subj={`${dataTestSubjPrefix}SecretSection`}
                 css={css`
+                  display: flex;
+                  flex-direction: column;
+                  align-self: stretch;
+                  width: 100%;
                   min-width: 0;
-                  min-inline-size: 0;
-                  inline-size: 100%;
+                  row-gap: 8px;
                 `}
               >
-                <ApiEndpointSecretCodeBlockWithToolbar
-                  displayedSecret={displayedSecret}
-                  secretIsMissing={secretIsMissing}
-                  lineCommentLabel={secretFieldLabel}
-                  ariaLabel={secretSnippetAriaLabel}
-                  dataTestSubj={`${dataTestSubjPrefix}SecretCode`}
-                  codeBlockShortCss={codeBlockShortCss}
-                  secretCodeSubduedCss={secretCodeSubduedCss}
-                  showActions={showSecretRowAction}
-                  isEnrollment={isEnrollment}
-                  fleetUrl={fleetUrl}
-                  apiKeyManageHref={apiKeyManageHref}
-                  onApiKeyCreated={(result) => {
-                    if (selected != null) {
-                      onApiKeyCreated(result, selected.id);
-                    }
-                  }}
-                  createApiKeyDataTestSubj={createApiKeyDataTestSubj}
-                  copySecretDataTestSubj={`${dataTestSubjPrefix}SecretCopy`}
-                  createEnrollmentTokenDataTestSubj={`${dataTestSubjPrefix}CreateEnrollmentToken`}
-                />
+                <EuiFlexGroup
+                  responsive={false}
+                  alignItems="center"
+                  justifyContent="spaceBetween"
+                  gutterSize="s"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="xxxs">
+                      <h4
+                        css={css`
+                          margin-block: 0;
+                        `}
+                      >
+                        {secretCredentialsSectionTitle}
+                      </h4>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  {showSecretRowAction ? (
+                    <EuiFlexItem grow={false}>
+                      {isEnrollment && fleetUrl ? (
+                        <EuiButton
+                          data-test-subj={`${dataTestSubjPrefix}NewToken`}
+                          size="xs"
+                          display="base"
+                          fill={false}
+                          iconType="plusInCircle"
+                          iconSide="left"
+                          href={fleetUrl}
+                        >
+                          {newCredentialButtonLabel}
+                        </EuiButton>
+                      ) : (
+                        <Version2ApiEndpointsCreateApiKeyButton
+                          variant="small"
+                          dataTestSubj={createApiKeyDataTestSubj}
+                          manageApiKeysHref={apiKeyManageHref}
+                          onCreated={(result) => {
+                            if (selected != null) {
+                              onApiKeyCreated(result, selected.id);
+                            }
+                          }}
+                        />
+                      )}
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
+                <div
+                  css={css`
+                    min-width: 0;
+                    min-inline-size: 0;
+                    inline-size: 100%;
+                  `}
+                >
+                  <ApiEndpointSecretCodeBlockWithToolbar
+                    displayedSecret={displayedSecret}
+                    secretIsMissing={secretIsMissing}
+                    ariaLabel={secretSnippetAriaLabel}
+                    dataTestSubj={`${dataTestSubjPrefix}SecretCode`}
+                    codeBlockShortCss={codeBlockShortCss}
+                    secretCodeSubduedCss={secretCodeSubduedCss}
+                    showActions={false}
+                    isEnrollment={isEnrollment}
+                    fleetUrl={fleetUrl}
+                    apiKeyManageHref={apiKeyManageHref}
+                    onApiKeyCreated={(result) => {
+                      if (selected != null) {
+                        onApiKeyCreated(result, selected.id);
+                      }
+                    }}
+                    createApiKeyDataTestSubj={createApiKeyDataTestSubj}
+                    copySecretDataTestSubj={`${dataTestSubjPrefix}SecretCopy`}
+                    createEnrollmentTokenDataTestSubj={`${dataTestSubjPrefix}CreateEnrollmentToken`}
+                  />
+                </div>
               </div>
             </div>
           </EuiPanel>

@@ -1080,28 +1080,6 @@ export interface ApiEndpoint {
 
 export const API_ENDPOINTS: ApiEndpoint[] = [
   {
-    id: 'endpoint-elasticsearch',
-    name: 'Elasticsearch',
-    panelActionTitle: 'Index and query data',
-    useCaseBullets: ['Client applications', 'Batch pipelines', 'HTTPS API'],
-    detailTitle: 'Index and query your data via the Elasticsearch REST endpoint',
-    description:
-      'Push and query documents from apps, jobs, and pipelines using the Elasticsearch REST API when you need direct control over reads and writes.',
-    details:
-      'Push and query documents from apps, jobs, and pipelines using the Elasticsearch REST API when you need direct control over reads and writes.',
-    docsUrl: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/rest-apis.html',
-    logoUrl: `${ELASTIC_LOGOS}/elasticsearch/img/logo_elasticsearch.svg`,
-    getEndpointUrl: (origin) => `${origin}/elasticsearch`,
-    sampleSecret:
-      'Rkx0d19Ja0VLWU5jbU46WjBaYk9XbHBZWEo1T25Oa2IyTkxaWEo1T2pVMU5qYzJNVEl4TnpZMU5UWXhPRGt4TmpJd05qRXpOVEE0TURJMU1qQT0',
-    keyType: 'api_key',
-    keyRole: 'superuser',
-    keyBehavior: 'reused',
-    badge: 'recommended',
-    keyTypeLabel: 'Endpoint',
-    keyTypeDescription: 'The primary method for authenticating API requests',
-  },
-  {
     id: 'endpoint-otlp',
     name: 'Ingest - OTLP',
     panelActionTitle: 'Send OpenTelemetry data',
@@ -1168,6 +1146,48 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     keyTypeDescription: 'Primary path for managing agents and directly ingesting data',
   },
   {
+    id: 'endpoint-elasticsearch',
+    name: 'Elasticsearch',
+    panelActionTitle: 'Index and query data',
+    useCaseBullets: ['Client applications', 'Batch pipelines', 'HTTPS API'],
+    detailTitle: 'Index and query your data via the Elasticsearch REST endpoint',
+    description:
+      'Push and query documents from apps, jobs, and pipelines using the Elasticsearch REST API when you need direct control over reads and writes.',
+    details:
+      'Push and query documents from apps, jobs, and pipelines using the Elasticsearch REST API when you need direct control over reads and writes.',
+    docsUrl: 'https://www.elastic.co/guide/en/elasticsearch/reference/current/rest-apis.html',
+    logoUrl: `${ELASTIC_LOGOS}/elasticsearch/img/logo_elasticsearch.svg`,
+    getEndpointUrl: (origin) => `${origin}/elasticsearch`,
+    sampleSecret:
+      'Rkx0d19Ja0VLWU5jbU46WjBaYk9XbHBZWEo1T25Oa2IyTkxaWEo1T2pVMU5qYzJNVEl4TnpZMU5UWXhPRGt4TmpJd05qRXpOVEE0TURJMU1qQT0',
+    keyType: 'api_key',
+    keyRole: 'superuser',
+    keyBehavior: 'reused',
+    badge: 'recommended',
+    keyTypeLabel: 'Endpoint',
+    keyTypeDescription: 'The primary method for authenticating API requests',
+  },
+  {
+    id: 'endpoint-kibana',
+    name: 'Kibana',
+    panelActionTitle: 'Automate with the Kibana API',
+    useCaseBullets: ['CI workflows', 'Space exports', 'Detection rules'],
+    detailTitle: 'Automate dashboards and alerts using the Kibana API endpoint',
+    description:
+      'Call the Kibana HTTP APIs to automate dashboards, saved objects, and alerting from scripts, CI jobs, or other tools that integrate with Kibana.',
+    details:
+      'Call the Kibana HTTP APIs to automate dashboards, saved objects, and alerting from scripts, CI jobs, or other tools that integrate with Kibana.',
+    docsUrl: 'https://www.elastic.co/guide/en/kibana/current/api.html',
+    logoUrl: `${ELASTIC_LOGOS}/kibana/img/logo_kibana.svg`,
+    getEndpointUrl: (origin) => origin,
+    sampleSecret:
+      'S2liYW5hX3Jlc3Q6WjJkbWMzUmhkR1ZoWTJobGMzTjNiM0prYjIxaGFXNHVZMjl0T2pFMU56azJOVEkxT0RreU5EazFOVGs1TnpVeE16VXpPVFUzTURJeg',
+    keyType: 'kibana_note',
+    badge: 'legacy',
+    keyTypeLabel: 'Endpoint',
+    keyTypeDescription: 'Use an Elasticsearch API key to authenticate',
+  },
+  {
     id: 'endpoint-cloud-id',
     name: 'Cloud ID',
     panelActionTitle: 'Connect with Cloud ID',
@@ -1189,26 +1209,6 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     badge: 'legacy',
     keyTypeLabel: 'Endpoint',
     keyTypeDescription: 'A secondary auth method',
-  },
-  {
-    id: 'endpoint-kibana',
-    name: 'Kibana',
-    panelActionTitle: 'Automate with the Kibana API',
-    useCaseBullets: ['CI workflows', 'Space exports', 'Detection rules'],
-    detailTitle: 'Automate dashboards and alerts using the Kibana API endpoint',
-    description:
-      'Call the Kibana HTTP APIs to automate dashboards, saved objects, and alerting from scripts, CI jobs, or other tools that integrate with Kibana.',
-    details:
-      'Call the Kibana HTTP APIs to automate dashboards, saved objects, and alerting from scripts, CI jobs, or other tools that integrate with Kibana.',
-    docsUrl: 'https://www.elastic.co/guide/en/kibana/current/api.html',
-    logoUrl: `${ELASTIC_LOGOS}/kibana/img/logo_kibana.svg`,
-    getEndpointUrl: (origin) => origin,
-    sampleSecret:
-      'S2liYW5hX3Jlc3Q6WjJkbWMzUmhkR1ZoWTJobGMzTjNiM0prYjIxaGFXNHVZMjl0T2pFMU56azJOVEkxT0RreU5EazFOVGs1TnpVeE16VXpPVFUzTURJeg',
-    keyType: 'kibana_note',
-    badge: 'legacy',
-    keyTypeLabel: 'Endpoint',
-    keyTypeDescription: 'Use an Elasticsearch API key to authenticate',
   },
 ];
 
