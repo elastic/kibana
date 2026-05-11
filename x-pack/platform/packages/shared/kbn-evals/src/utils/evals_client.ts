@@ -48,7 +48,7 @@ interface GetRunFilters {
   suiteId?: string;
 }
 
-interface IngestScoresFailureResponse {
+interface IngestScoresResult {
   ingested: number;
   conflicted: number;
   failed: Array<{
@@ -60,7 +60,7 @@ interface IngestScoresFailureResponse {
 
 export interface IngestScoresError extends Error {
   statusCode: 400 | 429 | 500;
-  body: IngestScoresFailureResponse;
+  body: IngestScoresResult;
 }
 
 const EVALS_PLUGIN_DISABLED_MESSAGE =
@@ -83,7 +83,7 @@ const getResponseStatusCode = (response: unknown): number | undefined => {
   return typeof status === 'number' ? status : undefined;
 };
 
-const toIngestScoresError = (statusCode: 400 | 429 | 500, body: IngestScoresFailureResponse) =>
+const toIngestScoresError = (statusCode: 400 | 429 | 500, body: IngestScoresResult) =>
   Object.assign(new Error(`Failed to ingest scores (status ${statusCode})`), {
     statusCode,
     body,
@@ -125,7 +125,7 @@ const buildRunQuery = (options?: GetRunFilters) => ({
 export class EvalsClient {
   constructor(private readonly kbnClient: KbnClient, private readonly log: SomeDevLog) {}
 
-  async ingestScores(request: IngestScoresRequestBodyInput): Promise<IngestScoresFailureResponse> {
+  async ingestScores(request: IngestScoresRequestBodyInput): Promise<IngestScoresResult> {
     const body = IngestScoresRequestBody.parse(request);
     const response = await this.kbnClient.request({
       path: EVALS_SCORES_URL,
