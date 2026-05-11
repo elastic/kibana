@@ -8,6 +8,7 @@
 import type { api, tracing } from '@elastic/opentelemetry-node/sdk';
 import { trace } from '@opentelemetry/api';
 import { v7 as uuidv7, validate as uuidValidate, version as uuidVersion } from 'uuid';
+import { isInferenceSpan } from '@kbn/inference-tracing';
 
 const OPIK_TRACE_ID = 'opik.trace_id';
 const OPIK_SPAN_ID = 'opik.span_id';
@@ -60,6 +61,8 @@ export const attachOpikDistributedTrace = (
  */
 export class OpikDistributedTracingSpanProcessor implements tracing.SpanProcessor {
   onStart(span: tracing.Span, parentContext: api.Context): void {
+    if (!isInferenceSpan(span, parentContext)) return;
+
     const parentSpan = trace.getSpan(parentContext);
     if (!parentSpan) return;
 
