@@ -49,7 +49,7 @@ const combineConditions = (conditions: Array<string | undefined>): string | unde
   const filtered = conditions.map((c) => c?.trim()).filter((c): c is string => Boolean(c));
   if (filtered.length === 0) return undefined;
   if (filtered.length === 1) return filtered[0];
-  return filtered.map((c) => `(${c})`).join(' AND ');
+  return filtered.map((c) => `(${c})`).join(' and ');
 };
 
 export function getInputId(
@@ -89,22 +89,16 @@ export const storedPackagePolicyToAgentInputs = (
       return;
     }
 
-    const inputStreams = getFullInputStreams(input);
-
     // Integration-level condition fans out to each non-otelcol input on non-agentless
-    // policies, AND-combined with the input-level condition already produced by
-    // getFullInputStreams. Flag-gated so behavior is unchanged when off.
+    // policies. The caller (here) owns this gating; getFullInputStreams just combines.
     const integrationLevelCondition =
       enableIntegrationConditions && !isAgentless && input.type !== OTEL_COLLECTOR_INPUT_TYPE
         ? packagePolicy.condition
         : undefined;
-    const combinedInputCondition = combineConditions([
-      integrationLevelCondition,
-      inputStreams.condition,
-    ]);
-    if (combinedInputCondition !== undefined) {
-      inputStreams.condition = combinedInputCondition;
-    }
+
+    const inputStreams = getFullInputStreams(input, {
+      integrationCondition: integrationLevelCondition,
+    });
 
     const fullInput: FullAgentPolicyInput = {
       // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
@@ -189,15 +183,35 @@ export const mergeInputsOverrides = (
   return fullInput;
 };
 
+export interface GetFullInputStreamsOptions {
+  /** Force-include disabled streams (used for template-inputs previews). */
+  allStreamEnabled?: boolean;
+  /** Map of stream ids <destinationId, originalId>. */
+  streamsOriginalIdsMap?: Map<string, string>;
+  /** Pre-gated by the caller; layered onto the input-level condition. */
+  integrationCondition?: string;
+}
+
 export const getFullInputStreams = (
   input: PackagePolicyInput,
-  allStreamEnabled: boolean = false,
-  streamsOriginalIdsMap?: Map<string, string> // Map of stream ids <destinationId, originalId>
+  {
+    allStreamEnabled = false,
+    streamsOriginalIdsMap,
+    integrationCondition,
+  }: GetFullInputStreamsOptions = {}
 ): FullAgentPolicyInputStream => {
-  // Extract template-defined `condition` (from compiled_input) before spreading so a
-  // later AND-combine with the user input.condition.
+  const { enableIntegrationConditions } = appContextService.getExperimentalFeatures();
+  // Extract template-defined `condition` (from compiled_input) before spreading so it can
+  // AND-combine flat with the integration- and user-level conditions instead of being
+  // overwritten by the spread.
+  // User-set conditions are flag-gated: when off, only the template condition flows through.
   const { condition: compiledInputCondition, ...compiledInputRest } = input.compiled_input || {};
-  const inputCondition = combineConditions([compiledInputCondition, input.condition]);
+  const userInputCondition = enableIntegrationConditions ? input.condition : undefined;
+  const inputCondition = combineConditions([
+    integrationCondition,
+    compiledInputCondition,
+    userInputCondition,
+  ]);
 
   return {
     ...compiledInputRest,
@@ -213,9 +227,12 @@ export const getFullInputStreams = (
                 condition: compiledStreamCondition,
                 ...compiledStream
               } = stream.compiled_stream ?? {};
+              const userStreamCondition = enableIntegrationConditions
+                ? stream.condition
+                : undefined;
               const streamCondition = combineConditions([
                 compiledStreamCondition,
-                stream.condition,
+                userStreamCondition,
               ]);
               const fullStream: FullAgentPolicyInputStream = {
                 id: streamId,
