@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiToolTip } from '@elastic/eui';
 
 interface Props {
-  children?: React.ReactElement;
+  children: React.ReactElement;
   showTooltip: boolean;
 }
 
