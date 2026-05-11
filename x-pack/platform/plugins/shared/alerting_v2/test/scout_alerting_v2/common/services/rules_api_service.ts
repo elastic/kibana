@@ -7,6 +7,7 @@
 
 import type { KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
+import { expect } from '@kbn/scout/api';
 import type {
   BulkOperationParams,
   BulkOperationResponse,
@@ -15,7 +16,12 @@ import type {
   FindRulesResponse,
   RuleResponse,
 } from '@kbn/alerting-v2-schemas';
-import { COMMON_HEADERS, RULE_API_PATH } from '../../common/constants';
+import { COMMON_HEADERS, POLL_INTERVAL_MS, POLL_TIMEOUT_MS, RULE_API_PATH } from '../constants';
+
+export interface WaitForEnabledStateParams {
+  id: string;
+  enabled: boolean;
+}
 
 export interface RulesApiService {
   create: (data: CreateRuleData, options?: { id?: string }) => Promise<RuleResponse>;
@@ -23,6 +29,9 @@ export interface RulesApiService {
   find: (query?: FindRulesParams) => Promise<FindRulesResponse>;
   delete: (id: string) => Promise<void>;
   bulkDelete: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
+  bulkDisable: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
+  bulkEnable: (params: BulkOperationParams) => Promise<BulkOperationResponse>;
+  waitForEnabledState: (params: WaitForEnabledStateParams) => Promise<void>;
   cleanUp: () => Promise<void>;
 }
 
@@ -49,6 +58,15 @@ export const getRulesApiService = ({
       return response.data;
     });
 
+  const get = (id: string) =>
+    measurePerformanceAsync(log, 'rules.get', async () => {
+      const response = await kbnClient.request<RuleResponse>({
+        method: 'GET',
+        path: `${RULE_API_PATH}/${encodeURIComponent(id)}`,
+      });
+      return response.data;
+    });
+
   return {
     create: (data, options) =>
       measurePerformanceAsync(log, 'rules.create', async () => {
@@ -64,14 +82,7 @@ export const getRulesApiService = ({
         return response.data;
       }),
 
-    get: (id) =>
-      measurePerformanceAsync(log, 'rules.get', async () => {
-        const response = await kbnClient.request<RuleResponse>({
-          method: 'GET',
-          path: `${RULE_API_PATH}/${encodeURIComponent(id)}`,
-        });
-        return response.data;
-      }),
+    get,
 
     find: (query = {}) =>
       measurePerformanceAsync(log, 'rules.find', async () => {
@@ -93,9 +104,36 @@ export const getRulesApiService = ({
           retries: 0,
         });
       }),
-
     bulkDelete,
-
+    bulkDisable: (params: BulkOperationParams) =>
+      measurePerformanceAsync(log, 'rules.bulkDisable', async () => {
+        const response = await kbnClient.request<BulkOperationResponse>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/_bulk_disable`,
+          headers: COMMON_HEADERS,
+          body: params,
+        });
+        return response.data;
+      }),
+    bulkEnable: (params: BulkOperationParams) =>
+      measurePerformanceAsync(log, 'rules.bulkEnable', async () => {
+        const response = await kbnClient.request<BulkOperationResponse>({
+          method: 'POST',
+          path: `${RULE_API_PATH}/_bulk_enable`,
+          headers: COMMON_HEADERS,
+          body: params,
+        });
+        return response.data;
+      }),
+    waitForEnabledState: ({ id, enabled }) =>
+      measurePerformanceAsync(log, 'rules.waitForEnabledState', async () => {
+        await expect
+          .poll(async () => (await get(id)).enabled, {
+            timeout: POLL_TIMEOUT_MS,
+            intervals: [POLL_INTERVAL_MS],
+          })
+          .toBe(enabled);
+      }),
     cleanUp: () =>
       measurePerformanceAsync(log, 'rules.cleanUp', async () => {
         await bulkDelete({ match_all: true });
