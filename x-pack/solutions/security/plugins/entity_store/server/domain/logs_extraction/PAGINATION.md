@@ -1,6 +1,8 @@
 # Logs Extraction Pagination
 
-Two nested loops process raw log documents into aggregated entity rows.
+Three nested loops process raw log documents into aggregated entity rows.
+
+**Window cap outer loop**: When the gap between `fromDateISO` and the effective window end (`now - delay`) exceeds `maxTimeWindowSize + GRACE_PERIOD` (default `15m + 30s`), the run processes the time range as a sequence of capped `[fromSub, toSub]` sub-windows of width `maxTimeWindowSize`, advancing within a single execution until the effective end is reached. Sub-windows are an in-memory iteration concept — the saved-object schema is unaware of them. Crash recovery uses the per-slice persistence emitted by the inner outer-loop (last `paginationTimestamp` / `checkpointTimestamp` written). Manual `specificWindow` / `windowOverride` runs bypass capping and run as a single pass.
 
 **Outer loop — log slices**: Each iteration runs a **boundary probe** (`buildLogPaginationCursorProbeEsql`) to locate the inclusive end of the next raw-log slice (up to `maxLogsPerPage` documents, sorted by `@timestamp ASC, _id ASC`). The probe returns `total_logs` (count before `LIMIT`) so the client knows when the window is exhausted.
 
@@ -12,7 +14,7 @@ Two nested loops process raw log documents into aggregated entity rows.
 
 | Cursor | Persisted fields | Semantics |
 |--------|-----------------|-----------|
-| **Log slice start** | `logsPageCursorStartTimestamp/Id` | Exclusive compound lower bound `(@timestamp, _id)` for the next probe. Set to the previous slice end after completing all entity pages. |
+| **Log slice start** | `logsPageCursorStartTimestamp/Id` | Exclusive compound lower bound `(@timestamp, _id)` for the next probe. Set to the previous slice end after completing all entity pages. Doubles as the resume point on crash mid-run — no separate sub-window checkpoint is persisted. |
 | **Log slice end** | `logsPageCursorEndTimestamp/Id` | Inclusive upper bound for the current slice. Set by the probe; cleared when the slice is fully processed. |
 | **Entity cursor** | `paginationTimestamp/Id` | `(FirstSeenLogInPage, UntypedId)` of the last ingested entity page. Cleared when a slice finishes. |
 
@@ -92,6 +94,39 @@ If the process crashes mid inner-loop, `paginationId` is set in the saved state.
 
 ---
 
+## Lagging environment: multiple sub-windows in one run
+
+When `effectiveWindowEnd - fromDateISO > maxTimeWindowSize + GRACE_PERIOD`, the time range is processed as a sequence of capped sub-windows within a single `extractLogs` run. Each sub-window runs the existing slice/entity loops to completion. Persistence between sub-windows is whatever the inner outer-loop already wrote (per-slice `paginationTimestamp`); no extra checkpoint round-trip is added.
+
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant ES as Elasticsearch
+    Note over C: fromDateISO=T0, effectiveEnd=T0+15m, cap=5m
+
+    rect rgb(240, 240, 240)
+    Note over C: sub-window 1: [T0, T0+5m]
+    C->>ES: probe → slice end, then extract + ingest entities
+    Note over C: per-slice persistence: paginationTimestamp = lastSliceEnd_ts
+    end
+
+    rect rgb(240, 240, 240)
+    Note over C: sub-window 2: [T0+5m, T0+10m] (in-memory advance)
+    C->>ES: probe → slice end, then extract + ingest entities
+    end
+
+    rect rgb(240, 240, 240)
+    Note over C: sub-window 3: [T0+10m, T0+15m] (effective end — not capped)
+    C->>ES: probe → slice end, then extract + ingest entities
+    end
+
+    Note over C: final cleanup: clear all cursors, set lastExecutionTimestamp = T0+15m
+```
+
+If the process is aborted between sub-windows, recovery resumes from the last persisted slice end (`paginationTimestamp` set by the inner outer-loop after the most recently completed slice) — not from a sub-window boundary. The next run re-establishes its own sub-window cap from that resume point.
+
+---
+
 ## Recovery
 
 A crash mid-entity-page leaves the following state on disk:
@@ -126,9 +161,15 @@ sequenceDiagram
 
 The entity-level pagination WHERE uses `> T_ent OR (= T_ent AND untypedId > E_ent)` — entities already ingested before the crash are skipped; the slice is re-established from `T_ent` inclusive.
 
+A crash *between* sub-windows is indistinguishable from a crash at a slice boundary: the most recently persisted state is `paginationTimestamp = lastSliceEnd_ts` (from the inner outer-loop's per-slice `advanceEngineStateAfterLogPageCompletes`). The next run reads that as `fromDateISO` and re-establishes the sub-window cap from there — re-fetching the slice-boundary doc itself, which is harmless under the idempotent aggregations (`TOP`, `LAST`, `MIN`, `MV_UNION`).
+
 ---
 
 ## Edge cases
+
+### Cap interaction with `specificWindow` / `windowOverride`
+
+When a manual window is supplied (admin-triggered API call), the sub-window cap is bypassed and the supplied bounds are processed in a single pass via the existing slice/entity loops. State is not advanced — the user explicitly picked the bounds, and we do not silently shorten or shift them.
 
 ### Timestamp collision at a slice boundary
 

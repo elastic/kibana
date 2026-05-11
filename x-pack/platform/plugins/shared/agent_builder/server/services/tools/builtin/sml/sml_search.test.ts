@@ -61,6 +61,7 @@ describe('createSmlSearchTool', () => {
       spaceId: 'default',
       esClient: mockContext.esClient,
       request: mockContext.request,
+      filters: undefined,
     });
   });
 
@@ -136,6 +137,76 @@ describe('createSmlSearchTool', () => {
       expect.objectContaining({
         query: 'test',
         size: undefined,
+      })
+    );
+  });
+
+  it('passes connector_ids as filters from agentConfiguration', async () => {
+    mockSearch.mockResolvedValue({ results: [], total: 0 });
+    const contextWithConnectors = {
+      ...mockContext,
+      agentConfiguration: { connector_ids: ['conn-1', 'conn-2'], tools: [] },
+    };
+
+    const tool = createSmlSearchTool({ getAgentContextLayer });
+    await tool.handler({ query: 'test' }, contextWithConnectors as unknown as ToolHandlerContext);
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: { connector: { ids: ['conn-1', 'conn-2'] } },
+      })
+    );
+  });
+
+  it('does not pass filters when agentConfiguration has no connector_ids', async () => {
+    mockSearch.mockResolvedValue({ results: [], total: 0 });
+    const contextWithoutConnectors = {
+      ...mockContext,
+      agentConfiguration: { tools: [] },
+    };
+
+    const tool = createSmlSearchTool({ getAgentContextLayer });
+    await tool.handler(
+      { query: 'test' },
+      contextWithoutConnectors as unknown as ToolHandlerContext
+    );
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: undefined,
+      })
+    );
+  });
+
+  it('passes empty connector ids filter when connector_ids is []', async () => {
+    mockSearch.mockResolvedValue({ results: [], total: 0 });
+    const contextWithEmptyConnectors = {
+      ...mockContext,
+      agentConfiguration: { connector_ids: [], tools: [] },
+    };
+
+    const tool = createSmlSearchTool({ getAgentContextLayer });
+    await tool.handler(
+      { query: 'test' },
+      contextWithEmptyConnectors as unknown as ToolHandlerContext
+    );
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: { connector: { ids: [] } },
+      })
+    );
+  });
+
+  it('does not pass filters when agentConfiguration is undefined', async () => {
+    mockSearch.mockResolvedValue({ results: [], total: 0 });
+
+    const tool = createSmlSearchTool({ getAgentContextLayer });
+    await tool.handler({ query: 'test' }, mockContext as unknown as ToolHandlerContext);
+
+    expect(mockSearch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filters: undefined,
       })
     );
   });
