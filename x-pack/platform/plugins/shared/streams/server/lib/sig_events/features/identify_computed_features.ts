@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { Feature, Streams } from '@kbn/streams-schema';
+import { type Feature, type Streams, Streams as StreamsNS } from '@kbn/streams-schema';
 import { generateAllComputedFeatures } from '@kbn/streams-ai';
 import type { FeatureClient } from '../../streams/feature/feature_client';
 import { reconcileComputedFeatures } from './reconcile_features';
@@ -35,8 +35,13 @@ export async function identifyComputedFeatures({
   featureTtlDays,
   runId,
 }: IdentifyComputedFeaturesOptions): Promise<Feature[]> {
+  const indexPattern = StreamsNS.RemoteStream.Definition.is(stream)
+    ? stream.remote_index_pattern ?? stream.name
+    : stream.name;
+
   const computedFeatures = await generateAllComputedFeatures({
     stream,
+    indexPattern,
     start,
     end,
     esClient,

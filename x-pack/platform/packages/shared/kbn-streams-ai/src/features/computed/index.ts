@@ -82,12 +82,49 @@ function toComputedFeature(
  * Generates all computed features by running all registered generators in parallel.
  */
 export async function generateAllComputedFeatures(
-  options: ComputedFeatureGeneratorOptions
+  options: Omit<ComputedFeatureGeneratorOptions, 'indexPattern'> & { indexPattern?: string }
 ): Promise<BaseFeature[]> {
-  return Promise.all(
+  const resolvedOptions: ComputedFeatureGeneratorOptions = {
+    ...options,
+    indexPattern: options.indexPattern ?? options.stream.name,
+  };
+  const results = await Promise.allSettled(
     registry.getAll().map(async (generator) => {
-      const value = await generator.generate(options);
-      return toComputedFeature(generator, value, options.stream.name);
+      resolvedOptions.logger.debug(
+        `Running computed feature generator [${generator.type}] on index [${resolvedOptions.indexPattern}]`
+      );
+      try {
+        const value = await generator.generate(resolvedOptions);
+        return toComputedFeature(generator, value, options.stream.name);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        const body =
+          err != null &&
+          typeof err === 'object' &&
+          'meta' in err &&
+          (err as Record<string, unknown>).meta != null &&
+          typeof (err as Record<string, unknown>).meta === 'object' &&
+          'body' in ((err as Record<string, unknown>).meta as object)
+            ? JSON.stringify(
+                ((err as Record<string, unknown>).meta as Record<string, unknown>).body
+              )
+            : undefined;
+        resolvedOptions.logger.warn(
+          `Computed feature generator [${generator.type}] failed for index [${
+            resolvedOptions.indexPattern
+          }]: ${msg}${body ? `\nResponse body: ${body}` : ''}`
+        );
+        throw err;
+      }
     })
   );
+
+  const features: BaseFeature[] = [];
+  for (const result of results) {
+    if (result.status === 'fulfilled') {
+      features.push(result.value);
+    }
+    // rejections already logged above; swallow so other generators still contribute
+  }
+  return features;
 }

@@ -42,6 +42,7 @@ describe('logSamplesGenerator', () => {
 
     const result = await logSamplesGenerator.generate({
       stream,
+      indexPattern: stream.name,
       start: 100,
       end: 200,
       esClient,

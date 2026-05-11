@@ -78,6 +78,7 @@ function getErrorMessage(error: unknown): string {
  */
 export async function generateSignificantEvents({
   stream,
+  indexPattern,
   esClient,
   getFeatures,
   inferenceClient,
@@ -90,6 +91,12 @@ export async function generateSignificantEvents({
   maxExistingQueriesForContext = DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
 }: {
   stream: Streams.all.Definition;
+  /**
+   * The index or index pattern to use in ES|QL FROM clauses.
+   * Defaults to `stream.name`; override for remote streams where the
+   * backing index differs from the stream name.
+   */
+  indexPattern?: string;
   esClient: ElasticsearchClient;
   getFeatures(params?: {
     type?: string[];
@@ -130,11 +137,13 @@ export async function generateSignificantEvents({
       )
     : '';
 
+  const effectiveIndexPattern = indexPattern ?? stream.name;
+
   logger.trace('Generating significant events via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
     executeAsReasoningAgent({
       input: {
-        name: stream.name,
+        name: effectiveIndexPattern,
         description: stream.description,
         available_feature_types: SIGNIFICANT_EVENTS_FEATURE_TOOL_TYPES.join(', '),
         computed_feature_instructions: getComputedFeatureInstructions(),
@@ -228,10 +237,13 @@ export async function generateSignificantEvents({
                 }
 
                 const hints = getStatsQueryHints(rewritten);
+                const validationQuery = `${rewritten}\n| LIMIT 0`;
+
+                logger.debug(`Validating ES|QL query:\n${validationQuery}`);
 
                 await esClient.esql.query(
                   {
-                    query: `${rewritten}\n| LIMIT 0`,
+                    query: validationQuery,
                     format: 'json',
                   },
                   { signal, requestTimeout: '10s' }
@@ -247,11 +259,28 @@ export async function generateSignificantEvents({
                 };
               } catch (error) {
                 hasFailures = true;
+                const errorMessage = getErrorMessage(error);
+                // Log the body of the error response if available (e.g. ES 400 responses
+                // contain the actual reason string in error.meta.body).
+                const body =
+                  error != null &&
+                  typeof error === 'object' &&
+                  'meta' in error &&
+                  error.meta != null &&
+                  typeof error.meta === 'object' &&
+                  'body' in error.meta
+                    ? JSON.stringify(error.meta.body)
+                    : undefined;
+                logger.warn(
+                  `ES|QL query validation failed: ${errorMessage}${
+                    body ? `\nResponse body: ${body}` : ''
+                  }`
+                );
                 return {
                   query,
                   valid: false,
                   status: 'Failed to add',
-                  error: getErrorMessage(error),
+                  error: errorMessage,
                 };
               }
             })

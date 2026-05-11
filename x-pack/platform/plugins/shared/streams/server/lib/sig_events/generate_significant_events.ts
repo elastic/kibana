@@ -7,7 +7,11 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
-import type { GeneratedSignificantEventQuery, Streams } from '@kbn/streams-schema';
+import {
+  type GeneratedSignificantEventQuery,
+  type Streams,
+  Streams as StreamsNS,
+} from '@kbn/streams-schema';
 import { QUERY_TYPE_STATS, ensureMetadata } from '@kbn/streams-schema';
 import { generateSignificantEvents } from '@kbn/streams-ai';
 import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
@@ -61,8 +65,13 @@ export async function generateSignificantEventDefinitions(
     connectorId,
   });
 
+  const indexPattern = StreamsNS.RemoteStream.Definition.is(definition)
+    ? definition.remote_index_pattern ?? definition.name
+    : definition.name;
+
   const { queries, tokensUsed, toolUsage } = await generateSignificantEvents({
     stream: definition,
+    indexPattern,
     esClient,
     inferenceClient: boundInferenceClient,
     logger,

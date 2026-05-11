@@ -27,7 +27,7 @@ export interface EnrichedStream extends ListStreamDetail {
   nameSortKey: string;
   documentsCount: number;
   retentionMs: number;
-  type: 'wired' | 'root' | 'classic';
+  type: 'wired' | 'root' | 'classic' | 'remote';
   children?: EnrichedStream[];
 }
 
@@ -195,7 +195,9 @@ export const enrichStream = (node: StreamTree | ListStreamDetail): EnrichedStrea
     nameSortKey,
     documentsCount: 0,
     retentionMs,
-    type: Streams.ClassicStream.Definition.is(node.stream)
+    type: Streams.RemoteStream.Definition.is(node.stream)
+      ? 'remote'
+      : Streams.ClassicStream.Definition.is(node.stream)
       ? 'classic'
       : isRootStreamDefinition(node.stream)
       ? 'root'

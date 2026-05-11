@@ -42,6 +42,7 @@ describe('errorLogsGenerator', () => {
 
     const result = await errorLogsGenerator.generate({
       stream,
+      indexPattern: stream.name,
       start: 100,
       end: 200,
       esClient,

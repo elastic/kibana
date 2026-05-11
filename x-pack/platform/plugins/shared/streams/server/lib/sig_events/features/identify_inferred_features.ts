@@ -178,6 +178,7 @@ async function tryIdentifyFeatures(
 interface RunInferredIterationOptions {
   esClient: ElasticsearchClient;
   streamName: string;
+  indexPattern: string;
   start: number;
   end: number;
   runId: string;
@@ -217,6 +218,7 @@ type InferredIterationResult =
 async function runInferredIteration({
   esClient,
   streamName,
+  indexPattern,
   start,
   end,
   runId,
@@ -244,7 +246,7 @@ async function runInferredIteration({
 
   const batchResult = await fetchSampleDocuments({
     esClient,
-    index: streamName,
+    index: indexPattern,
     start,
     end,
     features: discoveredFeatures.filter(isFeatureWithFilter),
@@ -348,6 +350,8 @@ export interface IdentifyInferredFeaturesOptions {
   logger: Logger;
   signal: AbortSignal;
   streamName: string;
+  /** Effective index pattern to query — defaults to streamName, overridden for remote streams. */
+  indexPattern?: string;
   streamType: StreamType;
   start: number;
   end: number;
@@ -375,6 +379,7 @@ export async function identifyInferredFeatures({
   logger,
   signal,
   streamName,
+  indexPattern,
   streamType,
   start,
   end,
@@ -384,6 +389,7 @@ export async function identifyInferredFeatures({
   diverseOffset = 0,
   trackFeaturesIdentified,
 }: IdentifyInferredFeaturesOptions): Promise<IdentifyInferredFeaturesResult> {
+  const effectiveIndexPattern = indexPattern ?? streamName;
   const [
     { hits: allFeatures },
     { hits: excludedFeatures },
@@ -401,6 +407,7 @@ export async function identifyInferredFeatures({
   const iterationResult = await runInferredIteration({
     esClient,
     streamName,
+    indexPattern: effectiveIndexPattern,
     start,
     end,
     runId,

@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { streamMatchesIndexPatterns, DEFAULT_INDEX_PATTERNS } from '@kbn/streams-schema';
+import { streamMatchesIndexPatterns, DEFAULT_INDEX_PATTERNS, Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_SIG_EVENTS_INDEX_PATTERNS } from '@kbn/management-settings-ids';
 import { useKibana } from './use_kibana';
 
@@ -31,9 +31,14 @@ export function useIndexPatternsConfig() {
 
   const filterStreamsByIndexPatterns = useMemo(() => {
     return <T extends { stream: { name: string } }>(streamsToFilter: T[]): T[] =>
-      streamsToFilter.filter((streamItem) =>
-        streamMatchesIndexPatterns(streamItem.stream.name, indexPatterns)
-      );
+      streamsToFilter.filter((streamItem) => {
+        // Remote streams are always shown regardless of index pattern — their
+        // data lives on a remote cluster and the stream name is not an index.
+        if (Streams.RemoteStream.Definition.is(streamItem.stream as Streams.all.Definition)) {
+          return true;
+        }
+        return streamMatchesIndexPatterns(streamItem.stream.name, indexPatterns);
+      });
   }, [indexPatterns]);
 
   return {

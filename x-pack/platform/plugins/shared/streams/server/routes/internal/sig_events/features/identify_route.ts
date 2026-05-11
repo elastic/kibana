@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import {
   getStreamTypeFromDefinition,
+  Streams,
   STREAMS_SIG_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
 } from '@kbn/streams-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
@@ -65,7 +66,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
     const {
-      scopedClusterClient,
       getFeatureClient,
       streamsClient,
       inferenceClient,
@@ -73,6 +73,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
       tuningConfig,
       licensing,
       uiSettingsClient,
+      getDataClusterClientForStream,
     } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
@@ -110,10 +111,15 @@ const identifyInferredFeaturesRoute = createServerRoute({
     ]);
 
     const streamType = getStreamTypeFromDefinition(stream);
+    const { esClient } = getDataClusterClientForStream(stream);
+    const indexPattern = Streams.RemoteStream.Definition.is(stream)
+      ? stream.remote_index_pattern ?? stream.name
+      : stream.name;
 
     try {
       const result = await identifyInferredFeatures({
-        esClient: scopedClusterClient.asCurrentUser,
+        esClient,
+        indexPattern,
         featureClient,
         soClient,
         inferenceClient: inferenceClient.bindTo({ connectorId }),
@@ -206,12 +212,12 @@ const identifyComputedFeaturesRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
     const {
-      scopedClusterClient,
       getFeatureClient,
       streamsClient,
       tuningConfig,
       licensing,
       uiSettingsClient,
+      getDataClusterClientForStream,
     } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
@@ -230,6 +236,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       getFeatureClient(),
       streamsClient.getStream(streamName),
     ]);
+    const { esClient } = getDataClusterClientForStream(stream);
 
     try {
       const computedFeatures = await identifyComputedFeatures({
@@ -237,7 +244,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
         streamName,
         start,
         end,
-        esClient: scopedClusterClient.asCurrentUser,
+        esClient,
         featureClient,
         logger: routeLogger,
         featureTtlDays,

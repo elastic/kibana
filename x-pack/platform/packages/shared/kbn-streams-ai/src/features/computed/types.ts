@@ -13,6 +13,12 @@ import type { Streams } from '@kbn/streams-schema';
  */
 export interface ComputedFeatureGeneratorOptions {
   stream: Streams.all.Definition;
+  /**
+   * The index or index pattern to query on the data cluster.
+   * Defaults to `stream.name` but overridden for remote streams
+   * where `remote_index_pattern` differs from the stream name.
+   */
+  indexPattern: string;
   start: number;
   end: number;
   esClient: ElasticsearchClient;

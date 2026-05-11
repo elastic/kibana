@@ -12,6 +12,7 @@ import {
   type IterationResult,
   type Feature,
   getStreamTypeFromDefinition,
+  Streams,
 } from '@kbn/streams-schema';
 import { v4 as uuid } from 'uuid';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
@@ -130,6 +131,9 @@ async function runFeaturesIdentification(
     const streamType = getStreamTypeFromDefinition(stream);
     const boundInferenceClient = inferenceClient.bindTo({ connectorId });
     const { esClient } = getDataClusterClientForStream(stream);
+    const indexPattern = Streams.RemoteStream.Definition.is(stream)
+      ? stream.remote_index_pattern ?? stream.name
+      : stream.name;
 
     const trackFeaturesIdentified = (
       data: Parameters<typeof taskContext.telemetry.trackFeaturesIdentified>[0]
@@ -195,6 +199,7 @@ async function runFeaturesIdentification(
         logger: taskLogger,
         signal: runContext.abortController.signal,
         streamName: stream.name,
+        indexPattern,
         streamType,
         start,
         end,

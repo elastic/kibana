@@ -57,7 +57,8 @@ export const classifyStreams = ({
   for (const stream of allStreams) {
     if (
       !Streams.WiredStream.Definition.is(stream) &&
-      !Streams.ClassicStream.Definition.is(stream)
+      !Streams.ClassicStream.Definition.is(stream) &&
+      !Streams.RemoteStream.Definition.is(stream)
     ) {
       unsupported.push(stream.name);
       continue;

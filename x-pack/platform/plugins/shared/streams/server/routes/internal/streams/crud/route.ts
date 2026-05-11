@@ -77,7 +77,7 @@ export const listStreamsRoute = createServerRoute({
     });
 
     const enrichedStreams = availableStreams.map<ListStreamDetail>(({ stream }) => {
-      if (Streams.QueryStream.Definition.is(stream)) {
+      if (Streams.QueryStream.Definition.is(stream) || Streams.RemoteStream.Definition.is(stream)) {
         return { stream, privileges: { read_failure_store: false } };
       }
 

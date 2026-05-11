@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection, ClusterConnectionPool } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 export interface RemoteEsClusterConfig {
@@ -20,6 +20,11 @@ export class RemoteEsClientService {
     this.client = new Client({
       node: config.host,
       auth: { apiKey: config.apiKey },
+      // Use ClusterConnectionPool + HttpConnection to disable sniffing.
+      // The default SniffingTransport discovers internal node IPs for cloud
+      // clusters that are unreachable from outside, breaking subsequent requests.
+      Connection: HttpConnection,
+      ConnectionPool: ClusterConnectionPool,
     }) as unknown as ElasticsearchClient;
   }
 

@@ -18,6 +18,12 @@ export function getIndexPatternsForStream(stream: Streams.all.Definition | undef
   if (Streams.ClassicStream.Definition.is(stream)) {
     return [stream.name];
   }
+  if (Streams.RemoteStream.Definition.is(stream)) {
+    // Remote streams reference an index on a separate cluster.
+    // Use remote_index_pattern if set, otherwise fall back to the stream name.
+    const pattern = stream.remote_index_pattern ?? stream.name;
+    return [pattern];
+  }
   // Returns [name, name.*] for ingest streams. The wildcard matches child ingest
   // data streams but NOT query stream ES|QL views, which live in the $.namespace
   // (e.g. $.name.child). This separation is intentional — see ESQL_VIEW_PREFIX.

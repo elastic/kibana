@@ -86,7 +86,11 @@ export function StreamsTreeTable({
   // Filter streams by query, including ancestors of matches
   const filteredStreams = React.useMemo(() => {
     return filterStreamsByQuery(
-      streams.filter((stream) => Streams.ingest.all.Definition.is(stream.stream)),
+      streams.filter(
+        (stream) =>
+          Streams.ingest.all.Definition.is(stream.stream) ||
+          Streams.RemoteStream.Definition.is(stream.stream)
+      ),
       searchQuery?.text ?? ''
     );
   }, [streams, searchQuery]);
