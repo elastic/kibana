@@ -418,24 +418,75 @@ describe('mergeChunks', () => {
     });
   });
 
-  it('throws an error when a tool call has no toolCallId and no previous chunk set it for that index', async () => {
-    expect(() => {
-      mergeChunks([
-        {
-          content: '',
-          type: ChatCompletionEventType.ChatCompletionChunk,
-          tool_calls: [
-            {
-              function: {
-                name: 'myFunction',
-                arguments: '{ "foo": "bar" }',
-              },
-              index: 0,
-              toolCallId: '', // Empty toolCallId without a previous chunk setting it
+  it('merges a single chunk that omits toolCallId (e.g. Gemini-via-EIS sends full args in one chunk with empty id/name)', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: {
+              name: '',
+              arguments: '{"criteria":["foo"]}',
             },
-          ],
+            index: 0,
+            toolCallId: '',
+          },
+        ],
+      },
+    ]);
+
+    expect(message).toEqual({
+      content: '',
+      tool_calls: [
+        {
+          function: {
+            name: '',
+            arguments: '{"criteria":["foo"]}',
+          },
+          toolCallId: '',
         },
-      ]);
-    }).toThrow('Tool call key is missing for index 0');
+      ],
+    });
+  });
+
+  it('accumulates continuation chunks for an index when no chunk ever carries the toolCallId', async () => {
+    const message = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: { name: 'myFunction', arguments: '{ ' },
+            index: 0,
+            toolCallId: '',
+          },
+        ],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: { name: '', arguments: '"foo": "bar" }' },
+            index: 0,
+            toolCallId: '',
+          },
+        ],
+      },
+    ]);
+
+    expect(message).toEqual({
+      content: '',
+      tool_calls: [
+        {
+          function: {
+            name: 'myFunction',
+            arguments: '{ "foo": "bar" }',
+          },
+          toolCallId: '',
+        },
+      ],
+    });
   });
 });

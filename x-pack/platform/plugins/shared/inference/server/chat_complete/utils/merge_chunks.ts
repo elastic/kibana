@@ -20,12 +20,18 @@ interface UnvalidatedMessage {
  * - `toolCallId` and `function.name` appear in the first chunk and should be set once
  * - `function.arguments` is streamed across multiple chunks and should be accumulated
  * - When `toolCallId` is empty, it's a continuation chunk for the most recent tool call at that index
+ * - When no chunk for an index ever carries a `toolCallId` (e.g. Gemini-via-EIS emits a
+ *   single delta with empty id/name and full args), a per-index synthetic key is used so the
+ *   tool call still merges cleanly. Real `toolCallId`s, when present, still take precedence and
+ *   disambiguate tool calls that share an index but have different ids.
  */
 const mergeToolCalls = (chunks: ChatCompletionChunkEvent[]): UnvalidatedToolCall[] => {
   // Map to store tool calls by their unique identifier
   const toolCallsMap = new Map<string, UnvalidatedToolCall>();
   // Map to track which index corresponds to which toolCallId
   const indexToToolCallId = new Map<number, string>();
+
+  const syntheticKeyForIndex = (index: number) => `__index_${index}`;
 
   for (const chunk of chunks) {
     chunk.tool_calls?.forEach((toolCall) => {
@@ -34,12 +40,10 @@ const mergeToolCalls = (chunks: ChatCompletionChunkEvent[]): UnvalidatedToolCall
         indexToToolCallId.set(toolCall.index, toolCall.toolCallId);
       }
 
-      const key = toolCall.toolCallId || indexToToolCallId.get(toolCall.index);
-      if (!key) {
-        throw new Error(
-          `Tool call key is missing for index ${toolCall.index} in chunk ${JSON.stringify(chunk)}`
-        );
-      }
+      const key =
+        toolCall.toolCallId ||
+        indexToToolCallId.get(toolCall.index) ||
+        syntheticKeyForIndex(toolCall.index);
 
       const existingToolCall = toolCallsMap.get(key);
       const updatedToolCall: UnvalidatedToolCall = {
