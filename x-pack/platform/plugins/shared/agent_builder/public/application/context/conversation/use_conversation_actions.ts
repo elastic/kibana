@@ -16,13 +16,17 @@ import type {
   Conversation,
   CompactionStep,
   BackgroundAgentCompleteStep,
+  TodosStep,
 } from '@kbn/agent-builder-common';
 import {
   isToolCallStep,
   isCompactionStep,
+  findTodosStep,
   ConversationRoundStatus,
   ConversationRoundStepType,
+  carriedOverTodos,
 } from '@kbn/agent-builder-common';
+import type { TodoItem } from '@kbn/agent-builder-common/chat/conversation';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
@@ -67,6 +71,7 @@ export interface ConversationActions {
   clearPendingPrompts: () => void;
   onConversationCreated: ({ title }: { title: string }) => void;
   addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => void;
+  addOrUpdateTodosStep: ({ todos }: { todos: TodoItem[] }) => void;
   addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => void;
   setCompactionStepComplete: ({
     tokenCountAfter,
@@ -148,9 +153,21 @@ export const createConversationActions = ({
             conversationAttachments: current?.attachments,
           });
 
+          const prevTodosStep = findTodosStep(draft?.rounds?.at(-1)?.steps);
+          const carryoverTodos = carriedOverTodos(prevTodosStep?.todos);
+
           const nextRound = createNewRound({
             userMessage,
             attachments: fallbackAttachments,
+            steps: carryoverTodos
+              ? [
+                  {
+                    type: ConversationRoundStepType.updateTodos,
+                    todos: carryoverTodos,
+                    carried_over: true,
+                  },
+                ]
+              : [],
           });
           if (attachmentRefs.length) {
             nextRound.input.attachment_refs = attachmentRefs;
@@ -218,6 +235,18 @@ export const createConversationActions = ({
     addBackgroundExecutionCompleteStep: ({ step }: { step: BackgroundAgentCompleteStep }) => {
       setCurrentRound((round) => {
         round.steps.push(step);
+      });
+    },
+    addOrUpdateTodosStep: ({ todos }: { todos: TodoItem[] }) => {
+      setCurrentRound((round) => {
+        const existing = findTodosStep(round.steps);
+        if (existing) {
+          existing.todos = todos;
+          existing.carried_over = false;
+        } else {
+          const step: TodosStep = { type: ConversationRoundStepType.updateTodos, todos };
+          round.steps.push(step);
+        }
       });
     },
     addCompactionStep: ({ tokenCountBefore }: { tokenCountBefore: number }) => {
