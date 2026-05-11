@@ -27,7 +27,10 @@ import type { Logger } from '@kbn/logging';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { securityTool } from '../constants';
-import { pciIndexPatternSchema, buildScopeClaim } from '../pci_compliance_schemas';
+import {
+  pciAutonomousIndexPatternSchema,
+  buildAutonomousScopeClaim,
+} from './pci_autonomous_schemas';
 
 const pciScopeType = z.enum([
   'all',
@@ -47,7 +50,7 @@ const pciAutonomousScopeDiscoverySchema = z.object({
       'Scope focus area for discovery: all, network, identity, endpoint, cloud, application, or vulnerability.'
     ),
   customIndices: z
-    .array(pciIndexPatternSchema)
+    .array(pciAutonomousIndexPatternSchema)
     .min(1)
     .max(50)
     .optional()
@@ -230,7 +233,7 @@ export const pciAutonomousScopeDiscoveryTool = (
         }
       }
 
-      const scopeClaim = buildScopeClaim({
+      const scopeClaim = buildAutonomousScopeClaim({
         indices: discovered.map((d) => d.index),
         from: new Date(0).toISOString(),
         to: new Date().toISOString(),

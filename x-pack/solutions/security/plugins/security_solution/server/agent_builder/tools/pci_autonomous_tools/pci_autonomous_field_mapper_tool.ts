@@ -22,17 +22,17 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugi
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { securityTool } from '../constants';
 import {
-  pciIndexPatternSchema,
-  pciTimeRangeSchema,
-  buildScopeClaim,
-} from '../pci_compliance_schemas';
+  pciAutonomousIndexPatternSchema,
+  pciAutonomousTimeRangeSchema,
+  buildAutonomousScopeClaim,
+} from './pci_autonomous_schemas';
 
 const DEFAULT_SAMPLE_LOOKBACK_DAYS = 7;
 const SAMPLE_HIT_COUNT = 3;
 const SAMPLE_SOURCE_FIELD_LIMIT = 20;
 
 const pciAutonomousFieldMapperSchema = z.object({
-  indexPattern: pciIndexPatternSchema.describe(
+  indexPattern: pciAutonomousIndexPatternSchema.describe(
     'Index pattern to inspect for field mapping (e.g. "logs-custom-myapp*").'
   ),
   targetFields: z
@@ -41,7 +41,7 @@ const pciAutonomousFieldMapperSchema = z.object({
     .max(50)
     .optional()
     .describe('Optional list of ECS fields to map to. Defaults to common PCI-relevant ECS fields.'),
-  timeRange: pciTimeRangeSchema
+  timeRange: pciAutonomousTimeRangeSchema
     .optional()
     .describe(
       'Optional ISO-8601 time range for the sample-hit lookup. Defaults to the last 7 days.'
@@ -247,7 +247,7 @@ export const pciAutonomousFieldMapperTool = (
         // best-effort
       }
 
-      const scopeClaim = buildScopeClaim({
+      const scopeClaim = buildAutonomousScopeClaim({
         indices: [indexPattern],
         from: resolvedRange.from,
         to: resolvedRange.to,

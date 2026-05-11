@@ -15,9 +15,10 @@
  * evidence) and the LLM routes more reliably between two narrow tools than one mode-
  * parameterised one.
  *
- * The handler reuses the shared PCI domain helpers (`evaluateRequirement`, requirement
- * catalog, ScopeClaim builder). The architectural surface — ID, description, schema, and
- * the fact that this tool exists at all — is the autonomous variant's own contribution.
+ * INDEPENDENCE CLAIM (see comparison.html §1.5): this tool now imports only from the
+ * autonomously-authored engine modules (`pci_autonomous_requirements`,
+ * `pci_autonomous_evaluator`, `pci_autonomous_schemas`). It has ZERO imports from the
+ * hand-written sibling's `pci_compliance_*` modules.
  */
 
 import { z } from '@kbn/zod';
@@ -29,41 +30,41 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugi
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { securityTool } from '../constants';
 import {
-  type ComplianceStatus,
-  type ComplianceConfidence,
-  getIndexList,
-  getIndexPattern,
-  getTimeRangeForCheck,
-  resolveRequirementIds,
-  PCI_REQUIREMENTS,
-} from '../pci_compliance_requirements';
+  type AutonomousComplianceStatus,
+  type AutonomousComplianceConfidence,
+  AUTONOMOUS_PCI_REQUIREMENTS,
+  getAutonomousIndexList,
+  getAutonomousIndexPattern,
+  getAutonomousTimeRangeForCheck,
+  resolveAutonomousRequirementIds,
+} from './pci_autonomous_requirements';
 import {
-  pciIndexPatternSchema,
-  pciTimeRangeSchema,
-  buildScopeClaim,
-} from '../pci_compliance_schemas';
+  pciAutonomousIndexPatternSchema,
+  pciAutonomousTimeRangeSchema,
+  buildAutonomousScopeClaim,
+} from './pci_autonomous_schemas';
 import {
-  type EvaluatedRequirement,
-  evaluateRequirement,
-  runWithConcurrency,
-  PCI_REQUIREMENT_CONCURRENCY,
-} from '../pci_compliance_evaluator';
+  type AutonomousEvaluatedRequirement,
+  evaluateAutonomousRequirement,
+  runAutonomousWithConcurrency,
+  AUTONOMOUS_PCI_REQUIREMENT_CONCURRENCY,
+} from './pci_autonomous_evaluator';
 
 const REPORT_FORMATS = ['summary', 'detailed', 'executive'] as const;
 
 const pciAutonomousScorecardReportSchema = z
   .object({
-    timeRange: pciTimeRangeSchema
+    timeRange: pciAutonomousTimeRangeSchema
       .optional()
       .describe(
         'Optional ISO-8601 time range (`from` <= `to`). If omitted, each requirement uses its ' +
           'recommended lookback window.'
       ),
     indices: z
-      .array(pciIndexPatternSchema)
+      .array(pciAutonomousIndexPatternSchema)
       .min(1)
       .optional()
-      .describe('Index patterns to query. Defaults to logs-*, metrics-*, endgame-*.'),
+      .describe('Index patterns to query. Defaults to logs-*, endgame-*, winlogbeat-*.'),
     format: z
       .enum(REPORT_FORMATS)
       .optional()
@@ -89,13 +90,13 @@ export const PCI_AUTONOMOUS_SCORECARD_REPORT_TOOL_ID = securityTool(
   'pci_autonomous_scorecard_report'
 );
 
-const scoreToStatus = (score: number): ComplianceStatus => {
+const scoreToStatus = (score: number): AutonomousComplianceStatus => {
   if (score >= 85) return 'GREEN';
   if (score >= 60) return 'AMBER';
   return 'RED';
 };
 
-const rollupConfidence = (rows: EvaluatedRequirement[]): ComplianceConfidence => {
+const rollupConfidence = (rows: AutonomousEvaluatedRequirement[]): AutonomousComplianceConfidence => {
   if (rows.length === 0) return 'NOT_ASSESSABLE';
   const counts = rows.reduce((acc, r) => {
     acc[r.confidence] = (acc[r.confidence] ?? 0) + 1;
@@ -132,14 +133,14 @@ export const pciAutonomousScorecardReportTool = (
       { timeRange, indices, format = 'summary', includeRecommendations = true },
       { esClient }
     ) => {
-      const requirementIds = resolveRequirementIds(undefined);
+      const requirementIds = resolveAutonomousRequirementIds(undefined);
 
-      const indexList = getIndexList(indices);
-      const indexPattern = getIndexPattern(indices);
+      const indexList = getAutonomousIndexList(indices);
+      const indexPattern = getAutonomousIndexPattern(indices);
 
       const tasks = requirementIds.map((reqId) => async () => {
-        const { from, to } = getTimeRangeForCheck(reqId, timeRange);
-        return evaluateRequirement({
+        const { from, to } = getAutonomousTimeRangeForCheck(reqId, timeRange);
+        return evaluateAutonomousRequirement({
           requirementId: reqId,
           indexPattern,
           from,
@@ -149,16 +150,16 @@ export const pciAutonomousScorecardReportTool = (
         });
       });
 
-      const rows = await runWithConcurrency(tasks, PCI_REQUIREMENT_CONCURRENCY);
+      const rows = await runAutonomousWithConcurrency(tasks, AUTONOMOUS_PCI_REQUIREMENT_CONCURRENCY);
 
       const requiredFieldsChecked = Array.from(
-        new Set(requirementIds.flatMap((id) => PCI_REQUIREMENTS[id]?.requiredFields ?? []))
+        new Set(requirementIds.flatMap((id) => AUTONOMOUS_PCI_REQUIREMENTS[id]?.requiredFields ?? []))
       );
 
       const resolvedTimeRange =
         timeRange ??
         (() => {
-          const ranges = requirementIds.map((id) => getTimeRangeForCheck(id));
+          const ranges = requirementIds.map((id) => getAutonomousTimeRangeForCheck(id));
           const from = ranges.reduce(
             (earliest, r) => (r.from < earliest ? r.from : earliest),
             ranges[0].from
@@ -167,7 +168,7 @@ export const pciAutonomousScorecardReportTool = (
           return { from, to };
         })();
 
-      const scopeClaim = buildScopeClaim({
+      const scopeClaim = buildAutonomousScopeClaim({
         indices: indexList,
         from: resolvedTimeRange.from,
         to: resolvedTimeRange.to,

@@ -22,12 +22,15 @@ import { PCI_SCOPE_DISCOVERY_TOOL_ID } from '../../tools/pci_scope_discovery_too
 import { PCI_FIELD_MAPPER_TOOL_ID } from '../../tools/pci_field_mapper_tool';
 
 /**
- * Contract tests for the autonomously-architected variant. Two-part surface:
+ * Contract tests for the autonomously-architected variant. Three-part surface:
  *  1. Domain-knowledge content (SAQ taxonomy, v3→v4 deltas, scope-reduction levers, technical-
  *     vs-process classification) authored by the autonomous architect.
- *  2. **Isolation property**: the autonomous skill must reference only autonomous-namespaced
- *     tool IDs and must NOT depend on the hand-written variant's tool IDs. This is the core
- *     end-to-end property — skill+tool autonomous stack — under test in the eval suite.
+ *  2. **Surface isolation property**: the autonomous skill must reference only autonomous-
+ *     namespaced tool IDs and must NOT depend on the hand-written variant's tool IDs.
+ *  3. **Engine isolation property** (v6 deep autonomy): the autonomous tools' handlers
+ *     must import only from autonomous-namespaced engine modules. That property is
+ *     locked in by `pci_autonomous_tools/pci_autonomous_modules_no_handwritten_imports.test.ts`
+ *     — this file covers the skill-level surface; the engine-level CI runs alongside it.
  */
 describe('pciComplianceAutonomousSkill', () => {
   it('uses the dedicated autonomous skill id (separate from the hand-written variant)', () => {

@@ -14,10 +14,11 @@
  * are easier for the LLM to route between than a single tool with a `mode` parameter that
  * branches behaviour.
  *
- * The handler reuses the shared PCI domain helpers (`evaluateRequirement`, requirement
- * catalog, ScopeClaim builder) — those are domain truth, not architectural artefacts.
- * What this tool defines independently: ID, description, schema, response shape, and the
- * fact that it has only one mode of operation (check) — no `mode` parameter at all.
+ * INDEPENDENCE CLAIM (see comparison.html §1.5): this tool now imports only from the
+ * autonomously-authored engine modules (`pci_autonomous_requirements`,
+ * `pci_autonomous_evaluator`, `pci_autonomous_schemas`). It has ZERO imports from the
+ * hand-written sibling's `pci_compliance_*` modules. The CI test
+ * `pci_autonomous_modules_no_handwritten_imports.test.ts` locks this in.
  */
 
 import { z } from '@kbn/zod';
@@ -29,51 +30,51 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugi
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import { securityTool } from '../constants';
 import {
-  type ComplianceStatus,
-  type ComplianceConfidence,
-  getIndexList,
-  getIndexPattern,
-  getTimeRangeForCheck,
-  normalizeRequirementId,
-  resolveRequirementIds,
-  PCI_REQUIREMENTS,
-} from '../pci_compliance_requirements';
+  type AutonomousComplianceStatus,
+  type AutonomousComplianceConfidence,
+  AUTONOMOUS_PCI_REQUIREMENTS,
+  getAutonomousIndexList,
+  getAutonomousIndexPattern,
+  getAutonomousTimeRangeForCheck,
+  normalizeAutonomousRequirementId,
+  resolveAutonomousRequirementIds,
+} from './pci_autonomous_requirements';
 import {
-  pciIndexPatternSchema,
-  pciRequirementIdSchema,
-  pciTimeRangeSchema,
-  buildScopeClaim,
-} from '../pci_compliance_schemas';
+  pciAutonomousIndexPatternSchema,
+  pciAutonomousRequirementIdSchema,
+  pciAutonomousTimeRangeSchema,
+  buildAutonomousScopeClaim,
+} from './pci_autonomous_schemas';
 import {
-  type EvaluatedRequirement,
-  evaluateRequirement,
-  runWithConcurrency,
-  PCI_REQUIREMENT_CONCURRENCY,
-} from '../pci_compliance_evaluator';
+  type AutonomousEvaluatedRequirement,
+  evaluateAutonomousRequirement,
+  runAutonomousWithConcurrency,
+  AUTONOMOUS_PCI_REQUIREMENT_CONCURRENCY,
+} from './pci_autonomous_evaluator';
 
 const pciAutonomousComplianceCheckSchema = z
   .object({
     requirements: z
-      .array(pciRequirementIdSchema)
+      .array(pciAutonomousRequirementIdSchema)
       .min(1)
       .optional()
       .describe(
         'Requirement identifiers to check. Accepts "all", top-level ("1".."12"), or sub-requirements ' +
           'like "8.3.4". Defaults to ["all"].'
       ),
-    timeRange: pciTimeRangeSchema
+    timeRange: pciAutonomousTimeRangeSchema
       .optional()
       .describe(
         'Optional ISO-8601 time range (`from` <= `to`). If omitted, each requirement uses its ' +
           'recommended lookback window (e.g. 7 days for brute-force, 365 days for stale accounts).'
       ),
     indices: z
-      .array(pciIndexPatternSchema)
+      .array(pciAutonomousIndexPatternSchema)
       .min(1)
       .optional()
       .describe(
         'Index patterns to query. Specify exact patterns to avoid overlap / double-counting during ' +
-          're-indexing. Defaults to logs-*, metrics-*, endgame-*.'
+          're-indexing. Defaults to logs-*, endgame-*, winlogbeat-*.'
       ),
     includeEvidence: z
       .boolean()
@@ -91,7 +92,7 @@ export const PCI_AUTONOMOUS_COMPLIANCE_CHECK_TOOL_ID = securityTool(
   'pci_autonomous_compliance_check'
 );
 
-const rollupConfidence = (rows: EvaluatedRequirement[]): ComplianceConfidence => {
+const rollupConfidence = (rows: AutonomousEvaluatedRequirement[]): AutonomousComplianceConfidence => {
   if (rows.length === 0) return 'NOT_ASSESSABLE';
   const counts = rows.reduce((acc, r) => {
     acc[r.confidence] = (acc[r.confidence] ?? 0) + 1;
@@ -103,7 +104,7 @@ const rollupConfidence = (rows: EvaluatedRequirement[]): ComplianceConfidence =>
   return 'MEDIUM';
 };
 
-const rollupOverallStatus = (rows: EvaluatedRequirement[]): ComplianceStatus => {
+const rollupOverallStatus = (rows: AutonomousEvaluatedRequirement[]): AutonomousComplianceStatus => {
   const counts = rows.reduce((acc, r) => {
     acc[r.status] = (acc[r.status] ?? 0) + 1;
     return acc;
@@ -137,7 +138,7 @@ export const pciAutonomousComplianceCheckTool = (
     handler: async ({ requirements, timeRange, indices, includeEvidence = true }, { esClient }) => {
       const requestedRaw = requirements && requirements.length > 0 ? requirements : ['all'];
 
-      const normalizedRaw = requestedRaw.map((req) => normalizeRequirementId(req));
+      const normalizedRaw = requestedRaw.map((req) => normalizeAutonomousRequirementId(req));
       if (normalizedRaw.some((id) => id === null)) {
         const invalid = requestedRaw.filter((_, i) => normalizedRaw[i] === null);
         return {
@@ -156,7 +157,7 @@ export const pciAutonomousComplianceCheckTool = (
 
       const requestedIds = normalizedRaw.filter((id): id is string => id !== null);
       const wantAll = requestedIds.includes('all');
-      const requirementIds = resolveRequirementIds(
+      const requirementIds = resolveAutonomousRequirementIds(
         wantAll ? undefined : Array.from(new Set(requestedIds))
       );
 
@@ -171,12 +172,12 @@ export const pciAutonomousComplianceCheckTool = (
         };
       }
 
-      const indexList = getIndexList(indices);
-      const indexPattern = getIndexPattern(indices);
+      const indexList = getAutonomousIndexList(indices);
+      const indexPattern = getAutonomousIndexPattern(indices);
 
       const tasks = requirementIds.map((reqId) => async () => {
-        const { from, to } = getTimeRangeForCheck(reqId, timeRange);
-        return evaluateRequirement({
+        const { from, to } = getAutonomousTimeRangeForCheck(reqId, timeRange);
+        return evaluateAutonomousRequirement({
           requirementId: reqId,
           indexPattern,
           from,
@@ -186,16 +187,16 @@ export const pciAutonomousComplianceCheckTool = (
         });
       });
 
-      const rows = await runWithConcurrency(tasks, PCI_REQUIREMENT_CONCURRENCY);
+      const rows = await runAutonomousWithConcurrency(tasks, AUTONOMOUS_PCI_REQUIREMENT_CONCURRENCY);
 
       const requiredFieldsChecked = Array.from(
-        new Set(requirementIds.flatMap((id) => PCI_REQUIREMENTS[id]?.requiredFields ?? []))
+        new Set(requirementIds.flatMap((id) => AUTONOMOUS_PCI_REQUIREMENTS[id]?.requiredFields ?? []))
       );
 
       const resolvedTimeRange =
         timeRange ??
         (() => {
-          const ranges = requirementIds.map((id) => getTimeRangeForCheck(id));
+          const ranges = requirementIds.map((id) => getAutonomousTimeRangeForCheck(id));
           const from = ranges.reduce(
             (earliest, r) => (r.from < earliest ? r.from : earliest),
             ranges[0].from
@@ -204,7 +205,7 @@ export const pciAutonomousComplianceCheckTool = (
           return { from, to };
         })();
 
-      const scopeClaim = buildScopeClaim({
+      const scopeClaim = buildAutonomousScopeClaim({
         indices: indexList,
         from: resolvedTimeRange.from,
         to: resolvedTimeRange.to,
@@ -230,7 +231,7 @@ export const pciAutonomousComplianceCheckTool = (
       for (const row of redFindings) {
         for (const finding of row.findings) {
           if (finding.evidence && finding.evidence.values.length > 0) {
-            const { from, to } = getTimeRangeForCheck(row.requirement, timeRange);
+            const { from, to } = getAutonomousTimeRangeForCheck(row.requirement, timeRange);
             results.push({
               tool_result_id: getToolResultId(),
               type: ToolResultType.esqlResults,
