@@ -24,7 +24,7 @@ import type {
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { parseYamlToJSONWithoutValidation, updateYamlField } from '@kbn/workflows-yaml';
 import type { WorkflowCrudService } from './workflow_crud_service';
-import { computeDefinitionHash, getTriggerTypesFromDefinition } from '../api/lib/workflow_prepare';
+import { getTriggerTypesFromDefinition } from '../api/lib/workflow_prepare';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 const MANAGED_WORKFLOW_SYSTEM_USER = 'system';
@@ -142,7 +142,7 @@ export class ManagedWorkflowsService {
 
     const isStartupWindow = !this.readyPluginIds.has(registeredPluginId);
     const now = new Date().toISOString();
-    const definitionHash = this.computeManagedDefinitionHash(definition);
+    const definitionVersion = definition.version;
     const existing = await this.deps.crudService.getWorkflowDocumentSource(
       workflowDocumentId,
       spaceId
@@ -160,7 +160,7 @@ export class ManagedWorkflowsService {
         managedTemplateValues,
         spaceId,
         now,
-        definitionHash,
+        definitionVersion,
       });
       await this.deps.crudService.indexWorkflowDocument(workflowDocumentId, document);
       return;
@@ -172,7 +172,7 @@ export class ManagedWorkflowsService {
       );
     }
 
-    if (existing.definitionHash === definitionHash) {
+    if (existing.managedDefinitionVersion === definitionVersion) {
       if (this.areTemplateValuesEqual(existing.managedTemplateValues, managedTemplateValues)) {
         return;
       }
@@ -189,7 +189,7 @@ export class ManagedWorkflowsService {
       managedTemplateValues,
       spaceId,
       now,
-      definitionHash,
+      definitionVersion,
       enabled,
       createdAt: existing.created_at,
     });
@@ -283,11 +283,6 @@ export class ManagedWorkflowsService {
 
   /**
    * Per-plugin reconciliation triggered by ready().
-   * Removes persisted static workflow documents whose definition was NOT installed
-   * during the startup window.
-   */
-  /**
-   * Per-plugin reconciliation triggered by ready().
    * Removes persisted static workflow documents that were NOT installed during the
    * startup window. Compares at the (workflowDocumentId, spaceId) level so that
    * suffix-based and per-space instances are individually tracked.
@@ -370,11 +365,11 @@ export class ManagedWorkflowsService {
     managedTemplateValues: ManagedWorkflowTemplateValues | null;
     spaceId: string;
     now: string;
-    definitionHash: string;
+    definitionVersion: number;
     enabled?: boolean;
     createdAt?: string;
   }): WorkflowProperties {
-    const { definition, yaml, managedTemplateValues, spaceId, now, definitionHash, createdAt } =
+    const { definition, yaml, managedTemplateValues, spaceId, now, definitionVersion, createdAt } =
       params;
     const parsed = parseYamlToJSONWithoutValidation(yaml);
 
@@ -412,7 +407,7 @@ export class ManagedWorkflowsService {
       spaceId,
       managed: true,
       managedBy: definition.pluginId,
-      definitionHash,
+      managedDefinitionVersion: definitionVersion,
       managedTemplateValues: managedTemplateValues as Record<string, unknown> | null,
       originSystemWorkflowId: definition.id,
       lifecycle: definition.management.lifecycle,
@@ -501,18 +496,6 @@ export class ManagedWorkflowsService {
       yaml: definition.yaml,
       managedTemplateValues: null,
     };
-  }
-
-  private computeManagedDefinitionHash(definition: ManagedWorkflowDefinition): string {
-    if (definition.yamlTemplate) {
-      return computeDefinitionHash(definition.yamlTemplate.toString());
-    }
-    if (!definition.yaml) {
-      throw new Error(
-        `Managed workflow '${definition.id}' must define either yaml or yamlTemplate`
-      );
-    }
-    return computeDefinitionHash(definition.yaml);
   }
 
   private areTemplateValuesEqual(

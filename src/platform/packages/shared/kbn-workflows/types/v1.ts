@@ -363,7 +363,7 @@ export interface WorkflowDetailDto {
   enabled: boolean;
   managed?: boolean;
   managedBy?: string | null;
-  definitionHash?: string | null;
+  managedDefinitionVersion?: number | null;
   originSystemWorkflowId?: string | null;
   lifecycle?: 'static' | 'dynamic' | null;
   createdAt: string;

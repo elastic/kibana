@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EXAMPLE_MANAGED_WORKFLOW, EXAMPLE_MANAGED_WORKFLOW_ID } from './definitions';
 import type {
   ManagedWorkflowDefinition,
   ManagedWorkflowManagement,
   ManagedWorkflowTemplateValues,
 } from './types';
-import { EXAMPLE_MANAGED_WORKFLOW, EXAMPLE_MANAGED_WORKFLOW_ID } from './workflows';
 
 export type { ManagedWorkflowDefinition, ManagedWorkflowManagement, ManagedWorkflowTemplateValues };
+export type { ExampleManagedWorkflowTemplateValues } from './definitions';
 
 export const managedWorkflowDefinitions = [EXAMPLE_MANAGED_WORKFLOW] as const;
 

@@ -37,7 +37,7 @@ const storageSettings = {
       triggerTypes: types.keyword({}), // We filter by trigger subscription (e.g. event-driven)
       managed: types.boolean({}),
       managedBy: types.keyword({}),
-      definitionHash: types.keyword({ index: false }),
+      managedDefinitionVersion: types.long({ index: false }),
       managedTemplateValues: types.object({ enabled: false }),
       originSystemWorkflowId: types.keyword({}),
       lifecycle: types.keyword({}),
@@ -67,7 +67,7 @@ export interface WorkflowProperties {
   spaceId: string;
   managed?: boolean;
   managedBy?: string | null;
-  definitionHash?: string | null;
+  managedDefinitionVersion?: number | null;
   managedTemplateValues?: Record<string, unknown> | null;
   originSystemWorkflowId?: string | null;
   lifecycle?: 'static' | 'dynamic' | null;

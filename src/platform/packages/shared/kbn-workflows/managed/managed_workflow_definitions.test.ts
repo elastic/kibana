@@ -8,10 +8,9 @@
  */
 
 import { parse } from 'yaml';
-import { managedWorkflowDefinitions } from '.';
+import { EXAMPLE_MANAGED_WORKFLOW_ID, managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
-import { EXAMPLE_MANAGED_WORKFLOW_ID } from './workflows';
 import { WorkflowSchema } from '../spec/schema';
 
 type RegistryManagedWorkflowDefinition = (typeof managedWorkflowDefinitions)[number];
@@ -102,6 +101,11 @@ describe('managedWorkflowDefinitions', () => {
   it.each(managedDefinitionsById)('%s declares an explicit pluginId', (_id, definition) => {
     expect(typeof definition.pluginId).toBe('string');
     expect(definition.pluginId.trim()).not.toHaveLength(0);
+  });
+
+  it.each(managedDefinitionsById)('%s declares an integer version >= 1', (_id, definition) => {
+    expect(Number.isInteger(definition.version)).toBe(true);
+    expect(definition.version).toBeGreaterThanOrEqual(1);
   });
 
   it.each(managedDefinitionsById)(

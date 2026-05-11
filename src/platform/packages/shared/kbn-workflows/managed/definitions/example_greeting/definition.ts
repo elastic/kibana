@@ -7,27 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ManagedWorkflowDefinition } from './types';
+import { yamlTemplate } from './latest';
+import type { ExampleManagedWorkflowTemplateValues } from './types';
+import type { ManagedWorkflowDefinition } from '../../types';
 
 export const EXAMPLE_MANAGED_WORKFLOW_ID = 'system-example-greeting';
 
-export interface ExampleManagedWorkflowTemplateValues {
-  recipient: string;
-}
+export type { ExampleManagedWorkflowTemplateValues } from './types';
 
 export const EXAMPLE_MANAGED_WORKFLOW = {
   id: EXAMPLE_MANAGED_WORKFLOW_ID,
   pluginId: 'workflowsExtensionsExample',
-  yamlTemplate: ({ recipient }) => `name: Example Greeting - ${recipient}
-enabled: true
-triggers:
-  - type: manual
-steps:
-  - name: greet
-    type: console
-    with:
-      message: "Hello, ${recipient}! This is a managed workflow example."
-`,
+  yamlTemplate,
+  version: 1,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',

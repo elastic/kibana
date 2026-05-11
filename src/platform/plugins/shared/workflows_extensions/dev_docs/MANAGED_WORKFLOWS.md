@@ -276,27 +276,111 @@ Key distinction: **static** workflows are declarative — the set installed at s
 
 ## 7) Authoring a definition
 
-All managed workflow definitions live in `@kbn/workflows/managed`. Adding a new definition is a three-step change in that package:
+All managed workflow definitions live in `@kbn/workflows/managed/definitions/`. Each workflow gets its own directory with versioned yaml files, mirroring the saved-object model-version pattern.
 
-1. **Declare the id as a `const` and the definition.** Export both — the id is the value other code uses to call `install` / `uninstall` / `execute`, and tests reference it.
-2. **Register the definition** by adding it to the `managedWorkflowDefinitions` array in `managed/index.ts`. The platform discovers definitions through this registry (e.g., for orphan cleanup and auto-update reconciliation), so a definition that isn't in this list does not exist as far as the platform is concerned.
-3. **Re-export the id** from `managed/index.ts` so consumers import it from the package entry point (`@kbn/workflows/managed`) rather than from internal paths.
+### Directory structure
 
-```ts
-// packages/kbn-workflows/managed/workflows.ts
-export const MY_WORKFLOW_ID = 'system-my-workflow';
-
-export const MY_WORKFLOW: ManagedWorkflowDefinition = {
-  id: MY_WORKFLOW_ID,
-  pluginId: 'myPlugin',
-  yaml: '...',
-  management: { lifecycle: 'static', versionStrategy: 'auto', enablement: 'enforced' },
-};
+```
+kbn-workflows/managed/
+├── index.ts                          (registry, exports, type inference)
+├── types.ts                          (ManagedWorkflowDefinition, etc.)
+├── managed_workflow_definitions.test.ts
+└── definitions/
+    ├── index.ts                      (barrel: re-exports all definitions + IDs)
+    └── my_workflow/
+        ├── types.ts                  (template values interface, if using yamlTemplate)
+        ├── definition.ts             (id, pluginId, version, management, wires latest yaml)
+        ├── latest.ts                 (re-exports from current version)
+        ├── v1.ts                     (yaml body — string or template function)
+        └── (future: v2.ts, v3.ts)
 ```
 
+### Steps to add a new workflow
+
+1. **Create the workflow directory** under `definitions/` using snake_case.
+
+2. **Create `types.ts`** (only needed for `yamlTemplate` workflows):
+
 ```ts
-// packages/kbn-workflows/managed/index.ts
-import { MY_WORKFLOW, MY_WORKFLOW_ID } from './workflows';
+// definitions/my_workflow/types.ts
+export interface MyWorkflowTemplateValues {
+  entityId: string;
+}
+```
+
+3. **Create the version file** (`v1.ts`) with only the yaml body:
+
+```ts
+// definitions/my_workflow/v1.ts
+import type { MyWorkflowTemplateValues } from './types';
+
+export const yamlTemplate = ({ entityId }: MyWorkflowTemplateValues) =>
+  `name: Monitor ${entityId}
+enabled: true
+triggers:
+  - type: scheduled
+    with:
+      every: 5m
+steps:
+  - name: check
+    type: console
+    with:
+      message: "Checking ${entityId}"
+`;
+```
+
+For a fixed `yaml` workflow (no template values), export a string instead:
+
+```ts
+// definitions/my_workflow/v1.ts
+export const yaml = `name: My Workflow
+enabled: true
+...`;
+```
+
+4. **Create `latest.ts`** pointing to the current version:
+
+```ts
+// definitions/my_workflow/latest.ts
+export { yamlTemplate } from './v1';
+```
+
+5. **Create `definition.ts`** with metadata wiring the latest yaml:
+
+```ts
+// definitions/my_workflow/definition.ts
+import { yamlTemplate } from './latest';
+import type { MyWorkflowTemplateValues } from './types';
+import type { ManagedWorkflowDefinition } from '../../types';
+
+export const MY_WORKFLOW_ID = 'system-my-workflow';
+
+export type { MyWorkflowTemplateValues } from './types';
+
+export const MY_WORKFLOW = {
+  id: MY_WORKFLOW_ID,
+  pluginId: 'myPlugin',
+  yamlTemplate,
+  version: 1,
+  management: {
+    lifecycle: 'static',
+    versionStrategy: 'auto',
+    enablement: 'enforced',
+  },
+} as const satisfies ManagedWorkflowDefinition<MyWorkflowTemplateValues>;
+```
+
+6. **Register in the barrel** (`definitions/index.ts`):
+
+```ts
+export { MY_WORKFLOW, MY_WORKFLOW_ID } from './my_workflow/definition';
+export type { MyWorkflowTemplateValues } from './my_workflow/definition';
+```
+
+7. **Add to the registry** in `managed/index.ts`:
+
+```ts
+import { MY_WORKFLOW, MY_WORKFLOW_ID } from './definitions';
 
 export const managedWorkflowDefinitions = [
   // ...existing definitions
@@ -306,13 +390,21 @@ export const managedWorkflowDefinitions = [
 export { MY_WORKFLOW_ID };
 ```
 
-Consumers then use the id as a const everywhere:
+### Version bump workflow
 
-```ts
-import { MY_WORKFLOW_ID } from '@kbn/workflows/managed';
+When changing the yaml body of an existing workflow:
 
-await managed.install(MY_WORKFLOW_ID, { spaceId: 'default' });
-```
+1. Create a new version file (`v2.ts`) with the updated yaml.
+2. Update `latest.ts` to re-export from `v2`.
+3. Bump the `version` field in `definition.ts` (e.g., `version: 2`).
+
+The platform compares the persisted `managedDefinitionVersion` against the definition's `version`. A mismatch triggers an overwrite on the next reconciliation pass (for `versionStrategy: 'auto'`) or explicit `install` (for `on_adopt`).
+
+### Why version files?
+
+- **History visibility**: Git blame and file history per version show exactly what changed and when.
+- **Rollback**: Reverting `latest.ts` to point at a prior version is a one-line change.
+- **Future migrations**: The structure allows adding per-version transforms or metadata without refactoring.
 
 > Never hardcode the literal `'system-...'` string at call sites — always import the id const. This keeps definition ownership and rename safety in one place.
 
@@ -343,6 +435,7 @@ steps:
     type: console
     with:
       message: "workflows-management is alive"`,
+  version: 1,
   management: {
     lifecycle: 'static',
     versionStrategy: 'auto',
@@ -383,6 +476,7 @@ steps:
     type: console
     with:
       message: "Checking ${entityId}"`,
+  version: 1,
   management: {
     lifecycle: 'dynamic',
     versionStrategy: 'auto',

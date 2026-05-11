@@ -93,7 +93,7 @@ export const prepareWorkflowDocument = (params: {
     spaceId,
     managed: false,
     managedBy: null,
-    definitionHash: null,
+    managedDefinitionVersion: null,
     originSystemWorkflowId: null,
     lifecycle: null,
     valid: workflowToCreate.valid,
