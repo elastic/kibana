@@ -50,6 +50,14 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         return;
       }
 
+      const recoveryMetrics = input.executionContext.metrics.recovery;
+      const recoveryType = rule.recovery_policy?.type ?? recoveryPolicyType.no_breach;
+      // Record the mode regardless of whether any active episodes need recovery
+      // — the operator dashboard wants to know which recovery flavour ran.
+      recoveryMetrics.recordRecoveryMode(
+        recoveryType === recoveryPolicyType.query ? 'query' : 'no_breach'
+      );
+
       const activeGroupHashes = await step.fetchActiveAlertGroupHashes(
         rule.id,
         input.executionContext
@@ -63,8 +71,6 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         return;
       }
 
-      const recoveryType = rule.recovery_policy?.type ?? recoveryPolicyType.no_breach;
-
       const recoveryEvents =
         recoveryType === recoveryPolicyType.query
           ? await step.buildQueryRecovery({ rule, input, activeGroupHashes })
@@ -76,6 +82,10 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
               breachedGroupHashes: new Set(alertEventsBatch.map((e) => e.group_hash)),
               scheduledTimestamp: input.scheduledAt,
             });
+
+      for (let i = 0; i < recoveryEvents.length; i += 1) {
+        recoveryMetrics.recordRecoveryEvent();
+      }
 
       step.logger.debug({
         message: `[${step.name}] Created ${recoveryEvents.length} recovery events (${recoveryType}) for rule ${input.ruleId}`,
@@ -123,6 +133,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
       filter: queryPayload.filter,
       params: queryPayload.params,
       abortSignal: input.executionContext.signal,
+      metrics: input.executionContext.metrics.query,
     });
 
     return buildQueryRecoveryAlertEvents({

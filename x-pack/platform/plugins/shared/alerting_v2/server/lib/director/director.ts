@@ -21,12 +21,23 @@ import {
 } from '../../resources/datastreams/alert_events';
 import { TransitionStrategyFactory } from './strategies/strategy_resolver';
 import type { ITransitionStrategy, StateTransitionResult } from './strategies/types';
-import type { ExecutionContext } from '../execution_context';
+import type {
+  DirectorMetricsRecorder,
+  EpisodeTransitionKind,
+  ExecutionContext,
+} from '../execution_context';
 
 interface RunDirectorParams {
   rule: RuleResponse;
   alertEvents: readonly AlertEvent[];
   executionContext: ExecutionContext;
+  /**
+   * Optional sink for episode-transition counters. Receives one increment per
+   * processed alert event whose episode transitioned to `active`,
+   * `recovering`, or `inactive` (i.e. a new lifecycle status — `pending` is
+   * intentionally ignored to align with the RFC's `transitioned_to_*` shape).
+   */
+  metrics?: DirectorMetricsRecorder;
 }
 
 interface CalculateNextStateParams {
@@ -50,21 +61,27 @@ export class DirectorService {
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  async run({ rule, alertEvents, executionContext }: RunDirectorParams): Promise<AlertEvent[]> {
+  async run({
+    rule,
+    alertEvents,
+    executionContext,
+    metrics,
+  }: RunDirectorParams): Promise<AlertEvent[]> {
     if (alertEvents.length === 0) {
       return [];
     }
 
     const strategy = this.strategyFactory.getStrategy(rule);
     executionContext.throwIfAborted();
-    return this.processAlertEvents(rule, alertEvents, strategy, executionContext);
+    return this.processAlertEvents(rule, alertEvents, strategy, executionContext, metrics);
   }
 
   private async processAlertEvents(
     rule: RuleResponse,
     alertEvents: readonly AlertEvent[],
     strategy: ITransitionStrategy,
-    executionContext: ExecutionContext
+    executionContext: ExecutionContext,
+    metrics: DirectorMetricsRecorder | undefined
   ): Promise<AlertEvent[]> {
     const scope = executionContext.createScope();
     const groupHashes = [...new Set(alertEvents.map((e) => e.group_hash))];
@@ -79,14 +96,27 @@ export class DirectorService {
     try {
       executionContext.throwIfAborted();
 
-      return alertEvents.map((currentAlertEvent) =>
-        this.getAlertEventWithNextEpisode({
+      return alertEvents.map((currentAlertEvent) => {
+        const previousAlertEvent = alertStateByGroupHash.get(currentAlertEvent.group_hash);
+        const result = this.getAlertEventWithNextEpisode({
           rule,
           currentAlertEvent,
-          previousAlertEvent: alertStateByGroupHash.get(currentAlertEvent.group_hash),
+          previousAlertEvent,
           strategy,
-        })
-      );
+        });
+
+        if (metrics != null) {
+          const transition = toEpisodeTransitionKind(
+            previousAlertEvent?.last_episode_status,
+            result.episode?.status
+          );
+          if (transition != null) {
+            metrics.recordEpisodeTransition(transition);
+          }
+        }
+
+        return result;
+      });
     } finally {
       await scope.disposeAll();
     }
@@ -169,5 +199,31 @@ export class DirectorService {
     }
 
     return currentEpisodeId ?? uuidV4();
+  }
+}
+
+/**
+ * Maps an episode status change to one of the RFC's
+ * `transitioned_to_*` buckets. Returns `undefined` when:
+ * - the status did not change (no transition), or
+ * - the new status is `pending` (the RFC only tracks active/recovering/inactive).
+ */
+function toEpisodeTransitionKind(
+  previousStatus: AlertEpisodeStatus | null | undefined,
+  nextStatus: AlertEpisodeStatus | undefined
+): EpisodeTransitionKind | undefined {
+  if (nextStatus == null || nextStatus === previousStatus) {
+    return undefined;
+  }
+
+  switch (nextStatus) {
+    case alertEpisodeStatus.active:
+      return 'active';
+    case alertEpisodeStatus.recovering:
+      return 'recovering';
+    case alertEpisodeStatus.inactive:
+      return 'inactive';
+    default:
+      return undefined;
   }
 }

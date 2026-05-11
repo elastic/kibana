@@ -7,16 +7,26 @@
 
 import { RuleExecutionCancellationError } from './cancellation_error';
 import { CancellationScope } from './cancellation_scope';
+import { noopExecutionMetricsRecorders, type ExecutionMetricsRecorders } from './metrics_recorders';
 
 export interface ExecutionContext {
   readonly signal: AbortSignal;
+  /**
+   * Per-execution telemetry sinks. Defaults to no-op recorders when the
+   * context is created without an explicit bag (e.g. for non-rule-executor
+   * callers or unit tests).
+   */
+  readonly metrics: ExecutionMetricsRecorders;
   throwIfAborted(): void;
   onAbort(handler: () => void): () => void;
   createScope(): CancellationScope;
 }
 
 export class AbortSignalExecutionContext implements ExecutionContext {
-  constructor(public readonly signal: AbortSignal) {}
+  constructor(
+    public readonly signal: AbortSignal,
+    public readonly metrics: ExecutionMetricsRecorders = noopExecutionMetricsRecorders
+  ) {}
 
   public throwIfAborted(): void {
     if (!this.signal.aborted) {
@@ -58,5 +68,7 @@ export class AbortSignalExecutionContext implements ExecutionContext {
   }
 }
 
-export const createExecutionContext = (signal: AbortSignal): ExecutionContext =>
-  new AbortSignalExecutionContext(signal);
+export const createExecutionContext = (
+  signal: AbortSignal,
+  metrics: ExecutionMetricsRecorders = noopExecutionMetricsRecorders
+): ExecutionContext => new AbortSignalExecutionContext(signal, metrics);

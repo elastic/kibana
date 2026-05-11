@@ -29,6 +29,7 @@ import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
 } from '../lib/dispatcher/steps/constants';
+import { RULE_EXECUTOR_EVENT_ACTIONS } from '../lib/rule_executor/event_log/constants';
 
 export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
   bind(OnSetup).toConstantValue((container) => {
@@ -64,10 +65,10 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
     const eventLogService = container.get(
       PluginSetup<AlertingServerSetupDependencies['eventLog']>('eventLog')
     );
-    eventLogService.registerProviderActions(
-      ACTION_POLICY_EVENT_PROVIDER,
-      Object.values(ACTION_POLICY_EVENT_ACTIONS)
-    );
+    eventLogService.registerProviderActions(ACTION_POLICY_EVENT_PROVIDER, [
+      ...Object.values(ACTION_POLICY_EVENT_ACTIONS),
+      ...Object.values(RULE_EXECUTOR_EVENT_ACTIONS),
+    ]);
     const eventLogger = eventLogService.getLogger({
       event: { provider: ACTION_POLICY_EVENT_PROVIDER },
     });

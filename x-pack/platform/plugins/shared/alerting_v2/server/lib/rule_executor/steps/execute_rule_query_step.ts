@@ -65,6 +65,7 @@ export class ExecuteRuleQueryStep implements RuleExecutionStep {
         filter: queryPayload.filter,
         params: queryPayload.params,
         abortSignal: input.executionContext.signal,
+        metrics: input.executionContext.metrics.query,
       });
 
       let yielded = false;

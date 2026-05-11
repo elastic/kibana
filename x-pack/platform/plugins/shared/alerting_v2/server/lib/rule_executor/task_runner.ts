@@ -15,7 +15,7 @@ import type {
   RuleExecutionPipelineInput,
   RuleExecutionPipelineResult,
 } from './execution_pipeline';
-import { RuleExecutionPipeline } from './execution_pipeline';
+import { RuleExecutionPipelineContractToken } from './tokens';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
@@ -25,8 +25,15 @@ type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
 
 @injectable()
 export class RuleExecutorTaskRunner {
+  /**
+   * The injected contract is the **decorated** pipeline assembled in
+   * `bind_rule_executor.ts` (TelemetryRecorderDecorator + future decorators
+   * folded around the inner `RuleExecutionPipeline`). The task runner stays
+   * unaware of the chain and never directly references any decorator.
+   */
   constructor(
-    @inject(RuleExecutionPipeline) private readonly pipeline: RuleExecutionPipelineContract,
+    @inject(RuleExecutionPipelineContractToken)
+    private readonly pipeline: RuleExecutionPipelineContract,
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 

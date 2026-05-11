@@ -10,12 +10,21 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
+import type { AlertEventStatusKind, StorageMetricsRecorder } from '../../execution_context';
 
 export interface BulkIndexDocsParams<TDocument extends Record<string, unknown>> {
   index: string;
   docs: readonly TDocument[];
   /** When `'wait_for'`, the bulk call blocks until the indexed documents are visible to search. Defaults to `false`. */
   refresh?: boolean | 'wait_for';
+  /**
+   * Optional sink for per-document write counts, partitioned by alert-event
+   * `status` (`breached` / `recovered` / `no_data`). Documents that are not
+   * shaped like an alert event (i.e. without a recognised `status` field) are
+   * ignored — the recorder is a best-effort signal for the rule executor's
+   * `events_written.*` metrics tree.
+   */
+  metrics?: StorageMetricsRecorder;
 }
 
 export interface StorageServiceContract {
@@ -35,6 +44,7 @@ export class StorageService implements StorageServiceContract {
     index,
     docs,
     refresh = false,
+    metrics,
   }: BulkIndexDocsParams<TDocument>): Promise<void> {
     if (docs.length === 0) {
       return;
@@ -53,6 +63,8 @@ export class StorageService implements StorageServiceContract {
         refresh,
       });
 
+      this.recordEventsWritten({ docs, response, metrics });
+
       this.logBulkIndexResponse({ index, docsCount: docs.length, response });
     } catch (error) {
       this.logger.error({
@@ -62,6 +74,38 @@ export class StorageService implements StorageServiceContract {
       });
 
       throw error;
+    }
+  }
+
+  /**
+   * Walks the bulk response, pairs each item with the source doc by index, and
+   * notifies the metrics sink for every successfully indexed alert event. We
+   * skip docs whose `status` field is not one of the known alert-event values
+   * so non-alert callers (potential future) do not poison the counters.
+   */
+  private recordEventsWritten<TDocument extends Record<string, unknown>>({
+    docs,
+    response,
+    metrics,
+  }: {
+    docs: readonly TDocument[];
+    response: BulkResponse;
+    metrics: StorageMetricsRecorder | undefined;
+  }): void {
+    if (!metrics) {
+      return;
+    }
+
+    const items = response.items ?? [];
+    for (let i = 0; i < items.length; i += 1) {
+      const item = items[i];
+      if (item.create?.error) {
+        continue;
+      }
+      const status = (docs[i] as { status?: unknown } | undefined)?.status;
+      if (isAlertEventStatusKind(status)) {
+        metrics.recordEventWritten(status);
+      }
     }
   }
 
@@ -116,3 +160,12 @@ export class StorageService implements StorageServiceContract {
     return `StorageService: Bulk create completed with errors for index: ${index} (successful: ${successItemCount}, failed: ${failedItemCount}, total: ${docsCount})`;
   }
 }
+
+const ALERT_EVENT_STATUS_KINDS: ReadonlySet<AlertEventStatusKind> = new Set<AlertEventStatusKind>([
+  'breached',
+  'recovered',
+  'no_data',
+]);
+
+const isAlertEventStatusKind = (value: unknown): value is AlertEventStatusKind =>
+  typeof value === 'string' && ALERT_EVENT_STATUS_KINDS.has(value as AlertEventStatusKind);
