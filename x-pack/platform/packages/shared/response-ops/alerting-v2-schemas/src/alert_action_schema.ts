@@ -79,7 +79,6 @@ const deactivateActionSchema = z.object({
   reason: z.string().describe('Reason for deactivating the alert.'),
 });
 
-
 export const createAckAlertActionBodySchema = ackActionSchema.omit({ action_type: true }).strict();
 export type CreateAckAlertActionBody = z.infer<typeof createAckAlertActionBodySchema>;
 

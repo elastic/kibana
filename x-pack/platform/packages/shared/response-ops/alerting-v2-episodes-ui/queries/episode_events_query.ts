@@ -17,13 +17,21 @@ export interface EpisodeEventRow {
   group_hash: string;
 }
 
+const ALERT_EPISODE_EVENT_FIELDS = [
+  '@timestamp',
+  'episode.id',
+  'episode.status',
+  'rule.id',
+  'group_hash',
+] as const;
+
 /**
  * ES|QL query returning all events for a single alert episode, oldest first.
- * Returns all fields so expanded views can display the full event document.
  */
 export const buildEpisodeEventsEsqlQuery = (episodeId: string) => {
   // prettier-ignore
   return esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`
     .where`episode.id == ${episodeId}`
-    .sort([TIME_FIELD, 'ASC']);
+    .sort([TIME_FIELD, 'ASC'])
+    .keep(...ALERT_EPISODE_EVENT_FIELDS);
 };

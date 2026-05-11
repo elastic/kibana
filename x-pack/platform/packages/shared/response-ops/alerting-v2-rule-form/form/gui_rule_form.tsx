@@ -23,6 +23,18 @@ export interface GuiRuleFormProps {
   includeQueryEditor?: boolean;
 }
 
+/**
+ * GUI-based rule form with standard form fields.
+ *
+ * This component renders the visual form interface with field groups for:
+ * - Rule details (name, tags, description — no wrapper panel)
+ * - Rule evaluation (full ES|QL query)
+ * - Rule execution settings (schedule, lookback)
+ * - Rule kind (alert vs monitor)
+ * - Alert conditions (alert delay, recovery policy, recovery delay)
+ *
+ * Requires a FormProvider context with FormValues type to be present in the component tree.
+ */
 export const GuiRuleForm = ({ onSubmit, includeQueryEditor = true }: GuiRuleFormProps) => {
   const { handleSubmit } = useFormContext<FormValues>();
 

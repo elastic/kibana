@@ -30,15 +30,6 @@ export interface AlertEpisode {
   snooze_expiry?: string;
   last_deactivate_action?: 'activate' | 'deactivate';
   last_tags?: string[];
-  /** JSON string from the latest **non-empty** alert `data` (see `addEpisodeAggregation`) */
-  episode_data?: string | null;
-}
-
-/**
- * Raw ES|QL response shape before client-side normalization.
- */
-export interface AlertEpisodeEsqlRow extends Omit<AlertEpisode, 'last_tags'> {
-  last_tags?: string | string[] | null;
 }
 
 export const ALERT_EPISODE_FIELDS = [
@@ -56,7 +47,6 @@ export const ALERT_EPISODE_FIELDS = [
   'snooze_expiry',
   'last_deactivate_action',
   'last_tags',
-  'episode_data',
 ] as const;
 
 export interface EpisodesFilterState {
@@ -90,17 +80,12 @@ const sanitizeSortField = (field: string) => {
 };
 
 export const addEpisodeAggregation = (query: ComposerQuery) => {
-  /* This will be simplified when the `$.alerting-episodes` ES|QL view works.
-   * Matches `buildEpisodeEventDataQuery` and `buildRelatedEpisodesQuery`.
-   */
-
+  // This will be simplified when the `$.alerting-episodes` ES|QL view works.
   // prettier-ignore
   query
-    .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
-    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}" BY episode.id`
+    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp) BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
-    .pipe`WHERE @timestamp == last_timestamp`
-    .pipe`EVAL @timestamp = first_timestamp`;
+    .pipe`WHERE @timestamp == last_timestamp`;
 };
 
 const addGroupHashActionStats = (query: ComposerQuery) => {
@@ -144,7 +129,7 @@ const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
  * then narrows to episode rows and derives `effective_status`.
  */
 export const buildEpisodesBaseQuery = (search?: string): ComposerQuery => {
-  const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM], ['_source']);
+  const query = esql.from([ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM]);
 
   const trimmedSearch = search?.trim();
   if (trimmedSearch) {
