@@ -169,15 +169,17 @@ Beyond the root-cause `classification` above, decide whether this failure should
 
 ## Comment format
 
-Post exactly one concise comment on the target issue with this structure:
+Post exactly one comment on the target issue. The comment has two parts: a short **TL;DR** at the top that tells the whole story in 2–3 sentences, followed by a single collapsed **More details** section that holds the rest.
 
-### Investigation Summary
+### TL;DR (top of the comment, always visible)
 
-One short paragraph with the current best explanation.
+Write 2–3 sentences, plain prose (no headings, no bullet lists), covering:
 
-### Flakiness Finding
+1. What broke and where (one specific sentence — name the test file or test name).
+2. The most likely root cause in one sentence.
+3. The recommended next action in one sentence (the proposed fix, or "needs human investigation because X", or "real product bug — not a flake", etc.).
 
-Emit exactly these five bullets, in this order, with one concrete value per bullet (no choice lists, no placeholders). Downstream tooling parses them directly, so keep the keys, casing, and `` - `key`: value `` shape exactly.
+Immediately after the TL;DR paragraph, emit the Flakiness Finding bullets so the structured metadata is visible without expanding the details. Emit exactly these five bullets, in this order, with one concrete value per bullet (no choice lists, no placeholders). Downstream tooling parses them directly, so keep the keys, casing, and `` - `key`: value `` shape exactly.
 
 - `classification`: one of `test`, `code`, `external`, `inconclusive`
 - `confidence`: one of `high`, `medium`, `low`
@@ -187,12 +189,19 @@ Emit exactly these five bullets, in this order, with one concrete value per bull
 
 If `fixability` is `auto-fixable`, you must also apply the `needs-flaky-fix` label to the triggering issue via `add-labels`. Do not apply that label in any other case.
 
-### Suspected Root Cause
+### More details (collapsed)
 
-Use 2 to 5 bullets tied to evidence.
-- If a recent commit appears causal, include the commit link and mention the author when justified.
+Wrap everything below in a single `<details>` block so the comment stays compact by default. Use exactly this structure (note the blank lines after `</summary>` and before `</details>` — they are required for the inner markdown to render):
 
-### Proposed Fix
+```
+<details>
+<summary>More details</summary>
+
+#### Suspected Root Cause
+
+2 to 5 bullets tied to evidence. If a recent commit appears causal, include the commit link and mention the author when justified.
+
+#### Proposed Fix
 
 - Provide one focused fix proposal when justified.
 - Include the exact file, function, assertion, wait condition, fixture, selector, API, or behavior that should change.
@@ -203,9 +212,14 @@ Use 2 to 5 bullets tied to evidence.
 - Only include a diff when it is grounded in the evidence you collected.
 - If no credible fix is available, say that clearly and explain what evidence is missing.
 
-### Evidence Used
+#### Evidence Used
 
-List the key issue comments, file paths, commits, or links that drove the conclusion.
+The key issue comments, file paths, commits, or links that drove the conclusion.
+
+</details>
+```
+
+Use `####` headings inside the details block (not `###`) so they nest below the comment's own structure.
 
 ## Constraints
 
