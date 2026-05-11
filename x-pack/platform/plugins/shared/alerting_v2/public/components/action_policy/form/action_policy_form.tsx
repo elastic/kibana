@@ -46,7 +46,7 @@ export const ActionPolicyForm = () => {
             <h3>
               <FormattedMessage
                 id="xpack.alertingV2.actionPolicy.form.basicInfo.title"
-                defaultMessage="Basic information"
+                defaultMessage="Policy name and description"
               />
             </h3>
           </EuiTitle>
@@ -140,14 +140,14 @@ export const ActionPolicyForm = () => {
             <h3>
               <FormattedMessage
                 id="xpack.alertingV2.actionPolicy.form.matchConditions.title"
-                defaultMessage="Match conditions"
+                defaultMessage="Policy scope"
               />
             </h3>
           </EuiTitle>
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.alertingV2.actionPolicy.form.matchConditions.description"
-              defaultMessage="Define conditions that must be met for this policy to trigger. Leave empty to match all alert episodes."
+              defaultMessage="Define which alerts this policy applies to."
             />
           </EuiText>
         </EuiSplitPanel.Inner>
@@ -161,9 +161,13 @@ export const ActionPolicyForm = () => {
                 <EuiSpacer size="m" />
                 <EuiFormRow
                   label={i18n.translate('xpack.alertingV2.actionPolicy.form.matcher', {
-                    defaultMessage: 'Matcher',
+                    defaultMessage: 'Match conditions',
                   })}
                   labelAppend={optionalLabel}
+                  helpText={i18n.translate('xpack.alertingV2.actionPolicy.form.matcher.helpText', {
+                    defaultMessage:
+                      'A KQL expression that defines which alert episodes meet the conditions for this policy. Leave empty to apply the policy to all episodes in the space.',
+                  })}
                   fullWidth
                 >
                   <MatcherInput
@@ -194,14 +198,14 @@ export const ActionPolicyForm = () => {
             <h3>
               <FormattedMessage
                 id="xpack.alertingV2.actionPolicy.form.dispatch.title"
-                defaultMessage="Dispatch"
+                defaultMessage="Notification controls"
               />
             </h3>
           </EuiTitle>
           <EuiText size="xs" color="subdued">
             <FormattedMessage
               id="xpack.alertingV2.actionPolicy.form.dispatch.description"
-              defaultMessage="How should matched episodes be grouped, and how often should they be dispatched?"
+              defaultMessage="Controls how matching episodes are grouped and how often notifications are sent."
             />
           </EuiText>
         </EuiSplitPanel.Inner>

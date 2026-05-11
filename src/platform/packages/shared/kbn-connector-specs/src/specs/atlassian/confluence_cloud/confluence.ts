@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../../..';
 import {
   ListPagesInputSchema,
@@ -89,32 +89,37 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       },
     ],
   },
-  schema: z.object({
-    subdomain: z
-      .string()
-      .trim()
-      .min(1)
-      .regex(BARE_SUBDOMAIN_REGEX, {
-        message:
-          'Subdomain may only contain letters, numbers, and hyphens (for example, your-domain)',
-      })
-      .describe(
-        i18n.translate('core.kibanaConnectorSpecs.confluence.config.subdomain.description', {
-          defaultMessage: 'Your Atlassian subdomain',
+  schema: lazySchema(() =>
+    z.object({
+      subdomain: z
+        .string()
+        .trim()
+        .min(1)
+        .regex(BARE_SUBDOMAIN_REGEX, {
+          message:
+            'Subdomain may only contain letters, numbers, and hyphens (for example, your-domain)',
         })
-      )
-      .meta({
-        widget: 'text',
-        label: i18n.translate('core.kibanaConnectorSpecs.confluence.config.subdomain.label', {
-          defaultMessage: 'Subdomain',
+        .describe(
+          i18n.translate('core.kibanaConnectorSpecs.confluence.config.subdomain.description', {
+            defaultMessage: 'Your Atlassian subdomain',
+          })
+        )
+        .meta({
+          widget: 'text',
+          label: i18n.translate('core.kibanaConnectorSpecs.confluence.config.subdomain.label', {
+            defaultMessage: 'Subdomain',
+          }),
+          placeholder: 'your-domain',
+          helpText: i18n.translate(
+            'core.kibanaConnectorSpecs.confluence.config.subdomain.helpText',
+            {
+              defaultMessage:
+                'The subdomain for your Confluence Cloud site (for example, your-domain for https://your-domain.atlassian.net)',
+            }
+          ),
         }),
-        placeholder: 'your-domain',
-        helpText: i18n.translate('core.kibanaConnectorSpecs.confluence.config.subdomain.helpText', {
-          defaultMessage:
-            'The subdomain for your Confluence Cloud site (for example, your-domain for https://your-domain.atlassian.net)',
-        }),
-      }),
-  }),
+    })
+  ),
   actions: {
     listPages: {
       description:

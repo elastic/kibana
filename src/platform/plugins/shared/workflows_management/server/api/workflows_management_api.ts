@@ -9,6 +9,10 @@
 // TODO: remove eslint exceptions once we have a better way to handle this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type {
+  SmlIndexAction,
+  SmlIndexAttachmentParams,
+} from '@kbn/agent-context-layer-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { getWorkflowJsonSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
@@ -28,6 +32,7 @@ import type {
   WorkflowListDto,
   WorkflowYaml,
 } from '@kbn/workflows';
+import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { ChildWorkflowExecutionItem, WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
@@ -47,20 +52,9 @@ import type {
   SearchWorkflowExecutionsParams,
   WorkflowsService,
 } from './workflows_management_service';
-import { WORKFLOW_SML_TYPE } from '../../common/agent_builder/constants';
 import { connectorParamsSchemaResolver } from '../../common/lib/connector_params_schema_resolver';
 
-// Mirrors SmlIndexAction and SmlStart['indexAttachment'] from @kbn/agent-builder-plugin/server.
-// Declared inline to avoid a circular TS project reference: agent_builder already references
-// workflows_management, so a reverse import would create a build cycle.
-export type SmlIndexAction = 'create' | 'update' | 'delete';
-
-export type SmlIndexAttachmentFn = (params: {
-  request: KibanaRequest;
-  originId: string;
-  attachmentType: string;
-  action: SmlIndexAction;
-}) => Promise<void>;
+export type SmlIndexAttachmentFn = (params: SmlIndexAttachmentParams) => Promise<void>;
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
@@ -156,8 +150,12 @@ export class WorkflowsManagementApi {
 
   constructor(
     private readonly workflowsService: WorkflowsService,
-    private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
+    public readonly isWorkflowsAvailable: boolean
   ) {}
+
+  private async getWorkflowsExecutionEngine(): Promise<WorkflowsExecutionEnginePluginStart> {
+    return this.workflowsService.getWorkflowsExecutionEngine();
+  }
 
   public setSmlIndexAttachment(fn: SmlIndexAttachmentFn, logger: Logger): void {
     this.smlIndexAttachment = fn;

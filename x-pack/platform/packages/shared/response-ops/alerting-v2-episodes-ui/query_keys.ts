@@ -21,6 +21,24 @@ export const queryKeys = {
     timeRange?: { from: string; to: string } | null
   ) => [...queryKeys.all, 'list', pageSize, filterState, sortState, timeRange] as const,
   episodeEvents: (episodeId: string) => [...queryKeys.all, 'episode-events', episodeId] as const,
+  relatedSameGroupEpisodes: (ruleId: string, groupHash: string, pageSize: number) =>
+    [...queryKeys.all, 'related-episodes-same-group', ruleId, groupHash, pageSize] as const,
+  relatedOtherEpisodes: (
+    ruleId: string,
+    pageSize: number,
+    currentGroupKey: string,
+    excludeEpisodeId: string
+  ) =>
+    [
+      ...queryKeys.all,
+      'related-episodes-other',
+      ruleId,
+      pageSize,
+      currentGroupKey,
+      excludeEpisodeId,
+    ] as const,
+  episodeEventData: (episodeId: string) =>
+    [...queryKeys.all, 'episode-event-data', episodeId] as const,
   relatedEpisodes: (ruleId: string, excludeEpisodeId: string, pageSize: number) =>
     [...queryKeys.all, 'related-episodes', ruleId, excludeEpisodeId, pageSize] as const,
   tagOptionsAll: () => [...queryKeys.all, 'tag-options'] as const,

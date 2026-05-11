@@ -32,7 +32,7 @@ export function monacoPositionToOffset(expression: string, position: monaco.Posi
  *
  * IMPORTANT NOTE:
  * offset ranges are ZERO-based and NOT end-inclusive — [start, end)
- * monaco ranges are ONE-based and ARE end-inclusive — [start, end]
+ * monaco ranges are ONE-based and NOT end-inclusive — [start, end)
  */
 export const offsetRangeToMonacoRange = (
   expression: string,
@@ -63,7 +63,7 @@ export const offsetRangeToMonacoRange = (
 
     if (i === range.start) {
       startColumn = i + 1 - startOfCurrentLine;
-      endColumn = startColumn + range.end - range.start - 1;
+      endColumn = startColumn + range.end - range.start;
       break;
     }
   }

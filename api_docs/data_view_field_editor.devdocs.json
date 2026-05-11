@@ -36,7 +36,7 @@
           " & S, any>"
         ],
         "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-        "lineNumber": 65,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -49,7 +49,7 @@
             "label": "formatId",
             "description": [],
             "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-            "lineNumber": 69,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -72,7 +72,7 @@
               " & S"
             ],
             "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-            "lineNumber": 70,
+            "lineNumber": 67,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -112,7 +112,7 @@
               "[]; }"
             ],
             "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-            "lineNumber": 72,
+            "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -135,7 +135,7 @@
                   "<{}>"
                 ],
                 "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-                "lineNumber": 72,
+                "lineNumber": 69,
                 "columnNumber": 35,
                 "deprecated": false,
                 "docsReferencedTypeName": "FormatEditorProps",
@@ -159,7 +159,7 @@
                   }
                 ],
                 "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-                "lineNumber": 72,
+                "lineNumber": 69,
                 "columnNumber": 69,
                 "deprecated": false,
                 "docsReferencedTypeName": "FormatEditorState",
@@ -180,7 +180,7 @@
               "(newParams?: Partial<{ type?: string | undefined; } & P>) => void"
             ],
             "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-            "lineNumber": 84,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -196,7 +196,7 @@
                   "Partial<{ type?: string | undefined; } & P>"
                 ],
                 "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-                "lineNumber": 84,
+                "lineNumber": 80,
                 "columnNumber": 15,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -216,7 +216,7 @@
               "() => React.JSX.Element"
             ],
             "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/editors/default/default.tsx",
-            "lineNumber": 93,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -998,10 +998,13 @@
           {
             "parentPluginId": "dataViewFieldEditor",
             "id": "def-public.Sample.output",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "output",
             "description": [],
+            "signature": [
+              "React.ReactNode"
+            ],
             "path": "src/platform/plugins/shared/data_view_field_editor/public/components/field_format_editor/types.ts",
             "lineNumber": 16,
             "columnNumber": 3,

@@ -12,6 +12,7 @@ import { isColumn } from '@elastic/esql';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { pipeCompleteItem, commaCompleteItem } from '../complete_items';
 import type { ISuggestionItem } from '../types';
+import { ReplacementRangeStrategyKind } from '../../../language/autocomplete/utils/prefix_range';
 import { endsWithComma, endsWithWhitespace } from '../../definitions/utils/regex';
 
 export type SortPosition =
@@ -116,11 +117,8 @@ export const getSuggestionsAfterCompleteExpression = (
 
   // does the query end with whitespace?
   if (endsWithWhitespace(innerText)) {
-    // Replace the trailing space so `field ` + `, ` becomes `field, `.
-    // This is one small local explicit-range case.
-    commaSuggestion.rangeToReplace = {
-      start: innerText.length - 1,
-      end: innerText.length,
+    commaSuggestion.replacementRangeStrategy = {
+      kind: ReplacementRangeStrategyKind.TRAILING_WHITESPACE,
     };
   }
   // special case: cursor right after a column name

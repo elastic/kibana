@@ -127,6 +127,7 @@ export const HostPanelContent = ({
         observedHost={observedHost}
         contextID={contextID}
         identityFields={identityFields}
+        entityRecord={entityRecord}
         scopeId={scopeId}
         queryId={HOST_PANEL_OBSERVED_HOST_QUERY_ID}
       />

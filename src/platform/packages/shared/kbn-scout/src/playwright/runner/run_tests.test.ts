@@ -104,7 +104,7 @@ describe('hasTestsInPlaywrightConfig', () => {
 
     expect(mockLog.info).toHaveBeenCalledWith('scout: Validate Playwright config has tests');
     expect(mockLog.error).toHaveBeenCalledWith(
-      'scout: No tests found in [configPath/playwright.config.ts]'
+      expect.stringMatching(/^scout: No tests found in \[configPath\/playwright\.config\.ts\]\./)
     );
     expect(exitCode).toEqual(2);
   });

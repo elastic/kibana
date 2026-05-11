@@ -61,9 +61,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await agentBuilder.prepareEmbeddableSidebar();
       await agentBuilder.openEmbeddableMenu();
 
-      const agentRow = await testSubjects.find('agentBuilderEmbeddableAgentRow');
-      const agentRowText = await agentRow.getVisibleText();
-      expect(agentRowText).to.contain('Elastic AI Agent');
+      await retry.try(async () => {
+        const agentRow = await testSubjects.find('agentBuilderEmbeddableAgentRow');
+        const agentRowText = await agentRow.getVisibleText();
+        expect(agentRowText).to.contain('Elastic AI Agent');
+      });
 
       const browser = getService('browser');
       await browser.pressKeys(browser.keys.ESCAPE);
@@ -130,9 +132,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // The custom agent should still be shown in the menu
       await agentBuilder.openEmbeddableMenu();
-      const agentRow = await testSubjects.find('agentBuilderEmbeddableAgentRow');
-      const agentRowText = await agentRow.getVisibleText();
-      expect(agentRowText).to.contain(CUSTOM_AGENT_NAME);
+      await retry.try(async () => {
+        const agentRow = await testSubjects.find('agentBuilderEmbeddableAgentRow');
+        const agentRowText = await agentRow.getVisibleText();
+        expect(agentRowText).to.contain(CUSTOM_AGENT_NAME);
+      });
 
       const browser = getService('browser');
       await browser.pressKeys(browser.keys.ESCAPE);
