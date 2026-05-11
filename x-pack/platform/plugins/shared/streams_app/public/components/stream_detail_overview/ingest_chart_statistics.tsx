@@ -53,6 +53,7 @@ export function IngestChartStatistics({
 }: IngestChartStatisticsProps) {
   const {
     core: { uiSettings },
+    isServerless,
     dependencies: {
       start: {
         data,
@@ -86,13 +87,13 @@ export function IngestChartStatistics({
 
   const storeStatsFetch = useStreamsAppFetch(
     ({ signal }) =>
-      !isQueryStream
+      !isQueryStream && !isServerless
         ? streamsRepositoryClient.fetch('GET /internal/streams/{name}/_store_stats', {
             signal,
             params: { path: { name: streamName } },
           })
         : Promise.resolve({ store_size_bytes: 0 }),
-    [isQueryStream, streamName, streamsRepositoryClient]
+    [isQueryStream, isServerless, streamName, streamsRepositoryClient]
   );
 
   const { docsInRange, peakRateDocsSec, avgDocsPerDay } = useMemo(() => {
@@ -171,7 +172,7 @@ export function IngestChartStatistics({
           }
         />
 
-        {!isQueryStream && (
+        {!isQueryStream && !isServerless && (
           <StatCell
             title={i18n.translate('xpack.streams.ingestChartStatistics.storageSize.label', {
               defaultMessage: 'Storage size',
