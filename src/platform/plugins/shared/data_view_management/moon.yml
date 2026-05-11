@@ -60,6 +60,7 @@ dependsOn:
   - '@kbn/saved-objects-tagging-oss-plugin'
   - '@kbn/cps-utils'
   - '@kbn/cps'
+  - '@kbn/discover-utils'
 tags:
   - plugin
   - prod

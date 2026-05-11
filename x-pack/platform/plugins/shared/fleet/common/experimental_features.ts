@@ -33,6 +33,7 @@ const _allowedExperimentalValues = {
   enableOTelVerifier: true, // When enabled, OTel-based cloud connector permission verification is active.
   enableResolveDependencies: true, // When enabled, the resolve dependencies step will be available during package installation.
   enableOtelUI: false, // When enabled, OTel-specific UI elements (e.g. Collector Config tab) will be shown.
+  enableIntegrationConditions: false, // When enabled, package policies accept user-defined `condition` (EQL) fields.
 };
 
 /**

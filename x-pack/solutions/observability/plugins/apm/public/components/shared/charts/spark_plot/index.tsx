@@ -272,7 +272,7 @@ export function SparkPlotItem({
         justifyContent: 'center',
       }}
     >
-      <EuiIcon type="chartLine" color={euiTheme.colors.mediumShade} />
+      <EuiIcon type="chartLine" color={euiTheme.colors.mediumShade} aria-hidden={true} />
     </div>
   );
 }
