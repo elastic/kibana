@@ -34,6 +34,7 @@ import { splitQuery } from './use_heuristic_split';
 import { getStepTitles } from './use_compose_discover_state';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
+import { RuleDetailsFieldGroup, RuleExecutionFieldGroup } from '../../form';
 
 interface ComposeDiscoverFormProps {
   state: ComposeDiscoverState;
@@ -459,7 +460,7 @@ function AlertConditionStep({
         </>
       )}
 
-      <EvalFields state={state} dispatch={dispatch} />
+      <RuleExecutionFieldGroup />
     </>
   );
 }
@@ -524,35 +525,7 @@ function DetailsAndArtifactsStep({
 }) {
   return (
     <>
-      <EuiTitle size="xs">
-        <h3>Rule details</h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-
-      <EuiFormRow label="Rule name" fullWidth>
-        <EuiFieldText
-          fullWidth
-          value={state.name}
-          onChange={(e) => dispatch({ type: 'SET_NAME', name: e.target.value })}
-          placeholder="e.g. High CPU hosts"
-          data-test-subj="composeDiscoverRuleName"
-        />
-      </EuiFormRow>
-
-      <EuiSpacer size="m" />
-
-      <EuiFormRow label="Tags" fullWidth>
-        <EuiComboBox
-          fullWidth
-          selectedOptions={state.tags.map((t) => ({ label: t }))}
-          onChange={(opts) => dispatch({ type: 'SET_TAGS', tags: opts.map((o) => o.label) })}
-          onCreateOption={(val) =>
-            dispatch({ type: 'SET_TAGS', tags: [...state.tags, val] })
-          }
-          placeholder="Add tags"
-          data-test-subj="composeDiscoverRuleTags"
-        />
-      </EuiFormRow>
+      <RuleDetailsFieldGroup />
 
       <EuiHorizontalRule margin="m" />
 
