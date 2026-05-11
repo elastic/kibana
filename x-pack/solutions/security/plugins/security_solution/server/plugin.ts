@@ -280,6 +280,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       logger,
       ml: plugins.ml,
       options: { endpointAppContextService },
+      core,
+      config: this.config,
     }).catch((error) => {
       this.logger.error(`Error registering security skills: ${error}`);
     });

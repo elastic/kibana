@@ -3181,6 +3181,7 @@ x-pack/platform/test/automatic_import_api_integration @elastic/integration-exper
 /x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-defend-workflows
+/x-pack/solutions/security/plugins/security_solution/server/lib/detection_emulation @elastic/security-detection-engine @elastic/security-defend-workflows
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/osquery @elastic/security-defend-workflows
 
 # Cloud Security Posture team

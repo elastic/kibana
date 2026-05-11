@@ -148,6 +148,11 @@ import { ModifiedRuleBadge } from '../../../rule_management/components/rule_deta
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 import { AddRuleAttachmentToChatButton } from '../../../rule_creation_ui/components/add_rule_attachment_to_chat_button';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { RunEmulationModal } from '../../../../detections/components/emulation';
+import type {
+  CommandSuggestion,
+  CommandApprovalResponse,
+} from '../../../../detections/components/emulation';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
@@ -604,6 +609,22 @@ export const RuleDetailsPage = connector(
       confirmManualRuleRun,
     } = useManualRuleRunConfirmation();
 
+    const [pendingEmulationApproval, setPendingEmulationApproval] = useState<{
+      suggestion: CommandSuggestion;
+      requestId: string;
+    } | null>(null);
+
+    const handleEmulationApprove = useCallback(
+      (_requestId: string, _response: CommandApprovalResponse) => {
+        setPendingEmulationApproval(null);
+      },
+      []
+    );
+
+    const handleEmulationReject = useCallback((_requestId: string) => {
+      setPendingEmulationApproval(null);
+    }, []);
+
     const groupTakeActionItems = useGroupTakeActionsItems({
       currentStatus: currentAlertStatusFilterValue,
       showAlertStatusActions: Boolean(hasIndexWrite) && Boolean(hasIndexMaintenance),
@@ -674,6 +695,14 @@ export const RuleDetailsPage = connector(
         )}
         {isManualRuleRunConfirmationVisible && (
           <ManualRuleRunModal onCancel={cancelManualRuleRun} onConfirm={confirmManualRuleRun} />
+        )}
+        {pendingEmulationApproval && (
+          <RunEmulationModal
+            suggestion={pendingEmulationApproval.suggestion}
+            requestId={pendingEmulationApproval.requestId}
+            onApprove={handleEmulationApprove}
+            onReject={handleEmulationReject}
+          />
         )}
         <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
           <EuiWindowEvent event="resize" handler={noop} />

@@ -322,6 +322,13 @@ export const DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/users/_find` as const;
 
 /**
+ * Detection emulation routes
+ */
+export const DETECTION_ENGINE_EMULATION_URL = `${INTERNAL_DETECTION_ENGINE_URL}/emulation` as const;
+export const DETECTION_ENGINE_EMULATION_RUN_COMMAND_URL =
+  `${DETECTION_ENGINE_EMULATION_URL}/run_command` as const;
+
+/**
  * Extended alerts routes
  */
 export const DETECTION_ENGINE_UNIFIED_ALERTS_URL =

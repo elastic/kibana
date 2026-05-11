@@ -20,6 +20,7 @@ import { registerRuleExceptionsRoutes } from '../lib/detection_engine/rule_excep
 import { registerRuleManagementRoutes } from '../lib/detection_engine/rule_management';
 import { registerRuleMonitoringRoutes } from '../lib/detection_engine/rule_monitoring';
 import { registerRulePreviewRoutes } from '../lib/detection_engine/rule_preview';
+import { registerDetectionEmulationRoutes } from '../lib/detection_emulation';
 
 import { createIndexRoute } from '../lib/detection_engine/routes/index/create_index_route';
 import { readIndexRoute } from '../lib/detection_engine/routes/index/read_index_route';
@@ -99,6 +100,7 @@ export const initRoutes = (
     logger,
     isServerless
   );
+  registerDetectionEmulationRoutes(router, config, logger);
 
   registerResolverRoutes(router, getStartServices);
 
