@@ -9,6 +9,7 @@ import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/ty
 import type { RoleApiCredentials, ScoutWorkerFixtures } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { deletePipeline } from '../../helpers';
 import { apiTest, testData } from '../fixtures';
 
 interface PipelineTreeNode {
@@ -92,11 +93,7 @@ apiTest.describe('Ingest pipelines structure tree API', { tag: tags.stateful.cla
 
   apiTest.afterAll(async ({ esClient, log }) => {
     for (const pipelineId of createdPipelines) {
-      try {
-        await esClient.ingest.deletePipeline({ id: pipelineId });
-      } catch (error) {
-        log.debug(`Pipeline cleanup failed for ${pipelineId}: ${(error as Error).message}`);
-      }
+      await deletePipeline({ esClient, pipelineName: pipelineId, log });
     }
   });
 

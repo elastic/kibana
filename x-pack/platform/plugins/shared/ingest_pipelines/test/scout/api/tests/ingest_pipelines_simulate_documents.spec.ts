@@ -8,6 +8,7 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { uniqueName } from '../../helpers';
 import { apiTest, testData } from '../fixtures';
 
 apiTest.describe(
@@ -16,9 +17,6 @@ apiTest.describe(
   () => {
     const indexNamesToCleanup = new Set<string>();
     let adminCredentials: RoleApiCredentials;
-
-    const uniqueName = (prefix: string) =>
-      `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
     apiTest.beforeAll(async ({ requestAuth }) => {
       adminCredentials = await requestAuth.getApiKey('admin');

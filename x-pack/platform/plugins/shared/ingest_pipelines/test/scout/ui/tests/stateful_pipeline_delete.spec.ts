@@ -7,6 +7,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { deletePipeline } from '../../helpers';
 import { test, testData } from '../fixtures';
 
 test.describe('Ingest pipelines delete', { tag: tags.stateful.classic }, () => {
@@ -24,7 +25,7 @@ test.describe('Ingest pipelines delete', { tag: tags.stateful.classic }, () => {
   });
 
   test.afterAll(async ({ esClient }) => {
-    await esClient.ingest.deletePipeline({ id: testData.MANAGED_PIPELINE_NAME }).catch(() => {});
+    await deletePipeline({ esClient, pipelineName: testData.MANAGED_PIPELINE_NAME });
   });
 
   test('shows warning callout when deleting a managed pipeline', async ({ pageObjects }) => {

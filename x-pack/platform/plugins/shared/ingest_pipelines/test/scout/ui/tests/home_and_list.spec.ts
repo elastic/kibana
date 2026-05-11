@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ScoutWorkerFixtures } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { deletePipeline } from '../../helpers';
 import { test, testData } from '../fixtures';
 
 const sharedDeploymentTags = [
@@ -16,16 +16,6 @@ const sharedDeploymentTags = [
   ...tags.serverless.search,
   ...tags.serverless.security.complete,
 ];
-
-const deletePipeline = async ({
-  esClient,
-  pipelineName,
-}: {
-  esClient: ScoutWorkerFixtures['esClient'];
-  pipelineName: string;
-}) => {
-  await esClient.ingest.deletePipeline({ id: pipelineName }).catch(() => {});
-};
 
 test.describe('Ingest pipelines home and list', { tag: sharedDeploymentTags }, () => {
   test.beforeAll(async ({ esClient }) => {

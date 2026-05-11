@@ -8,14 +8,13 @@
 import type { RoleApiCredentials, ScoutWorkerFixtures } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { deletePipeline, uniqueName } from '../../helpers';
 import { apiTest, testData } from '../fixtures';
 
 apiTest.describe('Ingest pipelines read and delete API', { tag: tags.deploymentAgnostic }, () => {
   const pipelineIdsToCleanup = new Set<string>();
   let adminCredentials: RoleApiCredentials;
 
-  const uniqueName = (prefix: string) =>
-    `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const createPipeline = async ({
     esClient,
     name,
@@ -38,11 +37,7 @@ apiTest.describe('Ingest pipelines read and delete API', { tag: tags.deploymentA
 
   apiTest.afterAll(async ({ esClient, log }) => {
     for (const pipelineId of pipelineIdsToCleanup) {
-      try {
-        await esClient.ingest.deletePipeline({ id: pipelineId });
-      } catch (error) {
-        log.debug(`Pipeline cleanup failed for ${pipelineId}: ${(error as Error).message}`);
-      }
+      await deletePipeline({ esClient, pipelineName: pipelineId, log });
     }
   });
 
