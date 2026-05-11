@@ -16,6 +16,7 @@ import { ALL_ENTITY_TYPES, useEntityStoreEuidApi } from '@kbn/entity-store/publi
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { getField, getFieldArray } from '../../../flyout/document_details/shared/utils';
 import { useHasGraphVisualizationLicense } from '../../../common/hooks/use_has_graph_visualization_license';
+import { useIsEntityStoreV2Available } from '../../../flyout/shared/hooks/use_is_entity_store_v2_available';
 import { useEntityStoreStatus } from '../../../entity_analytics/components/entity_store/hooks/use_entity_store';
 import { EventKind } from '../constants/event_kinds';
 
@@ -86,14 +87,21 @@ export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreview
   const action: string[] | undefined =
     actionField != null ? (getFieldArray(actionField) as string[]) : undefined;
 
-  const hasRequiredLicense = useHasGraphVisualizationLicense();
-  const { data: entityStoreStatus } = useEntityStoreStatus();
-  const isEntityStoreRunning = entityStoreStatus?.status === 'running';
-
   const hasGraphData =
     Boolean(timestamp) && Boolean(action?.length) && eventIds.length > 0 && hasActor && hasTarget;
 
-  const shouldShowGraph = hasGraphData && hasRequiredLicense && isEntityStoreRunning;
+  const hasRequiredLicense = useHasGraphVisualizationLicense();
+  // Entity-store availability is detected via two complementary signals because either may be
+  // unavailable depending on session role: the `/status` endpoint 403s for the Serverless
+  // "editor"/"viewer" roles, and the entities-index probe can miss recently-installed engines
+  // when the latest index has not yet been created. OR'ing them keeps the graph visible in both
+  // restricted-role test runs and admin sessions.
+  const { data: entitiesIndexExists } = useIsEntityStoreV2Available();
+  const { data: entityStoreStatus } = useEntityStoreStatus();
+  const isEntityStoreAvailable =
+    entitiesIndexExists?.indexExists === true || entityStoreStatus?.status === 'running';
+
+  const shouldShowGraph = hasGraphData && hasRequiredLicense && isEntityStoreAvailable;
 
   const isAlert = getField(getFieldsData(EVENT_KIND)) === EventKind.signal;
 
