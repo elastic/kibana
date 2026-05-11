@@ -6,11 +6,14 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { EuiFlyout } from '@elastic/eui';
 import { find } from 'lodash/fp';
-import { useBasicDataFromDetailsData } from '../hooks/use_basic_data_from_details_data';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils';
+import { useStore } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
 import { TakeActionDropdown } from './take_action_dropdown';
@@ -18,13 +21,15 @@ import { AddExceptionFlyoutWrapper } from '../../../../detections/components/ale
 import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/event_filters_flyout';
 import { OsqueryFlyout } from '../../../../detections/components/osquery/osquery_flyout';
 import { useDocumentDetailsContext } from '../context';
-import { useHostIsolation } from '../hooks/use_host_isolation';
 import { useRefetchByScope } from '../../../../flyout_v2/document/hooks/use_refetch_by_scope';
 import { useExceptionFlyout } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
 import { isActiveTimeline } from '../../../../helpers';
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
-import { IsolateHostPanelHeader } from '../../isolate_host/header';
-import { IsolateHostPanelContent } from '../../isolate_host/content';
+import { useKibana } from '../../../../common/lib/kibana';
+import { flyoutProviders } from '../../../../flyout_v2/shared/components/flyout_provider';
+import { defaultToolsFlyoutProperties } from '../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { documentFlyoutHistoryKey } from '../../../../flyout_v2/shared/constants/flyout_history';
+import { HostIsolation } from '../../../../flyout_v2/host_isolation';
 
 interface AlertSummaryData {
   /**
@@ -62,17 +67,46 @@ export const TakeActionButton: FC = () => {
     searchHit,
   } = useDocumentDetailsContext();
 
-  // host isolation interaction
-  const {
-    isolateAction,
-    isHostIsolationPanelOpen,
-    showHostIsolationPanel,
-    isIsolateActionSuccessBannerVisible,
-    handleIsolationActionSuccess,
-    showAlertDetails,
-  } = useHostIsolation();
+  const { services } = useKibana();
+  const { overlays } = services;
+  const store = useStore();
+  const history = useHistory();
+  const hostIsolationFlyoutRef = useRef<OverlayRef | null>(null);
 
-  const { hostName } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const hit = useMemo(
+    () => (searchHit ? buildDataTableRecord(searchHit as EsHitRecord) : undefined),
+    [searchHit]
+  );
+
+  const openHostIsolation = useCallback(
+    (action: 'isolateHost' | 'unisolateHost') => {
+      if (!hit || !dataFormattedForFieldBrowser) {
+        return;
+      }
+      const closeHostIsolation = () => hostIsolationFlyoutRef.current?.close();
+      hostIsolationFlyoutRef.current = overlays.openSystemFlyout(
+        flyoutProviders({
+          services,
+          store,
+          history,
+          children: (
+            <HostIsolation
+              hit={hit}
+              detailsData={dataFormattedForFieldBrowser}
+              isolateAction={action}
+              onClose={closeHostIsolation}
+            />
+          ),
+        }),
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey: documentFlyoutHistoryKey,
+          session: 'start',
+        }
+      );
+    },
+    [dataFormattedForFieldBrowser, history, hit, overlays, services, store]
+  );
 
   const { refetch: refetchAll } = useRefetchByScope({ scopeId });
 
@@ -159,10 +193,10 @@ export const TakeActionButton: FC = () => {
           dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
           dataAsNestedObject={dataAsNestedObject}
           handleOnEventClosed={closeFlyout}
-          isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+          isHostIsolationPanelOpen={false}
           onAddEventFilterClick={onAddEventFilterClick}
           onAddExceptionTypeClick={onAddExceptionTypeClick}
-          onAddIsolationStatusClick={showHostIsolationPanel}
+          onAddIsolationStatusClick={openHostIsolation}
           refetchFlyoutData={refetchFlyoutData}
           refetch={refetchAll}
           scopeId={scopeId}
@@ -196,24 +230,6 @@ export const TakeActionButton: FC = () => {
           onClose={closeOsqueryFlyout}
           ecsData={dataAsNestedObject}
         />
-      )}
-
-      {isHostIsolationPanelOpen && (
-        <EuiFlyout onClose={showAlertDetails} size="m">
-          <IsolateHostPanelHeader
-            isolateAction={isolateAction}
-            data={dataFormattedForFieldBrowser}
-          />
-          <IsolateHostPanelContent
-            isIsolateActionSuccessBannerVisible={isIsolateActionSuccessBannerVisible}
-            hostName={hostName}
-            alertId={alertId ?? undefined}
-            isolateAction={isolateAction}
-            dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-            showAlertDetails={showAlertDetails}
-            handleIsolationActionSuccess={handleIsolationActionSuccess}
-          />
-        </EuiFlyout>
       )}
     </>
   );
