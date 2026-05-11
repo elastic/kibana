@@ -211,7 +211,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
         tags,
         metadata,
         service: { type: 'kibana', version: kibanaVersion },
-        transaction: correlationId ? { id: correlationId } : undefined,
+        span: correlationId ? { id: correlationId } : undefined,
       };
       // Queue operations
       request.documents.push({ _id: document.event.id, ...document });
