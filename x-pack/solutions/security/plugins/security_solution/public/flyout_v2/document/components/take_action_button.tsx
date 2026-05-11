@@ -12,19 +12,23 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import { ALERT_WORKFLOW_STATUS, EVENT_KIND } from '@kbn/rule-data-utils';
+import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EventKind } from '../constants/event_kinds';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy';
 import type { Status } from '../../../../common/api/detection_engine';
+import { getOr } from 'lodash/fp';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useAlertAssigneesActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
 import { useAlertTagsActions } from '../../../detections/components/alerts_table/timeline_actions/use_alert_tags_actions';
+import { useAlertExceptionActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { useRunAlertWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 import { useExploreActions } from '../hooks/use_explore_actions';
+import { useOpenAddRuleException } from '../../add_rule_exception/hooks/use_open_add_rule_exception';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
@@ -93,6 +97,17 @@ export const TakeActionButton = memo(
     const alertStatus = useMemo(() => {
       const rawStatus = getFieldValue(hit, ALERT_WORKFLOW_STATUS);
       return (Array.isArray(rawStatus) ? rawStatus[0] : rawStatus) as Status;
+    }, [hit]);
+    const isEndpointAlert = useMemo(() => {
+      const modules = getOr(
+        [],
+        'kibana.alert.original_event.module',
+        hit.flattened
+      ) as string[];
+      const kinds = getOr([], 'kibana.alert.original_event.kind', hit.flattened) as string[];
+      const moduleList = Array.isArray(modules) ? modules : [modules];
+      const kindList = Array.isArray(kinds) ? kinds : [kinds];
+      return moduleList.includes('endpoint') && kindList.includes('alert');
     }, [hit]);
 
     const { addToCaseActionItems } = useAddToCaseActions({
@@ -169,12 +184,26 @@ export const TakeActionButton = memo(
       closePopover: closePopoverHandler,
     });
 
+    const openAddRuleException = useOpenAddRuleException({ hit, onAlertUpdated });
+    const handleOpenAddRuleException = useCallback(
+      (type?: ExceptionListTypeEnum) => {
+        closePopoverHandler();
+        openAddRuleException(type ?? null);
+      },
+      [closePopoverHandler, openAddRuleException]
+    );
+    const { exceptionActionItems } = useAlertExceptionActions({
+      isEndpointAlert,
+      onAddExceptionTypeClick: handleOpenAddRuleException,
+    });
+
     const items = useMemo(
       () => [
         ...(!isRemoteDocument ? addToCaseActionItems : []),
         ...(!isRemoteDocument && isAlert ? statusActionItems : []),
         ...(!isRemoteDocument && isAlert ? alertTagsItems : []),
         ...(!isRemoteDocument && isAlert ? alertAssigneesItems : []),
+        ...(!isRemoteDocument && isAlert ? exceptionActionItems : []),
         ...(!isRemoteDocument ? (isAlert ? runWorkflowMenuItem : documentWorkflowMenuItem) : []),
         ...(!isRemoteDocument && !isAlert ? noteItems : []),
         ...(isInSecurityApp ? investigateInTimelineActionItems : []),
@@ -185,6 +214,7 @@ export const TakeActionButton = memo(
         alertAssigneesItems,
         alertTagsItems,
         documentWorkflowMenuItem,
+        exceptionActionItems,
         exploreActionItems,
         investigateInTimelineActionItems,
         isAlert,

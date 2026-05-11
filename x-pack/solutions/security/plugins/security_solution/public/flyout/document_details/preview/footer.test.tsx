@@ -17,7 +17,6 @@ import { PREVIEW_FOOTER_TEST_ID, PREVIEW_FOOTER_LINK_TEST_ID } from './test_ids'
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from '../shared/components/test_ids';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import { useKibana } from '../../../common/lib/kibana';
-import { useAlertExceptionActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useInvestigateInTimeline } from '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 
@@ -31,7 +30,6 @@ jest.mock('react-router-dom', () => {
 });
 
 jest.mock('../../../common/lib/kibana');
-jest.mock('../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions');
 jest.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
@@ -49,7 +47,6 @@ describe('<PreviewPanelFooter />', () => {
         cases: { hooks: { useIsAddToCaseOpen: jest.fn().mockReturnValue(false) } },
       },
     });
-    (useAlertExceptionActions as jest.Mock).mockReturnValue({ exceptionActionItems: [] });
     (useInvestigateInTimeline as jest.Mock).mockReturnValue({
       investigateInTimelineActionItems: [],
     });
