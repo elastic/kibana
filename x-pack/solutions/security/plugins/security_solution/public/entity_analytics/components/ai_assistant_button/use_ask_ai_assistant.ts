@@ -9,7 +9,7 @@ import { useMemo, useCallback } from 'react';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
 import { type Replacements } from '@kbn/elastic-assistant-common';
 
-import { useAssistantAvailability } from '../../../../../assistant/use_assistant_availability';
+import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 
 /**
  * This category is provided in the prompt context for the assistant
