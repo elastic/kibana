@@ -48,7 +48,8 @@ export function registerDefaultRepositoryRoutes({
           filter_path: DEFAULT_REPOSITORY_PATH,
         });
 
-        const { repositories }: DefaultRepositorySettings = persistent;
+        const { repositories }: DefaultRepositorySettings = (persistent ??
+          {}) as DefaultRepositorySettings;
 
         return res.ok({
           body: { repositoryName: repositories?.default_repository ?? null },

@@ -42,6 +42,14 @@ describe('[Snapshot and Restore API Routes] Default repository', () => {
       });
     });
 
+    it('should return null when getSettings does not include persistent', async () => {
+      getSettingsFn.mockResolvedValue({});
+
+      await expect(router.runRequest(mockRequest)).resolves.toEqual({
+        body: { repositoryName: null },
+      });
+    });
+
     it('should return the default repository name from persistent settings', async () => {
       getSettingsFn.mockResolvedValue({
         persistent: { repositories: { default_repository: 'repoA' } },

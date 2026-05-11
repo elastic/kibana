@@ -136,6 +136,30 @@ describe('<RepositoryEdit />', () => {
     });
   });
 
+  it('SHOULD not show default repository load error callout when no default repository is set', async () => {
+    const history = createMemoryHistory({
+      initialEntries: [`/edit_repository/${mockDecodedRepositoryName}`],
+    });
+    render(
+      <I18nProvider>
+        <Router history={history}>
+          <RepositoryEdit
+            history={history}
+            location={history.location}
+            match={{
+              params: { name: mockDecodedRepositoryName },
+              isExact: true,
+              path: '',
+              url: '',
+            }}
+          />
+        </Router>
+      </I18nProvider>
+    );
+
+    expect(screen.queryByText('Default repository could not be loaded')).not.toBeInTheDocument();
+  });
+
   it('SHOULD not show default toggle or attempt setting default when missing privilege', async () => {
     mockUseCanSetDefaultRepository.mockReturnValue(false);
 

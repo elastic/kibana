@@ -151,6 +151,7 @@ describe('<RepositoryAdd />', () => {
     );
 
     expect(screen.getByTestId('pageTitle')).toHaveTextContent('Register repository');
+    expect(screen.queryByText('Default repository could not be loaded')).not.toBeInTheDocument();
   });
 
   it('SHOULD surface API error when save fails', async () => {
