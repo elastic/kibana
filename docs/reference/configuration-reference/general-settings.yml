@@ -264,7 +264,7 @@ groups:
           Add sources for the [Content Security Policy `connect-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/connect-src) in reporting mode.
         datatype: string
         applies_to:
-          - "stack: ga"
+          - "stack: ga 9.5"
           - "ech: unavailable"
           - "self: ga"
 
