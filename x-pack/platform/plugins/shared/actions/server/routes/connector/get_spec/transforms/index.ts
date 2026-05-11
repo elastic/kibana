@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+export { transformGetConnectorSpecResponse } from './transform_get_connector_spec_response/latest';
 
-export const getConnectorSpecParamsSchema = schema.object({
-  id: schema.string({
-    minLength: 1,
-    meta: {
-      description: 'The connector type identifier.',
-    },
-  }),
-});
+export { transformGetConnectorSpecResponse as transformGetConnectorSpecResponseV1 } from './transform_get_connector_spec_response/v1';

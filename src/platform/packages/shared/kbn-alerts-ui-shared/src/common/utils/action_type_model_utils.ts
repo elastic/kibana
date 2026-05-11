@@ -20,7 +20,14 @@ import {
   type ConnectorZodSchema,
 } from '@kbn/connector-specs';
 import { generateFormFields } from '@kbn/response-ops-form-generator';
+import type {
+  ConnectorSpecResponse,
+  ConnectorSpecWireResponse,
+} from '../apis/fetch_connector_spec';
+import { transformConnectorSpecResponse } from '../apis/fetch_connector_spec';
 import type { ActionConnectorFieldsProps, ActionTypeModel } from '../types/action_types';
+
+export type { ConnectorSpecResponse } from '../apis/fetch_connector_spec';
 
 const WORKFLOWS_CONNECTOR_FEATURE_ID = 'workflows';
 
@@ -37,21 +44,6 @@ export function shouldHideWorkflowsOnlyConnector(
   return !(uiSettings?.get<boolean>('workflows:ui:enabled', true) ?? true);
 }
 
-/** Response from GET /internal/actions/connector_types/{id}/spec */
-export interface ConnectorSpecResponse {
-  metadata: {
-    id: string;
-    displayName: string;
-    description: string;
-    icon?: string;
-    docsUrl?: string;
-    minimumLicense: string;
-    isTechnicalPreview?: boolean;
-    supportedFeatureIds: string[];
-  };
-  schema: Record<string, unknown>;
-}
-
 /**
  * Fetches a connector spec from the API.
  */
@@ -60,10 +52,11 @@ export async function fetchConnectorSpec(
   connectorTypeId: string,
   signal?: AbortSignal
 ): Promise<ConnectorSpecResponse> {
-  return http.get<ConnectorSpecResponse>(
+  const wire = await http.get<ConnectorSpecWireResponse>(
     `/internal/actions/connector_types/${encodeURIComponent(connectorTypeId)}/spec`,
     { signal }
   );
+  return transformConnectorSpecResponse(wire);
 }
 
 /**

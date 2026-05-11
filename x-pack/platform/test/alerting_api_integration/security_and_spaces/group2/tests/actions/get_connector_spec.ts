@@ -25,11 +25,11 @@ export default function getConnectorSpecTests({ getService }: FtrProviderContext
         // Verify metadata structure
         expect(response.body).to.have.property('metadata');
         expect(response.body.metadata).to.have.property('id', '.alienvault-otx');
-        expect(response.body.metadata).to.have.property('displayName');
+        expect(response.body.metadata).to.have.property('display_name');
         expect(response.body.metadata).to.have.property('description');
-        expect(response.body.metadata).to.have.property('minimumLicense');
-        expect(response.body.metadata).to.have.property('supportedFeatureIds');
-        expect(response.body.metadata.supportedFeatureIds).to.be.an('array');
+        expect(response.body.metadata).to.have.property('minimum_license');
+        expect(response.body.metadata).to.have.property('supported_feature_ids');
+        expect(response.body.metadata.supported_feature_ids).to.be.an('array');
 
         // Verify schema structure
         expect(response.body).to.have.property('schema');
@@ -120,17 +120,17 @@ export default function getConnectorSpecTests({ getService }: FtrProviderContext
 
         // Required fields per the route schema
         expect(metadata).to.have.property('id');
-        expect(metadata).to.have.property('displayName');
+        expect(metadata).to.have.property('display_name');
         expect(metadata).to.have.property('description');
-        expect(metadata).to.have.property('minimumLicense');
-        expect(metadata).to.have.property('supportedFeatureIds');
+        expect(metadata).to.have.property('minimum_license');
+        expect(metadata).to.have.property('supported_feature_ids');
 
         // Type validations
         expect(typeof metadata.id).to.eql('string');
-        expect(typeof metadata.displayName).to.eql('string');
+        expect(typeof metadata.display_name).to.eql('string');
         expect(typeof metadata.description).to.eql('string');
-        expect(typeof metadata.minimumLicense).to.eql('string');
-        expect(Array.isArray(metadata.supportedFeatureIds)).to.eql(true);
+        expect(typeof metadata.minimum_license).to.eql('string');
+        expect(Array.isArray(metadata.supported_feature_ids)).to.eql(true);
       });
 
       it('works without space prefix (default space)', async () => {

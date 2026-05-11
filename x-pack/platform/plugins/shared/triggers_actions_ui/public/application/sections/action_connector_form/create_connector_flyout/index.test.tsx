@@ -898,10 +898,10 @@ describe('CreateConnectorFlyout', () => {
     const mockSpecResponse = {
       metadata: {
         id: 'spec-connector-test',
-        displayName: 'Spec Connector Test',
+        display_name: 'Spec Connector Test',
         description: 'Connect to Test API',
-        minimumLicense: 'basic',
-        supportedFeatureIds: ['workflows'],
+        minimum_license: 'basic',
+        supported_feature_ids: ['workflows'],
       },
       schema: {
         type: 'object',

@@ -41,9 +41,13 @@ export async function getConnectorSpec({
     const webhookSettings = configurationUtilities.getWebhookSettings();
     const isPfxEnabled = webhookSettings.ssl.pfx.enabled;
     const isEarsEnabled = configurationUtilities.isEarsEnabled();
-    return serializeConnectorSpec(spec, { isPfxEnabled, isEarsEnabled });
+    const serialized = serializeConnectorSpec(spec, { isPfxEnabled, isEarsEnabled });
+    return {
+      metadata: serialized.metadata,
+      schema: serialized.schema,
+    };
   } catch (error) {
-    throw Boom.badImplementation(
+    throw new Error(
       `Failed to serialize connector spec: ${
         error instanceof Error ? error.message : String(error)
       }`

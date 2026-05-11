@@ -74,13 +74,13 @@ describe('getConnectorSpecRoute', () => {
     const router = httpServiceMock.createRouter();
     const actionsConfigUtils = createActionsConfigUtilsMock();
     const actionsClient = actionsClientMock.create();
-    const responseBody = {
+    const clientResult = {
       metadata: {
         id: 'test-connector',
         displayName: 'Test Connector',
         description: 'A test connector',
         minimumLicense: 'basic' as const,
-        supportedFeatureIds: ['alerting'],
+        supportedFeatureIds: ['alerting'] as const,
         isTechnicalPreview: true,
       },
       schema: {
@@ -91,7 +91,18 @@ describe('getConnectorSpecRoute', () => {
         },
       },
     };
-    actionsClient.getConnectorSpec.mockResolvedValue(responseBody as never);
+    const responseBody = {
+      metadata: {
+        id: 'test-connector',
+        display_name: 'Test Connector',
+        description: 'A test connector',
+        minimum_license: 'basic',
+        supported_feature_ids: ['alerting'],
+        is_technical_preview: true,
+      },
+      schema: clientResult.schema,
+    };
+    actionsClient.getConnectorSpec.mockResolvedValue(clientResult as never);
 
     getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
 
@@ -121,7 +132,16 @@ describe('getConnectorSpecRoute', () => {
       earsEnabled: true,
     });
     const actionsClient = actionsClientMock.create();
-    actionsClient.getConnectorSpec.mockResolvedValue({ metadata: {}, schema: {} } as never);
+    actionsClient.getConnectorSpec.mockResolvedValue({
+      metadata: {
+        id: 'test-connector',
+        displayName: 'Test',
+        description: 'Test',
+        minimumLicense: 'basic',
+        supportedFeatureIds: ['alerting'],
+      },
+      schema: {},
+    } as never);
 
     getConnectorSpecRoute(router, licenseState, actionsConfigUtils);
 
@@ -173,7 +193,16 @@ describe('getConnectorSpecRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     const actionsClient = actionsClientMock.create();
-    actionsClient.getConnectorSpec.mockResolvedValue({ metadata: {}, schema: {} } as never);
+    actionsClient.getConnectorSpec.mockResolvedValue({
+      metadata: {
+        id: 'test-connector',
+        displayName: 'Test',
+        description: 'Test',
+        minimumLicense: 'basic',
+        supportedFeatureIds: ['alerting'],
+      },
+      schema: {},
+    } as never);
 
     getConnectorSpecRoute(router, licenseState, createActionsConfigUtilsMock());
 
@@ -211,12 +240,12 @@ describe('getConnectorSpecRoute', () => {
     expect(verifyAccessAndContext).toHaveBeenCalledWith(licenseState, expect.any(Function));
   });
 
-  it('propagates serialization failure from getConnectorSpec (wrapped by handleLegacyErrors in production)', async () => {
+  it('propagates serialization failure from getConnectorSpec', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
     const actionsClient = actionsClientMock.create();
     actionsClient.getConnectorSpec.mockRejectedValue(
-      Boom.badImplementation('Failed to serialize connector spec: Serialization error')
+      new Error('Failed to serialize connector spec: Serialization error')
     );
 
     getConnectorSpecRoute(router, licenseState, createActionsConfigUtilsMock());
@@ -226,14 +255,12 @@ describe('getConnectorSpecRoute', () => {
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
       { params: { id: 'test-connector' } },
-      ['ok', 'customError']
+      ['ok']
     );
 
-    await expect(handler(context, req, res)).rejects.toMatchObject({
-      output: {
-        statusCode: 500,
-      },
-    });
+    await expect(handler(context, req, res)).rejects.toThrow(
+      'Failed to serialize connector spec: Serialization error'
+    );
   });
 
   it('validates request params schema', async () => {

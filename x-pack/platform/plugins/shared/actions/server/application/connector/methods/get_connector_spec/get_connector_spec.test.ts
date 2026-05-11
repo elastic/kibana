@@ -87,6 +87,8 @@ describe('getConnectorSpec', () => {
     });
     expect(result).toHaveProperty('metadata');
     expect(result.metadata).toHaveProperty('id', '.alienvault-otx');
+    expect(result.metadata).toHaveProperty('displayName');
+    expect(result.metadata).toHaveProperty('supportedFeatureIds');
     expect(result).toHaveProperty('schema');
   });
 

@@ -920,10 +920,10 @@ describe('EditConnectorFlyout spec loading', () => {
   const mockSpecResponse = {
     metadata: {
       id: 'spec-edit-connector',
-      displayName: 'Spec Edit Connector',
+      display_name: 'Spec Edit Connector',
       description: 'Connect to Test API',
-      minimumLicense: 'basic',
-      supportedFeatureIds: ['workflows'],
+      minimum_license: 'basic',
+      supported_feature_ids: ['workflows'],
     },
     schema: {
       type: 'object',

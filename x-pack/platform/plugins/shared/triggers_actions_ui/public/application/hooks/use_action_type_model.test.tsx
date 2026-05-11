@@ -30,10 +30,10 @@ describe('useActionTypeModel', () => {
   const mockSpecResponse = {
     metadata: {
       id: 'spec-connector',
-      displayName: 'Spec Connector',
+      display_name: 'Spec Connector',
       description: 'A spec-based connector',
-      minimumLicense: 'basic',
-      supportedFeatureIds: ['alerting'],
+      minimum_license: 'basic',
+      supported_feature_ids: ['alerting'],
     },
     schema: serializeConnectorSpec(connectorsSpecs.AlienVaultOTXConnector).schema as Record<
       string,
@@ -444,7 +444,7 @@ describe('useActionTypeModel', () => {
       metadata: {
         ...mockSpecResponse.metadata,
         id: 'workflows-spec-connector',
-        supportedFeatureIds: [WORKFLOWS_CONNECTOR_FEATURE_ID],
+        supported_feature_ids: [WORKFLOWS_CONNECTOR_FEATURE_ID],
       },
     };
 

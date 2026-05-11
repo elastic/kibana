@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getConnectorSpecParamsSchema, getConnectorSpecResponseBodySchema } from './v1';
+export { getConnectorSpecParamsSchema } from './v1';

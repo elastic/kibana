@@ -9,14 +9,18 @@ import type { IRouter } from '@kbn/core/server';
 import {
   type GetConnectorSpecParamsV1,
   getConnectorSpecParamsSchemaV1,
-  getConnectorSpecResponseBodySchemaV1,
 } from '../../../../common/routes/connector/apis/get_spec';
+import {
+  getConnectorSpecResponseBodySchemaV1,
+  type GetConnectorSpecResponseV1,
+} from '../../../../common/routes/connector/response';
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { INTERNAL_BASE_ACTION_API_PATH } from '../../../../common';
 import type { ILicenseState } from '../../../lib';
 import type { ActionsConfigurationUtilities } from '../../../actions_config';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';
+import { transformGetConnectorSpecResponseV1 } from './transforms';
 
 /**
  * GET /internal/actions/connector_types/{id}/spec
@@ -64,11 +68,13 @@ export const getConnectorSpecRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
         const { id }: GetConnectorSpecParamsV1 = req.params;
-        const body = await actionsClient.getConnectorSpec({
+        const specResult = await actionsClient.getConnectorSpec({
           id,
           configurationUtilities,
         });
-        return res.ok({ body });
+        const responseBody: GetConnectorSpecResponseV1 =
+          transformGetConnectorSpecResponseV1(specResult);
+        return res.ok({ body: responseBody });
       })
     )
   );
