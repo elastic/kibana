@@ -9,6 +9,15 @@ export const BIGGER_TIMEOUT = 20000 as const;
 export const SHORTER_TIMEOUT = 5000 as const;
 
 export const RULE_DETAILS_APP_PATH = 'management/insightsAndAlerting/triggersActions';
+export const CONNECTORS_APP_PATH = '/app/management/insightsAndAlerting/triggersActionsConnectors';
+export const MAINTENANCE_WINDOWS_APP_PATH =
+  '/app/management/insightsAndAlerting/maintenanceWindows';
+
+// Shared CSS selectors for the connectors list page.
+export const CONNECTORS_LIST_SELECTORS = {
+  SEARCH_INPUT: '[data-test-subj="actionsList"] .euiFieldSearch',
+  TABLE_LOADED: '.euiBasicTable[data-test-subj="actionsTable"]:not(.euiBasicTable-loading)',
+} as const;
 
 export const RULE_DETAILS_TEST_SUBJECTS = {
   RULE_DETAILS_TITLE: 'ruleDetailsTitle',

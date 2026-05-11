@@ -21,6 +21,10 @@ type CommonlyUsedTimeRange =
   | 'Last_90 days'
   | 'Last_1 year';
 
+interface TimeoutOptions {
+  timeout?: number;
+}
+
 export class DashboardApp {
   private readonly renderable: RenderablePage;
   private readonly toasts: Toasts;
@@ -133,9 +137,9 @@ export class DashboardApp {
   }
 
   /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */
-  async openNewDashboard() {
+  async openNewDashboard(options?: TimeoutOptions) {
     await this.page.gotoApp('dashboards', { hash: '/create' });
-    await expect(this.addTopNavButton).toBeVisible({ timeout: 20_000 });
+    await expect(this.addTopNavButton).toBeVisible({ timeout: options?.timeout ?? 20_000 });
   }
 
   private getSettingsFlyout() {
@@ -264,12 +268,12 @@ export class DashboardApp {
    * Opens the "Add from library" flyout.
    * Low-level building block used by addEmbeddable().
    */
-  private async openLibraryFlyout() {
+  private async openLibraryFlyout(options?: TimeoutOptions) {
     await this.addTopNavButton.click();
     await this.page.testSubj.click('addToDashboardTab-library');
     await expect(this.savedObjectsFinderTable).toBeVisible();
     await expect(this.savedObjectFinderLoadingIndicator).toBeHidden({
-      timeout: 30_000,
+      timeout: options?.timeout ?? 30_000,
     });
   }
 
@@ -287,8 +291,13 @@ export class DashboardApp {
    *
    * @param embeddableName - Name with dashes (e.g., 'Rendering-Test:-saved-search')
    * @param embeddableType - Optional type filter (e.g., 'search', 'Visualization')
+   * @param options - Optional timeout overrides
    */
-  private async filterEmbeddableNames(embeddableName: string, embeddableType?: string) {
+  private async filterEmbeddableNames(
+    embeddableName: string,
+    embeddableType?: string,
+    options?: TimeoutOptions
+  ) {
     // Build search query using type filter and quoted name.
     // type:(search) "Rendering Test:-saved-search" (only first dash replaced with space)
     const typePrefix = embeddableType ? `type:(${embeddableType}) ` : '';
@@ -301,7 +310,7 @@ export class DashboardApp {
 
     // Wait for search results to load
     await expect(this.savedObjectFinderLoadingIndicator).toBeHidden({
-      timeout: 30_000,
+      timeout: options?.timeout ?? 30_000,
     });
   }
 
@@ -310,10 +319,11 @@ export class DashboardApp {
    *
    * @param embeddableName - Name with dashes (e.g., 'Rendering-Test:-saved-search')
    * @param embeddableType - Optional type filter (e.g., 'search', 'Visualization')
+   * @param options - Optional timeout overrides
    */
-  async addEmbeddable(embeddableName: string, embeddableType?: string) {
-    await this.openLibraryFlyout();
-    await this.filterEmbeddableNames(embeddableName, embeddableType);
+  async addEmbeddable(embeddableName: string, embeddableType?: string, options?: TimeoutOptions) {
+    await this.openLibraryFlyout(options);
+    await this.filterEmbeddableNames(embeddableName, embeddableType, options);
 
     // Click on the saved object title
     const titleSelector = `savedObjectTitle${embeddableName.split(' ').join('-')}`;
@@ -335,9 +345,10 @@ export class DashboardApp {
    * Wrapper around addEmbeddable() with type='search'.
    *
    * @param searchName - Name with dashes (e.g., 'Rendering-Test:-saved-search')
+   * @param options - Optional timeout overrides
    */
-  async addSavedSearch(searchName: string) {
-    return this.addEmbeddable(searchName, 'search');
+  async addSavedSearch(searchName: string, options?: TimeoutOptions) {
+    return this.addEmbeddable(searchName, 'search', options);
   }
 
   /**
@@ -345,9 +356,10 @@ export class DashboardApp {
    * Wrapper around addEmbeddable() with type='lens'.
    *
    * @param lensName - Name of the Lens saved object
+   * @param options - Optional timeout overrides
    */
-  async addLens(lensName: string) {
-    return this.addEmbeddable(lensName, 'lens');
+  async addLens(lensName: string, options?: TimeoutOptions) {
+    return this.addEmbeddable(lensName, 'lens', options);
   }
 
   /**
@@ -477,31 +489,22 @@ export class DashboardApp {
     return Number(attribute);
   }
 
-  async getPanelGroupOrder(): Promise<string[]> {
-    const panelGroups = await this.panelSelectionFlyout
+  async getAddPanelFlyoutGroups(): Promise<string[]> {
+    const groupElements = await this.panelSelectionFlyout
       .locator('[data-test-subj*="dashboardEditorMenu-"]')
       .all();
 
-    const panelGroupData = await Promise.all(
-      panelGroups.map(async (panelGroup) => {
-        const order = await panelGroup.getAttribute('data-group-sort-order');
-        const testSubj = await panelGroup.getAttribute('data-test-subj');
+    return await Promise.all(
+      groupElements.map(async (groupElement) => {
+        const testSubj = await groupElement.getAttribute('data-test-subj');
+        // remove prefix so strings like 'dashboardEditorMenu-visualizationsGroup' become 'visualizationsGroup'
         const match = testSubj?.match(/dashboardEditorMenu-(.*)/);
-        return { order, groupTitle: match?.[1] };
+        return match?.[1] ?? '';
       })
     );
-
-    const panelGroupByOrder = new Map<string, string>();
-    panelGroupData
-      .filter((item): item is { order: string; groupTitle: string } =>
-        Boolean(item.order && item.groupTitle)
-      )
-      .forEach((item) => panelGroupByOrder.set(item.order, item.groupTitle));
-
-    return [...panelGroupByOrder.values()];
   }
 
-  async getPanelTypeCount(): Promise<number> {
+  async getAddPanelFlyoutPanelTypesCount(): Promise<number> {
     return this.panelSelectionFlyout.locator('[data-test-subj*="create-action-"]').count();
   }
 

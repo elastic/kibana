@@ -8,11 +8,13 @@
 import { AttachmentType } from '../../../common/types/domain';
 import {
   COMMENT_ATTACHMENT_TYPE,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   LEGACY_LENS_ATTACHMENT_TYPE,
   LENS_ATTACHMENT_TYPE,
 } from '../../../common/constants/attachments';
 import { getAttachmentTypeFromAttributes, getAttachmentTypeTransformers } from '.';
 import { commentAttachmentTransformer } from './comment';
+import { externalReferenceAttachmentTransformer } from './external_reference';
 
 const owner = 'cases';
 
@@ -44,6 +46,32 @@ describe('common/attachments', () => {
       expect(getAttachmentTypeFromAttributes({ comment: 'hello', type: 'user' })).toBe(
         AttachmentType.user
       );
+    });
+
+    it('resolves migrated external reference subtypes to unified type names', () => {
+      expect(
+        getAttachmentTypeFromAttributes({
+          type: AttachmentType.externalReference,
+          externalReferenceAttachmentTypeId: 'endpoint',
+        })
+      ).toBe(SECURITY_ENDPOINT_ATTACHMENT_TYPE);
+    });
+
+    it('returns externalReference for unmigrated external reference subtypes', () => {
+      expect(
+        getAttachmentTypeFromAttributes({
+          type: AttachmentType.externalReference,
+          externalReferenceAttachmentTypeId: 'some-unknown-type',
+        })
+      ).toBe(AttachmentType.externalReference);
+    });
+
+    it('returns type for external references without externalReferenceAttachmentTypeId', () => {
+      expect(
+        getAttachmentTypeFromAttributes({
+          type: AttachmentType.externalReference,
+        })
+      ).toBe(AttachmentType.externalReference);
     });
 
     it('returns persistableStateAttachmentTypeId for persistable state attachments', () => {
@@ -89,9 +117,15 @@ describe('common/attachments', () => {
       expect(transformer4).toBe(commentAttachmentTransformer);
     });
 
+    it('returns external reference transformer for security.endpoint', () => {
+      const transformer = getAttachmentTypeTransformers(SECURITY_ENDPOINT_ATTACHMENT_TYPE, owner);
+      expect(transformer).toBe(externalReferenceAttachmentTransformer);
+    });
+
     it('returns pass-through transformer for other types', () => {
       const transformer = getAttachmentTypeTransformers(AttachmentType.alert, owner);
       expect(transformer).not.toBe(commentAttachmentTransformer);
+      expect(transformer).not.toBe(externalReferenceAttachmentTransformer);
       expect(transformer.isType({ type: AttachmentType.alert } as never)).toBe(false);
     });
 

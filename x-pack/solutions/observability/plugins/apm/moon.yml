@@ -97,7 +97,6 @@ dependsOn:
   - '@kbn/metrics-data-access-plugin'
   - '@kbn/profiling-data-access-plugin'
   - '@kbn/profiling-utils'
-  - '@kbn/monaco'
   - '@kbn/deeplinks-observability'
   - '@kbn/custom-icons'
   - '@kbn/elastic-agent-utils'
@@ -125,7 +124,6 @@ dependsOn:
   - '@kbn/apm-types'
   - '@kbn/serverless'
   - '@kbn/aiops-log-rate-analysis'
-  - '@kbn/router-utils'
   - '@kbn/alerting-comparators'
   - '@kbn/saved-search-component'
   - '@kbn/saved-search-plugin'
@@ -163,6 +161,8 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-server'
   - '@kbn/presentation-util'
+  - '@kbn/unified-doc-viewer-plugin'
+  - '@kbn/ebt-click'
 tags:
   - plugin
   - prod
