@@ -390,7 +390,7 @@ export const WatchListPage = () => {
                 { defaultMessage: 'Edit' }
               );
               return (
-                <EuiToolTip content={label} delay="long">
+                <EuiToolTip content={label}>
                   <EuiButtonIcon
                     isDisabled={watch.isSystemWatch}
                     aria-label={i18n.translate(
@@ -416,7 +416,7 @@ export const WatchListPage = () => {
                 { defaultMessage: 'Delete' }
               );
               return (
-                <EuiToolTip content={label} delay="long">
+                <EuiToolTip content={label}>
                   <EuiButtonIcon
                     isDisabled={watch.isSystemWatch}
                     aria-label={i18n.translate(
