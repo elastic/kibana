@@ -8,7 +8,6 @@
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { CellActionRenderer } from '../shared/components/cell_actions';
 import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
@@ -19,6 +18,7 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useTimelineDataFilters } from '../../timelines/containers/use_timeline_data_filters';
 import { Resolver } from '../../resolver/view';
+import { ANALYZER_TITLE } from '../shared/constants/flyout_titles';
 
 export const ANALYZER_GRAPH_TEST_ID = `${PREFIX}AnalyzerGraph` as const;
 
@@ -38,10 +38,6 @@ export interface AnalyzerGraphProps {
 }
 
 const RESOLVER_COMPONENT_INSTANCE_ID = 'flyout_v2_analyzer_graph';
-
-const TITLE = i18n.translate('xpack.securitySolution.flyout.analyzer.title', {
-  defaultMessage: 'Analyzer',
-});
 
 /**
  * Analyzer graph view displayed in the analyzer tools flyout
@@ -75,7 +71,7 @@ export const AnalyzerGraph = memo(
         >
           <ToolsFlyoutHeader
             hit={hit}
-            title={TITLE}
+            title={ANALYZER_TITLE}
             renderCellActions={renderCellActions}
             onAlertUpdated={onAlertUpdated}
           />

@@ -33,6 +33,8 @@ import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use
 import { RuleDetails } from '../../../../../flyout_v2/rule';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { formatFlyoutTitle } from '../../../../../flyout_v2/document/utils/get_header_title';
+import { RULE_FLYOUT_TITLE } from '../../../../../flyout_v2/shared/constants/flyout_titles';
 
 const EventModuleFlexItem = styled(EuiFlexItem)`
   width: 100%;
@@ -95,6 +97,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       }
 
       if (newFlyoutSystemEnabled && ruleId) {
+        const ruleTitle = formatFlyoutTitle(RULE_FLYOUT_TITLE, ruleName);
         overlays.openSystemFlyout(
           flyoutProviders({
             services,
@@ -104,7 +107,8 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
           }),
           {
             ...defaultDocumentFlyoutProperties,
-            session: 'inherit',
+            session: 'start',
+            title: ruleTitle,
           }
         );
         return;
@@ -133,6 +137,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
       store,
       history,
       defaultDocumentFlyoutProperties,
+      ruleName,
     ]
   );
 
@@ -262,7 +267,7 @@ export const renderEventModule = ({
             }
           >
             <EuiLink href={endpointRefUrl} target="_blank">
-              <EuiIcon type={endPointSvg} size="m" />
+              <EuiIcon type={endPointSvg} size="m" aria-hidden={true} />
             </EuiLink>
           </EuiToolTip>
         </EuiFlexItem>

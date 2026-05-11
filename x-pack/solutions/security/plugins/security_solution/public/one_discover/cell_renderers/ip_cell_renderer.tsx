@@ -12,7 +12,10 @@ import { useHistory } from 'react-router-dom';
 import { getOrEmptyTagFromValue } from '../../common/components/empty_value';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
-import { buildFlyoutContent } from '../../flyout_v2/shared/utils/build_flyout_content';
+import {
+  buildFlyoutContent,
+  buildFlyoutTitleFromField,
+} from '../../flyout_v2/shared/utils/flyout_field_resolver';
 import { DataViewManagerBootstrap } from '../alert_flyout_overview_tab_component/data_view_manager_bootstrap';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
@@ -44,6 +47,7 @@ export const IpCellRenderer = React.memo<IpCellRendererProps>(({ services, store
     (ip: string) => {
       const flyoutContent = buildFlyoutContent(props.columnId, ip);
       if (flyoutContent) {
+        const ipTitle = buildFlyoutTitleFromField(props.columnId, ip);
         overlays.openSystemFlyout(
           flyoutProviders({
             services,
@@ -59,6 +63,7 @@ export const IpCellRenderer = React.memo<IpCellRendererProps>(({ services, store
           {
             ...defaultDocumentFlyoutProperties,
             session: 'start',
+            title: ipTitle,
           }
         );
       }

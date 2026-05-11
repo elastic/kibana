@@ -10,9 +10,9 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { ChildLink } from './child_link';
 import { CHILD_LINK_TEST_ID } from './test_ids';
-import { buildFlyoutContent } from '../utils/build_flyout_content';
+import { buildFlyoutContent } from '../utils/flyout_field_resolver';
 
-jest.mock('../utils/build_flyout_content');
+jest.mock('../utils/flyout_field_resolver');
 jest.mock('./flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));

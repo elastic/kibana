@@ -60,6 +60,7 @@ import { isAttackDiscoveryRow } from './is_attack_discovery_row';
 import { DocumentFlyoutWrapper } from '../../../../../flyout_v2/document/document_flyout_wrapper';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { getDocumentHistoryTitle } from '../../../../../flyout_v2/document/utils/get_header_title';
 
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
@@ -206,6 +207,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
               ...defaultFlyoutProperties,
               historyKey: documentFlyoutHistoryKey,
               session: 'start',
+              title: getDocumentHistoryTitle(eventData),
             }
           );
         } else {

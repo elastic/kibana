@@ -5,17 +5,22 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { useHistory } from 'react-router-dom';
+import { useStore } from 'react-redux';
 import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
 import { CorrelationsDetailsView } from './components/correlations_details_view';
-
-const TITLE = i18n.translate('xpack.securitySolution.flyout.correlations.title', {
-  defaultMessage: 'Correlations',
-});
+import { useKibana } from '../../common/lib/kibana';
+import type { CellActionRenderer } from '../shared/components/cell_actions';
+import { flyoutProviders } from '../shared/components/flyout_provider';
+import { DocumentFlyoutWrapper } from '../document/document_flyout_wrapper';
+import { useDefaultDocumentFlyoutProperties } from '../shared/hooks/use_default_flyout_properties';
+import { useFlyoutNavTitle } from '../shared/hooks/use_flyout_nav_title';
+import { CORRELATIONS_TITLE } from '../shared/constants/flyout_titles';
+import { getAlertHistoryTitle } from '../document/utils/get_header_title';
 
 export interface CorrelationsDetailsProps {
   /**
@@ -31,9 +36,13 @@ export interface CorrelationsDetailsProps {
    */
   isRulePreview: boolean;
   /**
-   * Callback to open an alert preview when clicking the preview button in the correlations table
+   * Renderer used by the document flyout for field cell actions.
    */
-  onShowAlert: (id: string, indexName: string) => void;
+  renderCellActions: CellActionRenderer;
+  /**
+   * Callback invoked after alert mutations to refresh parent flyout content.
+   */
+  onAlertUpdated: () => void;
   /**
    * Callback to open an attack preview when clicking the expand button in the related attacks table.
    * When not provided, the expand button column is hidden.
@@ -47,8 +56,55 @@ export interface CorrelationsDetailsProps {
  * This component is meant to be used in a tools flyout, with the new EUI flyout system.
  */
 export const CorrelationsDetails = memo(
-  ({ hit, scopeId, isRulePreview, onShowAlert, onShowAttack }: CorrelationsDetailsProps) => {
+  ({
+    hit,
+    scopeId,
+    isRulePreview,
+    renderCellActions,
+    onAlertUpdated,
+    onShowAttack,
+  }: CorrelationsDetailsProps) => {
     const { euiTheme } = useEuiTheme();
+    const { services } = useKibana();
+    const { overlays } = services;
+    const store = useStore();
+    const history = useHistory();
+    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+    const buildChildFlyoutTitle = useFlyoutNavTitle();
+
+    const onShowAlert = useCallback(
+      (id: string, indexName: string) =>
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: (
+              <DocumentFlyoutWrapper
+                documentId={id}
+                indexName={indexName}
+                renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
+              />
+            ),
+          }),
+          {
+            ...defaultFlyoutProperties,
+            session: 'inherit',
+            title: buildChildFlyoutTitle(getAlertHistoryTitle()),
+          }
+        ),
+      [
+        buildChildFlyoutTitle,
+        defaultFlyoutProperties,
+        renderCellActions,
+        history,
+        onAlertUpdated,
+        overlays,
+        services,
+        store,
+      ]
+    );
 
     return (
       <>
@@ -58,7 +114,7 @@ export const CorrelationsDetails = memo(
             padding-block: ${euiTheme.size.s} !important;
           `}
         >
-          <ToolsFlyoutHeader hit={hit} title={TITLE} />
+          <ToolsFlyoutHeader hit={hit} title={CORRELATIONS_TITLE} />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <CorrelationsDetailsView

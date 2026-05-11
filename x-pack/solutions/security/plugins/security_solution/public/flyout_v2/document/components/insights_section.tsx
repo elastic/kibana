@@ -6,14 +6,12 @@
  */
 
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
-import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useMemo } from 'react';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { documentFlyoutHistoryKey } from '../../shared/constants/flyout_history';
-import { DocumentFlyoutWrapper } from '../document_flyout_wrapper';
 import { type CellActionRenderer } from '../../shared/components/cell_actions';
 import { EventKind } from '../constants/event_kinds';
 import { getColumns } from '../../prevalence/utils/get_columns';
@@ -26,25 +24,22 @@ import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
 import { CorrelationsOverview } from './correlations_overview';
 import { PrevalenceOverview } from './prevalence_overview';
-import { PrevalenceDetails } from '../../prevalence';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { CorrelationsDetails } from '../../correlations';
 import { ThreatIntelligenceDetails } from '../../threat_intelligence';
 import { ChildLink } from '../../shared/components/child_link';
+import { PrevalenceDetails } from '../../prevalence';
+import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import {
-  defaultToolsFlyoutProperties,
-  useDefaultDocumentFlyoutProperties,
-} from '../../shared/hooks/use_default_flyout_properties';
+  CORRELATIONS_TITLE,
+  INSIGHTS_SECTION_TITLE,
+  PREVALENCE_TITLE,
+  THREAT_INTELLIGENCE_TITLE,
+} from '../../shared/constants/flyout_titles';
+import { formatFlyoutTitle, getDocumentTitle } from '../utils/get_header_title';
 
 export const INSIGHTS_SECTION_TEST_ID = `${PREFIX}InsightsSection` as const;
-
-export const INSIGHTS_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.document.insights.sectionTitle',
-  {
-    defaultMessage: 'Insights',
-  }
-);
 
 const LOCAL_STORAGE_SECTION_KEY = 'insights';
 
@@ -73,7 +68,6 @@ export const InsightsSection = memo(
     const { overlays } = services;
     const store = useStore();
     const history = useHistory();
-    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
     const isInSecurityApp = useIsInSecurityApp();
     const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
 
@@ -112,41 +106,10 @@ export const InsightsSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
+          title: formatFlyoutTitle(THREAT_INTELLIGENCE_TITLE, getDocumentTitle(hit)),
         }
       );
     }, [history, historyKey, hit, overlays, services, store]);
-
-    const onShowAlert = useCallback(
-      (id: string, indexName: string) =>
-        overlays.openSystemFlyout(
-          flyoutProviders({
-            services,
-            store,
-            history,
-            children: (
-              <DocumentFlyoutWrapper
-                documentId={id}
-                indexName={indexName}
-                renderCellActions={renderCellActions}
-                onAlertUpdated={onAlertUpdated}
-              />
-            ),
-          }),
-          {
-            ...defaultFlyoutProperties,
-            session: 'inherit',
-          }
-        ),
-      [
-        defaultFlyoutProperties,
-        renderCellActions,
-        history,
-        onAlertUpdated,
-        overlays,
-        services,
-        store,
-      ]
-    );
 
     const onShowCorrelationsDetails = useCallback(() => {
       overlays.openSystemFlyout(
@@ -159,7 +122,8 @@ export const InsightsSection = memo(
               hit={hit}
               scopeId=""
               isRulePreview={false}
-              onShowAlert={onShowAlert}
+              renderCellActions={renderCellActions}
+              onAlertUpdated={onAlertUpdated}
             />
           ),
         }),
@@ -167,9 +131,10 @@ export const InsightsSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
+          title: formatFlyoutTitle(CORRELATIONS_TITLE, getDocumentTitle(hit)),
         }
       );
-    }, [history, historyKey, hit, onShowAlert, overlays, services, store]);
+    }, [history, historyKey, hit, onAlertUpdated, overlays, renderCellActions, services, store]);
 
     const onShowPrevalenceDetails = useCallback(() => {
       overlays.openSystemFlyout(
@@ -190,6 +155,7 @@ export const InsightsSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
+          title: formatFlyoutTitle(PREVALENCE_TITLE, getDocumentTitle(hit)),
         }
       );
     }, [

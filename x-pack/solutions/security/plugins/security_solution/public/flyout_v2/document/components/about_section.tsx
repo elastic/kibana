@@ -7,9 +7,8 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import { type DataTableRecord, getFieldValue } from '@kbn/discover-utils';
-import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useMemo } from 'react';
-import { ALERT_RULE_UUID, EVENT_KIND } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID, EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { EventKind } from '../constants/event_kinds';
@@ -22,6 +21,8 @@ import { useKibana } from '../../../common/lib/kibana';
 import { flyoutProviders } from '../../shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import { RuleDetails } from '../../rule';
+import { formatFlyoutTitle } from '../utils/get_header_title';
+import { useFlyoutNavTitle } from '../../shared/hooks/use_flyout_nav_title';
 import { AlertDescription } from './alert_description';
 import { AlertReason } from './alert_reason';
 import { AlertStatus } from './alert_status';
@@ -29,15 +30,9 @@ import { MitreAttack } from './mitre_attack';
 import { EventCategoryDescription } from './event_category_description';
 import { EventKindDescription } from './event_kind_description';
 import { EventRenderer } from './event_renderer';
+import { ABOUT_SECTION_TITLE, RULE_FLYOUT_TITLE } from '../../shared/constants/flyout_titles';
 
 export const ABOUT_SECTION_TEST_ID = `${PREFIX}AboutSection` as const;
-
-export const ABOUT_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.document.about.sectionTitle',
-  {
-    defaultMessage: 'About',
-  }
-);
 
 const LOCAL_STORAGE_SECTION_KEY = 'about';
 
@@ -70,6 +65,13 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
     [hit, isAlert]
   );
 
+  const ruleName = useMemo(
+    () => (isAlert ? (getFieldValue(hit, ALERT_RULE_NAME) as string | undefined) : undefined),
+    [hit, isAlert]
+  );
+
+  const buildChildFlyoutTitle = useFlyoutNavTitle();
+
   const onShowRuleSummary = useCallback(() => {
     overlays.openSystemFlyout(
       flyoutProviders({
@@ -81,9 +83,19 @@ export const AboutSection = memo(({ hit }: AboutSectionProps) => {
       {
         ...defaultDocumentFlyoutProperties,
         session: 'inherit',
+        title: buildChildFlyoutTitle(formatFlyoutTitle(RULE_FLYOUT_TITLE, ruleName)),
       }
     );
-  }, [defaultDocumentFlyoutProperties, history, overlays, ruleId, services, store]);
+  }, [
+    buildChildFlyoutTitle,
+    defaultDocumentFlyoutProperties,
+    history,
+    overlays,
+    ruleName,
+    ruleId,
+    services,
+    store,
+  ]);
 
   const expanded = useExpandSection({
     storageKey: FLYOUT_STORAGE_KEYS.OVERVIEW_TAB_EXPANDED_SECTIONS,

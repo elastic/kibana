@@ -13,11 +13,8 @@ import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
-import {
-  INVESTIGATION_SECTION_TEST_ID,
-  INVESTIGATION_SECTION_TITLE,
-  InvestigationSection,
-} from './investigation_section';
+import { INVESTIGATION_SECTION_TEST_ID, InvestigationSection } from './investigation_section';
+import { INVESTIGATION_SECTION_TITLE } from '../../shared/constants/flyout_titles';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
 import { useKibana } from '../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';

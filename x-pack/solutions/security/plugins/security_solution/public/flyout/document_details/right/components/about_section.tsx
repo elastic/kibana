@@ -31,10 +31,8 @@ import { EventKindDescription } from '../../../../flyout_v2/document/components/
 import { EventRenderer } from '../../../../flyout_v2/document/components/event_renderer';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 import { AlertDescription } from '../../../../flyout_v2/document/components/alert_description';
-import {
-  ABOUT_SECTION_TEST_ID,
-  ABOUT_SECTION_TITLE,
-} from '../../../../flyout_v2/document/components/about_section';
+import { ABOUT_SECTION_TEST_ID } from '../../../../flyout_v2/document/components/about_section';
+import { ABOUT_SECTION_TITLE } from '../../../../flyout_v2/shared/constants/flyout_titles';
 import { AlertStatus } from '../../../../flyout_v2/document/components/alert_status';
 import {
   ALERT_REASON_BANNER,

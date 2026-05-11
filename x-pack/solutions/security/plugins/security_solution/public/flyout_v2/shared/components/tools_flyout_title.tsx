@@ -14,13 +14,14 @@ import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { EventKind } from '../../document/constants/event_kinds';
-import { getDocumentTitle } from '../../document/utils/get_header_title';
+import { getDocumentTitle, getDocumentHistoryTitle } from '../../document/utils/get_header_title';
 import { useKibana } from '../../../common/lib/kibana';
 import type { CellActionRenderer } from './cell_actions';
 import { noopCellActionRenderer } from './cell_actions';
 import { flyoutProviders } from './flyout_provider';
 import { DocumentFlyout } from '../../document';
 import { useDefaultDocumentFlyoutProperties } from '../hooks/use_default_flyout_properties';
+import { useFlyoutNavTitle } from '../hooks/use_flyout_nav_title';
 import { TOOLS_FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 
 const noop = () => {};
@@ -57,7 +58,9 @@ export const ToolsFlyoutTitle: FC<ToolsFlyoutTitleProps> = memo(
       [hit]
     );
     const title = useMemo(() => getDocumentTitle(hit), [hit]);
+    const sessionTitle = useMemo(() => getDocumentHistoryTitle(hit), [hit]);
     const iconType = isAlert ? 'warning' : 'analyzeEvent';
+    const buildChildFlyoutTitle = useFlyoutNavTitle();
 
     const onShowDocument = useCallback(() => {
       services.overlays?.openSystemFlyout(
@@ -73,9 +76,23 @@ export const ToolsFlyoutTitle: FC<ToolsFlyoutTitleProps> = memo(
             />
           ),
         }),
-        { ...defaultFlyoutProperties, session: 'inherit' }
+        {
+          ...defaultFlyoutProperties,
+          session: 'inherit',
+          title: buildChildFlyoutTitle(sessionTitle),
+        }
       );
-    }, [defaultFlyoutProperties, history, hit, onAlertUpdated, renderCellActions, services, store]);
+    }, [
+      buildChildFlyoutTitle,
+      defaultFlyoutProperties,
+      history,
+      hit,
+      onAlertUpdated,
+      renderCellActions,
+      services,
+      sessionTitle,
+      store,
+    ]);
 
     return (
       <EuiButtonEmpty

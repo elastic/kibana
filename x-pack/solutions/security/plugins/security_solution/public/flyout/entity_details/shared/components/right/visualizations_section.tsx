@@ -11,10 +11,8 @@ import { FLYOUT_STORAGE_KEYS } from '../../../../../flyout_v2/document/constants
 import { useExpandSection } from '../../../../../flyout_v2/shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../../../flyout_v2/shared/components/expandable_section';
 import { GraphPreviewContainer } from '../../../../shared/components/graph_preview_container';
-import {
-  VISUALIZATION_SECTION_TEST_ID,
-  VISUALIZATION_SECTION_TITLE,
-} from '../../../../../flyout_v2/document/components/visualizations_section';
+import { VISUALIZATION_SECTION_TEST_ID } from '../../../../../flyout_v2/document/components/visualizations_section';
+import { VISUALIZATION_SECTION_TITLE } from '../../../../../flyout_v2/shared/constants/flyout_titles';
 import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
 import { EntityDetailsLeftPanelTab, type EntityDetailsPath } from '../left_panel/left_panel_header';
 

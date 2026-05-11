@@ -10,7 +10,8 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { act, render } from '@testing-library/react';
 import React from 'react';
 import { useExpandSection } from '../../shared/hooks/use_expand_section';
-import { ABOUT_SECTION_TEST_ID, ABOUT_SECTION_TITLE, AboutSection } from './about_section';
+import { ABOUT_SECTION_TEST_ID, AboutSection } from './about_section';
+import { ABOUT_SECTION_TITLE } from '../../shared/constants/flyout_titles';
 
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: () => ({

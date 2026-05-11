@@ -12,6 +12,7 @@ import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
+import { formatFlyoutTitle } from '../../../flyout_v2/document/utils/get_header_title';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { getOrEmptyTagFromValue } from '../../../common/components/empty_value';
@@ -21,9 +22,10 @@ import { NetworkDetailsLink } from '../../../common/components/links';
 import { NetworkPanelKey } from '../../../flyout/network_details';
 import { FlyoutLink } from '../../../flyout/shared/components/flyout_link';
 import { ChildLink } from '../../../flyout_v2/shared/components/child_link';
-import { Network } from '../../../flyout_v2/network_details';
+import { Network } from '../../../flyout_v2/network';
 import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../flyout_v2/shared/hooks/use_default_flyout_properties';
+import { NETWORK_FLYOUT_TITLE } from '../../../flyout_v2/shared/constants/flyout_titles';
 
 const tryStringify = (value: string | object | null | undefined): string => {
   try {
@@ -82,6 +84,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
         : FlowTargetSourceDest.source;
 
       if (newFlyoutSystemEnabled) {
+        const networkTitle = formatFlyoutTitle(NETWORK_FLYOUT_TITLE, ip);
         overlays.openSystemFlyout(
           flyoutProviders({
             services,
@@ -92,6 +95,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
           {
             ...defaultDocumentFlyoutProperties,
             session: 'start',
+            title: networkTitle,
           }
         );
       } else if (eventContext) {

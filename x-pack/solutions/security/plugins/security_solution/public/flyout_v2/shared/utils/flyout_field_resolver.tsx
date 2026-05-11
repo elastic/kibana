@@ -13,8 +13,28 @@ import {
   SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
-import { Network } from '../../network_details';
+import { Network } from '../../network';
 import { RuleDetails } from '../../rule';
+import { formatFlyoutTitle } from '../../document/utils/get_header_title';
+import { NETWORK_FLYOUT_TITLE, RULE_FLYOUT_TITLE } from '../constants/flyout_titles';
+
+/**
+ * Returns the flyout navigation title for the given field/value pair in the format
+ * "{canonical type} - {value}". Used as the `title` in `openSystemFlyout` options.
+ */
+export const buildFlyoutTitleFromField = (field: string, value: string): string => {
+  const ecsField = getEcsField(field);
+
+  if (ecsField?.type === IP_FIELD_TYPE) {
+    return formatFlyoutTitle(NETWORK_FLYOUT_TITLE, value);
+  }
+
+  if (field === SIGNAL_RULE_NAME_FIELD_NAME || field === LEGACY_SIGNAL_RULE_NAME_FIELD_NAME) {
+    return formatFlyoutTitle(RULE_FLYOUT_TITLE, value);
+  }
+
+  return value;
+};
 
 /**
  * Returns the React element to render inside the system flyout for the given field/value,

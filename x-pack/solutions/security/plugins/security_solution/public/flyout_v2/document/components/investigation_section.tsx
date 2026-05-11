@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
@@ -30,15 +29,13 @@ import { HighlightedFields } from './highlighted_fields';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { ChildLink } from '../../shared/components/child_link';
+import {
+  INVESTIGATION_GUIDE_TITLE,
+  INVESTIGATION_SECTION_TITLE,
+} from '../../shared/constants/flyout_titles';
+import { formatFlyoutTitle, getDocumentTitle } from '../utils/get_header_title';
 
 export const INVESTIGATION_SECTION_TEST_ID = `${PREFIX}InvestigationSection` as const;
-
-export const INVESTIGATION_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.flyout.document.investigation.sectionTitle',
-  {
-    defaultMessage: 'Investigation',
-  }
-);
 
 const LOCAL_STORAGE_SECTION_KEY = 'investigation';
 
@@ -110,6 +107,7 @@ export const InvestigationSection = memo(
           ...defaultToolsFlyoutProperties,
           historyKey,
           session: 'start',
+          title: formatFlyoutTitle(INVESTIGATION_GUIDE_TITLE, getDocumentTitle(hit)),
         }
       );
     }, [history, historyKey, hit, overlays, services, store]);

@@ -8,16 +8,12 @@
 import { css } from '@emotion/react';
 import React, { memo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ToolsFlyoutHeader } from '../shared/components/tools_flyout_header';
 import { ThreatIntelligenceDetailsView } from './components/threat_intelligence_details_view';
+import { THREAT_INTELLIGENCE_TITLE } from '../shared/constants/flyout_titles';
 
 export const THREAT_INTELLIGENCE_TAB_ID = 'threatIntelligence';
-
-const TITLE = i18n.translate('xpack.securitySolution.flyout.threatIntelligence.title', {
-  defaultMessage: 'Threat intelligence',
-});
 
 export interface ThreatIntelligenceDetailsProps {
   /**
@@ -40,7 +36,7 @@ export const ThreatIntelligenceDetails = memo(({ hit }: ThreatIntelligenceDetail
           padding-block: ${euiTheme.size.s} !important;
         `}
       >
-        <ToolsFlyoutHeader hit={hit} title={TITLE} />
+        <ToolsFlyoutHeader hit={hit} title={THREAT_INTELLIGENCE_TITLE} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <ThreatIntelligenceDetailsView hit={hit} />

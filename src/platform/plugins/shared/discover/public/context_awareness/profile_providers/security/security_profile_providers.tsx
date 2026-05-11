@@ -8,6 +8,8 @@
  */
 
 import React from 'react';
+import { getFieldValue } from '@kbn/discover-utils';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import {
   EnhancedAlertEventOverviewLazy,
   EnhancedAlertFlyoutFooterLazy,
@@ -35,6 +37,9 @@ export const createSecurityDocumentProfileProviders = (
         const isAlert = isAlertDocument(params.record);
         const isEvent = isEventDocument(params.record);
         const isIOC = isIOCDocument(params.record);
+        const ruleName = isAlert
+          ? (getFieldValue(params.record, ALERT_RULE_NAME) as string | undefined)
+          : undefined;
 
         let renderFooter = prevDocViewer.renderFooter;
         if (isIOC) {
@@ -78,6 +83,7 @@ export const createSecurityDocumentProfileProviders = (
 
         return {
           ...prevDocViewer,
+          title: isAlert ? i18n.alertFlyoutTitle(ruleName) : prevDocViewer.title,
           renderHeader,
           docViewsRegistry: (registry) => {
             if (isIOC) {
