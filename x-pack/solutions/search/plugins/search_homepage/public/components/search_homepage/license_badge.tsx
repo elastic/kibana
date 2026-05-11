@@ -11,15 +11,19 @@ import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { LicenseType } from '@kbn/licensing-types/src/types';
 import { css } from '@emotion/react';
+import { TrialUsageBadge } from '@kbn/search-shared-ui';
 import { useGetLicenseInfo } from '../../hooks/use_get_license_info';
-import { TrialUsageBadge } from './trial_usage_badge';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const LicenseBadge = () => {
   const { isTrial, licenseType } = useGetLicenseInfo();
   const { euiTheme } = useEuiTheme();
+  const {
+    services: { cloud },
+  } = useKibana();
 
   if (isTrial) {
-    return <TrialUsageBadge />;
+    return <TrialUsageBadge cloud={cloud} />;
   }
 
   const LICENSE_LABEL: Record<LicenseType, string> = {

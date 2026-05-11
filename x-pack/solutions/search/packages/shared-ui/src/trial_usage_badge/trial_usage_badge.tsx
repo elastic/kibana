@@ -23,7 +23,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../hooks/use_kibana';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 const TRIAL_TOTAL_DAYS = 15;
 
@@ -34,20 +34,21 @@ function getProgressColor(value: number, max: number): 'primary' | 'warning' | '
   return 'primary';
 }
 
-export const TrialUsageBadge: React.FC = () => {
+interface TrialUsageBadgeProps {
+  cloud?: CloudStart;
+}
+
+export const TrialUsageBadge: React.FC<TrialUsageBadgeProps> = ({ cloud }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
-  const {
-    services: { cloud },
-  } = useKibana();
 
-  const [billingUrl, setBillingUrl] = useState<string>('');
+  const [billingUrl, setBillingUrl] = useState<string>('llll');
   useEffect(() => {
     cloud
       ?.getPrivilegedUrls()
       .then((urls) => {
         if (urls.billingUrl) {
-          setBillingUrl(urls.billingUrl);
+          // setBillingUrl(urls.billingUrl);
         }
       })
       .catch(() => {});
@@ -64,7 +65,7 @@ export const TrialUsageBadge: React.FC = () => {
         ? {
             onClick: () => setIsPopoverOpen((prev) => !prev),
             onClickAriaLabel: i18n.translate(
-              'xpack.searchHomepage.trialUsageBadge.toggleAriaLabel',
+              'xpack.searchSharedUI.trialUsageBadge.toggleAriaLabel',
               { defaultMessage: 'Toggle trial usage details' }
             ),
             iconType: 'arrowDown',
@@ -73,7 +74,7 @@ export const TrialUsageBadge: React.FC = () => {
         : {})}
       data-test-subj="trialUsageBadge"
     >
-      {i18n.translate('xpack.searchHomepage.trialUsageBadge.trialLabel', {
+      {i18n.translate('xpack.searchSharedUI.trialUsageBadge.trialLabel', {
         defaultMessage: 'TRIAL',
       })}
     </EuiBadge>
@@ -89,17 +90,29 @@ export const TrialUsageBadge: React.FC = () => {
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
       anchorPosition="downLeft"
-      aria-label={i18n.translate('xpack.searchHomepage.trialUsageBadge.popoverAriaLabel', {
+      aria-label={i18n.translate('xpack.searchSharedUI.trialUsageBadge.popoverAriaLabel', {
         defaultMessage: 'Trial usage details',
       })}
       data-test-subj="trialUsagePopover"
     >
-      <EuiPopoverTitle>
+      <EuiPopoverTitle
+        css={
+          trialDaysLeft <= 0
+            ? css`
+                margin-block-end: 0;
+              `
+            : undefined
+        }
+      >
         <EuiTitle size="xxs">
           <h4>
-            {i18n.translate('xpack.searchHomepage.trialUsageBadge.serverlessTitle', {
-              defaultMessage: 'Elasticsearch Serverless',
-            })}
+            {cloud?.isServerlessEnabled
+              ? i18n.translate('xpack.searchSharedUI.trialUsageBadge.serverlessTitle', {
+                  defaultMessage: 'Elasticsearch Serverless',
+                })
+              : i18n.translate('xpack.searchSharedUI.trialUsageBadge.cloudHostedTitle', {
+                  defaultMessage: 'Elastic Cloud Hosted',
+                })}
           </h4>
         </EuiTitle>
       </EuiPopoverTitle>
@@ -114,7 +127,7 @@ export const TrialUsageBadge: React.FC = () => {
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs">
                         <strong>
-                          {i18n.translate('xpack.searchHomepage.trialUsageBadge.trialPeriodLabel', {
+                          {i18n.translate('xpack.searchSharedUI.trialUsageBadge.trialPeriodLabel', {
                             defaultMessage: 'Trial period',
                           })}
                         </strong>
@@ -124,7 +137,7 @@ export const TrialUsageBadge: React.FC = () => {
                       <EuiIconTip
                         type="info"
                         content={i18n.translate(
-                          'xpack.searchHomepage.trialUsageBadge.trialPeriodTooltip',
+                          'xpack.searchSharedUI.trialUsageBadge.trialPeriodTooltip',
                           {
                             defaultMessage:
                               'Your free trial period. After it expires, you will need to subscribe to continue using the service.',
@@ -136,7 +149,7 @@ export const TrialUsageBadge: React.FC = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs">
-                    {i18n.translate('xpack.searchHomepage.trialUsageBadge.daysLeft', {
+                    {i18n.translate('xpack.searchSharedUI.trialUsageBadge.daysLeft', {
                       defaultMessage: '{days} days left',
                       values: { days: trialDaysLeft },
                     })}
@@ -152,7 +165,7 @@ export const TrialUsageBadge: React.FC = () => {
               />
 
               <EuiText size="xs" color="subdued">
-                {i18n.translate('xpack.searchHomepage.trialUsageBadge.daysUsed', {
+                {i18n.translate('xpack.searchSharedUI.trialUsageBadge.daysUsed', {
                   defaultMessage: '{used} / {total} days',
                   values: { used: daysUsed, total: TRIAL_TOTAL_DAYS },
                 })}
@@ -163,7 +176,16 @@ export const TrialUsageBadge: React.FC = () => {
       )}
 
       {billingUrl && (
-        <EuiPopoverFooter>
+        <EuiPopoverFooter
+          css={
+            trialDaysLeft <= 0
+              ? css`
+                  margin-block-start: 0;
+                  border-top: none;
+                `
+              : undefined
+          }
+        >
           <EuiButton
             data-test-subj="trialUsageBadgeManageSubscriptionButton"
             href={billingUrl}
@@ -173,7 +195,7 @@ export const TrialUsageBadge: React.FC = () => {
             iconType="popout"
             iconSide="right"
           >
-            {i18n.translate('xpack.searchHomepage.trialUsageBadge.manageSubscription', {
+            {i18n.translate('xpack.searchSharedUI.trialUsageBadge.manageSubscription', {
               defaultMessage: 'Manage subscription',
             })}
           </EuiButton>

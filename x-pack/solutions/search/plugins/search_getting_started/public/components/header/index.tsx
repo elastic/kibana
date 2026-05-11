@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
@@ -19,7 +19,6 @@ import { KibanaVersionBadge, TrialUsageBadge } from '@kbn/search-shared-ui';
 
 import { docLinks } from '../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
-import { useTrialUsageData } from '../../hooks/use_trial_usage_data';
 import { ElasticsearchConnectionDetails } from '../elasticsearch_connection_details';
 
 export const SearchGettingStartedHeader: React.FC = () => {
@@ -27,20 +26,7 @@ export const SearchGettingStartedHeader: React.FC = () => {
   const {
     services: { cloud, kibanaVersion },
   } = useKibana();
-
-  const { data: trialUsageData } = useTrialUsageData();
-
-  const [billingUrl, setBillingUrl] = useState<string>('');
-  useEffect(() => {
-    cloud
-      ?.getPrivilegedUrls()
-      .then((urls) => {
-        if (urls.billingUrl) {
-          setBillingUrl(urls.billingUrl);
-        }
-      })
-      .catch(() => {});
-  }, [cloud]);
+  const isTrial = cloud?.isInTrial() ?? false;
 
   return (
     <EuiFlexGroup gutterSize={currentBreakpoint === 'xl' ? 'l' : 'xl'} direction="column">
@@ -51,27 +37,13 @@ export const SearchGettingStartedHeader: React.FC = () => {
             alignSelf: 'stretch',
           })}
         >
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-            <EuiFlexItem
-              grow={false}
-              css={css({
-                alignItems: 'flex-start',
-              })}
-            >
-              <TrialUsageBadge
-                billingUrl={billingUrl}
-                isServerless={cloud?.isServerlessEnabled}
-                trialDaysLeft={trialUsageData?.trialDaysLeft}
-                storageUsage={trialUsageData?.storageUsage}
-                mlNodeCount={trialUsageData?.mlNodeCount}
-                mlMemoryLimit={trialUsageData?.mlMemoryLimit}
-                llmTotalTokens={trialUsageData?.llmTotalTokens}
-                searchPowerMax={trialUsageData?.searchPowerMax}
-                searchPowerMin={trialUsageData?.searchPowerMin}
-                boostWindowHours={trialUsageData?.boostWindowHours}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" justifyContent={isTrial ? 'spaceBetween' : 'flexEnd'}>
+            {(true || isTrial) && (
+              <EuiFlexItem grow={false}>
+                <TrialUsageBadge cloud={cloud} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false} order={1}>
               <KibanaVersionBadge
                 docLink={
                   cloud?.isServerlessEnabled
