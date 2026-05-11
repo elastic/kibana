@@ -62,6 +62,14 @@ export class OtelInstance extends Entity<ApmOtelFields> {
     });
   }
 
+  exitSpan({ name }: { name: string }) {
+    return new OtelSpan({
+      ...this.fields,
+      name,
+      kind: 'Client',
+    });
+  }
+
   dbExitSpan({ name, type, statement }: { name: string; type: string; statement?: string }) {
     return new OtelSpan({
       ...this.fields,
