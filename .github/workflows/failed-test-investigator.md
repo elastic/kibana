@@ -144,10 +144,6 @@ Beyond the root-cause `classification` above, decide whether this failure should
 
 - `inconclusive` — none of the above apply with enough confidence; evidence is missing.
 
-## Auto-fix label rule
-
-If and only if `fixability` is `auto-fixable`, add the label `needs-flaky-fix` to the triggering issue using the safe-output `add-labels` mechanism. Do not add this label in any other case. Do not add any other labels.
-
 ## Fix proposal rules
 
 - Propose a fix only when you can point to the likely file or code area.
@@ -181,9 +177,15 @@ One short paragraph with the current best explanation.
 
 ### Flakiness Finding
 
-- `classification`: `test` | `code` | `external` | `inconclusive`
-- `confidence`: `high` | `medium` | `low`
-- `fixability`: `auto-fixable` | `needs-human` | `not-a-flake` | `env-issue` | `inconclusive`
+Emit exactly these five bullets, in this order, with one concrete value per bullet (no choice lists, no placeholders). Downstream tooling parses them directly, so keep the keys, casing, and `` - `key`: value `` shape exactly.
+
+- `classification`: one of `test`, `code`, `external`, `inconclusive`
+- `confidence`: one of `high`, `medium`, `low`
+- `fixability`: one of `auto-fixable`, `needs-human`, `not-a-flake`, `env-issue`, `inconclusive`
+- `test.type`: one of `scout`, `ftr`, `jest`, `unknown`. Use `scout` if the issue carries the `scout-playwright` label; otherwise `ftr` for an FTR-style failure, `jest` for a Jest failure, or `unknown` if you cannot tell.
+- `test.file`: repo-relative path to the failing test, or `unknown`.
+
+If `fixability` is `auto-fixable`, you must also apply the `needs-flaky-fix` label to the triggering issue via `add-labels`. Do not apply that label in any other case.
 
 ### Suspected Root Cause
 
@@ -204,26 +206,6 @@ Use 2 to 5 bullets tied to evidence.
 ### Evidence Used
 
 List the key issue comments, file paths, commits, or links that drove the conclusion.
-
-### Machine-readable metadata footer
-
-After the human-readable sections above, append exactly this HTML-comment-wrapped block at the very end of the comment, with values filled in from your analysis. The Auto-Fix pipeline parses this block, so do not change the keys, casing, or wrappers.
-
-```
-<!-- flaky-fix:metadata -->
-- `classification`: <test|code|external|inconclusive>
-- `confidence`: <high|medium|low>
-- `fixability`: <auto-fixable|needs-human|not-a-flake|env-issue|inconclusive>
-- `test.type`: <scout|ftr|jest|unknown>
-- `test.file`: <repo-relative path or "unknown">
-<!-- /flaky-fix:metadata -->
-```
-
-Rules for the footer:
-
-- Always emit the block, even when `fixability` is `inconclusive` or `not-a-flake`.
-- `test.type` is `scout` if the issue carries the `scout-playwright` label, otherwise `ftr` for an FTR-style failure, `jest` for a Jest failure, or `unknown` if you cannot tell.
-- If `fixability` is `auto-fixable`, you must also apply the `needs-flaky-fix` label to the triggering issue via `add-labels`. Do not apply it in any other case.
 
 ## Constraints
 
