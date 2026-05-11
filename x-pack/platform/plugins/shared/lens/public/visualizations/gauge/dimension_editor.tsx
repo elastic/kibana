@@ -160,7 +160,6 @@ export function GaugeDimensionEditor(
                     'Places ticks on each band border instead of distributing them evenly',
                 })}
                 condition={true}
-                delay="regular"
               >
                 <span>
                   {i18n.translate('xpack.lens.shared.ticksPositionOptions', {
