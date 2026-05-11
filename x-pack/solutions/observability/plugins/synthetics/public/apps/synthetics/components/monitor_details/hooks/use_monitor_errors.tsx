@@ -71,7 +71,15 @@ export function useMonitorErrors(monitorIdArg?: string) {
             summary: {
               top_hits: {
                 size: 1,
-                _source: ['error', 'state', 'monitor', '@timestamp'],
+                _source: [
+                  'error',
+                  'state',
+                  'monitor',
+                  '@timestamp',
+                  'config_id',
+                  'observer',
+                  'http.response.status_code',
+                ],
                 sort: [{ '@timestamp': 'desc' }],
               },
             },
