@@ -506,7 +506,7 @@ export class DashboardApp {
 
   async getAddPanelFlyoutActions(): Promise<string[]> {
     const addPanelActions = await this.panelSelectionFlyout
-      .locator('[data-test-subj*="create-action-"]')
+      .locator('[data-test-subj*="create-action-"]:not([data-test-subj$="-wrapper"])')
       .all();
 
     return await Promise.all(
