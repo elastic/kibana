@@ -11,10 +11,6 @@ import { schema } from '@kbn/config-schema';
 import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 
-export function getUpdateRequestBodySchema(isDashboardAppRequest: boolean) {
-  return getDashboardStateSchema(isDashboardAppRequest);
-}
-
 export function getUpdateResponseBodySchema(isDashboardAppRequest: boolean) {
   return schema.object({
     id: schema.string({

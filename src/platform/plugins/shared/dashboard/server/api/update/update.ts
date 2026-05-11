@@ -16,13 +16,13 @@ import Boom from '@hapi/boom';
 import type { SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { DashboardUpdateRequestBody, DashboardUpdateResponseBody } from './types';
+import type { DashboardUpdateResponseBody } from './types';
 import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
 import { create } from '../create';
 import type { DashboardCreateResponseBody } from '../create';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
-import type { Operation } from '../types';
+import type { DashboardState, Operation } from '../types';
 
 /**
  * Upserts a dashboard by id — creates it if it doesn't exist, or updates it if it does.
@@ -41,7 +41,7 @@ export async function update(
   requestCtx: RequestHandlerContext,
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
-  updateBody: DashboardUpdateRequestBody,
+  updateBody: DashboardState,
   serverTiming?: RequestTiming,
   isDashboardAppRequest: boolean = false
 ): Promise<{

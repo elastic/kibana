@@ -12,13 +12,14 @@ import type { RequestTiming } from '@kbn/core-http-server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { transformDashboardIn } from '../transforms';
 import { getDashboardCRUResponseBody } from '../get_cru_response_body';
-import type { DashboardCreateRequestBody, DashboardCreateResponseBody } from './types';
+import type { DashboardCreateResponseBody } from './types';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
+import type { DashboardState } from '../types';
 
 export async function create(
   requestCtx: RequestHandlerContext,
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
-  createBody: DashboardCreateRequestBody,
+  createBody: DashboardState,
   serverTiming?: RequestTiming,
   isDashboardAppRequest: boolean = false,
   id?: string
