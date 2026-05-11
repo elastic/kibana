@@ -192,6 +192,12 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
           actionRequest.parameters.id
         );
 
+        if (actionToCancel.agentType !== 'endpoint') {
+          throw new ResponseActionsClientError(
+            `Action ID [${actionRequest.parameters.id} / ${actionToCancel.command} / ${actionToCancel.agentType}] agent type is not 'endpoint'`
+          );
+        }
+
         if (actionToCancel.isCompleted) {
           throw new ResponseActionsClientError(
             `Action [${actionRequest.parameters.id}] is already completed and cannot be canceled.`
