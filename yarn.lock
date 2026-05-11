@@ -9523,6 +9523,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-suites-xpack-vectordb@link:x-pack/solutions/vectordb/test":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-suites-xpack-workplace-ai@link:x-pack/solutions/workplaceai/test":
   version "0.0.0"
   uid ""
