@@ -112,13 +112,10 @@ export class ActionPoliciesApi {
   }
 
   public async fetchDataFields(matcher?: string) {
+    const trimmed = matcher?.trim();
     return this.http.get<string[]>(
       `${ALERTING_V2_ACTION_POLICY_API_PATH}/suggestions/data_fields`,
-      {
-        query: {
-          matcher: matcher || undefined,
-        },
-      }
+      trimmed ? { query: { matcher: trimmed } } : {}
     );
   }
 

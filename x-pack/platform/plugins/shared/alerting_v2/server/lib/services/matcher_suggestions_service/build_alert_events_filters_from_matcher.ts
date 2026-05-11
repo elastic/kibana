@@ -53,6 +53,11 @@ const rewriteFieldArg = (node: KueryNode): KueryNode | null => {
   };
 };
 
+// Walks the KQL AST and drops leaves whose field is not in SUPPORTED_MATCHER_FIELDS
+// (or under `data.*`), collapsing now-empty `and`/`or`/`not`/`nested` parents.
+// Returns `null` when the whole subtree is pruned. Example:
+//   In:  rule.id : "r1" and rule.name : "x"   (rule.name is not in the alert_events mapping)
+//   Out: rule.id : "r1"                        (the `and` collapses to its surviving child)
 const pruneNode = (node: KueryNode): KueryNode | null => {
   if (node.type !== 'function') {
     return node;

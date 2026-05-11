@@ -17,7 +17,7 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 
 const matcherDataFieldsQuerySchema = z.object({
-  matcher: z.string().optional(),
+  matcher: z.string().min(1).max(2048).optional(),
 });
 
 @injectable()

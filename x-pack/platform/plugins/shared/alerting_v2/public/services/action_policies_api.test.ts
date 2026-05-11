@@ -11,40 +11,36 @@ import { ActionPoliciesApi } from './action_policies_api';
 const DATA_FIELDS_PATH = '/api/alerting/v2/action_policies/suggestions/data_fields';
 
 describe('ActionPoliciesApi.fetchDataFields', () => {
-  it('calls the data_fields endpoint with matcher=undefined when no matcher is provided', async () => {
+  it('omits the query param entirely when no matcher is provided', async () => {
     const http = httpServiceMock.createStartContract();
     http.get.mockResolvedValue([]);
     const api = new ActionPoliciesApi(http);
 
     await api.fetchDataFields();
 
-    expect(http.get).toHaveBeenCalledWith(DATA_FIELDS_PATH, {
-      query: { matcher: undefined },
-    });
+    expect(http.get).toHaveBeenCalledWith(DATA_FIELDS_PATH, {});
   });
 
-  it('forwards the matcher as a query parameter', async () => {
+  it('forwards the trimmed matcher as a query parameter', async () => {
     const http = httpServiceMock.createStartContract();
     http.get.mockResolvedValue([]);
     const api = new ActionPoliciesApi(http);
 
-    await api.fetchDataFields('rule.id : "abc"');
+    await api.fetchDataFields('  rule.id : "abc"  ');
 
     expect(http.get).toHaveBeenCalledWith(DATA_FIELDS_PATH, {
       query: { matcher: 'rule.id : "abc"' },
     });
   });
 
-  it('treats empty matcher as undefined in the query', async () => {
+  it('omits the query param when matcher is empty or whitespace', async () => {
     const http = httpServiceMock.createStartContract();
     http.get.mockResolvedValue([]);
     const api = new ActionPoliciesApi(http);
 
-    await api.fetchDataFields('');
+    await api.fetchDataFields('   ');
 
-    expect(http.get).toHaveBeenCalledWith(DATA_FIELDS_PATH, {
-      query: { matcher: undefined },
-    });
+    expect(http.get).toHaveBeenCalledWith(DATA_FIELDS_PATH, {});
   });
 
   it('returns the response payload from the HTTP layer', async () => {
