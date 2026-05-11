@@ -439,11 +439,17 @@ const html = `<!doctype html>
 <h1>PCI compliance skill: <span style="color:var(--mute);font-weight:400">hand-written</span> vs <span style="color:var(--accent)">autonomous</span></h1>
 <p class="lead">
   Side-by-side comparison of two Agent Builder skills that target the same domain
-  (PCI DSS v4.0.1 compliance). The hand-written variant uses 3 PCI tools authored by
-  Smriti; the autonomous variant now uses its <strong>own independently-authored
-  4-tool decomposition</strong> (cycle-17 architect blueprint) — neither skill knows
-  about the other's tools. This validates a full end-to-end autonomous workflow
-  where <em>both</em> the skill and its supporting tools are autonomously created.
+  (PCI DSS v4.0.1 compliance). The hand-written variant uses 3 PCI tools authored
+  by Smriti; the autonomous variant ships 4 tools whose <strong>agent-facing
+  surface</strong> (tool IDs, descriptions, schemas, decomposition, skill content)
+  was authored independently by the cycle-17 architect — but whose
+  <strong>underlying domain engine</strong> (the PCI DSS v4.0.1 requirement catalog,
+  evaluator logic, ScopeClaim builder, and input validation schemas) is
+  <em>shared</em> with the hand-written variant via direct module imports. See
+  §1.5 below for the precise autonomy ladder. The eval result therefore measures
+  whether an autonomously-authored agent surface can route through a shared engine
+  as well as a hand-written surface does — not whether the autonomous workflow
+  can author the domain engine from scratch.
 </p>
 
 <div class="pillrow">
@@ -497,6 +503,94 @@ The script boots Kibana twice (once per variant), runs all ${specScenarioCount} 
     <tr><td>Buildkite step</td><td><code>kbn-evals-weekly-pci-compliance</code></td><td><code>kbn-evals-weekly-pci-compliance-autonomous</code></td></tr>
   </tbody>
 </table>
+
+<h2>1.5 · Autonomy ladder — what's truly independent vs what's shared</h2>
+<p class="lead">
+  The question "how autonomous is the autonomous variant?" has different answers at
+  different layers. This table breaks them out explicitly so the eval result can be
+  interpreted correctly.
+</p>
+<table>
+  <thead><tr><th>Layer</th><th>Hand-written</th><th>Autonomous</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Tool IDs / namespacing</td>
+      <td><code>pci_scope_discovery</code>, <code>pci_compliance</code>, <code>pci_field_mapper</code></td>
+      <td><code>pci_autonomous_*</code> × 4 (separate allowlist entry)</td>
+      <td><span class="pill" style="background:#d1fae5;color:#065f46;border-color:#065f46">independent</span></td>
+    </tr>
+    <tr>
+      <td>Tool descriptions</td>
+      <td>Smriti's wording</td>
+      <td>Architect's wording, different rationale ("two narrow tools easier to route between than one mode-parameterised tool")</td>
+      <td><span class="pill" style="background:#d1fae5;color:#065f46;border-color:#065f46">independent</span></td>
+    </tr>
+    <tr>
+      <td>Agent-facing zod schemas (argument shapes)</td>
+      <td>Smriti's shape</td>
+      <td>Architect's shape</td>
+      <td><span class="pill" style="background:#d1fae5;color:#065f46;border-color:#065f46">independent</span></td>
+    </tr>
+    <tr>
+      <td>Tool decomposition</td>
+      <td>3 tools — <code>check</code> &amp; <code>report</code> consolidated behind a <code>mode</code> parameter</td>
+      <td>4 tools — <code>check</code> and <code>report</code> as <em>separate</em> tools</td>
+      <td><span class="pill" style="background:#d1fae5;color:#065f46;border-color:#065f46">independent — different design choice</span></td>
+    </tr>
+    <tr>
+      <td>Skill content / prose</td>
+      <td>Smriti's authored markdown</td>
+      <td>Architect-authored markdown (46 web citations + 5 model-knowledge)</td>
+      <td><span class="pill" style="background:#d1fae5;color:#065f46;border-color:#065f46">independent</span></td>
+    </tr>
+    <tr>
+      <td>Registration / feature flag / allowlist</td>
+      <td><code>pciComplianceAgentBuilder</code></td>
+      <td><code>pciComplianceAutonomousAgentBuilder</code> + separate <code>AGENT_BUILDER_BUILTIN_TOOLS</code> entries</td>
+      <td><span class="pill" style="background:#d1fae5;color:#065f46;border-color:#065f46">independent</span></td>
+    </tr>
+    <tr>
+      <td>PCI requirement catalog (<code>PCI_REQUIREMENTS</code>: which requirements, required fields, ESQL queries, violation thresholds)</td>
+      <td colspan="2" style="text-align:center"><code>pci_compliance_requirements.ts</code> — authored by Smriti, <strong>imported directly</strong> by both variants</td>
+      <td><span class="pill" style="background:#fee2e2;color:#991b1b;border-color:#991b1b">SHARED</span></td>
+    </tr>
+    <tr>
+      <td>Compliance evaluator engine (<code>evaluateRequirement</code>: how to assess a requirement against indexed data)</td>
+      <td colspan="2" style="text-align:center"><code>pci_compliance_evaluator.ts</code> — authored by Smriti, <strong>imported directly</strong> by both variants</td>
+      <td><span class="pill" style="background:#fee2e2;color:#991b1b;border-color:#991b1b">SHARED</span></td>
+    </tr>
+    <tr>
+      <td>Input validation schemas (<code>pciIndexPatternSchema</code>, <code>pciRequirementIdSchema</code>, <code>pciTimeRangeSchema</code>) &amp; ScopeClaim builder</td>
+      <td colspan="2" style="text-align:center"><code>pci_compliance_schemas.ts</code> — authored by Smriti, <strong>imported directly</strong> by both variants</td>
+      <td><span class="pill" style="background:#fee2e2;color:#991b1b;border-color:#991b1b">SHARED</span></td>
+    </tr>
+    <tr>
+      <td>Time-range helpers, requirement-ID normalisation (<code>getTimeRangeForCheck</code>, <code>normalizeRequirementId</code>, <code>resolveRequirementIds</code>)</td>
+      <td colspan="2" style="text-align:center"><code>pci_compliance_requirements.ts</code> — <strong>imported directly</strong> by both variants</td>
+      <td><span class="pill" style="background:#fee2e2;color:#991b1b;border-color:#991b1b">SHARED</span></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  <strong>What the eval result therefore measures:</strong> given the same PCI
+  domain engine, does an autonomously-authored skill + tool surface route the
+  agent through that engine as well as a hand-written surface does? Answer
+  (from §4 + §5 below): <strong>yes, within ~1.5 points on holdout</strong>.
+</p>
+<p>
+  <strong>What the eval result does NOT measure:</strong> can the autonomous
+  workflow author the requirement catalog, evaluator, and schemas from zero (the
+  public PCI DSS v4.0.1 spec) and produce numbers in the same band? That is a
+  deeper test we have not run here.
+</p>
+<p class="footnote">
+  The rationale embedded in <code>pci_autonomous_compliance_check_tool.ts</code> (lines 17-20)
+  for the shared engine is that the PCI requirement catalog is <em>domain truth</em>
+  — there is one PCI DSS v4.0.1 spec published by the PCI Security Standards
+  Council, and re-implementing it would be reinventing a fact, not making an
+  architectural choice. That is defensible, but it is a process choice and not a
+  constraint of the autonomous workflow.
+</p>
 
 <h2>2 · Skill content comparison (structural)</h2>
 <table>
@@ -614,7 +708,7 @@ ${
           ? ` After the first round of fixes — (a) registering the PCI tools whenever <em>either</em> feature flag is on (the original gate excluded the autonomous variant entirely), and (b) restructuring the skill content tool-first with theory at the bottom and an explicit "always call the dedicated PCI tools, do not improvise raw ES|QL" injunction — Auto v3 closed to <strong>${auSonnetV3.toFixed(3)}</strong> on Sonnet 4.6, ${(sonnetDeltaV3 * 100).toFixed(1)} pts behind the hand-written variant (down from ${(sonnetDelta * 100).toFixed(1)} pts).`
           : '';
         const verdictV5 = Number.isFinite(auSonnetV5)
-          ? ` <strong>The final step — full autonomy of tools too.</strong> Auto v5 ships an independently-authored 4-tool decomposition (<code>pci_autonomous_scope_discovery</code>, <code>pci_autonomous_compliance_check</code>, <code>pci_autonomous_scorecard_report</code>, <code>pci_autonomous_field_mapper</code>) registered behind its own allowlist entry. The autonomous skill no longer has any visibility into the hand-written PCI tools. Result: <strong>${auSonnetV5.toFixed(3)} on Sonnet 4.6 — ${v5HitParity ? 'matching the hand-written baseline of ' + hwSonnet.toFixed(3) + ' exactly' : (sonnetDeltaV5 >= 0 ? (sonnetDeltaV5 * 100).toFixed(1) + ' pts behind' : Math.abs(sonnetDeltaV5 * 100).toFixed(1) + ' pts ahead of') + ' the hand-written variant'}</strong>. This validates that a fully autonomous stack (skill + tools, no shared context with the human-authored variant) achieves parity with a hand-crafted equivalent for this domain.`
+          ? ` <strong>The final step — surface-level autonomy of tools too.</strong> Auto v5 ships an independently-authored 4-tool decomposition (<code>pci_autonomous_scope_discovery</code>, <code>pci_autonomous_compliance_check</code>, <code>pci_autonomous_scorecard_report</code>, <code>pci_autonomous_field_mapper</code>) registered behind its own allowlist entry. The agent router has no path to the hand-written tool IDs when the autonomous feature flag is on. Result: <strong>${auSonnetV5.toFixed(3)} on Sonnet 4.6 — ${v5HitParity ? 'matching the hand-written baseline of ' + hwSonnet.toFixed(3) + ' exactly' : (sonnetDeltaV5 >= 0 ? (sonnetDeltaV5 * 100).toFixed(1) + ' pts behind' : Math.abs(sonnetDeltaV5 * 100).toFixed(1) + ' pts ahead of') + ' the hand-written variant'}</strong>. <strong>Caveat (see §1.5):</strong> the autonomous tools' agent-facing surface is independent, but their handler bodies still import the PCI requirement catalog, evaluator engine, and ScopeClaim builder from the hand-written variant's domain modules. This run therefore validates that an autonomously-authored skill + tool surface routes through a shared engine as well as a hand-written surface — not that the autonomous workflow can produce the domain engine from zero. A follow-up run with an independently-authored requirement catalog and evaluator (\`pci_autonomous_requirements.ts\` / \`pci_autonomous_evaluator.ts\`) is the next layer of validation and is not yet measured here.`
           : '';
         const bannerClass = v5HitParity ? 'banner-success' : (hwOpus > auOpus && hwSonnet > auSonnet ? 'banner-info' : 'banner-warn');
         const verdict = `<div class="banner ${bannerClass}">
@@ -929,7 +1023,7 @@ Then re-run this builder with both <code>--runs</code> and <code>--holdout-runs<
       <li><strong>Citation-dense.</strong> Cycle-17 dogfood reports 51 inspiration citations across 2 provenance classes (46 web-research + 5 model-knowledge). Every load-bearing claim is anchored.</li>
       <li><strong>Broader domain framing.</strong> SAQ taxonomy as scoping pre-step, scope-reduction levers (tokenisation/P2PE/segmentation), technical-vs-process classification, v3→v4 delta set — none of these appear in the hand-written variant.</li>
       <li><strong>Stricter activation boundaries.</strong> Explicit do-not-use bullets call out adjacent frameworks (SOC 2, HIPAA, NIST, ISO 27001) with named sibling-skill handoffs to prevent activation drift.</li>
-      <li><strong>Independently-authored tools.</strong> The autonomous variant now ships its own 4-tool decomposition (<code>pci_autonomous_scope_discovery</code>, <code>pci_autonomous_compliance_check</code>, <code>pci_autonomous_scorecard_report</code>, <code>pci_autonomous_field_mapper</code>) — registered behind a separate allowlist entry. Neither the skill nor the agent router has any path to the hand-written PCI tools when the autonomous feature flag is on. This is what the v5 column measures.</li>
+      <li><strong>Independently-authored tool surface (engine still shared — see §1.5).</strong> The autonomous variant ships its own 4-tool decomposition (<code>pci_autonomous_scope_discovery</code>, <code>pci_autonomous_compliance_check</code>, <code>pci_autonomous_scorecard_report</code>, <code>pci_autonomous_field_mapper</code>) with its own IDs, descriptions, schemas, response shapes, and allowlist entry. The agent router has no path to the hand-written tool IDs under the autonomous feature flag. <em>But</em> each autonomous tool's handler imports the requirement catalog (<code>PCI_REQUIREMENTS</code>), the evaluator (<code>evaluateRequirement</code>), and the schemas / ScopeClaim builder directly from the hand-written variant's domain modules — see the autonomy ladder in §1.5 for the precise breakdown. This is what the v5 column measures: agent-surface autonomy on top of a shared engine.</li>
     </ul>
   </div>
 </div>
@@ -970,6 +1064,29 @@ EVAL_PCI_VARIANT=autonomous node scripts/evals start --suite pci-compliance-auto
   <li>Eval spec: <code>x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance/evals/pci_compliance/pci_compliance.spec.ts</code></li>
   <li>Live results (when present): <code>${escapeHtml(repoRelative(handwrittenResults.dir))}/results.json</code> &amp; <code>${escapeHtml(repoRelative(autonomousResults.dir))}/results.json</code></li>
 </ul>
+
+<h3>Honest limitation: autonomy is layered, not total</h3>
+<p>
+  The autonomous variant's agent-facing surface (tool IDs, descriptions, schemas,
+  decomposition, skill content, registration) was authored independently by the
+  cycle-17 architect. Its <em>domain engine</em> (PCI requirement catalog,
+  evaluator logic, input validation schemas, ScopeClaim builder) is shared with
+  the hand-written variant via direct module imports from
+  <code>pci_compliance_requirements.ts</code>,
+  <code>pci_compliance_evaluator.ts</code>, and
+  <code>pci_compliance_schemas.ts</code>. See the autonomy ladder in §1.5 for the
+  precise per-layer breakdown.
+</p>
+<p>
+  The eval numbers in §4–§5 therefore measure agent-surface autonomy on top of
+  a shared engine. Validating that the autonomous workflow can produce the
+  domain engine itself from zero (the public PCI DSS v4.0.1 spec) is a separate
+  experiment not run here — it would require independently-authored
+  <code>pci_autonomous_requirements.ts</code>,
+  <code>pci_autonomous_evaluator.ts</code>, and
+  <code>pci_autonomous_schemas.ts</code> with a CI test asserting zero imports
+  from the hand-written variant's modules, then a re-run of the same suites.
+</p>
 
 <h2>9 · Bedrock connector fix (Claude Opus 4.7 enablement)</h2>
 <p class="lead">
