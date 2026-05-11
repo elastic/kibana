@@ -628,11 +628,7 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
     _.has(rawConfig, 'server.host') ||
     _.has(rawConfig, 'server.port') ||
     _.get(rawConfig, 'server.ssl.enabled');
-  if (
-    opts.basePath !== false &&
-    !_.has(rawConfig, 'server.publicBaseUrl') &&
-    !userCustomizedHttp
-  ) {
+  if (opts.basePath !== false && !_.has(rawConfig, 'server.publicBaseUrl') && !userCustomizedHttp) {
     const basePath = _.get(rawConfig, 'server.basePath', '');
     lodashSet(rawConfig, 'server.publicBaseUrl', `http://localhost:5601${basePath}`);
   }
