@@ -8,8 +8,14 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { isMac } from '@kbn/shared-ux-utility';
 import { useShortcutsContext } from './shortcuts_provider';
-import { isPrimaryModifierOnly, normalizeShortcutKey } from './shortcut_utils';
+import {
+  getScreenReaderShortcutDescription,
+  isPrimaryModifierOnly,
+  normalizeShortcutKey,
+} from './shortcut_utils';
 import { ShortcutsOverlay, ShortcutsOverlayItem } from './shortcuts_overlay';
 
 export const LeaderShortcutPicker = () => {
@@ -31,6 +37,29 @@ export const LeaderShortcutPicker = () => {
       />
     ));
   }, [sortedLeaderKeyShortcuts]);
+  const screenReaderHint = useMemo(() => {
+    return i18n.translate('unifiedShortcuts.leaderShortcutPicker.screenReaderHint', {
+      defaultMessage: 'Press {shortcut} to access all shortcuts.',
+      values: {
+        shortcut: isMac ? 'Command apostrophe' : 'Control apostrophe',
+      },
+    });
+  }, []);
+  const screenReaderAnnouncement = useMemo(() => {
+    return i18n.translate('unifiedShortcuts.leaderShortcutPicker.screenReaderAnnouncement', {
+      defaultMessage: 'Shortcuts available. {shortcutDescriptions}. Press Escape to exit.',
+      values: {
+        shortcutDescriptions: sortedLeaderKeyShortcuts
+          .map(({ leaderKey, leaderKeyDescription }) =>
+            getScreenReaderShortcutDescription({
+              key: leaderKey,
+              description: leaderKeyDescription,
+            })
+          )
+          .join(', '),
+      },
+    });
+  }, [sortedLeaderKeyShortcuts]);
   const shouldOpen = useCallback(
     (event: KeyboardEvent) => {
       return (
@@ -48,5 +77,13 @@ export const LeaderShortcutPicker = () => {
     [leaderKeyShortcutsByKey]
   );
 
-  return <ShortcutsOverlay items={overlayItems} shouldOpen={shouldOpen} runAction={runAction} />;
+  return (
+    <ShortcutsOverlay
+      items={overlayItems}
+      shouldOpen={shouldOpen}
+      runAction={runAction}
+      screenReaderHint={screenReaderHint}
+      screenReaderAnnouncement={screenReaderAnnouncement}
+    />
+  );
 };

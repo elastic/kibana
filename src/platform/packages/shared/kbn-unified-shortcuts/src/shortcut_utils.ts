@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 
 const editableTargetSelector = [
@@ -46,4 +47,35 @@ export const isPrimaryModifierOnly = (event: KeyboardEvent) => {
   return isMac
     ? event.metaKey && !event.ctrlKey && !event.altKey && !event.shiftKey
     : event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey;
+};
+
+const getScreenReaderShortcutKeyLabel = (key: string) => {
+  switch (key) {
+    case 'ArrowLeft':
+      return i18n.translate('unifiedShortcuts.shortcutUtils.screenReaderArrowLeftLabel', {
+        defaultMessage: 'left arrow',
+      });
+    case 'ArrowRight':
+      return i18n.translate('unifiedShortcuts.shortcutUtils.screenReaderArrowRightLabel', {
+        defaultMessage: 'right arrow',
+      });
+    default:
+      return key.toLowerCase();
+  }
+};
+
+export const getScreenReaderShortcutDescription = ({
+  key,
+  description,
+}: {
+  key: string;
+  description: string;
+}) => {
+  return i18n.translate('unifiedShortcuts.shortcutUtils.screenReaderShortcutDescription', {
+    defaultMessage: '{key} for {description}',
+    values: {
+      key: getScreenReaderShortcutKeyLabel(key),
+      description,
+    },
+  });
 };

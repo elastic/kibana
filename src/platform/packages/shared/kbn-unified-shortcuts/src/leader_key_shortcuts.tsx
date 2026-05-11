@@ -9,7 +9,12 @@
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { hasModifierKey, isEditableTarget, normalizeShortcutKey } from './shortcut_utils';
+import {
+  getScreenReaderShortcutDescription,
+  hasModifierKey,
+  isEditableTarget,
+  normalizeShortcutKey,
+} from './shortcut_utils';
 import {
   ShortcutsOverlay,
   ShortcutsOverlayDivider,
@@ -43,34 +48,6 @@ export interface LeaderKeyShortcutsProps {
   /** The follow-up shortcuts available after the leader key is pressed. */
   shortcuts: LeaderKeyShortcut[];
 }
-
-const getScreenReaderShortcutKeyLabel = (key: string) => {
-  switch (key) {
-    case 'ArrowLeft':
-      return i18n.translate('unifiedShortcuts.leaderKeyShortcuts.screenReaderArrowLeftLabel', {
-        defaultMessage: 'left arrow',
-      });
-    case 'ArrowRight':
-      return i18n.translate('unifiedShortcuts.leaderKeyShortcuts.screenReaderArrowRightLabel', {
-        defaultMessage: 'right arrow',
-      });
-    default:
-      return key.toLowerCase();
-  }
-};
-
-const getScreenReaderShortcutDescription = ({
-  key,
-  description,
-}: Pick<LeaderKeyShortcut, 'key' | 'description'>) => {
-  return i18n.translate('unifiedShortcuts.leaderKeyShortcuts.screenReaderShortcutDescription', {
-    defaultMessage: '{key} for {description}',
-    values: {
-      key: getScreenReaderShortcutKeyLabel(key),
-      description,
-    },
-  });
-};
 
 /**
  * Renders a leader-key shortcut overlay and handles the two-step key sequence used to trigger
