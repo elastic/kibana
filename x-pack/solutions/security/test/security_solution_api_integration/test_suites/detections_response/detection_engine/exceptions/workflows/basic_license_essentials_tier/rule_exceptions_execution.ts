@@ -476,6 +476,12 @@ export default ({ getService }: FtrProviderContext) => {
           let sample: AuditbeatValueListSample;
 
           before(async () => {
+            // `source.port` must fit into an Elasticsearch `short` (signed
+            // 16-bit: -32768..32767). Many auditbeat ephemeral ports exceed
+            // this range, which would cause `short`-typed list item imports to
+            // be rejected and the `short` test to time out waiting for the
+            // list item to appear. Constrain the sample selection up front.
+            const SHORT_MAX = 32767;
             const res = await es.search({
               index: ['auditbeat-*'],
               size: 50,
@@ -488,6 +494,7 @@ export default ({ getService }: FtrProviderContext) => {
                     { exists: { field: 'destination.port' } },
                     { exists: { field: '@timestamp' } },
                     { exists: { field: 'host.containerized' } },
+                    { range: { 'source.port': { lte: SHORT_MAX } } },
                     // { exists: { field: 'source.geo.location' } },
                   ],
                 },
