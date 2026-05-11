@@ -11,6 +11,7 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionType } from '@kbn/actions-types';
 import type { ObservabilityAIAssistantService } from '@kbn/observability-ai-assistant-plugin/public';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
@@ -24,7 +25,8 @@ import {
 } from './translations';
 
 export function getConnectorType(
-  service: ObservabilityAIAssistantService
+  service: ObservabilityAIAssistantService,
+  getHideInUi: (actionTypes: ActionType[]) => boolean
 ): ConnectorTypeModel<unknown, {}, ObsAIAssistantActionParams> {
   return {
     id: OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID,
@@ -64,5 +66,6 @@ export function getConnectorType(
       }))
     ),
     actionConnectorFields: null,
+    getHideInUi,
   };
 }

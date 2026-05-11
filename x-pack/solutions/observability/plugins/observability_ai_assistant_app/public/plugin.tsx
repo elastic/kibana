@@ -181,12 +181,14 @@ export class ObservabilityAIAssistantAppPlugin
       )
     );
 
-    const chatExperience = coreStart.settings.client.get<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
+    const getHideInUi = () =>
+      coreStart.settings.client.get<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE) ===
+      AIChatExperience.Agent;
 
     const isObservabilityAIAssistantEnabled = service.isEnabled();
-    if (chatExperience === AIChatExperience.Classic && isObservabilityAIAssistantEnabled) {
+    if (isObservabilityAIAssistantEnabled) {
       pluginsStart.triggersActionsUi.actionTypeRegistry.register(
-        getObsAIAssistantConnectorType(service)
+        getObsAIAssistantConnectorType(service, getHideInUi)
       );
     }
 

@@ -175,6 +175,10 @@ export const RuleActionsConnectorsBody = ({
         return false;
       }
 
+      if (actionTypeModel.getHideInUi?.(connectorTypes)) {
+        return false;
+      }
+
       const checkEnabledResult = checkActionFormActionTypeEnabled(
         actionType,
         preconfiguredConnectors
