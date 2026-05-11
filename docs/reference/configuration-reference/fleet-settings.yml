@@ -557,7 +557,7 @@ groups:
           ech: unavailable
           self: ga
 
-      - setting: xpack.fleet.fleetPolicyRevisionsCleanup.maxRevisions
+      - setting: xpack.fleet.fleetPolicyRevisionsCleanup.max_revisions
         description: |
           The maximum number of revisions to maintain for a Fleet agent policy.
         datatype: int
@@ -577,7 +577,7 @@ groups:
           ech: ga
           self: ga
 
-      - setting: xpack.fleet.fleetPolicyRevisionsCleanup.maxPoliciesPerRun
+      - setting: xpack.fleet.fleetPolicyRevisionsCleanup.max_policies_per_run
         description: |
           The maximum number of Fleet agent policies to clean up revisions from per interval.
         datatype: int
