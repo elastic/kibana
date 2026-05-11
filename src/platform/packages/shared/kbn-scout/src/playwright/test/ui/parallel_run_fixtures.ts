@@ -57,6 +57,7 @@ export interface ScoutParallelWorkerFixtures {
   esClient: EsClient;
   scoutSpace: ScoutSpaceParallelFixture;
   apiServices: ApiServicesFixture;
+  isSnapshotBuild: boolean;
 }
 
 export const globalSetupFixtures = mergeTests(

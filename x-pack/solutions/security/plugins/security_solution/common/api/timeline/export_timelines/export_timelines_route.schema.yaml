@@ -33,6 +33,8 @@ paths:
                 ids:
                   nullable: true
                   type: array
+                  minItems: 1
+                  maxItems: 1000
                   items:
                     type: string
       responses:

@@ -26,6 +26,8 @@ describe('Scout path globs', () => {
       'src/platform/packages/shared/my_package/test/scout',
       'src/platform/packages/private/my_package/test/scout',
       'src/core/packages/my_package/test/scout',
+      'src/core/test/scout',
+      'src/core/test/scout_custom',
       'x-pack/platform/plugins/shared/my_plugin/test/scout',
       'x-pack/solutions/security/plugins/my_plugin/test/scout',
       'x-pack/solutions/observability/plugins/my_plugin/test/scout',
@@ -60,6 +62,8 @@ describe('Scout path globs', () => {
       'x-pack/solutions/security/plugins/my_plugin/test/scout/api/playwright.config.ts',
       'x-pack/solutions/security/plugins/my_plugin/test/scout_custom/ui/playwright.config.ts',
       'src/core/packages/my_package/test/scout/api/playwright.config.ts',
+      'src/core/test/scout/api/playwright.config.ts',
+      'src/core/test/scout_custom/api/playwright.config.ts',
       'examples/hello_world/test/scout_examples/api/playwright.config.ts',
       'examples/hello_world/test/scout_examples/ui/playwright.config.ts',
       'x-pack/examples/hello_world/test/scout_examples/api/playwright.config.ts',
@@ -257,6 +261,36 @@ describe('Scout path regexes', () => {
           platformOrCore: 'core',
           moduleKind: 'packages',
           moduleName: 'my_package',
+          testCategory: 'api',
+        })
+      );
+    });
+
+    it('matches src/core root path (no sub-package) with correct named groups', () => {
+      const match = 'src/core/test/scout/api/playwright.config.ts'.match(
+        SCOUT_UNIFIED_CONFIG_PATH_REGEX
+      );
+      expect(match?.groups).toEqual(
+        expect.objectContaining({
+          coreRoot: 'src/core',
+          platformOrCore: undefined,
+          moduleKind: undefined,
+          moduleName: undefined,
+          serverConfigSet: undefined,
+          testCategory: 'api',
+          testConfigType: '',
+        })
+      );
+    });
+
+    it('matches src/core root path with custom server config set', () => {
+      const match = 'src/core/test/scout_custom/api/playwright.config.ts'.match(
+        SCOUT_UNIFIED_CONFIG_PATH_REGEX
+      );
+      expect(match?.groups).toEqual(
+        expect.objectContaining({
+          coreRoot: 'src/core',
+          serverConfigSet: 'custom',
           testCategory: 'api',
         })
       );
