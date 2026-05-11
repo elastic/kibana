@@ -36,12 +36,19 @@ export type SupportedLogo =
   | 'kafka'
   | 'mongodb'
   | 'apache_tomcat'
+  | 'couchbase'
+  | 'logstash'
   | 'firehose'
   | 'fluentbit'
   | 'linux'
   | 'windows'
   | 'apple_black'
-  | 'apple_white';
+  | 'apple_white'
+  | 'slack'
+  | 'jira'
+  | 'confluence'
+  | 'salesforce'
+  | 'splunk';
 
 export function isSupportedLogo(logo: string): logo is SupportedLogo {
   return [
@@ -68,38 +75,46 @@ export function isSupportedLogo(logo: string): logo is SupportedLogo {
     'kafka',
     'mongodb',
     'apache_tomcat',
+    'couchbase',
+    'logstash',
     'fluentbit',
     'linux',
     'windows',
     'apple',
+    'slack',
+    'jira',
+    'confluence',
+    'salesforce',
+    'splunk',
   ].includes(logo);
 }
+
+// Logos that EUI ships natively. Anything not listed here falls through to a
+// bundled SVG asset served from the plugin's `public/assets/` folder.
+const EUI_LOGO_BY_BRAND: Partial<Record<SupportedLogo, string>> = {
+  aws: 'logoAWS',
+  azure: 'logoAzure',
+  gcp: 'logoGCP',
+  kubernetes: 'logoKubernetes',
+  nginx: 'logoNginx',
+  prometheus: 'logoPrometheus',
+  docker: 'logoDocker',
+  windows: 'logoWindows',
+  slack: 'logoSlack',
+  apache: 'logoApache',
+  mysql: 'logoMySQL',
+  redis: 'logoRedis',
+  rabbitmq: 'logoRabbitmq',
+  couchbase: 'logoCouchbase',
+  logstash: 'logoLogstash',
+};
 
 function useIconForLogo(logo?: SupportedLogo): string | undefined {
   const {
     services: { http },
   } = useKibana();
   if (!logo) return undefined;
-  switch (logo) {
-    case 'aws':
-      return 'logoAWS';
-    case 'azure':
-      return 'logoAzure';
-    case 'gcp':
-      return 'logoGCP';
-    case 'kubernetes':
-      return 'logoKubernetes';
-    case 'nginx':
-      return 'logoNginx';
-    case 'prometheus':
-      return 'logoPrometheus';
-    case 'docker':
-      return 'logoDocker';
-    case 'windows':
-      return 'logoWindows';
-    default:
-      return http?.staticAssets.getPluginAssetHref(`${logo}.svg`);
-  }
+  return EUI_LOGO_BY_BRAND[logo] ?? http?.staticAssets.getPluginAssetHref(`${logo}.svg`);
 }
 
 type LogoIconSizeProp = EuiIconProps['size'] | EuiAvatarProps['size'] | undefined;

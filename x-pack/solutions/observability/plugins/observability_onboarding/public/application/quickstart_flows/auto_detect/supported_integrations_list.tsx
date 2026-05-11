@@ -17,10 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import apacheIconSrc from '../../../assets/apache.svg';
 import dockerIconSrc from '../../../assets/docker.svg';
-import nginxIconSrc from '../../../assets/nginx.svg';
-import mysqlIconSrc from '../../../assets/mysql.svg';
 
 const SUPPORTED_INTEGRATIONS_LIST = [
   'Apache',
@@ -46,10 +43,10 @@ interface SupportedIntegrationItem {
 }
 
 const FEATURED_INTEGRATIONS_LIST: SupportedIntegrationItem[] = [
-  { title: 'Apache', icon: apacheIconSrc },
+  { title: 'Apache', icon: 'logoApache' },
   { title: 'Docker', icon: dockerIconSrc },
-  { title: 'Nginx', icon: nginxIconSrc },
-  { title: 'MySQL', icon: mysqlIconSrc },
+  { title: 'Nginx', icon: 'logoNginx' },
+  { title: 'MySQL', icon: 'logoMySQL' },
   { title: 'System', icon: 'display' },
 ];
 
