@@ -165,7 +165,7 @@ describe('fetchSampleDocuments', () => {
         start: 100,
         end: 200,
         sampleSize: 4,
-        loadUnmappedFields: true,
+        unmappedFields: 'LOAD',
       })
     );
     expect(BasicPrettyPrinter.print(entityFilteredCall.whereCondition!)).toBe(

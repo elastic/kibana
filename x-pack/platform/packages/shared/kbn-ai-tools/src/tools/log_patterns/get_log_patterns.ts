@@ -14,8 +14,7 @@ import type {
   AggregationsTopHitsAggregation,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import { esql, type ComposerQueryTagHole } from '@elastic/esql';
-import type { ESQLAstExpression } from '@elastic/esql/types';
+import { esql } from '@elastic/esql';
 import { categorizationAnalyzer } from '@kbn/aiops-log-pattern-analysis/categorization_analyzer';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { ESQLSearchResponse } from '@kbn/es-types';
@@ -40,8 +39,6 @@ const MAX_DOCS_TO_SAMPLE = 100_000;
 // the DSL helper's second rare-pattern aggregation, while still giving
 // selectLogPatternsForLlm enough sorted rows to take the head and tail.
 const SIG_EVENTS_PASS1_LIMIT = 1000;
-
-type WhereCondition = ESQLAstExpression & ComposerQueryTagHole;
 
 interface FieldPatternResultBase {
   field: string;
@@ -297,7 +294,6 @@ interface SigEventsLogPatternEsqlOptions {
   end: number;
   index: string | string[];
   fields: string[];
-  kql?: string;
   logger: Logger;
 }
 
@@ -431,7 +427,6 @@ export async function getSigEventsLogPatternsEsql({
   start,
   end,
   index,
-  kql,
   fields,
   logger,
 }: SigEventsLogPatternEsqlOptions): Promise<LogPatternEsqlEntry[]> {
@@ -455,7 +450,7 @@ export async function getSigEventsLogPatternsEsql({
     return [];
   }
 
-  const totalDocs = await runEsqlCountQuery({ esClient, index, start, end, kql });
+  const totalDocs = await runEsqlCountQuery({ esClient, index, start, end });
   if (totalDocs === 0) {
     return [];
   }
@@ -472,7 +467,6 @@ export async function getSigEventsLogPatternsEsql({
         index,
         start,
         end,
-        kql,
         field,
         samplingProbability,
         limit: SIG_EVENTS_PASS1_LIMIT,
@@ -537,16 +531,14 @@ async function runEsqlCountQuery({
   index,
   start,
   end,
-  kql,
 }: {
   esClient: TracedElasticsearchClient;
   index: string | string[];
   start: number;
   end: number;
-  kql?: string;
 }): Promise<number> {
   const response = (await esClient.esql('count_docs_for_sigevents_log_patterns', {
-    query: buildCountQuery({ index, kql }),
+    query: buildCountQuery({ index }),
     filter: { bool: { filter: dateRangeQuery(start, end) } },
     drop_null_columns: true,
   })) as unknown as ESQLSearchResponse;
@@ -560,7 +552,6 @@ async function runSigEventsPass1({
   index,
   start,
   end,
-  kql,
   field,
   samplingProbability,
   limit,
@@ -569,7 +560,6 @@ async function runSigEventsPass1({
   index: string | string[];
   start: number;
   end: number;
-  kql?: string;
   field: string;
   samplingProbability: number;
   limit: number;
@@ -577,7 +567,6 @@ async function runSigEventsPass1({
   const response = (await esClient.esql('categorize_sigevents_log_patterns', {
     query: buildPass1Query({
       indices: Array.isArray(index) ? index : [index],
-      kql,
       field,
       samplingProbability,
       limit,
@@ -589,19 +578,10 @@ async function runSigEventsPass1({
   return parsePass1Rows(response);
 }
 
-function buildWhereExpression(kql?: string): WhereCondition | undefined {
-  return kql ? esql.exp`KQL(${esql.str(kql)})` : undefined;
-}
-
-function buildCountQuery({ index, kql }: { index: string | string[]; kql?: string }): string {
-  const whereExpression = buildWhereExpression(kql);
-  let query = esql.from(Array.isArray(index) ? index : [index]);
-
-  if (whereExpression) {
-    query = query.where`${whereExpression}`;
-  }
-
-  return query.pipe`STATS total = COUNT(*)`.print('basic');
+function buildCountQuery({ index }: { index: string | string[] }): string {
+  return esql.from(Array.isArray(index) ? index : [index]).pipe`STATS total = COUNT(*)`.print(
+    'basic'
+  );
 }
 
 /**
@@ -613,18 +593,15 @@ function buildCountQuery({ index, kql }: { index: string | string[]; kql?: strin
  */
 function buildPass1Query({
   indices,
-  kql,
   field,
   samplingProbability,
   limit,
 }: {
   indices: string[];
-  kql?: string;
   field: string;
   samplingProbability: number;
   limit: number;
 }): string {
-  const whereExpression = buildWhereExpression(kql);
   // `_index:_id` is the join key, not `_id` alone: stream names can expand to
   // multiple backing indices, and Elasticsearch only guarantees `_id`
   // uniqueness inside a single index.
@@ -632,9 +609,6 @@ function buildPass1Query({
     '_index'
   )}, ":", ${esql.col('_id')})`;
 
-  if (whereExpression) {
-    query = query.where`${whereExpression}`;
-  }
   if (samplingProbability < 1) {
     query = query.pipe`SAMPLE ${esql.num(samplingProbability)}`;
   }

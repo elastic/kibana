@@ -83,21 +83,20 @@ describe('getSigEventsLogPatternsEsql', () => {
       start: 100,
       end: 200,
       fields: ['body.text'],
-      kql: 'service.name:"checkout"',
       logger,
     });
 
     expect(esql.mock.calls[0]).toEqual([
       'count_docs_for_sigevents_log_patterns',
       expect.objectContaining({
-        query: 'FROM logs-* | WHERE KQL("service.name:\\"checkout\\"") | STATS total = COUNT(*)',
+        query: 'FROM logs-* | STATS total = COUNT(*)',
       }),
     ]);
     expect(esql.mock.calls[1]).toEqual([
       'categorize_sigevents_log_patterns',
       expect.objectContaining({
         query:
-          'FROM logs-* METADATA _index, _id | EVAL doc_key = CONCAT(_index, ":", _id) | WHERE KQL("service.name:\\"checkout\\"") | STATS representative_key = TOP(doc_key, 1, "desc"), count = COUNT(*) BY pattern = CATEGORIZE(body.text) | SORT count DESC | LIMIT 1000',
+          'FROM logs-* METADATA _index, _id | EVAL doc_key = CONCAT(_index, ":", _id) | STATS representative_key = TOP(doc_key, 1, "desc"), count = COUNT(*) BY pattern = CATEGORIZE(body.text) | SORT count DESC | LIMIT 1000',
       }),
     ]);
     expect(rawEsqlQuery.mock.calls[0]).toEqual([
