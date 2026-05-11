@@ -206,7 +206,7 @@ const HostEntityFlyoutOverviewCanvas: React.FC<{
   searchSession,
 }) => {
   const euidApi = useEntityStoreEuidApi();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const safeContextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
   const scopeId = AGENT_BUILDER_ENTITY_CARD_SCOPE;
@@ -537,7 +537,7 @@ const UserEntityFlyoutOverviewCanvas: React.FC<{
   searchSession,
 }) => {
   const euidApi = useEntityStoreEuidApi();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
   const safeContextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
   const scopeId = AGENT_BUILDER_ENTITY_CARD_SCOPE;
@@ -862,7 +862,7 @@ const ServiceEntityFlyoutOverviewCanvas: React.FC<{
   const safeContextID = AGENT_BUILDER_ENTITY_CARD_SCOPE;
   const scopeId = AGENT_BUILDER_ENTITY_CARD_SCOPE;
   const isPreviewMode = false;
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const serviceStoreIdentityFields = useMemo(
     () => (!entityId && serviceName ? { 'service.name': serviceName } : undefined),
     [entityId, serviceName]
