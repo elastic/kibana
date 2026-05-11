@@ -25,22 +25,20 @@ export async function updateRemovedTypes(
     await jsonToFile(REMOVED_TYPES_JSON_PATH, allTypes);
   }
 
-  const message = fix
-    ? `The following SO types are no longer registered: '${removedTypes.join(
-        ', '
-      )}'. Updated 'removed_types.json' to prevent the same names from being reused in the future.`
-    : `The following SO types are no longer registered: '${removedTypes.join(
-        ', '
-      )}'. Please run with --fix to update 'removed_types.json'.`;
+  const fixHint = fix
+    ? `Commit the updated 'removed_types.json' alongside your changes.`
+    : `Run 'node scripts/check_saved_objects --baseline <sha> --fix' locally to update 'removed_types.json' and commit it.`;
 
-  throw new SavedObjectsCheckError({
+  const findings = removedTypes.map((type) => ({
     ruleId: RULE_IDS.REMOVED_TYPE_NEEDS_UPDATE,
-    severity: 'error',
-    typeName: removedTypes[0],
-    message,
-    fixHint: fix
-      ? `Commit the updated 'removed_types.json' alongside your changes.`
-      : `Run 'node scripts/check_saved_objects --baseline <sha> --fix' locally to update 'removed_types.json' and commit it.`,
+    severity: 'error' as const,
+    typeName: type,
+    message: fix
+      ? `SO type '${type}' is no longer registered. Updated 'removed_types.json' to prevent the same name from being reused in the future.`
+      : `SO type '${type}' is no longer registered. Please run with --fix to update 'removed_types.json'.`,
+    fixHint,
     docsAnchor: '#defining-model-versions',
-  });
+  }));
+
+  throw new SavedObjectsCheckError(findings);
 }

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RULE_IDS, isSavedObjectsCheckError, type SavedObjectsCheckFinding } from './types';
+import { RULE_IDS, type SavedObjectsCheckFinding } from './types';
+import { isSavedObjectsCheckError } from './error';
 
 export class FindingsCollector {
   private readonly findings: SavedObjectsCheckFinding[] = [];
@@ -18,14 +19,14 @@ export class FindingsCollector {
 
   /**
    * Convert errors collected by Listr (`globalTask.errors`) into findings.
-   * `SavedObjectsCheckError` instances surface their structured payload; everything
-   * else falls back to a generic-rule finding so coverage stays at 100% while
-   * validators are migrated incrementally.
+   * `SavedObjectsCheckError` instances surface their structured payload(s);
+   * everything else falls back to a generic-rule finding so coverage stays
+   * at 100% while validators are migrated incrementally.
    */
   ingestErrors(errors: ReadonlyArray<unknown>): void {
     for (const err of errors) {
       if (isSavedObjectsCheckError(err)) {
-        this.findings.push(err.finding);
+        this.findings.push(...err.findings);
         continue;
       }
 

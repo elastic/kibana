@@ -71,10 +71,21 @@ describe('buildSuccessBody', () => {
     expect(body).toContain('**Removed types:** `old-type`');
   });
 
-  it('includes the 2-step release reminder with a docs link', () => {
+  it('includes the 2-step release reminder when types were updated', () => {
     const body = buildSuccessBody(report({ updatedTypes: ['task'] }));
     expect(body).toMatch(/2-step release/);
     expect(body).toContain('https://www.elastic.co/docs/extend/kibana/saved-objects');
+  });
+
+  it('includes the 2-step release reminder when types were removed', () => {
+    const body = buildSuccessBody(report({ removedTypes: ['old-type'] }));
+    expect(body).toMatch(/2-step release/);
+  });
+
+  it('omits the 2-step release reminder for pure new-type additions', () => {
+    const body = buildSuccessBody(report({ newTypes: ['shiny-new-type'] }));
+    expect(body).not.toMatch(/2-step release/);
+    expect(body).toContain('**New types:** `shiny-new-type`');
   });
 });
 
@@ -150,5 +161,34 @@ describe('buildFailureBody', () => {
     );
 
     expect(body).not.toContain('_Fix:_');
+  });
+
+  describe('when the run failed but no findings were collected', () => {
+    const originalBuildUrl = process.env.BUILDKITE_BUILD_URL;
+    afterEach(() => {
+      if (originalBuildUrl === undefined) {
+        delete process.env.BUILDKITE_BUILD_URL;
+      } else {
+        process.env.BUILDKITE_BUILD_URL = originalBuildUrl;
+      }
+    });
+
+    it('renders a fallback body that points to the Buildkite build URL when set', () => {
+      process.env.BUILDKITE_BUILD_URL = 'https://buildkite.com/org/pipeline/builds/123';
+      const body = buildFailureBody(report({ status: 'fail', findings: [] }));
+
+      expect(body).toContain('Saved Objects CI check failed');
+      expect(body).toContain('no structured findings were collected');
+      expect(body).toContain('[Buildkite logs](https://buildkite.com/org/pipeline/builds/123)');
+      expect(body).not.toMatch(/0 issue\(s\) across 0 type\(s\)/);
+    });
+
+    it('falls back to a generic phrasing when BUILDKITE_BUILD_URL is unset', () => {
+      delete process.env.BUILDKITE_BUILD_URL;
+      const body = buildFailureBody(report({ status: 'fail', findings: [] }));
+
+      expect(body).toContain('See the Buildkite logs for details');
+      expect(body).not.toContain('[Buildkite logs](');
+    });
   });
 });

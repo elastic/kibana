@@ -27,16 +27,18 @@ export async function detectConflictsWithRemovedTypes(
     }
   }
 
-  if (conflictingTypes.length > 0) {
-    throw new SavedObjectsCheckError({
-      ruleId: RULE_IDS.REMOVED_TYPE_NAME_REUSED,
-      severity: 'error',
-      typeName: conflictingTypes[0],
-      message: `Cannot re-register previously removed type(s): ${conflictingTypes.join(
-        ', '
-      )}. Please use a different name.`,
-      fixHint: `Pick a different name for the SO type. Once removed, a name cannot be reused.`,
-      docsAnchor: '#defining-model-versions',
-    });
+  if (conflictingTypes.length === 0) {
+    return;
   }
+
+  const findings = conflictingTypes.map((type) => ({
+    ruleId: RULE_IDS.REMOVED_TYPE_NAME_REUSED,
+    severity: 'error' as const,
+    typeName: type,
+    message: `Cannot re-register previously removed type '${type}'. Please use a different name.`,
+    fixHint: `Pick a different name for the SO type. Once removed, a name cannot be reused.`,
+    docsAnchor: '#defining-model-versions',
+  }));
+
+  throw new SavedObjectsCheckError(findings);
 }

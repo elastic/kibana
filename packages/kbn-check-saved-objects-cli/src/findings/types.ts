@@ -41,7 +41,12 @@ export interface SavedObjectsCheckFinding {
   typeName?: string;
   message: string;
   fixHint?: string;
-  /** Anchor fragment under the Saved Objects docs page (e.g. `#defining-model-versions`). */
+  /**
+   * Path fragment appended to the Saved Objects docs base URL.
+   * MUST start with `#` (anchor on the same page, e.g. `#defining-model-versions`)
+   * or `/` (relative path, e.g. `/validate#troubleshooting`).
+   * A value without a leading `#` or `/` will produce a malformed URL.
+   */
   docsAnchor?: string;
 }
 
@@ -53,18 +58,4 @@ export interface SavedObjectsCheckReport {
   updatedTypes: string[];
   removedTypes: string[];
   findings: SavedObjectsCheckFinding[];
-}
-
-export class SavedObjectsCheckError extends Error {
-  public readonly finding: SavedObjectsCheckFinding;
-
-  constructor(finding: SavedObjectsCheckFinding) {
-    super(finding.message);
-    this.name = 'SavedObjectsCheckError';
-    this.finding = finding;
-  }
-}
-
-export function isSavedObjectsCheckError(err: unknown): err is SavedObjectsCheckError {
-  return err instanceof Error && err.name === 'SavedObjectsCheckError' && 'finding' in err;
 }

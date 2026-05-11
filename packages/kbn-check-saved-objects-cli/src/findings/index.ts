@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { RULE_IDS, SavedObjectsCheckError, isSavedObjectsCheckError } from './types';
+export { RULE_IDS } from './types';
 export type {
   RuleId,
   FindingSeverity,
   SavedObjectsCheckFinding,
   SavedObjectsCheckReport,
 } from './types';
+export { SavedObjectsCheckError, isSavedObjectsCheckError } from './error';
 export { FindingsCollector } from './collector';

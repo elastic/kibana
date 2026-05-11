@@ -49,7 +49,7 @@ export function validateChangesExistingType({
       ruleId: RULE_IDS.EXISTING_TYPE_MUTATED_MIGRATIONS,
       severity: 'error',
       typeName: name,
-      message: `Modifications have been detected in the '${name}.migrations'. This property is deprected and no modifications are allowed.`,
+      message: `Modifications have been detected in the '${name}.migrations'. This property is deprecated and no modifications are allowed.`,
       fixHint: `Revert any changes to '${name}.migrations' and use a model version instead.`,
       docsAnchor: '#defining-model-versions',
     });

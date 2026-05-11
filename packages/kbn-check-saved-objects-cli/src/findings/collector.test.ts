@@ -8,7 +8,8 @@
  */
 
 import { FindingsCollector } from './collector';
-import { RULE_IDS, SavedObjectsCheckError } from './types';
+import { RULE_IDS } from './types';
+import { SavedObjectsCheckError } from './error';
 
 describe('FindingsCollector', () => {
   it('collects added findings in order', () => {
@@ -32,7 +33,7 @@ describe('FindingsCollector', () => {
     expect(findings[1].ruleId).toBe(RULE_IDS.MODEL_VERSION_MISSING_SCHEMAS);
   });
 
-  it('extracts the finding payload from SavedObjectsCheckError', () => {
+  it('extracts the single-finding payload from SavedObjectsCheckError', () => {
     const collector = new FindingsCollector();
     const err = new SavedObjectsCheckError({
       ruleId: RULE_IDS.EXISTING_TYPE_MUTATED_MODEL_VERSION,
@@ -48,6 +49,30 @@ describe('FindingsCollector', () => {
     expect(finding.ruleId).toBe(RULE_IDS.EXISTING_TYPE_MUTATED_MODEL_VERSION);
     expect(finding.typeName).toBe('baz');
     expect(finding.fixHint).toBe('add a new model version');
+  });
+
+  it('expands a multi-finding SavedObjectsCheckError into one entry per payload, preserving order', () => {
+    const collector = new FindingsCollector();
+    const err = new SavedObjectsCheckError([
+      {
+        ruleId: RULE_IDS.REMOVED_TYPE_NAME_REUSED,
+        severity: 'error',
+        typeName: 'foo',
+        message: "Cannot re-register 'foo'",
+      },
+      {
+        ruleId: RULE_IDS.REMOVED_TYPE_NAME_REUSED,
+        severity: 'error',
+        typeName: 'bar',
+        message: "Cannot re-register 'bar'",
+      },
+    ]);
+
+    collector.ingestErrors([err]);
+
+    const findings = collector.getFindings();
+    expect(findings).toHaveLength(2);
+    expect(findings.map((f) => f.typeName)).toEqual(['foo', 'bar']);
   });
 
   it('falls back to a generic finding for plain Error instances and strips leading status emojis', () => {

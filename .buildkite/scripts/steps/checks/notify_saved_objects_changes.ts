@@ -22,6 +22,11 @@ export interface SavedObjectsCheckFinding {
   typeName?: string;
   message: string;
   fixHint?: string;
+  /**
+   * Path fragment appended to the Saved Objects docs base URL.
+   * MUST start with `#` (anchor on the same page) or `/` (relative path).
+   * A value without a leading `#` or `/` will produce a malformed URL.
+   */
   docsAnchor?: string;
 }
 
@@ -42,6 +47,15 @@ const MODEL_VERSIONS_URL = `${DOCS_BASE_URL}#defining-model-versions`;
 
 function hasSoChanges(report: SavedObjectsCheckReport): boolean {
   return report.newTypes.length + report.updatedTypes.length + report.removedTypes.length > 0;
+}
+
+function needsTwoStepReleaseReminder(report: SavedObjectsCheckReport): boolean {
+  return report.updatedTypes.length > 0 || report.removedTypes.length > 0;
+}
+
+function buildkiteBuildLink(): string {
+  const url = process.env.BUILDKITE_BUILD_URL;
+  return url ? `[Buildkite logs](${url})` : 'the Buildkite logs';
 }
 
 function listSection(title: string, items: string[]): string {
@@ -68,8 +82,16 @@ function groupFindingsByType(
 }
 
 export function buildFailureBody(report: SavedObjectsCheckReport): string {
+  if (report.findings.length === 0) {
+    return `## Saved Objects CI check failed
+
+The check failed but no structured findings were collected. See ${buildkiteBuildLink()} for details.
+
+See the [Saved Objects troubleshooting guide](${TROUBLESHOOTING_URL}) and the [model versions documentation](${MODEL_VERSIONS_URL}).`;
+  }
+
   const groups = groupFindingsByType(report.findings);
-  const errorCount = report.findings.length;
+  const findingCount = report.findings.length;
   const typeCount = groups.size;
 
   const sections: string[] = [];
@@ -90,7 +112,7 @@ export function buildFailureBody(report: SavedObjectsCheckReport): string {
 
   return `## Saved Objects CI check failed
 
-${errorCount} issue(s) across ${typeCount} type(s).
+${findingCount} issue(s) across ${typeCount} type(s).
 
 ${sections.join('\n\n')}
 
@@ -112,11 +134,13 @@ export function buildSuccessBody(report: SavedObjectsCheckReport): string {
     .filter(Boolean)
     .join('\n');
 
+  const reminder = needsTwoStepReleaseReminder(report)
+    ? `\n\n> Some Saved Objects changes (e.g. mapping additions, type removals) require a **2-step release**: ship the change first, then update consumers in a follow-up. Review the [Saved Objects model versions documentation](${MODEL_VERSIONS_URL}) before merging.`
+    : '';
+
   return `## Saved Objects CI check passed
 
-${summary}
-
-> Some Saved Objects changes (e.g. mapping additions, type removals) require a **2-step release**: ship the change first, then update consumers in a follow-up. Review the [Saved Objects model versions documentation](${MODEL_VERSIONS_URL}) before merging.`;
+${summary}${reminder}`;
 }
 
 export function buildCommentBody(report: SavedObjectsCheckReport): string | null {

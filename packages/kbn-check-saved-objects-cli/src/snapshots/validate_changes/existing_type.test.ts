@@ -52,7 +52,7 @@ describe('validateChangesExistingType', () => {
     const to = loadSnapshot('migrations_deleted.json');
 
     expect(() => validateChangesWrapper({ from, to, type: { name: 'config' } })).toThrowError(
-      `Modifications have been detected in the 'config.migrations'. This property is deprected and no modifications are allowed.`
+      `Modifications have been detected in the 'config.migrations'. This property is deprecated and no modifications are allowed.`
     );
   });
 
@@ -61,7 +61,7 @@ describe('validateChangesExistingType', () => {
     const to = loadSnapshot('migrations_added.json');
 
     expect(() => validateChangesWrapper({ from, to, type: { name: 'config' } })).toThrowError(
-      `Modifications have been detected in the 'config.migrations'. This property is deprected and no modifications are allowed.`
+      `Modifications have been detected in the 'config.migrations'. This property is deprecated and no modifications are allowed.`
     );
   });
 

@@ -107,11 +107,11 @@ if is_pr; then
   CHECK_EXIT=0
 
   if ! is_auto_commit_disabled; then
-    # The step might update files like removed_types.json and/or SO fixtures
+    # The step might update files like removed_types.json and/or SO fixtures.
+    # `check_for_changed_files` runs unconditionally so that any files produced by --fix
+    # are auto-committed even when the check also reports non-fixable violations.
     node scripts/check_saved_objects --baseline "$MERGE_BASE_REV" "${SERVERLESS_BASELINE_FLAG[@]}" --algorithm both --report-path "$SO_REPORT_PATH" --fix || CHECK_EXIT=$?
-    if [[ "$CHECK_EXIT" -eq 0 ]]; then
-      check_for_changed_files "node scripts/check_saved_objects" true
-    fi
+    check_for_changed_files "node scripts/check_saved_objects" true
   else
     node scripts/check_saved_objects --baseline "$MERGE_BASE_REV" "${SERVERLESS_BASELINE_FLAG[@]}" --algorithm both --report-path "$SO_REPORT_PATH" || CHECK_EXIT=$?
   fi
