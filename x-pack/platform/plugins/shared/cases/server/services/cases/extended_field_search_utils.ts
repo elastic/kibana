@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { CASE_SAVED_OBJECT, CASE_EXTENDED_FIELDS } from '../../../common/constants';
 import type { Template } from '../../../common/types/domain/template/v1';
+import { FieldType } from '../../../common/types/domain/template/fields';
 
 export interface ExtendedFieldFilter {
   label: string;
@@ -53,10 +54,7 @@ const ES_TYPE_TO_RUNTIME_TYPE: Record<string, RuntimeType> = {
 const mapToRuntimeType = (esType: string): RuntimeType =>
   ES_TYPE_TO_RUNTIME_TYPE[esType] ?? 'keyword';
 
-const CHECKBOX_GROUP = 'CHECKBOX_GROUP';
-const USER_PICKER = 'USER_PICKER';
-const DATE_PICKER = 'DATE_PICKER';
-const INPUT_NUMBER = 'INPUT_NUMBER';
+const { CHECKBOX_GROUP, USER_PICKER, DATE_PICKER, INPUT_NUMBER, INPUT_TEXT, TEXTAREA } = FieldType;
 
 const FLATTENED_FIELD_PATH = `${CASE_SAVED_OBJECT}.${CASE_EXTENDED_FIELDS}`;
 
@@ -66,11 +64,14 @@ const FLATTENED_FIELD_PATH = `${CASE_SAVED_OBJECT}.${CASE_EXTENDED_FIELDS}`;
  * - CHECKBOX_GROUP: stores JSON arrays like '["A","B"]' as a single token
  * - USER_PICKER: stores JSON objects, needs regex to extract names
  * - INPUT_NUMBER: flattened fields can't do numeric range/comparison
+ * - INPUT_TEXT / TEXTAREA: need substring matching; flattened fields don't support wildcard queries
  */
 const needsRuntimeScript = (control: string, esType: string): boolean =>
   control === CHECKBOX_GROUP ||
   control === USER_PICKER ||
   control === INPUT_NUMBER ||
+  control === INPUT_TEXT ||
+  control === TEXTAREA ||
   mapToRuntimeType(esType) === 'long' ||
   mapToRuntimeType(esType) === 'double';
 
@@ -236,6 +237,9 @@ const buildTemplateVersionFilter = (
   };
 };
 
+const isFreeTextControl = (control: string): boolean =>
+  control === INPUT_TEXT || control === TEXTAREA;
+
 const buildFlattenedFilterClause = ({
   storageKey,
   value,
@@ -264,6 +268,10 @@ const buildRuntimeFilterClause = ({
     const range = parseDateFilterToRange(value);
     if (range == null) return null;
     return { range: { [fieldName]: range } };
+  }
+
+  if (isFreeTextControl(control)) {
+    return { wildcard: { [fieldName]: { value: `*${value}*`, case_insensitive: true } } };
   }
 
   const runtimeType = mapToRuntimeType(esType);

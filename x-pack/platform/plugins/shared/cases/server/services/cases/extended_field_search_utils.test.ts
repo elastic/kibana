@@ -603,6 +603,40 @@ describe('buildExtendedFieldRuntimeMappings', () => {
 
     expect(Object.keys(mappings)).toEqual(['ef_effort_as_integer']);
   });
+
+  it('builds runtime mapping for INPUT_TEXT (needs substring matching)', () => {
+    const mappings = buildExtendedFieldRuntimeMappings([
+      [
+        {
+          storageKey: 'summary_as_keyword',
+          value: 'test',
+          esType: 'keyword',
+          control: 'INPUT_TEXT',
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
+        },
+      ],
+    ]);
+
+    expect(mappings).toHaveProperty('ef_summary_as_keyword');
+    expect(mappings.ef_summary_as_keyword.type).toBe('keyword');
+  });
+
+  it('builds runtime mapping for TEXTAREA (needs substring matching)', () => {
+    const mappings = buildExtendedFieldRuntimeMappings([
+      [
+        {
+          storageKey: 'notes_as_keyword',
+          value: 'deploy',
+          esType: 'keyword',
+          control: 'TEXTAREA',
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
+        },
+      ],
+    ]);
+
+    expect(mappings).toHaveProperty('ef_notes_as_keyword');
+    expect(mappings.ef_notes_as_keyword.type).toBe('keyword');
+  });
 });
 
 describe('buildExtendedFieldFilterClauses', () => {
@@ -651,6 +685,56 @@ describe('buildExtendedFieldFilterClauses', () => {
         },
       },
     ]);
+  });
+
+  it('builds wildcard query for INPUT_TEXT control via runtime field', () => {
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'summary_as_keyword',
+          value: 'some changes',
+          esType: 'keyword',
+          control: 'INPUT_TEXT',
+          templateVersions: [{ id: 'tmpl-a', version: 1 }],
+        },
+      ],
+    ]);
+
+    expect(clauses[0]?.bool?.filter).toBeDefined();
+    const filterArray = clauses[0]!.bool!.filter as estypes.QueryDslQueryContainer[];
+    expect(filterArray[0]).toEqual({
+      wildcard: {
+        ef_summary_as_keyword: {
+          value: '*some changes*',
+          case_insensitive: true,
+        },
+      },
+    });
+  });
+
+  it('builds wildcard query for TEXTAREA control via runtime field', () => {
+    const clauses = buildExtendedFieldFilterClauses([
+      [
+        {
+          storageKey: 'notes_as_keyword',
+          value: 'deploy',
+          esType: 'keyword',
+          control: 'TEXTAREA',
+          templateVersions: [{ id: 'tmpl-b', version: 1 }],
+        },
+      ],
+    ]);
+
+    expect(clauses[0]?.bool?.filter).toBeDefined();
+    const filterArray = clauses[0]!.bool!.filter as estypes.QueryDslQueryContainer[];
+    expect(filterArray[0]).toEqual({
+      wildcard: {
+        ef_notes_as_keyword: {
+          value: '*deploy*',
+          case_insensitive: true,
+        },
+      },
+    });
   });
 
   it('builds term queries with numeric value for integer fields', () => {
