@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('lens', () => {
-    loadTestFile(require.resolve('./visualizations'));
-  });
-}
+export const BASIC_RULES_TAB = '[data-test-subj="configurationsTab-basic_rules"]';
