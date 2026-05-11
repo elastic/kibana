@@ -98,7 +98,8 @@
     "@kbn/cps",
     "@kbn/security-plugin",
     "@kbn/std",
-    "@kbn/lens-common"
+    "@kbn/lens-common",
+    "@kbn/inspector-plugin"
   ],
   "exclude": ["target/**/*"]
 }

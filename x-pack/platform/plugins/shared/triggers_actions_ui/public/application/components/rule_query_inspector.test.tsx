@@ -8,23 +8,16 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { RuleQueryInspector, RuleQueryInspectorFlyout } from './rule_query_inspector';
+import { RuleQueryInspector } from './rule_query_inspector';
 import { useKibana } from '../../common/lib/kibana';
+import * as inspectQueryApi from '../lib/rule_api/inspect_query';
 
 jest.mock('../../common/lib/kibana');
+jest.mock('../lib/rule_api/inspect_query');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-      cacheTime: 0,
-    },
-  },
-});
+const loadRuleQueryInspectorMock = inspectQueryApi.loadRuleQueryInspector as jest.Mock;
 
 const mockResponse = {
   queries: [
@@ -43,16 +36,23 @@ const mockResponse = {
   ],
 };
 
+const mockInspectorOpen = jest.fn();
+const mockToastsAddError = jest.fn();
+
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
-  <IntlProvider locale="en">
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-  </IntlProvider>
+  <IntlProvider locale="en">{children}</IntlProvider>
 );
 
 describe('RuleQueryInspector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    queryClient.clear();
+    (useKibanaMock as unknown as jest.Mock).mockReturnValue({
+      services: {
+        http: {},
+        inspector: { open: mockInspectorOpen },
+        notifications: { toasts: { addError: mockToastsAddError } },
+      },
+    });
   });
 
   it('renders the Inspect button for supported rule types', () => {
@@ -76,8 +76,25 @@ describe('RuleQueryInspector', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('opens the flyout when the button is clicked', async () => {
-    useKibanaMock().services.http.get = jest.fn().mockImplementation(() => new Promise(() => {}));
+  it('renders nothing when inspector plugin is not available', () => {
+    (useKibanaMock as unknown as jest.Mock).mockReturnValue({
+      services: {
+        http: {},
+        notifications: { toasts: { addError: mockToastsAddError } },
+      },
+    });
+
+    const { container } = render(
+      <Wrapper>
+        <RuleQueryInspector ruleId="rule-123" ruleTypeId="observability.rules.custom_threshold" />
+      </Wrapper>
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('fetches the API and opens the inspector on click', async () => {
+    loadRuleQueryInspectorMock.mockResolvedValue(mockResponse);
 
     render(
       <Wrapper>
@@ -87,138 +104,65 @@ describe('RuleQueryInspector', () => {
 
     await userEvent.click(screen.getByTestId('ruleQueryInspectorButton'));
 
-    expect(screen.getByTestId('ruleQueryInspectorFlyout')).toBeInTheDocument();
-  });
-});
-
-describe('RuleQueryInspectorFlyout', () => {
-  const onClose = jest.fn();
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    queryClient.clear();
-  });
-
-  it('shows loading spinner while fetching', () => {
-    useKibanaMock().services.http.get = jest.fn().mockImplementation(() => new Promise(() => {}));
-
-    render(
-      <Wrapper>
-        <RuleQueryInspectorFlyout ruleId="rule-123" onClose={onClose} />
-      </Wrapper>
-    );
-
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
-  });
-
-  it('displays the request JSON in the Request tab', async () => {
-    useKibanaMock().services.http.get = jest.fn().mockResolvedValue({
-      queries: [mockResponse.queries[0]],
-    });
-
-    render(
-      <Wrapper>
-        <RuleQueryInspectorFlyout ruleId="rule-123" onClose={onClose} />
-      </Wrapper>
-    );
-
     await waitFor(() => {
-      expect(screen.getByText(/"filter"/)).toBeInTheDocument();
+      expect(loadRuleQueryInspectorMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ruleId: 'rule-123',
+          mode: 'execute',
+        })
+      );
     });
-  });
 
-  it('shows error callout on fetch failure', async () => {
-    useKibanaMock().services.http.get = jest.fn().mockRejectedValue(new Error('Network error'));
-
-    render(
-      <Wrapper>
-        <RuleQueryInspectorFlyout ruleId="rule-123" onClose={onClose} />
-      </Wrapper>
+    expect(mockInspectorOpen).toHaveBeenCalledWith(
+      expect.objectContaining({ requests: expect.any(Object) }),
+      expect.objectContaining({ title: 'Inspect' })
     );
-
-    await waitFor(() => {
-      expect(screen.getByText('Unable to load query')).toBeInTheDocument();
-      expect(screen.getByText('Network error')).toBeInTheDocument();
-    });
-  });
-
-  it('renders criterion selector when multiple queries are returned', async () => {
-    useKibanaMock().services.http.get = jest.fn().mockResolvedValue(mockResponse);
-
-    render(
-      <Wrapper>
-        <RuleQueryInspectorFlyout ruleId="rule-123" onClose={onClose} />
-      </Wrapper>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId('ruleQueryInspectorCriterionSelect')).toBeInTheDocument();
-    });
-  });
-
-  it('does not render criterion selector for a single query', async () => {
-    useKibanaMock().services.http.get = jest.fn().mockResolvedValue({
-      queries: [mockResponse.queries[0]],
-    });
-
-    render(
-      <Wrapper>
-        <RuleQueryInspectorFlyout ruleId="rule-123" onClose={onClose} />
-      </Wrapper>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText(/"filter"/)).toBeInTheDocument();
-    });
-
-    expect(screen.queryByTestId('ruleQueryInspectorCriterionSelect')).not.toBeInTheDocument();
   });
 
   it('passes alert_id to the API call when alertId prop is provided', async () => {
-    const mockGet = jest.fn().mockResolvedValue({ queries: [mockResponse.queries[0]] });
-    useKibanaMock().services.http.get = mockGet;
+    loadRuleQueryInspectorMock.mockResolvedValue({ queries: [mockResponse.queries[0]] });
 
     render(
       <Wrapper>
-        <RuleQueryInspectorFlyout ruleId="rule-123" onClose={onClose} alertId="alert-456" />
+        <RuleQueryInspector
+          ruleId="rule-123"
+          ruleTypeId="observability.rules.custom_threshold"
+          alertId="alert-456"
+        />
       </Wrapper>
     );
 
+    await userEvent.click(screen.getByTestId('ruleQueryInspectorButton'));
+
     await waitFor(() => {
-      expect(mockGet).toHaveBeenCalledWith(
-        expect.stringContaining('/query_inspector'),
+      expect(loadRuleQueryInspectorMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: expect.objectContaining({
-            alert_id: 'alert-456',
-          }),
+          ruleId: 'rule-123',
+          mode: 'execute',
+          alertId: 'alert-456',
         })
       );
     });
   });
 
-  it('triggers execute mode when Response tab is clicked', async () => {
-    const mockGet = jest.fn().mockResolvedValue({ queries: [mockResponse.queries[0]] });
-    useKibanaMock().services.http.get = mockGet;
+  it('shows a toast error on API failure', async () => {
+    loadRuleQueryInspectorMock.mockRejectedValue(new Error('Network error'));
 
     render(
       <Wrapper>
-        <RuleQueryInspectorFlyout ruleId="rule-123" onClose={onClose} />
+        <RuleQueryInspector ruleId="rule-123" ruleTypeId="observability.rules.custom_threshold" />
       </Wrapper>
     );
 
-    await waitFor(() => {
-      expect(screen.getByText(/"filter"/)).toBeInTheDocument();
-    });
-
-    await userEvent.click(screen.getByText('Response'));
+    await userEvent.click(screen.getByTestId('ruleQueryInspectorButton'));
 
     await waitFor(() => {
-      expect(mockGet).toHaveBeenCalledWith(
-        expect.stringContaining('/query_inspector'),
-        expect.objectContaining({
-          query: expect.objectContaining({ mode: 'execute' }),
-        })
+      expect(mockToastsAddError).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ title: 'Unable to load query' })
       );
     });
+
+    expect(mockInspectorOpen).not.toHaveBeenCalled();
   });
 });
