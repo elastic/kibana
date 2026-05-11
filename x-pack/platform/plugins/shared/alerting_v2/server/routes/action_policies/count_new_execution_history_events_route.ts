@@ -65,7 +65,7 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { since } = this.request.query ?? { since: new Date().toISOString() };
+    const { since } = this.request.query;
 
     const result = await this.executionHistoryClient.countNewEventsSince({
       request: this.request,
