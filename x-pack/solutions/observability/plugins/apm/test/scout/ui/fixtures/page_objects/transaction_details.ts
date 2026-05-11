@@ -9,9 +9,14 @@ import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { dismissGlobalToastsIfPresent, waitForApmSettingsHeaderLink } from '../page_helpers';
 import { EXTENDED_TIMEOUT } from '../constants';
+import { type TraceWaterfallFlyout, createTraceWaterfallFlyout } from './trace_waterfall_flyout';
 
 export class TransactionDetailsPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  public readonly traceWaterfallFlyout: TraceWaterfallFlyout;
+
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+    this.traceWaterfallFlyout = createTraceWaterfallFlyout(page);
+  }
 
   async goToTransactionDetails(params: {
     serviceName: string;
