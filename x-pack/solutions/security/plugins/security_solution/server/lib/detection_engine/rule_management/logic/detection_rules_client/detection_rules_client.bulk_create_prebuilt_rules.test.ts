@@ -55,7 +55,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
       rules: [getRuleMock(getQueryRuleParams()), getRuleMock(getQueryRuleParams())],
       errors: [],
       total: 2,
-      backgroundWork: Promise.resolve([]),
+      backgroundWork: () => Promise.resolve([]),
     });
 
     const { results, errors } = await detectionRulesClient.bulkCreatePrebuiltRules({
@@ -80,7 +80,7 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
         rules: [],
         errors: [{ message: 'boom', status: 500, rule: { id, name: asset.name } }],
         total: 1,
-        backgroundWork: Promise.resolve([]),
+        backgroundWork: () => Promise.resolve([]),
       };
     });
 

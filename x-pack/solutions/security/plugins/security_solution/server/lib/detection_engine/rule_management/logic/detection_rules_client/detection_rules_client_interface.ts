@@ -6,6 +6,7 @@
  */
 
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
+import type { BulkImportRulesResult } from './methods/bulk_import_rules';
 import type {
   RuleCreateProps,
   RuleUpdateProps,
@@ -37,7 +38,7 @@ export interface IDetectionRulesClient {
   revertPrebuiltRule: (args: RevertPrebuiltRuleArgs) => Promise<RuleResponse>;
   importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
   importRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportErrorObject>>;
-  bulkImportRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportErrorObject>>;
+  bulkImportRules: (args: ImportRulesArgs) => Promise<BulkImportRulesResult>;
 }
 
 export interface CreateCustomRuleArgs {

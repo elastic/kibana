@@ -180,14 +180,14 @@ describe('bulkCreateRules', () => {
   });
 
   describe('foreground (synchronous result)', () => {
-    test('empty input returns immediately with a resolved backgroundWork promise', async () => {
+    test('empty input returns immediately with a no-op backgroundWork thunk', async () => {
       const result = await rulesClient.bulkCreateRules({ rules: [] });
 
       expect(result.rules).toEqual([]);
       expect(result.errors).toEqual([]);
       expect(result.total).toBe(0);
-      expect(result.backgroundWork).toBeInstanceOf(Promise);
-      await expect(result.backgroundWork).resolves.toEqual([]);
+      expect(typeof result.backgroundWork).toBe('function');
+      await expect(result.backgroundWork()).resolves.toEqual([]);
 
       expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
@@ -208,9 +208,9 @@ describe('bulkCreateRules', () => {
       expect(result.errors).toEqual([]);
       expect(result.total).toBe(2);
       expect(result.rules).toHaveLength(2);
-      expect(result.backgroundWork).toBeInstanceOf(Promise);
+      expect(typeof result.backgroundWork).toBe('function');
 
-      await result.backgroundWork;
+      await result.backgroundWork();
 
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
       expect(unsecuredSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
@@ -239,7 +239,7 @@ describe('bulkCreateRules', () => {
       expect(result.rules[0].scheduledTaskId).toBe('mock-id-1');
 
       releaseSchedule();
-      await result.backgroundWork;
+      await result.backgroundWork();
     });
 
     test('Phase 1 per-rule prepare error is isolated', async () => {
@@ -279,7 +279,7 @@ describe('bulkCreateRules', () => {
       expect(result.rules).toHaveLength(1);
       expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toHaveLength(1);
 
-      await result.backgroundWork;
+      await result.backgroundWork();
     });
 
     test('Phase 1 API key creation failure: enabled rule degrades to disabled in foreground', async () => {
@@ -321,7 +321,7 @@ describe('bulkCreateRules', () => {
       expect(result.errors[0].message.startsWith(BULK_CREATE_AS_DISABLED_PREFIX)).toBe(true);
       expect(result.errors[0].message).toContain('keys disabled');
 
-      await result.backgroundWork;
+      await result.backgroundWork();
 
       // Only the surviving enabled rule was scheduled.
       expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
@@ -348,7 +348,7 @@ describe('bulkCreateRules', () => {
       expect(result.errors[0].status).toBe(409);
       expect(result.errors[0].disabledReason).toBeUndefined();
 
-      await result.backgroundWork;
+      await result.backgroundWork();
 
       // The 409’d row’s key is invalidated; the surviving enabled row’s key
       // is NOT (its rule is live).
@@ -398,11 +398,11 @@ describe('bulkCreateRules', () => {
       // No DISABLE in the foreground.
       expect(actions.filter((a) => a === RuleAuditAction.DISABLE)).toHaveLength(0);
 
-      await result.backgroundWork;
+      await result.backgroundWork();
     });
   });
 
-  describe('background (after awaiting backgroundWork)', () => {
+  describe('background (after invoking backgroundWork())', () => {
     test('schedules tasks disabled, then bulkEnables them (runAt stagger) for all enabled persisted rules', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
         buildBulkResponse([
@@ -422,7 +422,7 @@ describe('bulkCreateRules', () => {
         ],
       });
 
-      await expect(result.backgroundWork).resolves.toEqual([]);
+      await expect(result.backgroundWork()).resolves.toEqual([]);
 
       expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
       const tasks = taskManager.bulkSchedule.mock.calls[0][0] as Array<{
@@ -458,7 +458,7 @@ describe('bulkCreateRules', () => {
         ],
       });
 
-      await expect(result.backgroundWork).resolves.toEqual([
+      await expect(result.backgroundWork()).resolves.toEqual([
         expect.objectContaining({
           rule: expect.objectContaining({ id: 'mock-id-2' }),
           disabledReason: 'task_enable_failed',
@@ -488,7 +488,7 @@ describe('bulkCreateRules', () => {
         ],
       });
 
-      const bgErrors = await result.backgroundWork;
+      const bgErrors = await result.backgroundWork();
       expect(bgErrors).toHaveLength(2);
       expect(bgErrors.every((e) => e.disabledReason === 'task_enable_failed')).toBe(true);
       expect(bgErrors.every((e) => e.message.includes('TM down'))).toBe(true);
@@ -522,7 +522,7 @@ describe('bulkCreateRules', () => {
       expect(result.errors).toHaveLength(0);
 
       // backgroundWork surfaces the demotion error.
-      await expect(result.backgroundWork).resolves.toEqual([
+      await expect(result.backgroundWork()).resolves.toEqual([
         expect.objectContaining({
           rule: expect.objectContaining({ id: 'mock-id-1' }),
           disabledReason: 'schedule_limit_exceeded',
@@ -568,7 +568,7 @@ describe('bulkCreateRules', () => {
 
       expect(result.errors).toHaveLength(0);
 
-      await expect(result.backgroundWork).resolves.toEqual([
+      await expect(result.backgroundWork()).resolves.toEqual([
         expect.objectContaining({
           rule: expect.objectContaining({ id: 'mock-id-1' }),
           disabledReason: 'task_schedule_failed',
@@ -604,7 +604,7 @@ describe('bulkCreateRules', () => {
 
       expect(result.errors).toHaveLength(0);
 
-      await expect(result.backgroundWork).resolves.toEqual([
+      await expect(result.backgroundWork()).resolves.toEqual([
         expect.objectContaining({
           rule: expect.objectContaining({ id: 'mock-id-2' }),
           disabledReason: 'task_schedule_entry_failed',
@@ -619,7 +619,7 @@ describe('bulkCreateRules', () => {
       expect(taskManager.bulkRemove).not.toHaveBeenCalled();
     });
 
-    test('background bulkUpdate throwing does not reject backgroundWork (caught + logged)', async () => {
+    test('background bulkUpdate throwing does not reject backgroundWork() (caught + logged)', async () => {
       taskManager.bulkSchedule.mockRejectedValueOnce(new Error('cluster unavailable'));
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue(
         buildBulkResponse([{ id: 'mock-id-1', enabled: true }])
@@ -632,7 +632,7 @@ describe('bulkCreateRules', () => {
 
       // Awaiting must not throw; demotion errors were collected before the
       // bulkUpdate failed, so they still surface to the caller.
-      await expect(result.backgroundWork).resolves.toEqual([
+      await expect(result.backgroundWork()).resolves.toEqual([
         expect.objectContaining({
           rule: expect.objectContaining({ id: 'mock-id-1' }),
           disabledReason: 'task_schedule_failed',
@@ -655,7 +655,7 @@ describe('bulkCreateRules', () => {
         rules: [{ data: baseRule({ name: 'a', enabled: true }) }],
       });
 
-      await result.backgroundWork;
+      await result.backgroundWork();
 
       expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
       // No tasks were scheduled (no enabled persisted rules), no bulkUpdate.

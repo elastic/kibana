@@ -198,6 +198,7 @@ export const importRulesRoute = (
             ruleSourceImporter,
             detectionRulesClient,
             experimentalFeatures,
+            logger,
           });
 
           const parseErrors = parsedRuleErrors.map((error) =>

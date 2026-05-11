@@ -56,7 +56,7 @@ describe('detectionRulesClient.bulkImportRules', () => {
       rules: [],
       errors: [],
       total: 0,
-      backgroundWork: Promise.resolve([]),
+      backgroundWork: () => Promise.resolve([]),
     });
 
     mockRuleSourceImporter = ruleSourceImporterMock.create();
@@ -72,7 +72,7 @@ describe('detectionRulesClient.bulkImportRules', () => {
       rules: [getRuleMock(getQueryRuleParams())],
       errors: [],
       total: 1,
-      backgroundWork: Promise.resolve([]),
+      backgroundWork: () => Promise.resolve([]),
     });
 
     await subject.bulkImportRules({
@@ -94,7 +94,7 @@ describe('detectionRulesClient.bulkImportRules', () => {
       rules: [getRuleMock(getQueryRuleParams())],
       errors: [],
       total: 1,
-      backgroundWork: Promise.resolve([]),
+      backgroundWork: () => Promise.resolve([]),
     });
 
     await subject.bulkImportRules({
@@ -119,7 +119,7 @@ describe('detectionRulesClient.bulkImportRules', () => {
       rules: [getRuleMock(getQueryRuleParams())],
       errors: [],
       total: 1,
-      backgroundWork: Promise.resolve([]),
+      backgroundWork: () => Promise.resolve([]),
     });
 
     const result = await subject.bulkImportRules({
@@ -129,7 +129,9 @@ describe('detectionRulesClient.bulkImportRules', () => {
       rules: [r1, r2],
     });
 
-    const conflicts = result.filter((r) => isRuleImportError(r) && r.error.type === 'conflict');
+    const conflicts = result.responses.filter(
+      (r) => isRuleImportError(r) && r.error.type === 'conflict'
+    );
     expect(conflicts).toHaveLength(1);
     expect(isRuleImportError(conflicts[0]) && conflicts[0].error.ruleId).toBe('existing-rule');
     expect(rulesClient.bulkCreateRules.mock.calls[0][0].rules).toHaveLength(1);
@@ -147,7 +149,7 @@ describe('detectionRulesClient.bulkImportRules', () => {
       rules: [getRuleMock(getQueryRuleParams())],
       errors: [],
       total: 1,
-      backgroundWork: Promise.resolve([]),
+      backgroundWork: () => Promise.resolve([]),
     });
 
     await subject.bulkImportRules({
@@ -172,7 +174,7 @@ describe('detectionRulesClient.bulkImportRules', () => {
         rules: [],
         errors: [{ message: 'boom', status: 500, rule: { id, name: ruleToImport.name } }],
         total: 1,
-        backgroundWork: Promise.resolve([]),
+        backgroundWork: () => Promise.resolve([]),
       };
     });
 
@@ -183,7 +185,7 @@ describe('detectionRulesClient.bulkImportRules', () => {
       rules: [ruleToImport],
     });
 
-    const errors = result.filter(isRuleImportError);
+    const errors = result.responses.filter(isRuleImportError);
     expect(errors).toHaveLength(1);
     expect(errors[0].error.ruleId).toBe(ruleToImport.rule_id);
     expect(errors[0].error.message).toBe('boom');
@@ -197,9 +199,31 @@ describe('detectionRulesClient.bulkImportRules', () => {
       rules: [],
     });
 
-    expect(result).toEqual([]);
+    expect(result.responses).toEqual([]);
+    expect(typeof result.backgroundWork).toBe('function');
     expect(rulesClient.bulkCreateRules).not.toHaveBeenCalled();
     expect(findRules).not.toHaveBeenCalled();
+  });
+
+  it('returns the alerting backgroundWork thunk untouched (not auto-invoked)', async () => {
+    const ruleToImport = { ...getImportRulesSchemaMock(), enabled: true };
+    const backgroundWork = jest.fn(() => Promise.resolve([]));
+    rulesClient.bulkCreateRules.mockResolvedValueOnce({
+      rules: [getRuleMock(getQueryRuleParams())],
+      errors: [],
+      total: 1,
+      backgroundWork,
+    });
+
+    const result = await subject.bulkImportRules({
+      allowMissingConnectorSecrets: false,
+      overwriteRules: false,
+      ruleSourceImporter: mockRuleSourceImporter,
+      rules: [ruleToImport],
+    });
+
+    expect(backgroundWork).not.toHaveBeenCalled();
+    expect(result.backgroundWork).toBe(backgroundWork);
   });
 });
 

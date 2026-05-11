@@ -102,6 +102,10 @@ export const bulkCreatePrebuiltRules = async ({
 
   const result = await rulesClient.bulkCreateRules<RuleParams>({ rules: bulkInputs });
 
+  // Prebuilt rules are always created disabled, so background work is just key
+  // invalidation flushing on error rows. Fire and forget; never rejects.
+  void result.backgroundWork();
+
   result.rules.forEach((createdRule) => {
     results.push({ result: convertAlertingRuleToRuleResponse(createdRule) });
   });

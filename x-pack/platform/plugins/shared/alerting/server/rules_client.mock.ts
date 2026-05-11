@@ -56,7 +56,7 @@ const createRulesClientMock = () => {
       rules: [],
       errors: [],
       total: 0,
-      backgroundWork: Promise.resolve([]),
+      backgroundWork: () => Promise.resolve([]),
     }),
     bulkDeleteRules: jest.fn(),
     bulkEnableRules: jest.fn(),

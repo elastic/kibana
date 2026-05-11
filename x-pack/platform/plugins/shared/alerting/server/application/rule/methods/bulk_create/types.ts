@@ -40,10 +40,14 @@ export interface BulkCreateRulesResult<Params extends RuleParams = never> {
   errors: BulkCreateOperationError[];
   total: number;
   /**
-   * Promise that resolves when the detached post-create work finishes:
+   * Thunk that, when invoked, runs the detached post-create work and resolves
+   * with one error per demoted rule (empty on full success):
    *   - Task scheduling
    *   - Failure recovery: rule SO enabled -> disabled.
    *   - API key invalidations
+   *
+   * The returned promise is wrapped to never reject; callers can fire-and-forget.
+   * Not invoking the thunk skips the background phases entirely.
    */
-  backgroundWork: Promise<BulkCreateOperationError[]>;
+  backgroundWork: () => Promise<BulkCreateOperationError[]>;
 }

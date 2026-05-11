@@ -9,7 +9,7 @@ import pMap from 'p-map';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { BulkCreateOperationError, RulesClient } from '@kbn/alerting-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { SERVER_APP_ID } from '../../../../../../../common';
@@ -55,11 +55,27 @@ interface BulkImportRulesOptions {
  */
 const escapeKql = (id: string) => id.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
+export interface BulkImportRulesResult {
+  responses: Array<RuleResponse | RuleImportErrorObject>;
+  /**
+   * Deferred post-create work from `rulesClient.bulkCreateRules` (task scheduling,
+   * key invalidation, demotion bookkeeping). Caller decides when to invoke; the
+   * inner promise never rejects. Returns a no-op thunk when nothing was bulk-created.
+   */
+  backgroundWork: () => Promise<BulkCreateOperationError[]>;
+}
+
+const NOOP_BACKGROUND_WORK: () => Promise<BulkCreateOperationError[]> = () => Promise.resolve([]);
+
 /**
  * Bulk-import rules in a single chunk. Performs per-rule pre-checks, a single
  * `findRules` lookup for `rule_id` conflicts, and one `rulesClient.bulkCreateRules`
  * call for new rules (mixed enabled/disabled). Existing rules with `overwriteRules`
  * still fall through to the per-rule `importRule` path under a small concurrency cap.
+ *
+ * Returns the alerting `bulkCreateRules` background-work thunk untouched — the
+ * orchestrator (`importRules`) is responsible for invoking it after all batches
+ * have completed their foreground work.
  */
 export const bulkImportRules = async ({
   actionsClient,
@@ -67,9 +83,9 @@ export const bulkImportRules = async ({
   savedObjectsClient,
   mlAuthz,
   args,
-}: BulkImportRulesOptions): Promise<Array<RuleResponse | RuleImportErrorObject>> => {
+}: BulkImportRulesOptions): Promise<BulkImportRulesResult> => {
   const { rules, overwriteRules, ruleSourceImporter, allowMissingConnectorSecrets } = args;
-  if (rules.length === 0) return [];
+  if (rules.length === 0) return { responses: [], backgroundWork: NOOP_BACKGROUND_WORK };
 
   const responses: Array<RuleResponse | RuleImportErrorObject> = [];
 
@@ -151,7 +167,7 @@ export const bulkImportRules = async ({
     }
   }
 
-  if (prepared.length === 0) return responses;
+  if (prepared.length === 0) return { responses, backgroundWork: NOOP_BACKGROUND_WORK };
 
   // Bulk lookup for `rule_id` conflicts: single KQL parenthesized OR-list.
   const ruleIds = prepared.map((p) => p.rule.rule_id);
@@ -229,7 +245,7 @@ export const bulkImportRules = async ({
     responses.push(...overwriteResults);
   }
 
-  if (toBulkCreate.length === 0) return responses;
+  if (toBulkCreate.length === 0) return { responses, backgroundWork: NOOP_BACKGROUND_WORK };
 
   // Bulk-create new rules in a single alerting call. Pre-assign uuids so we
   // can re-pair successes/failures back to the source `rule_id`.
@@ -271,7 +287,7 @@ export const bulkImportRules = async ({
     );
   });
 
-  return responses;
+  return { responses, backgroundWork: bulkResult.backgroundWork };
 };
 
 export { escapeKql as __testing_escapeKql };

@@ -39,12 +39,13 @@ import type { ApiKeyEntry, DemotionEntry, PreparedRule } from './utils';
 /**
  * Persist-first bulk rule create. 2 parts:
  * 1. Foreground: SO bulkCreate, audit, return.
- * 2. Background (`result.backgroundWork`): Scheduling - limit checks,
+ * 2. Background (`result.backgroundWork()`): Scheduling - limit checks,
  *    task scheduling (created disabled), task enabling via
  *    taskManager.bulkEnable, key invalidation.
  *
- * Returned `rules[]` reflect input intent; the background promise may
+ * Returned `rules[]` reflect input intent; invoking `backgroundWork()` may
  * later demote rules to "disabled" if related tasks failed to schedule.
+ * The thunk is not auto-invoked — callers decide when (and whether) to run it.
  */
 export async function bulkCreateRules<Params extends RuleParams = never>(
   context: RulesClientContext,
@@ -55,7 +56,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
   const total = rules.length;
 
   if (total === 0) {
-    return { rules: [], errors: [], total: 0, backgroundWork: Promise.resolve([]) };
+    return { rules: [], errors: [], total: 0, backgroundWork: () => Promise.resolve([]) };
   }
 
   const username = await context.getUserName();
@@ -74,6 +75,8 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
   const errors: BulkOperationError[] = [];
   const apiKeysMap = new Map<string, ApiKeyEntry>();
   const keysToInvalidate = new Set<string>();
+
+  logger.debug('Bulk creation. prepareRule().');
 
   await pMap(
     inputsWithIds,
@@ -94,9 +97,11 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     { concurrency: API_KEY_GENERATE_CONCURRENCY }
   );
 
+  logger.debug('Bulk creation. ruleAuditEvent(RuleAuditAction.CREATE).');
+
   if (preparedRules.size === 0) {
     await flushKeysToInvalidate(keysToInvalidate, context);
-    return { rules: [], errors, total, backgroundWork: Promise.resolve([]) };
+    return { rules: [], errors, total, backgroundWork: () => Promise.resolve([]) };
   }
 
   // Audit per-rule CREATE event before persistence (mirrors createRuleSavedObject).
@@ -109,6 +114,8 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
       })
     );
   }
+
+  logger.debug('Bulk creation. bulkCreateRulesSo()');
 
   // Phase 2: bulk SO create (no overwrite — id collisions surface as per-row 409).
   const bulkObjects: Array<SavedObjectsBulkCreateObject<RawRule>> = [...preparedRules.values()].map(
@@ -136,6 +143,8 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     await flushKeysToInvalidate(keysToInvalidate, context);
     throw error;
   }
+
+  logger.debug('Bulk creation. ruleAuditEvent(RuleAuditAction.ENABLE).');
 
   // Phase 3: per-row outcome split.
   const successfulSos: Array<SavedObject<RawRule>> = [];
@@ -175,11 +184,15 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     .filter((so) => so.attributes.enabled)
     .map((so) => so.id);
 
-  // Phase 4: detached background work — wrapped so the promise never rejects.
-  // Resolves to one error per demoted rule (empty array on full success).
-  const backgroundWork = (async (): Promise<BulkCreateOperationError[]> => {
+  // Phase 4: deferred background work — returned as a thunk. Caller invokes
+  // when ready; the inner promise is wrapped so it never rejects. Resolves to
+  // one error per demoted rule (empty array on full success).
+  const backgroundWork = async (): Promise<BulkCreateOperationError[]> => {
     const bgErrors: BulkCreateOperationError[] = [];
     try {
+      logger.debug(
+        `Starting background work -> scheduling TM tasks for ${enabledPersistedIds.length} rules.`
+      );
       const demotedIds = new Map<string, DemotionEntry>();
 
       // Phase 4A: schedule-limit check.
@@ -251,7 +264,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
           }
         }
 
-        // Phase 4C: enable scheduled tasks via taskManager.bulkEnable. 
+        // Phase 4C: enable scheduled tasks via taskManager.bulkEnable.
         await bulkEnableScheduledTasks({ context, scheduledIds, demotedIds });
       }
 
@@ -273,8 +286,12 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     } catch (err) {
       logger.error(`bulkCreateRules background phases failed: ${err.message}`);
     }
+
+    logger.debug(`Finished background work -> tasks for ${enabledPersistedIds.length} rules.`);
     return bgErrors;
-  })();
+  };
+
+  logger.debug('Bulk creation. toSanitizedRule().');
 
   // Phase 5: domain transform + return (reflects input intent).
   const sanitizedRules: Array<SanitizedRule<Params>> = successfulSos.map((so) =>

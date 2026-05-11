@@ -40,6 +40,8 @@ export { RuleNotifyWhen } from '../common';
 export type { AlertingServerSetup, AlertingServerStart } from './plugin';
 export type { FindResult, BulkEditOperation, BulkOperationError } from './rules_client';
 export type {
+  BulkCreateDisabledReason,
+  BulkCreateOperationError,
   BulkCreateRulesItem,
   BulkCreateRulesParams,
   BulkCreateRulesResult,
