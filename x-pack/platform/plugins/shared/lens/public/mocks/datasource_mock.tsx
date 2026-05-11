@@ -47,6 +47,7 @@ export function createMockDatasource(
     toExpression: jest.fn(
       (_frame, _state, _indexPatterns, dateRange, nowInstant) => 'datasource_expression'
     ),
+    toESQL: jest.fn(() => null),
     insertLayer: jest.fn((_state, _newLayerId) => ({})),
     removeLayer: jest.fn((state, layerId) => ({ newState: state, removedLayerIds: [layerId] })),
     cloneLayer: jest.fn((_state, _layerId, _newLayerId, getNewId) => {}),
