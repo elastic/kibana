@@ -1661,6 +1661,7 @@ describe('ActionPolicyClient', () => {
       const existingAttributes: ActionPolicySavedObjectAttributes = {
         name: 'before',
         description: 'before description',
+        type: 'global',
         enabled: false,
         destinations: [{ type: 'workflow', id: 'wf-before' }],
         matcher: 'env: production',

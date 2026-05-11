@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import type {
   ActionPolicyBulkAction,
   ActionPolicyResponse,
-  CreateActionPolicyData,
+  CreateActionPolicyDataInput,
 } from '@kbn/alerting-v2-schemas';
 import {
   createActionPolicyDataSchema,
@@ -156,8 +156,8 @@ export class ActionPolicyClient {
   public async createActionPolicy(params: CreateActionPolicyParams): Promise<ActionPolicyResponse> {
     const parsed = this.parseActionPolicyData(createActionPolicyDataSchema, params.data, 'create');
 
-    if (parsed.data.type === 'single_rule' && parsed.data.ruleId) {
-      await this.assertRuleExists(parsed.data.ruleId);
+    if (parsed.type === 'single_rule' && parsed.ruleId) {
+      await this.assertRuleExists(parsed.ruleId);
     }
 
     const userProfile = await this.getUserProfile();
@@ -637,7 +637,7 @@ export class ActionPolicyClient {
     data,
   }: {
     id: string;
-    data: CreateActionPolicyData;
+    data: CreateActionPolicyDataInput;
   }): Promise<{ policy: ActionPolicyResponse; created: boolean }> {
     // Validate up front so a bad body never spends an API key allocation or
     // even consults the SO store.
