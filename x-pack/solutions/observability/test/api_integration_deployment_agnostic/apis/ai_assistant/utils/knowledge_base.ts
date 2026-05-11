@@ -15,6 +15,7 @@ import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/ser
 import expect from '@kbn/expect';
 import pRetry from 'p-retry';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { setAdvancedSettings } from './advanced_settings';
 import { TINY_ELSER_INFERENCE_ID } from './model_and_inference';
 import type { ObservabilityAIAssistantApiClient } from '../../../services/observability_ai_assistant_api';
 
@@ -149,9 +150,9 @@ export async function addSampleDocsToCustomIndex(
   customSearchConnectorIndex: string
 ) {
   const es = getService('es');
-  const kibanaServer = getService('kibanaServer');
+  // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
+  const supertest = getService('supertest');
   const log = getService('log');
-  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   // create index with semantic_text mapping for `text` field
   log.info('Creating custom index with sample animal docs...');
@@ -179,28 +180,9 @@ export async function addSampleDocsToCustomIndex(
     })
   );
 
-  const expectedDocumentIds = new Set(sampleDocs.map(({ id }) => id));
-
-  await kibanaServer.uiSettings.update({
+  // update the advanced settings (`observability:aiAssistantSearchConnectorIndexPattern`) to include the custom index
+  await setAdvancedSettings(supertest, {
     'observability:aiAssistantSearchConnectorIndexPattern': customSearchConnectorIndex,
-  });
-  await kibanaServer.uiSettings.withPropagationDelay({
-    description: 'ai assistant search connector settings propagation',
-    assertion: async () => {
-      const { body, status } = await observabilityAIAssistantAPIClient.editor({
-        endpoint: 'POST /internal/observability_ai_assistant/functions/recall',
-        params: {
-          body: {
-            queries: [{ text: 'Cheetah' }],
-          },
-        },
-      });
-
-      expect(status).to.be(200);
-      expect(body.entries.some(({ id }: { id: string }) => expectedDocumentIds.has(id))).to.be(
-        true
-      );
-    },
   });
 }
 

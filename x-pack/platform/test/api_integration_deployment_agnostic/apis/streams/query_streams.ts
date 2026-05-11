@@ -27,7 +27,6 @@ import {
   putQueryStream,
   putStream,
 } from './helpers/requests';
-import { updateStreamsUiSettingsWithPropagation } from './helpers/ui_settings';
 
 function createQueryStreamRequest(
   esql: string,
@@ -65,12 +64,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await enableStreams(apiClient);
 
       // Enable query streams feature flag
-      await updateStreamsUiSettingsWithPropagation({
-        kibanaServer,
-        updates: {
-          [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
-        },
-        description: 'streams query uiSettings propagation',
+      await kibanaServer.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: true,
       });
 
       await forkStream(apiClient, 'logs.otel', {
@@ -106,12 +101,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
       await deleteStream(apiClient, PARENT_STREAM_NAME);
       await disableStreams(apiClient);
-      await updateStreamsUiSettingsWithPropagation({
-        kibanaServer,
-        updates: {
-          [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
-        },
-        description: 'streams query uiSettings cleanup',
+      await kibanaServer.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: false,
       });
     });
 

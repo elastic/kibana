@@ -31,7 +31,6 @@ import {
   ingestPipelineExists,
   putStream,
 } from './helpers/requests';
-import { updateStreamsUiSettingsWithPropagation } from './helpers/ui_settings';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -51,13 +50,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
 
-      await updateStreamsUiSettingsWithPropagation({
-        kibanaServer,
-        updates: {
-          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
-          [OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS]: true,
-        },
-        description: 'streams draft uiSettings propagation',
+      await kibanaServer.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
+        [OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS]: true,
       });
 
       // Create a parent wired stream to fork drafts from
@@ -69,13 +64,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await deleteStream(apiClient, PARENT).catch(() => {});
-      await updateStreamsUiSettingsWithPropagation({
-        kibanaServer,
-        updates: {
-          [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
-          [OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS]: false,
-        },
-        description: 'streams draft uiSettings cleanup',
+      await kibanaServer.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
+        [OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS]: false,
       });
     });
 

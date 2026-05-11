@@ -27,7 +27,6 @@ import {
   importContent,
   putStream,
 } from './helpers/requests';
-import { updateStreamsUiSettingsWithPropagation } from './helpers/ui_settings';
 
 const upsertRequest = ({
   fields = {},
@@ -60,13 +59,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Content packs', () => {
     before(async () => {
-      await updateStreamsUiSettingsWithPropagation({
-        kibanaServer,
-        updates: {
-          [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-          [OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS]: true,
-        },
-        description: 'streams content pack uiSettings propagation',
+      await kibanaServer.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
+        [OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS]: true,
       });
 
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
@@ -150,12 +145,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     after(async () => {
       await disableStreams(apiClient);
 
-      await updateStreamsUiSettingsWithPropagation({
-        kibanaServer,
-        updates: {
-          [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
-        },
-        description: 'streams content pack uiSettings cleanup',
+      await kibanaServer.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
       });
     });
 
