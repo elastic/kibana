@@ -38,7 +38,7 @@ const groupEventsByHost = (events: AlertEvent[]): Record<string, AlertEvent> =>
  * Isolated cases for the alerting_v2 rule executor's persisted output.
  *
  */
-apiTest.describe.only('Rule executor', { tag: tags.stateful.classic }, () => {
+apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
   const SOURCE_INDEX = 'test-alerting-v2-rule-executor-source';
   /**
    * Time-based wait used only by tests that assert the *absence* of events from
