@@ -16,9 +16,6 @@ import { MAX_MINUTES, PREVENT_SELECTIVE_TESTS_LABEL, RETRIES } from './const';
 import { loadRunOrderConfig } from './env_config';
 
 const TYPE_ENV = {
-  TEST_GROUP_TYPE_UNIT: 'unit-type',
-  TEST_GROUP_TYPE_INTEGRATION: 'integration-type',
-  TEST_GROUP_TYPE_FUNCTIONAL: 'functional-type',
   BUILDKITE_BRANCH: 'main',
   BUILDKITE_PIPELINE_SLUG: 'kibana-pull-request',
 };
@@ -37,7 +34,12 @@ describe('loadRunOrderConfig', () => {
   it('applies sensible defaults when nothing is set', () => {
     const cfg = loadRunOrderConfig();
 
-    expect(cfg.unitType).toBe('unit-type');
+    expect(cfg.unitType).toBe('Jest Unit Tests');
+    expect(cfg.integrationType).toBe('Jest Integration Tests');
+    expect(cfg.functionalType).toBe('Functional Tests');
+    expect(cfg.jestUnitScript).toBeUndefined();
+    expect(cfg.jestIntegrationScript).toBeUndefined();
+    expect(cfg.ftrConfigsScript).toBeUndefined();
     expect(cfg.jestUnitMaxMinutes).toBe(MAX_MINUTES.JEST_UNIT_DEFAULT);
     expect(cfg.jestIntegrationMaxMinutes).toBe(MAX_MINUTES.JEST_INTEGRATION_DEFAULT);
     expect(cfg.functionalMaxMinutes).toBe(MAX_MINUTES.FUNCTIONAL_DEFAULT);
@@ -139,5 +141,27 @@ describe('loadRunOrderConfig', () => {
   it('disables selective testing when not a PR', () => {
     const cfg = loadRunOrderConfig();
     expect(cfg.useSelectiveTesting).toBe(false);
+  });
+
+  it('uses TEST_GROUP_TYPE_* overrides when provided', () => {
+    process.env.TEST_GROUP_TYPE_UNIT = 'unit-type';
+    process.env.TEST_GROUP_TYPE_INTEGRATION = 'integration-type';
+    process.env.TEST_GROUP_TYPE_FUNCTIONAL = 'functional-type';
+
+    const cfg = loadRunOrderConfig();
+    expect(cfg.unitType).toBe('unit-type');
+    expect(cfg.integrationType).toBe('integration-type');
+    expect(cfg.functionalType).toBe('functional-type');
+  });
+
+  it('exposes per-type scripts when provided', () => {
+    process.env.JEST_UNIT_SCRIPT = 'run-unit.sh';
+    process.env.JEST_INTEGRATION_SCRIPT = 'run-integration.sh';
+    process.env.FTR_CONFIGS_SCRIPT = 'run-ftr.sh';
+
+    const cfg = loadRunOrderConfig();
+    expect(cfg.jestUnitScript).toBe('run-unit.sh');
+    expect(cfg.jestIntegrationScript).toBe('run-integration.sh');
+    expect(cfg.ftrConfigsScript).toBe('run-ftr.sh');
   });
 });

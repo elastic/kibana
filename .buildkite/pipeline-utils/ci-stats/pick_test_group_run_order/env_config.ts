@@ -13,18 +13,30 @@ import { collectEnvFromLabels, getRequiredEnv } from '#pipeline-utils';
 const VALID_SOLUTIONS = ['observability', 'search', 'security', 'workplaceai', 'vectordb'];
 const VALID_LIMIT_CONFIG_TYPES = ['unit', 'integration', 'functional'];
 
+// Defaults mirror `.buildkite/scripts/common/env.sh` so this script can also run
+// outside the standard Buildkite bootstrap (locally, ad-hoc pipelines, etc.).
+const DEFAULT_TEST_GROUP_TYPE_UNIT = 'Jest Unit Tests';
+const DEFAULT_TEST_GROUP_TYPE_INTEGRATION = 'Jest Integration Tests';
+const DEFAULT_TEST_GROUP_TYPE_FUNCTIONAL = 'Functional Tests';
+
 /**
  * Read and validate every `process.env.*` input the orchestrator depends on.
  * Throws synchronously when something is malformed so callers don't have to.
+ *
+ * Only the Buildkite-injected branch/pipeline slug are treated as hard
+ * requirements. Test-type names fall back to the well-known defaults from
+ * `common/env.sh`, and per-script env vars (JEST_UNIT_SCRIPT, etc.) are
+ * optional here — they're validated by the orchestrator only when a step of
+ * the corresponding type is actually going to be emitted.
  */
 export function loadRunOrderConfig() {
   return {
     ownBranch: getRequiredEnv('BUILDKITE_BRANCH'),
     pipelineSlug: getRequiredEnv('BUILDKITE_PIPELINE_SLUG'),
 
-    unitType: getRequiredEnv('TEST_GROUP_TYPE_UNIT'),
-    integrationType: getRequiredEnv('TEST_GROUP_TYPE_INTEGRATION'),
-    functionalType: getRequiredEnv('TEST_GROUP_TYPE_FUNCTIONAL'),
+    unitType: process.env.TEST_GROUP_TYPE_UNIT || DEFAULT_TEST_GROUP_TYPE_UNIT,
+    integrationType: process.env.TEST_GROUP_TYPE_INTEGRATION || DEFAULT_TEST_GROUP_TYPE_INTEGRATION,
+    functionalType: process.env.TEST_GROUP_TYPE_FUNCTIONAL || DEFAULT_TEST_GROUP_TYPE_FUNCTIONAL,
 
     jestUnitMaxMinutes: parseFloatEnv('JEST_UNIT_MAX_MINUTES', MAX_MINUTES.JEST_UNIT_DEFAULT),
     jestIntegrationMaxMinutes: parseFloatEnv(
@@ -51,9 +63,11 @@ export function loadRunOrderConfig() {
     ftrConfigsDeps: parseDefinedCsvEnv('FTR_CONFIGS_DEPS') ?? ['build'],
     jestConfigsDeps: parseDefinedCsvEnv('JEST_CONFIGS_DEPS') ?? [],
 
-    jestUnitScript: getRequiredEnv('JEST_UNIT_SCRIPT'),
-    jestIntegrationScript: getRequiredEnv('JEST_INTEGRATION_SCRIPT'),
-    ftrConfigsScript: getRequiredEnv('FTR_CONFIGS_SCRIPT'),
+    // Optional here; required by the orchestrator only when a step of that
+    // type is actually going to be emitted (parallelism > 0 / non-empty group).
+    jestUnitScript: process.env.JEST_UNIT_SCRIPT || undefined,
+    jestIntegrationScript: process.env.JEST_INTEGRATION_SCRIPT || undefined,
+    ftrConfigsScript: process.env.FTR_CONFIGS_SCRIPT || undefined,
 
     ftrExtraArgs: process.env.FTR_EXTRA_ARGS
       ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }

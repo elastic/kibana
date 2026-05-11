@@ -107,36 +107,39 @@ export async function pickTestGroupRunOrder() {
   }
 
   const steps: BuildkiteStep[] = [
-    buildJestStep({
-      command: config.jestUnitScript,
-      label: 'Jest Tests',
-      parallelism: unit.count,
-      key: STEP_KEYS.JEST_UNIT,
-      agentDiskSize: AGENT_DISK_GIB.JEST_UNIT,
-      envFromLabels: config.envFromLabels,
-      dependsOn: config.jestConfigsDeps,
-      retryCount: config.jestConfigsRetryCount,
-    }),
-    buildJestStep({
-      command: config.jestIntegrationScript,
-      label: 'Jest Integration Tests',
-      parallelism: integration.count,
-      key: STEP_KEYS.JEST_INTEGRATION,
-      agentDiskSize: AGENT_DISK_GIB.JEST_INTEGRATION,
-      envFromLabels: config.envFromLabels,
-      dependsOn: config.jestConfigsDeps,
-      retryCount: config.jestConfigsRetryCount,
-    }),
-    buildFunctionalStepGroup({
-      command: config.ftrConfigsScript,
-      functionalGroups,
-      defaultQueue,
-      ftrExtraArgs: config.ftrExtraArgs,
-      envFromLabels: config.envFromLabels,
-      dependsOn: config.ftrConfigsDeps,
-      retryCount: config.ftrConfigsRetryCount,
-    }),
-  ].filter((s): s is BuildkiteStep => s !== undefined);
+    unit.count > 0 &&
+      buildJestStep({
+        command: requireVariable(config.jestUnitScript, 'JEST_UNIT_SCRIPT'),
+        label: 'Jest Tests',
+        parallelism: unit.count,
+        key: STEP_KEYS.JEST_UNIT,
+        agentDiskSize: AGENT_DISK_GIB.JEST_UNIT,
+        envFromLabels: config.envFromLabels,
+        dependsOn: config.jestConfigsDeps,
+        retryCount: config.jestConfigsRetryCount,
+      }),
+    integration.count > 0 &&
+      buildJestStep({
+        command: requireVariable(config.jestIntegrationScript, 'JEST_INTEGRATION_SCRIPT'),
+        label: 'Jest Integration Tests',
+        parallelism: integration.count,
+        key: STEP_KEYS.JEST_INTEGRATION,
+        agentDiskSize: AGENT_DISK_GIB.JEST_INTEGRATION,
+        envFromLabels: config.envFromLabels,
+        dependsOn: config.jestConfigsDeps,
+        retryCount: config.jestConfigsRetryCount,
+      }),
+    functionalGroups.length > 0 &&
+      buildFunctionalStepGroup({
+        command: requireVariable(config.ftrConfigsScript, 'FTR_CONFIGS_SCRIPT'),
+        functionalGroups,
+        defaultQueue,
+        ftrExtraArgs: config.ftrExtraArgs,
+        envFromLabels: config.envFromLabels,
+        dependsOn: config.ftrConfigsDeps,
+        retryCount: config.ftrConfigsRetryCount,
+      }),
+  ].filter((s): s is BuildkiteStep => Boolean(s));
 
   registerCancelKeys(bk, {
     unitCount: unit.count,
@@ -145,6 +148,16 @@ export async function pickTestGroupRunOrder() {
   });
 
   bk.uploadSteps(steps);
+}
+
+/**
+ * Throws an error if the variable's value is missing at runtime.
+ */
+function requireVariable(value: string | undefined, envName: string): string {
+  if (!value) {
+    throw new Error(`Missing required environment variable "${envName}"`);
+  }
+  return value;
 }
 
 /**

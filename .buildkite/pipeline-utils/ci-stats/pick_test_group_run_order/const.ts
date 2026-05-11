@@ -9,15 +9,22 @@
 
 /**
  * Environment variables that drive test selection and pipeline behaviour.
- * Required at runtime (no defaults):
- *   TEST_GROUP_TYPE_UNIT        — ci-stats type name for jest unit groups
- *   TEST_GROUP_TYPE_INTEGRATION — ci-stats type name for jest integration groups
- *   TEST_GROUP_TYPE_FUNCTIONAL  — ci-stats type name for ftr groups
+ *
+ * Hard requirements (always injected by Buildkite):
+ *   BUILDKITE_BRANCH            — current branch
+ *   BUILDKITE_PIPELINE_SLUG     — current pipeline slug
+ *
+ * Conditionally required (only when a step of that type will actually be emitted —
+ * i.e. the type is in LIMIT_CONFIG_TYPE *and* ci-stats produces a non-empty group):
  *   JEST_UNIT_SCRIPT            — shell command that runs a single jest unit job
  *   JEST_INTEGRATION_SCRIPT     — shell command that runs a single jest integration job
  *   FTR_CONFIGS_SCRIPT          — shell command that runs a single ftr job
- *   BUILDKITE_BRANCH            — current branch (injected by Buildkite)
- *   BUILDKITE_PIPELINE_SLUG     — current pipeline slug (injected by Buildkite)
+ *
+ * Have sensible defaults (set in `.buildkite/scripts/common/env.sh`,
+ * fall back to the same values in `env_config.ts`):
+ *   TEST_GROUP_TYPE_UNIT        — ci-stats type name for jest unit groups
+ *   TEST_GROUP_TYPE_INTEGRATION — ci-stats type name for jest integration groups
+ *   TEST_GROUP_TYPE_FUNCTIONAL  — ci-stats type name for ftr groups
  *
  * Optional feature flags / filters (absent means "not set" / disabled):
  *   LIMIT_CONFIG_TYPE            — comma-separated subset of: unit, integration, functional

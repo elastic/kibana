@@ -29,11 +29,6 @@ export interface BuildkiteClientConfig {
   exec?: ExecType;
 }
 
-export interface BuildkiteGroup {
-  group: string;
-  steps: BuildkiteStep[];
-}
-
 export type BuildkiteStep =
   | BuildkiteGroupStep
   | BuildkiteCommandStep
@@ -446,7 +441,7 @@ export class BuildkiteClient {
     });
   };
 
-  uploadSteps = (steps: Array<BuildkiteStep | BuildkiteGroup>) => {
+  uploadSteps = (steps: Array<BuildkiteStep>) => {
     this.exec(`buildkite-agent pipeline upload`, {
       input: stringify({ steps }),
       stdio: ['pipe', 'inherit', 'inherit'],
