@@ -41,7 +41,7 @@ import { PROJECT_ROUTING } from '@kbn/cps-utils';
 import { DocumentDetailsRightPanelKey } from '../../../flyout/document_details/shared/constants/panel_keys';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { alertFlyoutHistoryKey } from '../../../flyout_v2/document/constants/flyout_history';
+import { documentFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/flyout_history';
 import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { PaginatedDocumentFlyout } from '../../../flyout_v2/document/paginated_document_flyout';
@@ -648,7 +648,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
           }),
           {
             ...defaultFlyoutProperties,
-            historyKey: alertFlyoutHistoryKey,
+            historyKey: documentFlyoutHistoryKey,
             session: 'start',
             onClose: (flyout) => {
               flyout.close();
