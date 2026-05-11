@@ -157,8 +157,14 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
           },
         },
         async (context, request, response) => {
-          const { protocol, hostname, port } = core.http.getServerInfo();
-          const pathname = core.http.basePath.prepend('/api/security/saml/callback');
+          // `getServerInfo()` returns the inner Kibana port, not the proxy ES sees.
+          const baseUrl =
+            core.http.basePath.publicBaseUrl ??
+            (() => {
+              const { protocol, hostname, port } = core.http.getServerInfo();
+              return `${protocol}://${hostname}:${port}${core.http.basePath.serverBasePath}`;
+            })();
+          const kibanaAcsUrl = `${baseUrl.replace(/\/+$/, '')}/api/security/saml/callback`;
 
           const serverlessOptions = plugins.cloud?.serverless
             ? {
@@ -176,7 +182,6 @@ export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = as
               logger.info(`Sending SAML response for request ID: ${samlRequestInfo.requestId}`);
             }
 
-            const kibanaAcsUrl = `${protocol}://${hostname}:${port}${pathname}`;
             const destinationUrl = samlRequestInfo?.acsUrl ?? kibanaAcsUrl;
 
             const parsed = new URL(request.body.url, 'https://localhost');

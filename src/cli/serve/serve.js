@@ -617,11 +617,24 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
     lodashSet(rawConfig, 'xpack.cloud.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
   }
 
-  // Pin Kibana to a fixed base path so SP/ACS endpoints in Elasticsearch's SAML realm stay aligned
-  // with Kibana's URL across restarts (the dev proxy otherwise generates a random one each run).
-  // Skipped when the user passed `--no-base-path` or already configured a custom value.
+  // Pin a stable base path so SP/ACS endpoints stay aligned with the SAML realm across restarts.
   if (opts.basePath !== false && !_.has(rawConfig, 'server.basePath')) {
     lodashSet(rawConfig, 'server.basePath', MOCK_IDP_KIBANA_BASE_PATH);
+  }
+
+  // Expose the proxy URL so the mock IdP stamps `Destination` correctly — the inner port from
+  // `getServerInfo()` would mismatch the realm config.
+  const userCustomizedHttp =
+    _.has(rawConfig, 'server.host') ||
+    _.has(rawConfig, 'server.port') ||
+    _.get(rawConfig, 'server.ssl.enabled');
+  if (
+    opts.basePath !== false &&
+    !_.has(rawConfig, 'server.publicBaseUrl') &&
+    !userCustomizedHttp
+  ) {
+    const basePath = _.get(rawConfig, 'server.basePath', '');
+    lodashSet(rawConfig, 'server.publicBaseUrl', `http://localhost:5601${basePath}`);
   }
 
   return true;
