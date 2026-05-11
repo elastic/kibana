@@ -8,6 +8,7 @@
  */
 
 import { set as lodashSet } from '@kbn/safer-lodash-set';
+import chalk from 'chalk';
 import _ from 'lodash';
 import { resolve } from 'path';
 import url from 'url';
@@ -633,12 +634,14 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
   }
 
   if (_.get(rawConfig, 'server.basePath') !== MOCK_IDP_KIBANA_BASE_PATH) {
+    const publicBaseUrl = _.get(rawConfig, 'server.publicBaseUrl');
+    const label = chalk.black.bgYellow(' saml-config-no-base-path ');
+    console.warn(label, '='.repeat(100));
     console.warn(
-      `Kibana is running with a non-default base path. Make sure to adjust the --kibanaUrl=${_.get(
-        rawConfig,
-        'server.publicBaseUrl'
-      )} parameter while running the local ES cluster.`
+      label,
+      `Kibana is running with a non-default base path. Make sure to adjust the --kibanaUrl=${publicBaseUrl} parameter while running the local ES cluster.`
     );
+    console.warn(label, '='.repeat(100));
   }
 
   return true;
