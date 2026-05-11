@@ -664,6 +664,13 @@ export class HttpServer {
 
       executionContext?.setRequestId(requestId);
 
+      // NOTE: We store per-request Kibana state on Hapi's `request.app` bag.
+      // This couples our Request representation to a specific HTTP framework (Hapi).
+      // A Core-owned per-request state container (e.g. a WeakMap or a symbol-keyed
+      // field that doesn't depend on Hapi conventions) would let us swap or layer
+      // alternative HTTP backends without rewriting every reader. Worth doing when
+      // we touch the broader Kibana-state-on-Hapi pattern; out of scope for the
+      // first-class-spaceId work.
       app.startTime = performance.now();
       app.requestId = requestId;
       app.requestUuid = uuidv4();
