@@ -8,7 +8,6 @@
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import { test } from '../fixtures';
-import { forceClassicDiscoverMode } from '../fixtures/discover_mode';
 import { generateLogsData } from '../fixtures/generators';
 
 const WIRED_STREAM_NAME = 'logs.otel.child';
@@ -30,8 +29,8 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ page }) => {
-      await forceClassicDiscoverMode(page);
+    test.beforeEach(async ({ pageObjects }) => {
+      await pageObjects.discover.setQueryMode('classic');
     });
 
     test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
