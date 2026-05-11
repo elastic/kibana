@@ -496,7 +496,7 @@ describe('executeDashboardOperations', () => {
     ]);
   });
 
-  it('adds heterogeneous section panels without requiring a visualization resolver', async () => {
+  it('adds non-visualization section panels without invoking the visualization resolver', async () => {
     const resolveVisualizationConfig = jest.fn<
       ReturnType<ResolveVisualizationConfig>,
       Parameters<ResolveVisualizationConfig>
