@@ -83,10 +83,7 @@ export const AllStates: Story = {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 480 }}>
       {RULE_STEPS.map((_, i) => (
         <div key={i} style={{ border: '1px solid #eee', borderRadius: 8, padding: 12 }}>
-          <HorizontalMinimalStepper
-            steps={makeSteps(RULE_STEPS, i)}
-            animated={false}
-          />
+          <HorizontalMinimalStepper steps={makeSteps(RULE_STEPS, i)} />
         </div>
       ))}
     </div>
@@ -182,16 +179,23 @@ export const ThreeSteps: Story = {
 };
 
 // ---------------------------------------------------------------------------
-// Animation disabled (respects prefers-reduced-motion equivalently)
+// Reduced motion — simulate what users with prefers-reduced-motion see
+// (The component handles this automatically via euiCanAnimate in its styles;
+//  this story documents the expected visual output for reviewers.)
 // ---------------------------------------------------------------------------
-export const AnimationDisabled: Story = {
+export const ReducedMotion: Story = {
+  parameters: {
+    backgrounds: { default: 'light' },
+    // Chromatic / Storybook can simulate prefers-reduced-motion via this parameter
+    chromatic: { prefersReducedMotion: 'reduce' },
+  },
   render: () => {
     const [currentStep, setCurrentStep] = useState(0);
     const steps = makeSteps(RULE_STEPS, currentStep);
 
     return (
       <div style={{ maxWidth: 480, border: '1px solid #eee', borderRadius: 8, padding: 16 }}>
-        <HorizontalMinimalStepper steps={steps} animated={false} />
+        <HorizontalMinimalStepper steps={steps} />
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -207,8 +211,9 @@ export const AnimationDisabled: Story = {
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <EuiText size="xs" color="subdued">
-          <code>animated=false</code> — instant transitions, equivalent to{' '}
-          <code>prefers-reduced-motion: reduce</code> (which the component also detects automatically).
+          Animation is handled via <code>euiCanAnimate</code> in the Emotion styles — the transition
+          is automatically absent when <code>prefers-reduced-motion: reduce</code> is set. No{' '}
+          <code>animated</code> prop needed.
         </EuiText>
       </div>
     );

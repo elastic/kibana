@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { useEuiTheme, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { useHorizontalMinimalStepperStyles } from './horizontal_minimal_stepper.styles';
 
 /** Mirrors the status subset used by EuiStepsHorizontal. */
 export type MinimalStepStatus = 'current' | 'complete' | 'incomplete';
@@ -19,11 +20,6 @@ export interface MinimalStep {
 export interface HorizontalMinimalStepperProps {
   /** Steps with their current status — same shape as EuiStepsHorizontal steps (subset). */
   steps: MinimalStep[];
-  /**
-   * When true, indicators animate on step change using a spring curve.
-   * Defaults to true. Pass false to disable for testing or reduced-motion contexts.
-   */
-  animated?: boolean;
 }
 
 /**
@@ -31,6 +27,9 @@ export interface HorizontalMinimalStepperProps {
  *
  * Renders a row of small indicators (dots + pill for current step), a bold
  * current-step title, and a muted N / N counter.
+ *
+ * Animation respects `prefers-reduced-motion` automatically via the
+ * `euiCanAnimate` CSS media query in the styles file.
  *
  * Layout is intentionally self-contained — place alongside other elements
  * using standard EuiFlexGroup/EuiFlexItem outside this component:
@@ -44,64 +43,35 @@ export interface HorizontalMinimalStepperProps {
  *     </EuiFlexItem>
  *   </EuiFlexGroup>
  */
-export const HorizontalMinimalStepper: React.FC<HorizontalMinimalStepperProps> = ({
-  steps,
-  animated = true,
-}) => {
-  const { euiTheme } = useEuiTheme();
-
-  const DOT_SIZE = 8;
-  const BAR_WIDTH = 24;
-  const BAR_HEIGHT = DOT_SIZE;
-  const GAP = 4;
-
-  const activeColor = euiTheme.colors.primary;
-  const futureColor = euiTheme.colors.lightShade;
+export const HorizontalMinimalStepper: React.FC<HorizontalMinimalStepperProps> = ({ steps }) => {
+  const euiThemeContext = useEuiTheme();
+  const { indicatorByStatus, indicatorRow } = useHorizontalMinimalStepperStyles(euiThemeContext);
 
   const currentIndex = steps.findIndex((s) => s.status === 'current');
+  const displayIndex = currentIndex >= 0 ? currentIndex : 0;
   const currentTitle = currentIndex >= 0 ? steps[currentIndex].title : '';
   const total = steps.length;
 
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-
-  const transition =
-    animated && !prefersReducedMotion
-      ? 'width 220ms cubic-bezier(0.34, 1.56, 0.64, 1), ' +
-        'border-radius 220ms cubic-bezier(0.34, 1.56, 0.64, 1), ' +
-        'background-color 150ms ease'
-      : undefined;
-
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      {/* Step indicators */}
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      role="group"
+      aria-label={`Step ${displayIndex + 1} of ${total}: ${currentTitle}`}
+    >
+      {/* Step indicators — decorative, described by the group aria-label */}
       <EuiFlexItem grow={false}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: GAP }}>
-          {steps.map((step, i) => {
-            const isCurrent = step.status === 'current';
-            const isComplete = step.status === 'complete';
-
-            return (
-              <div
-                key={i}
-                style={{
-                  width: isCurrent ? BAR_WIDTH : DOT_SIZE,
-                  height: isCurrent ? BAR_HEIGHT : DOT_SIZE,
-                  borderRadius: isCurrent ? BAR_HEIGHT / 2 : '50%',
-                  backgroundColor: isCurrent || isComplete ? activeColor : futureColor,
-                  flexShrink: 0,
-                  transition,
-                }}
-              />
-            );
-          })}
+        <div css={indicatorRow} aria-hidden>
+          {steps.map((step, i) => (
+            <div key={i} css={indicatorByStatus[step.status]} />
+          ))}
         </div>
       </EuiFlexItem>
 
       {/* Current step title */}
       <EuiFlexItem grow={false}>
-        <EuiText size="s">
+        <EuiText size="s" aria-current="step">
           <strong>{currentTitle}</strong>
         </EuiText>
       </EuiFlexItem>
@@ -111,8 +81,12 @@ export const HorizontalMinimalStepper: React.FC<HorizontalMinimalStepperProps> =
 
       {/* N / N counter */}
       <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
-          {currentIndex + 1} / {total}
+        <EuiText
+          size="xs"
+          color="subdued"
+          aria-label={`Step ${displayIndex + 1} of ${total}`}
+        >
+          {displayIndex + 1} / {total}
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
