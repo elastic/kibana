@@ -21,4 +21,10 @@ const durationSchema = z.string().superRefine((value, ctx) => {
   }
 });
 
-export { durationSchema };
+/**
+ * Shared schema for tag arrays used across alerting v2 (rule metadata, action policies,
+ * alert tag actions, tag filters). Each tag is up to 128 characters. Up to 20 tags allowed.
+ */
+const tagsSchema = z.array(z.string().min(1).max(128)).max(20);
+
+export { durationSchema, tagsSchema };
