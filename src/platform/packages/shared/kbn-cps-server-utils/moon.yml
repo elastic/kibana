@@ -17,7 +17,6 @@ project:
   owner: '@elastic/kibana-core'
   sourceRoot: src/platform/packages/shared/kbn-cps-server-utils
 dependsOn:
-  - '@kbn/core-elasticsearch-server'
   - '@kbn/core-spaces-common'
 tags:
   - shared-server

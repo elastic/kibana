@@ -26,7 +26,6 @@ dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/core-status-common'
   - '@kbn/dev-utils'
-  - '@kbn/spaces-plugin'
   - '@kbn/config-schema'
   - '@kbn/core-spaces-common'
 tags:
