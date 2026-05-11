@@ -2384,34 +2384,29 @@
     tree-dump "1.1.0"
     tslib "2.8.1"
 
-"@elastic/eui-theme-borealis@file:./eui_theme_borealis_7.0.0_selection_lists_01.tgz":
-  version "7.0.0"
-  resolved "file:./eui_theme_borealis_7.0.0_selection_lists_01.tgz#a5a6ba8786779295ce3b5936feaa016ed1dbdbee"
+"@elastic/eui-theme-borealis@8.0.0":
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-8.0.0.tgz#51b11163728fc634bea4848586642eecc0b6b39c"
+  integrity sha512-mNcZxVYPr5c1VDru42Z/VnFZn9GtgNSiEF3SfCiI1c29LNWVzz9qle35tffDxJSu/A2iIWA8tBmuxAFYYLydnw==
   dependencies:
-    "@elastic/eui-theme-common" "9.0.0"
+    "@elastic/eui-theme-common" "10.0.0"
     chroma-js "^2.4.2"
 
-"@elastic/eui-theme-common@9.0.0":
-  version "9.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-9.0.0.tgz#df57056b2195c24fb32eff1eaa60c67483da8c68"
-  integrity sha512-0Vxu6coC2KccsU3HLPhDhqJam0PCwyVZpqS9hJ65mFst/jutVYVx8RBKNGq10R2qr0wgO20aJLA5OzaniJ56/A==
+"@elastic/eui-theme-common@10.0.0":
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-10.0.0.tgz#d2f71b0863e026ca55b06c1cecc5f6f130aefa37"
+  integrity sha512-cnUZx3S6XlDcm3ArkEGB3Q5Ehq+E5g4gB+a74ob0+Csjglvus0QO4Fyr5UwYHLJqueSMuV9YefVtKDC41lh16g==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui-theme-common@file:./eui_theme_common_9.0.0_selection_lists_01.tgz":
-  version "9.0.0"
-  resolved "file:./eui_theme_common_9.0.0_selection_lists_01.tgz#d9c3d666e27fc6b3995c98520e97b34b3775c518"
+"@elastic/eui@116.0.0":
+  version "116.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-116.0.0.tgz#4b29ab193c6c2a95e86d57092f24214ac7191f00"
+  integrity sha512-1DqOgznqxtGYdeNPvjSjcmrnXfZLdxE32/wrHV52xBG0t2B9QJ6HO7ixNeX3GVo6HsMVb8BWtIQVmWh+ZeTAGA==
   dependencies:
-    "@types/lodash" "^4.14.202"
-    chroma-js "^2.4.2"
-    lodash "^4.17.21"
-
-"@elastic/eui@file:./eui_116.0.0_pre_release_02.tgz":
-  version "115.0.0"
-  resolved "file:./eui_116.0.0_pre_release_02.tgz#9e3b8cc57f9b7441f7ff14a84259451c141ea6cf"
-  dependencies:
+    "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
