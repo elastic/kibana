@@ -150,6 +150,78 @@ describe('space id extraction in onRequest', () => {
     });
   });
 
+  it('defaults to "default" when no /s/ prefix follows the server basePath', async () => {
+    const { server: innerServer, createRouter } = await start({
+      basePath: '/kibana',
+      rewriteBasePath: true,
+    });
+    const router = createRouter('/');
+
+    router.get(
+      {
+        path: '/api/echo',
+        validate: false,
+        security: { authz: { enabled: false, reason: 'integration test' } },
+      },
+      (_context, req, res) => {
+        return res.ok({
+          body: {
+            spaceId: req.spaceId,
+            url: req.url.pathname,
+            rewrittenUrl: req.rewrittenUrl?.pathname ?? null,
+          },
+        });
+      }
+    );
+
+    await server.start();
+
+    const response = await supertest(innerServer.listener).get('/kibana/api/echo').expect(200);
+
+    expect(response.body).toEqual({
+      spaceId: 'default',
+      url: '/api/echo',
+      rewrittenUrl: '/kibana/api/echo',
+    });
+  });
+
+  it('does not match /s/<id>/ in the middle of the path after the server basePath', async () => {
+    const { server: innerServer, createRouter } = await start({
+      basePath: '/kibana',
+      rewriteBasePath: true,
+    });
+    const router = createRouter('/');
+
+    router.get(
+      {
+        path: '/api/foo/s/middle/bar',
+        validate: false,
+        security: { authz: { enabled: false, reason: 'integration test' } },
+      },
+      (_context, req, res) => {
+        return res.ok({
+          body: {
+            spaceId: req.spaceId,
+            url: req.url.pathname,
+            rewrittenUrl: req.rewrittenUrl?.pathname ?? null,
+          },
+        });
+      }
+    );
+
+    await server.start();
+
+    const response = await supertest(innerServer.listener)
+      .get('/kibana/api/foo/s/middle/bar')
+      .expect(200);
+
+    expect(response.body).toEqual({
+      spaceId: 'default',
+      url: '/api/foo/s/middle/bar',
+      rewrittenUrl: '/kibana/api/foo/s/middle/bar',
+    });
+  });
+
   it('does not match /s/<id>/ in the middle of the path', async () => {
     const { server: innerServer, createRouter } = await start();
     const router = createRouter('/');
