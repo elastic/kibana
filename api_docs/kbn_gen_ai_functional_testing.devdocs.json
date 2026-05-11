@@ -291,7 +291,15 @@
         "tags": [],
         "label": "DEFAULT_FTR_GEN_AI_LLM_SAMPLE_SIZE",
         "description": [
-          "\nMax number of LLMs (connectors / EIS models) to run per FTR suite when unset.\nOverride with {@link FTR_GEN_AI_LLM_SAMPLE_SIZE_ENV}."
+          "\nMax number of LLMs (connectors / EIS models) to run per FTR suite when unset.\nOverride with ",
+          {
+            "pluginId": "@kbn/gen-ai-functional-testing",
+            "scope": "common",
+            "docId": "kibKbnGenAiFunctionalTestingPluginApi",
+            "section": "def-common.FTR_GEN_AI_LLM_SAMPLE_SIZE_ENV",
+            "text": "FTR_GEN_AI_LLM_SAMPLE_SIZE_ENV"
+          },
+          "."
         ],
         "signature": [
           "1"

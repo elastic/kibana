@@ -54,6 +54,9 @@ post:
         application/json:
           schema:
             type: object
+          examples:
+            createRuntimeFieldResponse:
+              $ref: '../components/examples/create_runtime_field_response.yaml'
 
 put:
   summary: Create or update a runtime field
@@ -121,12 +124,15 @@ put:
                 type: array
                 items:
                   type: object
-          # examples:
-          #   createRuntimeFieldResponse:
-          #     $ref: '../components/examples/create_runtime_field_response.yaml'
+          examples:
+            createUpdateRuntimeFieldResponse:
+              $ref: '../components/examples/create_runtime_field_response.yaml'
     '400':
       description: Bad request
       content:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            createUpdateRuntimeFieldBadRequest:
+              $ref: '../components/examples/error_400_response.yaml'

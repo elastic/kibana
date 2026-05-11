@@ -25,6 +25,7 @@ export {
 } from './workflows/suggest_processing_pipeline';
 export {
   generateSignificantEvents,
+  DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
   type ExistingQuerySummary,
 } from './src/significant_events/generate_significant_events';
 export {

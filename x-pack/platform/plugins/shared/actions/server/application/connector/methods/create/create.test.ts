@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { actionsAuthorizationMock } from '../../../../authorization/actions_authorization.mock';
 import type { ActionsAuthorization } from '../../../../authorization/actions_authorization';
@@ -663,6 +664,110 @@ describe('create()', () => {
           config: {},
           secrets: {},
         },
+        { id: 'mock-saved-object-id' }
+      );
+    });
+  });
+
+  describe('spec connector config.authType', () => {
+    test('persists config.authType from secrets when config is empty (spec source)', async () => {
+      (authTypeRegistry.get as jest.Mock).mockReturnValue({
+        id: 'bearer',
+        authMode: 'shared',
+      });
+
+      const actionType = getConnectorType({
+        source: ACTION_TYPE_SOURCES.spec,
+        validate: {
+          config: { schema: z.any() },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: { authType: 'bearer' },
+          secrets: { authType: 'bearer', token: 'secret' },
+          authMode: 'shared' as const,
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: { authType: 'bearer', token: 'secret' },
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({
+          config: { authType: 'bearer' },
+          secrets: { authType: 'bearer', token: 'secret' },
+        }),
+        { id: 'mock-saved-object-id' }
+      );
+    });
+
+    test('does not inject config.authType for stack source when secrets include authType', async () => {
+      (authTypeRegistry.get as jest.Mock).mockReturnValue({
+        id: 'bearer',
+        authMode: 'shared',
+      });
+
+      const actionType = getConnectorType({
+        source: ACTION_TYPE_SOURCES.stack,
+        validate: {
+          config: { schema: z.any() },
+          secrets: { schema: z.any() },
+          params: { schema: z.object({}) },
+        },
+      });
+      (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+
+      const savedObjectCreateResult = {
+        id: '1',
+        type: 'action',
+        attributes: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          isMissingSecrets: false,
+          config: {},
+          secrets: { authType: 'bearer', token: 'secret' },
+          authMode: 'shared' as const,
+        },
+        references: [],
+      };
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
+
+      await create({
+        context: mockContext,
+        action: {
+          name: 'my name',
+          actionTypeId: 'my-connector-type',
+          config: {},
+          secrets: { authType: 'bearer', token: 'secret' },
+        },
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'action',
+        expect.objectContaining({
+          config: {},
+          secrets: { authType: 'bearer', token: 'secret' },
+        }),
         { id: 'mock-saved-object-id' }
       );
     });

@@ -30,11 +30,13 @@ import { getCriteriaFromUsersType } from '../../../../common/components/ml/crite
 import { UsersType } from '../../../../explore/users/store/model';
 import type { ObservedUserData } from '../content';
 import type { IdentityFields } from '../../../document_details/shared/utils';
+import type { EntityStoreRecord } from '../../shared/hooks/use_entity_from_store';
 
 export const ObservedDataSection = memo(
   ({
     userName,
     identityFields,
+    entityRecord,
     observedUser,
     contextID,
     scopeId,
@@ -42,6 +44,7 @@ export const ObservedDataSection = memo(
   }: {
     userName: string;
     identityFields: IdentityFields;
+    entityRecord?: EntityStoreRecord | null;
     observedUser: ObservedUserData;
     contextID: string;
     scopeId: string;
@@ -128,6 +131,7 @@ export const ObservedDataSection = memo(
             <ObservedDataSectionContent
               userName={userName}
               identityFields={identityFields}
+              entityRecord={entityRecord}
               observedUser={observedUser}
               contextID={contextID}
               scopeId={scopeId}
@@ -145,6 +149,7 @@ const ObservedDataSectionContent = memo(
   ({
     userName,
     identityFields,
+    entityRecord,
     observedUser,
     contextID,
     scopeId,
@@ -152,6 +157,7 @@ const ObservedDataSectionContent = memo(
   }: {
     userName: string;
     identityFields: IdentityFields;
+    entityRecord?: EntityStoreRecord | null;
     observedUser: ObservedUserData;
     contextID: string;
     scopeId: string;
@@ -164,10 +170,17 @@ const ObservedDataSectionContent = memo(
     const euidApi = useEntityStoreEuidApi();
     const euid = euidApi?.euid;
     const [isLoadingAnomaliesData, anomaliesData] = useAnomaliesTableData({
-      criteriaFields: getCriteriaFromUsersType(UsersType.details, userName, identityFields, euid),
+      criteriaFields: getCriteriaFromUsersType({
+        type: UsersType.details,
+        userName,
+        entityRecord,
+        identityFields,
+        euid,
+      }),
       filterQuery: buildAnomaliesTableInfluencersFilterQuery({
         euid,
         entityType: 'user',
+        entityRecord,
         isScopedToEntity: true,
         identityFields,
         fallbackDisplayName: userName,

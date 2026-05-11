@@ -367,6 +367,7 @@
                 "lineNumber": 37,
                 "columnNumber": 26,
                 "deprecated": false,
+                "docsReferencedTypeName": "MockedLogger",
                 "trackAdoption": false
               }
             ]
@@ -576,6 +577,7 @@
                 "lineNumber": 71,
                 "columnNumber": 28,
                 "deprecated": false,
+                "docsReferencedTypeName": "MockedLogger",
                 "trackAdoption": false
               }
             ]

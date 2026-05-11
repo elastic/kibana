@@ -33,6 +33,11 @@ export const ReadExceptionListRequestQuery = lazySchema(() =>
      * Human readable exception list string identifier, e.g. `trusted-linux-processes`. Either `id` or `list_id` must be specified.
      */
     list_id: ExceptionListHumanId.optional(),
+    /**
+      * When `single`, the list is resolved in the current Kibana space. When `agnostic`, the list is a global
+(space-agnostic) container. Required for looking up the correct list when `list_id` is not unique.
+
+      */
     namespace_type: ExceptionNamespaceType.optional().default('single'),
   })
 );

@@ -6,17 +6,16 @@
  */
 
 import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { mockAppDataView, mockDataView, mockUxSeries, render } from '../rtl_helpers';
 import { FilterLabel } from './filter_label';
 import * as useSeriesHook from '../hooks/use_series_filters';
 import { buildFilterLabel } from '../../filter_value_label/filter_value_label';
 import 'jest-canvas-mock';
 
-jest.setTimeout(10 * 1000);
+jest.setTimeout(30 * 1000);
 
-// Failing: See https://github.com/elastic/kibana/issues/253320
-describe.skip('FilterLabel', function () {
+describe('FilterLabel', function () {
   mockAppDataView();
 
   const invertFilter = jest.fn();
@@ -38,11 +37,9 @@ describe.skip('FilterLabel', function () {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByText('elastic-co')).toBeInTheDocument();
-      expect(screen.getByText(/web application:/i)).toBeInTheDocument();
-      expect(screen.getByTitle('Delete Web Application: elastic-co')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('elastic-co')).toBeInTheDocument();
+    expect(await screen.findByText(/web application:/i)).toBeInTheDocument();
+    expect(await screen.findByTitle('Delete Web Application: elastic-co')).toBeInTheDocument();
   });
 
   it('should delete filter', async function () {

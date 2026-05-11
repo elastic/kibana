@@ -18,6 +18,9 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 export const DeletePrivMonUserRequestParams = lazySchema(() =>
   z.object({
+    /**
+     * The document ID of the monitored user to delete
+     */
     id: z.string(),
   })
 );

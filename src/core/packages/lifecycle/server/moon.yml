@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/core-di'
   - '@kbn/core-data-streams-server'
   - '@kbn/core-user-activity-server'
+  - '@kbn/core-user-storage-server'
 tags:
   - shared-server
   - package

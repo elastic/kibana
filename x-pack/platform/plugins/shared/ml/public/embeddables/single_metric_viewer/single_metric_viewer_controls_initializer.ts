@@ -7,11 +7,11 @@
 
 import type { StateComparators, TitlesApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, map, merge } from 'rxjs';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { JobId } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 import type {
   SingleMetricViewerEmbeddableState,
   SingleMetricViewerEmbeddableUserInput,
-} from './types';
+} from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 
 export type AnomalySwimLaneControlsState = Pick<
   SingleMetricViewerEmbeddableState,

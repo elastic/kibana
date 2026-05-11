@@ -13,10 +13,15 @@ export const ANOMALIES_PLACEHOLDER_PANEL = '[data-test-subj="recent-anomalies-pa
 
 export const ENTITIES_TABLE_GRID = '[data-test-subj="entity-analytics-test-subj-grid-wrapper"]';
 export const ENTITIES_TABLE_EMPTY = '[data-test-subj="entity-analytics-empty-state"]';
+export const ENTITY_STORE_DISABLED_EMPTY_PROMPT =
+  '[data-test-subj="entityStoreDisabledEmptyPrompt"]';
 
 export const DATAGRID_HEADER = '[data-test-subj="dataGridHeader"]';
 export const DATAGRID_COLUMN_SELECTOR = '[data-test-subj="dataGridColumnSelectorButton"]';
 export const DATAGRID_SORTING_SELECTOR = '[data-test-subj="dataGridColumnSortingButton"]';
+export const DATA_GRID_ROW_CELL = '[data-test-subj="dataGridRowCell"]';
+export const dataGridRowCellByColumn = (columnId: string) =>
+  `${DATA_GRID_ROW_CELL}[data-gridcell-column-id="${columnId}"]`;
 
 export const EXPAND_ROW_BUTTON = '[data-test-subj="docTableExpandToggleColumn"]';
 

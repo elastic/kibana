@@ -15,6 +15,7 @@ paths:
         - name: id
           in: path
           required: true
+          description: The document ID of the monitored user to delete
           schema:
             type: string
       responses:

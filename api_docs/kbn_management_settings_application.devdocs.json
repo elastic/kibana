@@ -47,6 +47,7 @@
             "lineNumber": 23,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "SettingsApplicationKibanaDependencies",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -61,7 +62,15 @@
         "tags": [],
         "label": "SettingsApplication",
         "description": [
-          "\nComponent for displaying the {@link SettingsApplication} component."
+          "\nComponent for displaying the ",
+          {
+            "pluginId": "@kbn/management-settings-application",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsApplicationPluginApi",
+            "section": "def-public.SettingsApplication",
+            "text": "SettingsApplication"
+          },
+          " component."
         ],
         "signature": [
           "() => React.JSX.Element"

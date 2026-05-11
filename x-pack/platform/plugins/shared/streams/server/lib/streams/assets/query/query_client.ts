@@ -52,7 +52,8 @@ import {
   STREAM_NAME,
 } from '../fields';
 import type { QueryStorageSettings } from '../storage_settings';
-import { parseError } from '../../errors/parse_error';
+import { bulkWithInferenceFallback } from '../../errors/bulk_with_inference_fallback';
+import { searchWithKeywordFallback } from '../../errors/search_with_keyword_fallback';
 import { computeRuleId } from './helpers/query';
 import {
   DEFAULT_SIG_EVENTS_TUNING_CONFIG,
@@ -275,11 +276,12 @@ export function buildSearchEmbeddingText(
 function toStorage(
   definition: Streams.all.Definition,
   request: QueryLinkRequest,
-  inferenceAvailable: boolean
+  includeEmbedding: boolean
 ): StoredQueryLink {
   const link = toQueryLink(definition, request);
   const { query, stream_name, ...rest } = link;
   const derivedType = deriveQueryType(query.esql.query);
+  const embeddingText = buildSearchEmbeddingText(query, definition.name);
   return {
     ...rest,
     [STREAM_NAME]: definition.name,
@@ -291,9 +293,7 @@ function toStorage(
     [QUERY_EVIDENCE]: query.evidence,
     [RULE_BACKED]: request.rule_backed,
     [RULE_ID]: link.rule_id,
-    ...(inferenceAvailable
-      ? { [QUERY_SEARCH_EMBEDDING]: buildSearchEmbeddingText(query, definition.name) }
-      : {}),
+    ...(includeEmbedding && embeddingText ? { [QUERY_SEARCH_EMBEDDING]: embeddingText } : {}),
   } as StoredQueryLink;
 }
 
@@ -345,7 +345,6 @@ export class QueryClient {
       logger: Logger;
     },
     private readonly isSignificantEventsEnabled: boolean = false,
-    private readonly inferenceAvailable: boolean = false,
     private readonly config: Pick<
       SigEventsTuningConfig,
       'semantic_min_score' | 'rrf_rank_constant'
@@ -482,10 +481,8 @@ export class QueryClient {
 
   /**
    * Shared bool-query shape for the promotable-unbacked set: `rule_backed=false`
-   * AND `type != STATS`, with optional severity floor. Keeps
-   * {@link countPromotableUnbackedQueries} and {@link getPromotableUnbackedQueries}
-   * structurally aligned so the UI callout count and the Promote-All set
-   * can't diverge.
+   * AND `type != STATS`, with optional severity floor. Used by
+   * {@link getPromotableUnbackedQueries} and {@link promoteUnbackedQueries}.
    */
   private promotableUnbackedBoolQuery(filters?: { minSeverityScore?: number }) {
     return {
@@ -499,26 +496,7 @@ export class QueryClient {
   }
 
   /**
-   * Counts queries promotable to rules — unbacked AND non-STATS. Pairs with
-   * {@link getPromotableUnbackedQueries}.
-   *
-   * Pre-migration docs lacking QUERY_TYPE are safe: STATS were introduced
-   * alongside the type field, so any doc without it is a match query.
-   */
-  async countPromotableUnbackedQueries(filters?: { minSeverityScore?: number }): Promise<number> {
-    const assetsResponse = await this.dependencies.storageClient.search({
-      size: 0,
-      track_total_hits: true,
-      query: { bool: this.promotableUnbackedBoolQuery(filters) },
-    });
-
-    const total = assetsResponse.hits.total;
-    return typeof total === 'number' ? total : total?.value ?? 0;
-  }
-
-  /**
-   * Returns all unbacked, non-STATS queries across streams — the list whose
-   * size is {@link countPromotableUnbackedQueries}.
+   * Returns all unbacked, non-STATS queries across streams.
    */
   async getPromotableUnbackedQueries(filters?: {
     minSeverityScore?: number;
@@ -616,36 +594,11 @@ export class QueryClient {
     filters?: QueryLinkFilters,
     searchMode?: SearchMode
   ): Promise<QueryLink[]> {
-    const effectiveMode = this.resolveSearchMode(searchMode);
-
-    try {
-      return await this.executeFindQueries(effectiveMode, streamNames, query, filters);
-    } catch (error) {
-      // Only fall back silently when the mode was auto-resolved (no explicit
-      // searchMode from the caller). If the caller explicitly requested a
-      // non-keyword mode, propagate the error so they know their request failed.
-      if (effectiveMode !== 'keyword' && !searchMode) {
-        const { message } = parseError(error);
-        this.dependencies.logger.warn(
-          `Search mode "${effectiveMode}" failed, falling back to keyword: ${message}`
-        );
-        return await this.executeFindQueries('keyword', streamNames, query, filters);
-      }
-      throw error;
-    }
-  }
-
-  private resolveSearchMode(searchMode?: SearchMode): SearchMode {
-    if (searchMode) {
-      if (searchMode !== 'keyword' && !this.inferenceAvailable) {
-        this.dependencies.logger.debug(
-          `Search mode "${searchMode}" requested but inference is unavailable, falling back to keyword`
-        );
-        return 'keyword';
-      }
-      return searchMode;
-    }
-    return this.inferenceAvailable ? 'hybrid' : 'keyword';
+    return searchWithKeywordFallback(
+      this.dependencies.logger,
+      { searchMode, label: 'Query', streamNames },
+      (mode) => this.executeFindQueries(mode, streamNames, query, filters)
+    );
   }
 
   private async executeFindQueries(
@@ -693,11 +646,22 @@ export class QueryClient {
       size: SEARCH_SIZE_LIMIT,
       track_total_hits: false,
       retriever: {
-        standard: {
-          query: {
-            match: { [QUERY_SEARCH_EMBEDDING]: query },
-          },
-          filter: { bool: { filter } },
+        linear: {
+          retrievers: [
+            {
+              retriever: {
+                standard: {
+                  query: {
+                    match: { [QUERY_SEARCH_EMBEDDING]: query },
+                  },
+                  filter: { bool: { filter } },
+                },
+              },
+              weight: 1,
+              normalizer: 'minmax',
+            },
+          ],
+          rank_window_size: SEARCH_SIZE_LIMIT,
           min_score: this.config.semantic_min_score,
         },
       },
@@ -725,11 +689,21 @@ export class QueryClient {
               },
             },
             {
-              standard: {
-                query: {
-                  match: { [QUERY_SEARCH_EMBEDDING]: query },
-                },
-                // See config.semantic_min_score for rationale.
+              linear: {
+                retrievers: [
+                  {
+                    retriever: {
+                      standard: {
+                        query: {
+                          match: { [QUERY_SEARCH_EMBEDDING]: query },
+                        },
+                      },
+                    },
+                    weight: 1,
+                    normalizer: 'minmax',
+                  },
+                ],
+                rank_window_size: SEARCH_SIZE_LIMIT,
                 min_score: this.config.semantic_min_score,
               },
             },
@@ -754,27 +728,29 @@ export class QueryClient {
     definition: Streams.all.Definition,
     operations: QueryStorageBulkOperation[]
   ) {
-    return await this.dependencies.storageClient.bulk({
-      operations: operations.map((operation) => {
-        if ('index' in operation) {
-          const document = toStorage(definition, operation.index.asset, this.inferenceAvailable);
+    return await bulkWithInferenceFallback(this.dependencies.logger, ({ includeEmbedding }) =>
+      this.dependencies.storageClient.bulk({
+        operations: operations.map((operation) => {
+          if ('index' in operation) {
+            const document = toStorage(definition, operation.index.asset, includeEmbedding);
+            return {
+              index: {
+                document,
+                _id: document[ASSET_UUID],
+              },
+            };
+          }
+
+          const id = getQueryLinkUuid(definition.name, operation.delete.asset);
           return {
-            index: {
-              document,
-              _id: document[ASSET_UUID],
+            delete: {
+              _id: id,
             },
           };
-        }
-
-        const id = getQueryLinkUuid(definition.name, operation.delete.asset);
-        return {
-          delete: {
-            _id: id,
-          },
-        };
-      }),
-      throwOnFail: true,
-    });
+        }),
+        throwOnFail: true,
+      })
+    );
   }
 
   async getAssets(name: string): Promise<Query[]> {

@@ -25,7 +25,7 @@ describe('transformOut', () => {
             openInNewTab: false,
             useCurrentDateRange: false,
             useCurrentFilters: false,
-          } as LinkOptions,
+          } as unknown,
         },
       ],
     } as LinksEmbeddableState;
@@ -49,7 +49,7 @@ describe('transformOut', () => {
           options: {
             openInNewTab: false,
             encodeUrl: true,
-          } as LinkOptions,
+          } as unknown,
         },
       ],
     } as LinksEmbeddableState;

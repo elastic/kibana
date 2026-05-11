@@ -10,7 +10,15 @@
         "tags": [],
         "label": "FieldCategories",
         "description": [
-          "\nConvenience component for displaying a set of {@link FieldCategory} components, given\na set of categorized fields.\n"
+          "\nConvenience component for displaying a set of ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.FieldCategory",
+            "text": "FieldCategory"
+          },
+          " components, given\na set of categorized fields.\n"
         ],
         "signature": [
           "({ categorizedFields, categoryCounts, unsavedChanges, onClearQuery, isSavingEnabled, onFieldChange, }: ",
@@ -49,6 +57,7 @@
             "lineNumber": 41,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldCategoriesProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -104,6 +113,7 @@
             "lineNumber": 41,
             "columnNumber": 31,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldCategoryProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -118,7 +128,15 @@
         "tags": [],
         "label": "FieldCategoryKibanaProvider",
         "description": [
-          "\nKibana-specific Provider that maps Kibana plugins and services to a {@link FieldCategoryProvider}."
+          "\nKibana-specific Provider that maps Kibana plugins and services to a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.FieldCategoryProvider",
+            "text": "FieldCategoryProvider"
+          },
+          "."
         ],
         "signature": [
           "React.FunctionComponent<React.PropsWithChildren<",
@@ -152,6 +170,7 @@
             "lineNumber": 1109,
             "columnNumber": 10,
             "deprecated": false,
+            "docsReferencedTypeName": "P",
             "trackAdoption": false
           },
           {
@@ -180,7 +199,15 @@
         "tags": [],
         "label": "FieldCategoryProvider",
         "description": [
-          "\nReact Provider that provides services to a {@link FieldCategory} component and its dependents."
+          "\nReact Provider that provides services to a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.FieldCategory",
+            "text": "FieldCategory"
+          },
+          " component and its dependents."
         ],
         "signature": [
           "({ children, ...services }: ",
@@ -205,7 +232,7 @@
             "id": "def-public.FieldCategoryProvider.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{ children, ...services }",
             "description": [],
             "signature": [
               {
@@ -220,6 +247,7 @@
             "lineNumber": 31,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "FieldRowProviderProps",
             "trackAdoption": false
           }
         ],
@@ -234,7 +262,15 @@
         "tags": [],
         "label": "ClearQueryLinkProps",
         "description": [
-          "\nProps for the {@link ClearQueryLink} component."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.ClearQueryLink",
+            "text": "ClearQueryLink"
+          },
+          " component."
         ],
         "path": "src/platform/packages/shared/kbn-management/settings/components/field_category/clear_query_link.tsx",
         "lineNumber": 16,
@@ -302,7 +338,15 @@
         "tags": [],
         "label": "FieldCategoriesProps",
         "description": [
-          "\nProps for the {@link FieldCategories} component."
+          "\nProps for the ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.FieldCategories",
+            "text": "FieldCategories"
+          },
+          " component."
         ],
         "signature": [
           {
@@ -417,7 +461,15 @@
         "tags": [],
         "label": "FieldCategoryProps",
         "description": [
-          "\nProps for a {@link FieldCategory} component."
+          "\nProps for a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.FieldCategory",
+            "text": "FieldCategory"
+          },
+          " component."
         ],
         "signature": [
           {
@@ -465,7 +517,15 @@
             "tags": [],
             "label": "children",
             "description": [
-              "Children-- should be {@link FieldRow} components."
+              "Children-- should be ",
+              {
+                "pluginId": "@kbn/management-settings-components-field-category",
+                "scope": "public",
+                "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+                "section": "def-public.FieldRow",
+                "text": "FieldRow"
+              },
+              " components."
             ],
             "signature": [
               "React.ReactElement<",
@@ -502,7 +562,15 @@
         "tags": [],
         "label": "FieldCategoryProviderProps",
         "description": [
-          "\nProps for {@link FieldCategoryProvider}."
+          "\nProps for ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.FieldCategoryProvider",
+            "text": "FieldCategoryProvider"
+          },
+          "."
         ],
         "signature": [
           {
@@ -556,7 +624,15 @@
         "tags": [],
         "label": "FieldCategoryKibanaDependencies",
         "description": [
-          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a {@link FieldCategory} component and its dependents."
+          "\nAn interface containing a collection of Kibana plugins and services required to\nrender a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.FieldCategory",
+            "text": "FieldCategory"
+          },
+          " component and its dependents."
         ],
         "signature": [
           {
@@ -589,7 +665,15 @@
         "tags": [],
         "label": "FieldCategoryServices",
         "description": [
-          "\nContextual services used by a {@link FieldCategory} component and its dependents."
+          "\nContextual services used by a ",
+          {
+            "pluginId": "@kbn/management-settings-components-field-category",
+            "scope": "public",
+            "docId": "kibKbnManagementSettingsComponentsFieldCategoryPluginApi",
+            "section": "def-public.FieldCategory",
+            "text": "FieldCategory"
+          },
+          " component and its dependents."
         ],
         "signature": [
           {

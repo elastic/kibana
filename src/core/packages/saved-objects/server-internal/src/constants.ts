@@ -64,4 +64,6 @@ export const REMOVED_TYPES: string[] = [
   'streams-significant-events-settings',
   // Removed in 9.4 https://github.com/elastic/kibana/pull/260587
   'data_connector',
+  // Renamed in 9.4 https://github.com/elastic/kibana/pull/264182
+  'alerting_notification_policy',
 ].sort();

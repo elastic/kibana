@@ -35,7 +35,7 @@ export { VALID_KI_FEATURE_TYPES, getFeaturesFromOutput } from './types';
 
 export const createKIFeatureExtractionEvaluators = (scenarioCriteria?: {
   criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator;
-  criteria: EvaluationCriterion[];
+  criteria?: EvaluationCriterion[];
 }) => {
   const evaluators: KIFeatureExtractionEvaluator[] = [
     typeValidationEvaluator,

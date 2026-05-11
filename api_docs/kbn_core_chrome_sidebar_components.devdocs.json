@@ -143,6 +143,7 @@
             "lineNumber": 69,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SidebarAppId",
             "trackAdoption": false,
             "isRequired": true
           }

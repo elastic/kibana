@@ -7,6 +7,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { RetryService } from '@kbn/ftr-common-functional-services';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { privateLocationSavedObjectName } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
 import type { SyntheticsPrivateLocations } from '@kbn/synthetics-plugin/common/runtime_types';
 import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
@@ -181,23 +182,40 @@ export class PrivateLocationTestService {
     });
   }
 
-  async addTestPrivateLocation(spaceId = 'default') {
-    const apiResponse = await this.addFleetPolicy(uuidv4(), [spaceId]);
+  /**
+   * Creates a Fleet agent policy and a backing private location saved object.
+   *
+   * Accepts a single space id (default 'default') or an array of space ids
+   * — including the wildcard `*` (ALL_SPACES_ID) to create a globally-shared
+   * private location available in every space. Tests that share monitors to
+   * additional spaces should use the all-spaces variant so that the synthetics
+   * private-location-space-coverage validation is satisfied.
+   */
+  async addTestPrivateLocation(spaces: string | string[] = 'default') {
+    const spaceIds = Array.isArray(spaces) ? spaces : [spaces];
+    const apiResponse = await this.addFleetPolicy(uuidv4(), spaceIds);
     const testPolicyId = apiResponse.body.item.id;
-    return (await this.setTestLocations([testPolicyId], spaceId))[0];
+    return (await this.setTestLocations([testPolicyId], spaceIds))[0];
   }
 
   async addFleetPolicy(name: string, spaceIds = ['default']) {
+    const isAllSpaces = spaceIds.includes(ALL_SPACES_ID);
+    // The Fleet endpoint cannot be called with an `/s/*` URL prefix, so route
+    // all-spaces and default-only requests through the default space and rely
+    // on the `space_ids` payload to mark the policy as all-spaces.
+    const urlSpacePrefix = isAllSpaces || spaceIds[0] === 'default' ? '' : `/s/${spaceIds[0]}`;
+    const isMultiSpace = isAllSpaces || spaceIds.length > 1;
+
     return await this.retry.try(async () => {
       const response = await this.supertestWithAuth
-        .post(`${spaceIds[0] !== 'default' ? `/s/${spaceIds[0]}` : ``}/api/fleet/agent_policies`)
+        .post(`${urlSpacePrefix}/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'true')
         .send({
           name,
           description: '',
           namespace: 'default',
           monitoring_enabled: [],
-          space_ids: spaceIds.length > 1 ? spaceIds : undefined,
+          space_ids: isMultiSpace ? spaceIds : undefined,
         })
         .expect(200);
       return response;
@@ -222,7 +240,17 @@ export class PrivateLocationTestService {
       },
       isServiceManaged: false,
     }));
-    const urlSpaceId = spaceId ? (Array.isArray(spaceId) ? spaceId[0] : spaceId) : 'default';
+    const initialNamespaces = spaceId
+      ? Array.isArray(spaceId)
+        ? spaceId
+        : [spaceId]
+      : ['default'];
+    // `*` is not a valid URL space prefix — issue the bulk_create from the
+    // default space and rely on `initialNamespaces` to share the saved object
+    // to all spaces.
+    const firstNamespace = initialNamespaces[0];
+    const urlSpaceId =
+      firstNamespace === ALL_SPACES_ID || !firstNamespace ? 'default' : firstNamespace;
 
     await this.supertestWithAuth
       .post(`/s/${urlSpaceId}/api/saved_objects/_bulk_create`)
@@ -233,7 +261,7 @@ export class PrivateLocationTestService {
           type: privateLocationSavedObjectName,
           id: location.id,
           attributes: location,
-          initialNamespaces: spaceId ? (Array.isArray(spaceId) ? spaceId : [spaceId]) : ['default'],
+          initialNamespaces,
         }))
       )
       .expect(200);

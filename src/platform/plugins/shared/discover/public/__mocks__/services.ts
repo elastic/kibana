@@ -263,6 +263,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
     },
     metadata: {
       branch: 'test',
+      version: 'major.minor.patch',
     },
     theme,
     storage: new LocalStorageMock({}) as unknown as Storage,
@@ -319,7 +320,7 @@ export function createDiscoverServicesMock(): DiscoverServices {
       isEmbeddedEditor: jest.fn(() => false),
       canSaveToDashboard: jest.fn(() => false),
       transferBackToEditor: jest.fn(),
-      getByValueInput: jest.fn(),
+      getByValueTab: jest.fn(),
       clearEditorState: jest.fn(),
     },
     alertingVTwo: {

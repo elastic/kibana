@@ -50,4 +50,13 @@ describe('registerAttachmentUiDefinitions', () => {
     };
     expect(config.getLabel(attachment)).toBe('Security Alert');
   });
+
+  it('does not register the security.entity attachment type (owned by registerEntityAttachment)', () => {
+    registerAttachmentUiDefinitions(mockAttachments);
+
+    const entityCall = mockAddAttachmentType.mock.calls.find(
+      (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.entity
+    );
+    expect(entityCall).toBeUndefined();
+  });
 });

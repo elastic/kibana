@@ -1,0 +1,109 @@
+name: Add closes:rna label to PRs
+
+on:
+  pull_request_target:
+    types: [opened, edited]
+
+jobs:
+  label-rna-project:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Label if PR closes an issue on the RNA Program Board
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const label = "closes:rna";
+            const rnaBoardNumber = 2076;
+            const prNumber = context.payload.pull_request.number;
+
+            const existingLabels = context.payload.pull_request.labels.map(l => l.name);
+            if (existingLabels.includes(label)) {
+              return;
+            }
+
+            const { repository } = await github.graphql(`
+              query($owner: String!, $repo: String!, $prNumber: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $prNumber) {
+                    body
+                    closingIssuesReferences(first: 10) {
+                      nodes {
+                        projectItems(first: 20) {
+                          nodes {
+                            project { number }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              prNumber,
+            });
+
+            const pr = repository.pullRequest;
+
+            const isOnRnaBoard = (issue) =>
+              issue.projectItems.nodes.some(item => item.project.number === rnaBoardNumber);
+
+            // Check closingIssuesReferences first (works for PRs targeting default branch)
+            if (pr.closingIssuesReferences.nodes.some(isOnRnaBoard)) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                labels: [label],
+              });
+              return;
+            }
+
+            // Fallback: parse issue references from PR body
+            const body = pr.body || "";
+            const pattern = /(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)[\s:]*(?:https:\/\/github\.com\/([^/]+\/[^/]+)\/issues\/(\d+)|#(\d+))/gi;
+            const issueRefs = [];
+            let match;
+            while ((match = pattern.exec(body)) !== null) {
+              if (match[1] && match[2]) {
+                const [owner, repo] = match[1].split("/");
+                issueRefs.push({ owner, repo, number: parseInt(match[2]) });
+              } else if (match[3]) {
+                issueRefs.push({ owner: context.repo.owner, repo: context.repo.repo, number: parseInt(match[3]) });
+              }
+            }
+
+            for (const ref of issueRefs) {
+              try {
+                const { repository: issueRepo } = await github.graphql(`
+                  query($owner: String!, $repo: String!, $number: Int!) {
+                    repository(owner: $owner, name: $repo) {
+                      issue(number: $number) {
+                        projectItems(first: 20) {
+                          nodes {
+                            project { number }
+                          }
+                        }
+                      }
+                    }
+                  }
+                `, ref);
+
+                if (isOnRnaBoard(issueRepo.issue)) {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: prNumber,
+                    labels: [label],
+                  });
+                  return;
+                }
+              } catch (e) {
+                // Issue may not exist or be inaccessible
+              }
+            }

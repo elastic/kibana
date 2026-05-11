@@ -72,6 +72,7 @@ export const getTransformOut = (
 
     const {
       title: _, // ignore attributes title
+      description: __, // ignore attributes description
       ...apiConfig
     } = builder.toAPIFormat({
       ...migratedAttributes,

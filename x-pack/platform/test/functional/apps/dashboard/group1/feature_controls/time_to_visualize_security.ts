@@ -182,7 +182,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await dashboard.clickNewDashboard();
         await dashboard.waitForRenderComplete();
 
-        await dashboardAddPanel.clickAddCustomVisualization();
+        await dashboardAddPanel.clickAddVega();
 
         await visualize.saveVisualizationAndReturn();
         const newPanelCount = await dashboard.getPanelCount();

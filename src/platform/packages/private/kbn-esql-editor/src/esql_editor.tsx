@@ -30,6 +30,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ESQL_LANG_ID, monaco } from '@kbn/monaco';
 import { DataSourceBrowser } from '@kbn/esql-resource-browser';
 import { FieldsBrowser } from '@kbn/esql-resource-browser';
+import { useStableCallback } from '@kbn/react-hooks';
 import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -58,6 +59,7 @@ import {
   trackSuggestionPopupState,
   onKeyDownResizeHandler,
   onMouseDownResizeHandler,
+  isCodeActionMenuVisible,
 } from './helpers';
 import {
   useInitLatencyTracking,
@@ -356,7 +358,19 @@ const ESQLEditorInternal = function ESQLEditor({
         suppressSuggestionsRef.current = false;
         return;
       }
-      editorRef.current?.trigger(undefined, 'editor.action.triggerSuggest', { auto: true });
+
+      if (!editorRef.current) {
+        return;
+      }
+
+      // When the quick fix menu is displayed, it triggers onDidFocusEditorText,
+      // calling then this method that makes the popup to close right away.
+      // If the quick fix menu is visible, do not trigger suggestions to avoid this issue.
+      if (isCodeActionMenuVisible(editorRef.current)) {
+        return;
+      }
+
+      editorRef.current.trigger(undefined, 'editor.action.triggerSuggest', { auto: true });
     }, 0);
   }, []);
 
@@ -482,6 +496,11 @@ const ESQLEditorInternal = function ESQLEditor({
   });
   useEsqlEditorActionsRegistration(editorActions);
 
+  // Stable proxies for callbacks captured by long-lived Monaco command closures
+  const stableOnQuerySubmit = useStableCallback(onQuerySubmit);
+  const stableOnToggleVisor = useStableCallback(onToggleVisor);
+  const stableOnPrettifyQuery = useStableCallback(onPrettifyQuery);
+
   const esqlCallbacks = useEsqlCallbacks({
     core,
     data,
@@ -539,8 +558,8 @@ const ESQLEditorInternal = function ESQLEditor({
     telemetryService,
   });
 
-  const { editorMessages, onLookupIndexCreate, onNewFieldsAddedToLookupIndex } = useQueryValidation(
-    {
+  const { editorMessages, editorMessagesRef, onLookupIndexCreate, onNewFieldsAddedToLookupIndex } =
+    useQueryValidation({
       code,
       codeWhenSubmitted,
       editorRef,
@@ -562,8 +581,7 @@ const ESQLEditorInternal = function ESQLEditor({
         trackValidationLatencyEnd,
         resetValidationTracking,
       },
-    }
-  );
+    });
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editorRef,
@@ -578,6 +596,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const {
     esqlDepsByModelUri,
     suggestionProvider,
+    codeActionsProvider,
     codeEditorHoverProvider,
     signatureProvider,
     inlineCompletionsProvider,
@@ -596,6 +615,7 @@ const ESQLEditorInternal = function ESQLEditor({
     measuredEditorWidth,
     setMeasuredEditorWidth,
     resetPendingTracking,
+    editorMessagesRef,
   });
 
   const htmlId = useGeneratedHtmlId({ prefix: 'esql-editor' });
@@ -670,6 +690,7 @@ const ESQLEditorInternal = function ESQLEditor({
                 signatureProvider={signatureProvider}
                 inlineCompletionsProvider={inlineCompletionsProvider}
                 documentHighlightProvider={documentHighlightProvider}
+                codeActions={codeActionsProvider}
                 onChange={onQueryUpdate}
                 editorDidMount={async (editor) => {
                   // Track editor init time once per mount
@@ -683,6 +704,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     esqlDepsByModelUri.set(editorModelUriRef.current, {
                       ...esqlCallbacks,
                       telemetry: telemetryCallbacks,
+                      getEditorMessages: () => editorMessagesRef.current,
                     });
                     await addLookupIndicesDecorator();
                     if (enableResourceBrowser) {
@@ -709,7 +731,12 @@ const ESQLEditorInternal = function ESQLEditor({
                   });
 
                   // Add editor key bindings
-                  addEditorKeyBindings(editor, onQuerySubmit, onToggleVisor, onPrettifyQuery);
+                  addEditorKeyBindings(
+                    editor,
+                    stableOnQuerySubmit,
+                    stableOnToggleVisor,
+                    stableOnPrettifyQuery
+                  );
 
                   // Store disposables for cleanup
                   const currentEditor = editorRef.current;

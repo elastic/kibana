@@ -21,6 +21,9 @@ import { List } from '../model/list_schemas.gen';
 
 export const ReadListRequestQuery = lazySchema(() =>
   z.object({
+    /**
+     * Value list identifier (`id`) returned when the list was created.
+     */
     id: ListId,
   })
 );

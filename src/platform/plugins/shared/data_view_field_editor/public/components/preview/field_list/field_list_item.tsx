@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, {
+  useState,
+  useMemo,
+  isValidElement,
+  Children,
+  type ReactNode,
+  type ReactElement,
+} from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -29,6 +36,31 @@ import type { DocumentField } from './field_list';
 import type { PreviewState } from '../types';
 import { useStateSelector } from '../../../state_utils';
 import { ITEM_HEIGHT } from './constants';
+
+/**
+ * Recursively checks if a ReactNode tree contains an img element.
+ */
+const containsImgElement = (node: ReactNode): boolean => {
+  if (Array.isArray(node)) {
+    return node.some(containsImgElement);
+  }
+
+  if (!isValidElement(node)) {
+    return false;
+  }
+
+  const element = node as ReactElement;
+  if (element.type === 'img') {
+    return true;
+  }
+
+  const { children } = element.props;
+  if (children) {
+    return Children.toArray(children).some(containsImgElement);
+  }
+
+  return false;
+};
 
 export interface PreviewListItemProps {
   field: DocumentField;
@@ -63,7 +95,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
   const showPinIcon = isPinHovered || isPinFocused || isPinned;
 
-  const doesContainImage = formattedValue?.includes('<img');
+  const doesContainImage = useMemo(() => containsImgElement(formattedValue), [formattedValue]);
 
   const renderName = () => {
     if (isFromScript && !Boolean(key)) {
@@ -135,13 +167,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
     }
 
     if (formattedValue !== undefined) {
-      return withTooltip(
-        <span
-          css={styles.keyAndValueWrapper}
-          // We  can dangerously set HTML here because this content is guaranteed to have been run through a valid field formatter first.
-          dangerouslySetInnerHTML={{ __html: formattedValue! }} // eslint-disable-line react/no-danger
-        />
-      );
+      return withTooltip(<span css={styles.keyAndValueWrapper}>{formattedValue}</span>);
     }
 
     return withTooltip(<span css={styles.keyAndValueWrapper}>{JSON.stringify(value)}</span>);
@@ -190,7 +216,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
       </EuiFlexGroup>
       {isPreviewImageModalVisible && (
         <ImagePreviewModal
-          imgHTML={formattedValue!}
+          imgElement={formattedValue}
           closeModal={() => setIsPreviewImageModalVisible(false)}
         />
       )}

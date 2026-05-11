@@ -20,7 +20,7 @@ import {
   getRenderMode,
   applyCellColoring,
   isNonColorableValue,
-  HtmlCell,
+  FormattedCell,
   LinkCell,
   BadgeCell,
 } from './cell_value_helpers';
@@ -54,10 +54,7 @@ export const createGridCell = (
     const isNonColorable = isNonColorableValue(rawValue);
     const renderMode = getRenderMode(colorMode, isClickable, isNonColorable);
 
-    // Badge and link modes need plain text; html mode uses the formatter's html output.
-    const contentFormat = renderMode !== 'html' ? 'text' : 'html';
     const fallbackText = rawValue == null ? '' : String(rawValue);
-    const content = formatter?.convert(rawValue, contentFormat) ?? fallbackText;
 
     const alignment = alignments?.get(columnId);
 
@@ -114,7 +111,7 @@ export const createGridCell = (
       case 'badge':
         return (
           <BadgeCell
-            label={content}
+            label={formatter?.convert(rawValue, 'text') ?? fallbackText}
             badgeColor={badgeColor}
             isClickable={isClickable}
             onClick={onFilter}
@@ -141,7 +138,7 @@ export const createGridCell = (
 
         return (
           <LinkCell
-            content={content}
+            content={formatter?.convert(rawValue, 'text') ?? fallbackText}
             linkColor={linkColor}
             onClick={onFilter}
             alignment={alignment}
@@ -150,11 +147,11 @@ export const createGridCell = (
         );
       }
 
-      case 'html':
+      case 'formatted':
       default:
         return (
-          <HtmlCell
-            content={content}
+          <FormattedCell
+            content={formatter?.reactConvert(rawValue) ?? fallbackText}
             alignment={alignment}
             fitRowToContent={fitRowToContent}
             isColored={Boolean(cellStyle)}

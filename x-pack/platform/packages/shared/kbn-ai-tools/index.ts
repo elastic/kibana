@@ -10,7 +10,10 @@ export { describeDataset } from './src/tools/describe_dataset';
 export { formatDocumentAnalysis } from './src/tools/describe_dataset/format_document_analysis';
 
 export { mergeSampleDocumentsWithFieldCaps } from './src/tools/describe_dataset/merge_sample_documents_with_field_caps';
-export { getSampleDocuments } from './src/tools/describe_dataset/get_sample_documents';
+export {
+  getSampleDocuments,
+  getSampleDocumentsEsql,
+} from './src/tools/describe_dataset/get_sample_documents';
 export { getDiverseSampleDocuments } from './src/tools/describe_dataset/get_diverse_sample_documents';
 export type {
   DocumentAnalysis,
@@ -18,6 +21,8 @@ export type {
 } from './src/tools/describe_dataset/document_analysis';
 export {
   getLogPatterns,
+  getSigEventsLogPatternsEsql,
+  type LogPatternEsqlEntry,
   type FieldPatternResultWithChanges,
 } from './src/tools/log_patterns/get_log_patterns';
 export {

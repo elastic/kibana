@@ -527,6 +527,7 @@
                 "lineNumber": 15,
                 "columnNumber": 35,
                 "deprecated": false,
+                "docsReferencedTypeName": "DeepPartial",
                 "trackAdoption": false
               }
             ]

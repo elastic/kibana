@@ -22,6 +22,7 @@ import {
   EXCLUDED_GAP_REASONS_KEY,
 } from '../../../../../../common/constants';
 import { useGapAutoFillSchedulerContext } from '../../../../rule_gaps/context/gap_auto_fill_scheduler_context';
+import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { URL_PARAM_KEY } from '../../../../../common/hooks/use_url_state';
 import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
@@ -45,6 +46,7 @@ import {
 import { RuleSource } from './rules_table_saved_state';
 import { useRulesTableSavedState } from './use_rules_table_saved_state';
 import { defaultRangeValue } from '../../../../rule_gaps/constants';
+import { getGapRange } from '../../../../rule_gaps/api/hooks/utils';
 
 interface RulesSnoozeSettings {
   /**
@@ -250,6 +252,25 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   const pagination = useMemo(() => ({ page, perPage }), [page, perPage]);
 
+  const findRulesQueryArgs = useMemo(() => {
+    const searchTerm = filterOptions.filter?.trim();
+    const structuredKql = convertRulesFilterToKQL({ ...filterOptions, filter: '' });
+
+    const shouldApplyGaps = Boolean(filterOptions.gapFillStatuses?.length);
+    const gapRange = shouldApplyGaps ? getGapRange(defaultRangeValue) : undefined;
+
+    return {
+      filter: structuredKql,
+      sort_field: sortingOptions.field,
+      sort_order: sortingOptions.order,
+      pagination,
+      ...(searchTerm !== '' ? { search: { term: searchTerm, mode: 'legacy' as const } } : {}),
+      ...(shouldApplyGaps ? { gap_fill_statuses: filterOptions.gapFillStatuses } : {}),
+      ...(gapRange ? { gaps_range_start: gapRange.start, gaps_range_end: gapRange.end } : {}),
+      ...(activeSchedulerId ? { gap_auto_fill_scheduler_id: activeSchedulerId } : {}),
+    };
+  }, [filterOptions, sortingOptions, pagination, activeSchedulerId]);
+
   const handleFilterOptionsChange = useCallback((newFilter: Partial<FilterOptions>) => {
     setFilterOptions((currentFilter) => ({ ...currentFilter, ...newFilter }));
     setPage(1);
@@ -308,21 +329,13 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     isFetching,
     isLoading,
     isRefetching,
-  } = useFindRules(
-    {
-      filterOptions,
-      sortingOptions,
-      pagination,
-      schedulerId: activeSchedulerId,
-    },
-    {
-      // We don't need refreshes on windows focus and reconnects if auto-refresh if off
-      refetchOnWindowFocus: isRefreshOn && !isActionInProgress,
-      refetchOnReconnect: isRefreshOn && !isActionInProgress,
-      refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
-      keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
-    }
-  );
+  } = useFindRules(findRulesQueryArgs, {
+    // We don't need refreshes on windows focus and reconnects if auto-refresh if off
+    refetchOnWindowFocus: isRefreshOn && !isActionInProgress,
+    refetchOnReconnect: isRefreshOn && !isActionInProgress,
+    refetchInterval: isRefreshOn && !isActionInProgress && autoRefreshSettings.value,
+    keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
+  });
 
   // Fetch rules snooze settings
   const {
