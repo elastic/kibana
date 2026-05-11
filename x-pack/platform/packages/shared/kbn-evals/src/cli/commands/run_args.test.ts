@@ -71,7 +71,6 @@ describe('buildPlaywrightArgs', () => {
 
   it('omits shard when not provided', () => {
     const args = buildPlaywrightArgs({ configPath, project: 'gpt-4o' });
-    expect(args).not.toContain(expect.stringMatching(/--shard/));
     expect(args.some((a) => a.startsWith('--shard'))).toBe(false);
   });
 

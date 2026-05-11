@@ -188,7 +188,6 @@ EOF
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
           EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
-          EVAL_SUITE_SHARDS: "${EVAL_SUITE_SHARDS:-}"
           EVAL_PROJECT: "${connector_id}"
           EVAL_FANOUT: "0"
           TEST_RUN_ID: "${TEST_RUN_ID:-}"
